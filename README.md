@@ -1,2 +1,1 @@
-
-see [wiki](wiki)
+see [wiki](https://git.statoil.no/APS/GUI/wikis/)
