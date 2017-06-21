@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>454</width>
+    <height>289</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>28</x>
+     <y>21</y>
+     <width>401</width>
+     <height>251</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <widget class="QLabel" name="Heading_label">
+      <property name="font">
+       <font>
+        <family>Abyssinica SIL</family>
+        <pointsize>16</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Assign probabilities to modelled facies</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QDialogButtonBox" name="buttonBox">
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLabel" name="F1_label">
+        <property name="text">
+         <string>F1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="KTreeWidgetSearchLine" name="F1_ktreewidgetsearchline"/>
+      </item>
+      <item row="1" column="2">
+       <widget class="KHistoryComboBox" name="F1_khistorycombobox"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="F2_label">
+        <property name="text">
+         <string>F2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="KTreeWidgetSearchLine" name="F2_ktreewidgetsearchline"/>
+      </item>
+      <item row="2" column="2">
+       <widget class="KHistoryComboBox" name="F2_khistorycombobox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="F3_label">
+        <property name="text">
+         <string>F3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="KTreeWidgetSearchLine" name="F3_ktreewidgetsearchline"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="KHistoryComboBox" name="F3_khistorycombobox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="F4_label">
+        <property name="text">
+         <string>F4</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="KTreeWidgetSearchLine" name="F4_ktreewidgetsearchline"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="KHistoryComboBox" name="F4_khistorycombobox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="F5_label">
+        <property name="text">
+         <string>F5</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="KTreeWidgetSearchLine" name="F5_ktreewidgetsearchline"/>
+      </item>
+      <item row="5" column="2">
+       <widget class="KHistoryComboBox" name="F5_khistorycombobox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="Facies_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Facies</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="Probability_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Probability Cube</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KTreeWidgetSearchLine</class>
+   <extends>KLineEdit</extends>
+   <header>ktreewidgetsearchline.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>klineedit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KComboBox</class>
+   <extends>QComboBox</extends>
+   <header>kcombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KHistoryComboBox</class>
+   <extends>KComboBox</extends>
+   <header>khistorycombobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

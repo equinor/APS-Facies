@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>604</width>
+    <height>846</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>30</y>
+     <width>491</width>
+     <height>771</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="TruncationLibrary_gridLayout">
+    <item row="2" column="0">
+     <layout class="QGridLayout" name="gridLayout_9">
+      <item row="0" column="0">
+       <widget class="QLabel" name="Cubic_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Cubic</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="TypeApushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeA.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeA.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="TypeBpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeB.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeB.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="TypeCpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeC.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeC.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="TypeDpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeD.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeD.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QPushButton" name="TypeEpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeE.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeE.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="TypeFpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeF.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeF.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="TypeGpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeG.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeG.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="TypeHpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeH.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeH.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="TypeIpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeI.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeI.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4">
+       <widget class="QPushButton" name="TypeJpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeJ.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeJ.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QPushButton" name="TypeKpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeK.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeK.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QPushButton" name="TypeLpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeL.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeL.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QPushButton" name="TypeMpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeM.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeM.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QPushButton" name="TypeNpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeN.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeN.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QPushButton" name="TypeOpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeO.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeO.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QPushButton" name="TypePpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeP.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeP.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QPushButton" name="TypeQpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeQ.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeQ.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QPushButton" name="TypeRpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeR.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeR.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QPushButton" name="TypeSpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeS.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeS.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="4">
+       <widget class="QPushButton" name="TypeTpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeT.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeT.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QPushButton" name="TypeUpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeU.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeU.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QPushButton" name="TypeVpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeV.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeV.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QPushButton" name="TypeWpushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeW.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeW.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <spacer name="TruncationLibrary_verticalSpacer2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="NonCubic_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Non-Cubic</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="TypeI_pushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeI.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeI.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="TypeII_pushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeII.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="TypeIII_pushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIII.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="TypeIV_pushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIV.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIV.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4">
+       <widget class="QPushButton" name="TypeVI_pushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVI.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVI.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="TypeV_PushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeV.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeV.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="TypeIII_PushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVIII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVIII.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <spacer name="TruncationLibrary_verticalSpacer4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="5" column="0">
+     <spacer name="TruncationLibrary_verticalSpacer5">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>58</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="6" column="0">
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="0">
+       <widget class="QLabel" name="Bayfill_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Bayfill </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="TypeVII_pushButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="8" column="0">
+     <layout class="QGridLayout" name="gridLayout_15">
+      <item row="0" column="2">
+       <widget class="QPushButton" name="Assign_Probability_pushButton">
+        <property name="text">
+         <string>Assign Probabilitiy </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <spacer name="Conditiontowells_horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="Conditiontowells_radioButton">
+        <property name="text">
+         <string>Condition to wells</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="10" column="0">
+     <layout class="QGridLayout" name="gridLayout_14">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="Previeweer_pushButton">
+        <property name="text">
+         <string>&amp;Previewer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="Save_pushButton">
+        <property name="text">
+         <string>&amp;Save</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="SaveAs_pushButton">
+        <property name="text">
+         <string>&amp;Save As..</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="Close_pushButton">
+        <property name="text">
+         <string>&amp;Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <spacer name="TruncationLibrary_verticalSpacer3">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>48</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="1" column="0">
+     <spacer name="TruncationLibrary_verticalSpacer1">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="9" column="0">
+     <spacer name="verticalSpacer_6">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="7" column="0">
+     <spacer name="TruncationLibrary_verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="TruncationLibrary_label">
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Truncation Library</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>657</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QDockWidget" name="Project_dockWidget">
+   <property name="geometry">
+    <rect>
+     <x>-10</x>
+     <y>-20</y>
+     <width>641</width>
+     <height>431</height>
+    </rect>
+   </property>
+   <widget class="QWidget" name="dockWidgetContents">
+    <widget class="QTabWidget" name="Project_Parameter_tabWidget">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>10</y>
+       <width>611</width>
+       <height>251</height>
+      </rect>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Project</string>
+      </attribute>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>591</width>
+         <height>151</height>
+        </rect>
+       </property>
+       <layout class="QFormLayout" name="formLayout_10">
+        <item row="0" column="0">
+         <layout class="QFormLayout" name="formLayout_8">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="Experimental_mode_radioButton">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Experimental mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="ReadRMSProjectFile_radioButton">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Read RMS project file</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="LocationRMSproject_FileLabel">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Location RMS project file</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <spacer name="After_LocationRMSprojectfile_horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="3">
+           <spacer name="AfterLineEdit_horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="4">
+           <widget class="QPushButton" name="BrowseProjectFilepushButton">
+            <property name="font">
+             <font>
+              <family>Abyssinica SIL</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Browse..</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="6">
+           <spacer name="After_Browse_PushButton_horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLineEdit" name="BrowseProjectLineEdit"/>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDialogButtonBox" name="Ok_Cancel_buttonBox">
+          <property name="font">
+           <font>
+            <family>Abyssinica SIL</family>
+            <pointsize>11</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="standardButtons">
+           <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Parameters</string>
+      </attribute>
+      <widget class="QWidget" name="">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>40</y>
+         <width>451</width>
+         <height>146</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="WorkflowName_label">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Workflow name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="KTreeWidgetSearchLine" name="WorkflowName_ktreewidgetsearchline"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="GridModelName_label">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Grid Model name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="KTreeWidgetSearchLine" name="GridModelName_ktreewidgetsearchline"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="FaciesParameterName__label">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Facies parameter name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="KTreeWidgetSearchLine" name="FaciesParameterName_ktreewidgetsearchline"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="GaussianParameterName_label">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Zones parameter name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="KTreeWidgetSearchLine" name="ZonesParameterName_ktreewidgetsearchline"/>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="GaussiaParameterName_label">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Gaussian parameter name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <widget class="KTreeWidgetSearchLine" name="GaussianParameterName_ktreewidgetsearchline"/>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="1">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="2" column="1">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="3" column="1">
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="4" column="1">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KTreeWidgetSearchLine</class>
+   <extends>KLineEdit</extends>
+   <header>ktreewidgetsearchline.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>klineedit.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
