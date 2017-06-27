@@ -11,7 +11,7 @@ import numpy as np
 # -----       Functions used to draw gaussian fields: -------------------------
 
 #Global object with c/c++ code for simulation of gaussian fields
-_draw2DLib = ct.CDLL('./libdraw2D.so.1.0')
+_draw2DLib = ct.CDLL('lib/libdraw2D.so.')
 
 # Define input data types
 _draw2DLib.draw2DGaussField.argtypes = (ct.c_int, ct.c_int, 
