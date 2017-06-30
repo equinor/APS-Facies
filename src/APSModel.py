@@ -68,15 +68,11 @@
 #
 # -----------------------------------------------------------------------------
 
-import sys
 import copy
-from datetime import date
-from datetime import time
-import datetime 
-
+import datetime
 
 import xml.etree.ElementTree as ET
-from  xml.etree.ElementTree import Element, SubElement, dump
+from xml.etree.ElementTree import Element
 from xml.dom import minidom
 
 from APSZoneModel import APSZoneModel
@@ -84,82 +80,80 @@ from APSGaussFieldJobs import APSGaussFieldJobs
 from APSMainFaciesTable import APSMainFaciesTable
 
 
-
 def prettify(elem):
-    rough_string = ET.tostring(elem,'utf-8')
+    rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ",newl="\n")
+    return reparsed.toprettyxml(indent="  ", newl="\n")
 
 
 class APSModel:
-    def __init__(self,modelFileName= None):
+    def __init__(self, modelFileName=None):
         # Local variables
         self.__className = 'APSModel'
-        self.__rmsProjectName  = ' '
-        self.__rmsWorkflowName = ' '
-        self.__rmsGaussFieldScriptName = ' '
+        self.__rmsProjectName = ''
+        self.__rmsWorkflowName = ''
+        self.__rmsGaussFieldScriptName = ''
 
-        self.__rmsGridModelName   = ' '
-        self.__rmsZoneParamName   = ' '
-        self.__rmsFaciesParamName = ' '
-        self.__printInfo   = 0
-        self.__rmsGFJobs   = None
+        self.__rmsGridModelName = ''
+        self.__rmsZoneParamName = ''
+        self.__rmsFaciesParamName = ''
+        self.__printInfo = 0
+        self.__rmsGFJobs = None
         self.__faciesTable = None
         self.__nZones = 0
-        self.__zoneModelsMainLevel  = []
+        self.__zoneModelsMainLevel = []
         self.__zoneNumberList = []
         self.__zoneModelsSecondLevel = []
         self.__selectedZoneNumberList = []
-#        self.__refHorizonNameForVarioTrend = None
-#        self.__refHorizonReprNameForVarioTrend = None
-#        self.__keywordsFMU = []
-#        self.__hasNewValues = 0
+        # self.__refHorizonNameForVarioTrend = None
+        # self.__refHorizonReprNameForVarioTrend = None
+        # self.__keywordsFMU = []
+        # self.__hasNewValues = 0
         self.__previewZone = 0
-#        self.__previewGridNx = 300
-#        self.__previewGridNy = 300
-#        self.__previewGridXSize = 1000.0
-#        self.__previewGridYSize = 1000.0
-#        self.__previewGridOrientation = 0.0
-#        self.__previewCell = []
+        # self.__previewGridNx = 300
+        # self.__previewGridNy = 300
+        # self.__previewGridXSize = 1000.0
+        # self.__previewGridYSize = 1000.0
+        # self.__previewGridOrientation = 0.0
+        # self.__previewCell = []
 
         # Read model if it is defined
-        if modelFileName == None:
+        if modelFileName is None:
             return
         self.__interpretXMLModelFile(modelFileName)
         return
+
     # End __init__
 
-
-    def __interpretXMLModelFile(self,modelFileName):
-        err = 0
+    def __interpretXMLModelFile(self, modelFileName):
         tree = ET.parse(modelFileName)
         self.__ET_Tree = tree
         root = tree.getroot()
-        
+
         # --- PrintInfo ---
         kw = 'PrintInfo'
-        obj =  root.find(kw)
-        if obj == None:
+        obj = root.find(kw)
+        if obj is None:
             # Default value is set
             self.__printInfo = 1
         else:
             text = obj.text
             self.__printInfo = int(text.strip())
-        if self.__printInfo >=3:
+        if self.__printInfo >= 3:
             print(' ')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
             print(' ')
-        
+
         # --- Preview ---
         kw = 'Preview'
         obj = root.find(kw)
-        if obj != None:
-            self.__previewZone  = int(obj.get('zoneNumber'))
-        
+        if obj is not None:
+            self.__previewZone = int(obj.get('zoneNumber'))
+
         # --- SelectedZones ---
         kw = 'SelectedZones'
         obj = root.find(kw)
-        if obj != None:
+        if obj is not None:
             text = obj.text
             words = text.split()
             for w in words:
@@ -169,21 +163,23 @@ class APSModel:
         # --- RMSProjectName ---
         kw = 'RMSProjectName'
         obj = root.find(kw)
-        if obj == None:
-            print('Error reading ' + modelFileName)
-            print('Error missing command: ' + kw)
-            err = 1
+        if obj is None:
+            raise IOError(
+                'Error reading {}'
+                'Error missing command: {}'.format(modelFileName, kw)
+            )
         else:
             text = obj.text
-            self.__rmsProjectName  = copy.copy(text.strip())
+            self.__rmsProjectName = copy.copy(text.strip())
 
         # --- RMSWorkflowName ---
         kw = 'RMSWorkflowName'
         obj = root.find(kw)
-        if obj == None:
-            print('Error reading ' + modelFileName)
-            print('Error missing command: ' + kw)
-            err = 1
+        if obj is None:
+            raise IOError(
+                'Error reading {}'
+                'Error missing command: {}'.format(modelFileName, kw)
+            )
         else:
             text = obj.text
             self.__rmsWorkflowName = copy.copy(text.strip())
@@ -191,10 +187,11 @@ class APSModel:
         # --- RMSGaussFieldScriptName ---
         kw = 'RMSGaussFieldScriptName'
         obj = root.find(kw)
-        if obj == None:
-            print('Error reading ' + modelFileName)
-            print('Error missing command: ' + kw)
-            err = 1
+        if obj is None:
+            raise IOError(
+                'Error reading {}'
+                'Error missing command: {}'.format(modelFileName, kw)
+            )
         else:
             text = obj.text
             self.__rmsGaussFieldScriptName = copy.copy(text.strip())
@@ -202,21 +199,23 @@ class APSModel:
         # --- GridModelName ---
         kw = 'GridModelName'
         obj = root.find(kw)
-        if obj == None:
-            print('Error reading ' + modelFileName)
-            print('Error missing command: ' + kw)
-            err = 1
+        if obj is None:
+            raise IOError(
+                'Error reading {}'
+                'Error missing command: {}'.format(modelFileName, kw)
+            )
         else:
             text = obj.text
             self.__rmsGridModelName = copy.copy(text.strip())
-        
+
         # --- ZoneParamName ---
         kw = 'ZoneParamName'
         obj = root.find(kw)
-        if obj == None:
-            print('Error reading ' + modelFileName)
-            print('Error missing command: ' + kw)
-            err = 1
+        if obj is None:
+            raise IOError(
+                'Error reading {}'
+                'Error missing command: {}'.format(modelFileName, kw)
+            )
         else:
             text = obj.text
             self.__rmsZoneParamName = copy.copy(text.strip())
@@ -224,21 +223,20 @@ class APSModel:
         # --- ResultFaciesParamName ---
         kw = 'ResultFaciesParamName'
         obj = root.find(kw)
-        if obj == None:
-            print('Error reading ' + modelFileName)
-            print('Error missing command: ' + kw)
-            err = 1
+        if obj is None:
+            raise IOError(
+                'Error reading {}'
+                'Error missing command: {}'.format(modelFileName, kw)
+            )
         else:
             text = obj.text
             self.__rmsFaciesParamName = copy.copy(text.strip())
 
-
         # Read all gauss field jobs and their gauss field 3D parameter names
-        self.__rmsGFJobs = APSGaussFieldJobs(self.__ET_Tree,modelFileName)
+        self.__rmsGFJobs = APSGaussFieldJobs(self.__ET_Tree, modelFileName)
 
         # Read all facies names available
-        self.__faciesTable    = APSMainFaciesTable(self.__ET_Tree,modelFileName)
-
+        self.__faciesTable = APSMainFaciesTable(self.__ET_Tree, modelFileName)
 
         if self.__printInfo >= 3:
             print('Debug output: RMSGridModel: ' + self.__rmsGridModelName)
@@ -248,38 +246,39 @@ class APSModel:
             print('Debug output: Name of RMS workflow read: ' + self.__rmsWorkflowName)
             print('Debug output: Name of RMS gauss field IPL script: ' + self.__rmsGaussFieldScriptName)
 
-
-        
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
         zModels = root.find('ZoneModels')
-        if zModels == None:
-            print('Error when reading model file: ' + modelFileName)
-            print('Error: Missing keyword ZoneModels')
-            sys.exit()
+        if zModels is None:
+            raise IOError(
+                'Error when reading model file: {}\n'
+                'Error: Missing keyword ZoneModels'
+                ''.format(modelFileName)
+            )
 
         # --- Zone ---
         for zone in zModels.findall('Zone'):
-            if zone == None:
-                print('Error when reading model file: ' + modelFileName)
-                print('Error: Missing keyword Zone in keyword ZoneModels')
-                sys.exit()
+            if zone is None:
+                raise IOError(
+                    'Error when reading model file: {}\n'
+                    'Error: Missing keyword Zone in keyword ZoneModels'
+                    ''.format(modelFileName)
+                )
 
-            zoneNumber      = int(zone.get('number'))
+            zoneNumber = int(zone.get('number'))
             mainLevelFacies = zone.get('mainLevelFacies')
-            if mainLevelFacies == None:
-                if not zoneNumber in self.__zoneNumberList:
+            if mainLevelFacies is None:
+                if zoneNumber not in self.__zoneNumberList:
                     # List of zone numbers
-                    self.__zoneNumberList.append(zoneNumber) 
+                    self.__zoneNumberList.append(zoneNumber)
 
-                    if self.__printInfo >=3:
+                    if self.__printInfo >= 3:
                         print(' ')
                         print(' ')
                         print('Debug output: ---- Read zone model for zone number: ' + str(zoneNumber))
 
-
                     # List of main level facies models for each zone
-                    zoneModel = APSZoneModel(self.__ET_Tree,zoneNumber,mainLevelFacies, modelFileName)
+                    zoneModel = APSZoneModel(self.__ET_Tree, zoneNumber, mainLevelFacies, modelFileName)
                     self.__zoneModelsMainLevel.append(zoneModel)
 
                     # Allocate space for list of list of secondary models.
@@ -290,11 +289,10 @@ class APSModel:
                     # second level facies for one realisation of main level facies. If the
                     # main level facies realisation contain n facies, there can be up to n facies models
                     # for the second level facies.
-                    self.__zoneModelsSecondLevel.append(zoneModel) 
+                    self.__zoneModelsSecondLevel.append(zoneModel)
                 else:
-                    print('Error: Multiple specification of models for zone number: ' + str(zoneNumber))
-                    sys.exit()
-        self.__nZones = len(self.__zoneNumberList) 
+                    raise ValueError('Error: Multiple specification of models for zone number: {}'.format(zoneNumber))
+        self.__nZones = len(self.__zoneNumberList)
 
         for i in range(len(self.__zoneModelsSecondLevel)):
             # Entry number i corresponds to the zoneModelsMainLevel[i]
@@ -302,57 +300,51 @@ class APSModel:
             self.__zoneModelsSecondLevel[i] = []
 
         for zone in zModels.findall('Zone'):
-            zoneNumber      = int(zone.get('number'))
+            zoneNumber = int(zone.get('number'))
             mainLevelFacies = zone.get('mainLevelFacies')
-            if mainLevelFacies != None:
+            if mainLevelFacies is not None:
                 # Now read only second level facies models
                 for i in range(self.__nZones):
-                    zM    = self.__zoneModelsMainLevel[i]
+                    zM = self.__zoneModelsMainLevel[i]
                     sNr = zM.getZoneNumber()
                     if sNr == zoneNumber:
                         if zM.hasFacies(mainLevelFacies):
                             # This second level model belongs to an existing first level facies 
                             # model for this zone 
                             if self.__printInfo >= 3:
-                                text = 'Second level facies model defined for zone: ' + str(zoneNumber) 
-                                text = text +  ' for main level facies: ' + mainLevelFacies
+                                text = 'Second level facies model defined for zone: ' + str(zoneNumber)
+                                text = text + ' for main level facies: ' + mainLevelFacies
                                 print(text)
-                            secondLevelModel = APSZoneModel(self.__ET_Tree,zoneNumber,mainLevelFacies,modelFileName)
+                            secondLevelModel = APSZoneModel(self.__ET_Tree, zoneNumber, mainLevelFacies, modelFileName)
                             self.__zoneModelsSecondLevel[i].append(secondLevelModel)
 
         # Check that second level models are not duplicated
         for i in range(self.__nZones):
             for j in range(len(self.__zoneModelsSecondLevel[i])):
                 zM1 = self.__zoneModelsSecondLevel[i][j]
-                f1  = zM1.getMainLevelFacies()
+                f1 = zM1.getMainLevelFacies()
                 for k in range(len(self.__zoneModelsSecondLevel[i])):
                     if j != k:
                         zM2 = self.__zoneModelsSecondLevel[i][k]
-                        f2  = zM2.getMainLevelFacies()
+                        f2 = zM2.getMainLevelFacies()
                         if f1 == f2:
                             zoneNumber = zM2.getZoneNumber()
-                            text = 'Error: There are multiple specification of second level facies\n'
-                            text = text + ' models for the main level facies: ' + f1 
-                            text = text + ' for zone number: ' + str(zoneNumber)
-                            print(text)
-                            sys.exit()
-        if err == 1:
-            sys.exit()
+                            raise ValueError(
+                                'Error: There are multiple specification of second level facies\n'
+                                ' models for the main level facies: {}'
+                                ' for zone number: {}'.format(f1, zoneNumber)
+                            )
 
-        if self.__printInfo >=3:
+        if self.__printInfo >= 3:
             print(' ')
             print('------------ End reading model file in APSModel ------------------')
             print(' ')
         return
 
-
-    def updateXMLModelFile(self,modelFileName,parameterFileName,printInfo):
-        err = 0
-
+    def updateXMLModelFile(self, modelFileName, parameterFileName, printInfo):
         # Read XML model file
         tree = ET.parse(modelFileName)
         root = tree.getroot()
-
 
         # Scan XML model file for variables that can be updated by FMU/ERT
         # These variables belongs to xml keywords with attribute 'kw'. 
@@ -365,42 +357,40 @@ class APSModel:
         keywordsDefinedForUpdating = []
         for obj in root.findall(".//*[@kw]"):
             keyWord = obj.get('kw')
-            tag     = obj.tag
-            value   = obj.text
-            keywordsDefinedForUpdating.append([keyWord.strip(),value.strip()])
+            tag = obj.tag
+            value = obj.text
+            keywordsDefinedForUpdating.append([keyWord.strip(), value.strip()])
             if printInfo > 1:
-                print('{0:30} {1:20}  {2:10}'.format(keyWord,tag,value))
-
-
+                print('{0:30} {1:20}  {2:10}'.format(keyWord, tag, value))
 
         # Read keywords from parameterFileName (Global IPL include file with variables updated by FMU/ERT)
-        keywordsRead = self.__readParamFromFile(parameterFileName,printInfo)
+        keywordsRead = self.__readParamFromFile(parameterFileName, printInfo)
         # keywordsRead = [name,value]
 
         # Set new values
         for i in range(len(keywordsDefinedForUpdating)):
             item = keywordsDefinedForUpdating[i]
             keyword = item[0]
-            oldValue   = item[1]
+            oldValue = item[1]
             for j in range(len(keywordsRead)):
                 itemRead = keywordsRead[j]
-                kw     = itemRead[0]
-                value  = itemRead[1]
+                kw = itemRead[0]
+                value = itemRead[1]
                 if kw == keyword:
                     # set new value
                     item[1] = ' ' + value.strip() + ' '
         if printInfo >= 3:
-            print('Debug output: ' + ' Keywords and values that is updated in xml tree: ')
+            print('Debug output:  Keywords and values that is updated in xml tree: ')
 
         for obj in root.findall(".//*[@kw]"):
             keyWord = obj.get('kw')
-            tag     = obj.tag
-            oldValue   = obj.text
+            tag = obj.tag
+            oldValue = obj.text
 
             found = 0
             for i in range(len(keywordsDefinedForUpdating)):
                 item = keywordsDefinedForUpdating[i]
-                kw  = item[0]
+                kw = item[0]
                 val = item[1]
                 if kw == keyWord:
                     # Update value in XML tree for this keyword
@@ -409,18 +399,18 @@ class APSModel:
                     break
             if found == 1:
                 if printInfo >= 3:
-                    print('{0:30} {1:20}  {2:10}'.format(keyWord,oldValue,obj.text))
+                    print('{0:30} {1:20}  {2:10}'.format(keyWord, oldValue, obj.text))
             else:
-                print('Error: Inconsistency. Programming error in function updateXMLModelFile in class APSModel')
-                sys.exit()
+                raise ValueError(
+                    'Error: Inconsistency. Programming error in function updateXMLModelFile in class APSModel'
+                )
 
         if printInfo >= 3:
             print(' ')
 
         return tree
 
-
-    def __readParamFromFile(self,inputFile,printInfo):
+    def __readParamFromFile(self, inputFile, printInfo):
 
         # Search through the file line for line and skip lines commented out with '//' 
         # Collect all variables that are assigned value as the three first words on a line
@@ -429,7 +419,7 @@ class APSModel:
             print('- Read file: ' + inputFile)
         nKeywords = 0
         keywordsFMU = []
-        with open(inputFile,'r') as file:
+        with open(inputFile, 'r') as file:
             lines = file.readlines()
 
             for line in lines:
@@ -445,51 +435,49 @@ class APSModel:
                 if words[1] == '=':
                     # This is assumed to be an assignment
                     nKeywords += 1
-                    value   = copy.copy(words[2])
+                    value = copy.copy(words[2])
                     keyword = copy.copy(words[0])
-                    keywordsFMU.append([keyword,value])
+                    keywordsFMU.append([keyword, value])
         if printInfo >= 3:
             print('Debug output: Keywords and values found in parameter file:  ' + inputFile)
             for item in keywordsFMU:
                 kw = item[0]
                 val = item[1]
-                print('  {0:30} {1:20}'.format(kw,val))
+                print('  {0:30} {1:20}'.format(kw, val))
             print(' ')
         # End read file
-        
+
         return keywordsFMU
 
-
-
-    def initialize(self,rmsProjName,rmsWorkflowName,rmsGaussFieldScriptName,
-                   rmsGridModelName,rmsZoneParamName,rmsFaciesParamName,
-                   printInfo,rmsGFJobs,rmsHorizonRefName,rmsHorizonRefNameDataType,
+    def initialize(self, rmsProjName, rmsWorkflowName, rmsGaussFieldScriptName,
+                   rmsGridModelName, rmsZoneParamName, rmsFaciesParamName,
+                   printInfo, rmsGFJobs, rmsHorizonRefName, rmsHorizonRefNameDataType,
                    mainFaciesTable,
-                   zoneModelListMainLevel,zoneModelListSecondLevel):
-        self.__rmsProjectName  = copy.copy(rmsProjName)
+                   zoneModelListMainLevel, zoneModelListSecondLevel):
+        self.__rmsProjectName = copy.copy(rmsProjName)
         self.__rmsWorkflowName = copy.copy(rmsWorkflowName)
         self.__rmsGaussFieldScriptName = copy.copy(rmsGaussFieldScriptName)
         self.__refHorizonNameForVarioTrend = copy.copy(rmsHorizonRefName)
         self.__refHorizonReprNameForVarioTrend = copy.copy(rmsHorizonRefNameDataType)
-        self.__rmsGridModelName   = copy.copy(rmsGridModelName)
-        self.__rmsZoneParamName   = copy.copy(rmsZoneParamName)
+        self.__rmsGridModelName = copy.copy(rmsGridModelName)
+        self.__rmsZoneParamName = copy.copy(rmsZoneParamName)
         self.__rmsFaciesParamName = copy.copy(rmsFaciesParamName)
-        self.__printInfo   = printInfo
-        self.__rmsGFJobs   = copy.deepcopy(rmsGFJobs)
+        self.__printInfo = printInfo
+        self.__rmsGFJobs = copy.deepcopy(rmsGFJobs)
         self.__faciesTable = mainFaciesTable
         self.__nZones = len(zoneModelListMainLevel)
-        self.__zoneModelsMainLevel  = copy.deepcopy(zoneModelListMainLevel)
+        self.__zoneModelsMainLevel = copy.deepcopy(zoneModelListMainLevel)
         self.__zoneModelsSecondLevel = copy.deepcopy(zoneModelListSecondLevel)
         self.__zoneNumberList = self.getZoneNumberList()
         self.__previewZone = 1
-#        self.__previewGridNx = 300
-#        self.__previewGridNy = 300
-#        self.__previewGridXSize = 1000.0
-#        self.__previewGridYSize = 1000.0
-#        self.__previewGridOrientation = 0.0
+        #        self.__previewGridNx = 300
+        #        self.__previewGridNy = 300
+        #        self.__previewGridXSize = 1000.0
+        #        self.__previewGridYSize = 1000.0
+        #        self.__previewGridOrientation = 0.0
         return
 
-#  ---- Get functions -----
+    #  ---- Get functions -----
     def getXmlTree(self):
         tree = self.__ET_Tree
         return tree
@@ -503,11 +491,11 @@ class APSModel:
         return copy.copy(self.__selectedZoneNumberList)
 
     # Get pointer to zone model object
-    def getZoneModel(self,zoneNumber,mainLevelFacies=None):
+    def getZoneModel(self, zoneNumber, mainLevelFacies=None):
         foundModel = None
         for i in range(len(self.__zoneNumberList)):
             if self.__zoneNumberList[i] == zoneNumber:
-                if mainLevelFacies == None:
+                if mainLevelFacies is None:
                     foundModel = self.__zoneModelsMainLevel[i]
                 else:
                     for j in range(len(self.__zoneModelsSecondLevel[i])):
@@ -526,14 +514,13 @@ class APSModel:
     def getZoneNumberList(self):
         return copy.copy(self.__zoneNumberList)
 
-#    def getPreviewZone(self):
-#        return [self.__previewZone,self.__previewGridNx,self.__previewGridNy, 
-#                self.__previewGridXSize, self.__previewGridYSize, 
-#                self.__previewGridOrientation]
+    #    def getPreviewZone(self):
+    #        return [self.__previewZone,self.__previewGridNx,self.__previewGridNy,
+    #                self.__previewGridXSize, self.__previewGridYSize,
+    #                self.__previewGridOrientation]
 
     def getPreviewZoneNumber(self):
         return self.__previewZone
-
 
     def getAllGaussFieldNamesUsed(self):
         gfAllZones = []
@@ -570,72 +557,70 @@ class APSModel:
 
         return allProbList
 
-# ----- Set functions -----
-    def setRmsProjectName(self,name):
+    # ----- Set functions -----
+    def setRmsProjectName(self, name):
         self.__rmsProjectName = copy.copy(name)
         return
 
-    def setRmsWorkflowName(self,name):
+    def setRmsWorkflowName(self, name):
         self.__rmsWorkflowName = copy.copy(name)
         return
 
-    def setGaussFieldScriptName(self,name):
+    def setGaussFieldScriptName(self, name):
         self.__rmsGaussFieldScriptName = copy.copy(name)
         return
 
-    def setRmsGridModelName(self,name):
+    def setRmsGridModelName(self, name):
         self.__rmsGridModelName = copy.copy(name)
         return
 
-    def setRmsZoneParamName(self,name):
-        self.__rmsZoneParamName   = copy.copy(name)
+    def setRmsZoneParamName(self, name):
+        self.__rmsZoneParamName = copy.copy(name)
         return
 
-    def setRmsResultFaciesParamName(self,name):
+    def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
         return
 
-    def setPrintInfo(self,printInfo):
+    def setPrintInfo(self, printInfo):
         if printInfo < 0:
             printInfo = 0
         self.__printInfo = printInfo
         return
 
-    def setSelectedZoneNumberList(self,selectedZoneNumbers):
-        err = 0
+    def setSelectedZoneNumberList(self, selectedZoneNumbers):
         self.__selectedZoneNumberList = []
         for i in range(len(selectedZoneNumbers)):
             number = selectedZoneNumbers[i]
             if not (number in self.__zoneNumberList):
-                err = 1
-                print('Error in ' + self.__className + ' in ' + 'setSelectedZoneNumberList')
-                print('Error:  Selected zone number: ' + str(number) + ' is not among the possible zone numbers.')
-                break
+                raise ValueError(
+                    'Error in {} in setSelectedZoneNumberList\n'
+                    'Error:  Selected zone number: {} is not among the possible zone numbers.'
+                    ''.format(self.__className, number)
+                )
             self.__selectedZoneNumberList.append(number)
-        return err 
 
-    def setPreviewZoneNumber(self,zoneNumber):
-        err = 0
+    def setPreviewZoneNumber(self, zoneNumber):
         if not (zoneNumber in self.__zoneNumberList):
-            err = 1
-            print('Error in ' + self.__className + ' in ' + 'setPreviewZoneNumber')
-            print('Error:  Zone number: ' + str(zoneNumber) + ' is not among the possible zone numbers.')
+            raise ValueError(
+                'Error in {} in setPreviewZoneNumber\n'
+                'Error:  Zone number: {} is not among the possible zone numbers.'.format(self.__className, zoneNumber)
+            )
         else:
             self.__previewZone = zoneNumber
-        return err
 
     # Add the pointer to the new zone object into the zone list
-    def addNewZone(self,zoneObject):
+    def addNewZone(self, zoneObject):
         zoneNumber = zoneObject.getZoneNumber()
         self.__zoneModelsMainLevel.append(zoneObject)
         self.__zoneNumberList.append(zoneNumber)
         self.__nZones += 1
         return
 
-    def deleteZone(self,zoneNumber):
+    def deleteZone(self, zoneNumber):
         for i in range(len(self.__zoneModelsMainLevel)):
             zone = self.__zoneModelsMainLevel[i]
-            zNr  = zone.getZoneNumber()
+            zNr = zone.getZoneNumber()
             if zNr == zoneNumber:
                 # Remove zone object from list (and forget it)
                 self.__zoneModelsMainLevel.pop(i)
@@ -655,189 +640,145 @@ class APSModel:
         return
 
     # Set facies table to refer to the input facies table object
-    def setMainFaciesTable(self,faciesTableObj):
+    def setMainFaciesTable(self, faciesTableObj):
         self.__faciesTable = faciesTableObj
         return
 
     # Set gauss field job to refer to the input gauss field job object
-    def setGaussFieldJobs(self,gfJobObject):
+    def setGaussFieldJobs(self, gfJobObject):
         self.__rmsGFJobs = gfJobObject
         return
 
-
     def createSimGaussFieldIPL(self):
         print('Call createSimGaussFieldIPL')
-        print('Write file: ' +  self.__rmsGaussFieldScriptName)
+        print('Write file: {}'.format(self.__rmsGaussFieldScriptName))
         outputFileName = self.__rmsGaussFieldScriptName
-        gridModelName  = self.__rmsGridModelName
+        gridModelName = self.__rmsGridModelName
         zoneNumberList = self.__zoneNumberList
         nZones = len(zoneNumberList)
-        jobObject  = self.__rmsGFJobs
-        nJobs      = jobObject.getNumberOfGFJobs()
-        jobNames   = jobObject.getGaussFieldJobNames()
-        
-        with open(outputFileName,'w') as file:
-            line = '// IPL: ' + outputFileName
-            file.write(line+'\n')
-            line = '// IPL:  Run RMS jobs to create gaussian fields for the APS method'
-            file.write(line+'\n')
-            line = '// Created by: Python script APSModel.py'
-            file.write(line+'\n')
+        jobObject = self.__rmsGFJobs
+        nJobs = jobObject.getNumberOfGFJobs()
+        jobNames = jobObject.getGaussFieldJobNames()
 
-            d = datetime.datetime.today()
-            t = datetime.datetime.now()
-            line = '// Date: ' + d.strftime("%d/%m/%y") + ' Clock: ' +t.strftime("%H.%M.%S")
-            file.write(line+'\n')
+        with open(outputFileName, 'w') as file:
+            file.write('// IPL: {}\n'.format(outputFileName))
+            file.write('// IPL:  Run RMS jobs to create gaussian fields for the APS method\n')
+            file.write('// Created by: Python script APSModel.py\n')
 
-            line = '// --- Declarations ---'
-            file.write(line+'\n')
-            line = 'Job job'
-            file.write(line+'\n')
-            line = 'String gridModelName'
-            file.write(line+'\n')
-            line = 'String jobName,fullJobName'
-            file.write(line+'\n')
-            line = 'String varioType'
-            file.write(line+'\n')
-            line = 'String scriptName'
-            file.write(line+'\n')
-            line = 'String paramName'
-            file.write(line+'\n')
-            line = 'Int    nZones'
-            file.write(line+'\n')
-            line = 'Float    value'
-            file.write(line+'\n')
-            line = 'GridModel gm'
-            file.write(line+'\n')
-            line = ' '
-            file.write(line+'\n')
-            line = '// --- Assignments  ---'
-            file.write(line+'\n')
-            line = 'scriptName    = ' + '"' + outputFileName + '"'
-            file.write(line+'\n')
-            line = 'gridModelName = ' + '"' + gridModelName + '"'
-            file.write(line+'\n')
-            line = 'nZones        = ' + str(nZones)
-            file.write(line+'\n')
-            line = ' '
-            file.write(line+'\n')
-            line ='// --- Executable code ---'
-            file.write(line+'\n')
-            line = 'GetGridModel(gridModelName,gm)'
-            file.write(line+'\n')
-            line = ' '
-            file.write(line+'\n')
-            line = ' '
-            file.write(line+'\n')
+            d = datetime.datetime.today().strftime("%d/%m/%y")
+            t = datetime.datetime.now().strftime("%H.%M.%S")
+            file.write('// Date: {} Clock: {}\n'.format(d, t))
+
+            file.write('// --- Declarations ---\n')
+            file.write('Job job\n')
+            file.write('String gridModelName\n')
+            file.write('String jobName,fullJobName\n')
+            file.write('String varioType\n')
+            file.write('String scriptName\n')
+            file.write('String paramName\n')
+            file.write('Int    nZones\n')
+            file.write('Float    value\n')
+            file.write('GridModel gm\n')
+            file.write(' \n')
+            file.write('// --- Assignments  ---\n')
+            file.write('scriptName    = "{}"\n'.format(outputFileName))
+            file.write('gridModelName = "{}"\n'.format(gridModelName))
+            file.write('nZones        = {}\n'.format(nZones))
+            file.write(' \n')
+            file.write('// --- Executable code ---\n')
+            file.write('GetGridModel(gridModelName,gm)\n')
+            file.write(' \n')
+            file.write(' \n')
 
             updateJob = []
             for j in range(nJobs):
                 updateJob.append(0)
-            
+
             for zIndx in range(nZones):
                 zoneNumber = zoneNumberList[zIndx]
-                if not zoneNumber in self.__selectedZoneNumberList:
+                if zoneNumber not in self.__selectedZoneNumberList:
                     continue
-                line = '// --- RMS zone number ' + str(zoneNumber) + ' parameter settings ---'
-                file.write(line+'\n')
+                file.write('// --- RMS zone number {} parameter settings ---\n'.format(zoneNumber))
                 currentZoneModel = self.__zoneModelsMainLevel[zIndx]
                 gaussFieldNamesInZoneModel = currentZoneModel.getUsedGaussFieldNames()
                 nGFParamUsed = len(gaussFieldNamesInZoneModel)
 
                 for i in range(nGFParamUsed):
                     gfNameUsed = gaussFieldNamesInZoneModel[i]
-                    line = 'Print("Update Gauss field: ",' + '"' + gfNameUsed + '"' + ',' + '" for zone: ",' + str(zoneNumber) + ')'
-                    file.write(line+'\n')
+                    file.write('Print("Update Gauss field: ","{}"," for zone: ",{})\n'.format(gfNameUsed, zoneNumber))
 
                     # Check which rms job this gauss field parameter belongs to
                     for j in range(nJobs):
 
                         currentJobName = jobNames[j]
-                        if jobObject.checkGaussFieldNameInJob(currentJobName,gfNameUsed):
+                        if jobObject.checkGaussFieldNameInJob(currentJobName, gfNameUsed):
                             updateJob[j] = 1
                             # This job must be updated with variogram parameters 
                             # for current zone number
-                            gfIndx    = jobObject.getGaussFieldIndx(currentJobName,gfNameUsed)
+                            gfIndx = jobObject.getGaussFieldIndx(currentJobName, gfNameUsed)
                             varioType = currentZoneModel.getVarioType(gfNameUsed)
-                            range1    = currentZoneModel.getMainRange(gfNameUsed)
-                            range2    = currentZoneModel.getPerpRange(gfNameUsed)
-                            range3    = currentZoneModel.getVertRange(gfNameUsed)
+                            range1 = currentZoneModel.getMainRange(gfNameUsed)
+                            range2 = currentZoneModel.getPerpRange(gfNameUsed)
+                            range3 = currentZoneModel.getVertRange(gfNameUsed)
+                            # TODO: power is UNUSED
                             power = 1.0
                             if varioType == 'GEN_EXPONENTIAL':
                                 power = currentZoneModel.getPower(gfNameUsed)
 
+                            file.write('job = "{}"\n'.format(currentJobName))
 
+                            file.write(
+                                'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
+                            )
 
-                            line = 'job = ' + '"' + currentJobName + '"'
-                            file.write(line+'\n')
-
-                            line = 'paramName = "Zone[' + str(zoneNumber) + '].Group[' + str(gfIndx+1) + '].VariogramType"'
-                            file.write(line+'\n')
-
-                            line = 'ModifyJob(job,paramName,' + '"' + varioType + '"' +')'
-                            file.write(line+'\n')
-                            line = 'paramName = "Zone[' + str(zoneNumber) + '].Group[' + str(gfIndx+1) + '].VariogramStdDev"'
-                            file.write(line+'\n')
-                            line = 'value = ' + str(1.0)
-                            file.write(line+'\n')
-                            line = 'ModifyJob(job,paramName,value)'
-                            file.write(line+'\n')
-                            line = 'paramName = "Zone[' + str(zoneNumber) + '].Group[' + str(gfIndx+1) + '].VariogramMainRange"'
-                            file.write(line+'\n')
-                            line = 'value = ' + str(range1)
-                            file.write(line+'\n')
-                            line = 'ModifyJob(job,paramName,value)'
-                            file.write(line+'\n')
-                            line = 'paramName = "Zone[' + str(zoneNumber) + '].Group[' + str(gfIndx+1) + '].VariogramPerpRange"'
-                            file.write(line+'\n')
-                            line = 'value = ' + str(range2)
-                            file.write(line+'\n')
-                            line = 'ModifyJob(job,paramName,value)'
-                            file.write(line+'\n')
-                            line = 'paramName = "Zone[' + str(zoneNumber) + '].Group[' + str(gfIndx+1) + '].VariogramVertRange"'
-                            file.write(line+'\n')
-                            line = 'value = ' + str(range3)
-                            file.write(line+'\n')
-                            line = 'ModifyJob(job,paramName,value)'
-                            file.write(line+'\n')
-                            line = 'ApplyJob(job)'
-                            file.write(line+'\n')
-                            line = ' '
-                            file.write(line+'\n')
+                            file.write('ModifyJob(job,paramName,"{}")\n'.format(varioType))
+                            file.write(
+                                'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
+                            )
+                            file.write('value = {}\n'.format(1.0))
+                            file.write('ModifyJob(job,paramName,value)\n')
+                            file.write(
+                                'paramName = "Zone[{}].Group[{}].VariogramMainRange"\n'.format(zoneNumber, gfIndx + 1)
+                            )
+                            file.write('value = {}\n'.format(range1))
+                            file.write('ModifyJob(job,paramName,value)\n')
+                            file.write(
+                                'paramName = "Zone[{}].Group[{}].VariogramPerpRange"\n'.format(zoneNumber, gfIndx + 1)
+                            )
+                            file.write('value = {}\n'.format(range2))
+                            file.write('ModifyJob(job,paramName,value)\n')
+                            file.write(
+                                'paramName = "Zone[{}].Group[{}].VariogramVertRange"\n'.format(zoneNumber, gfIndx + 1)
+                            )
+                            file.write('value = {}\n'.format(range3))
+                            file.write('ModifyJob(job,paramName,value)\n')
+                            file.write('ApplyJob(job)\n')
+                            file.write(' \n')
                             break
 
             # End for zone
-            line = '// --- Execute jobs ---'
-            file.write(line+'\n')
+            file.write('// --- Execute jobs ---\n')
             for j in range(nJobs):
                 if updateJob[j] == 1:
                     currentJobName = jobNames[j]
-                    line = 'fullJobName = gridModelName + ".Grid." + ' + '"' + currentJobName + '"'
-                    file.write(line+'\n')
-                    line = 'job = ' + '"' + currentJobName + '"'
-                    file.write(line+'\n')
-                    line = 'Print("Start running job: ",fullJobName)'
-                    file.write(line+'\n')
-                    line = 'ExecuteJob(job)'
-                    file.write(line+'\n')
+                    file.write('fullJobName = gridModelName + ".Grid." + "{}"\n'.format(currentJobName))
+                    file.write('job = "{}"\n'.format(currentJobName))
+                    file.write('Print("Start running job: ",fullJobName)\n')
+                    file.write('ExecuteJob(job)\n')
 
-            line = ' '
-            file.write(line+'\n')
-            line = 'Print("Finished IPL script: ",' + '"' + outputFileName + '")'
-            file.write(line+'\n')
-            line = '// --------------- End script -----------------'
-            file.write(line+'\n')
+            file.write(' \n')
+            file.write('Print("Finished IPL script: ","{}")\n'.format(outputFileName))
+            file.write('// --------------- End script -----------------\n')
         return
 
-
-    def XMLAddElement(self,root):
+    def XMLAddElement(self, root):
 
         # Add a command specifying which zone to use in for preview
         # This is temporary solution
         if self.__previewZone > 0:
             tag = 'Preview'
-            attribute = {'zoneNumber':str(self.__previewZone)}
-            elem = Element(tag,attribute)
+            attribute = {'zoneNumber': str(self.__previewZone)}
+            elem = Element(tag, attribute)
             root.append(elem)
         # If selected zone list is defined (has elements) write them to a keyword
         if len(self.__selectedZoneNumberList) > 0:
@@ -853,31 +794,30 @@ class APSModel:
         # Add all main commands to the root APSModel
         tag = 'RMSProjectName'
         elem = Element(tag)
-        elem.text =  ' ' + self.__rmsProjectName.strip()+ ' '
+        elem.text = ' ' + self.__rmsProjectName.strip() + ' '
         root.append(elem)
 
         tag = 'RMSWorkflowName'
         elem = Element(tag)
-        elem.text =  ' ' + self.__rmsWorkflowName.strip() + ' '
+        elem.text = ' ' + self.__rmsWorkflowName.strip() + ' '
         root.append(elem)
 
         tag = 'RMSGaussFieldScriptName'
         elem = Element(tag)
-        elem.text =  ' ' + self.__rmsGaussFieldScriptName.strip() + ' '
+        elem.text = ' ' + self.__rmsGaussFieldScriptName.strip() + ' '
         root.append(elem)
 
-#        tag = 'RMSTrendMapLayoutReference'
-#        elemHor = Element(tag)
-#        tag = 'HorizonName'
-#        elem = Element(tag)
-#        elem.text = ' ' + self.__refHorizonNameForVarioTrend + ' '
-#        elemHor.append(elem)
-#        tag = 'DataTypeName'
-#        elem = Element(tag)
-#        elem.text = ' ' + self.__refHorizonReprNameForVarioTrend + ' '
-#        elemHor.append(elem)
-#        root.append(elemHor)
-
+        #        tag = 'RMSTrendMapLayoutReference'
+        #        elemHor = Element(tag)
+        #        tag = 'HorizonName'
+        #        elem = Element(tag)
+        #        elem.text = ' ' + self.__refHorizonNameForVarioTrend + ' '
+        #        elemHor.append(elem)
+        #        tag = 'DataTypeName'
+        #        elem = Element(tag)
+        #        elem.text = ' ' + self.__refHorizonReprNameForVarioTrend + ' '
+        #        elemHor.append(elem)
+        #        root.append(elemHor)
 
         tag = 'GridModelName'
         elem = Element(tag)
@@ -915,9 +855,8 @@ class APSModel:
             # Add command Zone
             zoneObject.XMLAddElement(zoneListElement)
 
-
         # Add command ZoneModels for secondLevel facies models
-        if self.__zoneModelsSecondLevel != None:
+        if self.__zoneModelsSecondLevel is not None:
             for i in range(len(self.__zoneModelsSecondLevel)):
                 for j in range(len(self.__zoneModelsSecondLevel[i])):
                     zoneObject = self.__zoneModelsSecondLevel[i][j]
@@ -927,24 +866,23 @@ class APSModel:
         rootReformatted = prettify(root)
         return rootReformatted
 
-
-    def writeModel(self,modelFileName, printInfo=0):
+    def writeModel(self, modelFileName, printInfo=0):
         print('Write file: ' + modelFileName)
         top = Element('APSModel')
         rootUpdated = self.XMLAddElement(top)
-        with open(modelFileName,'w') as file:
+        with open(modelFileName, 'w') as file:
             file.write(rootUpdated)
         return
 
-    def writeModelFromXMLRoot(self,inputETree,outputModelFileName):
+    def writeModelFromXMLRoot(self, inputETree, outputModelFileName):
         print('Write file: ' + outputModelFileName)
         root = inputETree.getroot()
         rootReformatted = prettify(root)
-        with open(outputModelFileName,'w') as file:
+        with open(outputModelFileName, 'w') as file:
             file.write(rootReformatted)
         return
 
-#    def get2DMapRefHorizonName(self):
+# def get2DMapRefHorizonName(self):
 #        return copy.copy(self.__refHorizonNameForVarioTrend)
 #
 #    def get2DMapRefHorizonType(self):
