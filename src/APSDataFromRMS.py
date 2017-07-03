@@ -1,173 +1,202 @@
-#x!/bin/env python
+#!/bin/env python
 # Python 3 script to read data from xml file with RMS information.
 
-import sys
 import copy
 import numpy as np
 import xml.etree.ElementTree as ET
 from  xml.etree.ElementTree import Element, SubElement, dump
 from xml.dom import minidom
-#import importlib
+# import importlib
 
 import APSMainFaciesTable
 
-#importlib.reload(APSMainFaciesTable)
 
+# importlib.reload(APSMainFaciesTable)
 
 
 def prettify(elem):
-    rough_string = ET.tostring(elem,'utf-8')
+    rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
 
-# ----------------------------------------------------------------------------------
-# APSDataFromRMS:
-# Description: This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
-#              for both 3D grid model and for horizon data and facies data from wells.
-#              NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
-#              specifying which grid model to scan and which well and log to scan to get facies data. 
-#             
-#
-# Functions:
-#     readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data. 
-#                                              The input XML file is previously written by the function
-#                                              scanRMSProjectAndWriteXMLFile.
-#                                              This function is to be used e.g in the GUI script.
-#     getFaciesTable()   - Get facies table which is defined in the RMS project by a selected facies log.
-#     getGridModelName() - Get name of grid model to use.
-#     getHorizonNames()  - Get list of all horizon names in the RMS project.
-#     getGridSize()      - Get grid size and dimension for the 3D grid in the grid model.
-#     getSurfaceSize()   - Get dimension and size of the 2D horizon maps.
-#     getGridZoneNames() - Get list of zone names for the grid model.
-#     getContinuousGridParamNames()  - Get list of all 3D parameters of continuous type belonging to the grid model.
-#     getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
-# --------------------------------------------------------------------------------------------                                             
-class APSDataFromRMS:
 
-    def __init__(self,printInfo=0):
-        self.__propertyListContinuous = []
-        self.__propertyListDiscrete   = []
-        self.__projectName = ' '
-        self.__projectSeed = 0
-        self.__projectRealNumber = 0
-        self.__gridModelName = ' '
-        self.__zones = []
-        self.__horizonNames = []
+"""
+----------------------------------------------------------------------------------
+APSDataFromRMS:
+Description: This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
+             for both 3D grid model and for horizon data and facies data from wells.
+             NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
+             specifying which grid model to scan and which well and log to scan to get facies data. 
+
+
+Functions:
+    readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data. 
+                                             The input XML file is previously written by the function
+                                             scanRMSProjectAndWriteXMLFile.
+                                             This function is to be used e.g in the GUI script.
+    getFaciesTable()   - Get facies table which is defined in the RMS project by a selected facies log.
+    getGridModelName() - Get name of grid model to use.
+    getHorizonNames()  - Get list of all horizon names in the RMS project.
+    getGridSize()      - Get grid size and dimension for the 3D grid in the grid model.
+    getSurfaceSize()   - Get dimension and size of the 2D horizon maps.
+    getGridZoneNames() - Get list of zone names for the grid model.
+    getContinuousGridParamNames()  - Get list of all 3D parameters of continuous type belonging to the grid model.
+    getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
+--------------------------------------------------------------------------------------------                                             
+"""
+
+
+class APSDataFromRMS:
+    def __init__(self, printInfo=0):
+        self.__data = {
+            'Property list continuous': [],
+            'Property list discrete': [],
+            'Project name': '',
+            'Project seed': 0,
+            'Project realization number': 0,
+            'Grid model name': '',
+            'Zones': [],
+            'Horizon names': [],
+        }
+
+        self.__keyword_mapping = {
+            # The keys are the tags in the XML file, while the values are the names used internally in this class
+            'Project': 'Project name',
+            'Seed': 'Project seed',
+            'RealisationNumber': 'Project realisation number',
+            'GridModel': 'Grid model name',
+            'ZoneName': 'Zones',
+            'Horizon': 'Horizon names',
+            'NX': 'nx',
+            'NY': 'ny',
+            'Xmin': 'x min',
+            'Xmax': 'x max',
+            'Ymin': 'y min',
+            'Ymax': 'y max',
+            'Xinc': 'x inc',
+            'Yinc': 'y inc',
+            'Rotation': 'rotation',
+            'OrigoX': 'x_0',
+            'OrigoY': 'y_0',
+            'XSize': 'x size',
+            'YSize': 'y size',
+            'AsimuthAngle': 'azimuth angle',
+        }
+
         self.__faciesTable = None
 
-        self.__surf_nx = 0
-        self.__surf_ny = 0
-        self.__surf_xmin = 0
-        self.__surf_xmax = 0
-        self.__surf_ymin = 0
-        self.__surf_ymax = 0
-        self.__surf_xinc = 0
-        self.__surf_yinc = 0
-        self.__surf_rotation = 0
+        self.__surf = {
+            'nx': 0,
+            'ny': 0,
+            'x min': 0,
+            'x max': 0,
+            'y min': 0,
+            'y max': 0,
+            'x inc': 0,
+            'y inc': 0,
+            'rotation': 0,
+        }
 
-        self.__grid_nx = 0
-        self.__grid_ny = 0
-        self.__grid_x0 = 0
-        self.__grid_y0 = 0
-        self.__grid_xSize = 0
-        self.__grid_ySize = 0
-        self.__grid_xinc = 0
-        self.__grid_yinc = 0
-        self.__grid_asimuth = 0
+        self.__grid = {
+            'nx': 0,
+            'ny': 0,
+            'x_0': 0,
+            'y_0': 0,
+            'x size': 0,
+            'y size': 0,
+            'x inc': 0,
+            'y inc': 0,
+            'azimuth angle': 0,
+        }
 
         self.__printInfo = printInfo
-
-        return
-
 
     def getFaciesTable(self):
         return copy.copy(self.__faciesTable)
 
-
     def getProjectName(self):
-        return copy.copy(self.__projectName)
-
+        return copy.copy(self.__data['Project name'])
 
     def getProjectSeed(self):
-        return self.__projectSeed
+        return self.__data['Project seed']
 
     def getProjectRealNumber(self):
-        return self.__projectRealNumber
+        return self.__data['Project realization number']
 
     def getGridModelName(self):
-        return copy.copy(self.__gridModelName)
+        return copy.copy(self.__data['Grid model name'])
 
     def getHorizonNames(self):
-        return copy.copy(self.__horizonNames)
+        return copy.copy(self.__data['Horizon names'])
 
     def getGridSize(self):
-        return [self.__grid_nx, self.__grid_ny, self.__grid_x0, self.__grid_y0,
-                self.__grid_xSize, self.__grid_ySize, self.__grid_xinc, self.__grid_yinc,
-                self.__grid_asimuth]
+        order = ['nx', 'ny', 'x_0', 'y_0', 'x size', 'y size', 'x inc', 'y inc', 'azimuth angle']
+        return [self.__grid[key] for key in order]
 
     def getSurfaceSize(self):
-        return [self.__surf_nx, self.__surf_ny, self.__surf_xmin, self.__surf_xmax,
-                self.__surf_ymin, self.__surf_ymax, self.__surf_xinc, self.__surf_yinc,
-                self.__surf_rotation]
+        order = ['nx', 'ny', 'x min', 'x max', 'y min', 'y max', 'x inc', 'y inc', 'rotation']
+        return [self.__surf[key] for key in order]
 
     def getGridZoneNames(self):
         zoneNames = []
-        for item in self.__zones:
+        for item in self.__data['Zones']:
             name = item[1]
             zoneNames.append(name)
         return zoneNames
 
     def getContinuousGridParamNames(self):
-        return copy.copy(self.__propertyListContinuous)
+        return copy.copy(self.__data['Property list continuous'])
 
     def getDiscreteGridParamNames(self):
-        return copy.copy(self.__propertyListDiscrete)
+        return copy.copy(self.__data['Property list discrete'])
 
+    # def __add_key_word(self, kw, root):
+    #     item = root.find(kw)
+    #     if item is None:
+    #         raise ValueError('Error: Missing keyword {}'.format(kw))
+    #     text = item.get('name')
+    #     item_name = text.strip()
+    #     self.__dict__[self.__keyword_mapping[kw]] = item_name
 
-    def readRMSDataFromXMLFile(self,inputFileName):
+    def readRMSDataFromXMLFile(self, inputFileName):
         tree = ET.parse(inputFileName)
         root = tree.getroot()
 
         kw = 'Project'
         prObj = root.find(kw)
-        if prObj == None:
-            print('Error: Missing keyword ' + kw)
-            sys.exit()
+        if prObj is None:
+            raise ValueError('Error: Missing keyword {}'.format(kw))
         text = prObj.get('name')
         projectName = text.strip()
-        self.__projectName = projectName
+        self.__data[self.__keyword_mapping[kw]] = projectName
 
         kw = 'Seed'
         seedObj = prObj.find(kw)
-        if seedObj == None:
-            print('Error: Missing keyword ' + kw)
-            sys.exit()
+        if seedObj is None:
+            raise ValueError('Error: Missing keyword {}'.format(kw))
         text = seedObj.text
         projectSeed = int(text.strip())
-        self.__projectSeed = projectSeed
+        self.__data['Project seed'] = projectSeed
 
         kw = 'RealisationNumber'
         realObj = prObj.find(kw)
-        if realObj == None:
-            print('Error: Missing keyword ' + kw)
-            sys.exit()
+        if realObj is None:
+            raise ValueError('Error: Missing keyword {}'.format(kw))
         text = realObj.text
         projectRealNumber = int(text.strip())
-        self.__projectRealNumber = projectRealNumber
+        self.__data['Project realization number'] = projectRealNumber
 
-            
         kw = 'GridModel'
         gmObj = root.find(kw)
-        if gmObj == None:
-            print('Error: Missing keyword ' + kw)
-            sys.exit()
+        if gmObj is None:
+            raise ValueError('Error: Missing keyword {}'.format(kw))
         text = gmObj.get('name')
         gridModelName = text.strip()
-        self.__gridModelName = gridModelName
+        self.__data['Grid model name'] = gridModelName
 
         propertyListContinuous = []
         propertyListDiscrete = []
-        
+
         kw = 'Property'
         for probObj in gmObj.findall(kw):
             text = probObj.get('type')
@@ -179,8 +208,8 @@ class APSDataFromRMS:
             else:
                 propertyListDiscrete.append(propName)
 
-        self.__propertyListContinuous = propertyListContinuous
-        self.__propertyListDiscrete   = propertyListDiscrete
+        self.__data['Property list continuous'] = propertyListContinuous
+        self.__data['Property list discrete'] = propertyListDiscrete
 
         kw = 'ZoneName'
         zones = []
@@ -189,183 +218,91 @@ class APSDataFromRMS:
             zoneNumber = int(text.strip())
             text = zNameObj.text
             zoneName = text.strip()
-            zones.append([zoneNumber,zoneName])
-        self.__zones = zones
+            zones.append([zoneNumber, zoneName])
+        self.__data['Zones'] = zones
 
-        kw2 = 'XSize'
-        xsObj = gmObj.find(kw2)
-        text = xsObj.text
-        xSize = float(text.strip())
-        self.__grid_xSize = xSize 
-
-        kw2 = 'YSize'
-        ysObj = gmObj.find(kw2)
-        text = ysObj.text
-        ySize = float(text.strip())
-        self.__grid_ySize = ySize 
-        
-        kw2 = 'AsimuthAngle'
-        asimuthObj = gmObj.find(kw2)
-        text = asimuthObj.text
-        asimuth = float(text.strip())
-        self.__grid_asimuth = asimuth
-
-        kw2 = 'OrigoX'
-        origoXObj = gmObj.find(kw2)
-        text = origoXObj.text
-        origoX = float(text.strip())
-        self.__grid_x0 = origoX
-
-        kw2 = 'OrigoY'
-        origoYObj = gmObj.find(kw2)
-        text = origoYObj.text
-        origoY = float(text.strip())
-        self.__grid_y0 = origoY
-        
-        kw2 = 'NX'
-        nxObj = gmObj.find(kw2)
-        text = nxObj.text
-        nx = int(text.strip())
-        self.__grid_nx = nx
-        
-        kw2= 'NY'
-        nyObj = gmObj.find(kw2)
-        text = nyObj.text
-        ny = int(text.strip())
-        self.__grid_ny = ny
-        
-        kw2= 'Xinc'
-        xincObj = gmObj.find(kw2)
-        text = xincObj.text
-        xinc = float(text.strip())
-        self.__grid_xinc = xinc
-
-        kw2= 'Yinc'
-        yincObj = gmObj.find(kw2)
-        text = yincObj.text
-        yinc = float(text.strip())
-        self.__grid_yinc = yinc
-        
+        keywords = ['XSize', 'YSize', 'AsimuthAngle', 'OrigoX', 'OrigoY', 'NX', 'NY', 'Xinc', 'Yinc']
+        for key in keywords:
+            self.__add_grid(key, gmObj)
 
         kw = 'HorizonReference'
         hrObj = root.find(kw)
-        if hrObj != None:
+        if hrObj is not None:
             text = hrObj.get('name')
             horizonRefName = text.strip()
             text = hrObj.get('type')
             horizonRefType = text.strip()
 
-
         kw = 'SurfaceTrendDimensions'
         surfObj = root.find(kw)
-        if surfObj != None:
-            kw2 = 'Xmin'
-            xminObj = surfObj.find(kw2)
-            text = xminObj.text
-            xminSurface = float(text.strip())
-            self.__surf_xmin =xminSurface
-
-            kw2 = 'Xmax'
-            xmaxObj = surfObj.find(kw2)
-            text = xmaxObj.text
-            xmaxSurface = float(text.strip())
-            self.__surf_xmax =xmaxSurface
-
-            kw2 = 'Ymin'
-            yminObj = surfObj.find(kw2)
-            text = yminObj.text
-            yminSurface = float(text.strip())
-            self.__surf_ymin =yminSurface
-
-            kw2 = 'Ymax'
-            ymaxObj = surfObj.find(kw2)
-            text = ymaxObj.text
-            ymaxSurface = float(text.strip())
-            self.__surf_ymax =ymaxSurface
-
-            kw2 = 'Rotation'
-            rotObj = surfObj.find(kw2)
-            text = rotObj.text
-            rotationSurface = float(text.strip())
-            self.__surf_rotation = rotationSurface
-
-            kw2 = 'NX'
-            nxSurfObj = surfObj.find(kw2)
-            text = nxSurfObj.text
-            nxSurface = int(text.strip())
-            self.__surf_nx =nxSurface
-
-            kw2 = 'NY'
-            nySurfObj = surfObj.find(kw2)
-            text = nySurfObj.text
-            nySurface = int(text.strip())
-            self.__surf_ny =nySurface
-
-            kw2 = 'Xinc'
-            xincSurfObj = surfObj.find(kw2)
-            text = xincSurfObj.text
-            xincSurface = float(text.strip())
-            self.__surf_xinc =xincSurface
-
-            kw2 = 'Yinc'
-            yincSurfObj = surfObj.find(kw2)
-            text = yincSurfObj.text
-            yincSurface = float(text.strip())
-            self.__surf_yinc =yincSurface
+        if surfObj is not None:
+            keywords = ['Xmin', 'Xmax', 'Ymin', 'Ymax', 'Rotation', 'NX', 'NY', 'Xinc', 'Yinc']
+            for key in keywords:
+                self.__add_surfaces(key, surfObj)
 
             kw = 'Horizon'
             horizonNames = []
             for hObj in root.findall(kw):
                 text = hObj.text
                 horizonNames.append(text.strip())
-            self.__horizonNames = horizonNames
+            self.__data['Horizon names'] = horizonNames
         faciesCodes = {}
-        faciesTable = APSMainFaciesTable.APSMainFaciesTable(tree,inputFileName,self.__printInfo)
+        faciesTable = APSMainFaciesTable.APSMainFaciesTable(tree, inputFileName, self.__printInfo)
         self.__faciesTable = faciesTable
 
+    def __add_surfaces(self, kw, surface):
+        self.__add_to_object(kw, surface, self.__surf)
 
-        return
+    def __add_grid(self, kw, grid):
+        self.__add_to_object(kw, grid, self.__grid)
+
+    def __add_to_object(self, keyword, root, storage_object):
+        item = root.find(keyword)
+        text = item.text
+        value = float(text.strip())
+        key = self.__keyword_mapping[keyword]
+        storage_object[key] = value
 
     def printData(self):
-        print('Project name: ' + self.__projectName)
-        print('Project seed: ' + str(self.__projectSeed))
-        print('Project realisation number: ' + str(self.__projectRealNumber))
-        print('Grid model name: ' + self.__gridModelName)
+        print('Project name: ' + self.__data['Project name'])
+        print('Project seed: ' + str(self.__data['Project seed']))
+        print('Project realisation number: ' + str(self.__data['Project realization number']))
+        print('Grid model name: ' + self.__data['Grid model name'])
         print('Grid zones: ')
-        for item in self.__zones:
-            zoneName   = item[1]
+        for item in self.__data['Zones']:
+            zoneName = item[1]
             zoneNumber = item[0]
             print('  ' + str(zoneNumber) + '  ' + zoneName)
         print(' ')
         print('Grid dimensions:')
-        print('  NX:       ' +  str(self.__grid_nx))
-        print('  NY:       ' +  str(self.__grid_ny))
-        print('  XSize:    ' +  str(self.__grid_xSize))
-        print('  YSize:    ' +  str(self.__grid_ySize))
-        print('  Xinc:     ' +  str(self.__grid_xinc))
-        print('  Yinc:     ' +  str(self.__grid_yinc))
-        print('  Rotation: ' +  str(self.__grid_asimuth))
+        print('  NX:       ' + str(self.__grid['nx']))
+        print('  NY:       ' + str(self.__grid['ny']))
+        print('  XSize:    ' + str(self.__grid['x size']))
+        print('  YSize:    ' + str(self.__grid['y size']))
+        print('  Xinc:     ' + str(self.__grid['x inc']))
+        print('  Yinc:     ' + str(self.__grid['y inc']))
+        print('  Rotation: ' + str(self.__grid['azimuth angle']))
         print(' ')
         print('Property parameters: ')
-        for propName in self.__propertyListContinuous:
+        for propName in self.__data['Property list continuous']:
             print('  ' + propName)
-        for propName in self.__propertyListDiscrete:
+        for propName in self.__data['Property list discrete']:
             print('  ' + propName)
         print(' ')
         print('Horizon names: ')
-        for hName in self.__horizonNames:
+        for hName in self.__data['Horizon names']:
             print('  ' + hName)
         print(' ')
         print('Surface grid dimension:')
-        print('  NX:       ' +  str(self.__surf_nx))
-        print('  NY:       ' +  str(self.__surf_ny))
-        print('  xmin:     ' +  str(self.__surf_xmin))
-        print('  xmax:     ' +  str(self.__surf_xmax))
-        print('  ymin:     ' +  str(self.__surf_ymin))
-        print('  ymax:     ' +  str(self.__surf_ymax))
-        print('  xinc:     ' +  str(self.__surf_xinc))
-        print('  yinc:     ' +  str(self.__surf_yinc))
-        print('  Rotation: ' +  str(self.__surf_rotation))
+        print('  NX:       ' + str(self.__surf['nx']))
+        print('  NY:       ' + str(self.__surf['ny']))
+        print('  xmin:     ' + str(self.__surf['x min']))
+        print('  xmax:     ' + str(self.__surf['x max']))
+        print('  ymin:     ' + str(self.__surf['y min']))
+        print('  ymax:     ' + str(self.__surf['y max']))
+        print('  xinc:     ' + str(self.__surf['x inc']))
+        print('  yinc:     ' + str(self.__surf['y inc']))
+        print('  Rotation: ' + str(self.__surf['rotation']))
         print(' ')
         print('Facies table:')
         fTable = self.__faciesTable.getFaciesTable()
@@ -373,7 +310,3 @@ class APSDataFromRMS:
             name = item[0]
             code = item[1]
             print('  ' + name + '  ' + str(code))
-
-
-        return
-
