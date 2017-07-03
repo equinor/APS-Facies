@@ -624,7 +624,7 @@
          <rect>
           <x>80</x>
           <y>0</y>
-          <width>505</width>
+          <width>526</width>
           <height>821</height>
          </rect>
         </property>
@@ -674,14 +674,14 @@
                  <height>180</height>
                 </size>
                </property>
-               <property name="backgroundColor">
+               <property name="backgroundColor" stdset="0">
                 <color>
                  <red>255</red>
                  <green>255</green>
                  <blue>255</blue>
                 </color>
                </property>
-               <property name="foregroundColor">
+               <property name="foregroundColor" stdset="0">
                 <color>
                  <red>0</red>
                  <green>0</green>
@@ -745,14 +745,14 @@
                  <height>180</height>
                 </size>
                </property>
-               <property name="backgroundColor">
+               <property name="backgroundColor" stdset="0">
                 <color>
                  <red>255</red>
                  <green>255</green>
                  <blue>255</blue>
                 </color>
                </property>
-               <property name="foregroundColor">
+               <property name="foregroundColor" stdset="0">
                 <color>
                  <red>0</red>
                  <green>0</green>
@@ -816,14 +816,14 @@
                  <height>180</height>
                 </size>
                </property>
-               <property name="backgroundColor">
+               <property name="backgroundColor" stdset="0">
                 <color>
                  <red>255</red>
                  <green>255</green>
                  <blue>255</blue>
                 </color>
                </property>
-               <property name="foregroundColor">
+               <property name="foregroundColor" stdset="0">
                 <color>
                  <red>0</red>
                  <green>0</green>
@@ -890,7 +890,7 @@
      <x>0</x>
      <y>0</y>
      <width>1309</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -1014,19 +1014,6 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="3">
-           <spacer name="AfterLineEdit_horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
           <item row="1" column="5">
            <widget class="QPushButton" name="BrowseProjectFilepushButton">
             <property name="font">
@@ -1054,6 +1041,19 @@
              <size>
               <width>20</width>
               <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="3">
+           <spacer name="AfterLineEdit_horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
              </size>
             </property>
            </spacer>
@@ -1114,7 +1114,7 @@
          <x>80</x>
          <y>20</y>
          <width>451</width>
-         <height>146</height>
+         <height>151</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_11">
@@ -1357,7 +1357,7 @@
        </layout>
       </item>
       <item row="2" column="0">
-       <widget class="KActionSelector" name="SelectZones_actionSelector_Main">
+       <widget class="KActionSelector" name="SelectZones_actionSelector_Main" native="true">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -1436,7 +1436,7 @@
        </layout>
       </item>
       <item row="4" column="0">
-       <widget class="KActionSelector" name="Facies_kactionselector_Main">
+       <widget class="KActionSelector" name="Facies_kactionselector_Main" native="true">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -1511,14 +1511,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KTreeWidgetSearchLine</class>
-   <extends>KLineEdit</extends>
-   <header>ktreewidgetsearchline.h</header>
-  </customwidget>
-  <customwidget>
    <class>KPlotWidget</class>
    <extends>QFrame</extends>
    <header>kplotwidget.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>KLineEdit</class>
@@ -1529,6 +1525,11 @@
    <class>KActionSelector</class>
    <extends>QWidget</extends>
    <header>kactionselector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>KTreeWidgetSearchLine</class>
+   <extends>KLineEdit</extends>
+   <header>ktreewidgetsearchline.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
