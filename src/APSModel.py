@@ -6,8 +6,8 @@
 # Public member functions:
 #   Constructor: def __init__(self,modelFileName= None)
 #
-#   def updateXMLModelFile(self,modelFileName,parameterFileName,printInfo) 
-#             - Read xml model file and IPL parameter file and write 
+#   def updateXMLModelFile(self,modelFileName,parameterFileName,printInfo)
+#             - Read xml model file and IPL parameter file and write
 #               updated xml model file without putting any data into the data structure.
 #
 
@@ -18,7 +18,7 @@
 #             - Add data to xml tree
 #
 #   def writeModel(self,modelFileName, printInfo=0)
-#             - Create xml tree with model specification by calling XMLAddElement 
+#             - Create xml tree with model specification by calling XMLAddElement
 #             - Write xml tree with model specification to file
 #
 #   def writeModelFromXMLRoot(self,inputETree,outputModelFileName)
@@ -60,7 +60,7 @@
 
 
 # Private member functions:
-#  def __interpretXMLModelFile(self,modelFileName)  
+#  def __interpretXMLModelFile(self,modelFileName)
 #              - Read xml file and put the data into data structure
 #
 #  def __readParamFromFile(self,inputFile,printInfo)
@@ -282,7 +282,7 @@ class APSModel:
                     self.__zoneModelsMainLevel.append(zoneModel)
 
                     # Allocate space for list of list of secondary models.
-                    # This is just to allocate length of the list. 
+                    # This is just to allocate length of the list.
                     # The content will be overwritten. The length of the list must be equal to
                     # the length of self.__zoneModelsMainLevel list.
                     # Each element of the zoneModelsSecondLevel is a list of all models for
@@ -309,8 +309,8 @@ class APSModel:
                     sNr = zM.getZoneNumber()
                     if sNr == zoneNumber:
                         if zM.hasFacies(mainLevelFacies):
-                            # This second level model belongs to an existing first level facies 
-                            # model for this zone 
+                            # This second level model belongs to an existing first level facies
+                            # model for this zone
                             if self.__printInfo >= 3:
                                 text = 'Second level facies model defined for zone: ' + str(zoneNumber)
                                 text = text + ' for main level facies: ' + mainLevelFacies
@@ -347,7 +347,7 @@ class APSModel:
         root = tree.getroot()
 
         # Scan XML model file for variables that can be updated by FMU/ERT
-        # These variables belongs to xml keywords with attribute 'kw'. 
+        # These variables belongs to xml keywords with attribute 'kw'.
         # So search for attribute 'kw' to find all these variables. The attribute value is a keyword
         # name that will be used as identifier.
         if printInfo > 1:
@@ -412,7 +412,7 @@ class APSModel:
 
     def __readParamFromFile(self, inputFile, printInfo):
 
-        # Search through the file line for line and skip lines commented out with '//' 
+        # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
         if printInfo >= 1:
@@ -604,7 +604,8 @@ class APSModel:
         if not (zoneNumber in self.__zoneNumberList):
             raise ValueError(
                 'Error in {} in setPreviewZoneNumber\n'
-                'Error:  Zone number: {} is not among the possible zone numbers.'.format(self.__className, zoneNumber)
+                'Error:  Zone number: {} is not among the possible zone numbers.'
+                ''.format(self.__className, zoneNumber)
             )
         else:
             self.__previewZone = zoneNumber
@@ -713,7 +714,7 @@ class APSModel:
                         currentJobName = jobNames[j]
                         if jobObject.checkGaussFieldNameInJob(currentJobName, gfNameUsed):
                             updateJob[j] = 1
-                            # This job must be updated with variogram parameters 
+                            # This job must be updated with variogram parameters
                             # for current zone number
                             gfIndx = jobObject.getGaussFieldIndx(currentJobName, gfNameUsed)
                             varioType = currentZoneModel.getVarioType(gfNameUsed)

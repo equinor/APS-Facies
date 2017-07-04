@@ -2,11 +2,11 @@
 import sys
 import copy
 import xml.etree.ElementTree as ET
-from  xml.etree.ElementTree import Element, SubElement, dump
+from xml.etree.ElementTree import Element, SubElement, dump
 
 
 # Class APSGaussFieldJobs
-# Description: Keep the name of RMS petro jobs and  associated 3D property 
+# Description: Keep the name of RMS petro jobs and  associated 3D property
 #              parameter these jobs will create
 #
 # Public member functions:

@@ -4,7 +4,7 @@
 import copy
 import numpy as np
 import xml.etree.ElementTree as ET
-from  xml.etree.ElementTree import Element, SubElement, dump
+from xml.etree.ElementTree import Element, SubElement, dump
 from xml.dom import minidom
 # import importlib
 
@@ -26,11 +26,11 @@ APSDataFromRMS:
 Description: This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
              for both 3D grid model and for horizon data and facies data from wells.
              NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
-             specifying which grid model to scan and which well and log to scan to get facies data. 
+             specifying which grid model to scan and which well and log to scan to get facies data.
 
 
 Functions:
-    readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data. 
+    readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data.
                                              The input XML file is previously written by the function
                                              scanRMSProjectAndWriteXMLFile.
                                              This function is to be used e.g in the GUI script.
@@ -42,7 +42,7 @@ Functions:
     getGridZoneNames() - Get list of zone names for the grid model.
     getContinuousGridParamNames()  - Get list of all 3D parameters of continuous type belonging to the grid model.
     getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
---------------------------------------------------------------------------------------------                                             
+--------------------------------------------------------------------------------------------
 """
 
 
