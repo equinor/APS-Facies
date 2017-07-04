@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>28</x>
@@ -60,30 +60,30 @@
     <item row="1" column="0">
      <layout class="QGridLayout" name="gridLayout">
       <item row="1" column="0">
-       <widget class="QLabel" name="F1_label">
+       <widget class="QLabel" name="label_F1">
         <property name="text">
          <string>F1</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="KTreeWidgetSearchLine" name="F1_ktreewidgetsearchline"/>
+       <widget class="QLineEdit" name="lineedit_F1"/>
       </item>
       <item row="1" column="2">
-       <widget class="KHistoryComboBox" name="F1_khistorycombobox"/>
+       <widget class="QComboBox" name="combobox_F1"/>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="F2_label">
+       <widget class="QLabel" name="label_F2">
         <property name="text">
          <string>F2</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="KTreeWidgetSearchLine" name="F2_ktreewidgetsearchline"/>
+       <widget class="QLineEdit" name="lineedit_F2"/>
       </item>
       <item row="2" column="2">
-       <widget class="KHistoryComboBox" name="F2_khistorycombobox">
+       <widget class="QComboBox" name="combobox_F2">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -93,17 +93,17 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="F3_label">
+       <widget class="QLabel" name="label_F3">
         <property name="text">
          <string>F3</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="KTreeWidgetSearchLine" name="F3_ktreewidgetsearchline"/>
+       <widget class="QLineEdit" name="lineedit_F3"/>
       </item>
       <item row="3" column="2">
-       <widget class="KHistoryComboBox" name="F3_khistorycombobox">
+       <widget class="QComboBox" name="combobox_F3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -113,17 +113,17 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="F4_label">
+       <widget class="QLabel" name="label_F4">
         <property name="text">
          <string>F4</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="KTreeWidgetSearchLine" name="F4_ktreewidgetsearchline"/>
+       <widget class="QLineEdit" name="lineedit_F4"/>
       </item>
       <item row="4" column="2">
-       <widget class="KHistoryComboBox" name="F4_khistorycombobox">
+       <widget class="QComboBox" name="combobox_F4">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -133,17 +133,17 @@
        </widget>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="F5_label">
+       <widget class="QLabel" name="label_F5">
         <property name="text">
          <string>F5</string>
         </property>
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="KTreeWidgetSearchLine" name="F5_ktreewidgetsearchline"/>
+       <widget class="QLineEdit" name="lineedit_F5"/>
       </item>
       <item row="5" column="2">
-       <widget class="KHistoryComboBox" name="F5_khistorycombobox">
+       <widget class="QComboBox" name="combobox_F5">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -153,7 +153,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QLabel" name="Facies_label">
+       <widget class="QLabel" name="label_Facies">
         <property name="font">
          <font>
           <weight>75</weight>
@@ -166,7 +166,7 @@
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="Probability_label">
+       <widget class="QLabel" name="label_Probability">
         <property name="font">
          <font>
           <weight>75</weight>
@@ -183,28 +183,6 @@
    </layout>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KTreeWidgetSearchLine</class>
-   <extends>KLineEdit</extends>
-   <header>ktreewidgetsearchline.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>klineedit.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KComboBox</class>
-   <extends>QComboBox</extends>
-   <header>kcombobox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KHistoryComboBox</class>
-   <extends>KComboBox</extends>
-   <header>khistorycombobox.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

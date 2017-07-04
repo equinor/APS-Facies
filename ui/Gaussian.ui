@@ -154,7 +154,7 @@
      <string>Trend settings</string>
     </property>
    </widget>
-   <widget class="KPlotWidget" name="Trendsettings_kplotwidget">
+   <widget class="QCustomPlot" name="Trendsettings_kplotwidget">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -254,14 +254,14 @@
       </disabled>
      </palette>
     </property>
-    <property name="backgroundColor">
+    <property name="backgroundColor" stdset="0">
      <color>
       <red>255</red>
       <green>255</green>
       <blue>255</blue>
      </color>
     </property>
-    <property name="foregroundColor">
+    <property name="foregroundColor" stdset="0">
      <color>
       <red>0</red>
       <green>0</green>
@@ -326,7 +326,7 @@
       </spacer>
      </item>
      <item row="1" column="3">
-      <widget class="KComboBox" name="Stackingpattern_kcombobox"/>
+      <widget class="QComboBox" name="Stackingpattern_kcombobox"/>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="StackingAngle_label">
@@ -406,7 +406,7 @@
      <x>360</x>
      <y>40</y>
      <width>366</width>
-     <height>266</height>
+     <height>275</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
@@ -779,44 +779,54 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>40</y>
-     <width>269</width>
-     <height>252</height>
+     <x>49</x>
+     <y>39</y>
+     <width>301</width>
+     <height>285</height>
     </rect>
    </property>
-   <layout class="QFormLayout" name="formLayout">
+   <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
-     <widget class="QLabel" name="Gaussianplot_label">
+     <widget class="QLabel" name="label">
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>25</height>
+       </size>
+      </property>
       <property name="font">
        <font>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
       <property name="text">
        <string>Gaussian</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::RichText</enum>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="KPlotWidget" name="GaussianField_kplotwidget">
-      <property name="backgroundColor">
-       <color>
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
-       </color>
+     <widget class="QCustomPlot" name="frame">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
       </property>
-      <property name="foregroundColor">
-       <color>
-        <red>0</red>
-        <green>0</green>
-        <blue>0</blue>
-       </color>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
      </widget>
     </item>
@@ -825,14 +835,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KPlotWidget</class>
+   <class>QCustomPlot</class>
    <extends>QFrame</extends>
-   <header>kplotwidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KComboBox</class>
-   <extends>QComboBox</extends>
-   <header>kcombobox.h</header>
+   <header>qcustomplot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
