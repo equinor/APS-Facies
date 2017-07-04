@@ -145,6 +145,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# UI files
+src/ui/*
+
+# Additional compiled libraries, not maintained within Statoil / this project
+libraries/source
+
 # C extensions
 
 # Distribution / packaging
