@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1309</width>
+    <width>1325</width>
     <height>911</height>
    </rect>
   </property>
@@ -39,7 +39,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -895,7 +895,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1309</width>
+     <width>1325</width>
      <height>22</height>
     </rect>
    </property>
@@ -935,7 +935,7 @@
    <property name="minimumSize">
     <size>
      <width>685</width>
-     <height>35</height>
+     <height>350</height>
     </size>
    </property>
    <attribute name="dockWidgetArea">
@@ -947,25 +947,37 @@
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>611</width>
-       <height>221</height>
+       <width>641</width>
+       <height>300</height>
       </rect>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>611</width>
+       <height>300</height>
+      </size>
+     </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_5">
       <attribute name="title">
        <string>Project</string>
       </attribute>
-      <widget class="QWidget" name="layoutWidget_2">
+      <widget class="QGroupBox" name="groupBox_2">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>20</y>
-         <width>591</width>
-         <height>151</height>
+         <width>621</width>
+         <height>250</height>
         </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>250</height>
+        </size>
        </property>
        <layout class="QFormLayout" name="formLayout_11">
         <item row="0" column="0">
@@ -998,21 +1010,21 @@
           </item>
          </layout>
         </item>
-        <item row="1" column="0" colspan="2">
+        <item row="2" column="1">
+         <spacer name="verticalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
          <layout class="QGridLayout" name="gridLayout_7">
-          <item row="1" column="0">
-           <widget class="QLabel" name="LocationRMSproject_FileLabel_2">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Location RMS project file</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <spacer name="After_LocationRMSprojectfile_horizontalSpacer_2">
             <property name="orientation">
@@ -1083,9 +1095,22 @@
             </property>
            </spacer>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="LocationRMSproject_FileLabel_2">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Location RMS project file</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
-        <item row="3" column="1">
+        <item row="3" column="0" colspan="2">
          <widget class="QDialogButtonBox" name="Ok_Cancel_buttonBox_2">
           <property name="font">
            <font>
@@ -1099,19 +1124,6 @@
            <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
           </property>
          </widget>
-        </item>
-        <item row="2" column="1">
-         <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -1282,6 +1294,12 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="SelectionZones_Facies_dockWidget">
+   <property name="minimumSize">
+    <size>
+     <width>611</width>
+     <height>221</height>
+    </size>
+   </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
@@ -1289,10 +1307,10 @@
     <widget class="QWidget" name="layoutWidget_7">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>20</x>
        <y>20</y>
-       <width>616</width>
-       <height>555</height>
+       <width>457</width>
+       <height>141</height>
       </rect>
      </property>
      <layout class="QFormLayout" name="formLayout_Selection_Main">
