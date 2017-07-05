@@ -43,5 +43,8 @@ FORMS += \
         ui/TruncRuleTypeBayfill.ui \
         ui/Gaussian_menu.ui \
         ui/TruncationLibrary.ui \
-        ui/TruncRuleTypeNonCubic.ui \
+        ui/TruncRuleTypeNonCubic.ui
+
+RESOURCES += \
+    resources/Resources.qrc
 
