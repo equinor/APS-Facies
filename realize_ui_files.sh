@@ -14,20 +14,20 @@ mkdir -p "${pyui_files}"
 
 # Remove previous created Python files
 if [[ "$1" == "--clean" ]]; then
-    rm -rf ${ui_files}
+    rm -rf ${pyui_files}/*.py
 fi
 
 cd "${ui_files}"
 files=$(ls *.ui)
 for file in ${files}; do
     filename="${file%.*}"
-    pyuic5 ${filename}.ui --output="${pyui_files}/${filename}_ui.py"
+    pyuic5 -x ${filename}.ui --output="${pyui_files}/${filename}_ui.py"
 done
 
 # If autopep8 is "installed", clean up the files
 if [[ "$1" == "--autopep8" ]];then
     if type autopep8 > /dev/null; then
-        autopep8 ${pyui_files} --recursive --in-place --pep8-passes 5000
+        autopep8 ${pyui_files} --recursive --in-place --pep8-passes 5000 --max-line-length 120 --jobs $(nproc)
     else
         echo "autopep8 is not installed."
     fi
