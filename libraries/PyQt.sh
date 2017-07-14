@@ -49,12 +49,13 @@ mv doc "${DOCUMENTATION}/${PYQT_PREFIX}"
 cd ${SOURCE}
 
 ## Download and install dip
-DIP_VERSION="0.4.6"
-DIP_PREFIX="dip-${DIP_VERSION}"
-wget "https://www.riverbankcomputing.com/static/Downloads/dip/${DIP_PREFIX}.tar.gz"
-rm -f "${DIP_PREFIX}.tar.gz"
-tar -xvf ${DIP_PREFIX}.tar.gz
-cd ${DIP_PREFIX}
+#DIP_VERSION="0.4.6"
+#DIP_PREFIX="dip-${DIP_VERSION}"
+#wget "https://www.riverbankcomputing.com/static/Downloads/dip/${DIP_PREFIX}.tar.gz"
+#rm -f "${DIP_PREFIX}.tar.gz"
+#tar -xvf ${DIP_PREFIX}.tar.gz
+#cd ${DIP_PREFIX}
+# TODO: Something causes an error when trying to install...
 #python setup.py install
 #
 #cd ${SOURCE}
