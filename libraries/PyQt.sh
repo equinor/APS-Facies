@@ -3,7 +3,7 @@
 VENV="$(pwd)/../.venv"
 
 # Using the virtual environment
-source ./../.venv/bin/activate
+source "${VENV}/bin/activate"
 
 QT_PREFIX="/opt/Qt/5.9.1/gcc_64"
 QT_BIN_DIR="${QT_PREFIX}/bin"
@@ -14,6 +14,7 @@ PATH=${QT_BIN_DIR}:${PATH}
 
 # Setting the working directory
 SOURCE=$(pwd)/source
+DOCUMENTATION=$(pwd)/../documentation
 mkdir -p "${SOURCE}" && cd "${SOURCE}"
 
 # Download and install SIP
@@ -24,8 +25,10 @@ tar -xvf ${SIP_PREFIX}.tar.gz -C ${SIP_PREFIX} --strip-components 1
 rm -f ${SIP_PREFIX}.tar.gz
 cd ${SIP_PREFIX}
 python configure.py --sysroot "${VENV}"  --confirm-license
-make
-make install
+make && make install
+# Move documentation
+mv sphinx doc
+mv doc "${DOCUMENTATION}/${SIP_PREFIX}"
 
 cd ${SOURCE}
 
@@ -38,17 +41,20 @@ tar -xvf ${PYQT_GPL_PREFIX}.tar.gz -C ${PYQT_PREFIX} --strip-components 1
 rm -f ${PYQT_GPL_PREFIX}.tar.gz
 cd ${PYQT_GPL_PREFIX}
 python configure.py --sysroot "${VENV}" --qmake=${QMAKE_PATH}  --confirm-license
-make
-make install
+make && make install
+# Move documentation
+mv examples doc
+mv doc "${DOCUMENTATION}/${PYQT_PREFIX}"
 
 cd ${SOURCE}
 
 ## Download and install dip
-#DIP_VERSION="0.4.6"
-#DIP_PREFIX="dip-${DIP_VERSION}"
-#wget https://www.riverbankcomputing.com/static/Downloads/dip/${DIP_PREFIX}.tar.gz
-#tar -xvf ${DIP_PREFIX}.tar.gz
-#cd ${DIP_PREFIX}
+DIP_VERSION="0.4.6"
+DIP_PREFIX="dip-${DIP_VERSION}"
+wget "https://www.riverbankcomputing.com/static/Downloads/dip/${DIP_PREFIX}.tar.gz"
+rm -f "${DIP_PREFIX}.tar.gz"
+tar -xvf ${DIP_PREFIX}.tar.gz
+cd ${DIP_PREFIX}
 #python setup.py install
 #
 #cd ${SOURCE}
@@ -73,6 +79,9 @@ sudo make install
 cd "${BASE_DIR}/designer-Qt4Qt5"
 qmake && make
 sudo make install
+# Move documentation
+mv example-Qt4Qt5 doc
+mv doc "${DOCUMENTATION}/${QSCINTILLA_PREFIX}"
 
 cd ${SOURCE}
 
@@ -82,6 +91,11 @@ export LIBRARY_PATH=${QT_LIBRARY_PATH}:${LIBRARY_PATH}
 git clone https://github.com/dimv36/QCustomPlot-PyQt5.git
 cd QCustomPlot-PyQt5
 python setup.py build_ext --qmake "${QMAKE_PATH}" --qt-include-dir "${QT_INCLUDE_DIR}"
+# Move examples
+mv examples "${DOCUMENTATION}/${QSCINTILLA_PREFIX}"
+
+cd ${SOURCE}
 
 # Clean up
 rm -f *.tar.*
+rm -rf "${SOURCE}"
