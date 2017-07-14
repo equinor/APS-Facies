@@ -18,7 +18,7 @@ DOCUMENTATION=$(pwd)/../documentation
 mkdir -p "${SOURCE}" && cd "${SOURCE}"
 
 # Download and install SIP
-SIP_VERSION="4.19.2"
+SIP_VERSION="4.19.3"
 SIP_PREFIX="sip-${SIP_VERSION}"
 wget https://sourceforge.net/projects/pyqt/files/sip/${SIP_PREFIX}/${SIP_PREFIX}.tar.gz
 tar -xvf ${SIP_PREFIX}.tar.gz -C ${SIP_PREFIX} --strip-components 1
@@ -33,7 +33,7 @@ mv doc "${DOCUMENTATION}/${SIP_PREFIX}"
 cd ${SOURCE}
 
 # Download and install PyQt
-PYQT_VERSION="5.8.2"
+PYQT_VERSION="5.9"
 PYQT_PREFIX="PyQt-${PYQT_VERSION}"
 PYQT_GPL_PREFIX="PyQt5_gpl-${PYQT_VERSION}"
 wget https://sourceforge.net/projects/pyqt/files/PyQt5/${PYQT_PREFIX}/${PYQT_GPL_PREFIX}.tar.gz
