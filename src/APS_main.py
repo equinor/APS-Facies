@@ -17,17 +17,18 @@ import APSModel
 import APSMainFaciesTable
 import APSZoneModel
 import APSGaussFieldJobs
-import Trunc1D_xml
-import Trunc1D_A2_xml
-import Trunc2D_A_xml
-import Trunc2D_A2_xml
-import Trunc2D_B_xml
-import Trunc2D_B2_xml
-import Trunc2D_C_xml
-import Trunc2D_C_overlay_xml
+#import Trunc1D_xml
+#import Trunc1D_A2_xml
+#import Trunc2D_A_xml
+#import Trunc2D_A2_xml
+#import Trunc2D_B_xml
+#import Trunc2D_B2_xml
+#import Trunc2D_C_xml
+#import Trunc2D_C_overlay_xml
 import Trunc2D_Cubic_Overlay_xml
+import Trunc2D_Angle_Overlay_xml
 import Trunc3D_bayfill_xml
-import Trunc3D_A_xml
+#import Trunc3D_A_xml
 
 import Trend3D_linear
 import Trend3D_linear_model_xml
@@ -41,17 +42,18 @@ importlib.reload(APSMainFaciesTable)
 importlib.reload(APSGaussFieldJobs)
 
 importlib.reload(gr)
-importlib.reload(Trunc1D_xml)
-importlib.reload(Trunc1D_A2_xml)
-importlib.reload(Trunc2D_A_xml)
-importlib.reload(Trunc2D_A2_xml)
-importlib.reload(Trunc2D_B_xml)
-importlib.reload(Trunc2D_B2_xml)
-importlib.reload(Trunc2D_C_xml)
-importlib.reload(Trunc2D_C_overlay_xml)
+#importlib.reload(Trunc1D_xml)
+#importlib.reload(Trunc1D_A2_xml)
+#importlib.reload(Trunc2D_A_xml)
+#importlib.reload(Trunc2D_A2_xml)
+#importlib.reload(Trunc2D_B_xml)
+#importlib.reload(Trunc2D_B2_xml)
+#importlib.reload(Trunc2D_C_xml)
+#importlib.reload(Trunc2D_C_overlay_xml)
 importlib.reload(Trunc2D_Cubic_Overlay_xml)
+importlib.reload(Trunc2D_Angle_Overlay_xml)
 importlib.reload(Trunc3D_bayfill_xml)
-importlib.reload(Trunc3D_A_xml)
+#importlib.reload(Trunc3D_A_xml)
 importlib.reload(Trend3D_linear)
 importlib.reload(Trend3D_linear_model_xml)
 
@@ -238,9 +240,21 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
 
 
         if not np.allclose(psum,ones,eps):
-            if printInfo >=3:
-                text = 'Debug output: Normalise probability cubes.'
+            if printInfo >=2:
+                text = '--- Normalise probability cubes.'
                 print(text)
+
+            zeroProbSum = 0
+            for i in range(nDefinedCells):
+                if psum[i] < 10*eps:
+                    zeroProbSum += 1
+
+            if zeroProbSum > 0:
+                text = 'Error: Sum of input facies probabilities is less than: ' + str(10*eps) + ' in: ' 
+                text = text + str(zeroProbSum) + ' cells.\n'
+                text = text + '       Cannot normalize probabilities. Check your input!'
+                print(text)
+                sys.exit()
 
 
             for f in range(nFacies):
@@ -251,6 +265,7 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
                         if f == 0:
                             nCellWithModifiedProb += 1
                         p[i] = p[i]/psum[i]
+#                        print('i,p,psum:' + str(i) + ' ' + str(p[i]) + ' ' + str(psum[i]))
 
             if printInfo >= 3:
                 text = 'Debug output: Number of grid cells in zone is:             ' + str(nDefinedCells)
