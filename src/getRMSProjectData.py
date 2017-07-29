@@ -50,6 +50,7 @@ import generalFunctionsUsingRoxAPI as gr
 import APSMainFaciesTable
 
 importlib.reload(APSDataFromRMS)
+importlib.reload(APSMainFaciesTable)
 importlib.reload(gr)
 
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Form</class>
- <widget class="KButtonGroup" name="Form">
+ <widget class="QForm" name="Form">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -24,7 +24,7 @@
    </property>
    <layout class="QFormLayout" name="formLayout">
     <item row="0" column="0">
-     <widget class="KIconButton" name="TruncationRuleIcon_kiconbutton"/>
+     <widget class="QPushButton" name="TruncationRuleIcon_kiconbutton"/>
     </item>
     <item row="0" column="1">
      <widget class="QLabel" name="TruncationRuleNonCubic_label">
@@ -42,21 +42,21 @@
      </widget>
     </item>
     <item row="1" column="0">
-     <widget class="KPlotWidget" name="TruncationRuleNoenCubic_kplotwidget">
+     <widget class="QCustomPlot" name="TruncationRuleNoenCubic_kplotwidget">
       <property name="minimumSize">
        <size>
         <width>250</width>
         <height>250</height>
        </size>
       </property>
-      <property name="backgroundColor">
+      <property name="backgroundColor" stdset="0">
        <color>
         <red>255</red>
         <green>255</green>
         <blue>255</blue>
        </color>
       </property>
-      <property name="foregroundColor">
+      <property name="foregroundColor" stdset="0">
        <color>
         <red>0</red>
         <green>0</green>
@@ -75,7 +75,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="KComboBox" name="F1_kcombobox"/>
+       <widget class="QComboBox" name="F1_kcombobox"/>
       </item>
       <item row="3" column="2">
        <spacer name="horizontalSpacer_5">
@@ -91,7 +91,7 @@
        </spacer>
       </item>
       <item row="3" column="3">
-       <widget class="KColorButton" name="F1_kcolorbutton"/>
+       <widget class="QPushButton" name="F1_kcolorbutton"/>
       </item>
       <item row="3" column="4">
        <spacer name="horizontalSpacer_6">
@@ -153,7 +153,7 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="KComboBox" name="F2_kcombobox"/>
+       <widget class="QComboBox" name="F2_kcombobox"/>
       </item>
       <item row="4" column="2">
        <spacer name="horizontalSpacer_9">
@@ -169,7 +169,7 @@
        </spacer>
       </item>
       <item row="4" column="3">
-       <widget class="KColorButton" name="F2_kcolorbutton"/>
+       <widget class="QPushButton" name="F2_kcolorbutton"/>
       </item>
       <item row="4" column="4">
        <spacer name="horizontalSpacer_10">
@@ -231,7 +231,7 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="KComboBox" name="F3_kcombobox"/>
+       <widget class="QComboBox" name="F3_kcombobox"/>
       </item>
       <item row="5" column="2">
        <spacer name="horizontalSpacer_13">
@@ -247,7 +247,7 @@
        </spacer>
       </item>
       <item row="5" column="3">
-       <widget class="KColorButton" name="F3_kcolorbutton"/>
+       <widget class="QPushButton" name="F3_kcolorbutton"/>
       </item>
       <item row="5" column="4">
        <spacer name="horizontalSpacer_14">
@@ -309,7 +309,7 @@
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="KComboBox" name="F4_kcombobox"/>
+       <widget class="QComboBox" name="F4_kcombobox"/>
       </item>
       <item row="6" column="2">
        <spacer name="horizontalSpacer_17">
@@ -325,7 +325,7 @@
        </spacer>
       </item>
       <item row="6" column="3">
-       <widget class="KColorButton" name="F4_kcolorbutton"/>
+       <widget class="QPushButton" name="F4_kcolorbutton"/>
       </item>
       <item row="6" column="4">
        <spacer name="horizontalSpacer_18">
@@ -387,7 +387,7 @@
        </widget>
       </item>
       <item row="7" column="1">
-       <widget class="KComboBox" name="F5_kcombobox"/>
+       <widget class="QComboBox" name="F5_kcombobox"/>
       </item>
       <item row="7" column="2">
        <spacer name="horizontalSpacer_21">
@@ -403,7 +403,7 @@
        </spacer>
       </item>
       <item row="7" column="3">
-       <widget class="KColorButton" name="F5_kcolorbutton"/>
+       <widget class="QPushButton" name="F5_kcolorbutton"/>
       </item>
       <item row="7" column="4">
        <spacer name="horizontalSpacer_22">
@@ -613,30 +613,16 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KIconButton</class>
-   <extends>QPushButton</extends>
-   <header>kicondialog.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KButtonGroup</class>
-   <extends>QGroupBox</extends>
-   <header>kbuttongroup.h</header>
+   <class>QForm</class>
+   <extends>QWidget</extends>
+   <header>qform.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>KPlotWidget</class>
+   <class>QCustomPlot</class>
    <extends>QFrame</extends>
-   <header>kplotwidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KComboBox</class>
-   <extends>QComboBox</extends>
-   <header>kcombobox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KColorButton</class>
-   <extends>QPushButton</extends>
-   <header>kcolorbutton.h</header>
+   <header>qcustomplot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

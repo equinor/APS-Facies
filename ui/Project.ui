@@ -188,34 +188,21 @@
       <attribute name="title">
        <string>Parameters</string>
       </attribute>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>80</x>
-         <y>40</y>
+         <x>70</x>
+         <y>10</y>
          <width>451</width>
-         <height>146</height>
+         <height>196</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="WorkflowName_label">
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Workflow name</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="KTreeWidgetSearchLine" name="WorkflowName_ktreewidgetsearchline"/>
+        <item row="2" column="2">
+         <widget class="QLineEdit" name="lineEdit_FaciesParameterName"/>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="GridModelName_label">
+         <widget class="QLabel" name="label_GridModelName">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -227,11 +214,21 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="KTreeWidgetSearchLine" name="GridModelName_ktreewidgetsearchline"/>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_WorkflowName">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Workflow name</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="FaciesParameterName__label">
+         <widget class="QLabel" name="label_FaciesParameterName">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -243,11 +240,8 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="KTreeWidgetSearchLine" name="FaciesParameterName_ktreewidgetsearchline"/>
-        </item>
         <item row="3" column="0">
-         <widget class="QLabel" name="GaussianParameterName_label">
+         <widget class="QLabel" name="label_GaussianParameterName">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -259,11 +253,8 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="KTreeWidgetSearchLine" name="ZonesParameterName_ktreewidgetsearchline"/>
-        </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="GaussiaParameterName_label">
+         <widget class="QLabel" name="label_GaussiaParameterName">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -276,36 +267,19 @@
          </widget>
         </item>
         <item row="4" column="2">
-         <widget class="KTreeWidgetSearchLine" name="GaussianParameterName_ktreewidgetsearchline"/>
+         <widget class="QLineEdit" name="lineEdit_GaussianParameterName"/>
         </item>
-        <item row="0" column="1">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+        <item row="1" column="2">
+         <widget class="QLineEdit" name="lineEdit_GridModelName"/>
         </item>
-        <item row="1" column="1">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+        <item row="3" column="2">
+         <widget class="QLineEdit" name="lineEdit_ZonesParameterName"/>
         </item>
-        <item row="2" column="1">
-         <spacer name="horizontalSpacer_3">
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="lineEdit_WorkflowName"/>
+        </item>
+        <item row="4" column="1">
+         <spacer name="horizontalSpacer_5">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -330,8 +304,34 @@
           </property>
          </spacer>
         </item>
-        <item row="4" column="1">
-         <spacer name="horizontalSpacer_5">
+        <item row="2" column="1">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="1">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -350,18 +350,6 @@
    </widget>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KTreeWidgetSearchLine</class>
-   <extends>KLineEdit</extends>
-   <header>ktreewidgetsearchline.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header>klineedit.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
