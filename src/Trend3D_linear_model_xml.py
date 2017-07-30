@@ -58,8 +58,11 @@ class Trend3D_linear_model:
         self.__printInfo = printInfo
         self.__className = 'Trend3D_linear'
         self.type = 'Trend3D_linear'
-        assert trendRuleXML is not None
-
+        # assert trendRuleXML is not None
+        if trendRuleXML is None:
+            # Create empty object. Will be initialized or filled by the initialize or set functions
+            return
+        
         self.__interpretXMLTree(trendRuleXML, printInfo, modelFileName)
         if self.__printInfo >= 3:
             print('Trend:')

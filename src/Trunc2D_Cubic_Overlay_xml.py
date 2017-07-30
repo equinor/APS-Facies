@@ -112,7 +112,7 @@ class Trunc2D_Cubic_Overlay:
         self.__orderIndex = []
         self.__faciesIsDetermined = []
         self.__printInfo = printInfo
-        self.__className = 'Trunc2D_Cubic'
+        self.__className = 'Trunc2D_Cubic_Overlay'
 
         # Variables containing truncations for the 2D truncation map
         self.__truncStructure = []
@@ -144,13 +144,13 @@ class Trunc2D_Cubic_Overlay:
         self.__polygons = []
         self.__fIndxPerPolygon = []
 
-        if trRuleXML is not None:
-            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+        #if trRuleXML is not None:
+        #   self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
 
-        # if trRuleXML is None:
-        #     return
-        # self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
-        # return
+        if trRuleXML is None:
+            # Create empty object. Will be filled by initialize or set functions later
+            return
+        self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
         #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
@@ -460,10 +460,10 @@ class Trunc2D_Cubic_Overlay:
             if abs(sumProbFrac[i] - 1.0) > 0.001:
                 fName = self.__faciesInTruncRule[i]
                 raise ValueError(
-                    'Error in {}\n'
-                    'Error: Sum of probability fractions over all polygons for facies {} is not 1.0\n'
-                    'Error: The sum is: {}'.format(
-                        self.__className, fName, sumProbFrac[i])
+                    'Error in {0}\n'
+                    'Error: Sum of probability fractions over all polygons for facies {1} is not 1.0\n'
+                    'Error: The sum is: {2}'.format(
+                        self.__className, fName, str(sumProbFrac[i]))
                 )
 
         self.__truncStructure = truncStructure
@@ -725,9 +725,9 @@ class Trunc2D_Cubic_Overlay:
                 # Check that total sum of probabilities is =  1.0
         if abs(cumProbL1 - 1.0) > 0.001:
             raise ValueError(
-                'Error in {}\n'
+                'Error in {0}\n'
                 'Error: Internal program error. Sum of probabilities is not 1.0\n'
-                'Error: cumProbL1 = {}'.format(self.__className, cumProbL1)
+                'Error: cumProbL1 = {1}'.format(self.__className, str(cumProbL1))
             )
 
     def __calcThresholdValues(self):
@@ -1412,11 +1412,7 @@ class Trunc2D_Cubic_Overlay:
         nFacies = 0
         truncStructure = ['N', directionL1, nodeList, 0.0, poly, 0.0, 1.0, 0.0, 1.0]
         nodeListLevel1 = []
-        nodeListLevel2 = []
-        nodeListLevel3 = []
         truncStructure[self.__node_index['list of nodes']] = nodeListLevel1
-        # parentNodeDefinedL1 = 0
-        # parentNodeDefinedL2 = 0
         L1Prev = 0
         L2Prev = 0
         L3Prev = 0
@@ -1479,6 +1475,8 @@ class Trunc2D_Cubic_Overlay:
                 elif L2 == 1:
                     # Create L1 parent node for L2 nodes
                     poly = []
+                    # nodeListLevel2 is pointer to list of level 2 nodes for current level 1 node
+                    nodeListLevel2 = [] 
                     nodeData = ['N', directionL2, nodeListLevel2, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                     nodeListLevel1.append(nodeData)
                     if L3 == 0:
@@ -1493,6 +1491,8 @@ class Trunc2D_Cubic_Overlay:
                     elif L3 == 1:
                         # Create L2 parent node for L3 nodes
                         poly = []
+                        # nodeListLevel3 is pointer to list of level 3 nodes for current level 2 node
+                        nodeListLevel3 = []  
                         nodeData = ['N', directionL3, nodeListLevel3, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         parentNodeDefinedL2 = 1
@@ -1520,6 +1520,8 @@ class Trunc2D_Cubic_Overlay:
                     elif L3 == 1:
                         # Create L2 parent node for L3 nodes
                         poly = []
+                        # nodeListLevel3 is pointer to list of level 3 nodes for current level 2 node
+                        nodeListLevel3 = [] 
                         nodeData = ['N', directionL3, nodeListLevel3, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         parentNodeDefinedL2 = 1

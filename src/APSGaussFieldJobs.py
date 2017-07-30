@@ -47,15 +47,20 @@ def isNumber(s):
 
 
 class APSGaussFieldJobs:
-    def __init__(self, ET_Tree, modelFileName=None, printInfo=0):
+    def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__modelFileName = modelFileName
         self.__printInfo = printInfo
         self.__nGFNames = 0
         self.__gaussFieldNames = []
+        self.__nJobs = 0
         self.__jobNames = []
         self.__gaussFieldNamesPerJob = []
 
-        assert ET_Tree is not None
+        # assert ET_Tree is not None
+        if ET_Tree is None:
+            # Create an empty object. The object will at a later stage be filled by content by using
+            # addGaussFieldJob function or the initialize function
+            return
 
         # Search xml tree for model file to find the specified zone and mainLevelFacies
         self.__interpretXMLTree(ET_Tree)
