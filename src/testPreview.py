@@ -40,16 +40,16 @@ from matplotlib.colors import LinearSegmentedColormap
 #from  xml.etree.ElementTree import Element, SubElement, dump
 #from xml.dom import minidom
 
-#import importlib
+import importlib
 
 #importlib.reload(APSModel)
-#importlib.reload(APSZoneModel)
+importlib.reload(APSZoneModel)
 #importlib.reload(APSMainFaciesTable)
 #importlib.reload(APSGaussFieldJobs)
 #importlib.reload(APSDataFromRMS)
 
 #importlib.reload(gr)
-#importlib.reload(simGauss2D)
+importlib.reload(simGauss2D)
 #importlib.reload(Trunc1D_xml)
 #importlib.reload(Trunc1D_A2_xml)
 #importlib.reload(Trunc2D_A_xml)
@@ -260,8 +260,8 @@ truncObject.setTruncRule(faciesProb)
 #print(repr(faciesIndxPerPolygon))
 # Simulate three 2D gaussian fields
 gaussFieldParamNamesToSimulate = gaussFieldNames
-nx = nxPreview
-ny = nyPreview
+nx = int(nxPreview)
+ny = int(nyPreview)
 gridXSize = previewDX
 gridYSize = previewDY
 if noSim == 1:
