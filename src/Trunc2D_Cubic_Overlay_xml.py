@@ -1032,7 +1032,7 @@ class Trunc2D_Cubic_Overlay:
                     'Error: Programming error. Mismatch type. Expect F type.'
                     ''.format(self.__class__.__name__)
                 )
-                sys.exit()
+
             if y <= itemL3[self.__node_index['y max']]:
                 indx = itemL3[self.__node_index['index']]
                 if self.__isBackgroundFacies[indx] == 1:
@@ -1329,10 +1329,6 @@ class Trunc2D_Cubic_Overlay:
         # Check that facies in truncation rule is consistent with facies in zone
         self.__checkFaciesForZone()
 
-        # if err > 0:
-        #     print('Error in ' + self.__className)
-        #     print(' Error when initializing object')
-        #     sys.exit()
         self.__nFacies = len(self.__faciesInTruncRule)
 
     def __defineBackgroundFaciesAndOverLayFacies(self, backGroundFacies, overlayFacies):

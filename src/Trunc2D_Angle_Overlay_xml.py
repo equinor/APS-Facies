@@ -175,7 +175,7 @@ class Trunc2D_Angle_Overlay:
             )
 
         if self.__printInfo >= 3:
-            print('Debug output: Call Trunc2D_B2 init')
+            print('Debug output: Call Trunc2D_Angle_Overlay init')
 
         # Facies code for facies in zone
         for fName in self.__faciesInZone:
