@@ -11,14 +11,14 @@ import APSModel
 import APSMainFaciesTable
 import APSZoneModel
 import APSGaussFieldJobs
-
+import Trend3D_linear_model_xml
 import importlib
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(APSMainFaciesTable)
 importlib.reload(APSGaussFieldJobs)
-
+importlib.reload(Trend3D_linear_model_xml)
 # --------------- Start main script ------------------------------------------
 print('Run: APS_make_gauss_IPL ')
 modelFileName = 'APS.xml'

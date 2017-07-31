@@ -50,7 +50,7 @@ def isNumber(s):
 
 
 class APSMainFaciesTable:
-    def __init__(self, ET_Tree, modelFileName=None, printInfo=0):
+    def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__nFacies = 0
         self.__faciesTable = []
         self.__printInfo = printInfo
@@ -59,7 +59,11 @@ class APSMainFaciesTable:
         self.__CODE = 1
         self.__modelFileName = modelFileName
 
-        assert ET_Tree is not None
+        #assert ET_Tree is not None
+        if ET_Tree is None:
+            # Create an empty object which will at a later stage be filled by using 
+            # the initialize function.
+            return
 
         # Search xml tree for model file to find the specified Main facies table
         self.__interpretXMLTree(ET_Tree)

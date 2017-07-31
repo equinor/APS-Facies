@@ -63,7 +63,7 @@ class Trunc2D_Angle_Overlay:
 
     """
 
-    def __init__(self, trRuleXML, mainFaciesTable=None, faciesInZone=None, printInfo=0, modelFileName=None):
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, printInfo=0, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -139,8 +139,12 @@ class Trunc2D_Angle_Overlay:
         self.__lowH = 0
         self.__highH = 1
 
-        assert trRuleXML is not None
+        # assert trRuleXML is not None
+        if trRuleXML is None:
+            # Create an empty object. The object will be initialized by set functions later
+            return
 
+        # Fill the object from an xml model file
         self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
@@ -171,7 +175,7 @@ class Trunc2D_Angle_Overlay:
             )
 
         if self.__printInfo >= 3:
-            print('Debug output: Call Trunc2D_B2 init')
+            print('Debug output: Call Trunc2D_Angle_Overlay init')
 
         # Facies code for facies in zone
         for fName in self.__faciesInZone:

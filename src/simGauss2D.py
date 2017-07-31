@@ -7,11 +7,13 @@ import numpy as np
 #    EXPONENTIAL    2
 #    GAUSSIAN       3
 #    GENERAL_EXPONENTIAL  4
-
+# Input angle for variogram is asimuth angle in degrees
+# Input angle for linear trend direction is asimuth angle in degrees
+#
 # -----       Functions used to draw gaussian fields: -------------------------
 
 #Global object with c/c++ code for simulation of gaussian fields
-_draw2DLib = ct.CDLL('./libdraw2D.so.1.0')
+_draw2DLib = ct.CDLL('./libdraw2D.so')
 
 # Define input data types
 _draw2DLib.draw2DGaussField.argtypes = (ct.c_int, ct.c_int, 
@@ -58,7 +60,10 @@ def simGaussFieldAddTrendAndTransform(iseed,nx,ny,xsize,ysize,
     debugPrint = 0
     if printInfo >= 3:
         print( '    - Simulate  2D Gauss field using seed: ' + str(iseed))
-        debugPrint = 1                                            
+        debugPrint = 1    
+    # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+    # relative to first axis.
+    varioAngle1 = 90.0 - varioAngle1
     [v1Residual] = draw2D(nx,ny,xsize,ysize, varioType1, iseed, range11, range21, varioAngle1, pow1,debugPrint)
 
 
@@ -118,6 +123,9 @@ def simGaussFieldAddTrendAndTransform2(iseed,nx,ny,xsize,ysize,
                                       varioType1,range11,range21,varioAngle1,
                                       pow1,useTrend1,trendAsimuth1,relSigma1):
     # Residual gaussian fields
+    # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+    # relative to first axis.
+    varioAngle1 = 90.0 - varioAngle1
     [v1Residual] = draw2D(nx,ny,xsize,ysize, varioType1, iseed, range11, range21, varioAngle1, pow1)
 
 

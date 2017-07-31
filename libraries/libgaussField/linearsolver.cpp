@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <cmath>
 #include <cassert>
-#include "rms/global_def.h"
+#include "global_def.h"
 #include "lib_message.h"
 #include "linearsolver.h"
 

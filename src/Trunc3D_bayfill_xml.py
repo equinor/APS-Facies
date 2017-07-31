@@ -77,7 +77,7 @@ class Trunc3D_bayfill:
         trucation for the Bayfill model. (Three transformed gaussian fields)
     """
 
-    def __init__(self, trRuleXML, mainFaciesTable=None, faciesInZone=None, printInfo=0, modelFileName=None):
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, printInfo=0, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -137,7 +137,10 @@ class Trunc3D_bayfill:
         # vary from cell to cell.
         self.__useConstTruncModelParam = True
 
-        assert trRuleXML is not None
+        #assert trRuleXML is not None
+        if trRuleXML is None:
+            # Create an empty object which will be initialized by set functions
+            return
 
         self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
         #  End of __init__

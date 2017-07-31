@@ -56,16 +56,19 @@ class Trend3D_linear_model:
         self.__stackingAngle = 0.0
         self.__direction = 1
         self.__printInfo = printInfo
-        self.__className = 'Trend3D_linear'
+        self.__className = 'Trend3D_linear_model'
         self.type = 'Trend3D_linear'
-        assert trendRuleXML is not None
-
+        # assert trendRuleXML is not None
+        if trendRuleXML is None:
+            # Create empty object. Will be initialized or filled by the initialize or set functions
+            return
+        
         self.__interpretXMLTree(trendRuleXML, printInfo, modelFileName)
         if self.__printInfo >= 3:
-            print('Trend:')
-            print('Asimuth:        ' + str(self.__azimuth))
-            print('Stacking angle: ' + str(self.__stackingAngle))
-            print('Stacking type:  ' + str(self.__direction))
+            print('Debug output: Trend:')
+            print('Debug output: Asimuth:        ' + str(self.__azimuth))
+            print('Debug output: Stacking angle: ' + str(self.__stackingAngle))
+            print('Debug output: Stacking type:  ' + str(self.__direction))
 
         return
 
@@ -123,12 +126,6 @@ class Trend3D_linear_model:
                 'Error: Stacking angle for linear trend is not within [0,90] degrees.'
                 ''.format(self.__className)
             )
-
-        if self.__printInfo >= 3:
-            print('Trend:')
-            print('Asimuth:        ' + str(self.__azimuth))
-            print('Stacking angle: ' + str(self.__stackingAngle))
-            print('Stacking type:  ' + str(self.__direction))
 
     def initialize(self, asimuthAngle, stackingAngle, direction, printInfo):
         self.__printInfo = printInfo
