@@ -84,13 +84,12 @@ def printInfoText(functionName,text):
 
 def printError(functionName,text):
     print('Error in ' + functionName +': ' + text)
-    return 
+
 
 def printErrorAndTerminate(functionName,text):
-    print('Error in ' + functionName +': ' + text)
-    print('Error: Must exit from ' + functionName)
-    sys.exit()
-    return 
+    raise ValueError('Error in ' + functionName +': ' + text+'\n'
+                     'Error: Must exit from ' + functionName
+                     )
 
 
 def getCellValuesFilteredOnDiscreteParam(code,valueArray):
@@ -588,9 +587,9 @@ def get2DMapDimensions(horizons,horizonName,representationName,printInfo):
             horizonObj = h
             break
     if horizonObj == None:
-        print('Error in  get2DMapInfo')
-        print('Error: Horizon name: ' + horizonName + ' does not exist')
-        sys.exit()
+        raise ValueError('Error in  get2DMapInfo\n'
+                        'Error: Horizon name: ' + horizonName + ' does not exist'
+                        )
 
     reprObj = None
     for representation in horizons.representations:
@@ -598,14 +597,15 @@ def get2DMapDimensions(horizons,horizonName,representationName,printInfo):
             reprObj = representation
             break
     if reprObj == None:
-        print('Error in  get2DMapInfo')
-        print('Error: Horizons data type: ' + representationName + ' does not exist')
-        sys.exit()
+        raise ValueError('Error in  get2DMapInfo\n'
+                         'Error: Horizons data type: ' + representationName + ' does not exist'
+                         )
             
     surface = horizons[horizonName][representationName]
     if not isinstance(surface,roxar.Surface):
-        print('Error in get2DMapInfo')
-        print('Error: Specified object is not a 2D grid')
+        raise ValueError('Error in get2DMapInfo\n'
+                         'Error: Specified object is not a 2D grid'
+                         )
     grid    = surface.get_grid()
     values  = grid.get_values()
     shape = values.shape
@@ -647,9 +647,9 @@ def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
             horizonObj = h
             break
     if horizonObj == None:
-        print('Error in updateHorizonObject')
-        print('Error: Horizon name: ' + horizonName + ' does not exist')
-        sys.exit()
+        raise ValueError('Error in updateHorizonObject\n'
+                         'Error: Horizon name: ' + horizonName + ' does not exist'
+                         )
             
     # Find the correct representation. Must exist.
     reprObj = None
@@ -658,9 +658,9 @@ def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
             reprObj = representation
             break
     if reprObj == None:
-        print('Error in updateHorizonObject')
-        print('Error: Horizons data type: ' + reprName + ' does not exist')
-        sys.exit()
+        raise ValueError('Error in updateHorizonObject\n'
+                         'Error: Horizons data type: ' + reprName + ' does not exist'
+                         )
 
     surfaceObj = horizons[horizonName][reprName]
     if isinstance(surfaceObj,roxar.Surface):
