@@ -2,26 +2,15 @@
 import sys
 import copy
 import numpy as np
-#import generalFunctionsUsingRoxAPI as gr
 
 # Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
 from simGauss2D import  simGaussFieldAddTrendAndTransform 
 
-#from Trunc1D_xml   import  Trunc1D
-#from Trunc1D_A2_xml   import  Trunc1D_A2
-#from Trunc2D_A_xml import  Trunc2D_A
-#from Trunc2D_A2_xml import  Trunc2D_A2
-#from Trunc2D_B_xml import  Trunc2D_B
-#from Trunc2D_B2_xml import  Trunc2D_B2
 from Trunc2D_Angle_Overlay_xml import  Trunc2D_Angle_Overlay
-#from Trunc2D_C_xml import  Trunc2D_C
-#from Trunc2D_C_overlay_xml import  Trunc2D_C_overlay
 from Trunc2D_Cubic_Overlay_xml import  Trunc2D_Cubic_Overlay
 from Trunc3D_bayfill_xml import  Trunc3D_bayfill
-#from Trunc3D_A_xml import  Trunc3D_A
 
 from Trend3D_linear_model_xml import Trend3D_linear_model
-#from Trend2D_variogram_asimuth import Trend2D_Asimuth
 
 import xml.etree.ElementTree as ET
 from  xml.etree.ElementTree import Element, SubElement, dump
@@ -1155,8 +1144,12 @@ class APSZoneModel:
                     print('Debug output: Use gauss fields: ' + gfName1)
                 truncObject.setTruncRule(faciesProb)
                 for i in range(nDefinedCells):
-                    if np.mod(i,500000)==0 and printInfo >= 2:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if printInfo == 2:
+                        if np.mod(i,500000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
+                    elif printInfo >=3:
+                        if np.mod(i,10000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
         
                     # One transformed gaussian field.
                     cellIndx = cellIndexDefined[i]
@@ -1181,8 +1174,12 @@ class APSZoneModel:
                 # Calculate truncation rules
                 truncObject.setTruncRule(faciesProb)
                 for i in range(nDefinedCells):
-                    if np.mod(i,500000)==0 and printInfo >= 2:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if printInfo == 2:
+                        if np.mod(i,500000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
+                    elif printInfo >=3:
+                        if np.mod(i,10000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
         
                     # Truncate GF.  Two transformed gaussian fields.
                     cellIndx = cellIndexDefined[i]
@@ -1216,8 +1213,12 @@ class APSZoneModel:
                 # Calculate truncation rules
                 truncObject.setTruncRule(faciesProb)
                 for i in range(nDefinedCells):
-                    if np.mod(i,500000)==0 and printInfo >= 2:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if printInfo == 2:
+                        if np.mod(i,500000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
+                    elif printInfo >=3:
+                        if np.mod(i,10000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
         
                     # Truncate GF.  Three transformed gaussian fields.
                     cellIndx = cellIndexDefined[i]
@@ -1245,8 +1246,12 @@ class APSZoneModel:
                     print('Debug output: Use gauss fields: ' + gfName1)
 
                 for i in range(nDefinedCells):
-                    if np.mod(i,500000)==0 and printInfo >= 2:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if printInfo == 2:
+                        if np.mod(i,500000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
+                    elif printInfo >=3:
+                        if np.mod(i,10000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
 
                     if self.__useConstProb==1:
                         for f in range(nFacies):
@@ -1281,8 +1286,12 @@ class APSZoneModel:
                     print('Debug output: Use gauss fields: ' + gfName2)
 
                 for i in range(nDefinedCells):
-                    if np.mod(i,500000)==0 and printInfo >= 2:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if printInfo == 2:
+                        if np.mod(i,500000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
+                    elif printInfo >=3:
+                        if np.mod(i,10000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
         
                     if self.__useConstProb==1:
                         for f in range(nFacies):
@@ -1322,8 +1331,12 @@ class APSZoneModel:
                     print('Debug output: Use gauss fields: ' + gfName3)
 
                 for i in range(nDefinedCells):
-                    if np.mod(i,500000)==0 and printInfo >= 2:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if printInfo == 2:
+                        if np.mod(i,500000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
+                    elif printInfo >=3:
+                        if np.mod(i,10000)==0:
+                            print('--- Calculate facies for cell number: ' + str(i))
                 
                     if self.__useConstProb==1:
                         for f in range(nFacies):

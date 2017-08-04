@@ -819,9 +819,9 @@ class Trunc2D_Angle_Overlay:
     #    print( ' smin,smax: ' + str(smin) + ' '  + str(smax))
         sHigh = smax
         sLow = smin
-        nmax = 20
-        tolerance = 0.001
-        tolerance2 = 0.01
+        nmax = 15
+        tolerance  = 0.01
+        tolerance2 = 0.02
         converged = 0
         closestPolygon = 0
         isSplit = 0
