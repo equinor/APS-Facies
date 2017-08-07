@@ -7,28 +7,16 @@
 #       Facies realisation updated for specified zones.
 #       Updated 3D parameter for transformed gaussian fields.
 
-import roxar
-import numpy as np 
+import numpy as np
 import sys
-import copy
-import xml.etree.ElementTree as ET
 
 import APSModel
 import APSMainFaciesTable
 import APSZoneModel
 import APSGaussFieldJobs
-#import Trunc1D_xml
-#import Trunc1D_A2_xml
-#import Trunc2D_A_xml
-#import Trunc2D_A2_xml
-#import Trunc2D_B_xml
-#import Trunc2D_B2_xml
-#import Trunc2D_C_xml
-#import Trunc2D_C_overlay_xml
 import Trunc2D_Cubic_Overlay_xml
 import Trunc2D_Angle_Overlay_xml
 import Trunc3D_bayfill_xml
-#import Trunc3D_A_xml
 
 import Trend3D_linear
 import Trend3D_linear_model_xml
@@ -42,23 +30,11 @@ importlib.reload(APSMainFaciesTable)
 importlib.reload(APSGaussFieldJobs)
 
 importlib.reload(gr)
-#importlib.reload(Trunc1D_xml)
-#importlib.reload(Trunc1D_A2_xml)
-#importlib.reload(Trunc2D_A_xml)
-#importlib.reload(Trunc2D_A2_xml)
-#importlib.reload(Trunc2D_B_xml)
-#importlib.reload(Trunc2D_B2_xml)
-#importlib.reload(Trunc2D_C_xml)
-#importlib.reload(Trunc2D_C_overlay_xml)
 importlib.reload(Trunc2D_Cubic_Overlay_xml)
 importlib.reload(Trunc2D_Angle_Overlay_xml)
 importlib.reload(Trunc3D_bayfill_xml)
-#importlib.reload(Trunc3D_A_xml)
 importlib.reload(Trend3D_linear)
 importlib.reload(Trend3D_linear_model_xml)
-
-
-
 
 # Initialise common variables
 functionName = 'APS_trunc.py'
@@ -67,8 +43,7 @@ functionName = 'APS_trunc.py'
 eps = 0.000001
 
 
-
-def findDefinedCells(zoneValues,zoneNr,printInfo = 1):
+def findDefinedCells(zoneValues, zoneNr, printInfo = 1):
     """
          Description: For specified zoneNumber, identify which cells belongs to this zone.
          
@@ -90,7 +65,6 @@ def findDefinedCells(zoneValues,zoneNr,printInfo = 1):
     cellIndexDefined = []
     nCellsTotal = len(zoneValues)
 
-
     y1_defined = []
     for i in range(nCellsTotal):
         if zoneValues[i] == zoneNr:
@@ -98,13 +72,12 @@ def findDefinedCells(zoneValues,zoneNr,printInfo = 1):
             nDefinedCells += 1
 
     if printInfo >= 3:
-        text = 'Debug output: In findDefinedCells: Number of active cells for current zone: ' + str(nDefinedCells)
-        print(text)
+        print('Debug output: In findDefinedCells: Number of active cells for current zone: ' + str(nDefinedCells))
 
-    return [nDefinedCells,cellIndexDefined]
+    return [nDefinedCells, cellIndexDefined]
 
 
-def transformEmpiric(nDefinedCells,cellIndexDefined,gaussValues,alphaValues):
+def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
     """
          Description: For the defined cells, transform the input Gaussian fields by 
                       the cumulative empiric distribution to get uniform
@@ -148,8 +121,8 @@ def transformEmpiric(nDefinedCells,cellIndexDefined,gaussValues,alphaValues):
     return alpha
 
 
-def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefinedCells,cellIndexDefined,
-                          eps=0.0000001,printInfo=1):
+def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined,
+                          eps=0.0000001, printInfo=1):
     """
         Description: Check that probability cubes or probabilities in input probFacies is normalised.
                      If not normalised, a normalisation is done. The list cellIndexDefined is an index
@@ -187,7 +160,7 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
     # The list probParamValuesForFacies has items =[name,values]
     # Define index names for this item
     NAME = 0
-    VAL  = 1
+    VAL = 1
 
     # Check that probabilities sum to 1
     functionName = 'checkAndNormaliseProb'
@@ -203,12 +176,12 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
     if useConstProb == 0:
         # Allocate space for probability per facies per defined cell
         for f in range(nFacies):
-            probDefined.append(np.zeros(nDefinedCells,np.float32))
-            item   = probParamValuesForFacies[f]
-            fName  = item[NAME]
+            probDefined.append(np.zeros(nDefinedCells, np.float32))
+            item = probParamValuesForFacies[f]
+            fName = item[NAME]
             values = item[VAL]
             if printInfo >=3:
-                print('Debug output: Facies: ' + fName )
+                print('Debug output: Facies: ' + fName)
 
             nNeg = 0 
             nAboveOne = 0 
@@ -219,7 +192,7 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
                     nNeg += 1
                 elif v > 1.0:
                     nAboveOne += 1
-                probDefined[f][i]= v
+                probDefined[f][i] = v
             if nNeg > 0:
                 raise ValueError('Probability for facies ' + fName + ' has ' + str(nNeg) + ' negative values')
             if nAboveOne > 0:
@@ -227,14 +200,13 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
 
         # Sum up probability over all facies per defined cell
         psum = probDefined[0]
-        ones = np.ones(nDefinedCells,np.float32)
-        for f in range(1,nFacies):
+        ones = np.ones(nDefinedCells, np.float32)
+        for f in range(1, nFacies):
             # sum of np arrays (cell by cell sum)
-            psum   = psum + probDefined[f]  
+            psum = psum + probDefined[f]
 
-
-        if not np.allclose(psum,ones,eps):
-            if printInfo >=2:
+        if not np.allclose(psum, ones, eps):
+            if printInfo >= 2:
                 text = '--- Normalise probability cubes.'
                 print(text)
 
@@ -244,28 +216,24 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
                     zeroProbSum += 1
 
             if zeroProbSum > 0:
-                text = 'Error: Sum of input facies probabilities is less than: ' + str(10*eps) + ' in: ' 
-                text = text + str(zeroProbSum) + ' cells.\n'
-                text = text + '       Cannot normalize probabilities. Check your input!'
-                raise ValueError(text)
-
-
+                raise ValueError(
+                    'Error: Sum of input facies probabilities is less than: {} in: {} cells.\n'
+                    '       Cannot normalize probabilities. Check your input!'
+                    ''.format(10 * eps, zeroProbSum)
+                )
             for f in range(nFacies):
-                p = probDefined[f] #Points to array of probabilities
+                p = probDefined[f]  # Points to array of probabilities
                 for i in range(nDefinedCells):
                     if np.abs(psum[i]-1.0) > eps:
                         # Have to normalize
                         if f == 0:
                             nCellWithModifiedProb += 1
                         p[i] = p[i]/psum[i]
-#                        print('i,p,psum:' + str(i) + ' ' + str(p[i]) + ' ' + str(psum[i]))
+                        # print('i,p,psum:' + str(i) + ' ' + str(p[i]) + ' ' + str(psum[i]))
 
             if printInfo >= 3:
-                text = 'Debug output: Number of grid cells in zone is:             ' + str(nDefinedCells)
-                text = 'Debug output: Number of grid cells that are normalised is: ' + str(nCellWithModifiedProb)
-                print(text)
-
-        
+                print('Debug output: Number of grid cells in zone is:             ' + str(nDefinedCells))
+                print('Debug output: Number of grid cells that are normalised is: ' + str(nCellWithModifiedProb))
     else:
         for f in range(nFacies):
             item   = probParamValuesForFacies[f]
@@ -278,41 +246,43 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,nDefined
         # Check that probabilities sum to 1
         psum = probDefined[0]
         for f in range(1,nFacies):
-            psum   = psum + probDefined[f]  
+            psum = psum + probDefined[f]
         if psum != 1.0:
             raise ValueError('Probabilities for facies are not normalized for this zone ')
 
     return [probDefined,nCellWithModifiedProb]
 
 
-def createTrend(trendModelObj,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness,printInfo):
+def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
+                cellIndexDefined, zoneNumber, simBoxThickness, printInfo):
     if trendModelObj.type == 'Trend3D_linear':
-        trendObj = Trend3D_linear.Trend3D_linear(trendModelObj,printInfo)
-        [minmaxDifference,trendValues] = trendObj.createTrend(gridModel,realNumber,nDefinedCells,cellIndexDefined,
-                                                              zoneNumber,simBoxThickness)
+        trendObj = Trend3D_linear.Trend3D_linear(trendModelObj, printInfo)
+        [minmaxDifference, trendValues] = trendObj.createTrend(
+            gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness
+        )
     else:
         raise ValueError('Trend type: ' + trendModelObj.type + ' is not implemented.')
-    return  [minmaxDifference,trendValues]
+    return [minmaxDifference, trendValues]
 
 #--------------- Start main script ------------------------------------------
 
 realNumber = project.current_realisation
 print('Run: APS_trunc  on realisation ' + str(realNumber+1))
 
-modelFileName='APS.xml'
+modelFileName = 'APS.xml'
 
 print('- Read file: ' + modelFileName)
-apsModel      = APSModel.APSModel(modelFileName)
-printInfo     = apsModel.printInfo()
+apsModel = APSModel.APSModel(modelFileName)
+printInfo = apsModel.printInfo()
 rmsProjectName = apsModel.getRMSProjectName()
 gridModelName = apsModel.getGridModelName()
-gridModel     = project.grid_models[gridModelName]
+gridModel = project.grid_models[gridModelName]
 if gridModel.is_empty():
     raise ValueError('Specified grid model: ' + gridModel.name + ' is empty.')
 
 
 zoneNumberList = apsModel.getZoneNumberList()
-zoneParamName  = apsModel.getZoneParamName()
+zoneParamName = apsModel.getZoneParamName()
 resultParamName = apsModel.getResultFaciesParamName()
 
 gaussFieldScript = apsModel.getRMSGaussFieldScriptName()
@@ -323,13 +293,14 @@ gaussFieldScript = apsModel.getRMSGaussFieldScriptName()
 # Get zone param values
 if printInfo >= 2:
     print('--- Get RMS zone parameter: ' + zoneParamName + ' from RMS project ' + rmsProjectName)
-[zoneValues] = gr.getContinuous3DParameterValues(gridModel,zoneParamName,realNumber,printInfo)
+[zoneValues] = gr.getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, printInfo)
 
 
 emptyZoneList = [] 
 # Find min max zone over all active cells
-[minZone, maxZone,avgzone] = gr.calcStatisticsFor3DParameter(gridModel,zoneParamName,
-                                                             emptyZoneList,realNumber,printInfo)
+[minZone, maxZone, avgzone] = gr.calcStatisticsFor3DParameter(
+    gridModel, zoneParamName, emptyZoneList, realNumber, printInfo
+)
 
 # Allocate space for facies realisation and calculated volume fractions
 nCellsTotal = len(zoneValues)
@@ -338,17 +309,17 @@ faciesReal = np.zeros(nCellsTotal,np.uint16)
 
 # Gaussian field related lists
 GFNamesAlreadyRead = []
-GFAllValues        = []
-GFAllAlpha         = []
+GFAllValues = []
+GFAllAlpha = []
 
 # Probability related lists
 probParamNamesAlreadyRead = []
-probParamAllValues  = []
+probParamAllValues = []
 # The four lists: probParamAllValues,probParamValuesForFacies,GFAllValues, GFAllAlpha
 # will use a list of items where the item is of the form item =[name,value]
 # Index values are defined by:
-NAME = 0 # Name of index in items = [ name, values]
-VAL  = 1 # Name of index in items = [ name, values]
+NAME = 0  # Name of index in items = [ name, values]
+VAL = 1  # Name of index in items = [ name, values]
 
 # List of modelled facies names
 allFaciesNamesModelled = []
@@ -367,15 +338,15 @@ for zoneNumber in zoneNumberList:
         print('- Run model for zone number: ' + str(zoneNumber))
         print(' ')
 
-    zoneModel          = apsModel.getZoneModel(zoneNumber)
+    zoneModel = apsModel.getZoneModel(zoneNumber)
     # Read trend parameters for truncation parameters
 #    zoneModel.getTruncationParam(gridModel,realNumber)
     zoneModel.getTruncationParam(gr.getContinuous3DParameterValues,gridModel,realNumber)
 
-    useConstProb       = zoneModel.useConstProb()
-    GFNamesForZone     = zoneModel.getUsedGaussFieldNames()
+    useConstProb = zoneModel.useConstProb()
+    GFNamesForZone = zoneModel.getUsedGaussFieldNames()
     faciesNamesForZone = zoneModel.getFaciesInZoneModel()
-    nFacies            = len(faciesNamesForZone)
+    nFacies = len(faciesNamesForZone)
 
     if printInfo >= 2:
         for gfName in GFNamesForZone:
@@ -390,7 +361,7 @@ for zoneNumber in zoneNumberList:
             [values] = gr.getContinuous3DParameterValues(gridModel,gfName,realNumber,printInfo)
 
             # Allocate space for transformed gauss field property vector alpha
-            alpha     = np.zeros(len(values),np.float32)
+            alpha = np.zeros(len(values),np.float32)
 
             GFAllValues.append([gfName,values])
             gfNameTrans =   gfName + '_transf'
@@ -400,7 +371,6 @@ for zoneNumber in zoneNumberList:
             if printInfo >= 3:
                 print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
 
-
     # For current zone find the active cells for this zone 
     [nDefinedCells,cellIndexDefined] = findDefinedCells(zoneValues,zoneNumber,printInfo)
     if printInfo >= 2:
@@ -409,8 +379,7 @@ for zoneNumber in zoneNumberList:
     # For current zone,transform all gaussian fields used in this zone and update alpha 
     indx = -999
     GFAlphaForCurrentZone = []
-    zList = []
-    zList.append(zoneNumber -1)
+    zList = [zoneNumber - 1]
     for gfName in GFNamesForZone:
         for j in range(len(GFAllValues)):
             gName = GFAllValues[j][NAME]
@@ -425,9 +394,10 @@ for zoneNumber in zoneNumberList:
         if useTrend == 1:
             simBoxThickness = zoneModel.getSimBoxThickness()
             # trendValues contain trend values for the cells belonging to the set defined by cellIndexDefined
-            [minmaxDifference,trendValues] = createTrend(trendModelObj,gridModel,realNumber,
-                                                         nDefinedCells,cellIndexDefined,
-                                                         zoneNumber,simBoxThickness,printInfo)
+            [minmaxDifference, trendValues] = createTrend(
+                trendModelObj, gridModel, realNumber, nDefinedCells,
+                cellIndexDefined, zoneNumber, simBoxThickness, printInfo
+            )
             if printInfo >=2:
                 print('--- Calculate trend for: ' + gfName + ' for zone: ' + str(zoneNumber))
 
@@ -447,34 +417,31 @@ for zoneNumber in zoneNumberList:
                 print('Debug info: Trend + Residual values:')
                 print(repr(val))
 
-        alpha  = GFAllAlpha[indx][VAL]
+        alpha = GFAllAlpha[indx][VAL]
         # Update alpha for current zone
         if printInfo >= 2:
-            print('--- Transform: ' + gfName + ' for zone: ' + str(zoneNumber))
-        alpha  = transformEmpiric(nDefinedCells,cellIndexDefined,values,alpha)
+            print('--- Transform: {} for zone: {}'.format(gfName, zoneNumber))
+        alpha = transformEmpiric(nDefinedCells, cellIndexDefined, values, alpha)
         GFAllAlpha[indx][VAL] = alpha
         gfNamesTrans = GFAllAlpha[indx][NAME]
 
         # List of transformed values for each facies for current zone
-        GFAlphaForCurrentZone.append([gfName,alpha])
+        GFAlphaForCurrentZone.append([gfName, alpha])
 
         # Write back to RMS project the transformed gaussian values for the zone
         # Only current zone is updated
-        if not gr.setContinuous3DParameterValues(gridModel,gfNamesTrans,
-                                                 alpha,zList,realNumber,False,printInfo):
-            raise ValueError('Cannot create parameter ' + gfNamesTrans + ' in ' + gridModel.name)
+        if not gr.setContinuous3DParameterValues(gridModel, gfNamesTrans, alpha, zList, realNumber, False, printInfo):
+            raise ValueError('Cannot create parameter {} in {}'.format(gfNamesTrans, gridModel.name))
         else:
             if printInfo >= 2:
-                print('--- Create or update parameter: ' + gfNamesTrans + ' for zone number: ' + str(zoneNumber))
-
+                print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrans, zoneNumber))
 
     # Get all facies names to be modelled for this zone and corresponding probability parameters
     probParamValuesForFacies = []
     for fName in faciesNamesForZone:
         probParamName = zoneModel.getProbParamName(fName)
         if printInfo >= 3:
-            text = 'Debug output: Zone: ' + str(zoneNumber) + '  Facies name: ' + fName + '  Probability: ' + probParamName
-            print(text)
+            print('Debug output: Zone: {}  Facies name: {}  Probability: {}'.format(zoneNumber, fName, probParamName))
         values = []
         if useConstProb == 1:
             values.append(float(probParamName))
@@ -488,11 +455,12 @@ for zoneNumber in zoneNumberList:
             if not (probParamName in probParamNamesAlreadyRead):
                 probParamNamesAlreadyRead.append(probParamName)
                 if printInfo >= 3:
-                    text = 'Debug output: Probability parameter: ' + probParamName + ' is now being loaded for facies: ' 
-                    text = text + fName + ' for zone: ' + str(zoneNumber)
-                    print(text)
+                    print(
+                        'Debug output: Probability parameter: {} is now being loaded for facies: {} for zone: {}'
+                        ''.format(probParamName, fName, zoneNumber)
+                    )
 
-                [values] = gr.getContinuous3DParameterValues(gridModel,probParamName,realNumber,printInfo)
+                [values] = gr.getContinuous3DParameterValues(gridModel, probParamName, realNumber, printInfo)
 
                 # Add the probability values to a common list containing probabilities for
                 # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
@@ -503,9 +471,10 @@ for zoneNumber in zoneNumberList:
 
             else:
                 if printInfo >= 3:
-                    text = 'Debug output: Probability parameter: ' + probParamName + ' is already loaded for facies: ' 
-                    text = text + fName + ' for zone: ' + str(zoneNumber)
-                    print(text)
+                    print(
+                        'Debug output: Probability parameter: {} is already loaded for facies: {} for zone: {}'
+                        ''.format(probParamName, fName, zoneNumber)
+                    )
 
                 indx = -999
                 # Get the probability values from the common list since it already is loaded
@@ -516,31 +485,35 @@ for zoneNumber in zoneNumberList:
                         break
                 # Probabilities for each facies for current zone
                 values = probParamAllValues[indx][VAL]
-                probParamValuesForFacies.append([fName,values])
+                probParamValuesForFacies.append([fName, values])
         
     # end for
-
 
     # Check and normalise probabilities if necessary for current zone
     if printInfo >= 2:
         print('--- Check normalisation of probability fields.')
-    [probDefined,nCellsModifiedProb] = checkAndNormaliseProb(nFacies,probParamValuesForFacies,useConstProb,
-                                                             nDefinedCells,cellIndexDefined,eps,printInfo)
+    [probDefined, nCellsModifiedProb] = checkAndNormaliseProb(
+        nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined, eps, printInfo
+    )
     if printInfo >= 2:
         print('--- Number of cells that are normalised: ' + str(nCellsModifiedProb))
 
     # Facies realisation for current zone is updated.
         if printInfo >= 2:
             print('--- Truncate transformed Gaussian fields.')
-    volFrac =  []
-    [faciesReal,volFrac] = zoneModel.applyTruncations(probDefined,GFAlphaForCurrentZone,
-                                                      faciesReal,nDefinedCells,cellIndexDefined)
+    volFrac = []
+    [faciesReal, volFrac] = zoneModel.applyTruncations(
+        probDefined, GFAlphaForCurrentZone, faciesReal, nDefinedCells, cellIndexDefined
+    )
  
     if printInfo >= 2:
         print(' ')
         mainFaciesTable = apsModel.getMainFaciesTable()
         if useConstProb == 1:
-            print('--- Zone_number:    Facies_code:   Facies_name:     Volumefraction_specified:    Volumefracion_realisation:')
+            print(
+                '--- Zone_number:    Facies_code:   Facies_name:'
+                '     Volumefraction_specified:    Volumefracion_realisation:'
+            )
             for f in range(len(faciesNamesForZone)):
                 fName = faciesNamesForZone[f]
                 fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
@@ -550,10 +523,15 @@ for zoneNumber in zoneNumberList:
                     
 
                 probValues = item[VAL]
-                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber,fCode,fName,probValues[0],volFrac[f]))
+                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
+                    zoneNumber, fCode, fName, probValues[0], volFrac[f])
+                )
 
         else:
-            print('--- Zone_number:    Facies_code:   Facies_name:     Volumefraction_realisation  Volumefraction_from_probcube:')
+            print(
+                '--- Zone_number:    Facies_code:   Facies_name:'
+                '     Volumefraction_realisation  Volumefraction_from_probcube:'
+            )
             for f in range(len(faciesNamesForZone)):
                 fName = faciesNamesForZone[f]
                 fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
@@ -566,7 +544,7 @@ for zoneNumber in zoneNumberList:
                 print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber,fCode,fName,volFrac[f],avgProbValue))
 
         for fName in faciesNamesForZone:
-       #     fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
+            # fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
             if fName not in allFaciesNamesModelled:
                 allFaciesNamesModelled.append(fName)
                 if printInfo >= 3:
@@ -609,7 +587,6 @@ if not gr.setDiscrete3DParameterValues(gridModel,resultParamName,faciesReal,zLis
 else:
     if printInfo >= 1:
         print('- Create or update parameter: ' + resultParamName)
-
 
 
 print(' ')
