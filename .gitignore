@@ -303,3 +303,10 @@ CMakeLists.txt.user*
 # Qt Creator backups
 
 # End of https://www.gitignore.io/api/c,qt,git,c++,python,pycharm,qtcreator
+
+*.xml
+*.dat
+*.rms*/
+*.bmp
+Thumbs.db
+*.py~

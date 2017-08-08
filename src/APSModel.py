@@ -105,17 +105,7 @@ class APSModel:
         self.__zoneNumberList = []
         self.__zoneModelsSecondLevel = []
         self.__selectedZoneNumberList = []
-        # self.__refHorizonNameForVarioTrend = None
-        # self.__refHorizonReprNameForVarioTrend = None
-        # self.__keywordsFMU = []
-        # self.__hasNewValues = 0
         self.__previewZone = 0
-        # self.__previewGridNx = 300
-        # self.__previewGridNy = 300
-        # self.__previewGridXSize = 1000.0
-        # self.__previewGridYSize = 1000.0
-        # self.__previewGridOrientation = 0.0
-        # self.__previewCell = []
 
         # Read model if it is defined
         if modelFileName is None:
@@ -807,18 +797,6 @@ class APSModel:
         elem = Element(tag)
         elem.text = ' ' + self.__rmsGaussFieldScriptName.strip() + ' '
         root.append(elem)
-
-        #        tag = 'RMSTrendMapLayoutReference'
-        #        elemHor = Element(tag)
-        #        tag = 'HorizonName'
-        #        elem = Element(tag)
-        #        elem.text = ' ' + self.__refHorizonNameForVarioTrend + ' '
-        #        elemHor.append(elem)
-        #        tag = 'DataTypeName'
-        #        elem = Element(tag)
-        #        elem.text = ' ' + self.__refHorizonReprNameForVarioTrend + ' '
-        #        elemHor.append(elem)
-        #        root.append(elemHor)
 
         tag = 'GridModelName'
         elem = Element(tag)

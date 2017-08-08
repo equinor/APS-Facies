@@ -17,7 +17,7 @@ from utils.APSExceptions import InconsistencyError
 #  Date: 2017
 #
 # class Trunc3D_bayfill
-# Description: This truncation rulw was the first truncation rule developed in this project.
+# Description: This truncation rule was the first truncation rule developed in this project.
 #              It was designed mainly for bayfill reservoirs and should be used with a
 #              lateral trend for the first of the three gaussian fields.
 #              The method use 5 facies. Documentation of the truncation rule is found in
@@ -41,6 +41,7 @@ from utils.APSExceptions import InconsistencyError
 #    def getClassName(self)
 #    def getFaciesOrderIndexList(self)
 #    def getFaciesInTruncRule(self)
+#    def getNGaussFieldsInModel(self)
 #
 #   --- Set functions ---
 #    def setParamSF(self,paramName)
@@ -51,7 +52,7 @@ from utils.APSExceptions import InconsistencyError
 #   --- Common functions for all Truncation classes ---
 #    def useConstTruncModelParam(self)
 #    def setTruncRule(self,faciesProb,cellIndx=0)
-#    def defineFaciesByTruncRule(self,x,y,z)
+#    def defineFaciesByTruncRule(self,alphaCoord)
 #    def truncMapPolygons(self)
 #    def faciesIndxPerPolygon(self)
 #    def XMLAddElement(self,parent)
@@ -76,8 +77,43 @@ class Trunc3D_bayfill:
         Description: This class implements adaptive pluri-gaussian field
         trucation for the Bayfill model. (Three transformed gaussian fields)
     """
+    def __setEmpty(self):
+        # Global facies table
+        self.__mainFaciesTable = None
+        self.__nFaciesMain = 0
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, printInfo=0, modelFileName=None):
+        # Facies to be modelled
+        self.__faciesInZone = []
+        self.__faciesCode = []
+        self.__faciesInTruncRule = []
+        self.__orderIndex = []
+        self.__nFacies = 0
+
+        self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
+        self.__printInfo = 0
+        self.__className = 'Trunc3D_Bayfill'
+
+        # Internal data structure
+        self.__param_sf = []
+        self.__param_ysf = 0
+        self.__param_sbhd = 0
+        self.__param_sf_name = ''
+
+        self.__setTruncRuleIsCalled = False
+        self.__polygons = []
+        self.__useZ = 0
+        self.__Zm = 0
+
+        # Tolerance used for probabilities
+        self.__eps = 0.001
+        self.__faciesIsDetermined = []
+
+        # Define if truncation parameters are constant for all grid cells or
+        # vary from cell to cell.
+        self.__useConstTruncModelParam = True
+
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
+                 printInfo=0, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -100,54 +136,25 @@ class Trunc3D_bayfill:
            ordering and neigbourhood relation between the facies.
         """
 
-        # Global facies table
-        self.__mainFaciesTable = None
-        self.__nFaciesMain = 0
-
-        # Facies to be modelled
-        self.__faciesInZone = []
-        self.__faciesCode = []
-        self.__faciesInTruncRule = []
-        self.__orderIndex = []
-        self.__nFacies = 0
-        self.__modelFileName = modelFileName
-
-        self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
-        self.__printInfo = printInfo
-        self.__className = 'Trunc3D_Bayfill'
-
-        # Internal data structure
-        if printInfo >= 3:
-            print('Call Trunc3D_bayfill init')
-
-        self.__param_sf = []
-        self.__param_ysf = 0
-        self.__param_sbhd = 0
-        self.__param_sf_name = ''
-
-        self.__polygons = []
-        self.__useZ = 0
-        self.__Zm = 0
-
-        # Tolerance used for probabilities
-        self.__eps = 0.001
-        self.__faciesIsDetermined = []
-
-        # Define if truncation parameters are constant for all grid cells or
-        # vary from cell to cell.
-        self.__useConstTruncModelParam = True
-
         #assert trRuleXML is not None
-        if trRuleXML is None:
-            # Create an empty object which will be initialized by set functions
-            return
-
-        self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+        if trRuleXML is not None:
+            # Require extactly 3 transformed gauss fields
+            assert(nGaussFieldInModel == 3)
+            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+        else:
+            if printInfo >= 3:
+                # Create an empty object which will be initialized by set functions
+                print('Debug info: Create empty object of ' + self.__className)
         #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
         # Initialize object from xml tree object trRuleXML
         # Reference to main facies table which is global for the whole model
+        self.__setEmpty()
+        self.__printInfo = printInfo
+        if printInfo >= 3:
+            print('Call Trunc3D_bayfill init')
+
         if mainFaciesTable is not None:
             self.__mainFaciesTable = mainFaciesTable
             self.__nFaciesMain = self.__mainFaciesTable.getNFacies()
@@ -327,17 +334,20 @@ class Trunc3D_bayfill:
         """
            Description: Initialize the truncation object from input variables.
         """
+        self.__setEmpty()
+        
         # Main facies table i set
         self.__mainFaciesTable = copy.copy(mainFaciesTable)
         self.__nFaciesMain = self.__mainFaciesTable.getNFacies()
 
         # Facies in zone are set
         self.__faciesInZone = copy.copy(faciesInZone)
-        self.__faciesIsDetermined = np.zeros(self.__nFacies, int)
+
 
         # Facies in truncation rule
         self.__faciesInTruncRule = copy.copy(faciesInTruncRule)
         self.__nFacies = len(faciesInTruncRule)
+        self.__faciesIsDetermined = np.zeros(self.__nFacies, int)
 
         # Facies code for facies in zone
         self.__faciesCode = []
@@ -362,9 +372,7 @@ class Trunc3D_bayfill:
         # Check that facies in truncation rule is consistent with facies in zone
         if not self.__checkFaciesForZone():
             raise ValueError(
-                'Error when reading model file: {}\n'
                 'Error: Mismatch between facies for truncation rule and facies for the zone.'
-                ''.format(self.__modelFileName)
             )
 
         # Set orderIndex
@@ -381,6 +389,49 @@ class Trunc3D_bayfill:
             self.__orderIndex.append(fIndx)
 
         return
+
+
+    def writeContentsInDataStructure(self):
+        print(' ')
+        print('************  Contents of the data structure for class: ' + self.__className + ' ***************')
+        print('Eps: ' + str(self.__eps))
+        print('Main facies table:')
+        print(repr(self.__mainFaciesTable))
+        print('Number of facies in main facies table: ' + str(self.__nFaciesMain))
+        print('Facies to be modelled: ')
+        print(repr(self.__faciesInZone))
+        print('Facies code per facies to be modelled:')
+        print(repr(self.__faciesCode))
+        print('Facies in truncation rule:')
+        print(repr(self.__faciesInTruncRule))
+        print('Number of facies to be modelled:' + str(self.__nFacies))
+        print('Index array orderIndex: ')
+        print(repr(self.__orderIndex))
+        print('Facies index for facies which has 100% probability')
+        print(repr(self.__faciesIsDetermined))
+        print('Print info level: ' + str(self.__printInfo))
+        print('Is function setTruncRule called? ')
+        print(repr(self.__setTruncRuleIsCalled))
+        print('Number of Gauss fields in model: ' + str(3))
+        if self.__useConstTruncModelParam:
+            print('Parameter SF: ' + str(self.__param_sf))
+            print('Parameter YSF: ' + str(self.__param_ysf))
+            print('Parameter SBHD: ' + str(self.__param_sbhd))
+        else:
+            print('Parameter SF: ' + self.__param_sf_name)
+        print('UseZ: ' + str(self.__useZ))
+        print('Zm: ' + str(self.__Zm))
+        print('Number of polygons: ' + str(len(self.__polygons)))
+        for i in range(len(self.__polygons)):
+            poly = self.__polygons[i]
+            print('Polygon number: ' + str(i))
+            for j in range(len(poly)):
+                print(repr(poly[j]))
+        print('Facies index for polygons:')
+        print(repr(self.__fIndxPerPolygon))
+
+
+
 
     def __checkFaciesForZone(self):
         # Check that the facies for the truncation rule is the same
@@ -417,10 +468,14 @@ class Trunc3D_bayfill:
     def getFaciesInTruncRule(self):
         return copy.copy(self.__faciesInTruncRule)
 
+    def getNGaussFieldsInModel(self):
+        return 3
+
     def useConstTruncModelParam(self):
         return self.__useConstTruncModelParam
 
     def truncMapPolygons(self):
+        assert self.__setTruncRuleIsCalled
         isDetermined = 0
         for indx in range(len(self.__faciesInTruncRule)):
             if self.__faciesIsDetermined[indx] == 1:
@@ -440,41 +495,26 @@ class Trunc3D_bayfill:
         return [polygons]
 
     def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
-        # Read truncation parameters
-        if not self.__useConstTruncModelParam:
-            # Get param values
-            paramName = self.__param_sf_name
-            if self.__printInfo >= 2:
-                # TODO: fName is NOT defined for this scope!
-                print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
-            [values] = get3DParamFunction(gridModel, paramName, realNumber, self.__printInfo)
-#            [values] = getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__printInfo)
-            self.__param_sf = values
-        else:
-            raise ValueError(
-                'Error in {}\n'
-                'Error: Inconsistency in data structure. Programming error.'
-                ''.format(self.__className)
-            )
+        # Input: get3DParamFunction - Pointer to a function to read 3D parameter from RMS
+        #        gridModel - Pointer to grid model in RMS
 
+        # This function should only be called if the truncation parameter sf is to be spatially varying
+        assert self.__useConstTruncModelParam
+        
+        # Read truncation parameters
+        paramName = self.__param_sf_name
+        if self.__printInfo >= 2:
+            print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self.__className)
+            print('--- Read RMS parameter: ' + paramName)
+        # Expect that the function points to the function:
+        #  getContinuous3DParameterValues with input: (gridModel,paramName,realNumber,self.__printInfo)
+        [values] = get3DParamFunction(gridModel, paramName, realNumber, self.__printInfo)
+        self.__param_sf = values
+        
     def faciesIndxPerPolygon(self):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
-        return [fIndxList]
+        return fIndxList
 
-#    def getTruncationParam(self,gridModel,realNumber):
-#        # Read truncation parameters
-#        if not self.__useConstTruncModelParam:
-#            # Get param values
-#            paramName = self.__param_sf_name
-#            if self.__printInfo >= 2:
-#                print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
-#            [values] = getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__printInfo)
-#            self.__param_sf =values
-#        else:
-#            print('Error in ' + self.__className)
-#            print('Error: Inconsistency in data structure. Programming error')
-#            err = 1
-#        return
 
     def XMLAddElement(self, parent):
         # Add to the parent element a new element with specified tag and attributes.
@@ -591,6 +631,7 @@ class Trunc3D_bayfill:
         #  BHD        is 4 with probability P4
         #  Lagoon     is 5 with probability P5
 
+        self.__setTruncRuleIsCalled = True
         self.__setMinimumFaciesProb(faciesProb)
         isDetermined = 0
         for indx in range(len(faciesProb)):
@@ -1703,7 +1744,7 @@ class Trunc3D_bayfill:
         self.__useZ = useZ
         self.__Zm = Zm
 
-    def defineFaciesByTruncRule(self, x, y, z):
+    def defineFaciesByTruncRule(self, alphaCoord):
         """defineFaciesByTruncRule: Calculate facies by applying the truncation rule.
 
            Input:
@@ -1715,6 +1756,9 @@ class Trunc3D_bayfill:
                      self.__useZ
                      self.__Zm
         """
+        x = alphaCoord[0]
+        y = alphaCoord[1]
+        z = alphaCoord[2]
         for indx in range(len(self.__faciesInTruncRule)):
             if self.__faciesIsDetermined[indx] == 1:
                 fIndx = self.__orderIndex[indx]

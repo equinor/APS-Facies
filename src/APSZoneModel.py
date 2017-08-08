@@ -6,8 +6,12 @@ import numpy as np
 # Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
 from simGauss2D import  simGaussFieldAddTrendAndTransform 
 
+# To be outphased:
+from Trunc2D_Cubic_Multi_Overlay_xml import  Trunc2D_Cubic_Multi_Overlay
 from Trunc2D_Angle_Overlay_xml import  Trunc2D_Angle_Overlay
-from Trunc2D_Cubic_Overlay_xml import  Trunc2D_Cubic_Overlay
+
+from Trunc2D_Cubic_xml import  Trunc2D_Cubic
+from Trunc2D_Angle_xml import  Trunc2D_Angle
 from Trunc3D_bayfill_xml import  Trunc3D_bayfill
 
 from Trend3D_linear_model_xml import Trend3D_linear_model
@@ -16,6 +20,15 @@ import xml.etree.ElementTree as ET
 from  xml.etree.ElementTree import Element, SubElement, dump
 from APSMainFaciesTable import APSMainFaciesTable
 from APSGaussFieldJobs  import APSGaussFieldJobs
+
+
+def isNumber(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 
 # ----------------------------------------------------------------
 # class APSZoneModel
@@ -70,7 +83,8 @@ from APSGaussFieldJobs  import APSGaussFieldJobs
 
 #  ---  Calculate function ---
 #    def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
-#    def simGaussFieldWithTrendAndTransform(self,gridDimNx,gridDimNy,gridXSize,gridYSize,gridAsimuthAngle)
+#    def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
+#                                           gridXSize,gridYSize,gridAsimuthAngle)
 #
 #
 #  ---  write XML tree --- 
@@ -145,11 +159,8 @@ class APSZoneModel:
         self.__SNAME  = 0
         self.__SVALUE = 1
         
-        if ET_Tree == None:
-            return
-
-        self.__interpretXMLTree(ET_Tree)
-        return
+        if ET_Tree is not None:
+            self.__interpretXMLTree(ET_Tree)
     # End __init__
 
     def __interpretXMLTree(self,ET_Tree):
@@ -249,6 +260,23 @@ class APSZoneModel:
                     if mainFaciesTable.checkWithFaciesTable(name):
                         text     = f.find('ProbCube').text
                         probCubeName = text.strip()
+                        if self.__useConstProb == 1:
+                            if not isNumber(probCubeName):
+                                raise ValueError(
+                                    'Error in ' + self.__className + '\n'
+                                    'Error in keyword: FaciesProbForModel for facies name: ' + name +'\n'
+                                    '                  The specified probability is not a number even though '
+                                    'useConstProb keyword is set to 1.'
+                                    )
+                        else:
+                            if isNumber(probCubeName):
+                                raise ValueError(
+                                    'Error in ' + self.__className + '\n'
+                                    'Error in keyword: FaciesProbForModel for facies name: ' + name +'\n'
+                                    '                  The specified probability is not an RMS parameter name even though '
+                                    'useConstProb keyword is set to 0.'
+                                    )
+
                         item = [name,probCubeName]
                         self.__faciesProbForZoneModel.append(item)
                         self.__faciesInZoneModel.append(name)
@@ -424,24 +452,35 @@ class APSZoneModel:
                     nGaussFieldInModel  = int(trRule.get('nGFields'))
                     if nGaussFieldInModel != len(self.__varioForGFModel):
                         raise ValueError(
-                            'Error: In ' + self.__className + '\n'
-                            'Error: Number of specified RMS gaussian field 3D parameters does not match '
-                            '       truncation rule: ' + truncRuleName
+                            'Error: In {0}\n'
+                            'Error: Number of specified RMS gaussian field 3D parameters: {1}\n'
+                            '       does not match truncation number of gaussian fields in truncation rule {2} which is {3}'
+                            ''.format(self.__className,str(nGaussFieldInModel),truncRuleName,str(len(self.__varioForGFModel)))
                             )
                     else:
                         faciesInZone = self.__faciesInZoneModel
                         if truncRuleName == 'Trunc3D_Bayfill':
-                            self.__truncRule = Trunc3D_bayfill(trRule,mainFaciesTable,faciesInZone,
-                                                               self.__printInfo,self.__modelFileName)
+                            self.__truncRule = Trunc3D_bayfill(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                                               self.__printInfo, self.__modelFileName)
 
+
+                        elif truncRuleName == 'Trunc2D_Angle':
+                            self.__truncRule = Trunc2D_Angle(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                                             self.__printInfo, self.__modelFileName)
 
                         elif truncRuleName == 'Trunc2D_Angle_Overlay':
-                            self.__truncRule = Trunc2D_Angle_Overlay(trRule,mainFaciesTable,faciesInZone,
-                                                                     self.__printInfo,self.__modelFileName)
+                            self.__truncRule = Trunc2D_Angle_Overlay(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                                                     self.__printInfo, self.__modelFileName)
                     
-                        elif truncRuleName == 'Trunc2D_Cubic_Overlay':
-                            self.__truncRule = Trunc2D_Cubic_Overlay(trRule,mainFaciesTable,faciesInZone,
-                                                                     self.__printInfo,self.__modelFileName)
+                        elif truncRuleName == 'Trunc2D_Cubic':
+                            self.__truncRule = Trunc2D_Cubic(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                                             self.__printInfo, self.__modelFileName)
+
+                        elif truncRuleName == 'Trunc2D_Cubic_Multi_Overlay':
+                            # This is to be phases out. Is replaced by Trunc2D_Cubic
+                            self.__truncRule = Trunc2D_Cubic_Multi_Overlay(trRule, mainFaciesTable, faciesInZone, 
+                                                                           nGaussFieldInModel,
+                                                                           self.__printInfo, self.__modelFileName)
                         else:
                             raise NameError(
                                 'Error in ' + self.__className + '\n'
@@ -721,6 +760,12 @@ class APSZoneModel:
         return self.__simBoxThickness
 
     def getTruncationParam(self,get3DParamFunction,gridModel,realNumber):
+        # Input: get3DParamFunction - Function pointer for function to be applied
+        #                             to get 3D parameter from RMS project. Is used
+        #                             to avoid calling functions using RoxAPI here.
+        #        gridModel - Pointer to grid model object in RMS
+        #        NOTE: Will only call the function to read RMS parameter from
+        #              truncation rules that has defined this as a possibility.
         if not self.__truncRule.useConstTruncModelParam():
             self.__truncRule.getTruncationParam(get3DParamFunction,gridModel,realNumber)
 
@@ -1091,6 +1136,140 @@ class APSZoneModel:
         return
 
     def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined):
+
+        # GFAlphaList has items =[name,valueArray]
+        # Use NAME and VAL as index names
+        NAME = 0
+        VAL  = 1
+
+
+        truncObject    = self.__truncRule
+        functionName   = 'applyTruncations'
+        printInfo      = self.__printInfo
+        faciesNames    = self.__faciesInZoneModel
+        nFacies        = len(faciesNames)
+        classNameTrunc = truncObject.getClassName()
+        if len(probDefined) != nFacies:
+            raise ValueError(
+                'Error: In class: ' + self.__className + '\n'
+                'Error: Mismatch in input to applyTruncations'
+                )
+
+        useConstTruncParam = truncObject.useConstTruncModelParam()
+        nGaussFields = len(GFAlphaList)
+        faciesProb     = np.zeros(nFacies,np.float32)
+        volFrac        = np.zeros(nFacies,np.float32)
+        if printInfo >= 2:
+            print('--- Truncation rule: ' + classNameTrunc)
+
+        if self.__useConstProb==1 and useConstTruncParam == 1:
+            # Constant probability 
+            if printInfo >= 3:
+                print('Debug output: Using spatially constant probabilities for facies.')
+
+            for f in range(nFacies):
+                faciesProb[f] = probDefined[f]
+
+            if self.__printInfo >= 3:
+                print('Debug output: faciesProb:')
+                print(repr(faciesProb))
+
+            alphaList = []
+            for gaussFieldIndx in range(nGaussFields):
+                item   = GFAlphaList[gaussFieldIndx]
+                gfName = item[NAME]
+                alphaDataArray = item[VAL]
+                alphaList.append(alphaDataArray)
+                if printInfo >= 3:
+                    print('Debug output: Use gauss fields: ' + gfName)
+            
+
+            # Calculate truncation rules
+            # The truncation map/cube is constant and does not vary from cell to cell
+            truncObject.setTruncRule(faciesProb)
+
+
+            for i in range(nDefinedCells):
+                if printInfo == 2:
+                    if np.mod(i,500000)==0:
+                        print('--- Calculate facies for cell number: ' + str(i))
+                elif printInfo >=3:
+                    if np.mod(i,10000)==0:
+                        print('--- Calculate facies for cell number: ' + str(i))
+        
+                cellIndx = cellIndexDefined[i]
+                # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
+                alphaCoord = []
+                for gaussFieldIndx in range(nGaussFields):
+                    alphaDataArray = alphaList[gaussFieldIndx]
+                    alphaCoord.append(alphaDataArray[cellIndx])
+
+                # Calculate facies realization by applying truncation rules
+                [fCode,fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+                faciesReal[cellIndx] = fCode
+                volFrac[fIndx] += 1
+
+        else:
+            # Varying probability from cell to cell and / or 
+            # varying truncation parameter from cell to cell
+            if printInfo >= 3:
+                text = 'Debug output: Using spatially varying probabilities and/or '
+                text = text + 'truncation parameters for facies.' 
+                print(text)
+
+            alphaList = []
+            for gaussFieldIndx in range(nGaussFields):
+                item   = GFAlphaList[gaussFieldIndx]
+                gfName = item[NAME]
+                alphaDataArray = item[VAL]
+                if printInfo >= 3:
+                    print('Debug output: Use gauss fields: ' + gfName)
+                alphaList.append(alphaDataArray)
+            
+            for i in range(nDefinedCells):
+                if printInfo == 2:
+                    if np.mod(i,500000)==0:
+                        print('--- Calculate facies for cell number: ' + str(i))
+                elif printInfo >=3:
+                    if np.mod(i,10000)==0:
+                        print('--- Calculate facies for cell number: ' + str(i))
+
+                if self.__useConstProb==1:
+                    for f in range(nFacies):
+                        faciesProb[f] = probDefined[f]
+                else:
+                    for f in range(nFacies):
+                        faciesProb[f] = probDefined[f][i]
+
+
+                # Calculate truncation rules
+                # The truncation map/cube vary from cell to cell.
+                cellIndx = cellIndexDefined[i]
+                truncObject.setTruncRule(faciesProb,cellIndx)
+
+
+                alphaCoord = []
+                # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
+                for gaussFieldIndx in range(nGaussFields):
+                    alphaDataArray = alphaList[gaussFieldIndx]
+                    alphaCoord.append(alphaDataArray[cellIndx])
+                # Calculate facies realization by applying truncation rules
+                [fCode,fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+                faciesReal[cellIndx] = fCode
+                volFrac[fIndx] += 1
+
+        if self.__printInfo >= 4:
+            if truncObject.getClassName() == 'Trunc2D_Angle':
+                nCalc   = truncObject.getNCalcTruncMap()
+                nLookup = truncObject.getNLookupTruncMap()
+                nCount =  truncObject.getNCountShiftAlpha()
+                print('Debug info: nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount))
+
+        for f in range(nFacies):
+            volFrac[f] = volFrac[f]/float(nDefinedCells)    
+        return [faciesReal,volFrac]
+
+    def applyTruncationsOld(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined):
 
         # GFAlphaList has items =[name,valueArray]
         # Use NAME and VAL as index names
@@ -1484,17 +1663,19 @@ class APSZoneModel:
 
 
 
-    def simGaussFieldWithTrendAndTransform(self,gridDimNx,gridDimNy,gridXSize,gridYSize,gridAsimuthAngle):
+    def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
+                                           gridXSize,gridYSize,gridAsimuthAngle):
         nx = gridDimNx
         ny = gridDimNy
         xsize = gridXSize
         ysize = gridYSize
-        a1 = np.zeros(nx*ny,float)
-        a2 = np.zeros(nx*ny,float)
-        a3 = np.zeros(nx*ny,float)
+#        a1 = np.zeros(nx*ny,float)
+#        a2 = np.zeros(nx*ny,float)
+#        a3 = np.zeros(nx*ny,float)
         
         gaussFieldNamesForSimulation = self.getUsedGaussFieldNames()
-        nGaussFields = len(gaussFieldNamesForSimulation)
+        assert nGaussFields == len(gaussFieldNamesForSimulation)
+        gaussFields = []
         for i in range(nGaussFields):
             # Find data for specified Gauss field name
             name      = gaussFieldNamesForSimulation[i]
@@ -1535,25 +1716,16 @@ class APSZoneModel:
 
                 print('Seed value: ' + str(seedValue))
 
-                # Angle relative to x axis is input in degrees.
-                angle = 90.0 - angle
-            if i== 0:
-                # Gauss field 1
-                [a1] = simGaussFieldAddTrendAndTransform(seedValue,nx,ny,xsize,ysize,
-                                                         varioTypeNumber,r1,r2,angle,power,
-                                                         useTrend,trendAsimuth,relSigma,self.__printInfo)
-            if i== 1:
-                # Gauss field 2
-                [a2] = simGaussFieldAddTrendAndTransform(seedValue,nx,ny,xsize,ysize,
-                                                         varioTypeNumber,r1,r2,angle,power,
-                                                         useTrend,trendAsimuth,relSigma,self.__printInfo)
-            if i==2:
-                # Gauss field 3
-                [a3] = simGaussFieldAddTrendAndTransform(seedValue,nx,ny,xsize,ysize,
-                                                         varioTypeNumber,r1,r2,angle,power,
-                                                         useTrend,trendAsimuth,relSigma,self.__printInfo)
+            # Angle relative to x axis is input in degrees.
+            angle = 90.0 - angle
+            gfRealization = np.zeros(nx*ny,float)
+            [gfRealization] =  simGaussFieldAddTrendAndTransform(seedValue,nx,ny,xsize,ysize,
+                                                                 varioTypeNumber,r1,r2,angle,power,
+                                                                 useTrend,trendAsimuth,relSigma,self.__printInfo)
+
+            gaussFields.append(gfRealization)
         # End for        
 
-        return [a1,a2,a3]
+        return gaussFields
 
     
