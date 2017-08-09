@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="Gaussian_buttonBox">
    <property name="geometry">
     <rect>
-     <x>540</x>
-     <y>570</y>
+     <x>560</x>
+     <y>590</y>
      <width>176</width>
      <height>27</height>
     </rect>
@@ -30,9 +30,9 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>340</y>
+     <y>330</y>
      <width>691</width>
-     <height>231</height>
+     <height>251</height>
     </rect>
    </property>
    <property name="palette">
@@ -135,267 +135,296 @@
    <property name="frameShadow">
     <enum>QFrame::Raised</enum>
    </property>
-   <widget class="QLabel" name="Trendsettings_label">
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>0</y>
+      <width>256</width>
+      <height>241</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>161</width>
-      <height>16</height>
+      <width>411</width>
+      <height>241</height>
      </rect>
     </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Trend settings</string>
-    </property>
-   </widget>
-   <widget class="QCustomPlot" name="Trendsettings_kplotwidget">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>10</y>
-      <width>221</width>
-      <height>201</height>
-     </rect>
-    </property>
-    <property name="palette">
-     <palette>
-      <active>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Text">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="ButtonText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </active>
-      <inactive>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Text">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="ButtonText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </inactive>
-      <disabled>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>118</red>
-          <green>118</green>
-          <blue>117</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Text">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>118</red>
-          <green>118</green>
-          <blue>117</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="ButtonText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>118</red>
-          <green>118</green>
-          <blue>117</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </disabled>
-     </palette>
-    </property>
-    <property name="backgroundColor" stdset="0">
-     <color>
-      <red>255</red>
-      <green>255</green>
-      <blue>255</blue>
-     </color>
-    </property>
-    <property name="foregroundColor" stdset="0">
-     <color>
-      <red>0</red>
-      <green>0</green>
-      <blue>0</blue>
-     </color>
-    </property>
-    <property name="grid" stdset="0">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>31</x>
-      <y>40</y>
-      <width>391</width>
-      <height>161</height>
-     </rect>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_6">
-     <item row="0" column="0" colspan="2">
-      <widget class="QLabel" name="Depositionaldirection_label">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QLabel" name="Trendsettings_label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
-        <string>Depositional direction</string>
+        <string>Trend settings</string>
        </property>
       </widget>
-     </item>
-     <item row="0" column="2">
-      <spacer name="Depositionaldirection_horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="0" column="3">
-      <widget class="QLineEdit" name="DepositionalDirection_lineEdit"/>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="Stackingpattern_label">
-       <property name="text">
-        <string>Stacking pattern</string>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Select Trend</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>118</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox"/>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="1" rowspan="2">
+      <widget class="KPlotWidget" name="Trendsettings_kplotwidget">
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>118</red>
+             <green>118</green>
+             <blue>117</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>118</red>
+             <green>118</green>
+             <blue>117</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>118</red>
+             <green>118</green>
+             <blue>117</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="backgroundColor" stdset="0">
+        <color>
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </property>
+       <property name="foregroundColor" stdset="0">
+        <color>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </property>
+       <property name="grid" stdset="0">
+        <bool>false</bool>
        </property>
       </widget>
-     </item>
-     <item row="1" column="1" colspan="2">
-      <spacer name="Stackingpattern_horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="1" column="3">
-      <widget class="QComboBox" name="Stackingpattern_kcombobox"/>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="StackingAngle_label">
-       <property name="text">
-        <string>Stacking Angle</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <spacer name="StackingAngle_horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="2" column="3">
-      <widget class="QLineEdit" name="StackingAngle_lineEdit"/>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="RelativeStDev_label">
-       <property name="text">
-        <string>Relative St.Dev</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QLineEdit" name="RelativeStDev_lineEdit"/>
-     </item>
-     <item row="3" column="2">
-      <spacer name="RelativeStDev_horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="SimBoxthickness_label">
-       <property name="text">
-        <string>SimBox thickness:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <spacer name="SimBoxthickness_horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="4" column="3">
-      <widget class="QLineEdit" name="SimBoxthickness_lineEdit"/>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="Depositionaldirection_label">
+         <property name="text">
+          <string>Depositional direction</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <spacer name="Depositionaldirection_horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="DepositionalDirection_lineEdit"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="Stackingpattern_label">
+         <property name="text">
+          <string>Stacking pattern</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" colspan="2">
+        <spacer name="Stackingpattern_horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="3">
+        <widget class="KComboBox" name="Stackingpattern_kcombobox"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="StackingAngle_label">
+         <property name="text">
+          <string>Stacking Angle</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <spacer name="StackingAngle_horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLineEdit" name="StackingAngle_lineEdit"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="RelativeStDev_label">
+         <property name="text">
+          <string>Relative St.Dev</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLineEdit" name="RelativeStDev_lineEdit"/>
+       </item>
+       <item row="3" column="2">
+        <spacer name="RelativeStDev_horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="SimBoxthickness_label">
+         <property name="text">
+          <string>SimBox thickness:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <spacer name="SimBoxthickness_horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLineEdit" name="SimBoxthickness_lineEdit"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -406,7 +435,7 @@
      <x>360</x>
      <y>40</y>
      <width>366</width>
-     <height>275</height>
+     <height>266</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
@@ -426,7 +455,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QRadioButton" name="ApplyTrend_radioButton">
+       <widget class="QCheckBox" name="ApplyTrend_checkBox">
         <property name="text">
          <string>Apply Trend</string>
         </property>
@@ -779,66 +808,64 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="gridLayoutWidget">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>49</x>
-     <y>39</y>
-     <width>301</width>
-     <height>285</height>
+     <x>50</x>
+     <y>40</y>
+     <width>269</width>
+     <height>252</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout_4">
+   <layout class="QFormLayout" name="formLayout">
     <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>25</height>
-       </size>
-      </property>
+     <widget class="QLabel" name="Gaussianplot_label">
       <property name="font">
        <font>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
       <property name="text">
        <string>Gaussian</string>
       </property>
-      <property name="textFormat">
-       <enum>Qt::RichText</enum>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="KPlotWidget" name="GaussianField_kplotwidget">
+      <property name="backgroundColor" stdset="0">
+       <color>
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
+       </color>
+      </property>
+      <property name="foregroundColor" stdset="0">
+       <color>
+        <red>0</red>
+        <green>0</green>
+        <blue>0</blue>
+       </color>
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QCustomPlot" name="frame">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-     </widget>
+    <item row="2" column="1">
+     <widget class="QGraphicsView" name="graphicsView_2"/>
     </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>KPlotWidget</class>
    <extends>QFrame</extends>
-   <header>qcustomplot.h</header>
+   <header>kplotwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>KComboBox</class>
+   <extends>QComboBox</extends>
+   <header>kcombobox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

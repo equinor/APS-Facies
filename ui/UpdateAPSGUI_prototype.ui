@@ -19,12 +19,12 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>871</width>
+      <width>881</width>
       <height>781</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_3">
      <attribute name="title">
@@ -95,6 +95,13 @@
           <widget class="QLabel" name="label_5">
            <property name="text">
             <string>Selected Zones:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBox_8">
+           <property name="text">
+            <string>Seperate Zone Models</string>
            </property>
           </widget>
          </item>
@@ -224,7 +231,7 @@
          <item row="0" column="1">
           <widget class="QLabel" name="label_7">
            <property name="text">
-            <string>Facies selection:</string>
+            <string>Available Facies </string>
            </property>
           </widget>
          </item>
@@ -272,6 +279,13 @@
            </item>
           </layout>
          </item>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBox_9">
+           <property name="text">
+            <string>Select Facies</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item row="0" column="0">
@@ -305,7 +319,7 @@
         <x>10</x>
         <y>10</y>
         <width>861</width>
-        <height>671</height>
+        <height>721</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="TruncationLibrary_gridLayout_2">
@@ -462,7 +476,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>Zone(s) to be modelled       </string>
+            <string>Select current zone and facies</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
@@ -472,7 +486,7 @@
          <item row="0" column="2">
           <widget class="QLabel" name="label_15">
            <property name="text">
-            <string>Selected Zones:</string>
+            <string>Selected Facies</string>
            </property>
           </widget>
          </item>
@@ -485,7 +499,7 @@
          <item row="0" column="1">
           <widget class="QLabel" name="label_14">
            <property name="text">
-            <string>Zones selection:</string>
+            <string>Zones selection</string>
            </property>
           </widget>
          </item>
@@ -761,8 +775,8 @@
          </item>
         </layout>
        </item>
-       <item row="3" column="0">
-        <spacer name="verticalSpacer_12">
+       <item row="8" column="0">
+        <spacer name="verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -787,6 +801,43 @@
          </property>
         </spacer>
        </item>
+       <item row="3" column="0">
+        <spacer name="verticalSpacer_12">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_25">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Customized </string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QPushButton" name="TypeVII_pushButton_3">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</iconset>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -807,14 +858,14 @@
        <item row="0" column="2">
         <widget class="QLabel" name="label_24">
          <property name="text">
-          <string>Selected Zones:</string>
+          <string>Selected Facies</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_22">
          <property name="text">
-          <string>Zone(s) to be modelled       </string>
+          <string>Select current zone and facies</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -824,7 +875,7 @@
        <item row="0" column="1">
         <widget class="QLabel" name="label_23">
          <property name="text">
-          <string>Zones selection:</string>
+          <string>Zones selection</string>
          </property>
         </widget>
        </item>
@@ -863,7 +914,7 @@
             </font>
            </property>
            <property name="text">
-            <string>GRF1</string>
+            <string>GRF3</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -924,7 +975,7 @@
             </font>
            </property>
            <property name="text">
-            <string>GRF1</string>
+            <string>GRF4</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -982,7 +1033,7 @@
             </font>
            </property>
            <property name="text">
-            <string>GRF1</string>
+            <string>GRF2</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -1102,7 +1153,7 @@
             </font>
            </property>
            <property name="text">
-            <string>GRF1</string>
+            <string>GRF5</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -1160,7 +1211,7 @@
             </font>
            </property>
            <property name="text">
-            <string>GRF1</string>
+            <string>GRF6</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -1186,11 +1237,6 @@
       </layout>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string/>
-     </attribute>
-    </widget>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
@@ -1198,39 +1244,11 @@
       <x>20</x>
       <y>800</y>
       <width>871</width>
-      <height>62</height>
+      <height>83</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="7">
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="6">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="text">
-        <string>Save</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QPushButton" name="Assign_Probability_pushButton_3">
-       <property name="text">
-        <string>Assign Probability Cube</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QRadioButton" name="Conditiontowells_radioButton_2">
-       <property name="text">
-        <string>Condition to wells</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
+     <item row="1" column="5">
       <widget class="QPushButton" name="pushButton">
        <property name="font">
         <font>
@@ -1240,6 +1258,34 @@
        </property>
        <property name="text">
         <string>Run Previewer</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="7">
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="6">
+      <widget class="QPushButton" name="pushButton_3">
+       <property name="text">
+        <string>Save</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="7">
+      <widget class="QPushButton" name="Assign_Probability_pushButton_3">
+       <property name="text">
+        <string>Assign Probability Cube</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QCheckBox" name="Conditiontowells_checkBox_2">
+       <property name="text">
+        <string>Condition to wells</string>
        </property>
       </widget>
      </item>
