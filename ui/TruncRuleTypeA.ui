@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="KButtonGroup" name="Form">
+ <class>QtPlotAreaTruncRule_kplotwidget</class>
+ <widget class="KButtonGroup" name="QtPlotAreaTruncRule_kplotwidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1090</width>
-    <height>326</height>
+    <width>963</width>
+    <height>357</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,15 +16,22 @@
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>1069</width>
-     <height>306</height>
+     <x>20</x>
+     <y>14</y>
+     <width>922</width>
+     <height>311</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
+    <item row="1" column="0">
+     <widget class="KIconButton" name="Icon_TruncationRuleCubic_kiconbutton">
+      <property name="text">
+       <string>Apply overlay facies</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="1">
-     <widget class="QLabel" name="TruncationRuleNonCubic_label">
+     <widget class="QLabel" name="TruncationRuleCubic_label">
       <property name="font">
        <font>
         <family>Abyssinica SIL</family>
@@ -34,12 +41,12 @@
        </font>
       </property>
       <property name="text">
-       <string>Truncation Rule Non Cubic</string>
+       <string>Truncation Rule Cubic</string>
       </property>
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="KPlotWidget" name="TruncationRuleNoenCubic_kplotwidget">
+     <widget class="KPlotWidget" name="TruncationRuleCubic_kplotwidget">
       <property name="minimumSize">
        <size>
         <width>250</width>
@@ -64,17 +71,30 @@
     </item>
     <item row="2" column="1">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="F1_label">
         <property name="text">
          <string>F1</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="KComboBox" name="F1_kcombobox"/>
       </item>
-      <item row="3" column="2">
+      <item row="2" column="2">
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="4">
        <spacer name="horizontalSpacer_5">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -87,10 +107,14 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="3">
-       <widget class="KColorButton" name="F1_kcolorbutton"/>
+      <item row="2" column="5">
+       <widget class="QSlider" name="F1_horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
-      <item row="3" column="4">
+      <item row="2" column="6">
        <spacer name="horizontalSpacer_6">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -103,10 +127,20 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="5">
-       <widget class="QLineEdit" name="F1_Angle_lineEdit"/>
+      <item row="2" column="7">
+       <widget class="QLineEdit" name="F1_lineEdit"/>
       </item>
-      <item row="3" column="6">
+      <item row="3" column="0">
+       <widget class="QLabel" name="F2_label">
+        <property name="text">
+         <string>F2</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="KComboBox" name="F2_kcombobox"/>
+      </item>
+      <item row="3" column="2">
        <spacer name="horizontalSpacer_7">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -119,14 +153,7 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="7">
-       <widget class="QSlider" name="F1_horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="8">
+      <item row="3" column="4">
        <spacer name="horizontalSpacer_8">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -139,20 +166,14 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="9">
-       <widget class="QLineEdit" name="F1_Prop_lineEdit"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="F2_label">
-        <property name="text">
-         <string>F2</string>
+      <item row="3" column="5">
+       <widget class="QSlider" name="F2_horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="KComboBox" name="F2_kcombobox"/>
-      </item>
-      <item row="4" column="2">
+      <item row="3" column="6">
        <spacer name="horizontalSpacer_9">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -165,10 +186,20 @@
         </property>
        </spacer>
       </item>
-      <item row="4" column="3">
-       <widget class="KColorButton" name="F2_kcolorbutton"/>
+      <item row="3" column="7">
+       <widget class="QLineEdit" name="F2_lineEdit"/>
       </item>
-      <item row="4" column="4">
+      <item row="4" column="0">
+       <widget class="QLabel" name="F3_label">
+        <property name="text">
+         <string>F3</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="KComboBox" name="F3_kcombobox"/>
+      </item>
+      <item row="4" column="2">
        <spacer name="horizontalSpacer_10">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -181,10 +212,7 @@
         </property>
        </spacer>
       </item>
-      <item row="4" column="5">
-       <widget class="QLineEdit" name="F2_Angle_lineEdit"/>
-      </item>
-      <item row="4" column="6">
+      <item row="4" column="4">
        <spacer name="horizontalSpacer_11">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -197,14 +225,14 @@
         </property>
        </spacer>
       </item>
-      <item row="4" column="7">
-       <widget class="QSlider" name="F2_horizontalSlider">
+      <item row="4" column="5">
+       <widget class="QSlider" name="F3_horizontalSlider">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="4" column="8">
+      <item row="4" column="6">
        <spacer name="horizontalSpacer_12">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -217,18 +245,18 @@
         </property>
        </spacer>
       </item>
-      <item row="4" column="9">
-       <widget class="QLineEdit" name="F2_Prop_lineEdit_2"/>
+      <item row="4" column="7">
+       <widget class="QLineEdit" name="F3_lineEdit"/>
       </item>
       <item row="5" column="0">
-       <widget class="QLabel" name="F3_label">
+       <widget class="QLabel" name="F4_label">
         <property name="text">
-         <string>F3</string>
+         <string>F4</string>
         </property>
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="KComboBox" name="F3_kcombobox"/>
+       <widget class="KComboBox" name="F4_kcombobox"/>
       </item>
       <item row="5" column="2">
        <spacer name="horizontalSpacer_13">
@@ -242,9 +270,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="5" column="3">
-       <widget class="KColorButton" name="F3_kcolorbutton"/>
       </item>
       <item row="5" column="4">
        <spacer name="horizontalSpacer_14">
@@ -260,7 +285,11 @@
        </spacer>
       </item>
       <item row="5" column="5">
-       <widget class="QLineEdit" name="F3_Angle_lineEdit"/>
+       <widget class="QSlider" name="F4_horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
       <item row="5" column="6">
        <spacer name="horizontalSpacer_15">
@@ -276,13 +305,19 @@
        </spacer>
       </item>
       <item row="5" column="7">
-       <widget class="QSlider" name="F3_horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QLineEdit" name="F4_lineEdit"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="F5_label">
+        <property name="text">
+         <string>F5</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="8">
+      <item row="6" column="1">
+       <widget class="KComboBox" name="F5_kcombobox"/>
+      </item>
+      <item row="6" column="2">
        <spacer name="horizontalSpacer_16">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -295,20 +330,7 @@
         </property>
        </spacer>
       </item>
-      <item row="5" column="9">
-       <widget class="QLineEdit" name="F3_Prop_lineEdit"/>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="F4_label">
-        <property name="text">
-         <string>F4</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="KComboBox" name="F4_kcombobox"/>
-      </item>
-      <item row="6" column="2">
+      <item row="6" column="4">
        <spacer name="horizontalSpacer_17">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -321,10 +343,14 @@
         </property>
        </spacer>
       </item>
-      <item row="6" column="3">
-       <widget class="KColorButton" name="F4_kcolorbutton"/>
+      <item row="6" column="5">
+       <widget class="QSlider" name="F5_horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
-      <item row="6" column="4">
+      <item row="6" column="6">
        <spacer name="horizontalSpacer_18">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -337,164 +363,11 @@
         </property>
        </spacer>
       </item>
-      <item row="6" column="5">
-       <widget class="QLineEdit" name="F4_Angle_lineEdit"/>
-      </item>
-      <item row="6" column="6">
-       <spacer name="horizontalSpacer_19">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="6" column="7">
-       <widget class="QSlider" name="F4_horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="F5_lineEdit"/>
       </item>
-      <item row="6" column="8">
-       <spacer name="horizontalSpacer_20">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="6" column="9">
-       <widget class="QLineEdit" name="F4_Prop_lineEdit"/>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="F5_label">
-        <property name="text">
-         <string>F5</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="KComboBox" name="F5_kcombobox"/>
-      </item>
-      <item row="7" column="2">
-       <spacer name="horizontalSpacer_21">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="7" column="3">
-       <widget class="KColorButton" name="F5_kcolorbutton"/>
-      </item>
-      <item row="7" column="4">
-       <spacer name="horizontalSpacer_22">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="7" column="5">
-       <widget class="QLineEdit" name="F5_Angle_lineEdit"/>
-      </item>
-      <item row="7" column="6">
-       <spacer name="horizontalSpacer_23">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="7" column="7">
-       <widget class="QSlider" name="F5_horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="8">
-       <spacer name="horizontalSpacer_24">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="7" column="9">
-       <widget class="QLineEdit" name="F5_Prop_lineEdit"/>
-      </item>
-      <item row="2" column="1">
-       <widget class="QLabel" name="Facies_label_2">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Facies</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QLabel" name="label_3">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Color</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="5">
-       <widget class="QLabel" name="label_5">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Angle</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="9">
-       <widget class="QLabel" name="Proportions_input_label">
+      <item row="1" column="7">
+       <widget class="QLabel" name="Proportionsinput_label">
         <property name="font">
          <font>
           <weight>75</weight>
@@ -506,8 +379,8 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="7">
-       <widget class="QLabel" name="Proportions_scale_label">
+      <item row="0" column="7">
+       <widget class="QLabel" name="Valuesbetween_abel">
         <property name="font">
          <font>
           <weight>75</weight>
@@ -515,27 +388,24 @@
          </font>
         </property>
         <property name="text">
-         <string>Proportions Scale</string>
+         <string>Values between [0,1]</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <spacer name="horizontalSpacer_1">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="1" column="3">
+       <widget class="QLabel" name="Color_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
         </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
+        <property name="text">
+         <string>Color</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       </widget>
       </item>
-      <item row="2" column="4">
+      <item row="1" column="4">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -551,7 +421,36 @@
         </property>
        </spacer>
       </item>
-      <item row="2" column="6">
+      <item row="1" column="2">
+       <spacer name="horizontalSpacer_1">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>60</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="Facies_label">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Facies</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6">
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -561,21 +460,14 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>30</width>
+          <width>40</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
-      <item row="8" column="9">
-       <widget class="QDialogButtonBox" name="TruncationRuleNonCubic_buttonBox">
-        <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="9">
-       <widget class="QLabel" name="Valuesbetween_label">
+      <item row="1" column="5">
+       <widget class="QLabel" name="Proportions_scale_label">
         <property name="font">
          <font>
           <weight>75</weight>
@@ -583,39 +475,38 @@
          </font>
         </property>
         <property name="text">
-         <string>Values between [0,1]</string>
+         <string>Proportions Scale</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="8">
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+      <item row="7" column="7">
+       <widget class="QDialogButtonBox" name="TruncationRuleCubic_buttonBox">
+        <property name="standardButtons">
+         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
         </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>30</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="KColorButton" name="F1_kcolorbutton"/>
+      </item>
+      <item row="3" column="3">
+       <widget class="KColorButton" name="F2_kcolorbutton"/>
+      </item>
+      <item row="4" column="3">
+       <widget class="KColorButton" name="F3_kcolorbutton"/>
+      </item>
+      <item row="5" column="3">
+       <widget class="KColorButton" name="F4_kcolorbutton"/>
+      </item>
+      <item row="6" column="3">
+       <widget class="KColorButton" name="F5_kcolorbutton"/>
       </item>
      </layout>
-    </item>
-    <item row="1" column="0">
-     <widget class="KIconButton" name="TruncationRuleIcon_kiconbutton">
-      <property name="text">
-       <string>Apply overlay facies</string>
-      </property>
-     </widget>
     </item>
     <item row="0" column="0">
      <widget class="QCheckBox" name="checkBox">
       <property name="text">
-       <string>Applied over lay facies</string>
+       <string>Applied overlay facies</string>
       </property>
      </widget>
     </item>
