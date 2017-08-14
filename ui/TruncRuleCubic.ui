@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QtPlotAreaTruncRule_kplotwidget</class>
- <widget class="KButtonGroup" name="QtPlotAreaTruncRule_kplotwidget">
+ <class>QtPlotAreaTruncRule</class>
+ <widget class="QWidget" name="QtPlotAreaTruncRule">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -27,7 +27,7 @@
      <widget class="QPushButton" name="Icon_TruncationRuleCubic_kiconbutton"/>
     </item>
     <item row="1" column="0">
-     <widget class="QCustomPlot" name="TruncationRuleCubic_kplotwidget">
+     <widget class="QCustomPlot" name="TruncationRuleCubic_qcustomplot">
       <property name="minimumSize">
        <size>
         <width>250</width>
@@ -60,7 +60,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QComboBox" name="F1_kcombobox"/>
+       <widget class="QComboBox" name="F1_qcombobox"/>
       </item>
       <item row="2" column="2">
        <spacer name="horizontalSpacer_4">
@@ -119,7 +119,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="F2_kcombobox"/>
+       <widget class="QComboBox" name="F2_qcombobox"/>
       </item>
       <item row="3" column="2">
        <spacer name="horizontalSpacer_7">
@@ -178,7 +178,7 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QComboBox" name="F3_kcombobox"/>
+       <widget class="QComboBox" name="F3_qcombobox"/>
       </item>
       <item row="4" column="2">
        <spacer name="horizontalSpacer_10">
@@ -237,7 +237,7 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QComboBox" name="F4_kcombobox"/>
+       <widget class="QComboBox" name="F4_qcombobox"/>
       </item>
       <item row="5" column="2">
        <spacer name="horizontalSpacer_13">
@@ -296,7 +296,7 @@
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QComboBox" name="F5_kcombobox"/>
+       <widget class="QComboBox" name="F5_qcombobox"/>
       </item>
       <item row="6" column="2">
        <spacer name="horizontalSpacer_16">
@@ -468,19 +468,19 @@
        </widget>
       </item>
       <item row="2" column="3">
-       <widget class="QPushButton" name="F1_kcolorbutton"/>
+       <widget class="QPushButton" name="F1_qcolorbutton"/>
       </item>
       <item row="3" column="3">
-       <widget class="QPushButton" name="F2_kcolorbutton"/>
+       <widget class="QPushButton" name="F2_colorbutton"/>
       </item>
       <item row="4" column="3">
-       <widget class="QPushButton" name="F3_kcolorbutton"/>
+       <widget class="QPushButton" name="F3_colorbutton"/>
       </item>
       <item row="5" column="3">
        <widget class="QPushButton" name="F4_kcolorbutton"/>
       </item>
       <item row="6" column="3">
-       <widget class="QPushButton" name="F5_kcolorbutton"/>
+       <widget class="QPushButton" name="F5_colorbutton"/>
       </item>
      </layout>
     </item>
@@ -503,12 +503,6 @@
   </widget>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>KButtonGroup</class>
-   <extends>QGroupBox</extends>
-   <header>kbuttongroup.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>QCustomPlot</class>
    <extends>QFrame</extends>

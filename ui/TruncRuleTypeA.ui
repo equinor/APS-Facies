@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QtPlotAreaTruncRule_kplotwidget</class>
- <widget class="KButtonGroup" name="QtPlotAreaTruncRule_kplotwidget">
+ <class>QtPlotAreaTruncRuleTypeA</class>
+ <widget class="QWidget" name="QtPlotAreaTruncRuleTypeA">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -19,12 +19,12 @@
      <x>20</x>
      <y>14</y>
      <width>922</width>
-     <height>311</height>
+     <height>312</height>
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
     <item row="1" column="0">
-     <widget class="KIconButton" name="Icon_TruncationRuleCubic_kiconbutton">
+     <widget class="QPushButton" name="Icon_TruncationRuleCubic_qpushbutton">
       <property name="text">
        <string>Apply overlay facies</string>
       </property>
@@ -45,30 +45,6 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="KPlotWidget" name="TruncationRuleCubic_kplotwidget">
-      <property name="minimumSize">
-       <size>
-        <width>250</width>
-        <height>250</height>
-       </size>
-      </property>
-      <property name="backgroundColor" stdset="0">
-       <color>
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
-       </color>
-      </property>
-      <property name="foregroundColor" stdset="0">
-       <color>
-        <red>0</red>
-        <green>0</green>
-        <blue>0</blue>
-       </color>
-      </property>
-     </widget>
-    </item>
     <item row="2" column="1">
      <layout class="QGridLayout" name="gridLayout">
       <item row="2" column="0">
@@ -79,7 +55,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="KComboBox" name="F1_kcombobox"/>
+       <widget class="QComboBox" name="F1_qcombobox"/>
       </item>
       <item row="2" column="2">
        <spacer name="horizontalSpacer_4">
@@ -138,7 +114,7 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="KComboBox" name="F2_kcombobox"/>
+       <widget class="QComboBox" name="F2_qcombobox"/>
       </item>
       <item row="3" column="2">
        <spacer name="horizontalSpacer_7">
@@ -197,7 +173,7 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="KComboBox" name="F3_kcombobox"/>
+       <widget class="QComboBox" name="F3_qcombobox"/>
       </item>
       <item row="4" column="2">
        <spacer name="horizontalSpacer_10">
@@ -256,7 +232,7 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="KComboBox" name="F4_kcombobox"/>
+       <widget class="QComboBox" name="F4_qcombobox"/>
       </item>
       <item row="5" column="2">
        <spacer name="horizontalSpacer_13">
@@ -315,7 +291,7 @@
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="KComboBox" name="F5_kcombobox"/>
+       <widget class="QComboBox" name="F5_qcombobox"/>
       </item>
       <item row="6" column="2">
        <spacer name="horizontalSpacer_16">
@@ -487,19 +463,19 @@
        </widget>
       </item>
       <item row="2" column="3">
-       <widget class="KColorButton" name="F1_kcolorbutton"/>
+       <widget class="QPushButton" name="F1_colorbutton"/>
       </item>
       <item row="3" column="3">
-       <widget class="KColorButton" name="F2_kcolorbutton"/>
+       <widget class="QPushButton" name="F2_colorbutton"/>
       </item>
       <item row="4" column="3">
-       <widget class="KColorButton" name="F3_kcolorbutton"/>
+       <widget class="QPushButton" name="F3_colorbutton"/>
       </item>
       <item row="5" column="3">
-       <widget class="KColorButton" name="F4_kcolorbutton"/>
+       <widget class="QPushButton" name="F4_colorbutton"/>
       </item>
       <item row="6" column="3">
-       <widget class="KColorButton" name="F5_kcolorbutton"/>
+       <widget class="QPushButton" name="F5_colorbutton"/>
       </item>
      </layout>
     </item>
@@ -510,36 +486,25 @@
       </property>
      </widget>
     </item>
+    <item row="2" column="0">
+     <widget class="QCustomplot" name="TruncationRuleCubic_kplotwidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>250</width>
+        <height>250</height>
+       </size>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KPlotWidget</class>
-   <extends>QFrame</extends>
-   <header>kplotwidget.h</header>
+   <class>QCustomplot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>KComboBox</class>
-   <extends>QComboBox</extends>
-   <header>kcombobox.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KIconButton</class>
-   <extends>QPushButton</extends>
-   <header>kicondialog.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KButtonGroup</class>
-   <extends>QGroupBox</extends>
-   <header>kbuttongroup.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>KColorButton</class>
-   <extends>QPushButton</extends>
-   <header>kcolorbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
