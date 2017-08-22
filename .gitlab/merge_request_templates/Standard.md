@@ -39,4 +39,4 @@ Check those applicable, and remove those that are not.
 
 2 :+1:
 
-CC: @APS
+CC: @karbor @OLIA @SNIS @TBOR @hosm
