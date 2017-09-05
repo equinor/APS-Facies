@@ -31,7 +31,7 @@ class Trend3D_linear:
         self.__stackingAngle  = trendRuleModel.getStackingAngle()
         self.__direction      = trendRuleModel.getStackingDirection()
         self.__printInfo      = printInfo 
-        return
+
 
     def createTrend(self,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness):
         # Check if specified grid model exists and is not empty

@@ -7,10 +7,11 @@ import APSModel
 import APSZoneModel
 import generalFunctionsUsingRoxAPI as gr
 import importlib
-
+import Trunc2D_Cubic_Multi_Overlay_xml
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(gr)
+importlib.reload(Trunc2D_Cubic_Multi_Overlay_xml)
 
 
 modelFileName = 'APS.xml'

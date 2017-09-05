@@ -26,7 +26,7 @@ from xml.etree.ElementTree import Element, SubElement, dump
 #    faciesList               =  getFaciesInTruncRule()
 #    useConstTruncModelParam  =  useConstTruncModelParam()
 #                                setTruncRule(faciesProb,cellIndx = 0)
-#    [faciesCode,fIndx]       =  defineFaciesByTruncRule(x,y)
+#    [faciesCode,fIndx]       =  defineFaciesByTruncRule(alphaCoord)
 #    [polygons]               =  truncMapPolygons()
 #                                XMLAddElement(parent)
 
@@ -63,7 +63,8 @@ class Trunc2D_Angle_Overlay:
 
     """
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, printInfo=0, modelFileName=None):
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, 
+                 printInfo=0, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -140,12 +141,17 @@ class Trunc2D_Angle_Overlay:
         self.__highH = 1
 
         # assert trRuleXML is not None
-        if trRuleXML is None:
-            # Create an empty object. The object will be initialized by set functions later
-            return
+        if trRuleXML is not None:
+            # This method require exactly 3 transformed gauss fields
+            assert(nGaussFieldInModel == 3)
+            # Fill the object from an xml model file
+            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+        else:
+            if self.__printInfo>=3:
+                # Create an empty object. The object will be initialized by set functions later
+                print('Debug info: Create empty object of: ' + self.__className)
 
-        # Fill the object from an xml model file
-        self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
         # Initialize object from xml tree object trRuleXML
@@ -974,6 +980,7 @@ class Trunc2D_Angle_Overlay:
         for i in range(len(faciesProb)):
             p = faciesProb[i]
             faciesProb[i] = p / sumProb
+        return faciesProb
 
     def setTruncRule(self, faciesProb, cellIndx=0):
         """
@@ -982,7 +989,7 @@ class Trunc2D_Angle_Overlay:
         Output: A set of polygons that define the area for each facies
                 within the truncation map for the LBL truncation.
         """
-        self.__setMinimumFaciesProb(faciesProb)
+        faciesProb = self.__setMinimumFaciesProb(faciesProb)
         isDetermined = 0
         for indx in range(len(faciesProb)):
             fIndx = self.__orderIndex[indx]
@@ -1081,7 +1088,7 @@ class Trunc2D_Angle_Overlay:
 #
 #        return [faciesCode,fIndx]
 
-    def defineFaciesByTruncRule(self, x, y, z):
+    def defineFaciesByTruncRule(self, alphaCoord):
         """
         Function related to the LBL (Linear Boundary Lines) truncation rule.
         Input: polygons with definition of areas in the truncation map for each facies and a point in the truncation map.
@@ -1089,7 +1096,9 @@ class Trunc2D_Angle_Overlay:
                and which background facies to apply the overlay facies to.
         Output: Facies number for the facies in location (x,y,z) in the truncation map.
         """
-
+        x = alphaCoord[0]
+        y = alphaCoord[1]
+        z = alphaCoord[2]
         # Check if facies is defined (has probability 1)
         for indx in range(len(self.__faciesInTruncRule)):
             if self.__faciesIsDetermined[indx] == 1:
@@ -1193,7 +1202,7 @@ class Trunc2D_Angle_Overlay:
                 item = self.__probFracPerPolygon[i]
                 indx = item[0]
                 fIndxList.append(indx)
-        return [fIndxList]
+        return fIndxList
 
     def setAngle(self, polygonNumber, angle):
         err = 0
@@ -1308,3 +1317,25 @@ class Trunc2D_Angle_Overlay:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
+
+
+    def writeContentsInDataStructure(self):
+        print(' ')
+        print('************  Contents specific to the "Angle algorithm" *****************')
+        print('Orientation angles for normal vectors for facies polygon border lines in truncation map:')
+        for i in range(len(self.__faciesAlpha)):
+            print(repr(self.__faciesAlpha))
+        for i in range(len(self.__faciesAlphaName)):
+            print(repr(self.__faciesAlphaName))
+
+        print('Number of polygons: ' + str(self.__nPolygons))
+        for i in range(len(self.__faciesPolygons)):
+            poly = self.__faciesPolygons[i]
+            print('Polygon number: ' + str(i))
+            for j in range(len(poly)):
+                print(repr(poly[j]))
+        print('Prob frac per polygon: ')
+        print(repr(self.__probFracPerPolygon))
+        print('Facies index for polygons:')
+        faciesIndxPerPoly = self.faciesIndxPerPolygon()
+        print(repr(faciesIndxPerPoly))

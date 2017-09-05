@@ -167,14 +167,14 @@ class APSMainFaciesTable:
 
     def removeFacies(self, faciesName):
         for i in range(len(self.__faciesTable)):
-            item = self.__faciesTable
+            item = self.__faciesTable[i]
             fName = item[0]
-            fCode = item[1]
+            fCode = int(item[1])
             if faciesName == fName:
                 self.__faciesTable.pop(i)
                 self.__nFacies -= 1
                 break
-        return
+
 
     def checkWithFaciesTable(self, fName):
         found = 0
@@ -184,9 +184,9 @@ class APSMainFaciesTable:
                 found = 1
                 break
         if found == 0:
-            print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
-            print('Specified facies names and codes are: \n')
-            print(repr(self.__faciesTable))
+#            print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
+#            print('Specified facies names and codes are: \n')
+#            print(repr(self.__faciesTable))
             return False
         else:
             return True

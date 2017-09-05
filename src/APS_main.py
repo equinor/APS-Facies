@@ -14,8 +14,10 @@ import APSModel
 import APSMainFaciesTable
 import APSZoneModel
 import APSGaussFieldJobs
-import Trunc2D_Cubic_Overlay_xml
-import Trunc2D_Angle_Overlay_xml
+
+import Trunc2D_Base_xml
+import Trunc2D_Cubic_xml
+import Trunc2D_Angle_xml
 import Trunc3D_bayfill_xml
 
 import Trend3D_linear
@@ -30,8 +32,10 @@ importlib.reload(APSMainFaciesTable)
 importlib.reload(APSGaussFieldJobs)
 
 importlib.reload(gr)
-importlib.reload(Trunc2D_Cubic_Overlay_xml)
-importlib.reload(Trunc2D_Angle_Overlay_xml)
+
+importlib.reload(Trunc2D_Base_xml)
+importlib.reload(Trunc2D_Cubic_xml)
+importlib.reload(Trunc2D_Angle_xml)
 importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear)
 importlib.reload(Trend3D_linear_model_xml)
@@ -246,9 +250,12 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefin
         # Check that probabilities sum to 1
         psum = probDefined[0]
         for f in range(1,nFacies):
-            psum = psum + probDefined[f]
-        if psum != 1.0:
-            raise ValueError('Probabilities for facies are not normalized for this zone ')
+            psum   = psum + probDefined[f]  
+        if abs(psum -1.0) > eps:
+            raise ValueError(
+                'Probabilities for facies are not normalized for this zone '
+                '(Total: {})'.format(str(psum))
+            )
 
     return [probDefined,nCellWithModifiedProb]
 
@@ -340,7 +347,7 @@ for zoneNumber in zoneNumberList:
 
     zoneModel = apsModel.getZoneModel(zoneNumber)
     # Read trend parameters for truncation parameters
-#    zoneModel.getTruncationParam(gridModel,realNumber)
+    # zoneModel.getTruncationParam(gridModel,realNumber)
     zoneModel.getTruncationParam(gr.getContinuous3DParameterValues,gridModel,realNumber)
 
     useConstProb = zoneModel.useConstProb()

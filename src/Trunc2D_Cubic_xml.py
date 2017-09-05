@@ -2,130 +2,99 @@
 import sys
 import copy
 import numpy as np
-
+from  Trunc2D_Base_xml import Trunc2D_Base
 from xml.etree.ElementTree import Element
 
 
 """
 -----------------------------------------------------------------------
-class Trunc2D_Cubic_Overlay
-Description: A general truncation rule using rectangular polygons for the truncation map
+class Trunc2D_Cubic
+
+Description: This class is derived from Trunc2D_Base which contain common data structure for 
+             truncation algorithms with overlay facies.
+
+             A general truncation rule using rectangular polygons for the truncation map is implemented here.
              It is specified in a hierarchical way with 3 levels of subdivision of the truncation
-             uni1 square into rectangles.
-            In addition to the facies specified for the 2D truncation map, it is possible
-            to specify an additional facies using a third gaussian field. This facies is specified
-            to overprint the "background" facies which was specified for the 2D truncation map.
-            It is also possible to define different rectangular polygons from the truncation map
-            to belong to the same facies in order to generate truncation rule with non-neigbour
-            polygons in the truncation map.
+             unit square into rectangles.
+             In addition to the facies specified for the 2D truncation map, it is possible
+             to specify additional facies using additional gaussian fields. These facies are specified
+             to overprint or "overlay" the "background" facies which was specified for the 2D truncation map.
+             Note that for each overprint facies a subset of the facies defined by the two first
+             Gaussian fields must be defined. The algoritm also requires that there can be only one
+             overprint facies that can "overprint" a background facies. So if e.g. 3 background facies
+             are modelled like F1,F2,F3 and 2 overprint facies are specified like F4,F5, then the background facies
+             must be divided into 2 groups like e.g. (F1,F3) and (F2) where one group is overprinted by F4 
+             and the other by F5. It is not possible to the same background facies in two or more groups. 
+             It is also possible to define different rectangular polygons from the truncation map
+             to belong to the same facies in order to generate truncation rule with non-neigbour
+             polygons in the truncation map.
 
  Public member functions:
- Constructor:    def __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-                printInfo = 0,modelFileName=None)
-  def initialize(self,mainFaciesTable,faciesInZone,truncStructureList,
-                 backGroundFacies,overlayFacies,overlayTruncCenter=1.0,printInfo=0)
+  Constructor:    
+    def __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None, 
+                 nGaussFieldInModel=None, printInfo = 0, modelFileName=None)
 
 
-  --- Common get functions for all Truncation classes ---
-  def getClassName(self)
-  def getFaciesOrderIndexList(self)
-  def getFaciesInTruncRule(self)
 
-  --- Set functions ---
+  Public functions:
+    def initialize(self,mainFaciesTable,faciesInZone,truncStructureList,
+                 backGroundFacies=None,overlayFacies=None,overlayTruncCenter=None,printInfo=0)
+    def writeContentsInDataStructure(self):
+    def getClassName(self)
+    def useConstTruncModelParam(self)
+    def setTruncRule(self, faciesProb, cellIndx=0)
+    def defineFaciesByTruncRule(self, alphaCoord)
+    def truncMapPolygons(self)
+    def faciesIndxPerPolygon(self)
+    def XMLAddElement(self, parent)
 
 
-  --- Common functions for all Truncation classes ---
-  def useConstTruncModelParam(self)
-  def setTruncRule(self,faciesProb,cellIndx = 0)
-  def defineFaciesByTruncRule(self,alphaCoord)
-  def truncMapPolygons(self)
-  def faciesIndxPerPolygon(self)
-  def XMLAddElement(self,parent)
-
- Private member functions:
-   def __interpretXMLTree(trRuleXML,mainFaciesTable,faciesInZone,printInfo,modelFileName)
-   def __checkFaciesForZone(self)
-   def __addFaciesToTruncRule(self,fName)
-   def __modifyBackgroundFaciesArea(self,faciesProb)
-   def __calcProbForEachNode(self,faciesProb)
-   def __calcThresholdValues(self)
-   def __calcFaciesLevel1V(self,nodeListL1,x,y,z)
-   def __calcFaciesLevel1H(self,nodeListL1,x,y,z)
-   def __calcFaciesLevel2H(self,nodeListL2,x,y,z)
-   def __calcFaciesLevel2V(self,nodeListL2,x,y,z)
-   def __calcFaciesLevel3H(self,nodeListL3,y,z)
-   def __calcFaciesLevel3V(self,nodeListL3,x,z)
-   def __calcPolyLevel(self,direction,nodeList,polyLevelAbove,levelNumber)
-   def __writeDataForTruncRule(self)
-   def __getPolygonAndFaciesList(self)
-   def __setMinimumFaciesProb(self,faciesProb)
-   def __setTruncStructure(self,truncStructureList)
-   def __defineBackgroundFaciesAndOverLayFacies(self,backGroundFacies,overlayFacies)
+  Private functions:
+    def __setEmpty(self)
+    def __interpretXMLTree(self, trRuleXML, modelFileName):
+    def __calcProbForEachNode(self, faciesProb)
+    def __calcThresholdValues(self)
+    def __calcFaciesLevel1V(self, nodeListL1, alphaCoord)
+    def __calcFaciesLevel1H(self, nodeListL1, alphaCoord)
+    def __calcFaciesLevel2H(self, nodeListL2, alphaCoord)
+    def __calcFaciesLevel2V(self, nodeListL2, alphaCoord)
+    def __calcFaciesLevel3H(self, nodeListL3, alphaCoord)
+    def __calcFaciesLevel3V(self, nodeListL3, alphaCoord)
+    def __calcPolyLevel(self, direction, nodeList, polyLevelAbove, levelNumber)
+    def __writeDataForTruncRule(self)
+    def __getPolygonAndFaciesList(self)
+    def __setTruncStructure(self, truncStructureList)
 
 -------------------------------------------------------------
 """
 
 
-class Trunc2D_Cubic_Overlay:
+class Trunc2D_Cubic(Trunc2D_Base):
     """
     Description: This class implements adaptive plurigaussian field truncation
                  using two simulated gaussian fields (with trend).
 
     """
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
-                 printInfo=0, modelFileName=None):
-        """
-           Description: Create either an empty object which have to be initialized
-                        later using the initialize function or create a full object
-                        by reading the values from an input XML tree representing the
-                        model file input.
-        Data organization:
-        There are three facies lists:
-        1. mainFaciesTable.
-           Main facies list which is common for all zones, All other facies lists must check
-           against the main facies list that the facies is defined. Main facies list also contain
-           the facies code for each facies.
+    def __setEmpty(self):
 
-        2. faciesInZone.
-           For each zone there is a specific subset of facies that is modelled. For each of these
-           facies a probability is specified. This list is must be consistent with the facies
-           used in the truncation rule.
+        # Initialize variables defined in base class Trunc2D_Base
+        super()._setEmpty()
 
-        3. faciesInTrucRule.
-           The truncation rule specify the facies in a particular sequence. This sequence define the facies
-           ordering and neigbourhood relation between the facies.
-        """
-
-        # Tolerance used for probabilities
-        self.__eps = 0.0001
-
-        # Global facies table
-        self.__mainFaciesTable = None
-        self.__nFaciesMain = 0
-
-        # Facies to be modelled
-        self.__faciesInZone = []
-        self.__faciesCode = []
-        self.__faciesInTruncRule = []
-        self.__nFacies = 0
-        self.__orderIndex = []
-        self.__faciesIsDetermined = []
-        self.__printInfo = printInfo
-        self.__className = 'Trunc2D_Cubic_Overlay'
+        # Specific variables for class Trunc2D_Cubic
+        self._className = 'Trunc2D_Cubic'
 
         # Variables containing truncations for the 2D truncation map
         self.__truncStructure = []
         self.__useLevel2 = 0
         self.__useLevel3 = 0
-        self.__backGroundFaciesIndx = []
-        self.__isBackgroundFacies = []
-        self.__overlayFaciesIndx = -999
-        # self.__useOverLayFacies = 0
-        self.__deltaH = 0.0
-        self.__overLayTruncIntervalCenter = 1.0
-        # nodeData = ['N',direction,nodeList,prob,polygon,xmin,xmax,ymin.ymax]
-        # nodeData = ['F',indx,     probFrac,prob,polygon,xmin,xmax,ymin,ymax]
+        # The trunc structure contain a tree structure of data for the hierarchy of 
+        # how the truncation map is split into rectangular polygons. In this data structure the nodes in the tree
+        # is of two types. Either the node data is of form:
+        #     ['N',direction,nodeList,prob,polygon,xmin,xmax,ymin.ymax]  or the form 
+        #     ['F',indx,     probFrac,prob,polygon,xmin,xmax,ymin,ymax]
+
+        # The _node_index dictionary give name to each index in nodeData list
         self.__node_index = {
             'type': 0,
             'direction': 1,
@@ -140,59 +109,121 @@ class Trunc2D_Cubic_Overlay:
             'y max': 8
         }
 
+        # Number of polygons in the truncation map
         self.__nPoly = 0
+
+        # List of polygons the truncation map is split into
         self.__polygons = []
+
+        # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
 
 
+
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
+                 printInfo=0, modelFileName=None):
+        """
+           Description: This constructor can either create a new object by reading the information
+                        from an XML tree or it can create an empty data structure for such an object.
+                        If an empty data structure is created, the initialize function must be used.
+           About data structure:
+           All information related to common data which is used by more than one truncation algorithm
+           is saved in the base class Trunc2D_Base. 
+
+           The common data are:
+
+           1. mainFaciesTable.
+           Main facies list which is common for all zones, All other facies lists must check
+           against the main facies list that the facies is defined. Main facies list also contain
+           the facies code for each facies.
+
+           2. faciesInZone.
+           For each zone there is a specific subset of facies that is modelled. For each of these
+           facies a probability is specified. This list is must be consistent with the facies
+           used in the truncation rule.
+
+           3. faciesInTrucRule.
+           The truncation rule specify the facies in a particular sequence. This sequence define the facies
+           ordering and neigbourhood relation between the facies.
+
+           4. Data representing facies that are called overprint or overlay facies. 
+           This is also data common to more than one truncation algorithm.
+
+           The algorithm for Cubic truncation rule depends on specific data only relevant for
+           this algorithm. The data structure for this includes a tree structure of nodes where each node
+           is either a composed node or a simple node. A simple node contain information about a rectangular area
+           in truncation map, and which facies it belongs to. A composed node consists of a tree structure of simple nodes.
+           This hierarchical representation of the rectangular polygons splitting the unit square of the 2D truncation map
+           has three levels. These levels are specified in the XML file by keywords L1,L2,L3. 
+           Within L1 keyword there can be either L2 or one or more ProbFrac keywords.
+           Within L2 keyword there can be either L3 or one or more ProbFrac keywords. 
+           Within L3 keyword there can be only ProbFrac keywords (one or more). 
+        """
+        # Initialize data structure to empty. It will also call up the base class function setEmpty.
+        self.__setEmpty()
+
         if trRuleXML is not None:
-            # This method require exactly 3 transformed gauss fields
-            assert(nGaussFieldInModel == 3)
-            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+            if printInfo >= 3:
+                print('Debug info: Read data from model file for: ' + self._className)
+
+            self._nGaussFieldInModel = nGaussFieldInModel
+            self._printInfo = printInfo
+
+            # Call base class method to set modelled facies. 
+            # This will initialize common data for facies to be modelled (specified for the zone) and the 
+            # ordering of the facies in the truncation rule.
+            self._setModelledFacies(mainFaciesTable,faciesInZone)
+
+            # Read truncation rule for background facies from xml tree.
+            # Here the hierarchy of polygons in the 2D truncation map defined by the two
+            # first transformed gaussian fields is defined. This is specific for the Cubic truncations.
+            self.__interpretXMLTree(trRuleXML, modelFileName)
+
+            # Call base class method to read truncation rule for overlay facies.
+            # Overlay facies truncation rules are read here. The overlay facies does not
+            # have to know anything about how the 2D truncation map defined by the two first
+            # transformed gaussian fields looks like. It only need to know which facies in the 2D map
+            # is "background" for each overlay facies. Therefore data structure and methods 
+            # related to overprint facies is common to several different truncation algorithms.
+            self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName)
+            
+            # Call base class method to check that facies in truncation rule is 
+            # consistent with facies in zone.
+            self._checkFaciesForZone()
+
+            if self._printInfo >= 3:
+                print('Debug output: Facies names in truncation rule:')
+                print(repr(self._faciesInTruncRule))
+                print('Debug output: Facies ordering (relative to facies in zone):')
+                print(repr(self._orderIndex))
+                print('Debug output: Facies code for facies in zone')
+                print(repr(self._faciesCode))
+                for i in range(len(self._overlayFaciesIndx)):
+                    print('Debug output: Overlay facies for group ' + str(i+1) + ': ' 
+                          +  self._faciesInTruncRule[self._overlayFaciesIndx[i]])
+                    print('Debug output: Background facies index in trunc rule for this group: ')
+                    for j in range(len(self._backGroundFaciesIndx[i])):
+                        indx = self._backGroundFaciesIndx[i][j]
+                        print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
+
+
         else:
-            if self.__printInfo >= 3:
-                print('Debug info: Create empty object of: ' + self.__className)
+            if printInfo >= 3:
+                print('Debug info: Create empty object for: ' + self._className)
         #  End of __init__
 
-    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
-        # Initialize object from xml tree object trRuleXML
-        self.__printInfo = printInfo
-        # Reference to main facies table which is global for the whole model
-        if mainFaciesTable is not None:
-            self.__mainFaciesTable = mainFaciesTable
-            self.__nFaciesMain = self.__mainFaciesTable.getNFacies()
-        else:
-            raise ValueError(
-                'Error in {}\n'
-                'Error: Inconsistency.'
-                ''.format(self.__className)
-            )
+    def __interpretXMLTree(self, trRuleXML, modelFileName):
+        """ Initialize object from xml tree object trRuleXML. 
+            This function read Cubic truncation rules. 
+            It does however NOT read any Overlay facies. 
+            This is done by methods from base class which handle overlay facies.
+        """
+        self._className = 'Trunc2D_Cubic'
 
-        # Reference to facies in zone mode using this truncation rule
-        if faciesInZone is not None:
-            self.__faciesInZone = copy.copy(faciesInZone)
-            self.__nFacies = len(self.__faciesInZone)
-            self.__faciesIsDetermined = np.zeros(self.__nFacies, int)
-        else:
-            raise ValueError(
-                'Error in ' + self.__className + '\n'
-                'Error: Inconsistency'
-            )
-
-        if self.__printInfo >= 3:
-            print('Debug output: Call Trunc2D_Cubic_Overlay init')
-
-        # Facies code for facies in zone
-        for fName in self.__faciesInZone:
-            fCode = self.__mainFaciesTable.getFaciesCodeForFaciesName(fName)
-            self.__faciesCode.append(fCode)
 
         # Get info from the XML model file tree for this truncation rule
         TYPE = self.__node_index['type']
-        # DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
-        # PROB = self.__node_index['probability']
-        # POLY = self.__node_index['polygon']
         INDX = self.__node_index['index']
         PFRAC = self.__node_index['probability fraction']
 
@@ -206,7 +237,7 @@ class Trunc2D_Cubic_Overlay:
                 'Error when reading model file: {}\n'
                 'Error: Read truncation rule: {}\n'
                 'Error: Missing keyword {} under keyword  TruncationRule\n'
-                ''.format(modelFileName, self.__className, kw1)
+                ''.format(modelFileName, self._className, kw1)
             )
 
         text = L1Obj.get('direction')
@@ -216,7 +247,7 @@ class Trunc2D_Cubic_Overlay:
                 'Error when reading model file: {}\n'
                 'Error: Read truncation rule: {}\n'
                 'Error: Specified attribute "direction" must be H or V.'
-                ''.format(modelFileName, self.__className)
+                ''.format(modelFileName, self._className)
             )
 
         nodeList = []
@@ -238,22 +269,22 @@ class Trunc2D_Cubic_Overlay:
                 fName = text.strip()
                 text = childL1.text
                 probFrac = float(text.strip())
-                if fName not in self.__faciesInZone:
+                if fName not in self._faciesInZone:
                     raise ValueError(
-                        'Error when reading model file: {}\n'
-                        'Error: Read truncation rule: {}\n'
-                        'Error: Specified facies name in truncation rule: {} is not defined for this zone.'
-                        ''.format(modelFileName, self.__className, fName)
+                        'Error when reading model file: {0}\n'
+                        'Error: Read truncation rule: {1}\n'
+                        'Error: Specified facies name in truncation rule: {2} is not defined for this zone.'
+                        ''.format(modelFileName, self._className, fName)
                     )
                 if probFrac < 0.0 or probFrac > 1.0:
                     raise ValueError(
                         'Error when reading model file: {}\n'
                         'Error: Read truncation rule: {}\n'
                         'Error: Specified probability fraction in truncation rule is outside [0,1].'
-                        ''.format(modelFileName, self.__className)
+                        ''.format(modelFileName, self._className)
                     )
 
-                [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                 nPoly += 1
 
                 poly = []
@@ -261,7 +292,7 @@ class Trunc2D_Cubic_Overlay:
                 nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                 nodeListLevel1.append(nodeData)
                 if isNew == 1:
-                    self.__orderIndex.append(fIndx)
+                    self._orderIndex.append(fIndx)
             elif childL1.tag == kw3:
                 if directionL1 == 'H':
                     directionL2 = 'V'
@@ -284,21 +315,21 @@ class Trunc2D_Cubic_Overlay:
                         fName = text.strip()
                         text = childL2.text
                         probFrac = float(text.strip())
-                        if fName not in self.__faciesInZone:
+                        if fName not in self._faciesInZone:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                'Error: Read truncation rule: ' + self.__className + '\n'
+                                'Error: Read truncation rule: ' + self._className + '\n'
                                 'Error: Specified facies name in truncation rule: ' + fName
                                 + ' is not defined for this zone.'
                             )
                         elif probFrac < 0.0 or probFrac > 1.0:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                'Error: Read truncation rule: ' + self.__className + '\n'
+                                'Error: Read truncation rule: ' + self._className + '\n'
                                 'Error: Specified probability fraction in truncation rule is outside [0,1]'
                             )
 
-                        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                         nPoly += 1
 
                         poly = []
@@ -306,7 +337,7 @@ class Trunc2D_Cubic_Overlay:
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         if isNew == 1:
-                            self.__orderIndex.append(fIndx)
+                            self._orderIndex.append(fIndx)
                     elif childL2.tag == kw4:
                         directionL3 = directionL1
                         self.__useLevel3 = 1
@@ -325,21 +356,21 @@ class Trunc2D_Cubic_Overlay:
                                 fName = text.strip()
                                 text = childL3.text
                                 probFrac = float(text.strip())
-                                if not (fName in self.__faciesInZone):
+                                if not (fName in self._faciesInZone):
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                        'Error: Read truncation rule: ' + self.__className + '\n'
+                                        'Error: Read truncation rule: ' + self._className + '\n'
                                         'Error: Specified facies name in truncation rule: ' + fName
                                         + ' is not defined for this zone.'
                                     )
                                 if probFrac < 0.0 or probFrac > 1.0:
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                        'Error: Read truncation rule: ' + self.__className + '\n'
+                                        'Error: Read truncation rule: ' + self._className + '\n'
                                         'Error: Specified probability fraction in truncation rule is outside [0,1]'
                                     )
 
-                                [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                                [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                                 nPoly += 1
 
                                 poly = []
@@ -347,89 +378,17 @@ class Trunc2D_Cubic_Overlay:
                                 nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                                 nodeListLevel3.append(nodeData)
                                 if isNew == 1:
-                                    self.__orderIndex.append(fIndx)
+                                    self._orderIndex.append(fIndx)
 
         # End loop over L1 children
-
-        kw = 'OverLayFacies'
-        overLayObj = trRuleXML.find(kw)
-        if overLayObj is not None:
-            # self.__useOverLayFacies = 1
-            text = overLayObj.get('name')
-            fNameOverLayFacies = text.strip()
-            if fNameOverLayFacies not in self.__faciesInZone:
-                raise ValueError(
-                    'Error when reading model file: ' + modelFileName + '\n'
-                    'Error: Read truncation rule: ' + self.__className + '\n'
-                    'Error: Specified facies name in truncation rule: ' + fNameOverLayFacies
-                    + ' is not defined for this zone.'
-                )
-
-            kw1 = 'TruncIntervalCenter'
-            ticObj = overLayObj.find(kw1)
-            if ticObj is not None:
-                text = ticObj.text
-                center = float(text.strip())
-                if center < 0.0:
-                    center = 0.0
-                if center > 1.0:
-                    center = 1.0
-                self.__overLayTruncIntervalCenter = center
-
-            kw2 = 'Background'
-            self.__isBackgroundFacies = np.zeros(len(self.__faciesInZone), int)
-            for bgObj in overLayObj.findall(kw2):
-                text = bgObj.text
-                bgFaciesName = text.strip()
-                if bgFaciesName not in self.__faciesInTruncRule:
-                    raise ValueError(
-                        'Error when reading model file: {}\n'
-                        'Error: Read truncation rule: {}\n'
-                        'Error: Specified facies name as background facies in truncation rule: {} is not defined.'
-                        ''.format(modelFileName, self.__className, bgFaciesName)
-                    )
-                indx = -999
-                for i in range(len(self.__faciesInTruncRule)):
-                    fN = self.__faciesInTruncRule[i]
-                    if fN == bgFaciesName:
-                        indx = i
-                        break
-                self.__backGroundFaciesIndx.append(indx)
-                self.__isBackgroundFacies[indx] = 1
-
-            [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(
-                fNameOverLayFacies)
-            if isNew == 1:
-                self.__overlayFaciesIndx = indx
-                self.__orderIndex.append(fIndx)
-            else:
-                raise ValueError(
-                    'Error in {}\n'
-                    'Error: Specified overlay facies is already used as background facies.'
-                    ''.format(self.__className)
-                )
-        else:
-            raise ValueError(
-                'Error in {}\n'
-                'Error: Missing keyword {} in truncation rule.'
-                ''.format(self.__className, kw)
-            )
-            # End read overlay facies
-
-        # print('nFacies,self__nFacies: ' + str(nFacies) + ' ' + str(self.__nFacies))
-        if nFacies != self.__nFacies:
-            raise ValueError(
-                'Error when reading model file: {}\n'
-                'Error: Read truncation rule: {}\n'
-                'Error: Mismatch in number of facies specified in truncation rule\n'
-                '       and number of facies to be modelled for the zone.'
-                ''.format(modelFileName, self.__className)
-            )
+                                    
+        # Number of background facies in total 
+        self._nBackGroundFacies = nFacies
 
         # Check that specified probability fractions for each facies when summing over all polygons
         # for a facies is 1.0
-        # This sum should not include overlay facies which is the last facies in the faciesInTruncRule list
-        sumProbFrac = np.zeros(nFacies - 1, np.float32)
+        # Note that overlay facies is not a part of this calculations. 
+        sumProbFrac = np.zeros(self._nBackGroundFacies, np.float32)
         nodeListL1 = truncStructure[NLIST]
         for i in range(len(nodeListL1)):
             item = nodeListL1[i]
@@ -452,93 +411,48 @@ class Trunc2D_Cubic_Overlay:
                             indx = item[INDX]
                             probFrac = item[PFRAC]
                             sumProbFrac[indx] += probFrac
-        for i in range(nFacies - 1):
-            if self.__printInfo >= 3:
-                fName = self.__faciesInTruncRule[i]
-                print('Debug output: Sum prob frac for facies {} is: {}'.format(
-                    fName, sumProbFrac[i]))
+
+        # Check the sum over background facies for probfrac
+        for i in range(self._nBackGroundFacies):
+            fName = self._faciesInTruncRule[i]
+            if self._printInfo >= 3:
+                print('Debug output: Sum prob frac for facies {0} is: {1}'.format(fName, str(sumProbFrac[i])))
 
             if abs(sumProbFrac[i] - 1.0) > 0.001:
-                fName = self.__faciesInTruncRule[i]
                 raise ValueError(
                     'Error in {0}\n'
                     'Error: Sum of probability fractions over all polygons for facies {1} is not 1.0\n'
-                    'Error: The sum is: {2}'.format(
-                        self.__className, fName, str(sumProbFrac[i]))
+                    'Error: The sum is: {2}'.format(self._className, fName, str(sumProbFrac[i]))
                 )
-
         self.__truncStructure = truncStructure
 
-        self.__checkFaciesForZone()
+ 
+    def writeContentsInDataStructure(self):
+        # Write common contents from base class
+        super().writeContentsInDataStructure()
 
-        if self.__printInfo >= 3:
-            print('Debug output: Facies names in truncation rule:')
-            print(repr(self.__faciesInTruncRule))
-            print('Debug output: Facies ordering (relative to facies in zone):')
-            print(repr(self.__orderIndex))
-            print('Debug output: Facies code for facies in zone')
-            print(repr(self.__faciesCode))
-            print('Debug output: Overlay facies: ' +  self.__faciesInTruncRule[self.__overlayFaciesIndx])
-            print('Debug output: Background facies index in trunc rule: ')
-            print(repr(self.__backGroundFaciesIndx))
+        print(' ')
+        print('************  Contents specific to the "Cubic algorithm" *****************')
+        print('Truncation structure:')
+        for i in range(len(self.__truncStructure)):
+            item = self.__truncStructure[i]
+            print(repr(item))
+        print('Use level 2: ' + str(self.__useLevel2))
+        print('Use level 3: ' + str(self.__useLevel3))
+        print('Internal indices in data structure (node_index):')
+        print(self.__node_index)
+        print('Number of polygons: ' + str(self.__nPoly))
+        for i in range(len(self.__polygons)):
+            poly = self.__polygons[i]
+            print('Polygon number: ' + str(i))
+            for j in range(len(poly)):
+                print(repr(poly[j]))
+        print('Facies index for polygons:')
+        print(repr(self.__fIndxPerPolygon))
 
-    def __checkFaciesForZone(self):
-        # Check that the facies for the truncation rule is the same
-        # as defined for the zone with specified probabilities.
-        for fName in self.__faciesInTruncRule:
-            # print('fName in checkFaciesForZone: ')
-            # print(fName)
-            if fName not in self.__faciesInZone:
-                raise ValueError(
-                    'Error: In truncation rule: {}\n'
-                    'Error: Facies name {} is not defined for the current zone.\n'
-                    'Error: No probability is defined for this facies for the current zone.'
-                    ''.format(self.__className, fName)
-                )
-        for fName in self.__faciesInZone:
-            if fName not in self.__faciesInTruncRule:
-                raise ValueError(
-                    'Error: In truncation rule: {}\n'
-                    'Error: Facies name {} which is defined for the current zone is not defined in the truncation rule.\n'
-                    'Error: Cannot have facies with specified probability that is not used in the truncation rule.'
-                    ''.format(self.__className, fName)
-                )
-        return True
-
-    def __addFaciesToTruncRule(self, fName):
-        found = 0
-        isNew = 0
-        indx = -1
-        nFaciesInTruncRule = len(self.__faciesInTruncRule)
-        for i in range(nFaciesInTruncRule):
-            fN = self.__faciesInTruncRule[i]
-            if fN == fName:
-                found = 1
-                indx = i
-                break
-        if found == 0:
-            self.__faciesInTruncRule.append(fName)
-            indx = nFaciesInTruncRule
-            nFaciesInTruncRule += 1
-            isNew = 1
-        fIndx = -999
-        for j in range(self.__nFacies):
-            fN = self.__faciesInZone[j]
-            if fN == fName:
-                fIndx = j
-                break
-        if indx < 0:
-            raise ValueError("An error occured")
-        return [nFaciesInTruncRule, indx, fIndx, isNew]
 
     def getClassName(self):
-        return copy.copy(self.__className)
-
-    def getFaciesOrderIndexList(self):
-        return copy.copy(self.__orderIndex)
-
-    def getFaciesInTruncRule(self):
-        return copy.copy(self.__faciesInTruncRule)
+        return copy.copy(self._className)
 
     def useConstTruncModelParam(self):
         # This is a function returning True if there are no truncation model
@@ -548,131 +462,34 @@ class Trunc2D_Cubic_Overlay:
 
     def setTruncRule(self, faciesProb, cellIndx=0):
         """
-           Description: Calculate threshold values from probabilities per layer or column in truncation map.
+           Description: Calculate how truncation map is to be divided into polygons or threshold values.
+                        This function must be called each time the facies probability changes, so it must
+                        be called for each grid cell in a 3D modelling grid if the facies probability varies.
+                        This function must have the same input variables and the same output variables for
+                        each truncation algorithm that is implemented.
            Input:
                faciesProb - Probability for each facies.
-               cellIndx   - Is not used here , but may be used in case there are 3D parameters for
-                            truncation rule model parameters that are not facies probabilities.
+               cellIndx   - Is not used here , but may be used in other algorithms where there are 
+                            model parameters  that may vary from cell to cell in the 3D modelling grid.
         """
-        self.__setMinimumFaciesProb(faciesProb)
-        isDetermined = 0
-        for fIndx in range(len(faciesProb)):
-            self.__faciesIsDetermined[fIndx] = 0
-            if faciesProb[fIndx] > (1.0 - self.__eps):
-                self.__faciesIsDetermined[fIndx] = 1
-                isDetermined = 1
 
-        if isDetermined == 1:
-            return
+        # Call common functions from base class
+        # Check if facies probability is close to 1.0. In this case do not calculate truncation map.
+        # Take care of overprint facies to get correct probability (volume in truncation cube)
+        self._setTruncRuleIsCalled = True
+        faciesProb = self._setMinimumFaciesProb(faciesProb)
+        if self._isFaciesProbEqualOne(faciesProb):
+            return 
+        area = self._modifyBackgroundFaciesArea(faciesProb)
 
-        [area, deltaH, lowAlpha, highAlpha] = self.__modifyBackgroundFaciesArea(faciesProb)
+        # Call methods specific for this truncation rule with corrected area due to overprint facies
         self.__calcProbForEachNode(area)
-        self.__deltaH = deltaH
-        self.__lowAlpha = lowAlpha
-        self.__highAlpha = highAlpha
-
         self.__calcThresholdValues()
 
-        self.__writeDataForTruncRule()
+        if self._printInfo >= 3:
+            self.__writeDataForTruncRule()
         return
 
-    def __setMinimumFaciesProb(self, faciesProb):
-        sumProb = 0.0
-        eps = self.__eps * 0.5
-        for i in range(len(faciesProb)):
-            p = faciesProb[i]
-            if p < eps:
-                p = eps
-                faciesProb[i] = p
-            if p >= 1.0:
-                p = 1.0 - eps
-                faciesProb[i] = p
-            sumProb += p
-
-        for i in range(len(faciesProb)):
-            p = faciesProb[i]
-            faciesProb[i] = p / sumProb
-        return
-
-    def __modifyBackgroundFaciesArea(self, faciesProb):
-        sumProb = 0.0
-        area = copy.copy(faciesProb)
-        for i in range(len(self.__backGroundFaciesIndx)):
-            indx = self.__backGroundFaciesIndx[i]
-            fIndx = self.__orderIndex[indx]
-            fProb = faciesProb[fIndx]
-            if fProb < 0.0005:
-                fProb = 0.0005
-                area[fIndx] = fProb
-            sumProb += fProb
-            print('i,sumProb: ' + str(i) + ' ' + str(sumProb))
-        fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-        overLayProb = faciesProb[fIndx]
-        print('overLayProb: ' + str(overLayProb))
-
-        sumAll = 0.0
-        for indx in range(len(self.__orderIndex)):
-            fIndx = self.__orderIndex[indx]
-            fProb = area[fIndx]
-            sumAll += fProb
-        for indx in range(len(self.__orderIndex)):
-            fIndx = self.__orderIndex[indx]
-            fProb = area[fIndx] / sumAll
-            area[fIndx] = fProb
-
-        sumTot = sumProb + overLayProb
-        deltaH = 1.0
-        lowAlpha = 0.0
-        highAlpha = 0.0
-        if sumTot > 0.0005:
-            deltaH = sumProb / sumTot
-            print('deltaH: ' + str(deltaH))
-            for i in range(len(self.__backGroundFaciesIndx)):
-                indx = self.__backGroundFaciesIndx[i]
-                fIndx = self.__orderIndex[indx]
-                p = area[fIndx]
-                area[fIndx] = p / deltaH
-                print('faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
-            lowAlpha = self.__overLayTruncIntervalCenter - 0.5 * (1.0 - deltaH)
-            highAlpha = self.__overLayTruncIntervalCenter + 0.5 * (1.0 - deltaH)
-            if lowAlpha < 0.0:
-                lowAlpha = 0.0
-                highAlpha = 1.0 - deltaH
-            if highAlpha > 1.0:
-                highAlpha = 1.0
-                lowAlpha = deltaH
-
-        return [area, deltaH, lowAlpha, highAlpha]
-
-    #    def __modifyBackgroundFaciesArea(self,faciesProb):
-    #        sumProb = 0.0
-    #        for i in range(len(self.__backGroundFaciesIndx)):
-    #            indx = self.__backGroundFaciesIndx[i]
-    #            fIndx = self.__orderIndex[indx]
-    #            sumProb += faciesProb[fIndx]
-    #        overLayProb = faciesProb[self.__overlayFaciesIndx]
-    #        sumTot = sumProb + overLayProb
-    #        deltaH = 1.0
-    #        lowAlpha  = 0.0
-    #        highAlpha = 0.0
-    #        area = copy.copy(faciesProb)
-    #        if sumProb > 0.0:
-    #            deltaH = sumProb/(sumTot)
-    #            for i in range(len(self.__backGroundFaciesIndx)):
-    #                indx = self.__backGroundFaciesIndx[i]
-    #                fIndx = self.__orderIndex[indx]
-    #                p = faciesProb[fIndx]
-    #                area[fIndx] = p/deltaH
-    #            lowAlpha  = self.__overLayTruncIntervalCenter - 0.5*(1.0 - deltaH)
-    #            highAlpha = self.__overLayTruncIntervalCenter + 0.5*(1.0 - deltaH)
-    #            if lowAlpha < 0.0:
-    #                lowAlpha = 0.0
-    #                highAlpha = 1.0 - deltaH
-    #            if highAlpha > 1.0:
-    #                highAlpha = 1.0
-    #                lowAlpha = deltaH
-    #
-    #        return [area,deltaH,lowAlpha,highAlpha]
 
     def __calcProbForEachNode(self, faciesProb):
         TYPE = self.__node_index['type']
@@ -680,14 +497,14 @@ class Trunc2D_Cubic_Overlay:
         PROB = self.__node_index['probability']
         INDX = self.__node_index['index']
         PFRAC = self.__node_index['probability fraction']
-        # eps = self.__eps
+
         nodeListL1 = self.__truncStructure[NLIST]
         cumProbL1 = 0.0
         for i in range(len(nodeListL1)):
             itemL1 = nodeListL1[i]
             if itemL1[TYPE] == 'F':
                 indx = itemL1[INDX]
-                fIndx = self.__orderIndex[indx]
+                fIndx = self._orderIndex[indx]
                 probFrac = itemL1[PFRAC]
                 p = faciesProb[fIndx] * probFrac
                 itemL1[PROB] = p
@@ -699,7 +516,7 @@ class Trunc2D_Cubic_Overlay:
                     itemL2 = nodeListL2[j]
                     if itemL2[TYPE] == 'F':
                         indx = itemL2[INDX]
-                        fIndx = self.__orderIndex[indx]
+                        fIndx = self._orderIndex[indx]
                         probFrac = itemL2[PFRAC]
                         p = faciesProb[fIndx] * probFrac
                         itemL2[PROB] = p  # prob
@@ -711,7 +528,7 @@ class Trunc2D_Cubic_Overlay:
                         for k in range(len(nodeListL3)):
                             itemL3 = nodeListL3[k]
                             indx = itemL3[INDX]
-                            fIndx = self.__orderIndex[indx]
+                            fIndx = self._orderIndex[indx]
                             probFrac = itemL3[PFRAC]
                             p = faciesProb[fIndx] * probFrac
                             itemL3[PROB] = p  # prob
@@ -728,7 +545,7 @@ class Trunc2D_Cubic_Overlay:
             raise ValueError(
                 'Error in {0}\n'
                 'Error: Internal program error. Sum of probabilities is not 1.0\n'
-                'Error: cumProbL1 = {1}'.format(self.__className, str(cumProbL1))
+                'Error: cumProbL1 = {1}'.format(self._className, str(cumProbL1))
             )
 
     def __calcThresholdValues(self):
@@ -740,7 +557,7 @@ class Trunc2D_Cubic_Overlay:
         XMAX = self.__node_index['x max']
         YMIN = self.__node_index['y min']
         YMAX = self.__node_index['y max']
-        eps = self.__eps
+        eps = self._eps
         nodeListL1 = self.__truncStructure[NLIST]
         directionL1 = self.__truncStructure[DIR]
 
@@ -878,155 +695,131 @@ class Trunc2D_Cubic_Overlay:
         # end if use level 3
 
     def defineFaciesByTruncRule(self, alphaCoord):
-        x = alphaCoord[0]
-        y = alphaCoord[1]
-        z = alphaCoord[2]
-        for fIndx in range(len(self.__faciesInZone)):
-            if self.__faciesIsDetermined[fIndx] == 1:
-                faciesCode = self.__faciesCode[fIndx]
+        # Check if the facies is deterministic (100% probability) 
+        for fIndx in range(len(self._faciesInZone)):
+            if self._faciesIsDetermined[fIndx] == 1:
+                faciesCode = self._faciesCode[fIndx]
                 return [faciesCode, fIndx]
 
         directionL1 = self.__truncStructure[self.__node_index['direction']]
         nodeListL1 = self.__truncStructure[self.__node_index['list of nodes']]
         if directionL1 == 'H':
-            [faciesCode, fIndx] = self.__calcFaciesLevel1H(nodeListL1, x, y, z)
+            [faciesCode, fIndx] = self.__calcFaciesLevel1H(nodeListL1, alphaCoord)
         else:
-            [faciesCode, fIndx] = self.__calcFaciesLevel1V(nodeListL1, x, y, z)
+            [faciesCode, fIndx] = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
         return [faciesCode, fIndx]
 
-    def __calcFaciesLevel1V(self, nodeListL1, x, y, z):
-        faciesCode = None
-        fIndx = None
+
+
+    def __calcFaciesLevel1V(self, nodeListL1, alphaCoord):
+        faciesCode = -1
+        fIndx = -1
+        x = alphaCoord[0]
+        y = alphaCoord[1]
         for i in range(len(nodeListL1)):
             itemL1 = nodeListL1[i]
             typeNode = itemL1[self.__node_index['type']]
             if typeNode == 'F':
                 if x <= itemL1[self.__node_index['x max']]:
                     indx = itemL1[self.__node_index['index']]
-                    if self.__isBackgroundFacies[indx] == 1:
-                        if self.__lowAlpha < z <= self.__highAlpha:
-                            fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-                            faciesCode = self.__faciesCode[fIndx]
-                            break
-
-                    fIndx = self.__orderIndex[indx]
-                    faciesCode = self.__faciesCode[fIndx]
+                    # Check truncations for overlay facies (call function from base class)
+                    [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
                     break
             else:
                 if x <= itemL1[self.__node_index['x max']]:
                     directionL2 = itemL1[self.__node_index['direction']]
                     nodeListL2 = itemL1[self.__node_index['list of nodes']]
                     if directionL2 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2H(nodeListL2, x, y, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel2H(nodeListL2, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2V(nodeListL2, x, y, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel2V(nodeListL2, alphaCoord)
                     break
-        if not faciesCode or not fIndx:
-            # TODO: Proper error message
-            raise ValueError("Something happened")
+        if faciesCode < 0 or fIndx < 0:
+            raise ValueError('Programming error. Could not find facies when applying truncation rule')
         return [faciesCode, fIndx]
 
-    def __calcFaciesLevel1H(self, nodeListL1, x, y, z):
-        faciesCode = None
-        fIndx = None
+    def __calcFaciesLevel1H(self, nodeListL1, alphaCoord):
+        faciesCode = -1
+        fIndx = -1
+        x = alphaCoord[0]
+        y = alphaCoord[1]
         for i in range(len(nodeListL1)):
             itemL1 = nodeListL1[i]
             typeNode = itemL1[self.__node_index['type']]
             if typeNode == 'F':
                 if y <= itemL1[self.__node_index['y max']]:
                     indx = itemL1[self.__node_index['index']]
-                    if self.__isBackgroundFacies[indx] == 1:
-                        if self.__lowAlpha < z <= self.__highAlpha:
-                            fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-                            faciesCode = self.__faciesCode[fIndx]
-                            break
-
-                    fIndx = self.__orderIndex[indx]
-                    faciesCode = self.__faciesCode[fIndx]
+                    [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
                     break
             else:
                 if y <= itemL1[self.__node_index['y max']]:
                     directionL2 = itemL1[self.__node_index['direction']]
                     nodeListL2 = itemL1[self.__node_index['list of nodes']]
                     if directionL2 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2H(nodeListL2, x, y, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel2H(nodeListL2, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2V(nodeListL2, x, y, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel2V(nodeListL2, alphaCoord)
                     break
-        if not faciesCode or not fIndx:
-            # TODO: Proper error message
-            raise ValueError("Something happened")
+        if faciesCode < 0 or fIndx < 0:
+            raise ValueError('Programming error. Could not find facies when applying truncation rule')
         return [faciesCode, fIndx]
 
-    def __calcFaciesLevel2H(self, nodeListL2, x, y, z):
-        faciesCode = None
-        fIndx = None
+    def __calcFaciesLevel2H(self, nodeListL2, alphaCoord):
+        faciesCode = -1
+        fIndx = -1
+        x = alphaCoord[0]
+        y = alphaCoord[1]
         for j in range(len(nodeListL2)):
             itemL2 = nodeListL2[j]
             typeNode = itemL2[self.__node_index['type']]
             if typeNode == 'F':
                 if y <= itemL2[self.__node_index['y max']]:
                     indx = itemL2[self.__node_index['index']]
-                    if self.__isBackgroundFacies[indx] == 1:
-                        if self.__lowAlpha < z <= self.__highAlpha:
-                            fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-                            faciesCode = self.__faciesCode[fIndx]
-                            break
-
-                    fIndx = self.__orderIndex[indx]
-                    faciesCode = self.__faciesCode[fIndx]
+                    [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
                     break
             else:
                 if y <= itemL2[self.__node_index['y max']]:
                     directionL3 = itemL2[self.__node_index['direction']]
                     nodeListL3 = itemL2[self.__node_index['list of nodes']]
                     if directionL3 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3H(nodeListL3, y, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel3H(nodeListL3, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3V(nodeListL3, x, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel3V(nodeListL3, alphaCoord)
                     break
-        if not faciesCode or not fIndx:
-            # TODO: Proper error message
-            raise ValueError("Something happened")
+        if faciesCode < 0 or fIndx < 0:
+            raise ValueError('Programming error. Could not find facies when applying truncation rule')
         return [faciesCode, fIndx]
 
-    def __calcFaciesLevel2V(self, nodeListL2, x, y, z):
-        faciesCode = None
-        fIndx = None
+    def __calcFaciesLevel2V(self, nodeListL2, alphaCoord):
+        faciesCode = -1
+        fIndx = -1
+        x = alphaCoord[0]
+        y = alphaCoord[1]
         for j in range(len(nodeListL2)):
             itemL2 = nodeListL2[j]
             typeNode = itemL2[self.__node_index['type']]
             if typeNode == 'F':
                 if x <= itemL2[self.__node_index['x max']]:
                     indx = itemL2[self.__node_index['index']]
-                    if self.__isBackgroundFacies[indx] == 1:
-                        if self.__lowAlpha < z <= self.__highAlpha:
-                            fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-                            faciesCode = self.__faciesCode[fIndx]
-                            break
-
-                    fIndx = self.__orderIndex[indx]
-                    faciesCode = self.__faciesCode[fIndx]
+                    [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
                     break
             else:
                 if x <= itemL2[self.__node_index['x max']]:
                     directionL3 = itemL2[self.__node_index['direction']]
                     nodeListL3 = itemL2[self.__node_index['list of nodes']]
                     if directionL3 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3H(
-                            nodeListL3, y, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel3H(nodeListL3, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3V(
-                            nodeListL3, x, z)
+                        [faciesCode, fIndx] = self.__calcFaciesLevel3V(nodeListL3, alphaCoord)
                     break
-        if not faciesCode or not fIndx:
-            # TODO: Proper error message
-            raise ValueError("Something happened")
+        if faciesCode < 0 or fIndx < 0:
+            raise ValueError('Programming error. Could not find facies when applying truncation rule')
         return [faciesCode, fIndx]
 
-    def __calcFaciesLevel3H(self, nodeListL3, y, z):
-        faciesCode = None
-        fIndx = None
+    def __calcFaciesLevel3H(self, nodeListL3, alphaCoord):
+        faciesCode = -1
+        fIndx = -1
+        y = alphaCoord[1]
         for k in range(len(nodeListL3)):
             itemL3 = nodeListL3[k]
             typeNode = itemL3[self.__node_index['type']]
@@ -1034,29 +827,21 @@ class Trunc2D_Cubic_Overlay:
                 raise ValueError(
                     'Error in {}\n'
                     'Error: Programming error. Mismatch type. Expect F type.'
-                    ''.format(self.__class__.__name__)
+                    ''.format(self._className)
                 )
 
             if y <= itemL3[self.__node_index['y max']]:
                 indx = itemL3[self.__node_index['index']]
-                if self.__isBackgroundFacies[indx] == 1:
-                    if self.__lowAlpha < z <= self.__highAlpha:
-                        fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-                        faciesCode = self.__faciesCode[fIndx]
-                        break
-
-                fIndx = self.__orderIndex[indx]
-                faciesCode = self.__faciesCode[fIndx]
+                [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
                 break
-                # print('y,z,ymax: ' + str(y) + ' '  + str(z) + ' ' + str(itemL3[self.__node_index['y max']]))
-        if not faciesCode or not fIndx:
-            # TODO: Proper error message
-            raise ValueError("Something happened")
+        if faciesCode < 0 or fIndx < 0:
+            raise ValueError('Programming error. Could not find facies when applying truncation rule')
         return [faciesCode, fIndx]
 
-    def __calcFaciesLevel3V(self, nodeListL3, x, z):
-        faciesCode = None
-        fIndx = None
+    def __calcFaciesLevel3V(self, nodeListL3, alphaCoord):
+        faciesCode = -1
+        fIndx = -1
+        x = alphaCoord[0]
         for k in range(len(nodeListL3)):
             itemL3 = nodeListL3[k]
             typeNode = itemL3[self.__node_index['type']]
@@ -1064,34 +849,23 @@ class Trunc2D_Cubic_Overlay:
                 raise ValueError(
                     'Error in {}\n'
                     'Error: Programming error. Mismatch type. Expect F type.'
-                    ''.format(self.__className)
+                    ''.format(self._className)
                 )
             if x <= itemL3[self.__node_index['x max']]:
                 indx = itemL3[self.__node_index['index']]
-                if self.__isBackgroundFacies[indx] == 1:
-                    if self.__lowAlpha < z <= self.__highAlpha:
-                        fIndx = self.__orderIndex[self.__overlayFaciesIndx]
-                        faciesCode = self.__faciesCode[fIndx]
-                        break
-
-                fIndx = self.__orderIndex[indx]
-                faciesCode = self.__faciesCode[fIndx]
+                [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
                 break
-                # print('x,z,xmax: ' + str(x) + ' '  + str(z) + ' ' + str(itemL3[self.__node_index['x max']]))
-        if not faciesCode or not fIndx:
-            # TODO: Proper error message
-            raise ValueError("Something happened")
+
+        if faciesCode < 0 or fIndx < 0:
+            raise ValueError('Programming error. Could not find facies when applying truncation rule')
         return [faciesCode, fIndx]
 
     def __calcPolyLevel(self, direction, nodeList, polyLevelAbove, levelNumber):
         TYPE = self.__node_index['type']
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
-        # YMAX = self.__node_index['y max']
         POLY = self.__node_index['polygon']
-        # XMIN = self.__node_index['x min']
         XMAX = self.__node_index['x max']
-        # YMIN = self.__node_index['y min']
         YMAX = self.__node_index['y max']
         if direction == 'H':
             pt1Prev = polyLevelAbove[0]
@@ -1159,9 +933,7 @@ class Trunc2D_Cubic_Overlay:
 
     def __writeDataForTruncRule(self):
         TYPE = self.__node_index['type']
-        # DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
-        # POLY = self.__node_index['polygon']
         INDX = self.__node_index['index']
         PFRAC = self.__node_index['probability fraction']
         PROB = self.__node_index['probability']
@@ -1181,18 +953,16 @@ class Trunc2D_Cubic_Overlay:
             if itemL1[TYPE] == 'F':
                 indx = itemL1[INDX]
                 probFrac = itemL1[PFRAC]
-                fName = self.__faciesInTruncRule[indx]
-                if self.__printInfo >= 3:
-                    text = 'L1: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
-                    text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                    print(text)
+                fName = self._faciesInTruncRule[indx]
+                text = 'L1: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
+                text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                print(text)
 
             else:
                 nodeListL2 = itemL1[NLIST]
-                if self.__printInfo >= 3:
-                    text = 'L1: GRP  Prob: {}'.format(prob)
-                    text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                    print(text)
+                text = 'L1: GRP  Prob: {}'.format(prob)
+                text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                print(text)
                 for j in range(len(nodeListL2)):
                     itemL2 = nodeListL2[j]
                     prob = itemL2[PROB]
@@ -1203,17 +973,15 @@ class Trunc2D_Cubic_Overlay:
                     if itemL2[TYPE] == 'F':
                         indx = itemL2[INDX]
                         probFrac = itemL2[PFRAC]
-                        fName = self.__faciesInTruncRule[indx]
-                        if self.__printInfo >= 3:
-                            text = '  L2: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
-                            text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                            print(text)
+                        fName = self._faciesInTruncRule[indx]
+                        text = '  L2: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
+                        text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                        print(text)
                     else:
                         nodeListL3 = itemL2[NLIST]
-                        if self.__printInfo >= 3:
-                            text = '  L2: GRP  Prob: {}'.format(prob)
-                            text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                            print(text)
+                        text = '  L2: GRP  Prob: {}'.format(prob)
+                        text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                        print(text)
                         for k in range(len(nodeListL3)):
                             itemL3 = nodeListL3[k]
                             indx = itemL3[INDX]
@@ -1223,11 +991,10 @@ class Trunc2D_Cubic_Overlay:
                             xmax = itemL3[XMAX]
                             ymin = itemL3[YMIN]
                             ymax = itemL3[YMAX]
-                            fName = self.__faciesInTruncRule[indx]
-                            if self.__printInfo >= 3:
-                                text = '    L3: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
-                                text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                                print(text)
+                            fName = self._faciesInTruncRule[indx]
+                            text = '    L3: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
+                            text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                            print(text)
 
     def __getPolygonAndFaciesList(self):
         TYPE = self.__node_index['type']
@@ -1270,6 +1037,7 @@ class Trunc2D_Cubic_Overlay:
         return
 
     def truncMapPolygons(self):
+        assert  self._setTruncRuleIsCalled == True
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
         POLY = self.__node_index['polygon']
@@ -1298,76 +1066,80 @@ class Trunc2D_Cubic_Overlay:
 
     def faciesIndxPerPolygon(self):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
-        return [fIndxList]
+        return fIndxList
+
+
+
 
     def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
-                   backGroundFacies, overlayFacies, overlayTruncCenter=1.0, printInfo=0):
+                   backGroundFaciesGroups=None, overlayFacies=None, overlayTruncCenter=None, printInfo=0):
         """
            Description: Initialize the truncation object from input variables.
+                        This function is used when the truncation object is not initialized 
+                        by reading the specification from the model file.
+           Input: mainFaciesTable - Specify the global facies table and is used to check that specified facies
+                                    is legal.
+                  faciesInZone    - List of facies to be modelled for the zone this truncation rule is defined for.
+                  truncStructureList - Contain definition of truncation rule. See details in specification
+                                       described for function __setTruncStructure.
+                  backGroundFacies   - List of lists of background facies. The list backGroundFacies[groupIndx]
+                                       is a list of background facies for overlay facies overlayFacies[groupIndx]
+                                       where groupIndx run over the number of overlay facies.
+                  overlayTruncCenter - List of values for the interval center value for the truncation interval for overlay facies.
+              
         """
-        # Main facies table is set
-        self.__mainFaciesTable = copy.copy(mainFaciesTable)
-        self.__nFaciesMain = self.__mainFaciesTable.getNFacies()
+        # Initialize data structure
+        self.__setEmpty()
+        self._printInfo = printInfo
 
-        # Facies in zone are set
-        self.__faciesInZone = copy.copy(faciesInZone)
-        self.__nFacies = len(faciesInZone)
-        self.__faciesIsDetermined = np.zeros(self.__nFacies, int)
-
-        # Facies code for facies in zone
-        self.__faciesCode = []
-        for fName in self.__faciesInZone:
-            fCode = self.__mainFaciesTable.getFaciesCodeForFaciesName(fName)
-            self.__faciesCode.append(fCode)
-
-        self.__printInfo = printInfo
+        # Call base class method to set modelled facies
+        self._setModelledFacies(mainFaciesTable, faciesInZone)
 
         # Set truncation rule (hierarchy of rectangular polygons)
         self.__setTruncStructure(truncStructureList)
 
-        # Set which facies to be used as background facies when overprint facies is applied
-        self.__defineBackgroundFaciesAndOverLayFacies(backGroundFacies, overlayFacies)
+        if self._printInfo>=3:
+            print('Debug output: Background facies defined: ')
+            print(repr(self._faciesInTruncRule))
 
-        # Parameter for overlay facies truncation
-        self.__overLayTruncIntervalCenter = overlayTruncCenter
+        # Number of background facies in total is the number of facies read before reading overlay facies
+        self._nBackGroundFacies = len(self._faciesInTruncRule)
+#        print('nBackgroundFacies in total: ' + str(self._nBackGroundFacies))
+
+        # Check consistency
+        if overlayFacies != None:
+            m1 = len(backGroundFaciesGroups)
+            m2 = len(overlayFacies)
+            m3 = len(overlayTruncCenter)
+            if m1 != m2 or m1!= m3:
+                raise ValueError(
+                    'Programming error in function initialize in class ' + self._className + '\n'
+                    'Lenght of input lists are different from each other'
+                    )
+            self._nGaussFieldInModel = 2 + m2
+
+
+
+        # Set which facies to be used as background facies when overprint facies is applied
+        # Call base class function for overlay facies 
+        self._defineBackgroundFaciesAndOverLayFacies(backGroundFaciesGroups, overlayFacies, overlayTruncCenter)
 
         # Check that facies in truncation rule is consistent with facies in zone
-        self.__checkFaciesForZone()
+#        print('len(self._faciesInTruncRule): ' + str(len(self._faciesInTruncRule)))
+#        print('nFaciesInTruncRule: ' + str(self._nFaciesInTruncRule))
+#        print('len(self._faciesInZone) ' + str(len(self._faciesInZone)))
+        
 
-        self.__nFacies = len(self.__faciesInTruncRule)
 
-    def __defineBackgroundFaciesAndOverLayFacies(self, backGroundFacies, overlayFacies):
-        indx = -1
-        self.__isBackgroundFacies = np.zeros(len(self.__faciesInZone), int)
-        self.__backGroundFaciesIndx = []
-        for bgFaciesName in backGroundFacies:
-            for i in range(len(self.__faciesInTruncRule)):
-                fN = self.__faciesInTruncRule[i]
-                if fN == bgFaciesName:
-                    indx = i
-                    break
-            if indx < 0:
-                # TODO: Proper error message
-                raise IndexError("The proper index was not found")
-            else:
-                self.__backGroundFaciesIndx.append(indx)
-                self.__isBackgroundFacies[indx] = 1
+        self._checkFaciesForZone()
+ 
 
-        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(overlayFacies)
-        if isNew == 1:
-            self.__overlayFaciesIndx = indx
-            self.__orderIndex.append(fIndx)
-        else:
-            raise ValueError(
-                'Error in {}'
-                'Error: Specified overlay facies is already used as background facies.'
-                ''.format(self.__className)
-            )
 
     def __setTruncStructure(self, truncStructureList):
         # Truncation structure specified by list of facies in hierarchical way with items of the form
         # [faciesName,level]
-        # where level is one number for L1 ([1] or [2] ..), two number for L2 ([1,1] [1,2] ...) or for L3 ([2,1,1],[2,1,2]...)
+        # where level is one number for L1 ([1] or [2] ..), two number for L2 ([1,1] [1,2] ...) 
+        # or for L3 ([2,1,1],[2,1,2]...)
         # item in list is of the form ['Facies',probFrac,L1,L2,L3]
         # Example: The list can be:
         # 'H'
@@ -1417,14 +1189,11 @@ class Trunc2D_Cubic_Overlay:
         L1Prev = 0
         L2Prev = 0
         L3Prev = 0
-        # print('len = ' + str(len(truncStructureList)))
         for i in range(1, len(truncStructureList)):
             # L1 is an integer from 1 and up
             # L2 is either 0 which mean Level1 or an integer from 1 and up
             # L3 is either 0 which means Level2 or Level 1 or an integer from 1 and up
             item = truncStructureList[i]
-            # print(item)
-            # print('err: ' + str(err))
             fName = item[INDXFAC]
             probFrac = item[INDXPFRAC]
             L1 = int(item[INDXL1])
@@ -1466,15 +1235,16 @@ class Trunc2D_Cubic_Overlay:
             if L1 > L1Prev:
                 if L2 == 0:
                     # Create new facies node for L1 level
-                    [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                    [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                     nPoly += 1
                     poly = []
                     nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                     nodeListLevel1.append(nodeData)
                     if isNew == 1:
-                        self.__orderIndex.append(fIndx)
+                        self._orderIndex.append(fIndx)
                 elif L2 == 1:
                     # Create L1 parent node for L2 nodes
+                    self.__useLevel2 = 1
                     poly = []
                     # nodeListLevel2 is pointer to list of level 2 nodes for current level 1 node
                     nodeListLevel2 = [] 
@@ -1482,15 +1252,16 @@ class Trunc2D_Cubic_Overlay:
                     nodeListLevel1.append(nodeData)
                     if L3 == 0:
                         # Create L2 facies node
-                        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         if isNew == 1:
-                            self.__orderIndex.append(fIndx)
+                            self._orderIndex.append(fIndx)
                     elif L3 == 1:
                         # Create L2 parent node for L3 nodes
+                        self.__useLevel3 = 1
                         poly = []
                         # nodeListLevel3 is pointer to list of level 3 nodes for current level 2 node
                         nodeListLevel3 = []  
@@ -1499,27 +1270,30 @@ class Trunc2D_Cubic_Overlay:
                         parentNodeDefinedL2 = 1
 
                         # Create L3 facies node
-                        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel3.append(nodeData)
                         if isNew == 1:
-                            self.__orderIndex.append(fIndx)
+                            self._orderIndex.append(fIndx)
 
             elif L1 == L1Prev:
                 if L2 > L2Prev:
+                    self.__useLevel2 = 1
                     if L3 == 0:
+                
                         # Create L2 facies node
-                        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         if isNew == 1:
-                            self.__orderIndex.append(fIndx)
+                            self._orderIndex.append(fIndx)
                     elif L3 == 1:
                         # Create L2 parent node for L3 nodes
+                        self.__useLevel3 = 1
                         poly = []
                         # nodeListLevel3 is pointer to list of level 3 nodes for current level 2 node
                         nodeListLevel3 = [] 
@@ -1528,26 +1302,28 @@ class Trunc2D_Cubic_Overlay:
                         parentNodeDefinedL2 = 1
 
                         # Create L3 facies node
-                        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel3.append(nodeData)
                         if isNew == 1:
-                            self.__orderIndex.append(fIndx)
+                            self._orderIndex.append(fIndx)
                     else:
                         raise ValueError('Error: L3 cannot be > 1 when L2 has increased')
 
                 elif L2 == L2Prev:
+                    self.__useLevel2 = 1
                     if L3 > L3Prev:
                         # Create L3 facies node
-                        [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
+                        self.__useLevel3 = 1
+                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel3.append(nodeData)
                         if isNew == 1:
-                            self.__orderIndex.append(fIndx)
+                            self._orderIndex.append(fIndx)
                     else:
                         raise ValueError('Error: L3 must be 1 larger than L3Prev when L1 == L1Prev and L2 == L2Prev')
 
@@ -1557,7 +1333,10 @@ class Trunc2D_Cubic_Overlay:
         self.__truncStructure = truncStructure
         self.__nPoly = nPoly
 
+
     def XMLAddElement(self, parent):
+        if self._printInfo >= 3:
+            print('Debug output: call XMLADDElement from Trunc2D_Cubic_xml')
         TYPE = self.__node_index['type']
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
@@ -1567,7 +1346,8 @@ class Trunc2D_Cubic_Overlay:
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        attribute = {'name': 'Trunc2D_Cubic_Overlay', 'nGFields': '3'}
+        nGaussField = self._nOverLayFacies + 2
+        attribute = {'name': 'Trunc2D_Cubic', 'nGFields': str(nGaussField)}
         tag = 'TruncationRule'
         trRuleElement = Element(tag, attribute)
         # Put the xml commands for this truncation rule as the last child for the parent element
@@ -1584,7 +1364,7 @@ class Trunc2D_Cubic_Overlay:
             typeNode = itemL1[TYPE]
             if typeNode == 'F':
                 indx = itemL1[INDX]
-                fName = self.__faciesInTruncRule[indx]
+                fName = self._faciesInTruncRule[indx]
                 probFrac = itemL1[PFRAC]
                 tag = 'ProbFrac'
                 attribute = {'name': fName}
@@ -1602,7 +1382,7 @@ class Trunc2D_Cubic_Overlay:
                     typeNode = itemL2[TYPE]
                     if typeNode == 'F':
                         indx = itemL2[INDX]
-                        fName = self.__faciesInTruncRule[indx]
+                        fName = self._faciesInTruncRule[indx]
                         probFrac = itemL2[PFRAC]
                         tag = 'ProbFrac'
                         attribute = {'name': fName}
@@ -1618,7 +1398,7 @@ class Trunc2D_Cubic_Overlay:
                         for k in range(len(nodeListL3)):
                             itemL3 = nodeListL3[k]
                             indx = itemL3[INDX]
-                            fName = self.__faciesInTruncRule[indx]
+                            fName = self._faciesInTruncRule[indx]
                             probFrac = itemL3[PFRAC]
                             tag = 'ProbFrac'
                             attribute = {'name': fName}
@@ -1626,20 +1406,4 @@ class Trunc2D_Cubic_Overlay:
                             nodeElementL3Below.text = ' ' + str(probFrac) + ' '
                             nodeElementL3.append(nodeElementL3Below)
 
-        indx = self.__overlayFaciesIndx
-        fName = self.__faciesInTruncRule[indx]
-        tag = 'OverLayFacies'
-        attribute = {'name': fName}
-        overLayElement = Element(tag, attribute)
-        trRuleElement.append(overLayElement)
-        tag = 'TruncIntervalCenter'
-        ticElement = Element(tag)
-        ticElement.text = ' ' + str(self.__overLayTruncIntervalCenter) + ' '
-        overLayElement.append(ticElement)
-        tag = 'Background'
-        for i in range(len(self.__backGroundFaciesIndx)):
-            indx = self.__backGroundFaciesIndx[i]
-            fName = self.__faciesInTruncRule[indx]
-            bElement = Element(tag)
-            bElement.text = ' ' + fName + ' '
-            overLayElement.append(bElement)
+        super()._XMLAddElement(trRuleElement)
