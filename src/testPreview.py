@@ -49,14 +49,11 @@ def defineColors(nFacies):
     elif nFacies == 9:
         colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue']
     elif nFacies == 10:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue',
-                  'crimson']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson']
     elif nFacies == 11:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue',
-                  'crimson', 'darkorange']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange']
     elif nFacies == 12:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue',
-                  'crimson', 'darkorange', 'red']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange', 'red']
     return colors
 
 
@@ -405,7 +402,7 @@ for i in range(len(faciesPolygons)):
     polygon = Polygon(poly, closed=True, facecolor=colors[fIndx])
     axTrunc.add_patch(polygon)
     fName = faciesNames[fIndx]
-# print('Polygon:{0:2d} Facies: {1:7}  Color: {2:12} Facies index(zone): {3:2d}'.format(i,fName,colors[fIndx],fIndx))
+    # print('Polygon:{0:2d} Facies: {1:7}  Color: {2:12} Facies index(zone): {3:2d}'.format(i,fName,colors[fIndx],fIndx))
 #    print('Polygon Points:')
 #    print(repr(poly))
 axTrunc.set_title('TruncMap')
@@ -481,3 +478,4 @@ for i in range(nFacies):
 
 plt.show()
 print('Finished testPreview')
+

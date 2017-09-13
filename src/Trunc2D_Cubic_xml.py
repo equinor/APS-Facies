@@ -204,7 +204,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         else:
             if printInfo >= 3:
                 print('Debug info: Create empty object for: ' + self._className)
-                #  End of __init__
+        #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         """ Initialize object from xml tree object trRuleXML. 
@@ -311,15 +311,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         if fName not in self._faciesInZone:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                                                                    'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                        'Error: Specified facies name in truncation rule: ' + fName
-                                + ' is not defined for this zone.'
+                                'Error: Read truncation rule: ' + self._className + '\n'
+                                'Error: Specified facies name in truncation rule: ' + fName +
+                                ' is not defined for this zone.'
                             )
                         elif probFrac < 0.0 or probFrac > 1.0:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                                                                    'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                        'Error: Specified probability fraction in truncation rule is outside [0,1]'
+                                'Error: Read truncation rule: ' + self._className + '\n'
+                                'Error: Specified probability fraction in truncation rule is outside [0,1]'
                             )
 
                         [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
@@ -352,15 +352,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                 if not (fName in self._faciesInZone):
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                                                                            'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                                'Error: Specified facies name in truncation rule: ' + fName
-                                        + ' is not defined for this zone.'
+                                        'Error: Read truncation rule: ' + self._className + '\n'
+                                        'Error: Specified facies name in truncation rule: ' + fName +
+                                        ' is not defined for this zone.'
                                     )
                                 if probFrac < 0.0 or probFrac > 1.0:
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                                                                            'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                                'Error: Specified probability fraction in truncation rule is outside [0,1]'
+                                        'Error: Read truncation rule: ' + self._className + '\n'
+                                        'Error: Specified probability fraction in truncation rule is outside [0,1]'
                                     )
 
                                 [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
@@ -682,7 +682,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                             itemL3[XMAX] = xmaxL2
                                             itemL3[YMIN] = yminL3
                                             itemL3[YMAX] = ymaxL3
-                                            # end if use level 3
+        # end if use level 3
 
     def defineFaciesByTruncRule(self, alphaCoord):
         # Check if the facies is deterministic (100% probability) 
@@ -1089,7 +1089,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         # Number of background facies in total is the number of facies read before reading overlay facies
         self._nBackGroundFacies = len(self._faciesInTruncRule)
-        #        print('nBackgroundFacies in total: ' + str(self._nBackGroundFacies))
+        # print('nBackgroundFacies in total: ' + str(self._nBackGroundFacies))
 
         # Check consistency
         if overlayFacies != None:
@@ -1099,7 +1099,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             if m1 != m2 or m1 != m3:
                 raise ValueError(
                     'Programming error in function initialize in class ' + self._className + '\n'
-                                                                                             'Lenght of input lists are different from each other'
+                    'Lenght of input lists are different from each other'
                 )
             self._nGaussFieldInModel = 2 + m2
 
@@ -1108,9 +1108,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self._defineBackgroundFaciesAndOverLayFacies(backGroundFaciesGroups, overlayFacies, overlayTruncCenter)
 
         # Check that facies in truncation rule is consistent with facies in zone
-        #        print('len(self._faciesInTruncRule): ' + str(len(self._faciesInTruncRule)))
-        #        print('nFaciesInTruncRule: ' + str(self._nFaciesInTruncRule))
-        #        print('len(self._faciesInZone) ' + str(len(self._faciesInZone)))
+        # print('len(self._faciesInTruncRule): ' + str(len(self._faciesInTruncRule)))
+        # print('nFaciesInTruncRule: ' + str(self._nFaciesInTruncRule))
+        # print('len(self._faciesInZone) ' + str(len(self._faciesInZone)))
 
         self._checkFaciesForZone()
 
@@ -1385,3 +1385,4 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             nodeElementL3.append(nodeElementL3Below)
 
         super()._XMLAddElement(trRuleElement)
+

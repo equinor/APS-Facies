@@ -132,8 +132,7 @@ def readInputXMLFile(modelFileName, printInfo):
     logName = text.strip()
 
     if printInfo >= 3:
-        print(
-            'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
+        print('Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
 
     return [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
             wellRefName, trajectoryName, logrunName, logName]
@@ -406,7 +405,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     faciesTable = APSMainFaciesTable.APSMainFaciesTable()
     faciesTable.initialize(faciesCodeNames)
     faciesTable.XMLAddElement(topElement)
-    #    print('Write file: ' + outputRMSDataFile)
+    # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
         if printInfo > 1:
             print('Write file: ' + outputRMSDataFile)
@@ -427,7 +426,7 @@ def create2DMapsForVariogramAsimuthAngle(project, inputFile, printInfo):
                                                                                    horizonRefType,
                                                                                    printInfo)
     # Gauss field names (standard hardcoded names)
-    #    gaussFieldNames = ['GF1','GF2','GF3','GF4']
+    # gaussFieldNames = ['GF1','GF2','GF3','GF4']
     gaussFieldNames = gfNames
     asimuthValue = 0.0
     for hName in horizonList:
@@ -467,3 +466,4 @@ print('Finished running: ' + scriptName)
 # rmsData.readRMSDataFromXMLFile(outputRMSDataFile)
 # rmsData.printData()
 # print('Finished test output')
+

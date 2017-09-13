@@ -177,9 +177,9 @@ class APSMainFaciesTable:
                 found = 1
                 break
         if found == 0:
-            #            print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
-            #            print('Specified facies names and codes are: \n')
-            #            print(repr(self.__faciesTable))
+            # print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
+            # print('Specified facies names and codes are: \n')
+            # print(repr(self.__faciesTable))
             return False
         else:
             return True
