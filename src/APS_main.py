@@ -74,16 +74,13 @@ def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
                                    other parameter vectors containing cell values for 
                                    the active (physical) cells for the grid.
 
-                gaussValues      - Gaussian fields to be transformed. The length is the same as the list of defined
-                cells.
-                                   Only the cells belonging to the specified list in cellIndexDefined are considered
-                                   here.
+                gaussValues      - Gaussian fields to be transformed. The length is the same as the list of defined cells.
+                                   Only the cells belonging to the specified list in cellIndexDefined are considered here.
                 alpha            - Transformed gaussian fields. The length is the same as the cellIndexDefined list.
                                    The input values in the alpha vectors are updated for those cells that 
                                    belongs to specified cellIndexDefined list.
          Return:           
-                alpha            - The updated alpha vector is returned. Only cells belonging to list in
-                cellIndexDefined
+                alpha            - The updated alpha vector is returned. Only cells belonging to list in cellIndexDefined
                                    are modified compared with the values the vector had as input.
                 
     """
@@ -397,10 +394,8 @@ for zoneNumber in zoneNumberList:
                 print('Debug output: RelStdDev = ' + str(relStdDev))
                 print('Debug output: trendValues:')
                 print(repr(trendValues))
-                print(
-                    'Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(
-                    residualValues.max()))
+                print('Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
+                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
                 print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
                 print('Debug output: Trend + Residual values:')
                 print(repr(val))
@@ -528,8 +523,7 @@ for zoneNumber in zoneNumberList:
 
                 values = item[VAL]
                 avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
-                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f],
-                                                                        avgProbValue))
+                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f], avgProbValue))
 
         for fName in faciesNamesForZone:
             # fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
