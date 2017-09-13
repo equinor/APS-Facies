@@ -14,14 +14,6 @@ import sys
 # isOK                         = setContinuous3DParameterValues(gridModel,parameterName,values,realNumber=0,isShared=True,printInfo = 1)
 # isOK                         = setDiscrete3DParameterValues(gridModel,parameterName,values,codeNames,realNumber=0,isShared=True,printInfo = 1)
 
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-
 
 def calcStatisticsFor3DParameter(gridModel,paramName,zoneNumberList,realNumber=0,printInfo=1):
     """Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.

@@ -1,5 +1,4 @@
 #!/bin/env python
-import sys
 import copy
 import numpy as np
 
@@ -18,7 +17,7 @@ Description: This class is used as a base class for class Trunc2D_Cubic_Multi_Ov
 
 
  Protected functions (To be called from derived classes only, not public functions):
- def _setEmpty()
+ def __setEmpty()
  def _setModelledFacies(mainFaciesTable, faciesInZone)
  def _isFaciesInZone(fName)
  def _interpretXMLTree_overlay_facies(trRuleXML, modelFileName)
@@ -69,7 +68,7 @@ class Trunc2D_Base:
 
                  TODO: Beskriv her mer om data strukturen relatert til overlay facies.
     """
-    def _setEmpty(self):
+    def __setEmpty(self):
         """
         Description: Initialize the data structure for empty object. 
                      Need to be called by initialization functions in derived classes.
@@ -146,11 +145,6 @@ class Trunc2D_Base:
         # The index is overlay facies index (group index)
         self._overLayTruncIntervalCenter = []
 
-
-
-
-
-
     def __init__(self):
         """
            Description: Base class constructor. 
@@ -191,8 +185,6 @@ class Trunc2D_Base:
             fCode = self._mainFaciesTable.getFaciesCodeForFaciesName(fName)
             self._faciesCode.append(fCode)
 
-
-
     def _isFaciesInZone(self,fName):
         if fName in self._faciesInZone:
             return True
@@ -230,7 +222,6 @@ class Trunc2D_Base:
             raise ValueError('Mismatch in specification of truncation rule: {0} in model file: {1} regarding number of gaussian fields'
                              ''.format(self._className, modelFileName)
                              )
-            
 
         self._isBackGroundFacies = np.zeros((nOverLayFacies,len(self._faciesInZone)), dtype=int)
         groupIndx = 0
@@ -277,8 +268,6 @@ class Trunc2D_Base:
                     self._isBackGroundFacies[groupIndx,indx] = 1
                 groupIndx += 1
 
-                
-
                 [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fNameOverLayFacies)
                 if isNew == 1:
                     self._overlayFaciesIndx.append(indx)
@@ -322,7 +311,6 @@ class Trunc2D_Base:
         # End read overlay facies
 
     def _isFaciesProbEqualOne(self,faciesProb):
-
         """
         Description: Check if facies probability is close to 1.0. Return True or False.
                      This function is used to check if it is necessary to calculate truncation map or not.
@@ -338,8 +326,6 @@ class Trunc2D_Base:
             return True
         else:
             return False
-
-
 
     def _checkFaciesForZone(self):
         """
@@ -370,7 +356,6 @@ class Trunc2D_Base:
                     ''.format(self._className, fName)
                 )
 
-
     def _addFaciesToTruncRule(self, fName):
         """
         Description: Check if facies already exist in list of facies for the truncation rule. If not, add it to
@@ -394,9 +379,6 @@ class Trunc2D_Base:
                              )
         self._nFaciesInTruncRule = nFaciesInTruncRule
         return [nFaciesInTruncRule, indx, fIndx, isNew]
-
-
-
 
     def writeContentsInDataStructure(self):
         """
@@ -442,7 +424,6 @@ class Trunc2D_Base:
         print('Overlay parameter for truncation interval center: ')
         print(repr(self._overLayTruncIntervalCenter))
 
-
     def _defineBackgroundFaciesAndOverLayFacies(self, backGroundFaciesGroups=None, 
                                                 overlayFacies=None, overlayTruncCenter=None):
         """
@@ -469,7 +450,6 @@ class Trunc2D_Base:
 
         # Parameter for overlay facies truncation interval
         self._overLayTruncIntervalCenter = copy.copy(overlayTruncCenter)
-
 
         self._isBackGroundFacies = np.zeros((nOverLayFacies,self._nFacies), int)
         self._backGroundFaciesIndx = []
@@ -507,7 +487,6 @@ class Trunc2D_Base:
                     )
 
         assert self._nFacies == nFacies
-
 
     def getClassName(self):
         return copy.copy(self._className)
@@ -650,7 +629,6 @@ class Trunc2D_Base:
         self._highAlpha = highAlpha
         return area
 
-
     def _truncateOverlayFacies(self,indx,alphaCoord):
         """
         Description: Is used to truncate and find overlay facies. This function will be used
@@ -674,7 +652,6 @@ class Trunc2D_Base:
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
         return [faciesCode, fIndx]
-
 
     def _XMLAddElement(self, parent):
         """
@@ -700,4 +677,3 @@ class Trunc2D_Base:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
-        

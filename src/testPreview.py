@@ -5,31 +5,16 @@ import sys
 import copy
 import time
 
-import APSModel
-import APSMainFaciesTable
-import APSZoneModel
-import APSGaussFieldJobs
-import APSDataFromRMS
+from src import APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, APSDataFromRMS, simGauss2D
 # To be phases out and Trunc2D_Cubic is replacing it
-import Trunc2D_Cubic_Multi_Overlay_xml
-import Trunc2D_Angle_Overlay_xml
+import src.Trunc2D_Angle_Overlay_xml
 
 # Base class for Trunc2D_Cubic
-import Trunc2D_Base_xml
-
-import Trunc2D_Cubic_xml
-import Trunc2D_Angle_xml
-import Trunc3D_bayfill_xml
-
-import Trend3D_linear_model_xml
-
-import simGauss2D
-
+from src import Trunc2D_Base_xml, Trunc2D_Cubic_xml, Trunc2D_Angle_xml, Trunc3D_bayfill_xml, Trend3D_linear_model_xml
 
 from matplotlib import pyplot as plt 
 import matplotlib
 from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap
 #import scipy.ndimage
 
@@ -44,11 +29,8 @@ importlib.reload(APSDataFromRMS)
 
 importlib.reload(simGauss2D)
 importlib.reload(Trunc2D_Cubic_xml)
-importlib.reload(Trunc2D_Cubic_Multi_Overlay_xml)
-importlib.reload(Trunc2D_Angle_Overlay_xml)
 importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear_model_xml)
-
 
 
 def defineColors(nFacies):
@@ -77,6 +59,7 @@ def defineColors(nFacies):
         colors = ['lawngreen','grey','dodgerblue','gold','darkorchid','cyan','firebrick','olivedrab','blue','crimson','darkorange','red']
     return colors
 
+
 def writeFile(fileName,a,nx,ny):
     with open(fileName,'w') as file:
         # Choose an arbitary heading
@@ -101,6 +84,7 @@ def writeFile(fileName,a,nx,ny):
         file.write(outstring)
     print('Write file: ' + fileName)
     return
+
 
 def readFile(fileName):
     print('Read file: ' + fileName)
@@ -223,11 +207,6 @@ for fName in faciesNames:
     faciesProb.append(v)
 
 
-            
-                
-
-
-
 # Calculate truncation map for given facies probabilities
 #print('Facies prob:')
 #print(repr(faciesProb))
@@ -307,7 +286,6 @@ for m in range(nGaussFields):
     alphaReal = gaussFields[m]
     alphaMap = np.reshape(alphaReal,(ny,nx))
     alphaMapList.append(alphaMap)
-
 
 
 # Plot the result

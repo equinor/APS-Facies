@@ -1,17 +1,7 @@
 #!/bin/env python
 # Python 3 script to make IPL script for simulation of Gauss fields.
 
-import roxar
-import numpy as np 
-import sys
-import copy
-import xml.etree.ElementTree as ET
-
-import APSModel
-import APSMainFaciesTable
-import APSZoneModel
-import APSGaussFieldJobs
-import Trend3D_linear_model_xml
+from src import APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, Trend3D_linear_model_xml
 import importlib
 
 importlib.reload(APSModel)

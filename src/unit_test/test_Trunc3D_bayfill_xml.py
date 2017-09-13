@@ -1,20 +1,15 @@
 #!/bin/env python
 import sys
 import numpy as np
-from APSMainFaciesTable import APSMainFaciesTable
-from Trunc3D_bayfill_xml import Trunc3D_bayfill
-
+from src.APSMainFaciesTable import APSMainFaciesTable
+from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.utils.methods import prettify
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-from xml.dom import minidom
 import filecmp
 import sys
 
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
 
 def interpretXMLModelFileAndWrite(modelFileName,outputModelFileName):
     # Read test model file with truncation rule into xml tree

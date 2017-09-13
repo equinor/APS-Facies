@@ -1,7 +1,7 @@
 #!/bin/env python
 # Python3 script to update APS model file from global IPL include file
 
-import APSModel
+from src import APSModel
 import importlib
 
 importlib.reload(APSModel)

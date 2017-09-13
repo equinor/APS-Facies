@@ -1,20 +1,16 @@
 #!/bin/env python
 import sys
 import numpy as np
-from APSMainFaciesTable import APSMainFaciesTable
-from Trunc2D_Cubic_xml import Trunc2D_Cubic
-from Trunc2D_Base_xml import Trunc2D_Base
+from src.APSMainFaciesTable import APSMainFaciesTable
+from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.Trunc2D_Base_xml import Trunc2D_Base
+from src.utils.methods import prettify
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-from xml.dom import minidom
 import filecmp
 import sys
 
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
 
 def interpretXMLModelFileAndWrite(modelFileName,outputModelFileName):
     # Read test model file with truncation rule into xml tree
@@ -42,6 +38,7 @@ def interpretXMLModelFileAndWrite(modelFileName,outputModelFileName):
     
     return truncRuleOut
 
+
 def createXMLTreeAndWriteFile(truncRuleInput,outputModelFileName):
     # Build an XML tree with top as root
     # from truncation object and write it
@@ -52,6 +49,7 @@ def createXMLTreeAndWriteFile(truncRuleInput,outputModelFileName):
     print('Write file: ' + outputModelFileName)
     with open(outputModelFileName, 'w') as file:
         file.write(rootReformatted)
+
 
 def createTrunc(outputModelFileName):
     mainFaciesTable = APSMainFaciesTable()
@@ -65,6 +63,7 @@ def createTrunc(outputModelFileName):
     # Build an xml tree with the data and write it to file
     createXMLTreeAndWriteFile(truncRuleOut,outputModelFileName)
     return truncRuleOut
+
 
 def test_initialize_write_read():
     file1 = outputModelFileName1
@@ -91,10 +90,12 @@ def test_initialize_write_read():
         print('Files are equal: OK')
     return [truncRuleA,truncRuleB]
 
+
 def test_getClassName():
     assert truncRule != None
     name = truncRule.getClassName()
     assert name == 'Trunc2D_Cubic'
+
 
 def test_getFaciesInTruncRule():
     # Global variable truncRule
@@ -600,5 +601,3 @@ for testCase in range(start,end+1):
         test_getFaciesInTruncRule()         
         test_truncMapPolygons()
         test_apply_truncations()
-
-

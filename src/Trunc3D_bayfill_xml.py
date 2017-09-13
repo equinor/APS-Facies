@@ -1,75 +1,73 @@
 #!/bin/env python
-import sys
 import copy
 import numpy as np
 import math
 
-from APSMainFaciesTable import APSMainFaciesTable
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element, SubElement, dump
-from utils.APSExceptions import InconsistencyError
+from xml.etree.ElementTree import Element
+from src.utils.APSExceptions import InconsistencyError
+
+"""
+------------ Truncation map for Bayfill ----------------------------------
+ Developed by: Kari Skjerve and Tone-Berit Ornskar
+ Date: 2016
+ Adapted to new data structure by: O.Lia
+ Date: 2017
+
+class Trunc3D_bayfill
+Description: This truncation rule was the first truncation rule developed in this project.
+             It was designed mainly for bayfill reservoirs and should be used with a
+             lateral trend for the first of the three gaussian fields.
+             The method use 5 facies. Documentation of the truncation rule is found in
+             document: APS_truncmap_bayfill_final.pdf with title:
+            "APS truncation map for bayfill version: April 2016 by Kari B. Skjerve with updates by O.Lia.
+            The method was documented in report:
+            "Test the Adaptive Plurigaussian Simulation method for facies modelling on Bay fill deposits"
+            by Tone Berit Ornskar and O.Lia (2016).
+--------------------------------------------------------------------------------------------
+
+ Public member functions specific for class Trunc3D_bayfill
+
+   Constructor:           __init__(trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
+                                   printInfo = 0,modelFileName=None)
+
+   def initialize(self,mainFaciesTable,faciesInZone,faciesInTruncRule,
+                  sf_value, sf_name, ysf,sbhd, useConstTruncParam,printInfo)
 
 
-# ------------ Truncation map for Bayfill ----------------------------------
-#  Developed by: Kari Skjerve and Tone-Berit Ornskar
-#  Date: 2016
-#  Adapted to new data structure by: O.Lia
-#  Date: 2017
-#
-# class Trunc3D_bayfill
-# Description: This truncation rule was the first truncation rule developed in this project.
-#              It was designed mainly for bayfill reservoirs and should be used with a
-#              lateral trend for the first of the three gaussian fields.
-#              The method use 5 facies. Documentation of the truncation rule is found in
-#              document: APS_truncmap_bayfill_final.pdf with title:
-#             "APS truncation map for bayfill version: April 2016 by Kari B. Skjerve with updates by O.Lia.
-#             The method was documented in report:
-#             "Test the Adaptive Plurigaussian Simulation method for facies modelling on Bay fill deposits"
-#             by Tone Berit Ornskar and O.Lia (2016).
-# --------------------------------------------------------------------------------------------
-#
-#  Public member functions specific for class Trunc3D_bayfill
-#
-#    Constructor:           __init__(trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-#                                    printInfo = 0,modelFileName=None)
-#
-#    def initialize(self,mainFaciesTable,faciesInZone,faciesInTruncRule,
-#                   sf_value, sf_name, ysf,sbhd, useConstTruncParam,printInfo)
-#
-#
-#    --- Common get functions  for all Truncation classes ---
-#    def getClassName(self)
-#    def getFaciesOrderIndexList(self)
-#    def getFaciesInTruncRule(self)
-#    def getNGaussFieldsInModel(self)
-#
-#   --- Set functions ---
-#    def setParamSF(self,paramName)
-#    def setParamSFConst(self,value)
-#    def setParamYSFConst(self,value)
-#    def setParamSBHDConst(self,value)
+   --- Common get functions  for all Truncation classes ---
+   def getClassName(self)
+   def getFaciesOrderIndexList(self)
+   def getFaciesInTruncRule(self)
+   def getNGaussFieldsInModel(self)
 
-#   --- Common functions for all Truncation classes ---
-#    def useConstTruncModelParam(self)
-#    def setTruncRule(self,faciesProb,cellIndx=0)
-#    def defineFaciesByTruncRule(self,alphaCoord)
-#    def truncMapPolygons(self)
-#    def faciesIndxPerPolygon(self)
-#    def XMLAddElement(self,parent)
-#
-#    --- Other get functions specific for this class ---
-#    def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
-#
-#
-#  Local functions
-#
-#    def __interpretXMLTree(self,,trRuleXML,mainFaciesTable,faciesInZone,printInfo,modelFileName)
-#    def __checkFaciesForZone(self)
-#    def __isInsidePolygon(self,polygon, xInput,yInput)
-#    def __setUnitSquarePolygon(self)
-#    def __setZeroPolygon(self)
-#
-# ----------------------------------------------------------------------------
+  --- Set functions ---
+   def setParamSF(self,paramName)
+   def setParamSFConst(self,value)
+   def setParamYSFConst(self,value)
+   def setParamSBHDConst(self,value)
+
+  --- Common functions for all Truncation classes ---
+   def useConstTruncModelParam(self)
+   def setTruncRule(self,faciesProb,cellIndx=0)
+   def defineFaciesByTruncRule(self,alphaCoord)
+   def truncMapPolygons(self)
+   def faciesIndxPerPolygon(self)
+   def XMLAddElement(self,parent)
+
+   --- Other get functions specific for this class ---
+   def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
+
+
+ Local functions
+
+   def __interpretXMLTree(self,,trRuleXML,mainFaciesTable,faciesInZone,printInfo,modelFileName)
+   def __checkFaciesForZone(self)
+   def __isInsidePolygon(self,polygon, xInput,yInput)
+   def __setUnitSquarePolygon(self)
+   def __setZeroPolygon(self)
+
+----------------------------------------------------------------------------
+"""
 
 
 class Trunc3D_bayfill:
@@ -390,7 +388,6 @@ class Trunc3D_bayfill:
 
         return
 
-
     def writeContentsInDataStructure(self):
         print(' ')
         print('************  Contents of the data structure for class: ' + self.__className + ' ***************')
@@ -429,9 +426,6 @@ class Trunc3D_bayfill:
                 print(repr(poly[j]))
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
-
-
-
 
     def __checkFaciesForZone(self):
         # Check that the facies for the truncation rule is the same
@@ -514,7 +508,6 @@ class Trunc3D_bayfill:
     def faciesIndxPerPolygon(self):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
-
 
     def XMLAddElement(self, parent):
         # Add to the parent element a new element with specified tag and attributes.

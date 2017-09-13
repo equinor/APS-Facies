@@ -7,24 +7,10 @@ import copy
 import time
 import xml.etree.ElementTree as ET
 
-import APSModel
-import APSMainFaciesTable
-import APSZoneModel
-import APSGaussFieldJobs
-import APSDataFromRMS
-import Trunc1D_xml
-import Trunc1D_A2_xml
-import Trunc2D_A_xml
-import Trunc2D_A2_xml
-import Trunc2D_B_xml
-import Trunc2D_B2_xml
-import Trunc2D_C_xml
-import Trunc2D_Cubic_Overlay_xml
-import Trunc2D_Angle_Overlay_xml
-import Trunc3D_bayfill_xml
-import Trunc3D_A_xml
-import Trend3D_linear_model_xml
-import DefineTruncStructure
+from src import (
+     APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, Trunc2D_Cubic_Overlay_xml,
+     Trunc2D_Angle_Overlay_xml, Trunc3D_bayfill_xml, Trend3D_linear_model_xml, DefineTruncStructure
+)
 import importlib
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
@@ -62,7 +48,7 @@ mainFaciesTable.addFacies('F9',9)
 mainFaciesTable.addFacies('F10',10)
 apsmodel.setMainFaciesTable(mainFaciesTable)
 
-defineTruncStructureObject = DefineTruncStructure.DefineCubicTruncStructure()
+defineTruncStructureObject = DefineTruncStructure.DefineTruncStructure()
 
 gfJobObject = APSGaussFieldJobs.APSGaussFieldJobs()
 jobName = 'GF_1_2'

@@ -4,107 +4,100 @@ import copy
 import numpy as np
 
 # Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
-from simGauss2D import  simGaussFieldAddTrendAndTransform 
+from src.simGauss2D import simGaussFieldAddTrendAndTransform
 
 # To be outphased:
-from Trunc2D_Cubic_Multi_Overlay_xml import  Trunc2D_Cubic_Multi_Overlay
-from Trunc2D_Angle_Overlay_xml import  Trunc2D_Angle_Overlay
+from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
+from src.Trunc2D_Angle_Overlay_xml import Trunc2D_Angle_Overlay
 
-from Trunc2D_Cubic_xml import  Trunc2D_Cubic
-from Trunc2D_Angle_xml import  Trunc2D_Angle
-from Trunc3D_bayfill_xml import  Trunc3D_bayfill
+from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.Trunc2D_Angle_xml import Trunc2D_Angle
+from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 
-from Trend3D_linear_model_xml import Trend3D_linear_model
+from src.Trend3D_linear_model_xml import Trend3D_linear_model
 
-import xml.etree.ElementTree as ET
-from  xml.etree.ElementTree import Element, SubElement, dump
-from APSMainFaciesTable import APSMainFaciesTable
-from APSGaussFieldJobs  import APSGaussFieldJobs
+from src.APSMainFaciesTable import APSMainFaciesTable
+from src.APSGaussFieldJobs  import APSGaussFieldJobs
 
-
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
+from xml.etree.ElementTree import Element
 
 
-# ----------------------------------------------------------------
-# class APSZoneModel
-# Description: Keep data structure for a zone
-#
-# Public member functions:
-#   Constructor:  def __init__(self,ET_Tree= None,inputZoneNumber=0,
-#                              inputMainLevelFacies=None,modelFileName=None)
-#  --- Get functions ---
-#    def getZoneNumber(self)
-#    def useConstProb(self)
-#    def getMainLevelFacies(self)
-#    def getFaciesInZoneModel(self)
-#    def getUsedGaussFieldNames(self)
-#    def getVarioType(self,gaussFieldName)
-#    def getVarioTypeNumber(self,gaussFieldName)
-#    def getMainRange(self,gaussFieldName)
-#    def getPerpRange(self,gaussFieldName)
-#    def getVertRange(self,gaussFieldName)
-#    def getAnisotropyAsimuthAngle(self,gaussFieldName)
-#    def getPower(self,gaussFieldName)
-#    def getTruncRule(self)
-#    def getTrendRuleModel(self,gfName)
-#    def getSimBoxThickness(self)
-#    def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
-#    def printInfo(self)
-#    def getProbParamName(self,fName)
-#    def getAllProbParamForZone(self)
-#    def getConstProbValue(self,fName)
-#    def getHorizonNameForVarioTrendMap(self)
-#
-#
-#  ---  Set functions ---
-#    def setZoneNumber(self,zoneNumber)
-#    def setVarioType(self,gaussFieldName,varioType)
-#    def setRange1(self,gaussFieldName,range1)
-#    def setRange2(self,gaussFieldName,range2)
-#    def setRange3(self,gaussFieldName,range3)
-#    def setAngle(self,gaussFieldName,angle)
-#    def setPower(self,gaussFieldName,power)
-#    def setUseConstProb(self)
-#    def setSeedForPreviewSimulation(self)
-#    def setMainFaciesTable(self,mainFaciesTable)
-#    def setSimBoxThickness(self,thickness)
-#    def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,angle,power,
-#                              relStdDev=0.0,trendRuleModelObj=None)
-#    def removeGaussFieldParam(self,gfName)
-#    def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
-#    def removeFaciesWithProbForZone(self,fName)
-#    def setTruncRule(self,truncRuleObj)
-#    def setHorizonNameForVarioTrendMap(self,horizonNameForVarioTrendMap)
-
-#  ---  Calculate function ---
-#    def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
-#    def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
-#                                           gridXSize,gridYSize,gridAsimuthAngle)
-#
-#
-#  ---  write XML tree --- 
-#    def XMLAddElement(self,parent)
-#
-#  --- Check functions ---
-#    def hasFacies(self,fName)
-#    def isMainLevelModel(self)
-#
-# Private member functions:
-#    def __interpretXMLTree(ET_Tree)
-#    def __isVarioTypeOK(self,varioType)
-#    def __checkConstProbValuesAndNormalize(self)
-#    def __getGFIndex(self,gfName)
-#    def __updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,angle,power)
-#    def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
-#
-# ----------------------------------------------------------------
 class APSZoneModel:
+    """
+    ----------------------------------------------------------------
+    class APSZoneModel
+    Description: Keep data structure for a zone
 
+    Public member functions:
+      Constructor:  def __init__(self,ET_Tree= None,inputZoneNumber=0,
+                                 inputMainLevelFacies=None,modelFileName=None)
+     --- Get functions ---
+       def getZoneNumber(self)
+       def useConstProb(self)
+       def getMainLevelFacies(self)
+       def getFaciesInZoneModel(self)
+       def getUsedGaussFieldNames(self)
+       def getVarioType(self,gaussFieldName)
+       def getVarioTypeNumber(self,gaussFieldName)
+       def getMainRange(self,gaussFieldName)
+       def getPerpRange(self,gaussFieldName)
+       def getVertRange(self,gaussFieldName)
+       def getAnisotropyAsimuthAngle(self,gaussFieldName)
+       def getPower(self,gaussFieldName)
+       def getTruncRule(self)
+       def getTrendRuleModel(self,gfName)
+       def getSimBoxThickness(self)
+       def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
+       def printInfo(self)
+       def getProbParamName(self,fName)
+       def getAllProbParamForZone(self)
+       def getConstProbValue(self,fName)
+       def getHorizonNameForVarioTrendMap(self)
+
+
+     ---  Set functions ---
+       def setZoneNumber(self,zoneNumber)
+       def setVarioType(self,gaussFieldName,varioType)
+       def setRange1(self,gaussFieldName,range1)
+       def setRange2(self,gaussFieldName,range2)
+       def setRange3(self,gaussFieldName,range3)
+       def setAngle(self,gaussFieldName,angle)
+       def setPower(self,gaussFieldName,power)
+       def setUseConstProb(self)
+       def setSeedForPreviewSimulation(self)
+       def setMainFaciesTable(self,mainFaciesTable)
+       def setSimBoxThickness(self,thickness)
+       def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,angle,power,
+                                 relStdDev=0.0,trendRuleModelObj=None)
+       def removeGaussFieldParam(self,gfName)
+       def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
+       def removeFaciesWithProbForZone(self,fName)
+       def setTruncRule(self,truncRuleObj)
+       def setHorizonNameForVarioTrendMap(self,horizonNameForVarioTrendMap)
+
+     ---  Calculate function ---
+       def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
+       def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
+                                              gridXSize,gridYSize,gridAsimuthAngle)
+
+
+     ---  write XML tree ---
+       def XMLAddElement(self,parent)
+
+     --- Check functions ---
+       def hasFacies(self,fName)
+       def isMainLevelModel(self)
+
+    Private member functions:
+       def __interpretXMLTree(ET_Tree)
+       def __isVarioTypeOK(self,varioType)
+       def __checkConstProbValuesAndNormalize(self)
+       def __getGFIndex(self,gfName)
+       def __updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,angle,power)
+       def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
+
+    ----------------------------------------------------------------
+    """
     def __init__(self,ET_Tree= None,inputZoneNumber=0,inputMainLevelFacies=None,modelFileName=None):
         # Local variables
         self.__printInfo = 0

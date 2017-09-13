@@ -2,7 +2,7 @@
 import sys
 import copy
 import numpy as np
-from  Trunc2D_Base_xml import Trunc2D_Base
+from src.Trunc2D_Base_xml import Trunc2D_Base
 from xml.etree.ElementTree import Element
 
 
@@ -78,9 +78,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
     def __setEmpty(self):
 
-        # Initialize variables defined in base class Trunc2D_Base
-        super()._setEmpty()
-
         # Specific variables for class Trunc2D_Cubic
         self._className = 'Trunc2D_Cubic'
 
@@ -118,10 +115,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
 
-
-
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
-                 printInfo=0, modelFileName=None):
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, printInfo=0,
+                 modelFileName=None):
         """
            Description: This constructor can either create a new object by reading the information
                         from an XML tree or it can create an empty data structure for such an object.
@@ -160,6 +155,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
            Within L3 keyword there can be only ProbFrac keywords (one or more). 
         """
         # Initialize data structure to empty. It will also call up the base class function setEmpty.
+        super().__init__()
         self.__setEmpty()
 
         if trRuleXML is not None:
@@ -205,8 +201,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     for j in range(len(self._backGroundFaciesIndx[i])):
                         indx = self._backGroundFaciesIndx[i][j]
                         print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
-
-
         else:
             if printInfo >= 3:
                 print('Debug info: Create empty object for: ' + self._className)
@@ -425,7 +419,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     'Error: The sum is: {2}'.format(self._className, fName, str(sumProbFrac[i]))
                 )
         self.__truncStructure = truncStructure
-
  
     def writeContentsInDataStructure(self):
         # Write common contents from base class
@@ -449,7 +442,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 print(repr(poly[j]))
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
-
 
     def getClassName(self):
         return copy.copy(self._className)
@@ -489,7 +481,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if self._printInfo >= 3:
             self.__writeDataForTruncRule()
         return
-
 
     def __calcProbForEachNode(self, faciesProb):
         TYPE = self.__node_index['type']
@@ -708,8 +699,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         else:
             [faciesCode, fIndx] = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
         return [faciesCode, fIndx]
-
-
 
     def __calcFaciesLevel1V(self, nodeListL1, alphaCoord):
         faciesCode = -1
@@ -1068,9 +1057,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
 
-
-
-
     def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
                    backGroundFaciesGroups=None, overlayFacies=None, overlayTruncCenter=None, printInfo=0):
         """
@@ -1118,8 +1104,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     )
             self._nGaussFieldInModel = 2 + m2
 
-
-
         # Set which facies to be used as background facies when overprint facies is applied
         # Call base class function for overlay facies 
         self._defineBackgroundFaciesAndOverLayFacies(backGroundFaciesGroups, overlayFacies, overlayTruncCenter)
@@ -1128,12 +1112,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
 #        print('len(self._faciesInTruncRule): ' + str(len(self._faciesInTruncRule)))
 #        print('nFaciesInTruncRule: ' + str(self._nFaciesInTruncRule))
 #        print('len(self._faciesInZone) ' + str(len(self._faciesInZone)))
-        
-
 
         self._checkFaciesForZone()
- 
-
 
     def __setTruncStructure(self, truncStructureList):
         # Truncation structure specified by list of facies in hierarchical way with items of the form
@@ -1332,7 +1312,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
             L3Prev = L3
         self.__truncStructure = truncStructure
         self.__nPoly = nPoly
-
 
     def XMLAddElement(self, parent):
         if self._printInfo >= 3:
