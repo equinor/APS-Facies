@@ -139,13 +139,13 @@ class Trunc3D_bayfill:
         # assert trRuleXML is not None
         if trRuleXML is not None:
             # Require extactly 3 transformed gauss fields
-            assert (nGaussFieldInModel == 3)
+            assert nGaussFieldInModel == 3
             self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
         else:
             if printInfo >= 3:
                 # Create an empty object which will be initialized by set functions
                 print('Debug info: Create empty object of ' + self.__className)
-                #  End of __init__
+        #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
         # Initialize object from xml tree object trRuleXML
@@ -932,8 +932,7 @@ class Trunc3D_bayfill:
                 elif AmP4sqrt <= (XL - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c - 0.5 * (X2 - X4) * YS:
                     Ym = math.sqrt(max([
                         0,
-                        ((XL - X2) * (XL - X2) / (sf * sf)) + (c / (sf * (c - sf))) * (
-                        (XL - X2) * (XL - X2) / c + 2.0 * AmP4sqrt)
+                        ((XL - X2) * (XL - X2) / (sf * sf)) + (c / (sf * (c - sf))) * ((XL - X2) * (XL - X2) / c + 2.0 * AmP4sqrt)
                     ])) - (XL - X2) / sf
                     Ym2 = (1.0 - sf / c) * Ym - (XL - X2) / c
                     Xm = XL
@@ -998,8 +997,7 @@ class Trunc3D_bayfill:
                     Xm2 = X4
                     caseA = 2
                 # A2<AmP4sqrt<=A3
-                elif AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS + (XL - X4) * (
-                    1.0 - (XL - X4) / c):
+                elif AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS + (XL - X4) * (1.0 - (XL - X4) / c):
                     Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 *
                            (XL - X4) * (XL - X4) / c) / (XL - X4)
                     Ym = Ym2 + (XL - X4) / c
@@ -1646,7 +1644,7 @@ class Trunc3D_bayfill:
                     ])
                     polygons.insert(2, polyBHD)
 
-                    #                polygon = Polygon([(X4,1.0),(X4,YWIB),(0.0,YWIB),(0.0,1.0)],True) #WBF
+                    # polygon = Polygon([(X4,1.0),(X4,YWIB),(0.0,YWIB),(0.0,1.0)],True) #WBF
                     polyWBF.extend([
                         [X4, 1.0],
                         [X4, YWIB],
@@ -1721,8 +1719,7 @@ class Trunc3D_bayfill:
                 WBF_area = (X4 - X3) * (1.0 - YWIB)
                 BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
             else:
-                WBF_area = (X4 - X3) * (1.0 - 0.5 * (YS2 + YS)) - 0.5 * (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (
-                YS2 - YS)
+                WBF_area = (X4 - X3) * (1.0 - 0.5 * (YS2 + YS)) - 0.5 * (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (YS2 - YS)
                 BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
         elif bhdsit == 6:
             WBF_area = 0.5 * ((X4 - X3) * (1.0 - YS) - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (1.0 - YS))
@@ -1854,3 +1851,4 @@ class Trunc3D_bayfill:
                 raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
             else:
                 self.__sbhd = value
+

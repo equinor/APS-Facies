@@ -10,12 +10,13 @@ Output:
 """
 import sys
 
-import importlib
-import numpy as np
+from src import (
+    APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, Trunc2D_Base_xml, Trunc2D_Cubic_xml,
+    Trunc2D_Angle_xml, Trunc3D_bayfill_xml, Trend3D_linear, Trend3D_linear_model_xml
+)
 
 import src.generalFunctionsUsingRoxAPI as gr
-from src import APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, Trend3D_linear, Trend3D_linear_model_xml, \
-    Trunc2D_Angle_xml, Trunc2D_Base_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml
+import importlib
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
@@ -407,8 +408,7 @@ for zoneNumber in zoneNumberList:
                 print('Debug info: trendValues:')
                 print(repr(trendValues))
                 print('Debug info: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug info: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(
-                    residualValues.max()))
+                print('Debug info: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
                 print('Debug info: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
                 print('Debug info: Trend + Residual values:')
                 print(repr(val))
@@ -536,8 +536,7 @@ for zoneNumber in zoneNumberList:
 
                 values = item[VAL]
                 avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
-                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f],
-                                                                        avgProbValue))
+                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f], avgProbValue))
 
         for fName in faciesNamesForZone:
             # fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
@@ -594,3 +593,4 @@ if printInfo >= 1:
 
     print(' ')
 print('Finished APS_main.py')
+

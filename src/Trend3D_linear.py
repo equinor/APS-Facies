@@ -70,7 +70,7 @@ class Trend3D_linear:
 
                 # Create an empty array with 0 values with correct length
                 # corresponding to all active cells in the grid
-            #            values = grid3D.generate_values(np.float32)
+            # values = grid3D.generate_values(np.float32)
             valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
 
             # Calculate the 3D trend values
@@ -125,3 +125,4 @@ class Trend3D_linear:
 
     def getStackingDirection(self):
         return self.__direction
+

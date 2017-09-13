@@ -184,7 +184,7 @@ zoneObject.setTruncRule(truncRuleObject)
 
 apsmodel.addNewZone(zoneObject)
 
-# selectedZones =[1]
+# selectedZones = [1]
 # apsmodel.setSelectedZoneNumberList(selectedZones)
 # apsmodel.setPreviewZoneNumber(1)
 
@@ -212,14 +212,13 @@ for i in modelNumbers:
     # Set new truncation rule
     zoneObject.setTruncRule(truncRuleObject)
 
-# outfile = 'testOut'+'_' + str(i) + '.xml'
-#   apsmodel.writeModel(outfile,printInfo)
+   # outfile = 'testOut'+'_' + str(i) + '.xml'
+   #apsmodel.writeModel(outfile,printInfo)
 
-# Read the xml file into an new APSModel object
-#   apsmodel2 = APSModel.APSModel(outfile)
-#   outfile2 = 'testOut2'+'_' + str(i) + '.xml'
-#   apsmodel2.writeModel(outfile2,printInfo)
-
+   # Read the xml file into an new APSModel object
+   # apsmodel2 = APSModel.APSModel(outfile)
+   # outfile2 = 'testOut2'+'_' + str(i) + '.xml'
+   # apsmodel2.writeModel(outfile2,printInfo)
 
 
 # ------- Zone 2 --------------------------        
@@ -516,3 +515,4 @@ for i in range(4):
 # apsmodel2.writeModel(outfile2,printInfo)
 
 print('Finished')
+
