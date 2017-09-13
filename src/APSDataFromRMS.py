@@ -1,11 +1,14 @@
 #!/bin/env python
 # Python 3 script to read data from xml file with RMS information.
 
-import copy
 import xml.etree.ElementTree as ET
-# import importlib
+
+import copy
 
 from src import APSMainFaciesTable
+
+
+# import importlib
 
 
 # importlib.reload(APSMainFaciesTable)
@@ -36,6 +39,7 @@ class APSDataFromRMS:
         getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
     --------------------------------------------------------------------------------------------
     """
+
     def __init__(self, printInfo=0):
         self.__data = {
             'Property list continuous': [],

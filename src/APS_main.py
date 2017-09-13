@@ -8,16 +8,14 @@ Output:
       Facies realisation updated for specified zones.
       Updated 3D parameter for transformed gaussian fields.
 """
-import numpy as np
 import sys
 
-from src import (
-    APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, Trunc2D_Base_xml, Trunc2D_Cubic_xml,
-    Trunc2D_Angle_xml, Trunc3D_bayfill_xml, Trend3D_linear, Trend3D_linear_model_xml
-)
+import importlib
+import numpy as np
 
 import src.generalFunctionsUsingRoxAPI as gr
-import importlib
+from src import APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, Trend3D_linear, Trend3D_linear_model_xml, \
+    Trunc2D_Angle_xml, Trunc2D_Base_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
@@ -40,7 +38,7 @@ functionName = 'APS_trunc.py'
 eps = 0.000001
 
 
-def findDefinedCells(zoneValues, zoneNr, printInfo = 1):
+def findDefinedCells(zoneValues, zoneNr, printInfo=1):
     """
          Description: For specified zoneNumber, identify which cells belongs to this zone.
          
@@ -101,7 +99,6 @@ def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
     functionName = 'transformEmpiric'
     nCellsTotal = len(gaussValues)
 
-
     y1_defined = []
     for i in range(nDefinedCells):
         indx = cellIndexDefined[i]
@@ -113,12 +110,12 @@ def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
         # Assign the probability p= i/N to the cell corresponding to y1_defined cell 
         # with number i in sorting from smallest to highest value. 
         # Use cellIndexDefined to assign it to the correct cell.
-        alpha[cellIndexDefined[indx]] = float(i)/float(nDefinedCells) 
+        alpha[cellIndexDefined[indx]] = float(i) / float(nDefinedCells)
 
     return alpha
 
 
-def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined,
+def checkAndNormaliseProb(nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined,
                           eps=0.0000001, printInfo=1):
     """
         Description: Check that probability cubes or probabilities in input probFacies is normalised.
@@ -168,7 +165,7 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefin
             text = 'Debug output: Check normalisation of probabilities.'
         print(text)
 
-    probDefined = []        
+    probDefined = []
     nCellWithModifiedProb = 0
     if useConstProb == 0:
         # Allocate space for probability per facies per defined cell
@@ -177,11 +174,11 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefin
             item = probParamValuesForFacies[f]
             fName = item[NAME]
             values = item[VAL]
-            if printInfo >=3:
+            if printInfo >= 3:
                 print('Debug output: Facies: ' + fName)
 
-            nNeg = 0 
-            nAboveOne = 0 
+            nNeg = 0
+            nAboveOne = 0
             for i in range(nDefinedCells):
                 indx = cellIndexDefined[i]
                 v = values[indx]
@@ -209,7 +206,7 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefin
 
             zeroProbSum = 0
             for i in range(nDefinedCells):
-                if psum[i] < 10*eps:
+                if psum[i] < 10 * eps:
                     zeroProbSum += 1
 
             if zeroProbSum > 0:
@@ -221,11 +218,11 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefin
             for f in range(nFacies):
                 p = probDefined[f]  # Points to array of probabilities
                 for i in range(nDefinedCells):
-                    if np.abs(psum[i]-1.0) > eps:
+                    if np.abs(psum[i] - 1.0) > eps:
                         # Have to normalize
                         if f == 0:
                             nCellWithModifiedProb += 1
-                        p[i] = p[i]/psum[i]
+                        p[i] = p[i] / psum[i]
                         # print('i,p,psum:' + str(i) + ' ' + str(p[i]) + ' ' + str(psum[i]))
 
             if printInfo >= 3:
@@ -233,24 +230,24 @@ def checkAndNormaliseProb(nFacies,probParamValuesForFacies, useConstProb, nDefin
                 print('Debug output: Number of grid cells that are normalised is: ' + str(nCellWithModifiedProb))
     else:
         for f in range(nFacies):
-            item   = probParamValuesForFacies[f]
-            fName  = item[NAME]
-            values  = item[VAL]
+            item = probParamValuesForFacies[f]
+            fName = item[NAME]
+            values = item[VAL]
             if printInfo >= 3:
                 print('Debug output: Facies: ' + fName + ' with constant probability: ' + str(values[0]))
             probDefined.append(values[0])
 
         # Check that probabilities sum to 1
         psum = probDefined[0]
-        for f in range(1,nFacies):
-            psum   = psum + probDefined[f]  
-        if abs(psum -1.0) > eps:
+        for f in range(1, nFacies):
+            psum = psum + probDefined[f]
+        if abs(psum - 1.0) > eps:
             raise ValueError(
                 'Probabilities for facies are not normalized for this zone '
                 '(Total: {})'.format(str(psum))
             )
 
-    return [probDefined,nCellWithModifiedProb]
+    return [probDefined, nCellWithModifiedProb]
 
 
 def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
@@ -264,10 +261,11 @@ def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
         raise ValueError('Trend type: ' + trendModelObj.type + ' is not implemented.')
     return [minmaxDifference, trendValues]
 
-#--------------- Start main script ------------------------------------------
+
+# --------------- Start main script ------------------------------------------
 
 realNumber = project.current_realisation
-print('Run: APS_trunc  on realisation ' + str(realNumber+1))
+print('Run: APS_trunc  on realisation ' + str(realNumber + 1))
 
 modelFileName = 'APS.xml'
 
@@ -280,7 +278,6 @@ gridModel = project.grid_models[gridModelName]
 if gridModel.is_empty():
     raise ValueError('Specified grid model: ' + gridModel.name + ' is empty.')
 
-
 zoneNumberList = apsModel.getZoneNumberList()
 zoneParamName = apsModel.getZoneParamName()
 resultParamName = apsModel.getResultFaciesParamName()
@@ -288,15 +285,14 @@ resultParamName = apsModel.getResultFaciesParamName()
 gaussFieldScript = apsModel.getRMSGaussFieldScriptName()
 
 # For testing
-#apsModel.createSimGaussFieldIPL()
+# apsModel.createSimGaussFieldIPL()
 
 # Get zone param values
 if printInfo >= 2:
     print('--- Get RMS zone parameter: ' + zoneParamName + ' from RMS project ' + rmsProjectName)
 [zoneValues] = gr.getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, printInfo)
 
-
-emptyZoneList = [] 
+emptyZoneList = []
 # Find min max zone over all active cells
 [minZone, maxZone, avgzone] = gr.calcStatisticsFor3DParameter(
     gridModel, zoneParamName, emptyZoneList, realNumber, printInfo
@@ -304,8 +300,7 @@ emptyZoneList = []
 
 # Allocate space for facies realisation and calculated volume fractions
 nCellsTotal = len(zoneValues)
-faciesReal = np.zeros(nCellsTotal,np.uint16)
-
+faciesReal = np.zeros(nCellsTotal, np.uint16)
 
 # Gaussian field related lists
 GFNamesAlreadyRead = []
@@ -341,7 +336,7 @@ for zoneNumber in zoneNumberList:
     zoneModel = apsModel.getZoneModel(zoneNumber)
     # Read trend parameters for truncation parameters
     # zoneModel.getTruncationParam(gridModel,realNumber)
-    zoneModel.getTruncationParam(gr.getContinuous3DParameterValues,gridModel,realNumber)
+    zoneModel.getTruncationParam(gr.getContinuous3DParameterValues, gridModel, realNumber)
 
     useConstProb = zoneModel.useConstProb()
     GFNamesForZone = zoneModel.getUsedGaussFieldNames()
@@ -358,21 +353,21 @@ for zoneNumber in zoneNumberList:
             GFNamesAlreadyRead.append(gfName)
             if printInfo >= 3:
                 print('Debug output: Gauss field parameter: ' + gfName + ' is now being loaded.')
-            [values] = gr.getContinuous3DParameterValues(gridModel,gfName,realNumber,printInfo)
+            [values] = gr.getContinuous3DParameterValues(gridModel, gfName, realNumber, printInfo)
 
             # Allocate space for transformed gauss field property vector alpha
-            alpha = np.zeros(len(values),np.float32)
+            alpha = np.zeros(len(values), np.float32)
 
-            GFAllValues.append([gfName,values])
-            gfNameTrans =   gfName + '_transf'
-            GFAllAlpha.append([gfNameTrans,alpha])
+            GFAllValues.append([gfName, values])
+            gfNameTrans = gfName + '_transf'
+            GFAllAlpha.append([gfNameTrans, alpha])
 
         else:
             if printInfo >= 3:
                 print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
 
     # For current zone find the active cells for this zone 
-    [nDefinedCells,cellIndexDefined] = findDefinedCells(zoneValues,zoneNumber,printInfo)
+    [nDefinedCells, cellIndexDefined] = findDefinedCells(zoneValues, zoneNumber, printInfo)
     if printInfo >= 2:
         print('--- Number of active cells for zone: ' + str(nDefinedCells))
 
@@ -389,7 +384,7 @@ for zoneNumber in zoneNumberList:
         values = GFAllValues[indx][VAL]
 
         # Add trend to gaussian residual fields
-        [useTrend,trendModelObj,relStdDev] = zoneModel.getTrendRuleModel(gfName)
+        [useTrend, trendModelObj, relStdDev] = zoneModel.getTrendRuleModel(gfName)
 
         if useTrend == 1:
             simBoxThickness = zoneModel.getSimBoxThickness()
@@ -398,12 +393,12 @@ for zoneNumber in zoneNumberList:
                 trendModelObj, gridModel, realNumber, nDefinedCells,
                 cellIndexDefined, zoneNumber, simBoxThickness, printInfo
             )
-            if printInfo >=2:
+            if printInfo >= 2:
                 print('--- Calculate trend for: ' + gfName + ' for zone: ' + str(zoneNumber))
 
-            sigma = relStdDev*minmaxDifference
+            sigma = relStdDev * minmaxDifference
             residualValues = values[cellIndexDefined]
-            val = trendValues + sigma*residualValues
+            val = trendValues + sigma * residualValues
             values[cellIndexDefined] = val
             if printInfo >= 3:
                 print('Debug info: Trend minmaxDifference = ' + str(minmaxDifference))
@@ -412,7 +407,8 @@ for zoneNumber in zoneNumberList:
                 print('Debug info: trendValues:')
                 print(repr(trendValues))
                 print('Debug info: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug info: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
+                print('Debug info: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(
+                    residualValues.max()))
                 print('Debug info: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
                 print('Debug info: Trend + Residual values:')
                 print(repr(val))
@@ -447,10 +443,10 @@ for zoneNumber in zoneNumberList:
             values.append(float(probParamName))
             # Add the probability values to a common list containing probabilities for
             # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
-            probParamAllValues.append([fName,values])
+            probParamAllValues.append([fName, values])
 
             # Probabilities for each facies for current zone
-            probParamValuesForFacies.append([fName,values])
+            probParamValuesForFacies.append([fName, values])
         else:
             if not (probParamName in probParamNamesAlreadyRead):
                 probParamNamesAlreadyRead.append(probParamName)
@@ -464,10 +460,10 @@ for zoneNumber in zoneNumberList:
 
                 # Add the probability values to a common list containing probabilities for
                 # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
-                probParamAllValues.append([fName,values])
+                probParamAllValues.append([fName, values])
 
                 # Probabilities for each facies for current zone
-                probParamValuesForFacies.append([fName,values])
+                probParamValuesForFacies.append([fName, values])
 
             else:
                 if printInfo >= 3:
@@ -486,7 +482,7 @@ for zoneNumber in zoneNumberList:
                 # Probabilities for each facies for current zone
                 values = probParamAllValues[indx][VAL]
                 probParamValuesForFacies.append([fName, values])
-        
+
     # end for
 
     # Check and normalise probabilities if necessary for current zone
@@ -498,14 +494,14 @@ for zoneNumber in zoneNumberList:
     if printInfo >= 2:
         print('--- Number of cells that are normalised: ' + str(nCellsModifiedProb))
 
-    # Facies realisation for current zone is updated.
+        # Facies realisation for current zone is updated.
         if printInfo >= 2:
             print('--- Truncate transformed Gaussian fields.')
     volFrac = []
     [faciesReal, volFrac] = zoneModel.applyTruncations(
         probDefined, GFAlphaForCurrentZone, faciesReal, nDefinedCells, cellIndexDefined
     )
- 
+
     if printInfo >= 2:
         print(' ')
         mainFaciesTable = apsModel.getMainFaciesTable()
@@ -520,7 +516,6 @@ for zoneNumber in zoneNumberList:
                 item = probParamValuesForFacies[f]
                 if fName != item[NAME]:
                     raise ValueError('Inconsistencies in data structure in APS_main')
-                    
 
                 probValues = item[VAL]
                 print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
@@ -540,8 +535,9 @@ for zoneNumber in zoneNumberList:
                     raise ValueError('Inconsistencies in data structure in APS_main')
 
                 values = item[VAL]
-                avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined,values)
-                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber,fCode,fName,volFrac[f],avgProbValue))
+                avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
+                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f],
+                                                                        avgProbValue))
 
         for fName in faciesNamesForZone:
             # fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
@@ -549,7 +545,6 @@ for zoneNumber in zoneNumberList:
                 allFaciesNamesModelled.append(fName)
                 if printInfo >= 3:
                     print('Debug: Add facies: ' + fName + ' to the list of modelled facies')
-
 
 # End loop over zones
 
@@ -575,12 +570,12 @@ if printInfo >= 2:
 zList = []
 for s in zoneNumberList:
     if s in selectedZoneNumberList:
-        zList.append(s -1)
+        zList.append(s - 1)
         if printInfo >= 2:
             print('    Zone: ' + str(s))
 
-if not gr.setDiscrete3DParameterValues(gridModel,resultParamName,faciesReal,zList,codeNames,
-                                       realNumber,False,printInfo):
+if not gr.setDiscrete3DParameterValues(gridModel, resultParamName, faciesReal, zList, codeNames,
+                                       realNumber, False, printInfo):
     text = 'Error: Cannot create parameter ' + resultParamName + ' in ' + gridModel.name
     print(text)
     sys.exit()
@@ -588,17 +583,14 @@ else:
     if printInfo >= 1:
         print('- Create or update parameter: ' + resultParamName)
 
-
 print(' ')
 if printInfo >= 1:
     print('- Updated facies table:')
-    p = gr.get3DParameter(gridModel,resultParamName,realNumber,printInfo)
+    p = gr.get3DParameter(gridModel, resultParamName, realNumber, printInfo)
     print('- Facies_name   Facies_code')
     for key in p.code_names:
         u = p.code_names.get(key)
-        print('  {0:10}  {1:3d}'.format(u,key))
+        print('  {0:10}  {1:3d}'.format(u, key))
 
     print(' ')
 print('Finished APS_main.py')
-
-

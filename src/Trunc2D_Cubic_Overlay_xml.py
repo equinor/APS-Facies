@@ -1,10 +1,8 @@
 #!/bin/env python
-import sys
-import copy
-import numpy as np
-
 from xml.etree.ElementTree import Element
 
+import copy
+import numpy as np
 
 """
 -----------------------------------------------------------------------
@@ -144,15 +142,14 @@ class Trunc2D_Cubic_Overlay:
         self.__polygons = []
         self.__fIndxPerPolygon = []
 
-
         if trRuleXML is not None:
             # This method require exactly 3 transformed gauss fields
-            assert(nGaussFieldInModel == 3)
+            assert (nGaussFieldInModel == 3)
             self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
         else:
             if self.__printInfo >= 3:
                 print('Debug info: Create empty object of: ' + self.__className)
-        #  End of __init__
+                #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
         # Initialize object from xml tree object trRuleXML
@@ -176,7 +173,7 @@ class Trunc2D_Cubic_Overlay:
         else:
             raise ValueError(
                 'Error in ' + self.__className + '\n'
-                'Error: Inconsistency'
+                                                 'Error: Inconsistency'
             )
 
         if self.__printInfo >= 3:
@@ -287,15 +284,15 @@ class Trunc2D_Cubic_Overlay:
                         if fName not in self.__faciesInZone:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                'Error: Read truncation rule: ' + self.__className + '\n'
-                                'Error: Specified facies name in truncation rule: ' + fName
+                                                                                    'Error: Read truncation rule: ' + self.__className + '\n'
+                                                                                                                                         'Error: Specified facies name in truncation rule: ' + fName
                                 + ' is not defined for this zone.'
                             )
                         elif probFrac < 0.0 or probFrac > 1.0:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                'Error: Read truncation rule: ' + self.__className + '\n'
-                                'Error: Specified probability fraction in truncation rule is outside [0,1]'
+                                                                                    'Error: Read truncation rule: ' + self.__className + '\n'
+                                                                                                                                         'Error: Specified probability fraction in truncation rule is outside [0,1]'
                             )
 
                         [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
@@ -328,15 +325,15 @@ class Trunc2D_Cubic_Overlay:
                                 if not (fName in self.__faciesInZone):
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                        'Error: Read truncation rule: ' + self.__className + '\n'
-                                        'Error: Specified facies name in truncation rule: ' + fName
+                                                                                            'Error: Read truncation rule: ' + self.__className + '\n'
+                                                                                                                                                 'Error: Specified facies name in truncation rule: ' + fName
                                         + ' is not defined for this zone.'
                                     )
                                 if probFrac < 0.0 or probFrac > 1.0:
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                        'Error: Read truncation rule: ' + self.__className + '\n'
-                                        'Error: Specified probability fraction in truncation rule is outside [0,1]'
+                                                                                            'Error: Read truncation rule: ' + self.__className + '\n'
+                                                                                                                                                 'Error: Specified probability fraction in truncation rule is outside [0,1]'
                                     )
 
                                 [nFacies, indx, fIndx, isNew] = self.__addFaciesToTruncRule(fName)
@@ -360,8 +357,8 @@ class Trunc2D_Cubic_Overlay:
             if fNameOverLayFacies not in self.__faciesInZone:
                 raise ValueError(
                     'Error when reading model file: ' + modelFileName + '\n'
-                    'Error: Read truncation rule: ' + self.__className + '\n'
-                    'Error: Specified facies name in truncation rule: ' + fNameOverLayFacies
+                                                                        'Error: Read truncation rule: ' + self.__className + '\n'
+                                                                                                                             'Error: Specified facies name in truncation rule: ' + fNameOverLayFacies
                     + ' is not defined for this zone.'
                 )
 
@@ -478,7 +475,7 @@ class Trunc2D_Cubic_Overlay:
             print(repr(self.__orderIndex))
             print('Debug output: Facies code for facies in zone')
             print(repr(self.__faciesCode))
-            print('Debug output: Overlay facies: ' +  self.__faciesInTruncRule[self.__overlayFaciesIndx])
+            print('Debug output: Overlay facies: ' + self.__faciesInTruncRule[self.__overlayFaciesIndx])
             print('Debug output: Background facies index in trunc rule: ')
             print(repr(self.__backGroundFaciesIndx))
 
@@ -875,7 +872,7 @@ class Trunc2D_Cubic_Overlay:
                                             itemL3[XMAX] = xmaxL2
                                             itemL3[YMIN] = yminL3
                                             itemL3[YMAX] = ymaxL3
-        # end if use level 3
+                                            # end if use level 3
 
     def defineFaciesByTruncRule(self, alphaCoord):
         x = alphaCoord[0]
@@ -1477,7 +1474,7 @@ class Trunc2D_Cubic_Overlay:
                     # Create L1 parent node for L2 nodes
                     poly = []
                     # nodeListLevel2 is pointer to list of level 2 nodes for current level 1 node
-                    nodeListLevel2 = [] 
+                    nodeListLevel2 = []
                     nodeData = ['N', directionL2, nodeListLevel2, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                     nodeListLevel1.append(nodeData)
                     if L3 == 0:
@@ -1493,7 +1490,7 @@ class Trunc2D_Cubic_Overlay:
                         # Create L2 parent node for L3 nodes
                         poly = []
                         # nodeListLevel3 is pointer to list of level 3 nodes for current level 2 node
-                        nodeListLevel3 = []  
+                        nodeListLevel3 = []
                         nodeData = ['N', directionL3, nodeListLevel3, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         parentNodeDefinedL2 = 1
@@ -1522,7 +1519,7 @@ class Trunc2D_Cubic_Overlay:
                         # Create L2 parent node for L3 nodes
                         poly = []
                         # nodeListLevel3 is pointer to list of level 3 nodes for current level 2 node
-                        nodeListLevel3 = [] 
+                        nodeListLevel3 = []
                         nodeData = ['N', directionL3, nodeListLevel3, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
                         parentNodeDefinedL2 = 1
