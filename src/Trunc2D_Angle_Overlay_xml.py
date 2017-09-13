@@ -1,8 +1,8 @@
 #!/bin/env python
+from xml.etree.ElementTree import Element
+
 import copy
 import numpy as np
-
-from xml.etree.ElementTree import Element
 
 
 class Trunc2D_Angle_Overlay:
@@ -56,7 +56,7 @@ class Trunc2D_Angle_Overlay:
                                                            vxNormal,vyNormal,x0Normal,y0Normal,faciesProb)
     """
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, 
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
                  printInfo=0, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
@@ -136,15 +136,13 @@ class Trunc2D_Angle_Overlay:
         # assert trRuleXML is not None
         if trRuleXML is not None:
             # This method require exactly 3 transformed gauss fields
-            assert(nGaussFieldInModel == 3)
+            assert (nGaussFieldInModel == 3)
             # Fill the object from an xml model file
             self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
         else:
-            if self.__printInfo>=3:
+            if self.__printInfo >= 3:
                 # Create an empty object. The object will be initialized by set functions later
                 print('Debug info: Create empty object of: ' + self.__className)
-
-
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
         # Initialize object from xml tree object trRuleXML
@@ -394,7 +392,7 @@ class Trunc2D_Angle_Overlay:
                 'Error: Specified facies name in truncation rule is not defined for the zone.'
                 ''.format(self.__className)
             )
-        return[nFaciesInTruncRule, indx, fIndx, isNew]
+        return [nFaciesInTruncRule, indx, fIndx, isNew]
 
     def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
                    backgroundFacies, overlayFacies, overlayTruncCenter,
@@ -493,7 +491,7 @@ class Trunc2D_Angle_Overlay:
                         print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
                     [values] = get3DParamFunction(
                         gridModel, paramName, realNumber, self.__printInfo)
-#                    [values] = getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__printInfo)
+                    #                    [values] = getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__printInfo)
                     self.__faciesAlpha.append(values)
                 else:
                     raise ValueError(
@@ -517,7 +515,7 @@ class Trunc2D_Angle_Overlay:
             for fName in self.__faciesInZone:
                 if fName not in self.__faciesInTruncRule:
                     raise ValueError(
-                        'Error: In truncation rule: {}\n' 
+                        'Error: In truncation rule: {}\n'
                         'Error: Facies name {} which is defined for the current zone'
                         ' is not defined in the truncation rule.\n'
                         'Error: Cannot have facies with specified probability that'
@@ -562,7 +560,7 @@ class Trunc2D_Angle_Overlay:
         x0Normal = []
         y0Normal = []
         fNrLine = []
-#        print( 'i,alpha,vx,vy: ' + str(i) + ' ' + str(alpha) + ' ' + str(vx) + ' '  + str(vy))
+        #        print( 'i,alpha,vx,vy: ' + str(i) + ' ' + str(alpha) + ' ' + str(vx) + ' '  + str(vy))
 
         # Direction vectors [vx,vy] of normal to each facies border line
         # Direction vectors [vy,-vx] of facies border line  since dot product [vy,-vx]*[vx,vy] = 0
@@ -602,7 +600,7 @@ class Trunc2D_Angle_Overlay:
                 values = self.__faciesAlpha[i]
                 faciesAlpha.append(values[cellIndx])
 
-#        for i in range(self.__nFacies):
+            #        for i in range(self.__nFacies):
         for i in range(self.__nPolygons):
             alpha = faciesAlpha[i]
             alpha = alpha * 3.14159265 / 180.0
@@ -815,11 +813,11 @@ class Trunc2D_Angle_Overlay:
         # by checking all the corner points of the input polygon
         [smin, smax] = self.__findSminSmaxForPolygon(polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
 
-    #    print( ' smin,smax: ' + str(smin) + ' '  + str(smax))
+        #    print( ' smin,smax: ' + str(smin) + ' '  + str(smax))
         sHigh = smax
         sLow = smin
         nmax = 15
-        tolerance  = 0.01
+        tolerance = 0.01
         tolerance2 = 0.02
         converged = 0
         closestPolygon = 0
@@ -835,8 +833,10 @@ class Trunc2D_Angle_Overlay:
                 #            print( repr(outputPolyA))
                 #            print( ' Polygon B:')
                 #            print( repr(outputPolyB))
-                [sminA, smaxA] = self.__findSminSmaxForPolygon(outputPolyA, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
-                [sminB, smaxB] = self.__findSminSmaxForPolygon(outputPolyB, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
+                [sminA, smaxA] = self.__findSminSmaxForPolygon(outputPolyA, vx, vy, vxNormal, vyNormal, x0Normal,
+                                                               y0Normal)
+                [sminB, smaxB] = self.__findSminSmaxForPolygon(outputPolyB, vx, vy, vxNormal, vyNormal, x0Normal,
+                                                               y0Normal)
                 #            print( ' sminA,smaxA: ' + str(sminA) + ' ' + str(smaxA))
                 #            print( ' sminB,smaxB: ' + str(sminB) + ' ' + str(smaxB))
                 # Find the polygon closest to (x0Normal,y0Normal)
@@ -864,7 +864,7 @@ class Trunc2D_Angle_Overlay:
                     continue
             else:
                 converged = 1
-            #            print( 'area, prob: ' + str(area) + ' '  + str(faciesProb))
+                #            print( 'area, prob: ' + str(area) + ' '  + str(faciesProb))
                 break
 
         # End for
@@ -928,10 +928,10 @@ class Trunc2D_Angle_Overlay:
                 fProb = 0.0005
                 area[fIndx] = fProb
             sumProb += fProb
-#            print('i,sumProb: ' + str(i) + ' ' + str(sumProb))
+        #            print('i,sumProb: ' + str(i) + ' ' + str(sumProb))
         fIndx = self.__orderIndex[self.__overlayFaciesIndx]
         overLayProb = faciesProb[fIndx]
-#        print('overLayProb: ' + str(overLayProb))
+        #        print('overLayProb: ' + str(overLayProb))
 
         sumTot = sumProb + overLayProb
         deltaH = 1.0
@@ -939,13 +939,13 @@ class Trunc2D_Angle_Overlay:
         highAlpha = 0.0
         if sumTot > 0.0005:
             deltaH = sumProb / (sumTot)
-#            print('deltaH: ' + str(deltaH))
+            #            print('deltaH: ' + str(deltaH))
             for i in range(len(self.__backGroundFaciesIndx)):
                 indx = self.__backGroundFaciesIndx[i]
                 fIndx = self.__orderIndex[indx]
                 p = area[fIndx]
                 area[fIndx] = p / deltaH
-#                print('faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
+            #                print('faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
             lowAlpha = self.__overLayTruncIntervalCenter - 0.5 * (1.0 - deltaH)
             highAlpha = self.__overLayTruncIntervalCenter + 0.5 * (1.0 - deltaH)
             if lowAlpha < 0.0:
@@ -998,23 +998,23 @@ class Trunc2D_Angle_Overlay:
             self.__deltaH = deltaH
             self.__lowH = lowH
             self.__highH = highH
-#            print('deltaH: ' + str(deltaH))
-#            print('lowH: ' + str(lowH))
-#            print('highH: ' + str(highH))
-#            print('Facies prob:')
-#            print(repr(faciesProb))
-#            print('Adjusted area: ')
-#            print(repr(area))
-#            for i in range(len(faciesProb)-1):
-#                faciesProb[i] = area[i]
+        #            print('deltaH: ' + str(deltaH))
+        #            print('lowH: ' + str(lowH))
+        #            print('highH: ' + str(highH))
+        #            print('Facies prob:')
+        #            print(repr(faciesProb))
+        #            print('Adjusted area: ')
+        #            print(repr(area))
+        #            for i in range(len(faciesProb)-1):
+        #                faciesProb[i] = area[i]
 
         self.__setFaciesLines(cellIndx)
         initialPolygon = self.__setUnitSquarePolygon()
         polygon = copy.copy(initialPolygon)
-#        nFacies = self.__nFacies
+        #        nFacies = self.__nFacies
         nPolygons = self.__nPolygons
         faciesPolygons = []
-#        for i in range(nFacies-1):
+        #        for i in range(nFacies-1):
         for i in range(nPolygons - 1):
             # print('i: '+ str(i))
             vx = self.__vxLine[i]
@@ -1031,7 +1031,8 @@ class Trunc2D_Angle_Overlay:
             fIndx = self.__orderIndex[indx]
             fProb = area[fIndx] * probFrac
 
-            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N, y0N, fProb)
+            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N,
+                                                                                     y0N, fProb)
 
             # Save facies polygons that are complete
             if closestPolygon == 1:
@@ -1044,8 +1045,8 @@ class Trunc2D_Angle_Overlay:
                 polygon = outPolyB
             else:
                 faciesPolygons.append(outPolyB)
-            #            print( ' Valgt polygon for facies nummer ' + str(i+1) + ': B' )
-#                if i == nFacies-2:
+                #            print( ' Valgt polygon for facies nummer ' + str(i+1) + ': B' )
+                #                if i == nFacies-2:
                 if i == nPolygons - 2:
                     # add the last polygon to the last facies
                     faciesPolygons.append(outPolyA)
@@ -1053,33 +1054,32 @@ class Trunc2D_Angle_Overlay:
                 polygon = outPolyA
         self.__faciesPolygons = faciesPolygons
 
-
-#    def defineFaciesByTruncRule(self,x,y):
-#        """
-#        Function related to the LBL (Linear Boundary Lines) truncation rule.
-#        Input: polygons with definition of areas in the truncation map for each facies and a point in the truncation map.
-#        Output: Facies number for the facies in location (x,y) in the truncation map.
-#        """
-#        # Input is facies polygons for truncation rules and two values between 0 and 1
-#        # Check in which polygon the point is located and thereby the facies
-#        fIndx = -999
-#        print('Use overlay facies: No')
-#        for i in range(self.__nPolygons):
-#            polygon = self.__faciesPolygons[i]
-#            inside = self.__isInsidePolygon(polygon, x,y)
-#            if inside == 0:
-#                continue
-#            else:
-#                item = self.__probFracPerPolygon[i]
-#                indx = item[0]
-#                fIndx = self.__orderIndex[indx]
-#                faciesCode = self.__faciesCode[fIndx]
-#                break
-#        if fIndx == -999:
-#            print('Error: Point ('+ str(x) + ',' + str(y) + ')' + ' is not inside any polygon.')
-#
-#
-#        return [faciesCode,fIndx]
+    #    def defineFaciesByTruncRule(self,x,y):
+    #        """
+    #        Function related to the LBL (Linear Boundary Lines) truncation rule.
+    #        Input: polygons with definition of areas in the truncation map for each facies and a point in the truncation map.
+    #        Output: Facies number for the facies in location (x,y) in the truncation map.
+    #        """
+    #        # Input is facies polygons for truncation rules and two values between 0 and 1
+    #        # Check in which polygon the point is located and thereby the facies
+    #        fIndx = -999
+    #        print('Use overlay facies: No')
+    #        for i in range(self.__nPolygons):
+    #            polygon = self.__faciesPolygons[i]
+    #            inside = self.__isInsidePolygon(polygon, x,y)
+    #            if inside == 0:
+    #                continue
+    #            else:
+    #                item = self.__probFracPerPolygon[i]
+    #                indx = item[0]
+    #                fIndx = self.__orderIndex[indx]
+    #                faciesCode = self.__faciesCode[fIndx]
+    #                break
+    #        if fIndx == -999:
+    #            print('Error: Point ('+ str(x) + ',' + str(y) + ')' + ' is not inside any polygon.')
+    #
+    #
+    #        return [faciesCode,fIndx]
 
     def defineFaciesByTruncRule(self, alphaCoord):
         """
@@ -1212,7 +1212,7 @@ class Trunc2D_Angle_Overlay:
             fName = self.__faciesInTruncRule[indx]
             if self.__printInfo >= 3:
                 text = 'Debug output: ' + \
-                    'Set new angle for polygon number: ' + str(polygonNumber)
+                       'Set new angle for polygon number: ' + str(polygonNumber)
                 text = text + ' with facies ' + fName + ' : ' + str(angle)
                 print(text)
         return err
@@ -1310,7 +1310,6 @@ class Trunc2D_Angle_Overlay:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
-
 
     def writeContentsInDataStructure(self):
         print(' ')

@@ -1,7 +1,8 @@
 #!/bin/env python
 import sys
-import copy
 from xml.etree.ElementTree import Element
+
+import copy
 
 
 class APSGaussFieldJobs:
@@ -39,6 +40,7 @@ class APSGaussFieldJobs:
 
     -----------------------------------------------------------------------------------
     """
+
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__modelFileName = modelFileName
         self.__printInfo = printInfo

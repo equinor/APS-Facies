@@ -60,7 +60,7 @@ class Trend3D_linear_model:
                 print('Debug output: Stacking type:  ' + str(self.__direction))
         else:
             if self.__printInfo >= 3:
-                print('Debug info: Create empty object of ' + self.__className )
+                print('Debug info: Create empty object of ' + self.__className)
 
     def __interpretXMLTree(self, trendRuleXML, printInfo, modelFileName):
         # Initialize object form xml tree object trendRuleXML

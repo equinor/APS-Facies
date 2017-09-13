@@ -1,7 +1,8 @@
 #!/bin/env python
 import sys
-import copy
 from xml.etree.ElementTree import Element
+
+import copy
 
 
 class APSMainFaciesTable:
@@ -42,6 +43,7 @@ class APSMainFaciesTable:
 
     --------------------------------------------------------------------
     """
+
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__nFacies = 0
         self.__faciesTable = []
@@ -51,7 +53,7 @@ class APSMainFaciesTable:
         self.__CODE = 1
         self.__modelFileName = modelFileName
 
-        #assert ET_Tree is not None
+        # assert ET_Tree is not None
         if ET_Tree is None:
             # Create an empty object which will at a later stage be filled by using 
             # the initialize function.
@@ -167,7 +169,6 @@ class APSMainFaciesTable:
                 self.__nFacies -= 1
                 break
 
-
     def checkWithFaciesTable(self, fName):
         found = 0
         for fItem in self.__faciesTable:
@@ -176,9 +177,9 @@ class APSMainFaciesTable:
                 found = 1
                 break
         if found == 0:
-#            print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
-#            print('Specified facies names and codes are: \n')
-#            print(repr(self.__faciesTable))
+            #            print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
+            #            print('Specified facies names and codes are: \n')
+            #            print(repr(self.__faciesTable))
             return False
         else:
             return True

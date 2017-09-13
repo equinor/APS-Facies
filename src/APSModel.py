@@ -1,13 +1,13 @@
 #!/bin/env python
-import copy
 import datetime
-
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from src.APSZoneModel import APSZoneModel
+import copy
+
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
+from src.APSZoneModel import APSZoneModel
 from src.utils.methods import prettify
 
 
@@ -82,6 +82,7 @@ class APSModel:
 
     -----------------------------------------------------------------------------
     """
+
     def __init__(self, modelFileName=None):
         # Local variables
         self.__className = 'APSModel'
