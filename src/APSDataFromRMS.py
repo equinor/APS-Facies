@@ -1,52 +1,45 @@
 #!/bin/env python
 # Python 3 script to read data from xml file with RMS information.
 
-import copy
-import numpy as np
 import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element, SubElement, dump
-from xml.dom import minidom
-# import importlib
 
-import APSMainFaciesTable
+import copy
+
+from src import APSMainFaciesTable
+
+
+# import importlib
 
 
 # importlib.reload(APSMainFaciesTable)
 
 
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ")
-
-
-"""
-----------------------------------------------------------------------------------
-APSDataFromRMS:
-Description: This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
-             for both 3D grid model and for horizon data and facies data from wells.
-             NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
-             specifying which grid model to scan and which well and log to scan to get facies data.
-
-
-Functions:
-    readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data.
-                                             The input XML file is previously written by the function
-                                             scanRMSProjectAndWriteXMLFile.
-                                             This function is to be used e.g in the GUI script.
-    getFaciesTable()   - Get facies table which is defined in the RMS project by a selected facies log.
-    getGridModelName() - Get name of grid model to use.
-    getHorizonNames()  - Get list of all horizon names in the RMS project.
-    getGridSize()      - Get grid size and dimension for the 3D grid in the grid model.
-    getSurfaceSize()   - Get dimension and size of the 2D horizon maps.
-    getGridZoneNames() - Get list of zone names for the grid model.
-    getContinuousGridParamNames()  - Get list of all 3D parameters of continuous type belonging to the grid model.
-    getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
---------------------------------------------------------------------------------------------
-"""
-
-
 class APSDataFromRMS:
+    """
+    ----------------------------------------------------------------------------------
+    APSDataFromRMS:
+    Description: This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
+                 for both 3D grid model and for horizon data and facies data from wells.
+                 NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
+                 specifying which grid model to scan and which well and log to scan to get facies data.
+
+
+    Functions:
+        readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data.
+                                                 The input XML file is previously written by the function
+                                                 scanRMSProjectAndWriteXMLFile.
+                                                 This function is to be used e.g in the GUI script.
+        getFaciesTable()   - Get facies table which is defined in the RMS project by a selected facies log.
+        getGridModelName() - Get name of grid model to use.
+        getHorizonNames()  - Get list of all horizon names in the RMS project.
+        getGridSize()      - Get grid size and dimension for the 3D grid in the grid model.
+        getSurfaceSize()   - Get dimension and size of the 2D horizon maps.
+        getGridZoneNames() - Get list of zone names for the grid model.
+        getContinuousGridParamNames()  - Get list of all 3D parameters of continuous type belonging to the grid model.
+        getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
+    --------------------------------------------------------------------------------------------
+    """
+
     def __init__(self, printInfo=0):
         self.__data = {
             'Property list continuous': [],

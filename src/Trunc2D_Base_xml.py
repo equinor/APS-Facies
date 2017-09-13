@@ -1,10 +1,8 @@
 #!/bin/env python
-import sys
-import copy
-import numpy as np
-
 from xml.etree.ElementTree import Element
 
+import copy
+import numpy as np
 
 """
 -----------------------------------------------------------------------
@@ -18,7 +16,7 @@ Description: This class is used as a base class for class Trunc2D_Cubic_Multi_Ov
 
 
  Protected functions (To be called from derived classes only, not public functions):
- def _setEmpty()
+ def __setEmpty()
  def _setModelledFacies(mainFaciesTable, faciesInZone)
  def _isFaciesInZone(fName)
  def _interpretXMLTree_overlay_facies(trRuleXML, modelFileName)
@@ -69,7 +67,8 @@ class Trunc2D_Base:
 
                  TODO: Beskriv her mer om data strukturen relatert til overlay facies.
     """
-    def _setEmpty(self):
+
+    def __setEmpty(self):
         """
         Description: Initialize the data structure for empty object. 
                      Need to be called by initialization functions in derived classes.
@@ -113,9 +112,8 @@ class Trunc2D_Base:
         # truncation rule. If no overlay facies is specified, it is 2.
         self._nGaussFieldInModel = 2
 
-
         # Variables containing specification of overlay facies model
-        
+
         # Number of facies defined if no overlay facies is specified. These are also called background facies.
         self._nBackGroundFacies = 0
 
@@ -145,11 +143,6 @@ class Trunc2D_Base:
         # A list with value for the center point of the interval between low and high truncation value.
         # The index is overlay facies index (group index)
         self._overLayTruncIntervalCenter = []
-
-
-
-
-
 
     def __init__(self):
         """
@@ -182,7 +175,7 @@ class Trunc2D_Base:
         else:
             raise ValueError(
                 'Error in ' + self._className + '\n'
-                'Error: Inconsistency'
+                                                'Error: Inconsistency'
             )
 
         # Facies code for facies in zone
@@ -191,14 +184,12 @@ class Trunc2D_Base:
             fCode = self._mainFaciesTable.getFaciesCodeForFaciesName(fName)
             self._faciesCode.append(fCode)
 
-
-
-    def _isFaciesInZone(self,fName):
+    def _isFaciesInZone(self, fName):
         if fName in self._faciesInZone:
             return True
         else:
             return False
-    
+
     def _interpretXMLTree_overlay_facies(self, trRuleXML, modelFileName):
         """
         Description: Read specification of one or more overlay facies and which region (set of background facies)
@@ -227,12 +218,12 @@ class Trunc2D_Base:
 
         # Check that number of gauss fields in model match the required number in this model
         if self._nGaussFieldInModel != (nOverLayFacies + 2):
-            raise ValueError('Mismatch in specification of truncation rule: {0} in model file: {1} regarding number of gaussian fields'
-                             ''.format(self._className, modelFileName)
-                             )
-            
+            raise ValueError(
+                'Mismatch in specification of truncation rule: {0} in model file: {1} regarding number of gaussian fields'
+                ''.format(self._className, modelFileName)
+                )
 
-        self._isBackGroundFacies = np.zeros((nOverLayFacies,len(self._faciesInZone)), dtype=int)
+        self._isBackGroundFacies = np.zeros((nOverLayFacies, len(self._faciesInZone)), dtype=int)
         groupIndx = 0
         for overLayObj in trRuleXML.findall(kw):
             if overLayObj is not None:
@@ -243,12 +234,12 @@ class Trunc2D_Base:
                         'Error when reading truncation rule: {0} in model file: {1} \n'
                         'Specified facies name {2} is not defined.'
                         ''.format(self._className, modelFileName, fNameOverLayFacies)
-                        )
+                    )
 
                 kw1 = 'TruncIntervalCenter'
                 ticObj = overLayObj.find(kw1)
                 # Set default value 
-                center = 0.0 
+                center = 0.0
                 if ticObj is not None:
                     text = ticObj.text
                     center = float(text.strip())
@@ -272,12 +263,10 @@ class Trunc2D_Base:
                             'Error: Specified facies name as background facies in truncation rule: {} is not defined\n'
                             '       or is defined as overlay facies.'
                             ''.format(modelFileName, self._className, bgFaciesName)
-                            )
+                        )
                     bgFaciesIndxList.append(indx)
-                    self._isBackGroundFacies[groupIndx,indx] = 1
+                    self._isBackGroundFacies[groupIndx, indx] = 1
                 groupIndx += 1
-
-                
 
                 [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fNameOverLayFacies)
                 if isNew == 1:
@@ -287,28 +276,28 @@ class Trunc2D_Base:
                     raise ValueError(
                         'Error in {0}. Specified overlay facies {1} '
                         'is already used as background facies or overlay facies.'
-                        ''.format(self._className,fNameOverLayFacies)
-                        )
+                        ''.format(self._className, fNameOverLayFacies)
+                    )
 
             else:
                 raise ValueError(
                     'Error in {0}. Missing keyword {1} in truncation rule.'
                     ''.format(self._className, kw)
-                    )
+                )
 
         # Check that background facies regions for different overlay facies does not have
         # common facies.
         for groupIndx1 in range(len(self._overlayFaciesIndx)):
             bgFaciesIndxList1 = self._backGroundFaciesIndx[groupIndx1]
-            for groupIndx2 in range(groupIndx1+1,len(self._overlayFaciesIndx)):
+            for groupIndx2 in range(groupIndx1 + 1, len(self._overlayFaciesIndx)):
                 bgFaciesIndxList2 = self._backGroundFaciesIndx[groupIndx2]
                 for indx1 in bgFaciesIndxList1:
                     if indx1 in bgFaciesIndxList2:
                         raise ValueError(
                             'Error in {0}. Facies name: {1} is specified as background facies '
                             'for more than one overlay facies.'
-                            ''.format(self._className, self._faciesInTruncRule[indx1]) 
-                            )
+                            ''.format(self._className, self._faciesInTruncRule[indx1])
+                        )
         self._nOverLayFacies = len(self._overlayFaciesIndx)
 
         if len(self._faciesInTruncRule) != self._nFacies:
@@ -317,12 +306,11 @@ class Trunc2D_Base:
                 'Error: Read truncation rule: {1}\n'
                 'Error: Mismatch in number of facies specified in truncation rule: {2}\n'
                 '       and number of facies to be modelled for the zone: {3}.'
-                ''.format(modelFileName, self._className,str(len(self._faciesInTruncRule)),str(self._nFacies))
+                ''.format(modelFileName, self._className, str(len(self._faciesInTruncRule)), str(self._nFacies))
             )
-        # End read overlay facies
+            # End read overlay facies
 
-    def _isFaciesProbEqualOne(self,faciesProb):
-
+    def _isFaciesProbEqualOne(self, faciesProb):
         """
         Description: Check if facies probability is close to 1.0. Return True or False.
                      This function is used to check if it is necessary to calculate truncation map or not.
@@ -339,8 +327,6 @@ class Trunc2D_Base:
         else:
             return False
 
-
-
     def _checkFaciesForZone(self):
         """
         Description: Check that the facies for the truncation rule is the same
@@ -351,7 +337,7 @@ class Trunc2D_Base:
                 'Error: In truncation rule: {} Number of facies specified in truncation rule '
                 'is different from number of facies specified for zone'
                 ''.format(self._className)
-                )
+            )
         for fName in self._faciesInTruncRule:
             # print('fName in checkFaciesForZone: ')
             # print(fName)
@@ -369,7 +355,6 @@ class Trunc2D_Base:
                     'probability that is not used in the truncation rule.'
                     ''.format(self._className, fName)
                 )
-
 
     def _addFaciesToTruncRule(self, fName):
         """
@@ -390,13 +375,10 @@ class Trunc2D_Base:
         fIndx = self._getFaciesInZoneIndex(fName)
         if fIndx < 0:
             raise ValueError('Error in {0}. Specified facies name {1} is not defined for this zone.'
-                             ''.format(self._className,fName)
+                             ''.format(self._className, fName)
                              )
         self._nFaciesInTruncRule = nFaciesInTruncRule
         return [nFaciesInTruncRule, indx, fIndx, isNew]
-
-
-
 
     def writeContentsInDataStructure(self):
         """
@@ -442,8 +424,7 @@ class Trunc2D_Base:
         print('Overlay parameter for truncation interval center: ')
         print(repr(self._overLayTruncIntervalCenter))
 
-
-    def _defineBackgroundFaciesAndOverLayFacies(self, backGroundFaciesGroups=None, 
+    def _defineBackgroundFaciesAndOverLayFacies(self, backGroundFaciesGroups=None,
                                                 overlayFacies=None, overlayTruncCenter=None):
         """
         Define the class member variables that is used to handle overlay facies.
@@ -455,9 +436,9 @@ class Trunc2D_Base:
                overlayTruncCenter - A list of a float number between 0 and 1 defining the center of the truncation interval.
         """
         nOverLayFacies = len(overlayFacies)
-        self._nOverLayFacies =  nOverLayFacies
+        self._nOverLayFacies = nOverLayFacies
 
-        if backGroundFaciesGroups!= None:
+        if backGroundFaciesGroups != None:
             # Number of overlay facies and number of groups of background facies must be equal
             assert len(backGroundFaciesGroups) == len(overlayFacies)
 
@@ -470,8 +451,7 @@ class Trunc2D_Base:
         # Parameter for overlay facies truncation interval
         self._overLayTruncIntervalCenter = copy.copy(overlayTruncCenter)
 
-
-        self._isBackGroundFacies = np.zeros((nOverLayFacies,self._nFacies), int)
+        self._isBackGroundFacies = np.zeros((nOverLayFacies, self._nFacies), int)
         self._backGroundFaciesIndx = []
         for groupIndx in range(nOverLayFacies):
             bgFaciesGroup = backGroundFaciesGroups[groupIndx]
@@ -489,12 +469,12 @@ class Trunc2D_Base:
                         'Error in {}'
                         'Error: Inconsistent facies names as input for background facies. Programming error'
                         ''.format(self._className)
-                        )
+                    )
                 else:
                     bgFaciesIndxList.append(indx)
-                    self._isBackGroundFacies[groupIndx,indx] = 1
+                    self._isBackGroundFacies[groupIndx, indx] = 1
             overlayFaciesName = overlayFacies[groupIndx]
-#            print('Overlay facies name......: ' + overlayFaciesName)
+            #            print('Overlay facies name......: ' + overlayFaciesName)
             [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(overlayFaciesName)
             if isNew == 1:
                 self._overlayFaciesIndx.append(indx)
@@ -503,11 +483,10 @@ class Trunc2D_Base:
                 raise ValueError(
                     'Error in {0}'
                     'Error: Specified overlay facies {1} is already used as background facies.'
-                    ''.format(self._className,overlayFaciesName)
-                    )
+                    ''.format(self._className, overlayFaciesName)
+                )
 
         assert self._nFacies == nFacies
-
 
     def getClassName(self):
         return copy.copy(self._className)
@@ -521,7 +500,7 @@ class Trunc2D_Base:
     def getNGaussFieldsInModel(self):
         return self._nGaussFieldInModel
 
-    def _getFaciesInTruncRuleIndex(self,fName):
+    def _getFaciesInTruncRuleIndex(self, fName):
         # Loop over all facies defined in the list faciesInTruncRule
         indx = -1
         for i in range(len(self._faciesInTruncRule)):
@@ -531,7 +510,7 @@ class Trunc2D_Base:
                 break
         return indx
 
-    def _getBackgroundFaciesInTruncRuleIndex(self,fName):
+    def _getBackgroundFaciesInTruncRuleIndex(self, fName):
         # Loop over only the facies defined as background facies
         indx = -1
         for i in range(self._nBackGroundFacies):
@@ -541,7 +520,7 @@ class Trunc2D_Base:
                 break
         return indx
 
-    def _getFaciesInZoneIndex(self,fName):
+    def _getFaciesInZoneIndex(self, fName):
         # Loop over all facies defined in the list faciesInZone
         indx = -1
         for i in range(self._nFacies):
@@ -579,7 +558,7 @@ class Trunc2D_Base:
         sumProbBGFacies = []
         overLayProb = []
         for groupIndx in range(self._nOverLayFacies):
-#            print('Overlay facies group: ' + str(groupIndx))
+            #            print('Overlay facies group: ' + str(groupIndx))
             sumProb = 0.0
             bgFaciesIndxList = self._backGroundFaciesIndx[groupIndx]
             for i in range(len(bgFaciesIndxList)):
@@ -590,17 +569,17 @@ class Trunc2D_Base:
                     fProb = 0.0005
                 area[fIndx] = fProb
                 sumProb += fProb
-#            print('  sumProb background facies: ' + str(sumProb))
+            #            print('  sumProb background facies: ' + str(sumProb))
             sumProbBGFacies.append(sumProb)
             fIndx = self._orderIndex[self._overlayFaciesIndx[groupIndx]]
-#            print('fIndx: ' + str(fIndx))
-#            print('len(faciesProb): ')
-#            print(repr(faciesProb))
-#            print('orderindx: ')
-#            print(repr(self._orderIndex))
+            #            print('fIndx: ' + str(fIndx))
+            #            print('len(faciesProb): ')
+            #            print(repr(faciesProb))
+            #            print('orderindx: ')
+            #            print(repr(self._orderIndex))
             overLayProbability = faciesProb[fIndx]
             overLayProb.append(overLayProbability)
-#            print('  overLayProb: ' + str(overLayProbability))
+        #            print('  overLayProb: ' + str(overLayProbability))
 
         # Renormalize again the probability since it might have changed slightly in previous step
         sumAll = 0.0
@@ -615,9 +594,9 @@ class Trunc2D_Base:
 
         lowAlpha = []
         highAlpha = []
-#        deltaH = []
+        #        deltaH = []
         for groupIndx in range(self._nOverLayFacies):
-#            print('groupIndx: ' + str(groupIndx))
+            #            print('groupIndx: ' + str(groupIndx))
             bgFaciesIndxList = self._backGroundFaciesIndx[groupIndx]
             sumProb = sumProbBGFacies[groupIndx]
             sumTot = sumProb + overLayProb[groupIndx]
@@ -626,15 +605,15 @@ class Trunc2D_Base:
             hAlpha = 0.0
             if sumTot > 0.0005:
                 dH = sumProb / sumTot
-#                print('Overlay facies group: ' + str(groupIndx) + ' deltaH: ' + str(dH))
+                #                print('Overlay facies group: ' + str(groupIndx) + ' deltaH: ' + str(dH))
                 for i in range(len(bgFaciesIndxList)):
                     indx = bgFaciesIndxList[i]
                     fIndx = self._orderIndex[indx]
                     p = area[fIndx]
                     area[fIndx] = p / dH
-#                    print('  faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
-#                print('overLayTruncIntervalCenter: ')
-#                print(repr(self._overLayTruncIntervalCenter))
+                #                    print('  faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
+                #                print('overLayTruncIntervalCenter: ')
+                #                print(repr(self._overLayTruncIntervalCenter))
                 lAlpha = self._overLayTruncIntervalCenter[groupIndx] - 0.5 * (1.0 - dH)
                 hAlpha = self._overLayTruncIntervalCenter[groupIndx] + 0.5 * (1.0 - dH)
                 if lAlpha < 0.0:
@@ -645,18 +624,17 @@ class Trunc2D_Base:
                     lAlpha = dH
                 lowAlpha.append(lAlpha)
                 highAlpha.append(hAlpha)
-        
+
         self._lowAlpha = lowAlpha
         self._highAlpha = highAlpha
         return area
 
-
-    def _truncateOverlayFacies(self,indx,alphaCoord):
+    def _truncateOverlayFacies(self, indx, alphaCoord):
         """
         Description: Is used to truncate and find overlay facies. This function will be used
                      in truncation calculations in derived classes when overlay facies is defined.
         """
-        
+
         # Loop over all groups 
         # The indx will be updated only if overlay facies should be used
         # The fIndx and faciesCode will be looked up and returned
@@ -664,7 +642,7 @@ class Trunc2D_Base:
         for groupIndx in range(self._nOverLayFacies):
             if self._isBackGroundFacies[groupIndx][indx] == 1:
                 # This background facies can be overprinted by the overLay facies
-                z = alphaCoord[groupIndx+2]
+                z = alphaCoord[groupIndx + 2]
                 if self._lowAlpha[groupIndx] < z <= self._highAlpha[groupIndx]:
                     # The alpha is within the specified truncation interval
                     # Set indx to overlay facies
@@ -674,7 +652,6 @@ class Trunc2D_Base:
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
         return [faciesCode, fIndx]
-
 
     def _XMLAddElement(self, parent):
         """
@@ -700,4 +677,3 @@ class Trunc2D_Base:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
-        

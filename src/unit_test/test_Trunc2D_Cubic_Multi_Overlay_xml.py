@@ -1,22 +1,17 @@
 #!/bin/env python
 import sys
 import numpy as np
-from APSMainFaciesTable import APSMainFaciesTable
-from Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
-
+from src.APSMainFaciesTable import APSMainFaciesTable
+from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
+from src.utils.methods import prettify
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-from xml.dom import minidom
 import filecmp
 import sys
 
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
 
-def interpretXMLModelFileAndWrite(modelFileName,outputModelFileName):
+def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()

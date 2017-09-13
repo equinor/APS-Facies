@@ -1,52 +1,46 @@
 #!/bin/env python
 import sys
+from xml.etree.ElementTree import Element
+
 import copy
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element, SubElement, dump
-
-
-# Class APSGaussFieldJobs
-# Description: Keep the name of RMS petro jobs and  associated 3D property
-#              parameter these jobs will create
-#
-# Public member functions:
-# Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,printInfo=0)
-#
-#  -- Get functions ---
-#    def getNumberOfGFJobs(self)
-#    def getNumberOfGFNames(self)
-#    def getClassName(self)
-#    def getGaussFieldNames(self)
-#    def getGaussFieldJobNames(self)
-#    def getGaussFieldNamesPerJobs(self)
-#    def getGaussFieldIndx(self,jobName,gfName)
-#
-#  -- Set functions (add/remove) --
-#    def addGaussFieldJob(self,jobName,gaussFieldParamNames)
-#    def removeGaussFieldJob(self,jobName)
-#
-#  -- Check functions --
-#    def checkGaussFieldNameInJob(self,jobName,gfName)
-#    def checkGaussFieldName(self,gfName)
-#
-#  -- Write xml tree functions
-#    def XMLAddElement(self,root)
-#
-#  Private member functions:
-#    def __checkUniqueGaussFieldNames(self)
-#    def __interpretXMLTree(self,ET_Tree)
-#
-# -----------------------------------------------------------------------------------
-
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
 
 
 class APSGaussFieldJobs:
+    """
+    Class APSGaussFieldJobs
+    Description: Keep the name of RMS petro jobs and  associated 3D property
+                 parameter these jobs will create
+
+    Public member functions:
+    Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,printInfo=0)
+
+     -- Get functions ---
+       def getNumberOfGFJobs(self)
+       def getNumberOfGFNames(self)
+       def getClassName(self)
+       def getGaussFieldNames(self)
+       def getGaussFieldJobNames(self)
+       def getGaussFieldNamesPerJobs(self)
+       def getGaussFieldIndx(self,jobName,gfName)
+
+     -- Set functions (add/remove) --
+       def addGaussFieldJob(self,jobName,gaussFieldParamNames)
+       def removeGaussFieldJob(self,jobName)
+
+     -- Check functions --
+       def checkGaussFieldNameInJob(self,jobName,gfName)
+       def checkGaussFieldName(self,gfName)
+
+     -- Write xml tree functions
+       def XMLAddElement(self,root)
+
+     Private member functions:
+       def __checkUniqueGaussFieldNames(self)
+       def __interpretXMLTree(self,ET_Tree)
+
+    -----------------------------------------------------------------------------------
+    """
+
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__modelFileName = modelFileName
         self.__printInfo = printInfo

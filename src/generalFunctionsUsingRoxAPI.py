@@ -1,7 +1,9 @@
 #!/bin/env python
-import roxar
-import numpy as np
 import sys
+
+import numpy as np
+import roxar
+
 
 # List of functions in this file
 #                                printInfoText(functionName,text)
@@ -14,16 +16,8 @@ import sys
 # isOK                         = setContinuous3DParameterValues(gridModel,parameterName,values,realNumber=0,isShared=True,printInfo = 1)
 # isOK                         = setDiscrete3DParameterValues(gridModel,parameterName,values,codeNames,realNumber=0,isShared=True,printInfo = 1)
 
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
 
-
-
-def calcStatisticsFor3DParameter(gridModel,paramName,zoneNumberList,realNumber=0,printInfo=1):
+def calcStatisticsFor3DParameter(gridModel, paramName, zoneNumberList, realNumber=0, printInfo=1):
     """Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
     Input:
            property       - The Property object we wish to perform calculation on. 
@@ -37,26 +31,26 @@ def calcStatisticsFor3DParameter(gridModel,paramName,zoneNumberList,realNumber=0
             average  - average value
     """
     functionName = 'calcStatisticsFor3DParameter'
-    [values] = getSelectedGridCells(gridModel,paramName,zoneNumberList,realNumber,printInfo)
+    [values] = getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, printInfo)
 
     maximum = np.max(values)
     minimum = np.min(values)
     average = np.average(values)
     if printInfo >= 3:
         if len(zoneNumberList) > 0:
-            text = ' Calculate min, max, average for parameter: ' +  paramName + ' for selected zones '
-            printInfoText(functionName,text)
+            text = ' Calculate min, max, average for parameter: ' + paramName + ' for selected zones '
+            printInfoText(functionName, text)
         else:
-            text = ' Calculate min, max, average for parameter: ' +  paramName 
-            printInfoText(functionName,text)
+            text = ' Calculate min, max, average for parameter: ' + paramName
+            printInfoText(functionName, text)
 
         text = ' Min: ' + str(minimum) + '  Max: ' + str(maximum) + '  Average: ' + str(average)
-        printInfoText(functionName,text)
-
+        printInfoText(functionName, text)
 
     return [minimum, maximum, average]
 
-def calcAverage(nDefinedCells, cellIndexDefined,values):
+
+def calcAverage(nDefinedCells, cellIndexDefined, values):
     """ 
     Calculates average of the values array.
     Input:
@@ -71,28 +65,30 @@ def calcAverage(nDefinedCells, cellIndexDefined,values):
     for i in range(nDefinedCells):
         indx = cellIndexDefined[i]
         sumValue += values[indx]
-#        print('value: ' + str(values[indx]))
-    average = sumValue/float(nDefinedCells)
+    #        print('value: ' + str(values[indx]))
+    average = sumValue / float(nDefinedCells)
     return average
 
-def printInfoText(functionName,text):
+
+def printInfoText(functionName, text):
     if functionName == ' ':
-        print('Debug output: ' + text +'\n')
+        print('Debug output: ' + text + '\n')
     else:
         print('Debug output in ' + functionName + ': ' + text + '\n')
-    return 
-
-def printError(functionName,text):
-    print('Error in ' + functionName +': ' + text)
+    return
 
 
-def printErrorAndTerminate(functionName,text):
-    raise ValueError('Error in ' + functionName +': ' + text+'\n'
-                     'Error: Must exit from ' + functionName
+def printError(functionName, text):
+    print('Error in ' + functionName + ': ' + text)
+
+
+def printErrorAndTerminate(functionName, text):
+    raise ValueError('Error in ' + functionName + ': ' + text + '\n'
+                                                                'Error: Must exit from ' + functionName
                      )
 
 
-def getCellValuesFilteredOnDiscreteParam(code,valueArray):
+def getCellValuesFilteredOnDiscreteParam(code, valueArray):
     """
          Description: Calculate an index array to address all active (physical) cells in the
                       grid corresponding to the cells with specified integer value (code).
@@ -119,13 +115,10 @@ def getCellValuesFilteredOnDiscreteParam(code,valueArray):
             cellIndexDefined.append(i)
             nDefinedCells += 1
 
-    return [nDefinedCells,cellIndexDefined]
+    return [nDefinedCells, cellIndexDefined]
 
 
-
-
-
-def get3DParameter(gridModel,parameterName,realNumber=0,printInfo = 1):
+def get3DParameter(gridModel, parameterName, realNumber=0, printInfo=1):
     """Get 3D parameter from grid model.
     Input: 
            gridModel     - Grid model object
@@ -136,11 +129,11 @@ def get3DParameter(gridModel,parameterName,realNumber=0,printInfo = 1):
 
     Output: parameter object
     """
-    functionName =  'get3DParameter'
+    functionName = 'get3DParameter'
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         text = 'Specified grid model: ' + gridModel.name + ' is empty.'
-        printErrorAndTerminate(functionName,text)
+        printErrorAndTerminate(functionName, text)
 
     # Check if specified parameter name exists.
     found = 0
@@ -151,13 +144,14 @@ def get3DParameter(gridModel,parameterName,realNumber=0,printInfo = 1):
 
     if found == 0:
         text = ' Specified parameter: ' + parameterName + ' does not exist.'
-        printErrorAndTerminate(functionName,text)
+        printErrorAndTerminate(functionName, text)
 
     param = gridModel.properties[parameterName]
 
     return param
 
-def getContinuous3DParameterValues(gridModel,parameterName,realNumber=0,printInfo = 1):
+
+def getContinuous3DParameterValues(gridModel, parameterName, realNumber=0, printInfo=1):
     """Get array of continuous values (numpy.float32) from active cells for specified 3D parameter from grid model.
     Input: 
            gridModel     - grid model object
@@ -169,15 +163,16 @@ def getContinuous3DParameterValues(gridModel,parameterName,realNumber=0,printInf
     Output: numpy array with values for each active grid cell for specified 3D parameter.
     """
     functionName = 'getContinuous3DParameterValues'
-    param =  get3DParameter(gridModel,parameterName,realNumber,printInfo)
+    param = get3DParameter(gridModel, parameterName, realNumber, printInfo)
     if param.is_empty(realNumber):
         text = ' Specified parameter: ' + parameterName + ' is empty for realisation ' + str(realNumber)
-        printErrorAndTerminate(functionName,text)
+        printErrorAndTerminate(functionName, text)
 
     activeCellValues = param.get_values(realNumber)
     return [activeCellValues]
 
-def getDiscrete3DParameterValues(gridModel,parameterName,realNumber=0,printInfo = 1):
+
+def getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, printInfo=1):
     """Get array of discrete values (numpy.uint16) from active cells for specified 3D parameter from grid model.
     Input: 
            gridModel     - Grid model object.
@@ -189,19 +184,18 @@ def getDiscrete3DParameterValues(gridModel,parameterName,realNumber=0,printInfo 
     Output: numpy array with values for each active grid cell for specified 3D parameter 
             and a dictionary object with codeNames and values.
     """
-    functionName =  'getDiscrete3DParameterValues'
-    param =  get3DParameter(gridModel,parameterName,realNumber,printInfo)
+    functionName = 'getDiscrete3DParameterValues'
+    param = get3DParameter(gridModel, parameterName, realNumber, printInfo)
     if param.is_empty(realNumber):
         text = ' Specified parameter: ' + parameterName + ' is empty for realisation ' + str(realNumber)
-        printErrorAndTerminate(functionName,text)
-
+        printErrorAndTerminate(functionName, text)
 
     activeCellValues = param.get_values(realNumber)
     codeNames = param.code_names
-    return [activeCellValues,codeNames]
+    return [activeCellValues, codeNames]
 
 
-def getSelectedGridCells(gridModel,paramName,zoneNumberList,realNumber,printInfo=1):
+def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, printInfo=1):
     """
     Input:
            gridModel     - Grid model object
@@ -215,19 +209,19 @@ def getSelectedGridCells(gridModel,paramName,zoneNumberList,realNumber,printInfo
            is in general not of the same length as a vector with all active cells.
     """
     functionName = 'getSelectedGridCells'
-    allValues = getContinuous3DParameterValues(gridModel,paramName,realNumber,printInfo)
+    allValues = getContinuous3DParameterValues(gridModel, paramName, realNumber, printInfo)
     if len(zoneNumberList) > 0:
         # Get values for the specified zones
         grid3D = gridModel.get_grid(realNumber)
         indexer = grid3D.simbox_indexer
-        dimI,dimJ,dimK = indexer.dimensions
+        dimI, dimJ, dimK = indexer.dimensions
         nCellsSelected = 0
         for zoneIndx in indexer.zonation:
             if zoneIndx in zoneNumberList:
                 layerRanges = indexer.zonation[zoneIndx]
                 for lr in layerRanges:
                     # Get all the cell numbers for the layer range
-                    cellNumbers = indexer.get_cell_numbers_in_range((0,0,lr.start),(dimI,dimJ,lr.stop))
+                    cellNumbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dimI, dimJ, lr.stop))
                     # Set values for all cells in this layer
                     nCellsSelected += len(cellNumber)
                     for cIndx in cellNumbers:
@@ -237,26 +231,26 @@ def getSelectedGridCells(gridModel,paramName,zoneNumberList,realNumber,printInfo
     else:
         return [allValues]
 
-def modifySelectedGridCells(gridModel,zoneNumberList,realNumber,oldValues,newValues):
+
+def modifySelectedGridCells(gridModel, zoneNumberList, realNumber, oldValues, newValues):
     # Is used to set new values in existing 3D parameter 
     # for selected cells defined by a list of zone numbers
     grid3D = gridModel.get_grid(realNumber)
     indexer = grid3D.simbox_indexer
-    dimI,dimJ,dimK = indexer.dimensions
+    dimI, dimJ, dimK = indexer.dimensions
     for zoneIndx in indexer.zonation:
         if zoneIndx in zoneNumberList:
             layerRanges = indexer.zonation[zoneIndx]
             for lr in layerRanges:
                 # Get all the cell numbers for the layer range
-                cellNumbers = indexer.get_cell_numbers_in_range((0,0,lr.start),(dimI,dimJ,lr.stop))
+                cellNumbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dimI, dimJ, lr.stop))
                 # Set values for all cells in this layer
                 oldValues[cellNumbers] = newValues[cellNumbers]
     return [oldValues]
 
 
-
-def setContinuous3DParameterValues(gridModel,parameterName,inputValues,zoneNumberList,
-                                   realNumber=0,isShared= True,printInfo = 1):
+def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList,
+                                   realNumber=0, isShared=True, printInfo=1):
     """Set 3D parameter with values for specified grid model.
     Input: 
            gridModel     - Grid model object
@@ -280,9 +274,8 @@ def setContinuous3DParameterValues(gridModel,parameterName,inputValues,zoneNumbe
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         text = 'Specified grid model: ' + gridModel.name + ' is empty.'
-        printError(functionName,text)
+        printError(functionName, text)
         return False
-
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
     found = 0
@@ -294,46 +287,47 @@ def setContinuous3DParameterValues(gridModel,parameterName,inputValues,zoneNumbe
     if found == 0:
         if printInfo >= 3:
             text = 'Create specified parameter: ' + parameterName
-            printInfoText(functionName,text)
+            printInfoText(functionName, text)
             if isShared:
                 text = 'Set parameter to shared.'
-                printInfoText(functionName,text)
+                printInfoText(functionName, text)
             else:
                 text = 'Set parameter to non-shared.'
-                printInfoText(functionName,text)
+                printInfoText(functionName, text)
 
-        p = gridModel.properties.create(parameterName,roxar.GridPropertyType.continuous,np.float32)
-        currentValues = np.zeros(len(inputValues),np.float32)
-        [currentValues] = modifySelectedGridCells(gridModel,zoneNumberList,realNumber,currentValues,inputValues)
-        p.set_values(currentValues,realNumber)
-        p.set_shared(isShared,realNumber)
+        p = gridModel.properties.create(parameterName, roxar.GridPropertyType.continuous, np.float32)
+        currentValues = np.zeros(len(inputValues), np.float32)
+        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        p.set_values(currentValues, realNumber)
+        p.set_shared(isShared, realNumber)
     else:
 
         if printInfo >= 3:
             text = 'Update specified parameter: ' + parameterName
-            printInfoText(functionName,text)
+            printInfoText(functionName, text)
 
         # Parameter exist, but check if it is empty or not
         p = gridModel.properties[parameterName]
         if p.is_empty(realNumber):
             # Create parameter values (which are initialized to 0)
             grid3D = gridModel.get_grid(realNumber)
-            v = np.zeros(grid3D.defined_cell_count,np.float32)
-            p.set_values(v,realNumber)
+            v = np.zeros(grid3D.defined_cell_count, np.float32)
+            p.set_values(v, realNumber)
 
         # Get all active cell values
-        p = get3DParameter(gridModel,parameterName,realNumber,printInfo)
+        p = get3DParameter(gridModel, parameterName, realNumber, printInfo)
         if p.is_empty(realNumber):
             text = ' Specified parameter: ' + parameterName + ' is empty for realisation ' + str(realNumber)
-            printErrorAndTerminate(functionName,text)
+            printErrorAndTerminate(functionName, text)
 
         currentValues = p.get_values(realNumber)
-        [currentValues] = modifySelectedGridCells(gridModel,zoneNumberList,realNumber,currentValues,inputValues)
-        p.set_values(currentValues,realNumber)
-        p.set_shared(isShared,realNumber)
+        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        p.set_values(currentValues, realNumber)
+        p.set_shared(isShared, realNumber)
     return True
 
-def combineCodeNames(originalCodeNames,newCodeNames):
+
+def combineCodeNames(originalCodeNames, newCodeNames):
     error = 0
     codeValList = newCodeNames.keys()
     for code in codeValList:
@@ -346,7 +340,7 @@ def combineCodeNames(originalCodeNames,newCodeNames):
                     # The facies name for this code already exist
                     error = 1
                     break
-            item ={code: u}
+            item = {code: u}
             originalCodeNames.update(item)
             # error is 1 if the new facies code to be added to the original one has a facies name that already is used
         else:
@@ -356,12 +350,12 @@ def combineCodeNames(originalCodeNames,newCodeNames):
             if u != v:
                 # The code has different names in the existing original and the new codeNames dictionary
                 error = 1
-            
-    return [originalCodeNames,error]
+
+    return [originalCodeNames, error]
 
 
-def setDiscrete3DParameterValues(gridModel,parameterName,inputValues,zoneNumberList,codeNames,
-                                 realNumber=0,isShared= True,printInfo = 1):
+def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList, codeNames,
+                                 realNumber=0, isShared=True, printInfo=1):
     """Set discrete 3D parameter with values for specified grid model.
     Input: 
            gridModel     - Grid model object
@@ -385,14 +379,12 @@ def setDiscrete3DParameterValues(gridModel,parameterName,inputValues,zoneNumberL
     Output: True if 3D grid model exist and can be updated or 
              not if the 3D grid does not exist or if a new facies code is introduced but the corresponding facies name already exits.
     """
-    functionName =  'setDiscrete3DParameterValues'
+    functionName = 'setDiscrete3DParameterValues'
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         text = 'Specified grid model: ' + gridModel.name + ' is empty.'
-        printError(functionName,text)
+        printError(functionName, text)
         return False
-
-
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
     found = 0
@@ -404,51 +396,49 @@ def setDiscrete3DParameterValues(gridModel,parameterName,inputValues,zoneNumberL
     if found == 0:
         if printInfo >= 3:
             text = ' Create specified parameter: ' + parameterName + ' in ' + gridModel.name
-            printInfoText(functionName,text)
+            printInfoText(functionName, text)
             if isShared:
                 text = ' Set parameter to shared.'
-                printInfoText(functionName,text)
+                printInfoText(functionName, text)
             else:
                 text = ' Set parameter to non-shared.'
-                printInfoText(functionName,text)
+                printInfoText(functionName, text)
 
-        p = gridModel.properties.create(parameterName,roxar.GridPropertyType.discrete,np.uint16)
-        currentValues = np.zeros(len(inputValues),np.uint16)
-        [currentValues] = modifySelectedGridCells(gridModel,zoneNumberList,realNumber,currentValues,inputValues)
-        p.set_values(currentValues,realNumber)
-        p.set_shared(isShared,realNumber)
+        p = gridModel.properties.create(parameterName, roxar.GridPropertyType.discrete, np.uint16)
+        currentValues = np.zeros(len(inputValues), np.uint16)
+        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        p.set_values(currentValues, realNumber)
+        p.set_shared(isShared, realNumber)
         p.code_names = codeNames
     else:
         if printInfo >= 3:
             text = ' Update specified parameter: ' + parameterName + ' in ' + gridModel.name
-            printInfoText(functionName,text)
+            printInfoText(functionName, text)
 
         p = gridModel.properties[parameterName]
         if p.is_empty(realNumber):
             # Create parameter values (which are initialized to 0)
             grid3D = gridModel.get_grid(realNumber)
-            v = np.zeros(grid3D.defined_cell_count,np.uint16)
-            p.set_values(v,realNumber)
-
+            v = np.zeros(grid3D.defined_cell_count, np.uint16)
+            p.set_values(v, realNumber)
 
         # Get all active cell values
-        p = get3DParameter(gridModel,parameterName,realNumber,printInfo)
+        p = get3DParameter(gridModel, parameterName, realNumber, printInfo)
         if p.is_empty(realNumber):
             text = ' Specified parameter: ' + parameterName + ' is empty for realisation ' + str(realNumber)
-            printErrorAndTerminate(functionName,text)
-
+            printErrorAndTerminate(functionName, text)
 
         currentValues = p.get_values(realNumber)
-        [currentValues] = modifySelectedGridCells(gridModel,zoneNumberList,realNumber,currentValues,inputValues)
-        p.set_values(currentValues,realNumber)
+        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        p.set_values(currentValues, realNumber)
 
-        p.set_shared(isShared,realNumber)
+        p.set_shared(isShared, realNumber)
         originalCodeNames = p.code_names.copy()
-        [updatedCodeNames,err] = combineCodeNames(originalCodeNames,codeNames)
+        [updatedCodeNames, err] = combineCodeNames(originalCodeNames, codeNames)
         if err == 1:
             text1 = ' Try to define a new facies code with a facies name that already is used define a new facies name\n'
             text2 = ' for a facies code that already exists when updating facies realisation\n'
-            printError(functionName,'\n' + text1 + text2)
+            printError(functionName, '\n' + text1 + text2)
             print('Original facies codes from RMS project: ')
             print(repr(originalCodeNames))
             print('New facies codes specified in current APS model: ')
@@ -457,27 +447,27 @@ def setDiscrete3DParameterValues(gridModel,parameterName,inputValues,zoneNumberL
         p.code_names = updatedCodeNames
         if printInfo >= 3:
             text = 'Updated facies table: '
-            printInfoText(functionName,text)
+            printInfoText(functionName, text)
             print(p.code_names)
     return True
 
 
-def getGridAttributes(grid,printInfo):
+def getGridAttributes(grid, printInfo):
     indexer = grid.grid_indexer
     dimensions = indexer.dimensions
 
     # Get Max and Min coordinates
-    cell_numbers = indexer.get_cell_numbers_in_range((0,0,0), dimensions)
+    cell_numbers = indexer.get_cell_numbers_in_range((0, 0, 0), dimensions)
     cell_corners = grid.get_cell_corners(cell_numbers)
 
-    xmin = cell_corners[:,:,0].min()
-    xmax = cell_corners[:,:,0].max()
-    ymin = cell_corners[:,:,1].min()
-    ymax = cell_corners[:,:,1].max()
-    zmin = cell_corners[:,:,2].min()
-    zmax = cell_corners[:,:,2].max()
+    xmin = cell_corners[:, :, 0].min()
+    xmax = cell_corners[:, :, 0].max()
+    ymin = cell_corners[:, :, 1].min()
+    ymax = cell_corners[:, :, 1].max()
+    zmin = cell_corners[:, :, 2].min()
+    zmax = cell_corners[:, :, 2].max()
 
-    if printInfo >= 3:        
+    if printInfo >= 3:
         print('Min. X: {}   | Max. X: {}'.format(xmin, xmax))
         print('Min. Y: {}   | Max. Y: {}'.format(ymin, ymax))
         print('Min. Z: {}   | Max. Z: {}'.format(zmin, zmax))
@@ -513,51 +503,49 @@ def getGridAttributes(grid,printInfo):
             number_layers = 0
             layers = ""
             for layer_range in indexer.zonation[zone_index]:
-                start=layer_range[0]
-                end=layer_range[-1]
-                number_layers += (end+1 - start)
+                start = layer_range[0]
+                end = layer_range[-1]
+                number_layers += (end + 1 - start)
                 # Indexes start with 0, so add 1 to give user-friendly output
-                layers = "{}-{} ".format(start+1, end+1)
+                layers = "{}-{} ".format(start + 1, end + 1)
             print('Zone{}: "{}", Layers {} ({} layers)'.format(i, zone_name, layers, number_layers))
         print(' ')
     nZones = len(indexer.zonation)
 
-    [simBoxXLength,simBoxYLength,asimuthAngle,x0,y0] = getGridSimBoxSize(grid,printInfo)
-    return [xmin,xmax,ymin,ymax,zmin,zmax,simBoxXLength,simBoxYLength,asimuthAngle,x0,y0,
-            dimensions[0],dimensions[1],dimensions[2],nZones,zoneNames]
+    [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0] = getGridSimBoxSize(grid, printInfo)
+    return [xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, asimuthAngle, x0, y0,
+            dimensions[0], dimensions[1], dimensions[2], nZones, zoneNames]
 
 
-def getGridSimBoxSize(grid,printInfo):
+def getGridSimBoxSize(grid, printInfo):
     indexer = grid.grid_indexer
-    (nx,ny,nz) = indexer.dimensions
+    (nx, ny, nz) = indexer.dimensions
 
-
-    # Calculate dimensions of the simulation box 
-    cell_00 = grid.get_cell_corners_by_index((0,0,0))
-    cell_10 = grid.get_cell_corners_by_index((nx-1,0,0))
-    cell_01 = grid.get_cell_corners_by_index((0,ny-1,0))
-    cell_11 = grid.get_cell_corners_by_index((nx-1,ny-1,0))
+    # Calculate dimensions of the simulation box
+    cell_00 = grid.get_cell_corners_by_index((0, 0, 0))
+    cell_10 = grid.get_cell_corners_by_index((nx - 1, 0, 0))
+    cell_01 = grid.get_cell_corners_by_index((0, ny - 1, 0))
+    cell_11 = grid.get_cell_corners_by_index((nx - 1, ny - 1, 0))
     x2 = cell_01[2][0]
     x1 = cell_10[1][0]
     x0 = cell_00[0][0]
     y2 = cell_01[2][1]
     y1 = cell_10[1][1]
     y0 = cell_00[0][1]
-    simBoxXLength = np.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0))
-    simBoxYLength = np.sqrt((x2-x0)*(x2-x0) + (y2-y0)*(y2-y0))
-    cosTheta = (y2-y0)/simBoxYLength
-    sinTheta = (x2-x0)/simBoxYLength
-    asimuthAngle = np.arctan(sinTheta/cosTheta)
-    asimuthAngle = asimuthAngle*180.0/np.pi
-    if printInfo >= 3:        
+    simBoxXLength = np.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0))
+    simBoxYLength = np.sqrt((x2 - x0) * (x2 - x0) + (y2 - y0) * (y2 - y0))
+    cosTheta = (y2 - y0) / simBoxYLength
+    sinTheta = (x2 - x0) / simBoxYLength
+    asimuthAngle = np.arctan(sinTheta / cosTheta)
+    asimuthAngle = asimuthAngle * 180.0 / np.pi
+    if printInfo >= 3:
         print('Debug output: Length in x direction:  ' + str(simBoxXLength))
         print('Debug output: Length in y direction:  ' + str(simBoxYLength))
         print('Debug output: Sim box rotation angle: ' + str(asimuthAngle))
-    return [simBoxXLength,simBoxYLength,asimuthAngle,x0,y0]
+    return [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0]
 
 
-
-def createHorizonDataTypeObject(horizons,representationName,printInfo=0):
+def createHorizonDataTypeObject(horizons, representationName, printInfo=0):
     # Check if horizon representation (horizon data type) exist
     # for specified type. If not, create a new representation
     reprObj = None
@@ -572,13 +560,13 @@ def createHorizonDataTypeObject(horizons,representationName,printInfo=0):
                                                   roxar.VerticalDomain.depth)
         if printInfo >= 3:
             text = 'Debug ouput: Create new data type for horizon to be used '
-            text = text + 'for variogram asimuth trend' 
+            text = text + 'for variogram asimuth trend'
             print(text)
-            
+
     return reprObj
 
 
-def get2DMapDimensions(horizons,horizonName,representationName,printInfo):
+def get2DMapDimensions(horizons, horizonName, representationName, printInfo):
     # Read information about 2D grid size,orientation and resolution
     # from existing 2D map.
     horizonObj = None
@@ -588,8 +576,8 @@ def get2DMapDimensions(horizons,horizonName,representationName,printInfo):
             break
     if horizonObj == None:
         raise ValueError('Error in  get2DMapInfo\n'
-                        'Error: Horizon name: ' + horizonName + ' does not exist'
-                        )
+                         'Error: Horizon name: ' + horizonName + ' does not exist'
+                         )
 
     reprObj = None
     for representation in horizons.representations:
@@ -600,25 +588,25 @@ def get2DMapDimensions(horizons,horizonName,representationName,printInfo):
         raise ValueError('Error in  get2DMapInfo\n'
                          'Error: Horizons data type: ' + representationName + ' does not exist'
                          )
-            
+
     surface = horizons[horizonName][representationName]
-    if not isinstance(surface,roxar.Surface):
+    if not isinstance(surface, roxar.Surface):
         raise ValueError('Error in get2DMapInfo\n'
                          'Error: Specified object is not a 2D grid'
                          )
-    grid    = surface.get_grid()
-    values  = grid.get_values()
+    grid = surface.get_grid()
+    values = grid.get_values()
     shape = values.shape
     xinc = grid.increment[0]
     yinc = grid.increment[1]
     nx = shape[0]
     ny = shape[1]
     coordinates = grid.get_coordinates()
-    coordinates.mask[:,:,:2]= 0
-    xmin = coordinates[:,:,0].min()
-    xmax = coordinates[:,:,0].max()
-    ymin = coordinates[:,:,1].min()
-    ymax = coordinates[:,:,1].max()
+    coordinates.mask[:, :, :2] = 0
+    xmin = coordinates[:, :, 0].min()
+    xmax = coordinates[:, :, 0].max()
+    ymin = coordinates[:, :, 1].min()
+    ymax = coordinates[:, :, 1].max()
     rotation = grid.rotation
     if printInfo >= 3:
         print('Debug output:  For 2D map')
@@ -631,12 +619,11 @@ def get2DMapDimensions(horizons,horizonName,representationName,printInfo):
         print('  Map nx:   ' + str(nx))
         print('  Map ny:   ' + str(ny))
         print('  Map rotation:   ' + str(rotation))
-    return [nx,ny,xinc,yinc,xmin,ymin,xmax,ymax,rotation]
+    return [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation]
 
-            
 
-def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
-                              printInfo=0,xmin=0,ymin=0,xinc=0,yinc=0,nx=0,ny=0,rotation=0):
+def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
+                              printInfo=0, xmin=0, ymin=0, xinc=0, yinc=0, nx=0, ny=0, rotation=0):
     # This function will replace a horizon with specified name and type with a new one with value equal 
     # to the constant value specified in variable inputValue. The 2D grid dimensions can also specified if new maps
     # must created.
@@ -650,7 +637,7 @@ def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
         raise ValueError('Error in updateHorizonObject\n'
                          'Error: Horizon name: ' + horizonName + ' does not exist'
                          )
-            
+
     # Find the correct representation. Must exist.
     reprObj = None
     for representation in horizons.representations:
@@ -663,7 +650,7 @@ def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
                          )
 
     surfaceObj = horizons[horizonName][reprName]
-    if isinstance(surfaceObj,roxar.Surface):
+    if isinstance(surfaceObj, roxar.Surface):
         emptyGrid = 0
         try:
             grid = surfaceObj.get_grid()
@@ -673,17 +660,17 @@ def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
             if nx == 0 or ny == 0:
                 print('Error in  setConstantValueInHorizon:  Grid dimensions are not specified')
                 sys.exit()
-            grid = roxar.RegularGrid2D.create(xmin,ymin,xinc,yinc,nx,ny,rotation)
+            grid = roxar.RegularGrid2D.create(xmin, ymin, xinc, yinc, nx, ny, rotation)
             values = grid.get_values()
             values[:] = inputValue
             grid.set_values(values)
             surfaceObj.set_grid(grid)
             if printInfo >= 3:
-                text = 'Debug output: ' + 'Create trend surface ' + reprName 
-                text = text + ' for variogram asimuth in ' + horizonName 
+                text = 'Debug output: ' + 'Create trend surface ' + reprName
+                text = text + ' for variogram asimuth in ' + horizonName
                 text = text + ' Value: ' + str(inputValue)
                 print(text)
-            
+
         if emptyGrid == 0:
             # Modify grid values
             values = grid.get_values()
@@ -691,12 +678,8 @@ def setConstantValueInHorizon(horizons,horizonName,reprName,inputValue,
             grid.set_values(values)
             surfaceObj.set_grid(grid)
             if printInfo >= 3:
-                text = 'Debug output: ' + 'Update trend surface ' + reprName 
-                text = text + ' for variogram asimuth in ' + horizonName 
+                text = 'Debug output: ' + 'Update trend surface ' + reprName
+                text = text + ' for variogram asimuth in ' + horizonName
                 text = text + ' Value: ' + str(inputValue)
                 print(text)
     return
-            
-
-
-

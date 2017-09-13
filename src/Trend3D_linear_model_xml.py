@@ -1,48 +1,40 @@
 #!/bin/env python
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 
-import numpy as np
-import sys
-import copy
-import math
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element, SubElement, dump
-
-"""
--------------------------------------------------------------------
-class Trend3D_linear_model
-Description: This class keeps model parameter for linear 3D trend. The parameterization
-             is asimuth angle for depositional direction and stacking angle. In addition a variable
-             specifying whether the deposition is progradational or retrogradational is specified.
-
- Public member functions:
- Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
-
- Get functions:
-  def getAsimuth(self)
-  def getStackingAngle(self)
-  def getStackingDirection(self)
-
- Set functions:
-  def setAsimuth(self,angle)
-  def setStackingAngle(self,stackingAngle)
-  def setStackingDirection(self,direction)
-  def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
-
- XmlTree update function:
-  def XMLAddElement(self,parent)
-
- Private member functions:
-  def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
-
-
---------------------------------------------------------------------------------------
-"""
+from xml.etree.ElementTree import Element
 
 
 class Trend3D_linear_model:
     """
-    Description: Calculate linear 3D trend for specified grid cells.
+    -------------------------------------------------------------------
+    class Trend3D_linear_model
+    Description: Calculate linear 3D trend for specified grid cells. This class keeps model parameter for
+                 linear 3D trend. The parameterization is asimuth angle for depositional direction and stacking angle.
+                 In addition a variable specifying whether the deposition is progradational or
+                retrogradational is specified.
+
+     Public member functions:
+     Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
+
+     Get functions:
+      def getAsimuth(self)
+      def getStackingAngle(self)
+      def getStackingDirection(self)
+
+     Set functions:
+      def setAsimuth(self,angle)
+      def setStackingAngle(self,stackingAngle)
+      def setStackingDirection(self,direction)
+      def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
+
+     XmlTree update function:
+      def XMLAddElement(self,parent)
+
+     Private member functions:
+      def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
+
+
+    --------------------------------------------------------------------------------------
     """
 
     def __init__(self, trendRuleXML, printInfo=0, modelFileName=None):
@@ -68,8 +60,7 @@ class Trend3D_linear_model:
                 print('Debug output: Stacking type:  ' + str(self.__direction))
         else:
             if self.__printInfo >= 3:
-                print('Debug info: Create empty object of ' + self.__className )
-
+                print('Debug info: Create empty object of ' + self.__className)
 
     def __interpretXMLTree(self, trendRuleXML, printInfo, modelFileName):
         # Initialize object form xml tree object trendRuleXML
@@ -104,7 +95,7 @@ class Trend3D_linear_model:
                     'Error: Direction for linear trend must be 1 if stacking angle is positive\n'
                     '       when moving in positive asimuth direction and -1 if stacking angle\n'
                     '       is positive when moving in negative asimuth direction.'
-                  ''.format(self.__className, self.__direction)
+                    ''.format(self.__className, self.__direction)
                 )
 
         kw = 'stackAngle'

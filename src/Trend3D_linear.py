@@ -1,14 +1,11 @@
 #!/bin/env python
-# Dependency: ROXAPI
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
-
-import roxar
-import numpy as np 
-import sys
-import copy
 import math
+from _ast import List
 
-import generalFunctionsUsingRoxAPI as gr
+import numpy as np
+
+import src.generalFunctionsUsingRoxAPI as gr
 
 
 class Trend3D_linear:
@@ -16,7 +13,7 @@ class Trend3D_linear:
     Description: Calculate linear 3D trend for specified grid cells.
     """
 
-    def __init__(self,trendRuleModel,printInfo=0):
+    def __init__(self, trendRuleModel, printInfo=0):
         """
         Description: Create a trend object which is used to create 3D trends using ROXAPI. 
                      Input is model parameters.
@@ -27,37 +24,42 @@ class Trend3D_linear:
             print('Error: Programming error. Empty trendRuleModel object')
             return
 
-        self.__asimuth        = trendRuleModel.getAsimuth()
-        self.__stackingAngle  = trendRuleModel.getStackingAngle()
-        self.__direction      = trendRuleModel.getStackingDirection()
-        self.__printInfo      = printInfo 
+        self.__asimuth = trendRuleModel.getAsimuth()
+        self.__stackingAngle = trendRuleModel.getStackingAngle()
+        self.__direction = trendRuleModel.getStackingDirection()
+        self.__printInfo = printInfo
 
-
-    def createTrend(self,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness):
+    def createTrend(self,
+                    gridModel,
+                    realNumber: int,
+                    nDefinedCells: int,
+                    cellIndexDefined: List[int],
+                    zoneNumber: int,
+                    simBoxThickness: float
+                    ) -> List[object]:
         # Check if specified grid model exists and is not empty
         if gridModel.is_empty():
             text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
             print(text)
             values = None
         else:
-            grid3D      = gridModel.get_grid(realNumber)
+            grid3D = gridModel.get_grid(realNumber)
             gridIndexer = grid3D.simbox_indexer
-            (nx,ny,nz)  = gridIndexer.dimensions
-            [simBoxXLength,simBoxYLength,asimuthAngle,x0,y0] = gr.getGridSimBoxSize(grid3D,self.__printInfo)
+            (nx, ny, nz) = gridIndexer.dimensions
+            [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__printInfo)
 
             cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
-            cellIndices      = gridIndexer.get_indices(cellIndexDefined)
+            cellIndices = gridIndexer.get_indices(cellIndexDefined)
 
-
-            zoneName   = grid3D.zone_names[zoneNumber-1]
-            zonation   = gridIndexer.zonation
-            layerRanges = zonation[zoneNumber-1]
+            zoneName = grid3D.zone_names[zoneNumber - 1]
+            zonation = gridIndexer.zonation
+            layerRanges = zonation[zoneNumber - 1]
             n = 0
             for layer in layerRanges:
                 for k in layer:
                     n += 1
             nLayersInZone = n
-            zinc = simBoxThickness/nLayersInZone
+            zinc = simBoxThickness / nLayersInZone
             if self.__printInfo >= 3:
                 print('Debug output: In ' + self.__className)
                 print('Debug output:  Zone name: ' + zoneName)
@@ -66,53 +68,54 @@ class Trend3D_linear:
                 print('Debug output:  nx,ny,nz: ' + str(nx) + ' ' + str(ny) + ' ' + str(nz))
                 print('Debug output:  Number of layers in zone: ' + str(nLayersInZone))
 
-            # Create an empty array with 0 values with correct length 
-            # corresponding to all active cells in the grid
-#            values = grid3D.generate_values(np.float32)
-            valuesInSelectedCells = np.zeros(nDefinedCells,np.float32)
+                # Create an empty array with 0 values with correct length
+                # corresponding to all active cells in the grid
+            #            values = grid3D.generate_values(np.float32)
+            valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
 
             # Calculate the 3D trend values
 
-            alpha = (90.0 - self.__stackingAngle)*np.pi/180.0
+            alpha = (90.0 - self.__stackingAngle) * np.pi / 180.0
             if self.__direction == 1:
-                theta = self.__asimuth*np.pi/180.0
+                theta = self.__asimuth * np.pi / 180.0
             else:
-                theta = (self.__asimuth + 180.0)*np.pi/180.0
+                theta = (self.__asimuth + 180.0) * np.pi / 180.0
 
             # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
-            xComponent = math.cos(alpha)*math.sin(theta)
-            yComponent = math.cos(alpha)*math.cos(theta)
+            xComponent = math.cos(alpha) * math.sin(theta)
+            yComponent = math.cos(alpha) * math.cos(theta)
             zComponent = math.sin(alpha)
 
             if self.__printInfo >= 3:
                 print('Debug output: In ' + self.__className)
-                print('Debug output: normal vector: ' + '(' + str(xComponent) + ', ' +  str(yComponent) + ', ' + str(zComponent) + ')')
+                print('Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(
+                    zComponent) + ')')
 
             for indx in range(nDefinedCells):
-                x = cellCenterPoints[indx,0]
-                y = cellCenterPoints[indx,1]
-                z = cellCenterPoints[indx,2]
-                
-                i = cellIndices[indx,0]
-                j = cellIndices[indx,1]
-                k = cellIndices[indx,2]
+                x = cellCenterPoints[indx, 0]
+                y = cellCenterPoints[indx, 1]
+                z = cellCenterPoints[indx, 2]
+
+                i = cellIndices[indx, 0]
+                j = cellIndices[indx, 1]
+                k = cellIndices[indx, 2]
 
                 # Coordinates relative to a local origo (xmin,ymin) for x,y
                 # The depth coordinate zSimBox is relative to simulation box
                 xRel = x - x0
                 yRel = y - y0
-                zSimBox = (k+0.5)*zinc
-                trendValue = xComponent*xRel + yComponent*yRel + zComponent*zSimBox
+                zSimBox = (k + 0.5) * zinc
+                trendValue = xComponent * xRel + yComponent * yRel + zComponent * zSimBox
                 valuesInSelectedCells[indx] = trendValue
-            minValue = valuesInSelectedCells.min()    
+            minValue = valuesInSelectedCells.min()
             maxValue = valuesInSelectedCells.max()
             minmaxDifference = maxValue - minValue
-            valuesRescaled = self.__direction * valuesInSelectedCells/minmaxDifference
+            valuesRescaled = self.__direction * valuesInSelectedCells / minmaxDifference
 
-            minValue = valuesRescaled.min()    
+            minValue = valuesRescaled.min()
             maxValue = valuesRescaled.max()
             minmaxDifference = maxValue - minValue
-        return [minmaxDifference,valuesRescaled]
+        return [minmaxDifference, valuesRescaled]
 
     def getAsimuth(self):
         return self.__asimuth
@@ -122,5 +125,3 @@ class Trend3D_linear:
 
     def getStackingDirection(self):
         return self.__direction
-
-

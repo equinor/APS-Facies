@@ -1,92 +1,88 @@
 #!/bin/env python
-# Class APSModel  - contains the data structure for data read from model file
-#
-# Class member variables:
-
-# Public member functions:
-#   Constructor: def __init__(self,modelFileName= None)
-#
-#   def updateXMLModelFile(self,modelFileName,parameterFileName,printInfo)
-#             - Read xml model file and IPL parameter file and write
-#               updated xml model file without putting any data into the data structure.
-#
-
-#   def createSimGaussFieldIPL()
-#             - Write IPL file to simulate gaussian fields
-#
-#   def XMLAddElement(self,root)
-#             - Add data to xml tree
-#
-#   def writeModel(self,modelFileName, printInfo=0)
-#             - Create xml tree with model specification by calling XMLAddElement
-#             - Write xml tree with model specification to file
-#
-#   def writeModelFromXMLRoot(self,inputETree,outputModelFileName)
-#             - Write specified xml tree to file
-#
-#   Get data from data structure:
-#
-#    def getXmlTree(self)
-#    def getRoot(self)
-#    def getSelectedZoneNumberList(self)
-#    def getZoneModel(self,zoneNumber,mainLevelFacies=None)
-#    def getGridModelName(self)
-#    def getResultFaciesParamName(self)
-#    def getZoneNumberList(self)
-#    def getPreviewZoneNumber(self)
-#    def getAllGaussFieldNamesUsed(self)
-#    def getZoneParamName(self)
-#    def printInfo(self)
-#    def getMainFaciesTable(self)
-#    def getRMSProjectName(self)
-#    def getRMSGaussFieldScriptName(self)
-#    def getAllProbParam(self)
-#
-#   Set data and update data structure:
-#
-#    def setRmsProjectName(self,name)
-#    def setRmsWorkflowName(self,name)
-#    def setGaussFieldScriptName(self,name)
-#    def setRmsGridModelName(self,name)
-#    def setRmsZoneParamName(self,name)
-#    def setRmsResultFaciesParamName(self,name)
-#    def setPrintInfo(self,printInfo)
-#    def setSelectedZoneNumberList(self,selectedZoneNumbers)
-#    def setPreviewZoneNumber(self,zoneNumber)
-#    def addNewZone(self,zoneObject)
-#    def deleteZone(self,zoneNumber)
-#    def setMainFaciesTable(self,faciesTableObj)
-#    def setGaussFieldJobs(self,gfJobObject)
-
-
-# Private member functions:
-#  def __interpretXMLModelFile(self,modelFileName)
-#              - Read xml file and put the data into data structure
-#
-#  def __readParamFromFile(self,inputFile,printInfo)
-#              - Read IPL include file to get updated model parameters from FMU
-#
-# -----------------------------------------------------------------------------
-
-import copy
 import datetime
-
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-from xml.dom import minidom
 
-from APSZoneModel import APSZoneModel
-from APSGaussFieldJobs import APSGaussFieldJobs
-from APSMainFaciesTable import APSMainFaciesTable
+import copy
 
-
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
+from src.APSGaussFieldJobs import APSGaussFieldJobs
+from src.APSMainFaciesTable import APSMainFaciesTable
+from src.APSZoneModel import APSZoneModel
+from src.utils.methods import prettify
 
 
 class APSModel:
+    """
+    Class APSModel  - contains the data structure for data read from model file
+
+    Class member variables:
+
+    Public member functions:
+      Constructor: def __init__(self,modelFileName= None)
+
+      def updateXMLModelFile(self,modelFileName,parameterFileName,printInfo)
+                - Read xml model file and IPL parameter file and write
+                  updated xml model file without putting any data into the data structure.
+
+
+      def createSimGaussFieldIPL()
+                - Write IPL file to simulate gaussian fields
+
+      def XMLAddElement(self,root)
+                - Add data to xml tree
+
+      def writeModel(self,modelFileName, printInfo=0)
+                - Create xml tree with model specification by calling XMLAddElement
+                - Write xml tree with model specification to file
+
+      def writeModelFromXMLRoot(self,inputETree,outputModelFileName)
+                - Write specified xml tree to file
+
+      Get data from data structure:
+
+       def getXmlTree(self)
+       def getRoot(self)
+       def getSelectedZoneNumberList(self)
+       def getZoneModel(self,zoneNumber,mainLevelFacies=None)
+       def getGridModelName(self)
+       def getResultFaciesParamName(self)
+       def getZoneNumberList(self)
+       def getPreviewZoneNumber(self)
+       def getAllGaussFieldNamesUsed(self)
+       def getZoneParamName(self)
+       def printInfo(self)
+       def getMainFaciesTable(self)
+       def getRMSProjectName(self)
+       def getRMSGaussFieldScriptName(self)
+       def getAllProbParam(self)
+
+      Set data and update data structure:
+
+       def setRmsProjectName(self,name)
+       def setRmsWorkflowName(self,name)
+       def setGaussFieldScriptName(self,name)
+       def setRmsGridModelName(self,name)
+       def setRmsZoneParamName(self,name)
+       def setRmsResultFaciesParamName(self,name)
+       def setPrintInfo(self,printInfo)
+       def setSelectedZoneNumberList(self,selectedZoneNumbers)
+       def setPreviewZoneNumber(self,zoneNumber)
+       def addNewZone(self,zoneObject)
+       def deleteZone(self,zoneNumber)
+       def setMainFaciesTable(self,faciesTableObj)
+       def setGaussFieldJobs(self,gfJobObject)
+
+
+    Private member functions:
+     def __interpretXMLModelFile(self,modelFileName)
+                 - Read xml file and put the data into data structure
+
+     def __readParamFromFile(self,inputFile,printInfo)
+                 - Read IPL include file to get updated model parameters from FMU
+
+    -----------------------------------------------------------------------------
+    """
+
     def __init__(self, modelFileName=None):
         # Local variables
         self.__className = 'APSModel'

@@ -1,81 +1,80 @@
 #!/bin/env python
-import sys
-import copy
-import numpy as np
-from Trunc2D_Base_xml import Trunc2D_Base
 from xml.etree.ElementTree import Element
 
-"""
------------------------------------------------------------------------
- class Trunc2D_Angle
+import copy
+import numpy as np
 
- Description: This class is derived from Trunc2D_Base which contain common data structure for
-               truncation algorithms with overlay facies.
+from src.Trunc2D_Base_xml import Trunc2D_Base
 
-               Truncation map consists of polygons defined by linear sloping boundaries.
-               Each facies boundary has a normal vector with specified direction.
-               The direction is specified as anticlockwise rotation relative to first axis.
-               The angle is in degrees. So an angle of 0.0 means that the normal vector points
-               in the first axis direction ('x'-direction).
-               An angle of 90.0 degrees means that the normal vector points in
-               the second axis direction ('y' direction) while angle of 45.0 degrees means a
-               45 degree rotation of the vector relative to the first axis direction anticlockwise.
-               It is possible to specify that a facies can be associated with multiple polygons
-               in the truncation map.
 
-               Overlay facies can be defined and follow the rule defined in the Trunc2D_Base class.
-
- Constructor:
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, 
-                 nGaussFieldInModel=None, printInfo=0, modelFileName=None)
-
- Public member functions:  
- def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
-                backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-                useConstTruncParam, printInfo)
- def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
- def setTruncRule(self, faciesProb, cellIndx=0)
- def defineFaciesByTruncRule(self, alphaCoord)
- def getClassName(self)
- def useConstTruncModelParam(self)
- def getNCountShiftAlpha(self)
- def truncMapPolygons(self)
- def faciesIndxPerPolygon(self)
- def setAngle(self, polygonNumber, angle)
- def setAngleTrend(self, polygonNumber, angleParamName)
- def setUseTrendForAngles(self, useConstTrend)
- def XMLAddElement(self, parent)
- def writeContentsInDataStructure(self)
- def getNCalcTruncMap(self)
- def getNLookupTruncMap(self)
-
- Private member functions:
- def __setEmpty(self)
- def __interpretXMLTree(self, trRuleXML, modelFileName)
- def __setUnitSquarePolygon(self)
- def __setZeroPolygon(self)
- def __setFaciesLines(self, cellIndx)
- def __subdividePolygonByLine(self, polygonPts, vx, vy, x0, y0)
- def __polyArea(self, polygon)
- def __findSminSmaxForPolygon(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
- def __defineIntersectionFromProb(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal, faciesProb)
- def __isInsidePolygon(self, polygon, xInput, yInput)
- def __calculateFaciesPolygons(self,cellIndx,area)
-
-----------------------------------------------------------------------
-"""
 class Trunc2D_Angle(Trunc2D_Base):
     """
-    Description: This class implements adaptive plurigaussian field truncation
-                 using two simulated gaussian fields (with trend).
+    -----------------------------------------------------------------------
+     class Trunc2D_Angle
 
+     Description: This class implements adaptive plurigaussian field truncation
+                  using two simulated gaussian fields (with trend).
+
+                  This class is derived from Trunc2D_Base which contain common data structure for
+                  truncation algorithms with overlay facies.
+
+                  Truncation map consists of polygons defined by linear sloping boundaries.
+                  Each facies boundary has a normal vector with specified direction.
+                  The direction is specified as anticlockwise rotation relative to first axis.
+                  The angle is in degrees. So an angle of 0.0 means that the normal vector points
+                  in the first axis direction ('x'-direction).
+                  An angle of 90.0 degrees means that the normal vector points in
+                  the second axis direction ('y' direction) while angle of 45.0 degrees means a
+                  45 degree rotation of the vector relative to the first axis direction anticlockwise.
+                  It is possible to specify that a facies can be associated with multiple polygons
+                  in the truncation map.
+
+                  Overlay facies can be defined and follow the rule defined in the Trunc2D_Base class.
+
+     Constructor:
+        def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
+                     nGaussFieldInModel=None, printInfo=0, modelFileName=None)
+
+     Public member functions:
+     def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
+                    backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
+                    useConstTruncParam, printInfo)
+     def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
+     def setTruncRule(self, faciesProb, cellIndx=0)
+     def defineFaciesByTruncRule(self, alphaCoord)
+     def getClassName(self)
+     def useConstTruncModelParam(self)
+     def getNCountShiftAlpha(self)
+     def truncMapPolygons(self)
+     def faciesIndxPerPolygon(self)
+     def setAngle(self, polygonNumber, angle)
+     def setAngleTrend(self, polygonNumber, angleParamName)
+     def setUseTrendForAngles(self, useConstTrend)
+     def XMLAddElement(self, parent)
+     def writeContentsInDataStructure(self)
+     def getNCalcTruncMap(self)
+     def getNLookupTruncMap(self)
+
+     Private member functions:
+     def __setEmpty(self)
+     def __interpretXMLTree(self, trRuleXML, modelFileName)
+     def __setUnitSquarePolygon(self)
+     def __setZeroPolygon(self)
+     def __setFaciesLines(self, cellIndx)
+     def __subdividePolygonByLine(self, polygonPts, vx, vy, x0, y0)
+     def __polyArea(self, polygon)
+     def __findSminSmaxForPolygon(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
+     def __defineIntersectionFromProb(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal, faciesProb)
+     def __isInsidePolygon(self, polygon, xInput, yInput)
+     def __calculateFaciesPolygons(self,cellIndx,area)
+
+    ----------------------------------------------------------------------
     """
+
     def __setEmpty(self):
         """
         Description: Initialize values for empty data structure
         """
-        # Initialize variables defined in base class Trunc2D_Base
-        super()._setEmpty()
 
         # Specific variables for class Trunc2D_Angle
         self._className = 'Trunc2D_Angle'
@@ -84,8 +83,6 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Tolerance used for probabilities
         self._eps = 0.001
-
-
 
         # Variables containing truncations for the 2D truncation map
         # The input direction angles can be file names in case trend parameters for these are specified
@@ -123,10 +120,9 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__useMemoization = 1
         # To make a lookup key from facies probability, round off input facies probability
         # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
-        self.__keyResolution = 100 
+        self.__keyResolution = 100
 
-
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, 
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
                  printInfo=0, modelFileName=None):
         """
         Description: This constructor can either create a new object by reading the information
@@ -138,9 +134,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables 
         and data structure for modelling of overlya facies.
         
-        """        
+        """
+        super().__init__()
         self.__setEmpty()
-        
+
         if trRuleXML is not None:
             if printInfo >= 3:
                 print('Debug info: Read data from model file for: ' + self._className)
@@ -151,7 +148,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Call base class method to set modelled facies. 
             # This will initialize common data for facies to be modelled (specified for the zone) and the 
             # ordering of the facies in the truncation rule.
-            self._setModelledFacies(mainFaciesTable,faciesInZone)
+            self._setModelledFacies(mainFaciesTable, faciesInZone)
 
             # Read truncation rule for background facies from xml tree.
             # Here the hierarchy of polygons in the 2D truncation map defined by the two
@@ -165,7 +162,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             # is "background" for each overlay facies. Therefore data structure and methods 
             # related to overprint facies is common to several different truncation algorithms.
             self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName)
-            
+
             # Call base class method to check that facies in truncation rule is 
             # consistent with facies in zone.
             self._checkFaciesForZone()
@@ -178,19 +175,17 @@ class Trunc2D_Angle(Trunc2D_Base):
                 print('Debug output: Facies code for facies in zone')
                 print(repr(self._faciesCode))
                 for i in range(len(self._overlayFaciesIndx)):
-                    print('Debug output: Overlay facies for group ' + str(i+1) + ': ' 
-                          +  self._faciesInTruncRule[self._overlayFaciesIndx[i]])
+                    print('Debug output: Overlay facies for group ' + str(i + 1) + ': '
+                          + self._faciesInTruncRule[self._overlayFaciesIndx[i]])
                     print('Debug output: Background facies index in trunc rule for this group: ')
                     for j in range(len(self._backGroundFaciesIndx[i])):
                         indx = self._backGroundFaciesIndx[i][j]
                         print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
 
-
         else:
             if printInfo >= 3:
                 print('Debug info: Create empty object for: ' + self._className)
-        #  End of __init__
-
+                #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         """ Initialize object from xml tree object trRuleXML. 
@@ -283,7 +278,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__probFracPerPolygon = probFracPerPolygon
         self.__nPolygons = nPolygons
 
-
         # Check the sum over background facies for probfrac
         # Note that overlay facies is not a part of this calculations. 
         for i in range(self._nBackGroundFacies):
@@ -339,7 +333,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
 
-
         # Set data structure for truncation rule
         # Loop over all polygons in truncation map
         self.__useConstTruncModelParam = useConstTruncParam
@@ -361,9 +354,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 self._orderIndex.append(fIndx)
             self.__nPolygons += 1
 
-
-
-        if self._printInfo>=3:
+        if self._printInfo >= 3:
             print('Debug info: Background facies defined: ')
             print(repr(self._faciesInTruncRule))
 
@@ -375,14 +366,12 @@ class Trunc2D_Angle(Trunc2D_Base):
             m1 = len(backGroundFaciesGroups)
             m2 = len(overlayFacies)
             m3 = len(overlayTruncCenter)
-            if m1 != m2 or m1!= m3:
+            if m1 != m2 or m1 != m3:
                 raise ValueError(
                     'Programming error in function initialize in class ' + self._className + '\n'
-                    'Lenght of input lists are different from each other'
-                    )
+                                                                                             'Lenght of input lists are different from each other'
+                )
             self._nGaussFieldInModel = 2 + m2
-
-
 
         # Set which facies to be used as background facies when overprint facies is applied
         # Call base class function for overlay facies 
@@ -420,7 +409,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                         'Error in {}\n'
                         'Error: Inconsistency in data structure. Programming error.'
                         ''.format(self.__className)
-                        )
+                    )
 
     def __setUnitSquarePolygon(self):
         """
@@ -488,7 +477,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         x0Normal = []
         y0Normal = []
         fNrLine = []
-
 
         faciesAlpha = []
         if self.__useConstTruncModelParam:
@@ -720,7 +708,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         sHigh = smax
         sLow = smin
         nmax = 15
-        tolerance  = 0.01
+        tolerance = 0.01
         tolerance2 = 0.02
         converged = 0
         closestPolygon = 0
@@ -732,8 +720,10 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Split polygon
             [isSplit, outputPolyA, outputPolyB] = self.__subdividePolygonByLine(polygon, vx, vy, x0, y0)
             if isSplit:
-                [sminA, smaxA] = self.__findSminSmaxForPolygon(outputPolyA, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
-                [sminB, smaxB] = self.__findSminSmaxForPolygon(outputPolyB, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
+                [sminA, smaxA] = self.__findSminSmaxForPolygon(outputPolyA, vx, vy, vxNormal, vyNormal, x0Normal,
+                                                               y0Normal)
+                [sminB, smaxB] = self.__findSminSmaxForPolygon(outputPolyB, vx, vy, vxNormal, vyNormal, x0Normal,
+                                                               y0Normal)
 
                 # Find the polygon closest to (x0Normal,y0Normal)
                 if smaxA < smaxB:
@@ -811,14 +801,13 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Point pt is outside the closed polygon
             return 0
 
-    def __makeKey(self,faciesProb):
+    def __makeKey(self, faciesProb):
         keyList = []
         for p in faciesProb:
             # Round off the input values to nearest value of (0,0.01,0.02,..1.0)
-            keyList.append(int(self.__keyResolution*p + 0.5)/self.__keyResolution)
+            keyList.append(int(self.__keyResolution * p + 0.5) / self.__keyResolution)
             key = tuple(keyList)
         return key
-
 
     def setTruncRule(self, faciesProb, cellIndx=0):
         """
@@ -833,7 +822,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         self._setTruncRuleIsCalled = True
         faciesProb = self._setMinimumFaciesProb(faciesProb)
         if self._isFaciesProbEqualOne(faciesProb):
-            return 
+            return
         area = self._modifyBackgroundFaciesArea(faciesProb)
         if self.__useMemoization:
             key = self.__makeKey(faciesProb)
@@ -843,7 +832,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
                 # Call methods specific for this truncation rule with corrected area due to overprint facies
                 # Calculate polygons the truncation map is divided into
-                polygons = self.__calculateFaciesPolygons(cellIndx,area)
+                polygons = self.__calculateFaciesPolygons(cellIndx, area)
                 self.__memo[key] = polygons
                 self.__faciesPolygons = polygons
             else:
@@ -852,10 +841,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         else:
             # Call methods specific for this truncation rule with corrected area due to overprint facies
             # Calculate polygons the truncation map is divided into
-            polygons = self.__calculateFaciesPolygons(cellIndx,area)
+            polygons = self.__calculateFaciesPolygons(cellIndx, area)
             self.__faciesPolygons = polygons
 
-    def __calculateFaciesPolygons(self,cellIndx,area):
+    def __calculateFaciesPolygons(self, cellIndx, area):
         """
         Description:  Calculate polygons in truncation map for given facies fraction (area)
         The result is saved in the internal variable self.__faciesPolygons
@@ -875,13 +864,14 @@ class Trunc2D_Angle(Trunc2D_Base):
             x0N = self.__x0Normal[i]
             y0N = self.__y0Normal[i]
             item = self.__probFracPerPolygon[i]
-            
+
             indx = item[0]
             probFrac = item[1]
             fIndx = self._orderIndex[indx]
             fProb = area[fIndx] * probFrac
-            
-            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N, y0N, fProb)
+
+            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N,
+                                                                                     y0N, fProb)
             # Save facies polygons that are complete
             if closestPolygon == 1:
                 faciesPolygons.append(outPolyA)
@@ -928,21 +918,20 @@ class Trunc2D_Angle(Trunc2D_Base):
             else:
                 item = self.__probFracPerPolygon[i]
                 indx = item[0]
-                assert  indx >= 0
+                assert indx >= 0
                 # Check truncations for overlay facies (call function from base class)
-                [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
+                [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
                 break
-
 
         if inside == 0:
             # Problem to identify which polygon in truncation map the point is within.
             # Try once more but now by minor shift of the input point.
 
-#            print('nPolygons: ' + str(self.__nPolygons))
-#            print('x,y: ' + str(x) + ' '  + str(y))
-#            for i in range(self.__nPolygons):
-#                poly = self.__faciesPolygons[i]
-#                print(repr(poly))
+            #            print('nPolygons: ' + str(self.__nPolygons))
+            #            print('x,y: ' + str(x) + ' '  + str(y))
+            #            for i in range(self.__nPolygons):
+            #                poly = self.__faciesPolygons[i]
+            #                print(repr(poly))
 
             # Count the number of times in total for all cells this proble appears.
             self.__nCountShiftAlpha += 1
@@ -963,9 +952,9 @@ class Trunc2D_Angle(Trunc2D_Base):
                 else:
                     item = self.__probFracPerPolygon[i]
                     indx = item[0]
-                    assert  indx >= 0
+                    assert indx >= 0
                     # Check truncations for overlay facies (call function from base class)
-                    [faciesCode,fIndx] = self._truncateOverlayFacies(indx,alphaCoord)
+                    [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
                     break
 
             assert inside == 1
@@ -979,8 +968,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         return self.__useConstTruncModelParam
 
     def getNCountShiftAlpha(self):
-        return  self.__nCountShiftAlpha
-
+        return self.__nCountShiftAlpha
 
     def truncMapPolygons(self):
         """
@@ -1006,7 +994,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 else:
                     poly = self.__setZeroPolygon()
                     self.__faciesPolygons.append(poly)
-            
+
         polygons = copy.copy(self.__faciesPolygons)
 
         return [polygons]
@@ -1014,7 +1002,6 @@ class Trunc2D_Angle(Trunc2D_Base):
     def faciesIndxPerPolygon(self):
         faciesIndxPerPoly = copy.copy(self.__faciesIndxPerPolygon)
         return faciesIndxPerPoly
-
 
     def setAngle(self, polygonNumber, angle):
         err = 0
@@ -1078,7 +1065,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         attribute = {
             'name': 'Trunc2D_Angle',
             'nGFields': str(nGaussField)
-            }
+        }
         tag = 'TruncationRule'
         trRuleElement = Element(tag, attribute)
         # Put the xml commands for this truncation rule as the last child for the parent element
@@ -1117,7 +1104,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Read overlay facies keywords
         super()._XMLAddElement(trRuleElement)
 
-
     def writeContentsInDataStructure(self):
         # Write common contents from base class
         super().writeContentsInDataStructure()
@@ -1129,31 +1115,31 @@ class Trunc2D_Angle(Trunc2D_Base):
             print('Truncation rule polygons are not calculated yet')
             return
 
-        print('Number of polygons: ' + str(self.__nPolygons))        
+        print('Number of polygons: ' + str(self.__nPolygons))
         if self.__useConstTruncModelParam:
             for i in range(self.__nPolygons):
                 fAngle = self.__faciesAlpha[i]
-                indx   = self.__faciesIndxPerPolygon[i]
-                fName  = self._faciesInTruncRule[indx]
+                indx = self.__faciesIndxPerPolygon[i]
+                fName = self._faciesInTruncRule[indx]
                 poly = self.__faciesPolygons[i]
                 probFrac = self.__probFracPerPolygon[i][1]
                 assert indx == self.__probFracPerPolygon[i][0]
-                print('Polygon: {0} Angle: {1} Facies: {2} Prob frac: {3}'.format(str(i),str(fAngle), fName, probFrac))
+                print('Polygon: {0} Angle: {1} Facies: {2} Prob frac: {3}'.format(str(i), str(fAngle), fName, probFrac))
                 for j in range(len(poly)):
                     print(repr(poly[j]))
-        else: 
+        else:
             for i in range(self.__nPolygons):
                 fAngleParamName = self.__faciesAlphaName[i]
-                indx   = self.__faciesIndxPerPolygon[i]
-                fName  = self._faciesInTruncRule[indx]
+                indx = self.__faciesIndxPerPolygon[i]
+                fName = self._faciesInTruncRule[indx]
                 poly = self.__faciesPolygons[i]
                 probFrac = self.__probFracPerPolygon[i][1]
                 assert indx == self.__probFracPerPolygon[i][0]
-                print('Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'.format(str(i),fAngleParamName,fName,probFrac))
+                print('Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'.format(str(i), fAngleParamName,
+                                                                                             fName, probFrac))
                 for j in range(len(poly)):
                     print(repr(poly[j]))
 
         print('Facies index for polygons:')
         faciesIndxPerPoly = self.faciesIndxPerPolygon()
         print(repr(faciesIndxPerPoly))
-
