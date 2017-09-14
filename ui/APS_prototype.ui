@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_general">
      <attribute name="title">
@@ -984,30 +984,6 @@
        </item>
        <item row="2" column="2">
         <layout class="QGridLayout" name="group_grf_2">
-         <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="m_plot_area_GRF2">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>180</height>
-            </size>
-           </property>
-           <property name="backgroundColor" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-           <property name="foregroundColor" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_GRF2">
            <property name="font">
@@ -1038,6 +1014,16 @@
            </property>
           </widget>
          </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QCustomPlot" name="m_plot_area_GRF2" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>180</height>
+            </size>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item row="1" column="1">
@@ -1045,30 +1031,6 @@
        </item>
        <item row="2" column="1">
         <layout class="QGridLayout" name="group_grf_1">
-         <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="m_plot_area_GRF1">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>180</height>
-            </size>
-           </property>
-           <property name="backgroundColor" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-           <property name="foregroundColor" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="2">
           <widget class="QPushButton" name="m_button_GRF1_settings">
            <property name="text">
@@ -1096,6 +1058,16 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QCustomPlot" name="m_plot_area_GRF1" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>180</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -1147,30 +1119,6 @@
        </item>
        <item row="4" column="2">
         <layout class="QGridLayout" name="group_grf_6">
-         <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="m_plot_area_GRF6">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>180</height>
-            </size>
-           </property>
-           <property name="backgroundColor" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-           <property name="foregroundColor" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_GRF6">
            <property name="font">
@@ -1198,6 +1146,16 @@
           <widget class="QCheckBox" name="m_toggle_GRF6">
            <property name="text">
             <string>GRF6 Applied</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QCustomPlot" name="m_plot_area_GRF6" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>180</height>
+            </size>
            </property>
           </widget>
          </item>
