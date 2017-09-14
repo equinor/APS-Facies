@@ -16,7 +16,7 @@ elif [[ "$1" == "--description" ]]; then
   echo "    simGauss2D.C implements the 2D simulation class and is called from draw2DGaussField"
   echo "    The other files contain functions used by simGauss2D such as variogram in vario2D "
   echo "    About variogram specification: The input angle for anisotropy is measured anti-clockwise from x-axis"
-  echo "    The anisotrpy direction define the direction for main range  (range1) while range2 is in the ortogonal direction"
+  echo "    The anisotrpy direction define the direction for main range  (range1) while range2 is in the orthogonal direction"
   exit 0
 else
   echo "Usage: buildSharedlib.sh --no-optimizations: Does not use any optimizations"
@@ -26,12 +26,18 @@ else
   echo "                         --optimize: Same as -O3"
   echo "                         -g:  Enables debug symbols"
   echo "                         --debug: Same as -g"
-  echo "                         --description: Shows a discription of this library"
+  echo "                         --description: Shows a description of this library"
   exit 0
 fi
 
-PREFIX="$(pwd)/libgaussField"
+LIB="$(pwd)"
+PREFIX="${LIB}/libgaussField"
 LIBRARY_NAME="libdraw2D.so"
+
+if [[ -f ${LIB}/${LIBRARY_NAME} ]]; then
+    echo "${LIBRARY_NAME} has already been compiled."
+    exit 0
+fi
 
 mkdir -p "${PREFIX}/"build
 cd "${PREFIX}/"build
@@ -49,6 +55,5 @@ g++ -fPIC $args -c -Wall "${PREFIX}/draw2DGaussField.cpp"
 
 g++ -shared -Wl,-soname,libdraw2D.so.1 -o "${LIBRARY_NAME}" draw2DGaussField.o simGauss2D.o vario2D.o randomFuncs.o linearsolver.o message.o lib_matr.o lib_ran.o lib_message.o utl_malloc.o -lc
 
-mv "${LIBRARY_NAME}" .. && cd ..
-rm -rf build
+mv "${PREFIX}/build/${LIBRARY_NAME}" ${LIB}
 echo "The shared library 'libdraw2D.so' is created"
