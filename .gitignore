@@ -309,6 +309,7 @@ CMakeLists.txt.user*
 # End of https://www.gitignore.io/api/c,qt,git,c++,python,pycharm,qtcreator
 
 auxillary/
+src/resources/
 code.tar.gz
 
 *.xml
