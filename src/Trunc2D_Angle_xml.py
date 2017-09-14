@@ -140,7 +140,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         if trRuleXML is not None:
             if printInfo >= 3:
-                print('Debug info: Read data from model file for: ' + self._className)
+                print('Debug output: Read data from model file for: ' + self._className)
 
             self._nGaussFieldInModel = nGaussFieldInModel
             self._printInfo = printInfo
@@ -184,7 +184,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         else:
             if printInfo >= 3:
-                print('Debug info: Create empty object for: ' + self._className)
+                print('Debug output: Create empty object for: ' + self._className)
         #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
@@ -327,6 +327,9 @@ class Trunc2D_Angle(Trunc2D_Base):
                  printInfo - an integer number from 0 to 3 defining how much to be printed to screen during runs.
         """
         # Initialize data structure
+        if printInfo >= 3:
+            print('Debug output: Call the initialize function in ' + self._className)
+
         self.__setEmpty()
         self._printInfo = printInfo
 
@@ -355,7 +358,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             self.__nPolygons += 1
 
         if self._printInfo >= 3:
-            print('Debug info: Background facies defined: ')
+            print('Debug output: Background facies defined: ')
             print(repr(self._faciesInTruncRule))
 
         # Number of background facies in total is the number of facies read before reading overlay facies
@@ -1058,6 +1061,9 @@ class Trunc2D_Angle(Trunc2D_Base):
          After this function is called, the parent element has got a new child element
          for the current class.
         """
+        if self._printInfo >= 3:
+            print('Debug output: call XMLADDElement from ' + self._className)
+
         nGaussField = self._nOverLayFacies + 2
         attribute = {
             'name': 'Trunc2D_Angle',

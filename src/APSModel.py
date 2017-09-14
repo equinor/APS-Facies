@@ -633,8 +633,12 @@ class APSModel:
 
     # Set gauss field job to refer to the input gauss field job object
     def setGaussFieldJobs(self, gfJobObject):
-        self.__rmsGFJobs = gfJobObject
+        self.__rmsGFJobs = copy.deepcopy(gfJobObject)
         return
+
+    def getGaussFieldJobs(self):
+        return copy.copy(self.__rmsGFJobs)
+
 
     def createSimGaussFieldIPL(self):
         print('Call createSimGaussFieldIPL')
@@ -762,6 +766,9 @@ class APSModel:
 
         # Add a command specifying which zone to use in for preview
         # This is temporary solution
+        if self.__printInfo >= 3:
+            print('Debug output: call XMLADDElement from ' + self.__className)
+
         if self.__previewZone > 0:
             tag = 'Preview'
             attribute = {'zoneNumber': str(self.__previewZone)}

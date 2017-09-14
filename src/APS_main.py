@@ -14,12 +14,16 @@ from src import (
     APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, Trunc2D_Base_xml, Trunc2D_Cubic_xml,
     Trunc2D_Angle_xml, Trunc3D_bayfill_xml, Trend3D_linear, Trend3D_linear_model_xml
 )
+import APSGaussModel
+import xmlFunctions
 
 import src.generalFunctionsUsingRoxAPI as gr
 import importlib
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
+importlib.reload(APSFaciesProb)
+importlib.reload(APSGaussModel)
 importlib.reload(APSMainFaciesTable)
 importlib.reload(APSGaussFieldJobs)
 
@@ -31,6 +35,7 @@ importlib.reload(Trunc2D_Angle_xml)
 importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear)
 importlib.reload(Trend3D_linear_model_xml)
+importlib.reload(xmlFunctions)
 
 # Initialise common variables
 functionName = 'APS_trunc.py'
@@ -294,7 +299,7 @@ if printInfo >= 2:
 [zoneValues] = gr.getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, printInfo)
 
 emptyZoneList = []
-# Find min max zone over all active cells
+# Find min max zone over all active cells, send an empty zone list which means that all zones are selected
 [minZone, maxZone, avgzone] = gr.calcStatisticsFor3DParameter(
     gridModel, zoneParamName, emptyZoneList, realNumber, printInfo
 )
@@ -402,15 +407,15 @@ for zoneNumber in zoneNumberList:
             val = trendValues + sigma * residualValues
             values[cellIndexDefined] = val
             if printInfo >= 3:
-                print('Debug info: Trend minmaxDifference = ' + str(minmaxDifference))
-                print('Debug info: SimBoxThickness = ' + str(simBoxThickness))
-                print('Debug info: RelStdDev = ' + str(relStdDev))
-                print('Debug info: trendValues:')
+                print('Debug output: Trend minmaxDifference = ' + str(minmaxDifference))
+                print('Debug output: SimBoxThickness = ' + str(simBoxThickness))
+                print('Debug output: RelStdDev = ' + str(relStdDev))
+                print('Debug output: trendValues:')
                 print(repr(trendValues))
-                print('Debug info: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug info: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
-                print('Debug info: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
-                print('Debug info: Trend + Residual values:')
+                print('Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
+                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
+                print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
+                print('Debug output: Trend + Residual values:')
                 print(repr(val))
 
         alpha = GFAllAlpha[indx][VAL]
@@ -573,14 +578,12 @@ for s in zoneNumberList:
         if printInfo >= 2:
             print('    Zone: ' + str(s))
 
-if not gr.setDiscrete3DParameterValues(gridModel, resultParamName, faciesReal, zList, codeNames,
-                                       realNumber, False, printInfo):
-    text = 'Error: Cannot create parameter ' + resultParamName + ' in ' + gridModel.name
-    print(text)
-    sys.exit()
-else:
-    if printInfo >= 1:
-        print('- Create or update parameter: ' + resultParamName)
+gr.setDiscrete3DParameterValues(
+    gridModel, resultParamName, faciesReal, zList, codeNames,
+    realNumber, False, printInfo
+)
+if printInfo >= 1:
+    print('- Create or update parameter: ' + resultParamName)
 
 print(' ')
 if printInfo >= 1:

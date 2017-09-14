@@ -77,7 +77,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
     """
 
     def __setEmpty(self):
-
         # Specific variables for class Trunc2D_Cubic
         self._className = 'Trunc2D_Cubic'
 
@@ -160,7 +159,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         if trRuleXML is not None:
             if printInfo >= 3:
-                print('Debug info: Read data from model file for: ' + self._className)
+                print('Debug output: Read data from model file for: ' + self._className)
 
             self._nGaussFieldInModel = nGaussFieldInModel
             self._printInfo = printInfo
@@ -203,7 +202,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
         else:
             if printInfo >= 3:
-                print('Debug info: Create empty object for: ' + self._className)
+                print('Debug output: Create empty object for: ' + self._className)
         #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
@@ -1074,6 +1073,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
               
         """
         # Initialize data structure
+        if printInfo >= 3:
+            print('Debug output: Call the initialize function in ' + self._className)
+
         self.__setEmpty()
         self._printInfo = printInfo
 
@@ -1314,7 +1316,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
     def XMLAddElement(self, parent):
         if self._printInfo >= 3:
-            print('Debug output: call XMLADDElement from Trunc2D_Cubic_xml')
+            print('Debug output: call XMLADDElement from ' + self._className)
         TYPE = self.__node_index['type']
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']

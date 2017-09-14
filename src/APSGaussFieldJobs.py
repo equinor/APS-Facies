@@ -3,14 +3,14 @@ import sys
 from xml.etree.ElementTree import Element
 
 import copy
-
-
+from xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
+"""
 class APSGaussFieldJobs:
     """
     Class APSGaussFieldJobs
     Description: Keep the name of RMS petro jobs and  associated 3D property
                  parameter these jobs will create
-
+"""
     Public member functions:
     Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,printInfo=0)
 
@@ -43,6 +43,7 @@ class APSGaussFieldJobs:
 
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__modelFileName = modelFileName
+        self.__className = 'APSGaussFieldJobs'
         self.__printInfo = printInfo
         self.__nGFNames = 0
         self.__gaussFieldNames = []
@@ -50,16 +51,11 @@ class APSGaussFieldJobs:
         self.__jobNames = []
         self.__gaussFieldNamesPerJob = []
 
-        # assert ET_Tree is not None
-        if ET_Tree is None:
-            # Create an empty object. The object will at a later stage be filled by content by using
-            # addGaussFieldJob function or the initialize function
-            return
-
-        # Search xml tree for model file to find the specified zone and mainLevelFacies
-        self.__interpretXMLTree(ET_Tree)
-        if self.__printInfo >= 3:
-            print('Debug output: Call APSGaussFieldJobs init')
+        if ET_Tree is not None:
+            # Search xml tree 
+            self.__interpretXMLTree(ET_Tree)
+            if self.__printInfo >= 3:
+                print('Debug output: Call APSGaussFieldJobs init')
 
     # End __init__
 
@@ -69,23 +65,12 @@ class APSGaussFieldJobs:
     def __interpretXMLTree(self, ET_Tree):
         root = ET_Tree.getroot()
 
-        kw = 'PrintInfo'
-        obj = root.find(kw)
-        if obj is None:
-            # Default value is set
-            self.__printInfo = 1
-        else:
-            text = obj.text
-            self.__printInfo = int(text.strip())
+        self.__printInfo = getIntCommand(root, 'PrintInfo', 'Root',
+                                         defaultValue=1,
+                                         modelFile=self.__modelFileName,
+                                         required=False)
 
-        kw = 'GaussFieldJobNames'
-        obj = root.find(kw)
-        if obj is None:
-            raise ValueError(
-                'Error reading {}\n'
-                'Error missing command: {}.'
-                ''.format(self.__modelFileName, kw)
-            )
+        obj = getKeyword(root, 'GaussFieldJobNames','Root', modelFile=self.__modelFileName)
 
         gfJobs = obj
         gfJobList = []
@@ -134,14 +119,25 @@ class APSGaussFieldJobs:
                 name = gfList[j]
                 self.__gaussFieldNames.append(name)
         self.__nGFNames = len(self.__gaussFieldNames)
-
+        self.__nJobs = len(self.__jobNames)
         # Check that gauss field param names are unique
         if not self.__checkUniqueGaussFieldNames():
-            sys.exit()
+            raise ValueError('In model file {} in command GaussFieldJobNames.\n'
+                             'Specified Gaussian field names are not unique'.format(self.__modelFileName)
+                             )
+        if self.__printInfo >= 3:
+            print('Debug output: Number of gauss field jobs: ' + str(self.__nJobs))
+            print('Debug output: Number of gauss field names: ' + str(self.__nGFNames))
+            print('Debug output: Job names:')
+            print(repr(self.__jobNames))
+            print('Debug output: Gauss field names per job: ')
+            print(repr(self.__gaussFieldNamesPerJob))
+        
 
-        return
+    def initialize(self, gfJobNames, gfNamesPerJob,printInfo=0):
+        if printInfo >= 3:
+            print('Debug output: Call the initialize function in ' + self.__className)
 
-    def initialize(self, gfJobNames, gfNamesPerJob):
         self.__jobNames = copy.copy(gfJobNames)
         self.__gaussFieldNamesPerJob = copy.deepcopy(gfNamesPerJob)
         if self.getNumberOfGFJobs() != len(gfNamesPerJob):
@@ -155,6 +151,7 @@ class APSGaussFieldJobs:
                 gfName = self.__gaussFieldNamesPerJob[i][j]
                 self.__gaussFieldNames.append(gfName)
         self.__nGFNames = len(self.__gaussFieldNames)
+        self.__nJobs = len(self.__jobNames)
 
     def getNumberOfGFJobs(self):
         return len(self.__jobNames)
@@ -262,6 +259,8 @@ class APSGaussFieldJobs:
         return
 
     def XMLAddElement(self, root):
+        if self.__printInfo >= 3:
+            print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'GaussFieldJobNames'
         elem = Element(tag)
