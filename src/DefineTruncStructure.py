@@ -27,7 +27,7 @@ class DefineTruncStructure:
         self.__table = []
         self.__nRules = 31
 
-        #       -----   Cubic truncation rules  ---------------------------
+        # -----   Cubic truncation rules  ---------------------------
         nPolygons = 2
         nFacies = 3
         nGF = 3
@@ -42,7 +42,7 @@ class DefineTruncStructure:
         item = ['C02', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 3
         nFacies = 4
@@ -74,7 +74,7 @@ class DefineTruncStructure:
         item = ['C08', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
 
         nPolygons = 4
@@ -131,7 +131,7 @@ class DefineTruncStructure:
         item = ['C20', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 5
         nFacies = 6
@@ -139,47 +139,39 @@ class DefineTruncStructure:
         OPFacies = 'P6'
         BGFacies = ['P1', 'P2', 'P3', 'P4', 'P5']
         trOPCenter = 1.0
-        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 0, 0], ['P3', 1.0, 3, 0, 0], ['P4', 1.0, 4, 0, 0],
-                          ['P5', 1.0, 5, 0, 0]]
+        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 0, 0], ['P3', 1.0, 3, 0, 0], ['P4', 1.0, 4, 0, 0], ['P5', 1.0, 5, 0, 0]]
         item = ['C21', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 0, 0], ['P3', 1.0, 3, 0, 0], ['P4', 1.0, 4, 0, 0],
-                          ['P5', 1.0, 5, 0, 0]]
+        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 0, 0], ['P3', 1.0, 3, 0, 0], ['P4', 1.0, 4, 0, 0], ['P5', 1.0, 5, 0, 0]]
         item = ['C22', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 0], ['P4', 1.0, 2, 3, 1],
-                          ['P5', 1.0, 2, 3, 2]]
+        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 0], ['P4', 1.0, 2, 3, 1], ['P5', 1.0, 2, 3, 2]]
         item = ['C23', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 0], ['P4', 1.0, 2, 3, 1],
-                          ['P5', 1.0, 2, 3, 2]]
+        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 0], ['P4', 1.0, 2, 3, 1], ['P5', 1.0, 2, 3, 2]]
         item = ['C24', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 1], ['P3', 1.0, 2, 1, 2], ['P4', 1.0, 2, 2, 1],
-                          ['P5', 1.0, 2, 2, 2]]
+        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 1], ['P3', 1.0, 2, 1, 2], ['P4', 1.0, 2, 2, 1], ['P5', 1.0, 2, 2, 2]]
         item = ['C25', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 1], ['P3', 1.0, 2, 1, 2], ['P4', 1.0, 2, 2, 1],
-                          ['P5', 1.0, 2, 2, 2]]
+        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 1], ['P3', 1.0, 2, 1, 2], ['P4', 1.0, 2, 2, 1], ['P5', 1.0, 2, 2, 2]]
         item = ['C26', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 1], ['P4', 1.0, 2, 2, 2],
-                          ['P5', 1.0, 2, 3, 0]]
+        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 1], ['P4', 1.0, 2, 2, 2], ['P5', 1.0, 2, 3, 0]]
         item = ['C27', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 1], ['P4', 1.0, 2, 2, 2],
-                          ['P5', 1.0, 2, 3, 0]]
+        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 1], ['P4', 1.0, 2, 2, 2], ['P5', 1.0, 2, 3, 0]]
         item = ['C28', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         # Multiple polygons with same facies
         nPolygons = 6
@@ -188,17 +180,15 @@ class DefineTruncStructure:
         OPFacies = 'P6'
         BGFacies = ['P1', 'P2', 'P3', 'P4', 'P5']
         trOPCenter = 1.0
-        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 0.5, 2, 2, 1], ['P4', 1.0, 2, 2, 2],
-                          ['P3', 0.5, 2, 3, 1], ['P5', 1.0, 2, 3, 2]]
+        truncStructure = ['H', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 0.5, 2, 2, 1], ['P4', 1.0, 2, 2, 2], ['P3', 0.5, 2, 3, 1], ['P5', 1.0, 2, 3, 2]]
         item = ['C29', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 1], ['P5', 0.5, 2, 2, 2],
-                          ['P4', 1.0, 2, 3, 1], ['P5', 0.5, 2, 3, 2]]
+        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 1.0, 2, 2, 1], ['P5', 0.5, 2, 2, 2], ['P4', 1.0, 2, 3, 1], ['P5', 0.5, 2, 3, 2]]
         item = ['C30', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nFacies = 5
         nPolygons = 6
@@ -206,12 +196,11 @@ class DefineTruncStructure:
         OPFacies = 'P5'
         BGFacies = ['P1', 'P2', 'P3', 'P4']
         trOPCenter = 1.0
-        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 0.2, 2, 2, 1], ['P4', 1.0, 2, 2, 2],
-                          ['P3', 0.4, 2, 3, 1], ['P3', 0.4, 2, 3, 2]]
+        truncStructure = ['V', ['P1', 1.0, 1, 0, 0], ['P2', 1.0, 2, 1, 0], ['P3', 0.2, 2, 2, 1], ['P4', 1.0, 2, 2, 2], ['P3', 0.4, 2, 3, 1], ['P3', 0.4, 2, 3, 2]]
         item = ['C31', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       -----   Non-cubic truncation rules  ---------------------------
+        # -----   Non-cubic truncation rules  ---------------------------
         nPolygons = 2
         nFacies = 3
         nGF = 3
@@ -226,7 +215,7 @@ class DefineTruncStructure:
         item = ['A02', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 3
         nFacies = 4
@@ -242,7 +231,7 @@ class DefineTruncStructure:
         item = ['A04', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 4
         nFacies = 5
@@ -270,7 +259,7 @@ class DefineTruncStructure:
         item = ['A09', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 6
         nFacies = 6
@@ -278,12 +267,11 @@ class DefineTruncStructure:
         OPFacies = 'P6'
         BGFacies = ['P1', 'P2', 'P3', 'P4', 'P5']
         trOPCenter = 1.0
-        truncStructure = [['P1', '30.0', 1.0], ['P2', '20.0', 1.0], ['P5', '180.0', 1.0], ['P3', '180.0', 0.5],
-                          ['P4', '45.0', 1.0], ['P3', '0.0', 0.5]]
+        truncStructure = [['P1', '30.0', 1.0], ['P2', '20.0', 1.0], ['P5', '180.0', 1.0], ['P3', '180.0', 0.5], ['P4', '45.0', 1.0], ['P3', '0.0', 0.5]]
         item = ['A10', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------- Bayfill rule -------
+        # --------- Bayfill rule -------
         nPolygons = 5
         nFacies = 5
         nGF = 3
@@ -306,18 +294,18 @@ class DefineTruncStructure:
                     for i in range(len(trStruct)):
                         item = trStruct[i]
                         polyName = item[0]
-                        #                        print('PolyName: ' +polyName)
+                        # print('PolyName: ' +polyName)
                         indx = int(polyName[1:]) - 1
                         item[0] = copy.copy(faciesList[indx])
-                    #                        print('polyName: ' + polyName + ' Facies name: ' + item[0])
+                    # print('polyName: ' + polyName + ' Facies name: ' + item[0])
                 elif trRuleName[0] == 'C':
                     for i in range(1, len(trStruct)):
                         item = trStruct[i]
                         polyName = item[0]
-                        #                        print('PolyName: ' +polyName)
+                        # print('PolyName: ' +polyName)
                         indx = int(polyName[1:]) - 1
                         item[0] = copy.copy(faciesList[indx])
-                    #                        print('polyName: ' + polyName + ' Facies name: ' + item[0])
+                    # print('polyName: ' + polyName + ' Facies name: ' + item[0])
                 break
         return trStruct
 
@@ -359,10 +347,10 @@ class DefineTruncStructure:
                 for i in range(len(bgFaciesList)):
                     polyName = bgFaciesList[i]
                     indx = int(polyName[1:]) - 1
-                    #                    print('polyName: ' + polyName + ' indx: ' + str(indx))
+                    # print('polyName: ' + polyName + ' indx: ' + str(indx))
                     bgFname = copy.copy(faciesList[indx])
                     BGFaciesList.append(bgFname)
-                #                    print('polyName: ' + polyName + ' Background facies name: ' +bgFname)
+                # print('polyName: ' + polyName + ' Background facies name: ' +bgFname)
                 break
         if found:
             return BGFaciesList
@@ -376,9 +364,9 @@ class DefineTruncStructure:
             if name == trRuleName:
                 found = 1
                 polyName = trItem[4]
-                #                print('Overprint: ' + polyName)
+                # print('Overprint: ' + polyName)
                 indx = int(polyName[1:]) - 1
-                #                print('Overprint indx: ' + str(indx))
+                # print('Overprint indx: ' + str(indx))
                 OPFacies = copy.copy(faciesList[indx])
         if found == 1:
             return OPFacies
@@ -428,18 +416,18 @@ class DefineTruncStructure:
             overlayFacies = self.getTruncRuleOverPrintFacies(faciesList, name)
             backgroundFacies = self.getTruncRuleBackgroundFacies(faciesList, name)
             overlayTruncCenter = self.getTruncRuleOverPrintCenter(name)
-            #            print('Facies list:')
-            #            print(repr(faciesList))
-            #            print('Background facies list:')
-            #            print(repr(backgroundFacies))
-            #            print('Overlay facies: ' + overlayFacies)
-            #            print('Overlay trunc center: ' + str(overlayTruncCenter))
-            #            print('truncStructure:')
-            #            print(repr(truncStructure))
+            # print('Facies list:')
+            # print(repr(faciesList))
+            # print('Background facies list:')
+            # print(repr(backgroundFacies))
+            # print('Overlay facies: ' + overlayFacies)
+            # print('Overlay trunc center: ' + str(overlayTruncCenter))
+            # print('truncStructure:')
+            # print(repr(truncStructure))
             useConstTruncParam = 1
             trRuleObj = Trunc2D_Angle_Overlay_xml.Trunc2D_Angle_Overlay()
-            #            print(repr(faciesList))
-            #            print('Overlay facies: ' + overlayFacies)
+            # print(repr(faciesList))
+            # print('Overlay facies: ' + overlayFacies)
             trRuleObj.initialize(mainFaciesTable, faciesList, truncStructure,
                                  backgroundFacies, overlayFacies, overlayTruncCenter,
                                  useConstTruncParam, printInfo)
@@ -448,18 +436,18 @@ class DefineTruncStructure:
             overlayFacies = self.getTruncRuleOverPrintFacies(faciesList, name)
             backgroundFacies = self.getTruncRuleBackgroundFacies(faciesList, name)
             overlayTruncCenter = self.getTruncRuleOverPrintCenter(name)
-            #            print('Facies list:')
-            #            print(repr(faciesList))
-            #            print('Background facies list:')
-            #            print(repr(backgroundFacies))
-            #            print('Overlay facies: ' + overlayFacies)
-            #            print('Overlay trunc center: ' + str(overlayTruncCenter))
-            #            print('truncStructure:')
-            #            print(repr(truncStructure))
+            # print('Facies list:')
+            # print(repr(faciesList))
+            # print('Background facies list:')
+            # print(repr(backgroundFacies))
+            # print('Overlay facies: ' + overlayFacies)
+            # print('Overlay trunc center: ' + str(overlayTruncCenter))
+            # print('truncStructure:')
+            # print(repr(truncStructure))
             useConstTruncParam = 1
             trRuleObj = Trunc2D_Angle_Overlay_xml.Trunc2D_Angle_Overlay()
-            #            print(repr(faciesList))
-            #            print('Overlay facies: ' + overlayFacies)
+            # print(repr(faciesList))
+            # print('Overlay facies: ' + overlayFacies)
 
             trRuleObj = Trunc2D_Cubic_Overlay_xml.Trunc2D_Cubic_Overlay()
             trRuleObj.initialize(mainFaciesTable, faciesList, truncStructure,
@@ -467,16 +455,18 @@ class DefineTruncStructure:
         elif name.strip() == 'B01':
             useConstTruncParam = 1
             truncStructure = self.getTruncStructure(faciesList, name)
-            #            print('TruncStruct:')
-            #            print(repr(truncStructure))
+            # print('TruncStruct:')
+            # print(repr(truncStructure))
             sf = truncStructure[0]
             ysf = truncStructure[1]
             sbhd = truncStructure[2]
             trRuleObj = Trunc3D_bayfill_xml.Trunc3D_bayfill()
-            #            print('B01: faciesList:')
-            #            print(repr(faciesList))
-            trRuleObj.initialize(mainFaciesTable, faciesList, faciesList,
-                                 sf, ' ', ysf, sbhd, useConstTruncParam, printInfo)
+            # print('B01: faciesList:')
+            # print(repr(faciesList))
+            trRuleObj.initialize(
+                mainFaciesTable, faciesList, faciesList,
+                sf, ' ', ysf, sbhd, useConstTruncParam, printInfo
+            )
 
         else:
             print('Truncation rule: ' + name + ' is not implemented.')
@@ -495,7 +485,7 @@ class DefineAngleTruncStructure:
         self.__table = []
         self.__nRules = 5
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 2
         nFacies = 2
@@ -510,7 +500,7 @@ class DefineAngleTruncStructure:
         item = ['A02', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 3
         nFacies = 3
@@ -525,7 +515,7 @@ class DefineAngleTruncStructure:
         item = ['A04', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 4
         nFacies = 4
@@ -552,19 +542,18 @@ class DefineAngleTruncStructure:
         item = ['A09', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         nPolygons = 6
         nFacies = 5
         OPFacies = 'P6'
         BGFacies = ['P1', 'P2', 'P3', 'P4', 'P5']
         trOPCenter = 1.0
-        truncStructure = [['P1', '30.0', 1.0], ['P2', '20.0', 1.0], ['P5', '180.0', 1.0], ['P3', '180.0', 1.0],
-                          ['P4', '45.0', 1.0], ['P3', '0.0', 1.0]]
+        truncStructure = [['P1', '30.0', 1.0], ['P2', '20.0', 1.0], ['P5', '180.0', 1.0], ['P3', '180.0', 1.0], ['P4', '45.0', 1.0], ['P3', '0.0', 1.0]]
         item = ['A10', nPolygons, nFacies, truncStructure, OPFacies, BGFacies, trOPCenter, nGF]
         self.__table.append(item)
 
-        #       --------------------------------
+        # --------------------------------
 
         return
 
@@ -618,7 +607,7 @@ class DefineAngleTruncStructure:
                 for i in range(len(bgFaciesList)):
                     polyName = bgFaciesList[i]
                     indx = int(polyName[1:]) - 1
-                    #                    print('polyName: ' + polyName + ' indx: ' + str(indx))
+                    # print('polyName: ' + polyName + ' indx: ' + str(indx))
                     bgFname = copy.copy(bgFaciesList[indx])
                     BGFaciesList.append(bgFname)
                     print('polyName: ' + polyName + ' Background facies name: ' + bgFname)
@@ -651,3 +640,4 @@ class DefineAngleTruncStructure:
             if trNPoly == nPolygonsInput and trNFacies == nFaciesInput:
                 names.append(trRuleName)
         return names
+  

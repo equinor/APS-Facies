@@ -185,7 +185,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         else:
             if printInfo >= 3:
                 print('Debug info: Create empty object for: ' + self._className)
-                #  End of __init__
+        #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         """ Initialize object from xml tree object trRuleXML. 
@@ -369,7 +369,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             if m1 != m2 or m1 != m3:
                 raise ValueError(
                     'Programming error in function initialize in class ' + self._className + '\n'
-                                                                                             'Lenght of input lists are different from each other'
+                    'Lenght of input lists are different from each other'
                 )
             self._nGaussFieldInModel = 2 + m2
 
@@ -720,10 +720,8 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Split polygon
             [isSplit, outputPolyA, outputPolyB] = self.__subdividePolygonByLine(polygon, vx, vy, x0, y0)
             if isSplit:
-                [sminA, smaxA] = self.__findSminSmaxForPolygon(outputPolyA, vx, vy, vxNormal, vyNormal, x0Normal,
-                                                               y0Normal)
-                [sminB, smaxB] = self.__findSminSmaxForPolygon(outputPolyB, vx, vy, vxNormal, vyNormal, x0Normal,
-                                                               y0Normal)
+                [sminA, smaxA] = self.__findSminSmaxForPolygon(outputPolyA, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
+                [sminB, smaxB] = self.__findSminSmaxForPolygon(outputPolyB, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
 
                 # Find the polygon closest to (x0Normal,y0Normal)
                 if smaxA < smaxB:
@@ -870,8 +868,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             fIndx = self._orderIndex[indx]
             fProb = area[fIndx] * probFrac
 
-            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N,
-                                                                                     y0N, fProb)
+            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N, y0N, fProb)
             # Save facies polygons that are complete
             if closestPolygon == 1:
                 faciesPolygons.append(outPolyA)
@@ -927,11 +924,11 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Problem to identify which polygon in truncation map the point is within.
             # Try once more but now by minor shift of the input point.
 
-            #            print('nPolygons: ' + str(self.__nPolygons))
-            #            print('x,y: ' + str(x) + ' '  + str(y))
-            #            for i in range(self.__nPolygons):
-            #                poly = self.__faciesPolygons[i]
-            #                print(repr(poly))
+            # print('nPolygons: ' + str(self.__nPolygons))
+            # print('x,y: ' + str(x) + ' '  + str(y))
+            # for i in range(self.__nPolygons):
+            #     poly = self.__faciesPolygons[i]
+            #     print(repr(poly))
 
             # Count the number of times in total for all cells this proble appears.
             self.__nCountShiftAlpha += 1
@@ -1135,11 +1132,11 @@ class Trunc2D_Angle(Trunc2D_Base):
                 poly = self.__faciesPolygons[i]
                 probFrac = self.__probFracPerPolygon[i][1]
                 assert indx == self.__probFracPerPolygon[i][0]
-                print('Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'.format(str(i), fAngleParamName,
-                                                                                             fName, probFrac))
+                print('Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'.format(str(i), fAngleParamName, fName, probFrac))
                 for j in range(len(poly)):
                     print(repr(poly[j]))
 
         print('Facies index for polygons:')
         faciesIndxPerPoly = self.faciesIndxPerPolygon()
         print(repr(faciesIndxPerPoly))
+

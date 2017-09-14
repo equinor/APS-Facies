@@ -175,7 +175,7 @@ class Trunc2D_Base:
         else:
             raise ValueError(
                 'Error in ' + self._className + '\n'
-                                                'Error: Inconsistency'
+                'Error: Inconsistency'
             )
 
         # Facies code for facies in zone
@@ -474,7 +474,7 @@ class Trunc2D_Base:
                     bgFaciesIndxList.append(indx)
                     self._isBackGroundFacies[groupIndx, indx] = 1
             overlayFaciesName = overlayFacies[groupIndx]
-            #            print('Overlay facies name......: ' + overlayFaciesName)
+            # print('Overlay facies name......: ' + overlayFaciesName)
             [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(overlayFaciesName)
             if isNew == 1:
                 self._overlayFaciesIndx.append(indx)
@@ -558,7 +558,7 @@ class Trunc2D_Base:
         sumProbBGFacies = []
         overLayProb = []
         for groupIndx in range(self._nOverLayFacies):
-            #            print('Overlay facies group: ' + str(groupIndx))
+            # print('Overlay facies group: ' + str(groupIndx))
             sumProb = 0.0
             bgFaciesIndxList = self._backGroundFaciesIndx[groupIndx]
             for i in range(len(bgFaciesIndxList)):
@@ -569,17 +569,17 @@ class Trunc2D_Base:
                     fProb = 0.0005
                 area[fIndx] = fProb
                 sumProb += fProb
-            #            print('  sumProb background facies: ' + str(sumProb))
+            # print('  sumProb background facies: ' + str(sumProb))
             sumProbBGFacies.append(sumProb)
             fIndx = self._orderIndex[self._overlayFaciesIndx[groupIndx]]
-            #            print('fIndx: ' + str(fIndx))
-            #            print('len(faciesProb): ')
-            #            print(repr(faciesProb))
-            #            print('orderindx: ')
-            #            print(repr(self._orderIndex))
+            # print('fIndx: ' + str(fIndx))
+            # print('len(faciesProb): ')
+            # print(repr(faciesProb))
+            # print('orderindx: ')
+            # print(repr(self._orderIndex))
             overLayProbability = faciesProb[fIndx]
             overLayProb.append(overLayProbability)
-        #            print('  overLayProb: ' + str(overLayProbability))
+            # print('  overLayProb: ' + str(overLayProbability))
 
         # Renormalize again the probability since it might have changed slightly in previous step
         sumAll = 0.0
@@ -594,9 +594,9 @@ class Trunc2D_Base:
 
         lowAlpha = []
         highAlpha = []
-        #        deltaH = []
+        # deltaH = []
         for groupIndx in range(self._nOverLayFacies):
-            #            print('groupIndx: ' + str(groupIndx))
+            # print('groupIndx: ' + str(groupIndx))
             bgFaciesIndxList = self._backGroundFaciesIndx[groupIndx]
             sumProb = sumProbBGFacies[groupIndx]
             sumTot = sumProb + overLayProb[groupIndx]
@@ -605,15 +605,15 @@ class Trunc2D_Base:
             hAlpha = 0.0
             if sumTot > 0.0005:
                 dH = sumProb / sumTot
-                #                print('Overlay facies group: ' + str(groupIndx) + ' deltaH: ' + str(dH))
+                # print('Overlay facies group: ' + str(groupIndx) + ' deltaH: ' + str(dH))
                 for i in range(len(bgFaciesIndxList)):
                     indx = bgFaciesIndxList[i]
                     fIndx = self._orderIndex[indx]
                     p = area[fIndx]
                     area[fIndx] = p / dH
-                #                    print('  faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
-                #                print('overLayTruncIntervalCenter: ')
-                #                print(repr(self._overLayTruncIntervalCenter))
+                    # print('  faciesProb, area: ' + str(p) + ' ' + str(area[fIndx]))
+                # print('overLayTruncIntervalCenter: ')
+                # print(repr(self._overLayTruncIntervalCenter))
                 lAlpha = self._overLayTruncIntervalCenter[groupIndx] - 0.5 * (1.0 - dH)
                 hAlpha = self._overLayTruncIntervalCenter[groupIndx] + 0.5 * (1.0 - dH)
                 if lAlpha < 0.0:
@@ -677,3 +677,4 @@ class Trunc2D_Base:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
+ 

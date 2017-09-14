@@ -51,7 +51,7 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
             v = float(arrayPointer[n])
             values.append(v)
             n = n + 1
-            #            print( 'i,j,value: ' + '(' + str(i) +','+str(j) + '): ' + ' '  + str(values[n-1]))
+            # print( 'i,j,value: ' + '(' + str(i) +','+str(j) + '): ' + ' '  + str(values[n-1]))
     return [values]
 
 
@@ -96,7 +96,7 @@ def simGaussFieldAddTrendAndTransform(iseed, nx, ny, xsize, ysize,
                 n = n + 1
 
         sigma1 = relSigma1 * (maxV - minV)
-    # print( 'Sigma1: ' + str(sigma1))
+        # print( 'Sigma1: ' + str(sigma1))
 
     v1Trend = []
     for n in range(nx * ny):
@@ -153,7 +153,7 @@ def simGaussFieldAddTrendAndTransform2(iseed, nx, ny, xsize, ysize,
                 n = n + 1
 
         sigma1 = relSigma1 * (maxV - minV)
-    # print( 'Sigma1: ' + str(sigma1))
+        # print( 'Sigma1: ' + str(sigma1))
 
     v1 = np.zeros(nx * ny, float)
     v1WithTrend = np.zeros(nx * ny, float)
@@ -179,3 +179,4 @@ def simGaussFieldAddTrendAndTransform2(iseed, nx, ny, xsize, ysize,
     return [v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY]
 
 # ------------  End of functions to draw gaussian fields -----------------------------------
+

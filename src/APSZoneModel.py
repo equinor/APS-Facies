@@ -190,8 +190,9 @@ class APSZoneModel:
                 obj = zone.find('UseConstProb')
                 if obj == None:
                     raise NameError(
-                        'Error when reading model file: ' + self.__modelFileName + '\n'
-                                                                                   'Error: Missing keyword UseConstProb under keyword Zone'
+                        'Error when reading model file: {file_name}\n'
+                        'Error: Missing keyword UseConstProb under keyword Zone'
+                        ''.format(file_name=self.__modelFileName)
                     )
                 text = obj.text
                 self.__useConstProb = int(text.strip())
@@ -203,17 +204,16 @@ class APSZoneModel:
                     self.__simBoxThickness = float(text.strip())
                     if self.__simBoxThickness <= 0.0:
                         raise ValueError(
-                            'Error in ' + self.__className + '\n'
-                                                             'Error: In keyword: ' + kw + '\n'
-                                                                                          'Error: Specified 0 or negative simulation box thickness for zone ' + str(
-                                zoneNumber)
-                        )
+                            'Error in ' + self.__className +'\n'
+                            'Error: In keyword: ' + kw + '\n'
+                            'Error: Specified 0 or negative simulation box thickness for zone ' + str(zoneNumber)
+                            )
                 else:
                     raise ValueError(
                         'Error in ' + self.__className + '\n'
-                                                         'Error: Missing keyword: ' + kw + ' in zone number ' + str(
-                            zoneNumber)
-                    )
+                        'Error: Missing keyword: ' + kw + ' in zone number ' + str(zoneNumber)
+                        )
+
 
                 kw = 'HorizonNameVarioTrend'
                 refSurfObj = zone.find(kw)
@@ -223,6 +223,8 @@ class APSZoneModel:
                 else:
                     text = refSurfObj.text
                     self.__horizonNameForVarioTrendMap = copy.copy(text.strip())
+
+
 
                 if self.__printInfo >= 3:
                     print('Debug output: From APSZoneModel: ZoneNumber: ' + str(zoneNumber))
@@ -239,7 +241,7 @@ class APSZoneModel:
                 if obj == None:
                     raise NameError(
                         'Error when reading model file: ' + self.__modelFileName + '\n'
-                                                                                   'Error: Missing keyword FaciesProbForModel under keyword Zone'
+                        'Error: Missing keyword FaciesProbForModel under keyword Zone'
                     )
 
                 facForModel = obj
@@ -254,17 +256,17 @@ class APSZoneModel:
                             if not isNumber(probCubeName):
                                 raise ValueError(
                                     'Error in ' + self.__className + '\n'
-                                                                     'Error in keyword: FaciesProbForModel for facies name: ' + name + '\n'
-                                                                                                                                       '                  The specified probability is not a number even though '
-                                                                                                                                       'useConstProb keyword is set to 1.'
+                                    'Error in keyword: FaciesProbForModel for facies name: ' + name +'\n'
+                                    '                  The specified probability is not a number even though '
+                                    'useConstProb keyword is set to 1.'
                                 )
                         else:
                             if isNumber(probCubeName):
                                 raise ValueError(
                                     'Error in ' + self.__className + '\n'
-                                                                     'Error in keyword: FaciesProbForModel for facies name: ' + name + '\n'
-                                                                                                                                       '                  The specified probability is not an RMS parameter name even though '
-                                                                                                                                       'useConstProb keyword is set to 0.'
+                                    'Error in keyword: FaciesProbForModel for facies name: ' + name +'\n'
+                                    '                  The specified probability is not an RMS parameter name even though '
+                                    'useConstProb keyword is set to 0.'
                                 )
 
                         item = [name, probCubeName]
@@ -273,14 +275,14 @@ class APSZoneModel:
                     else:
                         raise NameError(
                             'Error in ' + self.__className + '\n'
-                                                             'Error in keyword: FaciesProbForModel. Facies name: ' + name + '\n'
-                                                                                                                            '                  is not defined in main facies table in command APSMainFaciesTable'
+                            'Error in keyword: FaciesProbForModel. Facies name: ' + name +'\n'
+                            '                  is not defined in main facies table in command APSMainFaciesTable'
                         )
 
                 if self.__faciesProbForZoneModel == None:
                     raise NameError(
                         'Error when reading model file: ' + self.__modelFileName + '\n'
-                                                                                   'Error: Missing keyword Facies under keyword FaciesProbForModel'
+                        'Error: Missing keyword Facies under keyword FaciesProbForModel'
                     )
 
                 self.__checkConstProbValuesAndNormalize()
@@ -360,12 +362,14 @@ class APSZoneModel:
 
                             trendName = trendObjXML.get('name')
                             if trendName == 'Linear3D':
-                                trendRuleModelObj = Trend3D_linear_model(trendObjXML, self.__printInfo,
-                                                                         self.__modelFileName)
+                                trendRuleModelObj = Trend3D_linear_model(
+                                    trendObjXML, self.__printInfo,
+                                    self.__modelFileName
+                                )
                             else:
                                 raise NameError(
                                     'Error in ' + self.__className + '\n'
-                                                                     'Error: Specified name of trend function ' + trendName + ' is not implemented.'
+                                    'Error: Specified name of trend function ' + trendName + ' is not implemented.'
                                 )
                         else:
                             if self.__printInfo >= 3:
@@ -382,7 +386,7 @@ class APSZoneModel:
                                 relStdDev = 0.0
                                 raise ValueError(
                                     'Error in ' + self.__className + '\n'
-                                                                     'Error: Missing keyword ' + kw
+                                    'Error: Missing keyword ' + kw
                                 )
                             else:
                                 text = relstdObj.text
@@ -400,16 +404,16 @@ class APSZoneModel:
                     else:
                         raise NameError(
                             'Error in ' + self.__className + '\n'
-                                                             'Error in zone: ' + str(zoneNumber) + '\n'
-                                                                                                   'Error: Keyword GaussField has specified non-existing gauss field parameter name: ' + name + '\n'
-                                                                                                                                                                                                'Error: This parameter name is not specified in command GaussFieldJobs.'
+                            'Error in zone: ' + str(zoneNumber) +'\n'
+                            'Error: Keyword GaussField has specified non-existing gauss field parameter name: ' + name +'\n'
+                            'Error: This parameter name is not specified in command GaussFieldJobs.'
                         )
 
                 # End loop over gauss fields for current zone model
                 if self.__varioForGFModel == None:
                     raise NameError(
                         'Error when reading model file: ' + self.__modelFileName + '\n'
-                                                                                   'Error: Missing keyword GaussField under keyword Zone'
+                        'Error: Missing keyword GaussField under keyword Zone'
                     )
 
                 if err == 0:
@@ -427,8 +431,8 @@ class APSZoneModel:
                     trRule = zone.find('TruncationRule')
                     if trRule == None:
                         raise NameError(
-                            'Error when reading model file: ' + self.__modelFileName + '\n'
-                                                                                       'Error: Missing keyword TruncationRule under keyword Zone'
+                            'Error when reading model file: ' + self.__modelFileName +'\n'
+                            'Error: Missing keyword TruncationRule under keyword Zone'
                         )
                     truncRuleName = trRule.get('name')
                     if self.__printInfo >= 3:
@@ -446,9 +450,10 @@ class APSZoneModel:
                     else:
                         faciesInZone = self.__faciesInZoneModel
                         if truncRuleName == 'Trunc3D_Bayfill':
-                            self.__truncRule = Trunc3D_bayfill(trRule, mainFaciesTable, faciesInZone,
-                                                               nGaussFieldInModel,
-                                                               self.__printInfo, self.__modelFileName)
+                            self.__truncRule = Trunc3D_bayfill(
+                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                self.__printInfo, self.__modelFileName
+                            )
 
 
                         elif truncRuleName == 'Trunc2D_Angle':
@@ -456,24 +461,26 @@ class APSZoneModel:
                                                              self.__printInfo, self.__modelFileName)
 
                         elif truncRuleName == 'Trunc2D_Angle_Overlay':
-                            self.__truncRule = Trunc2D_Angle_Overlay(trRule, mainFaciesTable, faciesInZone,
-                                                                     nGaussFieldInModel,
-                                                                     self.__printInfo, self.__modelFileName)
-
+                            self.__truncRule = Trunc2D_Angle_Overlay(
+                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                self.__printInfo, self.__modelFileName
+                            )
+                    
                         elif truncRuleName == 'Trunc2D_Cubic':
                             self.__truncRule = Trunc2D_Cubic(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
                                                              self.__printInfo, self.__modelFileName)
 
                         elif truncRuleName == 'Trunc2D_Cubic_Multi_Overlay':
                             # This is to be phases out. Is replaced by Trunc2D_Cubic
-                            self.__truncRule = Trunc2D_Cubic_Multi_Overlay(trRule, mainFaciesTable, faciesInZone,
-                                                                           nGaussFieldInModel,
-                                                                           self.__printInfo, self.__modelFileName)
+                            self.__truncRule = Trunc2D_Cubic_Multi_Overlay(
+                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                                self.__printInfo, self.__modelFileName
+                            )
                         else:
                             raise NameError(
                                 'Error in ' + self.__className + '\n'
-                                                                 'Error: Specified truncation rule name: ' + truncRuleName + '\n'
-                                                                                                                             '       is not implemented.'
+                                'Error: Specified truncation rule name: ' + truncRuleName +'\n'
+                                '       is not implemented.'
                             )
 
                         if self.__printInfo >= 3:
@@ -484,7 +491,7 @@ class APSZoneModel:
                             print(repr(self.__truncRule.getFaciesInTruncRule()))
 
                 break
-                # End if zone number
+            # End if zone number
         # End for zone
         if err == 1:
             raise ValueError('Some errors occured')
@@ -1011,7 +1018,7 @@ class APSZoneModel:
         if found == 0:
             # Create data for a new gauss field for both variogram  data and trend data
             # But data for trend parameters must be set by another function and default is set here.
-            itemVario = [gfName, varioType, range1, range2, range3, angle, power]
+            itemVario = [gfName,varioType,range1,range2,range3,angle,power]
             self.__varioForGFModel.append(itemVario)
             if trendRuleModelObj == None:
                 useTrend = 0
@@ -1130,7 +1137,7 @@ class APSZoneModel:
         if len(probDefined) != nFacies:
             raise ValueError(
                 'Error: In class: ' + self.__className + '\n'
-                                                         'Error: Mismatch in input to applyTruncations'
+                'Error: Mismatch in input to applyTruncations'
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
@@ -1237,8 +1244,9 @@ class APSZoneModel:
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
                 nCount = truncObject.getNCountShiftAlpha()
-                print('Debug info: nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(
-                    nCount))
+                print(
+                    'Debug info: nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount)
+                )
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -1266,7 +1274,7 @@ class APSZoneModel:
         if len(probDefined) != nFacies:
             raise ValueError(
                 'Error: In class: ' + self.__className + '\n'
-                                                         'Error: Mismatch in input to applyTruncations'
+                'Error: Mismatch in input to applyTruncations'
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
@@ -1417,11 +1425,11 @@ class APSZoneModel:
 
                     # Truncate GF.  One transformed gaussian field.
                     u1 = alpha1[cellIndx]
-                    #                    print('u1: '+ str(u1))
+                    # print('u1: '+ str(u1))
                     [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1)
                     faciesReal[cellIndx] = fCode
                     volFrac[fIndx] += 1
-                #                    print('cellIndx= ' + str(cellIndx) + '  fCode= ' + str(fCode) + ' fIndx= ' + str(fIndx))
+                    # print('cellIndx= ' + str(cellIndx) + '  fCode= ' + str(fCode) + ' fIndx= ' + str(fIndx))
             elif nGaussFields == 2:
                 item = GFAlphaList[ALPHA1]
                 gfName1 = item[NAME]
@@ -1635,9 +1643,9 @@ class APSZoneModel:
         ny = gridDimNy
         xsize = gridXSize
         ysize = gridYSize
-        #        a1 = np.zeros(nx*ny,float)
-        #        a2 = np.zeros(nx*ny,float)
-        #        a3 = np.zeros(nx*ny,float)
+        # a1 = np.zeros(nx*ny,float)
+        # a2 = np.zeros(nx*ny,float)
+        # a3 = np.zeros(nx*ny,float)
 
         gaussFieldNamesForSimulation = self.getUsedGaussFieldNames()
         assert nGaussFields == len(gaussFieldNamesForSimulation)
@@ -1693,3 +1701,4 @@ class APSZoneModel:
         # End for        
 
         return gaussFields
+
