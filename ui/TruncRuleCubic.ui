@@ -23,30 +23,6 @@
     </rect>
    </property>
    <layout class="QFormLayout" name="formLayout">
-    <item row="3" column="0">
-     <widget class="QCustomPlot" name="m_plot_truncation_rule_cubic">
-      <property name="minimumSize">
-       <size>
-        <width>250</width>
-        <height>250</height>
-       </size>
-      </property>
-      <property name="backgroundColor" stdset="0">
-       <color>
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
-       </color>
-      </property>
-      <property name="foregroundColor" stdset="0">
-       <color>
-        <red>0</red>
-        <green>0</green>
-        <blue>0</blue>
-       </color>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="0">
      <layout class="QGridLayout" name="layout_apply_overlay_facies">
       <item row="1" column="0">
@@ -319,14 +295,24 @@
       </item>
      </layout>
     </item>
+    <item row="3" column="0">
+     <widget class="QCustomPlot" name="m_plot_truncation_rule_cubic" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>250</width>
+        <height>250</height>
+       </size>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
    <class>QCustomPlot</class>
-   <extends>QFrame</extends>
-   <header>qcustomplot.h</header>
+   <extends>QWidget</extends>
+   <header location="global">qcustomplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
