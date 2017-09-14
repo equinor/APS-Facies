@@ -300,7 +300,7 @@
         </layout>
        </item>
        <item row="0" column="0">
-        <widget class="QRadioButton" name="m_rb_experimental_mode">
+        <widget class="QCheckBox" name="m_toggle_experimental_mode">
          <property name="text">
           <string>Experimental Mode</string>
          </property>
