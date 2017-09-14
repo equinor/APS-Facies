@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>dialog_add_facies</class>
+ <widget class="QDialog" name="dialog_add_facies">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,27 +13,27 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>50</x>
      <y>30</y>
      <width>391</width>
-     <height>61</height>
+     <height>62</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="content">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="layout_add_facies">
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="label_new_facies">
         <property name="text">
          <string>New Facies:</string>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
+       <spacer name="spacer_new_facies">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -46,28 +46,28 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineEdit"/>
+       <widget class="QLineEdit" name="m_edit_new_facies"/>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="layout_ok_cancle">
       <item row="0" column="1">
-       <widget class="QDialogButtonBox" name="buttonBox">
+       <widget class="QDialogButtonBox" name="m_buttons_ok_cancle">
         <property name="standardButtons">
          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="m_button_apply">
         <property name="text">
          <string>&amp;Apply</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <spacer name="horizontalSpacer_2">
+       <spacer name="spacer_ok_cancle">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>

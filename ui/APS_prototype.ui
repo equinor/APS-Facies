@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>928</width>
-    <height>929</height>
+    <height>934</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,23 +26,10 @@
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="tab_3">
+    <widget class="QWidget" name="tab_general">
      <attribute name="title">
       <string>General</string>
      </attribute>
-     <widget class="QLabel" name="label_3">
-      <property name="geometry">
-       <rect>
-        <x>664</x>
-        <y>44</y>
-        <width>215</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
@@ -52,27 +39,14 @@
         <height>691</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3">
+      <layout class="QGridLayout" name="layout_general">
        <item row="3" column="0">
-        <layout class="QGridLayout" name="gridLayout_4">
+        <layout class="QGridLayout" name="layout_zones">
          <item row="1" column="3">
-          <widget class="QListWidget" name="listWidget_4"/>
-         </item>
-         <item row="0" column="2">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          <widget class="QListWidget" name="m_list_selected_zones"/>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_6">
+          <widget class="QLabel" name="label_zones_to_be_modeled">
            <property name="text">
             <string>Zone(s) to be modelled       </string>
            </property>
@@ -82,33 +56,63 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="label_available_zones">
            <property name="text">
             <string>Zones selection:</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QListWidget" name="listWidget_3"/>
+          <widget class="QListWidget" name="m_list_available_zones"/>
          </item>
          <item row="0" column="3">
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="label_selected_zones">
            <property name="text">
             <string>Selected Zones:</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBox_8">
+          <widget class="QCheckBox" name="m_toggle_seperate_zone_models">
            <property name="text">
             <string>Seperate Zone Models</string>
            </property>
           </widget>
          </item>
+         <item row="1" column="2">
+          <layout class="QVBoxLayout" name="layout_add_remove_buttons">
+           <item>
+            <widget class="QPushButton" name="m_button_add_zone">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_button_remove_zone">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
         </layout>
        </item>
        <item row="2" column="0">
-        <spacer name="verticalSpacer">
+        <spacer name="spacer_create">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -121,7 +125,7 @@
         </spacer>
        </item>
        <item row="4" column="0">
-        <spacer name="verticalSpacer_3">
+        <spacer name="spacer_zones">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -134,12 +138,9 @@
         </spacer>
        </item>
        <item row="1" column="0">
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="5" column="4">
-          <layout class="QHBoxLayout" name="horizontalLayout_3"/>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label">
+        <layout class="QGridLayout" name="layout_create">
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_model_name">
            <property name="text">
             <string>Output Facies Model Name</string>
            </property>
@@ -148,20 +149,13 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="2">
-          <widget class="QComboBox" name="comboBox"/>
+         <item row="3" column="2">
+          <widget class="QComboBox" name="m_choose_select_facies_model"/>
          </item>
-         <item row="4" column="4">
-          <widget class="QLineEdit" name="lineEdit"/>
+         <item row="3" column="4">
+          <widget class="QLineEdit" name="m_edit_model_name"/>
          </item>
-         <item row="1" column="4">
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
+         <item row="3" column="1">
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -174,7 +168,7 @@
            </property>
           </spacer>
          </item>
-         <item row="4" column="3">
+         <item row="3" column="3">
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -188,14 +182,14 @@
           </spacer>
          </item>
          <item row="0" column="4">
-          <widget class="QLabel" name="label_12">
+          <widget class="QLabel" name="label_create">
            <property name="text">
             <string>Create</string>
            </property>
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="label_select_facies_model">
            <property name="text">
             <string>Select Facies Model</string>
            </property>
@@ -204,39 +198,26 @@
         </layout>
        </item>
        <item row="5" column="0">
-        <layout class="QGridLayout" name="gridLayout_5">
-         <item row="0" column="2">
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+        <layout class="QGridLayout" name="layout_facies">
          <item row="1" column="1">
-          <widget class="QListWidget" name="listWidget_5"/>
+          <widget class="QListWidget" name="m_list_available_facies"/>
          </item>
          <item row="0" column="3">
-          <widget class="QLabel" name="label_8">
+          <widget class="QLabel" name="label_selected_facies">
            <property name="text">
             <string>Simulated facies</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="label_7">
+          <widget class="QLabel" name="label_available_facies">
            <property name="text">
             <string>Available Facies </string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_9">
+          <widget class="QLabel" name="label_facies_to_be_modelled">
            <property name="text">
             <string>Facies to be modelled         </string>
            </property>
@@ -246,12 +227,12 @@
           </widget>
          </item>
          <item row="1" column="3">
-          <widget class="QListWidget" name="listWidget_6"/>
+          <widget class="QListWidget" name="m_list_selected_facies"/>
          </item>
          <item row="2" column="3">
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="layout_add_remove_new_facies">
            <item>
-            <widget class="QPushButton" name="pushButton_6">
+            <widget class="QPushButton" name="m_button_add_new_facies">
              <property name="text">
               <string>Add...</string>
              </property>
@@ -271,7 +252,7 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton_7">
+            <widget class="QPushButton" name="m_button_remove_selected">
              <property name="text">
               <string>Remove added</string>
              </property>
@@ -280,16 +261,46 @@
           </layout>
          </item>
          <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBox_9">
+          <widget class="QCheckBox" name="m_toggle_select_facies">
            <property name="text">
             <string>Select Facies</string>
            </property>
           </widget>
          </item>
+         <item row="1" column="2">
+          <layout class="QVBoxLayout" name="layout_add_remove_facies">
+           <item>
+            <widget class="QPushButton" name="m_button_add_facies">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="m_button_remove_facies">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>&lt;</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
         </layout>
        </item>
        <item row="0" column="0">
-        <widget class="QRadioButton" name="radioButton">
+        <widget class="QRadioButton" name="m_rb_experimental_mode">
          <property name="text">
           <string>Experimental Mode</string>
          </property>
@@ -298,7 +309,7 @@
       </layout>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_4">
+    <widget class="QWidget" name="tab_truncation_rule">
      <attribute name="title">
       <string>Truncation Rule</string>
      </attribute>
@@ -311,11 +322,88 @@
         <height>721</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="TruncationLibrary_gridLayout_2">
+      <layout class="QGridLayout" name="layout_trunctation_rule">
        <item row="4" column="0">
-        <layout class="QGridLayout" name="gridLayout_13">
+        <layout class="QGridLayout" name="layout_non_cubic">
+         <item row="1" column="1">
+          <widget class="QPushButton" name="m_button_type_II">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeII.png</normaloff>:/images/images/figures/NonCubic_TypeII.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="m_button_type_I">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeI.png</normaloff>:/images/images/figures/NonCubic_TypeI.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QPushButton" name="m_button_type_III">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeIII.png</normaloff>:/images/images/figures/NonCubic_TypeIII.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QPushButton" name="m_button_type_V">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeVI.png</normaloff>:/images/images/figures/NonCubic_TypeVI.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QPushButton" name="m_button_type_VI">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeV.png</normaloff>:/images/images/figures/NonCubic_TypeV.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="m_button_type_IV">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeIV.png</normaloff>:/images/images/figures/NonCubic_TypeIV.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="m_button_type_VII">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeVIII.png</normaloff>:/images/images/figures/NonCubic_TypeVIII.png</iconset>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0" colspan="2">
-          <widget class="QLabel" name="NonCubic_label_2">
+          <widget class="QLabel" name="label_non_cubic">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -327,100 +415,23 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QPushButton" name="TypeI_pushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeI.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeI.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="TypeII_pushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeII.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="TypeIII_pushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIII.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QPushButton" name="TypeIV_pushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIV.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeIV.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="TypeV_PushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeV.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeV.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="4">
-          <widget class="QPushButton" name="TypeVI_pushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVI.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVI.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QPushButton" name="TypeIII_PushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVIII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVIII.png</iconset>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item row="5" column="0">
-        <layout class="QGridLayout" name="gridLayout_16">
+        <layout class="QGridLayout" name="layout_bayfield">
          <item row="2" column="0">
-          <widget class="QPushButton" name="TypeVII_pushButton_2">
+          <widget class="QPushButton" name="m_button_bayfield">
            <property name="text">
             <string/>
            </property>
            <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</iconset>
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/NonCubic_TypeVII.png</normaloff>:/images/images/figures/NonCubic_TypeVII.png</iconset>
            </property>
           </widget>
          </item>
          <item row="3" column="0">
-          <spacer name="verticalSpacer_11">
+          <spacer name="spacer_bayfield">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -433,7 +444,7 @@
           </spacer>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_10">
+          <widget class="QLabel" name="label_bayfield">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -446,7 +457,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <spacer name="verticalSpacer_13">
+          <spacer name="spacer_non_cubic">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -457,310 +468,6 @@
             </size>
            </property>
           </spacer>
-         </item>
-        </layout>
-       </item>
-       <item row="0" column="0">
-        <layout class="QGridLayout" name="gridLayout_23">
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_13">
-           <property name="text">
-            <string>Select current zone and facies</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>Selected Facies</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QListWidget" name="listWidget_8"/>
-         </item>
-         <item row="1" column="2">
-          <widget class="QListWidget" name="listWidget_7"/>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Zones selection</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="2" column="0">
-        <layout class="QGridLayout" name="gridLayout_12">
-         <item row="0" column="0">
-          <widget class="QLabel" name="Cubic_label_2">
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Cubic</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="TypeApushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeA.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeA.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QPushButton" name="TypeBpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeB.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeB.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QPushButton" name="TypeCpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeC.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeC.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QPushButton" name="TypeDpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeD.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeD.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="4">
-          <widget class="QPushButton" name="TypeEpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeE.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeE.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="TypeFpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeF.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeF.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QPushButton" name="TypeGpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeG.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeG.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QPushButton" name="TypeHpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeH.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeH.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="3">
-          <widget class="QPushButton" name="TypeIpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeI.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeI.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="4">
-          <widget class="QPushButton" name="TypeJpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeJ.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeJ.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QPushButton" name="TypeKpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeK.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeK.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QPushButton" name="TypeLpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeL.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeL.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QPushButton" name="TypeMpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeM.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeM.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="3">
-          <widget class="QPushButton" name="TypeNpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeN.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeN.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="4">
-          <widget class="QPushButton" name="TypeOpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeO.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeO.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QPushButton" name="TypePpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeP.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeP.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QPushButton" name="TypeQpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeQ.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeQ.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QPushButton" name="TypeRpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeR.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeR.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="3">
-          <widget class="QPushButton" name="TypeSpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeS.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeS.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="4">
-          <widget class="QPushButton" name="TypeTpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeT.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeT.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QPushButton" name="TypeUpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeU.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeU.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <widget class="QPushButton" name="TypeVpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeV.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeV.png</iconset>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="2">
-          <widget class="QPushButton" name="TypeWpushButton_2">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeW.png</normaloff>../user/tbor/apsTesting/images_GUI/Cubic_TypeW.png</iconset>
-           </property>
-          </widget>
          </item>
         </layout>
        </item>
@@ -778,7 +485,7 @@
         </spacer>
        </item>
        <item row="1" column="0">
-        <spacer name="verticalSpacer_2">
+        <spacer name="spacer_selection">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -790,21 +497,19 @@
          </property>
         </spacer>
        </item>
-       <item row="3" column="0">
-        <spacer name="verticalSpacer_12">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+       <item row="7" column="0">
+        <widget class="QPushButton" name="m_button_type_customized">
+         <property name="text">
+          <string/>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
+         <property name="icon">
+          <iconset resource="../resources/Resources.qrc">
+           <normaloff>:/images/images/figures/NonCubic_TypeVII.png</normaloff>:/images/images/figures/NonCubic_TypeVII.png</iconset>
          </property>
-        </spacer>
+        </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="label_25">
+        <widget class="QLabel" name="label_customized">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -816,21 +521,339 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
-        <widget class="QPushButton" name="TypeVII_pushButton_3">
-         <property name="text">
-          <string/>
+       <item row="3" column="0">
+        <spacer name="spcer_cubic">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="icon">
-          <iconset>
-           <normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</normaloff>../user/tbor/apsTesting/images_GUI/NonCubic_TypeVII.png</iconset>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
          </property>
-        </widget>
+        </spacer>
+       </item>
+       <item row="2" column="0">
+        <layout class="QGridLayout" name="layout_cubic">
+         <item row="2" column="0">
+          <widget class="QPushButton" name="m_button_type_a">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeA.png</normaloff>:/images/images/figures/Cubic_TypeA.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>32</width>
+             <height>16</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="m_button_type_c">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeC.png</normaloff>:/images/images/figures/Cubic_TypeC.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="m_button_type_f">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeF.png</normaloff>:/images/images/figures/Cubic_TypeF.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4">
+          <widget class="QPushButton" name="m_button_type_e">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeE.png</normaloff>:/images/images/figures/Cubic_TypeE.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="m_button_type_d">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeD.png</normaloff>:/images/images/figures/Cubic_TypeD.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="m_button_type_b">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeB.png</normaloff>:/images/images/figures/Cubic_TypeB.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QPushButton" name="m_button_type_k">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeK.png</normaloff>:/images/images/figures/Cubic_TypeK.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QPushButton" name="m_button_type_j">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeJ.png</normaloff>:/images/images/figures/Cubic_TypeJ.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QPushButton" name="m_button_type_h">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeH.png</normaloff>:/images/images/figures/Cubic_TypeH.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QPushButton" name="m_button_type_i">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeI.png</normaloff>:/images/images/figures/Cubic_TypeI.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QPushButton" name="m_button_type_g">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeG.png</normaloff>:/images/images/figures/Cubic_TypeG.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QPushButton" name="m_button_type_m">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeM.png</normaloff>:/images/images/figures/Cubic_TypeM.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QPushButton" name="m_button_type_p">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeP.png</normaloff>:/images/images/figures/Cubic_TypeP.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="4">
+          <widget class="QPushButton" name="m_button_type_o">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeO.png</normaloff>:/images/images/figures/Cubic_TypeO.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="3">
+          <widget class="QPushButton" name="m_button_type_n">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeN.png</normaloff>:/images/images/figures/Cubic_TypeN.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QPushButton" name="m_button_type_l">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeL.png</normaloff>:/images/images/figures/Cubic_TypeL.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QPushButton" name="m_button_type_r">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeR.png</normaloff>:/images/images/figures/Cubic_TypeR.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="3">
+          <widget class="QPushButton" name="m_button_type_s">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeS.png</normaloff>:/images/images/figures/Cubic_TypeS.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QPushButton" name="m_button_type_u">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeU.png</normaloff>:/images/images/figures/Cubic_TypeU.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QPushButton" name="m_button_type_q">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeQ.png</normaloff>:/images/images/figures/Cubic_TypeQ.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="4">
+          <widget class="QPushButton" name="m_button_type_t">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeT.png</normaloff>:/images/images/figures/Cubic_TypeT.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QPushButton" name="m_button_type_v">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeV.png</normaloff>:/images/images/figures/Cubic_TypeV.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QPushButton" name="m_button_type_w">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../resources/Resources.qrc">
+             <normaloff>:/images/images/figures/Cubic_TypeW.png</normaloff>:/images/images/figures/Cubic_TypeW.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_cubic">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Cubic</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="layout_select_zones_and_facies">
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_select_current_zone_and_facies">
+           <property name="text">
+            <string>Select current zone and facies</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_select_facies">
+           <property name="text">
+            <string>Selected Facies</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QListWidget" name="m_list_zones"/>
+         </item>
+         <item row="1" column="2">
+          <widget class="QListWidget" name="m_list_facies"/>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLabel" name="label_select_zones">
+           <property name="text">
+            <string>Zones selection</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab">
+    <widget class="QWidget" name="tab_gaussian_random_fields">
      <attribute name="title">
       <string>GRF</string>
      </attribute>
@@ -843,16 +866,16 @@
         <height>661</height>
        </rect>
       </property>
-      <layout class="QGridLayout" name="gridLayout_26">
+      <layout class="QGridLayout" name="layout_gaussian_random_fields">
        <item row="0" column="2">
-        <widget class="QLabel" name="label_24">
+        <widget class="QLabel" name="label_select_facies_grf">
          <property name="text">
           <string>Selected Facies</string>
          </property>
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_22">
+        <widget class="QLabel" name="label_select_current_zone_and_facies_grf">
          <property name="text">
           <string>Select current zone and facies</string>
          </property>
@@ -862,40 +885,16 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLabel" name="label_23">
+        <widget class="QLabel" name="label_select_zones_grf">
          <property name="text">
           <string>Zones selection</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <layout class="QGridLayout" name="gridLayout_17">
-         <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="GRF1_kplotwidget_2">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>180</height>
-            </size>
-           </property>
-           <property name="backgroundColor" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-           <property name="foregroundColor" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
+        <layout class="QGridLayout" name="group_grf_3">
          <item row="0" column="0">
-          <widget class="QLabel" name="GRF1_label_2">
+          <widget class="QLabel" name="label_GRF3">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -911,52 +910,38 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="GAUS1Settings_pushButton_2">
+          <widget class="QPushButton" name="m_button_GRF3_settings">
            <property name="text">
             <string>GRF3 Settings</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_4">
+          <widget class="QCheckBox" name="m_toggle_GRF3">
            <property name="text">
             <string>GRF3 Applied</string>
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
-       <item row="1" column="2">
-        <widget class="QListWidget" name="listWidget_13"/>
-       </item>
-       <item row="3" column="2">
-        <layout class="QGridLayout" name="gridLayout_18">
          <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="GRF1_kplotwidget_3">
+          <widget class="QCustomPlot" name="m_plot_area_GRF3" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
              <height>180</height>
             </size>
            </property>
-           <property name="backgroundColor" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-           <property name="foregroundColor" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </property>
           </widget>
          </item>
+        </layout>
+       </item>
+       <item row="1" column="2">
+        <widget class="QListWidget" name="m_list_facies_grf"/>
+       </item>
+       <item row="3" column="2">
+        <layout class="QGridLayout" name="group_grf_4">
          <item row="0" column="0">
-          <widget class="QLabel" name="GRF1_label_3">
+          <widget class="QLabel" name="label_GRF4">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -972,25 +957,35 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="GAUS1Settings_pushButton_5">
+          <widget class="QPushButton" name="m_button_GRF4_settings">
            <property name="text">
             <string>GRF4 Settings</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_5">
+          <widget class="QCheckBox" name="m_toggle_GRF4">
            <property name="text">
             <string>GRF4 Applied</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QCustomPlot" name="m_plot_area_GRF4" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>180</height>
+            </size>
            </property>
           </widget>
          </item>
         </layout>
        </item>
        <item row="2" column="2">
-        <layout class="QGridLayout" name="gridLayout_31">
+        <layout class="QGridLayout" name="group_grf_2">
          <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="GRF1_kplotwidget_8">
+          <widget class="QFrame" name="m_plot_area_GRF2">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1014,7 +1009,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="GRF1_label_8">
+          <widget class="QLabel" name="label_GRF2">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -1030,14 +1025,14 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="GAUS1Settings_pushButton_14">
+          <widget class="QPushButton" name="m_button_GRF2_settings">
            <property name="text">
             <string>GRF2 Settings</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_14">
+          <widget class="QCheckBox" name="m_toggle_GRF2">
            <property name="text">
             <string>GRF2 Applied</string>
            </property>
@@ -1046,12 +1041,12 @@
         </layout>
        </item>
        <item row="1" column="1">
-        <widget class="QListWidget" name="listWidget_14"/>
+        <widget class="QListWidget" name="m_list_zones_grf"/>
        </item>
        <item row="2" column="1">
-        <layout class="QGridLayout" name="gridLayout_27">
+        <layout class="QGridLayout" name="group_grf_1">
          <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="GRF1_kplotwidget_4">
+          <widget class="QFrame" name="m_plot_area_GRF1">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1075,21 +1070,21 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="GAUS1Settings_pushButton_10">
+          <widget class="QPushButton" name="m_button_GRF1_settings">
            <property name="text">
             <string>GRF1 Settings</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_10">
+          <widget class="QCheckBox" name="m_toggle_GRF1">
            <property name="text">
             <string>GRF1 Applied</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="GRF1_label_4">
+          <widget class="QLabel" name="label_GRF1">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -1107,33 +1102,9 @@
         </layout>
        </item>
        <item row="4" column="1">
-        <layout class="QGridLayout" name="gridLayout_19">
-         <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="GRF1_kplotwidget_9">
-           <property name="minimumSize">
-            <size>
-             <width>180</width>
-             <height>180</height>
-            </size>
-           </property>
-           <property name="backgroundColor" stdset="0">
-            <color>
-             <red>255</red>
-             <green>255</green>
-             <blue>255</blue>
-            </color>
-           </property>
-           <property name="foregroundColor" stdset="0">
-            <color>
-             <red>0</red>
-             <green>0</green>
-             <blue>0</blue>
-            </color>
-           </property>
-          </widget>
-         </item>
+        <layout class="QGridLayout" name="group_grf_5">
          <item row="0" column="0">
-          <widget class="QLabel" name="GRF1_label_9">
+          <widget class="QLabel" name="label_GRF5">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -1149,25 +1120,35 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="GAUS1Settings_pushButton_6">
+          <widget class="QPushButton" name="m_button_GRF5_settings">
            <property name="text">
             <string>GRF5 Settings</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_6">
+          <widget class="QCheckBox" name="m_toggle_GRF5">
            <property name="text">
             <string>GRF5 Applied</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" rowspan="2">
+          <widget class="QCustomPlot" name="m_plot_area_GRF5" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>180</width>
+             <height>180</height>
+            </size>
            </property>
           </widget>
          </item>
         </layout>
        </item>
        <item row="4" column="2">
-        <layout class="QGridLayout" name="gridLayout_20">
+        <layout class="QGridLayout" name="group_grf_6">
          <item row="0" column="1" rowspan="2">
-          <widget class="QFrame" name="GRF1_kplotwidget_10">
+          <widget class="QFrame" name="m_plot_area_GRF6">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1191,7 +1172,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="GRF1_label_10">
+          <widget class="QLabel" name="label_GRF6">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -1207,14 +1188,14 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="GAUS1Settings_pushButton_7">
+          <widget class="QPushButton" name="m_button_GRF6_settings">
            <property name="text">
             <string>GRF6 Settings</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2">
-          <widget class="QCheckBox" name="checkBox_7">
+          <widget class="QCheckBox" name="m_toggle_GRF6">
            <property name="text">
             <string>GRF6 Applied</string>
            </property>
@@ -1235,9 +1216,9 @@
       <height>83</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
+    <layout class="QGridLayout" name="layout_button_group">
      <item row="1" column="5">
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="m_button_previewer">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -1249,31 +1230,38 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="7">
-      <widget class="QPushButton" name="pushButton_2">
+     <item row="1" column="8">
+      <widget class="QPushButton" name="m_button_close">
        <property name="text">
         <string>Close</string>
        </property>
       </widget>
      </item>
      <item row="1" column="6">
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="m_button_save">
        <property name="text">
         <string>Save</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="7">
-      <widget class="QPushButton" name="Assign_Probability_pushButton_3">
+     <item row="0" column="8">
+      <widget class="QPushButton" name="m_button_assign_probability">
        <property name="text">
         <string>Assign Probability Cube</string>
        </property>
       </widget>
      </item>
      <item row="0" column="5">
-      <widget class="QCheckBox" name="Conditiontowells_checkBox_2">
+      <widget class="QCheckBox" name="m_toggle_condition_to_wells">
        <property name="text">
         <string>Condition to wells</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="7">
+      <widget class="QPushButton" name="m_button_save_as">
+       <property name="text">
+        <string>Save As..</string>
        </property>
       </widget>
      </item>
@@ -1362,6 +1350,16 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header location="global">qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources/Resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
