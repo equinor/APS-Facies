@@ -150,9 +150,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# UI files
-src/resources/*
-
 # Additional compiled libraries, not maintained within Statoil / this project
 libraries/source
 
@@ -310,8 +307,11 @@ CMakeLists.txt.user*
 
 libraries/sources/
 auxillary/
+# UI files
 src/resources/
-code.tar.gz
+src/resources/ui/
+# Misc
+*.tar.*
 app
 
 *.xml

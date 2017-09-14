@@ -14,7 +14,7 @@ endif
 SOURCE_DIR = $(CODE_DIR)/src
 BUILD_DIR = $(CODE_DIR)/build
 LIB_PREFIX = $(CODE_DIR)/libraries
-ENTRY_POINT = $(SOURCE_DIR)/$(MAIN_FILE)
+ENTRY_POINT = $(SOURCE_DIR)/gui/$(MAIN_FILE)
 UI_FOLDER = $(CODE_DIR)/ui
 UI_FILES := $(shell echo $(UI_FOLDER)/*.ui)
 RESOURCE_ROOT = $(CODE_DIR)/resources
