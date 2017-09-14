@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>assign_probabilities</class>
+ <widget class="QWidget" name="assign_probabilities">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,7 +22,7 @@
      <height>251</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout_2">
+   <layout class="QGridLayout" name="layout">
     <item row="0" column="0">
      <widget class="QLabel" name="Heading_label">
       <property name="font">
@@ -51,14 +51,14 @@
      </widget>
     </item>
     <item row="3" column="0">
-     <widget class="QDialogButtonBox" name="buttonBox">
+     <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
       <property name="standardButtons">
        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
-     <layout class="QGridLayout" name="gridLayout">
+     <layout class="QGridLayout" name="layout_assignment">
       <item row="1" column="0">
        <widget class="QLabel" name="label_F1">
         <property name="text">
@@ -67,10 +67,10 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="lineedit_F1"/>
+       <widget class="QLineEdit" name="m_edit_F1"/>
       </item>
       <item row="1" column="2">
-       <widget class="QComboBox" name="combobox_F1"/>
+       <widget class="QComboBox" name="m_choose_F1"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_F2">
@@ -80,10 +80,10 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLineEdit" name="lineedit_F2"/>
+       <widget class="QLineEdit" name="m_edit_F2"/>
       </item>
       <item row="2" column="2">
-       <widget class="QComboBox" name="combobox_F2">
+       <widget class="QComboBox" name="m_choose_F2">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -100,10 +100,10 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QLineEdit" name="lineedit_F3"/>
+       <widget class="QLineEdit" name="m_edit_F3"/>
       </item>
       <item row="3" column="2">
-       <widget class="QComboBox" name="combobox_F3">
+       <widget class="QComboBox" name="m_choose_F3">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -120,10 +120,10 @@
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QLineEdit" name="lineedit_F4"/>
+       <widget class="QLineEdit" name="m_edit_F4"/>
       </item>
       <item row="4" column="2">
-       <widget class="QComboBox" name="combobox_F4">
+       <widget class="QComboBox" name="m_choose_F4">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -140,10 +140,10 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QLineEdit" name="lineedit_F5"/>
+       <widget class="QLineEdit" name="m_edit_F5"/>
       </item>
       <item row="5" column="2">
-       <widget class="QComboBox" name="combobox_F5">
+       <widget class="QComboBox" name="m_choose_F5">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
