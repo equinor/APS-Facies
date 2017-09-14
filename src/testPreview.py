@@ -1,6 +1,7 @@
 #!/bin/env python
 # Python3  test preliminary preview 
 import sys
+import APSFaciesProb
 
 import importlib
 import matplotlib
@@ -20,6 +21,7 @@ from src import (
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
+importlib.reload(APSFaciesProb)
 importlib.reload(APSMainFaciesTable)
 importlib.reload(APSGaussFieldJobs)
 importlib.reload(APSDataFromRMS)

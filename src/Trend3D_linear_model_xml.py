@@ -1,42 +1,40 @@
 #!/bin/env python
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 
-from xml.etree.ElementTree import Element
+import numpy as np
+import sys
+import copy
+import math
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element, SubElement, dump
+from xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
 
 
 class Trend3D_linear_model:
     """
-    -------------------------------------------------------------------
-    class Trend3D_linear_model
-    Description: Calculate linear 3D trend for specified grid cells. This class keeps model parameter for
-                 linear 3D trend. The parameterization is asimuth angle for depositional direction and stacking angle.
-                 In addition a variable specifying whether the deposition is progradational or
-                retrogradational is specified.
+    Description: This class keeps model parameter for linear 3D trend. The parameterization
+             is asimuth angle for depositional direction and stacking angle. In addition a variable
+             specifying whether the deposition is progradational or retrogradational is specified.
 
-     Public member functions:
-     Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
+    Public member functions:
+    Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
 
-     Get functions:
-      def getAsimuth(self)
-      def getStackingAngle(self)
-      def getStackingDirection(self)
+ Get functions:
+  def getAsimuth(self)
+  def getStackingAngle(self)
+  def getStackingDirection(self)
 
-     Set functions:
-      def setAsimuth(self,angle)
-      def setStackingAngle(self,stackingAngle)
-      def setStackingDirection(self,direction)
-      def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
-
-     XmlTree update function:
-      def XMLAddElement(self,parent)
-
-     Private member functions:
-      def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
-
-
-    --------------------------------------------------------------------------------------
-    """
-
+ Set functions:
+  def setAsimuth(self,angle)
+  def setStackingAngle(self,stackingAngle)
+  def setStackingDirection(self,direction)
+  def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
+    
+ XmlTree update function:
+  def XMLAddElement(self,parent)
+    
+ Private member functions:
+  def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
     def __init__(self, trendRuleXML, printInfo=0, modelFileName=None):
         """
         Description: Create either empty object which have to be initialized
@@ -60,21 +58,11 @@ class Trend3D_linear_model:
                 print('Debug output: Stacking type:  ' + str(self.__direction))
         else:
             if self.__printInfo >= 3:
-                print('Debug info: Create empty object of ' + self.__className)
+                print('Debug output: Create empty object of ' + self.__className )
 
     def __interpretXMLTree(self, trendRuleXML, printInfo, modelFileName):
         # Initialize object form xml tree object trendRuleXML
-        kw = 'asimuth'
-        obj = trendRuleXML.find(kw)
-        if obj is not None:
-            text = obj.text
-            self.__azimuth = float(text.strip())
-        else:
-            raise ValueError(
-                'Error in {}\n'
-                'Error missing keyword {} in keyword Trend'
-                ''.format(self.__className, kw)
-            )
+        self.__azimuth = getFloatCommand(trendRuleXML, 'asimuth', modelFile=modelFileName)
 
         if self.__azimuth < 0.0 or self.__azimuth > 360.0:
             raise ValueError(
@@ -83,32 +71,20 @@ class Trend3D_linear_model:
                 ''.format(self.__className)
             )
 
-        kw = 'directionStacking'
-        obj = trendRuleXML.find(kw)
-        if obj is not None:
-            text = obj.text
-            self.__direction = int(text.strip())
-            if self.__direction != -1 and self.__direction != 1:
-                raise ValueError(
-                    'Error: In {}\n'
-                    'Error: Direction for linear trend is specified to be: {}\n'
-                    'Error: Direction for linear trend must be 1 if stacking angle is positive\n'
-                    '       when moving in positive asimuth direction and -1 if stacking angle\n'
-                    '       is positive when moving in negative asimuth direction.'
-                    ''.format(self.__className, self.__direction)
-                )
-
-        kw = 'stackAngle'
-        obj = trendRuleXML.find(kw)
-        if obj is not None:
-            text = obj.text
-            self.__stackingAngle = float(text.strip())
-        else:
+        self.__direction = getIntCommand(trendRuleXML, 'directionStacking',modelFile=modelFileName)
+        if self.__direction != -1 and self.__direction != 1:
             raise ValueError(
-                'Error in {}\n'
-                'Error: Missing keyword {} in keyword Trend'
-                ''.format(self.__className, kw)
+                'Error: In {}\n'
+                'Error: Direction for linear trend is specified to be: {}\n'
+                'Error: Direction for linear trend must be 1 if stacking angle is positive\n'
+                '       when moving in positive asimuth direction and -1 if stacking angle\n'
+                '       is positive when moving in negative asimuth direction.'
+                ''.format(self.__className, self.__direction)
             )
+
+        self.__stackingAngle = getFloatCommand(
+            trendRuleXML, 'stackAngle', modelFile=modelFileName
+        )
 
         if self.__stackingAngle < 0.0 or self.__stackingAngle > 90.0:
             raise ValueError(
@@ -118,6 +94,9 @@ class Trend3D_linear_model:
             )
 
     def initialize(self, asimuthAngle, stackingAngle, direction, printInfo):
+        if printInfo >= 3:
+            print('Debug output: Call the initialize function in ' + self.__className)
+
         self.__printInfo = printInfo
         if asimuthAngle < 0.0 or asimuthAngle > 360.0:
             raise ValueError(
@@ -142,10 +121,10 @@ class Trend3D_linear_model:
         self.__direction = direction
         self.__printInfo = printInfo
         if self.__printInfo >= 3:
-            print('Trend:')
-            print('Asimuth:        ' + str(self.__azimuth))
-            print('Stacking angle: ' + str(self.__stackingAngle))
-            print('Stacking type:  ' + str(self.__direction))
+            print('Debug output: Trend:')
+            print('Debug output: Asimuth:        ' + str(self.__azimuth))
+            print('Debug output: Stacking angle: ' + str(self.__stackingAngle))
+            print('Debug output:Stacking type:  ' + str(self.__direction))
 
     def getAsimuth(self):
         return self.__azimuth
@@ -191,6 +170,9 @@ class Trend3D_linear_model:
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
+        if self.__printInfo >= 3:
+            print('Debug output: call XMLADDElement from ' + self.__className)
+
         attribute = {'name': 'Linear3D'}
         tag = 'Trend'
         trendElement = Element(tag, attribute)
