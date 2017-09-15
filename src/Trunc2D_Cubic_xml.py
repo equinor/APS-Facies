@@ -1385,4 +1385,3 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             nodeElementL3.append(nodeElementL3Below)
 
         super()._XMLAddElement(trRuleElement)
-

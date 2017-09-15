@@ -1139,4 +1139,3 @@ class Trunc2D_Angle(Trunc2D_Base):
         print('Facies index for polygons:')
         faciesIndxPerPoly = self.faciesIndxPerPolygon()
         print(repr(faciesIndxPerPoly))
-

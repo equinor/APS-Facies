@@ -640,4 +640,3 @@ class DefineAngleTruncStructure:
             if trNPoly == nPolygonsInput and trNFacies == nFaciesInput:
                 names.append(trRuleName)
         return names
-  

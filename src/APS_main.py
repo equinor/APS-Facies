@@ -593,4 +593,3 @@ if printInfo >= 1:
 
     print(' ')
 print('Finished APS_main.py')
-

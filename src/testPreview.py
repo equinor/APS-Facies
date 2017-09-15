@@ -478,4 +478,3 @@ for i in range(nFacies):
 
 plt.show()
 print('Finished testPreview')
-
