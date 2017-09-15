@@ -1701,4 +1701,3 @@ class APSZoneModel:
         # End for        
 
         return gaussFields
-

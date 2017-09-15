@@ -1328,4 +1328,3 @@ class Trunc2D_Angle_Overlay:
         print('Facies index for polygons:')
         faciesIndxPerPoly = self.faciesIndxPerPolygon()
         print(repr(faciesIndxPerPoly))
-

@@ -1851,4 +1851,3 @@ class Trunc3D_bayfill:
                 raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
             else:
                 self.__sbhd = value
-

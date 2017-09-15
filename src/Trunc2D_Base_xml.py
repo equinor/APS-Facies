@@ -677,4 +677,3 @@ class Trunc2D_Base:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
- 

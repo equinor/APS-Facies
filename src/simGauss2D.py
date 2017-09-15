@@ -179,4 +179,3 @@ def simGaussFieldAddTrendAndTransform2(iseed, nx, ny, xsize, ysize,
     return [v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY]
 
 # ------------  End of functions to draw gaussian fields -----------------------------------
-

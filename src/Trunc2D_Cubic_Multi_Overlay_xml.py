@@ -1841,4 +1841,3 @@ class Trunc2D_Cubic_Multi_Overlay:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
-        

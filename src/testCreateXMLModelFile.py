@@ -515,4 +515,3 @@ for i in range(4):
 # apsmodel2.writeModel(outfile2,printInfo)
 
 print('Finished')
-

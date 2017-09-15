@@ -125,4 +125,3 @@ class Trend3D_linear:
 
     def getStackingDirection(self):
         return self.__direction
-
