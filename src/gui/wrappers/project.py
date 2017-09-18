@@ -8,12 +8,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
+from src.gui.wrappers.message_box import MessageBox
 from src.resources.ui.Project_ui import Ui_project_selection
 from src.gui.wrappers.main_window import MainWindow
 from src.gui.state import State
 
-from src.utils.checks import is_reading_mode, is_experimental_mode
-from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions
+from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions, Defaults, MessageIcon
 
 
 class Project(QMainWindow, Ui_project_selection):
@@ -23,7 +23,7 @@ class Project(QMainWindow, Ui_project_selection):
         self.retranslateUi(self)
 
         self._state = State()
-        self.default_mode = ModeOptions.READING_MODE
+        self.default_mode = Defaults.OPERATION_MODE
         self.wire_up()
 
         self.main_window = None
@@ -43,11 +43,16 @@ class Project(QMainWindow, Ui_project_selection):
 
     def open_gui(self):
         data = self.read_parameters()
-        self._state.update(**data)
-        self.main_window = MainWindow(state=self._state)
-        self.main_window.show()
-        self.close()
-        pass
+        self._state.update(**data)  # TODO: Use a better method
+        if self._state.is_valid_state():
+            # The state is consistent, and the main window can be opened
+            self.main_window = MainWindow(state=self._state)
+            self.main_window.show()
+            self.close()
+        else:
+            error_message = self._state.get_error_message()
+            dialog = MessageBox(error_message, icon=MessageIcon.WARNING_ICON, parent=self)
+            dialog.show()
 
     def read_parameters(self) -> dict:
         mapping = {
@@ -80,22 +85,22 @@ class Project(QMainWindow, Ui_project_selection):
         elif event.key() == Qt.Key_Escape:
             self.m_buttons_ok_cancel_project.button(QDialogButtonBox.Cancel).click()
 
-    def activate_mode(self, mode: str) -> None:
+    def activate_mode(self) -> None:
         toggle_read_project = True
         toggle_experimental = True
-        if is_reading_mode(mode):
+        if self._state.is_reading_mode():
             toggle_experimental = False
-        elif is_experimental_mode(mode):
+        elif self._state.is_experimental_mode():
             toggle_read_project = False
         self.m_rb_read_rms_project_file.setChecked(toggle_read_project)
         self.m_rb_experimental_mode.setChecked(toggle_experimental)
 
     def toggle_mode(self, mode: str) -> None:
-        self.activate_mode(mode)
         self._state.set_execution_mode(mode)
-        if is_experimental_mode(mode):
+        self.activate_mode()
+        if self._state.is_experimental_mode():
             self.show_file_reading(False)
-        elif is_reading_mode(mode):
+        elif self._state.is_reading_mode():
             self.show_file_reading(True)
 
     def show_file_reading(self, enable: bool=True) -> None:

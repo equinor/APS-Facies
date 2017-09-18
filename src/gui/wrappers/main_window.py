@@ -14,7 +14,6 @@ from src.resources.ui import APS_prototype_ui
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 
 from src.utils.constants import ModeConstants
-from src.utils.checks import is_experimental_mode
 
 
 class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
@@ -40,7 +39,7 @@ class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
         # TODO: Read from the project data
         if self._state:
             for key in self._state.keys():
-                if key == ModeConstants.EXECUTION_MODE and is_experimental_mode(self._state[key]):
+                if key == ModeConstants.EXECUTION_MODE and self._state.is_experimental_mode():
                     self.m_toggle_experimental_mode.setChecked(True)
                 pass
 
