@@ -151,7 +151,7 @@ clean-tests:
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams:
 	cd $(CODE_DIR) && \
-	pyreverse -ASmy -k -o png $(SOURCE_DIR)/app.py -p APS-GUI
+	pyreverse -ASmy -k -o png $(ENTRY_POINT) -p APS-GUI
 
 linting:
 	pylint $(SOURCE_DIR)
