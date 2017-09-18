@@ -117,6 +117,15 @@ class HideOptions(Value):
     HIDE = 'hide'
 
 
+class Debug(Value):
+    OFF = 0
+    ON = 1
+    SOMEWHAT_VERBOSE = 1
+    VERBOSE = 2
+    VERY_VERBOSE = 3
+    VERY_VERY_VERBOSE = 4
+
+
 class Defaults(Value):
     FILE_EXTENSION = 'xml'
     FILE_FILTER = 'XML files (*.xml)'
@@ -124,6 +133,7 @@ class Defaults(Value):
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
     HIDE = HideOptions.DISABLE
+    DEBUG = Debug.OFF
 
 
 class MessageIcon(Icon):
