@@ -4,6 +4,8 @@ from xml.etree.ElementTree import Element
 import copy
 import numpy as np
 
+from src.utils.constants import Debug
+
 """
 -----------------------------------------------------------------------
 class Trunc2D_Base
@@ -102,7 +104,7 @@ class Trunc2D_Base:
 
         # Is set to a value from 0 to 3 and the lower the value, the less output is printed to screen
         # Value 3 result in output of debug info details.
-        self._printInfo = 0
+        self._debug_level = Debug.OFF
 
         # Is used to check if truncation map is initialized or not. E.g. truncation map polygons
         # depends on having calculated truncation map.
@@ -213,7 +215,7 @@ class Trunc2D_Base:
         if nOverLayFacies == 0:
             return
 
-        if self._printInfo >= 3:
+        if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Number of overlay facies is : ' + str(nOverLayFacies))
 
         # Check that number of gauss fields in model match the required number in this model
@@ -401,7 +403,7 @@ class Trunc2D_Base:
         print(repr(self._orderIndex))
         print('Facies index for facies which has 100% probability')
         print(repr(self._faciesIsDetermined))
-        print('Print info level: ' + str(self._printInfo))
+        print('Print info level: ' + str(self._debug_level))
         print('Is function setTruncRule called? ')
         print(repr(self._setTruncRuleIsCalled))
         print('Number of Gauss fields in model: ' + str(self._nGaussFieldInModel))
@@ -657,7 +659,7 @@ class Trunc2D_Base:
         """
         Description: Write to xml tree the keywords related to overlay facies
         """
-        if self._printInfo >= 3:
+        if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from Trunc2D_Base_xml')
         for groupIndx in range(self._nOverLayFacies):
             indx = self._overlayFaciesIndx[groupIndx]

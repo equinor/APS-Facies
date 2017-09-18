@@ -18,10 +18,10 @@ Description: A general truncation rule using rectangular polygons for the trunca
             polygons in the truncation map.
 
  Public member functions:
- Constructor:    def __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-                printInfo = 0,modelFileName=None)
-  def initialize(self,mainFaciesTable,faciesInZone,truncStructureList,
-                 backGroundFacies,overlayFacies,overlayTruncCenter=1.0,printInfo=0)
+ Constructor:    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
+                debug_level=Debug.OFF, modelFileName=None)
+  def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
+                 backGroundFacies, overlayFacies, overlayTruncCenter=1.0, debug_level=Debug.OFF)
 
 
   --- Common get functions for all Truncation classes ---
@@ -34,31 +34,31 @@ Description: A general truncation rule using rectangular polygons for the trunca
 
   --- Common functions for all Truncation classes ---
   def useConstTruncModelParam(self)
-  def setTruncRule(self,faciesProb,cellIndx = 0)
-  def defineFaciesByTruncRule(self,alphaCoord)
+  def setTruncRule(self,faciesProb, cellIndx = 0)
+  def defineFaciesByTruncRule(self, alphaCoord)
   def truncMapPolygons(self)
   def faciesIndxPerPolygon(self)
-  def XMLAddElement(self,parent)
+  def XMLAddElement(self, parent)
 
  Private member functions:
-   def __interpretXMLTree(trRuleXML,mainFaciesTable,faciesInZone,printInfo,modelFileName)
+   def __interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, debug_level, modelFileName)
    def __checkFaciesForZone(self)
-   def __addFaciesToTruncRule(self,fName)
-   def __modifyBackgroundFaciesArea(self,faciesProb)
-   def __calcProbForEachNode(self,faciesProb)
+   def __addFaciesToTruncRule(self, fName)
+   def __modifyBackgroundFaciesArea(self, faciesProb)
+   def __calcProbForEachNode(self, faciesProb)
    def __calcThresholdValues(self)
-   def __calcFaciesLevel1V(self,nodeListL1,x,y,z)
-   def __calcFaciesLevel1H(self,nodeListL1,x,y,z)
-   def __calcFaciesLevel2H(self,nodeListL2,x,y,z)
-   def __calcFaciesLevel2V(self,nodeListL2,x,y,z)
-   def __calcFaciesLevel3H(self,nodeListL3,y,z)
-   def __calcFaciesLevel3V(self,nodeListL3,x,z)
-   def __calcPolyLevel(self,direction,nodeList,polyLevelAbove,levelNumber)
+   def __calcFaciesLevel1V(self, nodeListL1, x, y, z)
+   def __calcFaciesLevel1H(self, nodeListL1, x, y, z)
+   def __calcFaciesLevel2H(self, nodeListL2, x, y, z)
+   def __calcFaciesLevel2V(self, nodeListL2, x, y, z)
+   def __calcFaciesLevel3H(self, nodeListL3, y, z)
+   def __calcFaciesLevel3V(self, nodeListL3, x, z)
+   def __calcPolyLevel(self, direction, nodeList, polyLevelAbove, levelNumber)
    def __writeDataForTruncRule(self)
    def __getPolygonAndFaciesList(self)
-   def __setMinimumFaciesProb(self,faciesProb)
-   def __setTruncStructure(self,truncStructureList)
-   def __defineBackgroundFaciesAndOverLayFacies(self,backGroundFacies,overlayFacies)
+   def __setMinimumFaciesProb(self, faciesProb)
+   def __setTruncStructure(self, truncStructureList)
+   def __defineBackgroundFaciesAndOverLayFacies(self, backGroundFacies, overlayFacies)
 
 -------------------------------------------------------------
 """
@@ -72,7 +72,7 @@ class Trunc2D_Cubic_Overlay:
     """
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
-                 printInfo=0, modelFileName=None):
+                 debug_level=Debug.OFF, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -109,7 +109,7 @@ class Trunc2D_Cubic_Overlay:
         self.__nFacies = 0
         self.__orderIndex = []
         self.__faciesIsDetermined = []
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__className = 'Trunc2D_Cubic_Overlay'
 
         # Variables containing truncations for the 2D truncation map
@@ -145,15 +145,15 @@ class Trunc2D_Cubic_Overlay:
         if trRuleXML is not None:
             # This method require exactly 3 transformed gauss fields
             assert (nGaussFieldInModel == 3)
-            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, debug_level, modelFileName)
         else:
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug info: Create empty object of: ' + self.__className)
                 #  End of __init__
 
-    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
+    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, debug_level, modelFileName):
         # Initialize object from xml tree object trRuleXML
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         # Reference to main facies table which is global for the whole model
         if mainFaciesTable is not None:
             self.__mainFaciesTable = mainFaciesTable
@@ -176,7 +176,7 @@ class Trunc2D_Cubic_Overlay:
                                                  'Error: Inconsistency'
             )
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call Trunc2D_Cubic_Overlay init')
 
         # Facies code for facies in zone
@@ -450,7 +450,7 @@ class Trunc2D_Cubic_Overlay:
                             probFrac = item[PFRAC]
                             sumProbFrac[indx] += probFrac
         for i in range(nFacies - 1):
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 fName = self.__faciesInTruncRule[i]
                 print('Debug output: Sum prob frac for facies {} is: {}'.format(
                     fName, sumProbFrac[i]))
@@ -468,7 +468,7 @@ class Trunc2D_Cubic_Overlay:
 
         self.__checkFaciesForZone()
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Facies names in truncation rule:')
             print(repr(self.__faciesInTruncRule))
             print('Debug output: Facies ordering (relative to facies in zone):')
@@ -1179,14 +1179,14 @@ class Trunc2D_Cubic_Overlay:
                 indx = itemL1[INDX]
                 probFrac = itemL1[PFRAC]
                 fName = self.__faciesInTruncRule[indx]
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     text = 'L1: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
                     text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
                     print(text)
 
             else:
                 nodeListL2 = itemL1[NLIST]
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     text = 'L1: GRP  Prob: {}'.format(prob)
                     text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
                     print(text)
@@ -1201,13 +1201,13 @@ class Trunc2D_Cubic_Overlay:
                         indx = itemL2[INDX]
                         probFrac = itemL2[PFRAC]
                         fName = self.__faciesInTruncRule[indx]
-                        if self.__printInfo >= 3:
+                        if self.__debug_level >= Debug.VERY_VERBOSE:
                             text = '  L2: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
                             text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
                             print(text)
                     else:
                         nodeListL3 = itemL2[NLIST]
-                        if self.__printInfo >= 3:
+                        if self.__debug_level >= Debug.VERY_VERBOSE:
                             text = '  L2: GRP  Prob: {}'.format(prob)
                             text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
                             print(text)
@@ -1221,7 +1221,7 @@ class Trunc2D_Cubic_Overlay:
                             ymin = itemL3[YMIN]
                             ymax = itemL3[YMAX]
                             fName = self.__faciesInTruncRule[indx]
-                            if self.__printInfo >= 3:
+                            if self.__debug_level >= Debug.VERY_VERBOSE:
                                 text = '    L3: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
                                 text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
                                 print(text)
@@ -1298,7 +1298,7 @@ class Trunc2D_Cubic_Overlay:
         return [fIndxList]
 
     def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
-                   backGroundFacies, overlayFacies, overlayTruncCenter=1.0, printInfo=0):
+                   backGroundFacies, overlayFacies, overlayTruncCenter=1.0, debug_level=Debug.OFF):
         """
            Description: Initialize the truncation object from input variables.
         """
@@ -1317,7 +1317,7 @@ class Trunc2D_Cubic_Overlay:
             fCode = self.__mainFaciesTable.getFaciesCodeForFaciesName(fName)
             self.__faciesCode.append(fCode)
 
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
         # Set truncation rule (hierarchy of rectangular polygons)
         self.__setTruncStructure(truncStructureList)

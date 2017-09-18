@@ -17,7 +17,7 @@ importlib.reload(Trunc2D_Cubic_Multi_Overlay_xml)
 modelFileName = 'APS.xml'
 print('- Read file: ' + modelFileName)
 apsModel = APSModel.APSModel(modelFileName)
-printInfo = apsModel.printInfo()
+debug_level = apsModel.debug_level()
 
 horizons = project.horizons
 selectedZoneNumberList = apsModel.getSelectedZoneNumberList()
@@ -34,6 +34,6 @@ for zoneNumber in selectedZoneNumberList:
 
         # Set the value in the map to the constant azimuth value.
         # Assume that the map already exist. 
-        gr.setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, printInfo)
+        gr.setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, debug_level)
 
 print('- Finished updating variogram azimuth trend maps in RMS project')

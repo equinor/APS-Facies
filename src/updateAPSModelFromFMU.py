@@ -5,6 +5,8 @@ import importlib
 
 from src import APSModel
 
+from src.utils.constants import Debug
+
 importlib.reload(APSModel)
 
 
@@ -25,5 +27,5 @@ def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, 
 globalIPLFile = "test_global_include.ipl"
 inputAPSModelFile = "APS.xml"
 outputAPSModelFile = "APS_modified.xml"
-printInfo = 3
+printInfo = Debug.VERY_VERBOSE
 updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, printInfo)

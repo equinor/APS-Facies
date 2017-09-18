@@ -3,6 +3,7 @@
 
 import math
 from xml.etree.ElementTree import Element
+from src.utils.constants import Debug
 
 import numpy as np
 
@@ -39,30 +40,36 @@ class Trend3D_linear_model:
     def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
 """
 
-    def __init__(self, trendRuleXML, printInfo=0, modelFileName=None):
+    def __init__(self, trendRuleXML, debug_level=Debug.OFF, modelFileName=None):
+        """
+        Description: Create either empty object which have to be initialized
+                     later using the initialize function or create a full object
+                     by reading input parameters from XML input tree.
+        """
+
         self.__azimuth = 0.0
         self.__stackingAngle = 0.0
         self.__direction = 1
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__className = 'Trend3D_linear_model'
         self.type = 'Trend3D_linear'
 
         if trendRuleXML is not None:
-            self.__interpretXMLTree(trendRuleXML, printInfo, modelFileName)
-            if self.__printInfo >= 3:
+            self.__interpretXMLTree(trendRuleXML, modelFileName, debug_level)
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Trend:')
                 print('Debug output: Azimuth:        ' + str(self.__azimuth))
                 print('Debug output: Stacking angle: ' + str(self.__stackingAngle))
                 print('Debug output: Stacking type:  ' + str(self.__direction))
         else:
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Create empty object of ' + self.__className)
 
     def __interpretXMLTree(self, trendRuleXML, printInfo, modelFileName):
         # Initialize object form xml tree object trendRuleXML
         self.__azimuth = getFloatCommand(trendRuleXML, 'azimuth', modelFile=modelFileName)
 
-        if self.__azimuth < 0.0 or self.__azimuth > 360.0:
+        if not 0.0 < self.__azimuth < 360.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Azimuth angle for linear trend is not within [0,360] degrees.'
@@ -91,11 +98,11 @@ class Trend3D_linear_model:
                 ''.format(self.__className)
             )
 
-    def initialize(self, azimuthAngle, stackingAngle, direction, printInfo=0):
-        if printInfo >= 3:
+    def initialize(self, azimuthAngle, stackingAngle, direction, debug_level=Debug.OFF):
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         if azimuthAngle < 0.0 or azimuthAngle > 360.0:
             raise ValueError(
                 'Error: In {}\n'
@@ -117,12 +124,12 @@ class Trend3D_linear_model:
         self.__azimuth = azimuthAngle
         self.__stackingAngle = stackingAngle
         self.__direction = direction
-        self.__printInfo = printInfo
-        if self.__printInfo >= 3:
+        self.__debug_level = debug_level
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Trend:')
             print('Debug output: Azimuth:        ' + str(self.__azimuth))
             print('Debug output: Stacking angle: ' + str(self.__stackingAngle))
-            print('Debug output:Stacking type:  ' + str(self.__direction))
+            print('Debug output: Stacking type:  ' + str(self.__direction))
 
     def getAzimuth(self):
         return self.__azimuth
@@ -168,7 +175,7 @@ class Trend3D_linear_model:
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         attribute = {'name': 'Linear3D'}
