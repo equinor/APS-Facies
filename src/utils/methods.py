@@ -5,9 +5,9 @@ from xml.dom import minidom
 import numpy as np
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QValidator
-from PyQt5.QtWidgets import QWidget,  QFileDialog
+from PyQt5.QtWidgets import QWidget,   QFileDialog, QCheckBox, QWidget
 
-from utils.constants import Defaults
+from utils.constants import Defaults, HideOptions
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -102,6 +102,16 @@ def apply_validator(elements: Union[List[QObject], QObject], validator: QValidat
 
 def show_dialog(dialog: QWidget):
     dialog.show()
+
+
+def toggle_elements(checkbox: QCheckBox, elements: List[QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
+    toggled = checkbox.isChecked()
+    assert deactivate_or_hide in HideOptions()
+    for element in elements:
+        if deactivate_or_hide == HideOptions.HIDE:
+            element.setVisible(toggled)
+        elif deactivate_or_hide == HideOptions.DISABLE:
+            element.setEnabled(toggled)
 
 
 def get_project_file(parent=None):
