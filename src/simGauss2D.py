@@ -3,7 +3,7 @@ import ctypes as ct
 
 import numpy as np
 
-from src.utils.constants import DrawingLibrary
+from src.utils.constants import DrawingLibrary, Debug
 
 # Variogram type:
 #    SPHERICAL      1
@@ -32,7 +32,11 @@ _draw2DLib.draw2DGaussField.restype = floatArrayPointer
 
 
 # Function simulationg 2D gaussian field
-def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power, debugPrint=0):
+def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power, debug_level=Debug.OFF):
+    if debug_level <= Debug.OFF:
+        debug_level = Debug.OFF
+    elif debug_level >= Debug.ON:
+        debug_level = Debug.ON
     global _draw2DLib
     values = []
 
@@ -45,7 +49,7 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
         ct.c_double(xsize), ct.c_double(ysize),
         ct.c_int(variotype), ct.c_uint(iseed),
         ct.c_double(range1), ct.c_double(range2),
-        ct.c_double(angle), ct.c_double(power), ct.c_int(debugPrint)
+        ct.c_double(angle), ct.c_double(power), ct.c_int(debug_level)
     )
 
     # Assign result to python array
@@ -54,7 +58,7 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
         for j in range(ny):
             v = float(arrayPointer[n])
             values.append(v)
-            n = n + 1
+            n += 1
             # print( 'i,j,value: ' + '(' + str(i) +','+str(j) + '): ' + ' '  + str(values[n-1]))
     return [values]
 
@@ -64,20 +68,18 @@ def simGaussFieldAddTrendAndTransform(
         varioAngle1, pow1, useTrend1, trendAzimuth1, relSigma1, printInfo=0
 ):
     # Residual gaussian fields
-    debugPrint = 0
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
-        debugPrint = 1
         # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     varioAngle1 = 90.0 - varioAngle1
-    [v1Residual] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1, debugPrint)
+    [v1Residual] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1, debug_level)
 
     # Trends for gaussian fields
     Trend1 = np.zeros(nx * ny, float)
     sigma1 = 1.0
     if useTrend1:
-        if printInfo >= 3:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('    - Add trend 2D Gauss field ')
         dx = 1.0 / float(nx - 1)
         dy = 1.0 / float(ny - 1)
@@ -109,7 +111,7 @@ def simGaussFieldAddTrendAndTransform(
         v1Trend.append(w + Trend1[n])
 
     # Transform into uniform distribution
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('    - Transform 2D Gauss field')
         print(' ')
     transformedValues = np.zeros(nx * ny, float)

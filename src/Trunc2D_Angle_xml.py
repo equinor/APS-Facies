@@ -5,6 +5,7 @@ import copy
 import numpy as np
 
 from src.Trunc2D_Base_xml import Trunc2D_Base
+from src.utils.constants import Debug
 
 
 class Trunc2D_Angle(Trunc2D_Base):
@@ -33,12 +34,12 @@ class Trunc2D_Angle(Trunc2D_Base):
 
      Constructor:
         def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-                     nGaussFieldInModel=None, printInfo=0, modelFileName=None)
+                     nGaussFieldInModel=None, debug_level=Debug.OFF, modelFileName=None)
 
      Public member functions:
      def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
                     backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-                    useConstTruncParam, printInfo)
+                    useConstTruncParam, debug_level)
      def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
      def setTruncRule(self, faciesProb, cellIndx=0)
      def defineFaciesByTruncRule(self, alphaCoord)
@@ -123,7 +124,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
-                 printInfo=0, modelFileName=None):
+                 debug_level=Debug.OFF, modelFileName=None):
         """
         Description: This constructor can either create a new object by reading the information
         from an XML tree or it can create an empty data structure for such an object.
@@ -139,11 +140,11 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__setEmpty()
 
         if trRuleXML is not None:
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Read data from model file for: ' + self._className)
 
             self._nGaussFieldInModel = nGaussFieldInModel
-            self._printInfo = printInfo
+            self._debug_level = debug_level
 
             # Call base class method to set modelled facies. 
             # This will initialize common data for facies to be modelled (specified for the zone) and the 
@@ -167,7 +168,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             # consistent with facies in zone.
             self._checkFaciesForZone()
 
-            if self._printInfo >= 3:
+            if self._debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Facies names in truncation rule:')
                 print(repr(self._faciesInTruncRule))
                 print('Debug output: Facies ordering (relative to facies in zone):')
@@ -183,7 +184,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                         print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
 
         else:
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Create empty object for: ' + self._className)
         #  End of __init__
 
@@ -281,7 +282,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Check the sum over background facies for probfrac
         # Note that overlay facies is not a part of this calculations. 
         for i in range(self._nBackGroundFacies):
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 fName = self.__faciesInTruncRule[i]
                 print('Debug output: Sum prob frac for facies {0} is: {1}'.format(fName, str(sumProbFrac[i])))
 
@@ -296,7 +297,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
     def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
                    backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-                   useConstTruncParam, printInfo):
+                   useConstTruncParam, debug_level=Debug.OFF):
         """
            Description: Initialize the truncation object from input variables.
            Input: mainFaciesTable - object of class APSMainFaciesTable
@@ -324,14 +325,14 @@ class Trunc2D_Angle(Trunc2D_Base):
                                      If it is set to 1, the angle numbers specified in truncStructure must be replaced 
                                      by name of RMS parameters containing the angles. 
                                      In this case it is possible to specify spatial trends for these parameters.
-                 printInfo - an integer number from 0 to 3 defining how much to be printed to screen during runs.
+                 debug_level - an integer number from 0 to 3 defining how much to be printed to screen during runs.
         """
         # Initialize data structure
-        if printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
         self.__setEmpty()
-        self._printInfo = printInfo
+        self._debug_level = debug_level
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
@@ -357,7 +358,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 self._orderIndex.append(fIndx)
             self.__nPolygons += 1
 
-        if self._printInfo >= 3:
+        if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Background facies defined: ')
             print(repr(self._faciesInTruncRule))
 
@@ -390,7 +391,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                      get grids with values for the angles. The function requires knowledge of which RMS grid and realization
                      to use in this operation.
                      The function pointer get3DParamFunction must be compatible with
-                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__printInfo)
+                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__debug_level)
                      defined in the roxapi dependent module generalFunctionsUsingRoxAPI.
         """
         # Read truncation parameters
@@ -403,9 +404,9 @@ class Trunc2D_Angle(Trunc2D_Base):
                 # Check consistency
                 if fName == self._faciesInTruncRule[k]:
                     # Get param values
-                    if self._printInfo >= 2:
+                    if self._debug_level >= Debug.VERBOSE:
                         print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
-                    [values] = get3DParamFunction(gridModel, paramName, realNumber, self._printInfo)
+                    [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
                     self.__faciesAlpha.append(values)
                 else:
                     raise ValueError(
@@ -1016,7 +1017,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             item = self.__probFracPerPolygon[polygonNumber]
             indx = item[0]
             fName = self.__faciesInTruncRule[indx]
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Set new angle for polygon number: ' + str(polygonNumber)
                 text = text + ' with facies ' + fName + ' : ' + str(angle)
                 print(text)
@@ -1030,7 +1031,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             indx = item[0]
             fName = self.__faciesInTruncRule[indx]
             self.__faciesAlphaName[polygonNumber] = [fName, angleParamName]
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Set new angle trend for polygon number: ' + str(polygonNumber)
                 text = text + ' with facies ' + fName + ' : ' + angleParamName
                 print(text)
@@ -1061,7 +1062,7 @@ class Trunc2D_Angle(Trunc2D_Base):
          After this function is called, the parent element has got a new child element
          for the current class.
         """
-        if self._printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
         nGaussField = self._nOverLayFacies + 2

@@ -10,6 +10,8 @@ from src import (
     Trend3D_linear_model_xml, Trunc2D_Angle_Overlay_xml, Trunc2D_Cubic_Overlay_xml, Trunc3D_bayfill_xml
 )
 
+from src.utils.constants import Debug
+
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(APSMainFaciesTable)
@@ -29,8 +31,8 @@ apsmodel.setGaussFieldScriptName('MakeGaussFields.ipl')
 apsmodel.setRmsGridModelName('APS_NESLEN_ODM')
 apsmodel.setRmsZoneParamName('Zone')
 apsmodel.setRmsResultFaciesParamName('FaciesReal')
-printInfo = 3
-apsmodel.setPrintInfo(printInfo)
+debug_level = Debug.VERY_VERBOSE
+apsmodel.setPrintInfo(debug_level)
 
 mainFaciesTable = APSMainFaciesTable.APSMainFaciesTable()
 mainFaciesTable.addFacies('F1', 1)
@@ -107,12 +109,12 @@ angle = 35.0
 power = 0
 
 # Set Gauss field trend parameters
-trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, debug_level, None)
 azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = 1
 relStdDev = 0.01
-trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power,
                                        relStdDev, trendModelObject)
 if err:
@@ -177,8 +179,10 @@ overlayTruncCenter = 0.0
 faciesInTruncRule = ['F1', 'F2', 'F3', 'F4']
 defineTruncStructureObject = DefineTruncStructure.DefineCubicTruncStructure()
 truncStructure = defineTruncStructureObject.getTruncStructure(faciesInTruncRule, truncName)
-truncRuleObject.initialize(mainFaciesTable, faciesList, truncStructure,
-                           backgroundFacies, overlayFacies, overlayTruncCenter, printInfo)
+truncRuleObject.initialize(
+    mainFaciesTable, faciesList, truncStructure,
+    backgroundFacies, overlayFacies, overlayTruncCenter, debug_level
+)
 
 zoneObject.setTruncRule(truncRuleObject)
 
@@ -207,18 +211,20 @@ for i in modelNumbers:
     faciesInTruncRule = ['F1', 'F2', 'F3', 'F4']
     #   defineTruncStructureObject = DefineTruncStructure.DefineCubicTruncStructure()
     truncStructure = defineTruncStructureObject.getTruncStructure(faciesInTruncRule, truncName)
-    truncRuleObject.initialize(mainFaciesTable, faciesList, truncStructure,
-                               backgroundFacies, overlayFacies, overlayTruncCenter, printInfo)
+    truncRuleObject.initialize(
+        mainFaciesTable, faciesList, truncStructure,
+        backgroundFacies, overlayFacies, overlayTruncCenter, debug_level
+)
     # Set new truncation rule
     zoneObject.setTruncRule(truncRuleObject)
 
    # outfile = 'testOut'+'_' + str(i) + '.xml'
-   #apsmodel.writeModel(outfile,printInfo)
+   #apsmodel.writeModel(outfile, debug_level)
 
    # Read the xml file into an new APSModel object
    # apsmodel2 = APSModel.APSModel(outfile)
    # outfile2 = 'testOut2'+'_' + str(i) + '.xml'
-   # apsmodel2.writeModel(outfile2,printInfo)
+   # apsmodel2.writeModel(outfile2, debug_level)
 
 
 # ------- Zone 2 --------------------------        
@@ -264,12 +270,12 @@ angle = 35.0
 power = 0
 
 # Set Gauss field trend parameters
-trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, debug_level, None)
 azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
+trendModelObject.initialize(asimuthAngle, stackingAngle, direction, debug_info)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
@@ -333,7 +339,7 @@ truncStructure = [['F2', '0.0', 0.5], ['F1', '90.0', 1.0], ['F3', '45.0', 1.0],
                   ['F7', '-180.0', 1.0], ['F8', '-90.0', 1.0], ['F6', '-45.0', 0.4]]
 truncRuleObject.initialize(mainFaciesTable, faciesList, truncStructure,
                            backgroundFacies, overlayFacies, overlayTruncCenter,
-                           useConstTruncParam, printInfo)
+                           useConstTruncParam, debug_level)
 
 zoneObject.setTruncRule(truncRuleObject)
 
@@ -409,12 +415,12 @@ angle = 35.0
 power = 0
 
 # Set Gauss field trend parameters
-trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, debug_level, None)
 azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
@@ -493,7 +499,7 @@ for i in range(4):
     sbhd = 0.6
     truncRuleObject.initialize(mainFaciesTable, faciesList, faciesInTruncRule,
                                sf_value, sf_name, ysf, sbhd,
-                               useConstTruncParam, printInfo)
+                               useConstTruncParam, debug_level)
 
     zoneObject.setTruncRule(truncRuleObject)
     if i == 0:
@@ -507,11 +513,11 @@ for i in range(4):
     else:
         name = 'B' + str(i)
     outfile = 'testOut' + '_' + name + '.xml'
-    apsmodel.writeModel(outfile, printInfo)
+    apsmodel.writeModel(outfile, debug_level)
 
 # Read the xml file into an new APSModel object
 # apsmodel2 = APSModel.APSModel(outfile)
 # outfile2 = 'testOut2.xml'
-# apsmodel2.writeModel(outfile2,printInfo)
+# apsmodel2.writeModel(outfile2, debug_level)
 
 print('Finished')

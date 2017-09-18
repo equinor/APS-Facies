@@ -47,6 +47,7 @@ import roxar
 
 import src.generalFunctionsUsingRoxAPI as gr
 from src import APSDataFromRMS, APSMainFaciesTable
+from src.utils.constants import Debug
 from src.utils.methods import prettify
 
 importlib.reload(APSDataFromRMS)
@@ -56,7 +57,7 @@ importlib.reload(gr)
 
 # Function: readInputXMLFile
 # Description: This function read user specification of which grid model etc to scan from RMS.
-def readInputXMLFile(modelFileName, printInfo):
+def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     # Read model if it is defined
     tree = ET.parse(modelFileName)
     root = tree.getroot()
@@ -68,7 +69,7 @@ def readInputXMLFile(modelFileName, printInfo):
         sys.exit()
     text = gridModelObj.text
     gridModelName = text.strip()
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: Grid model:         ' + gridModelName)
 
     kw = 'GaussFields'
@@ -82,14 +83,14 @@ def readInputXMLFile(modelFileName, printInfo):
 
     kw = 'HorizonReference'
     hRefObj = root.find(kw)
-    if hRefObj == None:
+    if hRefObj is None:
         print('Error: Missing specification of ' + kw)
         sys.exit()
     text = hRefObj.get('name')
     horizonRefName = text.strip()
     text = hRefObj.get('type')
     horizonRefType = text.strip()
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: Horizon reference:  ' + horizonRefName + ' with type ' + horizonRefType)
 
     kw = 'Horizon'
@@ -109,7 +110,7 @@ def readInputXMLFile(modelFileName, printInfo):
 
     kw2 = 'Trajectory'
     trRefObj = wellNameRefObj.find(kw2)
-    if trRefObj == None:
+    if trRefObj is None:
         print('Error: Missing specification of ' + kw2 + ' under ' + kw1)
         sys.exit()
     text = trRefObj.get('name')
@@ -117,7 +118,7 @@ def readInputXMLFile(modelFileName, printInfo):
 
     kw3 = 'Logrun'
     logrunRefObj = trRefObj.find(kw3)
-    if logrunRefObj == None:
+    if logrunRefObj is None:
         print('Error: Missing specification of ' + kw3 + ' under ' + kw2)
         sys.exit()
     text = logrunRefObj.get('name')
@@ -125,16 +126,15 @@ def readInputXMLFile(modelFileName, printInfo):
 
     kw4 = 'LogName'
     logNameRefObj = logrunRefObj.find(kw4)
-    if logNameRefObj == None:
+    if logNameRefObj is None:
         print('Error: Missing specification of ' + kw4 + ' under ' + kw3)
         sys.exit()
     text = logNameRefObj.text
     logName = text.strip()
 
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print(
-            'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   '
-            + logName)
+            'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
 
     return [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
             wellRefName, trajectoryName, logrunName, logName]
@@ -144,11 +144,11 @@ def readInputXMLFile(modelFileName, printInfo):
 # Description:  - Read a user specified input XML file specifying which grid model etc to scan.
 #               - Scan the RMS project using roxAPI to get RMS project information.
 #               - Write the RMS project info to an output XML file.
-def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printInfo):
+def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level=Debug.OFF):
     # Read a specification of which data to scan from the RMS project
 
     [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
-     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, printInfo)
+     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, debug_level)
 
     topElement = Element('RMS_project_data')
 
@@ -212,7 +212,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
         print('Error: Cound not find grid model with name: ' + gridModel.name + ' in RMS project.')
         sys.exit()
 
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('Debug outout: Read data for grid model: ' + gridModel.name + ' from  RMS project.')
         print('Debug output: Grid model is shared:     ' + str(gridModel.shared))
 
@@ -256,7 +256,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     nLayersPerZone = []
     grid = gridModel.get_grid()
     [xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, printInfo)
+     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, debug_level)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -336,7 +336,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
         sys.exit()
     # Use the specified reference horizon name and type to get 2D surface grid info
     [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
-        project.horizons, horizonRefName, horizonRefType, printInfo
+        project.horizons, horizonRefName, horizonRefType, debug_level
     )
     tag = 'SurfaceTrendDimensions'
     surfObj = Element(tag)
@@ -400,7 +400,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     log_curve = log_run.log_curves[logName]
     faciesCodeNames = log_curve.get_code_names()
 
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: Facies names: ')
         print(faciesCodeNames)
 
@@ -409,24 +409,23 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     faciesTable.XMLAddElement(topElement)
     # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
-        if printInfo > 1:
+        if debug_level > Debug.SOMEWHAT_VERBOSE:
             print('Write file: ' + outputRMSDataFile)
         root = prettify(topElement)
         file.write(root)
     return
 
 
-def create2DMapsForVariogramAzimuthAngle(project, inputFile, printInfo):
+def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):
     [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
-     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, printInfo)
+     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, debug_level)
 
     # Get dimensions from the reference map
     # horizons is defined to be a pointer to horizons in RMS by roxapi
     horizons = project.horizons
-    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(horizons,
-                                                                                   horizonRefName,
-                                                                                   horizonRefType,
-                                                                                   printInfo)
+    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
+        horizons, horizonRefName, horizonRefType, debug_level
+    )
     # Gauss field names (standard hardcoded names)
     # gaussFieldNames = ['GF1','GF2','GF3','GF4']
     gaussFieldNames = gfNames
@@ -435,36 +434,36 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, printInfo):
         for gfName in gaussFieldNames:
             reprName = gfName + '_VarioAzimuthTrend'
             # Create new horizon data type for this gauss field if not already existing
-            gr.createHorizonDataTypeObject(horizons, reprName, printInfo)
+            gr.createHorizonDataTypeObject(horizons, reprName, debug_level)
 
             # Set the value in the map to the constant azimuth value
-            gr.setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, printInfo,
-                                         xmin, ymin, xinc, yinc, nx, ny, rotation)
-
-    return
+            gr.setConstantValueInHorizon(
+                horizons, hName, reprName, azimuthValue, debug_level,
+                xmin, ymin, xinc, yinc, nx, ny, rotation
+            )
 
 
 # ----------------  Main ----------------------------------------------------
 scriptName = 'getRMSProjectData.py'
 inputFile = 'getRMSProjectData.xml'
 outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
-printInfo = 3
+debug_level = Debug.VERY_VERBOSE
 
 # Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
 print('Start running APS workflow preparation script')
 print('Read file: ' + inputFile)
 print('Create 2D maps in the horizon container to be used for variogram azimuth angle')
-create2DMapsForVariogramAzimuthAngle(project, inputFile, printInfo)
+create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
 
 print('Read RMS project and save some data to be read by the APS GUI script')
-scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printInfo)
+scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level)
 print('Finished running: ' + scriptName)
 
 
 
 # print(' ')
 # print('Start test output')
-# rmsData = APSDataFromRMS.APSDataFromRMS(printInfo)
+# rmsData = APSDataFromRMS.APSDataFromRMS(debug_level)
 # rmsData.readRMSDataFromXMLFile(outputRMSDataFile)
 # rmsData.printData()
 # print('Finished test output')

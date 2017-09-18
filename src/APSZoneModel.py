@@ -8,11 +8,17 @@ from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSGaussModel import APSGaussModel
 from src.APSMainFaciesTable import APSMainFaciesTable
+from src.Trend3D_linear_model_xml import Trend3D_linear_model
+from src.Trunc2D_Angle_Overlay_xml import Trunc2D_Angle_Overlay
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 # To be outphased:
+from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
-from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword, getTextCommand
+# Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
+from src.simGauss2D import simGaussFieldAddTrendAndTransform
+from src.utils.constants import Debug
+from src.utils.methods import isNumber
 
 
 class APSZoneModel:
@@ -42,7 +48,7 @@ class APSZoneModel:
        def getTrendRuleModel(self,gfName)
        def getSimBoxThickness(self)
        def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
-       def printInfo(self)
+       def debug_level(self)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
@@ -118,7 +124,8 @@ class APSZoneModel:
     # End __init__
 
     def __setEmpty(self):
-        self.__printInfo = 0
+        # Local variables
+        self.__debug_level = Debug.OFF
         self.__useConstProb = 0
         self.__className = 'APSZoneModel'
         self.__simBoxThickness = 10.0
@@ -140,7 +147,7 @@ class APSZoneModel:
         kw = 'PrintInfo'
         self.__printInfo = getIntCommand(root, kw, defaultValue=1, required=False)
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print(' ')
             print('Debug output: Call init ' + self.__className)
 
@@ -168,7 +175,7 @@ class APSZoneModel:
                 mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName)
                 self.__horizonNameForVarioTrendMap = mapName
 
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: From APSZoneModel: ZoneNumber: ' + str(zoneNumber))
                     print('Debug output: From APSZoneModel: mainLevelFacies: ' + str(mainLevelFacies))
                     print('Debug output: From APSZoneModel: useConstProb: ' + str(self.__useConstProb))
@@ -199,7 +206,7 @@ class APSZoneModel:
                         ''.format(modelName=modelFileName)
                     )
                 truncRuleName = trRule.get('name')
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
                 nGaussFieldInModel = int(trRule.get('nGFields'))
@@ -238,7 +245,7 @@ class APSZoneModel:
                             ''.format(className=self.__className, truncationRule=truncRuleName)
                         )
 
-                    if self.__printInfo >= 3:
+                    if self.__debug_level >= Debug.VERY_VERBOSE:
                         text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
                         text += self.__truncRule.getClassName()
                         print(text)
@@ -251,8 +258,8 @@ class APSZoneModel:
         return
 
     def initialize(self, inputZoneNumber, useConstProb, simBoxThickness, horizonNameForVarioTrendMap,
-                   faciesProbObject, gaussModelObject, truncRuleObject, printInfo):
-        if printInfo >= 3:
+                   faciesProbObject, gaussModelObject, truncRuleObject, debug_level=Debug.OFF):
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
         # Set default values
@@ -265,7 +272,7 @@ class APSZoneModel:
         self.__gaussModelObject = gaussModelObject
         self.__truncRule = truncRuleObject
 
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
         return
 
@@ -458,7 +465,7 @@ class APSZoneModel:
 
         truncObject = self.__truncRule
         functionName = 'applyTruncations'
-        printInfo = self.__printInfo
+        debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
         classNameTrunc = truncObject.getClassName()
@@ -472,18 +479,18 @@ class APSZoneModel:
         nGaussFields = len(GFAlphaList)
         faciesProb = np.zeros(nFacies, np.float32)
         volFrac = np.zeros(nFacies, np.float32)
-        if printInfo >= 2:
+        if debug_level >= Debug.VERBOSE:
             print('--- Truncation rule: ' + classNameTrunc)
 
         if self.__useConstProb == 1 and useConstTruncParam == 1:
-            # Constant probability 
-            if printInfo >= 3:
+            # Constant probability
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Using spatially constant probabilities for facies.')
 
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: faciesProb:')
                 print(repr(faciesProb))
 
@@ -493,7 +500,7 @@ class APSZoneModel:
                 gfName = item[NAME]
                 alphaDataArray = item[VAL]
                 alphaList.append(alphaDataArray)
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
 
             # Calculate truncation rules
@@ -501,10 +508,10 @@ class APSZoneModel:
             truncObject.setTruncRule(faciesProb)
 
             for i in range(nDefinedCells):
-                if printInfo == 2:
+                if debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo >= 3:
+                elif debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 10000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
@@ -521,9 +528,9 @@ class APSZoneModel:
                 volFrac[fIndx] += 1
 
         else:
-            # Varying probability from cell to cell and / or 
+            # Varying probability from cell to cell and / or
             # varying truncation parameter from cell to cell
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Using spatially varying probabilities and/or '
                 text = text + 'truncation parameters for facies.'
                 print(text)
@@ -533,15 +540,15 @@ class APSZoneModel:
                 item = GFAlphaList[gaussFieldIndx]
                 gfName = item[NAME]
                 alphaDataArray = item[VAL]
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
                 alphaList.append(alphaDataArray)
 
             for i in range(nDefinedCells):
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo == 2:
+                elif debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
@@ -567,14 +574,14 @@ class APSZoneModel:
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
-        if self.__printInfo >= 4:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             truncRuleName = truncObject.getClassName()
             if truncRuleName == 'Trunc2D_Angle':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
                 nCount = truncObject.getNCountShiftAlpha()
                 print(
-                    'Debug output: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc)
+                    'Debug info: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc)
                     + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount)
                 )
 
@@ -585,7 +592,7 @@ class APSZoneModel:
     def XMLAddElement(self, parent):
 
         # Add command Zone and all its childs
-        if self.__printInfo >= 3:
+        if self.debug_level >= Debug.VERY_VERBOSE
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'

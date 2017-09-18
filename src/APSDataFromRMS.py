@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 import copy
 
 from src.APSMainFaciesTable import APSMainFaciesTable
+from src.utils.constants import Debug
 
 # importlib.reload(APSMainFaciesTable)
 
@@ -41,7 +42,7 @@ class APSDataFromRMS:
     --------------------------------------------------------------------------------------------
     """
 
-    def __init__(self, printInfo=0):
+    def __init__(self, debug_level=Debug.OFF):
         self.__data = {
             'Property list continuous': [],
             'Property list discrete': [],
@@ -103,7 +104,7 @@ class APSDataFromRMS:
             'azimuth angle': 0,
         }
 
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
     def getFaciesTable(self):
         return copy.copy(self.__faciesTable)
@@ -252,7 +253,7 @@ class APSDataFromRMS:
                 horizonNames.append(text.strip())
             self.__data['Horizon names'] = horizonNames
         faciesCodes = {}
-        faciesTable = APSMainFaciesTable(tree, inputFileName, self.__printInfo)
+        faciesTable = APSMainFaciesTable(tree, inputFileName, self.__debug_level)
         self.__faciesTable = faciesTable
 
     def __add_surfaces(self, kw, surface):

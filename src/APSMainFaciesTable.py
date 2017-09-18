@@ -4,6 +4,8 @@ from xml.etree.ElementTree import Element
 
 import copy
 
+from src.utils.constants import Debug
+
 
 class APSMainFaciesTable:
     """
@@ -12,7 +14,7 @@ class APSMainFaciesTable:
                  must exist in this table before being used.
 
      Public member functions:
-       Constructor:  def __init__(self,ET_Tree=None,modelFileName=None,printInfo =0)
+       Constructor:  def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF)
 
        def initialize(self,fTable)
                   - Initialize the object from a facies/code dictionary object
@@ -44,10 +46,10 @@ class APSMainFaciesTable:
     --------------------------------------------------------------------
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
+    def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF):
         self.__nFacies = 0
         self.__faciesTable = []
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__className = 'APSMainFaciesTable'
         self.__NAME = 0
         self.__CODE = 1
@@ -61,7 +63,7 @@ class APSMainFaciesTable:
 
         # Search xml tree for model file to find the specified Main facies table
         self.__interpretXMLTree(ET_Tree)
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call APSMainFaciesTable init')
         return
 
@@ -73,7 +75,7 @@ class APSMainFaciesTable:
         # Read main facies table for the model
         kw = 'MainFaciesTable'
         obj = root.find(kw)
-        if obj == None:
+        if obj is None:
             print('Error when reading model file: ' + self.__modelFileName)
             print('Error: Missing keyword ' + kw)
             sys.exit()
@@ -84,7 +86,7 @@ class APSMainFaciesTable:
                 text = fItem.find('Code').text
                 fCode = int(text.strip())
                 self.__faciesTable.append([fName, fCode])
-            if self.__faciesTable == None:
+            if self.__faciesTable is None:
                 print('Error when reading model file: ' + self.__modelFileName)
                 print('Error: Missing keyword Facies when reading specification of MainFaciesTable')
                 sys.exit()
@@ -185,7 +187,6 @@ class APSMainFaciesTable:
             return True
 
     # -- End of function checkWithFaciesTable
-
 
     def XMLAddElement(self, root):
         tag = 'MainFaciesTable'
