@@ -13,19 +13,36 @@ from src.resources.ui import APS_prototype_ui
 
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 
+from src.utils.constants import ModeConstants
+from src.utils.checks import is_experimental_mode
+
 
 class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, state=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.retranslateUi(self)
 
+        self._state = state
+        self._project_data = None
+        if self._state:
+            # TODO: Is project_data really necessary
+            self._project_data = self._state.get_project_data()
         self.wire_up()
         self.probabilities = None
 
     def wire_up(self):
         self.m_button_assign_probability.clicked.connect(self.assign_probabilities)
         self.m_button_close.clicked.connect(self.close)
+        self.initialize_project_data()
+
+    def initialize_project_data(self):
+        # TODO: Read from the project data
+        if self._state:
+            for key in self._state.keys():
+                if key == ModeConstants.EXECUTION_MODE and is_experimental_mode(self._state[key]):
+                    self.m_toggle_experimental_mode.setChecked(True)
+                pass
 
     def assign_probabilities(self, content_in_combo_boxes=None):
         # TODO: Read from file, and give that as input
@@ -43,10 +60,4 @@ class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
             data=self.probabilities
         )
         self.probabilities.show()
-        self.statusBar().showMessage("Clicked on button!")
-        pass
-
-    @pyqtSlot(dict, QWidget)
-    def get_probabilities(self, data, source):
-        print(data)
         pass
