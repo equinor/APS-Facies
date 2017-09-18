@@ -113,6 +113,7 @@ class ProjectConstants(Key):
 
 class Defaults(Value):
     FILE_EXTENSION = 'xml'
+    FILE_FILTER = 'XML files (*.xml)'
     OPERATION_MODE = ModeOptions.READING_MODE
 
 

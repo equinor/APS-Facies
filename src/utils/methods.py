@@ -5,7 +5,9 @@ from xml.dom import minidom
 import numpy as np
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QValidator
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget,  QFileDialog
+
+from utils.constants import Defaults
 
 T = TypeVar('T')
 U = TypeVar('U')
@@ -100,3 +102,9 @@ def apply_validator(elements: Union[List[QObject], QObject], validator: QValidat
 
 def show_dialog(dialog: QWidget):
     dialog.show()
+
+
+def get_project_file(parent=None):
+    openfile = QFileDialog.getOpenFileName(parent=parent, filter=Defaults.FILE_FILTER)
+    path = openfile[0]
+    return path
