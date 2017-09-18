@@ -14,6 +14,7 @@ from src.gui.wrappers.main_window import MainWindow
 from src.gui.state import State
 
 from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions, Defaults, MessageIcon
+from src.utils.methods import get_project_file
 
 
 class Project(QMainWindow, Ui_project_selection):
@@ -75,8 +76,7 @@ class Project(QMainWindow, Ui_project_selection):
         self._state.set_project_path(path)
 
     def browse_files(self) -> None:
-        openfile = QFileDialog.getOpenFileName(self)
-        path = openfile[0]
+        path = get_project_file(self)
         self.m_edit_browse_project.setText(path)
 
     def keyPressEvent(self, event: QKeyEvent):
