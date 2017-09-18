@@ -140,7 +140,7 @@ copy-libdraw-to-test: libdraw2D.so
 
 run-tests:
 	cd $(TEST_FOLDER) && \
-	pytest
+	pytest --basetemp=$(TEST_FOLDER)
 
 clean-tests:
 	rm -rf $(TEST_FOLDER)/.cache && \
