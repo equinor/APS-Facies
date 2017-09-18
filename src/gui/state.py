@@ -66,7 +66,13 @@ class State(dict):
         # TODO: More checks
         return True
 
-    def set_execution_mode(self, mode):
+    def set_experimental_mode(self) -> None:
+        self.set_execution_mode(ModeOptions.EXPERIMENTAL_MODE)
+
+    def set_reading_mode(self) -> None:
+        self.set_execution_mode(ModeOptions.READING_MODE)
+
+    def set_execution_mode(self, mode: str) -> None:
         if mode not in ModeOptions():
             raise ValueError(
                 "The mode '{mode}' is not a valid mode for execution. Please use one of {options}".format(
@@ -78,8 +84,12 @@ class State(dict):
 
     def set_project_path(self, path: str) -> None:
         # TODO: Check if valid file
-        if self.has_valid_path():
+        if is_valid_path(path):
             self.__dict__[ProjectConstants.PATH_OF_PROJECT_FILE] = path
+            self.set_reading_mode()
+        else:
+            # TODO: Error message?
+            raise FileNotFoundError("The file {} was not found".format(path))
 
     def _is_valid_mode(self):
         mode = self[ModeConstants.EXECUTION_MODE]

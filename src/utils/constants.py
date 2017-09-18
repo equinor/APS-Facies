@@ -1,3 +1,4 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
 
 
@@ -111,10 +112,18 @@ class ProjectConstants(Key):
     ZONES_PARAMETER_NAME = 'zone parameter name'
 
 
+class HideOptions(Value):
+    DISABLE = 'disable'
+    HIDE = 'hide'
+
+
 class Defaults(Value):
     FILE_EXTENSION = 'xml'
     FILE_FILTER = 'XML files (*.xml)'
     OPERATION_MODE = ModeOptions.READING_MODE
+    SEPARATE_ZONE_MODELS = Qt.Unchecked
+    FACIES_MODELS = Qt.Unchecked
+    HIDE = HideOptions.DISABLE
 
 
 class MessageIcon(Icon):
