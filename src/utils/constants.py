@@ -1,3 +1,6 @@
+from PyQt5.QtWidgets import QMessageBox
+
+
 class Constants(object):
     @classmethod
     def constants(cls):
@@ -51,6 +54,10 @@ class Constants(object):
         return False
 
     @staticmethod
+    def is_icon():
+        return False
+
+    @staticmethod
     def _used_internally(name: str) -> bool:
         if name[0:2] == name[-2:] == '__':
             # These are 'magic' methods in Python, and thus used internally
@@ -58,7 +65,7 @@ class Constants(object):
         elif name[0] == '_':
             # Private methods
             return True
-        elif name in ['constants', 'values', 'all', 'is_key', 'is_value']:
+        elif name in ['constants', 'values', 'all', 'is_key', 'is_value', 'is_icon']:
             # These are methods in the base class, that are also used internally, and are therefore not constants
             return True
         else:
@@ -80,6 +87,12 @@ class Value(Constants):
         return False
 
 
+class Icon(Constants):
+    @staticmethod
+    def is_icon():
+        return True
+
+
 class ModeConstants(Key):
     EXECUTION_MODE = 'execution mode'
 
@@ -96,3 +109,16 @@ class ProjectConstants(Key):
     GAUSSIAN_PARAMETER_NAME = 'gaussian parameter name'
     GRID_MODEL_NAME = 'grid model name'
     ZONES_PARAMETER_NAME = 'zone parameter name'
+
+
+class Defaults(Value):
+    FILE_EXTENSION = 'xml'
+    OPERATION_MODE = ModeOptions.READING_MODE
+
+
+class MessageIcon(Icon):
+    NO_ICON = QMessageBox.NoIcon
+    QUESTION_ICON = QMessageBox.Question
+    INFORMATION_ICON = QMessageBox.Information
+    WARNING_ICON = QMessageBox.Warning
+    CRITICAL_ICON = QMessageBox.Critical
