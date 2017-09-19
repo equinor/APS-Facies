@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>project_selection</class>
- <widget class="QWidget" name="project_selection">
+ <class>ProjectSelection</class>
+ <widget class="QWidget" name="ProjectSelection">
   <property name="enabled">
    <bool>true</bool>
   </property>

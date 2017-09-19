@@ -7,10 +7,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-from src.resources.ui import Assign_Probs_ui
+from src.resources.ui.Assign_Probs_ui import Ui_AssignProbabilities
 
 
-class AssignProbabilities(QWidget, Assign_Probs_ui.Ui_assign_probabilities):
+class AssignProbabilities(QWidget, Ui_AssignProbabilities):
     def __init__(self, parent=None, content_in_combo_boxes=None, main_window=None, data=None):
         super(AssignProbabilities, self).__init__(parent)
         self.setupUi(self)

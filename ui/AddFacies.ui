@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dialog_add_facies</class>
- <widget class="QDialog" name="dialog_add_facies">
+ <class>AddFacies</class>
+ <widget class="QDialog" name="AddFacies">
   <property name="geometry">
    <rect>
     <x>0</x>
