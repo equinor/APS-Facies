@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 from src.gui.wrappers.message_box import MessageBox
-from src.resources.ui.Project_ui import Ui_project_selection
+from src.resources.ui.Project_ui import Ui_ProjectSelection
 from src.gui.wrappers.main_window import MainWindow
 from src.gui.state import State
 
@@ -17,7 +17,7 @@ from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions, De
 from src.utils.methods import get_project_file
 
 
-class Project(QMainWindow, Ui_project_selection):
+class Project(QMainWindow, Ui_ProjectSelection):
     def __init__(self):
         super(QMainWindow, self).__init__()
         self.setupUi(self)

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Define APS parameters</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="APS_GUI_Faner">
@@ -418,9 +418,9 @@
         </layout>
        </item>
        <item row="5" column="0">
-        <layout class="QGridLayout" name="layout_bayfield">
+        <layout class="QGridLayout" name="layout_bayfill">
          <item row="2" column="0">
-          <widget class="QPushButton" name="m_button_bayfield">
+          <widget class="QPushButton" name="m_button_bayfill">
            <property name="text">
             <string/>
            </property>
@@ -431,7 +431,7 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <spacer name="spacer_bayfield">
+          <spacer name="spacer_bayfill">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -444,7 +444,7 @@
           </spacer>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_bayfield">
+          <widget class="QLabel" name="label_bayfill">
            <property name="font">
             <font>
              <weight>75</weight>

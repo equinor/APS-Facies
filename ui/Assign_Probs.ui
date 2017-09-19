@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>assign_probabilities</class>
- <widget class="QWidget" name="assign_probabilities">
+ <class>AssignProbabilities</class>
+ <widget class="QWidget" name="AssignProbabilities">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Assign probabilities</string>
   </property>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
