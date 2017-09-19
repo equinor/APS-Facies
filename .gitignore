@@ -321,5 +321,9 @@ app
 Thumbs.db
 *.py~
 *.png
+<<<<<<< HEAD
 #*#
 *~
+=======
+app
+>>>>>>> chore: The binary is ignored from git
