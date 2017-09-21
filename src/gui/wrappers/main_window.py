@@ -11,8 +11,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from src.gui.state import State
-from src.resources.ui import APS_prototype_ui
-from src.gui.wrappers.message_box import MessageBox
+from src.resources.ui.APS_prototype_ui import Ui_MainWindow
+from src.gui.wrappers.base_classes import MessageBox
 
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.utils.checks import is_valid_path
@@ -21,7 +21,7 @@ from src.utils.constants import ModeConstants, Defaults
 from src.utils.methods import toggle_elements, get_project_file
 
 
-class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
+class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None, state: State=None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
@@ -41,6 +41,9 @@ class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
         self.m_toggle_seperate_zone_models.stateChanged.connect(self._toggle_separate_zone_models)
         self.m_toggle_select_facies.stateChanged.connect(self._toggle_select_facies)
         self.m_toggle_experimental_mode.clicked.connect(self._toggle_experimental_mode)
+        self.m_toggle_condition_to_wells.clicked.connect(self._condition_to_wells)
+
+        self.initialize_truncation_rules()
         self.initialize_project_data()
 
         self._set_checkboxes_to_defaults()
@@ -69,6 +72,15 @@ class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
             data=self.probabilities
         )
         self.probabilities.show()
+        pass
+
+    def initialize_truncation_rules(self):
+        library = {
+            'cubic': {key: self.__getattribute__('m_button_type_' + key) for key in 'abcdefghijklmnopqrstuvw'},
+            'num-cubic': {key: self.__getattribute__('m_button_type_' + key) for key in ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']},
+            'bayfill': self.m_button_bayfill,
+            'custom': self.m_button_type_customized,
+        }
         pass
 
     def _toggle_separate_zone_models(self):
@@ -108,4 +120,9 @@ class MainWindow(QMainWindow, APS_prototype_ui.Ui_MainWindow):
                 self._state.set_experimental_mode()
                 self.m_toggle_experimental_mode.setChecked(True)
         elif use_experimental_mode:
+            # TODO:
             pass
+
+    def _condition_to_wells(self):
+        # TODO: Implement
+        pass

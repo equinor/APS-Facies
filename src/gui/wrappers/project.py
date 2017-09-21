@@ -8,7 +8,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-from src.gui.wrappers.message_box import MessageBox
+from src.gui.wrappers.base_classes import MessageBox, OkCancelDialog
 from src.resources.ui.Project_ui import Ui_ProjectSelection
 from src.gui.wrappers.main_window import MainWindow
 from src.gui.state import State
@@ -17,9 +17,9 @@ from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions, De
 from src.utils.methods import get_project_file
 
 
-class Project(QMainWindow, Ui_ProjectSelection):
-    def __init__(self):
-        super(QMainWindow, self).__init__()
+class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
+    def __init__(self, parent=None):
+        super(QMainWindow, self).__init__(parent=parent)
         self.setupUi(self)
         self.retranslateUi(self)
 
@@ -29,12 +29,9 @@ class Project(QMainWindow, Ui_ProjectSelection):
 
         self.main_window = None
 
-    def wire_up(self) -> None:
-        ok = QDialogButtonBox.Ok
-        cancel = QDialogButtonBox.Cancel
-
-        self.m_buttons_ok_cancel_project.button(ok).clicked.connect(self.open_gui)
-        self.m_buttons_ok_cancel_project.button(cancel).clicked.connect(self.close)
+    def wire_up(self, **kwargs) -> None:
+        # TODO: Handle special ok, cancel
+        super(Project, self).wire_up(ok=self.open_gui, cancel=self.close)
         self.m_button_browse_project_file.clicked.connect(self.browse_files)
         self.m_rb_experimental_mode.clicked.connect(self.toggle_experimental_mode)
         self.m_rb_read_rms_project_file.clicked.connect(self.toggle_reading_mode)
@@ -78,12 +75,6 @@ class Project(QMainWindow, Ui_ProjectSelection):
     def browse_files(self) -> None:
         path = get_project_file(self)
         self.m_edit_browse_project.setText(path)
-
-    def keyPressEvent(self, event: QKeyEvent):
-        if event.key() == Qt.Key_Return:
-            self.m_buttons_ok_cancel_project.button(QDialogButtonBox.Ok).click()
-        elif event.key() == Qt.Key_Escape:
-            self.m_buttons_ok_cancel_project.button(QDialogButtonBox.Cancel).click()
 
     def activate_mode(self) -> None:
         toggle_read_project = True
