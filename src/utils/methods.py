@@ -5,7 +5,7 @@ from xml.dom import minidom
 import numpy as np
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QValidator
-from PyQt5.QtWidgets import QWidget,   QFileDialog, QCheckBox, QWidget
+from PyQt5.QtWidgets import QWidget, QFileDialog, QCheckBox, QWidget
 
 from src.utils.constants import Defaults, HideOptions
 

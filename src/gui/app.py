@@ -5,11 +5,12 @@ import sys
 from PyQt5.QtWidgets import QApplication
 
 from src.gui.wrappers.project import Project
+from src.gui.wrappers.truncation_rule import CubicTruncationRule
 
 
 def run():
     app = QApplication(sys.argv)
-    ui = Project()
+    ui = CubicTruncationRule()
     ui.show()
     sys.exit(app.exec_())
 

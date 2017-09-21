@@ -230,7 +230,7 @@
        <widget class="QPushButton" name="m_color_button_F2"/>
       </item>
       <item row="7" column="7">
-       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel_truncation_rule_cubic">
+       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
         <property name="standardButtons">
          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
         </property>
