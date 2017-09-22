@@ -22,7 +22,7 @@ PY_RESOURCE_FILE = $(PYQT_GENERATED_FILES)/Resources_rc.py
 TEST_FOLDER = $(SOURCE_DIR)/unit_test
 AUXILLARY = $(CODE_DIR)/auxillary
 VULNERABILITY_DB = $(AUXILLARY)/vulnerability/data
-DOCKERFILE = $(CODE_DIR)/Dockerfile
+DOCKERFILE = Dockerfile
 GCC_VERSION = 4.9.4
 QT_VERSION = 5.9.1
 ifeq ($(PIP),)
