@@ -1,4 +1,8 @@
 FROM centos:6
+LABEL version="1.4" \
+      maintainer="snis@statoil.com" \
+      description="This is the Docker image for building, and testing the APS-GUI." \
+      "com.statoil.vendor"="Statoil ASA"
 
 ######################################################################
 #  ___ ___  _____  ____   __  ___ ___ _____ _____ ___ _  _  ___ ___
@@ -98,7 +102,9 @@ ENV UPX_PREFIX=$INSTALL_DIR/upx-$UPX_VERSION
 
 ENV OPENSSL_PREFIX=$INSTALL_DIR/openssl-$OPENSSL_VERSION
 
-# Div. software
+VOLUME $CODE_DIR
+
+# Misc. software
 RUN yum update -y \
  && yum install -y \
    git \
@@ -417,5 +423,16 @@ RUN mkdir -p $CODE_DIR
 VOLUME $CODE_DIR
 
 # Install all python modules
+
+# 'Hack' to make PIP trust Statoil's Man-in-the-middle behaviour
+ENV PIP_CERT /usr/local/share/ca-certificates/ca-bundle.crt
+# Download Statoil certificate bundle (all proxy, root, and light)
+RUN mkdir -p /etc/pki/ca-trust/source/anchors \
+&& curl https://git.statoil.no/sdstrh/linux/raw/master/statoil-certs/ca-bundle.crt \
+        --insecure \
+        -o /usr/local/share/ca-certificates/ca-bundle.crt \
+ && update-ca-certificates
+
+
 COPY requirements.txt /requirements.txt
 RUN $PIP install -r /requirements.txt
