@@ -5,7 +5,7 @@ variables:
   FTP_PROXY:    "http://www-proxy.statoil.no:80"
   NO_PROXY:     "git.statoil.no"
   CODE_DIR:     "/code"
-  IMAGE_NAME:   "aps-gui:1.3"
+  IMAGE_NAME:   "aps-gui:1.4"  # May be removed when using the latest version
   DOCKER:       "docker run -v $CI_PROJECT_DIR:$CODE_DIR -i $IMAGE_NAME"
   MAKE:         "make --makefile=$CODE_DIR/Makefile"
   RUN:          "/bin/bash -c"

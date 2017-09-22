@@ -22,6 +22,7 @@ PY_RESOURCE_FILE = $(PYQT_GENERATED_FILES)/Resources_rc.py
 TEST_FOLDER = $(SOURCE_DIR)/unit_test
 AUXILLARY = $(CODE_DIR)/auxillary
 VULNERABILITY_DB = $(AUXILLARY)/vulnerability/data
+DOCKERFILE = $(CODE_DIR)/Dockerfile
 GCC_VERSION = 4.9.4
 QT_VERSION = 5.9.1
 ifeq ($(PIP),)
@@ -29,6 +30,12 @@ PIP := $(shell which pip)
 endif
 ifeq ($(UPX_DIR),)
 UPX_DIR := $(shell dirname $(shell which upx))
+endif
+ifeq ($(IMAGE_VERSION),)
+IMAGE_VERSION := $(shell ./bin/find-version-of-docker-image.sh $(CODE_DIR))
+endif
+ifeq ($(IMAGE_NAME),)
+IMAGE_NAME := $(PROJECT_NAME):$(IMAGE_VERSION)
 endif
 
 COLOR = \033[32;01m
@@ -87,7 +94,7 @@ pepify: resources
 	autopep8 $(PYQT_GENERATED_FILES) --recursive --in-place --pep8-passes 5000 --max-line-length 120 --jobs $(shell nproc)
 
 docker-image: check-docker-dependencies
-	docker build --rm --tag $(IMAGE_NAME) --file Dockerfile .
+	docker build --rm --tag $(IMAGE_NAME) --file $(DOCKERFILE) .
 
 check-docker-dependencies: #copy-source
 	[[ -d gcc-$(GCC_VERSION) ]] || { cp -R /prog/sdpsoft/gcc-$(GCC_VERSION) .; } && \
