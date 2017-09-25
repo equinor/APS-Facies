@@ -93,7 +93,7 @@ clean-ui-files:
 
 ui-files: clean-ui-files
 	mkdir -p $(PYQT_GENERATED_UI_FILS) && \
-	$(foreach file,$(UI_FILES),pyuic5 -x $(file) --import-from=src.resources --output="$(PYQT_GENERATED_UI_FILS)/$(shell basename $(file) .ui)_ui.py";)
+	$(foreach file,$(UI_FILES),pyuic5 $(file) --import-from=src.resources --output="$(PYQT_GENERATED_UI_FILS)/$(shell basename $(file) .ui)_ui.py";)
 
 resource-file: clean-resource-file
 	mkdir -p $(PYQT_GENERATED_FILES)  && \
