@@ -137,11 +137,13 @@ class BaseTruncation(OkCancelDialog):
         sender = self.sender()
         value = self._get_value(sender)
         if isinstance(item_that_should_changed, QLineEdit):
-            value = self._normalize(value, maximum_in=99, minimum_in=0, minimum_out=0, maximum_out=1)
-            item_that_should_changed.setText(str(value))
-            sender.blockSignals(True)
+            value = self._normalize(value, maximum_in=100, minimum_in=0, minimum_out=0, maximum_out=1)
+            if self.should_change(value, item_that_should_changed):
+                item_that_should_changed.setText(str(value))
         elif isinstance(item_that_should_changed, QSlider):
-            item_that_should_changed.setValue(int(value))
+            value = self._normalize(value, maximum_in=1, minimum_in=0, minimum_out=0, maximum_out=100)
+            if self.should_change(value, item_that_should_changed):
+                item_that_should_changed.setValue(int(value))
             pass
         pass
 
@@ -163,6 +165,8 @@ class BaseTruncation(OkCancelDialog):
                 return 0
             elif ',' in value:
                 value = value.replace(',', '.')
+            if value == '.':
+                value = 0
             return float(value)
         return -1
         pass
@@ -182,3 +186,9 @@ class BaseTruncation(OkCancelDialog):
                 BaseTruncation.apply_method_to(item, method)
         else:
             method(items)
+
+    @staticmethod
+    def should_change(value: float, item_that_should_changed: [QSlider, QLineEdit], esp=0.01) -> bool:
+        old_value = BaseTruncation._get_value(item_that_should_changed)
+        # TODO: Check if they are sufficiently different
+        return abs(old_value - value) > esp
