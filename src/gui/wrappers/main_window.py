@@ -12,7 +12,7 @@ from PyQt5.QtCore import *
 
 from src.gui.state import State
 from src.resources.ui.APS_prototype_ui import Ui_MainWindow
-from src.gui.wrappers.base_classes import MessageBox
+from src.gui.wrappers.base_classes.message_box import MessageBox
 
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.utils.checks import is_valid_path
@@ -84,21 +84,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pass
 
     def _toggle_separate_zone_models(self):
-        checkbox = self.m_toggle_seperate_zone_models
+        toggled = self.m_toggle_seperate_zone_models.isChecked()
         elements = [
             self.label_available_zones, self.label_selected_zones, self.label_zones_to_be_modeled,
             self.m_list_available_zones, self.m_list_selected_zones, self.m_button_add_zone, self.m_button_remove_zone
         ]
-        toggle_elements(checkbox, elements)
+        toggle_elements(toggled, elements)
 
     def _toggle_select_facies(self):
-        checkbox = self.m_toggle_select_facies
+        toggled = self.m_toggle_select_facies.isChecked()
         elements = [
             self.label_available_facies, self.label_facies_to_be_modelled, self.label_selected_facies,
             self.m_list_available_facies, self.m_list_selected_facies, self.m_button_add_facies,
             self.m_button_remove_facies, self.m_button_add_new_facies, self.m_button_remove_selected,
         ]
-        toggle_elements(checkbox, elements)
+        toggle_elements(toggled, elements)
 
     def _set_checkboxes_to_defaults(self):
         self.m_toggle_seperate_zone_models.setCheckState(Defaults.SEPARATE_ZONE_MODELS)

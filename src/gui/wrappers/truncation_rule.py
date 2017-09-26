@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 
 from src.resources.ui.TruncRuleCubic_ui import Ui_CubicTruncationRule
 from src.utils.constants import Proportions, Defaults
-from src.gui.wrappers.base_classes import BaseTruncation
+from src.gui.wrappers.base_classes.truncation import BaseTruncation
 
 
 class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
