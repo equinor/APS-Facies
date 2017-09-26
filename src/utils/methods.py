@@ -104,8 +104,7 @@ def show_dialog(dialog: QWidget):
     dialog.show()
 
 
-def toggle_elements(checkbox: QCheckBox, elements: List[QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
-    toggled = checkbox.isChecked()
+def toggle_elements(toggled: bool, elements: List[QWidget], deactivate_or_hide=Defaults.HIDE) -> None:    assert deactivate_or_hide in HideOptions()
     assert deactivate_or_hide in HideOptions()
     for element in elements:
         if deactivate_or_hide == HideOptions.HIDE:

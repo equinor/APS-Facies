@@ -8,7 +8,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-from src.gui.wrappers.base_classes import MessageBox, OkCancelDialog
+from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
+from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.resources.ui.Project_ui import Ui_ProjectSelection
 from src.gui.wrappers.main_window import MainWindow
 from src.gui.state import State
