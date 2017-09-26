@@ -5,13 +5,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from src.resources.ui.TruncRuleCubic_ui import Ui_CubicTruncationRule
-from src.utils.constants import Proportions
+from src.utils.constants import Proportions, Defaults
 from src.gui.wrappers.base_classes import BaseTruncation
 
 
 class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
-    def __init__(self, parent=None):
-        super(CubicTruncationRule, self).__init__(parent=parent)
+    def __init__(self, parent=None, name_of_buttons=Defaults.NAME_OF_BUTTON_BOX):
+        super(CubicTruncationRule, self).__init__(parent=parent, name_of_buttons=name_of_buttons)
         self.setupUi(self)
         self.retranslateUi(self)
 
@@ -20,6 +20,7 @@ class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
         pass
 
     def wire_up(self):
+        super(BaseTruncation, self).wire_up()
         validator = QDoubleValidator(bottom=Proportions.BOTTOM, top=Proportions.TOP, decimals=Proportions.DECIMALS)
         proportion_inputs = [self.__getattribute__('m_edit_proportion_' + name) for name in self.names]
         sliders = [self.__getattribute__('m_slider_' + name) for name in self.names]
