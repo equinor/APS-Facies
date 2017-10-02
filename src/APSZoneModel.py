@@ -36,6 +36,7 @@ class APSZoneModel:
        def getPerpRange(self,gaussFieldName)
        def getVertRange(self,gaussFieldName)
        def getAnisotropyAsimuthAngle(self,gaussFieldName)
+       def getAnisotropyDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
        def getTrendRuleModel(self,gfName)
@@ -47,6 +48,15 @@ class APSZoneModel:
        def getConstProbValue(self,fName)
        def getHorizonNameForVarioTrendMap(self)
 
+
+       ---  Set functions ---
+       def setZoneNumber(self,zoneNumber)
+       def setVarioType(self,gaussFieldName,varioType)
+       def setRange1(self,gaussFieldName,range1)
+       def setRange2(self,gaussFieldName,range2)
+       def setRange3(self,gaussFieldName,range3)
+       def setAnisotropyAsimuthAngle(self,gaussFieldName,angle)
+      def setAnisotropyDipAngle(self,gaussFieldName,angle)
 
      ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
@@ -70,8 +80,10 @@ class APSZoneModel:
 
      ---  Calculate function ---
        def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
-       def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
-                                              gridXSize,gridYSize,gridAsimuthAngle)
+       def simGaussFieldWithTrendAndTransform(
+           self, nGaussFields, gridDimNx, gridDimNy,
+           gridXSize, gridYSize, gridAsimuthAngle
+        )
 
 
      ---  write XML tree ---
@@ -127,7 +139,7 @@ class APSZoneModel:
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
-        printInfo = getIntCommand(root, kw, defaultValue=1,required=False)
+        self.__printInfo = getIntCommand(root, kw, defaultValue=1,required=False)
 
 #        obj =  root.find(kw)
 #        if obj == None:
@@ -332,6 +344,9 @@ class APSZoneModel:
     def getAnisotropyAsimuthAngle(self, gaussFieldName):
         return self.__gaussModelObject.getAnisotropyAsimuthAngle(gaussFieldName)
 
+    def getAnisotropyDipAngle(self,gaussFieldName):
+        return self.__gaussModelObject.getAnisotropyDipAngle(gaussFieldName)
+
     def getPower(self, gaussFieldName):
         return self.__gaussModelObject.getPower(gaussFieldName)
 
@@ -391,6 +406,9 @@ class APSZoneModel:
 
     def setAnisotropyAsimuthAngle(self,gaussFieldName,angle):
         return self.__gaussModelObject.setAnisotropyAsimuthAngle(gaussFieldName,angle)
+
+    def setAnisotropyDipAngle(self,gaussFieldName,angle):
+        return self.__gaussModelObject.setAnisotropyDipAngle(gaussFieldName,angle)
 
     def setPower(self, gaussFieldName, power):
         return self.__gaussModelObject.setPower(gaussFieldName,power)
@@ -535,11 +553,11 @@ class APSZoneModel:
                 alphaList.append(alphaDataArray)
 
             for i in range(nDefinedCells):
-                if printInfo == 2:
-                    if np.mod(i, 500000) == 0:
+                if printInfo >= 3:
+                    if np.mod(i,50000)==0:
                         print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo >= 3:
-                    if np.mod(i, 10000) == 0:
+                elif printInfo == 2:
+                    if np.mod(i,500000)==0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
                 if self.__useConstProb == 1:
@@ -565,12 +583,13 @@ class APSZoneModel:
                 volFrac[fIndx] += 1
 
         if self.__printInfo >= 4:
-            if truncObject.getClassName() == 'Trunc2D_Angle':
+            truncRuleName =  truncObject.getClassName()
+            if truncRuleName == 'Trunc2D_Angle':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
                 nCount = truncObject.getNCountShiftAlpha()
                 print(
-                    'Debug output: nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount))
+                    'Debug output: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount))
                 )
 
         for f in range(nFacies):
@@ -619,8 +638,19 @@ class APSZoneModel:
         self.__truncRule.XMLAddElement(zoneElement)
         return
 
-    def simGaussFieldWithTrendAndTransform(self, nGaussFields, gridDimNx, gridDimNy,
-                                           gridXSize, gridYSize, gridAsimuthAngle):
+    def simGaussFieldWithTrendAndTransform(
+            self, nGaussFields, gridDimNx, gridDimNy,
+            gridXSize, gridYSize, gridAsimuthAngle, previewCrossSection):
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
-            nGaussFields, gridDimNx, gridDimNy, gridXSize, gridYSize, gridAsimuthAngle
+            nGaussFields, gridDimNx, gridDimNy, gridXSize, gridYSize,
+            gridAsimuthAngle, previewCrossSection
         )
+    def simGaussFieldWithTrendAndTransformNew(self, nGaussFields,
+                                              simBoxXsize, simBoxYsize, simBoxZsize,
+                                              gridNX, gridNY, gridNZ,
+                                              gridAsimuthAngle, crossSectionType):
+        return self.__gaussModelObject.simGaussFieldWithTrendAndTransformNew(
+            nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAsimuthAngle, crossSectionType
+        )
+

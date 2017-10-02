@@ -63,7 +63,8 @@ def addZoneParam():
    trendModelList = []
    seedPreviewList = []
    for i in range(len(gfNames)):
-      gaussModelList.append([gfNames[i], gfTypes[i], range1[i], range2[i], range3[i], angles[i], power[i]])
+      gaussModelList.append([gfNames[i], gfTypes[i], range1[i], range2[i], range3[i], 
+                             asimuthVarioAngles[i], dipVarioAngles[i], power[i]])
 
       # Set Gauss field trend parameters
       trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None,printInfo,None)
@@ -175,7 +176,8 @@ for testCase in range(start,end+1):
       range1  = [2000.0, 1500.0]
       range2  = [1400.0, 750.0]
       range3 =  [ 2.0, 1.0]
-      angles =  [35.0, 125.0]
+      asimuthVarioAngles =  [35.0, 125.0]
+      dipVarioAngles =  [0.0, 0.1]
       power  =  [1.8, 1.0] 
 
       # Trend parameters. One entry in list for each gauss field
@@ -213,7 +215,8 @@ for testCase in range(start,end+1):
       range1  = [2000.0, 1500.0,6000.0]
       range2  = [1400.0, 750.0,250.0]
       range3 =  [ 2.0, 1.0,4.5]
-      angles =  [35.0, 125.0,315.0]
+      asimuthVarioAngles =  [35.0, 125.0,315.0]
+      dipVarioAngles =  [0.01, 0.0, 0.0]
       power  =  [1.8, 1.0,1.0] 
 
       # Trend parameters. One entry in list for each gauss field
@@ -262,7 +265,8 @@ for testCase in range(start,end+1):
       range1  = [3000.0, 1500.0, 2500.0, 750.0]
       range2  = [1400.0, 750.0, 800.0, 5200.0]
       range3 =  [ 2.0, 1.0, 4.0, 120.0]
-      angles =  [35.0, 125.0,95.0, 323.0]
+      asimuthVarioAngles =  [35.0, 125.0,95.0, 323.0]
+      dipVarioAngles =  [0.01, 0.0, 0.0, 0.02]
       power  =  [1.8, 1.0, 1.0, 1.95] 
 
       # Trend parameters. One entry in list for each gauss field
@@ -299,7 +303,8 @@ for testCase in range(start,end+1):
       range1  = [2000.0, 2500.0, 1500.0, 1750.0]
       range2  = [1400.0, 750.0, 800.0, 5200.0]
       range3 =  [ 2.0, 1.0, 4.0, 120.0]
-      angles =  [135.0, 25.0,75.0, 23.0]
+      asimuthVarioAngles =  [135.0, 25.0,75.0, 23.0]
+      dipVarioAngles =  [0.0, 0.0, 0.01, 0.02]
       power  =  [1.8, 1.0, 1.0, 1.95] 
 
       # Trend parameters. One entry in list for each gauss field
@@ -341,7 +346,8 @@ varioTypeList = ['SPHERICAL','EXPONENTIAL','GAUSSIAN','GENERAL_EXPONENTIAL','SPH
 mainRangeList = [1234.0, 5432.0,1200,1300,2150]
 perpRangeList = [123.0, 543.0,120,130,215]
 vertRangeList = [1.0, 5.0,1.2,1.3,2.15]
-angleList = [0.0,90.0,125.0,40.0,50.0]
+asimuthAngleList = [0.0,90.0,125.0,40.0,50.0]
+dipAngleList = [0.0, 0.01, 0.005, 0.009, 0.0008]
 powerList = [1.0, 1.2,1.3,1.4,1.5]
 
 for i in range(nGaussFields):
@@ -376,12 +382,20 @@ for i in range(nGaussFields):
    vertRange1 =  zone1.getVertRange(gfName)
    print('New VertRange: ' + str(vertRange1))
 
-   angle = zone1.getAnisotropyAsimuthAngle(gfName)
-   print('Original angle: ' + str(angle))
-   angle = angleList[i]
-   zone1.setAnisotropyAsimuthAngle(gfName,angle)
-   angle1 =  zone1.getAnisotropyAsimuthAngle(gfName)
-   print('New angle: ' + str(angle1))
+   asimuth = zone1.getAnisotropyAsimuthAngle(gfName)
+   print('Original asimuth angle: ' + str(asimuth))
+   asimuth = asimuthAngleList[i]
+   zone1.setAnisotropyAsimuthAngle(gfName,asimuth)
+   asimuth1 =  zone1.getAnisotropyAsimuthAngle(gfName)
+   print('New asimuth angle: ' + str(asimuth1))
+
+   dip = zone1.getAnisotropyDipAngle(gfName)
+   print('Original dip angle: ' + str(dip))
+   dip = dipAngleList[i]
+   zone1.setAnisotropyDipAngle(gfName,dip)
+   dip1 =  zone1.getAnisotropyDipAngle(gfName)
+   print('New dip angle: ' + str(dip1))
+
    if varioType =='GENERAL_EXPONENTIAL':
       power = zone1.getPower(gfName)
       print('Original exponent: ' + str(power))
@@ -403,5 +417,44 @@ else:
    print('Files are different. NOT OK')
 assert check == True
 
+apsGaussModel = APSGaussModel.APSGaussModel()
+zoneNumber = 1
 
+# Define main facies table
+mainFaciesTable = APSMainFaciesTable.APSMainFaciesTable()
+fTable = fTable = {2:'F2',1:'F1',3:'F3'}
+mainFaciesTable.initialize(fTable)
+gfJobs = APSGaussFieldJobs.APSGaussFieldJobs()
+gfJobNames = ['Job1','Job2']
+gfNamesPerJob=[['GRF1','GRF2'],['GRF3','GRF4','GRF5']]
+gfJobs.initialize(gfJobNames,gfNamesPerJob)
+mainRange = 1000
+perpRange = 100
+vertRange = 1.0
+asimuth = 45.0
+dip = 1.0
+gfName = 'GRF1'
+gaussModelList =[['GRF1','SPHERICAL',mainRange,perpRange,vertRange,asimuth,dip,1.0]]
+useTrend = 0
+relStdDev = 0.05
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None,printInfo,None)
+asimuthTrendAngle = 0.0
+stackingTrendAngle = 0.0
+direct = -1
+trendModelObject.initialize(asimuthTrendAngle,stackingTrendAngle,direct)
+
+trendModelList = [['GRF1',useTrend, trendModelObject,relStdDev]]
+simBoxThickness = 100.0
+prevSeedList = [['GRF1',92828]]
+printInfo = 3
+apsGaussModel.initialize(zoneNumber,mainFaciesTable,gfJobs,
+                         gaussModelList, trendModelList,
+                         simBoxThickness,prevSeedList,printInfo)
+gridAsimuthAngle = 0.0
+projection = 'xy'
+apsGaussModel.calc2DVarioFrom3DVario(gfName,gridAsimuthAngle,projection)
+projection = 'xz'
+apsGaussModel.calc2DVarioFrom3DVario(gfName,gridAsimuthAngle,projection)
+projection = 'yz'
+apsGaussModel.calc2DVarioFrom3DVario(gfName,gridAsimuthAngle,projection)
 print('Finished')

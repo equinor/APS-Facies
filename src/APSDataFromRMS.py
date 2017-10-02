@@ -132,12 +132,21 @@ class APSDataFromRMS:
         return [self.__surf[key] for key in order]
 
     def getGridZoneNames(self):
+        # item = [zoneNumber, zoneName, nLayers]
         zoneNames = []
         for item in self.__data['Zones']:
             name = item[1]
             zoneNames.append(name)
         return zoneNames
 
+    def getNumberOfLayersInZone(self,zoneNumber):
+        # item = [zoneNumber, zoneName, nLayers]
+        for item in self.__data['Zones']:
+            number = item[0]
+            if number == zoneNumber: 
+                nLayer = item[2]
+        return nLayer
+        
     def getContinuousGridParamNames(self):
         return copy.copy(self.__data['Property list continuous'])
 
@@ -210,9 +219,11 @@ class APSDataFromRMS:
         for zNameObj in gmObj.findall(kw):
             text = zNameObj.get('number')
             zoneNumber = int(text.strip())
+            text = zNameObj.get('nLayers')
+            nLayers = int(text.strip())
             text = zNameObj.text
             zoneName = text.strip()
-            zones.append([zoneNumber, zoneName])
+            zones.append([zoneNumber, zoneName, nLayers])
         self.__data['Zones'] = zones
 
         keywords = ['XSize', 'YSize', 'AsimuthAngle', 'OrigoX', 'OrigoY', 'NX', 'NY', 'Xinc', 'Yinc']
@@ -266,7 +277,8 @@ class APSDataFromRMS:
         for item in self.__data['Zones']:
             zoneName = item[1]
             zoneNumber = item[0]
-            print('  ' + str(zoneNumber) + '  ' + zoneName)
+            nLayers    = item[2]
+            print('  Zone number: {0} Zone name: {1}  Number of layers: {2}'.format(str(zoneNumber), zoneName , str(nLayers)))
         print(' ')
         print('Grid dimensions:')
         print('  NX:       ' + str(self.__grid['nx']))

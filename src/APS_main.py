@@ -16,7 +16,7 @@ from src import (
 )
 import APSGaussModel
 import xmlFunctions
-
+import simGauss2D
 import src.generalFunctionsUsingRoxAPI as gr
 import importlib
 
@@ -36,6 +36,7 @@ importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear)
 importlib.reload(Trend3D_linear_model_xml)
 importlib.reload(xmlFunctions)
+importlib.reload(simGauss2D)
 
 # Initialise common variables
 functionName = 'APS_trunc.py'

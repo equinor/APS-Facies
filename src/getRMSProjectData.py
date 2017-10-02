@@ -251,9 +251,10 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
 
     # Get grid dimensions etc for the grid model
     zoneNames = []
+    nLayersPerZone = []
     grid = gridModel.get_grid()
     [xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     asimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames] = gr.getGridAttributes(grid, printInfo)
+     asimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] =  gr.getGridAttributes(grid,printInfo)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -264,7 +265,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
 
     for i in range(len(zoneNames)):
         tag = 'ZoneName'
-        attribute = {'number': str(i + 1)}
+        attribute = {'number':str(i+1), 'nLayers':str(nLayersPerZone[i])}
         name = zoneNames[i]
         zNameObj = Element(tag, attribute)
         zNameObj.text = ' ' + name.strip() + ' '
@@ -332,10 +333,9 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
         print('Error: Specified type for reference horizon: ' + horizonRefType + ' is not defined')
         sys.exit()
     # Use the specified reference horizon name and type to get 2D surface grid info
-    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(project.horizons,
-                                                                                   horizonRefName,
-                                                                                   horizonRefType,
-                                                                                   printInfo)
+    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
+        project.horizons, horizonRefName, horizonRefType, printInfo
+    )
     tag = 'SurfaceTrendDimensions'
     surfObj = Element(tag)
     topElement.append(surfObj)

@@ -476,7 +476,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self.__calcProbForEachNode(area)
         self.__calcThresholdValues()
 
-        if self._printInfo >= 3:
+        if self._printInfo >= 4:
             self.__writeDataForTruncRule()
         return
 

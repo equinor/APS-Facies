@@ -475,7 +475,30 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
             printInfoText(functionName, text)
             print(p.code_names)
 
+def getNumberOfLayersPerZone(grid,zoneNumber):
+    indexer = grid.grid_indexer
+    zone_name = grid.zone_names[zoneNumber]
+    layer_ranges = indexer.zonation[zoneNumber]
+    number_layers = 0
+    for layer_range in layer_ranges:
+        start = layer_range[0]
+        end = layer_range[-1]
+        number_layers += (end+1-start)
+    return number_layers
 
+def getNumberOfLayers(grid):
+    indexer = grid.grid_indexer
+    number_layers_per_zone = []
+    for key in indexer.zonation:
+        zone_name = grid.zone_names[key]
+        layer_ranges = indexer.zonation[key]
+        number_layers = 0
+        for layer_range in layer_ranges:
+            start = layer_range[0]
+            end = layer_range[-1]
+            number_layers += (end+1-start)
+        number_layers_per_zone.append(number_layers)
+    return number_layers_per_zone
 
 def getGridAttributes(grid, printInfo):
     indexer = grid.grid_indexer
@@ -536,10 +559,13 @@ def getGridAttributes(grid, printInfo):
             print('Zone{}: "{}", Layers {} ({} layers)'.format(i, zone_name, layers, number_layers))
         print(' ')
     nZones = len(indexer.zonation)
-
+    nLayersPerZone = []
+    nLayersPerZone = getNumberOfLayers(grid)
     [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0] = getGridSimBoxSize(grid, printInfo)
-    return [xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, asimuthAngle, x0, y0,
-            dimensions[0], dimensions[1], dimensions[2], nZones, zoneNames]
+    return [
+        xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, asimuthAngle, x0, y0,
+        dimensions[0] ,dimensions[1], dimensions[2], nZones,zoneNames, nLayersPerZone
+    ]
 
 
 def getGridSimBoxSize(grid, printInfo):
@@ -600,9 +626,10 @@ def get2DMapDimensions(horizons, horizonName, representationName, printInfo):
             horizonObj = h
             break
     if horizonObj == None:
-        raise ValueError('Error in  get2DMapInfo\n'
-                         'Error: Horizon name: ' + horizonName + ' does not exist'
-                         )
+        raise ValueError(
+            'Error in  get2DMapInfo\n'
+            'Error: Horizon name: ' + horizonName + ' does not exist'
+        )
 
     reprObj = None
     for representation in horizons.representations:
@@ -610,15 +637,17 @@ def get2DMapDimensions(horizons, horizonName, representationName, printInfo):
             reprObj = representation
             break
     if reprObj == None:
-        raise ValueError('Error in  get2DMapInfo\n'
-                         'Error: Horizons data type: ' + representationName + ' does not exist'
-                         )
+        raise ValueError(
+            'Error in  get2DMapInfo\n'
+            'Error: Horizons data type: ' + representationName + ' does not exist'
+        )
 
     surface = horizons[horizonName][representationName]
     if not isinstance(surface, roxar.Surface):
-        raise ValueError('Error in get2DMapInfo\n'
-                         'Error: Specified object is not a 2D grid'
-                         )
+        raise ValueError(
+            'Error in get2DMapInfo\n'
+            'Error: Specified object is not a 2D grid'
+        )
     grid = surface.get_grid()
     values = grid.get_values()
     shape = values.shape
@@ -659,9 +688,10 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
             horizonObj = h
             break
     if horizonObj == None:
-        raise ValueError('Error in updateHorizonObject\n'
-                         'Error: Horizon name: ' + horizonName + ' does not exist'
-                         )
+        raise ValueError(
+            'Error in updateHorizonObject\n'
+            'Error: Horizon name: ' + horizonName + ' does not exist'
+        )
 
     # Find the correct representation. Must exist.
     reprObj = None
