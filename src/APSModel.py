@@ -102,7 +102,8 @@ class APSModel:
         self.__zoneModelsSecondLevel = []
         self.__selectedZoneNumberList = []
         self.__previewZone = 0
-
+        self.__previewCrossSection = 'IJ'
+        self.__previewScale = 1.0
         # Read model if it is defined
         if modelFileName is None:
             return
@@ -134,7 +135,20 @@ class APSModel:
         kw = 'Preview'
         obj = root.find(kw)
         if obj is not None:
-            self.__previewZone = int(obj.get('zoneNumber'))
+            text = obj.get('zoneNumber')
+            if text is None:
+                raise ValueError('Must specify zoneNumber attribute in keyword {}'.format(kw))
+            self.__previewZone = int(text)
+
+            text = obj.get('crossSection')
+            if text is None:
+                raise ValueError('Must specify crossSection attribute in keyword {}'.format(kw))
+            self.__previewCrossSection = text
+
+            text = obj.get('scale')
+            if text is None:
+                raise ValueError('Must specify scale attribute in keyword {}'.format(kw))
+            self.__previewScale = float(text)
 
         # --- SelectedZones ---
         kw = 'SelectedZones'
@@ -456,6 +470,8 @@ class APSModel:
         self.__zoneModelsSecondLevel = copy.deepcopy(zoneModelListSecondLevel)
         self.__zoneNumberList = self.getZoneNumberList()
         self.__previewZone = 1
+        self.__previewCrossSection = 'IJ'
+        self.__previewScale = 1.0
         #        self.__previewGridNx = 300
         #        self.__previewGridNy = 300
         #        self.__previewGridXSize = 1000.0
@@ -507,6 +523,12 @@ class APSModel:
 
     def getPreviewZoneNumber(self):
         return self.__previewZone
+
+    def getPreviewCrossSection(self):
+        return self.__previewCrossSection
+
+    def getPreviewScale(self):
+        return self.__previewScale
 
     def getAllGaussFieldNamesUsed(self):
         gfAllZones = []
@@ -595,6 +617,23 @@ class APSModel:
             )
         else:
             self.__previewZone = zoneNumber
+
+    def setPreviewCrossSection(self, crossSection):
+        if not (crossSection == 'IJ' or crossSection  == 'IK' or crossSection == 'JK'):
+            raise ValueError(
+                'Error in {} in setPreviewCrossSection\n'
+                'Error:  Cross section is not IJ, IK or JK.')
+        else:
+            self.__previewCrossSection = crossSection
+
+    def setPreviewScale(self, scale):
+        if not (scale > 0.0):
+            raise ValueError(
+                'Error in {} in setPreviewScale\n'
+                'Error:  Scale factor must be > 0'
+            )
+        else:
+            self.__previewScale = scale
 
     # Add the pointer to the new zone object into the zone list
     def addNewZone(self, zoneObject):
@@ -771,7 +810,9 @@ class APSModel:
 
         if self.__previewZone > 0:
             tag = 'Preview'
-            attribute = {'zoneNumber': str(self.__previewZone)}
+            attribute = {'zoneNumber': str(self.__previewZone),
+                         'crossSection': str(self.__previewCrossSection),
+                         'scale': str(self.__previewScale)}
             elem = Element(tag, attribute)
             root.append(elem)
         # If selected zone list is defined (has elements) write them to a keyword

@@ -59,15 +59,15 @@ def getFloatCommand(parent,keyword,parentKeyword='',minValue=None,maxValue=None,
         text = obj.text
         value = float(text.strip())
         if minValue is not None:
-            if value <= minValue:
+            if value < minValue:
                 raise ValueError('Value specified in keyword {} under keyword {} in model file {} '
-                                 'is less than or equal to mininum value {}.'
+                                 'is less than mininum value {}.'
                                  ''.format(keyword,parentKeyword,modelFile,str(minValue))
                 )
         if maxValue is not None:
-            if value >= maxValue:
+            if value > maxValue:
                 raise ValueError('Value specified in keyword {} under keyword {} in model file {} '
-                                 'is greater than than or equal to maximum value {}.'
+                                 'is greater than maximum value {}.'
                                  ''.format(keyword,parentKeyword,modelFile,str(maxValue))
                 )
         
@@ -93,15 +93,15 @@ def getIntCommand(parent,keyword,parentKeyword='',minValue=None,maxValue=None,
         text = obj.text
         value = int(text.strip())
         if minValue is not None:
-            if value <= minValue:
+            if value < minValue:
                 raise ValueError('Value specified in keyword {} under keyword {} in model file {} '
-                                 'is less than or equal to mininum value {}.'
+                                 'is less than mininum value {}.'
                                  ''.format(keyword,parentKeyword,modelFile,str(minValue))
                 )
         if maxValue is not None:
-            if value >= maxValue:
+            if value > maxValue:
                 raise ValueError('Value specified in keyword {} under keyword {} in model file {} '
-                                 'is greater than than or equal to maximum value {}.'
+                                 'is greater than maximum value {}.'
                                  ''.format(keyword,parentKeyword,modelFile,str(maxValue))
                 )
         
