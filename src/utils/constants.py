@@ -1,19 +1,30 @@
-from typing import List, Dict, Iterator
+from typing import Dict, Iterator, List
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+
+
+# TODO: Implement automatic initialization, when accessing a constant
+# Ex. ProjectConstants.PATH_OF_PROJECT_FIL (with, or without () at the end) will give a class instance having that value
 
 
 class Constants(object):
     def __init__(self, constant=None):
-        self._constant = None
+        self.constant = None
         if constant in self.constants() or constant is None:
-            self._constant = constant
+            self.constant = constant
         else:
             raise ValueError(
                 "The given constant, {constant} is not valid for {class_name}"
                 "".format(constant=constant, class_name=self.__class__.__name__)
             )
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        else:
+            pass
 
     def get_value(self):
         pass
@@ -141,6 +152,55 @@ class ProjectConstants(Key):
     ZONES_PARAMETER_NAME = 'zone parameter name'
 
 
+class ProjectElements(Value):
+    FACIES_PARAMETER_NAME = 'm_edit_facies_parameter_name'
+    GAUSSIAN_PARAMETER_NAME = 'm_edit_gaussian_parameter_name'
+    GRID_MODEL_NAME = 'm_edit_grid_model_name'
+    WORKFLOW_NAME = 'm_edit_workflow_name'
+    ZONES_PARAMETER_NAME = 'm_edit_zones_parameter_name'
+
+
+class TruncationRuleElements(Value):
+    pass
+
+
+class CubicTruncationRuleElements(TruncationRuleElements):
+    PROPORTIONS = 'm_edit_proportion_'
+    SLIDERS = 'm_slider_'
+    COLOR_BUTTON = 'm_color_button_'
+    DROP_DOWN = 'm_choose_'
+    TOGGLE_OVERLAY = 'm_toggle_apply_overlay_facies'
+    CLICK_OVERLAY = 'm_button_apply_overlay_facies'
+
+
+class NonCubicTruncationRuleElements(CubicTruncationRuleElements):
+    ANGLES = 'm_edit_angle_'
+
+
+class TruncationRuleConstants(Key):
+    TRUNCATION_RULES = 'truncation rules'
+    pass
+
+
+class CubicTruncationRuleConstants(TruncationRuleConstants):
+    PROPORTION_INPUT = 'text_field'
+    PROPORTION_SCALE = 'slider'
+    COLOR = 'color'
+    FACIES = 'chosen facies'
+
+
+class NonCubicTruncationRuleConstants(CubicTruncationRuleConstants):
+    ANGLES = 'angles'
+
+
+class FaciesLabels(Key):
+    F1 = 'F1'
+    F2 = 'F2'
+    F3 = 'F3'
+    F4 = 'F4'
+    F5 = 'F5'
+
+
 class HideOptions(Value):
     DISABLE = 'disable'
     HIDE = 'hide'
@@ -166,6 +226,11 @@ class Defaults(Value):
     FILE_EXTENSION = 'xml'
     FILE_FILTER = 'XML files (*.xml)'
     NAME_OF_BUTTON_BOX = 'm_buttons_ok_cancel'
+    NAME_OF_PROPORTIONS = CubicTruncationRuleElements.PROPORTIONS
+    NAME_OF_SLIDERS = CubicTruncationRuleElements.SLIDERS
+    NAME_OF_COLOR_BUTTON = CubicTruncationRuleElements.COLOR_BUTTON
+    NAME_OF_DROP_DOWN = CubicTruncationRuleElements.DROP_DOWN
+    NAME_OF_ANGLES = NonCubicTruncationRuleElements.ANGLES
     OPERATION_MODE = ModeOptions.READING_MODE
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
@@ -187,6 +252,12 @@ class Proportions(Value):
     DECIMALS = 5
 
 
+class Angles(Value):
+    MINIMUM = -180.0
+    MAXIMUM = +180.0
+    DECIMALS = 2
+
+
 class Ranges(Value):
     # Slider
     SLIDER_MAXIMUM = 99
@@ -194,3 +265,18 @@ class Ranges(Value):
     # Proportion
     PROPORTION_MINIMUM = 0.0
     PROPORTION_MAXIMUM = 1.0
+
+
+class Colors(Value):
+    LAWN_GREEN = QColor('lawngreen')  # Hex code: #7CFC00
+    GRAY = QColor('gray')  # Hex code: #808080
+    DODGER_BLUE = QColor('dodgerblue')  # Hex code: #1E90FF
+    GOLD = QColor('gold')  # Hex code: #D4AF37
+    DARK_ORCHID = QColor('darkorchid')  # Hex code: #9932CC
+    CYAN = QColor('cyan')  # Hex code: #00B7EB
+    FIREBRICK = QColor('firebrick')  # Hex code: #B22222
+    OLIVE_DRAB = QColor('olivedrab')  # Hex code: #6B8E23
+    BLUE = QColor('blue')  # Hex code: #0000FF
+    CRIMSON = QColor('crimson')  # Hex code: #DC143C
+    DARK_ORANGE = QColor('darkorange')  # Hex code: #FF8C00
+    RED = QColor('red')  # Hex code: #FF0000

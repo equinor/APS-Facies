@@ -4,18 +4,16 @@ A wrapper, and implementation of the the first window the user will normally see
 the experimental mode.
 'Implements' the design in Project.ui, and wraps around src/resources/ui/Project_ui.py.
 """
-from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 
+from src.gui.state import State
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.message_box import MessageBox
-from src.resources.ui.Project_ui import Ui_ProjectSelection
 from src.gui.wrappers.main_window import MainWindow
-from src.gui.state import State
-
-from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions, Defaults, MessageIcon
+from src.resources.ui.Project_ui import Ui_ProjectSelection
+from src.utils.constants import Defaults, MessageIcon, ModeOptions
 from src.utils.methods import get_project_file
+from utils.mappings import project_parameter_state_key_to_element_key
 
 
 class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
@@ -32,6 +30,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
 
     def wire_up(self, **kwargs) -> None:
         # TODO: Handle special ok, cancel
+        # TODO: Make accessing elements more robust
         super(Project, self).wire_up(ok=self.open_gui, cancel=self.close)
         self.m_button_browse_project_file.clicked.connect(self.browse_files)
         self.m_rb_experimental_mode.clicked.connect(self.toggle_experimental_mode)
@@ -42,7 +41,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
 
     def open_gui(self):
         data = self.read_parameters()
-        self._state.update(**data)  # TODO: Use a better method
+        self._state.set_project_parameters(data)
         if self._state.is_valid_state():
             # The state is consistent, and the main window can be opened
             self.main_window = MainWindow(state=self._state)
@@ -53,14 +52,9 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
             dialog = MessageBox(error_message, icon=MessageIcon.WARNING_ICON, parent=self)
             dialog.show()
 
-    def read_parameters(self) -> dict:
-        mapping = {
-            ProjectConstants.FACIES_PARAMETER_NAME: self.m_edit_facies_parameter_name,
-            ProjectConstants.GAUSSIAN_PARAMETER_NAME: self.m_edit_gaussian_parameter_name,
-            ProjectConstants.GRID_MODEL_NAME: self.m_edit_grid_model_name,
-            ProjectConstants.WORKFLOW_NAME: self.m_edit_workflow_name,
-            ProjectConstants.ZONES_PARAMETER_NAME: self.m_edit_zones_parameter_name,
-        }
+    @staticmethod
+    def read_parameters() -> dict:
+        mapping = project_parameter_state_key_to_element_key()
         data = {}
         for key in mapping.keys():
             m_edit = mapping[key]  # type: QLineEdit
@@ -95,7 +89,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         elif self._state.is_reading_mode():
             self.show_file_reading(True)
 
-    def show_file_reading(self, enable: bool=True) -> None:
+    def show_file_reading(self, enable: bool = True) -> None:
         self.m_button_browse_project_file.setEnabled(enable)
         self.m_edit_browse_project.setEnabled(enable)
         self.label_location_rms_project_file.setEnabled(enable)
