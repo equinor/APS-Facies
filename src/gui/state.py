@@ -1,11 +1,16 @@
-from src.utils.constants import ProjectConstants, ModeConstants, ModeOptions, Defaults
+from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
+from src.utils.constants import (
+    CubicTruncationRuleConstants, CubicTruncationRuleElements, ModeConstants, ModeOptions,
+    ProjectConstants, TruncationRuleConstants,
+)
 
 
 class State(dict):
     """
     A class that defines the state of the GUI application.
     """
+
     def __init__(self, **kwargs):
         super(State, self).__init__(**kwargs)
 
@@ -90,6 +95,25 @@ class State(dict):
         else:
             # TODO: Error message?
             raise FileNotFoundError("The file {} was not found".format(path))
+
+    def set_project_parameters(self, data: dict) -> None:
+        # TODO: Use a better method
+        self.update(**data)
+
+    def set_truncation_rules(self, truncation: BaseTruncation):
+        unnecessary_elements = [CubicTruncationRuleElements.SLIDERS]
+        values = truncation.get_all_values(skip_elements=unnecessary_elements)
+        self._ensure_normalization(values)
+        self.__dict__[TruncationRuleConstants.TRUNCATION_RULES] = values
+
+    @staticmethod
+    def _ensure_normalization(values):
+        proportion_key = CubicTruncationRuleConstants.PROPORTION_INPUT
+        total_sum = sum([values[label][proportion_key] for label in values.keys()])
+        if total_sum != 1.0:
+            for label in values.keys():
+                value = values[label][proportion_key]
+                values[label][proportion_key] = value / total_sum
 
     def _is_valid_mode(self):
         mode = self[ModeConstants.EXECUTION_MODE]

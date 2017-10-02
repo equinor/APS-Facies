@@ -104,13 +104,20 @@ def show_dialog(dialog: QWidget):
     dialog.show()
 
 
-def toggle_elements(toggled: bool, elements: List[QWidget], deactivate_or_hide=Defaults.HIDE) -> None:    assert deactivate_or_hide in HideOptions()
+def toggle_elements(toggled: bool, elements: Union[List[QWidget], QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
     assert deactivate_or_hide in HideOptions()
-    for element in elements:
+    if isinstance(elements, list):
+        for element in elements:
+            toggle_elements(toggled, element)
+    elif isinstance(elements, QWidget):
         if deactivate_or_hide == HideOptions.HIDE:
-            element.setVisible(toggled)
+            elements.setVisible(toggled)
         elif deactivate_or_hide == HideOptions.DISABLE:
-            element.setEnabled(toggled)
+            elements.setEnabled(toggled)
+        else:
+            raise ValueError
+    else:
+        raise TypeError
 
 
 def get_project_file(parent=None):

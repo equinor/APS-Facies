@@ -1,37 +1,57 @@
-from typing import List, Callable, Union
-
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-
-from src.resources.ui.TruncRuleCubic_ui import Ui_CubicTruncationRule
-from src.utils.constants import Proportions, Defaults
+from src.gui.state import State
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
+from src.resources.ui.TruncRuleCubic_ui import Ui_CubicTruncationRule
+from src.resources.ui.TruncRuleTypeNonCubic_ui import Ui_NonCubicTruncationRule
+from src.utils.constants import Defaults
 
 
 class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
-    def __init__(self, parent=None, name_of_buttons=Defaults.NAME_OF_BUTTON_BOX):
-        super(CubicTruncationRule, self).__init__(parent=parent, name_of_buttons=name_of_buttons)
+    def __init__(
+            self,
+            state: State,
+            parent=None,
+            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
+            basename_sliders=Defaults.NAME_OF_SLIDERS,
+            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
+            active=None
+    ):
+        super(CubicTruncationRule, self).__init__(
+            parent=parent,
+            state=state,
+            name_of_buttons=name_of_buttons,
+            basename_sliders=basename_sliders,
+            basename_proportions=basename_proportions,
+            active=active
+        )
         self.setupUi(self)
         self.retranslateUi(self)
+        self.active = ['F1', 'F2', 'F3', 'F4']  # TODO: Should be removed, in favor of dynamically loading
 
         self.wire_up()
 
-        pass
 
-    def wire_up(self):
-        super(BaseTruncation, self).wire_up()
-        validator = QDoubleValidator(bottom=Proportions.BOTTOM, top=Proportions.TOP, decimals=Proportions.DECIMALS)
-        proportion_inputs = [self.__getattribute__('m_edit_proportion_' + name) for name in self.names]
-        sliders = [self.__getattribute__('m_slider_' + name) for name in self.names]
+class NonCubicTruncationRule(BaseTruncation, Ui_NonCubicTruncationRule):
+    def __init__(
+            self,
+            state: State,
+            parent=None,
+            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
+            basename_sliders=Defaults.NAME_OF_SLIDERS,
+            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
+            basename_angles=Defaults.NAME_OF_ANGLES,
+            active=None
+    ):
+        super(NonCubicTruncationRule, self).__init__(
+            parent=parent,
+            state=state,
+            name_of_buttons=name_of_buttons,
+            basename_sliders=basename_sliders,
+            basename_proportions=basename_proportions,
+            active=active
+        )
+        self.setupUi(self)
+        self.retranslateUi(self)
+        self.active = ['F1', 'F2', 'F3', 'F4']  # TODO: Should be removed, in favor of dynamically loading
+        self.basename_angles = basename_angles
 
-        # Set edits fields to be numbers only
-        self.apply_method_to(proportion_inputs, lambda x: x.setValidator(validator))
-
-        for i in range(len(self.names)):
-            slider = sliders[i]  # type: QSlider
-            line_edit = proportion_inputs[i]  # type: QLineEdit
-            self.connect_slider_and_text(slider, line_edit)
-
-        # self.m_edit_proportion_F1.textChanged.connect(self.calculate_sums)
-        pass
+        self.wire_up()
