@@ -160,6 +160,15 @@ class ProjectElements(Value):
     ZONES_PARAMETER_NAME = 'm_edit_zones_parameter_name'
 
 
+class BaseNames(Value):
+    ANGLES = 'basename_angles'
+    COLOR_BUTTON = 'basename_color_button'
+    DROP_DOWN = 'basename_drop_down'
+    SLIDERS = 'basename_sliders'
+    PROPORTIONS = 'basename_proportions'
+    SLANT_FACTOR = 'basename_slanted_factor'
+
+
 class TruncationRuleElements(Value):
     pass
 
@@ -177,9 +186,12 @@ class NonCubicTruncationRuleElements(CubicTruncationRuleElements):
     ANGLES = 'm_edit_angle_'
 
 
+class BayfillTruncationRuleElements(CubicTruncationRuleElements):
+    SLANT_FACTOR = 'm_edit_factor_'
+
+
 class TruncationRuleConstants(Key):
     TRUNCATION_RULES = 'truncation rules'
-    pass
 
 
 class CubicTruncationRuleConstants(TruncationRuleConstants):
@@ -199,6 +211,28 @@ class FaciesLabels(Key):
     F3 = 'F3'
     F4 = 'F4'
     F5 = 'F5'
+
+
+class FaciesBayfill(FaciesLabels):
+    F1 = 'floodplain'
+    F2 = 'subbay'
+    F3 = 'WBF'
+    F4 = 'BHD'
+    F5 = 'lagoon'
+
+
+class FaciesNameBayfill(Key):
+    FLOODPLAIN = FaciesBayfill.F1
+    SUBBAY = FaciesBayfill.F2
+    WBF = FaciesBayfill.F3
+    BHD = FaciesBayfill.F4
+    LAGOON = FaciesBayfill.F5
+
+
+class SlantFactorsBayfill(Key):
+    SF = FaciesNameBayfill.FLOODPLAIN
+    YSF = FaciesNameBayfill.SUBBAY
+    SBHD = FaciesNameBayfill.BHD
 
 
 class HideOptions(Value):
@@ -231,6 +265,7 @@ class Defaults(Value):
     NAME_OF_COLOR_BUTTON = CubicTruncationRuleElements.COLOR_BUTTON
     NAME_OF_DROP_DOWN = CubicTruncationRuleElements.DROP_DOWN
     NAME_OF_ANGLES = NonCubicTruncationRuleElements.ANGLES
+    NAME_OF_SLANTED_FACTOR = BayfillTruncationRuleElements.SLANT_FACTOR
     OPERATION_MODE = ModeOptions.READING_MODE
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
@@ -250,6 +285,8 @@ class Proportions(Value):
     BOTTOM = 0
     TOP = 1
     DECIMALS = 5
+    MAXIMUM = TOP
+    MINIMUM = BOTTOM
 
 
 class Angles(Value):
