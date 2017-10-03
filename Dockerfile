@@ -1,5 +1,5 @@
 FROM centos:6
-LABEL version="1.4" \
+LABEL version="1.5.1" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -26,6 +26,11 @@ RUN echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
  && echo "http_proxy = $HTTPS_PROXY" >> /etc/wgetrc \
  && echo "ftp_proxy = $HTTP_PROXY" >> /etc/wgetrc \
  && echo "use_proxy = on" >> /etc/wgetrc
+
+# Download, and install Statoil's Certificates
+ENV STATOIL_CERT="statoil-ca-certificates.el6.rpm"
+RUN wget http://st-linrhn01.st.statoil.no/pub/$STATOIL_CERT \
+ && yum install -y $STATOIL_CERT
 
 #################################################
 #  __  __ ___ ___  ___     __  ___ _  ___   __
@@ -384,17 +389,6 @@ RUN cd $BUILD_DIR/dip-$DIP_VERSION \
 RUN cd $BUILD_DIR/pyqt-deploy-$PYQTDEPLOY_VERSION \
  && $PYTHON setup.py install
 
-# Download and install latest (before 3.3) PyInstaller
-RUN cd $SOURCE_DIR \
- && git clone https://github.com/pyinstaller/pyinstaller.git \
- && cd $SOURCE_DIR/pyinstaller/bootloader \
- && ln -s $(which strip) $GCC_PREFIX/bin/strip \
- && $PYTHON ./waf distclean all \
- && cd $SOURCE_DIR/pyinstaller \
- && $PIP install macholib \
- && $PYTHON setup.py install
-
-
 # Download, and install PyLint
 # Depends on
 # * astroid
@@ -423,16 +417,6 @@ RUN mkdir -p $CODE_DIR
 VOLUME $CODE_DIR
 
 # Install all python modules
-
-# 'Hack' to make PIP trust Statoil's Man-in-the-middle behaviour
-ENV PIP_CERT /usr/local/share/ca-certificates/ca-bundle.crt
-# Download Statoil certificate bundle (all proxy, root, and light)
-RUN mkdir -p /etc/pki/ca-trust/source/anchors \
-&& curl https://git.statoil.no/sdstrh/linux/raw/master/statoil-certs/ca-bundle.crt \
-        --insecure \
-        -o /usr/local/share/ca-certificates/ca-bundle.crt \
- && update-ca-certificates
-
 
 COPY requirements.txt /requirements.txt
 RUN $PIP install -r /requirements.txt
