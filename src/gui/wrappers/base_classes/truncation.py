@@ -1,12 +1,14 @@
+from PyQt5.Qt import Qt
 from typing import Dict, List, Union
 
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QLineEdit, QPushButton, QSlider, QWidget
+from functools import lru_cache
 
 from src.gui.wrappers.base_classes.chekkers.values import should_change
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.color import get_color
-from src.gui.wrappers.base_classes.getters.general import get_value_of_element
+from src.gui.wrappers.base_classes.getters.general import get_element, get_elements, get_value_of_element
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
@@ -30,6 +32,8 @@ class BaseTruncation(OkCancelDialog):
             basename_proportions=Defaults.NAME_OF_PROPORTIONS,
             basename_color_button=Defaults.NAME_OF_COLOR_BUTTON,
             basename_drop_down=Defaults.NAME_OF_DROP_DOWN,
+            facies_options=None,
+            color_options=None,
             names=None,
             active=None
     ):
@@ -49,8 +53,17 @@ class BaseTruncation(OkCancelDialog):
         :type basename_color_button: TruncationRuleElements
         :param basename_drop_down: The prefix for every drop-down menu
         :type basename_drop_down: TruncationRuleElements
+        :param facies_options: A (named) list of lists that contains the valid options for the drop-down menues for the
+                               different facies.
+        :type facies_options: Union[List[List[str]], Dict[str, List[str]]]
+        :param color_options: A list of the colors the buttons have by default. This may also be a 'named list' (a dict)
+                              where the key is the name / label of the facies. If only a list, then the colors are
+                              assigned in order (F1, ..., F5)
+        :type color_options: Union[List[QColor], Dict[str, QColor]]
+        :param names: A list of (default) names / labels for the different facies
+        :type names: List[str]
         :param active: A list, or set of 'elements' that are active
-        :type active: Union[List[str], Set[str]]
+        :type active: Union[List[str], Set[str], int]
         """
         super(BaseTruncation, self).__init__(parent=parent, name_of_buttons=name_of_buttons)
         self.state = state
@@ -58,6 +71,16 @@ class BaseTruncation(OkCancelDialog):
             self.names = ['F1', 'F2', 'F3', 'F4', 'F5']  # TODO: Make dynamic
         else:
             self.names = names
+
+        # TODO: Validate
+        self.color_options = color_options
+
+        # TODO: Validate
+        self.facies_options = facies_options
+
+        if isinstance(active, int):
+            # Use only the 'active' / n first elements / labels
+            active = self.names[:active]
         assert set(active) <= set(self.names)
         self.active = active
         self._set_base_names(BaseNames.SLIDERS, basename_sliders)
@@ -71,6 +94,8 @@ class BaseTruncation(OkCancelDialog):
         self.wire_up_proportions_and_sliders()
 
         self.wire_up_color_buttons()
+
+        self.wire_up_drop_downs()
 
         self.wire_up_angles()
 
@@ -92,8 +117,10 @@ class BaseTruncation(OkCancelDialog):
         toggle_overlay = CubicTruncationRuleElements.TOGGLE_OVERLAY
         click_overlay = CubicTruncationRuleElements.CLICK_OVERLAY
         if hasattr(self, toggle_overlay) and hasattr(self, click_overlay):
-            self._get_element(toggle_overlay).clicked.connect(self.toggle_apply_overlay_facies)
-            self._get_element(click_overlay).clicked.connect(self.apply_overlay_facies)
+            toggle_apply_overlay_facies = get_element(self, toggle_overlay)
+            button_apply_overlay_facies = get_element(self, click_overlay)
+            toggle_apply_overlay_facies.clicked.connect(self.toggle_apply_overlay_facies)
+            button_apply_overlay_facies.clicked.connect(self.apply_overlay_facies)
 
     def wire_up_angles(self):
         validator = QDoubleValidator(bottom=Angles.MINIMUM, top=Angles.MAXIMUM, decimals=Angles.DECIMALS)
@@ -104,51 +131,31 @@ class BaseTruncation(OkCancelDialog):
                 angle_input.textChanged.connect(self.update_angle)
                 angle_input.textChanged.connect(self.update_state)
 
+    def wire_up_drop_downs(self):
+        pass
+
     def wire_up_color_buttons(self):
         # Wire up the color buttons
         color_buttons = self._get_color_buttons()
+        # TODO: Set default colors
         for color_button in color_buttons:
             color_button.clicked.connect(self.select_color)
             color_button.clicked.connect(self.update_state)
 
-    def _get_elements(
-            self,
-            property: BaseNames
-    ) -> Union[List[QPushButton], List[QLineEdit], List[QSlider]]:
-        elements = []
-        if hasattr(self, property):
-            element_type = self._get_element_name_of_basename_property(property)
-            for name in self.names:
-                element_name = element_type + name
-                if hasattr(self, element_name):
-                    elements.append(self.__getattribute__(element_name))
-        return elements
-
-    def _get_element(self, name: str) -> Union[QPushButton, QLineEdit, QSlider]:
-        if hasattr(self, name):
-            return self.__getattribute__(name)
-
     def _get_color_buttons(self) -> List[QPushButton]:
-        return self._get_elements(BaseNames.COLOR_BUTTON)
+        return get_elements(self, BaseNames.COLOR_BUTTON, self.names)
 
     def _get_sliders(self) -> List[QSlider]:
-        return self._get_elements(BaseNames.SLIDERS)
+        return get_elements(self, BaseNames.SLIDERS, self.names)
 
     def _get_proportion_inputs(self) -> List[QLineEdit]:
-        return self._get_elements(BaseNames.PROPORTIONS)
+        return get_elements(self, BaseNames.PROPORTIONS, self.names)
 
     def _get_angle_inputs(self) -> List[QLineEdit]:
-        return self._get_elements(BaseNames.ANGLES)
+        return get_elements(self, BaseNames.ANGLES, self.names)
 
     def _get_slant_factors(self) -> List[QLineEdit]:
-        return self._get_elements(BaseNames.SLANT_FACTOR)
-
-    def _get_element_name_of_basename_property(self, property_name: BaseNames) -> Union[TruncationRuleElements, None]:
-        # FIXME
-        if hasattr(self, property_name):
-            return self.__getattribute__(property_name)
-        else:
-            return None
+        return get_elements(self, BaseNames.SLANT_FACTOR, self.names)
 
     def wire_up_proportions_and_sliders(self):
         validator = QDoubleValidator(bottom=Proportions.BOTTOM, top=Proportions.TOP, decimals=Proportions.DECIMALS)
@@ -218,6 +225,8 @@ class BaseTruncation(OkCancelDialog):
         assert element_type in self.get_basename_of_elements()
         assert element_label in self.active
         element = self._get_corresponding_element(element_label, element_type)
+        if element is None:
+            return None
         return get_value_of_element(element)
 
     def get_values(
@@ -244,9 +253,6 @@ class BaseTruncation(OkCancelDialog):
                 continue
             storage[element_label] = self.get_values(element_label, skip_elements)
         return storage
-
-    # def get_values(self, element_type: TruncationRuleConstants):
-    #     pass
 
     def connect_slider_and_text(self, slider: QSlider, line_edit: QLineEdit) -> None:
         slider.valueChanged[int].connect(self.update_text)
@@ -292,7 +298,7 @@ class BaseTruncation(OkCancelDialog):
             self,
             sender: Union[QWidget, FaciesLabels],
             element_name: Union[TruncationRuleElements, TruncationRuleConstants],
-    ) -> Union[QLineEdit, QSlider]:
+    ) -> Union[QLineEdit, QSlider, None]:
         if isinstance(sender, str) or isinstance(sender, FaciesLabels):
             sender = self._get_element_lookup_table()[sender][element_name]
         facies_label = self._get_facies_label_lookup_table()[sender]
@@ -302,8 +308,11 @@ class BaseTruncation(OkCancelDialog):
             element = self.get_mapping_for_element_names()[element_name]
         else:
             raise ValueError("The given element name, '{}' is invalid".format(element_name))
+        if facies_label is None or element is None:
+            return None
         return self._get_element_lookup_table()[facies_label][element]
 
+    @lru_cache()
     def get_mapping_for_element_names(self) -> Dict[TruncationRuleConstants, TruncationRuleElements]:
         return {
             CubicTruncationRuleConstants.PROPORTION_SCALE: self.basename_sliders,
@@ -401,14 +410,17 @@ class BaseTruncation(OkCancelDialog):
         # ]
         return to_be_changed
 
+    @lru_cache()
     def get_facies_label_of_element(self, element: Union[QSlider, QLineEdit, QComboBox, QPushButton]) -> FaciesLabels:
         return self._get_facies_label_lookup_table()[element]
 
+    @lru_cache()
     def get_basename_of_elements(self) -> List[TruncationRuleElements]:
         prefix = 'basename'
         element_variable_names = get_elements_with_prefix(self, prefix)
         return [self.__getattribute__(name) for name in element_variable_names]
 
+    @lru_cache()
     def _get_element_lookup_table(
             self
     ) -> Dict[FaciesLabels, Dict[TruncationRuleElements, Union[QLineEdit, QSlider, QPushButton, QComboBox]]]:
@@ -416,14 +428,15 @@ class BaseTruncation(OkCancelDialog):
         return {
             facies_label: {
                 base_name: self.__getattribute__(base_name + facies_label)
-                for base_name in base_elements if hasattr(self, base_name + facies_label)
+                if hasattr(self, base_name + facies_label) else None for base_name in base_elements
             } for facies_label in self.names
         }
 
+    @lru_cache()
     def _get_facies_label_lookup_table(self) -> Dict[QWidget, FaciesLabels]:
         element_lookup_table = self._get_element_lookup_table()
         return {
-            element: facies_label
+            element: facies_label if element else None
             for facies_label in element_lookup_table
             for element in element_lookup_table[facies_label].values()
         }

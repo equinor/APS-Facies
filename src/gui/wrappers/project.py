@@ -6,12 +6,13 @@ the experimental mode.
 """
 from PyQt5.QtWidgets import *
 
+from src.gui.wrappers.base_classes.getters.general import get_element
 from src.gui.state import State
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.main_window import MainWindow
 from src.resources.ui.Project_ui import Ui_ProjectSelection
-from src.utils.constants import Defaults, MessageIcon, ModeOptions
+from src.utils.constants import Defaults, MessageIcon, ModeOptions, ProjectElements
 from src.utils.methods import get_project_file
 from utils.mappings import project_parameter_state_key_to_element_key
 
@@ -52,19 +53,18 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
             dialog = MessageBox(error_message, icon=MessageIcon.WARNING_ICON, parent=self)
             dialog.show()
 
-    @staticmethod
-    def read_parameters() -> dict:
+    def read_parameters(self) -> dict:
         mapping = project_parameter_state_key_to_element_key()
         data = {}
         for key in mapping.keys():
-            m_edit = mapping[key]  # type: QLineEdit
+            m_edit = get_element(self, mapping[key])  # type: QLineEdit
             text = m_edit.text()
             if text:
                 data[key] = text
         return data
 
     def set_project_file_to_be_read(self) -> None:
-        path = self.m_edit_browse_project.text()
+        path = get_element(self, ProjectElements.BROWSE_PROJECT_INPUT).text()
         self._state.set_project_path(path)
 
     def browse_files(self) -> None:

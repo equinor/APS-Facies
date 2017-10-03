@@ -14,6 +14,7 @@ class GeneralDialog(QDialogButtonBox):
         self.valid_buttons = self._get_valid_buttons()
 
         self.name_of_buttons = name_of_buttons
+        self.setWindowModality(Qt.ApplicationModal)
         if kwargs:
             self.wire_up(**kwargs)
 
@@ -36,6 +37,7 @@ class GeneralDialog(QDialogButtonBox):
 
     @staticmethod
     def _get_valid_buttons() -> Dict[str, QDialogButtonBox.StandardButton]:
+        # TODO: Make Constants
         return {
             'ok':               QDialogButtonBox.Ok,
             'open':             QDialogButtonBox.Open,

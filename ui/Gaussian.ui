@@ -399,6 +399,21 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>m_choose_variogram_model</tabstop>
+  <tabstop>m_edit_azimuth</tabstop>
+  <tabstop>m_edit_dip</tabstop>
+  <tabstop>m_edit_parallell_to_azimuth</tabstop>
+  <tabstop>m_edit_normal_to_azimuth</tabstop>
+  <tabstop>m_edit_vertical_normal_to_dip</tabstop>
+  <tabstop>m_toggle_apply_trend</tabstop>
+  <tabstop>m_choose_select_trend</tabstop>
+  <tabstop>m_edit_depositional_direction</tabstop>
+  <tabstop>m_choose_stacking_pattern</tabstop>
+  <tabstop>m_edit_stacking_angle</tabstop>
+  <tabstop>m_edit_relative_standard_deviation</tabstop>
+  <tabstop>m_edit_simbox_thickness</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
