@@ -153,9 +153,13 @@ class ProjectConstants(Key):
 
 
 class ProjectElements(Value):
+    BROWSE_PROJECT_BUTTON = 'm_button_browse_project_file'
+    BROWSE_PROJECT_INPUT = 'm_edit_browse_project'
+    EXPERIMENTAL_BUTTON = 'm_rb_experimental_mode'
     FACIES_PARAMETER_NAME = 'm_edit_facies_parameter_name'
     GAUSSIAN_PARAMETER_NAME = 'm_edit_gaussian_parameter_name'
     GRID_MODEL_NAME = 'm_edit_grid_model_name'
+    READ_PROJECT_FILE = 'm_rb_read_rms_project_file'
     WORKFLOW_NAME = 'm_edit_workflow_name'
     ZONES_PARAMETER_NAME = 'm_edit_zones_parameter_name'
 
@@ -167,6 +171,39 @@ class BaseNames(Value):
     SLIDERS = 'basename_sliders'
     PROPORTIONS = 'basename_proportions'
     SLANT_FACTOR = 'basename_slanted_factor'
+
+
+class TruncationLibrary(Key):
+    pass
+
+
+class TruncationLibraryButtonNames(TruncationLibrary):
+    # Button names
+    CUBIC_BUTTON_PREFIX = 'm_button_type_'
+    NON_CUBIC_BUTTON_PREFIX = CUBIC_BUTTON_PREFIX
+    BAYFILL_BUTTON_NAME = 'm_button_bayfill'
+    CUSTOM_BUTTON_NAME = 'm_button_type_customized'
+
+
+class TruncationLibraryKeys(TruncationLibrary):
+    KEY = 'truncation rule type'
+    # Keys for types of truncation rules
+    CUBIC = 'cubic'
+    NON_CUBIC = 'non-cubic'
+    BAYFILL = 'bayfill'
+    CUSTOM = 'custom'
+
+
+class TruncationLibrarySubKeys(TruncationLibrary):
+    # Keys used in the library mapping
+    NUMBER_OF_FACIES_KEY = 'number of facies'
+    BUTTON_NAME_KEY = 'button name, or prefix'
+
+
+class TruncationLibraryButtonNameKeys(TruncationLibrary):
+    # Keys used for handling the button name
+    ACTUAL_NAME_OF_BUTTON = 'actual name of button'
+    IS_PREFIX = 'is prefix'
 
 
 class TruncationRuleElements(Value):
@@ -203,6 +240,10 @@ class CubicTruncationRuleConstants(TruncationRuleConstants):
 
 class NonCubicTruncationRuleConstants(CubicTruncationRuleConstants):
     ANGLES = 'angles'
+
+
+class BayfillTruncationRuleConstants(CubicTruncationRuleConstants):
+    SLANTED_FACTOR = 'slanted factor'
 
 
 class FaciesLabels(Key):

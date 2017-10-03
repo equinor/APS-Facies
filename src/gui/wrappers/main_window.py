@@ -3,26 +3,23 @@
 A wrapper, and implementation of the main GUI window of the APS-GUI.
 'Implements' the design in APS_prototype.ui, and wraps around src/resources/ui/APS_prototype_ui.py.
 """
-import sys
-from typing import List
+from typing import Dict, Union, Callable
 
-from PyQt5.Qt import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 
+from gui.wrappers.truncation_rule import CubicTruncationRule, NonCubicTruncationRule, BayfillTruncationRule, CustomTruncationRule
 from src.gui.state import State
-from src.resources.ui.APS_prototype_ui import Ui_MainWindow
-from src.gui.wrappers.base_classes.message_box import MessageBox
-
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
+from src.gui.wrappers.base_classes.message_box import MessageBox
+from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.utils.checks import is_valid_path
-
-from src.utils.constants import ModeConstants, Defaults
-from src.utils.methods import toggle_elements, get_project_file
+from src.utils.constants import Defaults, ModeConstants, TruncationLibraryKeys, TruncationLibrarySubKeys
+from src.utils.methods import get_project_file, toggle_elements, show_dialog
+from utils.mappings import truncation_library_elements, truncation_library_button_to_kind_and_number_of_facies
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None, state: State=None):
+    def __init__(self, parent=None, state: State = None):
         super(MainWindow, self).__init__(parent)
         self.setupUi(self)
         self.retranslateUi(self)
@@ -75,13 +72,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pass
 
     def initialize_truncation_rules(self):
-        library = {
-            'cubic': {key: self.__getattribute__('m_button_type_' + key) for key in 'abcdefghijklmnopqrstuvw'},
-            'num-cubic': {key: self.__getattribute__('m_button_type_' + key) for key in ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII']},
-            'bayfill': self.m_button_bayfill,
-            'custom': self.m_button_type_customized,
-        }
-        pass
+        library = truncation_library_elements(self)
+        for key in library.keys():
+            if isinstance(library[key], list):
+                for button_information in library[key]:
+                    self._connect_truncation_button(button_information)
+            else:
+                self._connect_truncation_button(library[key])
+
+    def _connect_truncation_button(
+            self,
+            button_information: Dict[TruncationLibrarySubKeys, Union[QWidget, int]]
+    ) -> None:
+        button = button_information[TruncationLibrarySubKeys.BUTTON_NAME_KEY]  # type: QPushButton
+        button.clicked.connect(self._generate_truncation_dialog)
+
+    def _generate_truncation_dialog(self):
+        sender = self.sender()
+        library = truncation_library_button_to_kind_and_number_of_facies(self)
+        button_information = library[sender]
+        truncation_rule = button_information[TruncationLibraryKeys.KEY]
+        number_of_facies = button_information[TruncationLibrarySubKeys.NUMBER_OF_FACIES_KEY]
+        parent = None
+        if truncation_rule == TruncationLibraryKeys.CUBIC:
+            dialog = CubicTruncationRule(parent=parent, state=self._state, active=number_of_facies)
+        elif truncation_rule == TruncationLibraryKeys.NON_CUBIC:
+            dialog = NonCubicTruncationRule(parent=parent, state=self._state, active=number_of_facies)
+        elif truncation_rule == TruncationLibraryKeys.BAYFILL:
+            dialog = BayfillTruncationRule(parent=parent, state=self._state)
+        elif truncation_rule == TruncationLibraryKeys.CUSTOM:
+            # TODO
+            dialog = CustomTruncationRule(parent=parent, state=self._state)
+        else:
+            raise ValueError
+        dialog.show()
 
     def _toggle_separate_zone_models(self):
         toggled = self.m_toggle_seperate_zone_models.isChecked()

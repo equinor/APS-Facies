@@ -70,6 +70,28 @@ def readFile(fileName, printInfo=0):
     return [a, nx, ny]
 
 
+def toggle_elements(toggled: bool, elements: Union[List[QWidget], QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
+    assert deactivate_or_hide in HideOptions()
+    if isinstance(elements, list):
+        for element in elements:
+            toggle_elements(toggled, element)
+    elif isinstance(elements, QWidget):
+        if deactivate_or_hide == HideOptions.HIDE:
+            elements.setVisible(toggled)
+        elif deactivate_or_hide == HideOptions.DISABLE:
+            elements.setEnabled(toggled)
+        else:
+            raise ValueError
+    else:
+        raise TypeError
+
+
+def get_project_file(parent=None):
+    openfile = QFileDialog.getOpenFileName(parent=parent, filter=Defaults.FILE_FILTER)
+    path = openfile[0]
+    return path
+
+
 def get_attributes(obj: QWidget, names: List[str]) -> List[QWidget]:
     elements = []
     for name in names:
@@ -98,29 +120,3 @@ def apply_method_to(items: Union[List[QObject], QObject], method) -> None:
 
 def apply_validator(elements: Union[List[QObject], QObject], validator: QValidator):
     apply_method_to(elements, lambda x: x.setValidator(validator))
-
-
-def show_dialog(dialog: QWidget):
-    dialog.show()
-
-
-def toggle_elements(toggled: bool, elements: Union[List[QWidget], QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
-    assert deactivate_or_hide in HideOptions()
-    if isinstance(elements, list):
-        for element in elements:
-            toggle_elements(toggled, element)
-    elif isinstance(elements, QWidget):
-        if deactivate_or_hide == HideOptions.HIDE:
-            elements.setVisible(toggled)
-        elif deactivate_or_hide == HideOptions.DISABLE:
-            elements.setEnabled(toggled)
-        else:
-            raise ValueError
-    else:
-        raise TypeError
-
-
-def get_project_file(parent=None):
-    openfile = QFileDialog.getOpenFileName(parent=parent, filter=Defaults.FILE_FILTER)
-    path = openfile[0]
-    return path

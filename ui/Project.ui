@@ -315,6 +315,18 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>m_rb_experimental_mode</tabstop>
+  <tabstop>m_rb_read_rms_project_file</tabstop>
+  <tabstop>m_button_browse_project_file</tabstop>
+  <tabstop>m_edit_browse_project</tabstop>
+  <tabstop>tabs_project_parameter</tabstop>
+  <tabstop>m_edit_workflow_name</tabstop>
+  <tabstop>m_edit_grid_model_name</tabstop>
+  <tabstop>m_edit_facies_parameter_name</tabstop>
+  <tabstop>m_edit_zones_parameter_name</tabstop>
+  <tabstop>m_edit_gaussian_parameter_name</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

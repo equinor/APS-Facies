@@ -477,6 +477,33 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>m_toggle_apply_overlay_facies</tabstop>
+  <tabstop>m_button_apply_overlay_facies</tabstop>
+  <tabstop>m_choose_floodplain</tabstop>
+  <tabstop>m_choose_subbay</tabstop>
+  <tabstop>m_choose_WBF</tabstop>
+  <tabstop>m_choose_BHD</tabstop>
+  <tabstop>m_choose_lagoon</tabstop>
+  <tabstop>m_color_button_floodplain</tabstop>
+  <tabstop>m_color_button_subbay</tabstop>
+  <tabstop>m_color_button_WBF</tabstop>
+  <tabstop>m_color_button_BHD</tabstop>
+  <tabstop>m_color_button_lagoon</tabstop>
+  <tabstop>m_slider_floodplain</tabstop>
+  <tabstop>m_slider_subbay</tabstop>
+  <tabstop>m_slider_WBF</tabstop>
+  <tabstop>m_slider_BHD</tabstop>
+  <tabstop>m_slider_lagoon</tabstop>
+  <tabstop>m_edit_proportion_floodplain</tabstop>
+  <tabstop>m_edit_proportion_subbay</tabstop>
+  <tabstop>m_edit_proportion_WBF</tabstop>
+  <tabstop>m_edit_proportion_BHD</tabstop>
+  <tabstop>m_edit_proportion_lagoon</tabstop>
+  <tabstop>m_edit_factor_floodplain</tabstop>
+  <tabstop>m_edit_factor_subbay</tabstop>
+  <tabstop>m_edit_factor_BHD</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
