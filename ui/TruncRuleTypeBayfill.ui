@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Bayfill Truncation rule</string>
   </property>
   <widget class="QGroupBox" name="layout_truncation_rule_bayfill">
    <property name="geometry">
@@ -36,10 +36,10 @@
     <item row="5" column="0" colspan="2">
      <layout class="QGridLayout" name="layout_facies_bounadries">
       <item row="2" column="6">
-       <widget class="QLineEdit" name="m_edit_SF_factor"/>
+       <widget class="QLineEdit" name="m_edit_factor_floodplain"/>
       </item>
       <item row="3" column="6">
-       <widget class="QLineEdit" name="m_edit_YSF_factor"/>
+       <widget class="QLineEdit" name="m_edit_factor_subbay"/>
       </item>
       <item row="2" column="1">
        <widget class="QLabel" name="label_SF">
@@ -78,7 +78,7 @@
        </widget>
       </item>
       <item row="4" column="6">
-       <widget class="QLineEdit" name="m_edit_BHD_factor"/>
+       <widget class="QLineEdit" name="m_edit_factor_BHD"/>
       </item>
       <item row="4" column="1">
        <widget class="QLabel" name="label_BHD">
@@ -235,7 +235,7 @@
          <widget class="QComboBox" name="m_choose_floodplain"/>
         </item>
         <item row="3" column="3">
-         <widget class="QPushButton" name="m_cololr_button_floodplain"/>
+         <widget class="QPushButton" name="m_color_button_floodplain"/>
         </item>
         <item row="3" column="5">
          <widget class="QSlider" name="m_slider_floodplain">
@@ -245,7 +245,7 @@
          </widget>
         </item>
         <item row="3" column="7">
-         <widget class="QLineEdit" name="m_edit_floodplain_proportion"/>
+         <widget class="QLineEdit" name="m_edit_proportion_floodplain"/>
         </item>
         <item row="4" column="0">
          <widget class="QLabel" name="label_subbay">
@@ -258,7 +258,7 @@
          <widget class="QComboBox" name="m_choose_subbay"/>
         </item>
         <item row="4" column="3">
-         <widget class="QPushButton" name="m_cololr_button_subbay"/>
+         <widget class="QPushButton" name="m_color_button_subbay"/>
         </item>
         <item row="4" column="5">
          <widget class="QSlider" name="m_slider_subbay">
@@ -268,7 +268,7 @@
          </widget>
         </item>
         <item row="4" column="7">
-         <widget class="QLineEdit" name="m_edit_subbay_proportion"/>
+         <widget class="QLineEdit" name="m_edit_proportion_subbay"/>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="label_WBF">
@@ -281,7 +281,7 @@
          <widget class="QComboBox" name="m_choose_WBF"/>
         </item>
         <item row="5" column="3">
-         <widget class="QPushButton" name="m_cololr_button_WBF"/>
+         <widget class="QPushButton" name="m_color_button_WBF"/>
         </item>
         <item row="5" column="5">
          <widget class="QSlider" name="m_slider_WBF">
@@ -291,7 +291,7 @@
          </widget>
         </item>
         <item row="5" column="7">
-         <widget class="QLineEdit" name="m_edit_WBF_proportion"/>
+         <widget class="QLineEdit" name="m_edit_proportion_WBF"/>
         </item>
         <item row="6" column="0">
          <widget class="QLabel" name="label_BHD_2">
@@ -304,7 +304,7 @@
          <widget class="QComboBox" name="m_choose_BHD"/>
         </item>
         <item row="6" column="3">
-         <widget class="QPushButton" name="m_cololr_button_BHD"/>
+         <widget class="QPushButton" name="m_color_button_BHD"/>
         </item>
         <item row="6" column="5">
          <widget class="QSlider" name="m_slider_BHD">
@@ -314,7 +314,7 @@
          </widget>
         </item>
         <item row="6" column="7">
-         <widget class="QLineEdit" name="m_edit_BHD_proportion"/>
+         <widget class="QLineEdit" name="m_edit_proportion_BHD"/>
         </item>
         <item row="7" column="0">
          <widget class="QLabel" name="label_lagoon">
@@ -327,7 +327,7 @@
          <widget class="QComboBox" name="m_choose_lagoon"/>
         </item>
         <item row="7" column="3">
-         <widget class="QPushButton" name="m_cololr_button_lagoon"/>
+         <widget class="QPushButton" name="m_color_button_lagoon"/>
         </item>
         <item row="7" column="5">
          <widget class="QSlider" name="m_slider_lagoon">
@@ -337,7 +337,7 @@
          </widget>
         </item>
         <item row="7" column="7">
-         <widget class="QLineEdit" name="m_edit_lagoon_proportion"/>
+         <widget class="QLineEdit" name="m_edit_proportion_lagoon"/>
         </item>
         <item row="2" column="1">
          <widget class="QLabel" name="label_facies">

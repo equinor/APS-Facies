@@ -10,12 +10,14 @@ from src.gui.wrappers.base_classes.getters.general import get_value_of_element
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
+from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
 from src.utils.constants import (
-    Angles, CubicTruncationRuleConstants, CubicTruncationRuleElements, Defaults,
+    Angles, BaseNames, CubicTruncationRuleConstants, CubicTruncationRuleElements, Defaults,
     FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleElements,
 )
 from src.utils.mappings import truncation_rule_element_key_to_state_key
 from src.utils.methods import apply_validator, get_attributes, get_elements_with_prefix, toggle_elements
+from src.utils.numeric import normalize_number, truncate_number
 
 
 class BaseTruncation(OkCancelDialog):
@@ -28,6 +30,7 @@ class BaseTruncation(OkCancelDialog):
             basename_proportions=Defaults.NAME_OF_PROPORTIONS,
             basename_color_button=Defaults.NAME_OF_COLOR_BUTTON,
             basename_drop_down=Defaults.NAME_OF_DROP_DOWN,
+            names=None,
             active=None
     ):
         """
@@ -37,26 +40,30 @@ class BaseTruncation(OkCancelDialog):
         :param state:
         :type state: State
         :param name_of_buttons: The name of the variable that holds an object of type QDialogButtonBox
-        :type name_of_buttons: str
+        :type name_of_buttons: TruncationRuleElements
         :param basename_sliders: The prefix of every slider
-        :type basename_sliders: str
+        :type basename_sliders: TruncationRuleElements
         :param basename_proportions: The prefix of every text input box
-        :type basename_proportions: str
+        :type basename_proportions: TruncationRuleElements
         :param basename_color_button: The prefix for every button to choose a color
-        :type basename_color_button: str
+        :type basename_color_button: TruncationRuleElements
         :param basename_drop_down: The prefix for every drop-down menu
-        :type basename_drop_down: str
+        :type basename_drop_down: TruncationRuleElements
         :param active: A list, or set of 'elements' that are active
         :type active: Union[List[str], Set[str]]
         """
         super(BaseTruncation, self).__init__(parent=parent, name_of_buttons=name_of_buttons)
         self.state = state
-        self.names = ['F1', 'F2', 'F3', 'F4', 'F5']  # TODO: Make dynamic
+        if names is None:
+            self.names = ['F1', 'F2', 'F3', 'F4', 'F5']  # TODO: Make dynamic
+        else:
+            self.names = names
+        assert set(active) <= set(self.names)
         self.active = active
-        self.basename_sliders = basename_sliders  # type: TruncationRuleElements
-        self.basename_proportions = basename_proportions  # type: TruncationRuleElements
-        self.basename_color_button = basename_color_button  # type: TruncationRuleElements
-        self.basename_drop_down = basename_drop_down  # type: TruncationRuleElements
+        self._set_base_names(BaseNames.SLIDERS, basename_sliders)
+        self._set_base_names(BaseNames.PROPORTIONS, basename_proportions)
+        self._set_base_names(BaseNames.COLOR_BUTTON, basename_color_button)
+        self._set_base_names(BaseNames.DROP_DOWN, basename_drop_down)
 
     def wire_up(self):
         super(BaseTruncation, self).wire_up(ok=self.save, cancel=self.close)
@@ -67,14 +74,26 @@ class BaseTruncation(OkCancelDialog):
 
         self.wire_up_angles()
 
+        self.wire_up_slated_factor()
+
         self.wire_up_overlay_facies()
 
         self.deactivate_inactive_elements()
 
+    def wire_up_slated_factor(self):
+        validator = QDoubleValidator(top=Proportions.TOP, bottom=Proportions.BOTTOM, decimals=Proportions.DECIMALS)
+        text_fields = self._get_slant_factors()
+        apply_validator(text_fields, validator)
+        for text_field in text_fields:
+            text_field.textChanged.connect(self.update_slanted_factor)
+            text_field.textChanged.connect(self.update_state)
+
     def wire_up_overlay_facies(self):
-        if hasattr(self, 'm_toggle_apply_overlay_facies') and hasattr(self, 'm_button_apply_overlay_facies'):
-            self.m_toggle_apply_overlay_facies.clicked.connect(self.toggle_apply_overlay_facies)
-            self.m_button_apply_overlay_facies.clicked.connect(self.apply_overlay_facies)
+        toggle_overlay = CubicTruncationRuleElements.TOGGLE_OVERLAY
+        click_overlay = CubicTruncationRuleElements.CLICK_OVERLAY
+        if hasattr(self, toggle_overlay) and hasattr(self, click_overlay):
+            self._get_element(toggle_overlay).clicked.connect(self.toggle_apply_overlay_facies)
+            self._get_element(click_overlay).clicked.connect(self.apply_overlay_facies)
 
     def wire_up_angles(self):
         validator = QDoubleValidator(bottom=Angles.MINIMUM, top=Angles.MAXIMUM, decimals=Angles.DECIMALS)
@@ -84,7 +103,6 @@ class BaseTruncation(OkCancelDialog):
             for angle_input in angle_inputs:
                 angle_input.textChanged.connect(self.update_angle)
                 angle_input.textChanged.connect(self.update_state)
-                pass
 
     def wire_up_color_buttons(self):
         # Wire up the color buttons
@@ -95,26 +113,42 @@ class BaseTruncation(OkCancelDialog):
 
     def _get_elements(
             self,
-            element_type: TruncationRuleElements
+            property: BaseNames
     ) -> Union[List[QPushButton], List[QLineEdit], List[QSlider]]:
         elements = []
-        for name in self.names:
-            element_name = element_type + name
-            if hasattr(self, element_name):
-                elements.append(self.__getattribute__(element_name))
+        if hasattr(self, property):
+            element_type = self._get_element_name_of_basename_property(property)
+            for name in self.names:
+                element_name = element_type + name
+                if hasattr(self, element_name):
+                    elements.append(self.__getattribute__(element_name))
         return elements
 
+    def _get_element(self, name: str) -> Union[QPushButton, QLineEdit, QSlider]:
+        if hasattr(self, name):
+            return self.__getattribute__(name)
+
     def _get_color_buttons(self) -> List[QPushButton]:
-        return self._get_elements(self.basename_color_button)
+        return self._get_elements(BaseNames.COLOR_BUTTON)
 
     def _get_sliders(self) -> List[QSlider]:
-        return self._get_elements(self.basename_sliders)
+        return self._get_elements(BaseNames.SLIDERS)
 
     def _get_proportion_inputs(self) -> List[QLineEdit]:
-        return self._get_elements(self.basename_proportions)
+        return self._get_elements(BaseNames.PROPORTIONS)
 
     def _get_angle_inputs(self) -> List[QLineEdit]:
-        return self._get_elements(self.basename_angles)
+        return self._get_elements(BaseNames.ANGLES)
+
+    def _get_slant_factors(self) -> List[QLineEdit]:
+        return self._get_elements(BaseNames.SLANT_FACTOR)
+
+    def _get_element_name_of_basename_property(self, property_name: BaseNames) -> Union[TruncationRuleElements, None]:
+        # FIXME
+        if hasattr(self, property_name):
+            return self.__getattribute__(property_name)
+        else:
+            return None
 
     def wire_up_proportions_and_sliders(self):
         validator = QDoubleValidator(bottom=Proportions.BOTTOM, top=Proportions.TOP, decimals=Proportions.DECIMALS)
@@ -132,6 +166,9 @@ class BaseTruncation(OkCancelDialog):
 
             # Set default values
             self._initialize_proportion_values()
+
+    def update_slanted_factor(self):
+        self._update_numeric(minimum_truncation=Proportions.BOTTOM, maximum_truncation=Proportions.TOP)
 
     def update_state(self):
         # TODO
@@ -157,7 +194,6 @@ class BaseTruncation(OkCancelDialog):
         self.ensure_normalization()
         self.state.set_truncation_rules(self)
         # TODO: Overprint facies
-
         pass
 
     def deactivate_inactive_elements(self):
@@ -177,33 +213,6 @@ class BaseTruncation(OkCancelDialog):
     def get_total_sum(self) -> float:
         content = [self._get_text_field_by_name(key) for key in self.active]
         return sum([get_value_of_element(cell) for cell in content])
-
-    def set_value(
-            self,
-            item_that_should_changed: [QLineEdit, QSlider],
-            value: float,
-            normalize: bool = True,
-            skip_signals: bool = False
-    ) -> None:
-        if normalize:
-            if isinstance(item_that_should_changed, QLineEdit):
-                value = self._normalize(value, maximum_in=100, minimum_in=0, minimum_out=0, maximum_out=1)
-            elif isinstance(item_that_should_changed, QSlider):
-                value = self._normalize(value, maximum_in=1, minimum_in=0, minimum_out=0, maximum_out=100)
-        self._set_value(item_that_should_changed, value, skip_signals)
-
-    @staticmethod
-    def _set_value(item_that_should_changed: [QLineEdit, QSlider], value: float, skip_signals: bool = False):
-        assert isinstance(item_that_should_changed, QLineEdit) or isinstance(item_that_should_changed, QSlider)
-        if should_change(value, item_that_should_changed):
-            if skip_signals:
-                item_that_should_changed.blockSignals(True)
-            if isinstance(item_that_should_changed, QLineEdit):
-                item_that_should_changed.setText(str(value))
-            elif isinstance(item_that_should_changed, QSlider):
-                item_that_should_changed.setValue(int(value))
-            if skip_signals:
-                item_that_should_changed.blockSignals(False)
 
     def get_value(self, element_type: TruncationRuleElements, element_label: FaciesLabels):
         assert element_type in self.get_basename_of_elements()
@@ -248,7 +257,7 @@ class BaseTruncation(OkCancelDialog):
         # TODO: Do not move the lower slider
         slider = self.sender()  # type: QSlider
         if self._slider_can_move():
-            value = self._normalize(slider.value(), minimum_in=0, maximum_in=100, minimum_out=0, maximum_out=1)
+            value = normalize_number(slider.value(), minimum_in=0, maximum_in=100, minimum_out=0, maximum_out=1)
             text_filed = self.get_corresponding_text_field(slider)
             if should_change(value, text_filed):
                 text_filed.setText(str(value))
@@ -257,12 +266,13 @@ class BaseTruncation(OkCancelDialog):
         corresponding_slider = self.get_corresponding_slider(text_field)
         value = get_value_of_element(text_field)
 
-        value = int(self._normalize(value, maximum_in=1, minimum_in=0, maximum_out=100, minimum_out=0))
+        value = int(normalize_number(value, maximum_in=1, minimum_in=0, maximum_out=100, minimum_out=0))
         if should_change(value, corresponding_slider):
-            self._set_value(corresponding_slider, value, skip_signals)
+            set_value(corresponding_slider, value, normalize=False, skip_signals=skip_signals)
 
     def update_slider(self):
         sender = self.sender()
+        assert isinstance(sender, QLineEdit)
         self._update_slider(sender)
 
     def update_sliders(self):
@@ -362,7 +372,7 @@ class BaseTruncation(OkCancelDialog):
             elif value > 1:
                 text_field.setText('1')
 
-    def add_difference_to_proportion_value(self, difference: float, name: Union[QLineEdit, str]) -> None:
+    def add_difference_to_proportion_value(self, difference: float, name: Union[QLineEdit, FaciesLabels]) -> None:
         if isinstance(name, str):
             element = self._get_text_field_by_name(name)
         elif isinstance(name, QLineEdit):
@@ -372,7 +382,7 @@ class BaseTruncation(OkCancelDialog):
                 "The element to be updated must be a 'QLineEdit', or 'str', and not '{}'".format(type(name))
             )
         value = max(get_value_of_element(element) + difference, 0)
-        self.set_value(element, value, normalize=False, skip_signals=True)
+        set_value(element, value, normalize=False, skip_signals=True)
 
     def get_elements_to_be_changed(self, sender: QWidget) -> List[str]:
         if sender is None:
@@ -405,7 +415,8 @@ class BaseTruncation(OkCancelDialog):
         base_elements = self.get_basename_of_elements()
         return {
             facies_label: {
-                base_name: self.__getattribute__(base_name + facies_label) for base_name in base_elements
+                base_name: self.__getattribute__(base_name + facies_label)
+                for base_name in base_elements if hasattr(self, base_name + facies_label)
             } for facies_label in self.names
         }
 
@@ -437,25 +448,13 @@ class BaseTruncation(OkCancelDialog):
         return color
 
     def update_angle(self):
+        self._update_numeric(minimum_truncation=Angles.MINIMUM, maximum_truncation=Angles.MAXIMUM)
+
+    def _update_numeric(self, minimum_truncation: float, maximum_truncation: float) -> None:
         sender = self.sender()
         value = get_value_of_numeric_text_field(sender)
-        angle = self._truncate(Angles.MINIMUM, value, Angles.MAXIMUM)
-        self.set_value(sender, angle, normalize=False, skip_signals=True)
+        value = truncate_number(minimum_truncation, value, maximum_truncation)
+        set_value(sender, value, normalize=False, skip_signals=True)
 
-    @staticmethod
-    def _normalize(value: float, minimum_in: float, maximum_in: float, minimum_out: float, maximum_out: float) -> float:
-        # TODO: Write unit test(s)
-        value = BaseTruncation._truncate(minimum_in, value, maximum_in)
-        normalized = (value - minimum_in) / (maximum_in - minimum_in)
-        normalized *= (maximum_out - minimum_out) + minimum_out
-        normalized = BaseTruncation._truncate(minimum_out, normalized, maximum_out)
-        return normalized
-
-    @staticmethod
-    def _truncate(minimum: float, value: float, maximum: float) -> float:
-        if value < minimum:
-            return minimum
-        elif value > maximum:
-            return maximum
-        else:
-            return value
+    def _set_base_names(self, basename_key: BaseNames, basename_value: TruncationRuleElements) -> None:
+        self.__setattr__(basename_key, basename_value)
