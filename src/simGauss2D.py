@@ -38,11 +38,13 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
     arrayPointer = floatArrayPointer * nx * ny
 
     # Call c/c++ function
-    arrayPointer = _draw2DLib.draw2DGaussField(ct.c_int(nx), ct.c_int(ny),
-                                               ct.c_double(xsize), ct.c_double(ysize),
-                                               ct.c_int(variotype), ct.c_uint(iseed),
-                                               ct.c_double(range1), ct.c_double(range2),
-                                               ct.c_double(angle), ct.c_double(power), ct.c_int(debugPrint))
+    arrayPointer = _draw2DLib.draw2DGaussField(
+        ct.c_int(nx), ct.c_int(ny),
+        ct.c_double(xsize), ct.c_double(ysize),
+        ct.c_int(variotype), ct.c_uint(iseed),
+        ct.c_double(range1), ct.c_double(range2),
+        ct.c_double(angle), ct.c_double(power), ct.c_int(debugPrint)
+    )
 
     # Assign result to python array
     n = 0
@@ -55,9 +57,10 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
     return [values]
 
 
-def simGaussFieldAddTrendAndTransform(iseed, nx, ny, xsize, ysize,
-                                      varioType1, range11, range21, varioAngle1,
-                                      pow1, useTrend1, trendAsimuth1, relSigma1, printInfo):
+def simGaussFieldAddTrendAndTransform(
+        iseed, nx, ny, xsize, ysize, varioType1, range11, range21,
+        varioAngle1, pow1, useTrend1, trendAsimuth1, relSigma1, printInfo
+):
     # Residual gaussian fields
     debugPrint = 0
     if printInfo >= 3:
@@ -117,9 +120,10 @@ def simGaussFieldAddTrendAndTransform(iseed, nx, ny, xsize, ysize,
     return [transformedValues]
 
 
-def simGaussFieldAddTrendAndTransform2(iseed, nx, ny, xsize, ysize,
-                                       varioType1, range11, range21, varioAngle1,
-                                       pow1, useTrend1, trendAsimuth1, relSigma1):
+def simGaussFieldAddTrendAndTransform2(
+        iseed, nx, ny, xsize, ysize, varioType1, range11, range21,
+        varioAngle1, pow1, useTrend1, trendAsimuth1, relSigma1
+):
     # Residual gaussian fields
     # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
@@ -178,20 +182,18 @@ def simGaussFieldAddTrendAndTransform2(iseed, nx, ny, xsize, ysize,
 
     return [v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY]
 
-def simGaussField(iseed,nx,ny,xsize,ysize,
-                  varioType1,range11,range21,varioAngle1,
-                  pow1,printInfo):
+
+def simGaussField(iseed, nx, ny, xsize, ysize, varioType1, range11, range21, varioAngle1, pow1, printInfo):
     # Residual gaussian fields
     debugPrint = 0
     if printInfo >= 3:
-        print( '    - Simulate  2D Gauss field using seed: ' + str(iseed))
-        debugPrint = 1    
-    # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+        print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
+        debugPrint = 1
+        # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     varioAngle1 = 90.0 - varioAngle1
-    [residualField] = draw2D(nx,ny,xsize,ysize, varioType1, iseed, range11, range21, varioAngle1, pow1,debugPrint)
+    [residualField] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1, debugPrint)
 
     return residualField
-
 
 # ------------  End of functions to draw gaussian fields -----------------------------------

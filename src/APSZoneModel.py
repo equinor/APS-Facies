@@ -1,22 +1,23 @@
 #!/bin/env python
-import sys
 from xml.etree.ElementTree import Element
 
 import copy
 import numpy as np
 
-from src.APSGaussFieldJobs import APSGaussFieldJobs
-from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSFaciesProb import APSFaciesProb
+from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSGaussModel import APSGaussModel
-from src.Trend3D_linear_model_xml import Trend3D_linear_model
+from src.APSMainFaciesTable import APSMainFaciesTable
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
+# To be outphased:
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
-from src.xmlFunctions import getKeyword, getTextCommand, getFloatCommand, getIntCommand
+from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword, getTextCommand
+
 
 class APSZoneModel:
     """
+    ----------------------------------------------------------------
     class APSZoneModel
     Description: Keep data structure for a zone
 
@@ -55,7 +56,7 @@ class APSZoneModel:
        def setRange2(self,gaussFieldName,range2)
        def setRange3(self,gaussFieldName,range3)
        def setAnisotropyAsimuthAngle(self,gaussFieldName,angle)
-       def setAnisotropyDipAngle(self,gaussFieldName,angle)
+      def setAnisotropyDipAngle(self,gaussFieldName,angle)
 
      ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
@@ -87,6 +88,7 @@ class APSZoneModel:
 
      ---  write XML tree ---
        def XMLAddElement(self,parent)
+       def getZoneNumber(self)
 
      --- Check functions ---
        def hasFacies(self,fName)
@@ -103,6 +105,18 @@ class APSZoneModel:
     ----------------------------------------------------------------
     """
 
+    def __init__(self, ET_Tree=None, inputZoneNumber=0, inputMainLevelFacies=None, modelFileName=None):
+
+        self.__setEmpty()
+
+        self.__zoneNumber = inputZoneNumber
+        self.__mainLevelFacies = inputMainLevelFacies
+
+        if ET_Tree is not None:
+            self.__interpretXMLTree(ET_Tree, modelFileName)
+
+    # End __init__
+
     def __setEmpty(self):
         self.__printInfo = 0
         self.__useConstProb = 0
@@ -118,70 +132,57 @@ class APSZoneModel:
         self.__mainLevelFacies = None
         self.__horizonNameForVarioTrendMap = None
 
-
-    def __init__(self,ET_Tree= None,inputZoneNumber=0,inputMainLevelFacies=None,modelFileName=None):
-
-        self.__setEmpty()
-
-        self.__zoneNumber = inputZoneNumber
-        self.__mainLevelFacies = inputMainLevelFacies
-
-        if ET_Tree is not None:
-            self.__interpretXMLTree(ET_Tree, modelFileName)
-
-    # End __init__
-
-    def __interpretXMLTree(self,ET_Tree, modelFileName):
+    def __interpretXMLTree(self, ET_Tree, modelFileName):
         #  Get root of xml tree for model specification
         root = ET_Tree.getroot()
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
-        self.__printInfo = getIntCommand(root, kw, defaultValue=1,required=False)
+        self.__printInfo = getIntCommand(root, kw, defaultValue=1, required=False)
+
         if self.__printInfo >= 3:
             print(' ')
             print('Debug output: Call init ' + self.__className)
 
-        mainFaciesTable = APSMainFaciesTable(ET_Tree,modelFileName)
-        gaussFieldJobs = APSGaussFieldJobs(ET_Tree,modelFileName)
+        mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
+        gaussFieldJobs = APSGaussFieldJobs(ET_Tree, modelFileName)
 
-        
-        zoneModels = getKeyword(root,'ZoneModels', 'Root',modelFile=modelFileName)
+        zoneModels = getKeyword(root, 'ZoneModels', 'Root', modelFile=modelFileName)
         for zone in zoneModels.findall('Zone'):
             zoneNumber = int(zone.get('number'))
             mainLevelFacies = zone.get('mainLevelFacies')
             if zoneNumber == self.__zoneNumber and mainLevelFacies == self.__mainLevelFacies:
-                if mainLevelFacies == None:
+                if mainLevelFacies is None:
                     self.__faciesLevel = 1
                 else:
                     self.__faciesLevel = 2
 
-                useConstProb = getIntCommand(zone,'UseConstProb', 'Zone', modelFile=modelFileName)
+                useConstProb = getIntCommand(zone, 'UseConstProb', 'Zone', modelFile=modelFileName)
                 self.__useConstProb = useConstProb
 
                 kw = 'SimBoxThickness'
-                simBoxThickness = getFloatCommand(zone,kw,'Zone',
-                                                  minValue=0.0,modelFile=modelFileName)
-                self.__simBoxThickness    = simBoxThickness
-                
+                simBoxThickness = getFloatCommand(zone, kw, 'Zone', minValue=0.0, modelFile=modelFileName)
+                self.__simBoxThickness = simBoxThickness
+
                 kw = 'HorizonNameVarioTrend'
-                mapName =  getTextCommand(zone,kw,'Zone',modelFile=modelFileName)
+                mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName)
                 self.__horizonNameForVarioTrendMap = mapName
-                
+
                 if self.__printInfo >= 3:
                     print('Debug output: From APSZoneModel: ZoneNumber: ' + str(zoneNumber))
                     print('Debug output: From APSZoneModel: mainLevelFacies: ' + str(mainLevelFacies))
                     print('Debug output: From APSZoneModel: useConstProb: ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
                     text = 'Debug output: From APSZoneModel: Horizon name to be used for saving \n'
-                    text = text + '              asimuth variogram trend for this zone: '
-                    text = text + str(self.__horizonNameForVarioTrendMap)
+                    text += '              asimuth variogram trend for this zone: '
+                    text += str(self.__horizonNameForVarioTrendMap)
                     print(text)
 
                 # Read facies probabilties
-                self.__faciesProbObject = APSFaciesProb(zone,mainFaciesTable,modelFileName,
-                                                        self.__printInfo, self.__useConstProb,
-                                                        self.__zoneNumber)
+                self.__faciesProbObject = APSFaciesProb(
+                    zone, mainFaciesTable, modelFileName,
+                    self.__printInfo, self.__useConstProb, self.__zoneNumber
+                )
                 # Read Gauss Fields model parameters
                 self.__gaussModelObject = APSGaussModel(
                     zone, mainFaciesTable, gaussFieldJobs, modelFileName,
@@ -190,17 +191,19 @@ class APSZoneModel:
 
                 # Read truncation rule for zone model
                 trRule = zone.find('TruncationRule')
-                if trRule == None:
+                if trRule is None:
                     raise NameError(
-                        'Error when reading model file: ' + modelFileName +'\n'
-                        'Error: Missing keyword TruncationRule under keyword Zone'
-                        )
+                        'Error when reading model file: {modelName}\n'
+                        'Error: Missing keyword TruncationRule '
+                        'under keyword Zone'
+                        ''.format(modelName=modelFileName)
+                    )
                 truncRuleName = trRule.get('name')
                 if self.__printInfo >= 3:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
-                nGaussFieldInModel = int(trRule.get('nGFields'))
-                nGaussFieldInZone   = self.__gaussModelObject.getNGaussFields()
+                    nGaussFieldInModel = int(trRule.get('nGFields'))
+                nGaussFieldInZone = self.__gaussModelObject.getNGaussFields()
                 if nGaussFieldInModel != nGaussFieldInZone:
                     raise ValueError(
                         'Error: In {0}\n'
@@ -216,39 +219,38 @@ class APSZoneModel:
                     if truncRuleName == 'Trunc3D_Bayfill':
                         self.__truncRule = Trunc3D_bayfill(
                             trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                            self.__printInfo, self.__modelFileName
+                            self.__printInfo, modelFileName
                         )
+
                     elif truncRuleName == 'Trunc2D_Angle':
                         self.__truncRule = Trunc2D_Angle(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                            self.__printInfo, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__printInfo, modelFileName
                         )
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.__truncRule = Trunc2D_Cubic(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                            self.__printInfo, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__printInfo, modelFileName
                         )
                     else:
                         raise NameError(
-                            'Error in ' + self.__className + '\n'
-                            'Error: Specified truncation rule name: ' + truncRuleName +'\n'
+                            'Error in {className}\n'
+                            'Error: Specified truncation rule name: {truncationRule}\n'
                             '       is not implemented.'
-                            )
+                            ''.format(className=self.__className, truncationRule=truncRuleName)
+                        )
 
                     if self.__printInfo >= 3:
                         text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
-                        text = text + self.__truncRule.getClassName()
+                        text += self.__truncRule.getClassName()
                         print(text)
                         print('Debug output: APSZoneModel: Facies in truncation rule: ')
                         print(repr(self.__truncRule.getFaciesInTruncRule()))
-
                 break
-            # End if zone number
+                # End if zone number
         # End for zone
 
         return
 
-    def initialize(self, inputZoneNumber, useConstProb, simBoxThickness, horizonNameForVarioTrendMap, 
+    def initialize(self, inputZoneNumber, useConstProb, simBoxThickness, horizonNameForVarioTrendMap,
                    faciesProbObject, gaussModelObject, truncRuleObject, printInfo):
         if printInfo >= 3:
             print('Debug output: Call the initialize function in ' + self.__className)
@@ -311,7 +313,6 @@ class APSZoneModel:
     def getUsedGaussFieldNames(self):
         return self.__gaussModelObject.getUsedGaussFieldNames()
 
-
     def getVarioType(self, gaussFieldName):
         return copy.copy(self.__gaussModelObject.getVarioType(gaussFieldName))
 
@@ -330,7 +331,7 @@ class APSZoneModel:
     def getAnisotropyAsimuthAngle(self, gaussFieldName):
         return self.__gaussModelObject.getAnisotropyAsimuthAngle(gaussFieldName)
 
-    def getAnisotropyDipAngle(self,gaussFieldName):
+    def getAnisotropyDipAngle(self, gaussFieldName):
         return self.__gaussModelObject.getAnisotropyDipAngle(gaussFieldName)
 
     def getPower(self, gaussFieldName):
@@ -373,38 +374,37 @@ class APSZoneModel:
     def getConstProbValue(self, fName):
         return self.__faciesProbObject.getConstProbValue(fName)
 
-
     def setZoneNumber(self, zoneNumber):
         self.__zoneNumber = zoneNumber
         return
 
     def setVarioType(self, gaussFieldName, varioType):
-        return self.__gaussModelObject.setVarioType(gaussFieldName,varioType)
+        return self.__gaussModelObject.setVarioType(gaussFieldName, varioType)
 
-    def setMainRange(self,gaussFieldName,range1):
-        return self.__gaussModelObject.setMainRange(gaussFieldName,range1)
+    def setMainRange(self, gaussFieldName, range1):
+        return self.__gaussModelObject.setMainRange(gaussFieldName, range1)
 
-    def setPerpRange(self,gaussFieldName,range2):
-        return self.__gaussModelObject.setPerpRange(gaussFieldName,range2)
+    def setPerpRange(self, gaussFieldName, range2):
+        return self.__gaussModelObject.setPerpRange(gaussFieldName, range2)
 
-    def setVertRange(self,gaussFieldName,range3):
-        return self.__gaussModelObject.setVertRange(gaussFieldName,range3)
+    def setVertRange(self, gaussFieldName, range3):
+        return self.__gaussModelObject.setVertRange(gaussFieldName, range3)
 
-    def setAnisotropyAsimuthAngle(self,gaussFieldName,angle):
-        return self.__gaussModelObject.setAnisotropyAsimuthAngle(gaussFieldName,angle)
+    def setAnisotropyAsimuthAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setAnisotropyAsimuthAngle(gaussFieldName, angle)
 
-    def setAnisotropyDipAngle(self,gaussFieldName,angle):
-        return self.__gaussModelObject.setAnisotropyDipAngle(gaussFieldName,angle)
+    def setAnisotropyDipAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setAnisotropyDipAngle(gaussFieldName, angle)
 
     def setPower(self, gaussFieldName, power):
-        return self.__gaussModelObject.setPower(gaussFieldName,power)
+        return self.__gaussModelObject.setPower(gaussFieldName, power)
 
     def setUseConstProb(self, useConstProb):
         self.__useConstProb = useConstProb
         return
 
     def setSeedForPreviewSimulation(self, gfName, seed):
-        return self.__gaussModelObject.setSeedForPreviewSimulation(gfName,seed)
+        return self.__gaussModelObject.setSeedForPreviewSimulation(gfName, seed)
 
     def setSimBoxThickness(self, thickness):
         err = 0
@@ -414,7 +414,7 @@ class APSZoneModel:
         return err
 
     def updateFaciesWithProbForZone(self, faciesList, faciesProbList):
-        return self.__faciesProbObject.updateFaciesWithProbForZone(faciesList,faciesProbList)
+        return self.__faciesProbObject.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
     def removeFaciesWithProbForZone(self, fName):
         self.__faciesProbObject.removeFaciesWithProbForZone(fName)
@@ -422,7 +422,7 @@ class APSZoneModel:
     def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, angle, power,
                               relStdDev=0.0, trendRuleModelObj=None):
         return self.__gaussModelObject.updateGaussFieldParam(
-            gfName,varioType, range1, range2, range3, angle, power,
+            gfName, varioType, range1, range2, range3, angle, power,
             relStdDev, trendRuleModelObj
         )
 
@@ -435,7 +435,7 @@ class APSZoneModel:
         self.__gaussModelObject.removeGaussFieldParam(gfName)
 
     def updateGaussFieldTrendParam(self, gfName, trendRuleModelObj, relStdDev):
-        self.__gaussModelObject.updateGaussFieldTrendParam(gfName,trendRuleModelObj,relStdDev)
+        self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendRuleModelObj, relStdDev)
 
     def setTruncRule(self, truncRuleObj):
         err = 0
@@ -449,7 +449,6 @@ class APSZoneModel:
         self.__horizonNameForVarioTrendMap = copy.copy(horizonNameForVarioTrendMap)
         return
 
-
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
 
         # GFAlphaList has items =[name,valueArray]
@@ -460,7 +459,7 @@ class APSZoneModel:
         truncObject = self.__truncRule
         functionName = 'applyTruncations'
         printInfo = self.__printInfo
-        faciesNames    = self.getFaciesInZoneModel()
+        faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
@@ -540,10 +539,10 @@ class APSZoneModel:
 
             for i in range(nDefinedCells):
                 if printInfo >= 3:
-                    if np.mod(i,50000)==0:
+                    if np.mod(i, 50000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
                 elif printInfo == 2:
-                    if np.mod(i,500000)==0:
+                    if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
                 if self.__useConstProb == 1:
@@ -569,13 +568,15 @@ class APSZoneModel:
                 volFrac[fIndx] += 1
 
         if self.__printInfo >= 4:
-            truncRuleName =  truncObject.getClassName()
+            truncRuleName = truncObject.getClassName()
             if truncRuleName == 'Trunc2D_Angle':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
                 nCount = truncObject.getNCountShiftAlpha()
-                print('Debug output: In truncation rule {} nCalc= {} nLookup= {} nCountShiftAlpha= {}'
-                      ''.format(truncRuleName, str(nCalc), str(nLookup), str(nCount)))
+                print(
+                    'Debug output: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc)
+                    + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount)
+                )
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -630,12 +631,11 @@ class APSZoneModel:
             nGaussFields, gridDimNx, gridDimNy, gridXSize, gridYSize,
             gridAsimuthAngle, previewCrossSection
         )
-    def simGaussFieldWithTrendAndTransformNew(self, nGaussFields,
-                                              simBoxXsize, simBoxYsize, simBoxZsize,
-                                              gridNX, gridNY, gridNZ,
-                                              gridAsimuthAngle, crossSectionType):
+
+    def simGaussFieldWithTrendAndTransformNew(
+            self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAsimuthAngle, crossSectionType):
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransformNew(
             nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAsimuthAngle, crossSectionType
         )
-

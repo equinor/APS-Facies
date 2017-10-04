@@ -397,8 +397,6 @@ class DefineTruncStructure:
         else:
             return None
 
-        return
-
     def getTruncRuleNGaussFields(self, name):
         trStruct = None
         nFac = -999

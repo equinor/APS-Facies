@@ -619,7 +619,7 @@ class APSModel:
             self.__previewZone = zoneNumber
 
     def setPreviewCrossSection(self, crossSection):
-        if not (crossSection == 'IJ' or crossSection  == 'IK' or crossSection == 'JK'):
+        if not (crossSection == 'IJ' or crossSection == 'IK' or crossSection == 'JK'):
             raise ValueError(
                 'Error in {} in setPreviewCrossSection\n'
                 'Error:  Cross section is not IJ, IK or JK.')
@@ -677,7 +677,6 @@ class APSModel:
 
     def getGaussFieldJobs(self):
         return copy.copy(self.__rmsGFJobs)
-
 
     def createSimGaussFieldIPL(self):
         print('Call createSimGaussFieldIPL')
@@ -810,9 +809,11 @@ class APSModel:
 
         if self.__previewZone > 0:
             tag = 'Preview'
-            attribute = {'zoneNumber': str(self.__previewZone),
-                         'crossSection': str(self.__previewCrossSection),
-                         'scale': str(self.__previewScale)}
+            attribute = {
+                'zoneNumber':   str(self.__previewZone),
+                'crossSection': str(self.__previewCrossSection),
+                'scale':        str(self.__previewScale)
+            }
             elem = Element(tag, attribute)
             root.append(elem)
         # If selected zone list is defined (has elements) write them to a keyword
