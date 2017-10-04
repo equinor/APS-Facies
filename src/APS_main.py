@@ -10,33 +10,13 @@ Output:
 """
 
 import importlib
-
-import APSGaussModel
-import simGauss2D
+import numpy as np
 import src.generalFunctionsUsingRoxAPI as gr
-import xmlFunctions
-from src import (
-    APSFaciesProb, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, Trend3D_linear,
-    Trend3D_linear_model_xml, Trunc2D_Angle_xml, Trunc2D_Base_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml,
-)
+from src import (APSModel, APSZoneModel, Trend3D_linear )
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
-importlib.reload(APSFaciesProb)
-importlib.reload(APSGaussModel)
-importlib.reload(APSMainFaciesTable)
-importlib.reload(APSGaussFieldJobs)
-
-importlib.reload(gr)
-
-importlib.reload(Trunc2D_Base_xml)
-importlib.reload(Trunc2D_Cubic_xml)
-importlib.reload(Trunc2D_Angle_xml)
-importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear)
-importlib.reload(Trend3D_linear_model_xml)
-importlib.reload(xmlFunctions)
-importlib.reload(simGauss2D)
 
 # Initialise common variables
 functionName = 'APS_trunc.py'
