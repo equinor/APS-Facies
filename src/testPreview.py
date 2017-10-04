@@ -1,9 +1,6 @@
 #!/bin/env python
 # Python3  test preliminary preview 
 import sys
-import APSFaciesProb
-import APSGaussModel
-
 import importlib
 import matplotlib
 import numpy as np
@@ -11,28 +8,28 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
-# Base class for Trunc2D_Cubic
 from src import (
-    APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, Trend3D_linear_model_xml,
-    Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D
+    APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel,
+    APSFaciesProb, APSGaussModel, Trend3D_linear_model_xml,
+    Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D,
 )
 
-# To be phases out and Trunc2D_Cubic is replacing it
-# import scipy.ndimage
-
+importlib.reload(APSDataFromRMS)
+importlib.reload(APSGaussFieldJobs)
+importlib.reload(APSMainFaciesTable)
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(APSFaciesProb)
-importlib.reload(APSMainFaciesTable)
-importlib.reload(APSGaussFieldJobs)
 importlib.reload(APSGaussModel)
-importlib.reload(APSDataFromRMS)
-
-importlib.reload(simGauss2D)
-importlib.reload(Trunc2D_Cubic_xml)
-importlib.reload(Trunc2D_Angle_xml)
-importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear_model_xml)
+importlib.reload(Trunc2D_Angle_xml)
+importlib.reload(Trunc2D_Cubic_xml)
+importlib.reload(Trunc3D_bayfill_xml)
+importlib.reload(simGauss2D)
+
+
+
+
 
 
 def defineColors(nFacies):
@@ -50,19 +47,19 @@ def defineColors(nFacies):
     elif nFacies == 7:
         colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick']
     elif nFacies == 8:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
                   'olivedrab']
     elif nFacies == 9:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
                   'olivedrab','blue']
     elif nFacies == 10:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
                   'olivedrab','blue','crimson']
     elif nFacies == 11:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
                   'olivedrab','blue','crimson','darkorange']
     elif nFacies == 12:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange', 'red']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
                   'olivedrab','blue','crimson','darkorange','red']
     return colors
 

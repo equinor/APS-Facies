@@ -3,14 +3,14 @@ import sys
 from xml.etree.ElementTree import Element
 
 import copy
-from xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
-"""
+from src.xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
+
 class APSGaussFieldJobs:
     """
     Class APSGaussFieldJobs
     Description: Keep the name of RMS petro jobs and  associated 3D property
                  parameter these jobs will create
-"""
+    
     Public member functions:
     Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,printInfo=0)
 
@@ -38,7 +38,6 @@ class APSGaussFieldJobs:
        def __checkUniqueGaussFieldNames(self)
        def __interpretXMLTree(self,ET_Tree)
 
-    -----------------------------------------------------------------------------------
     """
 
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):

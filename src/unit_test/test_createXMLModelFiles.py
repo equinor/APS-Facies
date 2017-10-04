@@ -9,19 +9,19 @@ import filecmp
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-import APSModel
-import APSMainFaciesTable
-import APSZoneModel
-import APSFaciesProb
-import APSGaussFieldJobs
-import APSGaussModel
+from src import (
+   APSModel, APSGaussFieldJobs, APSMainFaciesTable, APSZoneModel,
+   APSFaciesProb, APSGaussModel, Trend3D_linear_model_xml,
+   Trunc2D_Cubic_xml, Trunc2D_Angle_xml, Trunc3D_bayfill_xml
+)
 
-import Trunc2D_Base_xml
-import Trunc2D_Cubic_xml
-import Trunc2D_Angle_xml
-import Trunc3D_bayfill_xml
 
-import Trend3D_linear_model_xml
+#import Trunc2D_Base_xml
+#import Trunc2D_Cubic_xml
+#import Trunc2D_Angle_xml
+#import Trunc3D_bayfill_xml
+
+#import Trend3D_linear_model_xml
 
 
 

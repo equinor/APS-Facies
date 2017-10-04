@@ -3,16 +3,16 @@ import sys
 import copy
 import numpy as np
 
-from Trend3D_linear_model_xml import Trend3D_linear_model
+
 
 import xml.etree.ElementTree as ET
 from  xml.etree.ElementTree import Element, SubElement, dump
-from xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
 
-# Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
-from simGauss2D import  simGaussField, simGaussFieldAddTrendAndTransform
-#from src.utils.methods import isNumber
-from methods import isNumber
+from src.xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
+from src.simGauss2D import  simGaussField, simGaussFieldAddTrendAndTransform
+from src.Trend3D_linear_model_xml import Trend3D_linear_model
+from src.utils.methods import isNumber
+
 
 class APSGaussModel:
     """

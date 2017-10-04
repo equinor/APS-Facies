@@ -7,17 +7,16 @@ import numpy as np
 
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
+from src.APSFaciesProb import APSFaciesProb
+from src.APSGaussModel import APSGaussModel
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
-from src.Trunc2D_Angle_Overlay_xml import Trunc2D_Angle_Overlay
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
-# To be outphased:
-from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.xmlFunctions import getKeyword, getTextCommand, getFloatCommand, getIntCommand
 
 class APSZoneModel:
     """
-    ----------------------------------------------------------------
     class APSZoneModel
     Description: Keep data structure for a zone
 
@@ -56,7 +55,7 @@ class APSZoneModel:
        def setRange2(self,gaussFieldName,range2)
        def setRange3(self,gaussFieldName,range3)
        def setAnisotropyAsimuthAngle(self,gaussFieldName,angle)
-      def setAnisotropyDipAngle(self,gaussFieldName,angle)
+       def setAnisotropyDipAngle(self,gaussFieldName,angle)
 
      ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
@@ -88,7 +87,6 @@ class APSZoneModel:
 
      ---  write XML tree ---
        def XMLAddElement(self,parent)
-    def getZoneNumber(self)
 
      --- Check functions ---
        def hasFacies(self,fName)
@@ -140,15 +138,6 @@ class APSZoneModel:
         # --- PrintInfo ---
         kw = 'PrintInfo'
         self.__printInfo = getIntCommand(root, kw, defaultValue=1,required=False)
-
-#        obj =  root.find(kw)
-#        if obj == None:
-#            # Default value is set
-#            self.__printInfo = 1
-#        else:
-#            text = obj.text
-#            self.__printInfo = int(text.strip())
-
         if self.__printInfo >= 3:
             print(' ')
             print('Debug output: Call init ' + self.__className)
@@ -210,7 +199,7 @@ class APSZoneModel:
                 if self.__printInfo >= 3:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
-                    nGaussFieldInModel = int(trRule.get('nGFields'))
+                nGaussFieldInModel = int(trRule.get('nGFields'))
                 nGaussFieldInZone   = self.__gaussModelObject.getNGaussFields()
                 if nGaussFieldInModel != nGaussFieldInZone:
                     raise ValueError(
@@ -225,36 +214,33 @@ class APSZoneModel:
                 else:
                     faciesInZone = self.__faciesProbObject.getFaciesInZoneModel()
                     if truncRuleName == 'Trunc3D_Bayfill':
-                            self.__truncRule = Trunc3D_bayfill(
-                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                self.__printInfo, self.__modelFileName
-                            )
-
-
+                        self.__truncRule = Trunc3D_bayfill(
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                            self.__printInfo, self.__modelFileName
+                        )
                     elif truncRuleName == 'Trunc2D_Angle':
-                        self.__truncRule = Trunc2D_Angle(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                                         self.__printInfo, modelFileName)
-
-                                self.__printInfo, self.__modelFileName
-                            )
+                        self.__truncRule = Trunc2D_Angle(
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                            self.__printInfo, modelFileName
+                        )
                     elif truncRuleName == 'Trunc2D_Cubic':
-                        self.__truncRule = Trunc2D_Cubic(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                                         self.__printInfo, modelFileName)
-
-                            )
+                        self.__truncRule = Trunc2D_Cubic(
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                            self.__printInfo, modelFileName
+                        )
                     else:
                         raise NameError(
                             'Error in ' + self.__className + '\n'
-                                'Error: Specified truncation rule name: ' + truncRuleName +'\n'
-                                '       is not implemented.'
+                            'Error: Specified truncation rule name: ' + truncRuleName +'\n'
+                            '       is not implemented.'
                             )
 
                     if self.__printInfo >= 3:
-                            text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
+                        text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
                         text = text + self.__truncRule.getClassName()
                         print(text)
                         print('Debug output: APSZoneModel: Facies in truncation rule: ')
-                            print(repr(self.__truncRule.getFaciesInTruncRule()))
+                        print(repr(self.__truncRule.getFaciesInTruncRule()))
 
                 break
             # End if zone number
@@ -588,9 +574,8 @@ class APSZoneModel:
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
                 nCount = truncObject.getNCountShiftAlpha()
-                print(
-                    'Debug output: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount))
-                )
+                print('Debug output: In truncation rule {} nCalc= {} nLookup= {} nCountShiftAlpha= {}'
+                      ''.format(truncRuleName, str(nCalc), str(nLookup), str(nCount)))
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
