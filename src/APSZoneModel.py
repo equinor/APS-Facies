@@ -202,7 +202,7 @@ class APSZoneModel:
                 if self.__printInfo >= 3:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
-                    nGaussFieldInModel = int(trRule.get('nGFields'))
+                nGaussFieldInModel = int(trRule.get('nGFields'))
                 nGaussFieldInZone = self.__gaussModelObject.getNGaussFields()
                 if nGaussFieldInModel != nGaussFieldInZone:
                     raise ValueError(
