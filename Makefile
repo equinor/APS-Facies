@@ -8,6 +8,9 @@ MAIN_FILE = app.py
 ifeq ($(CODE_DIR),)
 CODE_DIR := .
 endif
+ifeq ($(PYTHONPATH),)
+PYTHONPATH := $(shell pwd)
+endif
 SOURCE_DIR = $(CODE_DIR)/src
 BUILD_DIR = $(CODE_DIR)/build
 LIB_PREFIX = $(CODE_DIR)/libraries
@@ -69,7 +72,15 @@ clean:
 	rm -rf $(LIB_PREFIX)/libgaussField/build && \
 	rm -f  $(EXEC_NAME).spec
 
-clean-all: clean clean-resource-file clean-ui-files clean-safety clean-tests clean-generated-pyqt-files
+clean-all: clean clean-resource-file clean-ui-files clean-safety clean-tests clean-generated-pyqt-files clean-cache
+
+clean-cache: clean-__pycache__ clean-pyc
+
+clean-__pycache__:
+	rm -rf $(shell find $(SOURCE_DIR) -name __pycache__)
+
+clean-pyc:
+	rm -f $(shell find $(SOURCE_DIR) -name *.pyc)
 
 clean-generated-pyqt-files:
 	rm -rf $(PYQT_GENERATED_FILES)
@@ -122,7 +133,10 @@ clean-safety:
 	rm -rf $(VULNERABILITY_DB)
 	$(shell type safety >/dev/null 2>&1 && pip-autoremove safety -y)
 
-unit-tests: run-tests clean-tests
+unit-tests: copy-libdraw-to-test run-tests clean-tests
+
+copy-libdraw-to-test: libdraw2D.so
+	cp $(LIB_PREFIX)/libdraw2D.so $(TEST_FOLDER)
 
 run-tests:
 	cd $(TEST_FOLDER) && \
@@ -131,7 +145,8 @@ run-tests:
 clean-tests:
 	rm -rf $(TEST_FOLDER)/.cache && \
 	rm -f  $(TEST_FOLDER)/*.dat  && \
-	rm -f  $(TEST_FOLDER)/*.xml
+	rm -f  $(TEST_FOLDER)/*.xml && \
+	rm -f  $(TEST_FOLDER)/libdraw2D.so
 
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams:

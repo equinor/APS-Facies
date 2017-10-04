@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 
 import copy
 
-from src import APSMainFaciesTable
+from src.APSMainFaciesTable import APSMainFaciesTable
 
 # importlib.reload(APSMainFaciesTable)
 
@@ -252,7 +252,7 @@ class APSDataFromRMS:
                 horizonNames.append(text.strip())
             self.__data['Horizon names'] = horizonNames
         faciesCodes = {}
-        faciesTable = APSMainFaciesTable.APSMainFaciesTable(tree, inputFileName, self.__printInfo)
+        faciesTable = APSMainFaciesTable(tree, inputFileName, self.__printInfo)
         self.__faciesTable = faciesTable
 
     def __add_surfaces(self, kw, surface):

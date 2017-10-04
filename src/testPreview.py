@@ -1,35 +1,37 @@
 #!/bin/env python
 # Python3  test preliminary preview 
 import sys
+
 import importlib
 import matplotlib
 import numpy as np
+# To be phases out and Trunc2D_Cubic is replacing it
+import scipy
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
+import APSFaciesProb
+import APSGaussModel
+# Base class for Trunc2D_Cubic
 from src import (
-    APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel,
-    APSFaciesProb, APSGaussModel, Trend3D_linear_model_xml,
+    APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, Trend3D_linear_model_xml,
     Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D,
 )
 
-importlib.reload(APSDataFromRMS)
-importlib.reload(APSGaussFieldJobs)
-importlib.reload(APSMainFaciesTable)
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(APSFaciesProb)
+importlib.reload(APSMainFaciesTable)
+importlib.reload(APSGaussFieldJobs)
 importlib.reload(APSGaussModel)
-importlib.reload(Trend3D_linear_model_xml)
-importlib.reload(Trunc2D_Angle_xml)
-importlib.reload(Trunc2D_Cubic_xml)
-importlib.reload(Trunc3D_bayfill_xml)
+importlib.reload(APSDataFromRMS)
+
 importlib.reload(simGauss2D)
-
-
-
-
+importlib.reload(Trunc2D_Cubic_xml)
+importlib.reload(Trunc2D_Angle_xml)
+importlib.reload(Trunc3D_bayfill_xml)
+importlib.reload(Trend3D_linear_model_xml)
 
 
 def defineColors(nFacies):
@@ -47,20 +49,15 @@ def defineColors(nFacies):
     elif nFacies == 7:
         colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick']
     elif nFacies == 8:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
-                  'olivedrab']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab']
     elif nFacies == 9:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
-                  'olivedrab','blue']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue']
     elif nFacies == 10:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
-                  'olivedrab','blue','crimson']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson']
     elif nFacies == 11:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
-                  'olivedrab','blue','crimson','darkorange']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange']
     elif nFacies == 12:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 
-                  'olivedrab','blue','crimson','darkorange','red']
+        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange', 'red']
     return colors
 
 
@@ -109,54 +106,53 @@ def readFile(fileName):
     return [a, nx, ny]
 
 
-def set2DGridDimension(nx,ny,nz,previewCrossSection,previewLX,previewLY,previewLZ,previewScale=0):
-    MIN_NZ =  100
-    MAX_NZ =  300
-    MIN_NX =  300
-    MAX_NX =  300
-    MIN_NY =  300
-    MAX_NY =  300
+def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, previewLZ, previewScale=0):
+    MIN_NZ = 100
+    MAX_NZ = 300
+    MIN_NX = 300
+    MAX_NX = 300
+    MIN_NY = 300
+    MAX_NY = 300
     nxPreview = nx
     nyPreview = ny
     nzPreview = nz
-    print('previewLX,LY,LZ,scale:' + str(previewLX) + ' ' + str(previewLY) + ' ' + str(previewLZ)+ ' ' + str(previewScale))
+    print('previewLX,LY,LZ,scale:' + str(previewLX) + ' ' + str(previewLY) + ' ' + str(previewLZ) + ' ' + str(
+        previewScale))
     if previewScale > 0:
         # Rescale vertical axis
-        previewLZ = previewLZ*previewScale
-    dx = previewLX/nx
-    dy = previewLY/ny
-    dz = previewLZ/nz
+        previewLZ = previewLZ * previewScale
+    dx = previewLX / nx
+    dy = previewLY / ny
+    dz = previewLZ / nz
     # Use square pixels in IJ plane
     if useBestResolution:
         if nx < MIN_NX:
             nx = MIN_NX
-            dx = previewLX/nx
+            dx = previewLX / nx
         if ny < MIN_NY:
             ny = MIN_NY
-            dy = previewLY/ny
-
+            dy = previewLY / ny
 
         if dx < dy:
             dy = dx
-            nyPreview = int(previewLY/dy)
+            nyPreview = int(previewLY / dy)
         else:
             dx = dy
-            nxPreview = int(previewLX/dx)
+            nxPreview = int(previewLX / dx)
     else:
         if nx > MAX_NX:
             nx = MAX_NX
-            dx = previewLX/nx
+            dx = previewLX / nx
         if ny > MAX_NY:
             ny = MAX_NY
-            dy = previewLY/ny
+            dy = previewLY / ny
 
         if dx < dy:
             dx = dy
-            nxPreview = int(previewLX/dx)
+            nxPreview = int(previewLX / dx)
         else:
             dy = dx
-            nyPreview = int(previewLY/dy)
-
+            nyPreview = int(previewLY / dy)
 
     if previewScale == 0:
         # Rescale to same size as horizontal
@@ -164,33 +160,33 @@ def set2DGridDimension(nx,ny,nz,previewCrossSection,previewLX,previewLY,previewL
             nzPreview = nxPreview
         if previewCrossSection == 'JK':
             nzPreview = nyPreview
-            
+
         if nzPreview < MIN_NZ:
             nzPreview = MIN_NZ
     else:
         # Keep ratio between lateral and vertical scale including scaling factor
         if previewCrossSection == 'IK':
-            ratio = previewLZ/previewLX
-            nzPreview = int(nxPreview*ratio)
+            ratio = previewLZ / previewLX
+            nzPreview = int(nxPreview * ratio)
         if previewCrossSection == 'JK':
-            ratio = previewLZ/previewLY
-            nzPreview = int(nyPreview*ratio)
+            ratio = previewLZ / previewLY
+            nzPreview = int(nyPreview * ratio)
 
     print('nxPreview,nyPreview,nzPreview: ' + str(nxPreview) + ' ' + str(nyPreview) + ' ' + str(nzPreview))
     return [nxPreview, nyPreview, nzPreview]
 
 
-def defineHorizontalAndVerticalResolutionForPlotting(previewCrossSection, nxPreview,nyPreview,nzPreview,
-                                                     previewLX,previewLY,previewLZ):
+def defineHorizontalAndVerticalResolutionForPlotting(
+        previewCrossSection, nxPreview, nyPreview, nzPreview, previewLX, previewLY, previewLZ
+):
     if previewCrossSection == 'IJ':
-        return [nxPreview, nyPreview,previewLX, previewLY]
+        return [nxPreview, nyPreview, previewLX, previewLY]
     elif previewCrossSection == 'IK':
-        return [nxPreview, nzPreview,previewLX, previewLZ]
+        return [nxPreview, nzPreview, previewLX, previewLZ]
     elif previewCrossSection == 'JK':
-        return [nyPreview, nzPreview,previewLY, previewLZ]
+        return [nyPreview, nzPreview, previewLY, previewLZ]
     else:
         raise ValueError('Cross section: {} is not defined'.format(previewCrossSection))
-
 
 
 # Initialise common variables
@@ -220,14 +216,14 @@ previewZoneNumber = apsModel.getPreviewZoneNumber()
 previewCrossSection = apsModel.getPreviewCrossSection()
 previewScale = apsModel.getPreviewScale()
 if printInfo >= 3:
-    print('Debug output: previewZoneNumber: ' + ' ' +str(previewZoneNumber))
-    print('Debug output: previewCrossSection: ' + ' ' +str(previewCrossSection))
+    print('Debug output: previewZoneNumber: ' + ' ' + str(previewZoneNumber))
+    print('Debug output: previewCrossSection: ' + ' ' + str(previewCrossSection))
     print('Debug output: previewScale: ' + str(previewScale))
 
 rmsData = APSDataFromRMS.APSDataFromRMS()
 print('- Read file: ' + inputRMSDataFileName)
 rmsData.readRMSDataFromXMLFile(inputRMSDataFileName)
-[nxFromGrid, nyFromGrid, x0, y0, simBoxXsize, simBoxYsize, xinc, yinc,asimuthGridOrientation] = rmsData.getGridSize()
+[nxFromGrid, nyFromGrid, x0, y0, simBoxXsize, simBoxYsize, xinc, yinc, asimuthGridOrientation] = rmsData.getGridSize()
 nzFromGrid = rmsData.getNumberOfLayersInZone(previewZoneNumber)
 nx = int(nxFromGrid)
 ny = int(nyFromGrid)
@@ -238,18 +234,18 @@ if zoneModel == None:
     print('Error: Zone number: ' + str(zoneNumber) + ' is not defined')
     sys.exit()
 simBoxZsize = zoneModel.getSimBoxThickness()
-print('- Grid dimension from RMS grid: nx: {0} ny:{1} nz: {2}'.format(str(nx),str(ny),str(nz)))
-print('- Size of simulation box: LX: {0} LY:{1} LZ: {2}'.format(str(simBoxXsize),str(simBoxYsize),str(simBoxZsize)))
+print('- Grid dimension from RMS grid: nx: {0} ny:{1} nz: {2}'.format(str(nx), str(ny), str(nz)))
+print('- Size of simulation box: LX: {0} LY:{1} LZ: {2}'.format(str(simBoxXsize), str(simBoxYsize), str(simBoxZsize)))
 print('- Simulate 2D cross section in: {} cross section'.format(previewCrossSection))
 
-[nxPreview,nyPreview,nzPreview] = set2DGridDimension(nx,ny,nz,previewCrossSection,
-                                                     simBoxXsize,simBoxYsize,simBoxZsize,previewScale)
+[nxPreview, nyPreview, nzPreview] = set2DGridDimension(nx, ny, nz, previewCrossSection,
+                                                       simBoxXsize, simBoxYsize, simBoxZsize, previewScale)
 if previewCrossSection == 'IJ':
-    print('- Preview simulation grid dimension: nx: {0} ny:{1}'.format(str(nxPreview),str(nyPreview)))
+    print('- Preview simulation grid dimension: nx: {0} ny:{1}'.format(str(nxPreview), str(nyPreview)))
 elif previewCrossSection == 'IK':
-    print('- Preview simulation grid dimension: nx: {0} nz:{1}'.format(str(nxPreview),str(nzPreview)))
+    print('- Preview simulation grid dimension: nx: {0} nz:{1}'.format(str(nxPreview), str(nzPreview)))
 elif previewCrossSection == 'JK':
-    print('- Preview simulation grid dimension: ny: {0} nz:{1}'.format(str(nyPreview),str(nzPreview)))
+    print('- Preview simulation grid dimension: ny: {0} nz:{1}'.format(str(nyPreview), str(nzPreview)))
 
 truncObject = zoneModel.getTruncRule()
 faciesNames = zoneModel.getFaciesInZoneModel()
@@ -260,7 +256,7 @@ nGaussFields = len(gaussFieldNames)
 useConstProb = zoneModel.useConstProb()
 cellNumber = 0
 
-faciesOrdering   = truncObject.getFaciesOrderIndexList()
+faciesOrdering = truncObject.getFaciesOrderIndexList()
 if useConstProb == 0:
     print('Error: Preview plots require constant facies probabilities')
     print('       Use arbitrary constant values')
@@ -293,7 +289,7 @@ for fName in faciesNames:
 # faciesIndxPerPolygon = truncObject.faciesIndxPerPolygon()
 
 # Write datastructure:
-#truncObject.writeContentsInDataStructure()
+# truncObject.writeContentsInDataStructure()
 
 # print('FaciesIndexPerPolygon:')
 # print(repr(faciesIndxPerPolygon))
@@ -314,7 +310,7 @@ if noSim == 1:
         a6 = readFile('a6.dat')
 else:
     gaussFields = zoneModel.simGaussFieldWithTrendAndTransformNew(
-        nGaussFields,simBoxXsize,simBoxYsize,simBoxZsize,
+        nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
         nxPreview, nyPreview, nzPreview, asimuthGridOrientation,
         previewCrossSection
     )
@@ -328,17 +324,14 @@ else:
         gridDim1 = nyPreview
         gridDim2 = nzPreview
 
-
     if setWrite == 1:
         print('Write 2D simulated gauss fields: ')
         for n in range(nGaussFields):
             gf = gaussFields[n]
-            fileName = 'a'+str(n+1)+ '_' +  previewCrossSection + '.dat'
-            writeFile(fileName,gf,gridDim1,gridDim2)
+            fileName = 'a' + str(n + 1) + '_' + previewCrossSection + '.dat'
+            writeFile(fileName, gf, gridDim1, gridDim2)
 
-
-
-facies = np.zeros(gridDim1*gridDim2,int)
+facies = np.zeros(gridDim1 * gridDim2, int)
 faciesFraction = np.zeros(nFacies, int)
 
 gfRealization1 = gaussFields[0]
@@ -354,15 +347,15 @@ for i in range(nGridCells):
     facies[i] = fIndx + 1  # Use fIndx+1 as values in the facies plot
     faciesFraction[fIndx] += 1
 
-writeFile('facies2D.dat',facies,gridDim1,gridDim2)
+writeFile('facies2D.dat', facies, gridDim1, gridDim2)
 if printInfo >= 3:
-    print( ' ')
+    print(' ')
     print('Facies name:   Simulated fractions:    Specified fractions:')
     for i in range(nFacies):
         f = faciesFraction[i]
-        fraction = float(f)/float(len(facies))
-        print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i],fraction,faciesProb[i]))
-    print( ' ' )
+        fraction = float(f) / float(len(facies))
+        print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i], fraction, faciesProb[i]))
+    print(' ')
 
 if truncObject.getClassName() == 'Trunc2D_Angle':
     nCalc = truncObject.getNCalcTruncMap()
@@ -376,11 +369,11 @@ if truncObject.getClassName() == 'Trunc2D_Angle':
 [faciesPolygons] = truncObject.truncMapPolygons()
 faciesIndxPerPolygon = truncObject.faciesIndxPerPolygon()
 
-fmap  = np.reshape(facies,(gridDim2,gridDim1))  #Reshape to a 2D array with c-index ordering
+fmap = np.reshape(facies, (gridDim2, gridDim1))  # Reshape to a 2D array with c-index ordering
 alphaMapList = []
 for m in range(nGaussFields):
     alphaReal = gaussFields[m]
-    alphaMap = np.reshape(alphaReal,(gridDim2,gridDim1))
+    alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
     alphaMapList.append(alphaMap)
 
 # Plot the result
@@ -395,7 +388,7 @@ fig = plt.figure(figsize=[25.0, 15.0])
 ax1 = plt.subplot(2, 6, 1)
 alphaMap = alphaMapList[0]
 if rotatePlot:
-    rot_im1 = scipy.ndimage.interpolation.rotate(alphaMap,asimuthGridOrientation)
+    rot_im1 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
 else:
     rot_im1 = alphaMap
 im1 = ax1.imshow(rot_im1, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
@@ -405,7 +398,7 @@ ax1.set_title('GRF1')
 ax2 = plt.subplot(2, 6, 2)
 alphaMap = alphaMapList[1]
 if rotatePlot:
-    rot_im2 = scipy.ndimage.interpolation.rotate(alphaMap,asimuthGridOrientation)
+    rot_im2 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
 else:
     rot_im2 = alphaMap
 im2 = ax2.imshow(rot_im2, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
@@ -415,12 +408,12 @@ plt.setp(ax2.get_yticklabels(), visible=False)
 
 # Gauss3 transformed is plotted
 ax3 = plt.subplot(2, 6, 3)
-alphaReal = np.zeros(gridDim1*gridDim2,np.float32)
-alphaMap = np.reshape(alphaReal,(gridDim2,gridDim1))
+alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
+alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
 if nGaussFields >= 3:
     alphaMap = alphaMapList[2]
 if rotatePlot:
-    rot_im3 = scipy.ndimage.interpolation.rotate(alphaMap,asimuthGridOrientation)
+    rot_im3 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
 else:
     rot_im3 = alphaMap
 im3 = ax3.imshow(rot_im3, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
@@ -430,12 +423,12 @@ plt.setp(ax3.get_yticklabels(), visible=False)
 
 # Gauss4 transformed is plotted
 ax4 = plt.subplot(2, 6, 4)
-alphaReal = np.zeros(gridDim1*gridDim2,np.float32)
-alphaMap = np.reshape(alphaReal,(gridDim2,gridDim1))
+alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
+alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
 if nGaussFields >= 4:
     alphaMap = alphaMapList[3]
 if rotatePlot:
-    rot_im4 = scipy.ndimage.interpolation.rotate(alphaMap,asimuthGridOrientation)
+    rot_im4 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
 else:
     rot_im4 = alphaMap
 im4 = ax4.imshow(rot_im4, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
@@ -445,12 +438,12 @@ plt.setp(ax4.get_yticklabels(), visible=False)
 
 # Gauss5 transformed is plotted
 ax5 = plt.subplot(2, 6, 5)
-alphaReal = np.zeros(gridDim1*gridDim2,np.float32)
-alphaMap = np.reshape(alphaReal,(gridDim2,gridDim1))
+alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
+alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
 if nGaussFields >= 5:
     alphaMap = alphaMapList[4]
 if rotatePlot:
-    rot_im5 = scipy.ndimage.interpolation.rotate(alphaMap,asimuthGridOrientation)
+    rot_im5 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
 else:
     rot_im5 = alphaMap
 im5 = ax5.imshow(rot_im5, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
@@ -460,12 +453,12 @@ plt.setp(ax5.get_yticklabels(), visible=False)
 
 # Gauss6 transformed is plotted
 ax6 = plt.subplot(2, 6, 6)
-alphaReal = np.zeros(gridDim1*gridDim2,np.float32)
-alphaMap = np.reshape(alphaReal,(gridDim2,gridDim1))
+alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
+alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
 if nGaussFields >= 6:
     alphaMap = alphaMapList[5]
 if rotatePlot:
-    rot_im6 = scipy.ndimage.interpolation.rotate(alphaMap,asimuthGridOrientation)
+    rot_im6 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
 else:
     rot_im6 = alphaMap
 im6 = ax6.imshow(rot_im6, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
@@ -502,7 +495,8 @@ for i in range(len(faciesPolygons)):
     polygon = Polygon(poly, closed=True, facecolor=colors[fIndx])
     axTrunc.add_patch(polygon)
     fName = faciesNames[fIndx]
-    # print('Polygon:{0:2d} Facies: {1:7}  Color: {2:12} Facies index(zone): {3:2d}'.format(i,fName,colors[fIndx],fIndx))
+    # print('Polygon:{0:2d} Facies: {1:7}  Color: {2:12} Facies index(zone): {3:2d}'.format(i,fName,colors[fIndx],
+    # fIndx))
 #    print('Polygon Points:')
 #    print(repr(poly))
 axTrunc.set_title('TruncMap')
@@ -510,7 +504,7 @@ axTrunc.set_title('TruncMap')
 # Facies map is plotted
 axFacies = plt.subplot(2, 6, 8)
 if rotatePlot:
-    rot_imFac = scipy.ndimage.interpolation.rotate(fmap,asimuthGridOrientation)
+    rot_imFac = scipy.ndimage.interpolation.rotate(fmap, asimuthGridOrientation)
 else:
     rot_imFac = fmap
 imFac = axFacies.imshow(rot_imFac, interpolation='none', cmap=cm, clim=(1, nFacies), origin='lower')
@@ -565,7 +559,7 @@ cax2.set_yticklabels(labels)
 plt.subplots_adjust(left=0.10, wspace=0.15, hspace=0.20,
                     bottom=0.05, top=0.92)
 # Label the rows and columns of the table
-text = 'Zone number: ' + str(zoneNumber) +' Cross section: ' + previewCrossSection 
+text = 'Zone number: ' + str(zoneNumber) + ' Cross section: ' + previewCrossSection
 fig.text(0.50, 0.98, text, ha='center')
 for i in range(nFacies):
     p = int(faciesProb[i] * 1000 + 0.5)

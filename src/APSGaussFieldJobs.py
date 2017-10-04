@@ -1,16 +1,16 @@
 #!/bin/env python
-import sys
 from xml.etree.ElementTree import Element
 
 import copy
-from src.xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
+
+from src.xmlFunctions import getIntCommand, getKeyword
+
 
 class APSGaussFieldJobs:
     """
     Class APSGaussFieldJobs
     Description: Keep the name of RMS petro jobs and  associated 3D property
                  parameter these jobs will create
-    
     Public member functions:
     Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,printInfo=0)
 
@@ -38,6 +38,7 @@ class APSGaussFieldJobs:
        def __checkUniqueGaussFieldNames(self)
        def __interpretXMLTree(self,ET_Tree)
 
+    -----------------------------------------------------------------------------------
     """
 
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
@@ -69,7 +70,7 @@ class APSGaussFieldJobs:
                                          modelFile=self.__modelFileName,
                                          required=False)
 
-        obj = getKeyword(root, 'GaussFieldJobNames','Root', modelFile=self.__modelFileName)
+        obj = getKeyword(root, 'GaussFieldJobNames', 'Root', modelFile=self.__modelFileName)
 
         gfJobs = obj
         gfJobList = []
@@ -131,9 +132,8 @@ class APSGaussFieldJobs:
             print(repr(self.__jobNames))
             print('Debug output: Gauss field names per job: ')
             print(repr(self.__gaussFieldNamesPerJob))
-        
 
-    def initialize(self, gfJobNames, gfNamesPerJob,printInfo=0):
+    def initialize(self, gfJobNames, gfNamesPerJob, printInfo=0):
         if printInfo >= 3:
             print('Debug output: Call the initialize function in ' + self.__className)
 

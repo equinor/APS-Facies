@@ -95,13 +95,13 @@ def readInputXMLFile(modelFileName, printInfo):
     kw = 'Horizon'
     horizonList = []
     for hObj in root.findall(kw):
-        if hObj != None:
+        if hObj is not None:
             text = hObj.text
             horizonList.append(text.strip())
 
     kw1 = 'WellName'
     wellNameRefObj = root.find(kw1)
-    if wellNameRefObj == None:
+    if wellNameRefObj is None:
         print('Error: Missing specification of ' + kw1)
         sys.exit()
     text = wellNameRefObj.get('name')
@@ -132,7 +132,9 @@ def readInputXMLFile(modelFileName, printInfo):
     logName = text.strip()
 
     if printInfo >= 3:
-        print('Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
+        print(
+            'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   '
+            + logName)
 
     return [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
             wellRefName, trajectoryName, logrunName, logName]
@@ -254,7 +256,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     nLayersPerZone = []
     grid = gridModel.get_grid()
     [xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     asimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] =  gr.getGridAttributes(grid,printInfo)
+     asimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, printInfo)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -265,7 +267,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
 
     for i in range(len(zoneNames)):
         tag = 'ZoneName'
-        attribute = {'number':str(i+1), 'nLayers':str(nLayersPerZone[i])}
+        attribute = {'number': str(i + 1), 'nLayers': str(nLayersPerZone[i])}
         name = zoneNames[i]
         zNameObj = Element(tag, attribute)
         zNameObj.text = ' ' + name.strip() + ' '
