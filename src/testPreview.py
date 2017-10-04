@@ -5,18 +5,14 @@ import sys
 import importlib
 import matplotlib
 import numpy as np
-# To be phases out and Trunc2D_Cubic is replacing it
 import scipy
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
-import APSFaciesProb
-import APSGaussModel
-# Base class for Trunc2D_Cubic
 from src import (
-    APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, Trend3D_linear_model_xml,
-    Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D,
+    APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, APSFaciesProb, APSGaussModel,
+    Trend3D_linear_model_xml, Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D
 )
 
 importlib.reload(APSModel)
@@ -177,8 +173,8 @@ def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, pr
 
 
 def defineHorizontalAndVerticalResolutionForPlotting(
-        previewCrossSection, nxPreview, nyPreview, nzPreview, previewLX, previewLY, previewLZ
-):
+        previewCrossSection, nxPreview, nyPreview, nzPreview,
+        previewLX, previewLY, previewLZ):
     if previewCrossSection == 'IJ':
         return [nxPreview, nyPreview, previewLX, previewLY]
     elif previewCrossSection == 'IK':
@@ -194,19 +190,15 @@ functionName = 'testPreview.py'
 rotatePlot = 0
 useBestResolution = 0
 noSim = 0  # Is set to 1 only if one don't want to simulate 2D fields (for test purpose only)
-setWrite = 1  # Is set to 1 if write out simulated 2D fields
+setWrite = 0  # Is set to 1 if write out simulated 2D fields
 
 
-# --------- Main test program ----------------
+# --------- Main function ----------------
 def main():
     print('matplotlib version: ' + matplotlib.__version__)
     print('Run: testPreview')
     modelFileName = 'APS.xml'
     inputRMSDataFileName = 'rms_project_data_for_APS_gui.xml'
-    nArgv = len(sys.argv)
-    modelName = ''
-    if nArgv > 1:
-        modelName = sys.argv[1]
 
     print('- Read file: ' + modelFileName)
     apsModel = APSModel.APSModel(modelFileName)
@@ -282,24 +274,16 @@ def main():
         faciesProb.append(v)
 
     # Calculate truncation map for given facies probabilities
-    # print('Facies prob:')
-    # print(repr(faciesProb))
-    # truncObject.setTruncRule(faciesProb)
-
-    # Calculate polygons for truncation map for current facies probability
-    # as specified when calling setTruncRule(faciesProb)
-    # [faciesPolygons]    = truncObject.truncMapPolygons()
-    # faciesIndxPerPolygon = truncObject.faciesIndxPerPolygon()
+    print('Facies prob:')
+    print(repr(faciesProb))
+    truncObject.setTruncRule(faciesProb)
 
     # Write datastructure:
     # truncObject.writeContentsInDataStructure()
 
-    # print('FaciesIndexPerPolygon:')
-    # print(repr(faciesIndxPerPolygon))
-    # Simulate three 2D gaussian fields
-
     gaussFields = []
     if noSim == 1:
+        # Read the gauss fields from files
         if nGaussFields >= 2:
             a1 = readFile('a1.dat')
             a2 = readFile('a2.dat')
@@ -312,6 +296,7 @@ def main():
         if nGaussFields >= 6:
             a6 = readFile('a6.dat')
     else:
+        # simulate gauss fields
         gaussFields = zoneModel.simGaussFieldWithTrendAndTransformNew(
             nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
             nxPreview, nyPreview, nzPreview, asimuthGridOrientation,
@@ -341,7 +326,6 @@ def main():
     nGridCells = len(gfRealization1)
     alphaCoord = np.zeros(nGaussFields, np.float32)
     for i in range(nGridCells):
-        truncObject.setTruncRule(faciesProb)
         for m in range(nGaussFields):
             alphaReal = gaussFields[m]
             alphaCoord[m] = alphaReal[i]
@@ -350,7 +334,8 @@ def main():
         facies[i] = fIndx + 1  # Use fIndx+1 as values in the facies plot
         faciesFraction[fIndx] += 1
 
-    writeFile('facies2D.dat', facies, gridDim1, gridDim2)
+    if setWrite == 1:
+        writeFile('facies2D.dat', facies, gridDim1, gridDim2)
     if printInfo >= 3:
         print(' ')
         print('Facies name:   Simulated fractions:    Specified fractions:')
@@ -360,12 +345,6 @@ def main():
             print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i], fraction, faciesProb[i]))
         print(' ')
 
-    if truncObject.getClassName() == 'Trunc2D_Angle':
-        nCalc = truncObject.getNCalcTruncMap()
-        nLookup = truncObject.getNLookupTruncMap()
-        if printInfo >= 3:
-            print('Debug output: Number of calculations of truncation map: ' + str(nCalc))
-            print('Debug output: Number of lookup of truncation map: ' + str(nLookup))
 
     # Calculate polygons for truncation map for current facies probability
     # as specified when calling setTruncRule(faciesProb)
@@ -381,7 +360,7 @@ def main():
 
     # Plot the result
     print('Make plots')
-    fig = plt.figure(figsize=[25.0, 15.0])
+    fig = plt.figure(figsize=[20.0, 10.0])
 
     # Figure containing the transformed Gaussian fields and facies realization
 
@@ -394,8 +373,12 @@ def main():
         rot_im1 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
     else:
         rot_im1 = alphaMap
-    im1 = ax1.imshow(rot_im1, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-    ax1.set_title('GRF1')
+    if previewCrossSection == 'IJ':
+        im1 = ax1.imshow(rot_im1, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
+        ax1.set_title('GRF1')
+    else:
+        im1 = ax1.imshow(rot_im1, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
+        ax1.set_title('GRF1')
 
     # Gauss2 transformed is plotted
     ax2 = plt.subplot(2, 6, 2)
@@ -404,8 +387,12 @@ def main():
         rot_im2 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
     else:
         rot_im2 = alphaMap
-    im2 = ax2.imshow(rot_im2, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
-    ax2.set_title('GRF2')
+    if previewCrossSection == 'IJ':
+        im2 = ax2.imshow(rot_im2, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
+        ax2.set_title('GRF2')
+    else:
+        im2 = ax2.imshow(rot_im2, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
+        ax2.set_title('GRF2')
     plt.setp(ax2.get_xticklabels(), visible=False)
     plt.setp(ax2.get_yticklabels(), visible=False)
 
@@ -419,13 +406,17 @@ def main():
         rot_im3 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
     else:
         rot_im3 = alphaMap
-    im3 = ax3.imshow(rot_im3, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
-    ax3.set_title('GRF3')
+    if previewCrossSection == 'IJ':
+        im3 = ax3.imshow(rot_im3, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
+        ax3.set_title('GRF3')
+    else:
+        im3 = ax3.imshow(rot_im3, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
+        ax3.set_title('GRF3')
     plt.setp(ax3.get_xticklabels(), visible=False)
     plt.setp(ax3.get_yticklabels(), visible=False)
 
     # Gauss4 transformed is plotted
-    ax4 = plt.subplot(2, 6, 4)
+    ax4 = plt.subplot(2, 6, 7)
     alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
     alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
     if nGaussFields >= 4:
@@ -434,13 +425,17 @@ def main():
         rot_im4 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
     else:
         rot_im4 = alphaMap
-    im4 = ax4.imshow(rot_im4, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
-    ax4.set_title('GRF4')
+    if previewCrossSection == 'IJ':
+        im4 = ax4.imshow(rot_im4, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
+        ax4.set_title('GRF4')
+    else:
+        im4 = ax4.imshow(rot_im4, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
+        ax4.set_title('GRF4')
     plt.setp(ax4.get_xticklabels(), visible=False)
     plt.setp(ax4.get_yticklabels(), visible=False)
 
     # Gauss5 transformed is plotted
-    ax5 = plt.subplot(2, 6, 5)
+    ax5 = plt.subplot(2, 6, 8)
     alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
     alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
     if nGaussFields >= 5:
@@ -449,13 +444,17 @@ def main():
         rot_im5 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
     else:
         rot_im5 = alphaMap
-    im5 = ax5.imshow(rot_im5, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
-    ax5.set_title('GRF5')
+    if previewCrossSection == 'IJ':
+        im5 = ax5.imshow(rot_im5, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
+        ax5.set_title('GRF5')
+    else:
+        im5 = ax5.imshow(rot_im5, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
+        ax5.set_title('GRF5')
     plt.setp(ax5.get_xticklabels(), visible=False)
     plt.setp(ax5.get_yticklabels(), visible=False)
 
     # Gauss6 transformed is plotted
-    ax6 = plt.subplot(2, 6, 6)
+    ax6 = plt.subplot(2, 6, 9)
     alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
     alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
     if nGaussFields >= 6:
@@ -464,8 +463,12 @@ def main():
         rot_im6 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
     else:
         rot_im6 = alphaMap
-    im6 = ax6.imshow(rot_im6, interpolation='none', vmin=0.0, vmax=1.0, origin='lower')
-    ax6.set_title('GRF6')
+    if previewCrossSection == 'IJ':
+        im6 = ax6.imshow(rot_im6, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
+        ax6.set_title('GRF6')
+    else:
+        im6 = ax6.imshow(rot_im6, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
+        ax6.set_title('GRF6')
     plt.setp(ax6.get_xticklabels(), visible=False)
     plt.setp(ax6.get_yticklabels(), visible=False)
 
@@ -476,7 +479,7 @@ def main():
     # Figure containing truncation map and facies
 
     # Truncation map is plotted
-    axTrunc = plt.subplot(2, 6, 7)
+    axTrunc = plt.subplot(2, 6, 10)
     colors = defineColors(nFacies)
     cmap_name = 'Colormap'
 
@@ -503,32 +506,38 @@ def main():
     #    print('Polygon Points:')
     #    print(repr(poly))
     axTrunc.set_title('TruncMap')
-
+    axTrunc.set_aspect('equal','box')
     # Facies map is plotted
-    axFacies = plt.subplot(2, 6, 8)
+    axFacies = plt.subplot(2, 6, 11)
     if rotatePlot:
         rot_imFac = scipy.ndimage.interpolation.rotate(fmap, asimuthGridOrientation)
     else:
         rot_imFac = fmap
-    imFac = axFacies.imshow(rot_imFac, interpolation='none', cmap=cm, clim=(1, nFacies), origin='lower')
-    axFacies.set_title('Facies')
-
+    if previewCrossSection == 'IJ':
+        imFac = axFacies.imshow(rot_imFac, interpolation='none', aspect='equal', cmap=cm, clim=(1, nFacies), origin='lower')
+        axFacies.set_title('Facies')
+    else:
+        imFac = axFacies.imshow(rot_imFac, interpolation='none', aspect='equal', cmap=cm, clim=(1, nFacies), origin='upper')
+        axFacies.set_title('Facies')
+        
     # Plot crossplot between GRF1 and GRF2,3,4,5
     if nGaussFields >= 2:
         # Cross plot between G1 and G2
         alphaReal1 = gaussFields[0]
         alphaReal2 = gaussFields[1]
-        axC1 = plt.subplot(2, 6, 9)
+        axC1 = plt.subplot(2, 6, 4)
         plt.scatter(alphaReal1, alphaReal2, alpha=0.15, marker='.', c='b')
         axC1.set_title('Crossplot GRF1 GRF2')
+        axC1.set_aspect('equal','box')
         plt.axis([0, 1, 0, 1])
     if nGaussFields >= 3:
         # Cross plot between G1 and G3
         alphaReal1 = gaussFields[0]
         alphaReal3 = gaussFields[2]
-        axC2 = plt.subplot(2, 6, 10)
+        axC2 = plt.subplot(2, 6, 5)
         plt.scatter(alphaReal1, alphaReal3, alpha=0.15, marker='.', c='b')
         axC2.set_title('Crossplot GRF1 GRF3')
+        axC2.set_aspect('equal','box')
         plt.axis([0, 1, 0, 1])
         plt.setp(axC2.get_xticklabels(), visible=False)
         plt.setp(axC2.get_yticklabels(), visible=False)
@@ -536,9 +545,10 @@ def main():
         # Cross plot between G1 and G4
         alphaReal1 = gaussFields[0]
         alphaReal4 = gaussFields[3]
-        axC3 = plt.subplot(2, 6, 11)
+        axC3 = plt.subplot(2, 6, 6)
         plt.scatter(alphaReal1, alphaReal4, alpha=0.15, marker='.', c='b')
         axC3.set_title('Crossplot GRF1 GRF4')
+        axC3.set_aspect('equal','box')
         plt.axis([0, 1, 0, 1])
         plt.setp(axC3.get_xticklabels(), visible=False)
         plt.setp(axC3.get_yticklabels(), visible=False)
@@ -574,5 +584,5 @@ def main():
     print('Finished testPreview')
 
 
-if __name__ == '_main__':
+if __name__ == '__main__':
     main()

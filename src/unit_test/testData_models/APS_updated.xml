@@ -406,8 +406,8 @@
       </GaussField>
       <GaussField name="GF8">
         <Vario name="GAUSSIAN">
-          <MainRange> 1200 </MainRange>
-          <PerpRange> 120 </PerpRange>
+          <MainRange> 1200.0 </MainRange>
+          <PerpRange> 120.0 </PerpRange>
           <VertRange> 1.2 </VertRange>
           <AsimuthAngle> 125.0 </AsimuthAngle>
           <DipAngle> 0.005 </DipAngle>
@@ -416,8 +416,8 @@
       </GaussField>
       <GaussField name="GF9">
         <Vario name="GENERAL_EXPONENTIAL">
-          <MainRange> 1300 </MainRange>
-          <PerpRange> 130 </PerpRange>
+          <MainRange> 1300.0 </MainRange>
+          <PerpRange> 130.0 </PerpRange>
           <VertRange> 1.3 </VertRange>
           <AsimuthAngle> 40.0 </AsimuthAngle>
           <DipAngle> 0.009 </DipAngle>
