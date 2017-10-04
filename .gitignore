@@ -319,3 +319,5 @@ code.tar.gz
 Thumbs.db
 *.py~
 *.png
+#*#
+*~
