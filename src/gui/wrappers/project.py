@@ -14,7 +14,7 @@ from src.gui.wrappers.main_window import MainWindow
 from src.resources.ui.Project_ui import Ui_ProjectSelection
 from src.utils.constants import Defaults, MessageIcon, ModeOptions, ProjectElements
 from src.utils.methods import get_project_file
-from utils.mappings import project_parameter_state_key_to_element_key
+from src.utils.mappings import project_parameter_state_key_to_element_key
 
 
 class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
