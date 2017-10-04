@@ -3,19 +3,22 @@
 A wrapper, and implementation of the main GUI window of the APS-GUI.
 'Implements' the design in APS_prototype.ui, and wraps around src/resources/ui/APS_prototype_ui.py.
 """
-from typing import Dict, Union, Callable
+from typing import Dict, Union
 
 from PyQt5.QtWidgets import *
 
-from gui.wrappers.truncation_rule import CubicTruncationRule, NonCubicTruncationRule, BayfillTruncationRule, CustomTruncationRule
 from src.gui.state import State
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.gui.wrappers.base_classes.message_box import MessageBox
+from src.gui.wrappers.truncation_rule import (
+    BayfillTruncationRule, CubicTruncationRule, CustomTruncationRule,
+    NonCubicTruncationRule,
+)
 from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.utils.checks import is_valid_path
 from src.utils.constants import Defaults, ModeConstants, TruncationLibraryKeys, TruncationLibrarySubKeys
-from src.utils.methods import get_project_file, toggle_elements, show_dialog
-from utils.mappings import truncation_library_elements, truncation_library_button_to_kind_and_number_of_facies
+from src.utils.mappings import truncation_library_button_to_kind_and_number_of_facies, truncation_library_elements
+from src.utils.methods import get_project_file, toggle_elements
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
