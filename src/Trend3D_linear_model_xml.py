@@ -7,7 +7,8 @@ import copy
 import math
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement, dump
-from xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
+
+from src.xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
 
 
 class Trend3D_linear_model:
@@ -19,22 +20,23 @@ class Trend3D_linear_model:
     Public member functions:
     Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
 
- Get functions:
-  def getAsimuth(self)
-  def getStackingAngle(self)
-  def getStackingDirection(self)
+    Get functions:
+    def getAsimuth(self)
+    def getStackingAngle(self)
+    def getStackingDirection(self)
 
- Set functions:
-  def setAsimuth(self,angle)
-  def setStackingAngle(self,stackingAngle)
-  def setStackingDirection(self,direction)
-  def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
+    Set functions:
+    def setAsimuth(self,angle)
+    def setStackingAngle(self,stackingAngle)
+    def setStackingDirection(self,direction)
+    def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
     
- XmlTree update function:
-  def XMLAddElement(self,parent)
+    XmlTree update function:
+    def XMLAddElement(self,parent)
     
- Private member functions:
-  def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
+    Private member functions:
+    def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
+    """
     def __init__(self, trendRuleXML, printInfo=0, modelFileName=None):
         """
         Description: Create either empty object which have to be initialized

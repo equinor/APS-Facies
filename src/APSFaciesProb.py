@@ -1,32 +1,30 @@
 #!/bin/env python
 import sys
 import copy
-import APSMainFaciesTable
+
+from src import (APSMainFaciesTable)
+from src.xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
+from src.utils.methods import isNumber
+
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement, dump
-from xmlFunctions import getKeyword, getFloatCommand, getTextCommand, getIntCommand
 
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-"""
-class APSFaciesProb
+class APSFaciesProb:
+    """
+    class APSFaciesProb
 
-Description:
-This class keep a list of facies names and associated facies probabilities for a zone. 
-The facies probabilities can be specified either as float numbers or as RMS parameter 
-names of facies probability cubes. The class contain functions to get the facies list 
-and facies probabilities from an XML tree containing the model file.
-Alternatively an empty object can be created and an initialization function can be 
-used to assign facies list and facies probabilities to the class.
-
-Constructor:
+    Description:
+    This class keep a list of facies names and associated facies probabilities for a zone. 
+    The facies probabilities can be specified either as float numbers or as RMS parameter 
+    names of facies probability cubes. The class contain functions to get the facies list 
+    and facies probabilities from an XML tree containing the model file.
+    Alternatively an empty object can be created and an initialization function can be 
+    used to assign facies list and facies probabilities to the class.
+    
+    Constructor:
     def __init__(self, ET_Tree_zone=None, mainFaciesTable= None,modelFileName=None,
                  printInfo=0,useConstProb=0,zoneNumber=0)
-Public functions:
+    Public functions:
     def getAllProbParamForZone(self)
     def getConstProbValue(self,fName)
     def getFaciesInZoneModel(self)
@@ -37,13 +35,12 @@ Public functions:
     def XMLAddElement(self,parent)
 
 
-Private functions:
+    Private functions:
     def __setEmpty(self)
     def __interpretXMLTree(self,ET_Tree_zone,modelFileName)
     def __checkConstProbValuesAndNormalize(self,zoneNumber)
 
-"""
-class APSFaciesProb:
+    """
     def __setEmpty(self):
         self.__className = 'APSFaciesProb'
         self.__faciesProbForZoneModel = []
