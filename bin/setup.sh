@@ -306,7 +306,7 @@ python setup.py install -O2
 
 cd ${SOURCE_DIR}
 
-PYLINT_VERSION=1.7.2
+PYLINT_VERSION=1.7.4
 PYLINT_PREFIX=pylint-$PYLINT_VERSION
 mkdir -p $SOURCE_DIR/$PYLINT_PREFIX
 wget https://github.com/PyCQA/pylint/archive/$PYLINT_PREFIX.tar.gz
