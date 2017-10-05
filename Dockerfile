@@ -1,5 +1,5 @@
 FROM centos:6
-LABEL version="1.5.1" \
+LABEL version="1.5.2" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -98,7 +98,7 @@ ENV READLINE_VERSION="7.0"
 
 ENV ASTROID_VERSION="1.5.3"
 ENV ISORT_VERSION="4.2.15"
-ENV PYLINT_VERSION="1.7.2"
+ENV PYLINT_VERSION="1.7.4"
 
 ENV UCL_VERSION="1.03"
 ENV UPX_VERSION="v3.94"
