@@ -6,7 +6,7 @@ from PyQt5.Qt import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from src.ui import APS_prototype_ui
+from src.resources import APS_prototype_ui
 
 
 class APSGUI(QMainWindow, APS_prototype_ui.Ui_ZoneParameterName):

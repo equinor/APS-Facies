@@ -144,7 +144,7 @@ class Trunc3D_bayfill:
         else:
             if printInfo >= 3:
                 # Create an empty object which will be initialized by set functions
-                print('Debug info: Create empty object of ' + self.__className)
+                print('Debug output: Create empty object of ' + self.__className)
         #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
@@ -515,6 +515,9 @@ class Trunc3D_bayfill:
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
+        if self.__printInfo >= 3:
+            print('Debug output: call XMLADDElement from ' + self.__className)
+
         attribute = {
             'name': 'Trunc3D_Bayfill',
             'nGFields': '3'

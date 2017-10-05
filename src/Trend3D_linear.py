@@ -29,14 +29,11 @@ class Trend3D_linear:
         self.__direction = trendRuleModel.getStackingDirection()
         self.__printInfo = printInfo
 
-    def createTrend(self,
-                    gridModel,
-                    realNumber: int,
-                    nDefinedCells: int,
-                    cellIndexDefined: List[int],
-                    zoneNumber: int,
-                    simBoxThickness: float
-                    ) -> List[object]:
+
+    def createTrend(self,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness):
+        """
+        Description: Create trend values for 3D grid zone using Roxar API.
+        """
         # Check if specified grid model exists and is not empty
         if gridModel.is_empty():
             text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
@@ -88,8 +85,9 @@ class Trend3D_linear:
 
             if self.__printInfo >= 3:
                 print('Debug output: In ' + self.__className)
-                print('Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(
-                    zComponent) + ')')
+                print(
+                    'Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(zComponent) + ')'
+                )
 
             for indx in range(nDefinedCells):
                 x = cellCenterPoints[indx, 0]
