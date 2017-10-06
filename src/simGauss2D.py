@@ -183,16 +183,22 @@ def simGaussFieldAddTrendAndTransform2(
     return [v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY]
 
 
-def simGaussField(iseed, nx, ny, xsize, ysize, varioType1, range11, range21, varioAngle1, pow1, printInfo):
+def simGaussField(iseed, nx, ny, xsize, ysize, varioType, range1, range2, varioAngle, pow, printInfo=0):
+    """
+    Description: Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize,ysize).
+                  Correlation lengths are range1 in main direction and range2 in orthogonal direction.
+                  The angle is asimuth (angle clockwise measured from y -axis).
+                  varioType is specified by an number, see heading of the file for variogramtype
+    """
     # Residual gaussian fields
     debugPrint = 0
     if printInfo >= 3:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
         debugPrint = 1
-        # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+    # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
-    varioAngle1 = 90.0 - varioAngle1
-    [residualField] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1, debugPrint)
+    varioAngle = 90.0 - varioAngle
+    [residualField] = draw2D(nx, ny, xsize, ysize, varioType, iseed, range1, range2, varioAngle, pow, debugPrint)
 
     return residualField
 
