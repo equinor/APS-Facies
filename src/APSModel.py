@@ -9,6 +9,7 @@ from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSZoneModel import APSZoneModel
 from src.utils.methods import prettify
+from src.xmlFunctions import getTextCommand
 
 
 class APSModel:
@@ -160,77 +161,18 @@ class APSModel:
                 w2 = w.strip()
                 self.__selectedZoneNumberList.append(int(w2))
 
-        # --- RMSProjectName ---
-        kw = 'RMSProjectName'
-        obj = root.find(kw)
-        if obj is None:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName, kw)
-            )
-        else:
-            text = obj.text
-            self.__rmsProjectName = copy.copy(text.strip())
-
-        # --- RMSWorkflowName ---
-        kw = 'RMSWorkflowName'
-        obj = root.find(kw)
-        if obj is None:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName, kw)
-            )
-        else:
-            text = obj.text
-            self.__rmsWorkflowName = copy.copy(text.strip())
-
-        # --- RMSGaussFieldScriptName ---
-        kw = 'RMSGaussFieldScriptName'
-        obj = root.find(kw)
-        if obj is None:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName, kw)
-            )
-        else:
-            text = obj.text
-            self.__rmsGaussFieldScriptName = copy.copy(text.strip())
-
-        # --- GridModelName ---
-        kw = 'GridModelName'
-        obj = root.find(kw)
-        if obj is None:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName, kw)
-            )
-        else:
-            text = obj.text
-            self.__rmsGridModelName = copy.copy(text.strip())
-
-        # --- ZoneParamName ---
-        kw = 'ZoneParamName'
-        obj = root.find(kw)
-        if obj is None:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName, kw)
-            )
-        else:
-            text = obj.text
-            self.__rmsZoneParamName = copy.copy(text.strip())
-
-        # --- ResultFaciesParamName ---
-        kw = 'ResultFaciesParamName'
-        obj = root.find(kw)
-        if obj is None:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName, kw)
-            )
-        else:
-            text = obj.text
-            self.__rmsFaciesParamName = copy.copy(text.strip())
+        placement = {
+            'RMSProjectName':          '__rmsProjectName',
+            'RMSWorkflowName':         '__rmsWorkflowName',
+            'RMSGaussFieldScriptName': '__rmsGaussFieldScriptName',
+            'GridModelName':           '__rmsGridModelName',
+            'ZoneParamName':           '__rmsZoneParamName',
+            'ResultFaciesParamName':   '__rmsFaciesParamName',
+        }
+        for keyword, variable in placement.items():
+            prefix = '_' + self.__class__.__name__
+            value = getTextCommand(root, keyword, modelFile=modelFileName)
+            self.__setattr__(prefix + variable, value)
 
         # Read all gauss field jobs and their gauss field 3D parameter names
         self.__rmsGFJobs = APSGaussFieldJobs(self.__ET_Tree, modelFileName)
@@ -341,7 +283,7 @@ class APSModel:
             print(' ')
         return
 
-    def updateXMLModelFile(self, modelFileName, parameterFileName, printInfo):
+    def updateXMLModelFile(self, modelFileName, parameterFileName, printInfo=0):
         # Read XML model file
         tree = ET.parse(modelFileName)
         root = tree.getroot()
@@ -410,8 +352,7 @@ class APSModel:
 
         return tree
 
-    def __readParamFromFile(self, inputFile, printInfo):
-
+    def __readParamFromFile(self, inputFile, printInfo=0):
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
@@ -452,8 +393,7 @@ class APSModel:
     def initialize(self, rmsProjName, rmsWorkflowName, rmsGaussFieldScriptName,
                    rmsGridModelName, rmsZoneParamName, rmsFaciesParamName,
                    printInfo, rmsGFJobs, rmsHorizonRefName, rmsHorizonRefNameDataType,
-                   mainFaciesTable,
-                   zoneModelListMainLevel, zoneModelListSecondLevel):
+                   mainFaciesTable, zoneModelListMainLevel, zoneModelListSecondLevel):
         self.__rmsProjectName = copy.copy(rmsProjName)
         self.__rmsWorkflowName = copy.copy(rmsWorkflowName)
         self.__rmsGaussFieldScriptName = copy.copy(rmsGaussFieldScriptName)
