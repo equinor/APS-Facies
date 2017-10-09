@@ -910,7 +910,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF3_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF3">
            <property name="text">
             <string>GRF3 Settings</string>
            </property>
@@ -924,7 +924,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF3" native="true">
+          <widget class="Plot" name="m_plot_area_GRF3" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -957,7 +957,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF4_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF4">
            <property name="text">
             <string>GRF4 Settings</string>
            </property>
@@ -971,7 +971,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF4" native="true">
+          <widget class="Plot" name="m_plot_area_GRF4" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1001,7 +1001,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF2_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF2">
            <property name="text">
             <string>GRF2 Settings</string>
            </property>
@@ -1015,7 +1015,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF2" native="true">
+          <widget class="Plot" name="m_plot_area_GRF2" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1032,7 +1032,7 @@
        <item row="2" column="1">
         <layout class="QGridLayout" name="group_grf_1">
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF1_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF1">
            <property name="text">
             <string>GRF1 Settings</string>
            </property>
@@ -1062,7 +1062,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF1" native="true">
+          <widget class="Plot" name="m_plot_area_GRF1" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1092,7 +1092,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF5_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF5">
            <property name="text">
             <string>GRF5 Settings</string>
            </property>
@@ -1106,7 +1106,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF5" native="true">
+          <widget class="Plot" name="m_plot_area_GRF5" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1136,7 +1136,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF6_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF6">
            <property name="text">
             <string>GRF6 Settings</string>
            </property>
@@ -1150,7 +1150,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF6" native="true">
+          <widget class="Plot" name="m_plot_area_GRF6" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1310,9 +1310,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>Plot</class>
    <extends>QWidget</extends>
-   <header location="global">qcustomplot.h</header>
+   <header location="global">src/gui/wrappers/base_classes/plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -1369,17 +1369,17 @@
   <tabstop>m_button_type_customized</tabstop>
   <tabstop>m_list_zones_grf</tabstop>
   <tabstop>m_list_facies_grf</tabstop>
-  <tabstop>m_button_GRF1_settings</tabstop>
+  <tabstop>m_button_settings_GRF1</tabstop>
   <tabstop>m_toggle_GRF1</tabstop>
-  <tabstop>m_button_GRF2_settings</tabstop>
+  <tabstop>m_button_settings_GRF2</tabstop>
   <tabstop>m_toggle_GRF2</tabstop>
-  <tabstop>m_button_GRF3_settings</tabstop>
+  <tabstop>m_button_settings_GRF3</tabstop>
   <tabstop>m_toggle_GRF3</tabstop>
-  <tabstop>m_button_GRF4_settings</tabstop>
+  <tabstop>m_button_settings_GRF4</tabstop>
   <tabstop>m_toggle_GRF4</tabstop>
-  <tabstop>m_button_GRF5_settings</tabstop>
+  <tabstop>m_button_settings_GRF5</tabstop>
   <tabstop>m_toggle_GRF5</tabstop>
-  <tabstop>m_button_GRF6_settings</tabstop>
+  <tabstop>m_button_settings_GRF6</tabstop>
   <tabstop>m_toggle_GRF6</tabstop>
   <tabstop>m_toggle_condition_to_wells</tabstop>
   <tabstop>m_button_assign_probability</tabstop>

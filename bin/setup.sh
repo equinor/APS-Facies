@@ -250,23 +250,6 @@ python test/runtests.py
 
 cd ${SOURCE_DIR}
 
-# Download and install QCustomPlot for python
-SOURCE_QCUSTOMPLOT=${SOURCE_DIR}/QCustomPlot-PyQt5
-BUILD_QCUSTOMPLOT=${BUILD_DIR}/QCustomPlot-PyQt5
-
-mkdir -p $BUILD_QCUSTOMPLOT
-
-export LD_LIBRARY_PATH=${QT_LIBRARY_PATH}
-export LIBRARY_PATH=${QT_LIBRARY_PATH}
-LDFLAGS="-L$QT_LIBRARY_PATH"
-git clone https://github.com/dimv36/QCustomPlot-PyQt5.git
-
-cd $SOURCE_QCUSTOMPLOT
-python setup.py build_ext --qmake "${QMAKE}" --qt-include-dir "${QT_INCLUDE_DIR}"
-
-
-cd ${SOURCE_DIR}
-
 # Download and install latest (before 3.3) PyInstaller
 git clone https://github.com/pyinstaller/pyinstaller.git
 cd ${SOURCE_DIR}/pyinstaller/bootloader
@@ -306,7 +289,7 @@ python setup.py install -O2
 
 cd ${SOURCE_DIR}
 
-PYLINT_VERSION=1.7.4
+PYLINT_VERSION=1.7.2
 PYLINT_PREFIX=pylint-$PYLINT_VERSION
 mkdir -p $SOURCE_DIR/$PYLINT_PREFIX
 wget https://github.com/PyCQA/pylint/archive/$PYLINT_PREFIX.tar.gz
