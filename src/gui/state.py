@@ -1,3 +1,4 @@
+from APSModel import APSModel
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants import (
@@ -106,6 +107,9 @@ class State(dict):
         self._ensure_normalization(values)
         self.__dict__[TruncationRuleConstants.TRUNCATION_RULES] = values
 
+    def read_project_model(self):
+        pass
+
     @staticmethod
     def _ensure_normalization(values):
         proportion_key = CubicTruncationRuleConstants.PROPORTION_INPUT
@@ -123,17 +127,21 @@ class State(dict):
                 return self._is_valid_reading_mode()
             elif self.is_experimental_mode():
                 return self._is_valid_experimental_mode()
-                pass
 
     def _is_valid_reading_mode(self):
         mode = self.get_mode()
         if mode != ModeOptions.READING_MODE:
             # The mode is invalid
             return False
-        if self.has_valid_path():
+        if not self.has_valid_path():
             # The is a file, and thus valid
+            return False
+        path_to_project_file = self.get_path()
+        try:
+            APSModel(path_to_project_file, printInfo=0)
             return True
-        return False
+        except:
+            return False
 
     def _is_valid_experimental_mode(self):
         # TODO: Make better?

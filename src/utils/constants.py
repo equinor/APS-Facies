@@ -173,11 +173,60 @@ class ProjectElements(Value):
     ZONES_PARAMETER_NAME = 'm_edit_zones_parameter_name'
 
 
+class MainWindowConstants(Key):
+    pass
+
+
+class MainWindowElements(Value):
+    pass
+
+
 class TruncationRuleLibraryElements(MainWindowElements):
     CUBIC_BUTTON = 'm_button_type_'
     NON_CUBIC_BUTTON = 'm_button_type_'
     BAYFILL_BUTTON = 'm_button_bayfill'
     CUSTOM_BUTTON = 'm_button_type_customized'
+
+
+class GaussianRandomFieldElements(MainWindowElements):
+    NUMBER_OF_ELEMENTS = 6
+    PLOT_AREA = 'm_plot_area_'
+    SETTINGS = 'm_button_settings_'
+    APPLY = 'm_toggle_'
+
+
+class DefineGaussianElements(Value):
+    TOGGLE_TREND = 'm_toggle_apply_trend'
+
+
+class VariogramModelElements(DefineGaussianElements):
+    VARIOGRAM = 'm_choose_variogram_model'
+    AZIMUTH = 'm_edit_azimuth'
+    DIP = 'm_edit_dip'
+    PARALLEL = 'm_edit_parallel_to_azimuth'
+    NORMAL = 'm_edit_normal_to_azimuth'
+    VERTICAL = 'm_edit_vertical_normal_to_dip'
+    PLOT = 'm_plot_variogram'
+
+
+class TrendSettingsElements(DefineGaussianElements):
+    TREND = 'm_choose_select_trend'
+    DEPOSITIONAL_DIRECTION = 'm_edit_depositional_direction'
+    STACKING_PATTERN = 'm_choose_stacking_pattern'
+    STACKING_ANGLE = 'm_edit_stacking_angle'
+    RELATIVE_STANDARD_DEVIATION = 'm_edit_relative_standard_deviation'
+    SIMULATION_BOX_THICKNESS = 'm_edit_simbox_thickness'
+    PLOT = 'm_plot_trend'
+
+
+class TrendSettingsLabelsElements(TrendSettingsElements):
+    TITLE = 'label_trend_settings'
+    SELECT_TREND = 'label_select_trend'
+    DEPOSITIONAL_DIRECTION_LABEL = 'label_depositional_direction'
+    STACKING_PATTERN_LABEL = 'label_stacking_pattern'
+    STACKING_ANGLE_LABEL = 'label_stacking_angle'
+    RELATIVE_STANDARD_DEVIATION_LABEL = 'label_relative_standard_deviation'
+    SIMULATION_BOX_THICKNESS_LABEL = 'label_simbox_thickness'
 
 
 class BaseNames(Value):
@@ -318,6 +367,7 @@ class Defaults(Value):
     OPERATION_MODE = ModeOptions.READING_MODE
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
+    GAUSSIAN_TREND = Qt.Unchecked
     HIDE = HideOptions.DISABLE
     DEBUG = Debug.OFF
 
@@ -366,3 +416,4 @@ class Colors(Value):
     CRIMSON = QColor('crimson')  # Hex code: #DC143C
     DARK_ORANGE = QColor('darkorange')  # Hex code: #FF8C00
     RED = QColor('red')  # Hex code: #FF0000
+    BACKGROUND = QColor('#EFEBE7')
