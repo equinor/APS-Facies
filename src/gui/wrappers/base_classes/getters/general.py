@@ -48,7 +48,7 @@ def get_elements(
     if isinstance(names, Iterable) and len(names) > 1:
         for name in names:
             element = get_element(obj, name)
-            if element:
+            if element is not None:
                 elements.append(element)
     return elements
 

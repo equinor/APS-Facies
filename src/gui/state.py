@@ -185,3 +185,7 @@ class State(dict):
             else:
                 error_message = 'There is an internal inconsistency error.'
         return error_message
+
+    def add_facies(self, facies_name):
+        # TODO: Implement!
+        pass

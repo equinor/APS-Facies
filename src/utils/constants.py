@@ -1,6 +1,5 @@
 from typing import Dict, Iterator, List, Union
 
-import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
@@ -41,31 +40,51 @@ class Constants(object):
         return False
 
     @classmethod
-    def constants(cls) -> List[str]:
+    def constants(cls, local: bool = False, sort: bool = False) -> List[str]:
         """
-        A method for getting the names of the constants defined in the class / category
-        :return: A list of strings with the names of constants defined in the class
+         A method for getting the names of the constants defined in the class / category.
+        :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
+                      of its parents. Default is to give ALL constants.
+        :type local: bool
+        :param sort: A flag for having the constants sorted alphabetically.
+        :type sort: bool
+        :return: A (sorted) list of strings with the names of constants (only) defined in the class.
         :rtype: List[str]
         """
-        return [name for name in dir(cls) if not cls._used_internally(name)]
+        all_constants = [name for name in dir(cls) if not cls._used_internally(name)]
+        if local:
+            if hasattr(cls.__base__, 'constants'):
+                irrelevant_constants = set(cls.__base__.constants())
+                all_constants = [constant for constant in all_constants if constant not in irrelevant_constants]
+        if sort:
+            all_constants.sort()
+        return all_constants
 
     @classmethod
-    def values(cls) -> List[ValueTypes]:
+    def values(cls, local: bool = False, sort: bool = False) -> List[ValueTypes]:
         """
-        Gets the values of the different constants
+        Gets the values of the different constants.
+        :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
+                      of its parents. Default is to give ALL constants.
+        :type local: bool
+        :param sort: A flag for having the constants sorted alphabetically.
+        :type sort: bool
         :return: A list of the definitions of the different constants
-        :rtype: List[object]
+        :rtype: List[ValueType]
         """
-        return [cls.__getattribute__(cls(), constant) for constant in cls.constants()]
+        return [cls.__getattribute__(cls(), constant) for constant in cls.constants(local=local, sort=sort)]
 
     @classmethod
-    def all(cls) -> Dict[str, ValueTypes]:
+    def all(cls, local: bool = False) -> Dict[str, ValueTypes]:
         """
         Gets a dictionary of the constants where the key is the name of the constant, and the value of the constant
+        :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
+                      of its parents. Default is to give ALL constants.
+        :type local: bool
         :return: A key, value pair of constants, and their value
-        :rtype: Dict[str, str]
+        :rtype: Dict[str, ValueTypes]
         """
-        return {constant: cls.__getattribute__(cls(), constant) for constant in cls.constants()}
+        return {constant: cls.__getattribute__(cls(), constant) for constant in cls.constants(local=local)}
 
     @classmethod
     def __contains__(cls, item) -> bool:
@@ -108,7 +127,7 @@ class Constants(object):
         elif name[0] == '_':
             # Private methods
             return True
-        elif name in ['constants', 'values', 'all', 'is_key', 'is_value', 'is_icon', 'get_value', 'get_constant']:
+        elif name.islower():
             # These are methods in the base class, that are also used internally, and are therefore not constants
             return True
         else:
@@ -142,7 +161,7 @@ class DataBase(Value):
 
 
 class DrawingLibrary(Value):
-    LIBRARY_FOLDER = ''  # Set automatically by make
+    LIBRARY_FOLDER = '/home/sindre/workspace/APS-GUI/libraries'  # Set automatically by make
     NAME = 'libdraw2D.so'
     LIBRARY_PATH = LIBRARY_FOLDER + '/' + NAME
 
@@ -177,12 +196,61 @@ class ProjectElements(Value):
     ZONES_PARAMETER_NAME = 'm_edit_zones_parameter_name'
 
 
+class AddFaciesElements(Value):
+    NEW_FACIES_NAME = 'm_edit_new_facies'
+
+
 class MainWindowConstants(Key):
     pass
 
 
 class MainWindowElements(Value):
+    ASSIGN_PROBABILITY_CUBE = 'm_button_assign_probability'
+    CLOSE = 'm_button_close'
+    CONDITION_TO_WELL = 'm_toggle_condition_to_wells'
+    EXPERIMENTAL_MODE = 'm_toggle_experimental_mode'
+    RUN_PREVIEWER = 'm_button_previewer'
+    SAVE = 'm_button_save'
+    SAVE_AS = 'm_button_save_as'
+
+
+class ZoneSelectionElements(MainWindowElements):
+    # Button for making the elements interactive
+    TOGGLE = 'm_toggle_separate_zone_models'
+    # Lists for available and selected
+    AVAILABLE = 'm_list_available_zones'
+    SELECTED = 'm_list_selected_zones'
+    # Buttons for moving items from 'selectable' to being 'selected'
+    SELECT = 'm_button_add_zone'
+    UNSELECT = 'm_button_remove_zone'
+
+    # Labels
+    LABEL_TITLE = 'label_zones_to_be_modeled'
+    LABEL_AVAILABLE = 'label_available_zones'
+    LABEL_SELECTED = 'label_selected_zones'
+
+
+class RegionSelectionElements(MainWindowElements):
     pass
+
+
+class FaciesSelectionElements(MainWindowElements):
+    # Button for making the elements interactive
+    TOGGLE = 'm_toggle_select_facies'
+    # Lists for available and selected
+    AVAILABLE = 'm_list_available_facies'
+    SELECTED = 'm_list_selected_facies'
+    # Buttons for moving items from 'selectable' to being 'selected'
+    SELECT = 'm_button_add_facies'
+    UNSELECT = 'm_button_remove_facies'
+    # Buttons for adding, and removing additional facies
+    ADD_FACIES = 'm_button_add_new_facies'
+    REMOVE_FACIES = 'm_button_remove_selected'
+
+    # Labels
+    LABEL_TITLE = 'label_facies_to_be_modelled'
+    LABEL_AVAILABLE = 'label_available_facies'
+    LABEL_SELECTED = 'label_selected_facies'
 
 
 class TruncationRuleLibraryElements(MainWindowElements):

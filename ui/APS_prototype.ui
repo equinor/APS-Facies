@@ -73,7 +73,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QCheckBox" name="m_toggle_seperate_zone_models">
+          <widget class="QCheckBox" name="m_toggle_separate_zone_models">
            <property name="text">
             <string>Seperate Zone Models</string>
            </property>
@@ -539,7 +539,7 @@
          <item row="2" column="0">
           <widget class="QPushButton" name="m_button_type_a">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -553,7 +553,7 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
+             <width>16</width>
              <height>16</height>
             </size>
            </property>
@@ -1321,7 +1321,7 @@
   <tabstop>m_toggle_experimental_mode</tabstop>
   <tabstop>m_choose_select_facies_model</tabstop>
   <tabstop>m_edit_model_name</tabstop>
-  <tabstop>m_toggle_seperate_zone_models</tabstop>
+  <tabstop>m_toggle_separate_zone_models</tabstop>
   <tabstop>m_list_available_zones</tabstop>
   <tabstop>m_list_selected_zones</tabstop>
   <tabstop>m_button_add_zone</tabstop>
