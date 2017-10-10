@@ -8,14 +8,14 @@ from functools import lru_cache
 from src.gui.wrappers.base_classes.chekkers.values import should_change
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.color import get_color
-from src.gui.wrappers.base_classes.getters.general import get_element, get_elements, get_value_of_element
+from src.gui.wrappers.base_classes.getters.general import get_element, get_elements_from_base_name, get_value_of_element
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
 from src.utils.constants import (
     Angles, BaseNames, CubicTruncationRuleConstants, CubicTruncationRuleElements, Defaults,
-    FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleElements,
+    FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleLibraryElements,
 )
 from src.utils.mappings import truncation_rule_element_key_to_state_key
 from src.utils.methods import apply_validator, get_attributes, get_elements_with_prefix, toggle_elements
@@ -44,15 +44,15 @@ class BaseTruncation(OkCancelDialog):
         :param state:
         :type state: State
         :param name_of_buttons: The name of the variable that holds an object of type QDialogButtonBox
-        :type name_of_buttons: TruncationRuleElements
+        :type name_of_buttons: TruncationRuleLibraryElements
         :param basename_sliders: The prefix of every slider
-        :type basename_sliders: TruncationRuleElements
+        :type basename_sliders: TruncationRuleLibraryElements
         :param basename_proportions: The prefix of every text input box
-        :type basename_proportions: TruncationRuleElements
+        :type basename_proportions: TruncationRuleLibraryElements
         :param basename_color_button: The prefix for every button to choose a color
-        :type basename_color_button: TruncationRuleElements
+        :type basename_color_button: TruncationRuleLibraryElements
         :param basename_drop_down: The prefix for every drop-down menu
-        :type basename_drop_down: TruncationRuleElements
+        :type basename_drop_down: TruncationRuleLibraryElements
         :param facies_options: A (named) list of lists that contains the valid options for the drop-down menues for the
                                different facies.
         :type facies_options: Union[List[List[str]], Dict[str, List[str]]]
@@ -221,7 +221,7 @@ class BaseTruncation(OkCancelDialog):
         content = [self._get_text_field_by_name(key) for key in self.active]
         return sum([get_value_of_element(cell) for cell in content])
 
-    def get_value(self, element_type: TruncationRuleElements, element_label: FaciesLabels):
+    def get_value(self, element_type: TruncationRuleLibraryElements, element_label: FaciesLabels):
         assert element_type in self.get_basename_of_elements()
         assert element_label in self.active
         element = self._get_corresponding_element(element_label, element_type)
@@ -232,7 +232,7 @@ class BaseTruncation(OkCancelDialog):
     def get_values(
             self,
             element_label: FaciesLabels,
-            skip_elements: List[TruncationRuleElements] = None
+            skip_elements: List[TruncationRuleLibraryElements] = None
     ) -> Dict[FaciesLabels, object]:  # TODO: Be more specific on the return values
         storage = {}
         key_mapping = truncation_rule_element_key_to_state_key()
@@ -246,7 +246,7 @@ class BaseTruncation(OkCancelDialog):
     def get_all_values(
             self,
             skip_labels: List[FaciesLabels] = None,
-            skip_elements: List[TruncationRuleElements] = None):
+            skip_elements: List[TruncationRuleLibraryElements] = None):
         storage = {}
         for element_label in self.active:
             if skip_labels and element_label in skip_labels:
@@ -297,7 +297,7 @@ class BaseTruncation(OkCancelDialog):
     def _get_corresponding_element(
             self,
             sender: Union[QWidget, FaciesLabels],
-            element_name: Union[TruncationRuleElements, TruncationRuleConstants],
+            element_name: Union[TruncationRuleLibraryElements, TruncationRuleConstants],
     ) -> Union[QLineEdit, QSlider, None]:
         if isinstance(sender, str) or isinstance(sender, FaciesLabels):
             sender = self._get_element_lookup_table()[sender][element_name]
@@ -313,7 +313,7 @@ class BaseTruncation(OkCancelDialog):
         return self._get_element_lookup_table()[facies_label][element]
 
     @lru_cache()
-    def get_mapping_for_element_names(self) -> Dict[TruncationRuleConstants, TruncationRuleElements]:
+    def get_mapping_for_element_names(self) -> Dict[TruncationRuleConstants, TruncationRuleLibraryElements]:
         return {
             CubicTruncationRuleConstants.PROPORTION_SCALE: self.basename_sliders,
             CubicTruncationRuleConstants.PROPORTION_INPUT: self.basename_proportions,
@@ -415,7 +415,7 @@ class BaseTruncation(OkCancelDialog):
         return self._get_facies_label_lookup_table()[element]
 
     @lru_cache()
-    def get_basename_of_elements(self) -> List[TruncationRuleElements]:
+    def get_basename_of_elements(self) -> List[TruncationRuleLibraryElements]:
         prefix = 'basename'
         element_variable_names = get_elements_with_prefix(self, prefix)
         return [self.__getattribute__(name) for name in element_variable_names]
@@ -423,7 +423,7 @@ class BaseTruncation(OkCancelDialog):
     @lru_cache()
     def _get_element_lookup_table(
             self
-    ) -> Dict[FaciesLabels, Dict[TruncationRuleElements, Union[QLineEdit, QSlider, QPushButton, QComboBox]]]:
+    ) -> Dict[FaciesLabels, Dict[TruncationRuleLibraryElements, Union[QLineEdit, QSlider, QPushButton, QComboBox]]]:
         base_elements = self.get_basename_of_elements()
         return {
             facies_label: {
@@ -444,7 +444,7 @@ class BaseTruncation(OkCancelDialog):
     def _get_element_by_name(
             self,
             facies_label: FaciesLabels,
-            element_type: TruncationRuleElements
+            element_type: TruncationRuleLibraryElements
     ) -> Union[QSlider, QLineEdit, QComboBox, QPushButton]:
         return self._get_element_lookup_table()[facies_label][element_type]
 
@@ -469,5 +469,5 @@ class BaseTruncation(OkCancelDialog):
         value = truncate_number(minimum_truncation, value, maximum_truncation)
         set_value(sender, value, normalize=False, skip_signals=True)
 
-    def _set_base_names(self, basename_key: BaseNames, basename_value: TruncationRuleElements) -> None:
+    def _set_base_names(self, basename_key: BaseNames, basename_value: TruncationRuleLibraryElements) -> None:
         self.__setattr__(basename_key, basename_value)
