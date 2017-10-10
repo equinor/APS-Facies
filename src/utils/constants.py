@@ -1,5 +1,6 @@
 from typing import Dict, Iterator, List
 
+import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
@@ -132,6 +133,12 @@ class Icon(Constants):
     @staticmethod
     def is_icon():
         return True
+
+
+class DrawingLibrary(Value):
+    LIBRARY_FOLDER = ''  # Set automatically by make
+    NAME = 'libdraw2D.so'
+    LIBRARY_PATH = LIBRARY_FOLDER + '/' + NAME
 
 
 class ModeConstants(Key):
