@@ -8,6 +8,7 @@ from src.gui.state import State
 from src.gui.wrappers.project import Project
 from src.gui.wrappers.truncation_rule import CubicTruncationRule, NonCubicTruncationRule, BayfillTruncationRule
 from src.gui.wrappers.main_window import MainWindow
+from src.gui.wrappers.define_gaussian import DefineGaussian
 
 
 def run():

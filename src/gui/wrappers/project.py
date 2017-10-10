@@ -12,8 +12,8 @@ from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.main_window import MainWindow
 from src.resources.ui.Project_ui import Ui_ProjectSelection
-from src.utils.constants import Defaults, MessageIcon, ModeOptions, ProjectElements
-from src.utils.methods import get_project_file
+from src.utils.constants import Defaults, MessageIcon, ModeOptions, ProjectElements, HideOptions
+from src.utils.methods import get_project_file, toggle_elements
 from src.utils.mappings import project_parameter_state_key_to_element_key
 
 
@@ -44,6 +44,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         data = self.read_parameters()
         self._state.set_project_parameters(data)
         if self._state.is_valid_state():
+            self._state.read_project_model()
             # The state is consistent, and the main window can be opened
             self.main_window = MainWindow(state=self._state)
             self.main_window.show()
@@ -90,9 +91,8 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
             self.show_file_reading(True)
 
     def show_file_reading(self, enable: bool = True) -> None:
-        self.m_button_browse_project_file.setEnabled(enable)
-        self.m_edit_browse_project.setEnabled(enable)
-        self.label_location_rms_project_file.setEnabled(enable)
+        elements = [self.m_button_browse_project_file, self.m_edit_browse_project, self.label_location_rms_project_file]
+        toggle_elements(enable, elements, HideOptions.DISABLE)
 
     def toggle_experimental_mode(self) -> None:
         self.toggle_mode(mode=ModeOptions.EXPERIMENTAL_MODE)

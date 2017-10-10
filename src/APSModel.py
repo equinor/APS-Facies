@@ -122,11 +122,9 @@ class APSModel:
         # Read model if it is defined
         if modelFileName is None:
             return
-        self.__interpretXMLModelFile(modelFileName)
+        self.__interpretXMLModelFile(modelFileName, printInfo=printInfo)
 
-    # End __init__
-
-    def __interpretXMLModelFile(self, modelFileName):
+    def __interpretXMLModelFile(self, modelFileName, printInfo=None):
         tree = ET.parse(modelFileName)
         self.__ET_Tree = tree
         root = tree.getroot()
@@ -293,7 +291,6 @@ class APSModel:
             print(' ')
             print('------------ End reading model file in APSModel ------------------')
             print(' ')
-        return
 
     def updateXMLModelFile(self, modelFileName, parameterFileName, printInfo=0):
         # Read XML model file
@@ -464,7 +461,7 @@ class APSModel:
         for zone in self.__zoneModelsMainLevel:
             gfNames = zone.getUsedGaussFieldNames()
             for z in gfNames:
-                if not (z in gfAllZones):
+                if z not in gfAllZones:
                     gfAllZones.append(z)
         return copy.copy(gfAllZones)
 
@@ -489,41 +486,33 @@ class APSModel:
         for zone in self.__zoneModelsMainLevel:
             probParamList = zone.getAllProbParamForZone()
             for pName in probParamList:
-                if not pName in allProbList:
+                if pName not in allProbList:
                     allProbList.append(pName)
-
         return allProbList
 
     # ----- Set functions -----
     def setRmsProjectName(self, name):
         self.__rmsProjectName = copy.copy(name)
-        return
 
     def setRmsWorkflowName(self, name):
         self.__rmsWorkflowName = copy.copy(name)
-        return
 
     def setGaussFieldScriptName(self, name):
         self.__rmsGaussFieldScriptName = copy.copy(name)
-        return
 
     def setRmsGridModelName(self, name):
         self.__rmsGridModelName = copy.copy(name)
-        return
 
     def setRmsZoneParamName(self, name):
         self.__rmsZoneParamName = copy.copy(name)
-        return
 
     def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
-        return
 
     def setPrintInfo(self, printInfo):
         if printInfo < 0:
             printInfo = 0
         self.__printInfo = printInfo
-        return
 
     def setSelectedZoneNumberList(self, selectedZoneNumbers):
         self.__selectedZoneNumberList = []
@@ -589,17 +578,14 @@ class APSModel:
                             self.__selectedZoneNumberList.pop(j)
                             break
                 break
-        return
 
     # Set facies table to refer to the input facies table object
     def setMainFaciesTable(self, faciesTableObj):
         self.__faciesTable = faciesTableObj
-        return
 
     # Set gauss field job to refer to the input gauss field job object
     def setGaussFieldJobs(self, gfJobObject):
         self.__rmsGFJobs = copy.deepcopy(gfJobObject)
-        return
 
     def getGaussFieldJobs(self):
         return copy.copy(self.__rmsGFJobs)
@@ -708,7 +694,7 @@ class APSModel:
                             file.write('value = {}\n'.format(range3))
                             file.write('ModifyJob(job,paramName,value)\n')
                             file.write('ApplyJob(job)\n')
-                            file.write(' \n')
+                            file.write('\n')
                             break
 
             # End for zone
@@ -721,10 +707,9 @@ class APSModel:
                     file.write('Print("Start running job: ",fullJobName)\n')
                     file.write('ExecuteJob(job)\n')
 
-            file.write(' \n')
+            file.write('\n')
             file.write('Print("Finished IPL script: ","{}")\n'.format(outputFileName))
             file.write('// --------------- End script -----------------\n')
-        return
 
     def XMLAddElement(self, root):
 
@@ -830,7 +815,6 @@ class APSModel:
         rootReformatted = prettify(root)
         with open(outputModelFileName, 'w') as file:
             file.write(rootReformatted)
-        return
 
 # def get2DMapRefHorizonName(self):
 #        return copy.copy(self.__refHorizonNameForVarioTrend)

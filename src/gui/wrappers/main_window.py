@@ -7,6 +7,8 @@ from typing import Dict, Union
 
 from PyQt5.QtWidgets import *
 
+from src.gui.wrappers.define_gaussian import DefineGaussian
+from src.gui.wrappers.base_classes.getters.general import get_element
 from src.gui.state import State
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.gui.wrappers.base_classes.message_box import MessageBox
@@ -16,7 +18,10 @@ from src.gui.wrappers.truncation_rule import (
 )
 from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.utils.checks import is_valid_path
-from src.utils.constants import Defaults, ModeConstants, TruncationLibraryKeys, TruncationLibrarySubKeys
+from src.utils.constants import (
+    Defaults, ModeConstants, TruncationLibraryKeys, TruncationLibrarySubKeys,
+    TruncationRuleLibraryElements, GaussianRandomFieldElements,
+)
 from src.utils.mappings import truncation_library_button_to_kind_and_number_of_facies, truncation_library_elements
 from src.utils.methods import get_project_file, toggle_elements
 
@@ -34,6 +39,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self._project_data = self._state.get_project_data()
         self.wire_up()
         self.probabilities = None
+        self.gaussian_settings = None
 
     def wire_up(self):
         self.m_button_assign_probability.clicked.connect(self.assign_probabilities)
@@ -46,7 +52,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.initialize_truncation_rules()
         self.initialize_project_data()
 
+        self.wire_up_gaussian_random_fields()
+        self.initialize_gaussian_random_field_clickability()
+
         self._set_checkboxes_to_defaults()
+
+    def initialize_gaussian_random_field_clickability(self):
+        # TODO: Read how many facies are available, and make sure that no more than that can be clicked.
+        # TODO: Do this for the different zones
+        pass
+
+    def wire_up_gaussian_random_fields(self):
+        settings_prefix = GaussianRandomFieldElements.SETTINGS
+        for i in range(GaussianRandomFieldElements.NUMBER_OF_ELEMENTS):
+            name = 'GRF' + str(i + 1)  # GRFs are 1 indexed
+            button = get_element(self, settings_prefix + name)
+            button.clicked.connect(self.define_gaussian_field)
+
+    def define_gaussian_field(self):
+        # TODO: Pass information on which button this came from
+        sender = self.sender()
+        self.gaussian_settings = DefineGaussian(self._state)
+        self.gaussian_settings.show()
+        pass
 
     def initialize_project_data(self):
         # TODO: Read from the project data
