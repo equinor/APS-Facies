@@ -143,19 +143,19 @@ class BaseTruncation(OkCancelDialog):
             color_button.clicked.connect(self.update_state)
 
     def _get_color_buttons(self) -> List[QPushButton]:
-        return get_elements(self, BaseNames.COLOR_BUTTON, self.names)
+        return get_elements_from_base_name(self, BaseNames.COLOR_BUTTON, self.names)
 
     def _get_sliders(self) -> List[QSlider]:
-        return get_elements(self, BaseNames.SLIDERS, self.names)
+        return get_elements_from_base_name(self, BaseNames.SLIDERS, self.names)
 
     def _get_proportion_inputs(self) -> List[QLineEdit]:
-        return get_elements(self, BaseNames.PROPORTIONS, self.names)
+        return get_elements_from_base_name(self, BaseNames.PROPORTIONS, self.names)
 
     def _get_angle_inputs(self) -> List[QLineEdit]:
-        return get_elements(self, BaseNames.ANGLES, self.names)
+        return get_elements_from_base_name(self, BaseNames.ANGLES, self.names)
 
     def _get_slant_factors(self) -> List[QLineEdit]:
-        return get_elements(self, BaseNames.SLANT_FACTOR, self.names)
+        return get_elements_from_base_name(self, BaseNames.SLANT_FACTOR, self.names)
 
     def wire_up_proportions_and_sliders(self):
         validator = QDoubleValidator(bottom=Proportions.BOTTOM, top=Proportions.TOP, decimals=Proportions.DECIMALS)
@@ -324,7 +324,7 @@ class BaseTruncation(OkCancelDialog):
     def ensure_normalization(self):
         sender = self.sender()
         if isinstance(sender, QSlider) or isinstance(sender, QLineEdit):
-            to_be_changed = self.get_elements_to_be_changed(sender)
+            to_be_changed = self.get_elements_from_base_name_to_be_changed(sender)
         elif isinstance(sender, QPushButton):
             to_be_changed = self.active
         else:
@@ -393,7 +393,7 @@ class BaseTruncation(OkCancelDialog):
         value = max(get_value_of_element(element) + difference, 0)
         set_value(element, value, normalize=False, skip_signals=True)
 
-    def get_elements_to_be_changed(self, sender: QWidget) -> List[str]:
+    def get_elements_from_base_name_to_be_changed(self, sender: QWidget) -> List[str]:
         if sender is None:
             return self.active
         lookup_table = self._get_facies_label_lookup_table()
