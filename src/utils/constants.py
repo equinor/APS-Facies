@@ -164,6 +164,13 @@ class ProjectElements(Value):
     ZONES_PARAMETER_NAME = 'm_edit_zones_parameter_name'
 
 
+class TruncationRuleLibraryElements(MainWindowElements):
+    CUBIC_BUTTON = 'm_button_type_'
+    NON_CUBIC_BUTTON = 'm_button_type_'
+    BAYFILL_BUTTON = 'm_button_bayfill'
+    CUSTOM_BUTTON = 'm_button_type_customized'
+
+
 class BaseNames(Value):
     ANGLES = 'basename_angles'
     COLOR_BUTTON = 'basename_color_button'
@@ -175,14 +182,6 @@ class BaseNames(Value):
 
 class TruncationLibrary(Key):
     pass
-
-
-class TruncationLibraryButtonNames(TruncationLibrary):
-    # Button names
-    CUBIC_BUTTON_PREFIX = 'm_button_type_'
-    NON_CUBIC_BUTTON_PREFIX = CUBIC_BUTTON_PREFIX
-    BAYFILL_BUTTON_NAME = 'm_button_bayfill'
-    CUSTOM_BUTTON_NAME = 'm_button_type_customized'
 
 
 class TruncationLibraryKeys(TruncationLibrary):
