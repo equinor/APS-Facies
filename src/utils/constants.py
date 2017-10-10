@@ -1,9 +1,11 @@
-from typing import Dict, Iterator, List
+from typing import Dict, Iterator, List, Union
 
 import os
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+
+ValueTypes = Union[str, int, float, QColor, QMessageBox.Icon]
 
 
 # TODO: Implement automatic initialization, when accessing a constant
@@ -48,7 +50,7 @@ class Constants(object):
         return [name for name in dir(cls) if not cls._used_internally(name)]
 
     @classmethod
-    def values(cls) -> List[object]:
+    def values(cls) -> List[ValueTypes]:
         """
         Gets the values of the different constants
         :return: A list of the definitions of the different constants
@@ -57,7 +59,7 @@ class Constants(object):
         return [cls.__getattribute__(cls(), constant) for constant in cls.constants()]
 
     @classmethod
-    def all(cls) -> Dict[str, object]:
+    def all(cls) -> Dict[str, ValueTypes]:
         """
         Gets a dictionary of the constants where the key is the name of the constant, and the value of the constant
         :return: A key, value pair of constants, and their value
@@ -78,11 +80,11 @@ class Constants(object):
         return len(cls.constants())
 
     @classmethod
-    def __getitem__(cls, item: str) -> object:
+    def __getitem__(cls, item: str) -> ValueTypes:
         return cls.__getattribute__(cls(), item)
 
     @classmethod
-    def _standard_return_attribute(cls) -> List[object]:
+    def _standard_return_attribute(cls) -> List[ValueTypes]:
         return cls.values()
 
     @staticmethod
