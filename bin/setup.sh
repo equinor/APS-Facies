@@ -59,6 +59,23 @@ make test
 sudo make install
 
 
+cd ${SOURCE_DIR}
+
+# Download and install SQLite
+SQLITE3_VERSION=3200100
+wget https://sqlite.org/2017/sqlite-autoconf-${SQLITE3_VERSION}.tar.gz
+tar -xvf sqlite-autoconf-${SQLITE3_VERSION}.tar.gz
+rm -f sqlite-autoconf-${SQLITE3_VERSION}.tar.gz
+cd sqlite-autoconf-${SQLITE3_VERSION}
+./configure --enable-readline \
+            --enable-threadsafe \
+            --enable-dynamic-extensions \
+            --enable-fts5 \
+            --enable-json1 \
+            --enable-session
+make
+make install
+
 # Download and install Qt
 QT_VERSION_MAJOR="5"
 QT_VERSION_MINOR="9"
@@ -289,7 +306,7 @@ python setup.py install -O2
 
 cd ${SOURCE_DIR}
 
-PYLINT_VERSION=1.7.2
+PYLINT_VERSION=1.7.4
 PYLINT_PREFIX=pylint-$PYLINT_VERSION
 mkdir -p $SOURCE_DIR/$PYLINT_PREFIX
 wget https://github.com/PyCQA/pylint/archive/$PYLINT_PREFIX.tar.gz

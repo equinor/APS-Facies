@@ -137,6 +137,10 @@ class Icon(Constants):
         return True
 
 
+class DataBase(Value):
+    NAME = 'state.db'
+
+
 class DrawingLibrary(Value):
     LIBRARY_FOLDER = ''  # Set automatically by make
     NAME = 'libdraw2D.so'

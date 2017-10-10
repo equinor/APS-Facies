@@ -1,5 +1,5 @@
 FROM centos:6
-LABEL version="1.6" \
+LABEL version="1.7" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -91,14 +91,18 @@ ENV PYQTPURCHASING_VERSION=$PYQT_VERSION
 ENV QSCINTILLA_VERSION="2.10.1"
 ENV PYQTDEPLOY_VERSION="1.3.2"
 
+# Python dependencies
 ENV OPENSSL_VERSION="1.1.0f"
 ENV NCURSES_VERSION="6.0"
 ENV READLINE_VERSION="7.0"
+ENV SQLITE3_VERSION=3200100
 
+# PyLint
 ENV ASTROID_VERSION="1.5.3"
 ENV ISORT_VERSION="4.2.15"
-ENV PYLINT_VERSION="1.7.2"
+ENV PYLINT_VERSION="1.7.4"
 
+# UPX: Binary compression
 ENV UCL_VERSION="1.03"
 ENV UPX_VERSION="v3.94"
 ENV UCL_PREFIX=$INSTALL_DIR/ucl-$UCL_VERSION
@@ -154,6 +158,7 @@ RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQt${PYQ
 RUN cd $SOURCE_DIR && wget https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz
 RUN cd $SOURCE_DIR && wget http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://sqlite.org/2017/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQtChart/PyQtChart-$PYQTCHARTS_VERSION/PyQtChart_gpl-$PYQTCHARTS_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-$PYQT3D_VERSION/PyQt3D_gpl-$PYQT3D_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-$PYQTDATAVISUALIZATION_VERSION/PyQtDataVisualization_gpl-$PYQTDATAVISUALIZATION_VERSION.tar.gz
@@ -176,6 +181,7 @@ RUN cd $BUILD_DIR \
     openssl-$OPENSSL_VERSION \
     ncurses-$NCURSES_VERSION \
     readline-$READLINE_VERSION \
+    sqlite3-$SQLITE3_VERSION \
     pyqt-chart-$PYQTCHARTS_VERSION \
     pyqt-3d-$PYQT3D_VERSION \
     pyqt-data-visualization-$PYQTDATAVISUALIZATION_VERSION \
@@ -196,6 +202,7 @@ RUN cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/openssl-"$OPENSSL_VERSION".tar.gz -C openssl-$OPENSSL_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/ncurses-$NCURSES_VERSION.tar.gz -C ncurses-$NCURSES_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/readline-$READLINE_VERSION.tar.gz -C readline-$READLINE_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz -C sqlite3-$SQLITE3_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/pyqt-deploy-$PYQTDEPLOY_VERSION.tar.gz -C pyqt-deploy-$PYQTDEPLOY_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/PyQt3D_gpl-$PYQT3D_VERSION.tar.gz -C pyqt-3d-$PYQT3D_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/PyQtChart_gpl-$PYQTCHARTS_VERSION.tar.gz -C pyqt-chart-$PYQTCHARTS_VERSION --strip-components=1 \
@@ -275,6 +282,16 @@ RUN cd $BUILD_DIR/readline-$READLINE_VERSION \
  && make \
  && make install
 
+RUN cd $BUILD_DIR/sqlite3-$SQLITE3_VERSION \
+ && ./configure --prefix=$PYTHON_PREFIX \
+                --enable-readline \
+                --enable-threadsafe \
+                --enable-dynamic-extensions \
+                --enable-fts5 \
+                --enable-json1 \
+                --enable-session \
+ && make \
+ && make install
 
 # Build Python
 # Useful build information here: https://hg.python.org/cpython/file/2.7/README
