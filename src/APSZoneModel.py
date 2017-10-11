@@ -587,8 +587,8 @@ class APSZoneModel:
 
     def XMLAddElement(self, parent):
 
-        # Add command Zone and all its childs
-        if self.debug_level >= Debug.VERY_VERBOSE:
+        # Add command Zone and all its children
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'
@@ -613,7 +613,7 @@ class APSZoneModel:
         zoneElement.append(elem)
 
         # Add child command HorizonNameVarioTrend
-        if self.__horizonNameForVarioTrendMap != None:
+        if self.__horizonNameForVarioTrendMap is not None:
             tag = 'HorizonNameVarioTrend'
             elem = Element(tag)
             elem.text = ' ' + self.__horizonNameForVarioTrendMap + ' '

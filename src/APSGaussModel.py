@@ -194,8 +194,9 @@ class APSGaussModel:
                 vario, 'PerpRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
             )
 
-            range3 = getFloatCommand(vario, 'VertRange', 'Vario', minValue=0.0,
-                                     modelFile=self.__modelFileName)
+            range3 = getFloatCommand(
+                vario, 'VertRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
+            )
 
             azimuth = getFloatCommand(
                 vario, 'AzimuthAngle', 'Vario',

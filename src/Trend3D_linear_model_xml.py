@@ -71,9 +71,9 @@ class Trend3D_linear_model:
 
         if not 0.0 < self.__azimuth < 360.0:
             raise ValueError(
-                'Error: In {}\n'
-                'Error: Azimuth angle for linear trend is not within [0,360] degrees.'
-                ''.format(self.__className)
+                'Error: In {className}\n'
+                'Error: Azimuth angle for linear trend ({angle}) is not within [0,360] degrees.'
+                ''.format(className=self.__className, angle=self.__azimuth)
             )
 
         self.__direction = getIntCommand(trendRuleXML, 'directionStacking', modelFile=modelFileName)
