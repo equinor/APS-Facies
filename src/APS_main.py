@@ -12,7 +12,8 @@ Output:
 import importlib
 import numpy as np
 import src.generalFunctionsUsingRoxAPI as gr
-from src import (APSModel, APSZoneModel, Trend3D_linear )
+from src import (APSModel, APSZoneModel, Trend3D_linear)
+import roxar
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)

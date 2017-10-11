@@ -30,7 +30,7 @@ class APSGaussModel:
     def getMainRange(self,gaussFieldName)
     def getPerpRange(self,gaussFieldName)
     def getVertRange(self,gaussFieldName)
-    def getAnisotropyAsimuthAngle(self,gaussFieldName)
+    def getAnisotropyAzimuthAngle(self,gaussFieldName)
     def getAnisotropyDipAngle(self,gaussFieldName)
     def getPower(self,gaussFieldName)
     def getTrendRuleModel(self,gfName)
@@ -41,18 +41,18 @@ class APSGaussModel:
     def setRange1(self,gaussFieldName,range1)
     def setRange2(self,gaussFieldName,range2)
     def setRange3(self,gaussFieldName,range3)
-    def setAnisotropyAsimuthAngle(self,gaussFieldName)
+    def setAnisotropyAzimuthAngle(self,gaussFieldName)
     def setAnisotropyDipAngle(self,gaussFieldName)
     def setPower(self,gaussFieldName,power)
     def setSeedForPreviewSimulation(self,gfName,seed)
-    def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,asimuth,dip,power,
+    def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,azimuth,dip,power,
                               useTrend=0,relStdDev=0.0,trendRuleModelObj=None)
-    def updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,asimuth,dip,power)
+    def updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,azimuth,dip,power)
     def removeGaussFieldParam(self,gfName)
     def updateGaussFieldTrendParam(self,gfName,useTrend,trendRuleModelObj,relStdDev)
     def XMLAddElement(self,parent)
     def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
-                                           gridXSize,gridYSize,gridAsimuthAngle,previewCrossSection)
+                                           gridXSize,gridYSize,gridAzimuthAngle,previewCrossSection)
 
     Private functions:
     def __setEmpty(self)
@@ -68,20 +68,20 @@ class APSGaussModel:
             'MainRange':    'MainRange',
             'PerpRange':    'PerpRange',
             'VertRange':    'VertRange',
-            'AsimuthAngle': 'AsimuthAngle',
+            'AzimuthAngle': 'AzimuthAngle',
             'DipAngle':     'DipAngle',
             'Power':        'Power'
         }
 
         # Dictionary give name to each index in __varioForGFModel list
-        # item in list: [name,type,range1,range2,range3,asimuth,dip,power]
+        # item in list: [name,type,range1,range2,range3,azimuth,dip,power]
         self.__index_vario = {
             'Name':         0,
             'Type':         1,
             'MainRange':    2,
             'PerpRange':    3,
             'VertRange':    4,
-            'AsimuthAngle': 5,
+            'AzimuthAngle': 5,
             'DipAngle':     6,
             'Power':        7
         }
@@ -98,12 +98,12 @@ class APSGaussModel:
             'MainRange':    0.0,
             'PerpRange':    0.0,
             'VertRange':    0.0,
-            'AsimuthAngle': 0.0,
+            'AzimuthAngle': 0.0,
             'DipAngle':     0.0,
             'Power':        1.0
         }
         self.__maxValue = {
-            'AsimuthAngle': 360.0,
+            'AzimuthAngle': 360.0,
             'DipAngle':     90.0,
             'Power':        2.0
         }
@@ -195,9 +195,9 @@ class APSGaussModel:
             range3 = getFloatCommand(vario, 'VertRange', 'Vario', minValue=0.0,
                                      modelFile=self.__modelFileName)
 
-            asimuth = getFloatCommand(vario, 'AsimuthAngle', 'Vario',
-                                      minValue=self.__minValue['AsimuthAngle'],
-                                      maxValue=self.__maxValue['AsimuthAngle'],
+            azimuth = getFloatCommand(vario, 'AzimuthAngle', 'Vario',
+                                      minValue=self.__minValue['AzimuthAngle'],
+                                      maxValue=self.__maxValue['AzimuthAngle'],
                                       modelFile=self.__modelFileName)
 
             dip = getFloatCommand(vario, 'DipAngle', 'Vario',
@@ -251,7 +251,7 @@ class APSGaussModel:
             item = [gfName, seed]
 
             # Add gauss field parameters to data structure
-            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, asimuth, dip, power,
+            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, azimuth, dip, power,
                                        useTrend, relStdDev, trendRuleModelObj)
             # Set preview simulation start seed for gauss field
             self.setSeedForPreviewSimulation(gfName, seed)
@@ -290,7 +290,7 @@ class APSGaussModel:
         GRANGE1 = self.__index_vario['MainRange']
         GRANGE2 = self.__index_vario['PerpRange']
         GRANGE3 = self.__index_vario['VertRange']
-        GASIMUTH = self.__index_vario['AsimuthAngle']
+        GAZIMUTH = self.__index_vario['AzimuthAngle']
         GDIP = self.__index_vario['DipAngle']
         GPOWER = self.__index_vario['Power']
 
@@ -307,7 +307,7 @@ class APSGaussModel:
         self.__simBoxThickness = simBoxThickness
         self.__mainFaciesTable = mainFaciesTable
 
-        # gaussModelList  = list of objects of the form: [gfName,type,range1,range2,range3,asimuth,dip,power]
+        # gaussModelList  = list of objects of the form: [gfName,type,range1,range2,range3,azimuth,dip,power]
         # trendModelList  = list of objects of the form: [gfName,useTrend,trendRuleModelObj,relStdDev]
         # previewSeedList = list of objects of the form: [gfName,seedValue]
         assert len(trendModelList) == len(gaussModelList)
@@ -339,7 +339,7 @@ class APSGaussModel:
             range1 = item[GRANGE1]
             range2 = item[GRANGE2]
             range3 = item[GRANGE3]
-            asimuth = item[GASIMUTH]
+            azimuth = item[GAZIMUTH]
             dip = item[GDIP]
             power = item[GPOWER]
 
@@ -349,7 +349,7 @@ class APSGaussModel:
             seed = seedItem[SVALUE]
 
             # Set variogram parameters for this gauss field
-            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, asimuth, dip, power)
+            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, azimuth, dip, power)
 
             # Set trend model parameters for this gauss field
             self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
@@ -438,10 +438,10 @@ class APSGaussModel:
         r = item[GRANGE3]
         return r
 
-    def getAnisotropyAsimuthAngle(self, gaussFieldName):
-        GASIMUTH = self.__index_vario['AsimuthAngle']
+    def getAnisotropyAzimuthAngle(self, gaussFieldName):
+        GAZIMUTH = self.__index_vario['AzimuthAngle']
         item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GASIMUTH]
+        r = item[GAZIMUTH]
         return r
 
     def getAnisotropyDipAngle(self, gaussFieldName):
@@ -565,8 +565,8 @@ class APSGaussModel:
         err = self.setValue(gaussFieldName, 'VertRange', range3)
         return err
 
-    def setAnisotropyAsimuthAngle(self, gaussFieldName, asimuth):
-        err = self.setValue(gaussFieldName, 'AsimuthAngle', asimuth, checkMax=True)
+    def setAnisotropyAzimuthAngle(self, gaussFieldName, azimuth):
+        err = self.setValue(gaussFieldName, 'AzimuthAngle', azimuth, checkMax=True)
         return err
 
     def setAnisotropyDipAngle(self, gaussFieldName, dip):
@@ -593,7 +593,7 @@ class APSGaussModel:
             err = 1
         return err
 
-    def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, asimuth, dip, power,
+    def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, azimuth, dip, power,
                               useTrend=0, relStdDev=0.0, trendRuleModelObj=None):
         # Update or create new gauss field parameter object (with trend)
         GNAME = self.__index_vario['Name']
@@ -623,14 +623,14 @@ class APSGaussModel:
         for item in self.__varioForGFModel:
             name = item[GNAME]
             if name == gfName:
-                self.updateGaussFieldVarioParam(gfName, varioType, range1, range2, range3, asimuth, dip, power)
+                self.updateGaussFieldVarioParam(gfName, varioType, range1, range2, range3, azimuth, dip, power)
                 self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
                 found = 1
                 break
         if found == 0:
             # Create data for a new gauss field for both variogram  data and trend data
             # But data for trend parameters must be set by another function and default is set here.
-            itemVario = [gfName, varioType, range1, range2, range3, asimuth, dip, power]
+            itemVario = [gfName, varioType, range1, range2, range3, azimuth, dip, power]
             self.__varioForGFModel.append(itemVario)
             if trendRuleModelObj is None:
                 useTrend = 0
@@ -643,7 +643,7 @@ class APSGaussModel:
             self.__seedForPreviewForGFModel.append([gfName, defaultSeed])
         return err
 
-    def updateGaussFieldVarioParam(self, gfName, varioType, range1, range2, range3, asimuth, dip, power):
+    def updateGaussFieldVarioParam(self, gfName, varioType, range1, range2, range3, azimuth, dip, power):
         # Update gauss field variogram parameters for existing gauss field model
         # But it does not create new object.
         GNAME = self.__index_vario['Name']
@@ -651,7 +651,7 @@ class APSGaussModel:
         GRANGE1 = self.__index_vario['MainRange']
         GRANGE2 = self.__index_vario['PerpRange']
         GRANGE3 = self.__index_vario['VertRange']
-        GASIMUTH = self.__index_vario['AsimuthAngle']
+        GAZIMUTH = self.__index_vario['AzimuthAngle']
         GDIP = self.__index_vario['DipAngle']
         GPOWER = self.__index_vario['Power']
 
@@ -666,7 +666,7 @@ class APSGaussModel:
                 item[GRANGE1] = range1
                 item[GRANGE2] = range2
                 item[GRANGE3] = range3
-                item[GASIMUTH] = asimuth
+                item[GAZIMUTH] = azimuth
                 item[GDIP] = dip
                 item[GPOWER] = power
                 break
@@ -722,7 +722,7 @@ class APSGaussModel:
         GRANGE1 = self.__index_vario['MainRange']
         GRANGE2 = self.__index_vario['PerpRange']
         GRANGE3 = self.__index_vario['VertRange']
-        GASIMUTH = self.__index_vario['AsimuthAngle']
+        GAZIMUTH = self.__index_vario['AzimuthAngle']
         GDIP = self.__index_vario['DipAngle']
         GPOWER = self.__index_vario['Power']
 
@@ -745,7 +745,7 @@ class APSGaussModel:
             range1 = self.__varioForGFModel[i][GRANGE1]
             range2 = self.__varioForGFModel[i][GRANGE2]
             range3 = self.__varioForGFModel[i][GRANGE3]
-            asimuth = self.__varioForGFModel[i][GASIMUTH]
+            azimuth = self.__varioForGFModel[i][GAZIMUTH]
             dip = self.__varioForGFModel[i][GDIP]
             power = self.__varioForGFModel[i][GPOWER]
 
@@ -778,9 +778,9 @@ class APSGaussModel:
             elem = Element(tag)
             elem.text = ' ' + str(range3) + ' '
             varioElement.append(elem)
-            tag = self.__xml_keyword['AsimuthAngle']
+            tag = self.__xml_keyword['AzimuthAngle']
             elem = Element(tag)
-            elem.text = ' ' + str(asimuth) + ' '
+            elem.text = ' ' + str(azimuth) + ' '
             varioElement.append(elem)
             tag = self.__xml_keyword['DipAngle']
             elem = Element(tag)
@@ -808,7 +808,7 @@ class APSGaussModel:
             gfElement.append(elem)
 
     def simGaussFieldWithTrendAndTransform(self, nGaussFields, gridDimNx, gridDimNy,
-                                           gridXSize, gridYSize, gridAsimuthAngle, previewCrossSection):
+                                           gridXSize, gridYSize, gridAzimuthAngle, previewCrossSection):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
@@ -831,17 +831,17 @@ class APSGaussModel:
             #            r1        = self.getMainRange(name)
             #            r2        = self.getPerpRange(name)
             #            r3        = self.getVertRange(name)
-            #            asimuthVario  = self.getAnisotropyAsimuthAngle(name)
+            #            azimuthVario  = self.getAnisotropyAzimuthAngle(name)
             #            dipVario  = self.getAnisotropyDipAngle(name)
-            #            asimuthVario = asimuthVario - gridAsimuthAngle
+            #            azimuthVario = azimuthVario - gridAzimuthAngle
 
             power = self.getPower(name)
 
             useTrend = self.__trendForGFModel[i][TUSE]
-            trendAsimuth = 0.0
+            trendAzimuth = 0.0
             if useTrend == 1:
                 trendObj = self.__trendForGFModel[i][TOBJ]
-                trendAsimuth = trendObj.getAsimuth() - gridAsimuthAngle
+                trendAzimuth = trendObj.getAzimuth() - gridAzimuthAngle
 
             relSigma = self.__trendForGFModel[i][TSTD]
             if self.__printInfo >= 3:
@@ -854,7 +854,7 @@ class APSGaussModel:
 
                 if useTrend == 1:
                     print('Debug output: Use trend:  YES')
-                    print('Debug output: Relative TrendAsimuth: ' + str(trendAsimuth))
+                    print('Debug output: Relative TrendAzimuth: ' + str(trendAzimuth))
                     print('Debug output: RelSigma : ' + str(relSigma))
                 else:
                     print('Debug output: Use trend:  NO')
@@ -869,8 +869,8 @@ class APSGaussModel:
             elif previewCrossSection == 'JK':
                 projection = 'yz'
 
-            [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAsimuthAngle, projection)
-            asimuthVario = angle1
+            [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAzimuthAngle, projection)
+            azimuthVario = angle1
             if self.__printInfo >= 3:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
@@ -878,11 +878,11 @@ class APSGaussModel:
                 print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
 
             # Angle relative to first  axis is input in degrees.
-            asimuthVario = 90.0 - asimuthVario
+            azimuthVario = 90.0 - azimuthVario
             gfRealization = np.zeros(nx * ny, float)
             [gfRealization] = simGaussFieldAddTrendAndTransform(seedValue, nx, ny, xsize, ysize,
-                                                                varioTypeNumber, range1, range2, asimuthVario, power,
-                                                                useTrend, trendAsimuth, relSigma, self.__printInfo)
+                                                                varioTypeNumber, range1, range2, azimuthVario, power,
+                                                                useTrend, trendAzimuth, relSigma, self.__printInfo)
 
             gaussFields.append(gfRealization)
         # End for        
@@ -892,7 +892,7 @@ class APSGaussModel:
     def simGaussFieldWithTrendAndTransformNew(self, nGaussFields,
                                               simBoxXsize, simBoxYsize, simBoxZsize,
                                               gridNX, gridNY, gridNZ,
-                                              gridAsimuthAngle, crossSectionType):
+                                              gridAzimuthAngle, crossSectionType):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
@@ -938,7 +938,7 @@ class APSGaussModel:
             mainRange = self.getMainRange(name)
             perpRange = self.getPerpRange(name)
             vertRange = self.getVertRange(name)
-            asimuthVario = self.getAnisotropyAsimuthAngle(name)
+            azimuthVario = self.getAnisotropyAzimuthAngle(name)
             dipVario = self.getAnisotropyDipAngle(name)
             power = self.getPower(name)
             if self.__printInfo >= 3:
@@ -946,7 +946,7 @@ class APSGaussModel:
                 print('Debug output: Simulate gauss field: ' + name)
                 print('Debug output: VarioType: ' + str(varioType))
                 print('Debug output: VarioTypeNumber: ' + str(varioTypeNumber))
-                print('Debug output: Asimuth angle for Main range direction: ' + str(asimuthVario))
+                print('Debug output: Azimuth angle for Main range direction: ' + str(azimuthVario))
                 print('Debug output: Dip angle for Main range direction: ' + str(dipVario))
 
                 if varioTypeNumber == 4:
@@ -955,8 +955,8 @@ class APSGaussModel:
                 print('Debug output: Seed value: ' + str(seedValue))
 
             # Calculate 2D projection of the correlation ellipsoid
-            [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAsimuthAngle, projection)
-            asimuthVario = angle1
+            [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAzimuthAngle, projection)
+            azimuthVario = angle1
             if self.__printInfo >= 3:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
@@ -965,7 +965,7 @@ class APSGaussModel:
 
             residualField = simGaussField(seedValue, gridDim1, gridDim2, size1, size2,
                                           varioTypeNumber, range1, range2,
-                                          asimuthVario, power,
+                                          azimuthVario, power,
                                           self.__printInfo)
 
             # Calculate trend
@@ -974,7 +974,7 @@ class APSGaussModel:
                 [minMaxDifference, trendField] = trendModelObject.createTrendFor2DProjection(simBoxXsize,
                                                                                              simBoxYsize,
                                                                                              simBoxZsize,
-                                                                                             gridAsimuthAngle,
+                                                                                             gridAzimuthAngle,
                                                                                              gridNX, gridNY, gridNZ,
                                                                                              crossSectionType,
                                                                                              crossSectionIndx)
@@ -1036,7 +1036,7 @@ class APSGaussModel:
 
         return transformedValues
 
-    def calc2DVarioFrom3DVario(self, gaussFieldName, gridAsimuthAngle, projection):
+    def calc2DVarioFrom3DVario(self, gaussFieldName, gridAzimuthAngle, projection):
         """
          Variogram ellipsoid in 3D is defined by a symmetric 3x3 matrix M such that
          transpose(V)*M * V = 1 where transpose(V) = [x,y,z]. The principal directions are found
@@ -1045,8 +1045,8 @@ class APSGaussModel:
          principal directions. For variogram ellipsoid the MainRange = A, PerpRange = B, VertRange = C.
          To define the orientation, first define a ellipsoid oriented with 
          MainRange in y direction, PerpRange in x direction and VertRange in z direction.
-         Then rotate this ellipsoid first around z axis with angle defined as AsimuthAngle in clockwise direction.
-         The asimuth angle is the angle between the y axis and the new rotated y' axis.
+         Then rotate this ellipsoid first around z axis with angle defined as AzimuthAngle in clockwise direction.
+         The azimuth angle is the angle between the y axis and the new rotated y' axis.
          Then rotate the the ellipsoid an angle around the new x' axis. This is the dip angle. The final orientation
          is then found and the principal axes are (x'',y'',z'') in which the M matrix is diagonal.
          Note that the coordinate system (x,y,z) is left handed and z axis is pointing 
@@ -1054,9 +1054,9 @@ class APSGaussModel:
          To define the matrix M in (x,y,z) coordinate system given that we 
          know its half axes in the principal directions, we need the transformation from column vector of (x,y,z)
          which we call V vector to column vector of (x'',y'',z'') which we call V'':
-             V'' =  R_dip * R_asimuth * V   where we call R = R_dip * R_asimuth
-         where R_asimuth is the matrix rotating the ellipse around z axis an angle = asimuth angle 
-         and R_dip is the matrix rotating the vector V' = R_asimuth*V around the x' axis and angle = dip angle.
+             V'' =  R_dip * R_azimuth * V   where we call R = R_dip * R_azimuth
+         where R_azimuth is the matrix rotating the ellipse around z axis an angle = azimuth angle
+         and R_dip is the matrix rotating the vector V' = R_azimuth*V around the x' axis and angle = dip angle.
          The final matrix M in x,y,z coordinates is then transpose(R)*M_diagonal*R.
 
          If we now assume y = 0, then the variogram ellipsoid becomes a variogram ellipse 
@@ -1076,24 +1076,24 @@ class APSGaussModel:
         rx = self.getPerpRange(gaussFieldName)
         rz = self.getVertRange(gaussFieldName)
 
-        # Asimuth relative to global x,y,z coordinates
-        asimuth = self.getAnisotropyAsimuthAngle(gaussFieldName)
+        # Azimuth relative to global x,y,z coordinates
+        azimuth = self.getAnisotropyAzimuthAngle(gaussFieldName)
 
-        # Asimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
-        asimuth = asimuth - gridAsimuthAngle
-        asimuth = asimuth * np.pi / 180.0
+        # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
+        azimuth = azimuth - gridAzimuthAngle
+        azimuth = azimuth * np.pi / 180.0
 
         # Dip angle relative to local simulation box
         dip = self.getAnisotropyDipAngle(gaussFieldName)
         dip = dip * np.pi / 180.0
 
-        cosTheta = np.cos(asimuth)
-        sinTheta = np.sin(asimuth)
+        cosTheta = np.cos(azimuth)
+        sinTheta = np.sin(azimuth)
         cosDip = np.cos(dip)
         sinDip = np.sin(dip)
 
-        # define R_asimuth matrix:
-        R_asimuth = np.array([[cosTheta, -sinTheta, 0.0],
+        # define R_azimuth matrix:
+        R_azimuth = np.array([[cosTheta, -sinTheta, 0.0],
                               [sinTheta, cosTheta, 0.0],
                               [0.0, 0.0, 1.0]])
 
@@ -1103,7 +1103,7 @@ class APSGaussModel:
                           [0.0, -sinDip, cosDip]])
 
         # calculate R matrix
-        R = R_dip.dot(R_asimuth)
+        R = R_dip.dot(R_azimuth)
         # calculate M matrix in principal coordinates
         M_diag = np.array([[1.0 / (rx * rx), 0.0, 0.0],
                            [0.0, 1.0 / (ry * ry), 0.0],
@@ -1130,7 +1130,7 @@ class APSGaussModel:
                           [M[1, 2], M[2, 2]]])
         else:
             raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
-        # angles are asimuth angles (Measured from 2nd axis clockwise)
+        # angles are azimuth angles (Measured from 2nd axis clockwise)
         [angle1, range1, angle2, range2] = self.__calcProjection(U)
 
         return [angle1, range1, angle2, range2]
@@ -1177,5 +1177,5 @@ class APSGaussModel:
             print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
                   ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
 
-        # Angles are asimuth angles 
+        # Angles are azimuth angles
         return [angle1, range1, angle2, range2]

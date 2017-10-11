@@ -74,7 +74,7 @@ class APSDataFromRMS:
             'OrigoY': 'y_0',
             'XSize': 'x size',
             'YSize': 'y size',
-            'AsimuthAngle': 'azimuth angle',
+            'AzimuthAngle': 'azimuth angle',
         }
 
         self.__faciesTable = None
@@ -226,7 +226,7 @@ class APSDataFromRMS:
             zones.append([zoneNumber, zoneName, nLayers])
         self.__data['Zones'] = zones
 
-        keywords = ['XSize', 'YSize', 'AsimuthAngle', 'OrigoX', 'OrigoY', 'NX', 'NY', 'Xinc', 'Yinc']
+        keywords = ['XSize', 'YSize', 'AzimuthAngle', 'OrigoX', 'OrigoY', 'NX', 'NY', 'Xinc', 'Yinc']
         for key in keywords:
             self.__add_grid(key, gmObj)
 

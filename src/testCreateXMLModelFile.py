@@ -83,7 +83,7 @@ if err:
     print('Error in zoneObject.setSimBoxThickness')
     sys.exit()
 
-# Set horizon name under which the variogram asimuth trend map is located
+# Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_1'
 zoneObject.setHorizonNameForVarioTrendMap(hName)
 
@@ -108,11 +108,11 @@ power = 0
 
 # Set Gauss field trend parameters
 trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
-asimuthAngle = 125.0
+azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = 1
 relStdDev = 0.01
-trendModelObject.initialize(asimuthAngle, stackingAngle, direction, printInfo)
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power,
                                        relStdDev, trendModelObject)
 if err:
@@ -242,7 +242,7 @@ if err:
     print('Error in zoneObject.setSimBoxThickness')
     sys.exit()
 
-# Set horizon name under which the variogram asimuth trend map is located
+# Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_2'
 zoneObject.setHorizonNameForVarioTrendMap(hName)
 
@@ -265,11 +265,11 @@ power = 0
 
 # Set Gauss field trend parameters
 trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
-asimuthAngle = 125.0
+azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(asimuthAngle, stackingAngle, direction, printInfo)
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
@@ -387,7 +387,7 @@ if err:
     print('Error in zoneObject.setSimBoxThickness')
     sys.exit()
 
-# Set horizon name under which the variogram asimuth trend map is located
+# Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_3'
 zoneObject.setHorizonNameForVarioTrendMap(hName)
 
@@ -410,11 +410,11 @@ power = 0
 
 # Set Gauss field trend parameters
 trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
-asimuthAngle = 125.0
+azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(asimuthAngle, stackingAngle, direction, printInfo)
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
