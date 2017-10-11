@@ -31,6 +31,7 @@ from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
+# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand
 
 
@@ -141,7 +142,7 @@ class APSZoneModel:
         # Local variables
         self.__zoneNumber = zoneNumber
         self.__regionNumber = regionNumber
-        #        self.__mainLevelFacies = inputMainLevelFacies
+        self.__mainLevelFacies = inputMainLevelFacies
         self.__useConstProb = useConstProb
         self.__simBoxThickness = simBoxThickness
 
@@ -149,6 +150,7 @@ class APSZoneModel:
         self.__gaussModelObject = gaussModelObject
 
         self.__truncRule = truncRuleObject
+        self.__faciesLevel = faciesLevel
         self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
@@ -226,6 +228,7 @@ class APSZoneModel:
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zoneNumber))
+                    print('Debug output: From APSZoneModel: mainLevelFacies: ' + str(mainLevelFacies))
                     print('Debug output: From APSZoneModel: RegionNumber:    ' + str(regionNumber))
                     print('Debug output: From APSZoneModel: useConstProb:    ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
@@ -324,6 +327,15 @@ class APSZoneModel:
 
     def useConstProb(self) -> bool:
         return self.__useConstProb
+
+    def isMainLevelModel(self):
+        if self._faciesLevel == 1:
+            return True
+        else:
+            return False
+
+    def getMainLevelFacies(self):
+        return copy.copy(self._mainLevelFacies)
 
     def getFaciesInZoneModel(self):
         return self.__faciesProbObject.getFaciesInZoneModel()
@@ -501,6 +513,10 @@ class APSZoneModel:
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
+            if self.__debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: faciesProb:')
+                print(repr(faciesProb))
+
             alphaList = []
             for gaussFieldIndx in range(nGaussFields):
                 item = GFAlphaList[gaussFieldIndx]
@@ -597,8 +613,7 @@ class APSZoneModel:
             if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
-
-                print(' ')
+                nCount = truncObject.getNCountShiftAlpha()
                 print(
                     '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
                     '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
@@ -653,7 +668,7 @@ class APSZoneModel:
         self.__gaussModelObject.XMLAddElement(zoneElement)
         # Add child command TruncationRule at end of the child list for
         self.__truncRule.XMLAddElement(zoneElement)
-        
+
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
