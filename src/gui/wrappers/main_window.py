@@ -7,7 +7,7 @@ from typing import Callable, Dict, Union
 
 from PyQt5.QtWidgets import *
 
-from src.gui.wrappers.base_classes.dialogs import AddFacies
+from src.gui.wrappers.dialogs import AddFacies
 from src.gui.state import State
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements
