@@ -874,8 +874,8 @@ class APSGaussModel:
             if self.__printInfo >= 3:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
-                print('Debug output: Angle from first axis for Range1 direction: ' + str(angle1))
-                print('Debug output: Angle from first axis for Range2 direction: ' + str(angle2))
+                print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
+                print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
 
             # Angle relative to first  axis is input in degrees.
             asimuthVario = 90.0 - asimuthVario
@@ -935,11 +935,19 @@ class APSGaussModel:
             seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
             varioType = self.getVarioType(name)
             varioTypeNumber = self.getVarioTypeNumber(name)
+            mainRange = self.getMainRange(name)
+            perpRange = self.getPerpRange(name)
+            vertRange = self.getVertRange(name)
+            asimuthVario = self.getAnisotropyAsimuthAngle(name)
+            dipVario = self.getAnisotropyDipAngle(name)
             power = self.getPower(name)
             if self.__printInfo >= 3:
+                print('Debug output: Within simGaussFieldWithTrendAndTransformNew')
                 print('Debug output: Simulate gauss field: ' + name)
                 print('Debug output: VarioType: ' + str(varioType))
                 print('Debug output: VarioTypeNumber: ' + str(varioTypeNumber))
+                print('Debug output: Asimuth angle for Main range direction: ' + str(asimuthVario))
+                print('Debug output: Dip angle for Main range direction: ' + str(dipVario))
 
                 if varioTypeNumber == 4:
                     print('Debug output: Power    : ' + str(power))
@@ -952,11 +960,8 @@ class APSGaussModel:
             if self.__printInfo >= 3:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
-                print('Debug output: Angle from first axis for Range1 direction: ' + str(angle1))
-                print('Debug output: Angle from first axis for Range2 direction: ' + str(angle2))
-
-            # Angle relative to first  axis is input in degrees.
-            asimuthVario = 90.0 - asimuthVario
+                print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
+                print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
 
             residualField = simGaussField(seedValue, gridDim1, gridDim2, size1, size2,
                                           varioTypeNumber, range1, range2,
@@ -1064,7 +1069,9 @@ class APSGaussModel:
          done
          for x,y plane with z = 0 and for y,z plane for x = 0.
          """
-
+        funcName = 'calc2DVarioFrom3DVario'
+        if self.__printInfo>=3:
+            print('Debug output: Function: {}'.format(funcName))
         ry = self.getMainRange(gaussFieldName)
         rx = self.getPerpRange(gaussFieldName)
         rz = self.getVertRange(gaussFieldName)
@@ -1129,6 +1136,7 @@ class APSGaussModel:
         return [angle1, range1, angle2, range2]
 
     def __calcProjection(self, U):
+        funcName = '__calcProjection'
         if self.__printInfo >= 3:
             print('Debug output: U:')
             print(U)
@@ -1138,30 +1146,36 @@ class APSGaussModel:
             print(w)
             print('Debug output: Eigenvectors')
             print(v)
-
+            
+        # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction 
         if v[0, 1] != 0.0:
             angle = np.arctan(v[0, 0] / v[0, 1])
             angle = angle * 180.0 / np.pi
             if angle < 0.0:
                 angle = angle + 180.0
         else:
-            angle = 0.0
+            # y component is 0, hence the direction is defined by the x axis
+            angle = 90.0
         angle1 = angle
         range1 = np.sqrt(1.0 / w[0])
         if self.__printInfo >= 3:
-            print('Debug output: Direction (angle): ' + str(angle1) + ' for range: ' + str(range1))
+            print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
+                  ''.format(funcName=funcName, angle=str(angle1), range=str(range1)))
 
+        # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction 
         if v[1, 1] != 0.0:
             angle = np.arctan(v[1, 0] / v[1, 1])
             angle = angle * 180.0 / np.pi
             if angle < 0.0:
                 angle = angle + 180.0
         else:
-            angle = 0.0
+            # y component is 0, hence the direction is defined by the x axis
+            angle = 90.0
         angle2 = angle
         range2 = np.sqrt(1.0 / w[1])
         if self.__printInfo >= 3:
-            print('Debug output: Direction (angle): ' + str(angle2) + ' for range: ' + str(range2))
+            print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
+                  ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
 
         # Angles are asimuth angles 
         return [angle1, range1, angle2, range2]

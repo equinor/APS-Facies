@@ -102,13 +102,13 @@ def readFile(fileName):
     return [a, nx, ny]
 
 
-def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, previewLZ, previewScale=0):
+def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, previewLZ, previewScale=0, printInfo=0):
     MIN_NZ = 100
-    MAX_NZ = 300
+    MAX_NZ = 500
     MIN_NX = 300
-    MAX_NX = 300
+    MAX_NX = 500
     MIN_NY = 300
-    MAX_NY = 300
+    MAX_NY = 500
     nxPreview = nx
     nyPreview = ny
     nzPreview = nz
@@ -149,7 +149,9 @@ def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, pr
         else:
             dy = dx
             nyPreview = int(previewLY / dy)
-
+    if printInfo >= 3:
+        print('dx = {}  dy= {}'.format(str(dx),str(dy)))
+        
     if previewScale == 0:
         # Rescale to same size as horizontal
         if previewCrossSection == 'IK':
@@ -188,7 +190,7 @@ def defineHorizontalAndVerticalResolutionForPlotting(
 # Initialise common variables
 functionName = 'testPreview.py'
 rotatePlot = 0
-useBestResolution = 0
+useBestResolution = 1
 noSim = 0  # Is set to 1 only if one don't want to simulate 2D fields (for test purpose only)
 setWrite = 0  # Is set to 1 if write out simulated 2D fields
 
@@ -214,6 +216,7 @@ def main():
         print('Debug output: previewZoneNumber: ' + ' ' + str(previewZoneNumber))
         print('Debug output: previewCrossSection: ' + ' ' + str(previewCrossSection))
         print('Debug output: previewScale: ' + str(previewScale))
+        print(' \n')
 
     rmsData = APSDataFromRMS.APSDataFromRMS()
     print('- Read file: ' + inputRMSDataFileName)
@@ -234,7 +237,7 @@ def main():
     print('- Simulate 2D cross section in: {} cross section'.format(previewCrossSection))
 
     [nxPreview, nyPreview, nzPreview] = set2DGridDimension(nx, ny, nz, previewCrossSection,
-                                                           simBoxXsize, simBoxYsize, simBoxZsize, previewScale)
+                                                           simBoxXsize, simBoxYsize, simBoxZsize, previewScale,printInfo)
     if previewCrossSection == 'IJ':
         print('- Preview simulation grid dimension: nx: {0} ny:{1}'.format(str(nxPreview), str(nyPreview)))
     elif previewCrossSection == 'IK':
