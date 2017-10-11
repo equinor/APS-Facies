@@ -20,7 +20,7 @@ class Trend3D_linear_model:
                      by reading input parameters from XML input tree.
 
     Public member functions:
-    Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
+    Constructor:   def __init__(self, trendRuleXML=None, debug_level=Debug.OFF, modelFileName=None)
 
    Get functions:
     def getAzimuth(self)
@@ -31,13 +31,13 @@ class Trend3D_linear_model:
     def setAzimuth(self,angle)
     def setStackingAngle(self,stackingAngle)
     def setStackingDirection(self,direction)
-    def initialize(self,azimuthAngle,stackingAngle,direction,printInfo)
+    def initialize(self,azimuthAngle,stackingAngle,direction,debug_level=Debug.OFF)
     
    XmlTree update function:
     def XMLAddElement(self,parent)
     
    Private member functions:
-    def __interpretXMLTree(self,trendRuleXML,printInfo,modelFileName)
+    def __interpretXMLTree(self,trendRuleXML,debug_level,modelFileName)
 """
 
     def __init__(self, trendRuleXML, debug_level=Debug.OFF, modelFileName=None):
@@ -65,7 +65,7 @@ class Trend3D_linear_model:
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Create empty object of ' + self.__className)
 
-    def __interpretXMLTree(self, trendRuleXML, printInfo, modelFileName):
+    def __interpretXMLTree(self, trendRuleXML, debug_level=Debug.OFF, modelFileName=None):
         # Initialize object form xml tree object trendRuleXML
         self.__azimuth = getFloatCommand(trendRuleXML, 'azimuth', modelFile=modelFileName)
 
@@ -198,96 +198,3 @@ class Trend3D_linear_model:
         obj = Element(tag)
         obj.text = ' ' + str(self.__stackingAngle) + ' '
         trendElement.append(obj)
-
-    def __calcLinearTrendNormalVector(self, azimuthSimBox):
-        """
-        Description: Calculate normal vector to iso-surfaces (planes) for constant trend values
-                     a*(x-x0)+b*(y-y0)+c*(z-z0) = K where K is a constant is such
-                     an iso surface and [a,b,c] is the normal vector to the plane.
-        """
-        # Calculate the 3D trend values
-
-        alpha = (90.0 - self.__stackingAngle) * np.pi / 180.0
-        if self.__direction == 1:
-            theta = (self.__azimuth - azimuthSimBox) * np.pi / 180.0
-        else:
-            theta = (self.__azimuth - azimuthSimBox + 180.0) * np.pi / 180.0
-
-        # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
-        xComponent = math.cos(alpha) * math.sin(theta)
-        yComponent = math.cos(alpha) * math.cos(theta)
-        zComponent = math.sin(alpha)
-        return [xComponent, yComponent, zComponent]
-
-    def createTrendFor2DProjection(self, simBoxXsize, simBoxYsize, simBoxZsize,
-                                   azimuthSimBox,
-                                   nxPreview, nyPreview, nzPreview, projectionType,
-                                   crossSectionIndx):
-
-        [xComponent, yComponent, zComponent] = self.__calcLinearTrendNormalVector(azimuthSimBox)
-        xinc = simBoxXsize / nxPreview
-        yinc = simBoxYsize / nyPreview
-        zinc = simBoxZsize / nzPreview
-
-        if projectionType == 'IJ':
-            zRel = (crossSectionIndx + 0.5) * zinc
-            values = np.zeros(nxPreview * nyPreview, float)
-            for i in range(nxPreview):
-                xRel = (i + 0.5) * xinc
-                for j in range(nyPreview):
-                    indx = i + j * nxPreview
-                    yRel = (j + 0.5) * yinc
-                    trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
-                    values[indx] = trendValue
-        elif projectionType == 'IK':
-            yRel = (crossSectionIndx + 0.5) * yinc
-            values = np.zeros(nxPreview * nzPreview, float)
-            for i in range(nxPreview):
-                xRel = (i + 0.5) * xinc
-                for k in range(nzPreview):
-                    indx = i + k * nxPreview
-                    zRel = (k + 0.5) * zinc
-                    trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
-                    values[indx] = trendValue
-        elif projectionType == 'JK':
-            xRel = (crossSectionIndx + 0.5) * xinc
-            values = np.zeros(nyPreview * nzPreview, float)
-            for j in range(nyPreview):
-                yRel = (j + 0.5) * yinc
-                for k in range(nzPreview):
-                    indx = j + k * nyPreview
-                    zRel = (k + 0.5) * zinc
-                    trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
-                    values[indx] = trendValue
-
-        v1 = 0.0
-        v2 = xComponent * simBoxXsize
-        v3 = yComponent * simBoxYsize
-        v4 = xComponent * simBoxXsize + yComponent * simBoxYsize
-
-        v5 = v1 + zComponent * simBoxZsize
-        v6 = v2 + zComponent * simBoxZsize
-        v7 = v3 + zComponent * simBoxZsize
-        v8 = v4 + zComponent * simBoxZsize
-        w = [v1, v2, v3, v4, v5, v6, v7, v8]
-        minValue = min(w)
-        maxValue = max(w)
-
-        #        minValue = np.min(values)
-        #        maxValue = np.max(values)
-        minmaxDifference = maxValue - minValue
-        valuesRescaled = self.__direction * values / minmaxDifference
-
-        minValue = minValue / minmaxDifference
-        maxValue = maxValue / minmaxDifference
-        minmaxDifference = maxValue - minValue
-        minValueInCrossSection = min(valuesRescaled)
-        maxValueInCrossSection = max(valuesRescaled)
-        if self.__printInfo >= 3:
-            print('Debug output: Min value of trend within simBox: ' + str(minValue))
-            print('Debug output: Max value of trend within simBox: ' + str(maxValue))
-            print('Debug output: Difference between max and min value within simBox: ' + str(minmaxDifference))
-            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
-            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
-
-        return [minmaxDifference, valuesRescaled]

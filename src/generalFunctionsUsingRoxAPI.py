@@ -80,8 +80,8 @@ def print_debug_information(function_name, text):
         print('Debug output in {function_name}: {text}\n'.format(function_name=function_name, text=text))
 
 
-def printError(functionName, text):
-    print('Error in ' + functionName + ': ' + text)
+def print_error(function_name, text):
+    print('Error in {function_name}: {text}'.format(function_name=function_name, text=text))
 
 
 def raise_error(function_name, text):
@@ -567,7 +567,7 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
     nZones = len(indexer.zonation)
     nLayersPerZone = []
     nLayersPerZone = getNumberOfLayers(grid)
-    [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = getGridSimBoxSize(grid, printInfo)
+    [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = getGridSimBoxSize(grid, debug_level)
     return [
         xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, azimuthAngle, x0, y0,
         dimensions[0] ,dimensions[1], dimensions[2], nZones,zoneNames, nLayersPerZone

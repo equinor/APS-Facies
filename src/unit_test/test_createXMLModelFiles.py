@@ -12,6 +12,7 @@ from src.APSZoneModel import APSZoneModel
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.utils.constants import Debug
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, VERY_VERBOSE_DEBUG,
     RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
@@ -20,7 +21,7 @@ from src.unit_test.constants import (
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, printInfo
+        zoneParamName, faciesRealParamNameResult, fTable, debug_level=Debug.OFF
 ):
     # The input data are global variables
 
@@ -30,13 +31,13 @@ def defineCommonModelParam(
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
-    apsmodel.setPrintInfo(printInfo)
+    apsmodel.setPrintInfo(debug_level)
 
     # Define gauss field jobs
     gfJobObject = APSGaussFieldJobs()
     gfJobNames = ['GRFJob1', 'GRFJob2', 'GRFJob3']
     gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5'], ['GRF6', 'GRF7', 'GRF8', 'GRF9']]
-    gfJobObject.initialize(gfJobNames, gfNamesPerJob, printInfo)
+    gfJobObject.initialize(gfJobNames, gfNamesPerJob, debug_level)
     apsmodel.setGaussFieldJobs(gfJobObject)
 
     # Define main facies table
@@ -50,13 +51,14 @@ def addZoneParam(
         range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles, stackingAngle,
         power, direction, useTrend, relStdDev, previewSeed, simBoxThickness, truncStructureList,
         backGroundFaciesGroups, overlayFacies, overlayTruncCenter, useConstTruncParam,
-        horizonNameForVarioTrendMap, printInfo):
+        horizonNameForVarioTrendMap, debug_level=Debug.OFF
+):
     mainFaciesTable = apsmodel.getMainFaciesTable()
     gaussFieldJobs = apsmodel.getGaussFieldJobs()
 
     # Define facies probabilities
     faciesProbObj = APSFaciesProb()
-    faciesProbObj.initialize(faciesInZone, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, printInfo)
+    faciesProbObj.initialize(faciesInZone, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, debug_level)
 
     # Define gauss field models
     gaussModelList = []
@@ -67,8 +69,8 @@ def addZoneParam(
                                azimuthVarioAngles[i], dipVarioAngles[i], power[i]])
 
         # Set Gauss field trend parameters
-        trendModelObject = Trend3D_linear_model(None, printInfo, None)
-        trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], printInfo)
+        trendModelObject = Trend3D_linear_model(None, debug_level, None)
+        trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
         trendModelList.append([gfNames[i], useTrend[i], trendModelObject, relStdDev[i]])
 
         seedPreviewList.append([gfNames[i], previewSeed[i]])
@@ -77,7 +79,7 @@ def addZoneParam(
     gaussModelObj.initialize(
         zoneNumber, mainFaciesTable, gaussFieldJobs,
         gaussModelList, trendModelList,
-        simBoxThickness, seedPreviewList, printInfo
+        simBoxThickness, seedPreviewList, debug_level
     )
 
     # Define truncation rule model
@@ -86,13 +88,13 @@ def addZoneParam(
         truncRuleObj = Trunc2D_Cubic()
         truncRuleObj.initialize(
             mainFaciesTable, faciesInZone, truncStructureList,
-            backGroundFaciesGroups, overlayFacies, overlayTruncCenter, printInfo
+            backGroundFaciesGroups, overlayFacies, overlayTruncCenter, debug_level
         )
     elif truncType == 'Angle':
         truncRuleObj = Trunc2D_Angle()
         truncRuleObj.initialize(
             mainFaciesTable, faciesInZone, truncStructureList, backGroundFaciesGroups,
-            overlayFacies, overlayTruncCenter, useConstTruncParam, printInfo
+            overlayFacies, overlayTruncCenter, useConstTruncParam, debug_level
         )
     else:
         raise ValueError("Invalid truncation type")
@@ -101,21 +103,21 @@ def addZoneParam(
     apsZoneModel = APSZoneModel()
     apsZoneModel.initialize(
         zoneNumber, useConstProb, simBoxThickness, horizonNameForVarioTrendMap,
-        faciesProbObj, gaussModelObj, truncRuleObj, printInfo
+        faciesProbObj, gaussModelObj, truncRuleObj, debug_level
     )
 
     # Add zone to APSModel
     apsmodel.addNewZone(apsZoneModel)
 
 
-def read_write_model(apsmodel, printInfo):
+def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
-    apsmodel.writeModel(outfile1, printInfo=printInfo)
+    apsmodel.writeModel(outfile1, debug_level=debug_level)
 
     # Read the xml file into an new APSModel object
-    apsmodel2 = APSModel(outfile1, printInfo=printInfo)
+    apsmodel2 = APSModel(outfile1, debug_level=debug_level)
     outfile2 = 'testOut2.xml'
-    apsmodel2.writeModel(outfile2, printInfo=printInfo)
+    apsmodel2.writeModel(outfile2, debug_level=debug_level)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = filecmp.cmp(outfile1, outfile2)
 
@@ -126,12 +128,12 @@ def read_write_model(apsmodel, printInfo):
     assert check is True
 
 
-def read_write_model_update(printInfo):
+def read_write_model_update(debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
     # Read the xml file into an new APSModel object
     apsmodel2 = APSModel(outfile1)
     outfile2 = 'testOut2.xml'
-    apsmodel2.writeModel(outfile2, printInfo)
+    apsmodel2.writeModel(outfile2, debug_level)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = filecmp.cmp(outfile1, outfile2)
 
@@ -183,10 +185,10 @@ def test_variogram_generation():
     trendModelList = [['GRF1', useTrend, trendModelObject, relStdDev]]
     simBoxThickness = 100.0
     prevSeedList = [['GRF1', 92828]]
-    printInfo = 3
+    debug_level = Debug.VERY_VERBOSE
     apsGaussModel.initialize(
         zoneNumber, mainFaciesTable, gfJobs, gaussModelList,
-        trendModelList, simBoxThickness, prevSeedList, printInfo
+        trendModelList, simBoxThickness, prevSeedList, debug_level
     )
     gridAzimuthAngle = 0.0
     projection = 'xy'
@@ -200,7 +202,7 @@ def test_variogram_generation():
 def test_updating_model():
     # Test updating of model
     modelFile = 'testData_models/APS.xml'
-    apsmodel = APSModel(modelFile, printInfo=VERY_VERBOSE_DEBUG)
+    apsmodel = APSModel(modelFile, debug_level=Debug.VERY_VERBOSE_DEBUG)
     # Do some updates of the model
     zoneNumber = 1
     zone1 = apsmodel.getZoneModel(zoneNumber)

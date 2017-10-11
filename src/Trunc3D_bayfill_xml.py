@@ -517,7 +517,7 @@ class Trunc3D_bayfill:
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         attribute = {
