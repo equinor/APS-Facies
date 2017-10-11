@@ -1,6 +1,6 @@
 #!/bin/env python
 """
-Python3 script using ROXAPI to update 2D maps for asimuth anisotropy for
+Python3 script using ROXAPI to update 2D maps for azimuth anisotropy for
 variogram for 3D gaussian field simulation.
 Dependency: ROXAPI
 """
@@ -27,13 +27,13 @@ for zoneNumber in selectedZoneNumberList:
     hName = zoneModel.getHorizonNameForVarioTrendMap()
     gaussFieldNames = zoneModel.getUsedGaussFieldNames()
     for gfName in gaussFieldNames:
-        reprName = gfName + '_VarioAsimuthTrend'
+        reprName = gfName + '_VarioAzimuthTrend'
 
-        # Get asimuth value for this gauss field for this zone
-        asimuthValue = zoneModel.getAnisotropyAsimuthAngle(gfName)
+        # Get azimuth value for this gauss field for this zone
+        azimuthValue = zoneModel.getAnisotropyAzimuthAngle(gfName)
 
-        # Set the value in the map to the constant asimuth value.
+        # Set the value in the map to the constant azimuth value.
         # Assume that the map already exist. 
-        gr.setConstantValueInHorizon(horizons, hName, reprName, asimuthValue, printInfo)
+        gr.setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, printInfo)
 
-print('- Finished updating variogram asimuth trend maps in RMS project')
+print('- Finished updating variogram azimuth trend maps in RMS project')

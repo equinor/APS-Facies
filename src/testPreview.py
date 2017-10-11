@@ -177,7 +177,7 @@ def main():
     rmsData = APSDataFromRMS.APSDataFromRMS()
     print('- Read file: ' + inputRMSDataFileName)
     rmsData.readRMSDataFromXMLFile(inputRMSDataFileName)
-    [nxFromGrid, nyFromGrid, x0, y0, simBoxXsize, simBoxYsize, xinc, yinc, asimuthGridOrientation] = rmsData.getGridSize()
+    [nxFromGrid, nyFromGrid, x0, y0, simBoxXsize, simBoxYsize, xinc, yinc, azimuthGridOrientation] = rmsData.getGridSize()
     nzFromGrid = rmsData.getNumberOfLayersInZone(previewZoneNumber)
     nx = int(nxFromGrid)
     ny = int(nyFromGrid)
@@ -258,7 +258,7 @@ def main():
         # simulate gauss fields
         gaussFields = zoneModel.simGaussFieldWithTrendAndTransformNew(
             nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            nxPreview, nyPreview, nzPreview, asimuthGridOrientation,
+            nxPreview, nyPreview, nzPreview, azimuthGridOrientation,
             previewCrossSection
         )
         if previewCrossSection == 'IJ':
@@ -276,7 +276,7 @@ def main():
             for n in range(nGaussFields):
                 gf = gaussFields[n]
                 fileName = 'a' + str(n + 1) + '_' + previewCrossSection + '.dat'
-                writeFile(fileName, gf, gridDim1, gridDim2)
+                writeFile(fileName, gf, gridDim1, gridDim2, printInfo)
 
     facies = np.zeros(gridDim1 * gridDim2, int)
     faciesFraction = np.zeros(nFacies, int)
@@ -329,7 +329,7 @@ def main():
     ax1 = plt.subplot(2, 6, 1)
     alphaMap = alphaMapList[0]
     if rotatePlot:
-        rot_im1 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
+        rot_im1 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
     else:
         rot_im1 = alphaMap
     if previewCrossSection == 'IJ':
@@ -343,7 +343,7 @@ def main():
     ax2 = plt.subplot(2, 6, 2)
     alphaMap = alphaMapList[1]
     if rotatePlot:
-        rot_im2 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
+        rot_im2 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
     else:
         rot_im2 = alphaMap
     if previewCrossSection == 'IJ':
@@ -362,7 +362,7 @@ def main():
     if nGaussFields >= 3:
         alphaMap = alphaMapList[2]
     if rotatePlot:
-        rot_im3 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
+        rot_im3 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
     else:
         rot_im3 = alphaMap
     if previewCrossSection == 'IJ':
@@ -381,7 +381,7 @@ def main():
     if nGaussFields >= 4:
         alphaMap = alphaMapList[3]
     if rotatePlot:
-        rot_im4 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
+        rot_im4 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
     else:
         rot_im4 = alphaMap
     if previewCrossSection == 'IJ':
@@ -400,7 +400,7 @@ def main():
     if nGaussFields >= 5:
         alphaMap = alphaMapList[4]
     if rotatePlot:
-        rot_im5 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
+        rot_im5 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
     else:
         rot_im5 = alphaMap
     if previewCrossSection == 'IJ':
@@ -419,7 +419,7 @@ def main():
     if nGaussFields >= 6:
         alphaMap = alphaMapList[5]
     if rotatePlot:
-        rot_im6 = scipy.ndimage.interpolation.rotate(alphaMap, asimuthGridOrientation)
+        rot_im6 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
     else:
         rot_im6 = alphaMap
     if previewCrossSection == 'IJ':
@@ -469,7 +469,7 @@ def main():
     # Facies map is plotted
     axFacies = plt.subplot(2, 6, 11)
     if rotatePlot:
-        rot_imFac = scipy.ndimage.interpolation.rotate(fmap, asimuthGridOrientation)
+        rot_imFac = scipy.ndimage.interpolation.rotate(fmap, azimuthGridOrientation)
     else:
         rot_imFac = fmap
     if previewCrossSection == 'IJ':

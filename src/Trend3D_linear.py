@@ -24,7 +24,7 @@ class Trend3D_linear:
             print('Error: Programming error. Empty trendRuleModel object')
             return
 
-        self.__asimuth = trendRuleModel.getAsimuth()
+        self.__azimuth = trendRuleModel.getAzimuth()
         self.__stackingAngle = trendRuleModel.getStackingAngle()
         self.__direction = trendRuleModel.getStackingDirection()
         self.__printInfo = printInfo
@@ -43,7 +43,7 @@ class Trend3D_linear:
             grid3D = gridModel.get_grid(realNumber)
             gridIndexer = grid3D.simbox_indexer
             (nx, ny, nz) = gridIndexer.dimensions
-            [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__printInfo)
+            [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__printInfo)
 
             cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
             cellIndices = gridIndexer.get_indices(cellIndexDefined)
@@ -74,9 +74,9 @@ class Trend3D_linear:
 
             alpha = (90.0 - self.__stackingAngle) * np.pi / 180.0
             if self.__direction == 1:
-                theta = self.__asimuth * np.pi / 180.0
+                theta = self.__azimuth * np.pi / 180.0
             else:
-                theta = (self.__asimuth + 180.0) * np.pi / 180.0
+                theta = (self.__azimuth + 180.0) * np.pi / 180.0
 
             # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
             xComponent = math.cos(alpha) * math.sin(theta)
@@ -115,8 +115,8 @@ class Trend3D_linear:
             minmaxDifference = maxValue - minValue
         return [minmaxDifference, valuesRescaled]
 
-    def getAsimuth(self):
-        return self.__asimuth
+    def getAzimuth(self):
+        return self.__azimuth
 
     def getStackingAngle(self):
         return self.__stackingAngle

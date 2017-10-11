@@ -35,7 +35,7 @@ class APSZoneModel:
        def getMainRange(self,gaussFieldName)
        def getPerpRange(self,gaussFieldName)
        def getVertRange(self,gaussFieldName)
-       def getAnisotropyAsimuthAngle(self,gaussFieldName)
+       def getAnisotropyAzimuthAngle(self,gaussFieldName)
        def getAnisotropyDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
@@ -55,7 +55,7 @@ class APSZoneModel:
        def setRange1(self,gaussFieldName,range1)
        def setRange2(self,gaussFieldName,range2)
        def setRange3(self,gaussFieldName,range3)
-       def setAnisotropyAsimuthAngle(self,gaussFieldName,angle)
+       def setAnisotropyAzimuthAngle(self,gaussFieldName,angle)
       def setAnisotropyDipAngle(self,gaussFieldName,angle)
 
      ---  Set functions ---
@@ -82,7 +82,7 @@ class APSZoneModel:
        def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
        def simGaussFieldWithTrendAndTransform(
            self, nGaussFields, gridDimNx, gridDimNy,
-           gridXSize, gridYSize, gridAsimuthAngle
+           gridXSize, gridYSize, gridAzimuthAngle
         )
 
 
@@ -174,7 +174,7 @@ class APSZoneModel:
                     print('Debug output: From APSZoneModel: useConstProb: ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
                     text = 'Debug output: From APSZoneModel: Horizon name to be used for saving \n'
-                    text += '              asimuth variogram trend for this zone: '
+                    text += '              azimuth variogram trend for this zone: '
                     text += str(self.__horizonNameForVarioTrendMap)
                     print(text)
 
@@ -328,8 +328,8 @@ class APSZoneModel:
     def getVertRange(self, gaussFieldName):
         return self.__gaussModelObject.getVertRange(gaussFieldName)
 
-    def getAnisotropyAsimuthAngle(self, gaussFieldName):
-        return self.__gaussModelObject.getAnisotropyAsimuthAngle(gaussFieldName)
+    def getAnisotropyAzimuthAngle(self, gaussFieldName):
+        return self.__gaussModelObject.getAnisotropyAzimuthAngle(gaussFieldName)
 
     def getAnisotropyDipAngle(self, gaussFieldName):
         return self.__gaussModelObject.getAnisotropyDipAngle(gaussFieldName)
@@ -390,8 +390,8 @@ class APSZoneModel:
     def setVertRange(self, gaussFieldName, range3):
         return self.__gaussModelObject.setVertRange(gaussFieldName, range3)
 
-    def setAnisotropyAsimuthAngle(self, gaussFieldName, angle):
-        return self.__gaussModelObject.setAnisotropyAsimuthAngle(gaussFieldName, angle)
+    def setAnisotropyAzimuthAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setAnisotropyAzimuthAngle(gaussFieldName, angle)
 
     def setAnisotropyDipAngle(self, gaussFieldName, angle):
         return self.__gaussModelObject.setAnisotropyDipAngle(gaussFieldName, angle)
@@ -626,16 +626,16 @@ class APSZoneModel:
 
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, gridDimNx, gridDimNy,
-            gridXSize, gridYSize, gridAsimuthAngle, previewCrossSection):
+            gridXSize, gridYSize, gridAzimuthAngle, previewCrossSection):
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
             nGaussFields, gridDimNx, gridDimNy, gridXSize, gridYSize,
-            gridAsimuthAngle, previewCrossSection
+            gridAzimuthAngle, previewCrossSection
         )
 
     def simGaussFieldWithTrendAndTransformNew(
             self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAsimuthAngle, crossSectionType):
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType):
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransformNew(
             nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAsimuthAngle, crossSectionType
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType
         )
