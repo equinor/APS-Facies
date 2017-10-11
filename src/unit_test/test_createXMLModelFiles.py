@@ -12,6 +12,10 @@ from src.APSZoneModel import APSZoneModel
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.unit_test.constants import (
+    FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, VERY_VERBOSE_DEBUG,
+    RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
+)
 
 
 def defineCommonModelParam(
@@ -142,32 +146,64 @@ def test_create_XMLModelFiles():
     # -------- Main -------
     print('Start test_createXMLModelFiles')
 
-    # Global variables
-    rmsProject = 'testNeslen.rms10'
-    rmsWorkflow = 'Example APS workflow'
-    gaussFieldSimScript = 'MakeGaussFields.ipl'
-    gridModelName = 'APS_NESLEN_ODM'
-    zoneParamName = 'Zone'
-    faciesRealParamNameResult = 'FaciesReal'
+    test_case_1()
+    test_case_2()
+
+    test_updating_model()
+
+    test_variogram_generation()
+    print('Finished')
+
+
+def test_variogram_generation():
+    apsGaussModel = APSGaussModel()
+    zoneNumber = 1
+    # Define main facies table
+    mainFaciesTable = APSMainFaciesTable()
+    fTable = fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
+    mainFaciesTable.initialize(fTable)
+    gfJobs = APSGaussFieldJobs()
+    gfJobNames = ['Job1', 'Job2']
+    gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5']]
+    gfJobs.initialize(gfJobNames, gfNamesPerJob)
+    mainRange = 1000
+    perpRange = 100
+    vertRange = 1.0
+    azimuth = 45.0
+    dip = 1.0
+    gfName = 'GRF1'
+    gaussModelList = [['GRF1', 'SPHERICAL', mainRange, perpRange, vertRange, azimuth, dip, 1.0]]
+    useTrend = 0
+    relStdDev = 0.05
+    trendModelObject = Trend3D_linear_model(None, VERY_VERBOSE_DEBUG, None)
+    azimuthTrendAngle = 0.0
+    stackingTrendAngle = 0.0
+    direct = -1
+    trendModelObject.initialize(azimuthTrendAngle, stackingTrendAngle, direct)
+    trendModelList = [['GRF1', useTrend, trendModelObject, relStdDev]]
+    simBoxThickness = 100.0
+    prevSeedList = [['GRF1', 92828]]
     printInfo = 3
-
-    case_1(
-        faciesRealParamNameResult, gaussFieldSimScript, gridModelName,
-        printInfo, rmsProject, rmsWorkflow, zoneParamName
+    apsGaussModel.initialize(
+        zoneNumber, mainFaciesTable, gfJobs, gaussModelList,
+        trendModelList, simBoxThickness, prevSeedList, printInfo
     )
-    case_2(
-        faciesRealParamNameResult, gaussFieldSimScript, gridModelName,
-        printInfo, rmsProject, rmsWorkflow, zoneParamName
-    )
+    gridAzimuthAngle = 0.0
+    projection = 'xy'
+    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
+    projection = 'xz'
+    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
+    projection = 'yz'
+    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
 
+
+def test_updating_model():
     # Test updating of model
     modelFile = 'testData_models/APS.xml'
-    apsmodel = APSModel(modelFile, printInfo)
+    apsmodel = APSModel(modelFile, VERY_VERBOSE_DEBUG)
     # Do some updates of the model
-
     zoneNumber = 1
     zone1 = apsmodel.getZoneModel(zoneNumber)
-
     gaussFieldNames = zone1.getUsedGaussFieldNames()
     nGaussFields = len(gaussFieldNames)
     varioTypeList = ['SPHERICAL', 'EXPONENTIAL', 'GAUSSIAN', 'GENERAL_EXPONENTIAL', 'SPHERICAL']
@@ -177,7 +213,6 @@ def test_create_XMLModelFiles():
     azimuthAngleList = [0.0, 90.0, 125.0, 40.0, 50.0]
     dipAngleList = [0.0, 0.01, 0.005, 0.009, 0.0008]
     powerList = [1.0, 1.2, 1.3, 1.4, 1.5]
-
     for i in range(nGaussFields):
         gfName = gaussFieldNames[i]
         print('Update zone ' + str(zoneNumber) + ' and gauss field ' + gfName)
@@ -231,74 +266,27 @@ def test_create_XMLModelFiles():
             zone1.setPower(gfName, power)
             power1 = zone1.getPower(gfName)
             print('New exponent: ' + str(power1))
-
     outfile2 = 'testOut2_updated.xml'
-    apsmodel.writeModel(outfile2, printInfo)
-
+    apsmodel.writeModel(outfile2, VERY_VERBOSE_DEBUG)
     reference_file = 'testData_models/APS_updated.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
     check = filecmp.cmp(outfile2, reference_file)
-
     if check:
         print('Files are equal. OK')
     else:
         print('Files are different. NOT OK')
     assert check is True
 
-    apsGaussModel = APSGaussModel()
-    zoneNumber = 1
 
-    # Define main facies table
-    mainFaciesTable = APSMainFaciesTable()
-    fTable = fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
-    mainFaciesTable.initialize(fTable)
-    gfJobs = APSGaussFieldJobs()
-    gfJobNames = ['Job1', 'Job2']
-    gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5']]
-    gfJobs.initialize(gfJobNames, gfNamesPerJob)
-    mainRange = 1000
-    perpRange = 100
-    vertRange = 1.0
-    azimuth = 45.0
-    dip = 1.0
-    gfName = 'GRF1'
-    gaussModelList = [['GRF1', 'SPHERICAL', mainRange, perpRange, vertRange, azimuth, dip, 1.0]]
-    useTrend = 0
-    relStdDev = 0.05
-    trendModelObject = Trend3D_linear_model(None, printInfo, None)
-    azimuthTrendAngle = 0.0
-    stackingTrendAngle = 0.0
-    direct = -1
-    trendModelObject.initialize(azimuthTrendAngle, stackingTrendAngle, direct)
-
-    trendModelList = [['GRF1', useTrend, trendModelObject, relStdDev]]
-    simBoxThickness = 100.0
-    prevSeedList = [['GRF1', 92828]]
-    printInfo = 3
-    apsGaussModel.initialize(
-        zoneNumber, mainFaciesTable, gfJobs, gaussModelList,
-        trendModelList, simBoxThickness, prevSeedList, printInfo
-    )
-    gridAzimuthAngle = 0.0
-    projection = 'xy'
-    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
-    projection = 'xz'
-    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
-    projection = 'yz'
-    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
-    print('Finished')
-
-
-def case_2(faciesRealParamNameResult, gaussFieldSimScript, gridModelName, printInfo, rmsProject, rmsWorkflow,
-           zoneParamName):
+def test_case_2():
     print('')
     print('**** Case number: 2 ****')
     # Global facies table, zone facies and facies probabilities
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, printInfo
+        apsmodel, RMS_PROJECT, RMS_WORKFLOW, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME,
+        ZONE_PARAM_NAME, FACIES_REAL_PARAM_NAME_RESULT, fTable, VERY_VERBOSE_DEBUG
     )
     #  --- Zone 1 ---
     zoneNumber = 1
@@ -336,7 +324,7 @@ def case_2(faciesRealParamNameResult, gaussFieldSimScript, gridModelName, printI
         gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
         stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
         truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, printInfo
+        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
     )
     #  --- Zone 2 ---
     zoneNumber = 2
@@ -373,24 +361,23 @@ def case_2(faciesRealParamNameResult, gaussFieldSimScript, gridModelName, printI
         gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
         stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
         truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, printInfo
+        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
     )
     selectedZones = [1, 2]
     apsmodel.setSelectedZoneNumberList(selectedZones)
     apsmodel.setPreviewZoneNumber(1)
-    read_write_model(apsmodel, printInfo)
+    read_write_model(apsmodel, VERY_VERBOSE_DEBUG)
 
 
-def case_1(faciesRealParamNameResult, gaussFieldSimScript, gridModelName, printInfo, rmsProject, rmsWorkflow,
-           zoneParamName):
+def test_case_1():
     print('')
     print('**** Case number: 1 ****')
     # Global facies table, zone facies and facies probabilities
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, printInfo
+        apsmodel, RMS_PROJECT, RMS_WORKFLOW, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME,
+        ZONE_PARAM_NAME, FACIES_REAL_PARAM_NAME_RESULT, fTable, VERY_VERBOSE_DEBUG
     )
     #  --- Zone 1 ---
     zoneNumber = 1
@@ -428,7 +415,7 @@ def case_1(faciesRealParamNameResult, gaussFieldSimScript, gridModelName, printI
         gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
         stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
         truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, printInfo
+        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
     )
     #  --- Zone 2 ---
     zoneNumber = 2
@@ -466,12 +453,12 @@ def case_1(faciesRealParamNameResult, gaussFieldSimScript, gridModelName, printI
         gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
         stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
         truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, printInfo
+        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
     )
     selectedZones = [1, 2]
     apsmodel.setSelectedZoneNumberList(selectedZones)
     apsmodel.setPreviewZoneNumber(1)
-    read_write_model(apsmodel, printInfo)
+    read_write_model(apsmodel, VERY_VERBOSE_DEBUG)
 
 
 if __name__ == '__main__':
