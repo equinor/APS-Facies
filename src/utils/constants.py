@@ -440,6 +440,7 @@ class Defaults(Value):
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
     GAUSSIAN_TREND = Qt.Unchecked
+    CONDITION_TO_WELL = Qt.Unchecked
     HIDE = HideOptions.DISABLE
     DEBUG = Debug.OFF
 

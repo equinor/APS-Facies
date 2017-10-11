@@ -180,12 +180,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         buttons = {
             ZoneSelectionElements.TOGGLE:   Defaults.SEPARATE_ZONE_MODELS,
             FaciesSelectionElements.TOGGLE: Defaults.FACIES_MODELS,
+            MainWindowElements.CONDITION_TO_WELL: Defaults.CONDITION_TO_WELL,
         }
         for key, default in buttons.items():
             check_box = get_element(self, key)
             check_box.setCheckState(default)
+        self._toggle_experimental_mode()
         self._toggle_separate_zone_models()
         self._toggle_select_facies()
+        self._condition_to_wells()
 
     def _toggle_experimental_mode(self):
         experimental_check_box = get_element(self, MainWindowElements.EXPERIMENTAL_MODE)
@@ -204,7 +207,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         elif use_experimental_mode:
             # TODO:
             pass
+        condition_to_wells = get_element(self, MainWindowElements.CONDITION_TO_WELL)
+        toggle_elements(not use_experimental_mode, condition_to_wells)
 
     def _condition_to_wells(self):
+        check_box = get_element(self, MainWindowElements.CONDITION_TO_WELL)
+        toggled = check_box.isChecked()
+        assign_probability_cube = get_element(self, MainWindowElements.ASSIGN_PROBABILITY_CUBE)
+        toggle_elements(toggled, assign_probability_cube)
         # TODO: Implement
         pass
