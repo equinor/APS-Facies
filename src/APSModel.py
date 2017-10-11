@@ -717,7 +717,7 @@ class APSModel:
 
         # Add a command specifying which zone to use in for preview
         # This is temporary solution
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         if self.__previewZone > 0:

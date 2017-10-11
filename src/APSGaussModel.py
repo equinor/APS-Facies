@@ -8,6 +8,7 @@ from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
 from src.simGauss2D import simGaussField, simGaussFieldAddTrendAndTransform
 from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword
+from src.utils.constants import Debug
 
 
 class APSGaussModel:
@@ -18,11 +19,11 @@ class APSGaussModel:
     
     Constructor:
     def __init__(self,ET_Tree_zone=None, mainFaciesTable= None,modelFileName = None,
-                 printInfo=0,zoneNumber=0,simBoxThickness=0)
+                 debug_level=Debug.OFF,zoneNumber=0,simBoxThickness=0)
     
     Public functions:
     def initialize(self,inputZoneNumber,mainFaciesTable,gaussModelList,trendModelList,
-                   simBoxThickness,previewSeed,printInfo)
+                   simBoxThickness,previewSeed,debug_level=Debug.OFF)
     def getZoneNumber(self)
     def getUsedGaussFieldNames(self)
     def getVarioType(self,gaussFieldName)
@@ -124,7 +125,7 @@ class APSGaussModel:
         }
 
         self.__className = 'APSGaussModel'
-        self.__printInfo = 0
+        self.__debug_level = 0
         self.__mainFaciesTable = None
         self.__varioForGFModel = []
         self.__trendForGFModel = []
@@ -133,17 +134,16 @@ class APSGaussModel:
         self.__zoneNumber = 0
         self.__modelFileName = None
 
-
-    def __init__(self,ET_Tree_zone=None, mainFaciesTable=None, gaussFieldJobs=None, modelFileName=None,
-                 printInfo=0,zoneNumber=0,simBoxThickness=0):
+    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, gaussFieldJobs=None, modelFileName=None,
+                 debug_level=Debug.OFF, zoneNumber=0, simBoxThickness=0):
         """
-        Decription: Can create empty object or object with data read from xml tree representing the model file.
+        Description: Can create empty object or object with data read from xml tree representing the model file.
         """
         self.__setEmpty()
 
         if ET_Tree_zone is not None:
             # Get data from xml tree
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Call init ' + self.__className + ' and read from xml file')
 
             assert mainFaciesTable
@@ -155,7 +155,7 @@ class APSGaussModel:
             self.__zoneNumber = zoneNumber
             self.__simBoxThickness = simBoxThickness
             self.__modelFileName = modelFileName
-            self.__printInfo = printInfo
+            self.__debug_level = debug_level
 
             self.__interpretXMLTree(ET_Tree_zone, gaussFieldJobs)
 
@@ -186,37 +186,45 @@ class APSGaussModel:
                     ''.format(self.__modelFileName, gfName)
                 )
 
-            range1 = getFloatCommand(vario, 'MainRange', 'Vario', minValue=0.0,
-                                     modelFile=self.__modelFileName)
+            range1 = getFloatCommand(
+                vario, 'MainRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
+            )
 
-            range2 = getFloatCommand(vario, 'PerpRange', 'Vario', minValue=0.0,
-                                     modelFile=self.__modelFileName)
+            range2 = getFloatCommand(
+                vario, 'PerpRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
+            )
 
             range3 = getFloatCommand(vario, 'VertRange', 'Vario', minValue=0.0,
                                      modelFile=self.__modelFileName)
 
-            azimuth = getFloatCommand(vario, 'AzimuthAngle', 'Vario',
-                                      minValue=self.__minValue['AzimuthAngle'],
-                                      maxValue=self.__maxValue['AzimuthAngle'],
-                                      modelFile=self.__modelFileName)
+            azimuth = getFloatCommand(
+                vario, 'AzimuthAngle', 'Vario',
+                minValue=self.__minValue['AzimuthAngle'],
+                maxValue=self.__maxValue['AzimuthAngle'],
+                modelFile=self.__modelFileName
+            )
 
-            dip = getFloatCommand(vario, 'DipAngle', 'Vario',
-                                  minValue=self.__minValue['DipAngle'],
-                                  maxValue=self.__maxValue['DipAngle'],
-                                  modelFile=self.__modelFileName)
+            dip = getFloatCommand(
+                vario, 'DipAngle', 'Vario',
+                minValue=self.__minValue['DipAngle'],
+                maxValue=self.__maxValue['DipAngle'],
+                modelFile=self.__modelFileName
+            )
 
             power = 1.0
             if varioType == 'GENERAL_EXPONENTIAL':
-                power = getFloatCommand(vario, 'Power', 'Vario',
-                                        minValue=self.__minValue['Power'],
-                                        maxValue=self.__maxValue['Power'],
-                                        modelFile=self.__modelFileName)
+                power = getFloatCommand(
+                    vario, 'Power', 'Vario',
+                    minValue=self.__minValue['Power'],
+                    maxValue=self.__maxValue['Power'],
+                    modelFile=self.__modelFileName
+                )
 
             # Read trend model for current GF
             trendObjXML = gf.find('Trend')
             trendRuleModelObj = None
-            if trendObjXML != None:
-                if self.__printInfo >= 3:
+            if trendObjXML is not None:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Read trend')
                 useTrend = 1
 
@@ -228,14 +236,15 @@ class APSGaussModel:
                     )
                 trendName = trendObjXML.get('name')
                 if trendName == 'Linear3D':
-                    trendRuleModelObj = Trend3D_linear_model(trendObjXML, self.__printInfo, self.__modelFileName)
+                    trendRuleModelObj = Trend3D_linear_model(trendObjXML, self.__debug_level, self.__modelFileName)
                 else:
                     raise NameError(
-                        'Error in ' + self.__className + '\n'
-                                                         'Error: Specified name of trend function ' + trendName + ' is not implemented.'
+                        'Error in {className}\n'
+                        'Error: Specified name of trend function {} is not implemented.'
+                        ''.format(className=self.__className, trendName=trendName)
                     )
             else:
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: No trend is specified')
                 useTrend = 0
                 trendRuleModelObj = None
@@ -243,16 +252,20 @@ class APSGaussModel:
 
             # Read RelstdDev
             if useTrend == 1:
-                relStdDev = getFloatCommand(gf, 'RelStdDev', 'GaussField', 0.0,
-                                            modelFile=self.__modelFileName)
+                relStdDev = getFloatCommand(
+                    gf, 'RelStdDev', 'GaussField', 0.0,
+                    modelFile=self.__modelFileName
+                )
 
             # Read preview seed for current GF
             seed = getIntCommand(gf, 'SeedForPreview', 'GaussField', modelFile=self.__modelFileName)
             item = [gfName, seed]
 
             # Add gauss field parameters to data structure
-            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, azimuth, dip, power,
-                                       useTrend, relStdDev, trendRuleModelObj)
+            self.updateGaussFieldParam(
+                gfName, varioType, range1, range2, range3, azimuth,
+                dip, power, useTrend, relStdDev, trendRuleModelObj
+            )
             # Set preview simulation start seed for gauss field
             self.setSeedForPreviewSimulation(gfName, seed)
 
@@ -260,12 +273,13 @@ class APSGaussModel:
 
         if self.__varioForGFModel is None:
             raise NameError(
-                'Error when reading model file: ' + self.__modelFileName + '\n'
-                                                                           'Error: Missing keyword GaussField under '
-                                                                           'keyword Zone'
+                'Error when reading model file: {modelName}\n'
+                'Error: Missing keyword GaussField under '
+                'keyword Zone'
+                ''.format(modelName=self.__modelFileName)
             )
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Gauss field variogram parameter for current zone model:')
             print(repr(self.__varioForGFModel))
 
@@ -277,9 +291,9 @@ class APSGaussModel:
 
     def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
                    gaussModelList, trendModelList,
-                   simBoxThickness, previewSeedList, printInfo):
+                   simBoxThickness, previewSeedList, debug_level=Debug.OFF):
 
-        if printInfo >= 3:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
         # Set default values
@@ -303,7 +317,7 @@ class APSGaussModel:
         SVALUE = self.__index_seed['Seed']
 
         self.__zoneNumber = inputZoneNumber
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__simBoxThickness = simBoxThickness
         self.__mainFaciesTable = mainFaciesTable
 
@@ -493,7 +507,7 @@ class APSGaussModel:
             return trendModelObj
 
     def printInfo(self):
-        return self.__printInfo
+        return self.__debug_level
 
     def __getGFIndex(self, gfName):
         GNAME = self.__index_vario['Name']
@@ -734,7 +748,7 @@ class APSGaussModel:
         SNAME = self.__index_seed['Name']
         SVALUE = self.__index_seed['Seed']
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         # Add child command GaussField
@@ -844,7 +858,7 @@ class APSGaussModel:
                 trendAzimuth = trendObj.getAzimuth() - gridAzimuthAngle
 
             relSigma = self.__trendForGFModel[i][TSTD]
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Simulate gauss field: ' + name)
                 print('Debug output: VarioType: ' + str(varioType))
                 print('Debug output: VarioTypeNumber: ' + str(varioTypeNumber))
@@ -871,7 +885,7 @@ class APSGaussModel:
 
             [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAzimuthAngle, projection)
             azimuthVario = angle1
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
                 print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
@@ -880,9 +894,11 @@ class APSGaussModel:
             # Angle relative to first  axis is input in degrees.
             azimuthVario = 90.0 - azimuthVario
             gfRealization = np.zeros(nx * ny, float)
-            [gfRealization] = simGaussFieldAddTrendAndTransform(seedValue, nx, ny, xsize, ysize,
-                                                                varioTypeNumber, range1, range2, azimuthVario, power,
-                                                                useTrend, trendAzimuth, relSigma, self.__printInfo)
+            [gfRealization] = simGaussFieldAddTrendAndTransform(
+                seedValue, nx, ny, xsize, ysize,
+                varioTypeNumber, range1, range2, azimuthVario, power,
+                useTrend, trendAzimuth, relSigma, self.__debug_level
+            )
 
             gaussFields.append(gfRealization)
         # End for        
@@ -941,7 +957,7 @@ class APSGaussModel:
             azimuthVario = self.getAnisotropyAzimuthAngle(name)
             dipVario = self.getAnisotropyDipAngle(name)
             power = self.getPower(name)
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Within simGaussFieldWithTrendAndTransformNew')
                 print('Debug output: Simulate gauss field: ' + name)
                 print('Debug output: VarioType: ' + str(varioType))
@@ -957,7 +973,7 @@ class APSGaussModel:
             # Calculate 2D projection of the correlation ellipsoid
             [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAzimuthAngle, projection)
             azimuthVario = angle1
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
                 print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
@@ -966,7 +982,7 @@ class APSGaussModel:
             residualField = simGaussField(seedValue, gridDim1, gridDim2, size1, size2,
                                           varioTypeNumber, range1, range2,
                                           azimuthVario, power,
-                                          self.__printInfo)
+                                          self.__debug_level)
 
             # Calculate trend
             [useTrend, trendModelObject, relStdDev] = self.getTrendRuleModel(name)
@@ -999,7 +1015,7 @@ class APSGaussModel:
         """
         # Standard deviation
         sigma = relSigma * trendMaxMinDifference
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Relative standard deviation = ' + str(relSigma))
             print('Debug output:  Difference between max value and min value of trend = ' + str(trendMaxMinDifference))
             print('Debug output:  Calculated standard deviation = ' + str(sigma))
@@ -1022,7 +1038,7 @@ class APSGaussModel:
         regarded as outcome from a probability distribution is uniform.
         """
         # Transform into uniform distribution
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Transform 2D Gauss field by empiric transformation to uniform distribution')
             print(' ')
 
@@ -1070,7 +1086,7 @@ class APSGaussModel:
          for x,y plane with z = 0 and for y,z plane for x = 0.
          """
         funcName = 'calc2DVarioFrom3DVario'
-        if self.__printInfo>=3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Function: {}'.format(funcName))
         ry = self.getMainRange(gaussFieldName)
         rx = self.getPerpRange(gaussFieldName)
@@ -1112,7 +1128,7 @@ class APSGaussModel:
         tmp = M_diag.dot(R)
         Rt = np.transpose(R)
         M = Rt.dot(tmp)
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: M:')
             print(M)
             print(' ')
@@ -1137,16 +1153,16 @@ class APSGaussModel:
 
     def __calcProjection(self, U):
         funcName = '__calcProjection'
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: U:')
             print(U)
         w, v = np.linalg.eigh(U)
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Eigenvalues:')
             print(w)
             print('Debug output: Eigenvectors')
             print(v)
-            
+
         # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction 
         if v[0, 1] != 0.0:
             angle = np.arctan(v[0, 0] / v[0, 1])
@@ -1158,7 +1174,7 @@ class APSGaussModel:
             angle = 90.0
         angle1 = angle
         range1 = np.sqrt(1.0 / w[0])
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
                   ''.format(funcName=funcName, angle=str(angle1), range=str(range1)))
 
@@ -1173,7 +1189,7 @@ class APSGaussModel:
             angle = 90.0
         angle2 = angle
         range2 = np.sqrt(1.0 / w[1])
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
                   ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
 

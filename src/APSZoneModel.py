@@ -8,17 +8,13 @@ from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSGaussModel import APSGaussModel
 from src.APSMainFaciesTable import APSMainFaciesTable
-from src.Trend3D_linear_model_xml import Trend3D_linear_model
-from src.Trunc2D_Angle_Overlay_xml import Trunc2D_Angle_Overlay
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 # To be outphased:
-from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
-# Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
-from src.simGauss2D import simGaussFieldAddTrendAndTransform
+# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.utils.constants import Debug
-from src.utils.methods import isNumber
+from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword, getTextCommand
 
 
 class APSZoneModel:
@@ -145,7 +141,7 @@ class APSZoneModel:
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
-        self.__printInfo = getIntCommand(root, kw, defaultValue=1, required=False)
+        self.__debug_level = getIntCommand(root, kw, defaultValue=1, required=False)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print(' ')
@@ -188,12 +184,12 @@ class APSZoneModel:
                 # Read facies probabilties
                 self.__faciesProbObject = APSFaciesProb(
                     zone, mainFaciesTable, modelFileName,
-                    self.__printInfo, self.__useConstProb, self.__zoneNumber
+                    self.__debug_level, self.__useConstProb, self.__zoneNumber
                 )
                 # Read Gauss Fields model parameters
                 self.__gaussModelObject = APSGaussModel(
                     zone, mainFaciesTable, gaussFieldJobs, modelFileName,
-                    self.__printInfo, self.__zoneNumber, self.__simBoxThickness
+                    self.__debug_level, self.__zoneNumber, self.__simBoxThickness
                 )
 
                 # Read truncation rule for zone model
@@ -226,16 +222,16 @@ class APSZoneModel:
                     if truncRuleName == 'Trunc3D_Bayfill':
                         self.__truncRule = Trunc3D_bayfill(
                             trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                            self.__printInfo, modelFileName
+                            self.__debug_level, modelFileName
                         )
 
                     elif truncRuleName == 'Trunc2D_Angle':
                         self.__truncRule = Trunc2D_Angle(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__printInfo, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__debug_level, modelFileName
                         )
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.__truncRule = Trunc2D_Cubic(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__printInfo, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__debug_level, modelFileName
                         )
                     else:
                         raise NameError(
@@ -367,7 +363,7 @@ class APSZoneModel:
             self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
 
     def printInfo(self):
-        return self.__printInfo
+        return self.__debug_level
 
     def getHorizonNameForVarioTrendMap(self):
         return copy.copy(self.__horizonNameForVarioTrendMap)
@@ -472,7 +468,7 @@ class APSZoneModel:
         if len(probDefined) != nFacies:
             raise ValueError(
                 'Error: In class: ' + self.__className + '\n'
-                'Error: Mismatch in input to applyTruncations'
+                                                         'Error: Mismatch in input to applyTruncations'
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
@@ -592,7 +588,7 @@ class APSZoneModel:
     def XMLAddElement(self, parent):
 
         # Add command Zone and all its childs
-        if self.debug_level >= Debug.VERY_VERBOSE
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'

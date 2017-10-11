@@ -207,7 +207,7 @@ apsmodel.addNewZone(zoneObject)
 selectedZones = [1]
 apsmodel.setSelectedZoneNumberList(selectedZones)
 apsmodel.setPreviewZoneNumber(1)
-apsmodel.setPrintInfo(1)
+apsmodel.setPrintInfo(Debug.SOMEWHAT_VERBOSE)
 outfile = 'testOut' + '_' + truncRuleName + '.xml'
 apsmodel.writeModel(outfile, debug_level)
 

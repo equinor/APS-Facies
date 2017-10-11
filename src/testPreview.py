@@ -15,6 +15,7 @@ from src import (
     Trend3D_linear_model_xml, Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D
 )
 from src.utils.methods import writeFile
+from src.utils.constants import Debug
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
@@ -58,7 +59,56 @@ def defineColors(nFacies):
     return colors
 
 
-def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, previewLZ, previewScale=0, printInfo=0):
+def writeFile(fileName, a, nx, ny):
+    with open(fileName, 'w') as file:
+        # Choose an arbitary heading
+        outstring = '-996  ' + str(ny) + '  50.000000     50.000000\n'
+        outstring = outstring + '637943.187500   678043.187500  4334008.000000  4375108.000000\n'
+        outstring = outstring + ' ' + str(nx) + ' ' + ' 0.000000   637943.187500  4334008.000000\n'
+        outstring = outstring + '0     0     0     0     0     0     0\n'
+
+        count = 0
+        text = ''
+        print('len(a): ' + str(len(a)))
+        for j in range(len(a)):
+            text = text + str(a[j]) + '  '
+            count += 1
+            if count >= 5:
+                text = text + '\n'
+                outstring += text
+                count = 0
+                text = ''
+        if count > 0:
+            outstring += text + '\n'
+        file.write(outstring)
+    print('Write file: ' + fileName)
+    return
+
+
+def readFile(fileName):
+    print('Read file: ' + fileName)
+    with open(fileName, 'r') as file:
+        inString = file.read()
+        words = inString.split()
+        n = len(words)
+        print('Number of words: ' + str(n))
+
+        ny = int(words[1])
+        nx = int(words[8])
+        print('nx,ny: ' + str(nx) + ' ' + str(ny))
+        print('Number of values: ' + str(len(words) - 19))
+        a = np.zeros(nx * ny, float)
+        for i in range(19, len(words)):
+            a[i - 19] = float(words[i])
+
+    return [a, nx, ny]
+
+
+def set2DGridDimension(
+        nx, ny, nz, previewCrossSection,
+        previewLX, previewLY, previewLZ,
+        previewScale=0, debug_level=Debug.OFF
+):
     MIN_NZ = 100
     MAX_NZ = 500
     MIN_NX = 300
@@ -105,9 +155,9 @@ def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, pr
         else:
             dy = dx
             nyPreview = int(previewLY / dy)
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('dx = {}  dy= {}'.format(str(dx),str(dy)))
-        
+
     if previewScale == 0:
         # Rescale to same size as horizontal
         if previewCrossSection == 'IK':
@@ -160,7 +210,7 @@ def main():
 
     print('- Read file: ' + modelFileName)
     apsModel = APSModel.APSModel(modelFileName)
-    printInfo = apsModel.printInfo()
+    debug_level = apsModel.debug_level()
     zoneParamName = apsModel.getZoneParamName()
     mainFaciesTable = apsModel.getMainFaciesTable()
 
@@ -168,7 +218,7 @@ def main():
     previewZoneNumber = apsModel.getPreviewZoneNumber()
     previewCrossSection = apsModel.getPreviewCrossSection()
     previewScale = apsModel.getPreviewScale()
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: previewZoneNumber: ' + ' ' + str(previewZoneNumber))
         print('Debug output: previewCrossSection: ' + ' ' + str(previewCrossSection))
         print('Debug output: previewScale: ' + str(previewScale))
@@ -192,8 +242,10 @@ def main():
     print('- Size of simulation box: LX: {0} LY:{1} LZ: {2}'.format(str(simBoxXsize), str(simBoxYsize), str(simBoxZsize)))
     print('- Simulate 2D cross section in: {} cross section'.format(previewCrossSection))
 
-    [nxPreview, nyPreview, nzPreview] = set2DGridDimension(nx, ny, nz, previewCrossSection,
-                                                           simBoxXsize, simBoxYsize, simBoxZsize, previewScale,printInfo)
+    [nxPreview, nyPreview, nzPreview] = set2DGridDimension(
+        nx, ny, nz, previewCrossSection,
+        simBoxXsize, simBoxYsize, simBoxZsize, previewScale,debug_level
+    )
     if previewCrossSection == 'IJ':
         print('- Preview simulation grid dimension: nx: {0} ny:{1}'.format(str(nxPreview), str(nyPreview)))
     elif previewCrossSection == 'IK':
@@ -295,7 +347,7 @@ def main():
 
     if setWrite == 1:
         writeFile('facies2D.dat', facies, gridDim1, gridDim2)
-    if printInfo >= 3:
+    if debug_level >= Debug.VERY_VERBOSE:
         print(' ')
         print('Facies name:   Simulated fractions:    Specified fractions:')
         for i in range(nFacies):
@@ -478,7 +530,7 @@ def main():
     else:
         imFac = axFacies.imshow(rot_imFac, interpolation='none', aspect='equal', cmap=cm, clim=(1, nFacies), origin='upper')
         axFacies.set_title('Facies')
-        
+
     # Plot crossplot between GRF1 and GRF2,3,4,5
     if nGaussFields >= 2:
         # Cross plot between G1 and G2

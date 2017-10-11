@@ -1,11 +1,10 @@
 #!/bin/env python
-import sys
 from xml.etree.ElementTree import Element
 
 import copy
 
-from src.xmlFunctions import getIntCommand, getKeyword
 from src.utils.constants import Debug
+from src.xmlFunctions import getIntCommand, getKeyword
 
 
 class APSGaussFieldJobs:
@@ -68,10 +67,12 @@ class APSGaussFieldJobs:
     def __interpretXMLTree(self, ET_Tree):
         root = ET_Tree.getroot()
 
-        self.__printInfo = getIntCommand(root, 'PrintInfo', 'Root',
-                                         defaultValue=1,
-                                         modelFile=self.__modelFileName,
-                                         required=False)
+        self.__debug_info = getIntCommand(
+            root, 'PrintInfo', 'Root',
+            defaultValue=1,
+            modelFile=self.__modelFileName,
+            required=False
+        )
 
         obj = getKeyword(root, 'GaussFieldJobNames', 'Root', modelFile=self.__modelFileName)
 
@@ -128,7 +129,7 @@ class APSGaussFieldJobs:
             raise ValueError(
                 'In model file {} in command GaussFieldJobNames.\n'
                 'Specified Gaussian field names are not unique'.format(self.__modelFileName)
-             )
+            )
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Number of gauss field jobs: ' + str(self.__nJobs))
             print('Debug output: Number of gauss field names: ' + str(self.__nGFNames))
@@ -137,7 +138,7 @@ class APSGaussFieldJobs:
             print('Debug output: Gauss field names per job: ')
             print(repr(self.__gaussFieldNamesPerJob))
 
-    def initialize(self, gfJobNames, gfNamesPerJob, printInfo=0):
+    def initialize(self, gfJobNames, gfNamesPerJob, debug_level=Debug.OFF):
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
