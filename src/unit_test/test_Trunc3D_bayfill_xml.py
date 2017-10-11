@@ -5,6 +5,10 @@ from xml.etree.ElementTree import Element
 
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.unit_test.constants import (
+    BAYFILL_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, NO_VERBOSE_DEBUG,
+    OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,
+)
 from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, writePolygons
 from src.utils.methods import prettify
 
@@ -134,116 +138,134 @@ def truncMapsystemPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outP
 
 
 def test_Trunc3DBayfill():
-    outputModelFileName1 = 'test_Trunc_output1.xml'
-    outputModelFileName2 = 'test_Trunc_output2.xml'
-    outPolyFile1 = 'test_Trunc_polygons1.dat'
-    outPolyFile2 = 'test_Trunc_polygons2.dat'
-    gaussFieldFiles = ['testData_Bayfill/a1.dat', 'testData_Bayfill/a2.dat', 'testData_Bayfill/a3.dat']
-
-    nGaussFields = 3
-    printInfo = 0
     nCase = 5
     start = 1
     end = 5
     for testCase in range(start, end + 1):
         print('Case number: ' + str(testCase))
-        faciesReferenceFile = 'testData_Bayfill/test_case_' + str(testCase) + '.dat'
-        #    faciesOutputFile    = 'testData_Bayfill/test_case_' + str(testCase) + '.dat'
-        faciesOutputFile = 'facies2D.dat'
 
         if testCase == 1:
-            fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
-            faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
-            faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
-            faciesProb = [0.2, 0.2, 0.2, 0.2, 0.2]
-            sf_value = 0.0
-            sf_name = ''
-            ysf = 0.0
-            sbhd = 0.0
-            useConstTruncParam = True
-            run(
-                fTable, faciesInTruncRule, faciesInZone, faciesOutputFile, faciesProb, faciesReferenceFile,
-                gaussFieldFiles, nGaussFields, outPolyFile1, outPolyFile2, outputModelFileName1, outputModelFileName2,
-                printInfo, sbhd, sf_name, sf_value, useConstTruncParam, ysf
-            )
+            test_case_1()
 
         elif testCase == 2:
-            fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
-            faciesInZone = ['F2', 'F5', 'F4', 'F1', 'F3']
-            faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
-            faciesProb = [0.01, 0.19, 0.4, 0.2, 0.2]
-            sf_value = 0.5
-            sf_name = ''
-            ysf = 0.0
-            sbhd = 0.0
-            useConstTruncParam = True
-            run(
-                fTable, faciesInTruncRule, faciesInZone, faciesOutputFile, faciesProb, faciesReferenceFile,
-                gaussFieldFiles, nGaussFields, outPolyFile1, outPolyFile2, outputModelFileName1, outputModelFileName2,
-                printInfo, sbhd, sf_name, sf_value, useConstTruncParam, ysf
-            )
+            test_case_2()
 
         elif testCase == 3:
-            fTable = {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'}
-            faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
-            faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
-            faciesProb = [0.8, 0.02, 0.0, 0.08, 0.1]
-            sf_value = 1.0
-            sf_name = ''
-            ysf = 0.0
-            sbhd = 0.0
-            useConstTruncParam = True
-            run(
-                fTable, faciesInTruncRule, faciesInZone, faciesOutputFile, faciesProb, faciesReferenceFile,
-                gaussFieldFiles, nGaussFields, outPolyFile1, outPolyFile2, outputModelFileName1, outputModelFileName2,
-                printInfo, sbhd, sf_name, sf_value, useConstTruncParam, ysf
-            )
+            test_case_3()
 
         elif testCase == 4:
-            fTable = {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'}
-            faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
-            faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
-            faciesProb = [0.1, 0.8, 0.05, 0.05, 0.0]
-            sf_value = 1.0
-            sf_name = ''
-            ysf = 1.0
-            sbhd = 0.0
-            useConstTruncParam = True
-            run(
-                fTable, faciesInTruncRule, faciesInZone, faciesOutputFile, faciesProb, faciesReferenceFile,
-                gaussFieldFiles, nGaussFields, outPolyFile1, outPolyFile2, outputModelFileName1, outputModelFileName2,
-                printInfo, sbhd, sf_name, sf_value, useConstTruncParam, ysf
-            )
+            test_case_4()
 
         elif testCase == 5:
-            fTable = {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'}
-            faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
-            faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
-            faciesProb = [0.1, 0.1, 0.15, 0.75, 0.0]
-            sf_value = 0.1
-            sf_name = ''
-            ysf = 1.0
-            sbhd = 1.0
-            useConstTruncParam = True
-            run(
-                fTable, faciesInTruncRule, faciesInZone, faciesOutputFile, faciesProb, faciesReferenceFile,
-                gaussFieldFiles, nGaussFields, outPolyFile1, outPolyFile2, outputModelFileName1, outputModelFileName2,
-                printInfo, sbhd, sf_name, sf_value, useConstTruncParam, ysf
-            )
+            test_case_5()
 
 
-def run(fTable, faciesInTruncRule, faciesInZone, faciesOutputFile, faciesProb, faciesReferenceFile, gaussFieldFiles,
-        nGaussFields, outPolyFile1, outPolyFile2, outputModelFileName1, outputModelFileName2, printInfo, sbhd, sf_name,
-        sf_value, useConstTruncParam, ysf):
+def test_case_1():
+    fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
+    faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
+    faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
+    faciesProb = [0.2, 0.2, 0.2, 0.2, 0.2]
+    sf_value = 0.0
+    sf_name = ''
+    ysf = 0.0
+    sbhd = 0.0
+    nGaussFields = 3
+    useConstTruncParam = True
+    faciesReferenceFile = get_facies_reference_file_path(1)
+    run(
+        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
+        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+    )
+
+
+def test_case_2():
+    fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
+    faciesInZone = ['F2', 'F5', 'F4', 'F1', 'F3']
+    faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
+    faciesProb = [0.01, 0.19, 0.4, 0.2, 0.2]
+    sf_value = 0.5
+    sf_name = ''
+    ysf = 0.0
+    sbhd = 0.0
+    nGaussFields = 3
+    useConstTruncParam = True
+    faciesReferenceFile = get_facies_reference_file_path(2)
+    run(
+        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
+        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+    )
+
+
+def test_case_3():
+    fTable = {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'}
+    faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
+    faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
+    faciesProb = [0.8, 0.02, 0.0, 0.08, 0.1]
+    sf_value = 1.0
+    sf_name = ''
+    ysf = 0.0
+    sbhd = 0.0
+    nGaussFields = 3
+    useConstTruncParam = True
+    faciesReferenceFile = get_facies_reference_file_path(3)
+    run(
+        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
+        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+    )
+
+
+def test_case_4():
+    fTable = {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'}
+    faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
+    faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
+    faciesProb = [0.1, 0.8, 0.05, 0.05, 0.0]
+    sf_value = 1.0
+    sf_name = ''
+    ysf = 1.0
+    sbhd = 0.0
+    nGaussFields = 3
+    useConstTruncParam = True
+    faciesReferenceFile = get_facies_reference_file_path(4)
+    run(
+        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
+        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+    )
+
+
+def test_case_5():
+    fTable = {1: 'F2', 2: 'F1', 3: 'F3', 4: 'F5', 5: 'F4'}
+    faciesInZone = ['F3', 'F2', 'F1', 'F4', 'F5']
+    faciesInTruncRule = ['F1', 'F2', 'F3', 'F4', 'F5']
+    faciesProb = [0.1, 0.1, 0.15, 0.75, 0.0]
+    sf_value = 0.1
+    sf_name = ''
+    ysf = 1.0
+    sbhd = 1.0
+    nGaussFields = 3
+    useConstTruncParam = True
+    faciesReferenceFile = get_facies_reference_file_path(5)
+    run(
+        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
+        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+    )
+
+
+def get_facies_reference_file_path(testCase):
+    faciesReferenceFile = 'testData_Bayfill/test_case_' + str(testCase) + '.dat'
+    return faciesReferenceFile
+
+
+def run(fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
+        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf):
     [truncRule, truncRule2] = initialize_write_read(
-        outputModelFileName1, outputModelFileName2, fTable, faciesInZone,
-        faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam, printInfo
+        OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, fTable, faciesInZone,
+        faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam, NO_VERBOSE_DEBUG
     )
     getClassName(truncRule)
     getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule)
-    truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2)
+    truncMapPolygons(truncRule, truncRule2, faciesProb, OUT_POLY_FILE1, OUT_POLY_FILE2)
     apply_truncations(
-        truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, printInfo
+        truncRule, faciesReferenceFile, nGaussFields, BAYFILL_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, NO_VERBOSE_DEBUG
     )
 
 

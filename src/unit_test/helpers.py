@@ -106,3 +106,8 @@ def writePolygons(fileName, polygons, printInfo=0):
                     print('x,y: ' + str(pt[0]) + ' ' + str(pt[1]))
                 file.write(str(pt))
                 file.write('\n')
+
+
+def get_cubic_facies_reference_file_path(testCase):
+    faciesReferenceFile = 'testData_Cubic/test_case_' + str(testCase) + '.dat'
+    return faciesReferenceFile
