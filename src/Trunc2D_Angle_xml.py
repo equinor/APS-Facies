@@ -87,41 +87,41 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Variables containing truncations for the 2D truncation map
         # The input direction angles can be file names in case trend parameters for these are specified
-        self.__faciesAlphaName = []
+        self._faciesAlphaName = []
 
         # List of angles in case no trend of truncation parameter is used
         # and in case trend parameters are used for truncation parameters,
         # each element in the list is a 3D parameter with values.
-        self.__faciesAlpha = []
+        self._faciesAlpha = []
 
-        self.__probFracPerPolygon = []
-        self.__nPolygons = 0
+        self._probFracPerPolygon = []
+        self._nPolygons = 0
 
         # Variables for the internal data structure
-        self.__vxLine = []
-        self.__vyLine = []
-        self.__vxNormal = []
-        self.__vyNormal = []
-        self.__x0Normal = []
-        self.__y0Normal = []
-        self.__fNrLine = []
-        self.__faciesPolygons = []
-        self.__faciesIndxPerPolygon = []
-        self.__shiftAlphaTolerance = 0.001
-        self.__nCountShiftAlpha = 0
+        self._vxLine = []
+        self._vyLine = []
+        self._vxNormal = []
+        self._vyNormal = []
+        self._x0Normal = []
+        self._y0Normal = []
+        self._fNrLine = []
+        self._faciesPolygons = []
+        self._faciesIndxPerPolygon = []
+        self._shiftAlphaTolerance = 0.001
+        self._nCountShiftAlpha = 0
         # Define if truncation parameter (angles) are constant for all grid cells or
         # vary from cell to cell.
-        self.__useConstTruncModelParam = True
+        self._useConstTruncModelParam = True
 
         # Define disctionary to be used in memoization for optimalization
         # In this dictionary use key equal to faciesProb and save faciespolygon
-        self.__memo = {}
-        self.__nCalc = 0
-        self.__nLookup = 0
-        self.__useMemoization = 1
+        self._memo = {}
+        self._nCalc = 0
+        self._nLookup = 0
+        self._useMemoization = 1
         # To make a lookup key from facies probability, round off input facies probability
         # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
-        self.__keyResolution = 100
+        self._keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
                  debug_level=Debug.OFF, modelFileName=None):
@@ -200,14 +200,14 @@ class Trunc2D_Angle(Trunc2D_Base):
         kw = 'UseConstTruncParam'
         useParamObj = trRuleXML.find(kw)
         if useParamObj is None:
-            self.__useConstTruncModelParam = True
+            self._useConstTruncModelParam = True
         else:
             text = useParamObj.text
             val = int(text.strip())
             if val == 0:
-                self.__useConstTruncModelParam = False
+                self._useConstTruncModelParam = False
             else:
-                self.__useConstTruncModelParam = True
+                self._useConstTruncModelParam = True
 
         kw = 'Facies'
         nPolygons = 0
@@ -219,11 +219,11 @@ class Trunc2D_Angle(Trunc2D_Base):
                     'Error when reading model file: {}\n'
                     'Error: Read truncation rule: {}\n'
                     'Error: Missing keyword {} under keyword TruncationRule.'
-                    ''.format(modelFileName, self.__className, kw)
+                    ''.format(modelFileName, self._className, kw)
                 )
             fName = faciesObj.get('name')
             [nFacies, indx, fIndx, isNewFacies] = self._addFaciesToTruncRule(fName)
-            self.__faciesIndxPerPolygon.append(indx)
+            self._faciesIndxPerPolygon.append(indx)
 
             kw2 = 'Angle'
             # Input angle is anticlockwise rotation from first axis and in degrees.
@@ -233,15 +233,15 @@ class Trunc2D_Angle(Trunc2D_Base):
                     'Error when reading model file: {}\n'
                     'Error: Read truncation rule: {}\n'
                     'Error: Missing keyword {} under keyword Facies under keyword TruncationRule'
-                    ''.format(modelFileName, self.__className, kw2)
+                    ''.format(modelFileName, self._className, kw2)
                 )
             text = angleObj.text
-            if self.__useConstTruncModelParam:
+            if self._useConstTruncModelParam:
                 value = float(text.strip())
-                self.__faciesAlpha.append(value)
+                self._faciesAlpha.append(value)
             else:
                 paramNameAlpha = copy.copy(text.strip())
-                self.__faciesAlphaName.append([fName, paramNameAlpha])
+                self._faciesAlphaName.append([fName, paramNameAlpha])
 
             kw3 = 'ProbFrac'
             # Input prob fraction must be in interval [0,1] and for each facies this fraction must
@@ -252,7 +252,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                     'Error when reading model file: {}\n'
                     'Error: Read truncation rule: {}\n'
                     'Error: Missing keyword {} under keyword Facies under keyword TruncationRule'
-                    ''.format(modelFileName, self.__className, kw3)
+                    ''.format(modelFileName, self._className, kw3)
                 )
             probFrac = float(pFracObj.text)
             if probFrac < 0.0 or probFrac > 1.0:
@@ -261,7 +261,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                     'Error: Read truncation rule: {}\n'
                     'Error: Probability fraction specified for {} in keyword {}\n'
                     ' under keyword Facies under keyword TruncationRule is: {} which is outside [0,1]'
-                    ''.format(modelFileName, self.__className, fName, kw3, probFrac)
+                    ''.format(modelFileName, self._className, fName, kw3, probFrac)
                 )
 
             item = [indx, probFrac]
@@ -276,23 +276,23 @@ class Trunc2D_Angle(Trunc2D_Base):
                 self._orderIndex.append(fIndx)
         # End read Facies
 
-        self.__probFracPerPolygon = probFracPerPolygon
-        self.__nPolygons = nPolygons
+        self._probFracPerPolygon = probFracPerPolygon
+        self._nPolygons = nPolygons
 
         # Check the sum over background facies for probfrac
         # Note that overlay facies is not a part of this calculations. 
         for i in range(self._nBackGroundFacies):
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                fName = self.__faciesInTruncRule[i]
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                fName = self._faciesInTruncRule[i]
                 print('Debug output: Sum prob frac for facies {0} is: {1}'.format(fName, str(sumProbFrac[i])))
 
             if abs(sumProbFrac[i] - 1.0) > 0.001:
-                fName = self.__faciesInTruncRule[i]
+                fName = self._faciesInTruncRule[i]
                 raise ValueError(
                     'Error in: {0}\n'
                     '         Sum of probability fractions over all polygons for facies {1} is not 1.0\n'
                     '         The sum is: {2}'
-                    ''.format(self.__className, fName, str(sumProbFrac[i]))
+                    ''.format(self._className, fName, str(sumProbFrac[i]))
                 )
 
     def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
@@ -328,7 +328,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                  debug_level - an integer number from 0 to 3 defining how much to be printed to screen during runs.
         """
         # Initialize data structure
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
         self.__setEmpty()
@@ -339,24 +339,24 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Set data structure for truncation rule
         # Loop over all polygons in truncation map
-        self.__useConstTruncModelParam = useConstTruncParam
-        self.__nPolygons = 0
+        self._useConstTruncModelParam = useConstTruncParam
+        self._nPolygons = 0
         for item in truncStructure:
             fName = item[0]
             probFrac = item[2]
-            if self.__useConstTruncModelParam == 1:
+            if self._useConstTruncModelParam == 1:
                 angle = float(item[1])
-                self.__faciesAlpha.append(angle)
+                self._faciesAlpha.append(angle)
             else:
                 angleTrendParamName = copy.copy(item[1])
-                self.__faciesAlphaName.append(angleTrendParamName)
+                self._faciesAlphaName.append(angleTrendParamName)
 
             [nFaciesInTruncRule, indx, fIndx, isNewFacies] = self._addFaciesToTruncRule(fName)
-            self.__faciesIndxPerPolygon.append(indx)
-            self.__probFracPerPolygon.append([indx, probFrac])
+            self._faciesIndxPerPolygon.append(indx)
+            self._probFracPerPolygon.append([indx, probFrac])
             if isNewFacies == 1:
                 self._orderIndex.append(fIndx)
-            self.__nPolygons += 1
+            self._nPolygons += 1
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Background facies defined: ')
@@ -391,14 +391,14 @@ class Trunc2D_Angle(Trunc2D_Base):
                      get grids with values for the angles. The function requires knowledge of which RMS grid and realization
                      to use in this operation.
                      The function pointer get3DParamFunction must be compatible with
-                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__debug_level)
+                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self._debug_level)
                      defined in the roxapi dependent module generalFunctionsUsingRoxAPI.
         """
         # Read truncation parameters
-        self.__faciesAlpha = []
-        if not self.__useConstTruncModelParam:
+        self._faciesAlpha = []
+        if not self._useConstTruncModelParam:
             for k in range(self._nFacies):
-                item = self.__faciesAlphaName[k]
+                item = self._faciesAlphaName[k]
                 fName = item[0]
                 paramName = item[1]
                 # Check consistency
@@ -407,12 +407,12 @@ class Trunc2D_Angle(Trunc2D_Base):
                     if self._debug_level >= Debug.VERBOSE:
                         print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
                     [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
-                    self.__faciesAlpha.append(values)
+                    self._faciesAlpha.append(values)
                 else:
                     raise ValueError(
                         'Error in {}\n'
                         'Error: Inconsistency in data structure. Programming error.'
-                        ''.format(self.__className)
+                        ''.format(self._className)
                     )
 
     def __setUnitSquarePolygon(self):
@@ -483,19 +483,19 @@ class Trunc2D_Angle(Trunc2D_Base):
         fNrLine = []
 
         faciesAlpha = []
-        if self.__useConstTruncModelParam:
+        if self._useConstTruncModelParam:
             # The angle is constant, not varying from cell to cell
-            # The list self.__faciesAlpha is one angle per polygon specified.
-            faciesAlpha = self.__faciesAlpha
+            # The list self._faciesAlpha is one angle per polygon specified.
+            faciesAlpha = self._faciesAlpha
         else:
             # The angle is constant, not varying from cell to cell
-            # The list self.__faciesAlpha is a list of arrays.
+            # The list self._faciesAlpha is a list of arrays.
             # Look up the value for the specified grid cell with index cellIndx
-            for i in range(self.__nPolygons):
-                values = self.__faciesAlpha[i]
+            for i in range(self._nPolygons):
+                values = self._faciesAlpha[i]
                 faciesAlpha.append(values[cellIndx])
 
-        for i in range(self.__nPolygons):
+        for i in range(self._nPolygons):
             alpha = faciesAlpha[i]
             alpha = alpha * 3.14159265 / 180.0
             vx = np.cos(alpha)
@@ -533,13 +533,13 @@ class Trunc2D_Angle(Trunc2D_Base):
 
             fNrLine.append(i)
             # The sequence defines which facies (facies index)
-        self.__vxLine = vxLine
-        self.__vyLine = vyLine
-        self.__vxNormal = vxNormal
-        self.__vyNormal = vyNormal
-        self.__x0Normal = x0Normal
-        self.__y0Normal = y0Normal
-        self.__fNrLine = fNrLine
+        self._vxLine = vxLine
+        self._vyLine = vyLine
+        self._vxNormal = vxNormal
+        self._vyNormal = vyNormal
+        self._x0Normal = x0Normal
+        self._y0Normal = y0Normal
+        self._fNrLine = fNrLine
         return
 
     def __subdividePolygonByLine(self, polygonPts, vx, vy, x0, y0):
@@ -738,7 +738,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 raise ValueError(
                     'Error in {}\n'
                     'Error: When calculating a split of the polygon.'
-                    ''.format(self.__className)
+                    ''.format(self._className)
                 )
 
             if np.abs(area - faciesProb) > tolerance:
@@ -807,7 +807,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         keyList = []
         for p in faciesProb:
             # Round off the input values to nearest value of (0,0.01,0.02,..1.0)
-            keyList.append(int(self.__keyResolution * p + 0.5) / self.__keyResolution)
+            keyList.append(int(self._keyResolution * p + 0.5) / self._keyResolution)
             key = tuple(keyList)
         return key
 
@@ -826,46 +826,46 @@ class Trunc2D_Angle(Trunc2D_Base):
         if self._isFaciesProbEqualOne(faciesProb):
             return
         area = self._modifyBackgroundFaciesArea(faciesProb)
-        if self.__useMemoization:
+        if self._useMemoization:
             key = self.__makeKey(faciesProb)
 
-            if key not in self.__memo:
-                self.__nCalc += 1
+            if key not in self._memo:
+                self._nCalc += 1
 
                 # Call methods specific for this truncation rule with corrected area due to overprint facies
                 # Calculate polygons the truncation map is divided into
                 polygons = self.__calculateFaciesPolygons(cellIndx, area)
-                self.__memo[key] = polygons
-                self.__faciesPolygons = polygons
+                self._memo[key] = polygons
+                self._faciesPolygons = polygons
             else:
-                self.__nLookup += 1
-                self.__faciesPolygons = self.__memo[key]
+                self._nLookup += 1
+                self._faciesPolygons = self._memo[key]
         else:
             # Call methods specific for this truncation rule with corrected area due to overprint facies
             # Calculate polygons the truncation map is divided into
-            polygons = self.__calculateFaciesPolygons(cellIndx, area)
-            self.__faciesPolygons = polygons
+            polygons = self._calculateFaciesPolygons(cellIndx, area)
+            self._faciesPolygons = polygons
 
     def __calculateFaciesPolygons(self, cellIndx, area):
         """
         Description:  Calculate polygons in truncation map for given facies fraction (area)
-        The result is saved in the internal variable self.__faciesPolygons
+        The result is saved in the internal variable self._faciesPolygons
         """
 
         # Call methods specific for this truncation rule with corrected area due to overprint facies
         self.__setFaciesLines(cellIndx)
         initialPolygon = self.__setUnitSquarePolygon()
         polygon = copy.copy(initialPolygon)
-        nPolygons = self.__nPolygons
+        nPolygons = self._nPolygons
         faciesPolygons = []
         for i in range(nPolygons - 1):
-            vx = self.__vxLine[i]
-            vy = self.__vyLine[i]
-            vxN = self.__vxNormal[i]
-            vyN = self.__vyNormal[i]
-            x0N = self.__x0Normal[i]
-            y0N = self.__y0Normal[i]
-            item = self.__probFracPerPolygon[i]
+            vx = self._vxLine[i]
+            vy = self._vyLine[i]
+            vxN = self._vxNormal[i]
+            vyN = self._vyNormal[i]
+            x0N = self._x0Normal[i]
+            y0N = self._y0Normal[i]
+            item = self._probFracPerPolygon[i]
 
             indx = item[0]
             probFrac = item[1]
@@ -891,10 +891,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         return faciesPolygons
 
     def getNCalcTruncMap(self):
-        return self.__nCalc
+        return self._nCalc
 
     def getNLookupTruncMap(self):
-        return self.__nLookup
+        return self._nLookup
 
     def defineFaciesByTruncRule(self, alphaCoord):
         """
@@ -911,13 +911,13 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Input is facies polygons for truncation rules and two values between 0 and 1
         # Check in which polygon the point is located and thereby the facies
         inside = 0
-        for i in range(self.__nPolygons):
-            polygon = self.__faciesPolygons[i]
+        for i in range(self._nPolygons):
+            polygon = self._faciesPolygons[i]
             inside = self.__isInsidePolygon(polygon, x, y)
             if inside == 0:
                 continue
             else:
-                item = self.__probFracPerPolygon[i]
+                item = self._probFracPerPolygon[i]
                 indx = item[0]
                 assert indx >= 0
                 # Check truncations for overlay facies (call function from base class)
@@ -928,30 +928,30 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Problem to identify which polygon in truncation map the point is within.
             # Try once more but now by minor shift of the input point.
 
-            # print('nPolygons: ' + str(self.__nPolygons))
+            # print('nPolygons: ' + str(self._nPolygons))
             # print('x,y: ' + str(x) + ' '  + str(y))
-            # for i in range(self.__nPolygons):
-            #     poly = self.__faciesPolygons[i]
+            # for i in range(self._nPolygons):
+            #     poly = self._faciesPolygons[i]
             #     print(repr(poly))
 
             # Count the number of times in total for all cells this proble appears.
-            self.__nCountShiftAlpha += 1
+            self._nCountShiftAlpha += 1
 
             # Shift the point slightly and check again
-            xNew = x + self.__shiftAlphaTolerance
+            xNew = x + self._shiftAlphaTolerance
             if xNew >= 1.0:
-                xNew = x - self.__shiftAlphaTolerance
-            yNew = y + self.__shiftAlphaTolerance
+                xNew = x - self._shiftAlphaTolerance
+            yNew = y + self._shiftAlphaTolerance
             if yNew >= 1.0:
-                yNew = y - self.__shiftAlphaTolerance
+                yNew = y - self._shiftAlphaTolerance
 
-            for i in range(self.__nPolygons):
-                polygon = self.__faciesPolygons[i]
+            for i in range(self._nPolygons):
+                polygon = self._faciesPolygons[i]
                 inside = self.__isInsidePolygon(polygon, xNew, yNew)
                 if inside == 0:
                     continue
                 else:
-                    item = self.__probFracPerPolygon[i]
+                    item = self._probFracPerPolygon[i]
                     indx = item[0]
                     assert indx >= 0
                     # Check truncations for overlay facies (call function from base class)
@@ -966,10 +966,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         return copy.copy(self._className)
 
     def useConstTruncModelParam(self):
-        return self.__useConstTruncModelParam
+        return self._useConstTruncModelParam
 
     def getNCountShiftAlpha(self):
-        return self.__nCountShiftAlpha
+        return self._nCountShiftAlpha
 
     def truncMapPolygons(self):
         """
@@ -985,74 +985,74 @@ class Trunc2D_Angle(Trunc2D_Base):
             # One facies has 100% facies probability
             # Make a polygon equal to the complete unit square for this facies
             # and dummy 0 area polygons for all other facies
-            self.__faciesPolygons = []
-            for i in range(self.__nPolygons):
-                indx = self.__faciesIndxPerPolygon[i]
+            self._faciesPolygons = []
+            for i in range(self._nPolygons):
+                indx = self._faciesIndxPerPolygon[i]
                 fIndx = self._orderIndex[indx]
                 if self._faciesIsDetermined[fIndx] == 1:
-                    poly = self.__setUnitSquarePolygon()
-                    self.__faciesPolygons.append(poly)
+                    poly = self._setUnitSquarePolygon()
+                    self._faciesPolygons.append(poly)
                 else:
-                    poly = self.__setZeroPolygon()
-                    self.__faciesPolygons.append(poly)
+                    poly = self._setZeroPolygon()
+                    self._faciesPolygons.append(poly)
 
-        polygons = copy.copy(self.__faciesPolygons)
+        polygons = copy.copy(self._faciesPolygons)
 
         return [polygons]
 
     def faciesIndxPerPolygon(self):
-        faciesIndxPerPoly = copy.copy(self.__faciesIndxPerPolygon)
+        faciesIndxPerPoly = copy.copy(self._faciesIndxPerPolygon)
         return faciesIndxPerPoly
 
     def setAngle(self, polygonNumber, angle):
         err = 0
-        if not self.__useConstTruncModelParam:
+        if not self._useConstTruncModelParam:
             err = 1
         else:
             if angle < -180.0:
                 angle = angle + 360.0
             if angle > 180.0:
                 angle = angle - 360.0
-            self.__faciesAlpha[polygonNumber] = angle
-            item = self.__probFracPerPolygon[polygonNumber]
+            self._faciesAlpha[polygonNumber] = angle
+            item = self._probFracPerPolygon[polygonNumber]
             indx = item[0]
-            fName = self.__faciesInTruncRule[indx]
-            if self.__debug_level >= Debug.VERY_VERBOSE:
+            fName = self._faciesInTruncRule[indx]
+            if self._debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Set new angle for polygon number: ' + str(polygonNumber)
                 text = text + ' with facies ' + fName + ' : ' + str(angle)
                 print(text)
         return err
 
     def setAngleTrend(self, polygonNumber, angleParamName):
-        if self.__useConstTruncModelParam:
+        if self._useConstTruncModelParam:
             raise ValueError("Error: Using a constant truncation model is incompatible with setting an angle trend.")
         else:
-            item = self.__probFracPerPolygon[polygonNumber]
+            item = self._probFracPerPolygon[polygonNumber]
             indx = item[0]
-            fName = self.__faciesInTruncRule[indx]
-            self.__faciesAlphaName[polygonNumber] = [fName, angleParamName]
-            if self.__debug_level >= Debug.VERY_VERBOSE:
+            fName = self._faciesInTruncRule[indx]
+            self._faciesAlphaName[polygonNumber] = [fName, angleParamName]
+            if self._debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Set new angle trend for polygon number: ' + str(polygonNumber)
                 text = text + ' with facies ' + fName + ' : ' + angleParamName
                 print(text)
 
     def setUseTrendForAngles(self, useConstTrend):
         if useConstTrend == 1:
-            if not self.__useConstTruncModelParam:
-                self.__faciesAlphaName = []
-                self.__faciesAlpha = []
+            if not self._useConstTruncModelParam:
+                self._faciesAlphaName = []
+                self._faciesAlpha = []
                 # set default values of faciesAlpha
-                for i in range(self.__nPolygons):
-                    self.__faciesAlpha.append(0.0)
-                self.__useConstTruncModelParam = True
+                for i in range(self._nPolygons):
+                    self._faciesAlpha.append(0.0)
+                self._useConstTruncModelParam = True
         else:
-            if self.__useConstTruncModelParam:
-                self.__faciesAlphaName = []
-                self.__faciesAlpha = []
+            if self._useConstTruncModelParam:
+                self._faciesAlphaName = []
+                self._faciesAlpha = []
                 # set default values of faciesAlphaName
-                for i in range(self.__nPolygons):
-                    self.__faciesAlphaName.append([' ', ' '])
-                self.__useConstTruncModelParam = False
+                for i in range(self._nPolygons):
+                    self._faciesAlphaName.append([' ', ' '])
+                self._useConstTruncModelParam = False
 
     def XMLAddElement(self, parent):
         """
@@ -1062,7 +1062,7 @@ class Trunc2D_Angle(Trunc2D_Base):
          After this function is called, the parent element has got a new child element
          for the current class.
         """
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
         nGaussField = self._nOverLayFacies + 2
@@ -1076,13 +1076,13 @@ class Trunc2D_Angle(Trunc2D_Base):
         parent.append(trRuleElement)
         tag = 'UseConstTruncParam'
         useConstElement = Element(tag)
-        if self.__useConstTruncModelParam:
+        if self._useConstTruncModelParam:
             useConstElement.text = '1'
         else:
             useConstElement.text = '0'
         trRuleElement.append(useConstElement)
-        for k in range(self.__nPolygons):
-            item = self.__probFracPerPolygon[k]
+        for k in range(self._nPolygons):
+            item = self._probFracPerPolygon[k]
             indx = item[0]
             probFrac = item[1]
             fName = self._faciesInTruncRule[indx]
@@ -1091,10 +1091,10 @@ class Trunc2D_Angle(Trunc2D_Base):
             fElement = Element(tag, attribute)
             tag = 'Angle'
             angleElement = Element(tag)
-            if self.__useConstTruncModelParam:
-                angleElement.text = ' ' + str(self.__faciesAlpha[k]) + ' '
+            if self._useConstTruncModelParam:
+                angleElement.text = ' ' + str(self._faciesAlpha[k]) + ' '
             else:
-                item = self.__faciesAlphaName[k]
+                item = self._faciesAlphaName[k]
                 angleParamName = copy.copy(item[1])
                 angleElement.text = ' ' + angleParamName + ' '
             fElement.append(angleElement)
@@ -1119,26 +1119,26 @@ class Trunc2D_Angle(Trunc2D_Base):
             print('Truncation rule polygons are not calculated yet')
             return
 
-        print('Number of polygons: ' + str(self.__nPolygons))
-        if self.__useConstTruncModelParam:
-            for i in range(self.__nPolygons):
-                fAngle = self.__faciesAlpha[i]
-                indx = self.__faciesIndxPerPolygon[i]
+        print('Number of polygons: ' + str(self._nPolygons))
+        if self._useConstTruncModelParam:
+            for i in range(self._nPolygons):
+                fAngle = self._faciesAlpha[i]
+                indx = self._faciesIndxPerPolygon[i]
                 fName = self._faciesInTruncRule[indx]
-                poly = self.__faciesPolygons[i]
-                probFrac = self.__probFracPerPolygon[i][1]
-                assert indx == self.__probFracPerPolygon[i][0]
+                poly = self._faciesPolygons[i]
+                probFrac = self._probFracPerPolygon[i][1]
+                assert indx == self._probFracPerPolygon[i][0]
                 print('Polygon: {0} Angle: {1} Facies: {2} Prob frac: {3}'.format(str(i), str(fAngle), fName, probFrac))
                 for j in range(len(poly)):
                     print(repr(poly[j]))
         else:
-            for i in range(self.__nPolygons):
-                fAngleParamName = self.__faciesAlphaName[i]
-                indx = self.__faciesIndxPerPolygon[i]
+            for i in range(self._nPolygons):
+                fAngleParamName = self._faciesAlphaName[i]
+                indx = self._faciesIndxPerPolygon[i]
                 fName = self._faciesInTruncRule[indx]
-                poly = self.__faciesPolygons[i]
-                probFrac = self.__probFracPerPolygon[i][1]
-                assert indx == self.__probFracPerPolygon[i][0]
+                poly = self._faciesPolygons[i]
+                probFrac = self._probFracPerPolygon[i][1]
+                assert indx == self._probFracPerPolygon[i][0]
                 print('Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'.format(str(i), fAngleParamName, fName, probFrac))
                 for j in range(len(poly)):
                     print(repr(poly[j]))

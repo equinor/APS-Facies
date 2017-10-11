@@ -275,7 +275,7 @@ azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(asimuthAngle, stackingAngle, direction, debug_info)
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
 err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
