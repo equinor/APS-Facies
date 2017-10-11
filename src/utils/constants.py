@@ -161,7 +161,7 @@ class DataBase(Value):
 
 
 class DrawingLibrary(Value):
-    LIBRARY_FOLDER = '/home/sindre/workspace/APS-GUI/libraries'  # Set automatically by make
+    LIBRARY_FOLDER = ''  # Set automatically by make
     NAME = 'libdraw2D.so'
     LIBRARY_PATH = LIBRARY_FOLDER + '/' + NAME
 
