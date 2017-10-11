@@ -14,6 +14,7 @@ from src import (
     APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, APSFaciesProb, APSGaussModel,
     Trend3D_linear_model_xml, Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D
 )
+from src.utils.methods import writeFile
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
@@ -55,51 +56,6 @@ def defineColors(nFacies):
     elif nFacies == 12:
         colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange', 'red']
     return colors
-
-
-def writeFile(fileName, a, nx, ny):
-    with open(fileName, 'w') as file:
-        # Choose an arbitary heading
-        outstring = '-996  ' + str(ny) + '  50.000000     50.000000\n'
-        outstring = outstring + '637943.187500   678043.187500  4334008.000000  4375108.000000\n'
-        outstring = outstring + ' ' + str(nx) + ' ' + ' 0.000000   637943.187500  4334008.000000\n'
-        outstring = outstring + '0     0     0     0     0     0     0\n'
-
-        count = 0
-        text = ''
-        print('len(a): ' + str(len(a)))
-        for j in range(len(a)):
-            text = text + str(a[j]) + '  '
-            count += 1
-            if count >= 5:
-                text = text + '\n'
-                outstring += text
-                count = 0
-                text = ''
-        if count > 0:
-            outstring += text + '\n'
-        file.write(outstring)
-    print('Write file: ' + fileName)
-    return
-
-
-def readFile(fileName):
-    print('Read file: ' + fileName)
-    with open(fileName, 'r') as file:
-        inString = file.read()
-        words = inString.split()
-        n = len(words)
-        print('Number of words: ' + str(n))
-
-        ny = int(words[1])
-        nx = int(words[8])
-        print('nx,ny: ' + str(nx) + ' ' + str(ny))
-        print('Number of values: ' + str(len(words) - 19))
-        a = np.zeros(nx * ny, float)
-        for i in range(19, len(words)):
-            a[i - 19] = float(words[i])
-
-    return [a, nx, ny]
 
 
 def set2DGridDimension(nx, ny, nz, previewCrossSection, previewLX, previewLY, previewLZ, previewScale=0, printInfo=0):
