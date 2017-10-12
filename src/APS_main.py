@@ -14,13 +14,15 @@ import numpy as np
 from src.utils.constants import Debug
 import src.generalFunctionsUsingRoxAPI as gr
 from src import (APSModel, APSZoneModel, Trend3D_linear)
+from src.utils.constants import Debug
+import roxar
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(Trend3D_linear)
 
 # Initialise common variables
-functionName = 'APS_trunc.py'
+functionName = 'APS_main.py'
 
 # Tolerance
 eps = 0.000001
@@ -484,7 +486,7 @@ for zoneNumber in zoneNumberList:
         # Facies realisation for current zone is updated.
         if debug_level >= Debug.VERBOSE:
             print('--- Truncate transformed Gaussian fields.')
-    volFrac = []
+
     [faciesReal, volFrac] = zoneModel.applyTruncations(
         probDefined, GFAlphaForCurrentZone, faciesReal, nDefinedCells, cellIndexDefined
     )

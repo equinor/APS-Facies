@@ -5,6 +5,8 @@ import copy
 import numpy as np
 
 from src.Trunc2D_Base_xml import Trunc2D_Base
+from  src.xmlFunctions import getKeyword
+from src.utils.constants import Debug
 
 from src.utils.constants import Debug
 
@@ -39,8 +41,8 @@ Description: This class is derived from Trunc2D_Base which contain common data s
 
 
   Public functions:
-    def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
-                 backGroundFacies=None, overlayFacies=None, overlayTruncCenter=None, debug_level=Debug.OFF)
+    def initialize(self,mainFaciesTable,faciesInZone,truncStructureList,
+                 backGroundFacies=None,overlayFacies=None,overlayTruncCenter=None,debug_level=Debug.OFF)
     def writeContentsInDataStructure(self):
     def getClassName(self)
     def useConstTruncModelParam(self)
@@ -79,6 +81,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
     """
 
     def __setEmpty(self):
+        
         # Specific variables for class Trunc2D_Cubic
         self._className = 'Trunc2D_Cubic'
 
@@ -116,34 +119,54 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, debug_level=Debug.OFF,
-                 modelFileName=None):
+        # Define disctionary to be used in memoization for optimalization
+        # In this dictionary use key equal to faciesProb and save faciespolygon
+        self.__memo = {}
+        self.__nCalc = 0
+        self.__nLookup = 0
+        self.__useMemoization = 1
+        # To make a lookup key from facies probability, round off input facies probability
+        # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
+        self.__keyResolution = 100
+
+
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
+                 keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
         """
            Description: This constructor can either create a new object by reading the information
                         from an XML tree or it can create an empty data structure for such an object.
                         If an empty data structure is created, the initialize function must be used.
-           About data structure:
-           All information related to common data which is used by more than one truncation algorithm
-           is saved in the base class Trunc2D_Base. 
+           
+                        About data structure:
+                        All information related to common data which is used by more than one truncation algorithm
+                        is saved in the base class Trunc2D_Base. 
 
            The common data are:
 
-           1. mainFaciesTable.
-           Main facies list which is common for all zones, All other facies lists must check
-           against the main facies list that the facies is defined. Main facies list also contain
-           the facies code for each facies.
 
-           2. faciesInZone.
-           For each zone there is a specific subset of facies that is modelled. For each of these
-           facies a probability is specified. This list is must be consistent with the facies
-           used in the truncation rule.
+                 Data organization for data structure related to facies:
+                 There are three facies lists:
+                 1. mainFaciesTable.
+                 Main facies list which is common for all zones, All other facies lists must check
+                 against the main facies list that the facies is defined. Main facies list also contain
+                 the facies code for each facies.
 
-           3. faciesInTrucRule.
-           The truncation rule specify the facies in a particular sequence. This sequence define the facies
-           ordering and neigbourhood relation between the facies.
+                 2. faciesInZone.
+                 For each zone there is a specific subset of facies that is modelled. For each of these
+                 facies a probability is specified. This list is must be consistent with the facies
+                 used in the truncation rule.
 
-           4. Data representing facies that are called overprint or overlay facies. 
-           This is also data common to more than one truncation algorithm.
+                 3. faciesInTrucRule.
+                 The truncation rule specify the facies in a particular sequence. This sequence define the facies
+                 ordering and neigbourhood relation between the facies.
+
+                 4. gaussFieldsInZone.
+                 The specified list of gaussian fields for the zone. 
+
+                 5. alphaIndx.
+                 The truncation cube is defined by coordinates (alpha1, alpha2) for the background facies truncation map
+                 and is extended to more dimensions if overlay facies is  modelled. The index list alphaIndx associate
+                 gauss field with alpha coordinates. j = alphaIndx[i]  where i is alpha coordinate number and j is gauss field number. 
 
            The algorithm for Cubic truncation rule depends on specific data only relevant for
            this algorithm. The data structure for this includes a tree structure of nodes where each node
@@ -155,22 +178,23 @@ class Trunc2D_Cubic(Trunc2D_Base):
            Within L2 keyword there can be either L3 or one or more ProbFrac keywords. 
            Within L3 keyword there can be only ProbFrac keywords (one or more). 
         """
-        # Initialize data structure to empty. It will also call up the base class function setEmpty.
-        super().__init__()
+        # Initialize data structure to empty if trRule is None and call up the base class function setEmpty as well.
+        # If the trRule is not none, the base class data structure is initialized.
+        nGaussFieldsInBackGroundModel = 2
+        super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                         debug_level, modelFileName, nGaussFieldsInBackGroundModel)
         self.__setEmpty()
+        
+        if keyResolution == 0:
+            self.__useMemoization = 0
+        else:
+            self.__useMemoization = 1
+            self.__keyResolution = keyResolution
 
         if trRuleXML is not None:
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Read data from model file for: ' + self._className)
-
-            self._nGaussFieldInModel = nGaussFieldInModel
-            self._debug_level = debug_level
-
-            # Call base class method to set modelled facies. 
-            # This will initialize common data for facies to be modelled (specified for the zone) and the 
-            # ordering of the facies in the truncation rule.
-            self._setModelledFacies(mainFaciesTable, faciesInZone)
-
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Read data from model file in: ' + self._className)
+                
             # Read truncation rule for background facies from xml tree.
             # Here the hierarchy of polygons in the 2D truncation map defined by the two
             # first transformed gaussian fields is defined. This is specific for the Cubic truncations.
@@ -182,7 +206,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # transformed gaussian fields looks like. It only need to know which facies in the 2D map
             # is "background" for each overlay facies. Therefore data structure and methods 
             # related to overprint facies is common to several different truncation algorithms.
-            self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName)
+            self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName, zoneNumber)
 
             # Call base class method to check that facies in truncation rule is 
             # consistent with facies in zone.
@@ -195,15 +219,17 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 print(repr(self._orderIndex))
                 print('Debug output: Facies code for facies in zone')
                 print(repr(self._faciesCode))
-                for i in range(len(self._overlayFaciesIndx)):
-                    print('Debug output: Overlay facies for group ' + str(i + 1) + ': '
-                          + self._faciesInTruncRule[self._overlayFaciesIndx[i]])
-                    print('Debug output: Background facies index in trunc rule for this group: ')
-                    for j in range(len(self._backGroundFaciesIndx[i])):
-                        indx = self._backGroundFaciesIndx[i][j]
-                        print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
+                print(' ')
+                print('Debug output: Gauss fields in zone:')
+                print(repr(self._gaussFieldsInZone))
+                print('Debug output: Gauss fields for each alpha coordinate:')
+                for  i in range(len(self._alphaIndxList)):
+                    j = self._alphaIndxList[i]
+                    gfName = self._gaussFieldsInZone[j]
+                    print(' {} {}'.format(str(i+1),gfName))
+                    
         else:
-            if debug_level >= Debug.VERY_VERBOSE:
+            if self._debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Create empty object for: ' + self._className)
         #  End of __init__
 
@@ -214,7 +240,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
             This is done by methods from base class which handle overlay facies.
         """
         self._className = 'Trunc2D_Cubic'
-
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: -- Start read background model in ' + self._className + ' from model file')
         # Get info from the XML model file tree for this truncation rule
         TYPE = self.__node_index['type']
         NLIST = self.__node_index['list of nodes']
@@ -224,16 +251,11 @@ class Trunc2D_Cubic(Trunc2D_Base):
         truncStructure = []
         nFacies = 0
         nPoly = 0
+        # Keyword BackGroundModel
+        bgmObj = getKeyword(trRuleXML, 'BackGroundModel', 'TruncationRule', modelFileName, required=True)
+        
         kw1 = 'L1'
-        L1Obj = trRuleXML.find(kw1)
-        if L1Obj is None:
-            raise ValueError(
-                'Error when reading model file: {}\n'
-                'Error: Read truncation rule: {}\n'
-                'Error: Missing keyword {} under keyword  TruncationRule\n'
-                ''.format(modelFileName, self._className, kw1)
-            )
-
+        L1Obj = getKeyword(bgmObj, kw1, 'BackGroundModel', modelFile=modelFileName, required=True)
         text = L1Obj.get('direction')
         directionL1 = text.strip()
         if directionL1 != 'H' and directionL1 != 'V':
@@ -419,6 +441,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     'Error: The sum is: {2}'.format(self._className, fName, str(sumProbFrac[i]))
                 )
         self.__truncStructure = truncStructure
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: -- End read background model in ' + self._className + ' from model file')
 
     def writeContentsInDataStructure(self):
         # Write common contents from base class
@@ -469,17 +493,45 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Check if facies probability is close to 1.0. In this case do not calculate truncation map.
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
-        faciesProb = self._setMinimumFaciesProb(faciesProb)
-        if self._isFaciesProbEqualOne(faciesProb):
+        #        faciesProb = self._setMinimumFaciesProb(faciesProb)
+        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__keyResolution)
+        print('FaciesProb: {}'.format(str(faciesProb)))
+        print('FaciesProbRoundOff: {}'.format(str(faciesProbRoundOff)))
+        if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
-        area = self._modifyBackgroundFaciesArea(faciesProb)
+        area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
 
-        # Call methods specific for this truncation rule with corrected area due to overprint facies
-        self.__calcProbForEachNode(area)
-        self.__calcThresholdValues()
+        if self.__useMemoization:
+            key = self._makeKey(faciesProb, self.__keyResolution)
 
+            if key not in self.__memo:
+                self.__nCalc += 1
+
+                # Call methods specific for this truncation rule with corrected area due to overprint facies
+                self.__calcProbForEachNode(area)
+                self.__calcThresholdValues()
+
+                truncStructure = copy.deepcopy(self.__truncStructure)
+                polygons = copy.deepcopy(self.__polygons)
+                fIndxPerPolygon = copy.deepcopy(self.__fIndxPerPolygon)
+                truncationObject = [truncStructure, self.__useLevel2, self.__useLevel3,
+                                    self.__nPoly, polygons, fIndxPerPolygon]
+                
+                self.__memo[key] = truncationObject
+            else:
+                self.__nLookup += 1
+                truncationObject = self.__memo[key]
+                self.__truncStructure = truncationObject[0]
+                self.__useLevel2 = truncationObject[1]
+                self.__useLevel3 = truncationObject[2]
+                self.__nPoly = truncationObject[3]
+                self.__polygons = truncationObject[4]
+                self.__fIndxPerPolygon = truncationObject[5]
+                
         if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             self.__writeDataForTruncRule()
+
+        
         return
 
     def __calcProbForEachNode(self, faciesProb):
@@ -548,7 +600,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         XMAX = self.__node_index['x max']
         YMIN = self.__node_index['y min']
         YMAX = self.__node_index['y max']
-        eps = self._eps
+        eps = self.getEpsFaciesProb()
         nodeListL1 = self.__truncStructure[NLIST]
         directionL1 = self.__truncStructure[DIR]
 
@@ -1057,32 +1109,40 @@ class Trunc2D_Cubic(Trunc2D_Base):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
 
-    def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
-                   backGroundFaciesGroups=None, overlayFacies=None, overlayTruncCenter=None, debug_level=Debug.OFF):
+    def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
+                   truncStructureList, overlayGroups=None, debug_level=Debug.OFF):
         """
+        TODO: Update documentation
+
            Description: Initialize the truncation object from input variables.
                         This function is used when the truncation object is not initialized 
                         by reading the specification from the model file.
            Input: mainFaciesTable - Specify the global facies table and is used to check that specified facies
                                     is legal.
                   faciesInZone    - List of facies to be modelled for the zone this truncation rule is defined for.
+                  gaussFieldsInZone - List of gauss fields defined for the zone.
+                  alphaFieldName1, alphaFieldName2 - Name of the gauss fields corresponding to alpha1 and alpha2 that define 
+                                                     background facies truncation map.
                   truncStructureList - Contain definition of truncation rule. See details in specification
                                        described for function __setTruncStructure.
-                  backGroundFacies   - List of lists of background facies. The list backGroundFacies[groupIndx]
-                                       is a list of background facies for overlay facies overlayFacies[groupIndx]
-                                       where groupIndx run over the number of overlay facies.
-                  overlayTruncCenter - List of values for the interval center value for the truncation interval for overlay facies.
-              
+                  overlayGroups - List of overlay facies with associated alphaFields and probability fractions.
         """
         # Initialize data structure
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
-
+        
+        # Initialize base class variables 
+        super()._setEmpty()
+        
+        # Initialize this class variables
         self.__setEmpty()
         self._debug_level = debug_level
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
+
+        # Call base class method to associate gauss fields with alpha coordinates
+        self._setGaussFieldForBackgroundFaciesTruncationMap(gaussFieldsInZone, alphaFieldNameForBackGroundFacies,2)
 
         # Set truncation rule (hierarchy of rectangular polygons)
         self.__setTruncStructure(truncStructureList)
@@ -1091,30 +1151,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
             print('Debug output: Background facies defined: ')
             print(repr(self._faciesInTruncRule))
 
-        # Number of background facies in total is the number of facies read before reading overlay facies
-        self._nBackGroundFacies = len(self._faciesInTruncRule)
-        # print('nBackgroundFacies in total: ' + str(self._nBackGroundFacies))
-
-        # Check consistency
-        if overlayFacies != None:
-            m1 = len(backGroundFaciesGroups)
-            m2 = len(overlayFacies)
-            m3 = len(overlayTruncCenter)
-            if m1 != m2 or m1 != m3:
-                raise ValueError(
-                    'Programming error in function initialize in class ' + self._className + '\n'
-                    'Lenght of input lists are different from each other'
-                )
-            self._nGaussFieldInModel = 2 + m2
-
-        # Set which facies to be used as background facies when overprint facies is applied
-        # Call base class function for overlay facies 
-        self._defineBackgroundFaciesAndOverLayFacies(backGroundFaciesGroups, overlayFacies, overlayTruncCenter)
-
-        # Check that facies in truncation rule is consistent with facies in zone
-        # print('len(self._faciesInTruncRule): ' + str(len(self._faciesInTruncRule)))
-        # print('nFaciesInTruncRule: ' + str(self._nFaciesInTruncRule))
-        # print('len(self._faciesInZone) ' + str(len(self._faciesInZone)))
+        # Call base class function to fill data structure with overlay facies
+        self._setOverlayFaciesDataStructure(overlayGroups)
 
         self._checkFaciesForZone()
 
@@ -1324,23 +1362,38 @@ class Trunc2D_Cubic(Trunc2D_Base):
         NLIST = self.__node_index['list of nodes']
         PFRAC = self.__node_index['probability fraction']
         INDX = self.__node_index['index']
+
         # Add to the parent element a new element with specified tag and attributes.
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        nGaussField = self._nOverLayFacies + 2
-        attribute = {'name': 'Trunc2D_Cubic', 'nGFields': str(nGaussField)}
+        nGF = self._nGaussFieldsInTruncationRule
+        attribute = {
+            'name': 'Trunc2D_Cubic',
+            'nGFields': str(nGF)}
         tag = 'TruncationRule'
         trRuleElement = Element(tag, attribute)
-        # Put the xml commands for this truncation rule as the last child for the parent element
         parent.append(trRuleElement)
-        # print(repr(self.__truncStructure))
+        
+        tag = 'BackGroundModel'
+        bgModelElement = Element(tag)
+        trRuleElement.append(bgModelElement)
+
+        tag = 'AlphaFields'
+        alphaFieldsElement = Element(tag)
+        alphaIndx1 = self._alphaIndxList[0]
+        gfName1 = self._gaussFieldsInZone[alphaIndx1]
+        alphaIndx2 = self._alphaIndxList[1]
+        gfName2 = self._gaussFieldsInZone[alphaIndx2]
+        alphaFieldsElement.text = ' ' + gfName1 + ' ' + gfName2 + ' '
+        bgModelElement.append(alphaFieldsElement)
+        
         directionL1 = self.__truncStructure[DIR]
         nodeListL1 = self.__truncStructure[NLIST]
         tag = 'L1'
         attribute = {'direction': directionL1}
         nodeElementL1 = Element(tag, attribute)
-        trRuleElement.append(nodeElementL1)
+        bgModelElement.append(nodeElementL1)
         for i in range(len(nodeListL1)):
             itemL1 = nodeListL1[i]
             typeNode = itemL1[TYPE]
