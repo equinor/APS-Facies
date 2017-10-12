@@ -5,7 +5,7 @@ import copy
 
 from src.utils.constants import Debug
 from src.xmlFunctions import getIntCommand, getKeyword
-
+from src.utils.constants import Debug
 
 class APSGaussFieldJobs:
     """
@@ -139,7 +139,7 @@ class APSGaussFieldJobs:
             print(repr(self.__gaussFieldNamesPerJob))
 
     def initialize(self, gfJobNames, gfNamesPerJob, debug_level=Debug.OFF):
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if debug_level >=  Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
         self.__jobNames = copy.copy(gfJobNames)
@@ -193,13 +193,15 @@ class APSGaussFieldJobs:
             return False
 
     def checkGaussFieldName(self, gfName):
-        if gfName in self.__gaussFieldNames:
+        text = gfName.strip()
+        if text in self.__gaussFieldNames:
             return True
         else:
             return False
 
     def getGaussFieldIndx(self, jobName, gfName):
         found = 0
+        indx = -999
         for i in range(len(self.__jobNames)):
             jName = self.__jobNames[i]
             if jName == jobName:
@@ -214,8 +216,11 @@ class APSGaussFieldJobs:
         if found == 1:
             return indx
         else:
-            print('Error: Cannot find specified gauss field name for specified job name.')
-            return -999
+            raise ValueError(
+                'Cannot find specified gauss field name {} for specified job name {}'
+                ''.format(gfName, jobName)
+            )
+
 
     def addGaussFieldJob(self, jobName, gaussFieldParamNames):
         # Check that the job name does not exist

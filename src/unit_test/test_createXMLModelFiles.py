@@ -46,11 +46,41 @@ def defineCommonModelParam(
 
 
 def addZoneParam(
-        apsmodel, truncType, faciesInZone, faciesProbList, useConstProb, zoneNumber, gfNames, gfTypes,
-        range1, range2, range3, azimuthAngle, azimuthVariogramAngles, dipVariogramAngles, stackingAngle,
-        power, direction, useTrend, relStdDev, previewSeed, simBoxThickness, truncStructureList,
-        backGroundFaciesGroups, overlayFacies, overlayTruncCenter, useConstTruncParam,
-        horizonNameForVariogramTrendMap, debug_level=NO_VERBOSE_DEBUG
+        apsmodel=None,
+        zoneNumber=0,
+        horizonNameForVariogramTrendMap=None,
+        simBoxThickness=0.0,
+        # Facies prob for zone
+        faciesInZone=None,
+        useConstProb=0,
+        faciesProbList=None,
+        # Gauss field parameters. One entry in list for each gauss field
+        gaussFieldsInZone=None,
+        gfTypes=None,
+        range1=None,
+        range2=None,
+        range3=None,
+        azimuthVariogramAngles=None,
+        dipVariogramAngles=None,
+        power=None,
+        # Trend parameters. One entry in list for each gauss field
+        useTrend=None,
+        relStdDev=None,
+        azimuthAngle=None,
+        stackingAngle=None,
+        direction=None,
+        previewSeed=None,
+        # Truncation rule
+        truncType=None,
+        alphaFieldNameForBackGroundFacies=None,
+        truncStructureList=None,
+        overlayGroups=None,
+        useConstTruncParam=None,
+        sf_value=None,
+        sf_name=None,
+        ysf=None,
+        sbhd=None,
+        debug_level=NO_VERBOSE_DEBUG
 ):
     mainFaciesTable = apsmodel.getMainFaciesTable()
     gaussFieldJobs = apsmodel.getGaussFieldJobs()
@@ -66,18 +96,18 @@ def addZoneParam(
     gaussModelList = []
     trendModelList = []
     seedPreviewList = []
-    for i in range(len(gfNames)):
+    for i in range(len(gaussFieldsInZone)):
         gaussModelList.append([
-            gfNames[i], gfTypes[i], range1[i], range2[i], range3[i],
+            gaussFieldsInZone[i], gfTypes[i], range1[i], range2[i], range3[i],
             azimuthVariogramAngles[i], dipVariogramAngles[i], power[i]
         ])
 
         # Set Gauss field trend parameters
         trendModelObject = Trend3D_linear_model(None, debug_level, None)
         trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
-        trendModelList.append([gfNames[i], useTrend[i], trendModelObject, relStdDev[i]])
+        trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 
-        seedPreviewList.append([gfNames[i], previewSeed[i]])
+        seedPreviewList.append([gaussFieldsInZone[i], previewSeed[i]])
 
     gaussModelObj = APSGaussModel()
     gaussModelObj.initialize(
@@ -91,16 +121,40 @@ def addZoneParam(
     if truncType == 'Cubic':
         truncRuleObj = Trunc2D_Cubic()
         truncRuleObj.initialize(
-            mainFaciesTable=mainFaciesTable, faciesInZone=faciesInZone, truncStructureList=truncStructureList,
-            backGroundFaciesGroups=backGroundFaciesGroups, overlayFacies=overlayFacies,
-            overlayTruncCenter=overlayTruncCenter, debug_level=debug_level
+            mainFaciesTable=mainFaciesTable,
+            faciesInZone=faciesInZone,
+            gaussFieldsInZone=gaussFieldsInZone,
+            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
+            truncStructureList=truncStructureList,
+            overlayGroups=overlayGroups,
+            debug_level=debug_level
         )
     elif truncType == 'Angle':
         truncRuleObj = Trunc2D_Angle()
         truncRuleObj.initialize(
-            mainFaciesTable=mainFaciesTable, faciesInZone=faciesInZone, truncStructure=truncStructureList,
-            backGroundFaciesGroups=backGroundFaciesGroups, overlayFacies=overlayFacies,
-            overlayTruncCenter=overlayTruncCenter, useConstTruncParam=useConstTruncParam, debug_level=debug_level
+            mainFaciesTable=mainFaciesTable,
+            faciesInZone=faciesInZone,
+            gaussFieldsInZone=gaussFieldsInZone,
+            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
+            truncStructure=truncStructureList,
+            overlayGroups=overlayGroups,
+            useConstTruncParam=useConstTruncParam,
+            debug_level=debug_level
+        )
+    elif truncType == 'Bayfill':
+        truncRuleObj = Trunc3D_Bayfill()
+        truncRuleObj.initialize(
+            mainFaciesTable=mainFaciesTable,
+            faciesInZone=faciesInZone,
+            faciesInTruncRule=faciesInTruncRule,
+            gaussFieldsInZone=gaussFieldsInZone,
+            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
+            sf_value=sf_value,
+            sf_name=sf_name,
+            ysf=ysf,
+            sbhd=sbhd,
+            useConstTruncParam=useConstTruncParam,
+            debug_level=debug_level
         )
     else:
         raise ValueError("Invalid truncation type")
@@ -324,7 +378,7 @@ def add_zone_2_for_case_2(apsmodel):
         useConstProb=0,
         faciesProbList=['F3_prob', 'F1_prob', 'F2_prob', 'F5_prob', 'F6_prob', 'F7_prob'],
         # Gauss field parameters. One entry in list for each gauss field
-        gfNames=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
         gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL'],
         range1=[2000.0, 2500.0, 1500.0, 1750.0],
         range2=[1400.0, 750.0, 800.0, 5200.0],
@@ -341,10 +395,9 @@ def add_zone_2_for_case_2(apsmodel):
         previewSeed=[9282727, 96785, 88760019, 8156827],
         # Truncation rule
         truncType='Angle',
+        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
         truncStructureList=[['F1', 0.0, 1.0], ['F3', 45.0, 1.0], ['F2', -35.0, 1.0], ['F5', 145.0, 1.0]],
-        overlayFacies=['F6', 'F7'],
-        backGroundFaciesGroups=[['F1', 'F3'], ['F2', 'F5']],
-        overlayTruncCenter=[0.5, 0.7],
+        overlayGroups=[[[['GRF8', 'F6', 1.0, 0.5]], ['F1', 'F3']], [[['GRF9', 'F7', 1.0, 0.7]], ['F2', 'F5']]],
         useConstTruncParam=1,
         debug_level=NO_VERBOSE_DEBUG
     )
@@ -372,7 +425,7 @@ def add_zone_1_for_case_2(apsmodel):
         useConstProb=1,
         faciesProbList=[0.4, 0.5, 0.03, 0.07],
         # Gauss field parameters. One entry in list for each gauss field
-        gfNames=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
         gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL'],
         range1=[3000.0, 1500.0, 2500.0, 750.0],
         range2=[1400.0, 750.0, 800.0, 5200.0],
@@ -389,10 +442,9 @@ def add_zone_1_for_case_2(apsmodel):
         previewSeed=[9282727, 96785, 88760019, 8156827],
         # Truncation rule
         truncType='Cubic',
+        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7'],
         truncStructureList=['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
-        overlayFacies=['F5', 'F7'],
-        backGroundFaciesGroups=[['F1'], ['F2']],
-        overlayTruncCenter=[0.0, 0.8],
+        overlayGroups=[[[['GRF8', 'F5', 1.0, 0.0]], ['F1']], [[['GRF9', 'F7', 1.0, 0.8]], ['F2']]],
         useConstTruncParam=1,
         debug_level=NO_VERBOSE_DEBUG
     )
@@ -437,7 +489,7 @@ def add_zone_2_for_case_1(apsmodel):
         useConstProb=0,
         faciesProbList=['F3_prob', 'F1_prob', 'F2_prob'],
         # Gauss field parameters. One entry in list for each gauss field
-        gfNames=['GRF3', 'GRF4', 'GRF5'],
+        gaussFieldsInZone=['GRF3', 'GRF4', 'GRF5'],
         gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL'],
         range1=[2000.0, 1500.0, 6000.0],
         range2=[1400.0, 750.0, 250.0],
@@ -454,12 +506,12 @@ def add_zone_2_for_case_1(apsmodel):
         previewSeed=[8727, 977727, 776785],
         # Truncation rule
         truncType='Angle',
+        alphaFieldNameForBackGroundFacies=['GRF3', 'GRF4'],
         truncStructureList=[['F1', 0.0, 1.0], ['F3', 45.0, 1.0]],
-        overlayFacies=['F2'],
-        backGroundFaciesGroups=[['F1', 'F3']],
-        overlayTruncCenter=[0.5],
+        overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1','F3']]],
         useConstTruncParam=1,
-        debug_level=NO_VERBOSE_DEBUG
+#        debug_level=NO_VERBOSE_DEBUG
+        debug_level=Debug.VERY_VERBOSE
     )
 
 
@@ -486,7 +538,7 @@ def add_zone_1_for_case_1(apsmodel):
         useConstProb=1,
         faciesProbList=[0.4, 0.6],
         # Gauss field parameters. One entry in list for each gauss field
-        gfNames=['GRF1', 'GRF2'],
+        gaussFieldsInZone=['GRF1', 'GRF2'],
         gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL'],
         range1=[2000.0, 1500.0],
         range2=[1400.0, 750.0],
@@ -503,11 +555,14 @@ def add_zone_1_for_case_1(apsmodel):
         previewSeed=[9282727, 96785],
         # Truncation rule
         truncType='Cubic',
+        alphaFieldNameForBackGroundFacies=['GRF1', 'GRF2'],
         truncStructureList=['V', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
-        overlayFacies=[],
-        backGroundFaciesGroups=[],
-        overlayTruncCenter=[],
+        overlayGroups=[],
         useConstTruncParam=1,
+        sf_value=0.0,
+        sf_name=None,
+        ysf=0.0,
+        sbhd=0.0,
         debug_level=NO_VERBOSE_DEBUG
     )
 

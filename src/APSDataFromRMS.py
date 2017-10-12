@@ -14,6 +14,7 @@ from src.utils.constants import Debug
 
 
 # importlib.reload(APSMainFaciesTable)
+from src.utils.constants import Debug
 
 
 class APSDataFromRMS:
@@ -264,6 +265,8 @@ class APSDataFromRMS:
 
     def __add_to_object(self, keyword, root, storage_object):
         item = root.find(keyword)
+        if item is None:
+            raise ValueError('Missing keyword {}'.format(keyword))
         text = item.text
         value = float(text.strip())
         key = self.__keyword_mapping[keyword]

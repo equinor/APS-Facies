@@ -38,8 +38,7 @@ class Trend3D_linear:
         # Check if specified grid model exists and is not empty
         if gridModel.is_empty():
             text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
-            print(text)
-            values = None
+            raise IOError(text)
         else:
             grid3D = gridModel.get_grid(realNumber)
             gridIndexer = grid3D.simbox_indexer

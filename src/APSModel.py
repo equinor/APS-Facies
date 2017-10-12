@@ -1,9 +1,8 @@
 #!/bin/env python
 import datetime
+import copy
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-
-import copy
 
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
@@ -90,7 +89,8 @@ class APSModel:
             rmsGridModelName='', rmsZoneParameterName='', rmsFaciesParameterName='', rmsGFJobs=None,
             rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None,
             zoneModelListMainLevel=None, zoneModelListSecondLevel=None,
-            previewZone=0, previewCrossSection='IJ', previewScale=1.0, debug_level=Debug.OFF):
+            previewZone=0, previewCrossSectionType='IJ', previewCrossSectionIndx=0,
+            previewScale=1.0, debug_level=Debug.OFF):
         # Local variables
         self.__className = self.__class__.__name__
         self.__rmsProjectName = rmsProjectName
@@ -107,22 +107,19 @@ class APSModel:
 
         self.__faciesTable = mainFaciesTable
         self.__zoneModelsMainLevel = zoneModelListMainLevel if zoneModelListMainLevel else []
-        # self.__zoneNumberList = []
+        self.__zoneNumberList = []
         self.__zoneModelsSecondLevel = zoneModelListSecondLevel if zoneModelListSecondLevel else []
         self.__selectedZoneNumberList = []
         self.__previewZone = previewZone
-        self.__previewCrossSection = previewCrossSection
+        self.__previewCrossSectionType = previewCrossSectionType
+        self.__previewCrossSectionIndx = previewCrossSectionIndx
         self.__previewScale = previewScale
         self.__debug_level = debug_level
 
-        # self.__previewGridNx = 300
-        # self.__previewGridNy = 300
-        # self.__previewGridXSize = 1000.0
-        # self.__previewGridYSize = 1000.0
-        # self.__previewGridOrientation = 0.0
         # Read model if it is defined
-        if modelFileName is not None:
-            self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
+        if modelFileName is None:
+            return
+        self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
 
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         tree = ET.parse(modelFileName)
@@ -152,15 +149,20 @@ class APSModel:
                 raise ValueError('Must specify zoneNumber attribute in keyword {}'.format(kw))
             self.__previewZone = int(text)
 
-            text = obj.get('crossSection')
+            text = obj.get('crossSectionType')
             if text is None:
-                raise ValueError('Must specify crossSection attribute in keyword {}'.format(kw))
-            self.__previewCrossSection = text
+                raise ValueError('Must specify crossSectionType attribute in keyword {}'.format(kw))
+            self.__previewCrossSectionType = text
+
+            text = obj.get('crossSectionIndx')
+            if text is None:
+                raise ValueError('Must specify crossSectionIndx attribute in keyword {}'.format(kw))
+            self.__previewCrossSectionIndx = int(text.strip())
 
             text = obj.get('scale')
             if text is None:
                 raise ValueError('Must specify scale attribute in keyword {}'.format(kw))
-            self.__previewScale = float(text)
+            self.__previewScale = float(text.strip())
 
         # --- SelectedZones ---
         kw = 'SelectedZones'
@@ -171,6 +173,7 @@ class APSModel:
             for w in words:
                 w2 = w.strip()
                 self.__selectedZoneNumberList.append(int(w2))
+                
 
         placement = {
             'RMSProjectName':          '__rmsProjectName',
@@ -340,7 +343,7 @@ class APSModel:
                 if kw == keyword:
                     # set new value
                     item[1] = ' ' + value.strip() + ' '
-        if debug_level > Debug.VERY_VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Keywords and values that is updated in xml tree: ')
 
         for obj in root.findall(".//*[@kw]"):
@@ -359,14 +362,14 @@ class APSModel:
                     found = 1
                     break
             if found == 1:
-                if debug_level > Debug.VERY_VERBOSE:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('{0:30} {1:20}  {2:10}'.format(keyWord, oldValue, obj.text))
             else:
                 raise ValueError(
                     'Error: Inconsistency. Programming error in function updateXMLModelFile in class APSModel'
                 )
 
-        if debug_level > Debug.VERY_VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print(' ')
 
         return tree
@@ -462,8 +465,11 @@ class APSModel:
     def getPreviewZoneNumber(self):
         return self.__previewZone
 
-    def getPreviewCrossSection(self):
-        return self.__previewCrossSection
+    def getPreviewCrossSectionType(self):
+        return self.__previewCrossSectionType
+
+    def getPreviewCrossSectionIndx(self):
+        return self.__previewCrossSectionIndx
 
     def getPreviewScale(self):
         return self.__previewScale
@@ -549,13 +555,23 @@ class APSModel:
         else:
             self.__previewZone = zoneNumber
 
-    def setPreviewCrossSection(self, crossSection):
-        if not (crossSection == 'IJ' or crossSection == 'IK' or crossSection == 'JK'):
+    def setPreviewCrossSectionType(self, crossSectionType):
+        if not (crossSectionType == 'IJ' or crossSectionType == 'IK' or crossSectionType == 'JK'):
             raise ValueError(
-                'Error in {} in setPreviewCrossSection\n'
-                'Error:  Cross section is not IJ, IK or JK.')
+                'Error in setPreviewCrossSectionType\n'
+                'Error:  Cross section is not IJ, IK or JK.'
+            )
         else:
-            self.__previewCrossSection = crossSection
+            self.__previewCrossSectionType = crossSectionType
+
+    def setPreviewCrossSectionIndx(self, crossSectionIndx):
+        if crossSectionIndx <= 0:
+            raise ValueError(
+                'Error in setPreviewCrossSectionIndx\n'
+                'Error:  Cross section index must be positive'
+            )
+        else:
+            self.__previewCrossSectionIndx = crossSectionIndx
 
     def setPreviewScale(self, scale):
         if not (scale > 0.0):
@@ -734,7 +750,8 @@ class APSModel:
             tag = 'Preview'
             attribute = {
                 'zoneNumber':   str(self.__previewZone),
-                'crossSection': str(self.__previewCrossSection),
+                'crossSectionType': str(self.__previewCrossSectionType),
+                'crossSectionIndx': str(self.__previewCrossSectionIndx),
                 'scale':        str(self.__previewScale)
             }
             elem = Element(tag, attribute)

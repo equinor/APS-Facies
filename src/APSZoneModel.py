@@ -9,13 +9,12 @@ from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSGaussModel import APSGaussModel
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
-# To be outphased:
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.utils.constants import Debug
 from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword, getTextCommand
-
+from src.utils.constants import Debug
 
 class APSZoneModel:
     """
@@ -111,7 +110,7 @@ class APSZoneModel:
             self, ET_Tree=None, zoneNumber=0, inputMainLevelFacies=None, modelFileName=None,
             useConstProb=False, simBoxThickness=10.0, horizonNameForVariogramTrendMap=None,
             faciesProbObject=None, gaussModelObject=None, truncRuleObject=None, faciesLevel=1,
-            debug_level=Debug.OFF
+            debug_level=Debug.OFF, keyResolution=100
     ):
         self.__className = self.__class__.__name__
         # Local variables
@@ -126,6 +125,7 @@ class APSZoneModel:
         self.__truncRule = truncRuleObject
         self.__faciesLevel = faciesLevel
         self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
+        self.__keyResolution = keyResolution
         self.__debug_level = debug_level
 
         if ET_Tree is not None:
@@ -143,6 +143,22 @@ class APSZoneModel:
             print('')
             print('Debug output: Call init ' + self.__className)
 
+        # Optimization parameters
+        obj =  getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
+        if obj is not None:
+            useMemoization =  getIntCommand(obj, 'UseMemoization', 'Optimization',
+                                            minValue=0, maxValue=1, defaultValue=1,
+                                            modelFile=modelFileName, required=False)
+
+            nIntervalForProbabilityInMemoizationKey = getIntCommand(obj, 'MemoizationResolution', 'Optimization',
+                                                                    minValue=100, maxValue=10000,
+                                                                    defaultValue=100, modelFile=modelFileName,
+                                                                    required=False)
+            if useMemoization == 1:
+                self.__keyResolution = nIntervalForProbabilityInMemoizationKey
+            else:
+                self.__keyResolution = 0
+                
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
         gaussFieldJobs = APSGaussFieldJobs(ET_Tree, modelFileName)
 
@@ -203,31 +219,37 @@ class APSZoneModel:
 
                 nGaussFieldInModel = int(trRule.get('nGFields'))
                 nGaussFieldInZone = self.__gaussModelObject.getNGaussFields()
-                if nGaussFieldInModel != nGaussFieldInZone:
+                if nGaussFieldInModel > nGaussFieldInZone:
                     raise ValueError(
-                        'Error: In {0}\n'
-                        'Error: Number of specified RMS gaussian field 3D parameters: {1}\n'
-                        '       does not match number of gaussian fields in truncation rule {2} which is {3}'
+                        'Error: In {className}\n'
+                        'Error: Number of specified RMS gaussian field 3D parameters in truncation rule {nGFTruncRule}\n'
+                        '       is larger than number of gauss fields {nGFModel} specified for the zone'
                         ''.format(
-                            self.__className, str(nGaussFieldInModel), truncRuleName,
-                            str(len(self.__varioForGFModel))
+                            className=self.__className,
+                            nGFTruncRule=str(nGaussFieldInModel),
+                            nGFModel=truncRuleName
                         )
                     )
                 else:
                     faciesInZone = self.__faciesProbObject.getFaciesInZoneModel()
+                    gaussFieldsInZone = self.__gaussModelObject.getUsedGaussFieldNames()
                     if truncRuleName == 'Trunc3D_Bayfill':
                         self.__truncRule = Trunc3D_bayfill(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
+                            trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                             self.__debug_level, modelFileName
                         )
 
                     elif truncRuleName == 'Trunc2D_Angle':
                         self.__truncRule = Trunc2D_Angle(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__debug_level, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                            self.__keyResolution,
+                            self.__debug_level, modelFileName, self.__zoneNumber
                         )
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.__truncRule = Trunc2D_Cubic(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__debug_level, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                            self.__keyResolution,
+                            self.__debug_level, modelFileName, self.__zoneNumber
                         )
                     else:
                         raise NameError(
@@ -605,17 +627,9 @@ class APSZoneModel:
         self.__truncRule.XMLAddElement(zoneElement)
 
     def simGaussFieldWithTrendAndTransform(
-            self, nGaussFields, gridDimNx, gridDimNy,
-            gridXSize, gridYSize, gridAzimuthAngle, previewCrossSection):
-        return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
-            nGaussFields, gridDimNx, gridDimNy, gridXSize, gridYSize,
-            gridAzimuthAngle, previewCrossSection
-        )
-
-    def simGaussFieldWithTrendAndTransformNew(
             self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType):
-        return self.__gaussModelObject.simGaussFieldWithTrendAndTransformNew(
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
+        return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
             nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
         )
