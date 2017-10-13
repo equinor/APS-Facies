@@ -66,7 +66,7 @@ class APSModel:
        def setRmsGridModelName(self,name)
        def setRmsZoneParamName(self,name)
        def setRmsResultFaciesParamName(self,name)
-       def setPrintInfo(self,debug_level)
+       def set_debug_level(self,debug_level)
        def setSelectedZoneNumberList(self,selectedZoneNumbers)
        def setPreviewZoneNumber(self,zoneNumber)
        def addNewZone(self,zoneObject)
@@ -288,7 +288,7 @@ class APSModel:
                                 ' for zone number: {}'.format(f1, zoneNumber)
                             )
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print(' ')
             print('------------ End reading model file in APSModel ------------------')
             print(' ')
@@ -368,7 +368,7 @@ class APSModel:
         else:
             return 0
 
-    def __readParamFromFile(self, inputFile, debug_level=Debug-OFF):
+    def __readParamFromFile(self, inputFile, debug_level=Debug.OFF):
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
@@ -510,11 +510,10 @@ class APSModel:
     def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
 
-    def setPrintInfo(self, printInfo):
-        if printInfo < 0:
-            printInfo = 0
-        self.__printInfo = printInfo
-        return
+    def set_debug_level(self, debug_level):
+        if debug_level not in Debug():
+            debug_level = Debug.OFF
+        self.__debug_level = debug_level
 
     def setSelectedZoneNumberList(self, selectedZoneNumbers):
         self.__selectedZoneNumberList = []

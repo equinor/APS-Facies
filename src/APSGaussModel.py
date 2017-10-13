@@ -36,7 +36,7 @@ class APSGaussModel:
     def getPower(self,gaussFieldName)
     def getTrendRuleModel(self,gfName)
     def getTrendRuleModelObject(self,gfName)
-    def printInfo(self)
+    def get_debug_level(self)
     def setZoneNumber(self,zoneNumber)
     def setVarioType(self,gaussFieldName,varioType)
     def setRange1(self,gaussFieldName,range1)
@@ -125,7 +125,7 @@ class APSGaussModel:
         }
 
         self.__className = 'APSGaussModel'
-        self.__debug_level = 0
+        self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
         self.__varioForGFModel = []
         self.__trendForGFModel = []
@@ -507,7 +507,7 @@ class APSGaussModel:
             trendModelObj = item[TOBJ]
             return trendModelObj
 
-    def printInfo(self):
+    def get_debug_level(self):
         return self.__debug_level
 
     def __getGFIndex(self, gfName):

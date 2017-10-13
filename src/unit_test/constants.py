@@ -1,11 +1,13 @@
+from src.utils.constants import Debug
+
 RMS_PROJECT = 'testNeslen.rms10'
 RMS_WORKFLOW = 'Example APS workflow'
 GAUSS_FIELD_SIM_SCRIPT = 'MakeGaussFields.ipl'
 GRID_MODEL_NAME = 'APS_NESLEN_ODM'
 ZONE_PARAM_NAME = 'Zone'
 FACIES_REAL_PARAM_NAME_RESULT = 'FaciesReal'
-VERY_VERBOSE_DEBUG = 3
-NO_VERBOSE_DEBUG = 0
+VERY_VERBOSE_DEBUG = Debug.VERY_VERBOSE
+NO_VERBOSE_DEBUG = Debug.OFF
 OUTPUT_MODEL_FILE_NAME1 = 'test_Trunc_output1.xml'
 OUTPUT_MODEL_FILE_NAME2 = 'test_Trunc_output2.xml'
 OUT_POLY_FILE1 = 'test_Trunc_polygons1.dat'

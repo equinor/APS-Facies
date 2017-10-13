@@ -46,7 +46,7 @@ class APSFaciesProb:
         self.__faciesProbForZoneModel = []
         self.__faciesInZoneModel = []
         self.__useConstProb = 0
-        self.__debug_level = 0
+        self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
         self.__zoneNumber = 0
 

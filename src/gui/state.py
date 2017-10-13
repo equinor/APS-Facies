@@ -2,8 +2,8 @@ from APSModel import APSModel
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants import (
-    CubicTruncationRuleConstants, CubicTruncationRuleElements, ModeConstants, ModeOptions,
-    ProjectConstants, TruncationRuleConstants,
+    CubicTruncationRuleConstants, CubicTruncationRuleElements, Debug, ModeConstants,
+    ModeOptions, ProjectConstants, TruncationRuleConstants,
 )
 
 
@@ -138,7 +138,7 @@ class State(dict):
             return False
         path_to_project_file = self.get_path()
         try:
-            APSModel(path_to_project_file, printInfo=0)
+            APSModel(path_to_project_file, debug_level=Debug.OFF)
             return True
         except:
             return False
