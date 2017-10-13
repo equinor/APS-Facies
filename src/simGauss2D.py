@@ -3,6 +3,8 @@ import ctypes as ct
 
 import numpy as np
 
+from src.utils.constants import DrawingLibrary
+
 # Variogram type:
 #    SPHERICAL      1
 #    EXPONENTIAL    2
@@ -14,7 +16,7 @@ import numpy as np
 # -----       Functions used to draw gaussian fields: -------------------------
 
 # Global object with c/c++ code for simulation of gaussian fields
-_draw2DLib = ct.CDLL('./libdraw2D.so')
+_draw2DLib = ct.CDLL(DrawingLibrary.LIBRARY_PATH)
 
 # Define input data types
 _draw2DLib.draw2DGaussField.argtypes = (
@@ -30,7 +32,7 @@ _draw2DLib.draw2DGaussField.restype = floatArrayPointer
 
 
 # Function simulationg 2D gaussian field
-def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power, debugPrint):
+def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power, debugPrint=0):
     global _draw2DLib
     values = []
 

@@ -6,7 +6,7 @@ LOG_LEVEL = INFO
 EXEC_NAME = app
 MAIN_FILE = app.py
 ifeq ($(CODE_DIR),)
-CODE_DIR := .
+CODE_DIR := $(shell pwd)
 endif
 ifeq ($(PYTHONPATH),)
 PYTHONPATH := $(shell pwd)
@@ -14,7 +14,7 @@ endif
 SOURCE_DIR = $(CODE_DIR)/src
 BUILD_DIR = $(CODE_DIR)/build
 LIB_PREFIX = $(CODE_DIR)/libraries
-ENTRY_POINT = $(SOURCE_DIR)/$(MAIN_FILE)
+ENTRY_POINT = $(SOURCE_DIR)/gui/$(MAIN_FILE)
 UI_FOLDER = $(CODE_DIR)/ui
 UI_FILES := $(shell echo $(UI_FOLDER)/*.ui)
 RESOURCE_ROOT = $(CODE_DIR)/resources
@@ -25,6 +25,7 @@ PY_RESOURCE_FILE = $(PYQT_GENERATED_FILES)/Resources_rc.py
 TEST_FOLDER = $(SOURCE_DIR)/unit_test
 AUXILLARY = $(CODE_DIR)/auxillary
 VULNERABILITY_DB = $(AUXILLARY)/vulnerability/data
+PYTHON_CONSTANTS = $(SOURCE_DIR)/utils/constants.py
 DOCKERFILE = Dockerfile
 GCC_VERSION = 4.9.4
 QT_VERSION = 5.9.1
@@ -46,8 +47,9 @@ NO_COLOR = \033[0m
 .PHONY: help run
 
 # Build / clean / run
+build: build-gui clean-all
 
-build: clean libdraw2D.so resource-file ui-files
+build-gui: clean-all libdraw2D.so resource-file ui-files
 	pyinstaller --onefile \
 	            --clean \
 	            --noconfirm \
@@ -63,11 +65,17 @@ build: clean libdraw2D.so resource-file ui-files
 	&& mv $(BUILD_DIR)/dist/$(EXEC_NAME) $(CODE_DIR)
 
 # Build libgaussField
-libdraw2D.so:
+libdraw2D.so: set-path-to-library
 	cd $(LIB_PREFIX) && \
 	./buildSharedLib.sh -O3
 
-clean:
+set-path-to-library:
+	sed -i -e "s|LIBRARY_FOLDER = '.*'|LIBRARY_FOLDER = '$(LIB_PREFIX)'|g" $(PYTHON_CONSTANTS)
+
+unset-path-to-library:
+	sed -i -e "s|LIBRARY_FOLDER = '.*'|LIBRARY_FOLDER = ''|g" $(PYTHON_CONSTANTS)
+
+clean: unset-path-to-library
 	rm -rf $(BUILD_DIR) && \
 	rm -rf $(LIB_PREFIX)/libgaussField/build && \
 	rm -f  $(EXEC_NAME).spec
@@ -93,7 +101,7 @@ clean-ui-files:
 
 ui-files: clean-ui-files
 	mkdir -p $(PYQT_GENERATED_UI_FILS) && \
-	$(foreach file,$(UI_FILES),pyuic5 -x $(file) --import-from=src.resources --output="$(PYQT_GENERATED_UI_FILS)/$(shell basename $(file) .ui)_ui.py";)
+	$(foreach file,$(UI_FILES),pyuic5 $(file) --import-from=src.resources --output="$(PYQT_GENERATED_UI_FILS)/$(shell basename $(file) .ui)_ui.py";)
 
 resource-file: clean-resource-file
 	mkdir -p $(PYQT_GENERATED_FILES)  && \
@@ -136,11 +144,10 @@ clean-safety:
 unit-tests: copy-libdraw-to-test run-tests clean-tests
 
 copy-libdraw-to-test: libdraw2D.so
-	cp $(LIB_PREFIX)/libdraw2D.so $(TEST_FOLDER)
 
 run-tests:
 	cd $(TEST_FOLDER) && \
-	pytest
+	pytest --basetemp=$(TEST_FOLDER)
 
 clean-tests:
 	rm -rf $(TEST_FOLDER)/.cache && \
@@ -151,7 +158,7 @@ clean-tests:
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams:
 	cd $(CODE_DIR) && \
-	pyreverse -ASmy -k -o png $(SOURCE_DIR)/app.py -p APS-GUI
+	pyreverse -ASmy -k -o png $(ENTRY_POINT) -p APS-GUI
 
 linting:
 	pylint $(SOURCE_DIR)

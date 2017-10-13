@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>CubicTruncationRule</class>
+ <widget class="QWidget" name="CubicTruncationRule">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -56,109 +56,125 @@
       </property>
      </widget>
     </item>
+    <item row="3" column="0">
+     <widget class="Plot" name="m_plot_truncation_rule_cubic" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>250</width>
+        <height>250</height>
+       </size>
+      </property>
+     </widget>
+    </item>
     <item row="3" column="1">
      <layout class="QGridLayout" name="layout_truncation_rule_cubic">
-      <item row="2" column="0">
+      <item row="2" column="1">
        <widget class="QLabel" name="label_F1">
         <property name="text">
          <string>F1</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="2" column="2">
        <widget class="QComboBox" name="m_choose_F1"/>
       </item>
-      <item row="2" column="5">
+      <item row="2" column="6">
        <widget class="QSlider" name="m_slider_F1">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="2" column="7">
+      <item row="2" column="8">
        <widget class="QLineEdit" name="m_edit_proportion_F1"/>
       </item>
-      <item row="3" column="0">
+      <item row="3" column="1">
        <widget class="QLabel" name="label_F2">
         <property name="text">
          <string>F2</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="7">
-       <widget class="QLineEdit" name="m_edit_proportion_F2"/>
-      </item>
-      <item row="3" column="1">
+      <item row="3" column="2">
        <widget class="QComboBox" name="m_choose_F2"/>
       </item>
-      <item row="3" column="5">
+      <item row="3" column="8">
+       <widget class="QLineEdit" name="m_edit_proportion_F2"/>
+      </item>
+      <item row="3" column="4">
+       <widget class="QPushButton" name="m_color_button_F2"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="QComboBox" name="m_choose_F3"/>
+      </item>
+      <item row="3" column="6">
        <widget class="QSlider" name="m_slider_F2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QComboBox" name="m_choose_F3"/>
+      <item row="4" column="8">
+       <widget class="QLineEdit" name="m_edit_proportion_F3"/>
       </item>
-      <item row="4" column="0">
+      <item row="4" column="1">
        <widget class="QLabel" name="label_F3">
         <property name="text">
          <string>F3</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="7">
-       <widget class="QLineEdit" name="m_edit_proportion_F3"/>
+      <item row="6" column="4">
+       <widget class="QPushButton" name="m_color_button_F5"/>
       </item>
-      <item row="4" column="5">
+      <item row="5" column="2">
+       <widget class="QComboBox" name="m_choose_F4"/>
+      </item>
+      <item row="4" column="6">
        <widget class="QSlider" name="m_slider_F3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QComboBox" name="m_choose_F4"/>
+      <item row="5" column="8">
+       <widget class="QLineEdit" name="m_edit_proportion_F4"/>
       </item>
-      <item row="5" column="0">
+      <item row="5" column="1">
        <widget class="QLabel" name="label_F4">
         <property name="text">
          <string>F4</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="7">
-       <widget class="QLineEdit" name="m_edit_proportion_F4"/>
+      <item row="6" column="2">
+       <widget class="QComboBox" name="m_choose_F5"/>
       </item>
-      <item row="5" column="5">
+      <item row="5" column="6">
        <widget class="QSlider" name="m_slider_F4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
-       <widget class="QComboBox" name="m_choose_F5"/>
+      <item row="6" column="8">
+       <widget class="QLineEdit" name="m_edit_proportion_F5"/>
       </item>
-      <item row="6" column="5">
+      <item row="6" column="6">
        <widget class="QSlider" name="m_slider_F5">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="6" column="1">
        <widget class="QLabel" name="label_F5">
         <property name="text">
          <string>F5</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="7">
-       <widget class="QLineEdit" name="m_edit_proportion_F5"/>
-      </item>
-      <item row="1" column="7">
+      <item row="1" column="8">
        <widget class="QLabel" name="label_proportions_input">
         <property name="font">
          <font>
@@ -171,7 +187,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="7">
+      <item row="0" column="8">
        <widget class="QLabel" name="label_values_between">
         <property name="font">
          <font>
@@ -184,7 +200,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
+      <item row="2" column="4">
+       <widget class="QPushButton" name="m_color_button_F1"/>
+      </item>
+      <item row="1" column="4">
        <widget class="QLabel" name="label_color">
         <property name="font">
          <font>
@@ -197,7 +216,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="1" column="2">
        <widget class="QLabel" name="label_facies">
         <property name="font">
          <font>
@@ -210,10 +229,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="3">
-       <widget class="QPushButton" name="m_color_button_F1"/>
-      </item>
-      <item row="1" column="5">
+      <item row="1" column="6">
        <widget class="QLabel" name="label_proportions_scale">
         <property name="font">
          <font>
@@ -226,26 +242,20 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
-       <widget class="QPushButton" name="m_color_button_F2"/>
+      <item row="4" column="4">
+       <widget class="QPushButton" name="m_color_button_F3"/>
       </item>
-      <item row="7" column="7">
-       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel_truncation_rule_cubic">
+      <item row="7" column="8">
+       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
         <property name="standardButtons">
          <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
-       <widget class="QPushButton" name="m_color_button_F3"/>
-      </item>
-      <item row="5" column="3">
+      <item row="5" column="4">
        <widget class="QPushButton" name="m_color_button_F4"/>
       </item>
-      <item row="6" column="3">
-       <widget class="QPushButton" name="m_color_button_F5"/>
-      </item>
-      <item row="1" column="4">
+      <item row="1" column="5">
        <spacer name="spacer_color">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -261,7 +271,7 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="6">
+      <item row="1" column="7">
        <spacer name="spacer_proportions_scale">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -277,7 +287,7 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="2">
+      <item row="1" column="3">
        <spacer name="spacer_facies">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -293,29 +303,56 @@
         </property>
        </spacer>
       </item>
+      <item row="4" column="0">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>1</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
-    </item>
-    <item row="3" column="0">
-     <widget class="QCustomPlot" name="m_plot_truncation_rule_cubic" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>250</width>
-        <height>250</height>
-       </size>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>Plot</class>
    <extends>QWidget</extends>
-   <header location="global">qcustomplot.h</header>
+   <header location="global">src/gui/wrappers/base_classes/plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>m_toggle_apply_overlay_facies</tabstop>
+  <tabstop>m_button_apply_overlay_facies</tabstop>
+  <tabstop>m_choose_F1</tabstop>
+  <tabstop>m_choose_F2</tabstop>
+  <tabstop>m_choose_F3</tabstop>
+  <tabstop>m_choose_F4</tabstop>
+  <tabstop>m_choose_F5</tabstop>
+  <tabstop>m_color_button_F1</tabstop>
+  <tabstop>m_color_button_F2</tabstop>
+  <tabstop>m_color_button_F3</tabstop>
+  <tabstop>m_color_button_F4</tabstop>
+  <tabstop>m_color_button_F5</tabstop>
+  <tabstop>m_slider_F1</tabstop>
+  <tabstop>m_slider_F2</tabstop>
+  <tabstop>m_slider_F3</tabstop>
+  <tabstop>m_slider_F4</tabstop>
+  <tabstop>m_slider_F5</tabstop>
+  <tabstop>m_edit_proportion_F1</tabstop>
+  <tabstop>m_edit_proportion_F2</tabstop>
+  <tabstop>m_edit_proportion_F3</tabstop>
+  <tabstop>m_edit_proportion_F4</tabstop>
+  <tabstop>m_edit_proportion_F5</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

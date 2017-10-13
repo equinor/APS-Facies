@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>DefineGaussian</class>
+ <widget class="QWidget" name="DefineGaussian">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Define parameter for the Gaussian field</string>
   </property>
   <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
    <property name="geometry">
@@ -224,13 +224,13 @@
      </item>
     </layout>
    </widget>
-   <widget class="QCustomPlot" name="m_plot_trend" native="true">
+   <widget class="Plot" name="m_plot_trend" native="true">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>0</y>
-      <width>301</width>
-      <height>251</height>
+      <x>420</x>
+      <y>10</y>
+      <width>291</width>
+      <height>231</height>
      </rect>
     </property>
    </widget>
@@ -332,7 +332,7 @@
        </widget>
       </item>
       <item row="6" column="6" colspan="4">
-       <widget class="QLineEdit" name="m_edit_parallell_to_azimuth"/>
+       <widget class="QLineEdit" name="m_edit_parallel_to_azimuth"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_anisotropy_directions">
@@ -354,7 +354,7 @@
        <widget class="QLineEdit" name="m_edit_vertical_normal_to_dip"/>
       </item>
       <item row="6" column="0">
-       <widget class="QLabel" name="label_parallell_to_azimuth">
+       <widget class="QLabel" name="label_parallel_to_azimuth">
         <property name="text">
          <string>    Parallell to azimuth</string>
         </property>
@@ -380,7 +380,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QCustomPlot" name="m_plot_variogran" native="true">
+  <widget class="Plot" name="m_plot_variogram" native="true">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -393,12 +393,27 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>Plot</class>
    <extends>QWidget</extends>
-   <header location="global">qcustomplot.h</header>
+   <header location="global">src/gui/wrappers/base_classes/plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>m_choose_variogram_model</tabstop>
+  <tabstop>m_edit_azimuth</tabstop>
+  <tabstop>m_edit_dip</tabstop>
+  <tabstop>m_edit_parallel_to_azimuth</tabstop>
+  <tabstop>m_edit_normal_to_azimuth</tabstop>
+  <tabstop>m_edit_vertical_normal_to_dip</tabstop>
+  <tabstop>m_toggle_apply_trend</tabstop>
+  <tabstop>m_choose_select_trend</tabstop>
+  <tabstop>m_edit_depositional_direction</tabstop>
+  <tabstop>m_choose_stacking_pattern</tabstop>
+  <tabstop>m_edit_stacking_angle</tabstop>
+  <tabstop>m_edit_relative_standard_deviation</tabstop>
+  <tabstop>m_edit_simbox_thickness</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
