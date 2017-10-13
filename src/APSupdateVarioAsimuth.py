@@ -24,7 +24,7 @@ selectedZoneNumberList = apsModel.getSelectedZoneNumberList()
 
 for zoneNumber in selectedZoneNumberList:
     zoneModel = apsModel.getZoneModel(zoneNumber)
-    hName = zoneModel.getHorizonNameForVarioTrendMap()
+    hName = zoneModel.getHorizonNameForVariogramTrendMap()
     gaussFieldNames = zoneModel.getUsedGaussFieldNames()
     for gfName in gaussFieldNames:
         reprName = gfName + '_VarioAzimuthTrend'

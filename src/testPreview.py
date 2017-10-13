@@ -328,7 +328,7 @@ def main():
             for n in range(nGaussFields):
                 gf = gaussFields[n]
                 fileName = 'a' + str(n + 1) + '_' + previewCrossSection + '.dat'
-                writeFile(fileName, gf, gridDim1, gridDim2, printInfo)
+                writeFile(fileName, gf, gridDim1, gridDim2, debug_level)
 
     facies = np.zeros(gridDim1 * gridDim2, int)
     faciesFraction = np.zeros(nFacies, int)

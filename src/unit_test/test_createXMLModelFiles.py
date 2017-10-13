@@ -31,7 +31,7 @@ def defineCommonModelParam(
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
-    apsmodel.setPrintInfo(debug_level)
+    apsmodel.set_debug_level(debug_level)
 
     # Define gauss field jobs
     gfJobObject = APSGaussFieldJobs()

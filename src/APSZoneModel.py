@@ -48,7 +48,7 @@ class APSZoneModel:
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
-       def getHorizonNameForVarioTrendMap(self)
+       def getHorizonNameForVariogramTrendMap(self)
 
 
        ---  Set functions ---
@@ -362,10 +362,10 @@ class APSZoneModel:
         if not self.__truncRule.useConstTruncModelParam():
             self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
 
-    def printInfo(self):
+    def get_debug_level(self):
         return self.__debug_level
 
-    def getHorizonNameForVarioTrendMap(self):
+    def getHorizonNameForVariogramTrendMap(self):
         return copy.copy(self.__horizonNameForVarioTrendMap)
 
     def getProbParamName(self, fName):

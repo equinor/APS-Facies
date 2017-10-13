@@ -63,7 +63,7 @@ apsmodel.setRmsGridModelName('APS_NESLEN_ODM')
 apsmodel.setRmsZoneParamName('Zone')
 apsmodel.setRmsResultFaciesParamName('FaciesReal')
 debug_level = Debug.SOMEWHAT_VERBOSE
-apsmodel.setPrintInfo(debug_level)
+apsmodel.set_debug_level(debug_level)
 
 mainFaciesTable = APSMainFaciesTable.APSMainFaciesTable()
 faciesCode = 1
@@ -207,7 +207,7 @@ apsmodel.addNewZone(zoneObject)
 selectedZones = [1]
 apsmodel.setSelectedZoneNumberList(selectedZones)
 apsmodel.setPreviewZoneNumber(1)
-apsmodel.setPrintInfo(Debug.SOMEWHAT_VERBOSE)
+apsmodel.set_debug_level(Debug.SOMEWHAT_VERBOSE)
 outfile = 'testOut' + '_' + truncRuleName + '.xml'
 apsmodel.writeModel(outfile, debug_level)
 

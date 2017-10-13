@@ -63,7 +63,7 @@ def createTrunc(
     mainFaciesTable.initialize(fTable)
 
     # Create an object and initialize it
-    # printInfo
+    # get_debug_level
     truncRuleOut = Trunc3D_bayfill()
     truncRuleOut.initialize(
         mainFaciesTable, faciesInZone, faciesInTruncRule,

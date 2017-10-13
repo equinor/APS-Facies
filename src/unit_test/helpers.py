@@ -3,6 +3,7 @@ import filecmp
 import numpy as np
 
 from src.utils.methods import writeFile, readFile
+from src.utils.constants import Debug
 
 
 def getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule):
@@ -22,11 +23,13 @@ def getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule):
         assert fName == faciesInTruncRule[i]
 
 
-def apply_truncations(truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, printInfo=0):
+def apply_truncations(
+        truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, debug_level=Debug.OFF
+):
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
-    if printInfo >= 1:
+    if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
         print('nGaussFields: ' + str(nGaussFields))
     assert nGaussFieldsInModel == nGaussFields
@@ -39,7 +42,7 @@ def apply_truncations(truncRule, faciesReferenceFile, nGaussFields, gaussFieldFi
         [a, nx, ny] = readFile(fileName)
         alphaFields.append(a)
         assert nValues == len(alphaFields[n])
-    if printInfo >= 0:
+    if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('nValues: ' + str(nValues))
         print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx*ny))
     alphaCoord = np.zeros(nGaussFields, np.float32)
@@ -51,7 +54,7 @@ def apply_truncations(truncRule, faciesReferenceFile, nGaussFields, gaussFieldFi
             alphaCoord[n] = alpha[i]
         [faciesCode, fIndx] = truncRule.defineFaciesByTruncRule(alphaCoord)
         faciesReal.append(faciesCode)
-    if printInfo >= 1:
+    if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('Number of shifts in alpha values for numerical reasons: ' + str(truncRule.getNCountShiftAlpha()))
     writeFile(faciesOutputFile, faciesReal, nx, ny)
 
@@ -89,8 +92,8 @@ def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFil
         print('Files are equal: OK')
 
 
-def writePolygons(fileName, polygons, printInfo=0):
-    if printInfo >= 1:
+def writePolygons(fileName, polygons, debug_level=Debug.OFF):
+    if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('Write file: ' + fileName)
     with open(fileName, 'w') as file:
         for n in range(len(polygons)):
@@ -102,7 +105,7 @@ def writePolygons(fileName, polygons, printInfo=0):
                 y = int(1000 * pt[1] + 0.5)
                 pt[0] = x / 1000.0
                 pt[1] = y / 1000.0
-                if printInfo >= 1:
+                if debug_level >= Debug.SOMEWHAT_VERBOSE:
                     print('x,y: ' + str(pt[0]) + ' ' + str(pt[1]))
                 file.write(str(pt))
                 file.write('\n')

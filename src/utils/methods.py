@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QCheckBox, QWidget
 
 from src.utils.constants import Defaults, HideOptions
 
+from src.utils.constants import Debug
+
 T = TypeVar('T')
 U = TypeVar('U')
 
@@ -27,7 +29,7 @@ def isNumber(s):
         return False
 
 
-def writeFile(fileName, a, nx, ny, printInfo=0):
+def writeFile(fileName, a, nx, ny, debug_level=Debug.OFF):
     with open(fileName, 'w') as file:
         # Choose an arbitrary heading
         outstring = '-996  ' + str(ny) + '  50.000000     50.000000\n'
@@ -36,7 +38,7 @@ def writeFile(fileName, a, nx, ny, printInfo=0):
         outstring += '0     0     0     0     0     0     0\n'
         count = 0
         text = ''
-        if printInfo >= 1:
+        if debug_level >= Debug.SOMEWHAT_VERBOSE:
             print('len(a): ' + str(len(a)))
         for j in range(len(a)):
             text = text + str(a[j]) + '  '
@@ -52,14 +54,14 @@ def writeFile(fileName, a, nx, ny, printInfo=0):
     print('Write file: ' + fileName)
 
 
-def readFile(fileName, printInfo=0):
+def readFile(fileName, debug_level=Debug.OFF):
     print('Read file: ' + fileName)
     with open(fileName, 'r') as file:
         inString = file.read()
         words = inString.split()
         ny = int(words[1])
         nx = int(words[8])
-        if printInfo >= 1:
+        if debug_level >= Debug.SOMEWHAT_VERBOSE:
             n = len(words)
             print('Number of words: ' + str(n))
             print('nx,ny: ' + str(nx) + ' ' + str(ny))

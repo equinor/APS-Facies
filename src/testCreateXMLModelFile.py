@@ -32,7 +32,7 @@ apsmodel.setRmsGridModelName('APS_NESLEN_ODM')
 apsmodel.setRmsZoneParamName('Zone')
 apsmodel.setRmsResultFaciesParamName('FaciesReal')
 debug_level = Debug.VERY_VERBOSE
-apsmodel.setPrintInfo(debug_level)
+apsmodel.set_debug_level(debug_level)
 
 mainFaciesTable = APSMainFaciesTable.APSMainFaciesTable()
 mainFaciesTable.addFacies('F1', 1)
