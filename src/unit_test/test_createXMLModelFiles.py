@@ -110,12 +110,12 @@ def addZoneParam(
 
 def read_write_model(apsmodel, printInfo):
     outfile1 = 'testOut1.xml'
-    apsmodel.writeModel(outfile1, printInfo)
+    apsmodel.writeModel(outfile1, printInfo=printInfo)
 
     # Read the xml file into an new APSModel object
-    apsmodel2 = APSModel(outfile1, printInfo)
+    apsmodel2 = APSModel(outfile1, printInfo=printInfo)
     outfile2 = 'testOut2.xml'
-    apsmodel2.writeModel(outfile2, printInfo)
+    apsmodel2.writeModel(outfile2, printInfo=printInfo)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = filecmp.cmp(outfile1, outfile2)
 
@@ -200,7 +200,7 @@ def test_variogram_generation():
 def test_updating_model():
     # Test updating of model
     modelFile = 'testData_models/APS.xml'
-    apsmodel = APSModel(modelFile, VERY_VERBOSE_DEBUG)
+    apsmodel = APSModel(modelFile, printInfo=VERY_VERBOSE_DEBUG)
     # Do some updates of the model
     zoneNumber = 1
     zone1 = apsmodel.getZoneModel(zoneNumber)
