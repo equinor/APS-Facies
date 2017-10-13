@@ -1,5 +1,5 @@
 #!/bin/env python
-import copy
+from src.utils.APSExceptions import ReadingXmlError, MoreThanExpected, LessThanExpected
 
 
 def getKeyword(parent, keyword, parentKeyword='', modelFile=None, required=True):
@@ -11,11 +11,7 @@ def getKeyword(parent, keyword, parentKeyword='', modelFile=None, required=True)
     obj = parent.find(keyword)
     if required:
         if obj is None:
-            raise ValueError(
-                'Missing keyword {} under keyword {} in model file {}'
-                ''.format(keyword, parentKeyword, modelFile)
-            )
-
+            raise ReadingXmlError(keyword, parentKeyword, modelFile)
     return obj
 
 
@@ -25,15 +21,13 @@ def getTextCommand(parent, keyword, parentKeyword='', defaultText=None, modelFil
         If the keyword is not required and the keyword is not found, the default text is returned.
     """
     obj = parent.find(keyword)
-    text = copy.copy(defaultText)
     if required:
         if obj is None:
-            raise ValueError(
-                'Missing keyword {} under keyword {} in model file {}'
-                ''.format(keyword, parentKeyword, modelFile)
-            )
+            raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text
+    else:
+        text = defaultText
 
     return text.strip()
 
@@ -53,28 +47,16 @@ def getFloatCommand(
     value = defaultValue
     if required:
         if obj is None:
-            raise ValueError(
-                'Missing keyword {} under keyword {} in model file {}'
-                ''.format(keyword, parentKeyword, modelFile)
-            )
+            raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text
         value = float(text.strip())
         if minValue is not None:
             if value < minValue:
-                raise ValueError(
-                    'Value specified in keyword {} under keyword {} in model file {} '
-                    'is less than mininum value {}.'
-                    ''.format(keyword, parentKeyword, modelFile, str(minValue))
-                )
+                raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
         if maxValue is not None:
             if value > maxValue:
-                raise ValueError(
-                    'Value specified in keyword {} under keyword {} in model file {} '
-                    'is greater than maximum value {}.'
-                    ''.format(keyword, parentKeyword, modelFile, str(maxValue))
-                )
-
+                raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
     return value
 
 
@@ -92,26 +74,14 @@ def getIntCommand(
     value = defaultValue
     if required:
         if obj is None:
-            raise ValueError(
-                'Missing keyword {} under keyword {} in model file {}'
-                ''.format(keyword, parentKeyword, modelFile)
-            )
+            raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text
         value = int(text.strip())
         if minValue is not None:
             if value < minValue:
-                raise ValueError(
-                    'Value specified in keyword {} under keyword {} in model file {} '
-                    'is less than mininum value {}.'
-                    ''.format(keyword, parentKeyword, modelFile, str(minValue))
-                )
+                raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
         if maxValue is not None:
             if value > maxValue:
-                raise ValueError(
-                    'Value specified in keyword {} under keyword {} in model file {} '
-                    'is greater than maximum value {}.'
-                    ''.format(keyword, parentKeyword, modelFile, str(maxValue))
-                )
-
+                raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
     return value
