@@ -15,9 +15,7 @@ variables:
 
 stages:
   - build docker image
-  - dependencies
-  - linting
-  - unit tests # https://github.com/ksator/continuous-integration-with-python
+  - testing
   - doc-tests  # https://docs.python.org/3/library/doctest.html
   - build gui
   - generate documentation
@@ -37,18 +35,18 @@ make documentation:
 
 
 check for vulnerabilities:
-  stage: dependencies
+  stage: testing
   script:
     - 'eval $DOCKER $MAKE safety-check'
 
 linting:
-  stage: linting
+  stage: testing
   script:
     - 'eval $DOCKER $MAKE linting'
   allow_failure: true
 
 unit testing:
-  stage: unit tests
+  stage: testing  # https://github.com/ksator/continuous-integration-with-python
   script:
     - 'eval $DOCKER $MAKE unit-tests'
 
