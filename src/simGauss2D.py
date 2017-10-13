@@ -31,8 +31,8 @@ floatArrayPointer = ct.POINTER(ct.c_float)
 _draw2DLib.draw2DGaussField.restype = floatArrayPointer
 
 
-# Function simulationg 2D gaussian field
-def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power, debug_level=Debug.OFF):
+# Function simulating 2D gaussian field
+def draw2D(nx, ny, xsize, ysize, variogram_type, iseed, range1, range2, angle, power, debug_level=Debug.OFF):
     if debug_level <= Debug.OFF:
         debug_level = Debug.OFF
     elif debug_level >= Debug.ON:
@@ -40,14 +40,11 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
     global _draw2DLib
     values = []
 
-    # Define the output variable to contain  nx*ny float values
-    arrayPointer = floatArrayPointer * nx * ny
-
     # Call c/c++ function
     arrayPointer = _draw2DLib.draw2DGaussField(
         ct.c_int(nx), ct.c_int(ny),
         ct.c_double(xsize), ct.c_double(ysize),
-        ct.c_int(variotype), ct.c_uint(iseed),
+        ct.c_int(variogram_type), ct.c_uint(iseed),
         ct.c_double(range1), ct.c_double(range2),
         ct.c_double(angle), ct.c_double(power), ct.c_int(debug_level)
     )
@@ -64,26 +61,29 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
 
 
 def simGaussFieldAddTrendAndTransform(
-        iseed, nx, ny, xsize, ysize, varioType1, range11, range21,
-        varioAngle1, pow1, useTrend1, trendAzimuth1, relSigma1, debug_level=Debug.OFF
+        iseed, nx, ny, xsize, ysize, variogramType, range1, range2,
+        variogramAngle, pow, useTrend, trendAzimuth, relSigma, debug_level=Debug.OFF
 ):
     # Residual gaussian fields
     if debug_level >= Debug.VERY_VERBOSE:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
         # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
-    varioAngle1 = 90.0 - varioAngle1
-    [v1Residual] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1, debug_level)
+    variogramAngle = 90.0 - variogramAngle
+    [v1Residual] = draw2D(
+        nx, ny, xsize, ysize, variogramType, iseed,
+        range1, range2, variogramAngle, pow, debug_level
+    )
 
     # Trends for gaussian fields
     Trend1 = np.zeros(nx * ny, float)
     sigma1 = 1.0
-    if useTrend1:
+    if useTrend:
         if debug_level >= Debug.VERY_VERBOSE:
             print('    - Add trend 2D Gauss field ')
         dx = 1.0 / float(nx - 1)
         dy = 1.0 / float(ny - 1)
-        ang1 = trendAzimuth1 * np.pi / 180.0
+        ang1 = trendAzimuth * np.pi / 180.0
         sintheta = np.sin(ang1)
         costheta = np.cos(ang1)
 
@@ -102,7 +102,7 @@ def simGaussFieldAddTrendAndTransform(
                     minV = x1
                 n = n + 1
 
-        sigma1 = relSigma1 * (maxV - minV)
+        sigma1 = relSigma * (maxV - minV)
         # print( 'Sigma1: ' + str(sigma1))
 
     v1Trend = []
@@ -125,29 +125,29 @@ def simGaussFieldAddTrendAndTransform(
 
 
 def simGaussFieldAddTrendAndTransform2(
-        iseed, nx, ny, xsize, ysize, varioType1, range11, range21,
-        varioAngle1, pow1, useTrend1, trendAzimuth1, relSigma1
+        iseed, nx, ny, xsize, ysize, variogramType, range1, range2,
+        variogramAngle, pow, useTrend, trendAzimuth, relSigma, debug_level=Debug.OFF
 ):
     # Residual gaussian fields
     # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
-    varioAngle1 = 90.0 - varioAngle1
-    [v1Residual] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1)
+    variogramAngle = 90.0 - variogramAngle
+    [v1Residual] = draw2D(nx, ny, xsize, ysize, variogramType, iseed, range1, range2, variogramAngle, pow, debug_level)
 
     # Trends for gaussian fields
     Trend1 = np.zeros(nx * ny, float)
     sigma1 = 1.0
-    if useTrend1:
+    if useTrend:
         print('    - Calculate trend for Gauss field')
         dx = 1.0 / float(nx - 1)
         dy = 1.0 / float(ny - 1)
-        ang1 = trendAzimuth1 * np.pi / 180.0
+        ang1 = trendAzimuth * np.pi / 180.0
         sintheta = np.sin(ang1)
         costheta = np.cos(ang1)
 
         n = 0
-        minV = 99999
-        maxV = -99999
+        minV = float('inf')
+        maxV = -float('inf')
         for j in range(ny):
             y = float(j) * dy
             for i in range(nx):
@@ -160,7 +160,7 @@ def simGaussFieldAddTrendAndTransform2(
                     minV = x1
                 n = n + 1
 
-        sigma1 = relSigma1 * (maxV - minV)
+        sigma1 = relSigma * (maxV - minV)
         # print( 'Sigma1: ' + str(sigma1))
 
     v1 = np.zeros(nx * ny, float)
@@ -187,20 +187,23 @@ def simGaussFieldAddTrendAndTransform2(
     return [v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY]
 
 
-def simGaussField(iseed, nx, ny, xsize, ysize, varioType, range1, range2, varioAngle, pow, debug_info=Debug.OFF):
+def simGaussField(
+        iseed, nx, ny, xsize, ysize, variogramType,
+        range1, range2, variogramAngle, pow, debug_info=Debug.OFF
+):
     """
     Description: Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
                   Correlation lengths are range1 in main direction and range2 in orthogonal direction.
                   The angle is azimuth (angle clockwise measured from y -axis).
-                  varioType is specified by an number, see heading of the file for variogramtype
+                  variogramType is specified by an number, see heading of the file for variogram type
     """
     # Residual gaussian fields
     if debug_info >= Debug.VERY_VERBOSE:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
     # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
-    varioAngle = 90.0 - varioAngle
-    [residualField] = draw2D(nx, ny, xsize, ysize, varioType, iseed, range1, range2, varioAngle, pow, debug_info)
+    variogramAngle = 90.0 - variogramAngle
+    [residualField] = draw2D(nx, ny, xsize, ysize, variogramType, iseed, range1, range2, variogramAngle, pow, debug_info)
 
     return residualField
 

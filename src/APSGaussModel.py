@@ -7,8 +7,8 @@ import numpy as np
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
 from src.simGauss2D import simGaussField, simGaussFieldAddTrendAndTransform
-from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword
 from src.utils.constants import Debug
+from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword
 
 
 class APSGaussModel:
@@ -26,8 +26,8 @@ class APSGaussModel:
                    simBoxThickness,previewSeed,debug_level=Debug.OFF)
     def getZoneNumber(self)
     def getUsedGaussFieldNames(self)
-    def getVarioType(self,gaussFieldName)
-    def getVarioTypeNumber(self,gaussFieldName)
+    def getVariogramType(self,gaussFieldName)
+    def getVariogramTypeNumber(self,gaussFieldName)
     def getMainRange(self,gaussFieldName)
     def getPerpRange(self,gaussFieldName)
     def getVertRange(self,gaussFieldName)
@@ -38,7 +38,7 @@ class APSGaussModel:
     def getTrendRuleModelObject(self,gfName)
     def get_debug_level(self)
     def setZoneNumber(self,zoneNumber)
-    def setVarioType(self,gaussFieldName,varioType)
+    def setVariogramType(self,gaussFieldName,variogramType)
     def setRange1(self,gaussFieldName,range1)
     def setRange2(self,gaussFieldName,range2)
     def setRange3(self,gaussFieldName,range3)
@@ -46,9 +46,9 @@ class APSGaussModel:
     def setAnisotropyDipAngle(self,gaussFieldName)
     def setPower(self,gaussFieldName,power)
     def setSeedForPreviewSimulation(self,gfName,seed)
-    def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,azimuth,dip,power,
+    def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,azimuth,dip,power,
                               useTrend=0,relStdDev=0.0,trendRuleModelObj=None)
-    def updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,azimuth,dip,power)
+    def updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,azimuth,dip,power)
     def removeGaussFieldParam(self,gfName)
     def updateGaussFieldTrendParam(self,gfName,useTrend,trendRuleModelObj,relStdDev)
     def XMLAddElement(self,parent)
@@ -58,7 +58,7 @@ class APSGaussModel:
     Private functions:
     def __setEmpty(self)
     def __interpretXMLTree(ET_Tree_zone)
-    def __isVarioTypeOK(self,varioType)
+    def __isVariogramTypeOK(self,variogramType)
     def __getGFIndex(self,gfName)
     """
 
@@ -76,7 +76,7 @@ class APSGaussModel:
 
         # Dictionary give name to each index in __varioForGFModel list
         # item in list: [name,type,range1,range2,range3,azimuth,dip,power]
-        self.__index_vario = {
+        self.__index_variogram = {
             'Name':         0,
             'Type':         1,
             'MainRange':    2,
@@ -111,7 +111,7 @@ class APSGaussModel:
 
         # Dictionary give number to variogram type
         # NOTE: This table must be consistent with simGauss2D
-        self.__varioTypeNumber = {
+        self.__variogramTypeNumber = {
             'SPHERICAL':           1,
             'EXPONENTIAL':         2,
             'GAUSSIAN':            3,
@@ -127,7 +127,7 @@ class APSGaussModel:
         self.__className = 'APSGaussModel'
         self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
-        self.__varioForGFModel = []
+        self.__variogramForGFModel = []
         self.__trendForGFModel = []
         self.__seedForPreviewForGFModel = []
         self.__simBoxThickness = 0
@@ -177,9 +177,9 @@ class APSGaussModel:
                 )
 
             # Read variogram for current GF
-            vario = getKeyword(gf, 'Vario', 'GaussField', modelFile=self.__modelFileName)
-            varioType = vario.get('name')
-            if not self.__isVarioTypeOK(varioType):
+            variogram = getKeyword(gf, 'Vario', 'GaussField', modelFile=self.__modelFileName)
+            variogramType = variogram.get('name')
+            if not self.__isVariogramTypeOK(variogramType):
                 raise ValueError(
                     'In model file {0} in zone number: {1} in command Vario.\n'
                     'Specified variogram type: {1} is not defined.'
@@ -187,35 +187,35 @@ class APSGaussModel:
                 )
 
             range1 = getFloatCommand(
-                vario, 'MainRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
+                variogram, 'MainRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
             )
 
             range2 = getFloatCommand(
-                vario, 'PerpRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
+                variogram, 'PerpRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
             )
 
             range3 = getFloatCommand(
-                vario, 'VertRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
+                variogram, 'VertRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
             )
 
             azimuth = getFloatCommand(
-                vario, 'AzimuthAngle', 'Vario',
+                variogram, 'AzimuthAngle', 'Vario',
                 minValue=self.__minValue['AzimuthAngle'],
                 maxValue=self.__maxValue['AzimuthAngle'],
                 modelFile=self.__modelFileName
             )
 
             dip = getFloatCommand(
-                vario, 'DipAngle', 'Vario',
+                variogram, 'DipAngle', 'Vario',
                 minValue=self.__minValue['DipAngle'],
                 maxValue=self.__maxValue['DipAngle'],
                 modelFile=self.__modelFileName
             )
 
             power = 1.0
-            if varioType == 'GENERAL_EXPONENTIAL':
+            if variogramType == 'GENERAL_EXPONENTIAL':
                 power = getFloatCommand(
-                    vario, 'Power', 'Vario',
+                    variogram, 'Power', 'Vario',
                     minValue=self.__minValue['Power'],
                     maxValue=self.__maxValue['Power'],
                     modelFile=self.__modelFileName
@@ -264,7 +264,7 @@ class APSGaussModel:
 
             # Add gauss field parameters to data structure
             self.updateGaussFieldParam(
-                gfName, varioType, range1, range2, range3, azimuth,
+                gfName, variogramType, range1, range2, range3, azimuth,
                 dip, power, useTrend, relStdDev, trendRuleModelObj
             )
             # Set preview simulation start seed for gauss field
@@ -272,7 +272,7 @@ class APSGaussModel:
 
         # End loop over gauss fields for current zone model
 
-        if self.__varioForGFModel is None:
+        if self.__variogramForGFModel is None:
             raise NameError(
                 'Error when reading model file: {modelName}\n'
                 'Error: Missing keyword GaussField under '
@@ -282,7 +282,7 @@ class APSGaussModel:
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Gauss field variogram parameter for current zone model:')
-            print(repr(self.__varioForGFModel))
+            print(repr(self.__variogramForGFModel))
 
             print('Debug output:Gauss field trend parameter for current zone model:')
             print(repr(self.__trendForGFModel))
@@ -300,14 +300,14 @@ class APSGaussModel:
         # Set default values
         self.__setEmpty()
 
-        GNAME = self.__index_vario['Name']
-        GTYPE = self.__index_vario['Type']
-        GRANGE1 = self.__index_vario['MainRange']
-        GRANGE2 = self.__index_vario['PerpRange']
-        GRANGE3 = self.__index_vario['VertRange']
-        GAZIMUTH = self.__index_vario['AzimuthAngle']
-        GDIP = self.__index_vario['DipAngle']
-        GPOWER = self.__index_vario['Power']
+        GNAME = self.__index_variogram['Name']
+        GTYPE = self.__index_variogram['Type']
+        GRANGE1 = self.__index_variogram['MainRange']
+        GRANGE2 = self.__index_variogram['PerpRange']
+        GRANGE3 = self.__index_variogram['VertRange']
+        GAZIMUTH = self.__index_variogram['AzimuthAngle']
+        GDIP = self.__index_variogram['DipAngle']
+        GPOWER = self.__index_variogram['Power']
 
         TNAME = self.__index_trend['Name']
         TUSE = self.__index_trend['Use trend']
@@ -328,7 +328,7 @@ class APSGaussModel:
         assert len(trendModelList) == len(gaussModelList)
         for i in range(len(gaussModelList)):
             item = gaussModelList[i]
-            if len(item) != len(self.__index_vario):
+            if len(item) != len(self.__index_variogram):
                 raise ValueError('Programming error: Input list items in gausModelList is not of correct length')
             trendItem = trendModelList[i]
             seedItem = previewSeedList[i]
@@ -344,12 +344,12 @@ class APSGaussModel:
                     ''.format(self.__modelFileName, str(self.__zoneNumber), gfName)
                 )
 
-            varioType = item[GTYPE]
-            if not self.__isVarioTypeOK(varioType):
+            variogramType = item[GTYPE]
+            if not self.__isVariogramTypeOK(variogramType):
                 raise ValueError(
                     'In initialize function for {0} in zone number: {1}. '
                     'Specified variogram type: {2} is not defined.'
-                    ''.format(self.__className, self.__zoneNumber, varioType)
+                    ''.format(self.__className, self.__zoneNumber, variogramType)
                 )
             range1 = item[GRANGE1]
             range2 = item[GRANGE2]
@@ -364,7 +364,7 @@ class APSGaussModel:
             seed = seedItem[SVALUE]
 
             # Set variogram parameters for this gauss field
-            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, azimuth, dip, power)
+            self.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, azimuth, dip, power)
 
             # Set trend model parameters for this gauss field
             self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
@@ -373,20 +373,21 @@ class APSGaussModel:
             self.setSeedForPreviewSimulation(gfName, seed)
 
     def getNGaussFields(self):
-        return len(self.__varioForGFModel)
+        return len(self.__variogramForGFModel)
 
-    def __isVarioTypeOK(self, varioType):
+    @staticmethod
+    def __isVariogramTypeOK(variogramType):
         isOK = 0
-        if varioType == 'SPHERICAL':
+        if variogramType == 'SPHERICAL':
             isOK = 1
-        elif varioType == 'EXPONENTIAL':
+        elif variogramType == 'EXPONENTIAL':
             isOK = 1
-        elif varioType == 'GAUSSIAN':
+        elif variogramType == 'GAUSSIAN':
             isOK = 1
-        elif varioType == 'GENERAL_EXPONENTIAL':
+        elif variogramType == 'GENERAL_EXPONENTIAL':
             isOK = 1
         if isOK == 0:
-            print('Error: Specified variogram : ' + varioType + ' is not implemented')
+            print('Error: Specified variogram : ' + variogramType + ' is not implemented')
             print('Error: Allowed variograms are: ')
             print('       SPHERICAL')
             print('       EXPONENTIAL')
@@ -400,21 +401,21 @@ class APSGaussModel:
 
     def getUsedGaussFieldNames(self):
         gfNames = []
-        GNAME = self.__index_vario['Name']
-        nGF = len(self.__varioForGFModel)
+        GNAME = self.__index_variogram['Name']
+        nGF = len(self.__variogramForGFModel)
         for i in range(nGF):
-            item = self.__varioForGFModel[i]
+            item = self.__variogramForGFModel[i]
             name = item[GNAME]
             gfNames.append(name)
         return gfNames
 
     def findGaussFieldParameterItem(self, gaussFieldName):
-        GNAME = self.__index_vario['Name']
-        nGF = len(self.__varioForGFModel)
+        GNAME = self.__index_variogram['Name']
+        nGF = len(self.__variogramForGFModel)
         found = False
         itemWithParameters = None
         for i in range(nGF):
-            item = self.__varioForGFModel[i]
+            item = self.__variogramForGFModel[i]
             name = item[GNAME]
             if name == gaussFieldName:
                 itemWithParameters = item
@@ -424,49 +425,49 @@ class APSGaussModel:
             raise ValueError('Variogram data for gauss field name: {} is not found.'.format(gaussFieldName))
         return itemWithParameters
 
-    def getVarioType(self, gaussFieldName):
-        GTYPE = self.__index_vario['Type']
+    def getVariogramType(self, gaussFieldName):
+        GTYPE = self.__index_variogram['Type']
         item = self.findGaussFieldParameterItem(gaussFieldName)
-        varioType = item[GTYPE]
-        return varioType
+        variogramType = item[GTYPE]
+        return variogramType
 
-    def getVarioTypeNumber(self, gaussFieldName):
-        varioType = self.getVarioType(gaussFieldName)
-        varioTypeNumber = self.__varioTypeNumber[varioType]
-        return varioTypeNumber
+    def getVariogramTypeNumber(self, gaussFieldName):
+        variogramType = self.getVariogramType(gaussFieldName)
+        variogramTypeNumber = self.__variogramTypeNumber[variogramType]
+        return variogramTypeNumber
 
     def getMainRange(self, gaussFieldName):
-        GRANGE1 = self.__index_vario['MainRange']
+        GRANGE1 = self.__index_variogram['MainRange']
         item = self.findGaussFieldParameterItem(gaussFieldName)
         r = item[GRANGE1]
         return r
 
     def getPerpRange(self, gaussFieldName):
-        GRANGE2 = self.__index_vario['PerpRange']
+        GRANGE2 = self.__index_variogram['PerpRange']
         item = self.findGaussFieldParameterItem(gaussFieldName)
         r = item[GRANGE2]
         return r
 
     def getVertRange(self, gaussFieldName):
-        GRANGE3 = self.__index_vario['VertRange']
+        GRANGE3 = self.__index_variogram['VertRange']
         item = self.findGaussFieldParameterItem(gaussFieldName)
         r = item[GRANGE3]
         return r
 
     def getAnisotropyAzimuthAngle(self, gaussFieldName):
-        GAZIMUTH = self.__index_vario['AzimuthAngle']
+        GAZIMUTH = self.__index_variogram['AzimuthAngle']
         item = self.findGaussFieldParameterItem(gaussFieldName)
         r = item[GAZIMUTH]
         return r
 
     def getAnisotropyDipAngle(self, gaussFieldName):
-        GDIP = self.__index_vario['DipAngle']
+        GDIP = self.__index_variogram['DipAngle']
         item = self.findGaussFieldParameterItem(gaussFieldName)
         r = item[GDIP]
         return r
 
     def getPower(self, gaussFieldName):
-        GPOWER = self.__index_vario['Power']
+        GPOWER = self.__index_variogram['Power']
         item = self.findGaussFieldParameterItem(gaussFieldName)
         r = item[GPOWER]
         return r
@@ -511,11 +512,11 @@ class APSGaussModel:
         return self.__debug_level
 
     def __getGFIndex(self, gfName):
-        GNAME = self.__index_vario['Name']
+        GNAME = self.__index_variogram['Name']
 
         indx = -1
-        for i in range(len(self.__varioForGFModel)):
-            item = self.__varioForGFModel[i]
+        for i in range(len(self.__variogramForGFModel)):
+            item = self.__variogramForGFModel[i]
             gf = item[GNAME]
             if gf == gfName:
                 indx = i
@@ -535,7 +536,7 @@ class APSGaussModel:
             maxValue = self.__maxValue[variableName]
 
         # index to where the variable is located in the __varioFORGFModel
-        variableIndex = self.__index_vario[variableName]
+        variableIndex = self.__index_variogram[variableName]
 
         err = 0
         if value < minValue:
@@ -547,21 +548,21 @@ class APSGaussModel:
             gfList = self.getUsedGaussFieldNames()
             if gaussFieldName in gfList:
                 indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
+                item = self.__variogramForGFModel[indx]
                 item[variableIndex] = value
             else:
                 err = 1
         return err
 
-    def setVarioType(self, gaussFieldName, varioType):
-        GTYPE = self.__index_vario['Type']
+    def setVariogramType(self, gaussFieldName, variogramType):
+        GTYPE = self.__index_variogram['Type']
         err = 0
-        if self.__isVarioTypeOK(varioType):
+        if self.__isVariogramTypeOK(variogramType):
             gfList = self.getUsedGaussFieldNames()
             if gaussFieldName in gfList:
                 indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
-                item[GTYPE] = varioType
+                item = self.__variogramForGFModel[indx]
+                item[GTYPE] = variogramType
             else:
                 err = 1
         else:
@@ -608,13 +609,15 @@ class APSGaussModel:
             err = 1
         return err
 
-    def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, azimuth, dip, power,
-                              useTrend=0, relStdDev=0.0, trendRuleModelObj=None):
+    def updateGaussFieldParam(
+            self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
+            useTrend=0, relStdDev=0.0, trendRuleModelObj=None
+    ):
         # Update or create new gauss field parameter object (with trend)
-        GNAME = self.__index_vario['Name']
+        GNAME = self.__index_variogram['Name']
         err = 0
         found = 0
-        if not self.__isVarioTypeOK(varioType):
+        if not self.__isVariogramTypeOK(variogramType):
             print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
             raise ValueError('Undefined variogram type specified.')
         if range1 < 0:
@@ -626,7 +629,7 @@ class APSGaussModel:
         if range3 < 0:
             print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
             raise ValueError('Correlation range < 0.0')
-        if varioType == 'GENERAL_EXPONENTIAL':
+        if variogramType == 'GENERAL_EXPONENTIAL':
             if power < 1.0 or power > 2.0:
                 print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
                 raise ValueError('Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0,2.0]')
@@ -635,18 +638,18 @@ class APSGaussModel:
             raise ValueError('Relative standard deviation used when trends are specified is negative.')
 
         # Check if gauss field is already defined, then update parameters or create new
-        for item in self.__varioForGFModel:
+        for item in self.__variogramForGFModel:
             name = item[GNAME]
             if name == gfName:
-                self.updateGaussFieldVarioParam(gfName, varioType, range1, range2, range3, azimuth, dip, power)
+                self.updateGaussFieldVariogramParameters(gfName, variogramType, range1, range2, range3, azimuth, dip, power)
                 self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
                 found = 1
                 break
         if found == 0:
             # Create data for a new gauss field for both variogram  data and trend data
             # But data for trend parameters must be set by another function and default is set here.
-            itemVario = [gfName, varioType, range1, range2, range3, azimuth, dip, power]
-            self.__varioForGFModel.append(itemVario)
+            itemVario = [gfName, variogramType, range1, range2, range3, azimuth, dip, power]
+            self.__variogramForGFModel.append(itemVario)
             if trendRuleModelObj is None:
                 useTrend = 0
                 relStdDev = 0.0
@@ -658,26 +661,26 @@ class APSGaussModel:
             self.__seedForPreviewForGFModel.append([gfName, defaultSeed])
         return err
 
-    def updateGaussFieldVarioParam(self, gfName, varioType, range1, range2, range3, azimuth, dip, power):
+    def updateGaussFieldVariogramParameters(self, gfName, variogramType, range1, range2, range3, azimuth, dip, power):
         # Update gauss field variogram parameters for existing gauss field model
         # But it does not create new object.
-        GNAME = self.__index_vario['Name']
-        GTYPE = self.__index_vario['Type']
-        GRANGE1 = self.__index_vario['MainRange']
-        GRANGE2 = self.__index_vario['PerpRange']
-        GRANGE3 = self.__index_vario['VertRange']
-        GAZIMUTH = self.__index_vario['AzimuthAngle']
-        GDIP = self.__index_vario['DipAngle']
-        GPOWER = self.__index_vario['Power']
+        GNAME = self.__index_variogram['Name']
+        GTYPE = self.__index_variogram['Type']
+        GRANGE1 = self.__index_variogram['MainRange']
+        GRANGE2 = self.__index_variogram['PerpRange']
+        GRANGE3 = self.__index_variogram['VertRange']
+        GAZIMUTH = self.__index_variogram['AzimuthAngle']
+        GDIP = self.__index_variogram['DipAngle']
+        GPOWER = self.__index_variogram['Power']
 
         err = 0
         found = 0
         # Check that gauss field is already defined, then update parameters.
-        for item in self.__varioForGFModel:
+        for item in self.__variogramForGFModel:
             name = item[GNAME]
             if name == gfName:
                 found = 1
-                item[GTYPE] = varioType
+                item[GTYPE] = variogramType
                 item[GRANGE1] = range1
                 item[GRANGE2] = range2
                 item[GRANGE3] = range3
@@ -690,17 +693,17 @@ class APSGaussModel:
         return err
 
     def removeGaussFieldParam(self, gfName):
-        GNAME = self.__index_vario['Name']
+        GNAME = self.__index_variogram['Name']
         indx = -1
-        for i in range(len(self.__varioForGFModel)):
-            item = self.__varioForGFModel[i]
+        for i in range(len(self.__variogramForGFModel)):
+            item = self.__variogramForGFModel[i]
             name = item[GNAME]
             if name == gfName:
                 indx = i
                 break
         if indx != -1:
             # Remove from list
-            self.__varioForGFModel.pop(indx)
+            self.__variogramForGFModel.pop(indx)
             self.__trendForGFModel.pop(indx)
             self.__seedForPreviewForGFModel.pop(indx)
         return
@@ -713,7 +716,7 @@ class APSGaussModel:
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
         err = 0
-        if trendRuleModelObj == None:
+        if trendRuleModelObj is None:
             err = 1
         else:
             # Check if gauss field is already defined, then update parameters
@@ -732,14 +735,14 @@ class APSGaussModel:
         return err
 
     def XMLAddElement(self, parent):
-        GNAME = self.__index_vario['Name']
-        GTYPE = self.__index_vario['Type']
-        GRANGE1 = self.__index_vario['MainRange']
-        GRANGE2 = self.__index_vario['PerpRange']
-        GRANGE3 = self.__index_vario['VertRange']
-        GAZIMUTH = self.__index_vario['AzimuthAngle']
-        GDIP = self.__index_vario['DipAngle']
-        GPOWER = self.__index_vario['Power']
+        GNAME = self.__index_variogram['Name']
+        GTYPE = self.__index_variogram['Type']
+        GRANGE1 = self.__index_variogram['MainRange']
+        GRANGE2 = self.__index_variogram['PerpRange']
+        GRANGE3 = self.__index_variogram['VertRange']
+        GAZIMUTH = self.__index_variogram['AzimuthAngle']
+        GDIP = self.__index_variogram['DipAngle']
+        GPOWER = self.__index_variogram['Power']
 
         TNAME = self.__index_trend['Name']
         TUSE = self.__index_trend['Use trend']
@@ -753,16 +756,16 @@ class APSGaussModel:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         # Add child command GaussField
-        nGaussFieldsForModel = len(self.__varioForGFModel)
+        nGaussFieldsForModel = len(self.__variogramForGFModel)
         for i in range(nGaussFieldsForModel):
-            gfName = self.__varioForGFModel[i][GNAME]
-            varioType = self.__varioForGFModel[i][GTYPE]
-            range1 = self.__varioForGFModel[i][GRANGE1]
-            range2 = self.__varioForGFModel[i][GRANGE2]
-            range3 = self.__varioForGFModel[i][GRANGE3]
-            azimuth = self.__varioForGFModel[i][GAZIMUTH]
-            dip = self.__varioForGFModel[i][GDIP]
-            power = self.__varioForGFModel[i][GPOWER]
+            gfName = self.__variogramForGFModel[i][GNAME]
+            variogramType = self.__variogramForGFModel[i][GTYPE]
+            range1 = self.__variogramForGFModel[i][GRANGE1]
+            range2 = self.__variogramForGFModel[i][GRANGE2]
+            range3 = self.__variogramForGFModel[i][GRANGE3]
+            azimuth = self.__variogramForGFModel[i][GAZIMUTH]
+            dip = self.__variogramForGFModel[i][GDIP]
+            power = self.__variogramForGFModel[i][GPOWER]
 
             if gfName != self.__trendForGFModel[i][TNAME]:
                 print('Error in class: ' + self.__className + ' in ' + 'XMLAddElement')
@@ -777,35 +780,35 @@ class APSGaussModel:
             parent.append(elem)
             gfElement = elem
             tag = 'Vario'
-            attribute = {'name': varioType}
+            attribute = {'name': variogramType}
             elem = Element(tag, attribute)
             gfElement.append(elem)
-            varioElement = elem
+            variogramElement = elem
             tag = self.__xml_keyword['MainRange']
             elem = Element(tag)
             elem.text = ' ' + str(range1) + ' '
-            varioElement.append(elem)
+            variogramElement.append(elem)
             tag = self.__xml_keyword['PerpRange']
             elem = Element(tag)
             elem.text = ' ' + str(range2) + ' '
-            varioElement.append(elem)
+            variogramElement.append(elem)
             tag = self.__xml_keyword['VertRange']
             elem = Element(tag)
             elem.text = ' ' + str(range3) + ' '
-            varioElement.append(elem)
+            variogramElement.append(elem)
             tag = self.__xml_keyword['AzimuthAngle']
             elem = Element(tag)
             elem.text = ' ' + str(azimuth) + ' '
-            varioElement.append(elem)
+            variogramElement.append(elem)
             tag = self.__xml_keyword['DipAngle']
             elem = Element(tag)
             elem.text = ' ' + str(dip) + ' '
-            varioElement.append(elem)
-            if varioType == 'GENERAL_EXPONENTIAL':
+            variogramElement.append(elem)
+            if variogramType == 'GENERAL_EXPONENTIAL':
                 tag = self.__xml_keyword['Power']
                 elem = Element(tag)
                 elem.text = ' ' + str(power) + ' '
-                varioElement.append(elem)
+                variogramElement.append(elem)
 
             if useTrend == 1:
                 # Add trend
@@ -841,14 +844,14 @@ class APSGaussModel:
             # Find data for specified Gauss field name
             name = gaussFieldNamesForSimulation[i]
             seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
-            varioType = self.getVarioType(name)
-            varioTypeNumber = self.getVarioTypeNumber(name)
-            #            r1        = self.getMainRange(name)
-            #            r2        = self.getPerpRange(name)
-            #            r3        = self.getVertRange(name)
-            #            azimuthVario  = self.getAnisotropyAzimuthAngle(name)
-            #            dipVario  = self.getAnisotropyDipAngle(name)
-            #            azimuthVario = azimuthVario - gridAzimuthAngle
+            variogramType = self.getVariogramType(name)
+            variogramTypeNumber = self.getVariogramTypeNumber(name)
+            # r1 = self.getMainRange(name)
+            # r2 = self.getPerpRange(name)
+            # r3 = self.getVertRange(name)
+            # azimuthVario  = self.getAnisotropyAzimuthAngle(name)
+            # dipVario  = self.getAnisotropyDipAngle(name)
+            # azimuthVario = azimuthVario - gridAzimuthAngle
 
             power = self.getPower(name)
 
@@ -861,10 +864,10 @@ class APSGaussModel:
             relSigma = self.__trendForGFModel[i][TSTD]
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Simulate gauss field: ' + name)
-                print('Debug output: VarioType: ' + str(varioType))
-                print('Debug output: VarioTypeNumber: ' + str(varioTypeNumber))
+                print('Debug output: VariogramType: ' + str(variogramType))
+                print('Debug output: VariogramTypeNumber: ' + str(variogramTypeNumber))
 
-                if varioTypeNumber == 4:
+                if variogramTypeNumber == 4:
                     print('Debug output: Power    : ' + str(power))
 
                 if useTrend == 1:
@@ -884,7 +887,7 @@ class APSGaussModel:
             elif previewCrossSection == 'JK':
                 projection = 'yz'
 
-            [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAzimuthAngle, projection)
+            [angle1, range1, angle2, range2] = self.calc2DVariogramFrom3DVariogram(name, gridAzimuthAngle, projection)
             azimuthVario = angle1
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
@@ -897,7 +900,7 @@ class APSGaussModel:
             gfRealization = np.zeros(nx * ny, float)
             [gfRealization] = simGaussFieldAddTrendAndTransform(
                 seedValue, nx, ny, xsize, ysize,
-                varioTypeNumber, range1, range2, azimuthVario, power,
+                variogramTypeNumber, range1, range2, azimuthVario, power,
                 useTrend, trendAzimuth, relSigma, self.__debug_level
             )
 
@@ -950,30 +953,30 @@ class APSGaussModel:
             # Find data for specified Gauss field name
             name = gaussFieldNamesForSimulation[i]
             seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
-            varioType = self.getVarioType(name)
-            varioTypeNumber = self.getVarioTypeNumber(name)
+            varigramoType = self.getVariogramType(name)
+            variogramTypeNumber = self.getVariogramTypeNumber(name)
             mainRange = self.getMainRange(name)
             perpRange = self.getPerpRange(name)
             vertRange = self.getVertRange(name)
-            azimuthVario = self.getAnisotropyAzimuthAngle(name)
-            dipVario = self.getAnisotropyDipAngle(name)
+            azimuthVariogram = self.getAnisotropyAzimuthAngle(name)
+            dipVariogram = self.getAnisotropyDipAngle(name)
             power = self.getPower(name)
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Within simGaussFieldWithTrendAndTransformNew')
                 print('Debug output: Simulate gauss field: ' + name)
-                print('Debug output: VarioType: ' + str(varioType))
-                print('Debug output: VarioTypeNumber: ' + str(varioTypeNumber))
-                print('Debug output: Azimuth angle for Main range direction: ' + str(azimuthVario))
-                print('Debug output: Dip angle for Main range direction: ' + str(dipVario))
+                print('Debug output: VariogramType: ' + str(varigramoType))
+                print('Debug output: VariogramTypeNumber: ' + str(variogramTypeNumber))
+                print('Debug output: Azimuth angle for Main range direction: ' + str(azimuthVariogram))
+                print('Debug output: Dip angle for Main range direction: ' + str(dipVariogram))
 
-                if varioTypeNumber == 4:
+                if variogramTypeNumber == 4:
                     print('Debug output: Power    : ' + str(power))
 
                 print('Debug output: Seed value: ' + str(seedValue))
 
             # Calculate 2D projection of the correlation ellipsoid
-            [angle1, range1, angle2, range2] = self.calc2DVarioFrom3DVario(name, gridAzimuthAngle, projection)
-            azimuthVario = angle1
+            [angle1, range1, angle2, range2] = self.calc2DVariogramFrom3DVariogram(name, gridAzimuthAngle, projection)
+            azimuthVariogram = angle1
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
@@ -981,8 +984,8 @@ class APSGaussModel:
                 print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
 
             residualField = simGaussField(seedValue, gridDim1, gridDim2, size1, size2,
-                                          varioTypeNumber, range1, range2,
-                                          azimuthVario, power,
+                                          variogramTypeNumber, range1, range2,
+                                          azimuthVariogram, power,
                                           self.__debug_level)
 
             # Calculate trend
@@ -1053,7 +1056,7 @@ class APSGaussModel:
 
         return transformedValues
 
-    def calc2DVarioFrom3DVario(self, gaussFieldName, gridAzimuthAngle, projection):
+    def calc2DVariogramFrom3DVariogram(self, gaussFieldName, gridAzimuthAngle, projection):
         """
          Variogram ellipsoid in 3D is defined by a symmetric 3x3 matrix M such that
          transpose(V)*M * V = 1 where transpose(V) = [x,y,z]. The principal directions are found
@@ -1086,7 +1089,7 @@ class APSGaussModel:
          done
          for x,y plane with z = 0 and for y,z plane for x = 0.
          """
-        funcName = 'calc2DVarioFrom3DVario'
+        funcName = 'calc2DVariogramFrom3DVariogram'
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Function: {}'.format(funcName))
         ry = self.getMainRange(gaussFieldName)
@@ -1137,14 +1140,20 @@ class APSGaussModel:
         # Let U be the 2x2 matrix in the projection (where row and column corresponding to 
         # the coordinate that is set to 0 is removed
         if projection == 'xy':
-            U = np.array([[M[0, 0], M[0, 1]],
-                          [M[0, 1], M[1, 1]]])
+            U = np.array([
+                [M[0, 0], M[0, 1]],
+                [M[0, 1], M[1, 1]]
+            ])
         elif projection == 'xz':
-            U = np.array([[M[0, 0], M[0, 2]],
-                          [M[0, 2], M[2, 2]]])
+            U = np.array([
+                [M[0, 0], M[0, 2]],
+                [M[0, 2], M[2, 2]]
+            ])
         elif projection == 'yz':
-            U = np.array([[M[1, 1], M[1, 2]],
-                          [M[1, 2], M[2, 2]]])
+            U = np.array([
+                [M[1, 1], M[1, 2]],
+                [M[1, 2], M[2, 2]]
+            ])
         else:
             raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
         # angles are azimuth angles (Measured from 2nd axis clockwise)

@@ -87,7 +87,7 @@ if err:
 
 # Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_1'
-zoneObject.setHorizonNameForVarioTrendMap(hName)
+zoneObject.setHorizonNameForVariogramTrendMap(hName)
 
 # Set facies with associated probabilities for the zone
 # faciesList = ['F1','F2','F3','F4','F5','F7']
@@ -101,7 +101,7 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF3'
-varioType = 'SPHERICAL'
+variogramType = 'SPHERICAL'
 range1 = 5500.0
 range2 = 5000.0
 range3 = 2.0
@@ -115,7 +115,7 @@ stackingAngle = 0.1
 direction = 1
 relStdDev = 0.01
 trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power,
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power,
                                        relStdDev, trendModelObject)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
@@ -130,13 +130,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF4'
-varioType = 'SPHERICAL'
+variogramType = 'SPHERICAL'
 range1 = 5500.0
 range2 = 1500.0
 range3 = 2.0
 angle = 35.0
 power = 0.0
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -150,13 +150,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF5'
-varioType = 'GENERAL_EXPONENTIAL'
+variogramType = 'GENERAL_EXPONENTIAL'
 range1 = 6000.0
 range2 = 1300.0
 range3 = 2.0
 angle = 125.0
 power = 1.8
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -250,7 +250,7 @@ if err:
 
 # Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_2'
-zoneObject.setHorizonNameForVarioTrendMap(hName)
+zoneObject.setHorizonNameForVariogramTrendMap(hName)
 
 # Set facies with associated probabilities for the zone
 faciesList = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8']
@@ -262,7 +262,7 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF1'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 500.0
 range3 = 2.0
@@ -276,7 +276,7 @@ stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
 trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
@@ -291,13 +291,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF2'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 1000.0
 range3 = 2.0
 angle = 35.0
 power = 0.0
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -311,13 +311,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF3'
-varioType = 'GENERAL_EXPONENTIAL'
+variogramType = 'GENERAL_EXPONENTIAL'
 range1 = 3000.0
 range2 = 500.0
 range3 = 2.0
 angle = 35.0
 power = 1.8
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -395,7 +395,7 @@ if err:
 
 # Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_3'
-zoneObject.setHorizonNameForVarioTrendMap(hName)
+zoneObject.setHorizonNameForVariogramTrendMap(hName)
 
 # Set facies with associated probabilities for the zone
 faciesList = ['F1', 'F2', 'F3', 'F4', 'F5']
@@ -407,7 +407,7 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF1'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 500.0
 range3 = 2.0
@@ -421,7 +421,7 @@ stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
 trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
@@ -436,13 +436,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF2'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 1000.0
 range3 = 2.0
 angle = 35.0
 power = 0.0
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -456,13 +456,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF3'
-varioType = 'GENERAL_EXPONENTIAL'
+variogramType = 'GENERAL_EXPONENTIAL'
 range1 = 3000.0
 range2 = 500.0
 range3 = 2.0
 angle = 35.0
 power = 1.8
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
