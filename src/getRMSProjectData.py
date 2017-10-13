@@ -256,7 +256,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     nLayersPerZone = []
     grid = gridModel.get_grid()
     [xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     asimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, printInfo)
+     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, printInfo)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -283,10 +283,10 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     ysObj.text = ' ' + str(yLength) + ' '
     gmElement.append(ysObj)
 
-    tag = 'AsimuthAngle'
-    asimuthObj = Element(tag)
-    asimuthObj.text = ' ' + str(asimuthAngle) + ' '
-    gmElement.append(asimuthObj)
+    tag = 'AzimuthAngle'
+    azimuthObj = Element(tag)
+    azimuthObj.text = ' ' + str(azimuthAngle) + ' '
+    gmElement.append(azimuthObj)
 
     tag = 'OrigoX'
     x0_obj = Element(tag)
@@ -416,7 +416,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printIn
     return
 
 
-def create2DMapsForVariogramAsimuthAngle(project, inputFile, printInfo):
+def create2DMapsForVariogramAzimuthAngle(project, inputFile, printInfo):
     [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
      wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, printInfo)
 
@@ -430,15 +430,15 @@ def create2DMapsForVariogramAsimuthAngle(project, inputFile, printInfo):
     # Gauss field names (standard hardcoded names)
     # gaussFieldNames = ['GF1','GF2','GF3','GF4']
     gaussFieldNames = gfNames
-    asimuthValue = 0.0
+    azimuthValue = 0.0
     for hName in horizonList:
         for gfName in gaussFieldNames:
-            reprName = gfName + '_VarioAsimuthTrend'
+            reprName = gfName + '_VarioAzimuthTrend'
             # Create new horizon data type for this gauss field if not already existing
             gr.createHorizonDataTypeObject(horizons, reprName, printInfo)
 
-            # Set the value in the map to the constant asimuth value
-            gr.setConstantValueInHorizon(horizons, hName, reprName, asimuthValue, printInfo,
+            # Set the value in the map to the constant azimuth value
+            gr.setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, printInfo,
                                          xmin, ymin, xinc, yinc, nx, ny, rotation)
 
     return
@@ -450,11 +450,11 @@ inputFile = 'getRMSProjectData.xml'
 outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
 printInfo = 3
 
-# Create 2D maps which can be used in RMS petrosim jobs for variogram asimuth angle
+# Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
 print('Start running APS workflow preparation script')
 print('Read file: ' + inputFile)
-print('Create 2D maps in the horizon container to be used for variogram asimuth angle')
-create2DMapsForVariogramAsimuthAngle(project, inputFile, printInfo)
+print('Create 2D maps in the horizon container to be used for variogram azimuth angle')
+create2DMapsForVariogramAzimuthAngle(project, inputFile, printInfo)
 
 print('Read RMS project and save some data to be read by the APS GUI script')
 scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, printInfo)

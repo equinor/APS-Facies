@@ -88,11 +88,11 @@
           <MainRange> 5500.0 </MainRange>
           <PerpRange> 5000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.01 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
-          <asimuth> 125.0 </asimuth>
+          <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 0.1 </stackAngle>
         </Trend>
@@ -105,7 +105,7 @@
           <MainRange> 1500.0 </MainRange>
           <PerpRange> 1000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.02 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -148,11 +148,11 @@
           <MainRange> 5500.0 </MainRange>
           <PerpRange> 5000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
-          <asimuth> 125.0 </asimuth>
+          <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 0.1 </stackAngle>
         </Trend>
@@ -165,7 +165,7 @@
           <MainRange> 1500.0 </MainRange>
           <PerpRange> 1000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -213,11 +213,11 @@
           <MainRange> 5500.0 </MainRange>
           <PerpRange> 5000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.01 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
-          <asimuth> 125.0 </asimuth>
+          <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 0.1 </stackAngle>
         </Trend>
@@ -230,7 +230,7 @@
           <MainRange> 1500.0 </MainRange>
           <PerpRange> 1000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -240,7 +240,7 @@
           <MainRange> 500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 135.0 </AsimuthAngle>
+          <AzimuthAngle> 135.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -250,7 +250,7 @@
           <MainRange> 2500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 100.0 </AsimuthAngle>
+          <AzimuthAngle> 100.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
@@ -305,11 +305,11 @@
           <MainRange> 5500.0 </MainRange>
           <PerpRange> 5000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.02 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
-          <asimuth> 125.0 </asimuth>
+          <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 0.1 </stackAngle>
         </Trend>
@@ -322,7 +322,7 @@
           <MainRange> 1500.0 </MainRange>
           <PerpRange> 1000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.005 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -332,7 +332,7 @@
           <MainRange> 500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 135.0 </AsimuthAngle>
+          <AzimuthAngle> 135.0 </AzimuthAngle>
           <DipAngle> 0.002 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -342,7 +342,7 @@
           <MainRange> 2500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 100.0 </AsimuthAngle>
+          <AzimuthAngle> 100.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
@@ -398,7 +398,7 @@
           <MainRange> 5500.0 </MainRange>
           <PerpRange> 5000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -409,7 +409,7 @@
           <MainRange> 1500.0 </MainRange>
           <PerpRange> 1000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -419,7 +419,7 @@
           <MainRange> 500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 135.0 </AsimuthAngle>
+          <AzimuthAngle> 135.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -429,7 +429,7 @@
           <MainRange> 2500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 100.0 </AsimuthAngle>
+          <AzimuthAngle> 100.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
@@ -493,11 +493,11 @@
           <MainRange> 5500.0 </MainRange>
           <PerpRange> 5000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
-          <asimuth> 125.0 </asimuth>
+          <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 0.1 </stackAngle>
         </Trend>
@@ -510,7 +510,7 @@
           <MainRange> 1500.0 </MainRange>
           <PerpRange> 1000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 35.0 </AsimuthAngle>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -520,7 +520,7 @@
           <MainRange> 500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 135.0 </AsimuthAngle>
+          <AzimuthAngle> 135.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -530,7 +530,7 @@
           <MainRange> 2500.0 </MainRange>
           <PerpRange> 300.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
-          <AsimuthAngle> 100.0 </AsimuthAngle>
+          <AzimuthAngle> 100.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>

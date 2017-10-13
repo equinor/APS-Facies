@@ -83,7 +83,7 @@ class APSModel:
     -----------------------------------------------------------------------------
     """
 
-    def __init__(self, modelFileName=None):
+    def __init__(self, modelFileName=None, printInfo=0):
         # Local variables
         self.__className = 'APSModel'
         self.__rmsProjectName = ''
@@ -93,7 +93,7 @@ class APSModel:
         self.__rmsGridModelName = ''
         self.__rmsZoneParamName = ''
         self.__rmsFaciesParamName = ''
-        self.__printInfo = 0
+        self.__printInfo = printInfo
         self.__rmsGFJobs = None
         self.__faciesTable = None
         self.__nZones = 0

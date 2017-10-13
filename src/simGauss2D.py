@@ -8,8 +8,8 @@ import numpy as np
 #    EXPONENTIAL    2
 #    GAUSSIAN       3
 #    GENERAL_EXPONENTIAL  4
-# Input angle for variogram is asimuth angle in degrees
-# Input angle for linear trend direction is asimuth angle in degrees
+# Input angle for variogram is azimuth angle in degrees
+# Input angle for linear trend direction is azimuth angle in degrees
 #
 # -----       Functions used to draw gaussian fields: -------------------------
 
@@ -59,14 +59,14 @@ def draw2D(nx, ny, xsize, ysize, variotype, iseed, range1, range2, angle, power,
 
 def simGaussFieldAddTrendAndTransform(
         iseed, nx, ny, xsize, ysize, varioType1, range11, range21,
-        varioAngle1, pow1, useTrend1, trendAsimuth1, relSigma1, printInfo
+        varioAngle1, pow1, useTrend1, trendAzimuth1, relSigma1, printInfo=0
 ):
     # Residual gaussian fields
     debugPrint = 0
     if printInfo >= 3:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
         debugPrint = 1
-        # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+        # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     varioAngle1 = 90.0 - varioAngle1
     [v1Residual] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1, debugPrint)
@@ -79,7 +79,7 @@ def simGaussFieldAddTrendAndTransform(
             print('    - Add trend 2D Gauss field ')
         dx = 1.0 / float(nx - 1)
         dy = 1.0 / float(ny - 1)
-        ang1 = trendAsimuth1 * np.pi / 180.0
+        ang1 = trendAzimuth1 * np.pi / 180.0
         sintheta = np.sin(ang1)
         costheta = np.cos(ang1)
 
@@ -122,10 +122,10 @@ def simGaussFieldAddTrendAndTransform(
 
 def simGaussFieldAddTrendAndTransform2(
         iseed, nx, ny, xsize, ysize, varioType1, range11, range21,
-        varioAngle1, pow1, useTrend1, trendAsimuth1, relSigma1
+        varioAngle1, pow1, useTrend1, trendAzimuth1, relSigma1
 ):
     # Residual gaussian fields
-    # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+    # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     varioAngle1 = 90.0 - varioAngle1
     [v1Residual] = draw2D(nx, ny, xsize, ysize, varioType1, iseed, range11, range21, varioAngle1, pow1)
@@ -137,7 +137,7 @@ def simGaussFieldAddTrendAndTransform2(
         print('    - Calculate trend for Gauss field')
         dx = 1.0 / float(nx - 1)
         dy = 1.0 / float(ny - 1)
-        ang1 = trendAsimuth1 * np.pi / 180.0
+        ang1 = trendAzimuth1 * np.pi / 180.0
         sintheta = np.sin(ang1)
         costheta = np.cos(ang1)
 
@@ -187,7 +187,7 @@ def simGaussField(iseed, nx, ny, xsize, ysize, varioType, range1, range2, varioA
     """
     Description: Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize,ysize).
                   Correlation lengths are range1 in main direction and range2 in orthogonal direction.
-                  The angle is asimuth (angle clockwise measured from y -axis).
+                  The angle is azimuth (angle clockwise measured from y -axis).
                   varioType is specified by an number, see heading of the file for variogramtype
     """
     # Residual gaussian fields
@@ -195,7 +195,7 @@ def simGaussField(iseed, nx, ny, xsize, ysize, varioType, range1, range2, varioA
     if printInfo >= 3:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
         debugPrint = 1
-    # Variogram angle input should be asimuth angle in degrees, but angle in simulation algorithm should be
+    # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     varioAngle = 90.0 - varioAngle
     [residualField] = draw2D(nx, ny, xsize, ysize, varioType, iseed, range1, range2, varioAngle, pow, debugPrint)

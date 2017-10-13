@@ -561,9 +561,9 @@ def getGridAttributes(grid, printInfo):
     nZones = len(indexer.zonation)
     nLayersPerZone = []
     nLayersPerZone = getNumberOfLayers(grid)
-    [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0] = getGridSimBoxSize(grid, printInfo)
+    [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = getGridSimBoxSize(grid, printInfo)
     return [
-        xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, asimuthAngle, x0, y0,
+        xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, azimuthAngle, x0, y0,
         dimensions[0] ,dimensions[1], dimensions[2], nZones,zoneNames, nLayersPerZone
     ]
 
@@ -587,13 +587,13 @@ def getGridSimBoxSize(grid, printInfo):
     simBoxYLength = np.sqrt((x2 - x0) * (x2 - x0) + (y2 - y0) * (y2 - y0))
     cosTheta = (y2 - y0) / simBoxYLength
     sinTheta = (x2 - x0) / simBoxYLength
-    asimuthAngle = np.arctan(sinTheta / cosTheta)
-    asimuthAngle = asimuthAngle * 180.0 / np.pi
+    azimuthAngle = np.arctan(sinTheta / cosTheta)
+    azimuthAngle = azimuthAngle * 180.0 / np.pi
     if printInfo >= 3:
         print('Debug output: Length in x direction:  ' + str(simBoxXLength))
         print('Debug output: Length in y direction:  ' + str(simBoxYLength))
-        print('Debug output: Sim box rotation angle: ' + str(asimuthAngle))
-    return [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0]
+        print('Debug output: Sim box rotation angle: ' + str(azimuthAngle))
+    return [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0]
 
 
 def createHorizonDataTypeObject(horizons, representationName, printInfo=0):
@@ -611,7 +611,7 @@ def createHorizonDataTypeObject(horizons, representationName, printInfo=0):
                                                   roxar.VerticalDomain.depth)
         if printInfo >= 3:
             text = 'Debug ouput: Create new data type for horizon to be used '
-            text = text + 'for variogram asimuth trend'
+            text = text + 'for variogram azimuth trend'
             print(text)
 
     return reprObj
@@ -722,7 +722,7 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
             surfaceObj.set_grid(grid)
             if printInfo >= 3:
                 text = 'Debug output: ' + 'Create trend surface ' + reprName
-                text = text + ' for variogram asimuth in ' + horizonName
+                text = text + ' for variogram azimuth in ' + horizonName
                 text = text + ' Value: ' + str(inputValue)
                 print(text)
 
@@ -734,7 +734,7 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
             surfaceObj.set_grid(grid)
             if printInfo >= 3:
                 text = 'Debug output: ' + 'Update trend surface ' + reprName
-                text = text + ' for variogram asimuth in ' + horizonName
+                text = text + ' for variogram azimuth in ' + horizonName
                 text = text + ' Value: ' + str(inputValue)
                 print(text)
     return

@@ -12,7 +12,7 @@ from src.xmlFunctions import getFloatCommand, getIntCommand
 class Trend3D_linear_model:
     """
     Description: This class keeps model parameter for linear 3D trend. The parameterization
-             is asimuth angle for depositional direction and stacking angle. In addition a variable
+             is azimuth angle for depositional direction and stacking angle. In addition a variable
              specifying whether the deposition is progradational or retrogradational is specified.
     Description: Create either empty object which have to be initialized
                      later using the initialize function or create a full object
@@ -22,15 +22,15 @@ class Trend3D_linear_model:
     Constructor:   def __init__(self,trendRuleXML=None,printInfo=0,modelFileName=None)
 
    Get functions:
-    def getAsimuth(self)
+    def getAzimuth(self)
     def getStackingAngle(self)
     def getStackingDirection(self)
 
    Set functions:
-    def setAsimuth(self,angle)
+    def setAzimuth(self,angle)
     def setStackingAngle(self,stackingAngle)
     def setStackingDirection(self,direction)
-    def initialize(self,asimuthAngle,stackingAngle,direction,printInfo)
+    def initialize(self,azimuthAngle,stackingAngle,direction,printInfo)
     
    XmlTree update function:
     def XMLAddElement(self,parent)
@@ -40,7 +40,7 @@ class Trend3D_linear_model:
 """
 
     def __init__(self, trendRuleXML, printInfo=0, modelFileName=None):
-        self.__asimuth = 0.0
+        self.__azimuth = 0.0
         self.__stackingAngle = 0.0
         self.__direction = 1
         self.__printInfo = printInfo
@@ -51,7 +51,7 @@ class Trend3D_linear_model:
             self.__interpretXMLTree(trendRuleXML, printInfo, modelFileName)
             if self.__printInfo >= 3:
                 print('Debug output: Trend:')
-                print('Debug output: Asimuth:        ' + str(self.__asimuth))
+                print('Debug output: Azimuth:        ' + str(self.__azimuth))
                 print('Debug output: Stacking angle: ' + str(self.__stackingAngle))
                 print('Debug output: Stacking type:  ' + str(self.__direction))
         else:
@@ -60,12 +60,12 @@ class Trend3D_linear_model:
 
     def __interpretXMLTree(self, trendRuleXML, printInfo, modelFileName):
         # Initialize object form xml tree object trendRuleXML
-        self.__asimuth = getFloatCommand(trendRuleXML, 'asimuth', modelFile=modelFileName)
+        self.__azimuth = getFloatCommand(trendRuleXML, 'azimuth', modelFile=modelFileName)
 
-        if self.__asimuth < 0.0 or self.__asimuth > 360.0:
+        if self.__azimuth < 0.0 or self.__azimuth > 360.0:
             raise ValueError(
                 'Error: In {}\n'
-                'Error: Asimuth angle for linear trend is not within [0,360] degrees.'
+                'Error: Azimuth angle for linear trend is not within [0,360] degrees.'
                 ''.format(self.__className)
             )
 
@@ -75,8 +75,8 @@ class Trend3D_linear_model:
                 'Error: In {}\n'
                 'Error: Direction for linear trend is specified to be: {}\n'
                 'Error: Direction for linear trend must be 1 if stacking angle is positive\n'
-                '       when moving in positive asimuth direction and -1 if stacking angle\n'
-                '       is positive when moving in negative asimuth direction.'
+                '       when moving in positive azimuth direction and -1 if stacking angle\n'
+                '       is positive when moving in negative azimuth direction.'
                 ''.format(self.__className, self.__direction)
             )
 
@@ -91,15 +91,15 @@ class Trend3D_linear_model:
                 ''.format(self.__className)
             )
 
-    def initialize(self, asimuthAngle, stackingAngle, direction, printInfo=0):
+    def initialize(self, azimuthAngle, stackingAngle, direction, printInfo=0):
         if printInfo >= 3:
             print('Debug output: Call the initialize function in ' + self.__className)
 
         self.__printInfo = printInfo
-        if asimuthAngle < 0.0 or asimuthAngle > 360.0:
+        if azimuthAngle < 0.0 or azimuthAngle > 360.0:
             raise ValueError(
                 'Error: In {}\n'
-                'Error: Cannot set asimuth angle for linear trend outside interval [0,360] degrees.'
+                'Error: Cannot set azimuth angle for linear trend outside interval [0,360] degrees.'
                 ''.format(self.__className)
             )
         if stackingAngle < 0.0 or stackingAngle > 90.0:
@@ -114,18 +114,18 @@ class Trend3D_linear_model:
                 'Error: Cannot set stacking type to be a number different from -1 and 1.'
                 ''.format(self.__className)
             )
-        self.__asimuth = asimuthAngle
+        self.__azimuth = azimuthAngle
         self.__stackingAngle = stackingAngle
         self.__direction = direction
         self.__printInfo = printInfo
         if self.__printInfo >= 3:
             print('Debug output: Trend:')
-            print('Debug output: Asimuth:        ' + str(self.__asimuth))
+            print('Debug output: Azimuth:        ' + str(self.__azimuth))
             print('Debug output: Stacking angle: ' + str(self.__stackingAngle))
             print('Debug output:Stacking type:  ' + str(self.__direction))
 
-    def getAsimuth(self):
-        return self.__asimuth
+    def getAzimuth(self):
+        return self.__azimuth
 
     def getStackingAngle(self):
         return self.__stackingAngle
@@ -133,15 +133,15 @@ class Trend3D_linear_model:
     def getStackingDirection(self):
         return self.__direction
 
-    def setAsimuth(self, angle):
+    def setAzimuth(self, angle):
         if angle < 0.0 or angle > 360.0:
             raise ValueError(
                 'Error: In {}\n'
-                'Error: Cannot set asimuth angle for linear trend outside interval [0,360] degrees'
+                'Error: Cannot set azimuth angle for linear trend outside interval [0,360] degrees'
                 ''.format(self.__className)
             )
         else:
-            self.__asimuth = angle
+            self.__azimuth = angle
 
     def setStackingAngle(self, stackingAngle):
         if stackingAngle < 0.0 or stackingAngle > 90.0:
@@ -177,9 +177,9 @@ class Trend3D_linear_model:
         # Put the xml commands for this truncation rule as the last child for the parent element
         parent.append(trendElement)
 
-        tag = 'asimuth'
+        tag = 'azimuth'
         obj = Element(tag)
-        obj.text = ' ' + str(self.__asimuth) + ' '
+        obj.text = ' ' + str(self.__azimuth) + ' '
         trendElement.append(obj)
 
         tag = 'directionStacking'
@@ -192,7 +192,7 @@ class Trend3D_linear_model:
         obj.text = ' ' + str(self.__stackingAngle) + ' '
         trendElement.append(obj)
 
-    def __calcLinearTrendNormalVector(self, asimuthSimBox):
+    def __calcLinearTrendNormalVector(self, azimuthSimBox):
         """
         Description: Calculate normal vector to iso-surfaces (planes) for constant trend values
                      a*(x-x0)+b*(y-y0)+c*(z-z0) = K where K is a constant is such
@@ -202,9 +202,9 @@ class Trend3D_linear_model:
 
         alpha = (90.0 - self.__stackingAngle) * np.pi / 180.0
         if self.__direction == 1:
-            theta = (self.__asimuth - asimuthSimBox) * np.pi / 180.0
+            theta = (self.__azimuth - azimuthSimBox) * np.pi / 180.0
         else:
-            theta = (self.__asimuth - asimuthSimBox + 180.0) * np.pi / 180.0
+            theta = (self.__azimuth - azimuthSimBox + 180.0) * np.pi / 180.0
 
         # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
         xComponent = math.cos(alpha) * math.sin(theta)
@@ -213,11 +213,11 @@ class Trend3D_linear_model:
         return [xComponent, yComponent, zComponent]
 
     def createTrendFor2DProjection(self, simBoxXsize, simBoxYsize, simBoxZsize,
-                                   asimuthSimBox,
+                                   azimuthSimBox,
                                    nxPreview, nyPreview, nzPreview, projectionType,
                                    crossSectionIndx):
 
-        [xComponent, yComponent, zComponent] = self.__calcLinearTrendNormalVector(asimuthSimBox)
+        [xComponent, yComponent, zComponent] = self.__calcLinearTrendNormalVector(azimuthSimBox)
         xinc = simBoxXsize / nxPreview
         yinc = simBoxYsize / nyPreview
         zinc = simBoxZsize / nzPreview
