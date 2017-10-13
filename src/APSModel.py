@@ -658,13 +658,13 @@ class APSModel:
                             # This job must be updated with variogram parameters
                             # for current zone number
                             gfIndx = jobObject.getGaussFieldIndx(currentJobName, gfNameUsed)
-                            varioType = currentZoneModel.getVarioType(gfNameUsed)
+                            variogramType = currentZoneModel.getVariogramType(gfNameUsed)
                             range1 = currentZoneModel.getMainRange(gfNameUsed)
                             range2 = currentZoneModel.getPerpRange(gfNameUsed)
                             range3 = currentZoneModel.getVertRange(gfNameUsed)
                             # TODO: power is UNUSED
                             power = 1.0
-                            if varioType == 'GEN_EXPONENTIAL':
+                            if variogramType == 'GEN_EXPONENTIAL':
                                 power = currentZoneModel.getPower(gfNameUsed)
 
                             file.write('job = "{}"\n'.format(currentJobName))
@@ -673,7 +673,7 @@ class APSModel:
                                 'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
                             )
 
-                            file.write('ModifyJob(job,paramName,"{}")\n'.format(varioType))
+                            file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramType))
                             file.write(
                                 'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
                             )
@@ -818,10 +818,10 @@ class APSModel:
             file.write(rootReformatted)
 
 # def get2DMapRefHorizonName(self):
-#        return copy.copy(self.__refHorizonNameForVarioTrend)
+#        return copy.copy(self.__refHorizonNameForVariogramTrend)
 #
 #    def get2DMapRefHorizonType(self):
-#        return copy.copy(self.__refHorizonReprNameForVarioTrend)
+#        return copy.copy(self.__refHorizonReprNameForVariogramTrend)
 #
 #
 #    def getCellForPreview(self):
