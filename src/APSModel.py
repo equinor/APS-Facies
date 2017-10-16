@@ -107,7 +107,7 @@ class APSModel:
 
         self.__faciesTable = mainFaciesTable
         self.__zoneModelsMainLevel = zoneModelListMainLevel if zoneModelListMainLevel else []
-        self.__zoneNumberList = []
+        # self.__zoneNumberList = []
         self.__zoneModelsSecondLevel = zoneModelListSecondLevel if zoneModelListSecondLevel else []
         self.__selectedZoneNumberList = []
         self.__previewZone = previewZone
@@ -121,9 +121,8 @@ class APSModel:
         # self.__previewGridYSize = 1000.0
         # self.__previewGridOrientation = 0.0
         # Read model if it is defined
-        if modelFileName is None:
-            return
-        self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
+        if modelFileName is not None:
+            self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
 
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         tree = ET.parse(modelFileName)
@@ -140,9 +139,9 @@ class APSModel:
             text = obj.text
             self.__debug_level = int(text.strip())
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print(' ')
+            print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
-            print(' ')
+            print('')
 
         # --- Preview ---
         kw = 'Preview'
@@ -187,17 +186,17 @@ class APSModel:
             self.__setattr__(prefix + variable, value)
 
         # Read all gauss field jobs and their gauss field 3D parameter names
-        self.__rmsGFJobs = APSGaussFieldJobs(self.__ET_Tree, modelFileName)
+        self.__rmsGFJobs = APSGaussFieldJobs(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         # Read all facies names available
-        self.__faciesTable = APSMainFaciesTable(self.__ET_Tree, modelFileName)
+        self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: RMSGridModel: ' + self.__rmsGridModelName)
-            print('Debug output: RMSZoneParamName: ' + self.__rmsZoneParamName)
-            print('Debug output: RMSFaciesParamName: ' + self.__rmsFaciesParamName)
-            print('Debug output: Name of RMS project read:  ' + self.__rmsProjectName)
-            print('Debug output: Name of RMS workflow read: ' + self.__rmsWorkflowName)
+            print('Debug output: RMSGridModel:                      ' + self.__rmsGridModelName)
+            print('Debug output: RMSZoneParamName:                  ' + self.__rmsZoneParamName)
+            print('Debug output: RMSFaciesParamName:                ' + self.__rmsFaciesParamName)
+            print('Debug output: Name of RMS project read:          ' + self.__rmsProjectName)
+            print('Debug output: Name of RMS workflow read:         ' + self.__rmsWorkflowName)
             print('Debug output: Name of RMS gauss field IPL script: ' + self.__rmsGaussFieldScriptName)
 
         # Read all zones for models specifying main level facies
@@ -222,17 +221,22 @@ class APSModel:
             zoneNumber = int(zone.get('number'))
             mainLevelFacies = zone.get('mainLevelFacies')
             if mainLevelFacies is None:
-                if zoneNumber not in self.__zoneNumberList:
+                if zoneNumber not in self.getZoneNumberList():
                     # List of zone numbers
-                    self.__zoneNumberList.append(zoneNumber)
+                    # self.__zoneNumberList.append(zoneNumber)
 
                     if self.__debug_level >= Debug.VERY_VERBOSE:
-                        print(' ')
-                        print(' ')
+                        print('')
+                        print('')
                         print('Debug output: ---- Read zone model for zone number: ' + str(zoneNumber))
 
                     # List of main level facies models for each zone
-                    zoneModel = APSZoneModel(self.__ET_Tree, zoneNumber, mainLevelFacies, modelFileName)
+                    zoneModel = APSZoneModel(
+                        ET_Tree=self.__ET_Tree,
+                        zoneNumber=zoneNumber,
+                        inputMainLevelFacies=mainLevelFacies,
+                        modelFileName=modelFileName
+                    )
                     self.__zoneModelsMainLevel.append(zoneModel)
 
                     # Allocate space for list of list of secondary models.
@@ -268,7 +272,12 @@ class APSModel:
                                 text = 'Second level facies model defined for zone: ' + str(zoneNumber)
                                 text = text + ' for main level facies: ' + mainLevelFacies
                                 print(text)
-                            secondLevelModel = APSZoneModel(self.__ET_Tree, zoneNumber, mainLevelFacies, modelFileName)
+                            secondLevelModel = APSZoneModel(
+                                ET_Tree=self.__ET_Tree,
+                                zoneNumber=zoneNumber,
+                                inputMainLevelFacies=mainLevelFacies,
+                                modelFileName=modelFileName
+                            )
                             self.__zoneModelsSecondLevel[i].append(secondLevelModel)
 
         # Check that second level models are not duplicated
@@ -289,9 +298,9 @@ class APSModel:
                             )
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print(' ')
+            print('')
             print('------------ End reading model file in APSModel ------------------')
-            print(' ')
+            print('')
 
     def updateXMLModelFile(self, modelFileName, parameterFileName, debug_level=Debug.OFF):
         # Read XML model file
@@ -303,7 +312,7 @@ class APSModel:
         # So search for attribute 'kw' to find all these variables. The attribute value is a keyword
         # name that will be used as identifier.
         if debug_level > Debug.SOMEWHAT_VERBOSE:
-            print(' ')
+            print('')
             print('-- Model parameters marked as possible to update when running in batch mode')
             print('Keyword:                        Tag:                Value: ')
         keywordsDefinedForUpdating = []
@@ -368,7 +377,8 @@ class APSModel:
         else:
             return 0
 
-    def __readParamFromFile(self, inputFile, debug_level=Debug.OFF):
+    @staticmethod
+    def __readParamFromFile(inputFile, debug_level=Debug.OFF):
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
@@ -383,7 +393,7 @@ class APSModel:
                 words = line.split()
                 nWords = len(words)
                 if nWords < 3:
-                    # Skip line (searcing for an assignment like keyword = value with at least 3 words
+                    # Skip line (searching for an assignment like keyword = value with at least 3 words
                     continue
                 if words[0] == '//':
                     # Skip line
@@ -422,8 +432,9 @@ class APSModel:
     # Get pointer to zone model object
     def getZoneModel(self, zoneNumber, mainLevelFacies=None):
         foundModel = None
-        for i in range(len(self.__zoneNumberList)):
-            if self.__zoneNumberList[i] == zoneNumber:
+        zoneNumberList = self.getZoneNumberList()
+        for i in range(len(zoneNumberList)):
+            if zoneNumberList[i] == zoneNumber:
                 if mainLevelFacies is None:
                     foundModel = self.__zoneModelsMainLevel[i]
                 else:
@@ -441,7 +452,7 @@ class APSModel:
         return copy.copy(self.__rmsFaciesParamName)
 
     def getZoneNumberList(self):
-        return copy.copy(self.__zoneNumberList)
+        return [zone.getZoneNumber() for zone in self.__zoneModelsMainLevel]
 
     #    def getPreviewZone(self):
     #        return [self.__previewZone,self.__previewGridNx,self.__previewGridNy,
@@ -517,9 +528,10 @@ class APSModel:
 
     def setSelectedZoneNumberList(self, selectedZoneNumbers):
         self.__selectedZoneNumberList = []
+        zoneNumberList = self.getZoneNumberList()
         for i in range(len(selectedZoneNumbers)):
             number = selectedZoneNumbers[i]
-            if not (number in self.__zoneNumberList):
+            if number not in zoneNumberList:
                 raise ValueError(
                     'Error in {} in setSelectedZoneNumberList\n'
                     'Error:  Selected zone number: {} is not among the possible zone numbers.'
@@ -528,7 +540,7 @@ class APSModel:
             self.__selectedZoneNumberList.append(number)
 
     def setPreviewZoneNumber(self, zoneNumber):
-        if not (zoneNumber in self.__zoneNumberList):
+        if zoneNumber not in self.getZoneNumberList():
             raise ValueError(
                 'Error in {} in setPreviewZoneNumber\n'
                 'Error:  Zone number: {} is not among the possible zone numbers.'
@@ -556,11 +568,10 @@ class APSModel:
 
     # Add the pointer to the new zone object into the zone list
     def addNewZone(self, zoneObject):
-        zoneNumber = zoneObject.getZoneNumber()
         self.__zoneModelsMainLevel.append(zoneObject)
-        self.__zoneNumberList.append(zoneNumber)
 
     def deleteZone(self, zoneNumber):
+        # TODO: rewrite with list comprehension
         for i in range(len(self.__zoneModelsMainLevel)):
             zone = self.__zoneModelsMainLevel[i]
             zNr = zone.getZoneNumber()
@@ -569,7 +580,7 @@ class APSModel:
                 self.__zoneModelsMainLevel.pop(i)
 
                 # Remove zone number from zoneNumber list
-                self.__zoneNumberList.pop(i)
+                # self.__zoneNumberList.pop(i)
                 # Check if the zone number is in the selected list
                 if zoneNumber in self.__selectedZoneNumberList:
                     for j in range(len(self.__selectedZoneNumberList)):
@@ -596,7 +607,7 @@ class APSModel:
         print('Write file: {}'.format(self.__rmsGaussFieldScriptName))
         outputFileName = self.__rmsGaussFieldScriptName
         gridModelName = self.__rmsGridModelName
-        zoneNumberList = self.__zoneNumberList
+        zoneNumberList = self.getZoneNumberList()
         nZones = len(zoneNumberList)
         jobObject = self.__rmsGFJobs
         nJobs = jobObject.getNumberOfGFJobs()
@@ -810,7 +821,8 @@ class APSModel:
             file.write(rootUpdated)
         return
 
-    def writeModelFromXMLRoot(self, inputETree, outputModelFileName):
+    @staticmethod
+    def writeModelFromXMLRoot(inputETree, outputModelFileName):
         print('Write file: ' + outputModelFileName)
         root = inputETree.getroot()
         rootReformatted = prettify(root)

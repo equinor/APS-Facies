@@ -364,13 +364,27 @@ class APSGaussModel:
             seed = seedItem[SVALUE]
 
             # Set variogram parameters for this gauss field
-            self.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, azimuth, dip, power)
+            self.updateGaussFieldParam(
+                gfName=gfName,
+                variogramType=variogramType,
+                range1=range1,
+                range2=range2,
+                range3=range3,
+                azimuth=azimuth,
+                dip=dip,
+                power=power
+            )
 
             # Set trend model parameters for this gauss field
-            self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
+            self.updateGaussFieldTrendParam(
+                gfName=gfName,
+                useTrend=useTrend,
+                trendRuleModelObj=trendRuleModelObj,
+                relStdDev=relStdDev
+            )
 
             # Set preview simulation start seed for gauss field
-            self.setSeedForPreviewSimulation(gfName, seed)
+            self.setSeedForPreviewSimulation(gfName=gfName, seed=seed)
 
     def getNGaussFields(self):
         return len(self.__variogramForGFModel)

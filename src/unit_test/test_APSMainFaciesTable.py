@@ -17,9 +17,8 @@ def test_mainFaciesTable():
     mainFaciesTable1.removeFacies('F7')
     mainFaciesTable1.removeFacies('F8')
 
-    mainFaciesTable2 = APSMainFaciesTable()
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6'}
-    mainFaciesTable2.initialize(fTable)
+    mainFaciesTable2 = APSMainFaciesTable(fTable=fTable)
 
     nFacies1 = mainFaciesTable1.getNFacies()
     nFacies2 = mainFaciesTable2.getNFacies()

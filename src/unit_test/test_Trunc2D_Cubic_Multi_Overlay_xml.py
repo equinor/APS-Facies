@@ -33,8 +33,7 @@ def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, fa
     nGaussFields = int(trRule.get('nGFields'))
     print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create truncation rule object from input data, not read from file
     truncRuleOut = Trunc2D_Cubic_Multi_Overlay(
@@ -63,8 +62,7 @@ def createTrunc(
         outputModelFileName, fTable, faciesInZone, truncStructure,
         backGroundFacies, overlayFacies, overlayTruncCenter, debug_level=Debug.OFF
 ):
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create an object and initialize it
     truncRuleOut = Trunc2D_Cubic_Multi_Overlay()

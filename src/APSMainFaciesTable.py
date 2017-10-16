@@ -5,6 +5,7 @@ from xml.etree.ElementTree import Element
 import copy
 
 from src.utils.constants import Debug
+from src.utils.APSExceptions import ReadingXmlError
 
 
 class APSMainFaciesTable:
@@ -46,28 +47,28 @@ class APSMainFaciesTable:
     --------------------------------------------------------------------
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF):
-        self.__nFacies = 0
-        self.__faciesTable = []
+    def __init__(self, ET_Tree=None, modelFileName=None, fTable=None, debug_level=Debug.OFF):
         self.__debug_level = debug_level
-        self.__className = 'APSMainFaciesTable'
+        self.__className = self.__class__.__name__
         self.__NAME = 0
         self.__CODE = 1
         self.__modelFileName = modelFileName
 
+        # Input fTable must be a dictionary
+        self.__faciesTable = []
+        if fTable is not None:
+            codeList = fTable.keys()
+            for c in codeList:
+                fName = fTable.get(c)
+                fCode = int(c)
+                self.__faciesTable.append([fName, fCode])
+
         # assert ET_Tree is not None
-        if ET_Tree is None:
-            # Create an empty object which will at a later stage be filled by using 
-            # the initialize function.
-            return
-
-        # Search xml tree for model file to find the specified Main facies table
-        self.__interpretXMLTree(ET_Tree)
-        if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call APSMainFaciesTable init')
-        return
-
-    # End __init__
+        if ET_Tree is not None:
+            # Search xml tree for model file to find the specified Main facies table
+            self.__interpretXMLTree(ET_Tree)
+            if self.__debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Call APSMainFaciesTable init')
 
     def __interpretXMLTree(self, ET_Tree):
         root = ET_Tree.getroot()
@@ -76,9 +77,7 @@ class APSMainFaciesTable:
         kw = 'MainFaciesTable'
         obj = root.find(kw)
         if obj is None:
-            print('Error when reading model file: ' + self.__modelFileName)
-            print('Error: Missing keyword ' + kw)
-            sys.exit()
+            raise ReadingXmlError(model_file_name=self.__modelFileName, keyword=kw)
         else:
             fTable = obj
             for fItem in fTable.findall('Facies'):
@@ -87,26 +86,17 @@ class APSMainFaciesTable:
                 fCode = int(text.strip())
                 self.__faciesTable.append([fName, fCode])
             if self.__faciesTable is None:
-                print('Error when reading model file: ' + self.__modelFileName)
-                print('Error: Missing keyword Facies when reading specification of MainFaciesTable')
-                sys.exit()
-        self.__nFacies = len(self.__faciesTable)
+                raise ReadingXmlError(
+                    keyword='Facies',
+                    model_file_name=self.__modelFileName,
+                    parent_keyword='MainFaciesTable'
+                )
         if not self.__checkUniqueFaciesNamesAndCodes():
             sys.exit()
         return
 
-    def initialize(self, fTable):
-        # Input fTable must be a dictionary
-        codeList = fTable.keys()
-        for c in codeList:
-            fName = fTable.get(c)
-            fCode = int(c)
-            self.__faciesTable.append([fName, fCode])
-        self.__nFacies = len(self.__faciesTable)
-        return
-
     def getNFacies(self):
-        return self.__nFacies
+        return len(self.__faciesTable)
 
     def getClassName(self):
         return copy.copy(self.__className)
@@ -130,7 +120,7 @@ class APSMainFaciesTable:
 
     def getFaciesIndx(self, fName):
         found = 0
-        for i in range(self.__nFacies):
+        for i in range(self.getNFacies()):
             fItem = self.__faciesTable[i]
             facName = fItem[self.__NAME]
             if fName == facName:
@@ -158,7 +148,6 @@ class APSMainFaciesTable:
 
         item = [faciesName, code]
         self.__faciesTable.append(item)
-        self.__nFacies += 1
         return err
 
     def removeFacies(self, faciesName):
@@ -168,7 +157,6 @@ class APSMainFaciesTable:
             fCode = int(item[1])
             if faciesName == fName:
                 self.__faciesTable.pop(i)
-                self.__nFacies -= 1
                 break
 
     def checkWithFaciesTable(self, fName):
@@ -193,7 +181,7 @@ class APSMainFaciesTable:
         elem = Element(tag)
         root.append(elem)
         ftElement = elem
-        for i in range(self.__nFacies):
+        for i in range(self.getNFacies()):
             fName = self.__faciesTable[i][0]
             fCode = self.__faciesTable[i][1]
             tag = 'Facies'
@@ -210,18 +198,18 @@ class APSMainFaciesTable:
 
     def __checkUniqueFaciesNamesAndCodes(self):
         found = 0
-        for i in range(self.__nFacies):
+        for i in range(self.getNFacies()):
             f1 = self.__faciesTable[i][self.__NAME]
-            for j in range(i + 1, self.__nFacies):
+            for j in range(i + 1, self.getNFacies()):
                 f2 = self.__faciesTable[j][self.__NAME]
                 if f1 == f2:
                     found = 1
                     print('Error: In ' + self.__className)
                     print('Error: Facies name: ' + f1 + ' is specified multiple times')
                     break
-        for i in range(self.__nFacies):
+        for i in range(self.getNFacies()):
             c1 = self.__faciesTable[i][self.__CODE]
-            for j in range(i + 1, self.__nFacies):
+            for j in range(i + 1, self.getNFacies()):
                 c2 = self.__faciesTable[j][self.__CODE]
                 if c1 == c2:
                     found = 1

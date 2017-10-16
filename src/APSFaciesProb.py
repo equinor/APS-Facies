@@ -42,7 +42,7 @@ class APSFaciesProb:
     """
 
     def __setEmpty(self):
-        self.__className = 'APSFaciesProb'
+        self.__className = self.__class__.__name__
         self.__faciesProbForZoneModel = []
         self.__faciesInZoneModel = []
         self.__useConstProb = 0
