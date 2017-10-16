@@ -29,8 +29,7 @@ def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, fa
     nGaussFields = int(trRule.get('nGFields'))
     print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create truncation rule object from input data, not read from file
     truncRuleOut = Trunc3D_bayfill(
@@ -59,8 +58,7 @@ def createTrunc(
         outputModelFileName, fTable, faciesInZone, faciesInTruncRule,
         sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
 ):
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create an object and initialize it
     # get_debug_level

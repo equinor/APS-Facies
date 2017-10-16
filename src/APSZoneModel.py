@@ -108,14 +108,14 @@ class APSZoneModel:
     """
 
     def __init__(
-            self, ET_Tree=None, inputZoneNumber=0, inputMainLevelFacies=None, modelFileName=None,
+            self, ET_Tree=None, zoneNumber=0, inputMainLevelFacies=None, modelFileName=None,
             useConstProb=False, simBoxThickness=10.0, horizonNameForVariogramTrendMap=None,
-            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None, zoneNumber=0, faciesLevel=1,
+            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None, faciesLevel=1,
             debug_level=Debug.OFF
     ):
         self.__className = self.__class__.__name__
         # Local variables
-        self.__zoneNumber = inputZoneNumber
+        self.__zoneNumber = zoneNumber
         self.__mainLevelFacies = inputMainLevelFacies
         self.__useConstProb = useConstProb
         self.__simBoxThickness = simBoxThickness
@@ -124,7 +124,6 @@ class APSZoneModel:
         self.__gaussModelObject = gaussModelObject
 
         self.__truncRule = truncRuleObject
-        self.__zoneNumber = zoneNumber
         self.__faciesLevel = faciesLevel
         self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
         self.__debug_level = debug_level
@@ -141,7 +140,7 @@ class APSZoneModel:
         self.__debug_level = getIntCommand(root, kw, defaultValue=1, required=False)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print(' ')
+            print('')
             print('Debug output: Call init ' + self.__className)
 
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
@@ -295,10 +294,10 @@ class APSZoneModel:
     def getUsedGaussFieldNames(self):
         return self.__gaussModelObject.getUsedGaussFieldNames()
 
-    def getVarioType(self, gaussFieldName):
+    def getVariogramType(self, gaussFieldName):
         return copy.copy(self.__gaussModelObject.getVariogramType(gaussFieldName))
 
-    def getVarioTypeNumber(self, gaussFieldName):
+    def getVariogramTypeNumber(self, gaussFieldName):
         return self.__gaussModelObject.getVariogramTypeNumber(gaussFieldName)
 
     def getMainRange(self, gaussFieldName):
@@ -401,16 +400,16 @@ class APSZoneModel:
     def removeFaciesWithProbForZone(self, fName):
         self.__faciesProbObject.removeFaciesWithProbForZone(fName)
 
-    def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, angle, power,
+    def updateGaussFieldParam(self, gfName, variogramType, range1, range2, range3, angle, power,
                               relStdDev=0.0, trendRuleModelObj=None):
         return self.__gaussModelObject.updateGaussFieldParam(
-            gfName, varioType, range1, range2, range3, angle, power,
+            gfName, variogramType, range1, range2, range3, angle, power,
             relStdDev, trendRuleModelObj
         )
 
-    def updateGaussFieldVarioParam(self, gfName, varioType, range1, range2, range3, angle, power):
+    def updateGaussFieldVariogramParam(self, gfName, variogramType, range1, range2, range3, angle, power):
         return self.__gaussModelObject.updateGaussFieldVariogramParameters(
-            gfName, varioType, range1, range2, range3, angle, power
+            gfName, variogramType, range1, range2, range3, angle, power
         )
 
     def removeGaussFieldParam(self, gfName):
@@ -421,14 +420,14 @@ class APSZoneModel:
 
     def setTruncRule(self, truncRuleObj):
         err = 0
-        if truncRuleObj == None:
+        if truncRuleObj is None:
             err = 1
         else:
             self.__truncRule = truncRuleObj
         return err
 
-    def setHorizonNameForVariogramTrendMap(self, horizonNameForVarioTrendMap):
-        self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVarioTrendMap)
+    def setHorizonNameForVariogramTrendMap(self, horizonNameForVariogramTrendMap):
+        self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVariogramTrendMap)
         return
 
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
@@ -604,7 +603,6 @@ class APSZoneModel:
         self.__gaussModelObject.XMLAddElement(zoneElement)
         # Add child command TruncationRule at end of the child list for
         self.__truncRule.XMLAddElement(zoneElement)
-        return
 
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, gridDimNx, gridDimNy,
