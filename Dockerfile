@@ -1,5 +1,5 @@
 FROM centos:6
-LABEL version="1.7" \
+LABEL version="1.7.1" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -30,7 +30,8 @@ RUN echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
 # Download, and install Statoil's Certificates
 ENV STATOIL_CERT="statoil-ca-certificates.el6.rpm"
 RUN wget http://st-linrhn01.st.statoil.no/pub/$STATOIL_CERT \
- && yum install -y $STATOIL_CERT
+ && yum install -y $STATOIL_CERT \
+ && rm -f $STATOIL_CERT
 
 #################################################
 #  __  __ ___ ___  ___     __  ___ _  ___   __
@@ -425,4 +426,5 @@ VOLUME $CODE_DIR
 # Install all python modules
 
 COPY requirements.txt /requirements.txt
-RUN $PIP install -r /requirements.txt
+RUN $PIP install -r /requirements.txt \
+ && rm -f /requirements.txt

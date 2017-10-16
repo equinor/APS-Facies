@@ -5,12 +5,13 @@ variables:
   FTP_PROXY:    "http://www-proxy.statoil.no:80"
   NO_PROXY:     "git.statoil.no"
   CODE_DIR:     "/code"
-  IMAGE_NAME:   "aps-gui:1.4"  # May be removed when using the latest version
+  ARTIFACTS:    "artifacts"
+  IMAGE_NAME:   "aps-gui:1.7.1"  # May be removed when using the latest version
   DOCKER:       "docker run -v $CI_PROJECT_DIR:$CODE_DIR -i $IMAGE_NAME"
+  DOCKER_BIN:   "docker run -v $CI_PROJECT_DIR:$CODE_DIR -v $CI_PROJECT_DIR/$ARTIFACTS:/$ARTIFACTS -i $IMAGE_NAME"
   MAKE:         "make --makefile=$CODE_DIR/Makefile"
   RUN:          "/bin/bash -c"
   GUI_FILE:     "app"
-  ARTIFACTS:    "artifacts"
 
 
 stages:
@@ -18,6 +19,7 @@ stages:
   - testing
   - doc-tests  # https://docs.python.org/3/library/doctest.html
   - build gui
+  - test gui
   - generate documentation
   - deploy
   - clean docker
@@ -61,6 +63,14 @@ build GUI:
     expire_in: 1 week
     paths:
       - artifacts/
+
+start GUI:
+  stage: test gui
+  script:
+    - 'eval $DOCKER_BIN /$ARTIFACTS/$GUI_FILE --help'
+#    - 'eval $CI_PROJECT_DIR/$ARTIFACTS/$GUI_FILE --version'
+  dependencies:
+    - build GUI
 
 build docker image:
   stage: build docker image
