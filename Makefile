@@ -33,13 +33,16 @@ ifeq ($(PIP),)
 PIP := $(shell which pip)
 endif
 ifeq ($(UPX_DIR),)
-UPX_DIR := $(shell dirname $(shell which upx))
+UPX_DIR := $(shell dirname $(shell which upx) 2>/dev/null || echo "")
 endif
 ifeq ($(IMAGE_VERSION),)
 IMAGE_VERSION := $(shell ./bin/find-version-of-docker-image.sh $(CODE_DIR))
 endif
 ifeq ($(IMAGE_NAME),)
 IMAGE_NAME := $(PROJECT_NAME):$(IMAGE_VERSION)
+endif
+ifeq ($(LIB_GL),)
+LIB_GL := $(shell echo "$(shell ldconfig -p | grep libGL.so.1 | tr ' ' '\n' | grep /)")
 endif
 
 COLOR = \033[32;01m
@@ -54,7 +57,8 @@ build-gui: clean-all libdraw2D.so resource-file ui-files
 	            --clean \
 	            --noconfirm \
 	            --add-data="../README.md:." \
-	            --add-binary="../libraries/libdraw2D.so:lib" \
+	            --add-binary="../libraries/libdraw2D.so:." \
+	            --add-binary="$(LIB_GL):." \
 	            --upx-dir="$(UPX_DIR)" \
 	            --workpath $(BUILD_DIR) \
 	            --distpath $(BUILD_DIR)/dist \

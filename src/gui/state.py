@@ -1,4 +1,4 @@
-from APSModel import APSModel
+from src.APSModel import APSModel
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants import (
