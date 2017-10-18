@@ -4,24 +4,30 @@ Please describe them here
 
 ### Related issues
 
+<!--
 Add link(s) to any related Gitlab issue(s)
-```md
-* APS/GUI#<ISSUE ID>
-```
+-->
+
+* APS/GUI#\<ISSUE ID\>
+
 
 ### Related merge requests
 
+<!--
 Add link(s) to any related merge requests
-```md
-* APS/GUI!<MERGE REQUEST ID>
-```
+-->
+
+* APS/GUI!\<MERGE REQUEST ID\>
+
 
 ### Related cards
 
+<!--
 Add link(s) to any LeanKit cards that are of relevance
-```md
-* https://sdstrh.leankit.com/card/<CARD ID>
-```
+-->
+
+* https://sdstrh.leankit.com/card/\<CARD ID\>
+
 
 ### Checklist
 
@@ -37,6 +43,6 @@ Check those applicable, and remove those that are not.
 
 ### Requires
 
-2 :+1:
+1 :+1:
 
 CC: @karbor @OLIA @SNIS @TBOR
