@@ -1,5 +1,5 @@
 FROM centos:6
-LABEL version="1.7.1" \
+LABEL version="1.7.2" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -105,7 +105,7 @@ ENV PYLINT_VERSION="1.7.4"
 
 # UPX: Binary compression
 ENV UCL_VERSION="1.03"
-ENV UPX_VERSION="v3.94"
+ENV UPX_VERSION="3.94"
 ENV UCL_PREFIX=$INSTALL_DIR/ucl-$UCL_VERSION
 ENV UPX_PREFIX=$INSTALL_DIR/upx-$UPX_VERSION
 
@@ -171,6 +171,8 @@ RUN cd $SOURCE_DIR && wget https://github.com/PyCQA/astroid/archive/astroid-$AST
 RUN cd $SOURCE_DIR && wget https://github.com/timothycrosley/isort/archive/$ISORT_VERSION.tar.gz --output-document=$SOURCE_DIR/isort-$ISORT_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://github.com/PyCQA/pylint/archive/pylint-$PYLINT_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget http://www.oberhumer.com/opensource/ucl/download/ucl-$UCL_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://github.com/upx/upx/archive/v$UPX_VERSION.tar.gz --output-document=$SOURCE_DIR/upx-$UPX_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://github.com/upx/upx-lzma-sdk/archive/v$UPX_VERSION.tar.gz --output-document=$SOURCE_DIR/upx-lzma-sdk-$UPX_VERSION.tar.gz
 
 
  # Create all build directories
@@ -193,7 +195,9 @@ RUN cd $BUILD_DIR \
     astroid-$ASTROID_VERSION \
     isort-$ISORT_VERSION \
     pylint-$PYLINT_VERSION \
-    ucl-$UCL_VERSION
+    ucl-$UCL_VERSION \
+    upx-$UPX_VERSION \
+    upx-$UPX_VERSION/src/lzma-sdk
 
 # Extract everything into build directories
 RUN cd $BUILD_DIR \
@@ -214,7 +218,9 @@ RUN cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/astroid-$ASTROID_VERSION.tar.gz -C astroid-$ASTROID_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/isort-$ISORT_VERSION.tar.gz -C isort-$ISORT_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/pylint-$PYLINT_VERSION.tar.gz -C pylint-$PYLINT_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/ucl-$UCL_VERSION.tar.gz -C ucl-$UCL_VERSION --strip-components=1
+ && tar -xvf  $SOURCE_DIR/ucl-$UCL_VERSION.tar.gz -C ucl-$UCL_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/upx-$UPX_VERSION.tar.gz -C upx-$UPX_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/upx-lzma-sdk-$UPX_VERSION.tar.gz -C upx-$UPX_VERSION/src/lzma-sdk --strip-components=1
 
 RUN rm -f $SOURCE_DIR/*.tar.*
 
@@ -240,14 +246,13 @@ RUN cd $BUILD_DIR/ucl-$UCL_VERSION \
 ENV LD_LIBRARY_PATH=$UCL_PREFIX/lib:$LD_LIBRARY_PATH
 ENV UPX_UCLDIR=$BUILD_DIR/ucl-$UCL_VERSION
 
-# Download and install UPX
-RUN git clone https://github.com/upx/upx.git \
-     --recursive \
-     --depth 1 \
-     $BUILD_DIR/upx \
- && cd $BUILD_DIR/upx \
- && make all \
- && mv $BUILD_DIR/upx/src/upx.out $UPX_PREFIX/bin/upx
+# Download necessary dependency, lzma-sdk
+#RUN git clone https://github.com/upx/upx-lzma-sdk.git $BUILD_DIR/upx-$UPX_VERSION/src/lzma-sdk
+
+# Install UPX
+RUN cd $BUILD_DIR/upx-$UPX_VERSION \
+ && make CHECK_WHITESPACE=/bin/true all \
+ && mv $BUILD_DIR/upx-$UPX_VERSION/src/upx.out $UPX_PREFIX/bin/upx
 
 ENV PATH=$UPX_PREFIX/bin:$PATH
 
@@ -318,10 +323,6 @@ RUN cd $BUILD_DIR/python$PYTHON_VERSION \
 
 # Upgrade setuptools
 RUN $PIP install setuptools --upgrade
-
-RUN cd $SOURCE_DIR \
- && wget https://bootstrap.pypa.io/get-pip.py \
- && $PYTHON get-pip.py
 
 RUN cd $BUILD_DIR/sip-$SIP_VERSION \
  && $PYTHON configure.py \
