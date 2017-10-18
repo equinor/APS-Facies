@@ -1,4 +1,9 @@
+from typing import List, Union
+
+from PyQt5.QtWidgets import QListWidgetItem
+
 from src.APSModel import APSModel
+from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants.constants import (
@@ -6,6 +11,9 @@ from src.utils.constants.constants import (
     ModeOptions, ProjectConstants, TruncationRuleConstants,
 )
 from src.utils.constants.simple import Debug
+
+# TODO: Rewrite, and split up into several files / folders?
+# TODO: Use SQLite
 
 
 class State(dict):
@@ -187,6 +195,128 @@ class State(dict):
                 error_message = 'There is an internal inconsistency error.'
         return error_message
 
-    def add_facies(self, facies_name):
-        # TODO: Implement!
-        pass
+    def select_facies(self, facies: Union[List[str], List[QListWidgetItem], str, QListWidgetItem]) -> None:
+        if isinstance(facies, list):
+            for f in facies:
+                self.add_facies(f, key=FaciesSelectionConstants.SELECTED)
+        else:
+            self.add_facies(facies, key=FaciesSelectionConstants.SELECTED)
+
+    def remove_select_facies(
+            self,
+            facies: Union[List[str], List[int], List[QListWidgetItem], str, int, QListWidgetItem]
+    ) -> None:
+        self.remove_facies(facies, key=FaciesSelectionConstants.SELECTED)
+
+    def add_facies(
+            self,
+            facies_name: Union[str, QListWidgetItem],
+            key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE,
+            max_facies=Defaults.MAXIMUM_NUMBER_OF_FACIES
+    ) -> bool:
+        """
+        Adds the given name, og list object to the list of (available/selected) facies. The method also reads from the
+        :param facies_name: The name of the facies to be added
+        :type facies_name: Union[str, QListWidgetItem]
+        :param key: The name of the list the name is added to. May be either available, or selected.
+                    These are defined in FaciesSelectionConstants (AVAILABLE, and SELECTED)
+        :type key: FaciesSelectionConstants
+        :param max_facies: The maximum number of facies that are allowed to be added
+        :type max_facies: int
+        :return:
+        :rtype: bool
+        """
+        assert key in [FaciesSelectionConstants.AVAILABLE, FaciesSelectionConstants.SELECTED]
+        assert max_facies <= Defaults.MAXIMUM_NUMBER_OF_FACIES
+        if key not in self.__dict__:
+            self.__dict__[key] = []
+        if isinstance(facies_name, QListWidgetItem):
+            facies_name = facies_name.text()
+        if facies_name not in self.__dict__[key]:
+            # This check is as it is because the user may try to add an item that already exists, and that's OK
+            if 0 <= max_facies <= len(self.__dict__[key]):
+                # I.e. max_facies have been enabled (> 0), and the we will exceed the threshold if another item is added
+                return False
+            else:
+                self.__dict__[key].append(facies_name)
+        return True
+
+    def remove_facies(
+            self,
+            facies: Union[List[int], List[str], List[QListWidgetItem], int, str, QListWidgetItem],
+            key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE
+    ) -> None:
+        if isinstance(facies, list):
+            for f in facies:
+                self.remove_facies(f, key=key)
+        elif isinstance(facies, int):
+            self.remove_facies_by_index(facies, key=key)
+        elif isinstance(facies, str):
+            self.remove_facies_by_name(facies, key=key)
+        elif isinstance(facies, QListWidgetItem):
+            self.remove_facies_by_name(facies.text(), key=key)
+        else:
+            # TODO: Raise exception?
+            pass
+
+    def remove_facies_by_index(
+            self,
+            indices: Union[List[int], int],
+            key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE
+    ) -> None:
+
+        if isinstance(indices, list):
+            for i in indices:
+                self.remove_facies_by_index(i)
+        elif isinstance(indices, int) and key in self.__dict__:
+            self._remove_item(indices, key)
+        else:
+            # TODO: Give warning / raise exception?
+            pass
+
+    def _remove_item(self, item: Union[int, str], key):
+        def remove(collection: list, item: Union[int, str]):
+            if isinstance(item, int):
+                collection.pop(item)
+            elif item in collection:
+                collection.remove(item)
+            else:
+                # TODO: raise an exception?
+                pass
+
+        available_key = FaciesSelectionConstants.AVAILABLE
+        selected_key = FaciesSelectionConstants.SELECTED
+
+        if key == FaciesSelectionConstants.AVAILABLE:
+            remove_from_available = True
+        else:
+            remove_from_available = False
+
+        if remove_from_available and available_key in self.__dict__:
+            remove(self.__dict__[available_key], item)
+        if selected_key in self.__dict__:
+            remove(self.__dict__[selected_key], item)
+
+    def remove_facies_by_name(
+            self,
+            facies_names: Union[List[str], str],
+            key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE
+    ) -> None:
+        if key in self.__dict__:
+            if isinstance(facies_names, list):
+                for facies_name in facies_names:
+                    self.remove_facies_by_name(facies_name)
+            elif isinstance(facies_names, str) and facies_names in self.__dict__[key]:
+                self._remove_item(facies_names, key)
+
+    def get_available_facies(self) -> List[str]:
+        return self._get_list_items(FaciesSelectionConstants.AVAILABLE)
+
+    def _get_list_items(self, key: str) -> List[str]:
+        if key in self.__dict__:
+            return self.__dict__[key]
+        else:
+            return []
+
+    def get_selected_facies(self) -> List[str]:
+        return self._get_list_items(FaciesSelectionConstants.SELECTED)

@@ -1,12 +1,12 @@
 import numpy as np
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtWidgets import QSizePolicy, QWidget
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.patches import Ellipse
 
 
-class Plot(FigureCanvas):
+class Plot(FigureCanvas, QWidget):
     def __init__(self, parent=None, dpi=100):
         super(Plot, self).__init__(figure=Figure(dpi=dpi))
         self.setParent(parent)
@@ -20,6 +20,12 @@ class Plot(FigureCanvas):
         self._add_sub_plot()
 
         self.plot()
+
+    def setVisible(self, visible: bool):
+        pass
+
+    def setEnabled(self, a0: bool):
+        pass
 
     def _add_sub_plot(self):
         self.ax = self.figure.add_subplot(111, aspect='auto', frameon=False)  # type: Axes

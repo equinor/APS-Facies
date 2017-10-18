@@ -61,7 +61,10 @@
       <item row="0" column="1">
        <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
         <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+         <set>QDialogButtonBox::Close|QDialogButtonBox::Save</set>
+        </property>
+        <property name="centerButtons">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

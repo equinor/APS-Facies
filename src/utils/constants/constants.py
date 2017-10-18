@@ -62,6 +62,16 @@ class MainWindowElements(Value):
     SAVE_AS = 'm_button_save_as'
 
 
+class OutputFaciesModelNameElements(MainWindowElements):
+    TITLE = 'label_model_name'
+    SELECT_FACIES_MODEL = 'm_choose_select_facies_model'
+    MODEL_NAME = 'm_edit_model_name'
+
+    # Labels
+    LABEL_SELECT_FACIES_MODEL = 'label_select_facies_model'
+    LABEL_MODEL_NAME = 'label_create'
+
+
 class ZoneSelectionElements(MainWindowElements):
     # Button for making the elements interactive
     TOGGLE = 'm_toggle_separate_zone_models'
@@ -101,11 +111,18 @@ class FaciesSelectionElements(MainWindowElements):
     LABEL_SELECTED = 'label_selected_facies'
 
 
+class FaciesSelectionConstants(Key):
+    AVAILABLE = 'available facies'
+    SELECTED = 'selected facies'
+
+
 class TruncationRuleLibraryElements(MainWindowElements):
     CUBIC_BUTTON = 'm_button_type_'
     NON_CUBIC_BUTTON = 'm_button_type_'
     BAYFILL_BUTTON = 'm_button_bayfill'
     CUSTOM_BUTTON = 'm_button_type_customized'
+    ZONES = 'm_list_zones'
+    FACIES = 'm_list_facies'
 
 
 class GaussianRandomFieldElements(MainWindowElements):
@@ -113,6 +130,8 @@ class GaussianRandomFieldElements(MainWindowElements):
     PLOT_AREA = 'm_plot_area_'
     SETTINGS = 'm_button_settings_'
     APPLY = 'm_toggle_'
+    ZONES = 'm_list_zones_grf'
+    FACIES = 'm_list_facies_grf'
 
 
 class DefineGaussianElements(Value):
@@ -268,13 +287,14 @@ class Defaults(Value):
     NAME_OF_DROP_DOWN = CubicTruncationRuleElements.DROP_DOWN
     NAME_OF_ANGLES = NonCubicTruncationRuleElements.ANGLES
     NAME_OF_SLANTED_FACTOR = BayfillTruncationRuleElements.SLANT_FACTOR
-    OPERATION_MODE = ModeOptions.READING_MODE
+    OPERATION_MODE = ModeOptions.EXPERIMENTAL_MODE
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
     GAUSSIAN_TREND = Qt.Unchecked
     CONDITION_TO_WELL = Qt.Unchecked
     HIDE = HideOptions.DISABLE
     DEBUG = Debug.OFF
+    MAXIMUM_NUMBER_OF_FACIES = 6  # -1 To turn off
 
 
 class MessageIcon(Icon):

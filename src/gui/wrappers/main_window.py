@@ -3,7 +3,7 @@
 A wrapper, and implementation of the main GUI window of the APS-GUI.
 'Implements' the design in APS_prototype.ui, and wraps around src/resources/ui/APS_prototype_ui.py.
 """
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, List, Union
 
 from PyQt5.QtWidgets import *
 
@@ -11,6 +11,7 @@ from src.gui.state import State
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements
 from src.gui.wrappers.base_classes.message_box import MessageBox
+from src.gui.wrappers.base_classes.plot import Plot
 from src.gui.wrappers.define_gaussian import DefineGaussian
 from src.gui.wrappers.dialogs import AddFacies
 from src.gui.wrappers.truncation_rule import (
@@ -21,7 +22,8 @@ from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.utils.checks import is_valid_path
 from src.utils.constants.constants import (
     Defaults, FaciesSelectionElements, GaussianRandomFieldElements, MainWindowElements,
-    ModeConstants, TruncationLibraryKeys, TruncationLibrarySubKeys, ZoneSelectionElements,
+    ModeConstants, OutputFaciesModelNameElements, TruncationLibraryKeys, TruncationLibrarySubKeys,
+    TruncationRuleLibraryElements, ZoneSelectionElements,
 )
 from src.utils.mappings import truncation_library_button_to_kind_and_number_of_facies, truncation_library_elements
 from src.utils.methods import get_project_file, toggle_elements
@@ -47,7 +49,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.wire_up_navigation()
         self.wire_up_selections()
 
-        self.initialize_truncation_rules()
+        self.wire_up_truncation_rules()
+
         self.initialize_project_data()
 
         self.wire_up_gaussian_random_fields()
@@ -57,7 +60,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def wire_up_selections(self):
         buttons = {
-            ZoneSelectionElements.TOGGLE: self._toggle_separate_zone_models,
+            ZoneSelectionElements.TOGGLE:   self._toggle_separate_zone_models,
             FaciesSelectionElements.TOGGLE: self._toggle_select_facies,
         }
         self._connect_buttons_to_functions_on_event(buttons, 'stateChanged')
@@ -70,24 +73,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def wire_up_navigation(self):
         buttons = {
             MainWindowElements.ASSIGN_PROBABILITY_CUBE: self.assign_probabilities,
-            MainWindowElements.CLOSE: self.close,
-            MainWindowElements.EXPERIMENTAL_MODE: self._toggle_experimental_mode,
-            MainWindowElements.CONDITION_TO_WELL: self._condition_to_wells,
-            FaciesSelectionElements.ADD_FACIES: self.add_facies,
+            MainWindowElements.CLOSE:                   self.close,
+            MainWindowElements.EXPERIMENTAL_MODE:       self._toggle_experimental_mode,
+            MainWindowElements.CONDITION_TO_WELL:       self._condition_to_wells,
+            FaciesSelectionElements.ADD_FACIES:         self.add_facies,
+            FaciesSelectionElements.REMOVE_FACIES:      self.remove_facies,
+            FaciesSelectionElements.SELECT:             self.select_facies,
+            FaciesSelectionElements.UNSELECT:           self.remove_select_facies,
         }
         self._connect_buttons_to_functions_on_event(buttons, 'clicked')
 
     def initialize_gaussian_random_field_clickability(self):
-        # TODO: Read how many facies are available, and make sure that no more than that can be clicked.
-        # TODO: Do this for the different zones
-        pass
+        self.update_available_gaussian_random_fields()
 
     def wire_up_gaussian_random_fields(self):
-        settings_prefix = GaussianRandomFieldElements.SETTINGS
+        buttons = self.get_gaussian_settings_buttons()
+        for button in buttons:
+            button.clicked.connect(self.define_gaussian_field)
+
+    def get_gaussian_settings_buttons(self) -> List[QPushButton]:
+        return self._get_gaussian_elements(GaussianRandomFieldElements.SETTINGS)
+
+    def _get_gaussian_elements(
+            self,
+            prefix: GaussianRandomFieldElements
+    ) -> Union[List[QPushButton], List[QCheckBox], List[Plot]]:
+        assert prefix in GaussianRandomFieldElements.values(local=True)
+        elements = []
         for i in range(GaussianRandomFieldElements.NUMBER_OF_ELEMENTS):
             name = 'GRF' + str(i + 1)  # GRFs are 1 indexed
-            button = get_element(self, settings_prefix + name)
-            button.clicked.connect(self.define_gaussian_field)
+            elements.append(get_element(self, prefix + name))
+        return elements
 
     def define_gaussian_field(self):
         # TODO: Pass information on which button this came from
@@ -105,9 +121,102 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     check_box.setChecked(True)
                 pass
 
+    def get_gaussian_random_field_elements(self):
+        prefixes = [
+            GaussianRandomFieldElements.PLOT_AREA, GaussianRandomFieldElements.SETTINGS,
+            GaussianRandomFieldElements.APPLY
+        ]
+        elements = []
+        for prefix in prefixes:
+            temp = self._get_gaussian_elements(prefix)
+            for i in range(len(temp)):
+                if len(elements) <= i:
+                    elements.append([])
+                elements[i].append(temp[i])
+        return elements
+
+    def update_available_truncation_rules(self):
+        library = truncation_library_elements(self)
+        for key in library.keys():
+            if isinstance(library[key], list):
+                for element in library[key]:
+                    self.disable_if_unusable_rules(element)
+            else:
+                self.disable_if_unusable_rules(library[key])
+        pass
+
+    def disable_if_unusable_rules(self, element):
+        button = element[TruncationLibrarySubKeys.BUTTON_NAME_KEY]
+        available_facies = len(self._state.get_selected_facies())
+        required_number_of_facies = element[TruncationLibrarySubKeys.NUMBER_OF_FACIES_KEY]
+        if not isinstance(required_number_of_facies, int):
+            required_number_of_facies = min(required_number_of_facies)
+
+        if available_facies >= required_number_of_facies:
+            toggle = True
+        else:
+            toggle = False
+        toggle_elements(toggle, button)
+
+    def update_available_gaussian_random_fields(self):
+        elements = self.get_gaussian_random_field_elements()
+        number_of_selected_facies = len(self._state.get_selected_facies())
+        should_be_enabled = elements[:number_of_selected_facies]
+        should_not_be_enabled = elements[number_of_selected_facies:]
+
+        toggle_elements(True, should_be_enabled)
+        toggle_elements(False, should_not_be_enabled)
+
     def add_facies(self):
-        self.new_facies_dialog = AddFacies(self._state)
+        self.new_facies_dialog = AddFacies(state=self._state, sender=self)
         self.new_facies_dialog.show()
+
+    def remove_facies(self):
+        available_facies_element = self._get_available_facies_elements()
+        to_be_removed = available_facies_element.selectedItems()
+        if to_be_removed:
+            self._state.remove_facies(to_be_removed)
+        else:
+            # None are selected, removing selected instead
+            self.remove_select_facies()
+        self.update_facies()
+
+    def update_facies(self):
+        available_facies_element = self._get_available_facies_elements()
+        selected_facies_elements = self._get_selected_facies_elements()
+        # Make sure that the lists reflects the STATE
+        available_facies_element.clear()
+        for item in self._state.get_available_facies():
+            available_facies_element.addItem(item)
+        for selected_facies_element in selected_facies_elements:
+            selected_facies_element.clear()
+            for item in self._state.get_selected_facies():
+                selected_facies_element.addItem(item)
+        self.update_available_gaussian_random_fields()
+        self.update_available_truncation_rules()
+
+    def select_facies(self):
+        # TODO: Combine with the 'remove_select_facies' method
+        selected_facies = get_element(self, FaciesSelectionElements.AVAILABLE).selectedItems()
+        self._state.select_facies(selected_facies)
+        self.update_facies()
+
+    def remove_select_facies(self):
+        # TODO: Combine with the 'select_facies' method
+        selected_facies = get_element(self, FaciesSelectionElements.SELECTED).selectedItems()
+        self._state.remove_select_facies(selected_facies)
+        self.update_facies()
+
+    def _get_selected_facies_elements(self) -> List[QListWidget]:
+        names = [
+            FaciesSelectionElements.SELECTED, GaussianRandomFieldElements.FACIES,
+            TruncationRuleLibraryElements.FACIES
+        ]
+        return [get_element(self, name) for name in names]
+
+    def _get_available_facies_elements(self) -> QListWidget:
+        available_facies_element = get_element(self, FaciesSelectionElements.AVAILABLE)
+        return available_facies_element
 
     def assign_probabilities(self, content_in_combo_boxes=None):
         # TODO: Read from file, and give that as input
@@ -127,7 +236,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.probabilities.show()
         pass
 
-    def initialize_truncation_rules(self):
+    def wire_up_truncation_rules(self):
         library = truncation_library_elements(self)
         for key in library.keys():
             if isinstance(library[key], list):
@@ -135,6 +244,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     self._connect_truncation_button(button_information)
             else:
                 self._connect_truncation_button(library[key])
+        self.update_available_truncation_rules()
 
     def _connect_truncation_button(
             self,
@@ -178,8 +288,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _set_checkboxes_to_defaults(self):
         buttons = {
-            ZoneSelectionElements.TOGGLE: Defaults.SEPARATE_ZONE_MODELS,
-            FaciesSelectionElements.TOGGLE: Defaults.FACIES_MODELS,
+            ZoneSelectionElements.TOGGLE:         Defaults.SEPARATE_ZONE_MODELS,
+            FaciesSelectionElements.TOGGLE:       Defaults.FACIES_MODELS,
             MainWindowElements.CONDITION_TO_WELL: Defaults.CONDITION_TO_WELL,
         }
         for key, default in buttons.items():
@@ -206,7 +316,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 experimental_check_box.setChecked(True)
         elif use_experimental_mode:
             # TODO:
-            pass
+            # Zones should be unavailable
+            toggle_separate_zones = get_element(self, ZoneSelectionElements.TOGGLE)
+            toggle_elements(False, toggle_separate_zones)
+
+            # The user may add, and remove (new) facies
+            toggle_separate_facies = get_element(self, FaciesSelectionElements.TOGGLE)
+            toggle_separate_facies.setChecked(True)
+
+        # Output Facies Model Name should be unavailable, when using experimental mode
+        output_facies_name_elements = get_elements(self, OutputFaciesModelNameElements.values(local=True))
+        toggle_elements(not use_experimental_mode, output_facies_name_elements)
+
+        # Condition to well should be unavailable when using experimental mode
         condition_to_wells = get_element(self, MainWindowElements.CONDITION_TO_WELL)
         toggle_elements(not use_experimental_mode, condition_to_wells)
 
@@ -215,5 +337,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         toggled = check_box.isChecked()
         assign_probability_cube = get_element(self, MainWindowElements.ASSIGN_PROBABILITY_CUBE)
         toggle_elements(toggled, assign_probability_cube)
-        # TODO: Implement
-        pass
