@@ -129,7 +129,7 @@ resource-file: clean-resource-file
 	mkdir -p $(PYQT_GENERATED_FILES)  && \
 	pyrcc5 $(RESOURCE_FILE) -o $(PY_RESOURCE_FILE) -name resources
 
-resources: ui-files resource-file
+resources: ui-files resource-file set-path-to-library
 
 pepify: resources
 	autopep8 $(PYQT_GENERATED_FILES) --recursive --in-place --pep8-passes 5000 --max-line-length 120 --jobs $(shell nproc)
