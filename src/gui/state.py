@@ -229,7 +229,7 @@ class State(dict):
         assert key in [FaciesSelectionConstants.AVAILABLE, FaciesSelectionConstants.SELECTED]
         assert max_facies <= Defaults.MAXIMUM_NUMBER_OF_FACIES
         if key not in self.__dict__:
-            self.__dict__[key] = []
+            self.__dict__[key] = {}
         if isinstance(facies_name, QListWidgetItem):
             facies_name = facies_name.text()
         if facies_name not in self.__dict__[key]:
@@ -238,7 +238,7 @@ class State(dict):
                 # I.e. max_facies have been enabled (> 0), and the we will exceed the threshold if another item is added
                 return False
             else:
-                self.__dict__[key].append(facies_name)
+                self.__dict__[key][facies_name] = {}
         return True
 
     def remove_facies(
@@ -264,7 +264,7 @@ class State(dict):
             indices: Union[List[int], int],
             key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE
     ) -> None:
-
+        # TODO: very duplicated (comp. remove_facies_by_name)
         if isinstance(indices, list):
             for i in indices:
                 self.remove_facies_by_index(i)
@@ -274,12 +274,10 @@ class State(dict):
             # TODO: Give warning / raise exception?
             pass
 
-    def _remove_item(self, item: Union[int, str], key):
-        def remove(collection: list, item: Union[int, str]):
-            if isinstance(item, int):
-                collection.pop(item)
-            elif item in collection:
-                collection.remove(item)
+    def _remove_item(self, item: str, key):
+        def remove(collection: dict, item: str):
+            if item in collection:
+                collection.pop(item, None)
             else:
                 # TODO: raise an exception?
                 pass
@@ -302,6 +300,7 @@ class State(dict):
             facies_names: Union[List[str], str],
             key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE
     ) -> None:
+        # TODO: very duplicated (comp. remove_facies_by_index)
         if key in self.__dict__:
             if isinstance(facies_names, list):
                 for facies_name in facies_names:
