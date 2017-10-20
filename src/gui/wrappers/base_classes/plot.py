@@ -5,6 +5,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.patches import Ellipse
 
+from src.utils.constants import Colors
+
 
 class Plot(FigureCanvas, QWidget):
     def __init__(self, parent=None, dpi=100):
@@ -16,15 +18,21 @@ class Plot(FigureCanvas, QWidget):
             QSizePolicy.Expanding
         )
         self.updateGeometry()
-        self.figure.set_facecolor((1, 1, 1, 0))
+        self.figure.set_facecolor(Colors.BACKGROUND.name())
         self._add_sub_plot()
 
         self.plot()
 
     def setVisible(self, visible: bool):
+        # FIXME: Do properly
+        if visible:
+            super(Plot, self).setVisible(visible)
         pass
 
-    def setEnabled(self, a0: bool):
+    def setEnabled(self, enable: bool):
+        # FIXME: Do properly
+        if enable:
+            super(Plot, self).setEnabled(enable)
         pass
 
     def _add_sub_plot(self):
