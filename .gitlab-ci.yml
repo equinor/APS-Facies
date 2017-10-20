@@ -16,6 +16,7 @@ variables:
 
 stages:
   - build docker image
+  - check requirements
   - testing
   - doc-tests  # https://docs.python.org/3/library/doctest.html
   - build gui
@@ -37,9 +38,14 @@ make documentation:
 
 
 check for vulnerabilities:
-  stage: testing
+  stage: check requirements
   script:
     - 'eval $DOCKER $MAKE safety-check'
+
+check for outdated requirements:
+  stage: check requirements
+  script:
+    - 'eval $DOCKER $MAKE check-requirements'
 
 linting:
   stage: testing

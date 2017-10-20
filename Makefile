@@ -126,6 +126,15 @@ check-docker-dependencies: #copy-source
 copy-source:
 	tar --exclude='$(CODE_DIR)/.git/' --exclude="$(CODE_DIR)/documentation" -cvzf code.tar.gz *
 
+check-requirements: clean-requirements-check install-piprot
+	piprot --outdated $(CODE_DIR)/requirements.txt
+
+clean-requirements-check:
+	$(shell piprot safety >/dev/null 2>&1 && pip-autoremove piprot -y)
+
+install-piprot:
+	$(PIP) install piprot
+
 safety-check: clean-safety install-safety get-vulnerability-db
 	safety check --full-report --db $(VULNERABILITY_DB)
 
