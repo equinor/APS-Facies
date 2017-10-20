@@ -12,6 +12,8 @@ from src.Trunc2D_Angle_xml import Trunc2D_Angle
 # To be outphased:
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
+from src.utils.constants import Debug
 from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword, getTextCommand
 
 
@@ -30,8 +32,8 @@ class APSZoneModel:
        def getMainLevelFacies(self)
        def getFaciesInZoneModel(self)
        def getUsedGaussFieldNames(self)
-       def getVarioType(self,gaussFieldName)
-       def getVarioTypeNumber(self,gaussFieldName)
+       def getVariogramType(self,gaussFieldName)
+       def getVariogramTypeNumber(self,gaussFieldName)
        def getMainRange(self,gaussFieldName)
        def getPerpRange(self,gaussFieldName)
        def getVertRange(self,gaussFieldName)
@@ -42,16 +44,16 @@ class APSZoneModel:
        def getTrendRuleModel(self,gfName)
        def getSimBoxThickness(self)
        def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
-       def printInfo(self)
+       def debug_level(self)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
-       def getHorizonNameForVarioTrendMap(self)
+       def getHorizonNameForVariogramTrendMap(self)
 
 
        ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
-       def setVarioType(self,gaussFieldName,varioType)
+       def setVariogramType(self,gaussFieldName,variogramType)
        def setRange1(self,gaussFieldName,range1)
        def setRange2(self,gaussFieldName,range2)
        def setRange3(self,gaussFieldName,range3)
@@ -60,7 +62,7 @@ class APSZoneModel:
 
      ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
-       def setVarioType(self,gaussFieldName,varioType)
+       def setVariogramType(self,gaussFieldName,variogramType)
        def setRange1(self,gaussFieldName,range1)
        def setRange2(self,gaussFieldName,range2)
        def setRange3(self,gaussFieldName,range3)
@@ -70,13 +72,13 @@ class APSZoneModel:
        def setSeedForPreviewSimulation(self)
        def setMainFaciesTable(self,mainFaciesTable)
        def setSimBoxThickness(self,thickness)
-       def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,angle,power,
+       def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,angle,power,
                                  relStdDev=0.0,trendRuleModelObj=None)
        def removeGaussFieldParam(self,gfName)
        def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
        def removeFaciesWithProbForZone(self,fName)
        def setTruncRule(self,truncRuleObj)
-       def setHorizonNameForVarioTrendMap(self,horizonNameForVarioTrendMap)
+       def setHorizonNameForVariogramTrendMap(self,horizonNameForVariogramTrendMap)
 
      ---  Calculate function ---
        def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
@@ -96,41 +98,38 @@ class APSZoneModel:
 
     Private member functions:
        def __interpretXMLTree(ET_Tree)
-       def __isVarioTypeOK(self,varioType)
+       def __isVariogramTypeOK(self,variogramType)
        def __checkConstProbValuesAndNormalize(self)
        def __getGFIndex(self,gfName)
-       def __updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,angle,power)
+       def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
        def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
 
     ----------------------------------------------------------------
     """
 
-    def __init__(self, ET_Tree=None, inputZoneNumber=0, inputMainLevelFacies=None, modelFileName=None):
-
-        self.__setEmpty()
-
-        self.__zoneNumber = inputZoneNumber
+    def __init__(
+            self, ET_Tree=None, zoneNumber=0, inputMainLevelFacies=None, modelFileName=None,
+            useConstProb=False, simBoxThickness=10.0, horizonNameForVariogramTrendMap=None,
+            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None, faciesLevel=1,
+            debug_level=Debug.OFF
+    ):
+        self.__className = self.__class__.__name__
+        # Local variables
+        self.__zoneNumber = zoneNumber
         self.__mainLevelFacies = inputMainLevelFacies
+        self.__useConstProb = useConstProb
+        self.__simBoxThickness = simBoxThickness
+
+        self.__faciesProbObject = faciesProbObject
+        self.__gaussModelObject = gaussModelObject
+
+        self.__truncRule = truncRuleObject
+        self.__faciesLevel = faciesLevel
+        self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
+        self.__debug_level = debug_level
 
         if ET_Tree is not None:
             self.__interpretXMLTree(ET_Tree, modelFileName)
-
-    # End __init__
-
-    def __setEmpty(self):
-        self.__printInfo = 0
-        self.__useConstProb = 0
-        self.__className = 'APSZoneModel'
-        self.__simBoxThickness = 10.0
-
-        self.__faciesProbObject = None
-        self.__gaussModelObject = None
-
-        self.__truncRule = None
-        self.__zoneNumber = 0
-        self.__faciesLevel = 1
-        self.__mainLevelFacies = None
-        self.__horizonNameForVarioTrendMap = None
 
     def __interpretXMLTree(self, ET_Tree, modelFileName):
         #  Get root of xml tree for model specification
@@ -138,10 +137,10 @@ class APSZoneModel:
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
-        self.__printInfo = getIntCommand(root, kw, defaultValue=1, required=False)
+        self.__debug_level = getIntCommand(root, kw, defaultValue=1, required=False)
 
-        if self.__printInfo >= 3:
-            print(' ')
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('')
             print('Debug output: Call init ' + self.__className)
 
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
@@ -166,27 +165,27 @@ class APSZoneModel:
 
                 kw = 'HorizonNameVarioTrend'
                 mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName)
-                self.__horizonNameForVarioTrendMap = mapName
+                self.__horizonNameForVariogramTrendMap = mapName
 
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: From APSZoneModel: ZoneNumber: ' + str(zoneNumber))
                     print('Debug output: From APSZoneModel: mainLevelFacies: ' + str(mainLevelFacies))
                     print('Debug output: From APSZoneModel: useConstProb: ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
                     text = 'Debug output: From APSZoneModel: Horizon name to be used for saving \n'
                     text += '              azimuth variogram trend for this zone: '
-                    text += str(self.__horizonNameForVarioTrendMap)
+                    text += str(self.__horizonNameForVariogramTrendMap)
                     print(text)
 
-                # Read facies probabilties
+                # Read facies probabilities
                 self.__faciesProbObject = APSFaciesProb(
                     zone, mainFaciesTable, modelFileName,
-                    self.__printInfo, self.__useConstProb, self.__zoneNumber
+                    self.__debug_level, self.__useConstProb, self.__zoneNumber
                 )
                 # Read Gauss Fields model parameters
                 self.__gaussModelObject = APSGaussModel(
                     zone, mainFaciesTable, gaussFieldJobs, modelFileName,
-                    self.__printInfo, self.__zoneNumber, self.__simBoxThickness
+                    self.__debug_level, self.__zoneNumber, self.__simBoxThickness
                 )
 
                 # Read truncation rule for zone model
@@ -199,7 +198,7 @@ class APSZoneModel:
                         ''.format(modelName=modelFileName)
                     )
                 truncRuleName = trRule.get('name')
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
                 nGaussFieldInModel = int(trRule.get('nGFields'))
@@ -219,16 +218,16 @@ class APSZoneModel:
                     if truncRuleName == 'Trunc3D_Bayfill':
                         self.__truncRule = Trunc3D_bayfill(
                             trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                            self.__printInfo, modelFileName
+                            self.__debug_level, modelFileName
                         )
 
                     elif truncRuleName == 'Trunc2D_Angle':
                         self.__truncRule = Trunc2D_Angle(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__printInfo, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__debug_level, modelFileName
                         )
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.__truncRule = Trunc2D_Cubic(
-                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__printInfo, modelFileName
+                            trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel, self.__debug_level, modelFileName
                         )
                     else:
                         raise NameError(
@@ -238,7 +237,7 @@ class APSZoneModel:
                             ''.format(className=self.__className, truncationRule=truncRuleName)
                         )
 
-                    if self.__printInfo >= 3:
+                    if self.__debug_level >= Debug.VERY_VERBOSE:
                         text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
                         text += self.__truncRule.getClassName()
                         print(text)
@@ -250,40 +249,22 @@ class APSZoneModel:
 
         return
 
-    def initialize(self, inputZoneNumber, useConstProb, simBoxThickness, horizonNameForVarioTrendMap,
-                   faciesProbObject, gaussModelObject, truncRuleObject, printInfo):
-        if printInfo >= 3:
-            print('Debug output: Call the initialize function in ' + self.__className)
-
-        # Set default values
-        self.__setEmpty()
-        self.__zoneNumber = inputZoneNumber
-        self.__useConstProb = useConstProb
-        self.__simBoxThickness = simBoxThickness
-        self.__horizonNameForVarioTrendMap = horizonNameForVarioTrendMap
-        self.__faciesProbObject = faciesProbObject
-        self.__gaussModelObject = gaussModelObject
-        self.__truncRule = truncRuleObject
-
-        self.__printInfo = printInfo
-
-        return
-
     def hasFacies(self, fName):
         return self.__faciesProbObject.hasFacies(fName)
 
-    def __isVarioTypeOK(self, varioType):
+    @staticmethod
+    def __isVariogramTypeOK(variogramType):
         isOK = 0
-        if varioType == 'SPHERICAL':
+        if variogramType == 'SPHERICAL':
             isOK = 1
-        elif varioType == 'EXPONENTIAL':
+        elif variogramType == 'EXPONENTIAL':
             isOK = 1
-        elif varioType == 'GAUSSIAN':
+        elif variogramType == 'GAUSSIAN':
             isOK = 1
-        elif varioType == 'GENERAL_EXPONENTIAL':
+        elif variogramType == 'GENERAL_EXPONENTIAL':
             isOK = 1
         if isOK == 0:
-            print('Error: Specified variogram : ' + varioType + ' is not implemented')
+            print('Error: Specified variogram : ' + variogramType + ' is not implemented')
             print('Error: Allowed variograms are: ')
             print('       SPHERICAL')
             print('       EXPONENTIAL')
@@ -313,11 +294,11 @@ class APSZoneModel:
     def getUsedGaussFieldNames(self):
         return self.__gaussModelObject.getUsedGaussFieldNames()
 
-    def getVarioType(self, gaussFieldName):
-        return copy.copy(self.__gaussModelObject.getVarioType(gaussFieldName))
+    def getVariogramType(self, gaussFieldName):
+        return copy.copy(self.__gaussModelObject.getVariogramType(gaussFieldName))
 
-    def getVarioTypeNumber(self, gaussFieldName):
-        return self.__gaussModelObject.getVarioTypeNumber(gaussFieldName)
+    def getVariogramTypeNumber(self, gaussFieldName):
+        return self.__gaussModelObject.getVariogramTypeNumber(gaussFieldName)
 
     def getMainRange(self, gaussFieldName):
         return self.__gaussModelObject.getMainRange(gaussFieldName)
@@ -359,11 +340,11 @@ class APSZoneModel:
         if not self.__truncRule.useConstTruncModelParam():
             self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
 
-    def printInfo(self):
-        return self.__printInfo
+    def get_debug_level(self):
+        return self.__debug_level
 
-    def getHorizonNameForVarioTrendMap(self):
-        return copy.copy(self.__horizonNameForVarioTrendMap)
+    def getHorizonNameForVariogramTrendMap(self):
+        return copy.copy(self.__horizonNameForVariogramTrendMap)
 
     def getProbParamName(self, fName):
         return self.__faciesProbObject.getProbParamName(fName)
@@ -378,8 +359,8 @@ class APSZoneModel:
         self.__zoneNumber = zoneNumber
         return
 
-    def setVarioType(self, gaussFieldName, varioType):
-        return self.__gaussModelObject.setVarioType(gaussFieldName, varioType)
+    def setVariogramType(self, gaussFieldName, variogramType):
+        return self.__gaussModelObject.setVariogramType(gaussFieldName, variogramType)
 
     def setMainRange(self, gaussFieldName, range1):
         return self.__gaussModelObject.setMainRange(gaussFieldName, range1)
@@ -419,16 +400,16 @@ class APSZoneModel:
     def removeFaciesWithProbForZone(self, fName):
         self.__faciesProbObject.removeFaciesWithProbForZone(fName)
 
-    def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, angle, power,
+    def updateGaussFieldParam(self, gfName, variogramType, range1, range2, range3, angle, power,
                               relStdDev=0.0, trendRuleModelObj=None):
         return self.__gaussModelObject.updateGaussFieldParam(
-            gfName, varioType, range1, range2, range3, angle, power,
+            gfName, variogramType, range1, range2, range3, angle, power,
             relStdDev, trendRuleModelObj
         )
 
-    def updateGaussFieldVarioParam(self, gfName, varioType, range1, range2, range3, angle, power):
-        return self.__gaussModelObject.updateGaussFieldVarioParam(
-            gfName, varioType, range1, range2, range3, angle, power
+    def updateGaussFieldVariogramParam(self, gfName, variogramType, range1, range2, range3, angle, power):
+        return self.__gaussModelObject.updateGaussFieldVariogramParameters(
+            gfName, variogramType, range1, range2, range3, angle, power
         )
 
     def removeGaussFieldParam(self, gfName):
@@ -439,14 +420,14 @@ class APSZoneModel:
 
     def setTruncRule(self, truncRuleObj):
         err = 0
-        if truncRuleObj == None:
+        if truncRuleObj is None:
             err = 1
         else:
             self.__truncRule = truncRuleObj
         return err
 
-    def setHorizonNameForVarioTrendMap(self, horizonNameForVarioTrendMap):
-        self.__horizonNameForVarioTrendMap = copy.copy(horizonNameForVarioTrendMap)
+    def setHorizonNameForVariogramTrendMap(self, horizonNameForVariogramTrendMap):
+        self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVariogramTrendMap)
         return
 
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
@@ -458,32 +439,32 @@ class APSZoneModel:
 
         truncObject = self.__truncRule
         functionName = 'applyTruncations'
-        printInfo = self.__printInfo
+        debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
                 'Error: In class: ' + self.__className + '\n'
-                'Error: Mismatch in input to applyTruncations'
+                                                         'Error: Mismatch in input to applyTruncations'
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
         nGaussFields = len(GFAlphaList)
         faciesProb = np.zeros(nFacies, np.float32)
         volFrac = np.zeros(nFacies, np.float32)
-        if printInfo >= 2:
+        if debug_level >= Debug.VERBOSE:
             print('--- Truncation rule: ' + classNameTrunc)
 
         if self.__useConstProb == 1 and useConstTruncParam == 1:
-            # Constant probability 
-            if printInfo >= 3:
+            # Constant probability
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Using spatially constant probabilities for facies.')
 
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: faciesProb:')
                 print(repr(faciesProb))
 
@@ -493,7 +474,7 @@ class APSZoneModel:
                 gfName = item[NAME]
                 alphaDataArray = item[VAL]
                 alphaList.append(alphaDataArray)
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
 
             # Calculate truncation rules
@@ -501,10 +482,10 @@ class APSZoneModel:
             truncObject.setTruncRule(faciesProb)
 
             for i in range(nDefinedCells):
-                if printInfo == 2:
+                if debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo >= 3:
+                elif debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 10000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
@@ -521,9 +502,9 @@ class APSZoneModel:
                 volFrac[fIndx] += 1
 
         else:
-            # Varying probability from cell to cell and / or 
+            # Varying probability from cell to cell and / or
             # varying truncation parameter from cell to cell
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Using spatially varying probabilities and/or '
                 text = text + 'truncation parameters for facies.'
                 print(text)
@@ -533,15 +514,15 @@ class APSZoneModel:
                 item = GFAlphaList[gaussFieldIndx]
                 gfName = item[NAME]
                 alphaDataArray = item[VAL]
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
                 alphaList.append(alphaDataArray)
 
             for i in range(nDefinedCells):
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo == 2:
+                elif debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
@@ -567,14 +548,14 @@ class APSZoneModel:
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
-        if self.__printInfo >= 4:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             truncRuleName = truncObject.getClassName()
             if truncRuleName == 'Trunc2D_Angle':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
                 nCount = truncObject.getNCountShiftAlpha()
                 print(
-                    'Debug output: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc)
+                    'Debug info: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc)
                     + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount)
                 )
 
@@ -584,8 +565,8 @@ class APSZoneModel:
 
     def XMLAddElement(self, parent):
 
-        # Add command Zone and all its childs
-        if self.__printInfo >= 3:
+        # Add command Zone and all its children
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'
@@ -610,10 +591,10 @@ class APSZoneModel:
         zoneElement.append(elem)
 
         # Add child command HorizonNameVarioTrend
-        if self.__horizonNameForVarioTrendMap != None:
+        if self.__horizonNameForVariogramTrendMap is not None:
             tag = 'HorizonNameVarioTrend'
             elem = Element(tag)
-            elem.text = ' ' + self.__horizonNameForVarioTrendMap + ' '
+            elem.text = ' ' + self.__horizonNameForVariogramTrendMap + ' '
             zoneElement.append(elem)
 
         # Add child command FaciesProbForModel
@@ -622,7 +603,6 @@ class APSZoneModel:
         self.__gaussModelObject.XMLAddElement(zoneElement)
         # Add child command TruncationRule at end of the child list for
         self.__truncRule.XMLAddElement(zoneElement)
-        return
 
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, gridDimNx, gridDimNy,

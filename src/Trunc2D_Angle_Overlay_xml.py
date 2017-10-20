@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element
 
 import copy
 import numpy as np
+from src.utils.constants import Debug
 
 
 class Trunc2D_Angle_Overlay:
@@ -26,7 +27,7 @@ class Trunc2D_Angle_Overlay:
        indexList                =  getFaciesOrderIndexList()
        faciesList               =  getFaciesInTruncRule()
        useConstTruncModelParam  =  useConstTruncModelParam()
-                                   setTruncRule(faciesProb,cellIndx = 0)
+                                   setTruncRule(faciesProb, cellIndx=0)
        [faciesCode,fIndx]       =  defineFaciesByTruncRule(alphaCoord)
        [polygons]               =  truncMapPolygons()
                                    XMLAddElement(parent)
@@ -34,14 +35,14 @@ class Trunc2D_Angle_Overlay:
      Public member functions specific for class Trunc2D_Angle_Overlay
 
      Constructor:
-                  __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-                           printInfo = 0,modelFileName=None)
+                  __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
+                           debug_level=Debug.OFF, modelFileName=None)
 
-     def initialize(self,mainFaciesTable,faciesInZone,truncStructure,
+     def initialize(self,mainFaciesTable, faciesInZone, truncStructure,
                       backgroundFacies, overlayFacies, overlayTruncCenter,
-                      useConstTruncParam,printInfo)
+                      useConstTruncParam, debug_level)
 
-     getTruncationParam(gridModel,realNumber)
+     getTruncationParam(gridModel, realNumber)
     --------------------------------------------------------
 
      Internal member functions specific for class Trunc2D_B
@@ -57,7 +58,7 @@ class Trunc2D_Angle_Overlay:
     """
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
-                 printInfo=0, modelFileName=None):
+                 debug_level=Debug.OFF, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -94,7 +95,7 @@ class Trunc2D_Angle_Overlay:
         self.__nFacies = 0
         self.__orderIndex = []
         self.__faciesIsDetermined = []
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__className = 'Trunc2D_Angle_Overlay'
 
         self.__modelFileName = modelFileName
@@ -138,15 +139,15 @@ class Trunc2D_Angle_Overlay:
             # This method require exactly 3 transformed gauss fields
             assert (nGaussFieldInModel == 3)
             # Fill the object from an xml model file
-            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, debug_level, modelFileName)
         else:
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 # Create an empty object. The object will be initialized by set functions later
                 print('Debug info: Create empty object of: ' + self.__className)
 
-    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
+    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, debug_level, modelFileName):
         # Initialize object from xml tree object trRuleXML
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
         # Reference to main facies table which is global for the whole model
         if mainFaciesTable is not None:
@@ -171,7 +172,7 @@ class Trunc2D_Angle_Overlay:
                 ''.format(self.__className)
             )
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call Trunc2D_Angle_Overlay init')
 
         # Facies code for facies in zone
@@ -342,7 +343,7 @@ class Trunc2D_Angle_Overlay:
 
         # Check that probability fractions summed over all polygons for each facies is 1.0
         for i in range(nFacies - 1):
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 fName = self.__faciesInTruncRule[i]
                 print('Debug output: Sum prob frac for facies ' + fName + ' is: ' + str(sumProbFrac[i]))
 
@@ -355,7 +356,7 @@ class Trunc2D_Angle_Overlay:
                     ''.format(self.__className, fName, sumProbFrac[i])
                 )
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Facies names in truncation rule:')
             print(repr(self.__faciesInTruncRule))
             print('Debug output: Facies ordering:')
@@ -396,11 +397,11 @@ class Trunc2D_Angle_Overlay:
 
     def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
                    backgroundFacies, overlayFacies, overlayTruncCenter,
-                   useConstTruncParam, printInfo):
+                   useConstTruncParam, debug_level):
         """
            Description: Initialize the truncation object from input variables.
         """
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__mainFaciesTable = copy.copy(
             mainFaciesTable)  # Main facies table
         self.__nFaciesMain = self.__mainFaciesTable.getNFacies()
@@ -487,11 +488,11 @@ class Trunc2D_Angle_Overlay:
                 # Check consistency
                 if fName == self.__faciesInTruncRule[k]:
                     # Get param values
-                    if self.__printInfo >= 2:
+                    if self.__debug_level >= Debug.VERBOSE:
                         print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
                     [values] = get3DParamFunction(
-                        gridModel, paramName, realNumber, self.__printInfo)
-                    # [values] = getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__printInfo)
+                        gridModel, paramName, realNumber, self.__debug_level)
+                    # [values] = getContinuous3DParameterValues(gridModel,paramName,realNumber,self.__debug_level)
                     self.__faciesAlpha.append(values)
                 else:
                     raise ValueError(
@@ -1207,10 +1208,10 @@ class Trunc2D_Angle_Overlay:
             item = self.__probFracPerPolygon[polygonNumber]
             indx = item[0]
             fName = self.__faciesInTruncRule[indx]
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: ' + \
                        'Set new angle for polygon number: ' + str(polygonNumber)
-                text = text + ' with facies ' + fName + ' : ' + str(angle)
+                text += ' with facies ' + fName + ' : ' + str(angle)
                 print(text)
         return err
 
@@ -1222,7 +1223,7 @@ class Trunc2D_Angle_Overlay:
             indx = item[0]
             fName = self.__faciesInTruncRule[indx]
             self.__faciesAlphaName[polygonNumber] = [fName, angleParamName]
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: ' + 'Set new angle trend for polygon number: ' + str(polygonNumber)
                 text = text + ' with facies ' + fName + ' : ' + str(angleParamName)
                 print(text)

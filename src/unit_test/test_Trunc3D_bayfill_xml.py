@@ -10,10 +10,11 @@ from src.unit_test.constants import (
     OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,
 )
 from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, writePolygons
+from src.utils.constants import Debug
 from src.utils.methods import prettify
 
 
-def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, printInfo):
+def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, debug_level=Debug.OFF):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()
@@ -28,13 +29,13 @@ def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, fa
     nGaussFields = int(trRule.get('nGFields'))
     print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create truncation rule object from input data, not read from file
-    # faciesInZone printInfo are global variables in test script
     truncRuleOut = Trunc3D_bayfill(
-        trRule, mainFaciesTable, faciesInZone, nGaussFields, printInfo, modelFileName)
+        trRule, mainFaciesTable, faciesInZone, nGaussFields,
+        debug_level, modelFileName
+    )
     # Create and write XML tree 
     createXMLTreeAndWriteFile(truncRuleOut, outputModelFileName)
 
@@ -55,18 +56,16 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
 
 def createTrunc(
         outputModelFileName, fTable, faciesInZone, faciesInTruncRule,
-        sf_value, sf_name, ysf, sbhd, useConstTruncParam, printInfo
+        sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
 ):
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create an object and initialize it
-    # Global variables in test script: faciesInZone, faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam
-    # printInfo
+    # get_debug_level
     truncRuleOut = Trunc3D_bayfill()
     truncRuleOut.initialize(
         mainFaciesTable, faciesInZone, faciesInTruncRule,
-        sf_value, sf_name, ysf, sbhd, useConstTruncParam, printInfo
+        sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
     )
 
     # Build an xml tree with the data and write it to file
@@ -76,23 +75,21 @@ def createTrunc(
 
 def initialize_write_read(
         outputModelFileName1, outputModelFileName2, fTable, faciesInZone,
-        faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam, printInfo
+        faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
 ):
     file1 = outputModelFileName1
     file2 = outputModelFileName2
     # Create an object for truncation rule and write to file
-    # Global variable truncRule
     truncRuleA = createTrunc(
         file1, fTable, faciesInZone, faciesInTruncRule,
-        sf_value, sf_name, ysf, sbhd, useConstTruncParam, printInfo
+        sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
     )
     inputFile = file1
 
     # Write datastructure:
-    #    truncRule.writeContentsInDataStructure()
+    # truncRule.writeContentsInDataStructure()
     # Read the previously written file as and XML file and write it out again to a new file
-    # Global variable truncRule2
-    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, printInfo)
+    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, debug_level)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = filecmp.cmp(file1, file2)
@@ -118,13 +115,11 @@ def truncMapsystemPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outP
     truncRule.setTruncRule(faciesProb)
     [polygons] = truncRule.truncMapPolygons()
     # Write polygons to file
-    # Global variable outPolyFile1
     writePolygons(outPolyFile1, polygons)
 
     truncRule2.setTruncRule(faciesProb)
     [polygons] = truncRule2.truncMapPolygons()
     # Write polygons to file
-    # Global variable outPolyFile2
     writePolygons(outPolyFile2, polygons)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite

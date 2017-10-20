@@ -6,6 +6,7 @@ from xml.etree.ElementTree import Element
 
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
+from src.utils.constants import Debug
 from src.unit_test.constants import (
     CUBIC_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, NO_VERBOSE_DEBUG,
     OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,
@@ -17,7 +18,7 @@ from src.unit_test.helpers import (
 from src.utils.methods import prettify
 
 
-def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, printInfo):
+def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, debug_level=Debug.OFF):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()
@@ -32,13 +33,12 @@ def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, fa
     nGaussFields = int(trRule.get('nGFields'))
     print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create truncation rule object from input data, not read from file
     truncRuleOut = Trunc2D_Cubic_Multi_Overlay(
         trRule, mainFaciesTable, faciesInZone,
-        nGaussFields, printInfo, modelFileName
+        nGaussFields, debug_level, modelFileName
     )
     # Create and write XML tree 
     createXMLTreeAndWriteFile(truncRuleOut, outputModelFileName)
@@ -60,16 +60,15 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
 
 def createTrunc(
         outputModelFileName, fTable, faciesInZone, truncStructure,
-        backGroundFacies, overlayFacies, overlayTruncCenter, printInfo
+        backGroundFacies, overlayFacies, overlayTruncCenter, debug_level=Debug.OFF
 ):
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create an object and initialize it
     truncRuleOut = Trunc2D_Cubic_Multi_Overlay()
     truncRuleOut.initialize(
         mainFaciesTable, faciesInZone, truncStructure,
-        backGroundFacies, overlayFacies, overlayTruncCenter, printInfo
+        backGroundFacies, overlayFacies, overlayTruncCenter, debug_level
     )
 
     # Build an xml tree with the data and write it to file
@@ -79,7 +78,7 @@ def createTrunc(
 
 def initialize_write_read(
         outputModelFileName1, outputModelFileName2, fTable, faciesInZone, truncStructure,
-        backGroundFacies, overlayFacies, overlayTruncCenter, printInfo
+        backGroundFacies, overlayFacies, overlayTruncCenter, debug_level=Debug.OFF
 ):
     file1 = outputModelFileName1
     file2 = outputModelFileName2
@@ -87,15 +86,15 @@ def initialize_write_read(
     # Global variable truncRule
     truncRuleA = createTrunc(
         file1, fTable, faciesInZone, truncStructure,
-        backGroundFacies, overlayFacies, overlayTruncCenter, printInfo
+        backGroundFacies, overlayFacies, overlayTruncCenter, debug_level
     )
     inputFile = file1
 
-    # Write data structure:
+    # Write datastructure:
     #    truncRule.writeContentsInDataStructure()
     # Read the previously written file as and XML file and write it out again to a new file
     # Global variable truncRule2
-    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, printInfo)
+    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, debug_level)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = filecmp.cmp(file1, file2)

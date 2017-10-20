@@ -7,6 +7,8 @@ import numpy as np
 
 from src.utils.APSExceptions import InconsistencyError
 
+from src.utils.constants import Debug
+
 """
 ------------ Truncation map for Bayfill ----------------------------------
  Developed by: Kari Skjerve and Tone-Berit Ornskar
@@ -29,10 +31,10 @@ Description: This truncation rule was the first truncation rule developed in thi
  Public member functions specific for class Trunc3D_bayfill
 
    Constructor:           __init__(trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-                                   printInfo = 0,modelFileName=None)
+                                   debug_level=Debug.OFF, modelFileName=None)
 
    def initialize(self,mainFaciesTable,faciesInZone,faciesInTruncRule,
-                  sf_value, sf_name, ysf,sbhd, useConstTruncParam,printInfo)
+                  sf_value, sf_name, ysf,sbhd, useConstTruncParam, debug_level=Debug.OFF)
 
 
    --- Common get functions  for all Truncation classes ---
@@ -42,26 +44,26 @@ Description: This truncation rule was the first truncation rule developed in thi
    def getNGaussFieldsInModel(self)
 
   --- Set functions ---
-   def setParamSF(self,paramName)
-   def setParamSFConst(self,value)
-   def setParamYSFConst(self,value)
-   def setParamSBHDConst(self,value)
+   def setParamSF(self, paramName)
+   def setParamSFConst(self, value)
+   def setParamYSFConst(self, value)
+   def setParamSBHDConst(self, value)
 
   --- Common functions for all Truncation classes ---
    def useConstTruncModelParam(self)
-   def setTruncRule(self,faciesProb,cellIndx=0)
-   def defineFaciesByTruncRule(self,alphaCoord)
+   def setTruncRule(self,faciesProb, cellIndx=0)
+   def defineFaciesByTruncRule(self, alphaCoord)
    def truncMapPolygons(self)
    def faciesIndxPerPolygon(self)
-   def XMLAddElement(self,parent)
+   def XMLAddElement(self, parent)
 
    --- Other get functions specific for this class ---
-   def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
+   def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
 
 
  Local functions
 
-   def __interpretXMLTree(self,,trRuleXML,mainFaciesTable,faciesInZone,printInfo,modelFileName)
+   def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, modelFileName, debug_level=Debug.OFF)
    def __checkFaciesForZone(self)
    def __isInsidePolygon(self,polygon, xInput,yInput)
    def __setUnitSquarePolygon(self)
@@ -90,7 +92,7 @@ class Trunc3D_bayfill:
         self.__nFacies = 0
 
         self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
-        self.__printInfo = 0
+        self.__debug_level = Debug.OFF
         self.__className = 'Trunc3D_Bayfill'
 
         # Internal data structure
@@ -113,7 +115,7 @@ class Trunc3D_bayfill:
         self.__useConstTruncModelParam = True
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
-                 printInfo=0, modelFileName=None):
+                 debug_level=Debug.OFF, modelFileName=None):
         """
            Description: Create either an empty object which have to be initialized
                         later using the initialize function or create a full object
@@ -140,19 +142,19 @@ class Trunc3D_bayfill:
         if trRuleXML is not None:
             # Require extactly 3 transformed gauss fields
             assert nGaussFieldInModel == 3
-            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName)
+            self.__interpretXMLTree(trRuleXML, mainFaciesTable, faciesInZone, modelFileName, debug_level=Debug.OFF)
         else:
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 # Create an empty object which will be initialized by set functions
                 print('Debug output: Create empty object of ' + self.__className)
         #  End of __init__
 
-    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, printInfo, modelFileName):
+    def __interpretXMLTree(self, trRuleXML, mainFaciesTable, faciesInZone, modelFileName, debug_level=Debug.OFF):
         # Initialize object from xml tree object trRuleXML
         # Reference to main facies table which is global for the whole model
         self.__setEmpty()
-        self.__printInfo = printInfo
-        if printInfo >= 3:
+        self.__debug_level = debug_level
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Call Trunc3D_bayfill init')
 
         if mainFaciesTable is not None:
@@ -169,7 +171,7 @@ class Trunc3D_bayfill:
         else:
             raise InconsistencyError(self.__className)
 
-        if printInfo >= 3:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call Trunc2D_B init')
 
         # Facies code for facies in zone
@@ -321,7 +323,7 @@ class Trunc3D_bayfill:
                 raise ValueError('Error in Trunc3D_Bayfill.  Programming error.')
             self.__orderIndex.append(fIndx)
 
-        if printInfo >= 3:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Facies names in truncation rule:')
             print(repr(self.__faciesInTruncRule))
             print('Debug output: Facies ordering:')
@@ -330,7 +332,7 @@ class Trunc3D_bayfill:
             print(repr(self.__faciesCode))
 
     def initialize(self, mainFaciesTable, faciesInZone, faciesInTruncRule,
-                   sf_value, sf_name, ysf, sbhd, useConstTruncParam, printInfo):
+                   sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF):
         """
            Description: Initialize the truncation object from input variables.
         """
@@ -354,7 +356,7 @@ class Trunc3D_bayfill:
             fCode = self.__mainFaciesTable.getFaciesCodeForFaciesName(fName)
             self.__faciesCode.append(fCode)
 
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
         # Set truncation parameters
         self.__useConstTruncModelParam = useConstTruncParam
@@ -407,7 +409,7 @@ class Trunc3D_bayfill:
         print(repr(self.__orderIndex))
         print('Facies index for facies which has 100% probability')
         print(repr(self.__faciesIsDetermined))
-        print('Print info level: ' + str(self.__printInfo))
+        print('Print info level: ' + str(self.__debug_level))
         print('Is function setTruncRule called? ')
         print(repr(self.__setTruncRuleIsCalled))
         print('Number of Gauss fields in model: ' + str(3))
@@ -498,12 +500,12 @@ class Trunc3D_bayfill:
 
         # Read truncation parameters
         paramName = self.__param_sf_name
-        if self.__printInfo >= 2:
+        if self.__debug_level >= Debug.VERBOSE:
             print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self.__className)
             print('--- Read RMS parameter: ' + paramName)
         # Expect that the function points to the function:
-        #  getContinuous3DParameterValues with input: (gridModel,paramName,realNumber,self.__printInfo)
-        [values] = get3DParamFunction(gridModel, paramName, realNumber, self.__printInfo)
+        #  getContinuous3DParameterValues with input: (gridModel,paramName,realNumber,self.__debug_level)
+        [values] = get3DParamFunction(gridModel, paramName, realNumber, self.__debug_level)
         self.__param_sf = values
 
     def faciesIndxPerPolygon(self):
@@ -515,7 +517,7 @@ class Trunc3D_bayfill:
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         attribute = {
@@ -662,7 +664,7 @@ class Trunc3D_bayfill:
 
         fIndx = self.__orderIndex[4]
         P5 = faciesProb[fIndx]
-        if self.__printInfo >= 3 and cellIndx == 0:
+        if self.__debug_level >= Debug.VERY_VERBOSE and cellIndx == 0:
             print('Debug output: P1,P2,P3,P4,P5: {} {} {} {} {}'.format(P1, P2, P3, P4, P5))
         if sbhd > 0.999:
             sbhd = 0.999
@@ -1053,7 +1055,7 @@ class Trunc3D_bayfill:
         else:
             Zm = 1.0
 
-        if self.__printInfo >= 3 and cellIndx == 0:
+        if self.__debug_level >= Debug.VERY_VERBOSE and cellIndx == 0:
             print('Internal variables in ' + self.__className + ' for cell index = ' + str(cellIndx) + ' :')
             print('FSsit= ' + str(fssit))
             print('BHDsit= ' + str(bhdsit))
@@ -1728,7 +1730,7 @@ class Trunc3D_bayfill:
             WBF_area = 0.5 * ((X4 - X3) * (1.0 - YS) - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (1.0 - YS))
             BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
 
-        if self.__printInfo >= 3 and cellIndx == 0:
+        if self.__debug_level >= Debug.VERY_VERBOSE and cellIndx == 0:
             print('Calculated probabilities for Bayfill truncation rule:')
             print('Prob FP = ' + str(FP_area))
             print('Prob SB = ' + str(SB_area))

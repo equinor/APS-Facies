@@ -12,15 +12,16 @@ from src.APSZoneModel import APSZoneModel
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.utils.constants import Debug
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, VERY_VERBOSE_DEBUG,
-    RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
+    RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME, NO_VERBOSE_DEBUG
 )
 
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, printInfo
+        zoneParamName, faciesRealParamNameResult, fTable, debug_level=NO_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
@@ -30,54 +31,59 @@ def defineCommonModelParam(
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
-    apsmodel.setPrintInfo(printInfo)
+    apsmodel.set_debug_level(debug_level)
 
     # Define gauss field jobs
     gfJobObject = APSGaussFieldJobs()
     gfJobNames = ['GRFJob1', 'GRFJob2', 'GRFJob3']
     gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5'], ['GRF6', 'GRF7', 'GRF8', 'GRF9']]
-    gfJobObject.initialize(gfJobNames, gfNamesPerJob, printInfo)
+    gfJobObject.initialize(gfJobNames=gfJobNames, gfNamesPerJob=gfNamesPerJob, debug_level=debug_level)
     apsmodel.setGaussFieldJobs(gfJobObject)
 
     # Define main facies table
-    mainFaciesTable = APSMainFaciesTable()
-    mainFaciesTable.initialize(fTable)
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
     apsmodel.setMainFaciesTable(mainFaciesTable)
 
 
 def addZoneParam(
         apsmodel, truncType, faciesInZone, faciesProbList, useConstProb, zoneNumber, gfNames, gfTypes,
-        range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles, stackingAngle,
+        range1, range2, range3, azimuthAngle, azimuthVariogramAngles, dipVariogramAngles, stackingAngle,
         power, direction, useTrend, relStdDev, previewSeed, simBoxThickness, truncStructureList,
         backGroundFaciesGroups, overlayFacies, overlayTruncCenter, useConstTruncParam,
-        horizonNameForVarioTrendMap, printInfo):
+        horizonNameForVariogramTrendMap, debug_level=NO_VERBOSE_DEBUG
+):
     mainFaciesTable = apsmodel.getMainFaciesTable()
     gaussFieldJobs = apsmodel.getGaussFieldJobs()
 
     # Define facies probabilities
     faciesProbObj = APSFaciesProb()
-    faciesProbObj.initialize(faciesInZone, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, printInfo)
+    faciesProbObj.initialize(
+        faciesList=faciesInZone, faciesProbList=faciesProbList, mainFaciesTable=mainFaciesTable,
+        useConstProb=useConstProb, zoneNumber=zoneNumber, debug_level=debug_level
+    )
 
     # Define gauss field models
     gaussModelList = []
     trendModelList = []
     seedPreviewList = []
     for i in range(len(gfNames)):
-        gaussModelList.append([gfNames[i], gfTypes[i], range1[i], range2[i], range3[i],
-                               azimuthVarioAngles[i], dipVarioAngles[i], power[i]])
+        gaussModelList.append([
+            gfNames[i], gfTypes[i], range1[i], range2[i], range3[i],
+            azimuthVariogramAngles[i], dipVariogramAngles[i], power[i]
+        ])
 
         # Set Gauss field trend parameters
-        trendModelObject = Trend3D_linear_model(None, printInfo, None)
-        trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], printInfo)
+        trendModelObject = Trend3D_linear_model(None, debug_level, None)
+        trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
         trendModelList.append([gfNames[i], useTrend[i], trendModelObject, relStdDev[i]])
 
         seedPreviewList.append([gfNames[i], previewSeed[i]])
 
     gaussModelObj = APSGaussModel()
     gaussModelObj.initialize(
-        zoneNumber, mainFaciesTable, gaussFieldJobs,
-        gaussModelList, trendModelList,
-        simBoxThickness, seedPreviewList, printInfo
+        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, gaussFieldJobs=gaussFieldJobs,
+        gaussModelList=gaussModelList, trendModelList=trendModelList, simBoxThickness=simBoxThickness,
+        previewSeedList=seedPreviewList, debug_level=debug_level
     )
 
     # Define truncation rule model
@@ -85,37 +91,39 @@ def addZoneParam(
     if truncType == 'Cubic':
         truncRuleObj = Trunc2D_Cubic()
         truncRuleObj.initialize(
-            mainFaciesTable, faciesInZone, truncStructureList,
-            backGroundFaciesGroups, overlayFacies, overlayTruncCenter, printInfo
+            mainFaciesTable=mainFaciesTable, faciesInZone=faciesInZone, truncStructureList=truncStructureList,
+            backGroundFaciesGroups=backGroundFaciesGroups, overlayFacies=overlayFacies,
+            overlayTruncCenter=overlayTruncCenter, debug_level=debug_level
         )
     elif truncType == 'Angle':
         truncRuleObj = Trunc2D_Angle()
         truncRuleObj.initialize(
-            mainFaciesTable, faciesInZone, truncStructureList, backGroundFaciesGroups,
-            overlayFacies, overlayTruncCenter, useConstTruncParam, printInfo
+            mainFaciesTable=mainFaciesTable, faciesInZone=faciesInZone, truncStructure=truncStructureList,
+            backGroundFaciesGroups=backGroundFaciesGroups, overlayFacies=overlayFacies,
+            overlayTruncCenter=overlayTruncCenter, useConstTruncParam=useConstTruncParam, debug_level=debug_level
         )
     else:
         raise ValueError("Invalid truncation type")
 
     # Initialize data for this zone
-    apsZoneModel = APSZoneModel()
-    apsZoneModel.initialize(
-        zoneNumber, useConstProb, simBoxThickness, horizonNameForVarioTrendMap,
-        faciesProbObj, gaussModelObj, truncRuleObj, printInfo
+    apsZoneModel = APSZoneModel(
+        zoneNumber=zoneNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
+        horizonNameForVariogramTrendMap=horizonNameForVariogramTrendMap, faciesProbObject=faciesProbObj,
+        gaussModelObject=gaussModelObj, truncRuleObject=truncRuleObj, debug_level=debug_level
     )
 
     # Add zone to APSModel
     apsmodel.addNewZone(apsZoneModel)
 
 
-def read_write_model(apsmodel, printInfo):
+def read_write_model(apsmodel, debug_level=NO_VERBOSE_DEBUG):
     outfile1 = 'testOut1.xml'
-    apsmodel.writeModel(outfile1, printInfo=printInfo)
+    apsmodel.writeModel(outfile1, debug_level=debug_level)
 
     # Read the xml file into an new APSModel object
-    apsmodel2 = APSModel(outfile1, printInfo=printInfo)
+    apsmodel2 = APSModel(outfile1, debug_level=debug_level)
     outfile2 = 'testOut2.xml'
-    apsmodel2.writeModel(outfile2, printInfo=printInfo)
+    apsmodel2.writeModel(outfile2, debug_level=debug_level)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = filecmp.cmp(outfile1, outfile2)
 
@@ -126,12 +134,12 @@ def read_write_model(apsmodel, printInfo):
     assert check is True
 
 
-def read_write_model_update(printInfo):
+def read_write_model_update(debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
     # Read the xml file into an new APSModel object
     apsmodel2 = APSModel(outfile1)
     outfile2 = 'testOut2.xml'
-    apsmodel2.writeModel(outfile2, printInfo)
+    apsmodel2.writeModel(outfile2, debug_level)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = filecmp.cmp(outfile1, outfile2)
 
@@ -159,9 +167,8 @@ def test_variogram_generation():
     apsGaussModel = APSGaussModel()
     zoneNumber = 1
     # Define main facies table
-    mainFaciesTable = APSMainFaciesTable()
-    fTable = fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
-    mainFaciesTable.initialize(fTable)
+    fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
+    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
     gfJobs = APSGaussFieldJobs()
     gfJobNames = ['Job1', 'Job2']
     gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5']]
@@ -183,30 +190,31 @@ def test_variogram_generation():
     trendModelList = [['GRF1', useTrend, trendModelObject, relStdDev]]
     simBoxThickness = 100.0
     prevSeedList = [['GRF1', 92828]]
-    printInfo = 3
+    debug_level = Debug.VERY_VERBOSE
     apsGaussModel.initialize(
-        zoneNumber, mainFaciesTable, gfJobs, gaussModelList,
-        trendModelList, simBoxThickness, prevSeedList, printInfo
+        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, gaussFieldJobs=gfJobs,
+        gaussModelList=gaussModelList, trendModelList=trendModelList, simBoxThickness=simBoxThickness,
+        previewSeedList=prevSeedList, debug_level=debug_level
     )
     gridAzimuthAngle = 0.0
     projection = 'xy'
-    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
+    apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
     projection = 'xz'
-    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
+    apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
     projection = 'yz'
-    apsGaussModel.calc2DVarioFrom3DVario(gfName, gridAzimuthAngle, projection)
+    apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
 
 
 def test_updating_model():
     # Test updating of model
     modelFile = 'testData_models/APS.xml'
-    apsmodel = APSModel(modelFile, printInfo=VERY_VERBOSE_DEBUG)
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=VERY_VERBOSE_DEBUG)
     # Do some updates of the model
     zoneNumber = 1
     zone1 = apsmodel.getZoneModel(zoneNumber)
     gaussFieldNames = zone1.getUsedGaussFieldNames()
     nGaussFields = len(gaussFieldNames)
-    varioTypeList = ['SPHERICAL', 'EXPONENTIAL', 'GAUSSIAN', 'GENERAL_EXPONENTIAL', 'SPHERICAL']
+    variogramTypeList = ['SPHERICAL', 'EXPONENTIAL', 'GAUSSIAN', 'GENERAL_EXPONENTIAL', 'SPHERICAL']
     mainRangeList = [1234.0, 5432.0, 1200.0, 1300.0, 2150.0]
     perpRangeList = [123.0, 543.0, 120.0, 130.0, 215.0]
     vertRangeList = [1.0, 5.0, 1.2, 1.3, 2.15]
@@ -217,12 +225,12 @@ def test_updating_model():
         gfName = gaussFieldNames[i]
         print('Update zone ' + str(zoneNumber) + ' and gauss field ' + gfName)
 
-        varioType = zone1.getVarioType(gfName)
-        print('Original varioType: ' + varioType)
-        varioType = varioTypeList[i]
-        zone1.setVarioType(gfName, varioType)
-        varioType1 = zone1.getVarioType(gfName)
-        print('New varioType     : ' + varioType1)
+        variogramType = zone1.getVariogramType(gfName)
+        print('Original variogramType: ' + variogramType)
+        variogramType = variogramTypeList[i]
+        zone1.setVariogramType(gfName, variogramType)
+        variogramType1 = zone1.getVariogramType(gfName)
+        print('New variogramType     : ' + variogramType1)
 
         mainRange = zone1.getMainRange(gfName)
         print('Original MainRange: ' + str(mainRange))
@@ -259,7 +267,7 @@ def test_updating_model():
         dip1 = zone1.getAnisotropyDipAngle(gfName)
         print('New dip angle: ' + str(dip1))
 
-        if varioType == 'GENERAL_EXPONENTIAL':
+        if variogramType == 'GENERAL_EXPONENTIAL':
             power = zone1.getPower(gfName)
             print('Original exponent: ' + str(power))
             power = powerList[i]
@@ -281,184 +289,227 @@ def test_updating_model():
 def test_case_2():
     print('')
     print('**** Case number: 2 ****')
-    # Global facies table, zone facies and facies probabilities
+
+    #  --- Zone 1 ---
+    test_case_2_zone_1()
+
+    #  --- Zone 2 ---
+    test_case_2_zone_2()
+
+
+def test_case_2_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
         apsmodel, RMS_PROJECT, RMS_WORKFLOW, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME,
         ZONE_PARAM_NAME, FACIES_REAL_PARAM_NAME_RESULT, fTable, VERY_VERBOSE_DEBUG
     )
-    #  --- Zone 1 ---
-    zoneNumber = 1
-    horizonNameForVarioTrendMap = 'zone_1'
-    simBoxThickness = 4.0
-    # Facies prob for zone
-    faciesInZone = ['F1', 'F2', 'F5', 'F7']
-    useConstProb = 1
-    faciesProbList = [0.4, 0.5, 0.03, 0.07]
-    # Gauss field parameters. One entry in list for each gauss field
-    gfNames = ['GRF6', 'GRF7', 'GRF8', 'GRF9']
-    gfTypes = ['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL']
-    range1 = [3000.0, 1500.0, 2500.0, 750.0]
-    range2 = [1400.0, 750.0, 800.0, 5200.0]
-    range3 = [2.0, 1.0, 4.0, 120.0]
-    azimuthVarioAngles = [35.0, 125.0, 95.0, 323.0]
-    dipVarioAngles = [0.01, 0.0, 0.0, 0.02]
-    power = [1.8, 1.0, 1.0, 1.95]
-    # Trend parameters. One entry in list for each gauss field
-    useTrend = [1, 0, 0, 0]
-    relStdDev = [0.05, 0, 0, 0]
-    azimuthAngle = [125.0, 0.0, 0.0, 0.0]
-    stackingAngle = [0.1, 0.0, 0.0, 0.0]
-    direction = [1, 1, 1, 1]
-    previewSeed = [9282727, 96785, 88760019, 8156827]
-    # Truncation rule
-    truncType = 'Cubic'
-    truncStructureList = ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]]
-    overlayFacies = ['F5', 'F7']
-    backGroundFaciesGroups = [['F1'], ['F2']]
-    overlayTruncCenter = [0.0, 0.8]
-    useConstTruncParam = 1
-    addZoneParam(
-        apsmodel, truncType, faciesInZone, faciesProbList, useConstProb, zoneNumber, gfNames,
-        gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
-        stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
-        truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
-    )
-    #  --- Zone 2 ---
-    zoneNumber = 2
-    horizonNameForVarioTrendMap = 'zone_2'
-    simBoxThickness = 12.0
-    # Facies prob for zone
-    faciesInZone = ['F3', 'F1', 'F2', 'F5', 'F6', 'F7']
-    useConstProb = 0
-    faciesProbList = ['F3_prob', 'F1_prob', 'F2_prob', 'F5_prob', 'F6_prob', 'F7_prob']
-    gfNames = ['GRF6', 'GRF7', 'GRF8', 'GRF9']
-    gfTypes = ['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL']
-    range1 = [2000.0, 2500.0, 1500.0, 1750.0]
-    range2 = [1400.0, 750.0, 800.0, 5200.0]
-    range3 = [2.0, 1.0, 4.0, 120.0]
-    azimuthVarioAngles = [135.0, 25.0, 75.0, 23.0]
-    dipVarioAngles = [0.0, 0.0, 0.01, 0.02]
-    power = [1.8, 1.0, 1.0, 1.95]
-    # Trend parameters. One entry in list for each gauss field
-    useTrend = [1, 0, 1, 0]
-    relStdDev = [0.05, 0, 0.03, 0]
-    azimuthAngle = [125.0, 0.0, 90.0, 0.0]
-    stackingAngle = [0.1, 0.0, 0.01, 0.0]
-    direction = [1, 1, -1, 1]
-    previewSeed = [9282727, 96785, 88760019, 8156827]
-    # Truncation rule
-    truncType = 'Angle'
-    truncStructureList = [['F1', 0.0, 1.0], ['F3', 45.0, 1.0], ['F2', -35.0, 1.0], ['F5', 145.0, 1.0]]
-    overlayFacies = ['F6', 'F7']
-    backGroundFaciesGroups = [['F1', 'F3'], ['F2', 'F5']]
-    overlayTruncCenter = [0.5, 0.7]
-    useConstTruncParam = 1
-    addZoneParam(
-        apsmodel, truncType, faciesInZone, faciesProbList, useConstProb, zoneNumber, gfNames,
-        gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
-        stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
-        truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
-    )
+
+    add_zone_1_for_case_2(apsmodel)
+    add_zone_2_for_case_2(apsmodel)
     selectedZones = [1, 2]
     apsmodel.setSelectedZoneNumberList(selectedZones)
     apsmodel.setPreviewZoneNumber(1)
     read_write_model(apsmodel, VERY_VERBOSE_DEBUG)
 
 
-def test_case_1():
-    print('')
-    print('**** Case number: 1 ****')
-    # Global facies table, zone facies and facies probabilities
-    fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
+def add_zone_2_for_case_2(apsmodel):
+    addZoneParam(
+        apsmodel=apsmodel,
+        zoneNumber=2,
+        horizonNameForVariogramTrendMap='zone_2',
+        simBoxThickness=12.0,
+        # Facies prob for zone
+        faciesInZone=['F3', 'F1', 'F2', 'F5', 'F6', 'F7'],
+        useConstProb=0,
+        faciesProbList=['F3_prob', 'F1_prob', 'F2_prob', 'F5_prob', 'F6_prob', 'F7_prob'],
+        # Gauss field parameters. One entry in list for each gauss field
+        gfNames=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL'],
+        range1=[2000.0, 2500.0, 1500.0, 1750.0],
+        range2=[1400.0, 750.0, 800.0, 5200.0],
+        range3=[2.0, 1.0, 4.0, 120.0],
+        azimuthVariogramAngles=[135.0, 25.0, 75.0, 23.0],
+        dipVariogramAngles=[0.0, 0.0, 0.01, 0.02],
+        power=[1.8, 1.0, 1.0, 1.95],
+        # Trend parameters. One entry in list for each gauss field
+        useTrend=[1, 0, 1, 0],
+        relStdDev=[0.05, 0, 0.03, 0],
+        azimuthAngle=[125.0, 0.0, 90.0, 0.0],
+        stackingAngle=[0.1, 0.0, 0.01, 0.0],
+        direction=[1, 1, -1, 1],
+        previewSeed=[9282727, 96785, 88760019, 8156827],
+        # Truncation rule
+        truncType='Angle',
+        truncStructureList=[['F1', 0.0, 1.0], ['F3', 45.0, 1.0], ['F2', -35.0, 1.0], ['F5', 145.0, 1.0]],
+        overlayFacies=['F6', 'F7'],
+        backGroundFaciesGroups=[['F1', 'F3'], ['F2', 'F5']],
+        overlayTruncCenter=[0.5, 0.7],
+        useConstTruncParam=1,
+        debug_level=NO_VERBOSE_DEBUG
+    )
+
+
+def test_case_2_zone_1():
+    fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
         apsmodel, RMS_PROJECT, RMS_WORKFLOW, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME,
         ZONE_PARAM_NAME, FACIES_REAL_PARAM_NAME_RESULT, fTable, VERY_VERBOSE_DEBUG
     )
+
+    add_zone_1_for_case_2(apsmodel)
+
+
+def add_zone_1_for_case_2(apsmodel):
+    addZoneParam(
+        apsmodel=apsmodel,
+        zoneNumber=1,
+        horizonNameForVariogramTrendMap='zone_1',
+        simBoxThickness=4.0,
+        # Facies prob for zone
+        faciesInZone=['F1', 'F2', 'F5', 'F7'],
+        useConstProb=1,
+        faciesProbList=[0.4, 0.5, 0.03, 0.07],
+        # Gauss field parameters. One entry in list for each gauss field
+        gfNames=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL'],
+        range1=[3000.0, 1500.0, 2500.0, 750.0],
+        range2=[1400.0, 750.0, 800.0, 5200.0],
+        range3=[2.0, 1.0, 4.0, 120.0],
+        azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
+        dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
+        power=[1.8, 1.0, 1.0, 1.95],
+        # Trend parameters. One entry in list for each gauss field
+        useTrend=[1, 0, 0, 0],
+        relStdDev=[0.05, 0, 0, 0],
+        azimuthAngle=[125.0, 0.0, 0.0, 0.0],
+        stackingAngle=[0.1, 0.0, 0.0, 0.0],
+        direction=[1, 1, 1, 1],
+        previewSeed=[9282727, 96785, 88760019, 8156827],
+        # Truncation rule
+        truncType='Cubic',
+        truncStructureList=['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
+        overlayFacies=['F5', 'F7'],
+        backGroundFaciesGroups=[['F1'], ['F2']],
+        overlayTruncCenter=[0.0, 0.8],
+        useConstTruncParam=1,
+        debug_level=NO_VERBOSE_DEBUG
+    )
+
+
+def test_case_1():
+    print('')
+    print('**** Case number: 1 ****')
+
     #  --- Zone 1 ---
-    zoneNumber = 1
-    horizonNameForVarioTrendMap = 'zone_1'
-    simBoxThickness = 4.0
-    # Facies prob for zone
-    faciesInZone = ['F1', 'F2']
-    useConstProb = 1
-    faciesProbList = [0.4, 0.6]
-    # Gauss field parameters. One entry in list for each gauss field
-    gfNames = ['GRF1', 'GRF2']
-    gfTypes = ['GENERAL_EXPONENTIAL', 'SPHERICAL']
-    range1 = [2000.0, 1500.0]
-    range2 = [1400.0, 750.0]
-    range3 = [2.0, 1.0]
-    azimuthVarioAngles = [35.0, 125.0]
-    dipVarioAngles = [0.0, 0.1]
-    power = [1.8, 1.0]
-    # Trend parameters. One entry in list for each gauss field
-    useTrend = [1, 0]
-    relStdDev = [0.05, 0]
-    azimuthAngle = [125.0, 0.0]
-    stackingAngle = [0.1, 0.0]
-    direction = [1, 1]
-    previewSeed = [9282727, 96785]
-    # Truncation rule
-    truncType = 'Cubic'
-    truncStructureList = ['V', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]]
-    overlayFacies = []
-    backGroundFaciesGroups = []
-    overlayTruncCenter = []
-    useConstTruncParam = 1
-    addZoneParam(
-        apsmodel, truncType, faciesInZone, faciesProbList, useConstProb, zoneNumber, gfNames,
-        gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
-        stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
-        truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
-    )
+    test_case_1_zone_1()
+
     #  --- Zone 2 ---
-    zoneNumber = 2
-    horizonNameForVarioTrendMap = 'zone_2'
-    simBoxThickness = 12.0
-    # Facies prob for zone
-    faciesInZone = ['F3', 'F1', 'F2']
-    useConstProb = 0
-    faciesProbList = ['F3_prob', 'F1_prob', 'F2_prob']
-    # Gauss field parameters. One entry in list for each gauss field
-    gfNames = ['GRF3', 'GRF4', 'GRF5']
-    gfTypes = ['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL']
-    range1 = [2000.0, 1500.0, 6000.0]
-    range2 = [1400.0, 750.0, 250.0]
-    range3 = [2.0, 1.0, 4.5]
-    azimuthVarioAngles = [35.0, 125.0, 315.0]
-    dipVarioAngles = [0.01, 0.0, 0.0]
-    power = [1.8, 1.0, 1.0]
-    # Trend parameters. One entry in list for each gauss field
-    useTrend = [0, 1, 0]
-    relStdDev = [0, 0.05, 0]
-    azimuthAngle = [0.0, 125.0, 0.0]
-    stackingAngle = [0.0, 0.1, 0.0]
-    direction = [1, -1, 1]
-    previewSeed = [8727, 977727, 776785]
-    # Truncation rule
-    truncType = 'Angle'
-    truncStructureList = [['F1', 0.0, 1.0], ['F3', 45.0, 1.0]]
-    overlayFacies = ['F2']
-    backGroundFaciesGroups = [['F1', 'F3']]
-    overlayTruncCenter = [0.5]
-    useConstTruncParam = 1
-    addZoneParam(
-        apsmodel, truncType, faciesInZone, faciesProbList, useConstProb, zoneNumber, gfNames,
-        gfTypes, range1, range2, range3, azimuthAngle, azimuthVarioAngles, dipVarioAngles,
-        stackingAngle, power, direction, useTrend, relStdDev, previewSeed, simBoxThickness,
-        truncStructureList, backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-        useConstTruncParam, horizonNameForVarioTrendMap, VERY_VERBOSE_DEBUG
+    test_case_1_zone_2()
+
+
+def test_case_1_zone_2():
+    fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
+    apsmodel = APSModel()
+    defineCommonModelParam(
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=VERY_VERBOSE_DEBUG
     )
+
+    add_zone_1_for_case_1(apsmodel)
+    add_zone_2_for_case_1(apsmodel)
     selectedZones = [1, 2]
     apsmodel.setSelectedZoneNumberList(selectedZones)
     apsmodel.setPreviewZoneNumber(1)
     read_write_model(apsmodel, VERY_VERBOSE_DEBUG)
+
+
+def add_zone_2_for_case_1(apsmodel):
+    addZoneParam(
+        apsmodel=apsmodel,
+        zoneNumber=2,
+        horizonNameForVariogramTrendMap='zone_2',
+        simBoxThickness=12.0,
+        # Facies prob for zone
+        faciesInZone=['F3', 'F1', 'F2'],
+        useConstProb=0,
+        faciesProbList=['F3_prob', 'F1_prob', 'F2_prob'],
+        # Gauss field parameters. One entry in list for each gauss field
+        gfNames=['GRF3', 'GRF4', 'GRF5'],
+        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL'],
+        range1=[2000.0, 1500.0, 6000.0],
+        range2=[1400.0, 750.0, 250.0],
+        range3=[2.0, 1.0, 4.5],
+        azimuthVariogramAngles=[35.0, 125.0, 315.0],
+        dipVariogramAngles=[0.01, 0.0, 0.0],
+        power=[1.8, 1.0, 1.0],
+        # Trend parameters. One entry in list for each gauss field
+        useTrend=[0, 1, 0],
+        relStdDev=[0, 0.05, 0],
+        azimuthAngle=[0.0, 125.0, 0.0],
+        stackingAngle=[0.0, 0.1, 0.0],
+        direction=[1, -1, 1],
+        previewSeed=[8727, 977727, 776785],
+        # Truncation rule
+        truncType='Angle',
+        truncStructureList=[['F1', 0.0, 1.0], ['F3', 45.0, 1.0]],
+        overlayFacies=['F2'],
+        backGroundFaciesGroups=[['F1', 'F3']],
+        overlayTruncCenter=[0.5],
+        useConstTruncParam=1,
+        debug_level=NO_VERBOSE_DEBUG
+    )
+
+
+def test_case_1_zone_1():
+    fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
+    apsmodel = APSModel()
+    defineCommonModelParam(
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=VERY_VERBOSE_DEBUG
+    )
+
+    add_zone_1_for_case_1(apsmodel)
+
+
+def add_zone_1_for_case_1(apsmodel):
+    addZoneParam(
+        apsmodel=apsmodel,
+        zoneNumber=1,
+        horizonNameForVariogramTrendMap='zone_1',
+        simBoxThickness=4.0,
+        # Facies prob for zone
+        faciesInZone=['F1', 'F2'],
+        useConstProb=1,
+        faciesProbList=[0.4, 0.6],
+        # Gauss field parameters. One entry in list for each gauss field
+        gfNames=['GRF1', 'GRF2'],
+        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL'],
+        range1=[2000.0, 1500.0],
+        range2=[1400.0, 750.0],
+        range3=[2.0, 1.0],
+        azimuthVariogramAngles=[35.0, 125.0],
+        dipVariogramAngles=[0.0, 0.1],
+        power=[1.8, 1.0],
+        # Trend parameters. One entry in list for each gauss field
+        useTrend=[1, 0],
+        relStdDev=[0.05, 0],
+        azimuthAngle=[125.0, 0.0],
+        stackingAngle=[0.1, 0.0],
+        direction=[1, 1],
+        previewSeed=[9282727, 96785],
+        # Truncation rule
+        truncType='Cubic',
+        truncStructureList=['V', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
+        overlayFacies=[],
+        backGroundFaciesGroups=[],
+        overlayTruncCenter=[],
+        useConstTruncParam=1,
+        debug_level=NO_VERBOSE_DEBUG
+    )
 
 
 if __name__ == '__main__':

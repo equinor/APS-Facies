@@ -3,6 +3,7 @@ from xml.etree.ElementTree import Element
 
 import copy
 
+from src.utils.constants import Debug
 from src.utils.methods import isNumber
 from src.xmlFunctions import getKeyword, getTextCommand
 
@@ -21,7 +22,7 @@ class APSFaciesProb:
 
     Constructor:
         def __init__(self, ET_Tree_zone=None, mainFaciesTable= None,modelFileName=None,
-                     printInfo=0,useConstProb=0,zoneNumber=0)
+                     debug_level=Debug.OFF,useConstProb=0,zoneNumber=0)
     Public functions:
         def getAllProbParamForZone(self)
         def getConstProbValue(self,fName)
@@ -41,11 +42,11 @@ class APSFaciesProb:
     """
 
     def __setEmpty(self):
-        self.__className = 'APSFaciesProb'
+        self.__className = self.__class__.__name__
         self.__faciesProbForZoneModel = []
         self.__faciesInZoneModel = []
         self.__useConstProb = 0
-        self.__printInfo = 0
+        self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
         self.__zoneNumber = 0
 
@@ -53,27 +54,27 @@ class APSFaciesProb:
         self.__FPROB = 1
 
     def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
-                 printInfo=0, useConstProb=0, zoneNumber=0):
+                 debug_level=Debug.OFF, useConstProb=0, zoneNumber=0):
 
         self.__setEmpty()
 
         if ET_Tree_zone is not None:
             self.__useConstProb = useConstProb
-            self.__printInfo = printInfo
+            self.__debug_level = debug_level
             self.__mainFaciesTable = mainFaciesTable
             self.__zoneNumber = zoneNumber
 
             # Get data from xml tree
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Call init ' + self.__className + ' and read from xml file')
             self.__interpretXMLTree(ET_Tree_zone, modelFileName)
 
             # End __init__
 
     def __interpretXMLTree(self, ET_Tree_zone, modelFileName):
-        assert self.__mainFaciesTable != None
-        assert modelFileName != None
-        assert ET_Tree_zone != None
+        assert self.__mainFaciesTable is not None
+        assert modelFileName is not None
+        assert ET_Tree_zone is not None
 
         self.__faciesProbForZoneModel = []
         self.__faciesInZoneModel = []
@@ -133,18 +134,18 @@ class APSFaciesProb:
 
         self.__checkConstProbValuesAndNormalize(self.__zoneNumber)
 
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: From ' + self.__className + ': Facies prob for current zone model: ')
             print(repr(self.__faciesProbForZoneModel))
 
-    def initialize(self, faciesList, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, printInfo):
-        if printInfo >= 3:
+    def initialize(self, faciesList, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, debug_level=Debug.OFF):
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
         self.__setEmpty()
         self.__useConstProb = useConstProb
         self.__zoneNumber = zoneNumber
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
         self.__mainFaciesTable = mainFaciesTable
         self.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
@@ -292,7 +293,7 @@ class APSFaciesProb:
             return copy.copy(probCubeName)
 
     def XMLAddElement(self, parent):
-        if self.__printInfo >= 3:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         # Add command FaciesProbForModel

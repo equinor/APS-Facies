@@ -1,11 +1,12 @@
 #!/bin/env python
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 import math
-from _ast import List
+from typing import List
 
 import numpy as np
 
 import src.generalFunctionsUsingRoxAPI as gr
+from src.utils.constants import Debug
 
 
 class Trend3D_linear:
@@ -13,7 +14,7 @@ class Trend3D_linear:
     Description: Calculate linear 3D trend for specified grid cells.
     """
 
-    def __init__(self, trendRuleModel, printInfo=0):
+    def __init__(self, trendRuleModel, debug_level=Debug.OFF):
         """
         Description: Create a trend object which is used to create 3D trends using ROXAPI. 
                      Input is model parameters.
@@ -27,7 +28,7 @@ class Trend3D_linear:
         self.__azimuth = trendRuleModel.getAzimuth()
         self.__stackingAngle = trendRuleModel.getStackingAngle()
         self.__direction = trendRuleModel.getStackingDirection()
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
 
     def createTrend(self,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness):
@@ -43,7 +44,7 @@ class Trend3D_linear:
             grid3D = gridModel.get_grid(realNumber)
             gridIndexer = grid3D.simbox_indexer
             (nx, ny, nz) = gridIndexer.dimensions
-            [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__printInfo)
+            [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__debug_level)
 
             cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
             cellIndices = gridIndexer.get_indices(cellIndexDefined)
@@ -57,7 +58,7 @@ class Trend3D_linear:
                     n += 1
             nLayersInZone = n
             zinc = simBoxThickness / nLayersInZone
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: In ' + self.__className)
                 print('Debug output:  Zone name: ' + zoneName)
                 print('Debug output:  SimboxThickness: ' + str(simBoxThickness))
@@ -83,7 +84,7 @@ class Trend3D_linear:
             yComponent = math.cos(alpha) * math.cos(theta)
             zComponent = math.sin(alpha)
 
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: In ' + self.__className)
                 print(
                     'Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(zComponent) + ')'

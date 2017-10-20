@@ -10,6 +10,8 @@ from src import (
     Trend3D_linear_model_xml, Trunc2D_Angle_Overlay_xml, Trunc2D_Cubic_Overlay_xml, Trunc3D_bayfill_xml
 )
 
+from src.utils.constants import Debug
+
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(APSMainFaciesTable)
@@ -29,8 +31,8 @@ apsmodel.setGaussFieldScriptName('MakeGaussFields.ipl')
 apsmodel.setRmsGridModelName('APS_NESLEN_ODM')
 apsmodel.setRmsZoneParamName('Zone')
 apsmodel.setRmsResultFaciesParamName('FaciesReal')
-printInfo = 3
-apsmodel.setPrintInfo(printInfo)
+debug_level = Debug.VERY_VERBOSE
+apsmodel.set_debug_level(debug_level)
 
 mainFaciesTable = APSMainFaciesTable.APSMainFaciesTable()
 mainFaciesTable.addFacies('F1', 1)
@@ -85,7 +87,7 @@ if err:
 
 # Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_1'
-zoneObject.setHorizonNameForVarioTrendMap(hName)
+zoneObject.setHorizonNameForVariogramTrendMap(hName)
 
 # Set facies with associated probabilities for the zone
 # faciesList = ['F1','F2','F3','F4','F5','F7']
@@ -99,7 +101,7 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF3'
-varioType = 'SPHERICAL'
+variogramType = 'SPHERICAL'
 range1 = 5500.0
 range2 = 5000.0
 range3 = 2.0
@@ -107,13 +109,13 @@ angle = 35.0
 power = 0
 
 # Set Gauss field trend parameters
-trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, debug_level, None)
 azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = 1
 relStdDev = 0.01
-trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power,
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power,
                                        relStdDev, trendModelObject)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
@@ -128,13 +130,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF4'
-varioType = 'SPHERICAL'
+variogramType = 'SPHERICAL'
 range1 = 5500.0
 range2 = 1500.0
 range3 = 2.0
 angle = 35.0
 power = 0.0
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -148,13 +150,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF5'
-varioType = 'GENERAL_EXPONENTIAL'
+variogramType = 'GENERAL_EXPONENTIAL'
 range1 = 6000.0
 range2 = 1300.0
 range3 = 2.0
 angle = 125.0
 power = 1.8
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -177,8 +179,10 @@ overlayTruncCenter = 0.0
 faciesInTruncRule = ['F1', 'F2', 'F3', 'F4']
 defineTruncStructureObject = DefineTruncStructure.DefineCubicTruncStructure()
 truncStructure = defineTruncStructureObject.getTruncStructure(faciesInTruncRule, truncName)
-truncRuleObject.initialize(mainFaciesTable, faciesList, truncStructure,
-                           backgroundFacies, overlayFacies, overlayTruncCenter, printInfo)
+truncRuleObject.initialize(
+    mainFaciesTable, faciesList, truncStructure,
+    backgroundFacies, overlayFacies, overlayTruncCenter, debug_level
+)
 
 zoneObject.setTruncRule(truncRuleObject)
 
@@ -207,18 +211,20 @@ for i in modelNumbers:
     faciesInTruncRule = ['F1', 'F2', 'F3', 'F4']
     #   defineTruncStructureObject = DefineTruncStructure.DefineCubicTruncStructure()
     truncStructure = defineTruncStructureObject.getTruncStructure(faciesInTruncRule, truncName)
-    truncRuleObject.initialize(mainFaciesTable, faciesList, truncStructure,
-                               backgroundFacies, overlayFacies, overlayTruncCenter, printInfo)
+    truncRuleObject.initialize(
+        mainFaciesTable, faciesList, truncStructure,
+        backgroundFacies, overlayFacies, overlayTruncCenter, debug_level
+)
     # Set new truncation rule
     zoneObject.setTruncRule(truncRuleObject)
 
    # outfile = 'testOut'+'_' + str(i) + '.xml'
-   #apsmodel.writeModel(outfile,printInfo)
+   #apsmodel.writeModel(outfile, debug_level)
 
    # Read the xml file into an new APSModel object
    # apsmodel2 = APSModel.APSModel(outfile)
    # outfile2 = 'testOut2'+'_' + str(i) + '.xml'
-   # apsmodel2.writeModel(outfile2,printInfo)
+   # apsmodel2.writeModel(outfile2, debug_level)
 
 
 # ------- Zone 2 --------------------------        
@@ -244,7 +250,7 @@ if err:
 
 # Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_2'
-zoneObject.setHorizonNameForVarioTrendMap(hName)
+zoneObject.setHorizonNameForVariogramTrendMap(hName)
 
 # Set facies with associated probabilities for the zone
 faciesList = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8']
@@ -256,7 +262,7 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF1'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 500.0
 range3 = 2.0
@@ -264,13 +270,13 @@ angle = 35.0
 power = 0
 
 # Set Gauss field trend parameters
-trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, debug_level, None)
 azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
@@ -285,13 +291,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF2'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 1000.0
 range3 = 2.0
 angle = 35.0
 power = 0.0
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -305,13 +311,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF3'
-varioType = 'GENERAL_EXPONENTIAL'
+variogramType = 'GENERAL_EXPONENTIAL'
 range1 = 3000.0
 range2 = 500.0
 range3 = 2.0
 angle = 35.0
 power = 1.8
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -333,7 +339,7 @@ truncStructure = [['F2', '0.0', 0.5], ['F1', '90.0', 1.0], ['F3', '45.0', 1.0],
                   ['F7', '-180.0', 1.0], ['F8', '-90.0', 1.0], ['F6', '-45.0', 0.4]]
 truncRuleObject.initialize(mainFaciesTable, faciesList, truncStructure,
                            backgroundFacies, overlayFacies, overlayTruncCenter,
-                           useConstTruncParam, printInfo)
+                           useConstTruncParam, debug_level)
 
 zoneObject.setTruncRule(truncRuleObject)
 
@@ -389,7 +395,7 @@ if err:
 
 # Set horizon name under which the variogram azimuth trend map is located
 hName = 'top_middle_Neslen_3'
-zoneObject.setHorizonNameForVarioTrendMap(hName)
+zoneObject.setHorizonNameForVariogramTrendMap(hName)
 
 # Set facies with associated probabilities for the zone
 faciesList = ['F1', 'F2', 'F3', 'F4', 'F5']
@@ -401,7 +407,7 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF1'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 500.0
 range3 = 2.0
@@ -409,13 +415,13 @@ angle = 35.0
 power = 0
 
 # Set Gauss field trend parameters
-trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, printInfo, None)
+trendModelObject = Trend3D_linear_model_xml.Trend3D_linear_model(None, debug_level, None)
 azimuthAngle = 125.0
 stackingAngle = 0.1
 direction = -1
 relStdDev = 0.02
-trendModelObject.initialize(azimuthAngle, stackingAngle, direction, printInfo)
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3,
+trendModelObject.initialize(azimuthAngle, stackingAngle, direction, debug_level)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3,
                                        angle, power, relStdDev, trendModelObject)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
@@ -430,13 +436,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF2'
-varioType = 'EXPONENTIAL'
+variogramType = 'EXPONENTIAL'
 range1 = 1000.0
 range2 = 1000.0
 range3 = 2.0
 angle = 35.0
 power = 0.0
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -450,13 +456,13 @@ if err:
 
 # Set Gauss field with parameters
 gfName = 'GF3'
-varioType = 'GENERAL_EXPONENTIAL'
+variogramType = 'GENERAL_EXPONENTIAL'
 range1 = 3000.0
 range2 = 500.0
 range3 = 2.0
 angle = 35.0
 power = 1.8
-err = zoneObject.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
+err = zoneObject.updateGaussFieldParam(gfName, variogramType, range1, range2, range3, angle, power)
 if err:
     print('Error in zoneObject.updateGaussFieldParam')
     sys.exit()
@@ -493,7 +499,7 @@ for i in range(4):
     sbhd = 0.6
     truncRuleObject.initialize(mainFaciesTable, faciesList, faciesInTruncRule,
                                sf_value, sf_name, ysf, sbhd,
-                               useConstTruncParam, printInfo)
+                               useConstTruncParam, debug_level)
 
     zoneObject.setTruncRule(truncRuleObject)
     if i == 0:
@@ -507,11 +513,11 @@ for i in range(4):
     else:
         name = 'B' + str(i)
     outfile = 'testOut' + '_' + name + '.xml'
-    apsmodel.writeModel(outfile, printInfo)
+    apsmodel.writeModel(outfile, debug_level)
 
 # Read the xml file into an new APSModel object
 # apsmodel2 = APSModel.APSModel(outfile)
 # outfile2 = 'testOut2.xml'
-# apsmodel2.writeModel(outfile2,printInfo)
+# apsmodel2.writeModel(outfile2, debug_level)
 
 print('Finished')
