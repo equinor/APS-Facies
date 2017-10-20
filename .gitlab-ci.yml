@@ -1,21 +1,19 @@
+image:
+  name: "git.statoil.no:4567/aps/gui:1.7.2"
+
 variables:
   GIT_STRATEGY: "fetch"
   HTTP_PROXY:   "http://www-proxy.statoil.no:80"
   HTTPS_PROXY:  "http://www-proxy.statoil.no:80"
   FTP_PROXY:    "http://www-proxy.statoil.no:80"
   NO_PROXY:     "git.statoil.no"
-  CODE_DIR:     "/code"
-  ARTIFACTS:    "artifacts"
-  IMAGE_NAME:   "aps-gui:1.7.1"  # May be removed when using the latest version
-  DOCKER:       "docker run -v $CI_PROJECT_DIR:$CODE_DIR -i $IMAGE_NAME"
-  DOCKER_BIN:   "docker run -v $CI_PROJECT_DIR:$CODE_DIR -v $CI_PROJECT_DIR/$ARTIFACTS:/$ARTIFACTS -i $IMAGE_NAME"
+  CODE_DIR:     "$CI_PROJECT_DIR"
+  ARTIFACTS:    "$CODE_DIR/artifacts"
   MAKE:         "make --makefile=$CODE_DIR/Makefile"
   RUN:          "/bin/bash -c"
   GUI_FILE:     "app"
 
-
 stages:
-  - build docker image
   - check requirements
   - testing
   - doc-tests  # https://docs.python.org/3/library/doctest.html
@@ -28,7 +26,7 @@ stages:
 make documentation:
   stage: generate documentation
   script:  # https://www.logilab.org/blogentry/6883
-    - 'eval $DOCKER $MAKE uml-diagrams'
+    - 'eval $MAKE uml-diagrams'
     - 'eval mkdir -p $CI_PROJECT_DIR/uml-diagrams'
     - 'eval mv $CI_PROJECT_DIR/classes_APS-GUI.png $CI_PROJECT_DIR/uml-diagrams'
   artifacts:
@@ -36,35 +34,34 @@ make documentation:
     paths:
       - uml-diagrams/
 
-
 check for vulnerabilities:
   stage: check requirements
   script:
-    - 'eval $DOCKER $MAKE safety-check'
+    - 'eval $MAKE safety-check'
 
 check for outdated requirements:
   stage: check requirements
   script:
-    - 'eval $DOCKER $MAKE check-requirements'
+    - 'eval $MAKE check-requirements'
 
 linting:
   stage: testing
   script:
-    - 'eval $DOCKER $MAKE linting'
+    - 'eval $MAKE linting'
   allow_failure: true
 
 unit testing:
   stage: testing  # https://github.com/ksator/continuous-integration-with-python
   script:
-    - 'eval $DOCKER $MAKE unit-tests'
+    - 'eval $MAKE unit-tests'
 
 build GUI:
   stage: build gui
   script:
-    - 'eval mkdir -p $CI_PROJECT_DIR/$ARTIFACTS'
-    - 'eval $DOCKER $MAKE build'
-    - 'eval mv $CI_PROJECT_DIR/$GUI_FILE $CI_PROJECT_DIR/$ARTIFACTS'
-    - 'eval du -sh $CI_PROJECT_DIR/$ARTIFACTS'
+    - 'eval mkdir -p $ARTIFACTS'
+    - 'eval $MAKE build'
+    - 'eval mv $CI_PROJECT_DIR/$GUI_FILE $ARTIFACTS'
+    - 'eval du -sh $ARTIFACTS'
   artifacts:
     expire_in: 1 week
     paths:
@@ -73,17 +70,10 @@ build GUI:
 start GUI:
   stage: test gui
   script:
-    - 'eval $DOCKER_BIN /$ARTIFACTS/$GUI_FILE --help'
-#    - 'eval $CI_PROJECT_DIR/$ARTIFACTS/$GUI_FILE --version'
+    - 'eval $ARTIFACTS/$GUI_FILE --help'
+    - 'eval $ARTIFACTS/$GUI_FILE --version'
   dependencies:
     - build GUI
-
-build docker image:
-  stage: build docker image
-  script:
-    - make docker-image
-  tags:
-    - docker
 
 deploy:
   stage: deploy
@@ -92,14 +82,3 @@ deploy:
   only:
    - master
 
-clean docker:
-  stage: clean docker
-  script:
-    - 'eval docker rmi $(docker images -f dangling=true -q) || echo "No dangling images to delete."'
-    - 'eval docker rm $(docker ps -aq) || echo "No images to be deleted"'
-  allow_failure: true
-
-#cache:
-#  paths:
-#    - gcc-*
-#    - qt-*
