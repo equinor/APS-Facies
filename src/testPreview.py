@@ -32,33 +32,22 @@ importlib.reload(Trunc3D_bayfill_xml)
 importlib.reload(Trend3D_linear_model_xml)
 
 
-def defineColors(nFacies):
-    # --- Colormaps from a list ---
-    colors = []
-    if nFacies == 2:
-        colors = ['lawngreen', 'grey']
-    elif nFacies == 3:
-        colors = ['lawngreen', 'grey', 'dodgerblue']
-    elif nFacies == 4:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold']
-    elif nFacies == 5:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid']
-    elif nFacies == 6:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan']
-    elif nFacies == 7:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick']
-    elif nFacies == 8:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab']
-    elif nFacies == 9:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue']
-    elif nFacies == 10:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson']
-    elif nFacies == 11:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange']
-    elif nFacies == 12:
-        colors = ['lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick', 'olivedrab', 'blue', 'crimson', 'darkorange', 'red']
-    return colors
+def defineColors(nFacies: int) -> List[str]:
+    """
 
+    :param nFacies:
+    :type nFacies:
+    :return:
+    :rtype:
+    """
+    colors = [
+        'lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick',
+        'olivedrab', 'blue', 'crimson', 'darkorange', 'red'
+    ]
+    if 2 <= nFacies <= len(colors):
+        return colors[:nFacies]
+    else:
+        return []
 
 def set2DGridDimension(nx, ny, nz, previewCrossSectionType, previewLX, previewLY, previewLZ, previewScale=0, debug_level=Debug.OFF):
     MIN_NZ = 100
@@ -87,10 +76,10 @@ def set2DGridDimension(nx, ny, nz, previewCrossSectionType, previewLX, previewLY
 
         if dx < dy:
             dy = dx
-            nyPreview = int(previewLY / dy)+1
+            nyPreview = int(previewLY / dy) + 1
         else:
             dx = dy
-            nxPreview = int(previewLX / dx)+1
+            nxPreview = int(previewLX / dx) + 1
     else:
         if nx > MAX_NX:
             nx = MAX_NX
@@ -101,13 +90,13 @@ def set2DGridDimension(nx, ny, nz, previewCrossSectionType, previewLX, previewLY
 
         if dx < dy:
             dx = dy
-            nxPreview = int(previewLX / dx)+1
+            nxPreview = int(previewLX / dx) + 1
         else:
             dy = dx
-            nyPreview = int(previewLY / dy)+1
+            nyPreview = int(previewLY / dy) + 1
     if debug_level >= Debug.VERY_VERBOSE:
         print('dx = {}  dy= {}'.format(str(dx),str(dy)))
-        
+
     if previewScale == 0:
         # Rescale to same size as horizontal
         if previewCrossSectionType == 'IK':
@@ -121,10 +110,10 @@ def set2DGridDimension(nx, ny, nz, previewCrossSectionType, previewLX, previewLY
         # Keep ratio between lateral and vertical scale including scaling factor
         if previewCrossSectionType == 'IK':
             ratio = previewLZ / previewLX
-            nzPreview = int(nxPreview * ratio)+1
+            nzPreview = int(nxPreview * ratio) + 1
         if previewCrossSectionType == 'JK':
             ratio = previewLZ / previewLY
-            nzPreview = int(nyPreview * ratio)+1
+            nzPreview = int(nyPreview * ratio) + 1
 
     if debug_level >= Debug.VERY_VERY_VERBOSE:
         print('nxPreview,nyPreview,nzPreview: ' + str(nxPreview) + ' ' + str(nyPreview) + ' ' + str(nzPreview))
@@ -195,8 +184,10 @@ def main():
     print('- Size of simulation box: LX: {0} LY:{1} LZ: {2}'.format(str(simBoxXsize), str(simBoxYsize), str(simBoxZsize)))
     print('- Simulate 2D cross section in: {} cross section for index: {}'.format(previewCrossSectionType, str(previewCrossSectionIndx)))
 
-    [nxPreview, nyPreview, nzPreview] = set2DGridDimension(nx, ny, nz, previewCrossSectionType,
-                                                           simBoxXsize, simBoxYsize, simBoxZsize, previewScale,debug_level)
+    [nxPreview, nyPreview, nzPreview] = set2DGridDimension(
+        nx, ny, nz, previewCrossSectionType,
+        simBoxXsize, simBoxYsize, simBoxZsize, previewScale,debug_level
+    )
     if previewCrossSectionType == 'IJ':
         if previewCrossSectionIndx < 0 or previewCrossSectionIndx >= nz:
             raise ValueError(
@@ -272,7 +263,7 @@ def main():
         if nGaussFields >= 2:
             a1 = readFile('a1.dat')
             a2 = readFile('a2.dat')
-        if nGaussFields >= Debug.VERY_VERBOSE:
+        if nGaussFields >= 3:
             a3 = readFile('a3.dat')
         if nGaussFields >= 4:
             a4 = readFile('a4.dat')
@@ -330,7 +321,6 @@ def main():
             fraction = float(f) / float(len(facies))
             print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i], fraction, faciesProb[i]))
         print(' ')
-
 
     # Calculate polygons for truncation map for current facies probability
     # as specified when calling setTruncRule(faciesProb)
