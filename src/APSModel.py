@@ -740,9 +740,14 @@ class APSModel:
             file.write('// --------------- End script -----------------\n')
 
     def XMLAddElement(self, root):
-
-        # Add a command specifying which zone to use in for preview
-        # This is temporary solution
+        """
+        Add a command specifying which zone to use in for preview
+        :param root:
+        :type root:
+        :return:
+        :rtype:
+        """
+        # TODO: This is temporary solution
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
@@ -761,7 +766,7 @@ class APSModel:
             selectedZoneString = ' '
             for i in range(len(self.__selectedZoneNumberList)):
                 sNr = self.__selectedZoneNumberList[i]
-                selectedZoneString = selectedZoneString + str(sNr) + ' '
+                selectedZoneString += str(sNr) + ' '
             tag = 'SelectedZones'
             elem = Element(tag)
             elem.text = selectedZoneString
@@ -831,12 +836,12 @@ class APSModel:
         return rootReformatted
 
     def writeModel(self, modelFileName, debug_level=Debug.OFF):
-        print('Write file: ' + modelFileName)
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Write file: ' + modelFileName)
         top = Element('APSModel')
         rootUpdated = self.XMLAddElement(top)
         with open(modelFileName, 'w') as file:
             file.write(rootUpdated)
-        return
 
     @staticmethod
     def writeModelFromXMLRoot(inputETree, outputModelFileName):

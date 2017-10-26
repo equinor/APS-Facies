@@ -5,9 +5,9 @@ from xml.etree.ElementTree import Element
 import numpy as np
 
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
-# Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
+# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.simGauss2D import simGaussField, simGaussFieldAddTrendAndTransform
-from src.utils.constants import Debug
+from src.utils.constants import Debug, VariogramType
 from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword
 from src.utils.constants import Debug
 
@@ -62,6 +62,31 @@ class APSGaussModel:
     def __isVariogramTypeOK(self,variogramType)
     def __getGFIndex(self,gfName)
     """
+
+    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, gaussFieldJobs=None, modelFileName=None,
+                 debug_level=Debug.OFF, zoneNumber=0, simBoxThickness=0):
+        """
+        Description: Can create empty object or object with data read from xml tree representing the model file.
+        """
+        self.__setEmpty()
+
+        if ET_Tree_zone is not None:
+            # Get data from xml tree
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Call init ' + self.__className + ' and read from xml file')
+
+            assert mainFaciesTable
+            assert zoneNumber
+            assert simBoxThickness
+            assert modelFileName
+
+            self.__mainFaciesTable = mainFaciesTable
+            self.__zoneNumber = zoneNumber
+            self.__simBoxThickness = simBoxThickness
+            self.__modelFileName = modelFileName
+            self.__debug_level = debug_level
+
+            self.__interpretXMLTree(ET_Tree_zone, gaussFieldJobs)
 
     def __setEmpty(self):
 
@@ -126,33 +151,6 @@ class APSGaussModel:
         self.__simBoxThickness = 0
         self.__zoneNumber = 0
         self.__modelFileName = None
-
-    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, gaussFieldJobs=None, modelFileName=None,
-                 debug_level=Debug.OFF, zoneNumber=0, simBoxThickness=0):
-        """
-        Description: Can create empty object or object with data read from xml tree representing the model file.
-        """
-        self.__setEmpty()
-
-        if ET_Tree_zone is not None:
-            # Get data from xml tree
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Call init ' + self.__className + ' and read from xml file')
-
-            assert mainFaciesTable
-            assert zoneNumber
-            assert simBoxThickness
-            assert modelFileName
-
-            self.__mainFaciesTable = mainFaciesTable
-            self.__zoneNumber = zoneNumber
-            self.__simBoxThickness = simBoxThickness
-            self.__modelFileName = modelFileName
-            self.__debug_level = debug_level
-
-            self.__interpretXMLTree(ET_Tree_zone, gaussFieldJobs)
-
-    # End __init__
 
     def __interpretXMLTree(self, ET_Tree_zone, gaussFieldJobs):
         """
@@ -349,7 +347,7 @@ class APSGaussModel:
         for i in range(len(gaussModelList)):
             item = gaussModelList[i]
             if len(item) != len(self.__index_variogram):
-                raise ValueError('Programming error: Input list items in gausModelList is not of correct length')
+                raise ValueError('Programming error: Input list items in gaussModelList is not of correct length')
             trendItem = trendModelList[i]
             seedItem = previewSeedList[i]
             assert item[GNAME] == trendItem[TNAME]
@@ -668,7 +666,9 @@ class APSGaussModel:
         for item in self.__variogramForGFModel:
             name = item[GNAME]
             if name == gfName:
-                self.updateGaussFieldVariogramParameters(gfName, variogramType, range1, range2, range3, azimuth, dip, power)
+                self.updateGaussFieldVariogramParameters(
+                    gfName, variogramType, range1, range2, range3, azimuth, dip, power
+                )
                 self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
                 found = 1
                 break
@@ -806,31 +806,38 @@ class APSGaussModel:
             elem = Element(tag, attribute)
             parent.append(elem)
             gfElement = elem
+
             tag = 'Vario'
             attribute = {'name': variogramType if isinstance(variogramType, str) else variogramType.name}
             elem = Element(tag, attribute)
             gfElement.append(elem)
             variogramElement = elem
+
             tag = self.__xml_keyword['MainRange']
             elem = Element(tag)
             elem.text = ' ' + str(range1) + ' '
             variogramElement.append(elem)
+
             tag = self.__xml_keyword['PerpRange']
             elem = Element(tag)
             elem.text = ' ' + str(range2) + ' '
             variogramElement.append(elem)
+
             tag = self.__xml_keyword['VertRange']
             elem = Element(tag)
             elem.text = ' ' + str(range3) + ' '
             variogramElement.append(elem)
+
             tag = self.__xml_keyword['AzimuthAngle']
             elem = Element(tag)
             elem.text = ' ' + str(azimuth) + ' '
             variogramElement.append(elem)
+
             tag = self.__xml_keyword['DipAngle']
             elem = Element(tag)
             elem.text = ' ' + str(dip) + ' '
             variogramElement.append(elem)
+
             if variogramType in ['GENERAL_EXPONENTIAL', VariogramType.GENERAL_EXPONENTIAL]:
                 tag = self.__xml_keyword['Power']
                 elem = Element(tag)
@@ -943,8 +950,9 @@ class APSGaussModel:
                     simBoxXsize, simBoxYsize, simBoxZsize, gridAzimuthAngle,
                     gridNX, gridNY, gridNZ, crossSectionType, crossSectionIndx
                 )
-                gaussFieldWithTrend = self.__addTrend(residualField, trendField,
-                                                      relStdDev, minMaxDifference)
+                gaussFieldWithTrend = self.__addTrend(
+                    residualField, trendField, relStdDev, minMaxDifference
+                )
             else:
                 gaussFieldWithTrend = residualField
 
@@ -1058,21 +1066,27 @@ class APSGaussModel:
         sinDip = np.sin(dip)
 
         # define R_azimuth matrix:
-        R_azimuth = np.array([[cosTheta, -sinTheta, 0.0],
-                              [sinTheta, cosTheta, 0.0],
-                              [0.0, 0.0, 1.0]])
+        R_azimuth = np.array([
+            [cosTheta, -sinTheta, 0.0],
+            [sinTheta, cosTheta, 0.0],
+            [0.0, 0.0, 1.0]
+        ])
 
         # define R_dip matrix
-        R_dip = np.array([[1.0, 0.0, 0.0],
-                          [0.0, cosDip, sinDip],
-                          [0.0, -sinDip, cosDip]])
+        R_dip = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, cosDip, sinDip],
+            [0.0, -sinDip, cosDip]
+        ])
 
         # calculate R matrix
         R = R_dip.dot(R_azimuth)
         # calculate M matrix in principal coordinates
-        M_diag = np.array([[1.0 / (rx * rx), 0.0, 0.0],
-                           [0.0, 1.0 / (ry * ry), 0.0],
-                           [0.0, 0.0, 1.0 / (rz * rz)]])
+        M_diag = np.array([
+            [1.0 / (rx * rx), 0.0, 0.0],
+            [0.0, 1.0 / (ry * ry), 0.0],
+            [0.0, 0.0, 1.0 / (rz * rz)]
+        ])
         # calculate M matrix in x,y,z coordinates
         tmp = M_diag.dot(R)
         Rt = np.transpose(R)

@@ -27,7 +27,37 @@ _draw2DLib.draw2DGaussField.restype = floatArrayPointer
 
 
 # Function simulating 2D gaussian field
-def draw2D(nx, ny, xsize, ysize, variogram_type, iseed, range1, range2, angle, power, debug_level=Debug.OFF):
+def draw2D(
+        nx: int, ny: int, xsize: float, ysize: float, variogram_type: VariogramType,
+        iseed: int, range1: float, range2: float, angle: float, power: float, debug_level: Debug = Debug.OFF
+):
+    """
+
+    :param nx:
+    :type nx: int
+    :param ny:
+    :type ny: int
+    :param xsize:
+    :type xsize: flaot
+    :param ysize:
+    :type ysize: float
+    :param variogram_type:
+    :type variogram_type: VariogramType
+    :param iseed:
+    :type iseed: int
+    :param range1:
+    :type range1: float
+    :param range2:
+    :type range2: float
+    :param angle:
+    :type angle: float
+    :param power:
+    :type power: float
+    :param debug_level:
+    :type debug_level: Debug
+    :return:
+    :rtype:
+    """
     if debug_level <= Debug.OFF:
         debug_level = Debug.OFF
     elif debug_level >= Debug.ON:
@@ -186,21 +216,49 @@ def simGaussFieldAddTrendAndTransform2(
 
 
 def simGaussField(
-        iseed, nx, ny, xsize, ysize, variogramType,
-        range1, range2, variogramAngle, pow, debug_info=Debug.OFF
+        iseed: int, nx: int, ny: int, xsize: float, ysize: float, variogram_type: VariogramType,
+        range_major_axis: float, range_minor_axis: float, azimuth_angle: float, power: float,
+        debug_info: Debug = Debug.OFF
 ):
     """
-    Description: Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
-                  Correlation lengths are range1 in main direction and range2 in orthogonal direction.
-                  The angle is azimuth (angle clockwise measured from y -axis).
-                  variogramType is specified by an number, see heading of the file for variogram type
+    Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
+    Correlation lengths are range1 in main direction and range2 in orthogonal direction.
+    The angle is azimuth (angle clockwise measured from y -axis).
+    variogramType is specified by an number, see heading of the file for variogram type
+    :param iseed:
+    :type iseed: int
+    :param nx:
+    :type nx: int
+    :param ny:
+    :type ny:int
+    :param xsize:
+    :type xsize: float
+    :param ysize:
+    :type ysize: float
+    :param variogram_type:
+    :type variogram_type: VariogramType
+    :param range_major_axis:
+    :type range_major_axis: float
+    :param range_minor_axis:
+    :type range_minor_axis: float
+    :param azimuth_angle:
+    :type azimuth_angle: float
+    :param power:
+    :type power: float
+    :param debug_info:
+    :type debug_info: Debug
+    :return:
+    :rtype:
     """
     # Residual gaussian fields
     if debug_info >= Debug.VERY_VERBOSE:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
     # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
-    variogramAngle = 90.0 - variogramAngle
-    [residualField] = draw2D(nx, ny, xsize, ysize, variogramType, iseed, range1, range2, variogramAngle, pow, debug_info)
-
+    azimuth_angle = 90.0 - azimuth_angle
+    residualField = draw2D(
+        nx=nx, ny=ny, xsize=xsize, ysize=ysize, variogram_type=variogram_type, iseed=iseed,
+        range1=range_major_axis, range2=range_minor_axis, angle=azimuth_angle, power=power,
+        debug_level=debug_info
+    )
     return residualField
