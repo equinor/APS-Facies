@@ -13,7 +13,7 @@ from src.Trend3D_linear_model_xml import Trend3D_linear_model
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
-from src.utils.constants import Debug
+from src.utils.constants import Debug, VariogramType
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, VERY_VERBOSE_DEBUG,
     RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME, NO_VERBOSE_DEBUG
@@ -189,7 +189,7 @@ def read_write_model(apsmodel, debug_level=Debug.OFF):
     else:
         print('Files are different. NOT OK')
     assert check is True
-    print(' ')
+    print('')
 
 
 def read_write_model_update(debug_level=Debug.OFF):
@@ -206,7 +206,7 @@ def read_write_model_update(debug_level=Debug.OFF):
     else:
         print('Files are different. NOT OK')
     assert check is True
-    print(' ')
+    print('')
 
 
 def test_create_XMLModelFiles():
@@ -273,10 +273,13 @@ def test_updating_model():
     apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.OFF)
     # Do some updates of the model
     zoneNumber = 1
-    zone1 = apsmodel.getZoneModel(zoneNumber)
-    gaussFieldNames = zone1.getUsedGaussFieldNames()
+    zone = apsmodel.getZoneModel(zoneNumber)
+    gaussFieldNames = zone.getUsedGaussFieldNames()
     nGaussFields = len(gaussFieldNames)
-    variogramTypeList = ['SPHERICAL', 'EXPONENTIAL', 'GAUSSIAN', 'GENERAL_EXPONENTIAL', 'SPHERICAL']
+    variogramTypeList = [
+        VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
+        VariogramType.GENERAL_EXPONENTIAL, VariogramType.SPHERICAL
+    ]
     mainRangeList = [1234.0, 5432.0, 1200.0, 1300.0, 2150.0]
     perpRangeList = [123.0, 543.0, 120.0, 130.0, 215.0]
     vertRangeList = [1.0, 5.0, 1.2, 1.3, 2.15]
@@ -287,55 +290,27 @@ def test_updating_model():
         gfName = gaussFieldNames[i]
         print('Update zone ' + str(zoneNumber) + ' and gauss field ' + gfName)
 
-        variogramType = zone1.getVariogramType(gfName)
-        print('Original variogramType: ' + variogramType)
         variogramType = variogramTypeList[i]
-        zone1.setVariogramType(gfName, variogramType)
-        variogramType1 = zone1.getVariogramType(gfName)
-        print('New variogramType     : ' + variogramType1)
+        assertPropertyGetterSetter(gfName, variogramType, zone, 'VariogramType')
 
-        mainRange = zone1.getMainRange(gfName)
-        print('Original MainRange: ' + str(mainRange))
         mainRange = mainRangeList[i]
-        zone1.setMainRange(gfName, mainRange)
-        mainRange1 = zone1.getMainRange(gfName)
-        print('New MainRange: ' + str(mainRange1))
+        assertPropertyGetterSetter(gfName, mainRange, zone, 'MainRange')
 
-        perpRange = zone1.getPerpRange(gfName)
-        print('Original PerpRange: ' + str(perpRange))
         perpRange = perpRangeList[i]
-        zone1.setPerpRange(gfName, perpRange)
-        perpRange1 = zone1.getPerpRange(gfName)
-        print('New PerpRange: ' + str(perpRange1))
+        assertPropertyGetterSetter(gfName, perpRange, zone, 'PerpRange')
 
-        vertRange = zone1.getVertRange(gfName)
-        print('Original VertRange: ' + str(vertRange))
         vertRange = vertRangeList[i]
-        zone1.setVertRange(gfName, vertRange)
-        vertRange1 = zone1.getVertRange(gfName)
-        print('New VertRange: ' + str(vertRange1))
+        assertPropertyGetterSetter(gfName, vertRange, zone, 'VertRange')
 
-        azimuth = zone1.getAnisotropyAzimuthAngle(gfName)
-        print('Original azimuth angle: ' + str(azimuth))
         azimuth = azimuthAngleList[i]
-        zone1.setAnisotropyAzimuthAngle(gfName, azimuth)
-        azimuth1 = zone1.getAnisotropyAzimuthAngle(gfName)
-        print('New azimuth angle: ' + str(azimuth1))
+        assertPropertyGetterSetter(gfName, azimuth, zone, 'AnisotropyAzimuthAngle')
 
-        dip = zone1.getAnisotropyDipAngle(gfName)
-        print('Original dip angle: ' + str(dip))
         dip = dipAngleList[i]
-        zone1.setAnisotropyDipAngle(gfName, dip)
-        dip1 = zone1.getAnisotropyDipAngle(gfName)
-        print('New dip angle: ' + str(dip1))
+        assertPropertyGetterSetter(gfName, dip, zone, 'AnisotropyDipAngle')
 
-        if variogramType == 'GENERAL_EXPONENTIAL':
-            power = zone1.getPower(gfName)
-            print('Original exponent: ' + str(power))
+        if variogramType == VariogramType.GENERAL_EXPONENTIAL:
             power = powerList[i]
-            zone1.setPower(gfName, power)
-            power1 = zone1.getPower(gfName)
-            print('New exponent: ' + str(power1))
+            assertPropertyGetterSetter(gfName, power, zone, 'Power')
     outfile2 = 'testOut2_updated.xml'
     apsmodel.writeModel(outfile2, Debug.OFF)
     reference_file = 'testData_models/APS_updated.xml'
@@ -346,6 +321,18 @@ def test_updating_model():
     else:
         print('Files are different. NOT OK')
     assert check is True
+
+
+def assertPropertyGetterSetter(gaussianFieldName: str, value: object, zone: APSZoneModel, baseName: str):
+    getter = zone.__getattribute__('get' + baseName)
+    setter = zone.__getattribute__('set' + baseName)
+
+    # TODO: Add an assert!
+    original = getter(gaussianFieldName)
+    setter(gaussianFieldName, value)
+    new = getter(gaussianFieldName)
+    print(baseName + ' ' + str(original) + ' -> ' + str(new))
+
 
 def test_case_1():
     print('')
@@ -646,16 +633,6 @@ def add_zone_1_for_case_3(apsmodel):
         faciesInTruncRule=['F1','F2','F3','F5','F7'],
         debug_level=NO_VERBOSE_DEBUG
     )
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
