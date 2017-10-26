@@ -75,10 +75,16 @@ start GUI:
   dependencies:
     - build GUI
 
-deploy:
+deploy release candidate:
   stage: deploy
   script:
     - ""  # TODO
   only:
    - master
 
+deploy develop:
+  stage: deploy
+  script:
+    - "" # TODO
+  only:
+    - develop
