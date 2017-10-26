@@ -3,13 +3,8 @@ import ctypes as ct
 
 import numpy as np
 
-from src.utils.constants import DrawingLibrary, Debug
+from src.utils.constants import DrawingLibrary, Debug, VariogramType
 
-# Variogram type:
-#    SPHERICAL      1
-#    EXPONENTIAL    2
-#    GAUSSIAN       3
-#    GENERAL_EXPONENTIAL  4
 # Input angle for variogram is azimuth angle in degrees
 # Input angle for linear trend direction is azimuth angle in degrees
 #
@@ -37,6 +32,9 @@ def draw2D(nx, ny, xsize, ysize, variogram_type, iseed, range1, range2, angle, p
         debug_level = Debug.OFF
     elif debug_level >= Debug.ON:
         debug_level = Debug.ON
+    if isinstance(variogram_type, VariogramType):
+        variogram_type = variogram_type.value
+
     global _draw2DLib
     values = []
 
@@ -57,7 +55,7 @@ def draw2D(nx, ny, xsize, ysize, variogram_type, iseed, range1, range2, angle, p
             values.append(v)
             n += 1
             # print( 'i,j,value: ' + '(' + str(i) +','+str(j) + '): ' + ' '  + str(values[n-1]))
-    return [values]
+    return values
 
 
 def simGaussFieldAddTrendAndTransform(
@@ -70,7 +68,7 @@ def simGaussFieldAddTrendAndTransform(
         # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     variogramAngle = 90.0 - variogramAngle
-    [v1Residual] = draw2D(
+    v1Residual = draw2D(
         nx, ny, xsize, ysize, variogramType, iseed,
         range1, range2, variogramAngle, pow, debug_level
     )
@@ -132,7 +130,7 @@ def simGaussFieldAddTrendAndTransform2(
     # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     variogramAngle = 90.0 - variogramAngle
-    [v1Residual] = draw2D(nx, ny, xsize, ysize, variogramType, iseed, range1, range2, variogramAngle, pow, debug_level)
+    v1Residual = draw2D(nx, ny, xsize, ysize, variogramType, iseed, range1, range2, variogramAngle, pow, debug_level)
 
     # Trends for gaussian fields
     Trend1 = np.zeros(nx * ny, float)
@@ -206,5 +204,3 @@ def simGaussField(
     [residualField] = draw2D(nx, ny, xsize, ysize, variogramType, iseed, range1, range2, variogramAngle, pow, debug_info)
 
     return residualField
-
-# ------------  End of functions to draw gaussian fields -----------------------------------

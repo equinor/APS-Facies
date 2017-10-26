@@ -3,6 +3,7 @@ from typing import Dict, Iterator, List, Union
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+from enum import Enum
 
 ValueTypes = Union[str, int, float, QColor, QMessageBox.Icon]
 
@@ -490,3 +491,10 @@ class Colors(Value):
     DARK_ORANGE = QColor('darkorange')  # Hex code: #FF8C00
     RED = QColor('red')  # Hex code: #FF0000
     BACKGROUND = QColor('#EFEBE7')
+
+
+class VariogramType(Enum):
+    SPHERICAL = 1
+    EXPONENTIAL = 2
+    GAUSSIAN = 3
+    GENERAL_EXPONENTIAL = 4
