@@ -56,7 +56,7 @@ def get_elements(
 def get_element(
         obj: object,
         name: str
-) -> Union[QPushButton, QLineEdit, QSlider, QCheckBox, TruncationRuleLibraryElements, QListWidget, None]:
+) -> Union[QPushButton, QLineEdit, QSlider, QCheckBox, TruncationRuleLibraryElements, QListWidget, QComboBox, None]:
     # TODO: Make more robust
     if hasattr(obj, name):
         return obj.__getattribute__(name)

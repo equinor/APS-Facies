@@ -130,7 +130,7 @@ class APSModel:
         obj = root.find(kw)
         if obj is None:
             # Default value is set
-            self.__debug_level = Debug.SOMEWHAT_VERBOSE
+            self.__debug_level = debug_level
         else:
             text = obj.text
             self.set_debug_level(text)
@@ -423,7 +423,7 @@ class APSModel:
         return tree
 
     def getRoot(self):
-        tree = self.__ET_Tree
+        tree = self.getXmlTree()
         root = tree.getroot()
         return root
 

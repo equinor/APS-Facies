@@ -1,3 +1,6 @@
+from typing import Union
+
+
 def normalize_number(
         value: float, minimum_in: float, maximum_in: float, minimum_out: float, maximum_out: float
 ) -> float:
@@ -9,10 +12,10 @@ def normalize_number(
     return normalized
 
 
-def truncate_number(minimum: float, value: float, maximum: float) -> float:
-    if value < minimum:
+def truncate_number(minimum: float, value: Union[float, str], maximum: float) -> Union[float, str]:
+    if float(value) < minimum:
         return minimum
-    elif value > maximum:
+    elif float(value) > maximum:
         return maximum
     else:
         return value
@@ -24,3 +27,15 @@ def isNumber(s):
         return True
     except ValueError:
         return False
+
+
+def strip_trailing_decimals(number: Union[float, int, str], maximum_number_of_decimals: int) -> str:
+    assert isinstance(number, float) or isinstance(number, int) or isinstance(number, str)
+    numeric_string = str(number)
+    if maximum_number_of_decimals < 0 or isinstance(number, int):
+        # Nothing to be done
+        return numeric_string
+    elif '.' in numeric_string:
+        return numeric_string[:numeric_string.find('.') + maximum_number_of_decimals]
+    else:
+        return numeric_string

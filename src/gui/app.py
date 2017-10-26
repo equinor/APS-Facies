@@ -29,6 +29,7 @@ args = parser.parse_args()
 def run():
     app = QApplication(sys.argv)
     ui = Project()
+    # ui = DefineGaussian(State())
     # ui = CubicTruncationRule(State(), active=['F1', 'F2', 'F3', 'F4'])
     ui.show()
     sys.exit(app.exec_())

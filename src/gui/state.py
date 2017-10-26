@@ -8,9 +8,10 @@ from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants.constants import (
     CubicTruncationRuleConstants, CubicTruncationRuleElements, ModeConstants,
-    ModeOptions, ProjectConstants, TruncationRuleConstants,
+    FaciesSelectionConstants, ModeOptions, ProjectConstants, TruncationRuleConstants,
+    GaussianRandomFieldConstants,
 )
-from src.utils.constants.simple import Debug
+from src.utils.constants.simple import Debug, VariogramType
 
 # TODO: Rewrite, and split up into several files / folders?
 # TODO: Use SQLite
@@ -115,6 +116,44 @@ class State(dict):
         values = truncation.get_all_values(skip_elements=unnecessary_elements)
         self._ensure_normalization(values)
         self.__dict__[TruncationRuleConstants.TRUNCATION_RULES] = values
+
+    def set_gaussian_field_settings(self, gaussian_settings):
+        values = gaussian_settings.get_values()
+        if GaussianRandomFieldConstants.SELECTED not in self.__dict__:
+            raise ValueError("No Gaussian Random Field selected")
+        current_gaussian_random_field = self.get_currently_selected_gaussian_field()
+        self.__dict__[GaussianRandomFieldConstants.AVAILABLE][current_gaussian_random_field] = values
+
+    def set_current_gaussian_random_field(self, name: str) -> None:
+        if GaussianRandomFieldConstants.SELECTED not in self.__dict__:
+            self.__dict__[GaussianRandomFieldConstants.SELECTED] = ''
+        self.__dict__[GaussianRandomFieldConstants.SELECTED] = name
+
+    def set_available_gaussian_random_fields(self, names: List[Union[str, None]]):
+        key = GaussianRandomFieldConstants.AVAILABLE
+        if key not in self.__dict__:
+            self.__dict__[key] = {}
+        for name in names:
+            if name:
+                self.__dict__[key][name] = {}
+
+    def update_toggled_gaussian_random_fields(self, name: str, toggled: bool) -> None:
+        key = GaussianRandomFieldConstants.SELECTED
+        if key not in self.__dict__:
+            self.__dict__[key] = set()
+        if toggled:
+            self.__dict__[key].add(name)
+        elif name in self.__dict__[key]:
+            self.__dict__[key].remove(name)
+        else:
+            # Nothing to do
+            pass
+
+    def get_currently_selected_gaussian_field(self) -> str:
+        if GaussianRandomFieldConstants.SELECTED in self.__dict__:
+            return self.__dict__[GaussianRandomFieldConstants.SELECTED]
+        else:
+            return ''
 
     def read_project_model(self):
         pass
@@ -319,3 +358,21 @@ class State(dict):
 
     def get_selected_facies(self) -> List[str]:
         return self._get_list_items(FaciesSelectionConstants.SELECTED)
+
+    @staticmethod
+    def get_variogram_models() -> List[VariogramType]:
+        return [model for model in VariogramType]
+
+    @staticmethod
+    def get_variogram_model_names() -> List[str]:
+        models = State.get_variogram_models()
+        names = [model.name for model in models]
+        return [name.replace('_', ' ').capitalize() for name in names]
+
+    @staticmethod
+    def convert_variogram_name_to_enum(variogram_name: str) -> Union[VariogramType, None]:
+        variogram_name = variogram_name.replace(' ', '_').upper()
+        for variogram in VariogramType:
+            if variogram.name == variogram_name:
+                return variogram
+        return None

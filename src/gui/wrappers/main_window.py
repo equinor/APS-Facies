@@ -3,6 +3,7 @@
 A wrapper, and implementation of the main GUI window of the APS-GUI.
 'Implements' the design in APS_prototype.ui, and wraps around src/resources/ui/APS_prototype_ui.py.
 """
+from multiprocessing.reduction import send_handle
 from typing import Callable, Dict, List, Union
 
 from PyQt5.QtWidgets import *
@@ -90,9 +91,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         buttons = self.get_gaussian_settings_buttons()
         for button in buttons:
             button.clicked.connect(self.define_gaussian_field)
+        check_boxes = self.get_gaussian_apply_buttons()
+        for check_box in check_boxes:
+            check_box.stateChanged.connect(self.update_activated_gaussian_random_fields)
 
     def get_gaussian_settings_buttons(self) -> List[QPushButton]:
         return self._get_gaussian_elements(GaussianRandomFieldElements.SETTINGS)
+
+    def get_gaussian_apply_buttons(self) -> List[QCheckBox]:
+        return self._get_gaussian_elements(GaussianRandomFieldElements.APPLY)
 
     def _get_gaussian_elements(
             self,
@@ -106,11 +113,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return elements
 
     def define_gaussian_field(self):
-        # TODO: Pass information on which button this came from
-        sender = self.sender()
+        current_gaussian_random_field_settings = self.get_gaussian_button_name(self.sender())
+        self._state.set_current_gaussian_random_field(current_gaussian_random_field_settings)
         self.gaussian_settings = DefineGaussian(self._state)
         self.gaussian_settings.show()
         pass
+
+    def get_gaussian_button_names(
+            self,
+            elements: List[Union[QPushButton, QCheckBox]]
+    ) -> List[Union[str, None]]:
+        if isinstance(elements, list):
+            names = []
+            for element in elements:
+                names.append(self.get_gaussian_button_name(element))
+            return names
+        else:
+            raise ValueError("Invalid input type")
+
+    def get_gaussian_button_name(self, sender: Union[QPushButton, QCheckBox]) -> Union[str, None]:
+        if isinstance(sender, QPushButton):
+            buttons = self.get_gaussian_settings_buttons()
+        elif isinstance(sender, QCheckBox):
+            buttons = self.get_gaussian_apply_buttons()
+        else:
+            raise ValueError("Invalid sender")
+        if sender in buttons:
+            return 'GRF' + str(buttons.index(sender) + 1)
+        else:
+            return None
 
     def initialize_project_data(self):
         # TODO: Read from the project data
@@ -164,8 +195,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         should_be_enabled = elements[:number_of_selected_facies]
         should_not_be_enabled = elements[number_of_selected_facies:]
 
+        settings_buttons = self._get_gaussian_elements(GaussianRandomFieldElements.SETTINGS)[:number_of_selected_facies]
+        available_gaussian_random_field_names = self.get_gaussian_button_names(settings_buttons)
+        self._state.set_available_gaussian_random_fields(available_gaussian_random_field_names)
+
         toggle_elements(True, should_be_enabled)
         toggle_elements(False, should_not_be_enabled)
+
+    def update_activated_gaussian_random_fields(self):
+        sender = self.sender()  # type: QCheckBox
+        name = self.get_gaussian_button_name(sender)
+        toggled = sender.isChecked()
+        self._state.update_toggled_gaussian_random_fields(name, toggled)
 
     def add_facies(self):
         self.new_facies_dialog = AddFacies(state=self._state, sender=self)

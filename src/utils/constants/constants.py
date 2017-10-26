@@ -3,6 +3,7 @@ from typing import Dict, Iterator, List, Union
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+from enum import Enum
 
 from src.utils.constants.base import Key, Value, Icon
 from src.utils.constants.simple import Debug
@@ -164,7 +165,7 @@ class DataBase(Value):
 
 
 class DrawingLibrary(Value):
-    LIBRARY_FOLDER = '/home/aps-gui/APS-GUI/libraries'  # Set automatically by make
+    LIBRARY_FOLDER = ''  # Set automatically by make
     NAME = 'libdraw2D.so'
     LIBRARY_PATH = LIBRARY_FOLDER + '/' + NAME
 
@@ -289,6 +290,11 @@ class GaussianRandomFieldElements(MainWindowElements):
     FACIES = 'm_list_facies_grf'
 
 
+class GaussianRandomFieldConstants(Key):
+    AVAILABLE = 'available grf models'
+    SELECTED = 'selected grf models'
+
+
 class DefineGaussianElements(Value):
     TOGGLE_TREND = 'm_toggle_apply_trend'
 
@@ -301,6 +307,20 @@ class VariogramModelElements(DefineGaussianElements):
     NORMAL = 'm_edit_normal_to_azimuth'
     VERTICAL = 'm_edit_vertical_normal_to_dip'
     PLOT = 'm_plot_variogram'
+    POWER = 'm_edit_power'
+
+    # Labels
+    LABEL_POWER = 'label_power'
+
+
+class VariogramModelConstants(Key):
+    VARIOGRAM = 'variogram model'
+    AZIMUTH = 'azimuth angle'
+    DIP = 'dip angle'
+    PARALLEL = 'parallel to azimuth'
+    NORMAL = 'normal to azimuth'
+    VERTICAL = 'vertical normal to dip'
+    POWER = 'power'
 
 
 class TrendSettingsElements(DefineGaussianElements):
@@ -465,7 +485,7 @@ class Defaults(Value):
     CONDITION_TO_WELL = Qt.Unchecked
     HIDE = HideOptions.DISABLE
     DEBUG = Debug.OFF
-    MAXIMUM_NUMBER_OF_FACIES = 6  # -1 To turn off
+    MAXIMUM_NUMBER_OF_FACIES = GaussianRandomFieldElements.NUMBER_OF_ELEMENTS  # -1 To turn off
 
 
 class MessageIcon(Icon):
@@ -476,18 +496,58 @@ class MessageIcon(Icon):
     CRITICAL_ICON = QMessageBox.Critical
 
 
-class Proportions(Value):
-    BOTTOM = 0
-    TOP = 1
+class Constraints(Value):
+    MINIMUM = float('-inf')
+    MAXIMUM = float('inf')
+    DECIMALS = -1
+
+
+class Proportions(Constraints):
+    MINIMUM = 0
+    MAXIMUM = 1
     DECIMALS = 5
-    MAXIMUM = TOP
-    MINIMUM = BOTTOM
 
 
-class Angles(Value):
+class Angles(Constraints):
     MINIMUM = -180.0
     MAXIMUM = +180.0
     DECIMALS = 2
+
+
+class MainRange(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = float('inf')
+    DECIMALS = 5
+
+
+class PerpRange(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = float('inf')
+    DECIMALS = 5
+
+
+class VerticalRange(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = float('inf')
+    DECIMALS = 5
+
+
+class AzimuthAngle(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = 360.0
+    DECIMALS = 2
+
+
+class DipAngle(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = 90.0
+    DECIMALS = 2
+
+
+class Power(Constraints):
+    MINIMUM = 1.0
+    MAXIMUM = 2.0
+    DECIMALS = 5
 
 
 class Ranges(Value):
@@ -513,3 +573,10 @@ class Colors(Value):
     DARK_ORANGE = QColor('darkorange')  # Hex code: #FF8C00
     RED = QColor('red')  # Hex code: #FF0000
     BACKGROUND = QColor('#EFEBE7')
+
+
+class VariogramType(Enum):
+    SPHERICAL = 1
+    EXPONENTIAL = 2
+    GAUSSIAN = 3
+    GENERAL_EXPONENTIAL = 4
