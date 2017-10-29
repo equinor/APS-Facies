@@ -254,7 +254,7 @@ class APSDataFromRMS:
                 horizonNames.append(text.strip())
             self.__data['Horizon names'] = horizonNames
         faciesCodes = {}
-        faciesTable = APSMainFaciesTable(tree, inputFileName, self.__debug_level)
+        faciesTable = APSMainFaciesTable(tree, modelFileName=inputFileName, debug_level=self.__debug_level)
         self.__faciesTable = faciesTable
 
     def __add_surfaces(self, kw, surface):
