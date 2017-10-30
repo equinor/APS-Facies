@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 import roxar
+from src.utils.constants import Debug
 
 from src.utils.constants import Debug
 

@@ -9,6 +9,7 @@ from src.Trend3D_linear_model_xml import Trend3D_linear_model
 from src.simGauss2D import simGaussField, simGaussFieldAddTrendAndTransform
 from src.utils.constants import Debug
 from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword
+from src.utils.constants import Debug
 
 
 class APSGaussModel:
@@ -224,6 +225,8 @@ class APSGaussModel:
             # Read trend model for current GF
             trendObjXML = gf.find('Trend')
             trendRuleModelObj = None
+            useTrend = 0
+            relStdDev = 0.0
             if trendObjXML is not None:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Read trend')
@@ -241,7 +244,7 @@ class APSGaussModel:
                 else:
                     raise NameError(
                         'Error in {className}\n'
-                        'Error: Specified name of trend function {} is not implemented.'
+                        'Error: Specified name of trend function {trendName} is not implemented.'
                         ''.format(className=self.__className, trendName=trendName)
                     )
             else:
@@ -338,10 +341,10 @@ class APSGaussModel:
             gfName = item[GNAME]
             if not gaussFieldJobs.checkGaussFieldName(gfName):
                 raise ValueError(
-                    'In model file {0} in zone number: {1} in command GaussField.'
-                    'Specified name of Gauss field:  {2} is not defined in any of '
+                    'In zone number: {0} in command GaussField. '
+                    'Specified name of Gauss field:  {1} is not defined in any of '
                     'the specified gauss field simulation jobs'
-                    ''.format(self.__modelFileName, str(self.__zoneNumber), gfName)
+                    ''.format(str(self.__zoneNumber), gfName)
                 )
 
             variogramType = item[GTYPE]
@@ -546,6 +549,7 @@ class APSGaussModel:
         minValue = self.__minValue[variableName]
 
         # Max allowed value
+        maxValue = 0.0
         if checkMax:
             maxValue = self.__maxValue[variableName]
 
@@ -839,94 +843,12 @@ class APSGaussModel:
             elem.text = ' ' + str(seedValue) + ' '
             gfElement.append(elem)
 
-    def simGaussFieldWithTrendAndTransform(self, nGaussFields, gridDimNx, gridDimNy,
-                                           gridXSize, gridYSize, gridAzimuthAngle, previewCrossSection):
-        TUSE = self.__index_trend['Use trend']
-        TOBJ = self.__index_trend['Object']
-        TSTD = self.__index_trend['RelStdev']
-        SVALUE = self.__index_seed['Seed']
 
-        nx = gridDimNx
-        ny = gridDimNy
-        xsize = gridXSize
-        ysize = gridYSize
 
-        gaussFieldNamesForSimulation = self.getUsedGaussFieldNames()
-        assert nGaussFields == len(gaussFieldNamesForSimulation)
-        gaussFields = []
-        for i in range(nGaussFields):
-            # Find data for specified Gauss field name
-            name = gaussFieldNamesForSimulation[i]
-            seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
-            variogramType = self.getVariogramType(name)
-            variogramTypeNumber = self.getVariogramTypeNumber(name)
-            # r1 = self.getMainRange(name)
-            # r2 = self.getPerpRange(name)
-            # r3 = self.getVertRange(name)
-            # azimuthVario  = self.getAnisotropyAzimuthAngle(name)
-            # dipVario  = self.getAnisotropyDipAngle(name)
-            # azimuthVario = azimuthVario - gridAzimuthAngle
-
-            power = self.getPower(name)
-
-            useTrend = self.__trendForGFModel[i][TUSE]
-            trendAzimuth = 0.0
-            if useTrend == 1:
-                trendObj = self.__trendForGFModel[i][TOBJ]
-                trendAzimuth = trendObj.getAzimuth() - gridAzimuthAngle
-
-            relSigma = self.__trendForGFModel[i][TSTD]
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Simulate gauss field: ' + name)
-                print('Debug output: VariogramType: ' + str(variogramType))
-                print('Debug output: VariogramTypeNumber: ' + str(variogramTypeNumber))
-
-                if variogramTypeNumber == 4:
-                    print('Debug output: Power    : ' + str(power))
-
-                if useTrend == 1:
-                    print('Debug output: Use trend:  YES')
-                    print('Debug output: Relative TrendAzimuth: ' + str(trendAzimuth))
-                    print('Debug output: RelSigma : ' + str(relSigma))
-                else:
-                    print('Debug output: Use trend:  NO')
-
-                print('Debug output: Seed value: ' + str(seedValue))
-
-            # Calculate 2D projection of the correlation ellipsoid
-            if previewCrossSection == 'IJ':
-                projection = 'xy'
-            elif previewCrossSection == 'IK':
-                projection = 'xz'
-            elif previewCrossSection == 'JK':
-                projection = 'yz'
-
-            [angle1, range1, angle2, range2] = self.calc2DVariogramFrom3DVariogram(name, gridAzimuthAngle, projection)
-            azimuthVario = angle1
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
-                print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
-                print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
-                print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
-
-            # Angle relative to first  axis is input in degrees.
-            azimuthVario = 90.0 - azimuthVario
-            gfRealization = np.zeros(nx * ny, float)
-            [gfRealization] = simGaussFieldAddTrendAndTransform(
-                seedValue, nx, ny, xsize, ysize,
-                variogramTypeNumber, range1, range2, azimuthVario, power,
-                useTrend, trendAzimuth, relSigma, self.__debug_level
-            )
-
-            gaussFields.append(gfRealization)
-        # End for        
-
-        return gaussFields
-
-    def simGaussFieldWithTrendAndTransformNew(self, nGaussFields,
-                                              simBoxXsize, simBoxYsize, simBoxZsize,
-                                              gridNX, gridNY, gridNZ,
-                                              gridAzimuthAngle, crossSectionType):
+    def simGaussFieldWithTrendAndTransform(self, nGaussFields,
+                                           simBoxXsize, simBoxYsize, simBoxZsize,
+                                           gridNX, gridNY, gridNZ,
+                                           gridAzimuthAngle, crossSectionType, crossSectionIndx):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
@@ -941,21 +863,24 @@ class APSGaussModel:
             gridDim2 = gridNY
             size1 = simBoxXsize
             size2 = simBoxYsize
-            crossSectionIndx = int(gridNZ / 2)
+            assert crossSectionIndx >= 0 and crossSectionIndx < gridNZ
+#            crossSectionIndx = int(gridNZ / 2)
             projection = 'xy'
         elif crossSectionType == 'IK':
             gridDim1 = gridNX
             gridDim2 = gridNZ
             size1 = simBoxXsize
             size2 = simBoxZsize
-            crossSectionIndx = int(gridNY / 2)
+            assert crossSectionIndx >= 0 and crossSectionIndx < gridNY
+#            crossSectionIndx = int(gridNY / 2)
             projection = 'xz'
         elif crossSectionType == 'JK':
             gridDim1 = gridNY
             gridDim2 = gridNZ
             size1 = simBoxYsize
             size2 = simBoxZsize
-            crossSectionIndx = int(gridNX / 2)
+            assert crossSectionIndx >= 0 and crossSectionIndx < gridNX
+#            crossSectionIndx = int(gridNX / 2)
             projection = 'yz'
         else:
             raise ValueError('Undefined cross section {}'.format(crossSectionType))

@@ -1,7 +1,7 @@
 #!/bin/env python
 import sys
 from xml.etree.ElementTree import Element
-
+from src.utils.constants import Debug
 import copy
 
 from src.utils.constants import Debug
@@ -120,6 +120,7 @@ class APSMainFaciesTable:
 
     def getFaciesIndx(self, fName):
         found = 0
+        fIndx = -999
         for i in range(self.getNFacies()):
             fItem = self.__faciesTable[i]
             facName = fItem[self.__NAME]
@@ -128,7 +129,10 @@ class APSMainFaciesTable:
                 found = 1
                 break
         if found == 0:
-            return -999
+            raise ValueError(
+                'Can not find facies with name {} in facies table'
+                ''.format(fName)
+            )
         else:
             return fIndx
 

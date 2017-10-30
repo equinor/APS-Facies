@@ -14,6 +14,7 @@ from src.utils.constants import Debug
 
 
 # importlib.reload(APSMainFaciesTable)
+from src.utils.constants import Debug
 
 
 class APSDataFromRMS:
@@ -253,7 +254,7 @@ class APSDataFromRMS:
                 horizonNames.append(text.strip())
             self.__data['Horizon names'] = horizonNames
         faciesCodes = {}
-        faciesTable = APSMainFaciesTable(tree, inputFileName, self.__debug_level)
+        faciesTable = APSMainFaciesTable(tree, modelFileName=inputFileName, debug_level=self.__debug_level)
         self.__faciesTable = faciesTable
 
     def __add_surfaces(self, kw, surface):
@@ -264,6 +265,8 @@ class APSDataFromRMS:
 
     def __add_to_object(self, keyword, root, storage_object):
         item = root.find(keyword)
+        if item is None:
+            raise ValueError('Missing keyword {}'.format(keyword))
         text = item.text
         value = float(text.strip())
         key = self.__keyword_mapping[keyword]

@@ -12,9 +12,10 @@ from src.unit_test.constants import (
 from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, writePolygons
 from src.utils.constants import Debug
 from src.utils.methods import prettify
+from src.utils.constants import Debug
 
 
-def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, debug_level=Debug.OFF):
+def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, debug_level):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()
@@ -32,10 +33,9 @@ def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, fa
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
     # Create truncation rule object from input data, not read from file
+    # faciesInZone debug_level are global variables in test script
     truncRuleOut = Trunc3D_bayfill(
-        trRule, mainFaciesTable, faciesInZone, nGaussFields,
-        debug_level, modelFileName
-    )
+        trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level, modelFileName)
     # Create and write XML tree 
     createXMLTreeAndWriteFile(truncRuleOut, outputModelFileName)
 
@@ -56,15 +56,19 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
 
 def createTrunc(
         outputModelFileName, fTable, faciesInZone, faciesInTruncRule,
-        sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
+        gaussFieldsInZone, gaussFieldsForBGFacies,
+        sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
 ):
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
+
     # Create an object and initialize it
-    # get_debug_level
+    # Global variables in test script: faciesInZone, faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam
+    # debug_level
     truncRuleOut = Trunc3D_bayfill()
     truncRuleOut.initialize(
         mainFaciesTable, faciesInZone, faciesInTruncRule,
+        gaussFieldsInZone, gaussFieldsForBGFacies,
         sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
     )
 
@@ -75,21 +79,24 @@ def createTrunc(
 
 def initialize_write_read(
         outputModelFileName1, outputModelFileName2, fTable, faciesInZone,
-        faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
+        faciesInTruncRule, gaussFieldsInZone, gaussFieldsForBGFacies,
+        sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
 ):
     file1 = outputModelFileName1
     file2 = outputModelFileName2
     # Create an object for truncation rule and write to file
+    # Global variable truncRule
     truncRuleA = createTrunc(
-        file1, fTable, faciesInZone, faciesInTruncRule,
+        file1, fTable, faciesInZone, faciesInTruncRule, gaussFieldsInZone, gaussFieldsForBGFacies,
         sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
     )
     inputFile = file1
 
     # Write datastructure:
-    # truncRule.writeContentsInDataStructure()
+    #    truncRule.writeContentsInDataStructure()
     # Read the previously written file as and XML file and write it out again to a new file
-    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, debug_level)
+    # Global variable truncRule2
+    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, gaussFieldsInZone, debug_level)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = filecmp.cmp(file1, file2)
@@ -164,12 +171,13 @@ def test_case_1():
     sf_name = ''
     ysf = 0.0
     sbhd = 0.0
-    nGaussFields = 3
+    gaussFieldsInZone = ['GRF1', 'GRF2', 'GRF3', 'GRF4']
+    gaussFieldsForBGFacies = ['GRF1', 'GRF2', 'GRF3']
     useConstTruncParam = True
     faciesReferenceFile = get_facies_reference_file_path(1)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf
     )
 
 
@@ -182,12 +190,13 @@ def test_case_2():
     sf_name = ''
     ysf = 0.0
     sbhd = 0.0
-    nGaussFields = 3
+    gaussFieldsInZone = ['GRF1', 'GRF2', 'GRF3', 'GRF4']
+    gaussFieldsForBGFacies = ['GRF1', 'GRF2', 'GRF3']
     useConstTruncParam = True
     faciesReferenceFile = get_facies_reference_file_path(2)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf
     )
 
 
@@ -200,12 +209,13 @@ def test_case_3():
     sf_name = ''
     ysf = 0.0
     sbhd = 0.0
-    nGaussFields = 3
+    gaussFieldsInZone = ['GRF1', 'GRF2', 'GRF3', 'GRF4']
+    gaussFieldsForBGFacies = ['GRF1', 'GRF2', 'GRF3']
     useConstTruncParam = True
     faciesReferenceFile = get_facies_reference_file_path(3)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf
     )
 
 
@@ -218,12 +228,13 @@ def test_case_4():
     sf_name = ''
     ysf = 1.0
     sbhd = 0.0
-    nGaussFields = 3
+    gaussFieldsInZone = ['GRF1', 'GRF2', 'GRF3', 'GRF4']
+    gaussFieldsForBGFacies = ['GRF1', 'GRF2', 'GRF3']
     useConstTruncParam = True
     faciesReferenceFile = get_facies_reference_file_path(4)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf
     )
 
 
@@ -236,12 +247,13 @@ def test_case_5():
     sf_name = ''
     ysf = 1.0
     sbhd = 1.0
-    nGaussFields = 3
+    gaussFieldsInZone = ['GRF1', 'GRF2', 'GRF3', 'GRF4']
+    gaussFieldsForBGFacies = ['GRF1', 'GRF2', 'GRF3']
     useConstTruncParam = True
     faciesReferenceFile = get_facies_reference_file_path(5)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf
+        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf
     )
 
 
@@ -251,11 +263,13 @@ def get_facies_reference_file_path(testCase):
 
 
 def run(fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        nGaussFields, sbhd, sf_name, sf_value, useConstTruncParam, ysf):
+        gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf):
     [truncRule, truncRule2] = initialize_write_read(
         OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, fTable, faciesInZone,
-        faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam, NO_VERBOSE_DEBUG
+        faciesInTruncRule,  gaussFieldsInZone, gaussFieldsForBGFacies,
+        sf_value, sf_name, ysf, sbhd, useConstTruncParam, NO_VERBOSE_DEBUG
     )
+    nGaussFields = truncRule.getNGaussFieldsInModel()
     getClassName(truncRule)
     getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule)
     truncMapPolygons(truncRule, truncRule2, faciesProb, OUT_POLY_FILE1, OUT_POLY_FILE2)

@@ -6,7 +6,7 @@ import copy
 from src.utils.constants import Debug
 from src.utils.methods import isNumber
 from src.xmlFunctions import getKeyword, getTextCommand
-
+from src.utils.constants import Debug
 
 class APSFaciesProb:
     """
@@ -149,6 +149,15 @@ class APSFaciesProb:
         self.__mainFaciesTable = mainFaciesTable
         self.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
+
+    def __roundOffProb(self,resolutionRoundOff=100):
+        if self.__useConstProb == 1:
+            for i in range(len(self.__faciesProbForZoneModel)):
+                item = self.__faciesProbForZoneModel[i]
+                prob = float(item[self.__FPROB])
+                probNew = int(prob*resolutionRoundOff + 0.5)/resolutionRoundOff
+                item[self.__FPROB] = probNew
+                
     def __checkConstProbValuesAndNormalize(self, zoneNumber):
         if self.__useConstProb == 1:
             sumProb = 0.0
@@ -181,6 +190,7 @@ class APSFaciesProb:
     def getConstProbValue(self, fName):
         if self.__useConstProb == 1:
             found = 0
+            probCubeName = '0.0'
             for item in self.__faciesProbForZoneModel:
                 fN = item[self.__FNAME]
                 if fN == fName:
@@ -188,13 +198,15 @@ class APSFaciesProb:
                     found = 1
                     break
             if found == 0:
-                print('Error: Probability not found for facies: ' + fName)
-                return -999
-            else:
-                return float(probCubeName)
+                raise ValueError(
+                    'Probability for facies {} is not found'
+                    ''.format(fName)
+                    )
+            return float(probCubeName)
         else:
-            print('Error: Can not call getConstProbValue when useConstProb = 0')
-            return -999
+            raise ValueError(
+                'Can not call getConstProbValue when useConstProb = 0'
+            )
 
     def getFaciesInZoneModel(self):
         return copy.copy(self.__faciesInZoneModel)
@@ -281,6 +293,7 @@ class APSFaciesProb:
 
     def getProbParamName(self, fName):
         found = 0
+        probCubeName = None
         for item in self.__faciesProbForZoneModel:
             fN = item[self.__FNAME]
             if fN == fName:

@@ -49,6 +49,7 @@ import src.generalFunctionsUsingRoxAPI as gr
 from src import APSDataFromRMS, APSMainFaciesTable
 from src.utils.constants import Debug
 from src.utils.methods import prettify
+from src.utils.constants import Debug
 
 importlib.reload(APSDataFromRMS)
 importlib.reload(APSMainFaciesTable)
@@ -202,15 +203,18 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     # Read data from RMS project and write to XML file
     # Scan grid model data
     grid_models = project.grid_models
+    found = 0
+    gridModel = None
     for grid_model in grid_models:
-        found = 0
         if grid_model.name == gridModelName:
             gridModel = grid_model
             found = 1
             break
     if found == 0:
-        print('Error: Cound not find grid model with name: ' + gridModel.name + ' in RMS project.')
-        sys.exit()
+        raise ValueError(
+            'Could not find grid model with name: {} in RMS project'
+            ''.format(gridModelName)
+        )
 
     if debug_level >= Debug.VERY_VERBOSE:
         print('Debug outout: Read data for grid model: ' + gridModel.name + ' from  RMS project.')
@@ -404,8 +408,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         print('Debug output: Facies names: ')
         print(faciesCodeNames)
 
-    faciesTable = APSMainFaciesTable.APSMainFaciesTable()
-    faciesTable.initialize(faciesCodeNames)
+    faciesTable = APSMainFaciesTable.APSMainFaciesTable(fTable=faciesCodeNames)
     faciesTable.XMLAddElement(topElement)
     # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
