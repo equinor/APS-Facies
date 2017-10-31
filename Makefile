@@ -9,7 +9,7 @@ ifeq ($(CODE_DIR),)
 CODE_DIR := $(shell pwd)
 endif
 ifeq ($(PYTHONPATH),)
-PYTHONPATH := $(shell pwd)
+PYTHONPATH := $(CODE_DIR)
 endif
 SOURCE_DIR = $(CODE_DIR)/src
 BUILD_DIR = $(CODE_DIR)/build
@@ -64,6 +64,7 @@ build-gui: clean-all libdraw2D.so resource-file ui-files
 	            --distpath $(BUILD_DIR)/dist \
 	            --specpath $(BUILD_DIR) \
 	            --log-level $(LOG_LEVEL) \
+	            --paths $(CODE_DIR) \
 	            --name $(EXEC_NAME) \
 	            $(ENTRY_POINT) \
 	&& mv $(BUILD_DIR)/dist/$(EXEC_NAME) $(CODE_DIR)
