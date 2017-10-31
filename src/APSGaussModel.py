@@ -795,8 +795,7 @@ class APSGaussModel:
             power = self.__variogramForGFModel[i][GPOWER]
 
             if gfName != self.__trendForGFModel[i][TNAME]:
-                print('Error in class: ' + self.__className + ' in ' + 'XMLAddElement')
-                sys.exit()
+                raise ValueError('Error in class: ' + self.__className + ' in ' + 'XMLAddElement')
             useTrend = self.__trendForGFModel[i][TUSE]
             trendObj = self.__trendForGFModel[i][TOBJ]
             relStdDev = self.__trendForGFModel[i][TSTD]
@@ -859,11 +858,9 @@ class APSGaussModel:
             elem.text = ' ' + str(seedValue) + ' '
             gfElement.append(elem)
 
-
-
     def simGaussFieldWithTrendAndTransform(
-        self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-        gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
+            self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
 ):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']

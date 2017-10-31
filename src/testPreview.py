@@ -164,7 +164,7 @@ def main():
         print('Debug output: previewCrossSectionType: ' + ' ' + str(previewCrossSectionType))
         print('Debug output: previewCrossSectionIndx: ' + ' ' + str(previewCrossSectionIndx))
         print('Debug output: previewScale: ' + str(previewScale))
-        print(' \n')
+        print('\n')
 
     rmsData = APSDataFromRMS.APSDataFromRMS()
     print('- Read file: ' + inputRMSDataFileName)
