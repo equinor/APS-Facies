@@ -9,12 +9,13 @@ from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, trunc
 from src.utils.constants import Debug
 from src.utils.methods import prettify
 from src.unit_test.constants import (
-    FACIES_OUTPUT_FILE, ANGLE_GAUSS_FIELD_FILES, NO_VERBOSE_DEBUG, OUTPUT_MODEL_FILE_NAME1,
+    FACIES_OUTPUT_FILE, ANGLE_GAUSS_FIELD_FILES, OUTPUT_MODEL_FILE_NAME1,
     OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, USE_CONST_TRUNC_PARAM,
 )
 
 
-def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone,  gaussFieldsInZone, debug_level):
+def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone,
+                                  debug_level):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()
@@ -27,7 +28,7 @@ def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, fa
 
     # Get number of required Gauss fields
     nGaussFields = int(trRule.get('nGFields'))
-    #    print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
+    # print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
@@ -56,7 +57,7 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
 
 def createTrunc(
         outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, gaussFieldsForBGFacies,
-        truncStructure, overlayGroups, useConstTruncParam, debug_level
+        truncStructure, overlayGroups, useConstTruncParam, debug_level=Debug.OFF
 ):
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
@@ -73,10 +74,8 @@ def createTrunc(
 
 
 def initialize_write_read(
-        outputModelFileName1, outputModelFileName2, fTable, faciesInZone,
-        gaussFieldsInZone, gaussFieldsForBGFacies,
-        truncStructure, overlayGroups,
-        useConstTruncParam, debug_level
+        outputModelFileName1, outputModelFileName2, fTable, faciesInZone, gaussFieldsInZone,
+        gaussFieldsForBGFacies, truncStructure, overlayGroups, useConstTruncParam, debug_level=Debug.OFF
 ):
     file1 = outputModelFileName1
     file2 = outputModelFileName2
@@ -117,7 +116,7 @@ def test_Trunc2DAngle():
     start = 1
     end = 9
     for testCase in range(start, end + 1):
-        print(' ')
+        print('')
         print('********* Case number: ' + str(testCase) + ' **********')
 
         if testCase == 1:
@@ -143,21 +142,21 @@ def test_Trunc2DAngle():
 
         elif testCase == 8:
             test_case_8()
-            
+
         elif testCase == 9:
             test_case_9()
-            
-        # elif testCase == 10:
-        #     test_case_10()
-        #
-        # elif testCase == 11:
-        #     test_case_11()
-        #
-        # elif testCase == 12:
-        #     test_case_12()
-        #
-        # elif testCase == 13:
-        #     test_case_13()
+
+            # elif testCase == 10:
+            #     test_case_10()
+            #
+            # elif testCase == 11:
+            #     test_case_11()
+            #
+            # elif testCase == 12:
+            #     test_case_12()
+            #
+            # elif testCase == 13:
+            #     test_case_13()
 
 
 def test_case_1():
@@ -173,7 +172,7 @@ def test_case_1():
     faciesReferenceFile = get_facies_reference_file_path(1)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
 
 
@@ -190,8 +189,9 @@ def test_case_2():
     faciesReferenceFile = get_facies_reference_file_path(2)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
+
 
 def test_case_3():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
@@ -204,12 +204,12 @@ def test_case_3():
 
     # Group1
     alphaList11 = [['GF3', 'F5', 1.0, 0.9]]
-    backgroundList1 =  ['F1']
+    backgroundList1 = ['F1']
     overlayGroup1 = [alphaList11, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
     alphaList12 = [['GF4', 'F4', 1.0, 0.0]]
-    backgroundList2 =  ['F3']
+    backgroundList2 = ['F3']
     overlayGroup2 = [alphaList12, backgroundList2]
     overlayGroups.append(overlayGroup2)
 
@@ -217,8 +217,9 @@ def test_case_3():
     faciesReferenceFile = get_facies_reference_file_path(3)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
+
 
 def test_case_3():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
@@ -230,19 +231,19 @@ def test_case_3():
     overlayGroups = []
     # Group1
     alphaList1 = [['GF3', 'F5', 1.0, 0.9]]
-    backgroundList1 =  ['F1']
+    backgroundList1 = ['F1']
     overlayGroup1 = [alphaList1, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
     alphaList2 = [['GF4', 'F4', 1.0, 0.0]]
-    backgroundList2 =  ['F3']
+    backgroundList2 = ['F3']
     overlayGroup2 = [alphaList2, backgroundList2]
     overlayGroups.append(overlayGroup2)
     faciesProb = [0.3, 0.2, 0.3, 0.1, 0.1]
     faciesReferenceFile = get_facies_reference_file_path(3)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
 
 
@@ -257,12 +258,12 @@ def test_case_4():
 
     # Group1
     alphaList11 = [['GF3', 'F5', 1.0, 0.0]]
-    backgroundList1 =  ['F2', 'F1']
+    backgroundList1 = ['F2', 'F1']
     overlayGroup1 = [alphaList11, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
     alphaList12 = [['GF4', 'F4', 1.0, 1.0]]
-    backgroundList2 =  ['F3']
+    backgroundList2 = ['F3']
     overlayGroup2 = [alphaList12, backgroundList2]
     overlayGroups.append(overlayGroup2)
 
@@ -270,7 +271,7 @@ def test_case_4():
     faciesReferenceFile = get_facies_reference_file_path(4)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
 
 
@@ -286,12 +287,12 @@ def test_case_5():
 
     # Group1
     alphaList11 = [['GF3', 'F5', 1.0, 0.0]]
-    backgroundList1 =  ['F3', 'F2']
+    backgroundList1 = ['F3', 'F2']
     overlayGroup1 = [alphaList11, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
     alphaList12 = [['GF4', 'F4', 1.0, 0.0]]
-    backgroundList2 =  ['F1']
+    backgroundList2 = ['F1']
     overlayGroup2 = [alphaList12, backgroundList2]
     overlayGroups.append(overlayGroup2)
 
@@ -299,15 +300,16 @@ def test_case_5():
     faciesReferenceFile = get_facies_reference_file_path(5)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
 
 
 def test_case_6():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'}
     faciesInZone = ['F2', 'F3', 'F1', 'F5', 'F4']
-    truncStructure = [['F1', -180.0, 1.0], ['F3', -170.0, 0.5], ['F3', -160.0, 0.5], ['F2', -150.0, 0.7],
-                      ['F2', -140.0, 0.3]]
+    truncStructure = [
+        ['F1', -180.0, 1.0], ['F3', -170.0, 0.5], ['F3', -160.0, 0.5], ['F2', -150.0, 0.7], ['F2', -140.0, 0.3]
+    ]
     faciesInTruncRule = ['F1', 'F3', 'F2', 'F5', 'F4']
     gaussFieldsInZone = ['GF1', 'GF2', 'GF3', 'GF4']
     gaussFieldsForBGFacies = ['GF1', 'GF2']
@@ -315,12 +317,12 @@ def test_case_6():
 
     # Group1
     alphaList11 = [['GF3', 'F5', 1.0, 0.0]]
-    backgroundList1 =  ['F3', 'F2']
+    backgroundList1 = ['F3', 'F2']
     overlayGroup1 = [alphaList11, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
     alphaList12 = [['GF4', 'F4', 1.0, 0.0]]
-    backgroundList2 =  ['F1']
+    backgroundList2 = ['F1']
     overlayGroup2 = [alphaList12, backgroundList2]
     overlayGroups.append(overlayGroup2)
 
@@ -328,15 +330,17 @@ def test_case_6():
     faciesReferenceFile = get_facies_reference_file_path(6)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
 
 
 def test_case_7():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7', 8: 'F8'}
     faciesInZone = ['F2', 'F3', 'F1', 'F5', 'F4', 'F6', 'F7', 'F8']
-    truncStructure = [['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
-                      ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]]
+    truncStructure = [
+        ['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
+        ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]
+    ]
     faciesInTruncRule = ['F1', 'F3', 'F7', 'F2', 'F6', 'F5', 'F4', 'F8']
     gaussFieldsInZone = ['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6']
     gaussFieldsForBGFacies = ['GF1', 'GF2']
@@ -344,33 +348,35 @@ def test_case_7():
 
     # Group1
     alphaList11 = [['GF3', 'F5', 1.0, 0.0]]
-    backgroundList1 =  ['F3', 'F2']
+    backgroundList1 = ['F3', 'F2']
     overlayGroup1 = [alphaList11, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
     alphaList12 = [['GF4', 'F4', 1.0, 0.0]]
-    backgroundList2 =  ['F1']
+    backgroundList2 = ['F1']
     overlayGroup2 = [alphaList12, backgroundList2]
     overlayGroups.append(overlayGroup2)
     # Group3
     alphaList13 = [['GF5', 'F8', 1.0, 1.0]]
-    backgroundList3 =  ['F7']
+    backgroundList3 = ['F7']
     overlayGroup3 = [alphaList13, backgroundList3]
     overlayGroups.append(overlayGroup3)
-    
+
     faciesProb = [0.15, 0.3, 0.2, 0.1, 0.1, 0.05, 0.05, 0.05]
     faciesReferenceFile = get_facies_reference_file_path(7)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
 
 
 def test_case_8():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7', 8: 'F8'}
     faciesInZone = ['F2', 'F3', 'F1', 'F5', 'F4', 'F6', 'F7', 'F8']
-    truncStructure = [['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
-                      ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]]
+    truncStructure = [
+        ['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
+        ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]
+    ]
     faciesInTruncRule = ['F1', 'F3', 'F7', 'F2', 'F6', 'F5', 'F4', 'F8']
     gaussFieldsInZone = ['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6']
     gaussFieldsForBGFacies = ['GF1', 'GF2']
@@ -378,35 +384,42 @@ def test_case_8():
 
     # Group1
     alphaList1 = [['GF3', 'F5', 1.0, 0.0]]
-    backgroundList1 =  ['F3', 'F2']
+    backgroundList1 = ['F3', 'F2']
     overlayGroup1 = [alphaList1, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
-    alphaList2 = [['GF4', 'F4', 0.3, 0.0],
-                  ['GF5', 'F8', 0.3, 0.0],
-                  ['GF6', 'F4', 0.4, 0.0]]
-    backgroundList2 =  ['F1']
+    alphaList2 = [
+        ['GF4', 'F4', 0.3, 0.0],
+        ['GF5', 'F8', 0.3, 0.0],
+        ['GF6', 'F4', 0.4, 0.0]
+    ]
+    backgroundList2 = ['F1']
     overlayGroup2 = [alphaList2, backgroundList2]
     overlayGroups.append(overlayGroup2)
     # Group3
-    alphaList3 = [['GF5', 'F8', 0.7, 1.0],
-                  ['GF4', 'F4', 0.3, 1.0]]
-    backgroundList3 =  ['F7']
+    alphaList3 = [
+        ['GF5', 'F8', 0.7, 1.0],
+        ['GF4', 'F4', 0.3, 1.0]
+    ]
+    backgroundList3 = ['F7']
     overlayGroup3 = [alphaList3, backgroundList3]
     overlayGroups.append(overlayGroup3)
-    
+
     faciesProb = [0.15, 0.3, 0.2, 0.1, 0.1, 0.05, 0.05, 0.05]
     faciesReferenceFile = get_facies_reference_file_path(8)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
+
 
 def test_case_9():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7', 8: 'F8'}
     faciesInZone = ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8']
-    truncStructure = [['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
-                      ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]]
+    truncStructure = [
+        ['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
+        ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]
+    ]
     faciesInTruncRule = ['F1', 'F3', 'F7', 'F2', 'F6', 'F5', 'F4', 'F8']
     gaussFieldsInZone = ['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6']
     gaussFieldsForBGFacies = ['GF1', 'GF2']
@@ -414,32 +427,33 @@ def test_case_9():
 
     # Group1
     alphaList1 = [['GF3', 'F5', 1.0, 0.0]]
-    backgroundList1 =  ['F3', 'F2']
+    backgroundList1 = ['F3', 'F2']
     overlayGroup1 = [alphaList1, backgroundList1]
     overlayGroups.append(overlayGroup1)
     # Group2
-    alphaList2 = [['GF4', 'F4', 0.3, 0.0],
-                  ['GF5', 'F8', 0.3, 0.0],
-                  ['GF6', 'F4', 0.4, 0.0]]
-    backgroundList2 =  ['F1']
+    alphaList2 = [
+        ['GF4', 'F4', 0.3, 0.0],
+        ['GF5', 'F8', 0.3, 0.0],
+        ['GF6', 'F4', 0.4, 0.0]
+    ]
+    backgroundList2 = ['F1']
     overlayGroup2 = [alphaList2, backgroundList2]
     overlayGroups.append(overlayGroup2)
     # Group3
-    alphaList3 = [['GF5', 'F8', 0.7, 1.0],
-                  ['GF4', 'F4', 0.3, 1.0]]
-    backgroundList3 =  ['F7']
+    alphaList3 = [
+        ['GF5', 'F8', 0.7, 1.0],
+        ['GF4', 'F4', 0.3, 1.0]
+    ]
+    backgroundList3 = ['F7']
     overlayGroup3 = [alphaList3, backgroundList3]
     overlayGroups.append(overlayGroup3)
-    
+
     faciesProb = [0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.99]
     faciesReferenceFile = get_facies_reference_file_path(9)
     run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
     )
-
-
-
 
 
 def get_facies_reference_file_path(testCase):
@@ -447,13 +461,13 @@ def get_facies_reference_file_path(testCase):
     return faciesReferenceFile
 
 
-def run(fTable, faciesInTruncRule, faciesInZone, faciesProb,
-        faciesReferenceFile, gaussFieldsInZone,  gaussFieldsForBGFacies, overlayGroups, truncStructure):
+def run(
+        fTable, faciesInTruncRule, faciesInZone, faciesProb,
+        faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
+):
     [truncRule, truncRule2] = initialize_write_read(
-        OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, fTable, faciesInZone,
-        gaussFieldsInZone, gaussFieldsForBGFacies,
-        truncStructure, overlayGroups,
-        USE_CONST_TRUNC_PARAM, Debug.OFF
+        OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, fTable, faciesInZone, gaussFieldsInZone,
+        gaussFieldsForBGFacies, truncStructure, overlayGroups, USE_CONST_TRUNC_PARAM, Debug.OFF
     )
     nGaussFields = truncRule.getNGaussFieldsInModel()
     getClassName(truncRule)
