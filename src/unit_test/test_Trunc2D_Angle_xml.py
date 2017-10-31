@@ -5,17 +5,18 @@ from xml.etree.ElementTree import Element
 
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
-from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons
-from src.utils.constants import Debug
-from src.utils.methods import prettify
 from src.unit_test.constants import (
     FACIES_OUTPUT_FILE, ANGLE_GAUSS_FIELD_FILES, OUTPUT_MODEL_FILE_NAME1,
     OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, USE_CONST_TRUNC_PARAM,
 )
+from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons
+from src.utils.constants.simple import Debug
+from src.utils.xml import prettify
 
 
-def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone,
-                                  debug_level):
+def interpretXMLModelFileAndWrite(
+        modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, debug_level=Debug.OFF
+):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()

@@ -1,10 +1,11 @@
 from src.APSModel import APSModel
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
-from src.utils.constants import (
-    CubicTruncationRuleConstants, CubicTruncationRuleElements, Debug, ModeConstants,
+from src.utils.constants.constants import (
+    CubicTruncationRuleConstants, CubicTruncationRuleElements, ModeConstants,
     ModeOptions, ProjectConstants, TruncationRuleConstants,
 )
+from src.utils.constants.simple import Debug
 
 
 class State(dict):

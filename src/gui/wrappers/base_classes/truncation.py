@@ -1,9 +1,8 @@
-from PyQt5.Qt import Qt
+from functools import lru_cache
 from typing import Dict, List, Union
 
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QLineEdit, QPushButton, QSlider, QWidget
-from functools import lru_cache
 
 from src.gui.wrappers.base_classes.chekkers.values import should_change
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
@@ -13,7 +12,7 @@ from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
-from src.utils.constants import (
+from src.utils.constants.constants import (
     Angles, BaseNames, CubicTruncationRuleConstants, CubicTruncationRuleElements, Defaults,
     FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleLibraryElements,
 )
@@ -317,8 +316,8 @@ class BaseTruncation(OkCancelDialog):
         return {
             CubicTruncationRuleConstants.PROPORTION_SCALE: self.basename_sliders,
             CubicTruncationRuleConstants.PROPORTION_INPUT: self.basename_proportions,
-            CubicTruncationRuleConstants.COLOR:            self.basename_color_button,
-            CubicTruncationRuleConstants.FACIES:           self.basename_drop_down,
+            CubicTruncationRuleConstants.COLOR: self.basename_color_button,
+            CubicTruncationRuleConstants.FACIES: self.basename_drop_down,
         }
 
     def ensure_normalization(self):

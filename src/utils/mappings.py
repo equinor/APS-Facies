@@ -1,14 +1,14 @@
+from functools import lru_cache
 from typing import Dict, List, Set, Union
 
 from PyQt5.QtWidgets import QWidget
-from functools import lru_cache
 
 from src.gui.wrappers.base_classes.getters.general import get_element
-from src.utils.constants import (
+from src.utils.constants.constants import (
     BayfillTruncationRuleConstants, BayfillTruncationRuleElements,
     CubicTruncationRuleConstants, CubicTruncationRuleElements, NonCubicTruncationRuleConstants,
     NonCubicTruncationRuleElements, ProjectConstants, ProjectElements, TruncationLibraryButtonNameKeys,
-    TruncationRuleLibraryElements, TruncationLibraryKeys, TruncationLibrarySubKeys, TruncationRuleConstants,
+    TruncationLibraryKeys, TruncationLibrarySubKeys, TruncationRuleConstants,
     TruncationRuleLibraryElements,
 )
 
@@ -16,11 +16,11 @@ from src.utils.constants import (
 @lru_cache()
 def truncation_rule_element_key_to_state_key() -> Dict[TruncationRuleLibraryElements, TruncationRuleConstants]:
     return {
-        CubicTruncationRuleElements.PROPORTIONS:    CubicTruncationRuleConstants.PROPORTION_INPUT,
-        CubicTruncationRuleElements.SLIDERS:        CubicTruncationRuleConstants.PROPORTION_SCALE,
-        CubicTruncationRuleElements.COLOR_BUTTON:   CubicTruncationRuleConstants.COLOR,
-        CubicTruncationRuleElements.DROP_DOWN:      CubicTruncationRuleConstants.FACIES,
-        NonCubicTruncationRuleElements.ANGLES:      NonCubicTruncationRuleConstants.ANGLES,
+        CubicTruncationRuleElements.PROPORTIONS: CubicTruncationRuleConstants.PROPORTION_INPUT,
+        CubicTruncationRuleElements.SLIDERS: CubicTruncationRuleConstants.PROPORTION_SCALE,
+        CubicTruncationRuleElements.COLOR_BUTTON: CubicTruncationRuleConstants.COLOR,
+        CubicTruncationRuleElements.DROP_DOWN: CubicTruncationRuleConstants.FACIES,
+        NonCubicTruncationRuleElements.ANGLES: NonCubicTruncationRuleConstants.ANGLES,
         BayfillTruncationRuleElements.SLANT_FACTOR: BayfillTruncationRuleConstants.SLANTED_FACTOR,
     }
 
@@ -28,11 +28,11 @@ def truncation_rule_element_key_to_state_key() -> Dict[TruncationRuleLibraryElem
 @lru_cache()
 def project_parameter_state_key_to_element_key() -> Dict[ProjectConstants, ProjectElements]:
     return {
-        ProjectConstants.FACIES_PARAMETER_NAME:   ProjectElements.FACIES_PARAMETER_NAME,
+        ProjectConstants.FACIES_PARAMETER_NAME: ProjectElements.FACIES_PARAMETER_NAME,
         ProjectConstants.GAUSSIAN_PARAMETER_NAME: ProjectElements.GAUSSIAN_PARAMETER_NAME,
-        ProjectConstants.GRID_MODEL_NAME:         ProjectElements.GRID_MODEL_NAME,
-        ProjectConstants.WORKFLOW_NAME:           ProjectElements.WORKFLOW_NAME,
-        ProjectConstants.ZONES_PARAMETER_NAME:    ProjectElements.ZONES_PARAMETER_NAME,
+        ProjectConstants.GRID_MODEL_NAME: ProjectElements.GRID_MODEL_NAME,
+        ProjectConstants.WORKFLOW_NAME: ProjectElements.WORKFLOW_NAME,
+        ProjectConstants.ZONES_PARAMETER_NAME: ProjectElements.ZONES_PARAMETER_NAME,
     }
 
 
@@ -52,8 +52,8 @@ def truncation_library_content() -> Dict[
     actual_name_key = TruncationLibraryButtonNameKeys.ACTUAL_NAME_OF_BUTTON
     prefix_key = TruncationLibraryButtonNameKeys.IS_PREFIX
     return {
-        TruncationLibraryKeys.CUBIC:     {
-            num_facies:  {
+        TruncationLibraryKeys.CUBIC: {
+            num_facies: {
                 2: ['a', 'b', ],
                 3: ['c', 'd', 'e', 'f', ],
                 4: ['g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', ],
@@ -61,11 +61,11 @@ def truncation_library_content() -> Dict[
             },
             button_name: {
                 actual_name_key: TruncationRuleLibraryElements.CUBIC_BUTTON,
-                prefix_key:      True,
+                prefix_key: True,
             },
         },
         TruncationLibraryKeys.NON_CUBIC: {
-            num_facies:  {
+            num_facies: {
                 2: ['I', ],
                 3: ['II', 'III', 'IV', ],
                 4: ['V', 'VI', ],
@@ -73,21 +73,21 @@ def truncation_library_content() -> Dict[
             },
             button_name: {
                 actual_name_key: TruncationRuleLibraryElements.NON_CUBIC_BUTTON,
-                prefix_key:      True,
+                prefix_key: True,
             },
         },
-        TruncationLibraryKeys.BAYFILL:   {
-            num_facies:  {5},
+        TruncationLibraryKeys.BAYFILL: {
+            num_facies: {5},
             button_name: {
                 actual_name_key: TruncationRuleLibraryElements.BAYFILL_BUTTON,
-                prefix_key:      False,
+                prefix_key: False,
             },
         },
-        TruncationLibraryKeys.CUSTOM:    {
-            num_facies:  {2, 3, 4, 5},
+        TruncationLibraryKeys.CUSTOM: {
+            num_facies: {2, 3, 4, 5},
             button_name: {
                 actual_name_key: TruncationRuleLibraryElements.CUSTOM_BUTTON,
-                prefix_key:      False,
+                prefix_key: False,
             },
         },
     }
@@ -143,7 +143,7 @@ def truncation_library_elements(element: QWidget) -> Dict[
     return {
         key: [
             {
-                button_name_key:                  get_element(element, button_information[button_name_key]),
+                button_name_key: get_element(element, button_information[button_name_key]),
                 num_facies_key: button_information[num_facies_key]
             }
             for button_information in button_names[key]
@@ -151,7 +151,7 @@ def truncation_library_elements(element: QWidget) -> Dict[
         if isinstance(button_names[key], list)
         else
         {
-            button_name_key:                 get_element(element, button_names[key][button_name_key]),
+            button_name_key: get_element(element, button_names[key][button_name_key]),
             num_facies_key: button_names[key][num_facies_key],
         }
         for key in button_names.keys()
@@ -181,6 +181,6 @@ def _add_button_information(button_information, data, key):
     button = button_information[TruncationLibrarySubKeys.BUTTON_NAME_KEY]
     number_of_facies = button_information[TruncationLibrarySubKeys.NUMBER_OF_FACIES_KEY]
     data[button] = {
-        TruncationLibraryKeys.KEY:                     key,
+        TruncationLibraryKeys.KEY: key,
         TruncationLibrarySubKeys.NUMBER_OF_FACIES_KEY: number_of_facies
     }

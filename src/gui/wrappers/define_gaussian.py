@@ -6,7 +6,7 @@ from src.gui.state import State
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements
 from src.resources.ui.Gaussian_ui import Ui_DefineGaussian
-from src.utils.constants import DefineGaussianElements, TrendSettingsLabelsElements, Defaults
+from src.utils.constants.constants import DefineGaussianElements, TrendSettingsLabelsElements, Defaults
 from src.utils.methods import toggle_elements
 
 

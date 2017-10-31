@@ -6,15 +6,15 @@ the experimental mode.
 """
 from PyQt5.QtWidgets import *
 
-from src.gui.wrappers.base_classes.getters.general import get_element
 from src.gui.state import State
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
+from src.gui.wrappers.base_classes.getters.general import get_element
 from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.main_window import MainWindow
 from src.resources.ui.Project_ui import Ui_ProjectSelection
-from src.utils.constants import Defaults, MessageIcon, ModeOptions, ProjectElements, HideOptions
-from src.utils.methods import get_project_file, toggle_elements
+from src.utils.constants.constants import Defaults, MessageIcon, ModeOptions, ProjectElements, HideOptions
 from src.utils.mappings import project_parameter_state_key_to_element_key
+from src.utils.methods import get_project_file, toggle_elements
 
 
 class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):

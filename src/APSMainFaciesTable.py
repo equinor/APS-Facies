@@ -1,18 +1,15 @@
 #!/bin/env python
+import copy
 import sys
 from xml.etree.ElementTree import Element
-from src.utils.constants import Debug
-import copy
 
-from src.utils.constants import Debug
 from src.utils.APSExceptions import ReadingXmlError
+from src.utils.constants.simple import Debug
 
 
 class APSMainFaciesTable:
     """
-    Class APSMainFaciesTable
-    Description: Keeps the global facies table. All facies used in the APS model
-                 must exist in this table before being used.
+    Keeps the global facies table. All facies used in the APS model must exist in this table before being used.
 
      Public member functions:
        Constructor:  def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF)
@@ -43,8 +40,6 @@ class APSMainFaciesTable:
      Private member functions:
 
        def __checkUniqueFaciesNamesAndCodes(self)
-
-    --------------------------------------------------------------------
     """
 
     def __init__(self, ET_Tree=None, modelFileName=None, fTable=None, debug_level=Debug.OFF):

@@ -4,8 +4,8 @@ A wrapper, and implementation of the window that lets the user assign probabilit
 'Implements' the design in Assign_Probs.ui, and wraps around src/resources/ui/Assign_Probs_ui.py.
 """
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from src.resources.ui.Assign_Probs_ui import Ui_AssignProbabilities
 

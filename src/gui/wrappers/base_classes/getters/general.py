@@ -1,4 +1,4 @@
-from typing import Union, List, Set, Iterable
+from typing import Union, List, Iterable
 
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QComboBox, QLineEdit, QPushButton, QSlider, QCheckBox
@@ -7,7 +7,7 @@ from src.gui.wrappers.base_classes.getters.color import get_color
 from src.gui.wrappers.base_classes.getters.combo_box import get_choice
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.getters.slider import get_value_of_slider
-from src.utils.constants import BaseNames, TruncationRuleLibraryElements, FaciesLabels
+from src.utils.constants.constants import BaseNames, TruncationRuleLibraryElements, FaciesLabels
 
 
 def get_value_of_element(element: Union[QLineEdit, QSlider, QPushButton, QComboBox]) -> Union[float, int, QColor, str]:

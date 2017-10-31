@@ -13,11 +13,11 @@ from src.Trend3D_linear_model_xml import Trend3D_linear_model
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
-from src.utils.constants import Debug, VariogramType
 from src.unit_test.constants import (
-    FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, VERY_VERBOSE_DEBUG,
-    RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME, NO_VERBOSE_DEBUG
+    FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
+    NO_VERBOSE_DEBUG
 )
+from src.utils.constants.simple import Debug, VariogramType
 
 
 def defineCommonModelParam(
@@ -344,6 +344,7 @@ def test_case_1():
     #  --- Zone 2 ---
     test_case_1_zone_2()
 
+
 def test_case_2():
     print('')
     print('**** Case number: 2 ****')
@@ -354,12 +355,14 @@ def test_case_2():
     #  --- Zone 2 ---
     test_case_2_zone_2()
 
+
 def test_case_3():
     print('')
     print('**** Case number: 3 ****')
 
     #  --- Zone 1 ---
     test_case_3_zone_1()
+
 
 def test_case_1_zone_1():
     print('Common parameters')
@@ -377,6 +380,7 @@ def test_case_1_zone_1():
     apsmodel.setSelectedZoneNumberList(selectedZones)
     apsmodel.setPreviewZoneNumber(1)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+
 
 def test_case_1_zone_2():
     print('Common parameters')
@@ -397,6 +401,7 @@ def test_case_1_zone_2():
     apsmodel.setPreviewZoneNumber(2)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
+
 def test_case_2_zone_1():
     print('Common parameters')
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
@@ -414,7 +419,8 @@ def test_case_2_zone_1():
     apsmodel.setSelectedZoneNumberList(selectedZones)
     apsmodel.setPreviewZoneNumber(1)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
-    
+
+
 def test_case_2_zone_2():
     print('Common parameters')
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
@@ -434,6 +440,7 @@ def test_case_2_zone_2():
     apsmodel.setPreviewZoneNumber(2)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
+
 def test_case_3_zone_1():
     print('Common parameters')
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
@@ -451,7 +458,7 @@ def test_case_3_zone_1():
     apsmodel.setPreviewZoneNumber(1)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
-    
+
 def add_zone_1_for_case_1(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
@@ -491,6 +498,7 @@ def add_zone_1_for_case_1(apsmodel):
         debug_level=NO_VERBOSE_DEBUG
     )
 
+
 def add_zone_2_for_case_1(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
@@ -521,11 +529,11 @@ def add_zone_2_for_case_1(apsmodel):
         truncType='Angle',
         alphaFieldNameForBackGroundFacies=['GRF3', 'GRF4'],
         truncStructureList=[['F1', 0.0, 1.0], ['F3', 45.0, 1.0]],
-        overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1','F3']]],
+        overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1', 'F3']]],
         useConstTruncParam=1,
         debug_level=NO_VERBOSE_DEBUG
     )
-    
+
 
 def add_zone_1_for_case_2(apsmodel):
     addZoneParam(
@@ -561,7 +569,8 @@ def add_zone_1_for_case_2(apsmodel):
         useConstTruncParam=1,
         debug_level=NO_VERBOSE_DEBUG
     )
-    
+
+
 def add_zone_2_for_case_2(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
@@ -597,6 +606,7 @@ def add_zone_2_for_case_2(apsmodel):
         debug_level=NO_VERBOSE_DEBUG
     )
 
+
 def add_zone_1_for_case_3(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
@@ -630,7 +640,7 @@ def add_zone_1_for_case_3(apsmodel):
         ysf=0.5,
         sbhd=0.55,
         useConstTruncParam=1,
-        faciesInTruncRule=['F1','F2','F3','F5','F7'],
+        faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
         debug_level=NO_VERBOSE_DEBUG
     )
 

@@ -1,4 +1,4 @@
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
 
 RMS_PROJECT = 'testNeslen.rms10'
 RMS_WORKFLOW = 'Example APS workflow'

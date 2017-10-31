@@ -1,17 +1,15 @@
 #!/bin/env python
+import copy
 from xml.etree.ElementTree import Element
 
-import copy
+from src.utils.constants.simple import Debug
+from src.utils.xml import getKeyword, getIntCommand
 
-from src.utils.constants import Debug
-from src.xmlFunctions import getIntCommand, getKeyword
-from src.utils.constants import Debug
 
 class APSGaussFieldJobs:
     """
-    Class APSGaussFieldJobs
-    Description: Keep the name of RMS petro jobs and  associated 3D property
-                 parameter these jobs will create
+    Keep the name of RMS petro jobs and  associated 3D property
+    parameter these jobs will create
 
     Public member functions:
     Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,debug_level=Debug.OFF)
@@ -139,7 +137,7 @@ class APSGaussFieldJobs:
             print(repr(self.__gaussFieldNamesPerJob))
 
     def initialize(self, gfJobNames, gfNamesPerJob, debug_level=Debug.OFF):
-        if debug_level >=  Debug.VERY_VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
         self.__jobNames = copy.copy(gfJobNames)
@@ -220,7 +218,6 @@ class APSGaussFieldJobs:
                 'Cannot find specified gauss field name {} for specified job name {}'
                 ''.format(gfName, jobName)
             )
-
 
     def addGaussFieldJob(self, jobName, gaussFieldParamNames):
         # Check that the job name does not exist
