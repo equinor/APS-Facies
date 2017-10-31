@@ -198,8 +198,6 @@ class APSMainFaciesTable:
             elem.text = ' ' + str(fCode) + ' '
             fElement.append(elem)
 
-        return
-
     def __checkUniqueFaciesNamesAndCodes(self):
         found = 0
         for i in range(self.getNFacies()):

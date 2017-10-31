@@ -288,7 +288,6 @@ class APSGaussFieldJobs:
                 elem = Element(tag)
                 elem.text = ' ' + gfName.strip() + ' '
                 jobElement.append(elem)
-        return
 
     def __checkUniqueGaussFieldNames(self):
         found = 0
