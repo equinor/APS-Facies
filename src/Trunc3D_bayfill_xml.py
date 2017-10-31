@@ -1,15 +1,11 @@
 #!/bin/env python
+import copy
 import math
 from xml.etree.ElementTree import Element
 
-import copy
-import numpy as np
 from src.Trunc2D_Base_xml import Trunc2D_Base
-from src.xmlFunctions import getKeyword
-from src.utils.APSExceptions import InconsistencyError
-from src.utils.constants import Debug
-
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
+from src.utils.xml import getKeyword
 
 """
 ------------ Truncation map for Bayfill ----------------------------------
@@ -77,8 +73,8 @@ Description: This truncation rule was the first truncation rule developed in thi
 
 class Trunc3D_bayfill(Trunc2D_Base):
     """
-        Description: This class implements adaptive pluri-gaussian field
-        trucation for the Bayfill model. (Three transformed gaussian fields)
+    This class implements adaptive pluri-gaussian field
+    truncation for the Bayfill model. (Three transformed gaussian fields)
     """
 
     def __setEmpty(self):
@@ -87,7 +83,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self._className = 'Trunc3D_Bayfill'
 
         self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
-        
+
         # Internal data structure
         self.__param_sf = []
         self.__param_ysf = 0
@@ -108,10 +104,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  debug_level=Debug.OFF, modelFileName=None):
         """
-           Description: Create either an empty object which have to be initialized
-                        later using the initialize function or create a full object
-                        by reading the values from an input XML tree representing the
-                        model file input.
+        Create either an empty object which have to be initialized
+        later using the initialize function or create a full object
+        by reading the values from an input XML tree representing the
+        model file input.
+
         Data organization:
         There are three facies lists:
         1. mainFaciesTable.
@@ -134,14 +131,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
         super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                          debug_level, modelFileName, nGaussFieldsInBackGroundModel)
         self.__setEmpty()
-     
-        
+
         if trRuleXML is not None:
             # Require exactly 3 transformed gauss fields
             nGaussFieldInZone = len(self._gaussFieldsInZone)
             assert nGaussFieldInZone >= 3
             self.__interpretXMLTree(trRuleXML, modelFileName)
-            
+
             # Call base class method to check that facies in truncation rule is 
             # consistent with facies in zone.
             self._checkFaciesForZone()
@@ -157,16 +153,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 print('Debug output: Gauss fields in zone:')
                 print(repr(self._gaussFieldsInZone))
                 print('Debug output: Gauss fields for each alpha coordinate:')
-                for  i in range(len(self._alphaIndxList)):
+                for i in range(len(self._alphaIndxList)):
                     j = self._alphaIndxList[i]
                     gfName = self._gaussFieldsInZone[j]
-                    print(' {} {}'.format(str(i+1),gfName))
+                    print(' {} {}'.format(str(i + 1), gfName))
 
         else:
             if debug_level >= Debug.VERY_VERBOSE:
                 # Create an empty object which will be initialized by set functions
                 print('Debug output: Create empty object of ' + self._className)
-        #  End of __init__
+                #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         # Initialize object from xml tree object trRuleXML
@@ -325,19 +321,20 @@ class Trunc3D_bayfill(Trunc2D_Base):
             print('Debug output: Facies code for facies in truncation rule')
             print(repr(self._faciesCode))
 
-    def initialize(self, mainFaciesTable, faciesInZone, faciesInTruncRule, gaussFieldsInZone,
-                   alphaFieldNameForBackGroundFacies,
-                   sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level):
+    def initialize(
+            self, mainFaciesTable, faciesInZone, faciesInTruncRule, gaussFieldsInZone,
+            alphaFieldNameForBackGroundFacies, sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
+    ):
         """
            Description: Initialize the truncation object from input variables.
         """
         # Initialize data structure
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
-        
+
         # Initialize base class variables 
         super()._setEmpty()
-        
+
         # Initialize this class variables
         self.__setEmpty()
         self._debug_level = debug_level
@@ -347,10 +344,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         # Call base class method to associate gauss fields with alpha coordinates
         self._setGaussFieldForBackgroundFaciesTruncationMap(gaussFieldsInZone,
-                                                            alphaFieldNameForBackGroundFacies,3)
+                                                            alphaFieldNameForBackGroundFacies, 3)
         # Set facies in truncation rule
         self._faciesInTruncRule = copy.copy(faciesInTruncRule)
-        
+
         # Set truncation parameters
         self.__useConstTruncModelParam = useConstTruncParam
         if self.__useConstTruncModelParam:
@@ -419,7 +416,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 print(repr(poly[j]))
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
-
 
     def getClassName(self):
         return copy.copy(self._className)
@@ -494,7 +490,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         trRuleElement = Element(tag, attribute)
         # Put the xml commands for this truncation rule as the last child for the parent element
         parent.append(trRuleElement)
-        
+
         tag = 'BackGroundModel'
         bgModelElement = Element(tag)
         trRuleElement.append(bgModelElement)
@@ -579,13 +575,15 @@ class Trunc3D_bayfill(Trunc2D_Base):
             faciesProb[i] = p / sumProb
         return
 
-    def __setUnitSquarePolygon(self):
+    @staticmethod
+    def __setUnitSquarePolygon():
         """  Create a polygon for the unit square
         """
         poly = [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
         return poly
 
-    def __setZeroPolygon(self):
+    @staticmethod
+    def __setZeroPolygon():
         """ Create a small polygon
         """
         poly = [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
@@ -918,7 +916,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 elif AmP4sqrt <= (XL - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c - 0.5 * (X2 - X4) * YS:
                     Ym = math.sqrt(max([
                         0,
-                        ((XL - X2) * (XL - X2) / (sf * sf)) + (c / (sf * (c - sf))) * ((XL - X2) * (XL - X2) / c + 2.0 * AmP4sqrt)
+                        ((XL - X2) * (XL - X2) / (sf * sf)) + (c / (sf * (c - sf))) * (
+                            (XL - X2) * (XL - X2) / c + 2.0 * AmP4sqrt)
                     ])) - (XL - X2) / sf
                     Ym2 = (1.0 - sf / c) * Ym - (XL - X2) / c
                     Xm = XL
@@ -983,7 +982,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     Xm2 = X4
                     caseA = 2
                 # A2<AmP4sqrt<=A3
-                elif AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS + (XL - X4) * (1.0 - (XL - X4) / c):
+                elif AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS + (XL - X4) * (
+                            1.0 - (XL - X4) / c):
                     Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 *
                            (XL - X4) * (XL - X4) / c) / (XL - X4)
                     Ym = Ym2 + (XL - X4) / c
@@ -1705,7 +1705,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 WBF_area = (X4 - X3) * (1.0 - YWIB)
                 BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
             else:
-                WBF_area = (X4 - X3) * (1.0 - 0.5 * (YS2 + YS)) - 0.5 * (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (YS2 - YS)
+                WBF_area = (X4 - X3) * (1.0 - 0.5 * (YS2 + YS)) - 0.5 * (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (
+                    YS2 - YS)
                 BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
         elif bhdsit == 6:
             WBF_area = 0.5 * ((X4 - X3) * (1.0 - YS) - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (1.0 - YS))
@@ -1776,7 +1777,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         return [faciesCode, fIndx]
 
-    def __isInsidePolygon(self, polygon, xInput, yInput):
+    @staticmethod
+    def __isInsidePolygon(polygon, xInput, yInput):
         """ Function related to the LBL (Linear Boundary Lines) truncation rule.
             Take as input a polygon and a point and return 0 or 1 depending on
             whether the point is inside or outside of the polygon.

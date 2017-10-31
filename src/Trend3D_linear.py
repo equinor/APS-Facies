@@ -1,12 +1,11 @@
 #!/bin/env python
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 import math
-from typing import List
 
 import numpy as np
 
 import src.generalFunctionsUsingRoxAPI as gr
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
 
 
 class Trend3D_linear:
@@ -20,7 +19,7 @@ class Trend3D_linear:
                      Input is model parameters.
         """
         self.__className = 'Trend3D_linear'
-        if trendRuleModel == None:
+        if trendRuleModel is None:
             print('Error in ' + self.__className)
             print('Error: Programming error. Empty trendRuleModel object')
             return
@@ -30,8 +29,7 @@ class Trend3D_linear:
         self.__direction = trendRuleModel.getStackingDirection()
         self.__debug_level = debug_level
 
-
-    def createTrend(self,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness):
+    def createTrend(self, gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
         """
@@ -86,7 +84,8 @@ class Trend3D_linear:
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: In ' + self.__className)
                 print(
-                    'Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(zComponent) + ')'
+                    'Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(
+                        zComponent) + ')'
                 )
 
             for indx in range(nDefinedCells):

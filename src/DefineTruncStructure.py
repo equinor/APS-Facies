@@ -2,7 +2,7 @@
 import copy
 
 from src import Trunc2D_Angle_Overlay_xml, Trunc2D_Cubic_Overlay_xml, Trunc3D_bayfill_xml
-
+# TODO: Deprecate?
 
 # import importlib
 
@@ -18,8 +18,7 @@ from src import Trunc2D_Angle_Overlay_xml, Trunc2D_Cubic_Overlay_xml, Trunc3D_ba
 
 class DefineTruncStructure:
     """
-    Description: This class keep data to define cubic truncation rules.
-   
+    This class keep data to define cubic truncation rules.
     """
 
     def __init__(self):
@@ -459,8 +458,10 @@ class DefineTruncStructure:
             # print('Overlay facies: ' + overlayFacies)
 
             trRuleObj = Trunc2D_Cubic_Overlay_xml.Trunc2D_Cubic_Overlay()
-            trRuleObj.initialize(mainFaciesTable, faciesList, truncStructure,
-                                 backgroundFacies, overlayFacies, overlayTruncCenter, debug_level)
+            trRuleObj.initialize(
+                mainFaciesTable, faciesList, truncStructure,
+                backgroundFacies, overlayFacies, overlayTruncCenter, debug_level
+            )
         elif name.strip() == 'B01':
             useConstTruncParam = 1
             truncStructure = self.getTruncStructure(faciesList, name)
@@ -485,7 +486,7 @@ class DefineTruncStructure:
 
 class DefineAngleTruncStructure:
     """
-    Description: This class keep data to define truncation rules based on rule with non-cubic polygons
+    This class keep data to define truncation rules based on rule with non-cubic polygons
     defined by class Trunc2D_Angle_Overlay.
     """
 

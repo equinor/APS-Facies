@@ -3,9 +3,8 @@ import sys
 
 import numpy as np
 import roxar
-from src.utils.constants import Debug
 
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
 
 
 # List of functions in this file
@@ -20,19 +19,29 @@ from src.utils.constants import Debug
 # isOK                         = setDiscrete3DParameterValues(gridModel, parameterName, values, codeNames, realNumber=0, isShared=True, debug_level=1)
 
 
-def calcStatisticsFor3DParameter(gridModel, paramName, zoneNumberList, realNumber=0,
-                                 debug_level=Debug.SOMEWHAT_VERBOSE):
-    """Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
+def calcStatisticsFor3DParameter(
+        gridModel, paramName, zoneNumberList, realNumber=0,
+        debug_level=Debug.SOMEWHAT_VERBOSE
+):
+    """
+    Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
+    TODO
     Input:
-           property       - The Property object we wish to perform calculation on. 
-           zoneNumberList - List of zone numbers (counting from 0) for zones that are included in the min,max,average calculation.
-                            Empty list or list containing all zones will find min,max,average over all zones
-           realNumber     - Realisation number counted from 0 for the parameter to get.
+           property       - The Property object we wish to perform calculation on.
 
-    Output: 
-            minimum  - minimum value
-            maximum  - maximum value
-            average  - average value
+    :param gridModel: TODO: property!
+    :param paramName: TODO: property!
+    :param zoneNumberList:  List of zone numbers (counting from 0) for zones that
+                            are included in the min, max, average calculation. Empty
+                            list or list containing all zones will find
+                            min, max, average over all zones
+    :param realNumber: Realisation number counted from 0 for the parameter to get.
+    :param debug_level: TODO
+    :returns: tuple (minimum, maximum, average)
+        WHERE
+        float minimum is the minimum value
+        float maximum is the maximum value
+        float average is the average value
     """
     functionName = 'calcStatisticsFor3DParameter'
     [values] = getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level)
@@ -51,7 +60,7 @@ def calcStatisticsFor3DParameter(gridModel, paramName, zoneNumberList, realNumbe
         text = ' Min: ' + str(minimum) + '  Max: ' + str(maximum) + '  Average: ' + str(average)
         print_debug_information(functionName, text)
 
-    return [minimum, maximum, average]
+    return (minimum, maximum, average)
 
 
 def calcAverage(nDefinedCells, cellIndexDefined, values):
@@ -95,32 +104,33 @@ def raise_error(function_name, text):
 
 def getCellValuesFilteredOnDiscreteParam(code, valueArray):
     """
-         Description: Calculate an index array to address all active (physical) cells in the
-                      grid corresponding to the cells with specified integer value (code).
-                      Is used to identify a subset of all grid cells that have grid cell values
-                      equal to the specified value in the input parameter code.
-                      Example of use of the output index list cellIndexDefined:
-                         indexIn3DParameterVector = cellIndexDefined[i]
-                      where i runs from 1 to nDefinedCells.
-                      Hence if valueArray is all active cell values for the zone parameter and code is a zoneNumber
-                      then the cellIndexDefined list will contain a list of all cell numbers for cells belonging
-                      to the specified zoneNumber.
-         Input:      code - An integer value. The function search through the whole vector valueArray and find
-                            all the values equal to code and save its cell index to cellIndexDefined.
-                     valueArray - A vector containing the 3D parameter values for the whole grid (all active cells).
+    Calculate an index array to address all active (physical) cells in the
+    grid corresponding to the cells with specified integer value (code).
+    Is used to identify a subset of all grid cells that have grid cell values
+    equal to the specified value in the input parameter code.
+    Example of use of the output index list cellIndexDefined:
+    indexIn3DParameterVector = cellIndexDefined[i]
+    where i runs from 1 to nDefinedCells.
+    Hence if valueArray is all active cell values for the zone parameter and code is a zoneNumber
+    then the cellIndexDefined list will contain a list of all cell numbers for cells belonging
+    to the specified zoneNumber.
 
-         Output:    nDefinedCells - The number of cells found that match the value in the input variable code.
-                    cellIndexDefined - A list of the cell indices where the valueArray value is equal to code.
+    :param code: An integer value. The function search through the whole vector valueArray and find
+                 all the values equal to code and save its cell index to cellIndexDefined.
+    :param valueArray: A vector containing the 3D parameter values for the whole grid (all active cells).
+    :returns: tuple (nDefinedCells, cellIndexDefined)
+        WHERE
+        int nDefinedCells is the number of cells found that match the value in the input variable code.
+        list cellIndexDefined is a list of the cell indices where the valueArray value is equal to code.
     """
-    nDefinedCells = 0
     cellIndexDefined = []
     nCellsTotal = len(valueArray)
     for i in range(nCellsTotal):
         if valueArray[i] == code:
             cellIndexDefined.append(i)
-            nDefinedCells += 1
+    nDefinedCells = len(cellIndexDefined)
 
-    return [nDefinedCells, cellIndexDefined]
+    return nDefinedCells, cellIndexDefined
 
 
 def get3DParameter(gridModel, parameterName, realNumber=0, debug_level=Debug.SOMEWHAT_VERBOSE):
@@ -482,7 +492,8 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
             print_debug_information(functionName, text)
             print(p.code_names)
 
-def getNumberOfLayersPerZone(grid,zoneNumber):
+
+def getNumberOfLayersPerZone(grid, zoneNumber):
     indexer = grid.grid_indexer
     zone_name = grid.zone_names[zoneNumber]
     layer_ranges = indexer.zonation[zoneNumber]
@@ -490,8 +501,9 @@ def getNumberOfLayersPerZone(grid,zoneNumber):
     for layer_range in layer_ranges:
         start = layer_range[0]
         end = layer_range[-1]
-        number_layers += (end+1-start)
+        number_layers += (end + 1 - start)
     return number_layers
+
 
 def getNumberOfLayers(grid):
     indexer = grid.grid_indexer
@@ -503,9 +515,10 @@ def getNumberOfLayers(grid):
         for layer_range in layer_ranges:
             start = layer_range[0]
             end = layer_range[-1]
-            number_layers += (end+1-start)
+            number_layers += (end + 1 - start)
         number_layers_per_zone.append(number_layers)
     return number_layers_per_zone
+
 
 def getGridAttributes(grid, debug_level=Debug.OFF):
     indexer = grid.grid_indexer
@@ -571,9 +584,8 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
     [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = getGridSimBoxSize(grid, debug_level)
     return [
         xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, azimuthAngle, x0, y0,
-        dimensions[0] ,dimensions[1], dimensions[2], nZones,zoneNames, nLayersPerZone
+        dimensions[0], dimensions[1], dimensions[2], nZones, zoneNames, nLayersPerZone
     ]
-
 
 
 def getGridSimBoxSize(grid, debug_level=Debug.OFF):
@@ -633,7 +645,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
         if h.name == horizonName:
             horizonObj = h
             break
-    if horizonObj == None:
+    if horizonObj is None:
         raise ValueError(
             'Error in  get2DMapInfo\n'
             'Error: Horizon name: ' + horizonName + ' does not exist'
@@ -644,7 +656,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
         if representation.name == representationName:
             reprObj = representation
             break
-    if reprObj == None:
+    if reprObj is None:
         raise ValueError(
             'Error in  get2DMapInfo\n'
             'Error: Horizons data type: ' + representationName + ' does not exist'
@@ -695,7 +707,7 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
         if h.name == horizonName:
             horizonObj = h
             break
-    if horizonObj == None:
+    if horizonObj is None:
         raise ValueError(
             'Error in updateHorizonObject\n'
             'Error: Horizon name: ' + horizonName + ' does not exist'
@@ -707,7 +719,7 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
         if representation.name == reprName:
             reprObj = representation
             break
-    if reprObj == None:
+    if reprObj is None:
         raise ValueError('Error in updateHorizonObject\n'
                          'Error: Horizons data type: ' + reprName + ' does not exist'
                          )

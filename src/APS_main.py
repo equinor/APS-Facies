@@ -10,12 +10,12 @@ Output:
 """
 
 import importlib
+
 import numpy as np
-from src.utils.constants import Debug
+
 import src.generalFunctionsUsingRoxAPI as gr
 from src import (APSModel, APSZoneModel, Trend3D_linear)
-from src.utils.constants import Debug
-import roxar
+from src.utils.constants.simple import Debug
 
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
@@ -30,20 +30,20 @@ eps = 0.000001
 
 def findDefinedCells(zoneValues, zoneNr, debug_level=Debug.SOMEWHAT_VERBOSE):
     """
-         Description: For specified zoneNumber, identify which cells belongs to this zone.
-         
-         Input: zoneValues  - Vector with zone values. The length is the same as the 
-                              number of active cells (physical cells) in the whole 3D grid.
-                zoneNr      - The zone number (counting from 1) for which this 
-                              transformation should be applied. Only the cells belonging to the 
-                              zone with zoneNr is considered here.
-         Return:           
-                nDefinedCells    - Number of active (physical cells) belonging to the specified zone. 
-                cellIndexDefined - Index array. The length is nDefinedCells. The content is cell index which
-                                   is used in the grid parameter vectors zoneValue, gaussField, alpha and all
-                                   other parameter vectors containing cell values for 
-                                   the active (physical) cells for the grid.
-                
+    For specified zoneNumber, identify which cells belongs to this zone.
+    :param zoneValues:  Vector with zone values. The length is the same as the
+                          number of active cells (physical cells) in the whole 3D grid.
+    :param zoneNr:      The zone number (counting from 1) for which this
+                          transformation should be applied. Only the cells belonging to the
+                          zone with zoneNr is considered here.
+    :param debug_level:
+    :returns: (nDefinedCells, cellIndexDefined)
+        WHERE
+        int nDefinedCells Number of active (physical cells) belonging to the specified zone.
+        list cellIndexDefined Index array. The length is nDefinedCells. The content is cell index which
+                                is used in the grid parameter vectors zoneValue, gaussField, alpha and all
+                                other parameter vectors containing cell values for
+                                the active (physical) cells for the grid.
     """
     functionName = 'findDefinedCells'
     nDefinedCells = 0
@@ -59,32 +59,34 @@ def findDefinedCells(zoneValues, zoneNr, debug_level=Debug.SOMEWHAT_VERBOSE):
     if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: In findDefinedCells: Number of active cells for current zone: ' + str(nDefinedCells))
 
-    return [nDefinedCells, cellIndexDefined]
+    return (nDefinedCells, cellIndexDefined)
 
 
 def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
     """
-         Description: For the defined cells, transform the input Gaussian fields by 
-                      the cumulative empiric distribution to get uniform
-                      distribution of the cells. The result is assigned to the input
-                      vectors alpha which also is returned.
-         
-         Input: 
-                nDefinedCells    - Number of active (physical cells). Is the length of list cellIndexDefined.
-                cellIndexDefined - Index array. The length is nDefinedCells. The content is cell index which
-                                   is used in the grid parameter vectors zoneValue, gaussField, alpha and all
-                                   other parameter vectors containing cell values for 
-                                   the active (physical) cells for the grid.
-
-                gaussValues      - Gaussian fields to be transformed. The length is the same as the list of defined cells.
-                                   Only the cells belonging to the specified list in cellIndexDefined are considered here.
-                alpha            - Transformed gaussian fields. The length is the same as the cellIndexDefined list.
-                                   The input values in the alpha vectors are updated for those cells that 
-                                   belongs to specified cellIndexDefined list.
-         Return:           
-                alpha            - The updated alpha vector is returned. Only cells belonging to list in cellIndexDefined
-                                   are modified compared with the values the vector had as input.
-                
+    For the defined cells, transform the input Gaussian fields by the
+    cumulative empiric distribution to get uniform distribution of the cells.
+    The result is assigned to the input vectors alpha which also is returned.
+    :param nDefinedCells: Number of active (physical cells). Is the length of
+                          list cellIndexDefined.
+    :type nDefinedCells: int
+    :param cellIndexDefined: Index array. The length is nDefinedCells.
+                             The content is cell index which is used in the
+                             grid parameter vectors zoneValue, gaussField,
+                             alpha and all other parameter vectors containing
+                             cell values for the active (physical) cells for the grid.
+    :type cellIndexDefined: list
+    :param gaussValues: Gaussian fields to be transformed. The length is the
+                        same as the list of defined cells. Only the cells
+                        belonging to the specified list in cellIndexDefined
+                        are considered here.
+    :param alphaValues: Transformed gaussian fields. The length is the same as
+                        the cellIndexDefined list. The input values in the
+                        alpha vectors are updated for those cells that belongs
+                        to specified cellIndexDefined list.
+    :return: The updated alpha vector is returned. Only cells belonging to
+             list in cellIndexDefined are modified compared with the values
+             the vector had as input.
     """
     functionName = 'transformEmpiric'
     nCellsTotal = len(gaussValues)
@@ -100,46 +102,60 @@ def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
         # Assign the probability p= i/N to the cell corresponding to y1_defined cell 
         # with number i in sorting from smallest to highest value. 
         # Use cellIndexDefined to assign it to the correct cell.
-        alpha[cellIndexDefined[indx]] = float(i) / float(nDefinedCells)
+        alphaValues[cellIndexDefined[indx]] = float(i) / float(nDefinedCells)
 
-    return alpha
+    return alphaValues
 
 
-def checkAndNormaliseProb(nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined,
-                          eps=0.0000001, debug_level=Debug.SOMEWHAT_VERBOSE):
+def checkAndNormaliseProb(
+        nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined,
+        eps=0.0000001, debug_level=Debug.SOMEWHAT_VERBOSE
+):
     """
-        Description: Check that probability cubes or probabilities in input probFacies is normalised.
-                     If not normalised, a normalisation is done. The list cellIndexDefined is an index
-                     vector. The length is in general less than the total number of active cells for the grid.
-                     Typically the cellIndexDefined vector represents active cells belonging to a specified zone, 
-                     but could in principle be any subset of interest of the total set of all active cells. 
-                     The content of the cellIndexDefined array is indices in vectors containing all active cells 
-                     and is a way of defining a subset of cells.
-                      
-        Input:
-               nFacies - Number of facies
-               probParamValuesForFacies - A list of vectors where each vector represents probabilities 
-                                          for active grid cells. The first entry corresponds to 
-                                          the first facies in the facies list and so on.
-                                          [fName,values] = probParamValuesForFacies[f] where fName 
-                                          is facies name and values is the probability values per cell.
-                                          Note: If useConstProb = 1, the values list has one element only. 
-                                          and represent a constant facies probability. 
-                                          If useConstProb = 0, the values is a list of probabilities, 
-                                          one per grid cell.
-
-               useConstProb  - Is 1 if probParamValuesForFacies contains constant probabilities 
-                               and 0 if probParamValuesForFacies contains vectors of probabilities, 
-                               one value per active grid cell.
-               nDefinedCells - Length of the vector cellIndexDefined.
-               cellIndexDefined - A vector containing indices.  cellIndexDefined[i] is an index in the 
-                                  probability vectors in probParamValuesForFacies.  It is a way
-                                  to defined a filter of grid cells, a subset of all active grid cells in the grid.
-               debug_level - Define output print level from the function.
-
-        Output: 
-               probDefined - list of vectors, one per facies. The vectors are normalised probabilities 
-                             for the subset of grid cells defined by the cellIndexDefined index vector.
+    Check that probability cubes or probabilities in input probFacies is
+    normalised. If not normalised, a normalisation is done. The list
+    cellIndexDefined is an index vector. The length is in general less than
+    the total number of active cells for the grid. Typically the
+    cellIndexDefined vector represents active cells belonging to a specified
+    zone, but could in principle be any subset of interest of the total set of
+    all active cells. The content of the cellIndexDefined array is indices in
+    vectors containing all active cells and is a way of defining a subset of
+    cells.
+    :param nFacies: the number of facies
+    :type nFacies: int
+    :param probParamValuesForFacies: A list of vectors where each vector
+                                     represents probabilities for active grid
+                                     cells. The first entry corresponds to the
+                                     first facies in the facies list and so on.
+                                     [fName,values] = probParamValuesForFacies[f]
+                                     where fName is facies name and values is
+                                     the probability values per cell.
+                                     Note: If useConstProb = 1, the values
+                                     list has one element only. and represent
+                                     a constant facies probability.
+                                     If useConstProb = 0, the values is a list
+                                     of probabilities, one per grid cell.
+    :type probParamValuesForFacies: list
+    :param useConstProb: Is True if probParamValuesForFacies contains constant
+                         probabilities and False if probParamValuesForFacies
+                         contains vectors of probabilities, one value per
+                         active grid cell.
+    :type useConstProb: bool
+    :param nDefinedCells: Length of the vector cellIndexDefined.
+    :type nDefinedCells: int
+    :param cellIndexDefined: A vector containing indices. cellIndexDefined[i]
+                             is an index in the probability vectors in
+                             probParamValuesForFacies. It is a way to defined
+                             a filter of grid cells, a subset of all active
+                             grid cells in the grid.
+    :type cellIndexDefined: list
+    :param eps: # TODO
+    :param debug_level: Define output print level from the function.
+    :type debug_level: Debug
+    :return: list of vectors, one per facies. The vectors are normalised
+             probabilities for the subset of grid cells defined by the
+             cellIndexDefined index vector.
+            TODO: Correct?
     """
     # The list probParamValuesForFacies has items =[name,values]
     # Define index names for this item
@@ -149,15 +165,14 @@ def checkAndNormaliseProb(nFacies, probParamValuesForFacies, useConstProb, nDefi
     # Check that probabilities sum to 1
     functionName = 'checkAndNormaliseProb'
     if debug_level >= Debug.VERY_VERBOSE:
-        if useConstProb == 0:
-            text = 'Debug output: Check normalisation of probability cubes.'
+        if not useConstProb:
+            print('Debug output: Check normalisation of probability cubes.')
         else:
-            text = 'Debug output: Check normalisation of probabilities.'
-        print(text)
+            print('Debug output: Check normalisation of probabilities.')
 
     probDefined = []
     nCellWithModifiedProb = 0
-    if useConstProb == 0:
+    if not useConstProb:
         # Allocate space for probability per facies per defined cell
         for f in range(nFacies):
             probDefined.append(np.zeros(nDefinedCells, np.float32))
@@ -187,7 +202,7 @@ def checkAndNormaliseProb(nFacies, probParamValuesForFacies, useConstProb, nDefi
         ones = np.ones(nDefinedCells, np.float32)
         for f in range(1, nFacies):
             # sum of np arrays (cell by cell sum)
-            psum = psum + probDefined[f]
+            psum += probDefined[f]
 
         if not np.allclose(psum, ones, eps):
             if debug_level >= Debug.VERBOSE:
@@ -284,7 +299,7 @@ if debug_level >= Debug.VERBOSE:
 
 emptyZoneList = []
 # Find min max zone over all active cells, send an empty zone list which means that all zones are selected
-[minZone, maxZone, avgzone] = gr.calcStatisticsFor3DParameter(
+(minZone, maxZone, avgzone) = gr.calcStatisticsFor3DParameter(
     gridModel, zoneParamName, emptyZoneList, realNumber, debug_level
 )
 
@@ -357,7 +372,7 @@ for zoneNumber in zoneNumberList:
                 print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
 
     # For current zone find the active cells for this zone 
-    [nDefinedCells, cellIndexDefined] = findDefinedCells(zoneValues, zoneNumber, debug_level)
+    (nDefinedCells, cellIndexDefined) = findDefinedCells(zoneValues, zoneNumber, debug_level)
     if debug_level >= Debug.VERBOSE:
         print('--- Number of active cells for zone: ' + str(nDefinedCells))
 
@@ -396,8 +411,10 @@ for zoneNumber in zoneNumberList:
                 print('Debug output: RelStdDev = ' + str(relStdDev))
                 print('Debug output: trendValues:')
                 print(repr(trendValues))
-                print('Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
+                print(
+                    'Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
+                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(
+                    residualValues.max()))
                 print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
                 print('Debug output: Trend + Residual values:')
                 print(repr(val))
@@ -525,7 +542,8 @@ for zoneNumber in zoneNumberList:
 
                 values = item[VAL]
                 avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
-                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f], avgProbValue))
+                print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(zoneNumber, fCode, fName, volFrac[f],
+                                                                        avgProbValue))
 
         for fName in faciesNamesForZone:
             # fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)

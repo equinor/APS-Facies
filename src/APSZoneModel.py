@@ -1,7 +1,7 @@
 #!/bin/env python
+import copy
 from xml.etree.ElementTree import Element
 
-import copy
 import numpy as np
 
 from src.APSFaciesProb import APSFaciesProb
@@ -11,16 +11,14 @@ from src.APSMainFaciesTable import APSMainFaciesTable
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.utils.constants.simple import Debug
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
-from src.utils.constants import Debug
-from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword, getTextCommand
-from src.utils.constants import Debug
+from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand
+
 
 class APSZoneModel:
     """
-    ----------------------------------------------------------------
-    class APSZoneModel
-    Description: Keep data structure for a zone
+    Keep data structure for a zone
 
     Public member functions:
       Constructor:  def __init__(self,ET_Tree= None,inputZoneNumber=0,
@@ -102,8 +100,6 @@ class APSZoneModel:
        def __getGFIndex(self,gfName)
        def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
        def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
-
-    ----------------------------------------------------------------
     """
 
     def __init__(
@@ -144,11 +140,11 @@ class APSZoneModel:
             print('Debug output: Call init ' + self.__className)
 
         # Optimization parameters
-        obj =  getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
+        obj = getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
         if obj is not None:
-            useMemoization =  getIntCommand(obj, 'UseMemoization', 'Optimization',
-                                            minValue=0, maxValue=1, defaultValue=1,
-                                            modelFile=modelFileName, required=False)
+            useMemoization = getIntCommand(obj, 'UseMemoization', 'Optimization',
+                                           minValue=0, maxValue=1, defaultValue=1,
+                                           modelFile=modelFileName, required=False)
 
             nIntervalForProbabilityInMemoizationKey = getIntCommand(obj, 'MemoizationResolution', 'Optimization',
                                                                     minValue=100, maxValue=10000,
@@ -158,7 +154,7 @@ class APSZoneModel:
                 self.__keyResolution = nIntervalForProbabilityInMemoizationKey
             else:
                 self.__keyResolution = 0
-                
+
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
         gaussFieldJobs = APSGaussFieldJobs(ET_Tree, modelFileName)
 

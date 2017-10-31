@@ -3,21 +3,18 @@
 
 import math
 from xml.etree.ElementTree import Element
-from src.utils.constants import Debug
 
 import numpy as np
 
-from src.xmlFunctions import getFloatCommand, getIntCommand
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
+from src.utils.xml import getFloatCommand, getIntCommand
+
 
 class Trend3D_linear_model:
     """
-    Description: This class keeps model parameter for linear 3D trend. The parameterization
-             is azimuth angle for depositional direction and stacking angle. In addition a variable
-             specifying whether the deposition is progradational or retrogradational is specified.
-    Description: Create either empty object which have to be initialized
-                     later using the initialize function or create a full object
-                     by reading input parameters from XML input tree.
+    This class keeps model parameter for linear 3D trend. The parameterization
+    is azimuth angle for depositional direction and stacking angle. In addition a variable
+    specifying whether the deposition is progradational or retrogradational is specified.
 
     Public member functions:
     Constructor:   def __init__(self, trendRuleXML=None, debug_level=Debug.OFF, modelFileName=None)
@@ -41,6 +38,14 @@ class Trend3D_linear_model:
 """
 
     def __init__(self, trendRuleXML, debug_level=Debug.OFF, modelFileName=None):
+        """
+        Create either empty object which have to be initialized
+        later using the initialize function or create a full object
+        by reading input parameters from XML input tree.
+        :param trendRuleXML:
+        :param debug_level:
+        :param modelFileName:
+        """
         self.__azimuth = 0.0
         self.__stackingAngle = 0.0
         self.__direction = 1
@@ -195,9 +200,9 @@ class Trend3D_linear_model:
 
     def __calcLinearTrendNormalVector(self, azimuthSimBox):
         """
-        Description: Calculate normal vector to iso-surfaces (planes) for constant trend values
-                     a*(x-x0)+b*(y-y0)+c*(z-z0) = K where K is a constant is such
-                     an iso surface and [a,b,c] is the normal vector to the plane.
+        Calculate normal vector to iso-surfaces (planes) for constant trend values
+        a*(x-x0)+b*(y-y0)+c*(z-z0) = K where K is a constant is such
+        an iso surface and [a,b,c] is the normal vector to the plane.
         """
         # Calculate the 3D trend values
 

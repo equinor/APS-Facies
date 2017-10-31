@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog
 
-from src.utils.constants import Defaults
+from src.utils.constants.constants import Defaults
 
 
 class GeneralDialog(QDialogButtonBox, QDialog):
@@ -39,24 +39,24 @@ class GeneralDialog(QDialogButtonBox, QDialog):
     def _get_valid_buttons() -> Dict[str, QDialogButtonBox.StandardButton]:
         # TODO: Make Constants
         return {
-            'ok':               QDialogButtonBox.Ok,
-            'open':             QDialogButtonBox.Open,
-            'save':             QDialogButtonBox.Save,
-            'cancel':           QDialogButtonBox.Cancel,
-            'close':            QDialogButtonBox.Close,
-            'discard':          QDialogButtonBox.Discard,
-            'apply':            QDialogButtonBox.Apply,
-            'reset':            QDialogButtonBox.Reset,
+            'ok': QDialogButtonBox.Ok,
+            'open': QDialogButtonBox.Open,
+            'save': QDialogButtonBox.Save,
+            'cancel': QDialogButtonBox.Cancel,
+            'close': QDialogButtonBox.Close,
+            'discard': QDialogButtonBox.Discard,
+            'apply': QDialogButtonBox.Apply,
+            'reset': QDialogButtonBox.Reset,
             'restore_defaults': QDialogButtonBox.RestoreDefaults,
-            'help':             QDialogButtonBox.Help,
-            'save_all':         QDialogButtonBox.SaveAll,
-            'yes':              QDialogButtonBox.Yes,
-            'yes_to_all':       QDialogButtonBox.YesToAll,
-            'no':               QDialogButtonBox.No,
-            'no_to_all':        QDialogButtonBox.NoToAll,
-            'abort':            QDialogButtonBox.Abort,
-            'retry':            QDialogButtonBox.Retry,
-            'ignore':           QDialogButtonBox.Ignore,
+            'help': QDialogButtonBox.Help,
+            'save_all': QDialogButtonBox.SaveAll,
+            'yes': QDialogButtonBox.Yes,
+            'yes_to_all': QDialogButtonBox.YesToAll,
+            'no': QDialogButtonBox.No,
+            'no_to_all': QDialogButtonBox.NoToAll,
+            'abort': QDialogButtonBox.Abort,
+            'retry': QDialogButtonBox.Retry,
+            'ignore': QDialogButtonBox.Ignore,
         }
 
     @staticmethod
@@ -66,7 +66,7 @@ class GeneralDialog(QDialogButtonBox, QDialog):
         for key in kwargs.keys():
             if key not in valid_keys:
                 return False
-            # TODO: Check for valid function in kwargs?
+                # TODO: Check for valid function in kwargs?
         return True
 
 

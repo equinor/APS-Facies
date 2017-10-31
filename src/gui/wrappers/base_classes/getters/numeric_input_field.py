@@ -1,4 +1,5 @@
 import re
+
 from PyQt5.QtWidgets import QLineEdit
 
 numeric_zero_regex = re.compile("^[+-]?[.,]?$")

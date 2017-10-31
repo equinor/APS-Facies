@@ -1,8 +1,9 @@
 from datetime import datetime
-from peewee import *
-from playhouse.sqlite_ext import JSONField, SqliteExtDatabase
 
-from src.utils.constants import DataBase
+from peewee import *
+from playhouse.sqlite_ext import SqliteExtDatabase
+
+from src.utils.constants.constants import DataBase
 
 db = SqliteExtDatabase(DataBase.NAME)
 

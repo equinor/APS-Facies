@@ -2,8 +2,8 @@ import filecmp
 
 import numpy as np
 
-from src.utils.methods import writeFile, readFile
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
+from src.utils.io import writeFile, readFile
 
 
 def getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule):
@@ -44,7 +44,7 @@ def apply_truncations(
         assert nValues == len(alphaFields[n])
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('nValues: ' + str(nValues))
-        print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx*ny))
+        print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
     alphaCoord = np.zeros(nGaussFields, np.float32)
     faciesReal = []
     # Loop through the gaussfield array in c-index ordering

@@ -7,19 +7,19 @@ from typing import Callable, Dict, Union
 
 from PyQt5.QtWidgets import *
 
-from src.gui.wrappers.dialogs import AddFacies
 from src.gui.state import State
 from src.gui.wrappers.assign_probabilities import AssignProbabilities
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements
 from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.define_gaussian import DefineGaussian
+from src.gui.wrappers.dialogs import AddFacies
 from src.gui.wrappers.truncation_rule import (
     BayfillTruncationRule, CubicTruncationRule, CustomTruncationRule,
     NonCubicTruncationRule,
 )
 from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.utils.checks import is_valid_path
-from src.utils.constants import (
+from src.utils.constants.constants import (
     Defaults, FaciesSelectionElements, GaussianRandomFieldElements, MainWindowElements,
     ModeConstants, TruncationLibraryKeys, TruncationLibrarySubKeys, ZoneSelectionElements,
 )
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def wire_up_selections(self):
         buttons = {
-            ZoneSelectionElements.TOGGLE:   self._toggle_separate_zone_models,
+            ZoneSelectionElements.TOGGLE: self._toggle_separate_zone_models,
             FaciesSelectionElements.TOGGLE: self._toggle_select_facies,
         }
         self._connect_buttons_to_functions_on_event(buttons, 'stateChanged')
@@ -70,10 +70,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def wire_up_navigation(self):
         buttons = {
             MainWindowElements.ASSIGN_PROBABILITY_CUBE: self.assign_probabilities,
-            MainWindowElements.CLOSE:                   self.close,
-            MainWindowElements.EXPERIMENTAL_MODE:       self._toggle_experimental_mode,
-            MainWindowElements.CONDITION_TO_WELL:       self._condition_to_wells,
-            FaciesSelectionElements.ADD_FACIES:         self.add_facies,
+            MainWindowElements.CLOSE: self.close,
+            MainWindowElements.EXPERIMENTAL_MODE: self._toggle_experimental_mode,
+            MainWindowElements.CONDITION_TO_WELL: self._condition_to_wells,
+            FaciesSelectionElements.ADD_FACIES: self.add_facies,
         }
         self._connect_buttons_to_functions_on_event(buttons, 'clicked')
 
@@ -178,7 +178,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _set_checkboxes_to_defaults(self):
         buttons = {
-            ZoneSelectionElements.TOGGLE:   Defaults.SEPARATE_ZONE_MODELS,
+            ZoneSelectionElements.TOGGLE: Defaults.SEPARATE_ZONE_MODELS,
             FaciesSelectionElements.TOGGLE: Defaults.FACIES_MODELS,
             MainWindowElements.CONDITION_TO_WELL: Defaults.CONDITION_TO_WELL,
         }
