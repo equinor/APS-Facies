@@ -5,6 +5,8 @@ def normalize_number(
         value: float, minimum_in: float, maximum_in: float, minimum_out: float, maximum_out: float
 ) -> float:
     # TODO: Write unit test(s)
+    if isinstance(value, str):
+        value = float(value)
     value = truncate_number(minimum_in, value, maximum_in)
     normalized = (value - minimum_in) / (maximum_in - minimum_in)
     normalized *= (maximum_out - minimum_out) + minimum_out

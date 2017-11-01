@@ -21,3 +21,14 @@ def get_value_of_numeric_text_field(element: QLineEdit) -> str:
     elif not numeric_regex.match(value):
         value = 0
     return str(value)
+
+
+def get_number_from_numeric_text_field(element: QLineEdit) -> float:
+    """
+    Use this instead of `get_value_of_numeric_text_field`, when only the number is of interest.
+    :param element: The input / text field from which we wish to get the value
+    :type element: QLineEdit
+    :return: The number written in the input field
+    :rtype: float
+    """
+    return float(get_value_of_numeric_text_field(element))

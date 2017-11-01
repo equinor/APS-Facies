@@ -4,10 +4,10 @@ from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QLineEdit
 from functools import lru_cache
 
-from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.state import State
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements
+from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number_from_numeric_text_field
 from src.resources.ui.Gaussian_ui import Ui_DefineGaussian
 from src.utils.constants.constants import (
     AzimuthAngle, Constraints, Defaults, DefineGaussianElements, DipAngle, MainRange,
@@ -114,7 +114,7 @@ class DefineGaussian(OkCancelDialog, Ui_DefineGaussian):
         for element, key in elements.items():
             if key == VariogramModelConstants.POWER and not is_general_exponential:
                 continue
-            values[key] = float(get_value_of_numeric_text_field(element))
+            values[key] = get_number_from_numeric_text_field(element)
         return values
 
     def _initialize_state(self):

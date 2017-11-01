@@ -217,7 +217,7 @@ class BaseTruncation(OkCancelDialog):
 
     def get_total_sum(self) -> float:
         content = [self._get_text_field_by_name(key) for key in self.active]
-        return sum([get_value_of_element(cell) for cell in content])
+        return sum([get_number_from_numeric_text_field(cell) for cell in content])
 
     def get_value(self, element_type: TruncationRuleLibraryElements, element_label: FaciesLabels):
         assert element_type in self.get_basename_of_elements()
@@ -225,7 +225,10 @@ class BaseTruncation(OkCancelDialog):
         element = self._get_corresponding_element(element_label, element_type)
         if element is None:
             return None
-        return get_value_of_element(element)
+        value = get_value_of_element(element)
+        if isinstance(element, QLineEdit):
+            value = float(value)
+        return value
 
     def get_values(
             self,
@@ -373,7 +376,7 @@ class BaseTruncation(OkCancelDialog):
     def _ensure_proportions_are_between_0_1(self):
         for name in self.active:
             text_field = self._get_text_field_by_name(name)  # type: QLineEdit
-            value = get_value_of_element(text_field)
+            value = get_number_from_numeric_text_field(text_field)
             if value < 0:
                 text_field.setText('0')
             elif value > 1:
