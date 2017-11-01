@@ -1,15 +1,14 @@
 #!/bin/env python
-import datetime
 import copy
+import datetime
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSZoneModel import APSZoneModel
-from src.utils.methods import prettify
-from src.xmlFunctions import getTextCommand
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
+from src.utils.xml import prettify, getTextCommand
 
 
 class APSModel:
@@ -134,7 +133,7 @@ class APSModel:
             self.__debug_level = Debug.SOMEWHAT_VERBOSE
         else:
             text = obj.text
-            self.__debug_level = int(text.strip())
+            self.set_debug_level(text)
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
@@ -173,15 +172,14 @@ class APSModel:
             for w in words:
                 w2 = w.strip()
                 self.__selectedZoneNumberList.append(int(w2))
-                
 
         placement = {
-            'RMSProjectName':          '__rmsProjectName',
-            'RMSWorkflowName':         '__rmsWorkflowName',
+            'RMSProjectName': '__rmsProjectName',
+            'RMSWorkflowName': '__rmsWorkflowName',
             'RMSGaussFieldScriptName': '__rmsGaussFieldScriptName',
-            'GridModelName':           '__rmsGridModelName',
-            'ZoneParamName':           '__rmsZoneParamName',
-            'ResultFaciesParamName':   '__rmsFaciesParamName',
+            'GridModelName': '__rmsGridModelName',
+            'ZoneParamName': '__rmsZoneParamName',
+            'ResultFaciesParamName': '__rmsFaciesParamName',
         }
         for keyword, variable in placement.items():
             prefix = '_' + self.__class__.__name__
@@ -528,7 +526,11 @@ class APSModel:
         self.__rmsFaciesParamName = copy.copy(name)
 
     def set_debug_level(self, debug_level):
-        if debug_level not in Debug():
+        if isinstance(debug_level, str):
+            debug_level = int(debug_level.strip())
+        if isinstance(debug_level, int):
+            debug_level = Debug(debug_level)
+        if debug_level not in Debug:
             debug_level = Debug.OFF
         self.__debug_level = debug_level
 
@@ -686,6 +688,7 @@ class APSModel:
                             # for current zone number
                             gfIndx = jobObject.getGaussFieldIndx(currentJobName, gfNameUsed)
                             variogramType = currentZoneModel.getVariogramType(gfNameUsed)
+                            variogramName = variogramType.name
                             range1 = currentZoneModel.getMainRange(gfNameUsed)
                             range2 = currentZoneModel.getPerpRange(gfNameUsed)
                             range3 = currentZoneModel.getVertRange(gfNameUsed)
@@ -700,7 +703,7 @@ class APSModel:
                                 'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
                             )
 
-                            file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramType))
+                            file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
                             file.write(
                                 'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
                             )
@@ -754,10 +757,10 @@ class APSModel:
         if self.__previewZone > 0:
             tag = 'Preview'
             attribute = {
-                'zoneNumber':   str(self.__previewZone),
+                'zoneNumber': str(self.__previewZone),
                 'crossSectionType': str(self.__previewCrossSectionType),
                 'crossSectionIndx': str(self.__previewCrossSectionIndx),
-                'scale':        str(self.__previewScale)
+                'scale': str(self.__previewScale)
             }
             elem = Element(tag, attribute)
             root.append(elem)
@@ -805,7 +808,7 @@ class APSModel:
 
         tag = 'PrintInfo'
         elem = Element(tag)
-        elem.text = ' ' + str(self.__debug_level) + ' '
+        elem.text = ' ' + str(self.__debug_level.value) + ' '
         root.append(elem)
 
         # Add command MainFaciesTable

@@ -1,31 +1,19 @@
 #!/bin/env python
 # Python 3 script to read data from xml file with RMS information.
 
+import copy
 import xml.etree.ElementTree as ET
 
-import copy
-
 from src.APSMainFaciesTable import APSMainFaciesTable
-from src.utils.constants import Debug
-
-# importlib.reload(APSMainFaciesTable)
-
-# import importlib
-
-
-# importlib.reload(APSMainFaciesTable)
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
 
 
 class APSDataFromRMS:
     """
-    ----------------------------------------------------------------------------------
-    APSDataFromRMS:
-    Description: This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
-                 for both 3D grid model and for horizon data and facies data from wells.
-                 NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
-                 specifying which grid model to scan and which well and log to scan to get facies data.
-
+    This class contain RMS data to be made available for the GUI script etc. RMS project data is collected
+    for both 3D grid model and for horizon data and facies data from wells.
+    NOTE: To limit and simplify this data collection, the user specify an XML file with a few keywords
+    specifying which grid model to scan and which well and log to scan to get facies data.
 
     Functions:
         readRMSDataFromXMLFile(inputFileName)  - Read an already written XML with the RMS data.
@@ -40,7 +28,6 @@ class APSDataFromRMS:
         getGridZoneNames() - Get list of zone names for the grid model.
         getContinuousGridParamNames()  - Get list of all 3D parameters of continuous type belonging to the grid model.
         getDiscreteGridParamNames()    - Get list of all 3D parameters of discrete type belonging to the grid model.
-    --------------------------------------------------------------------------------------------
     """
 
     def __init__(self, debug_level=Debug.OFF):
@@ -141,14 +128,14 @@ class APSDataFromRMS:
             zoneNames.append(name)
         return zoneNames
 
-    def getNumberOfLayersInZone(self,zoneNumber):
+    def getNumberOfLayersInZone(self, zoneNumber):
         # item = [zoneNumber, zoneName, nLayers]
         for item in self.__data['Zones']:
             number = item[0]
-            if number == zoneNumber: 
+            if number == zoneNumber:
                 nLayer = item[2]
         return nLayer
-        
+
     def getContinuousGridParamNames(self):
         return copy.copy(self.__data['Property list continuous'])
 
@@ -281,8 +268,9 @@ class APSDataFromRMS:
         for item in self.__data['Zones']:
             zoneName = item[1]
             zoneNumber = item[0]
-            nLayers    = item[2]
-            print('  Zone number: {0} Zone name: {1}  Number of layers: {2}'.format(str(zoneNumber), zoneName , str(nLayers)))
+            nLayers = item[2]
+            print('  Zone number: {0} Zone name: {1}  Number of layers: {2}'.format(str(zoneNumber), zoneName,
+                                                                                    str(nLayers)))
         print(' ')
         print('Grid dimensions:')
         print('  NX:       ' + str(self.__grid['nx']))

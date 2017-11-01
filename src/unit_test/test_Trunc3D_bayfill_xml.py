@@ -10,12 +10,13 @@ from src.unit_test.constants import (
     OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,
 )
 from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, writePolygons
-from src.utils.constants import Debug
-from src.utils.methods import prettify
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
+from src.utils.xml import prettify
 
 
-def interpretXMLModelFileAndWrite(modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, debug_level):
+def interpretXMLModelFileAndWrite(
+        modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, debug_level=Debug.OFF
+):
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()
@@ -60,7 +61,6 @@ def createTrunc(
         sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level
 ):
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
-
 
     # Create an object and initialize it
     # Global variables in test script: faciesInZone, faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam
@@ -266,7 +266,7 @@ def run(fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile
         gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf):
     [truncRule, truncRule2] = initialize_write_read(
         OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, fTable, faciesInZone,
-        faciesInTruncRule,  gaussFieldsInZone, gaussFieldsForBGFacies,
+        faciesInTruncRule, gaussFieldsInZone, gaussFieldsForBGFacies,
         sf_value, sf_name, ysf, sbhd, useConstTruncParam, NO_VERBOSE_DEBUG
     )
     nGaussFields = truncRule.getNGaussFieldsInModel()

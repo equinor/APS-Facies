@@ -4,9 +4,7 @@
 import importlib
 
 from src import APSModel
-from src.utils.constants import Debug
-
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
 
 importlib.reload(APSModel)
 
@@ -21,7 +19,6 @@ def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, 
 
     # Write the updated XML tree for the model parameters to a new file
     apsModel.writeModelFromXMLRoot(eTree, outputAPSModelFile)
-    return
 
 
 # -------  Main ----------------

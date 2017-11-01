@@ -3,7 +3,7 @@ from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.resources.ui.TruncRuleCubic_ui import Ui_CubicTruncationRule
 from src.resources.ui.TruncRuleTypeBayfill_ui import Ui_BayfillTruncationRule
 from src.resources.ui.TruncRuleTypeNonCubic_ui import Ui_NonCubicTruncationRule
-from src.utils.constants import BaseNames, Defaults
+from src.utils.constants.constants import BaseNames, Defaults
 
 
 class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):

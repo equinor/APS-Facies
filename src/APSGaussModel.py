@@ -1,15 +1,13 @@
 #!/bin/env python
-import sys
 from xml.etree.ElementTree import Element
 
 import numpy as np
 
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
-from src.simGauss2D import simGaussField, simGaussFieldAddTrendAndTransform
-from src.utils.constants import Debug, VariogramType
-from src.xmlFunctions import getFloatCommand, getIntCommand, getKeyword
-from src.utils.constants import Debug
+from src.simGauss2D import simGaussField
+from src.utils.constants.simple import Debug, VariogramType
+from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
 
 
 class APSGaussModel:
@@ -92,47 +90,47 @@ class APSGaussModel:
 
         # Dictionary give xml keyword for each variable
         self.__xml_keyword = {
-            'MainRange':    'MainRange',
-            'PerpRange':    'PerpRange',
-            'VertRange':    'VertRange',
+            'MainRange': 'MainRange',
+            'PerpRange': 'PerpRange',
+            'VertRange': 'VertRange',
             'AzimuthAngle': 'AzimuthAngle',
-            'DipAngle':     'DipAngle',
-            'Power':        'Power'
+            'DipAngle': 'DipAngle',
+            'Power': 'Power'
         }
 
         # Dictionary give name to each index in __varioForGFModel list
         # item in list: [name,type,range1,range2,range3,azimuth,dip,power]
         self.__index_variogram = {
-            'Name':         0,
-            'Type':         1,
-            'MainRange':    2,
-            'PerpRange':    3,
-            'VertRange':    4,
+            'Name': 0,
+            'Type': 1,
+            'MainRange': 2,
+            'PerpRange': 3,
+            'VertRange': 4,
             'AzimuthAngle': 5,
-            'DipAngle':     6,
-            'Power':        7
+            'DipAngle': 6,
+            'Power': 7
         }
         # Dictionary give name to each index in __trendForGFModel list
         # item in list: [name,useTrend,trendRuleModelObj,relStdDev]
         self.__index_trend = {
-            'Name':      0,
+            'Name': 0,
             'Use trend': 1,
-            'Object':    2,
-            'RelStdev':  3
+            'Object': 2,
+            'RelStdev': 3
         }
         # Dictionaries of legal value ranges for gauss field parameters
         self.__minValue = {
-            'MainRange':    0.0,
-            'PerpRange':    0.0,
-            'VertRange':    0.0,
+            'MainRange': 0.0,
+            'PerpRange': 0.0,
+            'VertRange': 0.0,
             'AzimuthAngle': 0.0,
-            'DipAngle':     0.0,
-            'Power':        1.0
+            'DipAngle': 0.0,
+            'Power': 1.0
         }
         self.__maxValue = {
             'AzimuthAngle': 360.0,
-            'DipAngle':     90.0,
-            'Power':        2.0
+            'DipAngle': 90.0,
+            'Power': 2.0
         }
 
         # Dictionary give name to each index in __seedForPreviewForGFModel
@@ -861,7 +859,7 @@ class APSGaussModel:
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
-):
+    ):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
@@ -876,7 +874,7 @@ class APSGaussModel:
             gridDim2 = gridNY
             size1 = simBoxXsize
             size2 = simBoxYsize
-            assert crossSectionIndx >= 0 and crossSectionIndx < gridNZ
+            assert 0 <= crossSectionIndx < gridNZ
             # crossSectionIndx = int(gridNZ / 2)
             projection = 'xy'
         elif crossSectionType == 'IK':
@@ -884,7 +882,7 @@ class APSGaussModel:
             gridDim2 = gridNZ
             size1 = simBoxXsize
             size2 = simBoxZsize
-            assert crossSectionIndx >= 0 and crossSectionIndx < gridNY
+            assert 0 <= crossSectionIndx < gridNY
             # crossSectionIndx = int(gridNY / 2)
             projection = 'xz'
         elif crossSectionType == 'JK':
@@ -892,7 +890,7 @@ class APSGaussModel:
             gridDim2 = gridNZ
             size1 = simBoxYsize
             size2 = simBoxZsize
-            assert crossSectionIndx >= 0 and crossSectionIndx < gridNX
+            assert 0 <= crossSectionIndx < gridNX
             # crossSectionIndx = int(gridNX / 2)
             projection = 'yz'
         else:
@@ -984,7 +982,7 @@ class APSGaussModel:
 
     def __transformEmpiricDistributionToUniform(self, inputValues):
         """
-        Description: Take input as numpy 1D float array and return numpy 1D float array where 
+        Take input as numpy 1D float array and return numpy 1D float array where
         the values is transformed to uniform distribution.
         The input array is regarded as outcome of  probability distribution. 
         The output assigm the empiric percentile from the cumulative empiric distribution 

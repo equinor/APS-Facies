@@ -35,30 +35,33 @@ Example input file to be specified before running this script.
 </GetRMSProjectData>
 """
 
+import copy
 import datetime
+import importlib
 import sys
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
-import copy
-import importlib
 import numpy as np
 import roxar
 
 import src.generalFunctionsUsingRoxAPI as gr
 from src import APSDataFromRMS, APSMainFaciesTable
-from src.utils.constants import Debug
-from src.utils.methods import prettify
-from src.utils.constants import Debug
+from src.utils.constants.simple import Debug
+from src.utils.xml import prettify
 
 importlib.reload(APSDataFromRMS)
 importlib.reload(APSMainFaciesTable)
 importlib.reload(gr)
 
 
-# Function: readInputXMLFile
-# Description: This function read user specification of which grid model etc to scan from RMS.
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
+    """
+    This function read user specification of which grid model etc to scan from RMS.
+    :param modelFileName:
+    :param debug_level:
+    :return:
+    """
     # Read model if it is defined
     tree = ET.parse(modelFileName)
     root = tree.getroot()
@@ -141,15 +144,22 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
             wellRefName, trajectoryName, logrunName, logName]
 
 
-# Function scanRMSProjectAndWriteXMLFile
-# Description:  - Read a user specified input XML file specifying which grid model etc to scan.
-#               - Scan the RMS project using roxAPI to get RMS project information.
-#               - Write the RMS project info to an output XML file.
 def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level=Debug.OFF):
-    # Read a specification of which data to scan from the RMS project
-
-    [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
-     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, debug_level)
+    """
+    Read a specification of which data to scan from the RMS project
+        - Read a user specified input XML file specifying which grid model etc to scan.
+        - Scan the RMS project using roxAPI to get RMS project information.
+        - Write the RMS project info to an output XML file.
+    :param project:
+    :param inputFile:
+    :param outputRMSDataFile:
+    :param debug_level:
+    :return:
+    """
+    [
+        gridModelName, gfNames, horizonRefName, horizonRefType,
+        horizonList, wellRefName, trajectoryName, logrunName, logName
+    ] = readInputXMLFile(inputFile, debug_level)
 
     topElement = Element('RMS_project_data')
 
@@ -160,8 +170,6 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         name = wflow.name
         workflowNames.append(name)
     # -- End commands using experimental roxAPI functionality --
-
-
 
     tag = 'Project'
     attribute = {'name': project.name}
@@ -203,14 +211,14 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     # Read data from RMS project and write to XML file
     # Scan grid model data
     grid_models = project.grid_models
-    found = 0
+    found = False
     gridModel = None
     for grid_model in grid_models:
         if grid_model.name == gridModelName:
             gridModel = grid_model
-            found = 1
+            found = True
             break
-    if found == 0:
+    if not found:
         raise ValueError(
             'Could not find grid model with name: {} in RMS project'
             ''.format(gridModelName)

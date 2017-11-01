@@ -1,6 +1,6 @@
 from os.path import isfile
 
-from src.utils.constants import Defaults
+from src.utils.constants.constants import Defaults
 
 
 def is_valid_path(path: str) -> bool:

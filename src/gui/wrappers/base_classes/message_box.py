@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox
 
-from src.utils.constants import MessageIcon
+from src.utils.constants.constants import MessageIcon
 
 
 class MessageBox(QMessageBox):

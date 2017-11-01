@@ -1,18 +1,14 @@
 #!/bin/env python
+import copy
 from xml.etree.ElementTree import Element
 
-import copy
+from src.utils.constants.simple import Debug
+from src.utils.numeric import isNumber
+from src.utils.xml import getKeyword, getTextCommand
 
-from src.utils.constants import Debug
-from src.utils.methods import isNumber
-from src.xmlFunctions import getKeyword, getTextCommand
-from src.utils.constants import Debug
 
 class APSFaciesProb:
     """
-    class APSFaciesProb
-
-    Description:
     This class keep a list of facies names and associated facies probabilities for a zone.
     The facies probabilities can be specified either as float numbers or as RMS parameter
     names of facies probability cubes. The class contain functions to get the facies list
@@ -149,15 +145,14 @@ class APSFaciesProb:
         self.__mainFaciesTable = mainFaciesTable
         self.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
-
-    def __roundOffProb(self,resolutionRoundOff=100):
+    def __roundOffProb(self, resolutionRoundOff=100):
         if self.__useConstProb == 1:
             for i in range(len(self.__faciesProbForZoneModel)):
                 item = self.__faciesProbForZoneModel[i]
                 prob = float(item[self.__FPROB])
-                probNew = int(prob*resolutionRoundOff + 0.5)/resolutionRoundOff
+                probNew = int(prob * resolutionRoundOff + 0.5) / resolutionRoundOff
                 item[self.__FPROB] = probNew
-                
+
     def __checkConstProbValuesAndNormalize(self, zoneNumber):
         if self.__useConstProb == 1:
             sumProb = 0.0
@@ -201,7 +196,7 @@ class APSFaciesProb:
                 raise ValueError(
                     'Probability for facies {} is not found'
                     ''.format(fName)
-                    )
+                )
             return float(probCubeName)
         else:
             raise ValueError(
