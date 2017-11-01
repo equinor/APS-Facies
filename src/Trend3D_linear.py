@@ -1,14 +1,11 @@
 #!/bin/env python
-# Dependency: ROXAPI
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
+from _ast import List
 
-import roxar
-import numpy as np 
-import sys
-import copy
+import numpy as np
 import math
 
-import generalFunctionsUsingRoxAPI as gr
+import src.generalFunctionsUsingRoxAPI as gr
 
 
 class Trend3D_linear:
@@ -30,10 +27,16 @@ class Trend3D_linear:
         self.__asimuth        = trendRuleModel.getAsimuth()
         self.__stackingAngle  = trendRuleModel.getStackingAngle()
         self.__direction      = trendRuleModel.getStackingDirection()
-        self.__printInfo      = printInfo 
+        self.__printInfo      = printInfo
 
-
-    def createTrend(self,gridModel,realNumber,nDefinedCells,cellIndexDefined,zoneNumber,simBoxThickness):
+    def createTrend(self,
+                    gridModel,
+                    realNumber: int,
+                    nDefinedCells: int,
+                    cellIndexDefined: List[int],
+                    zoneNumber: int,
+                    simBoxThickness: float
+                    ) -> List[object]:
         # Check if specified grid model exists and is not empty
         if gridModel.is_empty():
             text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
@@ -107,12 +110,12 @@ class Trend3D_linear:
             minValue = valuesInSelectedCells.min()    
             maxValue = valuesInSelectedCells.max()
             minmaxDifference = maxValue - minValue
-            valuesRescaled = self.__direction * valuesInSelectedCells/minmaxDifference
+            valuesRescaled = self.__direction * valuesInSelectedCells / minmaxDifference
 
             minValue = valuesRescaled.min()    
             maxValue = valuesRescaled.max()
             minmaxDifference = maxValue - minValue
-        return [minmaxDifference,valuesRescaled]
+        return [minmaxDifference, valuesRescaled]
 
     def getAsimuth(self):
         return self.__asimuth

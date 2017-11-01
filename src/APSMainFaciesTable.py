@@ -1,55 +1,47 @@
 #!/bin/env python
 import sys
 import copy
-import xml.etree.ElementTree as ET
-from  xml.etree.ElementTree import Element, SubElement, dump
-
-
-# Class APSMainFaciesTable
-# Description: Keeps the global facies table. All facies used in the APS model 
-#              must exist in this table before being used.
-#
-#  Public member functions:
-#    Constructor:  def __init__(self,ET_Tree=None,modelFileName=None,printInfo =0)
-#
-#    def initialize(self,fTable)
-#               - Initialize the object from a facies/code dictionary object
-#
-#   --- Get functions ---
-#    def getNFacies(self)
-#    def getClassName(self)
-#    def getFaciesTable(self)
-#    def getFaciesName(self,fIndx)
-#    def getFaciesCode(self,fIndx)
-#    def getFaciesCodeForFaciesName(self,fName)
-#    def getFaciesIndx(self,fName)
-#
-#    --- Set functions ---
-#    def addFacies(self,faciesName, code)
-#    def removeFacies(self,faciesName):
-#
-#    --- Check functions ---
-#    def checkWithFaciesTable(self,fName)
-#
-#    --- Write ---
-#    def XMLAddElement(self,root)
-#             - Add data to xml tree
-#
-#  Private member functions:
-#
-#    def __checkUniqueFaciesNamesAndCodes(self)
-#
-# --------------------------------------------------------------------
-
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
+from xml.etree.ElementTree import Element
 
 
 class APSMainFaciesTable:
+    """
+    Class APSMainFaciesTable
+    Description: Keeps the global facies table. All facies used in the APS model
+                 must exist in this table before being used.
+
+     Public member functions:
+       Constructor:  def __init__(self,ET_Tree=None,modelFileName=None,printInfo =0)
+
+       def initialize(self,fTable)
+                  - Initialize the object from a facies/code dictionary object
+
+      --- Get functions ---
+       def getNFacies(self)
+       def getClassName(self)
+       def getFaciesTable(self)
+       def getFaciesName(self,fIndx)
+       def getFaciesCode(self,fIndx)
+       def getFaciesCodeForFaciesName(self,fName)
+       def getFaciesIndx(self,fName)
+
+       --- Set functions ---
+       def addFacies(self,faciesName, code)
+       def removeFacies(self,faciesName):
+
+       --- Check functions ---
+       def checkWithFaciesTable(self,fName)
+
+       --- Write ---
+       def XMLAddElement(self,root)
+                - Add data to xml tree
+
+     Private member functions:
+
+       def __checkUniqueFaciesNamesAndCodes(self)
+
+    --------------------------------------------------------------------
+    """
     def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
         self.__nFacies = 0
         self.__faciesTable = []

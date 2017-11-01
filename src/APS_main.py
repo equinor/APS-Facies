@@ -1,29 +1,22 @@
 #!/bin/env python
-# Dependency: ROXAPI
-# Python 3 truncation script to be run in RMS 10 workflow
-# Input:   
-#       XML model file.
-# Output: 
-#       Facies realisation updated for specified zones.
-#       Updated 3D parameter for transformed gaussian fields.
-
+"""
+Dependency: ROXAPI
+Python 3 truncation script to be run in RMS 10 workflow
+Input:
+      XML model file.
+Output:
+      Facies realisation updated for specified zones.
+      Updated 3D parameter for transformed gaussian fields.
+"""
 import numpy as np
 import sys
 
-import APSModel
-import APSMainFaciesTable
-import APSZoneModel
-import APSGaussFieldJobs
+from src import (
+    APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, Trunc2D_Base_xml, Trunc2D_Cubic_xml,
+    Trunc2D_Angle_xml, Trunc3D_bayfill_xml, Trend3D_linear, Trend3D_linear_model_xml
+)
 
-import Trunc2D_Base_xml
-import Trunc2D_Cubic_xml
-import Trunc2D_Angle_xml
-import Trunc3D_bayfill_xml
-
-import Trend3D_linear
-import Trend3D_linear_model_xml
-
-import generalFunctionsUsingRoxAPI as gr
+import src.generalFunctionsUsingRoxAPI as gr
 import importlib
 
 importlib.reload(APSModel)

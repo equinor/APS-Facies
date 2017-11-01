@@ -49,9 +49,8 @@ def draw2D(nx,ny,xsize,ysize, variotype, iseed, range1, range2, angle, power,deb
             values.append(v)
             n = n+1
 #            print( 'i,j,value: ' + '(' + str(i) +','+str(j) + '): ' + ' '  + str(values[n-1]))
-
-            
     return [values]
+
 
 def simGaussFieldAddTrendAndTransform(iseed,nx,ny,xsize,ysize,
                                       varioType1,range11,range21,varioAngle1,
@@ -65,7 +64,6 @@ def simGaussFieldAddTrendAndTransform(iseed,nx,ny,xsize,ysize,
     # relative to first axis.
     varioAngle1 = 90.0 - varioAngle1
     [v1Residual] = draw2D(nx,ny,xsize,ysize, varioType1, iseed, range11, range21, varioAngle1, pow1,debugPrint)
-
 
     # Trends for gaussian fields
     Trend1 = np.zeros(nx*ny,float)
@@ -97,8 +95,6 @@ def simGaussFieldAddTrendAndTransform(iseed,nx,ny,xsize,ysize,
         sigma1 = relSigma1* (maxV-minV)
 #        print( 'Sigma1: ' + str(sigma1))
 
-
-
     v1Trend = []
     for n in range(nx*ny):
         w = sigma1*v1Residual[n]
@@ -118,7 +114,6 @@ def simGaussFieldAddTrendAndTransform(iseed,nx,ny,xsize,ysize,
     return [transformedValues]
 
 
-
 def simGaussFieldAddTrendAndTransform2(iseed,nx,ny,xsize,ysize,
                                       varioType1,range11,range21,varioAngle1,
                                       pow1,useTrend1,trendAsimuth1,relSigma1):
@@ -127,7 +122,6 @@ def simGaussFieldAddTrendAndTransform2(iseed,nx,ny,xsize,ysize,
     # relative to first axis.
     varioAngle1 = 90.0 - varioAngle1
     [v1Residual] = draw2D(nx,ny,xsize,ysize, varioType1, iseed, range11, range21, varioAngle1, pow1)
-
 
     # Trends for gaussian fields
     Trend1 = np.zeros(nx*ny,float)
@@ -158,8 +152,6 @@ def simGaussFieldAddTrendAndTransform2(iseed,nx,ny,xsize,ysize,
         sigma1 = relSigma1* (maxV-minV)
 #        print( 'Sigma1: ' + str(sigma1))
 
-
-
     v1             = np.zeros(nx*ny,float)
     v1WithTrend    = np.zeros(nx*ny,float)
     cumulativeX    = np.zeros(nx*ny,float)
@@ -183,9 +175,4 @@ def simGaussFieldAddTrendAndTransform2(iseed,nx,ny,xsize,ysize,
 
     return [v1,v1WithTrend,transformedValues,cumulativeX,cumulativeY]
 
-
-
-
-
 # ------------  End of functions to draw gaussian fields -----------------------------------
-

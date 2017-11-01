@@ -130,7 +130,6 @@ class Trunc2D_Cubic_Multi_Overlay:
         self.__polygons = []
         self.__fIndxPerPolygon = []
 
-
     def writeContentsInDataStructure(self):
         print(' ')
         print('************  Contents of the data structure for class: ' + self.__className + ' ***************')
@@ -185,8 +184,6 @@ class Trunc2D_Cubic_Multi_Overlay:
                 print(repr(poly[j]))
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
-
-
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None,
                  printInfo=0, modelFileName=None):
@@ -437,7 +434,6 @@ class Trunc2D_Cubic_Multi_Overlay:
         # Check that number of gauss fields in model match the required number in this model
         if self.__nGaussFieldInModel != (nOverLayFacies + 2):
             raise ValueError('Mismatch in specification of model file regarding number of gaussian fields and truncation rule')
-            
 
         self.__isBackGroundFacies = np.zeros((nOverLayFacies,len(self.__faciesInZone)), dtype=int)
         groupIndx = 0
@@ -998,7 +994,6 @@ class Trunc2D_Cubic_Multi_Overlay:
             [faciesCode, fIndx] = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
         return [faciesCode, fIndx]
 
-
     def __calcFaciesLevel1V(self, nodeListL1, alphaCoord):
         faciesCode = -1
         fIndx = -1
@@ -1450,9 +1445,6 @@ class Trunc2D_Cubic_Multi_Overlay:
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
 
-
-
-
     def initialize(self, mainFaciesTable, faciesInZone, truncStructureList,
                    backGroundFacies=None, overlayFacies=None, overlayTruncCenter=None, printInfo=0):
         """
@@ -1488,7 +1480,6 @@ class Trunc2D_Cubic_Multi_Overlay:
             fCode = self.__mainFaciesTable.getFaciesCodeForFaciesName(fName)
             self.__faciesCode.append(fCode)
 
-
         # Set truncation rule (hierarchy of rectangular polygons)
         self.__setTruncStructure(truncStructureList)
 
@@ -1507,7 +1498,6 @@ class Trunc2D_Cubic_Multi_Overlay:
                     'Lenght of input lists are different from each other'
                     )
             self.__nGaussFieldInModel = 2 + m2
-
 
         # Set which facies to be used as background facies when overprint facies is applied
         self.__defineBackgroundFaciesAndOverLayFacies(backGroundFacies, overlayFacies)
@@ -1851,4 +1841,3 @@ class Trunc2D_Cubic_Multi_Overlay:
                 bElement = Element(tag)
                 bElement.text = ' ' + fName + ' '
                 overLayElement.append(bElement)
-        

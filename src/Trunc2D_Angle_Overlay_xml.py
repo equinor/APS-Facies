@@ -1,66 +1,59 @@
 #!/bin/env python
-import sys
 import copy
 import numpy as np
 
-from APSMainFaciesTable import APSMainFaciesTable
-#from generalFunctionsUsingRoxAPI import getContinuous3DParameterValues
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element, SubElement, dump
-
-# class Trunc2D_Angle_Overlay
-# Description: Truncation map consists of polygons defined by linear sloping boundaries.
-#              Each facies boundary has a normal vector with specified direction.
-#              The direction is specified as anticlockwise rotation relative to first axis.
-#              The angle is in degrees. So an angle of 0.0 means that the normal vector points
-#              in the first axis direction ('x'-direction).
-#              An angle of 90.0 degrees means that the normal vector points in
-#              the second axis direction ('y' direction) while angle of 45.0 degrees means a
-#              45 degree rotation of the vector relative to the first axis direction anticlockwise.
-#              It is possible to specify that a facies can be associated with multiple polygons
-#              in the truncation map.
-#
-#  Member function with common name for all truncation type classes
-#    name                     =  getClassName()
-#    indexList                =  getFaciesOrderIndexList()
-#    faciesList               =  getFaciesInTruncRule()
-#    useConstTruncModelParam  =  useConstTruncModelParam()
-#                                setTruncRule(faciesProb,cellIndx = 0)
-#    [faciesCode,fIndx]       =  defineFaciesByTruncRule(alphaCoord)
-#    [polygons]               =  truncMapPolygons()
-#                                XMLAddElement(parent)
-
-#  Public member functions specific for class Trunc2D_Angle_Overlay
-#
-#  Constructor:
-#               __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
-#                        printInfo = 0,modelFileName=None)
-#
-#  def initialize(self,mainFaciesTable,faciesInZone,truncStructure,
-#                   backgroundFacies, overlayFacies, overlayTruncCenter,
-#                   useConstTruncParam,printInfo)
-#
-#  getTruncationParam(gridModel,realNumber)
-# --------------------------------------------------------
-#
-#  Internal member functions specific for class Trunc2D_B
-#    isOK                =  __checkFaciesForZone()
-#     polygon            =  __setUnitSquarePolygon()
-#                           __setFaciesLines(cellIndx)
-# [isSplit,outputPolyA, outputPolyB] = __subdividePolygonByLine(polygonPts, vx,vy,x0,y0)
-#    area                =  __polyArea(polygon)
-#   [smin,smax]          =  __findSminSmaxForPolygon(polygon,vx,vy,vxNormal,vyNormal,x0Normal,y0Normal)
-#   inside               =  __isInsidePolygon(polygon, xInput,yInput)
-#  [outputPolyA,outputPolyB,closestPolygon] = __defineIntersectionFromProb(self,polygon,vx,vy,
-#                                                        vxNormal,vyNormal,x0Normal,y0Normal,faciesProb)
-#
+from xml.etree.ElementTree import Element
 
 
 class Trunc2D_Angle_Overlay:
     """
-    Description: This class implements adaptive plurigaussian field truncation
-                 using two simulated gaussian fields (with trend).
+    class Trunc2D_Angle_Overlay
+    Description: This class implements adaptive plurigaussian field truncation using two simulated
+                 gaussian fields (with trend).
+                 Truncation map consists of polygons defined by linear sloping boundaries.
+                 Each facies boundary has a normal vector with specified direction.
+                 The direction is specified as anticlockwise rotation relative to first axis.
+                 The angle is in degrees. So an angle of 0.0 means that the normal vector points
+                 in the first axis direction ('x'-direction).
+                 An angle of 90.0 degrees means that the normal vector points in
+                 the second axis direction ('y' direction) while angle of 45.0 degrees means a
+                 45 degree rotation of the vector relative to the first axis direction anticlockwise.
+                 It is possible to specify that a facies can be associated with multiple polygons
+                 in the truncation map.
 
+     Member function with common name for all truncation type classes
+       name                     =  getClassName()
+       indexList                =  getFaciesOrderIndexList()
+       faciesList               =  getFaciesInTruncRule()
+       useConstTruncModelParam  =  useConstTruncModelParam()
+                                   setTruncRule(faciesProb,cellIndx = 0)
+       [faciesCode,fIndx]       =  defineFaciesByTruncRule(alphaCoord)
+       [polygons]               =  truncMapPolygons()
+                                   XMLAddElement(parent)
+
+     Public member functions specific for class Trunc2D_Angle_Overlay
+
+     Constructor:
+                  __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
+                           printInfo = 0,modelFileName=None)
+
+     def initialize(self,mainFaciesTable,faciesInZone,truncStructure,
+                      backgroundFacies, overlayFacies, overlayTruncCenter,
+                      useConstTruncParam,printInfo)
+
+     getTruncationParam(gridModel,realNumber)
+    --------------------------------------------------------
+
+     Internal member functions specific for class Trunc2D_B
+       isOK                =  __checkFaciesForZone()
+        polygon            =  __setUnitSquarePolygon()
+                              __setFaciesLines(cellIndx)
+    [isSplit,outputPolyA, outputPolyB] = __subdividePolygonByLine(polygonPts, vx,vy,x0,y0)
+       area                =  __polyArea(polygon)
+      [smin,smax]          =  __findSminSmaxForPolygon(polygon,vx,vy,vxNormal,vyNormal,x0Normal,y0Normal)
+      inside               =  __isInsidePolygon(polygon, xInput,yInput)
+     [outputPolyA,outputPolyB,closestPolygon] = __defineIntersectionFromProb(self,polygon,vx,vy,
+                                                           vxNormal,vyNormal,x0Normal,y0Normal,faciesProb)
     """
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, 

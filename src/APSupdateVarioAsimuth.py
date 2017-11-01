@@ -1,13 +1,13 @@
 #!/bin/env python
-# Python3 script using ROXAPI to update 2D maps for asimuth anisotropy for 
-# variogram for 3D gaussian field simulation.
-# Dependency: ROXAPI
+"""
+Python3 script using ROXAPI to update 2D maps for asimuth anisotropy for
+variogram for 3D gaussian field simulation.
+Dependency: ROXAPI
+"""
 import roxar
-import APSModel
-import APSZoneModel
-import generalFunctionsUsingRoxAPI as gr
+from src import APSModel, APSZoneModel,Trunc2D_Cubic_Multi_Overlay_xml
+import src.generalFunctionsUsingRoxAPI as gr
 import importlib
-import Trunc2D_Cubic_Multi_Overlay_xml
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
 importlib.reload(gr)

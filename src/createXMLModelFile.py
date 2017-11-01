@@ -7,11 +7,7 @@ import copy
 import time
 import xml.etree.ElementTree as ET
 
-import APSModel
-import APSMainFaciesTable
-import APSZoneModel
-import APSGaussFieldJobs
-import APSDataFromRMS
+from src import APSModel, APSMainFaciesTable, APSZoneModel, APSGaussFieldJobs, APSDataFromRMS
 #import Trunc1D_xml
 #import Trunc1D_A2_xml
 #import Trunc2D_A_xml
@@ -19,12 +15,12 @@ import APSDataFromRMS
 #import Trunc2D_B_xml
 #import Trunc2D_B2_xml
 #import Trunc2D_C_xml
-import Trunc2D_Cubic_Overlay_xml
-import Trunc2D_Angle_Overlay_xml
-import Trunc3D_bayfill_xml
+import src.Trunc2D_Cubic_Overlay_xml
+import src.Trunc2D_Angle_Overlay_xml
+import src.Trunc3D_bayfill_xml
 #import Trunc3D_A_xml
-import Trend3D_linear_model_xml
-import DefineTruncStructure
+import src.Trend3D_linear_model_xml
+import src.DefineTruncStructure
 #import importlib
 #importlib.reload(APSModel)
 #importlib.reload(APSZoneModel)

@@ -1,6 +1,7 @@
 #!/bin/env python
 import sys
-from APSMainFaciesTable import APSMainFaciesTable
+from src.APSMainFaciesTable import APSMainFaciesTable
+
 
 def test_mainFaciesTable():
     mainFaciesTable1 = APSMainFaciesTable()

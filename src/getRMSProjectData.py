@@ -1,63 +1,60 @@
 #!/bin/env python
-# Python3  script with roxAPI
-# This script will read the RMS project and save all relevant information necessary for the APSGUI.
-# This will include:
-# - Grid model name for selected grid model specified by user
-# - 3D parameter names for selected grid model
-# - name and type of all horizons in horizon container
-# - Name of all discrete variables (facies) in selected log from selected well
-# - Name of workflow
-# - Name of RMS project
-#
-# Example input file to be specified before running this script.
-#<?xml version="1.0" ?>
-#<GetRMSProjectData>
-#  <GridModel>
-#    APS_NESLEN_ODM
-#  </GridModel>
-#  <WellName name="B2">
-#    <Trajectory name="Drilled trajectory">
-#      <Logrun name="log">
-#        <LogName>
-#          ODM_Facies
-#        </LogName>
-#      </Logrun>
-#    </Trajectory>
-#  </WellName>
-#  <HorizonReference name="top_middle_Neslen_1" type="DepthSurface">  </HorizonReference>
-#  <Horizon> top_middle_Neslen_1 </Horizon>
-#  <Horizon> top_middle_Neslen_2 </Horizon>
-#  <Horizon> top_middle_Neslen_3 </Horizon>
-#  <Horizon> top_middle_Neslen_4 </Horizon>
-#  <Horizon> top_middle_Neslen_5 </Horizon>
-#  <Horizon> top_middle_Neslen_6 </Horizon>
-#</GetRMSProjectData>
+"""
+Python3  script with roxAPI
+This script will read the RMS project and save all relevant information necessary for the APSGUI.
+This will include:
+- Grid model name for selected grid model specified by user
+- 3D parameter names for selected grid model
+- name and type of all horizons in horizon container
+- Name of all discrete variables (facies) in selected log from selected well
+- Name of workflow
+- Name of RMS project
+
+Example input file to be specified before running this script.
+<?xml version="1.0" ?>
+<GetRMSProjectData>
+ <GridModel>
+   APS_NESLEN_ODM
+ </GridModel>
+ <WellName name="B2">
+   <Trajectory name="Drilled trajectory">
+     <Logrun name="log">
+       <LogName>
+         ODM_Facies
+       </LogName>
+     </Logrun>
+   </Trajectory>
+ </WellName>
+ <HorizonReference name="top_middle_Neslen_1" type="DepthSurface">  </HorizonReference>
+ <Horizon> top_middle_Neslen_1 </Horizon>
+ <Horizon> top_middle_Neslen_2 </Horizon>
+ <Horizon> top_middle_Neslen_3 </Horizon>
+ <Horizon> top_middle_Neslen_4 </Horizon>
+ <Horizon> top_middle_Neslen_5 </Horizon>
+ <Horizon> top_middle_Neslen_6 </Horizon>
+</GetRMSProjectData>
+"""
 
 import roxar
 import xml.etree.ElementTree as ET
-from  xml.etree.ElementTree import Element, SubElement, dump
-from xml.dom import minidom
+from xml.etree.ElementTree import Element
 import numpy as np
 import copy 
 import importlib
+import sys
 from datetime import date
 from datetime import time
 import datetime 
 
 
-import APSDataFromRMS
-import generalFunctionsUsingRoxAPI as gr
-import APSMainFaciesTable
+from src import APSDataFromRMS, APSMainFaciesTable
+import src.generalFunctionsUsingRoxAPI as gr
+from src.utils.methods import prettify
 
 importlib.reload(APSDataFromRMS)
 importlib.reload(APSMainFaciesTable)
 importlib.reload(gr)
 
-
-def prettify(elem):
-    rough_string = ET.tostring(elem,'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ")
 
 # Function: readInputXMLFile
 # Description: This function read user specification of which grid model etc to scan from RMS.
@@ -65,11 +62,10 @@ def readInputXMLFile(modelFileName,printInfo):
     # Read model if it is defined
     tree = ET.parse(modelFileName)
     root = tree.getroot()
-    
-        
+
     kw = 'GridModel'
     gridModelObj = root.find(kw)
-    if gridModelObj == None:
+    if gridModelObj is None:
         print('Error: Missing specification of ' + kw)
         sys.exit()
     text = gridModelObj.text

@@ -1,81 +1,77 @@
 #!/bin/env python
-import sys
 import copy
 import numpy as np
-from Trunc2D_Base_xml import Trunc2D_Base
+from src.Trunc2D_Base_xml import Trunc2D_Base
 from xml.etree.ElementTree import Element
 
-"""
------------------------------------------------------------------------
- class Trunc2D_Angle
 
- Description: This class is derived from Trunc2D_Base which contain common data structure for
-               truncation algorithms with overlay facies.
-
-               Truncation map consists of polygons defined by linear sloping boundaries.
-               Each facies boundary has a normal vector with specified direction.
-               The direction is specified as anticlockwise rotation relative to first axis.
-               The angle is in degrees. So an angle of 0.0 means that the normal vector points
-               in the first axis direction ('x'-direction).
-               An angle of 90.0 degrees means that the normal vector points in
-               the second axis direction ('y' direction) while angle of 45.0 degrees means a
-               45 degree rotation of the vector relative to the first axis direction anticlockwise.
-               It is possible to specify that a facies can be associated with multiple polygons
-               in the truncation map.
-
-               Overlay facies can be defined and follow the rule defined in the Trunc2D_Base class.
-
- Constructor:
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, 
-                 nGaussFieldInModel=None, printInfo=0, modelFileName=None)
-
- Public member functions:  
- def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
-                backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
-                useConstTruncParam, printInfo)
- def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
- def setTruncRule(self, faciesProb, cellIndx=0)
- def defineFaciesByTruncRule(self, alphaCoord)
- def getClassName(self)
- def useConstTruncModelParam(self)
- def getNCountShiftAlpha(self)
- def truncMapPolygons(self)
- def faciesIndxPerPolygon(self)
- def setAngle(self, polygonNumber, angle)
- def setAngleTrend(self, polygonNumber, angleParamName)
- def setUseTrendForAngles(self, useConstTrend)
- def XMLAddElement(self, parent)
- def writeContentsInDataStructure(self)
- def getNCalcTruncMap(self)
- def getNLookupTruncMap(self)
-
- Private member functions:
- def __setEmpty(self)
- def __interpretXMLTree(self, trRuleXML, modelFileName)
- def __setUnitSquarePolygon(self)
- def __setZeroPolygon(self)
- def __setFaciesLines(self, cellIndx)
- def __subdividePolygonByLine(self, polygonPts, vx, vy, x0, y0)
- def __polyArea(self, polygon)
- def __findSminSmaxForPolygon(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
- def __defineIntersectionFromProb(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal, faciesProb)
- def __isInsidePolygon(self, polygon, xInput, yInput)
- def __calculateFaciesPolygons(self,cellIndx,area)
-
-----------------------------------------------------------------------
-"""
 class Trunc2D_Angle(Trunc2D_Base):
     """
-    Description: This class implements adaptive plurigaussian field truncation
-                 using two simulated gaussian fields (with trend).
+    -----------------------------------------------------------------------
+     class Trunc2D_Angle
 
+     Description: This class implements adaptive plurigaussian field truncation
+                  using two simulated gaussian fields (with trend).
+
+                  This class is derived from Trunc2D_Base which contain common data structure for
+                  truncation algorithms with overlay facies.
+
+                  Truncation map consists of polygons defined by linear sloping boundaries.
+                  Each facies boundary has a normal vector with specified direction.
+                  The direction is specified as anticlockwise rotation relative to first axis.
+                  The angle is in degrees. So an angle of 0.0 means that the normal vector points
+                  in the first axis direction ('x'-direction).
+                  An angle of 90.0 degrees means that the normal vector points in
+                  the second axis direction ('y' direction) while angle of 45.0 degrees means a
+                  45 degree rotation of the vector relative to the first axis direction anticlockwise.
+                  It is possible to specify that a facies can be associated with multiple polygons
+                  in the truncation map.
+
+                  Overlay facies can be defined and follow the rule defined in the Trunc2D_Base class.
+
+     Constructor:
+        def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
+                     nGaussFieldInModel=None, printInfo=0, modelFileName=None)
+
+     Public member functions:
+     def initialize(self, mainFaciesTable, faciesInZone, truncStructure,
+                    backGroundFaciesGroups, overlayFacies, overlayTruncCenter,
+                    useConstTruncParam, printInfo)
+     def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
+     def setTruncRule(self, faciesProb, cellIndx=0)
+     def defineFaciesByTruncRule(self, alphaCoord)
+     def getClassName(self)
+     def useConstTruncModelParam(self)
+     def getNCountShiftAlpha(self)
+     def truncMapPolygons(self)
+     def faciesIndxPerPolygon(self)
+     def setAngle(self, polygonNumber, angle)
+     def setAngleTrend(self, polygonNumber, angleParamName)
+     def setUseTrendForAngles(self, useConstTrend)
+     def XMLAddElement(self, parent)
+     def writeContentsInDataStructure(self)
+     def getNCalcTruncMap(self)
+     def getNLookupTruncMap(self)
+
+     Private member functions:
+     def __setEmpty(self)
+     def __interpretXMLTree(self, trRuleXML, modelFileName)
+     def __setUnitSquarePolygon(self)
+     def __setZeroPolygon(self)
+     def __setFaciesLines(self, cellIndx)
+     def __subdividePolygonByLine(self, polygonPts, vx, vy, x0, y0)
+     def __polyArea(self, polygon)
+     def __findSminSmaxForPolygon(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal)
+     def __defineIntersectionFromProb(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal, faciesProb)
+     def __isInsidePolygon(self, polygon, xInput, yInput)
+     def __calculateFaciesPolygons(self,cellIndx,area)
+
+    ----------------------------------------------------------------------
     """
     def __setEmpty(self):
         """
         Description: Initialize values for empty data structure
         """
-        # Initialize variables defined in base class Trunc2D_Base
-        super()._setEmpty()
 
         # Specific variables for class Trunc2D_Angle
         self._className = 'Trunc2D_Angle'
@@ -84,8 +80,6 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Tolerance used for probabilities
         self._eps = 0.001
-
-
 
         # Variables containing truncations for the 2D truncation map
         # The input direction angles can be file names in case trend parameters for these are specified
@@ -125,7 +119,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
         self.__keyResolution = 100 
 
-
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, nGaussFieldInModel=None, 
                  printInfo=0, modelFileName=None):
         """
@@ -138,7 +131,8 @@ class Trunc2D_Angle(Trunc2D_Base):
         is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables 
         and data structure for modelling of overlya facies.
         
-        """        
+        """
+        super().__init__()
         self.__setEmpty()
         
         if trRuleXML is not None:
@@ -185,12 +179,10 @@ class Trunc2D_Angle(Trunc2D_Base):
                         indx = self._backGroundFaciesIndx[i][j]
                         print('Indx: ' + str(indx) + ' Facies name: ' + self._faciesInTruncRule[indx])
 
-
         else:
             if printInfo >= 3:
                 print('Debug info: Create empty object for: ' + self._className)
         #  End of __init__
-
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         """ Initialize object from xml tree object trRuleXML. 

@@ -1,10 +1,7 @@
 #!/bin/env python
 import sys
 import copy
-import APSMainFaciesTable
-import Trunc2D_Cubic_Overlay_xml
-import Trunc2D_Angle_Overlay_xml
-import Trunc3D_bayfill_xml
+from src import APSMainFaciesTable, Trunc2D_Cubic_Overlay_xml, Trunc2D_Angle_Overlay_xml, Trunc3D_bayfill_xml
 #import importlib
 
 #importlib.reload(Trunc2D_Cubic_Overlay_xml)
@@ -15,6 +12,7 @@ import Trunc3D_bayfill_xml
 # class DefineTruncStructure
 # Description:
 # -------------------------------------------------------------
+
 
 class DefineTruncStructure:
     """

@@ -1,20 +1,16 @@
 #!/bin/env python
 import sys
 import numpy as np
-from APSMainFaciesTable import APSMainFaciesTable
-from Trunc2D_Angle_xml import Trunc2D_Angle
-from Trunc2D_Base_xml import Trunc2D_Base
+from src.APSMainFaciesTable import APSMainFaciesTable
+from src.Trunc2D_Angle_xml import Trunc2D_Angle
+from src.Trunc2D_Base_xml import Trunc2D_Base
+from src.utils.methods import prettify
 
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-from xml.dom import minidom
 import filecmp
 import sys
 
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
 
 def interpretXMLModelFileAndWrite(modelFileName,outputModelFileName):
     # Read test model file with truncation rule into xml tree
@@ -42,6 +38,7 @@ def interpretXMLModelFileAndWrite(modelFileName,outputModelFileName):
     
     return truncRuleOut
 
+
 def createXMLTreeAndWriteFile(truncRuleInput,outputModelFileName):
     # Build an XML tree with top as root
     # from truncation object and write it
@@ -52,6 +49,7 @@ def createXMLTreeAndWriteFile(truncRuleInput,outputModelFileName):
     print('Write file: ' + outputModelFileName)
     with open(outputModelFileName, 'w') as file:
         file.write(rootReformatted)
+
 
 def createTrunc(outputModelFileName):
     mainFaciesTable = APSMainFaciesTable()
@@ -69,6 +67,7 @@ def createTrunc(outputModelFileName):
     # Build an xml tree with the data and write it to file
     createXMLTreeAndWriteFile(truncRuleOut,outputModelFileName)
     return truncRuleOut
+
 
 def test_initialize_write_read():
     file1 = outputModelFileName1
@@ -95,10 +94,12 @@ def test_initialize_write_read():
         print('Files are equal: OK')
     return [truncRuleA,truncRuleB]
 
+
 def test_getClassName():
     assert truncRule != None
     name = truncRule.getClassName()
     assert name == 'Trunc2D_Angle'
+
 
 def test_getFaciesInTruncRule():
     # Global variable truncRule
@@ -115,6 +116,7 @@ def test_getFaciesInTruncRule():
     for i in range(len(list)):
         fName = list[i]
         assert fName == faciesInTruncRule[i]
+
 
 def test_truncMapPolygons():
     assert faciesProb != None
@@ -142,6 +144,7 @@ def test_truncMapPolygons():
     else:
         print('Files are equal: OK')
 
+
 def writePolygons(fileName,polygons):
     print('Write file: ' + fileName)
     with open(fileName, 'w') as file:
@@ -157,6 +160,7 @@ def writePolygons(fileName,polygons):
 #                print('x,y: ' + str(pt[0]) + ' '  + str(pt[1]))
                 file.write(str(pt))
                 file.write('\n')
+
 
 def test_apply_truncations():
     assert truncRule != None
@@ -200,6 +204,7 @@ def test_apply_truncations():
     else:
         print('Files are equal: OK')
 
+
 def writeFile(fileName,a,nx,ny):
     with open(fileName,'w') as file:
         # Choose an arbitary heading
@@ -223,6 +228,7 @@ def writeFile(fileName,a,nx,ny):
         file.write(outstring)
     print('Write file: ' + fileName)
     return
+
 
 def readFile(fileName):
     print('Read file: ' + fileName)
