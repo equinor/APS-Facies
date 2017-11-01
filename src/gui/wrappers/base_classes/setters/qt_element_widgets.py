@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QLineEdit, QSlider
 
 from src.gui.wrappers.base_classes.chekkers.values import should_change
 from src.utils.numeric import normalize_number, strip_trailing_decimals
-from src.utils.constants import Constraints
+from src.utils.constants.constants import Constraints
 
 
 def set_value(

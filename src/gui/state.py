@@ -3,13 +3,12 @@ from typing import List, Union
 from PyQt5.QtWidgets import QListWidgetItem
 
 from src.APSModel import APSModel
-from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants.constants import (
     CubicTruncationRuleConstants, CubicTruncationRuleElements, ModeConstants,
     FaciesSelectionConstants, ModeOptions, ProjectConstants, TruncationRuleConstants,
-    GaussianRandomFieldConstants,
+    GaussianRandomFieldConstants, Defaults,
 )
 from src.utils.constants.simple import Debug, VariogramType
 
@@ -116,6 +115,7 @@ class State(dict):
         values = truncation.get_all_values(skip_elements=unnecessary_elements)
         self._ensure_normalization(values)
         self.__dict__[TruncationRuleConstants.TRUNCATION_RULES] = values
+        self.__dict__[TruncationRuleConstants.SELECTED] = truncation.get_truncation_rule()
 
     def set_gaussian_field_settings(self, gaussian_settings):
         values = gaussian_settings.get_values()

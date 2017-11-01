@@ -1,163 +1,12 @@
-from typing import Dict, Iterator, List, Union
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
-from enum import Enum
 
 from src.utils.constants.base import Key, Value, Icon
 from src.utils.constants.simple import Debug
 
-ValueTypes = Union[str, int, float, QColor, QMessageBox.Icon]
-VERSION_HASH = ''  # Set automatically
-
 # TODO: Implement automatic initialization, when accessing a constant
 # Ex. ProjectConstants.PATH_OF_PROJECT_FIL (with, or without () at the end) will give a class instance having that value
-
-
-class Constants(object):
-    def __init__(self, constant=None):
-        self.constant = None
-        if constant in self.constants() or constant is None:
-            self.constant = constant
-        else:
-            raise ValueError(
-                "The given constant, {constant} is not valid for {class_name}"
-                "".format(constant=constant, class_name=self.__class__.__name__)
-            )
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        else:
-            pass
-
-    def get_value(self):
-        pass
-
-    def get_constant(self):
-        pass
-
-    def __eq__(self, other) -> bool:
-        if isinstance(other, self.__class__):
-            return self.get_value() == other.get_value() and self.get_constant() == other.get_constant()
-        return False
-
-    @classmethod
-    def constants(cls, local: bool = False, sort: bool = False) -> List[str]:
-        """
-         A method for getting the names of the constants defined in the class / category.
-        :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
-                      of its parents. Default is to give ALL constants.
-        :type local: bool
-        :param sort: A flag for having the constants sorted alphabetically.
-        :type sort: bool
-        :return: A (sorted) list of strings with the names of constants (only) defined in the class.
-        :rtype: List[str]
-        """
-        all_constants = [name for name in dir(cls) if not cls._used_internally(name)]
-        if local:
-            if hasattr(cls.__base__, 'constants'):
-                irrelevant_constants = set(cls.__base__.constants())
-                all_constants = [constant for constant in all_constants if constant not in irrelevant_constants]
-        if sort:
-            all_constants.sort()
-        return all_constants
-
-    @classmethod
-    def values(cls, local: bool = False, sort: bool = False) -> List[ValueTypes]:
-        """
-        Gets the values of the different constants.
-        :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
-                      of its parents. Default is to give ALL constants.
-        :type local: bool
-        :param sort: A flag for having the constants sorted alphabetically.
-        :type sort: bool
-        :return: A list of the definitions of the different constants
-        :rtype: List[ValueType]
-        """
-        return [cls.__getattribute__(cls(), constant) for constant in cls.constants(local=local, sort=sort)]
-
-    @classmethod
-    def all(cls, local: bool = False) -> Dict[str, ValueTypes]:
-        """
-        Gets a dictionary of the constants where the key is the name of the constant, and the value of the constant
-        :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
-                      of its parents. Default is to give ALL constants.
-        :type local: bool
-        :return: A key, value pair of constants, and their value
-        :rtype: Dict[str, ValueTypes]
-        """
-        return {constant: cls.__getattribute__(cls(), constant) for constant in cls.constants(local=local)}
-
-    @classmethod
-    def __contains__(cls, item) -> bool:
-        return item in cls._standard_return_attribute()
-
-    @classmethod
-    def __iter__(cls) -> Iterator:
-        return cls.all().__iter__()
-
-    @classmethod
-    def __len__(cls) -> int:
-        return len(cls.constants())
-
-    @classmethod
-    def __getitem__(cls, item: str) -> ValueTypes:
-        return cls.__getattribute__(cls(), item)
-
-    @classmethod
-    def _standard_return_attribute(cls) -> List[ValueTypes]:
-        return cls.values()
-
-    @staticmethod
-    def is_key() -> bool:
-        return False
-
-    @staticmethod
-    def is_value() -> bool:
-        return False
-
-    @staticmethod
-    def is_icon() -> bool:
-        return False
-
-    @staticmethod
-    def _used_internally(name: str) -> bool:
-        # FIXME: Return true iff name is all uppercase?
-        if name[0:2] == name[-2:] == '__':
-            # These are 'magic' methods in Python, and thus used internally
-            return True
-        elif name[0] == '_':
-            # Private methods
-            return True
-        elif name.islower():
-            # These are methods in the base class, that are also used internally, and are therefore not constants
-            return True
-        else:
-            return False
-
-    @classmethod
-    def __repr__(cls):
-        return ''.join([cls.__name__, ': ', ', '.join(cls.constants())])
-
-
-class Key(Constants):
-    @staticmethod
-    def is_key():
-        return True
-
-
-class Value(Constants):
-    @staticmethod
-    def is_value():
-        return False
-
-
-class Icon(Constants):
-    @staticmethod
-    def is_icon():
-        return True
 
 
 class DataBase(Value):
@@ -369,6 +218,7 @@ class TruncationLibrarySubKeys(TruncationLibrary):
     # Keys used in the library mapping
     NUMBER_OF_FACIES_KEY = 'number of facies'
     BUTTON_NAME_KEY = 'button name, or prefix'
+    TRUNCATION_RULE_NAME = 'name of truncation rule'
 
 
 class TruncationLibraryButtonNameKeys(TruncationLibrary):
@@ -400,6 +250,7 @@ class BayfillTruncationRuleElements(CubicTruncationRuleElements):
 
 class TruncationRuleConstants(Key):
     TRUNCATION_RULES = 'truncation rules'
+    SELECTED = 'selected truncation rule'
 
 
 class CubicTruncationRuleConstants(TruncationRuleConstants):
@@ -452,25 +303,10 @@ class HideOptions(Value):
     HIDE = 'hide'
 
 
-class Debug(Value):
-    OFF = 0
-    ON = 1
-    SOMEWHAT_VERBOSE = 1
-    VERBOSE = 2
-    VERY_VERBOSE = 3
-    VERY_VERY_VERBOSE = 4
-
-
-class Variogram(Value):
-    SPHERICAL = 1
-    EXPONENTIAL = 2
-    GAUSSIAN = 3
-    GENERAL_EXPONENTIAL = 4
-
-
 class Defaults(Value):
     FILE_EXTENSION = 'xml'
     FILE_FILTER = 'XML files (*.xml)'
+    PREFIX_NAME_OF_BUTTON = 'm_button_'
     NAME_OF_BUTTON_BOX = 'm_buttons_ok_cancel'
     NAME_OF_PROPORTIONS = CubicTruncationRuleElements.PROPORTIONS
     NAME_OF_SLIDERS = CubicTruncationRuleElements.SLIDERS
@@ -573,10 +409,3 @@ class Colors(Value):
     DARK_ORANGE = QColor('darkorange')  # Hex code: #FF8C00
     RED = QColor('red')  # Hex code: #FF0000
     BACKGROUND = QColor('#EFEBE7')
-
-
-class VariogramType(Enum):
-    SPHERICAL = 1
-    EXPONENTIAL = 2
-    GAUSSIAN = 3
-    GENERAL_EXPONENTIAL = 4

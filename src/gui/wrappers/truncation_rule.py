@@ -10,6 +10,7 @@ class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
     def __init__(
             self,
             state: State,
+            truncation_type: str,
             parent=None,
             name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
             basename_sliders=Defaults.NAME_OF_SLIDERS,
@@ -21,6 +22,7 @@ class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
         super(CubicTruncationRule, self).__init__(
             parent=parent,
             state=state,
+            truncation_type=truncation_type,
             name_of_buttons=name_of_buttons,
             basename_sliders=basename_sliders,
             basename_proportions=basename_proportions,
@@ -38,6 +40,7 @@ class NonCubicTruncationRule(BaseTruncation, Ui_NonCubicTruncationRule):
     def __init__(
             self,
             state: State,
+            truncation_type: str,
             parent=None,
             name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
             basename_sliders=Defaults.NAME_OF_SLIDERS,
@@ -50,6 +53,7 @@ class NonCubicTruncationRule(BaseTruncation, Ui_NonCubicTruncationRule):
         super(NonCubicTruncationRule, self).__init__(
             parent=parent,
             state=state,
+            truncation_type=truncation_type,
             name_of_buttons=name_of_buttons,
             basename_sliders=basename_sliders,
             basename_proportions=basename_proportions,
@@ -79,6 +83,7 @@ class BayfillTruncationRule(BaseTruncation, Ui_BayfillTruncationRule):
         super(BayfillTruncationRule, self).__init__(
             parent=parent,
             state=state,
+            truncation_type='bayfill',
             name_of_buttons=name_of_buttons,
             basename_sliders=basename_sliders,
             basename_proportions=basename_proportions,
@@ -113,6 +118,7 @@ class CustomTruncationRule(BaseTruncation):
         super(CustomTruncationRule, self).__init__(
             state=state,
             parent=parent,
+            truncation_type='custom',
             name_of_buttons=name_of_buttons,
             basename_sliders=basename_sliders,
             basename_proportions=basename_proportions,

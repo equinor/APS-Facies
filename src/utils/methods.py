@@ -1,78 +1,16 @@
-import xml.etree.ElementTree as ET
 from typing import Dict, List, TypeVar, Union
-from xml.dom import minidom
 
-import numpy as np
 from PyQt5.QtCore import QObject
 from PyQt5.QtGui import QValidator
-from PyQt5.QtWidgets import QWidget, QFileDialog, QCheckBox, QWidget, QLineEdit
+from PyQt5.QtWidgets import QFileDialog, QLineEdit, QWidget
 
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
-from src.utils.constants.constants import Defaults, HideOptions, Constraints
-
-from src.utils.constants.simple import Debug
+from src.utils.constants.constants import Constraints, Defaults, HideOptions
 from src.utils.numeric import truncate_number
 
 T = TypeVar('T')
 U = TypeVar('U')
-
-
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
-
-
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
-
-
-def writeFile(fileName, a, nx, ny, debug_level=Debug.OFF):
-    with open(fileName, 'w') as file:
-        # Choose an arbitrary heading
-        outstring = '-996  ' + str(ny) + '  50.000000     50.000000\n'
-        outstring += '637943.187500   678043.187500  4334008.000000  4375108.000000\n'
-        outstring += ' ' + str(nx) + ' ' + ' 0.000000   637943.187500  4334008.000000\n'
-        outstring += '0     0     0     0     0     0     0\n'
-        count = 0
-        text = ''
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('len(a): ' + str(len(a)))
-        for j in range(len(a)):
-            text = text + str(a[j]) + '  '
-            count += 1
-            if count >= 5:
-                text += '\n'
-                outstring += text
-                count = 0
-                text = ''
-        if count > 0:
-            outstring += text + '\n'
-        file.write(outstring)
-    print('Write file: ' + fileName)
-
-
-def readFile(fileName, debug_level=Debug.OFF):
-    print('Read file: ' + fileName)
-    with open(fileName, 'r') as file:
-        inString = file.read()
-        words = inString.split()
-        ny = int(words[1])
-        nx = int(words[8])
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            n = len(words)
-            print('Number of words: ' + str(n))
-            print('nx,ny: ' + str(nx) + ' ' + str(ny))
-            print('Number of values: ' + str(len(words) - 19))
-        a = np.zeros(nx * ny, float)
-        for i in range(19, len(words)):
-            a[i - 19] = float(words[i])
-    return [a, nx, ny]
 
 
 def toggle_elements(toggled: bool, elements: Union[List[QWidget], QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
@@ -135,4 +73,5 @@ def update_numeric(
 ) -> None:
     value = get_value_of_numeric_text_field(element)
     value = truncate_number(minimum_truncation, value, maximum_truncation)
-    set_value(element, value, normalize=False, skip_signals=True, force_change=True, number_of_decimals=number_of_decimals)
+    set_value(element, value, normalize=False, skip_signals=True, force_change=True,
+              number_of_decimals=number_of_decimals)

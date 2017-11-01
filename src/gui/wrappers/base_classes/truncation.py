@@ -8,6 +8,7 @@ from src.gui.wrappers.base_classes.chekkers.values import should_change
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.color import get_color
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements_from_base_name, get_value_of_element
+from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number_from_numeric_text_field
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
@@ -24,6 +25,7 @@ class BaseTruncation(OkCancelDialog):
     def __init__(
             self,
             state,
+            truncation_type: str,
             parent=None,
             name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
             basename_sliders=Defaults.NAME_OF_SLIDERS,
@@ -41,6 +43,8 @@ class BaseTruncation(OkCancelDialog):
         :type parent:
         :param state:
         :type state: State
+        :param truncation_type: The truncation rule to be used (from the truncation library)
+        :type truncation_type: str  TODO: Make more precise / list in Constants
         :param name_of_buttons: The name of the variable that holds an object of type QDialogButtonBox
         :type name_of_buttons: TruncationRuleLibraryElements
         :param basename_sliders: The prefix of every slider
@@ -75,6 +79,9 @@ class BaseTruncation(OkCancelDialog):
 
         # TODO: Validate
         self.facies_options = facies_options
+
+        # TODO: Validate
+        self.truncation_type = truncation_type
 
         if isinstance(active, int):
             # Use only the 'active' / n first elements / labels
@@ -130,7 +137,12 @@ class BaseTruncation(OkCancelDialog):
                 angle_input.textChanged.connect(self.update_state)
 
     def wire_up_drop_downs(self):
-        pass
+        # TODO: Add different 'labels' / facies names to the different facies (F1, F2, ...)
+        selected_facies = ['']
+        selected_facies.extend(self.state.get_selected_facies().keys())
+        for facies in self.active:
+            drop_down = get_element(self, self.basename_drop_down + facies)  # type: QComboBox
+            drop_down.addItems(selected_facies)
 
     def wire_up_color_buttons(self):
         # Wire up the color buttons
@@ -199,7 +211,13 @@ class BaseTruncation(OkCancelDialog):
         self.ensure_normalization()
         self.state.set_truncation_rules(self)
         # TODO: Overprint facies
-        pass
+        self.close(unset_truncation_rule=False)
+
+    def close(self, unset_truncation_rule=True):
+        # TODO: Ugly hack, should only be set when saving
+        if unset_truncation_rule:
+            self.state.set_current_truncation_rule(None)
+        super().close()
 
     def deactivate_inactive_elements(self):
         # TODO: Make more general?
@@ -254,6 +272,10 @@ class BaseTruncation(OkCancelDialog):
                 continue
             storage[element_label] = self.get_values(element_label, skip_elements)
         return storage
+
+    def get_truncation_rule(self):
+        # TODO: Make proper, and return a proper class for Truncation rules
+        return self.truncation_type
 
     def connect_slider_and_text(self, slider: QSlider, line_edit: QLineEdit) -> None:
         slider.valueChanged[int].connect(self.update_text)
@@ -431,7 +453,7 @@ class BaseTruncation(OkCancelDialog):
     def _get_facies_label_lookup_table(self) -> Dict[QWidget, FaciesLabels]:
         element_lookup_table = self._get_element_lookup_table()
         return {
-            element: facies_label if element else None
+            element: facies_label if element is not None else None
             for facies_label in element_lookup_table
             for element in element_lookup_table[facies_label].values()
         }

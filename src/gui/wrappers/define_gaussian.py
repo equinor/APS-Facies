@@ -1,8 +1,8 @@
+from functools import lru_cache
 from typing import Dict, List, Union
 
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QCheckBox, QComboBox, QLineEdit
-from functools import lru_cache
 
 from src.gui.state import State
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
@@ -10,10 +10,11 @@ from src.gui.wrappers.base_classes.getters.general import get_element, get_eleme
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number_from_numeric_text_field
 from src.resources.ui.Gaussian_ui import Ui_DefineGaussian
 from src.utils.constants.constants import (
-    AzimuthAngle, Constraints, Defaults, DefineGaussianElements, DipAngle, MainRange,
-    PerpRange, Power, TrendSettingsLabelsElements, VariogramModelElements, VariogramType, VerticalRange,
-    VariogramModelConstants,
+    AzimuthAngle, Constraints, Defaults, DefineGaussianElements, DipAngle,
+    MainRange, PerpRange, Power, TrendSettingsLabelsElements, VariogramModelConstants, VariogramModelElements,
+    VerticalRange,
 )
+from src.utils.constants.simple import VariogramType
 from src.utils.methods import apply_validator, toggle_elements, update_numeric
 
 

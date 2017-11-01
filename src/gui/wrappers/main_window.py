@@ -300,16 +300,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         button_information = library[sender]
         truncation_rule = button_information[TruncationLibraryKeys.KEY]
         number_of_facies = button_information[TruncationLibrarySubKeys.NUMBER_OF_FACIES_KEY]
-        parent = None
+        rule_name = button_information[TruncationLibrarySubKeys.TRUNCATION_RULE_NAME]
         if truncation_rule == TruncationLibraryKeys.CUBIC:
-            dialog = CubicTruncationRule(parent=parent, state=self._state, active=number_of_facies)
+            dialog = CubicTruncationRule(state=self._state, truncation_type=rule_name, active=number_of_facies)
         elif truncation_rule == TruncationLibraryKeys.NON_CUBIC:
-            dialog = NonCubicTruncationRule(parent=parent, state=self._state, active=number_of_facies)
+            dialog = NonCubicTruncationRule(state=self._state, truncation_type=rule_name, active=number_of_facies)
         elif truncation_rule == TruncationLibraryKeys.BAYFILL:
-            dialog = BayfillTruncationRule(parent=parent, state=self._state)
+            dialog = BayfillTruncationRule(state=self._state)
         elif truncation_rule == TruncationLibraryKeys.CUSTOM:
             # TODO
-            dialog = CustomTruncationRule(parent=parent, state=self._state)
+            dialog = CustomTruncationRule(state=self._state)
         else:
             raise ValueError
         dialog.show()
@@ -329,8 +329,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _set_checkboxes_to_defaults(self):
         buttons = {
-            ZoneSelectionElements.TOGGLE:         Defaults.SEPARATE_ZONE_MODELS,
-            FaciesSelectionElements.TOGGLE:       Defaults.FACIES_MODELS,
+            ZoneSelectionElements.TOGGLE:   Defaults.SEPARATE_ZONE_MODELS,
+            FaciesSelectionElements.TOGGLE: Defaults.FACIES_MODELS,
             MainWindowElements.CONDITION_TO_WELL: Defaults.CONDITION_TO_WELL,
         }
         for key, default in buttons.items():
