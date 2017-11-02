@@ -482,10 +482,6 @@ class APSZoneModel:
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: faciesProb:')
-                print(repr(faciesProb))
-
             alphaList = []
             for gaussFieldIndx in range(nGaussFields):
                 item = GFAlphaList[gaussFieldIndx]
@@ -509,6 +505,7 @@ class APSZoneModel:
 
                 cellIndx = cellIndexDefined[i]
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
+                # The sequence is defined by the sequence they are specified in the model file.
                 alphaCoord = []
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
@@ -538,11 +535,20 @@ class APSZoneModel:
 
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE:
-                    if np.mod(i, 50000) == 0:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                    if np.mod(i, 10000) == 0:
+                        truncRuleName = truncObject.getClassName()
+                        if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
+                            nCalc = truncObject.getNCalcTruncMap()
+                            nLookup = truncObject.getNLookupTruncMap()
+                            print('--- Calculate facies for cell number: {}    New truncation cubes: {}    Re-used truncation cubes: {}'
+                                  ''.format(str(i), str(nCalc), str(nLookup))
+                                  )
+                        else:
+                            print('--- Calculate facies for cell number: {}'.format(str(i)))
+
                 elif debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                        print('--- Calculate facies for cell number: {}'.format(str(i)))
 
                 if self.__useConstProb == 1:
                     for f in range(nFacies):
@@ -558,6 +564,7 @@ class APSZoneModel:
 
                 alphaCoord = []
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
+                # The sequence is defined by the sequence they are specified in the model file.
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
                     alphaCoord.append(alphaDataArray[cellIndx])
@@ -566,16 +573,22 @@ class APSZoneModel:
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
-        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERBOSE:
             truncRuleName = truncObject.getClassName()
-            if truncRuleName == 'Trunc2D_Angle':
+            if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
-                nCount = truncObject.getNCountShiftAlpha()
+
+                print(' ')
                 print(
-                    'Debug info: In truncation rule ' + truncRuleName + 'nCalc = ' + str(nCalc)
-                    + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount)
+                    '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
+                    '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
+                    ''.format(truncRuleName, str(nCalc), str(nLookup))
                 )
+                if truncRuleName == 'Trunc2D_Angle':
+                    nCount = truncObject.getNCountShiftAlpha()
+                    print('Debug output: Small shifts of values for orientation of facies boundary lines are done {} number of times for numerical reasons.'
+                          ''.format(str(nCount)))
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)

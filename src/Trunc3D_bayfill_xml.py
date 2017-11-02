@@ -643,7 +643,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         fIndx = self._orderIndex[4]
         P5 = faciesProb[fIndx]
-        if self._debug_level >= Debug.VERY_VERBOSE and cellIndx == 0:
+        if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
             print('Debug output: P1,P2,P3,P4,P5: {} {} {} {} {}'.format(P1, P2, P3, P4, P5))
         if sbhd > 0.999:
             sbhd = 0.999
@@ -1036,8 +1036,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         else:
             Zm = 1.0
 
-        if self._debug_level >= Debug.VERY_VERBOSE and cellIndx == 0:
-            print('Internal variables in ' + self.__className + ' for cell index = ' + str(cellIndx) + ' :')
+        if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
+            print('Internal variables in ' + self._className + ' for cell index = ' + str(cellIndx) + ' :')
             print('FSsit= ' + str(fssit))
             print('BHDsit= ' + str(bhdsit))
             print('CaseT= ' + str(caseT))
@@ -1712,7 +1712,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             WBF_area = 0.5 * ((X4 - X3) * (1.0 - YS) - (X4 - X3) * (YWIB - YS) * (YWIB - YS) / (1.0 - YS))
             BHD_vol = 1.0 - WBF_area - LG_area - FP_area - SB_area
 
-        if self._debug_level >= Debug.VERY_VERBOSE and cellIndx == 0:
+        if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
             print('Calculated probabilities for Bayfill truncation rule:')
             print('Prob FP = ' + str(FP_area))
             print('Prob SB = ' + str(SB_area))

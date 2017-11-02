@@ -279,9 +279,9 @@ class APSGaussModel:
         variogramType = self.get_variogram_type(variogram)
         if not self.__isVariogramTypeOK(variogramType):
             raise ValueError(
-                'In model file {0} in zone number: {1} in command Vario.\n'
-                'Specified variogram type: {1} is not defined.'
-                ''.format(self.__modelFileName, gfName)
+                'In model file {0} in zone number: {1} in command Vario for gauss field {2}.\n'
+                'Specified variogram type is not defined.'
+                ''.format(self.__modelFileName, self.__zoneNumber, gfName)
             )
         return variogram, variogramType
 
@@ -304,6 +304,7 @@ class APSGaussModel:
         elif name == 'GENERAL_EXPONENTIAL':
             return VariogramType.GENERAL_EXPONENTIAL
         else:
+            print('Error: Unknown variogram type {}'.format(name))
             return None
 
     def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
@@ -363,9 +364,9 @@ class APSGaussModel:
             variogramType = self.get_variogram_type(item[GTYPE])
             if not self.__isVariogramTypeOK(variogramType):
                 raise ValueError(
-                    'In initialize function for {0} in zone number: {1}. '
-                    'Specified variogram type: {2} is not defined.'
-                    ''.format(self.__className, self.__zoneNumber, variogramType.name)
+                    'In initialize function for {0} in zone number: {1} for gauss field: {2}. '
+                    'Specified variogram type: {3} is not defined.'
+                    ''.format(self.__className, self.__zoneNumber, gfName, variogramType.name)
                 )
             range1 = item[GRANGE1]
             range2 = item[GRANGE2]

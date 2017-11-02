@@ -6,6 +6,8 @@ import sys
 import matplotlib
 import numpy as np
 import scipy
+from typing import List
+
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
@@ -138,7 +140,7 @@ def defineHorizontalAndVerticalResolutionForPlotting(
 # Initialise common variables
 functionName = 'testPreview.py'
 rotatePlot = 0
-useBestResolution = 1
+useBestResolution = 0
 noSim = 0  # Is set to 1 only if one don't want to simulate 2D fields (for test purpose only)
 setWrite = 0  # Is set to 1 if write out simulated 2D fields
 

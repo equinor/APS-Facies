@@ -52,8 +52,6 @@ class Trunc2D_Angle(Trunc2D_Base):
      def setUseTrendForAngles(self, useConstTrend)
      def XMLAddElement(self, parent)
      def writeContentsInDataStructure(self)
-     def getNCalcTruncMap(self)
-     def getNLookupTruncMap(self)
 
      Private member functions:
      def __setEmpty(self)
@@ -103,15 +101,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         # vary from cell to cell.
         self.__useConstTruncModelParam = True
 
-        # Define dictionary to be used in memoization for optimization
-        # In this dictionary use key equal to faciesProb and save faciespolygon
-        self.__memo = {}
-        self.__nCalc = 0
-        self.__nLookup = 0
-        self.__useMemoization = 1
-        # To make a lookup key from facies probability, round off input facies probability
-        # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
-        self.__keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
@@ -131,10 +120,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__setEmpty()
 
         if keyResolution == 0:
-            self.__useMemoization = 0
+            self._useMemoization = False
         else:
-            self.__useMemoization = 1
-            self.__keyResolution = keyResolution
+            self._useMemoization = True
+            self._keyResolution = keyResolution
 
         if trRuleXML is not None:
             if debug_level >= Debug.VERY_VERBOSE:
@@ -694,6 +683,9 @@ class Trunc2D_Angle(Trunc2D_Base):
         # y(s) = y0Normal + vyNormal*s
         # by checking all the corner points of the input polygon
         if faciesProb < self._epsFaciesProb:
+            # The polygon area is 0.0. Define output polygons to be a 0 area polygon as the
+            # closest polygon and the original as the one to be further divided.
+            
             smin = 0.0
             smax = 0.05
         elif faciesProb > (1 - 0 - self._epsFaciesProb):
@@ -814,14 +806,6 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Point pt is outside the closed polygon
             return 0
 
-        #    def __makeKey(self, faciesProb):
-        #        keyList = []
-        #        for p in faciesProb:
-        #            # Round off the input values to nearest value of (0,0.01,0.02,..1.0)
-        #            keyList.append(int(self.__keyResolution * p + 0.5) / self.__keyResolution)
-        #            key = tuple(keyList)
-        #        return key
-
     def setTruncRule(self, faciesProb, cellIndx=0):
         """
         Description:
@@ -834,26 +818,24 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
         #        faciesProb = self._setMinimumFaciesProb(faciesProb)
-        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__keyResolution)
-        # print('FaciesProb: {}'.format(str(faciesProb)))
-        # print('FaciesProbRoundOff: {}'.format(str(faciesProbRoundOff)))
+        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self._keyResolution)
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
         area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
-        if self.__useMemoization:
-            key = self._makeKey(faciesProb, self.__keyResolution)
+        if self._useMemoization:
+            key = self._makeKey(faciesProb, self._keyResolution)
 
-            if key not in self.__memo:
-                self.__nCalc += 1
+            if key not in self._memo:
+                self._nCalc += 1
 
                 # Call methods specific for this truncation rule with corrected area due to overprint facies
                 # Calculate polygons the truncation map is divided into
                 polygons = self.__calculateFaciesPolygons(cellIndx, area)
-                self.__memo[key] = polygons
+                self._memo[key] = polygons
                 self.__faciesPolygons = polygons
             else:
-                self.__nLookup += 1
-                self.__faciesPolygons = self.__memo[key]
+                self._nLookup += 1
+                self.__faciesPolygons = self._memo[key]
         else:
             # Call methods specific for this truncation rule with corrected area due to overprint facies
             # Calculate polygons the truncation map is divided into
@@ -885,31 +867,32 @@ class Trunc2D_Angle(Trunc2D_Base):
             probFrac = item[1]
             fIndx = self._orderIndex[indx]
             fProb = area[fIndx] * probFrac
-
-            [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N,
-                                                                                     y0N, fProb)
-            # Save facies polygons that are complete
-            if closestPolygon == 1:
+            # If area = 0 for a facies, define a 0 area polygon as the one that is split off the input polygon
+            if abs(area[fIndx]) < self._epsFaciesProb:
+                outPolyA = [[0.0, 0.0], [1.0,0.0], [1.0, 0.000001], [0.0, 0.000001], [0.0,0.0]]
                 faciesPolygons.append(outPolyA)
                 if i == nPolygons - 2:
-                    # add the last polygon to the last facies
-                    faciesPolygons.append(outPolyB)
-
-                polygon = outPolyB
+                    faciesPolygons.append(polygon)
             else:
-                faciesPolygons.append(outPolyB)
-                if i == nPolygons - 2:
-                    # add the last polygon to the last facies
+            
+                [outPolyA, outPolyB, closestPolygon] = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N, y0N, fProb)
+                # Save facies polygons that are complete
+                if closestPolygon == 1:
                     faciesPolygons.append(outPolyA)
+                    if i == nPolygons - 2:
+                        # add the last polygon to the last facies
+                        faciesPolygons.append(outPolyB)
 
-                polygon = outPolyA
+                    polygon = outPolyB
+                else:
+                    faciesPolygons.append(outPolyB)
+                    if i == nPolygons - 2:
+                        # add the last polygon to the last facies
+                        faciesPolygons.append(outPolyA)
+
+                    polygon = outPolyA
         return faciesPolygons
 
-    def getNCalcTruncMap(self):
-        return self.__nCalc
-
-    def getNLookupTruncMap(self):
-        return self.__nLookup
 
     def defineFaciesByTruncRule(self, alphaCoord):
         """
@@ -931,6 +914,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         #        print(' ')
         #        print('...nPolygons: {}'.format(str(self.__nPolygons)))
         for i in range(self.__nPolygons):
+            #            print('lengde av self.__faciesPolygons og nPolygons: '  + str(len(self.__faciesPolygons)) + ' ' + str(self.__nPolygons))
             polygon = self.__faciesPolygons[i]
             #            print(repr(polygon))
             #            print('i: {} x:{}, y:{}'.format(str(i), str(x), str(y)))
