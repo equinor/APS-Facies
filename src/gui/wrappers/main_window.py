@@ -27,7 +27,8 @@ from src.utils.constants.constants import (
     TruncationRuleLibraryElements, ZoneSelectionElements,
 )
 from src.utils.mappings import truncation_library_button_to_kind_and_number_of_facies, truncation_library_elements
-from src.utils.methods import get_project_file, toggle_elements
+from src.utils.gui.getters import get_project_file
+from src.utils.gui.update import toggle_elements
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

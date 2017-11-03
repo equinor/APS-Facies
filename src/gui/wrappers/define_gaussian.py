@@ -15,7 +15,7 @@ from src.utils.constants.constants import (
     VerticalRange,
 )
 from src.utils.constants.simple import VariogramType
-from src.utils.methods import apply_validator, toggle_elements, update_numeric
+from src.utils.gui.update import toggle_elements, apply_validator, update_numeric
 
 
 class DefineGaussian(OkCancelDialog, Ui_DefineGaussian):

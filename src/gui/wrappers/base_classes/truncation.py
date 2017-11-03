@@ -17,7 +17,8 @@ from src.utils.constants.constants import (
     FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleLibraryElements,
 )
 from src.utils.mappings import truncation_rule_element_key_to_state_key
-from src.utils.methods import apply_validator, get_attributes, get_elements_with_prefix, toggle_elements, update_numeric
+from src.utils.gui.getters import get_attributes, get_elements_with_prefix
+from src.utils.gui.update import toggle_elements, apply_validator, update_numeric
 from src.utils.numeric import normalize_number
 
 
