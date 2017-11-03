@@ -16,6 +16,7 @@ from src import (
     APSDataFromRMS, APSGaussFieldJobs, APSMainFaciesTable, APSModel, APSZoneModel, APSFaciesProb, APSGaussModel,
     Trend3D_linear_model_xml, Trunc2D_Angle_xml, Trunc2D_Cubic_xml, Trunc3D_bayfill_xml, simGauss2D
 )
+from src.utils.APSExceptions import UndefinedZoneError, CrossSectionOutsideRange
 from src.utils.constants.simple import Debug
 from src.utils.io import writeFile
 
@@ -182,8 +183,7 @@ def main():
     zoneNumber = previewZoneNumber
     zoneModel = apsModel.getZoneModel(zoneNumber)
     if zoneModel is None:
-        print('Error: Zone number: ' + str(zoneNumber) + ' is not defined')
-        sys.exit()
+        raise UndefinedZoneError(zoneNumber)
     simBoxZsize = zoneModel.getSimBoxThickness()
     print('- Grid dimension from RMS grid: nx: {0} ny:{1} nz: {2}'.format(str(nx), str(ny), str(nz)))
     print(
@@ -197,28 +197,19 @@ def main():
     )
     if previewCrossSectionType == 'IJ':
         if previewCrossSectionIndx < 0 or previewCrossSectionIndx >= nz:
-            raise ValueError(
-                'Cross section index is specified to be: {0} for IJ cross section, '
-                'but must be in interval [0,{1}]'
-                ''.format(str(previewCrossSectionIndx), str(nz - 1))
-            )
-        print('- Preview simulation grid dimension: nx: {0} ny:{1}'.format(str(nxPreview), str(nyPreview)))
+            raise CrossSectionOutsideRange('IJ', previewCrossSectionIndx, nz - 1)
+        if debug_level >= Debug.VERBOSE:
+            print(f'- Preview simulation grid dimension: nx: {nxPreview} ny:{nyPreview}')
     elif previewCrossSectionType == 'IK':
         if previewCrossSectionIndx < 0 or previewCrossSectionIndx >= ny:
-            raise ValueError(
-                'Cross section index is specified to be: {0} for IK cross section, '
-                'but must be in interval [0,{1}]'
-                ''.format(str(previewCrossSectionIndx), str(ny - 1))
-            )
-        print('- Preview simulation grid dimension: nx: {0} nz:{1}'.format(str(nxPreview), str(nzPreview)))
+            raise CrossSectionOutsideRange('IK', previewCrossSectionIndx, ny - 1)
+        if debug_level >= Debug.VERBOSE:
+            print(f'- Preview simulation grid dimension: nx: {nxPreview} nz:{nzPreview}')
     elif previewCrossSectionType == 'JK':
         if previewCrossSectionIndx < 0 or previewCrossSectionIndx >= nx:
-            raise ValueError(
-                'Cross section index is specified to be: {0} for JK cross section, '
-                'but must be in interval [0,{1}]'
-                ''.format(str(previewCrossSectionIndx), str(nx - 1))
-            )
-        print('- Preview simulation grid dimension: ny: {0} nz:{1}'.format(str(nyPreview), str(nzPreview)))
+            raise CrossSectionOutsideRange('JK', previewCrossSectionIndx, nx - 1)
+        if debug_level >= Debug.VERBOSE:
+            print(f'- Preview simulation grid dimension: ny: {nyPreview} nz:{nzPreview}')
 
     truncObject = zoneModel.getTruncRule()
     faciesNames = zoneModel.getFaciesInZoneModel()

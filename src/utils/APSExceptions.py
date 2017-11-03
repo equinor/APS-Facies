@@ -46,41 +46,61 @@ class ValueOutsideExpectedRange(ApsXmlError):
 
     @staticmethod
     def get_value_specified_error_message(keyword, parent_keyword=None, model_file_name=None, end_with_period=True):
-        message = "The value specified in the keyword '{keyword}'".format(keyword=keyword)
+        message = f"The value specified in the keyword '{keyword}'"
         if parent_keyword:
-            message += ", underneath the parent keyword '{keyword}'".format(keyword=parent_keyword)
+            message += f", underneath the parent keyword '{parent_keyword}'"
         if model_file_name:
-            message += ", in the model file '{file_name}'".format(file_name=model_file_name)
+            message += f", in the model file '{model_file_name}'"
         if end_with_period:
             message += '.'
         return message
 
 
 class LessThanExpected(ValueOutsideExpectedRange):
-    def __init__(self, keyword, value, minimum, parent_keyword=None, model_file_name=None):
+    def __init__(self, keyword, value, minimum, parent_keyword=None, model_file_name=None, end_with_period=True):
         base_message = self.get_value_specified_error_message(
             keyword=keyword,
             parent_keyword=parent_keyword,
             model_file_name=model_file_name,
             end_with_period=False
         )
-        message = base_message + ', is LESS than the minimum value ({value} < {minimum})'.format(
-            value=value,
-            minimum=minimum
-        )
+        message = base_message + f', is LESS than the minimum value ({value} < {minimum})'
+        if end_with_period:
+            message += '.'
         super(LessThanExpected, self).__init__(message)
 
 
 class MoreThanExpected(ValueOutsideExpectedRange):
-    def __init__(self, keyword, value, maximum, parent_keyword=None, model_file_name=None):
+    def __init__(self, keyword, value, maximum, parent_keyword=None, model_file_name=None, end_with_period=True):
         base_message = self.get_value_specified_error_message(
             keyword=keyword,
             parent_keyword=parent_keyword,
             model_file_name=model_file_name,
             end_with_period=False
         )
-        message = base_message + ', is GREATER than the maximum value ({value} > {maximum})'.format(
-            value=value,
-            maximum=maximum
-        )
+        message = base_message + f', is GREATER than the maximum value ({value} > {maximum})'
+        if end_with_period:
+            message += '.'
         super(MoreThanExpected, self).__init__(message)
+
+
+class UndefinedZoneError(NameError):
+    def __init__(self, zone_number: int):
+        super(UndefinedZoneError, self).__init__(
+            f'Error: Zone number: {zone_number} is not defined'
+        )
+
+
+class MissingAttributeInKeyword(KeyError):
+    def __init__(self, keyword, attribute_name):
+        super(MissingAttributeInKeyword, self).__init__(
+            f"The attribute '{attribute_name}' is required for the keyword '{keyword}'"
+        )
+
+
+class CrossSectionOutsideRange(ValueError):
+    def __init__(self, cross_section_name, cross_section_index, upper_bound):
+        super(CrossSectionOutsideRange, self).__init__(
+            f'Cross section index is specified to be: {cross_section_index} for {cross_section_name} cross section, '
+            f'but must be in interval [0, {upper_bound}]'
+        )

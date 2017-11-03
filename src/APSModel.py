@@ -7,6 +7,7 @@ from xml.etree.ElementTree import Element
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSZoneModel import APSZoneModel
+from src.utils.APSExceptions import MissingAttributeInKeyword
 from src.utils.constants.simple import Debug
 from src.utils.xml import prettify, getTextCommand
 
@@ -145,22 +146,22 @@ class APSModel:
         if obj is not None:
             text = obj.get('zoneNumber')
             if text is None:
-                raise ValueError('Must specify zoneNumber attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'zoneNumber')
             self.__previewZone = int(text)
 
             text = obj.get('crossSectionType')
             if text is None:
-                raise ValueError('Must specify crossSectionType attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'crossSectionType')
             self.__previewCrossSectionType = text
 
             text = obj.get('crossSectionIndx')
             if text is None:
-                raise ValueError('Must specify crossSectionIndx attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'crossSectionIndx')
             self.__previewCrossSectionIndx = int(text.strip())
 
             text = obj.get('scale')
             if text is None:
-                raise ValueError('Must specify scale attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'scale')
             self.__previewScale = float(text.strip())
 
         # --- SelectedZones ---
