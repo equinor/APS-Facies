@@ -198,6 +198,20 @@ class Trunc2D_Base:
         # A 2D list with background facies indices for a given overlay facies group
         self._backgroundFaciesInGroup = []
 
+        # Variables used to check optimization of algorithm
+        self._nCalc = 0
+        self._nLookup = 0
+        self._useMemoization = True
+
+        # Define disctionary to be used in memoization for optimalization
+        # In this dictionary use key equal to faciesProb and save faciespolygon
+        self._memo = {}
+
+        # To make a lookup key from facies probability, round off input facies probability
+        # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
+        self._keyResolution = 100
+
+
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  debug_level=Debug.OFF,
                  modelFileName=None, nGaussFieldsInBackGroundModel=2):
@@ -1048,11 +1062,14 @@ class Trunc2D_Base:
         """
         # The array faciesProb contain probability for all facies, a subset are background facies
         # NOTE: Only the entries in area corresponding to the background facies will be set
+        # Set initially -1 into the list area.
         area = np.ones(self._nFacies, dtype=float)
         area = -1.0 * area
         for i in range(self._nBackGroundFacies):
             fIndx = self._orderIndex[i]
             area[fIndx] = faciesProb[fIndx]
+        self._lowAlphaInGroup = []
+        self._highAlphaInGroup = []
 
         # Probability of the N dimensional polygone in alpha space defined by background facies and overlay facies
         # for each group must be calculated.
@@ -1060,9 +1077,10 @@ class Trunc2D_Base:
         sumProbBackGround = np.zeros(self._nGroups, dtype=float)
         sumProbOverlay = np.zeros(self._nGroups, dtype=float)
         sumProb = np.zeros(self._nGroups, dtype=float)
-        if self._debug_level >= Debug.VERY_VERBOSE:
-            print(
-                '\nDebug output: Calculate modified area for background facies and threshold values for overlay facies:')
+        if self._debug_level >= Debug.VERY_VERY_VERBOSE:
+            print('\n')
+            print('Debug output: Calculate modified area for background facies and threshold values for overlay facies:')
+            
         for groupIndx in range(self._nGroups):
             # Sum over probability for background facies
             for j in range(len(self._backgroundFaciesInGroup[groupIndx])):
@@ -1078,10 +1096,12 @@ class Trunc2D_Base:
                 fIndx = self._orderIndex[indx]
                 prob = faciesProb[fIndx]
                 probFrac = self._probFracOverlayFaciesInGroup[groupIndx][j]
+                assert probFrac > 0.0
                 prob = prob * probFrac
                 sumProbOverlay[groupIndx] += prob
+                
             sumProb[groupIndx] = sumProbBackGround[groupIndx] + sumProbOverlay[groupIndx]
-            if self._debug_level >= Debug.VERY_VERBOSE:
+            if self._debug_level >= Debug.VERY_VERY_VERBOSE:
                 print(
                     'Debug output: Group {group}: '
                     'Background facies prob={background}  Overlay facies prob={overlay}   Sum prob= {total}'
@@ -1097,63 +1117,103 @@ class Trunc2D_Base:
         # Calculate truncation intervals for each overlay facies
         # or overlay faciespolygon since the overlay facies can be defined in multiple polygons
         # in N dimensional unit cube in alpha space.
+        # Calculate area the background facies should cover in alpha,alpha2 plane
         for groupIndx in range(self._nGroups):
             deltaAlphaThisGroup = []
             lowAlphaThisGroup = []
             highAlphaThisGroup = []
-
+            nBackGroundFaciesInGroup = len(self._backgroundFaciesInGroup[groupIndx])
             nAlpha = len(self._alphaInGroup[groupIndx])
             D = sumProb[groupIndx]
-            B = 1.0
-            # The sequence the overlay facies polygons are calculated is defined by the sequence it was specified
-            # The first overlay facies polygon has truncation interval deltaAlpha1 = prob_of_facies1/sum_prob_group
-            # The second overlay facies polygon has truncation interval deltaAlpha2 = prob_of_facies2/sum_prob_group*(1-deltaAlpha1)
-            # The third overlay facies polygon has truncation interval deltaAlpha3 = prob_of_facies3/sum_prob_group*(1-deltaAlpha1):(1-deltaAlpha2)
-            # and so on ... (This is because the second,third and so on overlay facies polygons are conditioned not to overlap the previous once.
+            # print('D= ' + str(D))
+            if abs(D) < self._epsFaciesProb:
+                # Sum of background facies and overlay facies is 0 for this group. Set area to 0.0 for all background facies in this group
+                # and set truncation interval to 0 for overlay facies in this group.
+                for j in range(nBackGroundFaciesInGroup):
+                    indx = self._backgroundFaciesInGroup[groupIndx][j]
+                    fIndx = self._orderIndex[indx]
+                    area[fIndx] = 0.0
+                for j in range(nAlpha):
+                    # print('groupIndx, nAlpha, indx j: ' + str(groupIndx) + ' ' + str(nAlpha) + ' ' + str(j))
+                    indx = self._overlayFaciesIndxInGroup[groupIndx][j]
+                    fIndx = self._orderIndex[indx]
+                    lowAlphaThisGroup.append(0.0)
+                    highAlphaThisGroup.append(0.0)
+            else:
+                B = 1.0
+                # The sequence the overlay facies polygons are calculated is defined by the sequence it was specified
+                # The first overlay facies polygon has truncation interval deltaAlpha1 = prob_of_facies1/sum_prob_group
+                # The second overlay facies polygon has truncation interval deltaAlpha2 = prob_of_facies2/sum_prob_group*(1-deltaAlpha1)
+                # The third overlay facies polygon has truncation interval deltaAlpha3 = prob_of_facies3/sum_prob_group*(1-deltaAlpha1):(1-deltaAlpha2)
+                # and so on ... (This is because the second,third and so on overlay facies polygons are conditioned not to overlap the previous once.
+                #nAlpha = len(self._alphaInGroup[groupIndx])
+                for j in range(nAlpha):
+                    indx = self._overlayFaciesIndxInGroup[groupIndx][j]
+                    fIndx = self._orderIndex[indx]
+                    prob = faciesProb[fIndx]
+                    probFrac = self._probFracOverlayFaciesInGroup[groupIndx][j]
+                    prob = prob * probFrac
 
-            for j in range(nAlpha):
-                indx = self._overlayFaciesIndxInGroup[groupIndx][j]
-                fIndx = self._orderIndex[indx]
-                prob = faciesProb[fIndx]
-                probFrac = self._probFracOverlayFaciesInGroup[groupIndx][j]
-                prob = prob * probFrac
+                    if abs(D) < self._epsFaciesProb:
+                        # This overlay facies probability is 0.0
+                        delta = 0.0
+                        B = 0.0
+                        D = 0.0
+                    else:
+                        delta = prob / D
+                        B = B * (1.0 - delta)
+                        D = D * (1.0 - delta)
+                    deltaAlphaThisGroup.append(delta)
 
-                delta = prob / D
-                B = B * (1.0 - delta)
-                D = D * (1.0 - delta)
-                deltaAlphaThisGroup.append(delta)
+                #print('deltaAlpha in group:  {}'.format(str(groupIndx)))
+                #print(repr(deltaAlphaThisGroup))
+                #print('B=' + str(B))
 
-            # print('deltaAlpha in group:  {}'.format(str(groupIndx)))
-            # print(repr(deltaAlphaThisGroup))
-            # print('B=' + str(B))
+                # If sum of probability for background facies for this group is 0.0, then assign area to the background facies
+                # such that the som of area of the background facies is equal to the sum of probability of background and overlay facies
+                # for this group and also ensure that truncation intervals for overlay facies is defined such that the overlay facies probability
+                # sum up to the total facies probability for this group.
+                if abs(sumProbBackGround[groupIndx]) < self._epsFaciesProb:
+                    # Loop over all background facies in group and assign equal area to each background facies such that the sum is
+                    # equal to the sum of probability for the group.
+                    # NOTE: It is not unique how to split the area into the background facies in this case. This will have influence on the
+                    # geometry of the realization, but the facies fraction is correct anyway.
+                    for j in range(nBackGroundFaciesInGroup):
+                        indx = self._backgroundFaciesInGroup[groupIndx][j]
+                        fIndx = self._orderIndex[indx]
+                        area[fIndx] = sumProb[groupIndx]/nBackGroundFaciesInGroup
+                else:
+                    # The sum of background facies probability is > 0
+                    # Calculate area corresponding to background facies for the group in (alpha1, alpha2, 0, 0,..,0) plane of the truncation cube
+                    for j in range(nBackGroundFaciesInGroup):
+                        indx = self._backgroundFaciesInGroup[groupIndx][j]
+                        fIndx = self._orderIndex[indx]
+                        prob = faciesProb[fIndx]
+                        if abs(B) < self._epsFaciesProb:
+                            area[fIndx] = 0.0
+                        else:
+                            area[fIndx] = prob / B
+                        #print('B, prob, area: ' + str(B) + ' ' + str(prob) + ' ' + str(area[fIndx]))
+                        #print('area: ')
+                        #print(repr(area))
 
-            # Calculate area corresponding to background facies for the group in (alpha1, alpha2, 0, 0,..,0) plane of the truncation cube
-            for j in range(len(self._backgroundFaciesInGroup[groupIndx])):
-                indx = self._backgroundFaciesInGroup[groupIndx][j]
-                fIndx = self._orderIndex[indx]
-                prob = faciesProb[fIndx]
-                area[fIndx] = prob / B
-                # print('prob, area: ' + str(prob) + ' ' + str(area[fIndx]))
-                # print('area: ')
-                # print(repr(area))
-
-            for j in range(nAlpha):
-                c = self._centerTruncIntervalInGroup[groupIndx][j]
-                delta = deltaAlphaThisGroup[j]
-                low = c - 0.5 * delta
-                high = c + 0.5 * delta
-                if low < 0.0:
-                    low = 0.0
-                    high = delta
-                elif high > 1.0:
-                    high = 1.0
-                    low = 1.0 - delta
-                lowAlphaThisGroup.append(low)
-                highAlphaThisGroup.append(high)
-
+                for j in range(nAlpha):
+                    c = self._centerTruncIntervalInGroup[groupIndx][j]
+                    delta = deltaAlphaThisGroup[j]
+                    low = c - 0.5 * delta
+                    high = c + 0.5 * delta
+                    if low < 0.0:
+                        low = 0.0
+                        high = delta
+                    elif high > 1.0:
+                        high = 1.0
+                        low = 1.0 - delta
+                    lowAlphaThisGroup.append(low)
+                    highAlphaThisGroup.append(high)
+            # End if sumprob of group is 0
             self._lowAlphaInGroup.append(lowAlphaThisGroup)
             self._highAlphaInGroup.append(highAlphaThisGroup)
-        if self._debug_level >= Debug.VERY_VERBOSE:
+        if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             if len(self._lowAlphaInGroup) > 0:
                 print('Debug output: Low threshold values for overlay facies:')
                 print(repr(self._lowAlphaInGroup))
@@ -1272,6 +1332,15 @@ class Trunc2D_Base:
                 bgElement.text = ' ' + fName + ' '
                 groupElement.append(bgElement)
 
+    def getNCalcTruncMap(self):
+        return self._nCalc
+
+    def getNLookupTruncMap(self):
+        return self._nLookup
+
+    def getKeyResolution(self):
+        return self._keyResolution
+
     @staticmethod
     def _makeKey(faciesProb, keyResolution):
         keyList = []
@@ -1285,8 +1354,36 @@ class Trunc2D_Base:
     @staticmethod
     def _makeRoundOfFaciesProb(faciesProb, keyResolution):
         faciesProbNew = []
+        sumProb = 0.0
+        dValue = 1.0/keyResolution
+#        minProb = 1.0
+        maxProb = 0.0
         for i in range(len(faciesProb)):
             p = faciesProb[i]
             pNew = int(keyResolution * p + 0.5) / keyResolution
+            sumProb += pNew
+#            if minProb > pNew:
+#                minProb = pNew
+#                indxMin = i
+            if maxProb < pNew:
+                maxProb = pNew
+                indxMax = i
             faciesProbNew.append(pNew)
+        if sumProb > (0.9999 + dValue):
+#            print('sumProb: ' + str(sumProb))
+            faciesProbNew[indxMax] -= dValue
+            sumProb -= dValue
+            if sumProb > (0.9999 + dValue):
+                faciesProbNew[indxMax] -= dValue
+                sumProb -= dValue
+#            print('sumProb oppdatert: ' + str(sumProb))
+        elif sumProb < (1.0001- dValue):
+#            print('sumProb: ' + str(sumProb))
+            faciesProbNew[indxMax] += dValue
+            sumProb += dValue
+            if sumProb < (1.0001- dValue):
+                faciesProbNew[indxMax] += dValue
+                sumProb += dValue
+#            print('sumProb oppdatert: ' + str(sumProb))
         return faciesProbNew
+

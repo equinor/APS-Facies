@@ -115,15 +115,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
 
-        # Define disctionary to be used in memoization for optimalization
-        # In this dictionary use key equal to faciesProb and save faciespolygon
-        self.__memo = {}
-        self.__nCalc = 0
-        self.__nLookup = 0
-        self.__useMemoization = 1
-        # To make a lookup key from facies probability, round off input facies probability
-        # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
-        self.__keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
@@ -180,10 +171,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self.__setEmpty()
 
         if keyResolution == 0:
-            self.__useMemoization = 0
+            self._useMemoization = False
         else:
-            self.__useMemoization = 1
-            self.__keyResolution = keyResolution
+            self._useMemoization = True
+            self._keyResolution = keyResolution
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
@@ -489,18 +480,18 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
         #        faciesProb = self._setMinimumFaciesProb(faciesProb)
-        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__keyResolution)
-        print('FaciesProb: {}'.format(str(faciesProb)))
-        print('FaciesProbRoundOff: {}'.format(str(faciesProbRoundOff)))
+        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self._keyResolution)
+#        print('FaciesProb: {}'.format(str(faciesProb)))
+#        print('FaciesProbRoundOff: {}'.format(str(faciesProbRoundOff)))
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
         area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
 
-        if self.__useMemoization:
-            key = self._makeKey(faciesProb, self.__keyResolution)
+        if self._useMemoization:
+            key = self._makeKey(faciesProb, self._keyResolution)
 
-            if key not in self.__memo:
-                self.__nCalc += 1
+            if key not in self._memo:
+                self._nCalc += 1
 
                 # Call methods specific for this truncation rule with corrected area due to overprint facies
                 self.__calcProbForEachNode(area)
@@ -513,10 +504,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     truncStructure, self.__useLevel2, self.__useLevel3, self.__nPoly, polygons, fIndxPerPolygon
                 ]
 
-                self.__memo[key] = truncationObject
+                self._memo[key] = truncationObject
             else:
-                self.__nLookup += 1
-                truncationObject = self.__memo[key]
+                self._nLookup += 1
+                truncationObject = self._memo[key]
                 self.__truncStructure = truncationObject[0]
                 self.__useLevel2 = truncationObject[1]
                 self.__useLevel3 = truncationObject[2]

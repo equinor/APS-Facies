@@ -198,7 +198,8 @@ def checkAndNormaliseProb(
                 raise ValueError('Probability for facies ' + fName + ' has ' + str(nAboveOne) + ' values above 1.0')
 
         # Sum up probability over all facies per defined cell
-        psum = probDefined[0]
+        p = probDefined[0]
+        psum = np.copy(p)
         ones = np.ones(nDefinedCells, np.float32)
         for f in range(1, nFacies):
             # sum of np arrays (cell by cell sum)
@@ -231,8 +232,8 @@ def checkAndNormaliseProb(
                         # print('i,p,psum:' + str(i) + ' ' + str(p[i]) + ' ' + str(psum[i]))
 
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Number of grid cells in zone is:             ' + str(nDefinedCells))
-                print('Debug output: Number of grid cells that are normalised is: ' + str(nCellWithModifiedProb))
+                print('Debug output: Number of grid cells in zone is:                           ' + str(nDefinedCells))
+                print('Debug output: Number of grid cells which is recalculated and normalized: ' + str(nCellWithModifiedProb))
     else:
         for f in range(nFacies):
             item = probParamValuesForFacies[f]
