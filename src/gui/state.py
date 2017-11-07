@@ -75,6 +75,25 @@ class State(dict):
     def get_project_data(self):
         return {key: self.__dict__[key] for key in ProjectConstants.values() if key in self.__dict__}
 
+    def get_workflow_name(self) -> str:
+        return self._get_simple_value(key=ProjectConstants.WORKFLOW_NAME)
+
+    def get_grid_model_name(self):
+        return self._get_simple_value(ProjectConstants.GRID_MODEL_NAME)
+
+    def get_facies_parameter_name(self):
+        return self._get_simple_value(ProjectConstants.FACIES_PARAMETER_NAME)
+
+    def get_zone_parameter_name(self):
+        return self._get_simple_value(ProjectConstants.ZONES_PARAMETER_NAME)
+
+    def _get_simple_value(self, key) -> str:
+        project_data = self.get_project_data()
+        if key in self.__dict__:
+            return project_data[key]
+        else:
+            return ''
+
     def is_valid_state(self):
         if not self._is_valid_mode():
             return False
@@ -155,7 +174,18 @@ class State(dict):
         else:
             return ''
 
+    def get_aps_model(self):
+        return APSModel(
+            rmsWorkflowName=self.get_workflow_name(),
+            rmsGridModelName=self.get_grid_model_name(),
+            rmsFaciesParameterName=self.get_facies_parameter_name(),
+            rmsZoneParameterName=self.get_zone_parameter_name(),
+
+            previewZone=1,
+        )
+
     def read_project_model(self):
+        # TODO: Implement
         pass
 
     @staticmethod
