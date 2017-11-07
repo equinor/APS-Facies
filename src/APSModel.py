@@ -194,11 +194,11 @@ class APSModel:
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: RMSGridModel:                      ' + self.__rmsGridModelName)
-            print('Debug output: RMSZoneParamName:                  ' + self.__rmsZoneParamName)
-            print('Debug output: RMSFaciesParamName:                ' + self.__rmsFaciesParamName)
-            print('Debug output: Name of RMS project read:          ' + self.__rmsProjectName)
-            print('Debug output: Name of RMS workflow read:         ' + self.__rmsWorkflowName)
+            print('Debug output: RMSGridModel:                       ' + self.__rmsGridModelName)
+            print('Debug output: RMSZoneParamName:                   ' + self.__rmsZoneParamName)
+            print('Debug output: RMSFaciesParamName:                 ' + self.__rmsFaciesParamName)
+            print('Debug output: Name of RMS project read:           ' + self.__rmsProjectName)
+            print('Debug output: Name of RMS workflow read:          ' + self.__rmsWorkflowName)
             print('Debug output: Name of RMS gauss field IPL script: ' + self.__rmsGaussFieldScriptName)
 
         # Read all zones for models specifying main level facies
@@ -455,11 +455,6 @@ class APSModel:
 
     def getZoneNumberList(self):
         return [zone.getZoneNumber() for zone in self.__zoneModelsMainLevel]
-
-    #    def getPreviewZone(self):
-    #        return [self.__previewZone,self.__previewGridNx,self.__previewGridNy,
-    #                self.__previewGridXSize, self.__previewGridYSize,
-    #                self.__previewGridOrientation]
 
     def getPreviewZoneNumber(self):
         return self.__previewZone

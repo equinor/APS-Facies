@@ -106,9 +106,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
             'y max': 8
         }
 
-        # Number of polygons in the truncation map
-        self.__nPoly = 0
-
         # List of polygons the truncation map is split into
         self.__polygons = []
 
@@ -444,7 +441,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         print('Use level 3: ' + str(self.__useLevel3))
         print('Internal indices in data structure (node_index):')
         print(self.__node_index)
-        print('Number of polygons: ' + str(self.__nPoly))
+        print('Number of polygons: ' + str(self.__nPoly()))
         for i in range(len(self.__polygons)):
             poly = self.__polygons[i]
             print('Polygon number: ' + str(i))
@@ -501,7 +498,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 polygons = copy.deepcopy(self.__polygons)
                 fIndxPerPolygon = copy.deepcopy(self.__fIndxPerPolygon)
                 truncationObject = [
-                    truncStructure, self.__useLevel2, self.__useLevel3, self.__nPoly, polygons, fIndxPerPolygon
+                    truncStructure, self.__useLevel2, self.__useLevel3, self.__nPoly(), polygons, fIndxPerPolygon
                 ]
 
                 self._memo[key] = truncationObject
@@ -511,7 +508,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 self.__truncStructure = truncationObject[0]
                 self.__useLevel2 = truncationObject[1]
                 self.__useLevel3 = truncationObject[2]
-                self.__nPoly = truncationObject[3]
+                # self.__nPoly = truncationObject[3]
                 self.__polygons = truncationObject[4]
                 self.__fIndxPerPolygon = truncationObject[5]
 
@@ -954,7 +951,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         nodeListNextLevel = item[NLIST]
                         self.__calcPolyLevel(
                             directionNextLevel, nodeListNextLevel, poly, levelNumber + 1)
-        return
 
     def __writeDataForTruncRule(self):
         TYPE = self.__node_index['type']
@@ -981,13 +977,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 fName = self._faciesInTruncRule[indx]
                 text = 'L1: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
                 text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                print(text)
+                if self._debug_level >= Debug.VERBOSE:
+                    print(text)
 
             else:
                 nodeListL2 = itemL1[NLIST]
-                text = 'L1: GRP  Prob: {}'.format(prob)
-                text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                print(text)
+                if self._debug_level >= Debug.VERBOSE:
+                    text = 'L1: GRP  Prob: {}'.format(prob)
+                    text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                    print(text)
                 for j in range(len(nodeListL2)):
                     itemL2 = nodeListL2[j]
                     prob = itemL2[PROB]
@@ -999,14 +997,16 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         indx = itemL2[INDX]
                         probFrac = itemL2[PFRAC]
                         fName = self._faciesInTruncRule[indx]
-                        text = '  L2: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
-                        text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                        print(text)
+                        if self._debug_level >= Debug.VERBOSE:
+                            text = '  L2: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
+                            text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                            print(text)
                     else:
                         nodeListL3 = itemL2[NLIST]
-                        text = '  L2: GRP  Prob: {}'.format(prob)
-                        text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                        print(text)
+                        if self._debug_level >= Debug.VERBOSE:
+                            text = '  L2: GRP  Prob: {}'.format(prob)
+                            text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                            print(text)
                         for k in range(len(nodeListL3)):
                             itemL3 = nodeListL3[k]
                             indx = itemL3[INDX]
@@ -1017,9 +1017,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             ymin = itemL3[YMIN]
                             ymax = itemL3[YMAX]
                             fName = self._faciesInTruncRule[indx]
-                            text = '    L3: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
-                            text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
-                            print(text)
+                            if self._debug_level >= Debug.VERBOSE:
+                                text = '    L3: {}  ProbFrac: {}  Prob: {}'.format(fName, probFrac, prob)
+                                text += ' X: [{}, {}] Y: [{}, {}]'.format(xmin, xmax, ymin, ymax)
+                                print(text)
 
     def __getPolygonAndFaciesList(self):
         TYPE = self.__node_index['type']
@@ -1056,27 +1057,30 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             fIndxList.append(indxL3)
                             polygons.append(polyL3)
 
-        self.__nPoly = len(polygons)
         self.__polygons = polygons
         self.__fIndxPerPolygon = fIndxList
-        return
+        return self.__polygons
+
+    def __nPoly(self) -> int:
+        """
+        Getter for the number of polygons in the truncation map
+        :return: The number of polygons int the truncation map
+        :rtype: int
+        """
+        return len(self.__polygons)
 
     def truncMapPolygons(self):
-        assert self._setTruncRuleIsCalled == True
+        assert self._setTruncRuleIsCalled is True
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
         POLY = self.__node_index['polygon']
-        polygons = []
-        poly = []
         # Unit square (2D truncation map)
-        pt1 = [0.0, 0.0]
-        pt2 = [1.0, 0.0]
-        pt3 = [1.0, 1.0]
-        pt4 = [0.0, 1.0]
-        poly.append(pt1)
-        poly.append(pt2)
-        poly.append(pt3)
-        poly.append(pt4)
+        poly = [
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 1.0],
+        ]
 
         self.__truncStructure[POLY] = poly
         directionL1 = self.__truncStructure[DIR]
@@ -1087,7 +1091,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Create list of polygons and corresponding list of facies
         self.__getPolygonAndFaciesList()
         polygons = copy.deepcopy(self.__polygons)
-        return [polygons]
+        return polygons
 
     def faciesIndxPerPolygon(self):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
@@ -1218,8 +1222,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     if L3 <= L3Prev:
                         raise ValueError('Error: L1 == L1Prev and L2 == L2Prev and L3 <= L3Prev')
                     elif L3 - L3Prev > 1:
-                        raise ValueError(
-                            'Error: L1 == L1Prev and L2 == L2Prev and L3 - L3Prev > 1')
+                        raise ValueError('Error: L1 == L1Prev and L2 == L2Prev and L3 - L3Prev > 1')
                 elif L2 - L2Prev > 1:
                     raise ValueError('Error: L1 == L1Prev and L2 - L2Prev > 1')
             elif L1 - L1Prev > 1:
@@ -1336,7 +1339,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
             L2Prev = L2
             L3Prev = L3
         self.__truncStructure = truncStructure
-        self.__nPoly = nPoly
 
     def XMLAddElement(self, parent):
         if self._debug_level >= Debug.VERY_VERBOSE:
