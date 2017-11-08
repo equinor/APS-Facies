@@ -24,10 +24,6 @@ from src.utils.constants.simple import Debug
 from src.utils.xml import getFloatCommand, getIntCommand, getTextCommand
 
 
-#from _ast import List
-#from src.xmlFunctions import getFloatCommand, getIntCommand, getTextCommand
-
-
 class Trend3D:
     """
     Description: Parent class for Trend3D
@@ -262,7 +258,7 @@ class Trend3D_linear(Trend3D):
         self._className = 'Trend3D_linear'
 
         if trendRuleXML is not None:
-            self._interpretXMLTree(trendRuleXML,modelFileName,debug_level)
+            self._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
         else:
             if self._debug_level >= Debug.VERY_VERBOSE:
                 print('Debug info: Create empty object of ' + self._className)

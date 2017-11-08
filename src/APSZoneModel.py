@@ -329,13 +329,13 @@ class APSZoneModel:
         return self.__useConstProb
 
     def isMainLevelModel(self):
-        if self._faciesLevel == 1:
+        if self.__faciesLevel == 1:
             return True
         else:
             return False
 
     def getMainLevelFacies(self):
-        return copy.copy(self._mainLevelFacies)
+        return copy.copy(self.__mainLevelFacies)
 
     def getFaciesInZoneModel(self):
         return self.__faciesProbObject.getFaciesInZoneModel()
