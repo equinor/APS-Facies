@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Define APS parameters</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="APS_GUI_Faner">
@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_general">
      <attribute name="title">
@@ -73,7 +73,7 @@
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QCheckBox" name="m_toggle_seperate_zone_models">
+          <widget class="QCheckBox" name="m_toggle_separate_zone_models">
            <property name="text">
             <string>Seperate Zone Models</string>
            </property>
@@ -300,7 +300,7 @@
         </layout>
        </item>
        <item row="0" column="0">
-        <widget class="QRadioButton" name="m_rb_experimental_mode">
+        <widget class="QCheckBox" name="m_toggle_experimental_mode">
          <property name="text">
           <string>Experimental Mode</string>
          </property>
@@ -418,9 +418,9 @@
         </layout>
        </item>
        <item row="5" column="0">
-        <layout class="QGridLayout" name="layout_bayfield">
+        <layout class="QGridLayout" name="layout_bayfill">
          <item row="2" column="0">
-          <widget class="QPushButton" name="m_button_bayfield">
+          <widget class="QPushButton" name="m_button_bayfill">
            <property name="text">
             <string/>
            </property>
@@ -431,7 +431,7 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <spacer name="spacer_bayfield">
+          <spacer name="spacer_bayfill">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -444,7 +444,7 @@
           </spacer>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="label_bayfield">
+          <widget class="QLabel" name="label_bayfill">
            <property name="font">
             <font>
              <weight>75</weight>
@@ -539,7 +539,7 @@
          <item row="2" column="0">
           <widget class="QPushButton" name="m_button_type_a">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -553,7 +553,7 @@
            </property>
            <property name="iconSize">
             <size>
-             <width>32</width>
+             <width>16</width>
              <height>16</height>
             </size>
            </property>
@@ -910,7 +910,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF3_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF3">
            <property name="text">
             <string>GRF3 Settings</string>
            </property>
@@ -924,7 +924,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF3" native="true">
+          <widget class="Plot" name="m_plot_area_GRF3" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -957,7 +957,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF4_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF4">
            <property name="text">
             <string>GRF4 Settings</string>
            </property>
@@ -971,7 +971,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF4" native="true">
+          <widget class="Plot" name="m_plot_area_GRF4" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1001,7 +1001,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF2_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF2">
            <property name="text">
             <string>GRF2 Settings</string>
            </property>
@@ -1015,7 +1015,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF2" native="true">
+          <widget class="Plot" name="m_plot_area_GRF2" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1032,7 +1032,7 @@
        <item row="2" column="1">
         <layout class="QGridLayout" name="group_grf_1">
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF1_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF1">
            <property name="text">
             <string>GRF1 Settings</string>
            </property>
@@ -1062,7 +1062,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF1" native="true">
+          <widget class="Plot" name="m_plot_area_GRF1" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1092,7 +1092,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF5_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF5">
            <property name="text">
             <string>GRF5 Settings</string>
            </property>
@@ -1106,7 +1106,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF5" native="true">
+          <widget class="Plot" name="m_plot_area_GRF5" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1136,7 +1136,7 @@
           </widget>
          </item>
          <item row="0" column="2">
-          <widget class="QPushButton" name="m_button_GRF6_settings">
+          <widget class="QPushButton" name="m_button_settings_GRF6">
            <property name="text">
             <string>GRF6 Settings</string>
            </property>
@@ -1150,7 +1150,7 @@
           </widget>
          </item>
          <item row="0" column="1" rowspan="2">
-          <widget class="QCustomPlot" name="m_plot_area_GRF6" native="true">
+          <widget class="Plot" name="m_plot_area_GRF6" native="true">
            <property name="minimumSize">
             <size>
              <width>180</width>
@@ -1310,12 +1310,84 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>Plot</class>
    <extends>QWidget</extends>
-   <header location="global">qcustomplot.h</header>
+   <header location="global">src/gui/wrappers/base_classes/plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>APS_GUI_Faner</tabstop>
+  <tabstop>m_toggle_experimental_mode</tabstop>
+  <tabstop>m_choose_select_facies_model</tabstop>
+  <tabstop>m_edit_model_name</tabstop>
+  <tabstop>m_toggle_separate_zone_models</tabstop>
+  <tabstop>m_list_available_zones</tabstop>
+  <tabstop>m_list_selected_zones</tabstop>
+  <tabstop>m_button_add_zone</tabstop>
+  <tabstop>m_button_remove_zone</tabstop>
+  <tabstop>m_toggle_select_facies</tabstop>
+  <tabstop>m_list_available_facies</tabstop>
+  <tabstop>m_list_selected_facies</tabstop>
+  <tabstop>m_button_add_facies</tabstop>
+  <tabstop>m_button_remove_facies</tabstop>
+  <tabstop>m_button_add_new_facies</tabstop>
+  <tabstop>m_button_remove_selected</tabstop>
+  <tabstop>m_list_zones</tabstop>
+  <tabstop>m_list_facies</tabstop>
+  <tabstop>m_button_type_a</tabstop>
+  <tabstop>m_button_type_b</tabstop>
+  <tabstop>m_button_type_c</tabstop>
+  <tabstop>m_button_type_d</tabstop>
+  <tabstop>m_button_type_e</tabstop>
+  <tabstop>m_button_type_f</tabstop>
+  <tabstop>m_button_type_g</tabstop>
+  <tabstop>m_button_type_h</tabstop>
+  <tabstop>m_button_type_i</tabstop>
+  <tabstop>m_button_type_j</tabstop>
+  <tabstop>m_button_type_k</tabstop>
+  <tabstop>m_button_type_l</tabstop>
+  <tabstop>m_button_type_m</tabstop>
+  <tabstop>m_button_type_n</tabstop>
+  <tabstop>m_button_type_o</tabstop>
+  <tabstop>m_button_type_p</tabstop>
+  <tabstop>m_button_type_q</tabstop>
+  <tabstop>m_button_type_r</tabstop>
+  <tabstop>m_button_type_s</tabstop>
+  <tabstop>m_button_type_t</tabstop>
+  <tabstop>m_button_type_u</tabstop>
+  <tabstop>m_button_type_v</tabstop>
+  <tabstop>m_button_type_w</tabstop>
+  <tabstop>m_button_type_I</tabstop>
+  <tabstop>m_button_type_II</tabstop>
+  <tabstop>m_button_type_III</tabstop>
+  <tabstop>m_button_type_IV</tabstop>
+  <tabstop>m_button_type_V</tabstop>
+  <tabstop>m_button_type_VI</tabstop>
+  <tabstop>m_button_type_VII</tabstop>
+  <tabstop>m_button_bayfill</tabstop>
+  <tabstop>m_button_type_customized</tabstop>
+  <tabstop>m_list_zones_grf</tabstop>
+  <tabstop>m_list_facies_grf</tabstop>
+  <tabstop>m_button_settings_GRF1</tabstop>
+  <tabstop>m_toggle_GRF1</tabstop>
+  <tabstop>m_button_settings_GRF2</tabstop>
+  <tabstop>m_toggle_GRF2</tabstop>
+  <tabstop>m_button_settings_GRF3</tabstop>
+  <tabstop>m_toggle_GRF3</tabstop>
+  <tabstop>m_button_settings_GRF4</tabstop>
+  <tabstop>m_toggle_GRF4</tabstop>
+  <tabstop>m_button_settings_GRF5</tabstop>
+  <tabstop>m_toggle_GRF5</tabstop>
+  <tabstop>m_button_settings_GRF6</tabstop>
+  <tabstop>m_toggle_GRF6</tabstop>
+  <tabstop>m_toggle_condition_to_wells</tabstop>
+  <tabstop>m_button_assign_probability</tabstop>
+  <tabstop>m_button_previewer</tabstop>
+  <tabstop>m_button_save</tabstop>
+  <tabstop>m_button_save_as</tabstop>
+  <tabstop>m_button_close</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources/Resources.qrc"/>
  </resources>

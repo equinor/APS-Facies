@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dialog_add_facies</class>
- <widget class="QDialog" name="dialog_add_facies">
+ <class>AddFacies</class>
+ <widget class="QDialog" name="AddFacies">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +14,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Add new Facies</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
   </property>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
@@ -51,23 +57,19 @@
      </layout>
     </item>
     <item>
-     <layout class="QGridLayout" name="layout_ok_cancle">
+     <layout class="QGridLayout" name="layout_ok_cancel">
       <item row="0" column="1">
-       <widget class="QDialogButtonBox" name="m_buttons_ok_cancle">
+       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
         <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+         <set>QDialogButtonBox::Close|QDialogButtonBox::Save</set>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="m_button_apply">
-        <property name="text">
-         <string>&amp;Apply</string>
+        <property name="centerButtons">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <spacer name="spacer_ok_cancle">
+       <spacer name="spacer_ok_cancel">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>

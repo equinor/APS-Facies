@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>BayfillTruncationRule</class>
+ <widget class="QWidget" name="BayfillTruncationRule">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Bayfill Truncation rule</string>
   </property>
   <widget class="QGroupBox" name="layout_truncation_rule_bayfill">
    <property name="geometry">
@@ -27,7 +27,7 @@
      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
     </property>
     <item row="6" column="0" colspan="2">
-     <widget class="QDialogButtonBox" name="m_buttons_ok_cancel_truncation_rule_bayfill">
+     <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
       <property name="standardButtons">
        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
       </property>
@@ -36,10 +36,10 @@
     <item row="5" column="0" colspan="2">
      <layout class="QGridLayout" name="layout_facies_bounadries">
       <item row="2" column="6">
-       <widget class="QLineEdit" name="m_edit_SF_factor"/>
+       <widget class="QLineEdit" name="m_edit_factor_floodplain"/>
       </item>
       <item row="3" column="6">
-       <widget class="QLineEdit" name="m_edit_YSF_factor"/>
+       <widget class="QLineEdit" name="m_edit_factor_subbay"/>
       </item>
       <item row="2" column="1">
        <widget class="QLabel" name="label_SF">
@@ -78,7 +78,7 @@
        </widget>
       </item>
       <item row="4" column="6">
-       <widget class="QLineEdit" name="m_edit_BHD_factor"/>
+       <widget class="QLineEdit" name="m_edit_factor_BHD"/>
       </item>
       <item row="4" column="1">
        <widget class="QLabel" name="label_BHD">
@@ -224,122 +224,122 @@
       </item>
       <item row="2" column="1">
        <layout class="QGridLayout" name="layout_facies_proportions">
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_floodplain">
-          <property name="text">
-           <string>FLOODPLAIN</string>
-          </property>
-         </widget>
+        <item row="4" column="8">
+         <widget class="QLineEdit" name="m_edit_proportion_subbay"/>
         </item>
-        <item row="3" column="1">
-         <widget class="QComboBox" name="m_choose_floodplain"/>
-        </item>
-        <item row="3" column="3">
-         <widget class="QPushButton" name="m_cololr_button_floodplain"/>
-        </item>
-        <item row="3" column="5">
-         <widget class="QSlider" name="m_slider_floodplain">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="7">
-         <widget class="QLineEdit" name="m_edit_floodplain_proportion"/>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_subbay">
-          <property name="text">
-           <string>SUBBAY</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QComboBox" name="m_choose_subbay"/>
-        </item>
-        <item row="4" column="3">
-         <widget class="QPushButton" name="m_cololr_button_subbay"/>
-        </item>
-        <item row="4" column="5">
-         <widget class="QSlider" name="m_slider_subbay">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="7">
-         <widget class="QLineEdit" name="m_edit_subbay_proportion"/>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_WBF">
-          <property name="text">
-           <string>WBF</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QComboBox" name="m_choose_WBF"/>
-        </item>
-        <item row="5" column="3">
-         <widget class="QPushButton" name="m_cololr_button_WBF"/>
-        </item>
-        <item row="5" column="5">
+        <item row="5" column="6">
          <widget class="QSlider" name="m_slider_WBF">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="5" column="7">
-         <widget class="QLineEdit" name="m_edit_WBF_proportion"/>
+        <item row="3" column="1">
+         <widget class="QLabel" name="label_floodplain">
+          <property name="text">
+           <string>FLOODPLAIN</string>
+          </property>
+         </widget>
         </item>
-        <item row="6" column="0">
+        <item row="3" column="2">
+         <widget class="QComboBox" name="m_choose_floodplain"/>
+        </item>
+        <item row="3" column="4">
+         <widget class="QPushButton" name="m_color_button_floodplain"/>
+        </item>
+        <item row="3" column="6">
+         <widget class="QSlider" name="m_slider_floodplain">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="8">
+         <widget class="QLineEdit" name="m_edit_proportion_floodplain"/>
+        </item>
+        <item row="4" column="4">
+         <widget class="QPushButton" name="m_color_button_subbay"/>
+        </item>
+        <item row="4" column="2">
+         <widget class="QComboBox" name="m_choose_subbay"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="QLabel" name="label_subbay">
+          <property name="text">
+           <string>SUBBAY</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="6">
+         <widget class="QSlider" name="m_slider_subbay">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <widget class="QComboBox" name="m_choose_WBF"/>
+        </item>
+        <item row="5" column="4">
+         <widget class="QPushButton" name="m_color_button_WBF"/>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLabel" name="label_WBF">
+          <property name="text">
+           <string>WBF</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="8">
+         <widget class="QLineEdit" name="m_edit_proportion_WBF"/>
+        </item>
+        <item row="6" column="2">
+         <widget class="QComboBox" name="m_choose_BHD"/>
+        </item>
+        <item row="6" column="4">
+         <widget class="QPushButton" name="m_color_button_BHD"/>
+        </item>
+        <item row="6" column="1">
          <widget class="QLabel" name="label_BHD_2">
           <property name="text">
            <string>BHD</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
-         <widget class="QComboBox" name="m_choose_BHD"/>
+        <item row="6" column="8">
+         <widget class="QLineEdit" name="m_edit_proportion_BHD"/>
         </item>
-        <item row="6" column="3">
-         <widget class="QPushButton" name="m_cololr_button_BHD"/>
-        </item>
-        <item row="6" column="5">
+        <item row="6" column="6">
          <widget class="QSlider" name="m_slider_BHD">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="6" column="7">
-         <widget class="QLineEdit" name="m_edit_BHD_proportion"/>
+        <item row="7" column="2">
+         <widget class="QComboBox" name="m_choose_lagoon"/>
         </item>
-        <item row="7" column="0">
+        <item row="7" column="4">
+         <widget class="QPushButton" name="m_color_button_lagoon"/>
+        </item>
+        <item row="7" column="1">
          <widget class="QLabel" name="label_lagoon">
           <property name="text">
            <string>LAGOON</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
-         <widget class="QComboBox" name="m_choose_lagoon"/>
+        <item row="7" column="8">
+         <widget class="QLineEdit" name="m_edit_proportion_lagoon"/>
         </item>
-        <item row="7" column="3">
-         <widget class="QPushButton" name="m_cololr_button_lagoon"/>
-        </item>
-        <item row="7" column="5">
+        <item row="7" column="6">
          <widget class="QSlider" name="m_slider_lagoon">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="7" column="7">
-         <widget class="QLineEdit" name="m_edit_lagoon_proportion"/>
-        </item>
-        <item row="2" column="1">
+        <item row="2" column="2">
          <widget class="QLabel" name="label_facies">
           <property name="font">
            <font>
@@ -352,7 +352,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="3">
+        <item row="2" column="4">
          <widget class="QLabel" name="label_color">
           <property name="font">
            <font>
@@ -365,7 +365,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="7">
+        <item row="2" column="8">
          <widget class="QLabel" name="label_proportions_input">
           <property name="font">
            <font>
@@ -378,7 +378,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="5">
+        <item row="2" column="6">
          <widget class="QLabel" name="label_proportions_scale">
           <property name="font">
            <font>
@@ -391,7 +391,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
+        <item row="2" column="3">
          <spacer name="spacer_facies">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -407,7 +407,7 @@
           </property>
          </spacer>
         </item>
-        <item row="2" column="4">
+        <item row="2" column="5">
          <spacer name="spacer_color">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -423,7 +423,7 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="7">
+        <item row="1" column="8">
          <widget class="QLabel" name="label_values_between">
           <property name="font">
            <font>
@@ -436,7 +436,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="6">
+        <item row="2" column="7">
          <spacer name="spacer_proportions_scale">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -452,10 +452,23 @@
           </property>
          </spacer>
         </item>
+        <item row="4" column="0">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>1</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
       </item>
       <item row="2" column="0">
-       <widget class="QCustomPlot" name="m_plot_truncation_rule_bayfill" native="true">
+       <widget class="Plot" name="m_plot_truncation_rule_bayfill" native="true">
         <property name="minimumSize">
          <size>
           <width>250</width>
@@ -471,12 +484,39 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
+   <class>Plot</class>
    <extends>QWidget</extends>
-   <header location="global">qcustomplot.h</header>
+   <header location="global">src/gui/wrappers/base_classes/plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>m_toggle_apply_overlay_facies</tabstop>
+  <tabstop>m_button_apply_overlay_facies</tabstop>
+  <tabstop>m_choose_floodplain</tabstop>
+  <tabstop>m_choose_subbay</tabstop>
+  <tabstop>m_choose_WBF</tabstop>
+  <tabstop>m_choose_BHD</tabstop>
+  <tabstop>m_choose_lagoon</tabstop>
+  <tabstop>m_color_button_floodplain</tabstop>
+  <tabstop>m_color_button_subbay</tabstop>
+  <tabstop>m_color_button_WBF</tabstop>
+  <tabstop>m_color_button_BHD</tabstop>
+  <tabstop>m_color_button_lagoon</tabstop>
+  <tabstop>m_slider_floodplain</tabstop>
+  <tabstop>m_slider_subbay</tabstop>
+  <tabstop>m_slider_WBF</tabstop>
+  <tabstop>m_slider_BHD</tabstop>
+  <tabstop>m_slider_lagoon</tabstop>
+  <tabstop>m_edit_proportion_floodplain</tabstop>
+  <tabstop>m_edit_proportion_subbay</tabstop>
+  <tabstop>m_edit_proportion_WBF</tabstop>
+  <tabstop>m_edit_proportion_BHD</tabstop>
+  <tabstop>m_edit_proportion_lagoon</tabstop>
+  <tabstop>m_edit_factor_floodplain</tabstop>
+  <tabstop>m_edit_factor_subbay</tabstop>
+  <tabstop>m_edit_factor_BHD</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -1,4 +1,8 @@
 FROM centos:6
+LABEL version="1.7.4" \
+      maintainer="snis@statoil.com" \
+      description="This is the Docker image for building, and testing the APS-GUI." \
+      "com.statoil.vendor"="Statoil ASA"
 
 ######################################################################
 #  ___ ___  _____  ____   __  ___ ___ _____ _____ ___ _  _  ___ ___
@@ -23,6 +27,12 @@ RUN echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
  && echo "ftp_proxy = $HTTP_PROXY" >> /etc/wgetrc \
  && echo "use_proxy = on" >> /etc/wgetrc
 
+# Download, and install Statoil's Certificates
+ENV STATOIL_CERT="statoil-ca-certificates.el6.rpm"
+RUN wget http://st-linrhn01.st.statoil.no/pub/$STATOIL_CERT \
+ && yum install -y $STATOIL_CERT \
+ && rm -f $STATOIL_CERT
+
 #################################################
 #  __  __ ___ ___  ___     __  ___ _  ___   __
 # |  \/  |_ _/ __|/ __|   / / | __| \| \ \ / /
@@ -30,8 +40,6 @@ RUN echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
 # |_|  |_|___|___/\___| /_/   |___|_|\_| \_/
 #
 #################################################
-ENV CODE_DIR="/code"
-ENV PYTHONPATH="$CODE_DIR:$PYTHONPATH"
 ENV ENCODING="en_US.UTF-8"
 ENV LC_ALL=$ENCODING
 ENV LANG=$ENCODING
@@ -79,26 +87,29 @@ ENV PYQT3D_VERSION=$PYQT_VERSION
 ENV PYQTDATAVISUALIZATION_VERSION=$PYQT_VERSION
 ENV PYQTPURCHASING_VERSION=$PYQT_VERSION
 
-ENV QCUSTOMPLOT_VERSION="1.3.1-1"
 ENV QSCINTILLA_VERSION="2.10.1"
 ENV PYQTDEPLOY_VERSION="1.3.2"
 
+# Python dependencies
 ENV OPENSSL_VERSION="1.1.0f"
 ENV NCURSES_VERSION="6.0"
 ENV READLINE_VERSION="7.0"
+ENV SQLITE3_VERSION=3200100
 
+# PyLint
 ENV ASTROID_VERSION="1.5.3"
 ENV ISORT_VERSION="4.2.15"
-ENV PYLINT_VERSION="1.7.2"
+ENV PYLINT_VERSION="1.7.4"
 
+# UPX: Binary compression
 ENV UCL_VERSION="1.03"
-ENV UPX_VERSION="v3.94"
+ENV UPX_VERSION="3.94"
 ENV UCL_PREFIX=$INSTALL_DIR/ucl-$UCL_VERSION
 ENV UPX_PREFIX=$INSTALL_DIR/upx-$UPX_VERSION
 
 ENV OPENSSL_PREFIX=$INSTALL_DIR/openssl-$OPENSSL_VERSION
 
-# Div. software
+# Misc. software
 RUN yum update -y \
  && yum install -y \
    git \
@@ -128,8 +139,7 @@ RUN yum update -y \
 
 
 # Precreate all directories to avoid conflicts
-RUN mkdir -p $CODE_DIR \
-             $ROOT_DIR \
+RUN mkdir -p $ROOT_DIR \
              $BUILD_DIR \
              $SOURCE_DIR \
              $INSTALL_DIR \
@@ -144,7 +154,7 @@ RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQt${PYQ
 RUN cd $SOURCE_DIR && wget https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz
 RUN cd $SOURCE_DIR && wget http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget https://github.com/dimv36/QCustomPlot-PyQt5/archive/v$QCUSTOMPLOT_VERSION.tar.gz --output-document=$SOURCE_DIR/qcustomplot-$QCUSTOMPLOT_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://sqlite.org/2017/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQtChart/PyQtChart-$PYQTCHARTS_VERSION/PyQtChart_gpl-$PYQTCHARTS_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-$PYQT3D_VERSION/PyQt3D_gpl-$PYQT3D_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-$PYQTDATAVISUALIZATION_VERSION/PyQtDataVisualization_gpl-$PYQTDATAVISUALIZATION_VERSION.tar.gz
@@ -156,6 +166,8 @@ RUN cd $SOURCE_DIR && wget https://github.com/PyCQA/astroid/archive/astroid-$AST
 RUN cd $SOURCE_DIR && wget https://github.com/timothycrosley/isort/archive/$ISORT_VERSION.tar.gz --output-document=$SOURCE_DIR/isort-$ISORT_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://github.com/PyCQA/pylint/archive/pylint-$PYLINT_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget http://www.oberhumer.com/opensource/ucl/download/ucl-$UCL_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://github.com/upx/upx/archive/v$UPX_VERSION.tar.gz --output-document=$SOURCE_DIR/upx-$UPX_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://github.com/upx/upx-lzma-sdk/archive/v$UPX_VERSION.tar.gz --output-document=$SOURCE_DIR/upx-lzma-sdk-$UPX_VERSION.tar.gz
 
 
  # Create all build directories
@@ -167,7 +179,7 @@ RUN cd $BUILD_DIR \
     openssl-$OPENSSL_VERSION \
     ncurses-$NCURSES_VERSION \
     readline-$READLINE_VERSION \
-    qcustomplot-$QCUSTOMPLOT_VERSION \
+    sqlite3-$SQLITE3_VERSION \
     pyqt-chart-$PYQTCHARTS_VERSION \
     pyqt-3d-$PYQT3D_VERSION \
     pyqt-data-visualization-$PYQTDATAVISUALIZATION_VERSION \
@@ -178,7 +190,9 @@ RUN cd $BUILD_DIR \
     astroid-$ASTROID_VERSION \
     isort-$ISORT_VERSION \
     pylint-$PYLINT_VERSION \
-    ucl-$UCL_VERSION
+    ucl-$UCL_VERSION \
+    upx-$UPX_VERSION \
+    upx-$UPX_VERSION/src/lzma-sdk
 
 # Extract everything into build directories
 RUN cd $BUILD_DIR \
@@ -188,7 +202,7 @@ RUN cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/openssl-"$OPENSSL_VERSION".tar.gz -C openssl-$OPENSSL_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/ncurses-$NCURSES_VERSION.tar.gz -C ncurses-$NCURSES_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/readline-$READLINE_VERSION.tar.gz -C readline-$READLINE_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/qcustomplot-$QCUSTOMPLOT_VERSION.tar.gz -C qcustomplot-$QCUSTOMPLOT_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz -C sqlite3-$SQLITE3_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/pyqt-deploy-$PYQTDEPLOY_VERSION.tar.gz -C pyqt-deploy-$PYQTDEPLOY_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/PyQt3D_gpl-$PYQT3D_VERSION.tar.gz -C pyqt-3d-$PYQT3D_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/PyQtChart_gpl-$PYQTCHARTS_VERSION.tar.gz -C pyqt-chart-$PYQTCHARTS_VERSION --strip-components=1 \
@@ -199,7 +213,9 @@ RUN cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/astroid-$ASTROID_VERSION.tar.gz -C astroid-$ASTROID_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/isort-$ISORT_VERSION.tar.gz -C isort-$ISORT_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/pylint-$PYLINT_VERSION.tar.gz -C pylint-$PYLINT_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/ucl-$UCL_VERSION.tar.gz -C ucl-$UCL_VERSION --strip-components=1
+ && tar -xvf  $SOURCE_DIR/ucl-$UCL_VERSION.tar.gz -C ucl-$UCL_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/upx-$UPX_VERSION.tar.gz -C upx-$UPX_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/upx-lzma-sdk-$UPX_VERSION.tar.gz -C upx-$UPX_VERSION/src/lzma-sdk --strip-components=1
 
 RUN rm -f $SOURCE_DIR/*.tar.*
 
@@ -225,14 +241,13 @@ RUN cd $BUILD_DIR/ucl-$UCL_VERSION \
 ENV LD_LIBRARY_PATH=$UCL_PREFIX/lib:$LD_LIBRARY_PATH
 ENV UPX_UCLDIR=$BUILD_DIR/ucl-$UCL_VERSION
 
-# Download and install UPX
-RUN git clone https://github.com/upx/upx.git \
-     --recursive \
-     --depth 1 \
-     $BUILD_DIR/upx \
- && cd $BUILD_DIR/upx \
- && make all \
- && mv $BUILD_DIR/upx/src/upx.out $UPX_PREFIX/bin/upx
+# Download necessary dependency, lzma-sdk
+#RUN git clone https://github.com/upx/upx-lzma-sdk.git $BUILD_DIR/upx-$UPX_VERSION/src/lzma-sdk
+
+# Install UPX
+RUN cd $BUILD_DIR/upx-$UPX_VERSION \
+ && make CHECK_WHITESPACE=/bin/true all \
+ && mv $BUILD_DIR/upx-$UPX_VERSION/src/upx.out $UPX_PREFIX/bin/upx
 
 ENV PATH=$UPX_PREFIX/bin:$PATH
 
@@ -268,6 +283,16 @@ RUN cd $BUILD_DIR/readline-$READLINE_VERSION \
  && make \
  && make install
 
+RUN cd $BUILD_DIR/sqlite3-$SQLITE3_VERSION \
+ && ./configure --prefix=$PYTHON_PREFIX \
+                --enable-readline \
+                --enable-threadsafe \
+                --enable-dynamic-extensions \
+                --enable-fts5 \
+                --enable-json1 \
+                --enable-session \
+ && make \
+ && make install
 
 # Build Python
 # Useful build information here: https://hg.python.org/cpython/file/2.7/README
@@ -294,10 +319,6 @@ RUN cd $BUILD_DIR/python$PYTHON_VERSION \
 # Upgrade setuptools
 RUN $PIP install setuptools --upgrade
 
-RUN cd $SOURCE_DIR \
- && wget https://bootstrap.pypa.io/get-pip.py \
- && $PYTHON get-pip.py
-
 RUN cd $BUILD_DIR/sip-$SIP_VERSION \
  && $PYTHON configure.py \
  && make \
@@ -322,13 +343,6 @@ RUN cd $BUILD_DIR/pyqt-gpl-$PYQT_VERSION \
        --disable QtWebChannel \
  && make -j $(nproc) \
  && make install
-
-# Build QCustomPlot for PyQt
-RUN cd $BUILD_DIR/qcustomplot-$QCUSTOMPLOT_VERSION \
- && CFLAGS='-std=c++11' \
-    LIBRARY_PATH="$QT_PREFIX/lib:$LIBRARY_PATH" \
-    $PYTHON setup.py build_ext --qmake $QMAKE --qt-include-dir $QT_PREFIX/include \
- && $PYTHON setup.py install
 
 # Build PyQt3D
 RUN cd $BUILD_DIR/pyqt-3d-$PYQT3D_VERSION \
@@ -378,17 +392,6 @@ RUN cd $BUILD_DIR/dip-$DIP_VERSION \
 RUN cd $BUILD_DIR/pyqt-deploy-$PYQTDEPLOY_VERSION \
  && $PYTHON setup.py install
 
-# Download and install latest (before 3.3) PyInstaller
-RUN cd $SOURCE_DIR \
- && git clone https://github.com/pyinstaller/pyinstaller.git \
- && cd $SOURCE_DIR/pyinstaller/bootloader \
- && ln -s $(which strip) $GCC_PREFIX/bin/strip \
- && $PYTHON ./waf distclean all \
- && cd $SOURCE_DIR/pyinstaller \
- && $PIP install macholib \
- && $PYTHON setup.py install
-
-
 # Download, and install PyLint
 # Depends on
 # * astroid
@@ -407,15 +410,7 @@ RUN cd $BUILD_DIR/pylint-$PYLINT_VERSION \
 RUN rm -rf $SOURCE_DIR
 RUN rm -rf $BUILD_DIR
 
-#####################
-#                   #
-#  Adding the repo  #
-#                   #
-#####################
-
-RUN mkdir -p $CODE_DIR
-VOLUME $CODE_DIR
-
 # Install all python modules
 COPY requirements.txt /requirements.txt
-RUN $PIP install -r /requirements.txt
+RUN $PIP install -r /requirements.txt \
+ && rm -f /requirements.txt

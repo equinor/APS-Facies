@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>project_selection</class>
- <widget class="QWidget" name="project_selection">
+ <class>ProjectSelection</class>
+ <widget class="QWidget" name="ProjectSelection">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -121,7 +121,7 @@
        </layout>
       </item>
       <item row="3" column="1">
-       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel_project">
+       <widget class="QDialogButtonBox" name="m_buttons_ok_cancel">
         <property name="font">
          <font>
           <family>Abyssinica SIL</family>
@@ -315,6 +315,18 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>m_rb_experimental_mode</tabstop>
+  <tabstop>m_rb_read_rms_project_file</tabstop>
+  <tabstop>m_button_browse_project_file</tabstop>
+  <tabstop>m_edit_browse_project</tabstop>
+  <tabstop>tabs_project_parameter</tabstop>
+  <tabstop>m_edit_workflow_name</tabstop>
+  <tabstop>m_edit_grid_model_name</tabstop>
+  <tabstop>m_edit_facies_parameter_name</tabstop>
+  <tabstop>m_edit_zones_parameter_name</tabstop>
+  <tabstop>m_edit_gaussian_parameter_name</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

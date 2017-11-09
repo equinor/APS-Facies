@@ -1,18 +1,18 @@
 #!/bin/env python
-import sys
+import copy
 from xml.etree.ElementTree import Element
 
-import copy
+from src.utils.constants.simple import Debug
+from src.utils.xml import getKeyword, getIntCommand
 
 
 class APSGaussFieldJobs:
     """
-    Class APSGaussFieldJobs
-    Description: Keep the name of RMS petro jobs and  associated 3D property
-                 parameter these jobs will create
+    Keep the name of RMS petro jobs and  associated 3D property
+    parameter these jobs will create
 
     Public member functions:
-    Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,printInfo=0)
+    Constructor:     def __init__(self,ET_Tree = None, modelFileName = None,debug_level=Debug.OFF)
 
      -- Get functions ---
        def getNumberOfGFJobs(self)
@@ -41,25 +41,21 @@ class APSGaussFieldJobs:
     -----------------------------------------------------------------------------------
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, printInfo=0):
+    def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF):
         self.__modelFileName = modelFileName
-        self.__printInfo = printInfo
+        self.__className = 'APSGaussFieldJobs'
+        self.__debug_level = debug_level
         self.__nGFNames = 0
         self.__gaussFieldNames = []
         self.__nJobs = 0
         self.__jobNames = []
         self.__gaussFieldNamesPerJob = []
 
-        # assert ET_Tree is not None
-        if ET_Tree is None:
-            # Create an empty object. The object will at a later stage be filled by content by using
-            # addGaussFieldJob function or the initialize function
-            return
-
-        # Search xml tree for model file to find the specified zone and mainLevelFacies
-        self.__interpretXMLTree(ET_Tree)
-        if self.__printInfo >= 3:
-            print('Debug output: Call APSGaussFieldJobs init')
+        if ET_Tree is not None:
+            # Search xml tree for model file to find the specified zone and mainLevelFacies
+            self.__interpretXMLTree(ET_Tree)
+            if self.__debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Call APSGaussFieldJobs init')
 
     # End __init__
 
@@ -69,23 +65,14 @@ class APSGaussFieldJobs:
     def __interpretXMLTree(self, ET_Tree):
         root = ET_Tree.getroot()
 
-        kw = 'PrintInfo'
-        obj = root.find(kw)
-        if obj is None:
-            # Default value is set
-            self.__printInfo = 1
-        else:
-            text = obj.text
-            self.__printInfo = int(text.strip())
+        self.__debug_info = getIntCommand(
+            root, 'PrintInfo', 'Root',
+            defaultValue=1,
+            modelFile=self.__modelFileName,
+            required=False
+        )
 
-        kw = 'GaussFieldJobNames'
-        obj = root.find(kw)
-        if obj is None:
-            raise ValueError(
-                'Error reading {}\n'
-                'Error missing command: {}.'
-                ''.format(self.__modelFileName, kw)
-            )
+        obj = getKeyword(root, 'GaussFieldJobNames', 'Root', modelFile=self.__modelFileName)
 
         gfJobs = obj
         gfJobList = []
@@ -134,14 +121,25 @@ class APSGaussFieldJobs:
                 name = gfList[j]
                 self.__gaussFieldNames.append(name)
         self.__nGFNames = len(self.__gaussFieldNames)
-
+        self.__nJobs = len(self.__jobNames)
         # Check that gauss field param names are unique
         if not self.__checkUniqueGaussFieldNames():
-            sys.exit()
+            raise ValueError(
+                'In model file {} in command GaussFieldJobNames.\n'
+                'Specified Gaussian field names are not unique'.format(self.__modelFileName)
+            )
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Number of gauss field jobs: ' + str(self.__nJobs))
+            print('Debug output: Number of gauss field names: ' + str(self.__nGFNames))
+            print('Debug output: Job names:')
+            print(repr(self.__jobNames))
+            print('Debug output: Gauss field names per job: ')
+            print(repr(self.__gaussFieldNamesPerJob))
 
-        return
+    def initialize(self, gfJobNames, gfNamesPerJob, debug_level=Debug.OFF):
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Call the initialize function in ' + self.__className)
 
-    def initialize(self, gfJobNames, gfNamesPerJob):
         self.__jobNames = copy.copy(gfJobNames)
         self.__gaussFieldNamesPerJob = copy.deepcopy(gfNamesPerJob)
         if self.getNumberOfGFJobs() != len(gfNamesPerJob):
@@ -155,6 +153,7 @@ class APSGaussFieldJobs:
                 gfName = self.__gaussFieldNamesPerJob[i][j]
                 self.__gaussFieldNames.append(gfName)
         self.__nGFNames = len(self.__gaussFieldNames)
+        self.__nJobs = len(self.__jobNames)
 
     def getNumberOfGFJobs(self):
         return len(self.__jobNames)
@@ -192,13 +191,15 @@ class APSGaussFieldJobs:
             return False
 
     def checkGaussFieldName(self, gfName):
-        if gfName in self.__gaussFieldNames:
+        text = gfName.strip()
+        if text in self.__gaussFieldNames:
             return True
         else:
             return False
 
     def getGaussFieldIndx(self, jobName, gfName):
         found = 0
+        indx = -999
         for i in range(len(self.__jobNames)):
             jName = self.__jobNames[i]
             if jName == jobName:
@@ -213,8 +214,10 @@ class APSGaussFieldJobs:
         if found == 1:
             return indx
         else:
-            print('Error: Cannot find specified gauss field name for specified job name.')
-            return -999
+            raise ValueError(
+                'Cannot find specified gauss field name {} for specified job name {}'
+                ''.format(gfName, jobName)
+            )
 
     def addGaussFieldJob(self, jobName, gaussFieldParamNames):
         # Check that the job name does not exist
@@ -262,6 +265,8 @@ class APSGaussFieldJobs:
         return
 
     def XMLAddElement(self, root):
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'GaussFieldJobNames'
         elem = Element(tag)
@@ -280,7 +285,6 @@ class APSGaussFieldJobs:
                 elem = Element(tag)
                 elem.text = ' ' + gfName.strip() + ' '
                 jobElement.append(elem)
-        return
 
     def __checkUniqueGaussFieldNames(self):
         found = 0

@@ -150,9 +150,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# UI files
-src/resources/*
-
 # Additional compiled libraries, not maintained within Statoil / this project
 libraries/source
 
@@ -235,7 +232,7 @@ celerybeat-schedule
 .env
 
 # virtualenv
-.venv
+.venv/
 venv/
 ENV/
 
@@ -308,9 +305,14 @@ CMakeLists.txt.user*
 
 # End of https://www.gitignore.io/api/c,qt,git,c++,python,pycharm,qtcreator
 
+libraries/sources/
 auxillary/
+# UI files
 src/resources/
-code.tar.gz
+src/resources/ui/
+# Misc
+*.tar.*
+app
 
 *.xml
 *.dat
@@ -318,4 +320,5 @@ code.tar.gz
 *.bmp
 Thumbs.db
 *.py~
-*.png
+#*#
+*~

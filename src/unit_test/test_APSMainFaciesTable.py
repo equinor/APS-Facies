@@ -1,27 +1,24 @@
 #!/bin/env python
-import sys
 from src.APSMainFaciesTable import APSMainFaciesTable
 
 
 def test_mainFaciesTable():
     mainFaciesTable1 = APSMainFaciesTable()
     # Test example of facies table
-    mainFaciesTable1.addFacies('F1',1)
-    mainFaciesTable1.addFacies('F2',2)
-    mainFaciesTable1.addFacies('F8',8)
-    mainFaciesTable1.addFacies('F3',3)
-    mainFaciesTable1.addFacies('F7',7)
-    mainFaciesTable1.addFacies('F4',4)
-    mainFaciesTable1.addFacies('F5',5)
-    mainFaciesTable1.addFacies('F6',6)
+    mainFaciesTable1.addFacies('F1', 1)
+    mainFaciesTable1.addFacies('F2', 2)
+    mainFaciesTable1.addFacies('F8', 8)
+    mainFaciesTable1.addFacies('F3', 3)
+    mainFaciesTable1.addFacies('F7', 7)
+    mainFaciesTable1.addFacies('F4', 4)
+    mainFaciesTable1.addFacies('F5', 5)
+    mainFaciesTable1.addFacies('F6', 6)
 
     mainFaciesTable1.removeFacies('F7')
     mainFaciesTable1.removeFacies('F8')
 
-
-    mainFaciesTable2 = APSMainFaciesTable()
-    fTable = {1:'F1',2:'F2',3:'F3',4:'F4',5:'F5',6:'F6'}
-    mainFaciesTable2.initialize(fTable)
+    fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6'}
+    mainFaciesTable2 = APSMainFaciesTable(fTable=fTable)
 
     nFacies1 = mainFaciesTable1.getNFacies()
     nFacies2 = mainFaciesTable2.getNFacies()
@@ -35,7 +32,7 @@ def test_mainFaciesTable():
         fCode1 = mainFaciesTable1.getFaciesCode(i)
         fCode2 = mainFaciesTable2.getFaciesCode(i)
         assert fCode1 == fCode2
-        
+
         fCode = mainFaciesTable2.getFaciesCodeForFaciesName(fName1)
         assert fCode == fCode1
 
@@ -54,18 +51,18 @@ def test_mainFaciesTable():
         assert item1[0] == item2[0]
         assert item1[1] == item2[1]
 
-    faciesList = ['F3','F1','F4','S3','F2','F5','F6']
+    faciesList = ['F3', 'F1', 'F4', 'S3', 'F2', 'F5', 'F6']
     for i in range(len(faciesList)):
         fName = faciesList[i]
         if i != 3:
             check = mainFaciesTable1.checkWithFaciesTable(fName)
-            assert check == True
+            assert check is True
         else:
             check = mainFaciesTable1.checkWithFaciesTable(fName)
-            assert check == False
-
+            assert check is False
 
 
 # --------- Main ---------------
-test_mainFaciesTable()
 
+if __name__ == '__main__':
+    test_mainFaciesTable()

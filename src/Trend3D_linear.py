@@ -1,11 +1,11 @@
 #!/bin/env python
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 import math
-from _ast import List
 
 import numpy as np
 
 import src.generalFunctionsUsingRoxAPI as gr
+from src.utils.constants.simple import Debug
 
 
 class Trend3D_linear:
@@ -13,40 +13,35 @@ class Trend3D_linear:
     Description: Calculate linear 3D trend for specified grid cells.
     """
 
-    def __init__(self, trendRuleModel, printInfo=0):
+    def __init__(self, trendRuleModel, debug_level=Debug.OFF):
         """
         Description: Create a trend object which is used to create 3D trends using ROXAPI. 
                      Input is model parameters.
         """
         self.__className = 'Trend3D_linear'
-        if trendRuleModel == None:
+        if trendRuleModel is None:
             print('Error in ' + self.__className)
             print('Error: Programming error. Empty trendRuleModel object')
             return
 
-        self.__asimuth = trendRuleModel.getAsimuth()
+        self.__azimuth = trendRuleModel.getAzimuth()
         self.__stackingAngle = trendRuleModel.getStackingAngle()
         self.__direction = trendRuleModel.getStackingDirection()
-        self.__printInfo = printInfo
+        self.__debug_level = debug_level
 
-    def createTrend(self,
-                    gridModel,
-                    realNumber: int,
-                    nDefinedCells: int,
-                    cellIndexDefined: List[int],
-                    zoneNumber: int,
-                    simBoxThickness: float
-                    ) -> List[object]:
+    def createTrend(self, gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness):
+        """
+        Description: Create trend values for 3D grid zone using Roxar API.
+        """
         # Check if specified grid model exists and is not empty
         if gridModel.is_empty():
             text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
-            print(text)
-            values = None
+            raise IOError(text)
         else:
             grid3D = gridModel.get_grid(realNumber)
             gridIndexer = grid3D.simbox_indexer
             (nx, ny, nz) = gridIndexer.dimensions
-            [simBoxXLength, simBoxYLength, asimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__printInfo)
+            [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = gr.getGridSimBoxSize(grid3D, self.__debug_level)
 
             cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
             cellIndices = gridIndexer.get_indices(cellIndexDefined)
@@ -60,7 +55,7 @@ class Trend3D_linear:
                     n += 1
             nLayersInZone = n
             zinc = simBoxThickness / nLayersInZone
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: In ' + self.__className)
                 print('Debug output:  Zone name: ' + zoneName)
                 print('Debug output:  SimboxThickness: ' + str(simBoxThickness))
@@ -77,19 +72,21 @@ class Trend3D_linear:
 
             alpha = (90.0 - self.__stackingAngle) * np.pi / 180.0
             if self.__direction == 1:
-                theta = self.__asimuth * np.pi / 180.0
+                theta = self.__azimuth * np.pi / 180.0
             else:
-                theta = (self.__asimuth + 180.0) * np.pi / 180.0
+                theta = (self.__azimuth + 180.0) * np.pi / 180.0
 
             # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
             xComponent = math.cos(alpha) * math.sin(theta)
             yComponent = math.cos(alpha) * math.cos(theta)
             zComponent = math.sin(alpha)
 
-            if self.__printInfo >= 3:
+            if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: In ' + self.__className)
-                print('Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(
-                    zComponent) + ')')
+                print(
+                    'Debug output: normal vector: ' + '(' + str(xComponent) + ', ' + str(yComponent) + ', ' + str(
+                        zComponent) + ')'
+                )
 
             for indx in range(nDefinedCells):
                 x = cellCenterPoints[indx, 0]
@@ -117,8 +114,8 @@ class Trend3D_linear:
             minmaxDifference = maxValue - minValue
         return [minmaxDifference, valuesRescaled]
 
-    def getAsimuth(self):
-        return self.__asimuth
+    def getAzimuth(self):
+        return self.__azimuth
 
     def getStackingAngle(self):
         return self.__stackingAngle

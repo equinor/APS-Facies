@@ -1,16 +1,10 @@
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
+from typing import Dict, TypeVar
+
+T = TypeVar('T')
+U = TypeVar('U')
 
 
-def prettify(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
-
-
-def isNumber(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
+def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]:
+    return {
+        to_be_inverted[key]: key for key in to_be_inverted.keys()
+    }

@@ -1,28 +1,24 @@
 #!/bin/env python
-import sys
+import copy
 from xml.etree.ElementTree import Element
 
-import copy
 import numpy as np
 
+from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
+from src.APSGaussModel import APSGaussModel
 from src.APSMainFaciesTable import APSMainFaciesTable
-from src.Trend3D_linear_model_xml import Trend3D_linear_model
-from src.Trunc2D_Angle_Overlay_xml import Trunc2D_Angle_Overlay
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
-# To be outphased:
-from src.Trunc2D_Cubic_Multi_Overlay_xml import Trunc2D_Cubic_Multi_Overlay
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
-# Functions to draw 2D gaussian fields with linear trend and transformed to unifor distribution
-from src.simGauss2D import simGaussFieldAddTrendAndTransform
+from src.utils.constants.simple import Debug
+# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
+from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand
 
 
 class APSZoneModel:
     """
-    ----------------------------------------------------------------
-    class APSZoneModel
-    Description: Keep data structure for a zone
+    Keep data structure for a zone
 
     Public member functions:
       Constructor:  def __init__(self,ET_Tree= None,inputZoneNumber=0,
@@ -33,27 +29,37 @@ class APSZoneModel:
        def getMainLevelFacies(self)
        def getFaciesInZoneModel(self)
        def getUsedGaussFieldNames(self)
-       def getVarioType(self,gaussFieldName)
-       def getVarioTypeNumber(self,gaussFieldName)
+       def getVariogramType(self,gaussFieldName)
+       def getVariogramTypeNumber(self,gaussFieldName)
        def getMainRange(self,gaussFieldName)
        def getPerpRange(self,gaussFieldName)
        def getVertRange(self,gaussFieldName)
-       def getAnisotropyAsimuthAngle(self,gaussFieldName)
+       def getAnisotropyAzimuthAngle(self,gaussFieldName)
+       def getAnisotropyDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
        def getTrendRuleModel(self,gfName)
        def getSimBoxThickness(self)
        def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
-       def printInfo(self)
+       def debug_level(self)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
-       def getHorizonNameForVarioTrendMap(self)
+       def getHorizonNameForVariogramTrendMap(self)
 
+
+       ---  Set functions ---
+       def setZoneNumber(self,zoneNumber)
+       def setVariogramType(self,gaussFieldName,variogramType)
+       def setRange1(self,gaussFieldName,range1)
+       def setRange2(self,gaussFieldName,range2)
+       def setRange3(self,gaussFieldName,range3)
+       def setAnisotropyAzimuthAngle(self,gaussFieldName,angle)
+      def setAnisotropyDipAngle(self,gaussFieldName,angle)
 
      ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
-       def setVarioType(self,gaussFieldName,varioType)
+       def setVariogramType(self,gaussFieldName,variogramType)
        def setRange1(self,gaussFieldName,range1)
        def setRange2(self,gaussFieldName,range2)
        def setRange3(self,gaussFieldName,range3)
@@ -63,22 +69,25 @@ class APSZoneModel:
        def setSeedForPreviewSimulation(self)
        def setMainFaciesTable(self,mainFaciesTable)
        def setSimBoxThickness(self,thickness)
-       def updateGaussFieldParam(self,gfName,varioType,range1,range2,range3,angle,power,
+       def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,angle,power,
                                  relStdDev=0.0,trendRuleModelObj=None)
        def removeGaussFieldParam(self,gfName)
        def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
        def removeFaciesWithProbForZone(self,fName)
        def setTruncRule(self,truncRuleObj)
-       def setHorizonNameForVarioTrendMap(self,horizonNameForVarioTrendMap)
+       def setHorizonNameForVariogramTrendMap(self,horizonNameForVariogramTrendMap)
 
      ---  Calculate function ---
        def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
-       def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
-                                              gridXSize,gridYSize,gridAsimuthAngle)
+       def simGaussFieldWithTrendAndTransform(
+           self, nGaussFields, gridDimNx, gridDimNy,
+           gridXSize, gridYSize, gridAzimuthAngle
+        )
 
 
      ---  write XML tree ---
        def XMLAddElement(self,parent)
+       def getZoneNumber(self)
 
      --- Check functions ---
        def hasFacies(self,fName)
@@ -86,465 +95,194 @@ class APSZoneModel:
 
     Private member functions:
        def __interpretXMLTree(ET_Tree)
-       def __isVarioTypeOK(self,varioType)
+       def __isVariogramTypeOK(self,variogramType)
        def __checkConstProbValuesAndNormalize(self)
        def __getGFIndex(self,gfName)
-       def __updateGaussFieldVarioParam(self,gfName,varioType,range1,range2,range3,angle,power)
+       def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
        def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
-
-    ----------------------------------------------------------------
     """
 
-    def __init__(self, ET_Tree=None, inputZoneNumber=0, inputMainLevelFacies=None, modelFileName=None):
+    def __init__(
+            self, ET_Tree=None, zoneNumber=0, inputMainLevelFacies=None, modelFileName=None,
+            useConstProb=False, simBoxThickness=10.0, horizonNameForVariogramTrendMap=None,
+            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None, faciesLevel=1,
+            debug_level=Debug.OFF, keyResolution=100
+    ):
+        self.__className = self.__class__.__name__
         # Local variables
-        self.__printInfo = 0
-        self.__useConstProb = 0
-        self.__className = 'APSZoneModel'
-        self.__modelFileName = modelFileName
-        self.__simBoxThickness = 10.0
-
-        # List of facies name in the zone model with associated probability cube names
-        # and list of facies names should always be of the same length and kept in sync.
-        self.__faciesProbForZoneModel = []
-        self.__faciesInZoneModel = []
-
-        # List of gauss field data is split into one list for variogram data and one list for trend data
-        # but they should always be of the same length and kept in sync, 
-        # but trend data in the list can be disabled.
-        self.__trendForGFModel = []
-        self.__varioForGFModel = []
-
-        self.__seedForPreviewForGFModel = []
-        self.__mainFaciesTable = None
-        self.__truncRule = None
-        self.__zoneNumber = inputZoneNumber
-        self.__faciesLevel = 1
+        self.__zoneNumber = zoneNumber
         self.__mainLevelFacies = inputMainLevelFacies
-        self.__horizonNameForVarioTrendMap = None
+        self.__useConstProb = useConstProb
+        self.__simBoxThickness = simBoxThickness
 
-        # Index values for varioForGFModel list elements
-        # item in list: [name,type,range1,range2,range3,angle,power]
-        self.__GNAME = 0
-        self.__GTYPE = 1
-        self.__GRANGE1 = 2
-        self.__GRANGE2 = 3
-        self.__GRANGE3 = 4
-        self.__GANGLE = 5
-        self.__GPOWER = 6
+        self.__faciesProbObject = faciesProbObject
+        self.__gaussModelObject = gaussModelObject
 
-        # Index values for faciesProbForZoneModel list elements
-        # item in list: [name,probName]
-        self.__FNAME = 0
-        self.__FPROB = 1
-
-        # Index values for trendForGFModel  list elements
-        # item in list: [name,useTrend,trendRuleModelObj,relStdDev]
-        self.__TNAME = 0
-        self.__TUSE = 1
-        self.__TOBJ = 2
-        self.__TSTD = 3
-
-        # Index values for seedForPreviewForGFModel
-        # item in list: [name,value]
-        self.__SNAME = 0
-        self.__SVALUE = 1
+        self.__truncRule = truncRuleObject
+        self.__faciesLevel = faciesLevel
+        self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
+        self.__keyResolution = keyResolution
+        self.__debug_level = debug_level
 
         if ET_Tree is not None:
-            self.__interpretXMLTree(ET_Tree)
+            self.__interpretXMLTree(ET_Tree, modelFileName)
 
-    # End __init__
-
-    def __interpretXMLTree(self, ET_Tree):
+    def __interpretXMLTree(self, ET_Tree, modelFileName):
         #  Get root of xml tree for model specification
         root = ET_Tree.getroot()
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
-        obj = root.find(kw)
-        if obj == None:
-            # Default value is set
-            self.__printInfo = 1
-        else:
-            text = obj.text
-            self.__printInfo = int(text.strip())
+        self.__debug_level = getIntCommand(root, kw, defaultValue=1, required=False)
 
-        if self.__printInfo >= 3:
-            print(' ')
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('')
             print('Debug output: Call init ' + self.__className)
 
-        mainFaciesTable = APSMainFaciesTable(ET_Tree, self.__modelFileName)
-        gaussFieldJobs = APSGaussFieldJobs(ET_Tree, self.__modelFileName)
-        self.__mainFaciesTable = mainFaciesTable
+        # Optimization parameters
+        obj = getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
+        if obj is not None:
+            useMemoization = getIntCommand(obj, 'UseMemoization', 'Optimization',
+                                           minValue=0, maxValue=1, defaultValue=1,
+                                           modelFile=modelFileName, required=False)
 
-        err = 0
-        zoneModels = root.find('ZoneModels')
+            nIntervalForProbabilityInMemoizationKey = getIntCommand(obj, 'MemoizationResolution', 'Optimization',
+                                                                    minValue=100, maxValue=10000,
+                                                                    defaultValue=100, modelFile=modelFileName,
+                                                                    required=False)
+            if useMemoization == 1:
+                self.__keyResolution = nIntervalForProbabilityInMemoizationKey
+            else:
+                self.__keyResolution = 0
+
+        mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
+        gaussFieldJobs = APSGaussFieldJobs(ET_Tree, modelFileName)
+
+        zoneModels = getKeyword(root, 'ZoneModels', 'Root', modelFile=modelFileName)
         for zone in zoneModels.findall('Zone'):
             zoneNumber = int(zone.get('number'))
             mainLevelFacies = zone.get('mainLevelFacies')
             if zoneNumber == self.__zoneNumber and mainLevelFacies == self.__mainLevelFacies:
-                if mainLevelFacies == None:
+                if mainLevelFacies is None:
                     self.__faciesLevel = 1
                 else:
                     self.__faciesLevel = 2
 
-                obj = zone.find('UseConstProb')
-                if obj == None:
-                    raise NameError(
-                        'Error when reading model file: {file_name}\n'
-                        'Error: Missing keyword UseConstProb under keyword Zone'
-                        ''.format(file_name=self.__modelFileName)
-                    )
-                text = obj.text
-                self.__useConstProb = int(text.strip())
+                useConstProb = getIntCommand(zone, 'UseConstProb', 'Zone', modelFile=modelFileName)
+                self.__useConstProb = useConstProb
 
                 kw = 'SimBoxThickness'
-                obj = zone.find(kw)
-                if obj != None:
-                    text = obj.text
-                    self.__simBoxThickness = float(text.strip())
-                    if self.__simBoxThickness <= 0.0:
-                        raise ValueError(
-                            'Error in ' + self.__className +'\n'
-                            'Error: In keyword: ' + kw + '\n'
-                            'Error: Specified 0 or negative simulation box thickness for zone ' + str(zoneNumber)
-                            )
-                else:
-                    raise ValueError(
-                        'Error in ' + self.__className + '\n'
-                        'Error: Missing keyword: ' + kw + ' in zone number ' + str(zoneNumber)
-                        )
-
+                simBoxThickness = getFloatCommand(zone, kw, 'Zone', minValue=0.0, modelFile=modelFileName)
+                self.__simBoxThickness = simBoxThickness
 
                 kw = 'HorizonNameVarioTrend'
-                refSurfObj = zone.find(kw)
-                if refSurfObj == None:
-                    print('Warning: Keyword: ' + kw + ' is not specified.')
-                    print('Warning: Can not update variogram asimuth angle without using trend maps.')
-                else:
-                    text = refSurfObj.text
-                    self.__horizonNameForVarioTrendMap = copy.copy(text.strip())
+                mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName)
+                self.__horizonNameForVariogramTrendMap = mapName
 
-
-
-                if self.__printInfo >= 3:
+                if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: From APSZoneModel: ZoneNumber: ' + str(zoneNumber))
                     print('Debug output: From APSZoneModel: mainLevelFacies: ' + str(mainLevelFacies))
                     print('Debug output: From APSZoneModel: useConstProb: ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
                     text = 'Debug output: From APSZoneModel: Horizon name to be used for saving \n'
-                    text = text + '              asimuth variogram trend for this zone: '
-                    text = text + str(self.__horizonNameForVarioTrendMap)
+                    text += '              azimuth variogram trend for this zone: '
+                    text += str(self.__horizonNameForVariogramTrendMap)
                     print(text)
 
-                # Read Facies probability cubes for current zone model
-                obj = zone.find('FaciesProbForModel')
-                if obj == None:
+                # Read facies probabilities
+                self.__faciesProbObject = APSFaciesProb(
+                    zone, mainFaciesTable, modelFileName,
+                    self.__debug_level, self.__useConstProb, self.__zoneNumber
+                )
+                # Read Gauss Fields model parameters
+                self.__gaussModelObject = APSGaussModel(
+                    zone, mainFaciesTable, gaussFieldJobs, modelFileName,
+                    self.__debug_level, self.__zoneNumber, self.__simBoxThickness
+                )
+
+                # Read truncation rule for zone model
+                trRule = zone.find('TruncationRule')
+                if trRule is None:
                     raise NameError(
-                        'Error when reading model file: ' + self.__modelFileName + '\n'
-                        'Error: Missing keyword FaciesProbForModel under keyword Zone'
+                        'Error when reading model file: {modelName}\n'
+                        'Error: Missing keyword TruncationRule '
+                        'under keyword Zone'
+                        ''.format(modelName=modelFileName)
                     )
+                truncRuleName = trRule.get('name')
+                if self.__debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: TruncRuleName: ' + truncRuleName)
 
-                facForModel = obj
+                nGaussFieldInModel = int(trRule.get('nGFields'))
+                nGaussFieldInZone = self.__gaussModelObject.getNGaussFields()
+                if nGaussFieldInModel > nGaussFieldInZone:
+                    raise ValueError(
+                        'Error: In {className}\n'
+                        'Error: Number of specified RMS gaussian field 3D parameters in truncation rule {nGFTruncRule}\n'
+                        '       is larger than number of gauss fields {nGFModel} specified for the zone'
+                        ''.format(
+                            className=self.__className,
+                            nGFTruncRule=str(nGaussFieldInModel),
+                            nGFModel=truncRuleName
+                        )
+                    )
+                else:
+                    faciesInZone = self.__faciesProbObject.getFaciesInZoneModel()
+                    gaussFieldsInZone = self.__gaussModelObject.getUsedGaussFieldNames()
+                    if truncRuleName == 'Trunc3D_Bayfill':
+                        self.__truncRule = Trunc3D_bayfill(
+                            trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                            self.__debug_level, modelFileName
+                        )
 
-                for f in facForModel.findall('Facies'):
-                    text = f.get('name')
-                    name = text.strip()
-                    if mainFaciesTable.checkWithFaciesTable(name):
-                        text = f.find('ProbCube').text
-                        probCubeName = text.strip()
-                        if self.__useConstProb == 1:
-                            if not isNumber(probCubeName):
-                                raise ValueError(
-                                    'Error in ' + self.__className + '\n'
-                                    'Error in keyword: FaciesProbForModel for facies name: ' + name +'\n'
-                                    '                  The specified probability is not a number even though '
-                                    'useConstProb keyword is set to 1.'
-                                )
-                        else:
-                            if isNumber(probCubeName):
-                                raise ValueError(
-                                    'Error in ' + self.__className + '\n'
-                                    'Error in keyword: FaciesProbForModel for facies name: ' + name +'\n'
-                                    '                  The specified probability is not an RMS parameter name even though '
-                                    'useConstProb keyword is set to 0.'
-                                )
-
-                        item = [name, probCubeName]
-                        self.__faciesProbForZoneModel.append(item)
-                        self.__faciesInZoneModel.append(name)
+                    elif truncRuleName == 'Trunc2D_Angle':
+                        self.__truncRule = Trunc2D_Angle(
+                            trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                            self.__keyResolution,
+                            self.__debug_level, modelFileName, self.__zoneNumber
+                        )
+                    elif truncRuleName == 'Trunc2D_Cubic':
+                        self.__truncRule = Trunc2D_Cubic(
+                            trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                            self.__keyResolution,
+                            self.__debug_level, modelFileName, self.__zoneNumber
+                        )
                     else:
                         raise NameError(
-                            'Error in ' + self.__className + '\n'
-                            'Error in keyword: FaciesProbForModel. Facies name: ' + name +'\n'
-                            '                  is not defined in main facies table in command APSMainFaciesTable'
+                            'Error in {className}\n'
+                            'Error: Specified truncation rule name: {truncationRule}\n'
+                            '       is not implemented.'
+                            ''.format(className=self.__className, truncationRule=truncRuleName)
                         )
 
-                if self.__faciesProbForZoneModel == None:
-                    raise NameError(
-                        'Error when reading model file: ' + self.__modelFileName + '\n'
-                        'Error: Missing keyword Facies under keyword FaciesProbForModel'
-                    )
-
-                self.__checkConstProbValuesAndNormalize()
-
-                if self.__printInfo >= 3:
-                    print('Debug output: From APSZoneModel: Facies prob for current zone model: ')
-                    print(repr(self.__faciesProbForZoneModel))
-
-                # Read Gauss field models for current zone 
-                for gf in zone.findall('GaussField'):
-                    name = gf.get('name')
-                    if gaussFieldJobs.checkGaussFieldName(name):
-                        # Read variogram for current GF
-                        vario = gf.find('Vario')
-                        if vario == None:
-                            err = 1
-                        else:
-                            varioType = vario.get('name')
-                            if not self.__isVarioTypeOK(varioType):
-                                err = 1
-
-                            obj = vario.find('MainRange')
-                            if obj == None:
-                                err = 1
-                            else:
-                                text = obj.text
-                                range1 = float(text.strip())
-                            obj = vario.find('PerpRange')
-                            if obj == None:
-                                err = 1
-                            else:
-                                text = obj.text
-                                range2 = float(text.strip())
-                            obj = vario.find('VertRange')
-                            if obj == None:
-                                err = 1
-                            else:
-                                text = obj.text
-                                range3 = float(text.strip())
-
-                            obj = vario.find('Angle')
-                            if obj == None:
-                                err = 1
-                            else:
-                                text = obj.text
-                                angle = float(text.strip())
-
-                            power = 1.0
-                            if varioType == 'GENERAL_EXPONENTIAL':
-                                p = vario.find('Power')
-                                if p != None:
-                                    text = p.text
-                                    power = float(text.strip())
-                                else:
-                                    text = 'Error: In class ' + self.__className
-                                    text = text + 'Variograms specified as GENERAL_EXPONENTIAL lack specification of exponent'
-                                    print(text)
-                                    err = 1
-                                    power = -999
-
-                        self.__varioForGFModel.append([name, varioType, range1, range2, range3, angle, power])
-
-                        # Read trend model for current GF
-
-                        trendObjXML = gf.find('Trend')
-                        trendRuleModelObj = None
-                        if trendObjXML != None:
-                            if self.__printInfo >= 3:
-                                print('Debug output: Read trend')
-                            useTrend = 1
-
-                            if self.__simBoxThickness <= 0.0:
-                                print('Warning when reading model file: ' + self.__modelFileName)
-                                print('Warning: Missing keyword SimBoxThickness under keyword Zone')
-                                print('Warning: Use a default thickness of 10.0 m')
-                                self.__simBoxThickness = 10.0
-
-                            trendName = trendObjXML.get('name')
-                            if trendName == 'Linear3D':
-                                trendRuleModelObj = Trend3D_linear_model(
-                                    trendObjXML, self.__printInfo,
-                                    self.__modelFileName
-                                )
-                            else:
-                                raise NameError(
-                                    'Error in ' + self.__className + '\n'
-                                    'Error: Specified name of trend function ' + trendName + ' is not implemented.'
-                                )
-                        else:
-                            if self.__printInfo >= 3:
-                                print('Debug output: No trend is specified')
-                            useTrend = 0
-                            trendRuleModelObj = None
-                            relStdDev = 0
-
-                        # Read RelstdDev
-                        if useTrend == 1:
-                            kw = 'RelStdDev'
-                            relstdObj = gf.find(kw)
-                            if relstdObj == None:
-                                relStdDev = 0.0
-                                raise ValueError(
-                                    'Error in ' + self.__className + '\n'
-                                    'Error: Missing keyword ' + kw
-                                )
-                            else:
-                                text = relstdObj.text
-                                relStdDev = float(text.strip())
-
-                        self.__trendForGFModel.append([name, useTrend, trendRuleModelObj, relStdDev])
-
-                        # Read preview seed for current GF
-                        obj = gf.find('SeedForPreview')
-                        if obj != None:
-                            text = obj.text
-                            seed = int(text.strip())
-                            item = [name, seed]
-                            self.__seedForPreviewForGFModel.append(item)
-                    else:
-                        raise NameError(
-                            'Error in ' + self.__className + '\n'
-                            'Error in zone: ' + str(zoneNumber) +'\n'
-                            'Error: Keyword GaussField has specified non-existing gauss field parameter name: ' + name +'\n'
-                            'Error: This parameter name is not specified in command GaussFieldJobs.'
-                        )
-
-                # End loop over gauss fields for current zone model
-                if self.__varioForGFModel == None:
-                    raise NameError(
-                        'Error when reading model file: ' + self.__modelFileName + '\n'
-                        'Error: Missing keyword GaussField under keyword Zone'
-                    )
-
-                if err == 0:
-                    if self.__printInfo >= 3:
-                        print('Debug output: Gauss field variogram parameter for current zone model:')
-                        print(repr(self.__varioForGFModel))
-
-                        print('Debug output:Gauss field trend parameter for current zone model:')
-                        print(repr(self.__trendForGFModel))
-
-                        print('Debug output: Gauss field preview seed for current zone model:')
-                        print(repr(self.__seedForPreviewForGFModel))
-
-                    # Read truncation rule for zone model
-                    trRule = zone.find('TruncationRule')
-                    if trRule == None:
-                        raise NameError(
-                            'Error when reading model file: ' + self.__modelFileName +'\n'
-                            'Error: Missing keyword TruncationRule under keyword Zone'
-                        )
-                    truncRuleName = trRule.get('name')
-                    if self.__printInfo >= 3:
-                        print('Debug output: TruncRuleName: ' + truncRuleName)
-
-                    nGaussFieldInModel = int(trRule.get('nGFields'))
-                    if nGaussFieldInModel != len(self.__varioForGFModel):
-                        raise ValueError(
-                            'Error: In {0}\n'
-                            'Error: Number of specified RMS gaussian field 3D parameters: {1}\n'
-                            '       does not match truncation number of gaussian fields in truncation rule {2} which is {3}'
-                            ''.format(self.__className, str(nGaussFieldInModel), truncRuleName,
-                                      str(len(self.__varioForGFModel)))
-                        )
-                    else:
-                        faciesInZone = self.__faciesInZoneModel
-                        if truncRuleName == 'Trunc3D_Bayfill':
-                            self.__truncRule = Trunc3D_bayfill(
-                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                self.__printInfo, self.__modelFileName
-                            )
-
-
-                        elif truncRuleName == 'Trunc2D_Angle':
-                            self.__truncRule = Trunc2D_Angle(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                                             self.__printInfo, self.__modelFileName)
-
-                        elif truncRuleName == 'Trunc2D_Angle_Overlay':
-                            self.__truncRule = Trunc2D_Angle_Overlay(
-                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                self.__printInfo, self.__modelFileName
-                            )
-                    
-                        elif truncRuleName == 'Trunc2D_Cubic':
-                            self.__truncRule = Trunc2D_Cubic(trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                                             self.__printInfo, self.__modelFileName)
-
-                        elif truncRuleName == 'Trunc2D_Cubic_Multi_Overlay':
-                            # This is to be phases out. Is replaced by Trunc2D_Cubic
-                            self.__truncRule = Trunc2D_Cubic_Multi_Overlay(
-                                trRule, mainFaciesTable, faciesInZone, nGaussFieldInModel,
-                                self.__printInfo, self.__modelFileName
-                            )
-                        else:
-                            raise NameError(
-                                'Error in ' + self.__className + '\n'
-                                'Error: Specified truncation rule name: ' + truncRuleName +'\n'
-                                '       is not implemented.'
-                            )
-
-                        if self.__printInfo >= 3:
-                            text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
-                            text = text + self.__truncRule.getClassName()
-                            print(text)
-                            print('Debug output: APSZoneModel: Facies in truncation rule: ')
-                            print(repr(self.__truncRule.getFaciesInTruncRule()))
-
+                    if self.__debug_level >= Debug.VERY_VERBOSE:
+                        text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
+                        text += self.__truncRule.getClassName()
+                        print(text)
+                        print('Debug output: APSZoneModel: Facies in truncation rule: ')
+                        print(repr(self.__truncRule.getFaciesInTruncRule()))
                 break
-            # End if zone number
+                # End if zone number
         # End for zone
-        if err == 1:
-            raise ValueError('Some errors occured')
-        return
-
-    def initialize(self, inputZoneNumber, mainFaciesTable, truncRule, faciesNames, probNames, gaussNames):
-        # Set default values
-        self.__zoneNumber = inputZoneNumber
-        self.__printInfo = 0
-        self.__useConstProb = 0
-        self.__simBoxThickness = 10.0
-        self.__mainFaciesTable = mainFaciesTable
-        self.__truncRule = Trunc1D.Trunc1D()
-        self.__truncRule.initialize(mainFaciesTable, faciesNames)
-
-        self.updateFaciesWithProbForZone(faciesNames, probNames)
-        for gfName in gaussNames:
-            varioType = 'GENERAL_EXPONENTIAL'
-            range1 = 1000.0
-            range2 = 1000.0
-            range3 = 1.0
-            angle = 0.0
-            power = 1.8
-            self.updateGaussFieldParam(gfName, varioType, range1, range2, range3, angle, power)
 
         return
 
     def hasFacies(self, fName):
-        n = len(self.__faciesProbForZoneModel)
-        found = 0
-        for i in range(n):
-            item = self.__faciesProbForZoneModel[i]
-            faciesName = item[self.__FNAME]
-            if fName == faciesName:
-                found = 1
-                break
-        if found == 0:
-            return False
-        else:
-            return True
+        return self.__faciesProbObject.hasFacies(fName)
 
-    def __isVarioTypeOK(self, varioType):
+    @staticmethod
+    def __isVariogramTypeOK(variogramType):
         isOK = 0
-        if varioType == 'SPHERICAL':
+        if variogramType == 'SPHERICAL':
             isOK = 1
-        elif varioType == 'EXPONENTIAL':
+        elif variogramType == 'EXPONENTIAL':
             isOK = 1
-        elif varioType == 'GAUSSIAN':
+        elif variogramType == 'GAUSSIAN':
             isOK = 1
-        elif varioType == 'GENERAL_EXPONENTIAL':
+        elif variogramType == 'GENERAL_EXPONENTIAL':
             isOK = 1
         if isOK == 0:
-            print('Error: Specified variogram : ' + varioType + ' is not implemented')
+            print('Error: Specified variogram : ' + variogramType + ' is not implemented')
             print('Error: Allowed variograms are: ')
             print('       SPHERICAL')
             print('       EXPONENTIAL')
@@ -556,7 +294,7 @@ class APSZoneModel:
     def getZoneNumber(self):
         return self.__zoneNumber
 
-    def useConstProb(self):
+    def useConstProb(self) -> bool:
         return self.__useConstProb
 
     def isMainLevelModel(self):
@@ -569,182 +307,43 @@ class APSZoneModel:
         return copy.copy(self.__mainLevelFacies)
 
     def getFaciesInZoneModel(self):
-        return copy.copy(self.__faciesInZoneModel)
+        return self.__faciesProbObject.getFaciesInZoneModel()
 
     def getUsedGaussFieldNames(self):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            gfNames.append(name)
-        return gfNames
+        return self.__gaussModelObject.getUsedGaussFieldNames()
 
-    def getVarioType(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle]
-                varioType = item[self.__GTYPE]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
-            varioType = None
-        return copy.copy(varioType)
+    def getVariogramType(self, gaussFieldName):
+        return copy.copy(self.__gaussModelObject.getVariogramType(gaussFieldName))
 
-    def getVarioTypeNumber(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle]
-                varioType = item[self.__GTYPE]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
-            varioType = None
-
-        # NOTE: This table must be consistent with simGauss2D
-        if varioType == 'SPHERICAL':
-            varioTypeNumber = 1
-        elif varioType == 'EXPONENTIAL':
-            varioTypeNumber = 2
-        elif varioType == 'GAUSSIAN':
-            varioTypeNumber = 3
-        elif varioType == 'GENERAL_EXPONENTIAL':
-            varioTypeNumber = 4
-        else:
-            # Undefined
-            varioTypeNumber = 0
-        return varioTypeNumber
+    def getVariogramTypeNumber(self, gaussFieldName):
+        return self.__gaussModelObject.getVariogramTypeNumber(gaussFieldName)
 
     def getMainRange(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        r = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle]
-                r = item[self.__GRANGE1]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
-
-        return r
+        return self.__gaussModelObject.getMainRange(gaussFieldName)
 
     def getPerpRange(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        r = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle]
-                r = item[self.__GRANGE2]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
-
-        return r
+        return self.__gaussModelObject.getPerpRange(gaussFieldName)
 
     def getVertRange(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        r = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle]
-                r = item[self.__GRANGE3]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
+        return self.__gaussModelObject.getVertRange(gaussFieldName)
 
-        return r
+    def getAnisotropyAzimuthAngle(self, gaussFieldName):
+        return self.__gaussModelObject.getAnisotropyAzimuthAngle(gaussFieldName)
 
-    def getAnisotropyAsimuthAngle(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        r = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle]
-                r = item[self.__GANGLE]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
-
-        return r
+    def getAnisotropyDipAngle(self, gaussFieldName):
+        return self.__gaussModelObject.getAnisotropyDipAngle(gaussFieldName)
 
     def getPower(self, gaussFieldName):
-        gfNames = []
-        nGF = len(self.__varioForGFModel)
-        found = 0
-        r = 0
-        for i in range(nGF):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gaussFieldName:
-                # item = [name,varioType,range1,range2,range3,angle,power]
-                r = item[self.__GPOWER]
-                found = 1
-                break
-        if found == 0:
-            print('Error: Variogram data for gauss field name: ' + gaussFieldName + ' is not found.')
-
-        return r
+        return self.__gaussModelObject.getPower(gaussFieldName)
 
     def getTruncRule(self):
         return self.__truncRule
 
     def getTrendRuleModel(self, gfName):
-        found = 0
-        for item in self.__trendForGFModel:
-            name = item[self.__TNAME]
-            if name == gfName:
-                found = 1
-                useTrend = item[self.__TUSE]
-                trendModelObj = item[self.__TOBJ]
-                relStdDev = item[self.__TSTD]
-        if found == 1:
-            return [useTrend, trendModelObj, relStdDev]
-        else:
-            return None
+        return self.__gaussModelObject.getTrendRuleModel(gfName)
 
     def getTrendRuleModelObject(self, gfName):
-        found = 0
-        for item in self.__trendForGFModel:
-            name = item[self.__TNAME]
-            if name == gfName:
-                found = 1
-                trendModelObj = item[self.__TOBJ]
-        if found == 1:
-            return trendModelObj
-        else:
-            return None
+        return self.__gaussModelObject.getTrendRuleModelObject(gfName)
 
     def getSimBoxThickness(self):
         return self.__simBoxThickness
@@ -759,173 +358,52 @@ class APSZoneModel:
         if not self.__truncRule.useConstTruncModelParam():
             self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
 
-    def printInfo(self):
-        return self.__printInfo
+    def get_debug_level(self):
+        return self.__debug_level
 
-    def getHorizonNameForVarioTrendMap(self):
-        return copy.copy(self.__horizonNameForVarioTrendMap)
+    def getHorizonNameForVariogramTrendMap(self):
+        return copy.copy(self.__horizonNameForVariogramTrendMap)
 
     def getProbParamName(self, fName):
-        found = 0
-        for item in self.__faciesProbForZoneModel:
-            fN = item[self.__FNAME]
-            if fN == fName:
-                probCubeName = item[self.__FPROB]
-                found = 1
-                break
-        if found == 0:
-            return None
-        else:
-            return copy.copy(probCubeName)
+        return self.__faciesProbObject.getProbParamName(fName)
 
     def getAllProbParamForZone(self):
-        found = 0
-        allProbParamList = []
-        for item in self.__faciesProbForZoneModel:
-            probParamName = item[self.__FPROB]
-            if self.__useConstProb == 0:
-                if not probParamName in allProbParamList:
-                    allProbParamList.append(probParamName)
-        return allProbParamList
+        return self.__faciesProbObject.getAllProbParamForZone()
 
     def getConstProbValue(self, fName):
-        if self.__useConstProb == 1:
-            found = 0
-            for item in self.__faciesProbForZoneModel:
-                fN = item[self.__FNAME]
-                if fN == fName:
-                    probCubeName = item[self.__FPROB]
-                    found = 1
-                    break
-            if found == 0:
-                print('Error: Probability not found for facies: ' + fName)
-                return -999
-            else:
-                return float(probCubeName)
-        else:
-            print('Error: Can not call getConstProbValue when useConstProb = 0')
-            return -999
-
-    def __getGFIndex(self, gfName):
-        indx = -999
-        for i in range(len(self.__varioForGFModel)):
-            item = self.__varioForGFModel[i]
-            gf = item[self.__GNAME]
-            if gf == gfName:
-                indx = i
-                break
-        return indx
+        return self.__faciesProbObject.getConstProbValue(fName)
 
     def setZoneNumber(self, zoneNumber):
         self.__zoneNumber = zoneNumber
         return
 
-    def setVarioType(self, gaussFieldName, varioType):
-        err = 0
-        if self.__isVarioTypeOK(varioType):
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
-                item[self.__GTYPE] = varioType
-            else:
-                err = 1
-        else:
-            err = 1
-        return err
+    def setVariogramType(self, gaussFieldName, variogramType):
+        return self.__gaussModelObject.setVariogramType(gaussFieldName, variogramType)
 
-    def setRange1(self, gaussFieldName, range1):
-        err = 0
-        if range1 < 0.0:
-            err = 1
-        else:
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
-                item[self.__GRANGE1] = range1
-            else:
-                err = 1
-        return err
+    def setMainRange(self, gaussFieldName, range1):
+        return self.__gaussModelObject.setMainRange(gaussFieldName, range1)
 
-    def setRange2(self, gaussFieldName, range2):
-        err = 0
-        if range2 < 0.0:
-            err = 1
-        else:
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
-                item[self.__GRANGE2] = range2
-            else:
-                err = 1
-        return err
+    def setPerpRange(self, gaussFieldName, range2):
+        return self.__gaussModelObject.setPerpRange(gaussFieldName, range2)
 
-    def setRange3(self, gaussFieldName, range3):
-        err = 0
-        if range3 < 0.0:
-            err = 1
-        else:
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
-                item[self.__GRANGE3] = range3
-            else:
-                err = 1
-        return err
+    def setVertRange(self, gaussFieldName, range3):
+        return self.__gaussModelObject.setVertRange(gaussFieldName, range3)
 
-    def setAngle(self, gaussFieldName, angle):
-        err = 0
-        gfList = self.getUsedGaussFieldNames()
-        if gaussFieldName in gfList:
-            indx = self.__getGFIndex(gaussFieldName)
-            item = self.__varioForGFModel[indx]
-            item[self.__GANGLE] = angle
-        else:
-            err = 1
-        return err
+    def setAnisotropyAzimuthAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setAnisotropyAzimuthAngle(gaussFieldName, angle)
+
+    def setAnisotropyDipAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setAnisotropyDipAngle(gaussFieldName, angle)
 
     def setPower(self, gaussFieldName, power):
-        err = 0
-        if power < 1.0 or power > 2.0:
-            err = 1
-        else:
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__varioForGFModel[indx]
-                item[self.__GPOWER] = power
-            else:
-                err = 1
-        return err
-
-    def setMainFaciesTable(self, mainFaciesTable):
-        err = 0
-        if mainFaciesTable == None:
-            err = 1
-        else:
-            self.__mainFaciesTable = mainFaciesTable
-        return err
+        return self.__gaussModelObject.setPower(gaussFieldName, power)
 
     def setUseConstProb(self, useConstProb):
         self.__useConstProb = useConstProb
         return
 
     def setSeedForPreviewSimulation(self, gfName, seed):
-        err = 0
-        found = 0
-        for i in range(len(self.__seedForPreviewForGFModel)):
-            item = self.__seedForPreviewForGFModel[i]
-            name = item[self.__SNAME]
-            if name == gfName:
-                found = 1
-                item[self.__SVALUE] = seed
-                break
-        if found == 0:
-            err = 1
-        return err
+        return self.__gaussModelObject.setSeedForPreviewSimulation(gfName, seed)
 
     def setSimBoxThickness(self, thickness):
         err = 0
@@ -935,190 +413,39 @@ class APSZoneModel:
         return err
 
     def updateFaciesWithProbForZone(self, faciesList, faciesProbList):
-        err = 0
-        # Check that facies is defined
-        for fName in faciesList:
-            if not self.__mainFaciesTable.checkWithFaciesTable(fName):
-                err = 1
-                break
-        if len(faciesList) != len(faciesProbList):
-            err = 1
-
-        for i in range(len(faciesList)):
-            fName = faciesList[i]
-            fProbName = faciesProbList[i]
-            found = 0
-            for item in self.__faciesProbForZoneModel:
-                name = item[self.__FNAME]
-                if name == fName:
-                    # Update facies probability cube name
-                    found = 1
-                    item[self.__FPROB] = copy.copy(fProbName)
-                    break
-            if found == 0:
-                # insert new facies
-                item = [fName, fProbName]
-                self.__faciesProbForZoneModel.append(item)
-                self.__faciesInZoneModel.append(fName)
-        return err
+        return self.__faciesProbObject.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
     def removeFaciesWithProbForZone(self, fName):
-        indx = -999
-        for i in range(len(self.__faciesProbForZoneModel)):
-            item = self.__faciesProbForZoneModel[i]
-            name = item[self.__FNAME]
-            if fName == name:
-                indx = i
-                break
-        if indx != -999:
-            # Remove data for this facies
-            self.__faciesProbForZoneModel.pop(indx)
-            self.__faciesInZoneModel.pop(indx)
-        return
+        self.__faciesProbObject.removeFaciesWithProbForZone(fName)
 
-    def updateGaussFieldParam(self, gfName, varioType, range1, range2, range3, angle, power,
+    def updateGaussFieldParam(self, gfName, variogramType, range1, range2, range3, angle, power,
                               relStdDev=0.0, trendRuleModelObj=None):
-        # Update or create new gauss field parameter object (with trend)
-        err = 0
-        found = 0
-        if not self.__isVarioTypeOK(varioType):
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            print('Error: Undefined variogram type specified.')
-            err = 1
-        if range1 < 0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            print('Error: Correlation range < 0.0')
-            err = 1
-        if range2 < 0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            print('Error: Correlation range < 0.0')
-            err = 1
-        if range3 < 0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            print('Error: Correlation range < 0.0')
-            err = 1
-        if varioType == 'GENERAL_EXPONENTIAL':
-            if power < 1.0 or power > 2.0:
-                print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-                print('Error: Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0,2.0]')
-                err = 1
-        if relStdDev < 0.0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            print('Error: Relative standard deviation used when trends are specified is negative.')
-            err = 1
+        return self.__gaussModelObject.updateGaussFieldParam(
+            gfName, variogramType, range1, range2, range3, angle, power,
+            relStdDev, trendRuleModelObj
+        )
 
-        # Check if gauss field is already defined, then update parameters or create new
-        for item in self.__varioForGFModel:
-            name = item[self.__GNAME]
-            if name == gfName:
-                self.updateGaussFieldVarioParam(gfName, varioType, range1, range2, range3, angle, power)
-                self.updateGaussFieldTrendParam(gfName, trendRuleModelObj, relStdDev)
-                found = 1
-                break
-        if found == 0:
-            # Create data for a new gauss field for both variogram  data and trend data
-            # But data for trend parameters must be set by another function and default is set here.
-            itemVario = [gfName,varioType,range1,range2,range3,angle,power]
-            self.__varioForGFModel.append(itemVario)
-            if trendRuleModelObj == None:
-                useTrend = 0
-                relStdDev = 0.0
-            else:
-                useTrend = 1
-            itemTrend = [gfName, useTrend, trendRuleModelObj, relStdDev]
-            self.__trendForGFModel.append(itemTrend)
-            defaultSeed = 0
-            self.__seedForPreviewForGFModel.append([gfName, defaultSeed])
-        return err
-
-    def updateGaussFieldVarioParam(self, gfName, varioType, range1, range2, range3, angle, power):
-        # Update gauss field variogram parameters for existing gauss field model
-        # But it does not create new object.
-        err = 0
-        found = 0
-        # Check that gauss field is already defined, then update parameters.
-        for item in self.__varioForGFModel:
-            name = item[self.__GNAME]
-            if name == gfName:
-                found = 1
-                item[self.__GTYPE] = varioType
-                item[self.__GRANGE1] = range1
-                item[self.__GRANGE2] = range2
-                item[self.__GRANGE3] = range3
-                item[self.__GANGLE] = angle
-                item[self.__GPOWER] = power
-                break
-        if found == 0:
-            err = 1
-        return err
+    def updateGaussFieldVariogramParam(self, gfName, variogramType, range1, range2, range3, angle, power):
+        return self.__gaussModelObject.updateGaussFieldVariogramParameters(
+            gfName, variogramType, range1, range2, range3, angle, power
+        )
 
     def removeGaussFieldParam(self, gfName):
-        indx = -999
-        for i in range(len(self.__varioForGFModel)):
-            item = self.__varioForGFModel[i]
-            name = item[self.__GNAME]
-            if name == gfName:
-                indx = i
-                break
-        if indx != -999:
-            # Remove from list
-            self.__varioForGFModel.pop(indx)
-            self.__trendForGFModel.pop(indx)
-            self.__seedForPreviewForGFModel.pop(indx)
-        return
+        self.__gaussModelObject.removeGaussFieldParam(gfName)
 
     def updateGaussFieldTrendParam(self, gfName, trendRuleModelObj, relStdDev):
-        # Update trend parameters for existing trend for gauss field model
-        # But it does not create new trend object.
-        err = 0
-        if trendRuleModelObj == None:
-            err = 1
-        else:
-            # Check if gauss field is already defined, then update parameters
-            found = 0
-            for item in self.__trendForGFModel:
-                name = item[self.__TNAME]
-                if name == gfName:
-                    found = 1
-                    item[self.__TUSE] = 1
-                    item[self.__TSTD] = relStdDev
-                    item[self.__TOBJ] = trendRuleModelObj
-                    break
-            if found == 0:
-                # This gauss field was not found.
-                err = 1
-        return err
+        self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendRuleModelObj, relStdDev)
 
     def setTruncRule(self, truncRuleObj):
         err = 0
-        if truncRuleObj == None:
+        if truncRuleObj is None:
             err = 1
         else:
             self.__truncRule = truncRuleObj
         return err
 
-    def setHorizonNameForVarioTrendMap(self, horizonNameForVarioTrendMap):
-        self.__horizonNameForVarioTrendMap = copy.copy(horizonNameForVarioTrendMap)
-        return
-
-    def __checkConstProbValuesAndNormalize(self):
-        if self.__useConstProb == 1:
-            sumProb = 0.0
-            for i in range(len(self.__faciesProbForZoneModel)):
-                item = self.__faciesProbForZoneModel[i]
-                prob = float(item[self.__FPROB])
-                sumProb += prob
-            if abs(sumProb - 1.0) > 0.001:
-                print('Warning in ' + self.__className)
-                text = 'Warning: Specified constant probabilities sum up to: ' + str(sumProb)
-                text = text + ' and not 1.0 in zone: ' + str(self.__zoneNumber)
-                print(text)
-                print('Warning: The specified probabilities will be normalized.')
-                for i in range(len(self.__faciesProbForZoneModel)):
-                    item = self.__faciesProbForZoneModel[i]
-                    prob = float(item[self.__FPROB])
-                    normalizedProb = prob / sumProb
-                    item[self.__FPROB] = str(normalizedProb)
+    def setHorizonNameForVariogramTrendMap(self, horizonNameForVariogramTrendMap):
+        self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVariogramTrendMap)
         return
 
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
@@ -1130,34 +457,30 @@ class APSZoneModel:
 
         truncObject = self.__truncRule
         functionName = 'applyTruncations'
-        printInfo = self.__printInfo
-        faciesNames = self.__faciesInZoneModel
+        debug_level = self.__debug_level
+        faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
                 'Error: In class: ' + self.__className + '\n'
-                'Error: Mismatch in input to applyTruncations'
+                                                         'Error: Mismatch in input to applyTruncations'
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
         nGaussFields = len(GFAlphaList)
         faciesProb = np.zeros(nFacies, np.float32)
         volFrac = np.zeros(nFacies, np.float32)
-        if printInfo >= 2:
+        if debug_level >= Debug.VERBOSE:
             print('--- Truncation rule: ' + classNameTrunc)
 
         if self.__useConstProb == 1 and useConstTruncParam == 1:
-            # Constant probability 
-            if printInfo >= 3:
+            # Constant probability
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Using spatially constant probabilities for facies.')
 
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
-
-            if self.__printInfo >= 3:
-                print('Debug output: faciesProb:')
-                print(repr(faciesProb))
 
             alphaList = []
             for gaussFieldIndx in range(nGaussFields):
@@ -1165,7 +488,7 @@ class APSZoneModel:
                 gfName = item[NAME]
                 alphaDataArray = item[VAL]
                 alphaList.append(alphaDataArray)
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
 
             # Calculate truncation rules
@@ -1173,15 +496,16 @@ class APSZoneModel:
             truncObject.setTruncRule(faciesProb)
 
             for i in range(nDefinedCells):
-                if printInfo == 2:
+                if debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo >= 3:
+                elif debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 10000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
                 cellIndx = cellIndexDefined[i]
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
+                # The sequence is defined by the sequence they are specified in the model file.
                 alphaCoord = []
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
@@ -1193,9 +517,9 @@ class APSZoneModel:
                 volFrac[fIndx] += 1
 
         else:
-            # Varying probability from cell to cell and / or 
+            # Varying probability from cell to cell and / or
             # varying truncation parameter from cell to cell
-            if printInfo >= 3:
+            if debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Using spatially varying probabilities and/or '
                 text = text + 'truncation parameters for facies.'
                 print(text)
@@ -1205,17 +529,26 @@ class APSZoneModel:
                 item = GFAlphaList[gaussFieldIndx]
                 gfName = item[NAME]
                 alphaDataArray = item[VAL]
-                if printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
                 alphaList.append(alphaDataArray)
 
             for i in range(nDefinedCells):
-                if printInfo == 2:
-                    if np.mod(i, 500000) == 0:
-                        print('--- Calculate facies for cell number: ' + str(i))
-                elif printInfo >= 3:
+                if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 10000) == 0:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                        truncRuleName = truncObject.getClassName()
+                        if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
+                            nCalc = truncObject.getNCalcTruncMap()
+                            nLookup = truncObject.getNLookupTruncMap()
+                            print('--- Calculate facies for cell number: {}    New truncation cubes: {}    Re-used truncation cubes: {}'
+                                  ''.format(str(i), str(nCalc), str(nLookup))
+                                  )
+                        else:
+                            print('--- Calculate facies for cell number: {}'.format(str(i)))
+
+                elif debug_level == Debug.VERBOSE:
+                    if np.mod(i, 500000) == 0:
+                        print('--- Calculate facies for cell number: {}'.format(str(i)))
 
                 if self.__useConstProb == 1:
                     for f in range(nFacies):
@@ -1231,6 +564,7 @@ class APSZoneModel:
 
                 alphaCoord = []
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
+                # The sequence is defined by the sequence they are specified in the model file.
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
                     alphaCoord.append(alphaDataArray[cellIndx])
@@ -1239,281 +573,22 @@ class APSZoneModel:
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
-        if self.__printInfo >= 4:
-            if truncObject.getClassName() == 'Trunc2D_Angle':
+        if self.__debug_level >= Debug.VERBOSE:
+            truncRuleName = truncObject.getClassName()
+            if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
-                nCount = truncObject.getNCountShiftAlpha()
+
+                print(' ')
                 print(
-                    'Debug info: nCalc = ' + str(nCalc) + ' nLookup = ' + str(nLookup) + ' nCountShiftAlpha = ' + str(nCount)
+                    '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
+                    '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
+                    ''.format(truncRuleName, str(nCalc), str(nLookup))
                 )
-
-        for f in range(nFacies):
-            volFrac[f] = volFrac[f] / float(nDefinedCells)
-        return [faciesReal, volFrac]
-
-    def applyTruncationsOld(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
-
-        # GFAlphaList has items =[name,valueArray]
-        # Use NAME and VAL as index names
-        NAME = 0
-        VAL = 1
-
-        # GFAlphaList has one item for each transformed gaussian field
-        # Use ALPHA1,ALPHA2,ALPHA3 as index names
-        ALPHA1 = 0
-        ALPHA2 = 1
-        ALPHA3 = 2
-
-        truncObject = self.__truncRule
-        functionName = 'applyTruncations'
-        printInfo = self.__printInfo
-        faciesNames = self.__faciesInZoneModel
-        nFacies = len(faciesNames)
-        classNameTrunc = truncObject.getClassName()
-        if len(probDefined) != nFacies:
-            raise ValueError(
-                'Error: In class: ' + self.__className + '\n'
-                'Error: Mismatch in input to applyTruncations'
-            )
-
-        useConstTruncParam = truncObject.useConstTruncModelParam()
-        nGaussFields = len(GFAlphaList)
-        faciesProb = np.zeros(nFacies, np.float32)
-        volFrac = np.zeros(nFacies, np.float32)
-        if printInfo >= 2:
-            print('--- Truncation rule: ' + classNameTrunc)
-
-        if self.__useConstProb == 1 and useConstTruncParam == 1:
-            # Constant probability 
-            if printInfo >= 3:
-                print('Debug output: Using spatially constant probabilities for facies.')
-
-            for f in range(nFacies):
-                faciesProb[f] = probDefined[f]
-
-            if self.__printInfo >= 3:
-                print('Debug output: faciesProb:')
-                print(repr(faciesProb))
-
-            if nGaussFields == 1:
-                item = GFAlphaList[ALPHA1]
-                gfName1 = item[NAME]
-                alpha1 = item[VAL]
-
-                # Calculate truncation rules
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName1)
-                truncObject.setTruncRule(faciesProb)
-                for i in range(nDefinedCells):
-                    if printInfo == 2:
-                        if np.mod(i, 500000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-                    elif printInfo >= 3:
-                        if np.mod(i, 10000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-
-                    # One transformed gaussian field.
-                    cellIndx = cellIndexDefined[i]
-                    u1 = alpha1[cellIndx]
-                    [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1)
-                    faciesReal[cellIndx] = fCode
-                    volFrac[fIndx] += 1
-            elif nGaussFields == 2:
-                item = GFAlphaList[ALPHA1]
-                gfName1 = item[NAME]
-                alpha1 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName1)
-
-                item = GFAlphaList[ALPHA2]
-                gfName2 = item[NAME]
-                alpha2 = item[VAL]
-
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName2)
-
-                # Calculate truncation rules
-                truncObject.setTruncRule(faciesProb)
-                for i in range(nDefinedCells):
-                    if printInfo == 2:
-                        if np.mod(i, 500000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-                    elif printInfo >= 3:
-                        if np.mod(i, 10000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-
-                    # Truncate GF.  Two transformed gaussian fields.
-                    cellIndx = cellIndexDefined[i]
-                    u1 = alpha1[cellIndx]
-                    u2 = alpha2[cellIndx]
-                    [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1, u2)
-                    faciesReal[cellIndx] = fCode
-                    volFrac[fIndx] += 1
-            elif nGaussFields == 3:
-                item = GFAlphaList[ALPHA1]
-                gfName1 = item[NAME]
-                alpha1 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName1)
-
-                item = GFAlphaList[ALPHA2]
-                gfName2 = item[NAME]
-                alpha2 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName2)
-
-                item = GFAlphaList[ALPHA3]
-                gfName3 = item[NAME]
-                alpha3 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName3)
-
-                # Calculate truncation rules
-                truncObject.setTruncRule(faciesProb)
-                for i in range(nDefinedCells):
-                    if printInfo == 2:
-                        if np.mod(i, 500000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-                    elif printInfo >= 3:
-                        if np.mod(i, 10000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-
-                    # Truncate GF.  Three transformed gaussian fields.
-                    cellIndx = cellIndexDefined[i]
-                    u1 = alpha1[cellIndx]
-                    u2 = alpha2[cellIndx]
-                    u3 = alpha3[cellIndx]
-                    [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1, u2, u3)
-                    faciesReal[cellIndx] = fCode
-                    volFrac[fIndx] += 1
-
-        else:
-            # Varying probability from cell to cell and / or 
-            # varying truncation parameter from cell to cell
-            if printInfo >= 3:
-                text = 'Debug output: Using spatially varying probabilities and/or '
-                text = text + 'truncation parameters for facies.'
-                print(text)
-
-            if nGaussFields == 1:
-                item = GFAlphaList[ALPHA1]
-                gfName1 = item[NAME]
-                alpha1 = item[VAL]
-
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName1)
-
-                for i in range(nDefinedCells):
-                    if printInfo == 2:
-                        if np.mod(i, 500000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-                    elif printInfo >= 3:
-                        if np.mod(i, 10000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-
-                    if self.__useConstProb == 1:
-                        for f in range(nFacies):
-                            faciesProb[f] = probDefined[f]
-                    else:
-                        for f in range(nFacies):
-                            faciesProb[f] = probDefined[f][i]
-
-                    # Calculate truncation rules
-                    cellIndx = cellIndexDefined[i]
-                    truncObject.setTruncRule(faciesProb, cellIndx)
-
-                    # Truncate GF.  One transformed gaussian field.
-                    u1 = alpha1[cellIndx]
-                    # print('u1: '+ str(u1))
-                    [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1)
-                    faciesReal[cellIndx] = fCode
-                    volFrac[fIndx] += 1
-                    # print('cellIndx= ' + str(cellIndx) + '  fCode= ' + str(fCode) + ' fIndx= ' + str(fIndx))
-            elif nGaussFields == 2:
-                item = GFAlphaList[ALPHA1]
-                gfName1 = item[NAME]
-                alpha1 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName1)
-
-                item = GFAlphaList[ALPHA2]
-                gfName2 = item[NAME]
-                alpha2 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName2)
-
-                for i in range(nDefinedCells):
-                    if printInfo == 2:
-                        if np.mod(i, 500000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-                    elif printInfo >= 3:
-                        if np.mod(i, 10000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-
-                    if self.__useConstProb == 1:
-                        for f in range(nFacies):
-                            faciesProb[f] = probDefined[f]
-                    else:
-                        for f in range(nFacies):
-                            faciesProb[f] = probDefined[f][i]
-
-                    # Calculate truncation rules
-                    cellIndx = cellIndexDefined[i]
-                    truncObject.setTruncRule(faciesProb, cellIndx)
-
-                    # Truncate GF.  One transformed gaussian field.
-                    u1 = alpha1[cellIndx]
-                    u2 = alpha2[cellIndx]
-                    [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1, u2)
-                    faciesReal[cellIndx] = fCode
-                    volFrac[fIndx] += 1
-
-            elif nGaussFields == 3:
-                item = GFAlphaList[ALPHA1]
-                gfName1 = item[NAME]
-                alpha1 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName1)
-
-                item = GFAlphaList[ALPHA2]
-                gfName2 = item[NAME]
-                alpha2 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName2)
-
-                item = GFAlphaList[ALPHA3]
-                gfName3 = item[NAME]
-                alpha3 = item[VAL]
-                if printInfo >= 3:
-                    print('Debug output: Use gauss fields: ' + gfName3)
-
-                for i in range(nDefinedCells):
-                    if printInfo == 2:
-                        if np.mod(i, 500000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-                    elif printInfo >= 3:
-                        if np.mod(i, 10000) == 0:
-                            print('--- Calculate facies for cell number: ' + str(i))
-
-                    if self.__useConstProb == 1:
-                        for f in range(nFacies):
-                            faciesProb[f] = probDefined[f]
-                    else:
-                        for f in range(nFacies):
-                            faciesProb[f] = probDefined[f][i]
-
-                    # Calculate truncation rules
-                    cellIndx = cellIndexDefined[i]
-                    truncObject.setTruncRule(faciesProb, cellIndx)
-
-                    # Truncate GF.  One transformed gaussian field.
-                    u1 = alpha1[cellIndx]
-                    u2 = alpha2[cellIndx]
-                    u3 = alpha3[cellIndx]
-                    [fCode, fIndx] = truncObject.defineFaciesByTruncRule(u1, u2, u3)
-                    faciesReal[cellIndx] = fCode
-                    volFrac[fIndx] += 1
+                if truncRuleName == 'Trunc2D_Angle':
+                    nCount = truncObject.getNCountShiftAlpha()
+                    print('Debug output: Small shifts of values for orientation of facies boundary lines are done {} number of times for numerical reasons.'
+                          ''.format(str(nCount)))
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -1521,7 +596,9 @@ class APSZoneModel:
 
     def XMLAddElement(self, parent):
 
-        # Add command Zone and all its childs
+        # Add command Zone and all its children
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'
         if self.__faciesLevel == 1:
@@ -1545,159 +622,23 @@ class APSZoneModel:
         zoneElement.append(elem)
 
         # Add child command HorizonNameVarioTrend
-        if self.__horizonNameForVarioTrendMap != None:
+        if self.__horizonNameForVariogramTrendMap is not None:
             tag = 'HorizonNameVarioTrend'
             elem = Element(tag)
-            elem.text = ' ' + self.__horizonNameForVarioTrendMap + ' '
+            elem.text = ' ' + self.__horizonNameForVariogramTrendMap + ' '
             zoneElement.append(elem)
 
         # Add child command FaciesProbForModel
-        tag = 'FaciesProbForModel'
-        elem = Element(tag)
-        zoneElement.append(elem)
-        fProbElement = elem
-        for i in range(len(self.__faciesProbForZoneModel)):
-            fName = self.__faciesProbForZoneModel[i][self.__FNAME]
-            fProb = self.__faciesProbForZoneModel[i][self.__FPROB]
-            tag = 'Facies'
-            attribute = {'name': fName}
-            fElement = Element(tag, attribute)
-            fProbElement.append(fElement)
-            tag = 'ProbCube'
-            pElement = Element(tag)
-            pElement.text = ' ' + str(fProb) + ' '
-            fElement.append(pElement)
-
+        self.__faciesProbObject.XMLAddElement(zoneElement)
         # Add child command GaussField
-        nGaussFieldsForModel = len(self.__varioForGFModel)
-        for i in range(nGaussFieldsForModel):
-            gfName = self.__varioForGFModel[i][self.__GNAME]
-            varioType = self.__varioForGFModel[i][self.__GTYPE]
-            range1 = self.__varioForGFModel[i][self.__GRANGE1]
-            range2 = self.__varioForGFModel[i][self.__GRANGE2]
-            range3 = self.__varioForGFModel[i][self.__GRANGE3]
-            angle = self.__varioForGFModel[i][self.__GANGLE]
-            power = self.__varioForGFModel[i][self.__GPOWER]
-
-            if gfName != self.__trendForGFModel[i][self.__TNAME]:
-                print('Error in class: ' + self.__className + ' in ' + 'XMLAddElement')
-                sys.exit()
-            useTrend = self.__trendForGFModel[i][self.__TUSE]
-            trendObj = self.__trendForGFModel[i][self.__TOBJ]
-            relStdDev = self.__trendForGFModel[i][self.__TSTD]
-
-            tag = 'GaussField'
-            attribute = {'name': gfName}
-            elem = Element(tag, attribute)
-            zoneElement.append(elem)
-            gfElement = elem
-            tag = 'Vario'
-            attribute = {'name': varioType}
-            elem = Element(tag, attribute)
-            gfElement.append(elem)
-            varioElement = elem
-            tag = 'MainRange'
-            elem = Element(tag)
-            elem.text = ' ' + str(range1) + ' '
-            varioElement.append(elem)
-            tag = 'PerpRange'
-            elem = Element(tag)
-            elem.text = ' ' + str(range2) + ' '
-            varioElement.append(elem)
-            tag = 'VertRange'
-            elem = Element(tag)
-            elem.text = ' ' + str(range3) + ' '
-            varioElement.append(elem)
-            tag = 'Angle'
-            elem = Element(tag)
-            elem.text = ' ' + str(angle) + ' '
-            varioElement.append(elem)
-            if varioType == 'GENERAL_EXPONENTIAL':
-                tag = 'Power'
-                elem = Element(tag)
-                elem.text = ' ' + str(power) + ' '
-                varioElement.append(elem)
-
-            if useTrend == 1:
-                # Add trend
-                trendObj.XMLAddElement(gfElement)
-
-                tag = 'RelStdDev'
-                elem = Element(tag)
-                elem.text = ' ' + str(relStdDev) + ' '
-                gfElement.append(elem)
-
-            tag = 'SeedForPreview'
-            elem = Element(tag)
-            seedValue = self.__seedForPreviewForGFModel[i][self.__SVALUE]
-            elem.text = ' ' + str(seedValue) + ' '
-            gfElement.append(elem)
-
+        self.__gaussModelObject.XMLAddElement(zoneElement)
         # Add child command TruncationRule at end of the child list for
         self.__truncRule.XMLAddElement(zoneElement)
-        return
 
-    def simGaussFieldWithTrendAndTransform(self, nGaussFields, gridDimNx, gridDimNy,
-                                           gridXSize, gridYSize, gridAsimuthAngle):
-        nx = gridDimNx
-        ny = gridDimNy
-        xsize = gridXSize
-        ysize = gridYSize
-        # a1 = np.zeros(nx*ny,float)
-        # a2 = np.zeros(nx*ny,float)
-        # a3 = np.zeros(nx*ny,float)
-
-        gaussFieldNamesForSimulation = self.getUsedGaussFieldNames()
-        assert nGaussFields == len(gaussFieldNamesForSimulation)
-        gaussFields = []
-        for i in range(nGaussFields):
-            # Find data for specified Gauss field name
-            name = gaussFieldNamesForSimulation[i]
-            seedValue = self.__seedForPreviewForGFModel[i][self.__SVALUE]
-            varioType = self.getVarioType(name)
-            varioTypeNumber = self.getVarioTypeNumber(name)
-            r1 = self.getMainRange(name)
-            r2 = self.getPerpRange(name)
-            r3 = self.getVertRange(name)
-            angle = self.getAnisotropyAsimuthAngle(name)
-            angle = angle - gridAsimuthAngle
-
-            power = self.getPower(name)
-
-            useTrend = self.__trendForGFModel[i][self.__TUSE]
-            trendAsimuth = 0.0
-            if useTrend == 1:
-                trendObj = self.__trendForGFModel[i][self.__TOBJ]
-                trendAsimuth = trendObj.getAsimuth() - gridAsimuthAngle
-
-            relSigma = self.__trendForGFModel[i][self.__TSTD]
-            if self.__printInfo >= 3:
-                print('Simulate gauss field: ' + name)
-                print('VarioType: ' + str(varioType))
-                print('VarioTypeNumber: ' + str(varioTypeNumber))
-                print('Range1   : ' + str(r1))
-                print('Range2   : ' + str(r2))
-                print('Range3   : ' + str(r3))
-                if varioTypeNumber == 4:
-                    print('Power    : ' + str(power))
-                print('Relative asimuth anisotropy angle    : ' + str(angle))
-                if useTrend == 1:
-                    print('Use trend:  YES')
-                    print('Relative TrendAsimuth: ' + str(trendAsimuth))
-                    print('RelSigma : ' + str(relSigma))
-                else:
-                    print('Use trend:  NO')
-
-                print('Seed value: ' + str(seedValue))
-
-            # Angle relative to x axis is input in degrees.
-            angle = 90.0 - angle
-            gfRealization = np.zeros(nx * ny, float)
-            [gfRealization] = simGaussFieldAddTrendAndTransform(seedValue, nx, ny, xsize, ysize,
-                                                                varioTypeNumber, r1, r2, angle, power,
-                                                                useTrend, trendAsimuth, relSigma, self.__printInfo)
-
-            gaussFields.append(gfRealization)
-        # End for        
-
-        return gaussFields
+    def simGaussFieldWithTrendAndTransform(
+            self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
+        return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
+            nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
+        )

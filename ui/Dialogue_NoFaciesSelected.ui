@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>dialog_no_facies_selected</class>
- <widget class="QDialog" name="dialog_no_facies_selected">
+ <class>NoFaciesSelected</class>
+ <widget class="QDialog" name="NoFaciesSelected">
   <property name="geometry">
    <rect>
     <x>0</x>
