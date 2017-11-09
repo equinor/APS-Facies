@@ -1,3 +1,9 @@
+import matplotlib as mpl
+
+from src.utils.constants.environment import MATPLOTLIB_BACKEND
+
+mpl.use(MATPLOTLIB_BACKEND)
+
 import numpy as np
 from PyQt5.QtWidgets import QSizePolicy, QWidget
 from matplotlib.axes import Axes
@@ -20,19 +26,21 @@ class Plot(FigureCanvas, QWidget):
         self.updateGeometry()
         self.figure.set_facecolor(Colors.BACKGROUND.name())
         self._add_sub_plot()
+        self._visible = True
+        self._enabled = True
 
         self.plot()
 
     def setVisible(self, visible: bool):
         # FIXME: Do properly
-        if visible:
-            super(Plot, self).setVisible(visible)
+        self._visible = visible
+        # self.plot()
         pass
 
     def setEnabled(self, enable: bool):
         # FIXME: Do properly
-        if enable:
-            super(Plot, self).setEnabled(enable)
+        self._enabled = enable
+        # self.plot()
         pass
 
     def _add_sub_plot(self):
@@ -43,7 +51,8 @@ class Plot(FigureCanvas, QWidget):
         self.figure.tight_layout(pad=0)
 
     def plot(self):
-        NUM = 250
+        # TODO: Clean plotting area
+        NUM = 50
 
         ells = [
             Ellipse(
