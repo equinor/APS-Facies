@@ -294,7 +294,7 @@ class APSZoneModel:
     def getZoneNumber(self):
         return self.__zoneNumber
 
-    def useConstProb(self):
+    def useConstProb(self) -> bool:
         return self.__useConstProb
 
     def isMainLevelModel(self):

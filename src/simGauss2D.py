@@ -1,5 +1,5 @@
 #!/bin/env python
-import ctypes as ct
+from ctypes import CDLL, POINTER, c_double, c_float, c_int, c_uint
 
 import numpy as np
 
@@ -12,18 +12,18 @@ from src.utils.constants.simple import Debug, VariogramType
 # -----       Functions used to draw gaussian fields: -------------------------
 
 # Global object with c/c++ code for simulation of gaussian fields
-_draw2DLib = ct.CDLL(DrawingLibrary.LIBRARY_PATH.value)
+_draw2DLib = CDLL(DrawingLibrary.LIBRARY_PATH.value)
 
 # Define input data types
 _draw2DLib.draw2DGaussField.argtypes = (
-    ct.c_int, ct.c_int,
-    ct.c_double, ct.c_double,
-    ct.c_int, ct.c_uint,
-    ct.c_double, ct.c_double,
-    ct.c_double, ct.c_double, ct.c_int
+    c_int, c_int,
+    c_double, c_double,
+    c_int, c_uint,
+    c_double, c_double,
+    c_double, c_double, c_int
 )
 # Define output data type
-floatArrayPointer = ct.POINTER(ct.c_float)
+floatArrayPointer = POINTER(c_float)
 _draw2DLib.draw2DGaussField.restype = floatArrayPointer
 
 
@@ -71,11 +71,11 @@ def draw2D(
 
     # Call c/c++ function
     arrayPointer = _draw2DLib.draw2DGaussField(
-        ct.c_int(nx), ct.c_int(ny),
-        ct.c_double(xsize), ct.c_double(ysize),
-        ct.c_int(variogram_type), ct.c_uint(iseed),
-        ct.c_double(range1), ct.c_double(range2),
-        ct.c_double(angle), ct.c_double(power), ct.c_int(debug_level)
+        c_int(nx), c_int(ny),
+        c_double(xsize), c_double(ysize),
+        c_int(variogram_type), c_uint(iseed),
+        c_double(range1), c_double(range2),
+        c_double(angle), c_double(power), c_int(debug_level.value)
     )
 
     # Assign result to python array
@@ -219,7 +219,7 @@ def simGaussFieldAddTrendAndTransform2(
 def simGaussField(
         iseed: int, nx: int, ny: int, xsize: float, ysize: float, variogram_type: VariogramType,
         range_major_axis: float, range_minor_axis: float, azimuth_angle: float, power: float,
-        debug_info: Debug = Debug.OFF
+        debug_level: Debug = Debug.OFF
 ):
     """
     Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
@@ -246,13 +246,13 @@ def simGaussField(
     :type azimuth_angle: float
     :param power:
     :type power: float
-    :param debug_info:
-    :type debug_info: Debug
+    :param debug_level:
+    :type debug_level: Debug
     :return:
     :rtype:
     """
     # Residual gaussian fields
-    if debug_info >= Debug.VERY_VERBOSE:
+    if debug_level >= Debug.VERY_VERBOSE:
         print('    - Simulate  2D Gauss field using seed: ' + str(iseed))
     # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
@@ -260,6 +260,6 @@ def simGaussField(
     residualField = draw2D(
         nx=nx, ny=ny, xsize=xsize, ysize=ysize, variogram_type=variogram_type, iseed=iseed,
         range1=range_major_axis, range2=range_minor_axis, angle=azimuth_angle, power=power,
-        debug_level=debug_info
+        debug_level=debug_level
     )
     return residualField

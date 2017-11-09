@@ -980,13 +980,13 @@ class Trunc2D_Angle(Trunc2D_Base):
         """
         Description: Return a lost of the polygons the truncation maps is divided into.
         """
-        isDetermined = 0
+        isDetermined = False
         for fIndx in range(len(self._faciesInZone)):
             if self._faciesIsDetermined[fIndx] == 1:
-                isDetermined = 1
+                isDetermined = True
                 break
 
-        if isDetermined == 1:
+        if isDetermined:
             # One facies has 100% facies probability
             # Make a polygon equal to the complete unit square for this facies
             # and dummy 0 area polygons for all other facies
@@ -1003,7 +1003,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         polygons = copy.copy(self.__faciesPolygons)
 
-        return [polygons]
+        return polygons
 
     def faciesIndxPerPolygon(self):
         faciesIndxPerPoly = copy.copy(self.__faciesIndxPerPolygon)

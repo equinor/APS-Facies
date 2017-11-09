@@ -1,7 +1,7 @@
 from typing import Union, List, Iterable
 
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QComboBox, QLineEdit, QPushButton, QSlider, QCheckBox
+from PyQt5.QtWidgets import QComboBox, QLineEdit, QPushButton, QSlider, QCheckBox, QListWidget
 
 from src.gui.wrappers.base_classes.getters.color import get_color
 from src.gui.wrappers.base_classes.getters.combo_box import get_choice
@@ -56,7 +56,7 @@ def get_elements(
 def get_element(
         obj: object,
         name: str
-) -> Union[QPushButton, QLineEdit, QSlider, QCheckBox, TruncationRuleLibraryElements, None]:
+) -> Union[QPushButton, QLineEdit, QSlider, QCheckBox, TruncationRuleLibraryElements, QListWidget, QComboBox, None]:
     # TODO: Make more robust
     if hasattr(obj, name):
         return obj.__getattribute__(name)

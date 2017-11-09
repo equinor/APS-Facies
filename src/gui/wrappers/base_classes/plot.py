@@ -1,12 +1,14 @@
 import numpy as np
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtWidgets import QSizePolicy, QWidget
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.patches import Ellipse
 
+from src.utils.constants.constants import Colors
 
-class Plot(FigureCanvas):
+
+class Plot(FigureCanvas, QWidget):
     def __init__(self, parent=None, dpi=100):
         super(Plot, self).__init__(figure=Figure(dpi=dpi))
         self.setParent(parent)
@@ -16,10 +18,22 @@ class Plot(FigureCanvas):
             QSizePolicy.Expanding
         )
         self.updateGeometry()
-        self.figure.set_facecolor((1, 1, 1, 0))
+        self.figure.set_facecolor(Colors.BACKGROUND.name())
         self._add_sub_plot()
 
         self.plot()
+
+    def setVisible(self, visible: bool):
+        # FIXME: Do properly
+        if visible:
+            super(Plot, self).setVisible(visible)
+        pass
+
+    def setEnabled(self, enable: bool):
+        # FIXME: Do properly
+        if enable:
+            super(Plot, self).setEnabled(enable)
+        pass
 
     def _add_sub_plot(self):
         self.ax = self.figure.add_subplot(111, aspect='auto', frameon=False)  # type: Axes

@@ -130,11 +130,13 @@ class APSDataFromRMS:
 
     def getNumberOfLayersInZone(self, zoneNumber):
         # item = [zoneNumber, zoneName, nLayers]
+        number_of_layer = 0
         for item in self.__data['Zones']:
             number = item[0]
             if number == zoneNumber:
-                nLayer = item[2]
-        return nLayer
+                number_of_layer = item[2]
+                break
+        return number_of_layer
 
     def getContinuousGridParamNames(self):
         return copy.copy(self.__data['Property list continuous'])

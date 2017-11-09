@@ -1,5 +1,5 @@
 FROM centos:6
-LABEL version="1.7.2" \
+LABEL version="1.7.4" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -40,8 +40,6 @@ RUN wget http://st-linrhn01.st.statoil.no/pub/$STATOIL_CERT \
 # |_|  |_|___|___/\___| /_/   |___|_|\_| \_/
 #
 #################################################
-ENV CODE_DIR="/code"
-ENV PYTHONPATH="$CODE_DIR:$PYTHONPATH"
 ENV ENCODING="en_US.UTF-8"
 ENV LC_ALL=$ENCODING
 ENV LANG=$ENCODING
@@ -111,8 +109,6 @@ ENV UPX_PREFIX=$INSTALL_DIR/upx-$UPX_VERSION
 
 ENV OPENSSL_PREFIX=$INSTALL_DIR/openssl-$OPENSSL_VERSION
 
-VOLUME $CODE_DIR
-
 # Misc. software
 RUN yum update -y \
  && yum install -y \
@@ -143,8 +139,7 @@ RUN yum update -y \
 
 
 # Precreate all directories to avoid conflicts
-RUN mkdir -p $CODE_DIR \
-             $ROOT_DIR \
+RUN mkdir -p $ROOT_DIR \
              $BUILD_DIR \
              $SOURCE_DIR \
              $INSTALL_DIR \
@@ -415,17 +410,7 @@ RUN cd $BUILD_DIR/pylint-$PYLINT_VERSION \
 RUN rm -rf $SOURCE_DIR
 RUN rm -rf $BUILD_DIR
 
-#####################
-#                   #
-#  Adding the repo  #
-#                   #
-#####################
-
-RUN mkdir -p $CODE_DIR
-VOLUME $CODE_DIR
-
 # Install all python modules
-
 COPY requirements.txt /requirements.txt
 RUN $PIP install -r /requirements.txt \
  && rm -f /requirements.txt

@@ -149,7 +149,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 print(repr(self._orderIndex))
                 print('Debug output: Facies code for facies in zone')
                 print(repr(self._faciesCode))
-                print(' ')
+                print('')
                 print('Debug output: Gauss fields in zone:')
                 print(repr(self._gaussFieldsInZone))
                 print('Debug output: Gauss fields for each alpha coordinate:')
@@ -162,7 +162,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
             if debug_level >= Debug.VERY_VERBOSE:
                 # Create an empty object which will be initialized by set functions
                 print('Debug output: Create empty object of ' + self._className)
-                #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         # Initialize object from xml tree object trRuleXML
@@ -326,13 +325,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
             alphaFieldNameForBackGroundFacies, sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
     ):
         """
-           Description: Initialize the truncation object from input variables.
+        Initialize the truncation object from input variables.
         """
         # Initialize data structure
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
-        # Initialize base class variables 
+        # Initialize base class variables
         super()._setEmpty()
 
         # Initialize this class variables
@@ -376,10 +375,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 raise ValueError('Error in Trunc3D_bayfill.  Programming error.')
             self._orderIndex.append(fIndx)
 
-        return
-
     def writeContentsInDataStructure(self):
-        print(' ')
+        print('')
         print('************  Contents of the data structure for class: ' + self._className + ' ***************')
         print('Eps: ' + str(self.__eps))
         print('Main facies table:')
@@ -434,12 +431,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def truncMapPolygons(self):
         assert self._setTruncRuleIsCalled
-        isDetermined = 0
+        isDetermined = False
         for indx in range(len(self._faciesInTruncRule)):
             if self._faciesIsDetermined[indx] == 1:
-                isDetermined = 1
+                isDetermined = True
                 break
-        if isDetermined == 1:
+        if isDetermined:
             self.__polygons = []
             for indx in range(len(self._faciesInTruncRule)):
                 if self._faciesIsDetermined[indx] == 1:
@@ -450,7 +447,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     self.__polygons.append(poly)
 
         polygons = copy.copy(self.__polygons)
-        return [polygons]
+        return polygons
 
     def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
         # Input: get3DParamFunction - Pointer to a function to read 3D parameter from RMS
@@ -611,14 +608,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         self._setTruncRuleIsCalled = True
         self.__setMinimumFaciesProb(faciesProb)
-        isDetermined = 0
+        isDetermined = False
         for indx in range(len(faciesProb)):
             fIndx = self._orderIndex[indx]
             self._faciesIsDetermined[indx] = 0
             if faciesProb[fIndx] > (1.0 - self.__eps):
                 self._faciesIsDetermined[indx] = 1
-                isDetermined = 1
-        if isDetermined == 1:
+                isDetermined = True
+        if isDetermined:
             return
 
         if self.__useConstTruncModelParam:

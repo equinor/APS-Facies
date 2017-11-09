@@ -7,6 +7,7 @@ from xml.etree.ElementTree import Element
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSZoneModel import APSZoneModel
+from src.utils.APSExceptions import MissingAttributeInKeyword
 from src.utils.constants.simple import Debug
 from src.utils.xml import prettify, getTextCommand
 
@@ -130,7 +131,7 @@ class APSModel:
         obj = root.find(kw)
         if obj is None:
             # Default value is set
-            self.__debug_level = Debug.SOMEWHAT_VERBOSE
+            self.__debug_level = debug_level
         else:
             text = obj.text
             self.set_debug_level(text)
@@ -145,22 +146,22 @@ class APSModel:
         if obj is not None:
             text = obj.get('zoneNumber')
             if text is None:
-                raise ValueError('Must specify zoneNumber attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'zoneNumber')
             self.__previewZone = int(text)
 
             text = obj.get('crossSectionType')
             if text is None:
-                raise ValueError('Must specify crossSectionType attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'crossSectionType')
             self.__previewCrossSectionType = text
 
             text = obj.get('crossSectionIndx')
             if text is None:
-                raise ValueError('Must specify crossSectionIndx attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'crossSectionIndx')
             self.__previewCrossSectionIndx = int(text.strip())
 
             text = obj.get('scale')
             if text is None:
-                raise ValueError('Must specify scale attribute in keyword {}'.format(kw))
+                raise MissingAttributeInKeyword(kw, 'scale')
             self.__previewScale = float(text.strip())
 
         # --- SelectedZones ---
@@ -193,11 +194,11 @@ class APSModel:
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: RMSGridModel:                      ' + self.__rmsGridModelName)
-            print('Debug output: RMSZoneParamName:                  ' + self.__rmsZoneParamName)
-            print('Debug output: RMSFaciesParamName:                ' + self.__rmsFaciesParamName)
-            print('Debug output: Name of RMS project read:          ' + self.__rmsProjectName)
-            print('Debug output: Name of RMS workflow read:         ' + self.__rmsWorkflowName)
+            print('Debug output: RMSGridModel:                       ' + self.__rmsGridModelName)
+            print('Debug output: RMSZoneParamName:                   ' + self.__rmsZoneParamName)
+            print('Debug output: RMSFaciesParamName:                 ' + self.__rmsFaciesParamName)
+            print('Debug output: Name of RMS project read:           ' + self.__rmsProjectName)
+            print('Debug output: Name of RMS workflow read:          ' + self.__rmsWorkflowName)
             print('Debug output: Name of RMS gauss field IPL script: ' + self.__rmsGaussFieldScriptName)
 
         # Read all zones for models specifying main level facies
@@ -423,7 +424,7 @@ class APSModel:
         return tree
 
     def getRoot(self):
-        tree = self.__ET_Tree
+        tree = self.getXmlTree()
         root = tree.getroot()
         return root
 
@@ -454,11 +455,6 @@ class APSModel:
 
     def getZoneNumberList(self):
         return [zone.getZoneNumber() for zone in self.__zoneModelsMainLevel]
-
-    #    def getPreviewZone(self):
-    #        return [self.__previewZone,self.__previewGridNx,self.__previewGridNy,
-    #                self.__previewGridXSize, self.__previewGridYSize,
-    #                self.__previewGridOrientation]
 
     def getPreviewZoneNumber(self):
         return self.__previewZone

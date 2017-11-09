@@ -1,5 +1,5 @@
 image:
-  name: "git.statoil.no:4567/aps/gui:1.7.2"
+  name: "git.statoil.no:4567/aps/gui/aps-gui:1.7.4"
 
 variables:
   GIT_STRATEGY: "fetch"

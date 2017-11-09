@@ -47,7 +47,7 @@ def defineCommonModelParam(
 
 
 def addZoneParam(
-        apsmodel=None,
+        apsmodel,
         zoneNumber=0,
         horizonNameForVariogramTrendMap=None,
         simBoxThickness=0.0,
@@ -105,7 +105,7 @@ def addZoneParam(
         ])
 
         # Set Gauss field trend parameters
-        trendModelObject = Trend3D_linear_model(None, debug_level, None)
+        trendModelObject = Trend3D_linear_model(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
         trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
         trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 

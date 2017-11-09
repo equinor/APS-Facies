@@ -5,13 +5,18 @@ from PyQt5.QtWidgets import QMessageBox
 from src.utils.constants.base import Key, Value, Icon
 from src.utils.constants.simple import Debug
 
-
 # TODO: Implement automatic initialization, when accessing a constant
 # Ex. ProjectConstants.PATH_OF_PROJECT_FIL (with, or without () at the end) will give a class instance having that value
 
 
 class DataBase(Value):
     NAME = 'state.db'
+
+
+class DrawingLibrary(Value):
+    LIBRARY_FOLDER = ''  # Set automatically by make
+    NAME = 'libdraw2D.so'
+    LIBRARY_PATH = LIBRARY_FOLDER + '/' + NAME
 
 
 class ModeConstants(Key):
@@ -62,6 +67,16 @@ class MainWindowElements(Value):
     SAVE_AS = 'm_button_save_as'
 
 
+class OutputFaciesModelNameElements(MainWindowElements):
+    TITLE = 'label_model_name'
+    SELECT_FACIES_MODEL = 'm_choose_select_facies_model'
+    MODEL_NAME = 'm_edit_model_name'
+
+    # Labels
+    LABEL_SELECT_FACIES_MODEL = 'label_select_facies_model'
+    LABEL_MODEL_NAME = 'label_create'
+
+
 class ZoneSelectionElements(MainWindowElements):
     # Button for making the elements interactive
     TOGGLE = 'm_toggle_separate_zone_models'
@@ -101,11 +116,18 @@ class FaciesSelectionElements(MainWindowElements):
     LABEL_SELECTED = 'label_selected_facies'
 
 
+class FaciesSelectionConstants(Key):
+    AVAILABLE = 'available facies'
+    SELECTED = 'selected facies'
+
+
 class TruncationRuleLibraryElements(MainWindowElements):
     CUBIC_BUTTON = 'm_button_type_'
     NON_CUBIC_BUTTON = 'm_button_type_'
     BAYFILL_BUTTON = 'm_button_bayfill'
     CUSTOM_BUTTON = 'm_button_type_customized'
+    ZONES = 'm_list_zones'
+    FACIES = 'm_list_facies'
 
 
 class GaussianRandomFieldElements(MainWindowElements):
@@ -113,6 +135,13 @@ class GaussianRandomFieldElements(MainWindowElements):
     PLOT_AREA = 'm_plot_area_'
     SETTINGS = 'm_button_settings_'
     APPLY = 'm_toggle_'
+    ZONES = 'm_list_zones_grf'
+    FACIES = 'm_list_facies_grf'
+
+
+class GaussianRandomFieldConstants(Key):
+    AVAILABLE = 'available grf models'
+    SELECTED = 'selected grf models'
 
 
 class DefineGaussianElements(Value):
@@ -127,6 +156,20 @@ class VariogramModelElements(DefineGaussianElements):
     NORMAL = 'm_edit_normal_to_azimuth'
     VERTICAL = 'm_edit_vertical_normal_to_dip'
     PLOT = 'm_plot_variogram'
+    POWER = 'm_edit_power'
+
+    # Labels
+    LABEL_POWER = 'label_power'
+
+
+class VariogramModelConstants(Key):
+    VARIOGRAM = 'variogram model'
+    AZIMUTH = 'azimuth angle'
+    DIP = 'dip angle'
+    PARALLEL = 'parallel to azimuth'
+    NORMAL = 'normal to azimuth'
+    VERTICAL = 'vertical normal to dip'
+    POWER = 'power'
 
 
 class TrendSettingsElements(DefineGaussianElements):
@@ -175,6 +218,7 @@ class TruncationLibrarySubKeys(TruncationLibrary):
     # Keys used in the library mapping
     NUMBER_OF_FACIES_KEY = 'number of facies'
     BUTTON_NAME_KEY = 'button name, or prefix'
+    TRUNCATION_RULE_NAME = 'name of truncation rule'
 
 
 class TruncationLibraryButtonNameKeys(TruncationLibrary):
@@ -206,6 +250,7 @@ class BayfillTruncationRuleElements(CubicTruncationRuleElements):
 
 class TruncationRuleConstants(Key):
     TRUNCATION_RULES = 'truncation rules'
+    SELECTED = 'selected truncation rule'
 
 
 class CubicTruncationRuleConstants(TruncationRuleConstants):
@@ -261,6 +306,7 @@ class HideOptions(Value):
 class Defaults(Value):
     FILE_EXTENSION = 'xml'
     FILE_FILTER = 'XML files (*.xml)'
+    PREFIX_NAME_OF_BUTTON = 'm_button_'
     NAME_OF_BUTTON_BOX = 'm_buttons_ok_cancel'
     NAME_OF_PROPORTIONS = CubicTruncationRuleElements.PROPORTIONS
     NAME_OF_SLIDERS = CubicTruncationRuleElements.SLIDERS
@@ -268,13 +314,14 @@ class Defaults(Value):
     NAME_OF_DROP_DOWN = CubicTruncationRuleElements.DROP_DOWN
     NAME_OF_ANGLES = NonCubicTruncationRuleElements.ANGLES
     NAME_OF_SLANTED_FACTOR = BayfillTruncationRuleElements.SLANT_FACTOR
-    OPERATION_MODE = ModeOptions.READING_MODE
+    OPERATION_MODE = ModeOptions.EXPERIMENTAL_MODE
     SEPARATE_ZONE_MODELS = Qt.Unchecked
     FACIES_MODELS = Qt.Unchecked
     GAUSSIAN_TREND = Qt.Unchecked
     CONDITION_TO_WELL = Qt.Unchecked
     HIDE = HideOptions.DISABLE
     DEBUG = Debug.OFF
+    MAXIMUM_NUMBER_OF_FACIES = GaussianRandomFieldElements.NUMBER_OF_ELEMENTS  # -1 To turn off
 
 
 class MessageIcon(Icon):
@@ -285,18 +332,58 @@ class MessageIcon(Icon):
     CRITICAL_ICON = QMessageBox.Critical
 
 
-class Proportions(Value):
-    BOTTOM = 0
-    TOP = 1
+class Constraints(Value):
+    MINIMUM = float('-inf')
+    MAXIMUM = float('inf')
+    DECIMALS = -1
+
+
+class Proportions(Constraints):
+    MINIMUM = 0
+    MAXIMUM = 1
     DECIMALS = 5
-    MAXIMUM = TOP
-    MINIMUM = BOTTOM
 
 
-class Angles(Value):
+class Angles(Constraints):
     MINIMUM = -180.0
     MAXIMUM = +180.0
     DECIMALS = 2
+
+
+class MainRange(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = float('inf')
+    DECIMALS = 5
+
+
+class PerpRange(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = float('inf')
+    DECIMALS = 5
+
+
+class VerticalRange(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = float('inf')
+    DECIMALS = 5
+
+
+class AzimuthAngle(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = 360.0
+    DECIMALS = 2
+
+
+class DipAngle(Constraints):
+    MINIMUM = 0.0
+    MAXIMUM = 90.0
+    DECIMALS = 2
+
+
+class Power(Constraints):
+    MINIMUM = 1.0
+    MAXIMUM = 2.0
+    DECIMALS = 5
 
 
 class Ranges(Value):

@@ -73,12 +73,12 @@ def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFil
     assert truncRule is not None
     assert truncRule2 is not None
     truncRule.setTruncRule(faciesProb)
-    [polygons] = truncRule.truncMapPolygons()
+    polygons = truncRule.truncMapPolygons()
     # Write polygons to file
     writePolygons(outPolyFile1, polygons)
 
     truncRule2.setTruncRule(faciesProb)
-    [polygons] = truncRule2.truncMapPolygons()
+    polygons = truncRule2.truncMapPolygons()
     # Write polygons to file
     writePolygons(outPolyFile2, polygons)
 

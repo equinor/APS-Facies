@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>774</width>
-    <height>627</height>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>590</y>
+     <y>600</y>
      <width>201</width>
      <height>27</height>
     </rect>
@@ -30,7 +30,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>330</y>
+     <y>340</y>
      <width>721</width>
      <height>251</height>
     </rect>
@@ -241,7 +241,7 @@
      <x>360</x>
      <y>40</y>
      <width>401</width>
-     <height>291</height>
+     <height>298</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="layout_variogram_entire">
@@ -271,6 +271,9 @@
     </item>
     <item row="2" column="0">
      <layout class="QGridLayout" name="layout_variogram">
+      <item row="6" column="6" colspan="4">
+       <widget class="QLineEdit" name="m_edit_parallel_to_azimuth"/>
+      </item>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_variogram">
         <property name="font">
@@ -331,8 +334,11 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="6" colspan="4">
-       <widget class="QLineEdit" name="m_edit_parallel_to_azimuth"/>
+      <item row="4" column="6" colspan="4">
+       <widget class="QLineEdit" name="m_edit_dip"/>
+      </item>
+      <item row="8" column="6" colspan="4">
+       <widget class="QLineEdit" name="m_edit_vertical_normal_to_dip"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_anisotropy_directions">
@@ -347,11 +353,8 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="6" colspan="4">
-       <widget class="QLineEdit" name="m_edit_dip"/>
-      </item>
-      <item row="8" column="6" colspan="4">
-       <widget class="QLineEdit" name="m_edit_vertical_normal_to_dip"/>
+      <item row="3" column="6" colspan="4">
+       <widget class="QLineEdit" name="m_edit_azimuth"/>
       </item>
       <item row="6" column="0">
        <widget class="QLabel" name="label_parallel_to_azimuth">
@@ -373,8 +376,15 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="6" colspan="4">
-       <widget class="QLineEdit" name="m_edit_azimuth"/>
+      <item row="9" column="6" colspan="4">
+       <widget class="QLineEdit" name="m_edit_power"/>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="label_power">
+        <property name="text">
+         <string>    Power</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

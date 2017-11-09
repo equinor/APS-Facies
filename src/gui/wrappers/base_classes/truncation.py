@@ -8,7 +8,7 @@ from src.gui.wrappers.base_classes.chekkers.values import should_change
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.color import get_color
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements_from_base_name, get_value_of_element
-from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
+from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number_from_numeric_text_field
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
@@ -17,14 +17,16 @@ from src.utils.constants.constants import (
     FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleLibraryElements,
 )
 from src.utils.mappings import truncation_rule_element_key_to_state_key
-from src.utils.methods import apply_validator, get_attributes, get_elements_with_prefix, toggle_elements
-from src.utils.numeric import normalize_number, truncate_number
+from src.utils.gui.getters import get_attributes, get_elements_with_prefix
+from src.utils.gui.update import toggle_elements, apply_validator, update_numeric
+from src.utils.numeric import normalize_number
 
 
 class BaseTruncation(OkCancelDialog):
     def __init__(
             self,
             state,
+            truncation_type: str,
             parent=None,
             name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
             basename_sliders=Defaults.NAME_OF_SLIDERS,
@@ -42,6 +44,8 @@ class BaseTruncation(OkCancelDialog):
         :type parent:
         :param state:
         :type state: State
+        :param truncation_type: The truncation rule to be used (from the truncation library)
+        :type truncation_type: str  TODO: Make more precise / list in Constants
         :param name_of_buttons: The name of the variable that holds an object of type QDialogButtonBox
         :type name_of_buttons: TruncationRuleLibraryElements
         :param basename_sliders: The prefix of every slider
@@ -77,6 +81,9 @@ class BaseTruncation(OkCancelDialog):
         # TODO: Validate
         self.facies_options = facies_options
 
+        # TODO: Validate
+        self.truncation_type = truncation_type
+
         if isinstance(active, int):
             # Use only the 'active' / n first elements / labels
             active = self.names[:active]
@@ -105,7 +112,7 @@ class BaseTruncation(OkCancelDialog):
         self.deactivate_inactive_elements()
 
     def wire_up_slated_factor(self):
-        validator = QDoubleValidator(top=Proportions.TOP, bottom=Proportions.BOTTOM, decimals=Proportions.DECIMALS)
+        validator = QDoubleValidator(top=Proportions.MAXIMUM, bottom=Proportions.MINIMUM, decimals=Proportions.DECIMALS)
         text_fields = self._get_slant_factors()
         apply_validator(text_fields, validator)
         for text_field in text_fields:
@@ -131,7 +138,12 @@ class BaseTruncation(OkCancelDialog):
                 angle_input.textChanged.connect(self.update_state)
 
     def wire_up_drop_downs(self):
-        pass
+        # TODO: Add different 'labels' / facies names to the different facies (F1, F2, ...)
+        selected_facies = ['']
+        selected_facies.extend(self.state.get_selected_facies().keys())
+        for facies in self.active:
+            drop_down = get_element(self, self.basename_drop_down + facies)  # type: QComboBox
+            drop_down.addItems(selected_facies)
 
     def wire_up_color_buttons(self):
         # Wire up the color buttons
@@ -157,7 +169,7 @@ class BaseTruncation(OkCancelDialog):
         return get_elements_from_base_name(self, BaseNames.SLANT_FACTOR, self.names)
 
     def wire_up_proportions_and_sliders(self):
-        validator = QDoubleValidator(bottom=Proportions.BOTTOM, top=Proportions.TOP, decimals=Proportions.DECIMALS)
+        validator = QDoubleValidator(bottom=Proportions.MINIMUM, top=Proportions.MAXIMUM, decimals=Proportions.DECIMALS)
         proportion_inputs = self._get_proportion_inputs()
         sliders = self._get_sliders()
         if len(proportion_inputs) == len(sliders) == len(self.names) and len(self.names) > 0:
@@ -174,7 +186,7 @@ class BaseTruncation(OkCancelDialog):
             self._initialize_proportion_values()
 
     def update_slanted_factor(self):
-        self._update_numeric(minimum_truncation=Proportions.BOTTOM, maximum_truncation=Proportions.TOP)
+        update_numeric(self.sender(), minimum_truncation=Proportions.MINIMUM, maximum_truncation=Proportions.MAXIMUM)
 
     def update_state(self):
         # TODO
@@ -200,7 +212,13 @@ class BaseTruncation(OkCancelDialog):
         self.ensure_normalization()
         self.state.set_truncation_rules(self)
         # TODO: Overprint facies
-        pass
+        self.close(unset_truncation_rule=False)
+
+    def close(self, unset_truncation_rule=True):
+        # TODO: Ugly hack, should only be set when saving
+        if unset_truncation_rule:
+            self.state.set_current_truncation_rule(None)
+        super().close()
 
     def deactivate_inactive_elements(self):
         # TODO: Make more general?
@@ -218,7 +236,7 @@ class BaseTruncation(OkCancelDialog):
 
     def get_total_sum(self) -> float:
         content = [self._get_text_field_by_name(key) for key in self.active]
-        return sum([get_value_of_element(cell) for cell in content])
+        return sum([get_number_from_numeric_text_field(cell) for cell in content])
 
     def get_value(self, element_type: TruncationRuleLibraryElements, element_label: FaciesLabels):
         assert element_type in self.get_basename_of_elements()
@@ -226,7 +244,10 @@ class BaseTruncation(OkCancelDialog):
         element = self._get_corresponding_element(element_label, element_type)
         if element is None:
             return None
-        return get_value_of_element(element)
+        value = get_value_of_element(element)
+        if isinstance(element, QLineEdit):
+            value = float(value)
+        return value
 
     def get_values(
             self,
@@ -252,6 +273,10 @@ class BaseTruncation(OkCancelDialog):
                 continue
             storage[element_label] = self.get_values(element_label, skip_elements)
         return storage
+
+    def get_truncation_rule(self):
+        # TODO: Make proper, and return a proper class for Truncation rules
+        return self.truncation_type
 
     def connect_slider_and_text(self, slider: QSlider, line_edit: QLineEdit) -> None:
         slider.valueChanged[int].connect(self.update_text)
@@ -374,7 +399,7 @@ class BaseTruncation(OkCancelDialog):
     def _ensure_proportions_are_between_0_1(self):
         for name in self.active:
             text_field = self._get_text_field_by_name(name)  # type: QLineEdit
-            value = get_value_of_element(text_field)
+            value = get_number_from_numeric_text_field(text_field)
             if value < 0:
                 text_field.setText('0')
             elif value > 1:
@@ -401,12 +426,6 @@ class BaseTruncation(OkCancelDialog):
             name for name in self.names[index_beyond_which_sliders_may_change + 1:]
             if name in self.active
         ]
-        # FIXME:
-        # total_sum = self.get_total_sum()
-        # to_be_changed = [
-        #     name for name in to_be_changed
-        #     if self._get_value(self._get_text_field_by_name(name)) > abs(1 - total_sum) / len(to_be_changed)
-        # ]
         return to_be_changed
 
     @lru_cache()
@@ -435,7 +454,7 @@ class BaseTruncation(OkCancelDialog):
     def _get_facies_label_lookup_table(self) -> Dict[QWidget, FaciesLabels]:
         element_lookup_table = self._get_element_lookup_table()
         return {
-            element: facies_label if element else None
+            element: facies_label if element is not None else None
             for facies_label in element_lookup_table
             for element in element_lookup_table[facies_label].values()
         }
@@ -460,13 +479,7 @@ class BaseTruncation(OkCancelDialog):
         return color
 
     def update_angle(self):
-        self._update_numeric(minimum_truncation=Angles.MINIMUM, maximum_truncation=Angles.MAXIMUM)
-
-    def _update_numeric(self, minimum_truncation: float, maximum_truncation: float) -> None:
-        sender = self.sender()
-        value = get_value_of_numeric_text_field(sender)
-        value = truncate_number(minimum_truncation, value, maximum_truncation)
-        set_value(sender, value, normalize=False, skip_signals=True)
+        update_numeric(self.sender(), minimum_truncation=Angles.MINIMUM, maximum_truncation=Angles.MAXIMUM)
 
     def _set_base_names(self, basename_key: BaseNames, basename_value: TruncationRuleLibraryElements) -> None:
         self.__setattr__(basename_key, basename_value)
