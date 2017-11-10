@@ -414,7 +414,7 @@ class BaseTruncation(OkCancelDialog):
             raise TypeError(
                 "The element to be updated must be a 'QLineEdit', or 'str', and not '{}'".format(type(name))
             )
-        value = max(get_value_of_element(element) + difference, 0)
+        value = max(float(get_value_of_element(element)) + difference, 0)
         set_value(element, value, normalize=False, skip_signals=True)
 
     def get_elements_from_base_name_to_be_changed(self, sender: QWidget) -> List[str]:
