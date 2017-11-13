@@ -40,6 +40,8 @@ def run():
     # ui = CubicTruncationRule(State(), active=['F1', 'F2', 'F3', 'F4'])
     ui.show()
     sys.exit(app.exec_())
+    # TODO: Make sure the folder /tmp/_MEI**** is removed when closing
+    # TODO: Specify --runtime-tmpdir to be somewhere in $HOME?
 
 
 if __name__ == '__main__':
