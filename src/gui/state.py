@@ -144,9 +144,13 @@ class State(dict):
         self.__dict__[GaussianRandomFieldConstants.AVAILABLE][current_gaussian_random_field] = values
 
     def set_current_gaussian_random_field(self, name: str) -> None:
-        if GaussianRandomFieldConstants.SELECTED not in self.__dict__:
-            self.__dict__[GaussianRandomFieldConstants.SELECTED] = ''
-        self.__dict__[GaussianRandomFieldConstants.SELECTED] = name
+        key = GaussianRandomFieldConstants.CURRENT
+        # Set currently selected
+        if key not in self.__dict__:
+            self.__dict__[key] = ''
+        self.__dict__[key] = name
+        # Add to set of sel
+        self.update_toggled_gaussian_random_fields(name, True)
 
     def set_available_gaussian_random_fields(self, names: List[Union[str, None]]):
         key = GaussianRandomFieldConstants.AVAILABLE
@@ -169,8 +173,9 @@ class State(dict):
             pass
 
     def get_currently_selected_gaussian_field(self) -> str:
-        if GaussianRandomFieldConstants.SELECTED in self.__dict__:
-            return self.__dict__[GaussianRandomFieldConstants.SELECTED]
+        key = GaussianRandomFieldConstants.CURRENT
+        if key in self.__dict__:
+            return self.__dict__[key]
         else:
             return ''
 

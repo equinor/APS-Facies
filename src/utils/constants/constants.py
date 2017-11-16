@@ -142,6 +142,7 @@ class GaussianRandomFieldElements(MainWindowElements):
 class GaussianRandomFieldConstants(Key):
     AVAILABLE = 'available grf models'
     SELECTED = 'selected grf models'
+    CURRENT = 'currently selected grf model'
 
 
 class DefineGaussianElements(Value):
