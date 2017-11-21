@@ -1,10 +1,15 @@
 #!/bin/env python
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 import math
-
 import numpy as np
+import importlib
 
 import src.generalFunctionsUsingRoxAPI as gr
+import src.utils.constants.simple
+
+importlib.reload(gr)
+importlib.reload(src.utils.constants.simple)
+
 from src.utils.constants.simple import Debug
 
 

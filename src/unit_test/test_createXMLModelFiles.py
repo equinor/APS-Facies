@@ -2,6 +2,8 @@
 # Python3  test that the model files can be created correctly.
 
 import filecmp
+import collections
+
 
 from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
@@ -227,7 +229,9 @@ def test_create_XMLModelFiles():
     test_case_2()
     test_case_3()
 
-    test_updating_model()
+    test_read_and_write_APSModel()
+    test_updating_model1()
+    test_updating_model2()
 
     test_variogram_generation()
     print('Finished')
@@ -275,14 +279,30 @@ def test_variogram_generation():
     projection = 'yz'
     apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
 
+def test_read_and_write_APSModel():
+    print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
+    modelFile = 'testData_models/APS.xml'
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
+    outfile3 = 'testOut3.xml'
+    apsmodel.writeModel(outfile3, Debug.OFF)
+    reference_file = 'testData_models/APS_sorted.xml'
+    print('Compare file: ' + outfile3 + ' and ' + reference_file)
+    check = filecmp.cmp(outfile3, reference_file)
+    if check:
+        print('Files are equal. OK')
+    else:
+        print('Files are different. NOT OK')
+    assert check is True
 
-def test_updating_model():
-    print('***** Case: Update parameters *****')
+
+def test_updating_model1():
+    print('***** Case: Update parameters case 1 *****')
     # Test updating of model
     modelFile = 'testData_models/APS.xml'
-    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.OFF)
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
     # Do some updates of the model
     zoneNumber = 1
+    regionNumber = 0
     zone = apsmodel.getZoneModel(zoneNumber)
     gaussFieldNames = zone.getUsedGaussFieldNames()
     nGaussFields = len(gaussFieldNames)
@@ -323,7 +343,67 @@ def test_updating_model():
             assertPropertyGetterSetter(gfName, power, zone, 'Power')
     outfile2 = 'testOut2_updated.xml'
     apsmodel.writeModel(outfile2, Debug.OFF)
-    reference_file = 'testData_models/APS_updated.xml'
+    reference_file = 'testData_models/APS_updated1.xml'
+    print('Compare file: ' + outfile2 + ' and ' + reference_file)
+    check = filecmp.cmp(outfile2, reference_file)
+    if check:
+        print('Files are equal. OK')
+    else:
+        print('Files are different. NOT OK')
+    assert check is True
+
+def test_updating_model2():
+    print('***** Case: Update parameters case 2 *****')
+    # Test updating of model
+    modelFile = 'testData_models/APS.xml'
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
+    # Do some updates of the model
+    zoneNumber = 2
+    regionNumber = 4
+    zone = apsmodel.getZoneModel(zoneNumber, regionNumber)
+    gaussFieldNames = zone.getUsedGaussFieldNames()
+    nGaussFields = len(gaussFieldNames)
+    variogramTypeList = [
+        VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
+        VariogramType.GENERAL_EXPONENTIAL, VariogramType.SPHERICAL
+    ]
+    mainRangeList = [2099.0, 3210.0, 1204.0, 1308.0, 1090.0]
+    perpRangeList = [123.0, 543.0, 120.0, 130.0, 215.0]
+    vertRangeList = [1.0, 5.0, 1.2, 1.3, 2.15]
+    azimuthAngleList = [0.0, 90.0, 125.0, 40.0, 50.0]
+    dipAngleList = [0.0, 0.01, 0.005, 0.009, 0.0008]
+    powerList = [1.0, 1.2, 1.3, 1.4, 1.5]
+    for i in range(nGaussFields):
+        gfName = gaussFieldNames[i]
+        if regionNumber > 0:
+            print('Update (zone,region):  ({},{})  Gauss field: {}'.format(str(zoneNumber), str(regionNumber), gfName))
+        else:
+            print('Update zone:  {}  Gauss field: {}'.format(str(zoneNumber), gfName))
+
+        variogramType = variogramTypeList[i]
+        assertPropertyGetterSetter(gfName, variogramType, zone, 'VariogramType')
+
+        mainRange = mainRangeList[i]
+        assertPropertyGetterSetter(gfName, mainRange, zone, 'MainRange')
+
+        perpRange = perpRangeList[i]
+        assertPropertyGetterSetter(gfName, perpRange, zone, 'PerpRange')
+
+        vertRange = vertRangeList[i]
+        assertPropertyGetterSetter(gfName, vertRange, zone, 'VertRange')
+
+        azimuth = azimuthAngleList[i]
+        assertPropertyGetterSetter(gfName, azimuth, zone, 'AnisotropyAzimuthAngle')
+
+        dip = dipAngleList[i]
+        assertPropertyGetterSetter(gfName, dip, zone, 'AnisotropyDipAngle')
+
+        if variogramType == VariogramType.GENERAL_EXPONENTIAL:
+            power = powerList[i]
+            assertPropertyGetterSetter(gfName, power, zone, 'Power')
+    outfile2 = 'testOut2_updated.xml'
+    apsmodel.writeModel(outfile2, Debug.OFF)
+    reference_file = 'testData_models/APS_updated2.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
     check = filecmp.cmp(outfile2, reference_file)
     if check:

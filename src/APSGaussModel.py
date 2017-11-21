@@ -1,7 +1,18 @@
 #!/bin/env python
+import sys
+import numpy as np
+import importlib
 from xml.etree.ElementTree import Element
 
-import numpy as np
+import src.Trend3D_linear_model_xml
+import src.simGauss2D
+import src.utils.constants.simple
+import src.utils.xml
+
+importlib.reload(src.Trend3D_linear_model_xml)
+importlib.reload(src.simGauss2D)
+importlib.reload(src.utils.constants.simple)
+importlib.reload(src.utils.xml)
 
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
@@ -58,6 +69,7 @@ class APSGaussModel:
     Private functions:
     def __setEmpty(self)
     def __interpretXMLTree(ET_Tree_zone)
+    def __isVariogramTypeOK(self,variogramType)
     def __getGFIndex(self,gfName)
     """
 

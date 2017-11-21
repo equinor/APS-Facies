@@ -2,9 +2,15 @@
 # Python 3 Calculate linear trend in 3D in RMS10 using roxapi
 
 import math
+import numpy as np
+import importlib
 from xml.etree.ElementTree import Element
 
-import numpy as np
+import src.utils.constants.simple
+import src.utils.xml
+
+importlib.reload(src.utils.constants.simple)
+importlib.reload(src.utils.xml)
 
 from src.utils.constants.simple import Debug
 from src.utils.xml import getFloatCommand, getIntCommand

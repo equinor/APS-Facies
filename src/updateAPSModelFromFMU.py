@@ -3,15 +3,19 @@
 
 import importlib
 
-from src import APSModel
-from src.utils.constants.simple import Debug
+import src.APSModel
+import src.utils.constants.simple
 
-importlib.reload(APSModel)
+importlib.reload(src.APSModel)
+importlib.reload(src.utils.constants.simple)
+
+from src.APSModel import APSModel
+from src.utils.constants.simple import Debug
 
 
 def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, debug_level=Debug.OFF):
     # Create empty APSModel object
-    apsModel = APSModel.APSModel()
+    apsModel = APSModel()
 
     # Read model file and parameter file and update values in xml tree but no data 
     # is put into APSModel data structure but instead an updated XML data tree is returned.

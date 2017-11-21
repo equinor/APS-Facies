@@ -1,8 +1,27 @@
 #!/bin/env python
+import sys
 import copy
+import collections
 import datetime
+import importlib
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
+
+import src.APSGaussFieldJobs
+import src.APSMainFaciesTable
+import src.APSZoneModel
+import src.utils.exceptions.xml
+import src.utils.constants.simple
+import src.utils.xml
+import src.utils.numeric
+
+importlib.reload(src.APSGaussFieldJobs)
+importlib.reload(src.APSMainFaciesTable)
+importlib.reload(src.APSZoneModel)
+importlib.reload(src.utils.exceptions.xml)
+importlib.reload(src.utils.constants.simple)
+importlib.reload(src.utils.xml)
+importlib.reload(src.utils.numeric)
 
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
@@ -166,6 +185,7 @@ class APSModel:
         self.__faciesTable = mainFaciesTable
 #        self.__zoneModelList = zoneModelList if zoneModelList else []
         self.__zoneModelTable = zoneModelTable if zoneModelTable else {}
+        self.__sortedZoneModelTable = {}
         self.__zoneNumberList = []
 #        self.__zoneModelsSecondLevel = zoneModelListSecondLevel if zoneModelListSecondLevel else []
 #        self.__selectedZoneNumberList = []
@@ -180,8 +200,12 @@ class APSModel:
 
         # Read model if it is defined
         if modelFileName is None:
+            if len(self.__zoneModelTable) > 0:
+                # Define sorted sequence of the zone models
+                self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
             return
         self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
+
 
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         tree = ET.parse(modelFileName)
@@ -197,6 +221,7 @@ class APSModel:
         else:
             text = obj.text
             self.set_debug_level(text)
+#            self.__debug_level = int(text.strip())
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
@@ -359,6 +384,7 @@ class APSModel:
             # Read this sub set of zone and region combinations.
             self.__selectAllZonesAndRegions = False
             kw2 = 'SelectedZoneWithRegions'
+            objSelectedZone=None
             for objSelectedZone in obj.findall(kw2):
                 text = objSelectedZone.get('zone')
                 zNumber = int(text.strip())
@@ -403,11 +429,16 @@ class APSModel:
             # which is to select all defined  (zone,region) models
             self.__selectAllZonesAndRegions = True
 
-        if self.__debug_level >= Debug.VERBOSE:
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Zone models are defined for the following combination '
+        self.__checkZoneModels()
+        
+        # Define sorted sequence of the zone models
+        self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
+
+        if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
+            if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
+                print('- Zone models are defined for the following combination '
                       'of zone and region numbers:')
-                for key , value in self.__zoneModelTable.items():
+                for key , value in self.__sortedZoneModelTable.items():
                     zNumber = key[0]
                     rNumber = key[1]
                     if rNumber == 0:
@@ -487,12 +518,36 @@ class APSModel:
 
         return tree
 
-#    def __nZones(self):
-#        if self.__zoneModelList:
-#            return len(self.__zoneModelList)
-#        else:
-#            return 0
+    #    def __nZones(self):
+    #        if self.__zoneModelList:
+    #            return len(self.__zoneModelList)
+    #        else:
+    #            return 0
 
+    def __checkZoneModels(self):
+        """
+        Description: Run through all zone models and check that:
+           If a zone model is specified with region number 0, it is not allowed to specify zone models for the same 
+           zone which is individual for regions > 0 as well. The reason is that a zone model with region 0 (which means not using regions) 
+           and zone models for the same zone but specified for individual regions will change facies code in a set of cells in the grid that
+           is common and hence "overwrite" each other. 
+        """
+        zoneNumbers = []
+        for key, zoneModel in self.__zoneModelTable.items():
+            zNumber = key[0]
+            rNumber = key[1]
+            if zNumber in zoneNumbers:
+                if rNumber == 0:
+                    raise ValueError(
+                    'There exists more than one zone model for zone: {}'.format(str(zNumber))
+                    )
+                else:
+                    # This is a model for a new region for an existing zone number that has several regions
+                    zoneNumbers.append(zNumber)
+            else:
+                # This is a model for a new (zone,region) combination for a new zone number
+                zoneNumbers.append(zNumber)
+                    
     @staticmethod
     def __readParamFromFile(inputFile, debug_level=Debug.OFF):
         # Search through the file line for line and skip lines commented out with '//'
@@ -557,7 +612,7 @@ class APSModel:
 
     def getSelectedRegionNumberListForSpecifiedZoneNumber(self,zoneNumber):
         selectedRegionNumberList = []
-        keyList = list(self.__selectedZoneAndRegionNumberTable.keys())
+        keyList = sorted(list(self.__selectedZoneAndRegionNumberTable.keys()))
         for i in range(len(keyList)):
             item = keyList[i]
             zNumber = item[0]
@@ -568,6 +623,8 @@ class APSModel:
         return selectedRegionNumberList
 
     def isSelected(self, zoneNumber, regionNumber):
+        if self.isAllZoneRegionModelsSelected():
+            return True
         key = (zoneNumber, regionNumber)
         if key in self.__selectedZoneAndRegionNumberTable:
             return True
@@ -582,7 +639,13 @@ class APSModel:
             return foundZoneModel
         except KeyError:
             return None
-        
+
+    def getAllZoneModels(self):
+        return self.__zoneModelTable
+
+    def getAllZoneModelsSorted(self):
+        return self.__sortedZoneModelTable
+    
     def getGridModelName(self):
         return copy.copy(self.__rmsGridModelName)
 
@@ -640,6 +703,12 @@ class APSModel:
 
     def getZoneParamName(self):
         return copy.copy(self.__rmsZoneParamName)
+
+    def getRegionParamName(self):
+        if self.__rmsRegionParamName is not None:
+            return copy.copy(self.__rmsRegionParamName)
+        else:
+            return None
 
     def debug_level(self):
         return self.__debug_level
@@ -704,7 +773,7 @@ class APSModel:
         else:
             raise ValueError(
                 'Can not select (zoneNumber, regionNumber) = ({},{}) since the zone model does not exist'
-                ''.format(str(zoneNumber), str(regionNumber))
+                ''.format(str(selectedZoneNumber), str(selectedRegionNumber))
                 )
 
     def setPreviewZoneAndRegionNumber(self, zoneNumber,regionNumber=0):
@@ -747,10 +816,11 @@ class APSModel:
             self.__previewScale = scale
 
     def addNewZone(self, zoneObject):
-        print('Call addNewZone')
         zoneNumber = zoneObject.getZoneNumber()
         regionNumber = zoneObject.getRegionNumber()
-        print('From addNewZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber), str(regionNumber)))
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Call addNewZone')
+            print('Debug output: From addNewZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber), str(regionNumber)))
         key = (zoneNumber, regionNumber)
         if not key in self.__zoneModelTable:
             self.__zoneModelTable[key] = zoneObject
@@ -762,6 +832,10 @@ class APSModel:
 
     def deleteZone(self, zoneNumber, regionNumber=0):
         key = (zoneNumber, regionNumber)
+        if self.__debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Call deleteZone')
+            print('Debug output: From deleteZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber), str(regionNumber)))
+
         if key in self.__zoneModelTable:
             del self.__zoneModelTable[key]
         
@@ -843,7 +917,7 @@ class APSModel:
                     if self.__rmsSingleZoneGrid:
                         if regionNumber > 0:
                             file.write('Print("Update Gauss field: ","{}"," for single zone grid for region number: {}")\n'
-                                       ''.format(gfNameUsed), str(regionNumber))
+                                       ''.format(gfNameUsed, str(regionNumber)))
                         else:
                             file.write('Print("Update Gauss field: ","{}"," for single zone grid")\n'.format(gfNameUsed))
                     else:
@@ -977,19 +1051,18 @@ class APSModel:
         # If selected zone list is defined (has elements) write them to a keyword
         selectedZoneNumberList = self.getSelectedZoneNumberList()
         if len(selectedZoneNumberList) > 0:
+            sortedSelectedZoneAndRegionNumberTable = collections.OrderedDict(sorted(self.__selectedZoneAndRegionNumberTable.items()))
             tag = 'SelectedZonesAndRegions'
             elemSelectedZoneAndRegion = Element(tag)
             root.append(elemSelectedZoneAndRegion)
-            print('SelectedZoneNumberList:')
-            print(repr(selectedZoneNumberList))
-            for i in range(len(selectedZoneNumberList)):
-                zNumber = selectedZoneNumberList[i]
+            for key, selected in sortedSelectedZoneAndRegionNumberTable.items():
+                zNumber = key[0]
+                rNumber = key[1]
                 tag = 'SelectedZoneWithRegions'
                 attributes= {'zone':str(zNumber)}
                 text = ''
                 elemZoneRegion = Element(tag,attributes)
 
-                
                 rList = self.getSelectedRegionNumberListForSpecifiedZoneNumber(zNumber)
                 text = ' '
                 useRegion = 1
@@ -1057,7 +1130,11 @@ class APSModel:
         tag = 'ZoneModels'
         zoneListElement = Element(tag)
 
-        for key, zoneModel in self.__zoneModelTable.items():
+        if len(self.__zoneModelTable.items()) > 0 and len(self.__sortedZoneModelTable.items()) == 0:
+            # Define sorted sequence of the zone models
+            self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
+
+        for key, zoneModel in self.__sortedZoneModelTable.items():
             # Add command Zone
             zoneModel.XMLAddElement(zoneListElement)
         root.append(zoneListElement)

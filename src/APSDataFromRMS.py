@@ -2,7 +2,14 @@
 # Python 3 script to read data from xml file with RMS information.
 
 import copy
+import importlib
 import xml.etree.ElementTree as ET
+
+import src.APSMainFaciesTable
+import src.utils.constants.simple
+
+importlib.reload(src.APSMainFaciesTable)
+importlib.reload(src.utils.constants.simple)
 
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
@@ -39,6 +46,8 @@ class APSDataFromRMS:
             'Project realization number': 0,
             'Grid model name': '',
             'Zones': [],
+            'Gauss field names': [],
+            'Zone and region pairs':  {},
             'Horizon names': [],
         }
 
@@ -49,6 +58,8 @@ class APSDataFromRMS:
             'RealisationNumber': 'Project realisation number',
             'GridModel': 'Grid model name',
             'ZoneName': 'Zones',
+            'GaussFieldNames': 'Gauss field names',
+            'ZoneAndRegionNumbers': 'Zone and region pairs',
             'Horizon': 'Horizon names',
             'NX': 'nx',
             'NY': 'ny',
@@ -127,6 +138,12 @@ class APSDataFromRMS:
             name = item[1]
             zoneNames.append(name)
         return zoneNames
+
+    def getGaussFieldNames(self):
+        return copy.copy(self.__data['Gauss field names'])
+
+    def getZoneAndRegionNumbers(self):
+        return self.__data['Zone and region pairs']
 
     def getNumberOfLayersInZone(self, zoneNumber):
         # item = [zoneNumber, zoneName, nLayers]
@@ -216,6 +233,25 @@ class APSDataFromRMS:
             zoneName = text.strip()
             zones.append([zoneNumber, zoneName, nLayers])
         self.__data['Zones'] = zones
+
+        kw = 'GaussFieldNames'
+        gfNames = []
+        for gfNameObj in gmObj.findall(kw):
+            text = gfNameObj.text
+            gfNames.append(text.strip())
+        self.__data['Gauss field names'] = gfNames
+
+        kw = 'ZoneAndRegionNumbers'
+        zoneAndRegionNumbers={}
+        for zrNumbersObj in gmObj.findall(kw):
+            text = zrNumbersObj.get('zoneNumber')
+            zoneNumber = int(text.strip())
+            text = zrNumbersObj.get('regionNumber')
+            regionNumber = int(text.strip())
+            # The dictionary contain keys that are zone and region pairs
+            key = (zoneNumber, regionNumber)
+            zoneAndRegionNumbers[key] = 1
+        self.__data['Zone and region pairs'] = zoneAndRegionNumbers
 
         keywords = ['XSize', 'YSize', 'AzimuthAngle', 'OrigoX', 'OrigoY', 'NX', 'NY', 'Xinc', 'Yinc']
         for key in keywords:

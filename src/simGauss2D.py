@@ -2,8 +2,15 @@
 from ctypes import CDLL, POINTER, c_double, c_float, c_int, c_uint
 
 import numpy as np
+import importlib
 
-from src.utils.constants.environment import DrawingLibrary
+#import src.utils.constants.environment
+import src.utils.constants.simple
+
+#importlib.reload(src.utils.constants.environment)
+importlib.reload(src.utils.constants.simple)
+
+#from src.utils.constants.environment import DrawingLibrary
 from src.utils.constants.simple import Debug, VariogramType
 
 # Input angle for variogram is azimuth angle in degrees
@@ -12,7 +19,8 @@ from src.utils.constants.simple import Debug, VariogramType
 # -----       Functions used to draw gaussian fields: -------------------------
 
 # Global object with c/c++ code for simulation of gaussian fields
-_draw2DLib = CDLL(DrawingLibrary.LIBRARY_PATH.value)
+#_draw2DLib = CDLL(DrawingLibrary.LIBRARY_PATH.value)
+_draw2DLib = CDLL('./libdraw2D.so')
 
 # Define input data types
 _draw2DLib.draw2DGaussField.argtypes = (
@@ -28,9 +36,13 @@ _draw2DLib.draw2DGaussField.restype = floatArrayPointer
 
 
 # Function simulating 2D gaussian field
+#def draw2D(
+#        nx: int, ny: int, xsize: float, ysize: float, variogram_type: VariogramType,
+#        iseed: int, range1: float, range2: float, angle: float, power: float, debug_level: Debug = Debug.OFF
+#):
 def draw2D(
-        nx: int, ny: int, xsize: float, ysize: float, variogram_type: VariogramType,
-        iseed: int, range1: float, range2: float, angle: float, power: float, debug_level: Debug = Debug.OFF
+        nx, ny, xsize, ysize, variogram_type,
+        iseed, range1, range2, angle, power, debug_level
 ):
     """
 
@@ -73,7 +85,7 @@ def draw2D(
     arrayPointer = _draw2DLib.draw2DGaussField(
         c_int(nx), c_int(ny),
         c_double(xsize), c_double(ysize),
-        c_int(variogram_type), c_uint(iseed),
+        c_int(variogram_type.value), c_uint(iseed),
         c_double(range1), c_double(range2),
         c_double(angle), c_double(power), c_int(debug_level.value)
     )

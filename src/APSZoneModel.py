@@ -1,8 +1,30 @@
 #!/bin/env python
+import sys
 import copy
+import importlib
+import numpy as np
 from xml.etree.ElementTree import Element
 
-import numpy as np
+import src.APSFaciesProb
+import src.APSGaussFieldJobs
+import src.APSGaussModel
+import src.APSMainFaciesTable
+import src.Trunc2D_Angle_xml
+import src.Trunc2D_Cubic_xml
+import src.Trunc3D_bayfill_xml
+import src.utils.constants.simple
+import src.utils.xml
+
+
+importlib.reload(src.APSFaciesProb)
+importlib.reload(src.APSGaussFieldJobs)
+importlib.reload(src.APSGaussModel)
+importlib.reload(src.APSMainFaciesTable)
+importlib.reload(src.Trunc2D_Angle_xml)
+importlib.reload(src.Trunc2D_Cubic_xml)
+importlib.reload(src.Trunc3D_bayfill_xml)
+importlib.reload(src.utils.constants.simple)
+importlib.reload(src.utils.xml)
 
 from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
@@ -12,7 +34,6 @@ from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
-# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand
 
 
@@ -179,14 +200,14 @@ class APSZoneModel:
             regionNumberAsText = zone.get('regionNumber')
             if regionNumberAsText is not None:
                 regionNumber = int(regionNumberAsText)
+                if regionNumber < 0:
+                    raise ValueError('Region number must be positive integer if region is used.\n'
+                                     'Zero as region number means that regions is not used for the zone.\n'
+                                     'Can not have negative region number: {}'.format(str(regionNumber))
+                                     )
             else:
                 regionNumber = 0
-            if regionNumber < 0:
-                raise ValueError('Region number must be positive integer if region is used.\n'
-                                 'Zero as region number means that regions is not used for the zone.\n'
-                                 'Can not have negative region number: {}'.format(str(regionNumber))
-                                 )
-                if self.__debug_level == Debug.VERY_VERBOSE:
+            if self.__debug_level == Debug.VERY_VERBOSE:
                     print('Debug output: Zone number: {}  Region number: {}'.format(str(zoneNumber), str(regionNumber)))
             else:
                 if self.__debug_level == Debug.VERY_VERBOSE:
@@ -492,8 +513,8 @@ class APSZoneModel:
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
-                'Error: In class: ' + self.__className + '\n'
-                                                         'Error: Mismatch in input to applyTruncations'
+                'Error: In class: {}. Mismatch in input to applyTruncations '
+                ''.format(self.__className)
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
@@ -529,7 +550,7 @@ class APSZoneModel:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
                 elif debug_level >= Debug.VERY_VERBOSE:
-                    if np.mod(i, 10000) == 0:
+                    if np.mod(i, 50000) == 0:
                         print('--- Calculate facies for cell number: ' + str(i))
 
                 cellIndx = cellIndexDefined[i]
@@ -564,7 +585,7 @@ class APSZoneModel:
 
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE:
-                    if np.mod(i, 10000) == 0:
+                    if np.mod(i, 50000) == 0:
                         truncRuleName = truncObject.getClassName()
                         if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
                             nCalc = truncObject.getNCalcTruncMap()
