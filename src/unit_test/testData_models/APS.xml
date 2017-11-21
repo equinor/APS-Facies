@@ -1,13 +1,27 @@
 <?xml version="1.0" ?>
 <APSModel>
-  <Preview zoneNumber="5" crossSectionType="IJ" crossSectionIndx="5" scale="500">
+  <Preview zoneNumber="5" regionNumber="0" crossSectionType="IJ" crossSectionIndx="5" scale="500">
   </Preview>
+    <Optimization>
+    <UseMemoization> 1 </UseMemoization>
+    <MemoizationResolution>  100  </MemoizationResolution>
+  </Optimization>
+  
+  <SelectedZonesAndRegions>
+    <SelectedZoneWithRegions zone="5">        </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="2">  1 4    </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="4">       </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="6">  10      </SelectedZoneWithRegions>
+  </SelectedZonesAndRegions>
+
   <SelectedZones> 1 2 3 4 5 </SelectedZones>
   <RMSProjectName> testNeslen.rms10 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
   <RMSGaussFieldScriptName> MakeGaussFields.ipl </RMSGaussFieldScriptName>
   <GridModelName> APS_NESLEN_ODM </GridModelName>
+  <UseSingleZoneGrid> 0 </UseSingleZoneGrid>
   <ZoneParamName> Zone </ZoneParamName>
+  <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
   <PrintInfo> 2 </PrintInfo>
   <MainFaciesTable>
@@ -67,7 +81,7 @@
     </Job>
   </GaussFieldJobNames>
   <ZoneModels>
-    <Zone number="5">
+    <Zone number="5" regionNumber="0">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_1 </HorizonNameVarioTrend>
@@ -130,7 +144,7 @@
 	</BackGroundModel>
       </TruncationRule>
     </Zone>
-    <Zone number="2">
+    <Zone number="2" regionNumber="1">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_2 </HorizonNameVarioTrend>
@@ -193,7 +207,7 @@
 	</BackGroundModel>
       </TruncationRule>
     </Zone>
-    <Zone number="3">
+    <Zone number="2" regionNumber="4">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_3 </HorizonNameVarioTrend>
@@ -506,7 +520,7 @@
         </OverLayModel>
       </TruncationRule>
     </Zone>
-    <Zone number="6">
+    <Zone number="6" regionNumber="10">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_6 </HorizonNameVarioTrend>

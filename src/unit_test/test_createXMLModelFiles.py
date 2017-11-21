@@ -15,14 +15,14 @@ from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
-    NO_VERBOSE_DEBUG
+    NO_VERBOSE_DEBUG,VERY_VERBOSE_DEBUG
 )
 from src.utils.constants.simple import Debug, VariogramType
 
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, debug_level=NO_VERBOSE_DEBUG
+        zoneParamName, faciesRealParamNameResult, fTable, debug_level=VERY_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
@@ -33,7 +33,7 @@ def defineCommonModelParam(
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
     apsmodel.set_debug_level(debug_level)
-
+    print('Debug level: {}'.format(str(apsmodel.debug_level())))
     # Define gauss field jobs
     gfJobObject = APSGaussFieldJobs()
     gfJobNames = ['GRFJob1', 'GRFJob2', 'GRFJob3']
@@ -49,6 +49,7 @@ def defineCommonModelParam(
 def addZoneParam(
         apsmodel,
         zoneNumber=0,
+        regionNumber=0,
         horizonNameForVariogramTrendMap=None,
         simBoxThickness=0.0,
         # Facies prob for zone
@@ -164,7 +165,7 @@ def addZoneParam(
 
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
-        zoneNumber=zoneNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
+        zoneNumber=zoneNumber, regionNumber=regionNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
         horizonNameForVariogramTrendMap=horizonNameForVariogramTrendMap, faciesProbObject=faciesProbObj,
         gaussModelObject=gaussModelObj, truncRuleObject=truncRuleObj, debug_level=debug_level
     )
@@ -172,6 +173,15 @@ def addZoneParam(
     # Add zone to APSModel
     apsmodel.addNewZone(apsZoneModel)
 
+    # Delete zone to APSModel
+    apsmodel.deleteZone(zoneNumber, regionNumber)
+
+    # Add zone to APSModel
+    apsmodel.addNewZone(apsZoneModel)
+
+    # Get zone numbers and region numbers
+    print('Zone numbers:')
+    print(apsmodel.getZoneNumberList())
 
 def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
@@ -371,15 +381,16 @@ def test_case_1_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_1(apsmodel)
-    selectedZones = [1]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(1)
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    read_write_model(apsmodel, Debug.VERY_VERBOSE)
 
 
 def test_case_1_zone_2():
@@ -396,9 +407,14 @@ def test_case_1_zone_2():
     add_zone_1_for_case_1(apsmodel)
     print('Zone: 2')
     add_zone_2_for_case_1(apsmodel)
-    selectedZones = [1, 2]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(2)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+
+    selectedZoneNumber = 2
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -415,9 +431,10 @@ def test_case_2_zone_1():
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_2(apsmodel)
-    selectedZones = [1]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(1)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -435,9 +452,14 @@ def test_case_2_zone_2():
     add_zone_1_for_case_2(apsmodel)
     print('Zone: 2')
     add_zone_2_for_case_2(apsmodel)
-    selectedZones = [1, 2]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(2)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+
+    selectedZoneNumber = 2
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -453,9 +475,10 @@ def test_case_3_zone_1():
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_3(apsmodel)
-    selectedZones = [1]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(1)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -463,6 +486,7 @@ def add_zone_1_for_case_1(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=1,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
@@ -503,6 +527,7 @@ def add_zone_2_for_case_1(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=2,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_2',
         simBoxThickness=12.0,
         # Facies prob for zone
@@ -539,6 +564,7 @@ def add_zone_1_for_case_2(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=1,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
@@ -575,6 +601,7 @@ def add_zone_2_for_case_2(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=2,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_2',
         simBoxThickness=12.0,
         # Facies prob for zone
@@ -611,6 +638,7 @@ def add_zone_1_for_case_3(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=1,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone

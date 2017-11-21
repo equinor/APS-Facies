@@ -1,12 +1,18 @@
 <?xml version="1.0" ?>
 <APSModel>
-  <Preview crossSectionIndx="5" crossSectionType="IJ" scale="500.0" zoneNumber="5"/>
-  <SelectedZones> 1 2 3 4 5 </SelectedZones>
+  <Preview crossSectionIndx="5" crossSectionType="IJ" regionNumber="0" scale="500.0" zoneNumber="5"/>
+  <SelectedZonesAndRegions>
+    <SelectedZoneWithRegions zone="5"> </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="2">  1  4 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="4"> </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="6">  10 </SelectedZoneWithRegions>
+  </SelectedZonesAndRegions>
   <RMSProjectName> testNeslen.rms10 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
   <RMSGaussFieldScriptName> MakeGaussFields.ipl </RMSGaussFieldScriptName>
   <GridModelName> APS_NESLEN_ODM </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
+  <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
   <PrintInfo> 2 </PrintInfo>
   <MainFaciesTable>
@@ -126,7 +132,7 @@
         </BackGroundModel>
       </TruncationRule>
     </Zone>
-    <Zone number="2">
+    <Zone number="2" regionNumber="1">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_2 </HorizonNameVarioTrend>
@@ -186,7 +192,7 @@
         </BackGroundModel>
       </TruncationRule>
     </Zone>
-    <Zone number="3">
+    <Zone number="2" regionNumber="4">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_3 </HorizonNameVarioTrend>
@@ -497,7 +503,7 @@
         </OverLayModel>
       </TruncationRule>
     </Zone>
-    <Zone number="6">
+    <Zone number="6" regionNumber="10">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <HorizonNameVarioTrend> top_middle_Neslen_6 </HorizonNameVarioTrend>

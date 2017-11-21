@@ -103,15 +103,26 @@ class APSZoneModel:
     """
 
     def __init__(
-            self, ET_Tree=None, zoneNumber=0, inputMainLevelFacies=None, modelFileName=None,
+            self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
             useConstProb=False, simBoxThickness=10.0, horizonNameForVariogramTrendMap=None,
-            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None, faciesLevel=1,
+            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
             debug_level=Debug.OFF, keyResolution=100
     ):
+        # If the object is created by reading the xml tree for model parameters, it is required that
+        # zoneNumber is set to a value > 0 and optionally that regionNumber is set to a value > 0.
+        # The modelFileName is only used for more informative error messages and should also be defined in this case.
+        # None of the other parameters should be defined since they are read from the xml tree.
+        # If regionNumber is > 0 then both zone parameter and region parameter is used to define which grid cells
+        # is to be used when calculating facies. If zoneNumber is 0, the region parameter is not used to
+        # define which grid cells to calculate facies for.
+        #
+        # If the object is not created by reading the xml tree, then the ET_Tree should be None and
+        # modelFileName should not be defined. Then all other parameters must be defined.
         self.__className = self.__class__.__name__
         # Local variables
         self.__zoneNumber = zoneNumber
-        self.__mainLevelFacies = inputMainLevelFacies
+        self.__regionNumber = regionNumber
+        #        self.__mainLevelFacies = inputMainLevelFacies
         self.__useConstProb = useConstProb
         self.__simBoxThickness = simBoxThickness
 
@@ -119,7 +130,6 @@ class APSZoneModel:
         self.__gaussModelObject = gaussModelObject
 
         self.__truncRule = truncRuleObject
-        self.__faciesLevel = faciesLevel
         self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
@@ -158,15 +168,31 @@ class APSZoneModel:
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
         gaussFieldJobs = APSGaussFieldJobs(ET_Tree, modelFileName)
 
+        regionNumber = 0
+        zoneNumber   = 0
         zoneModels = getKeyword(root, 'ZoneModels', 'Root', modelFile=modelFileName)
         for zone in zoneModels.findall('Zone'):
             zoneNumber = int(zone.get('number'))
-            mainLevelFacies = zone.get('mainLevelFacies')
-            if zoneNumber == self.__zoneNumber and mainLevelFacies == self.__mainLevelFacies:
-                if mainLevelFacies is None:
-                    self.__faciesLevel = 1
-                else:
-                    self.__faciesLevel = 2
+            if zoneNumber <= 0:
+                raise ValueError('Zone number must be a positive integer number')
+            
+            regionNumberAsText = zone.get('regionNumber')
+            if regionNumberAsText is not None:
+                regionNumber = int(regionNumberAsText)
+            else:
+                regionNumber = 0
+            if regionNumber < 0:
+                raise ValueError('Region number must be positive integer if region is used.\n'
+                                 'Zero as region number means that regions is not used for the zone.\n'
+                                 'Can not have negative region number: {}'.format(str(regionNumber))
+                                 )
+                if self.__debug_level == Debug.VERY_VERBOSE:
+                    print('Debug output: Zone number: {}  Region number: {}'.format(str(zoneNumber), str(regionNumber)))
+            else:
+                if self.__debug_level == Debug.VERY_VERBOSE:
+                    print('Debug output: Zone number: {}'.format(str(zoneNumber)))
+                
+            if zoneNumber == self.__zoneNumber and regionNumber == self.__regionNumber:
 
                 useConstProb = getIntCommand(zone, 'UseConstProb', 'Zone', modelFile=modelFileName)
                 self.__useConstProb = useConstProb
@@ -180,9 +206,9 @@ class APSZoneModel:
                 self.__horizonNameForVariogramTrendMap = mapName
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: From APSZoneModel: ZoneNumber: ' + str(zoneNumber))
-                    print('Debug output: From APSZoneModel: mainLevelFacies: ' + str(mainLevelFacies))
-                    print('Debug output: From APSZoneModel: useConstProb: ' + str(self.__useConstProb))
+                    print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zoneNumber))
+                    print('Debug output: From APSZoneModel: RegionNumber:    ' + str(regionNumber))
+                    print('Debug output: From APSZoneModel: useConstProb:    ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
                     text = 'Debug output: From APSZoneModel: Horizon name to be used for saving \n'
                     text += '              azimuth variogram trend for this zone: '
@@ -294,17 +320,20 @@ class APSZoneModel:
     def getZoneNumber(self):
         return self.__zoneNumber
 
+    def getRegionNumber(self):
+        return self.__regionNumber
+
     def useConstProb(self) -> bool:
         return self.__useConstProb
 
-    def isMainLevelModel(self):
-        if self.__faciesLevel == 1:
-            return True
-        else:
-            return False
+#    def isMainLevelModel(self):
+#        if self.__faciesLevel == 1:
+#            return True
+#        else:
+#            return False
 
-    def getMainLevelFacies(self):
-        return copy.copy(self.__mainLevelFacies)
+#    def getMainLevelFacies(self):
+#        return copy.copy(self.__mainLevelFacies)
 
     def getFaciesInZoneModel(self):
         return self.__faciesProbObject.getFaciesInZoneModel()
@@ -601,10 +630,10 @@ class APSZoneModel:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'
-        if self.__faciesLevel == 1:
+        if self.__regionNumber <= 0:
             attribute = {'number': str(self.__zoneNumber)}
         else:
-            attribute = {'number': str(self.__zoneNumber), 'mainLevelFacies': self.__mainLevelFacies.strip()}
+            attribute = {'number': str(self.__zoneNumber), 'regionNumber': str(self.__regionNumber)}
         elem = Element(tag, attribute)
         zoneElement = elem
         parent.append(zoneElement)
@@ -634,7 +663,7 @@ class APSZoneModel:
         self.__gaussModelObject.XMLAddElement(zoneElement)
         # Add child command TruncationRule at end of the child list for
         self.__truncRule.XMLAddElement(zoneElement)
-
+        
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
