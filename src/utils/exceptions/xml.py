@@ -30,7 +30,6 @@ class ReadingXmlError(ApsXmlError, IOError):
 class ValueOutsideExpectedRange(ApsXmlError):
     def __init__(self, message, errors=None):
         super(ValueOutsideExpectedRange, self).__init__(message=message, errors=errors)
-        pass
 
     @staticmethod
     def get_value_specified_error_message(keyword, parent_keyword=None, model_file_name=None, end_with_period=True):
