@@ -3,7 +3,7 @@ import copy
 import sys
 from xml.etree.ElementTree import Element
 
-from src.utils.APSExceptions import ReadingXmlError
+from src.utils.exceptions.xml import ReadingXmlError
 from src.utils.constants.simple import Debug
 
 
