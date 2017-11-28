@@ -1,16 +1,4 @@
-class ApsException(Exception):
-    def __init__(self, message, errors=None):
-        super(ApsException, self).__init__(message)
-        self.errors = errors
-
-
-class InconsistencyError(ApsException):
-    def __init__(self, class_name):
-        super(InconsistencyError, self).__init__(
-            "Error in {}\n"
-            "Error: Inconsistency"
-            "".format(class_name)
-        )
+from src.utils.exceptions.base import ApsException
 
 
 class ApsXmlError(ApsException, IOError):
@@ -42,7 +30,6 @@ class ReadingXmlError(ApsXmlError, IOError):
 class ValueOutsideExpectedRange(ApsXmlError):
     def __init__(self, message, errors=None):
         super(ValueOutsideExpectedRange, self).__init__(message=message, errors=errors)
-        pass
 
     @staticmethod
     def get_value_specified_error_message(keyword, parent_keyword=None, model_file_name=None, end_with_period=True):
