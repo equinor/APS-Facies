@@ -7,7 +7,7 @@ from xml.etree.ElementTree import Element
 from src.APSGaussFieldJobs import APSGaussFieldJobs
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSZoneModel import APSZoneModel
-from src.utils.exceptions.xml import MissingAttributeInKeyword
+from src.utils.APSExceptions import MissingAttributeInKeyword
 from src.utils.constants.simple import Debug
 from src.utils.xml import prettify, getTextCommand, getKeyword, getIntCommand
 from src.utils.numeric import isNumber

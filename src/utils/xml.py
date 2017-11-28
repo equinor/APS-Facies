@@ -1,7 +1,7 @@
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
-from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected
+from src.utils.APSExceptions import ReadingXmlError, LessThanExpected, MoreThanExpected
 
 
 def prettify(elem):
