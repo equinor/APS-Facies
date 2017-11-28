@@ -4,7 +4,6 @@
 import matplotlib
 import numpy as np
 import scipy
-from typing import List
 
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
@@ -12,7 +11,7 @@ from matplotlib.patches import Polygon
 
 from src.APSDataFromRMS import APSDataFromRMS
 from src.APSModel import APSModel
-from src.utils.APSExceptions import CrossSectionOutsideRange, UndefinedZoneError
+from src.utils.exceptions.xml import CrossSectionOutsideRange, UndefinedZoneError
 from src.utils.constants.simple import Debug
 from src.utils.io import readFile, writeFile
 
