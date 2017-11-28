@@ -1,16 +1,4 @@
-class ApsException(Exception):
-    def __init__(self, message, errors=None):
-        super(ApsException, self).__init__(message)
-        self.errors = errors
-
-
-class InconsistencyError(ApsException):
-    def __init__(self, class_name):
-        super(InconsistencyError, self).__init__(
-            "Error in {}\n"
-            "Error: Inconsistency"
-            "".format(class_name)
-        )
+from src.utils.exceptions.base import ApsException
 
 
 class ApsXmlError(ApsException, IOError):
@@ -46,11 +34,11 @@ class ValueOutsideExpectedRange(ApsXmlError):
 
     @staticmethod
     def get_value_specified_error_message(keyword, parent_keyword=None, model_file_name=None, end_with_period=True):
-        message = f"The value specified in the keyword '{keyword}'"
+        message = "The value specified in the keyword '{keyword}'".format(keyword=keyword)
         if parent_keyword:
-            message += f", underneath the parent keyword '{parent_keyword}'"
+            message += ", underneath the parent keyword '{parent_keyword}'".format(parent_keyword=parent_keyword)
         if model_file_name:
-            message += f", in the model file '{model_file_name}'"
+            message += ", in the model file '{model_file_name}'".format(model_file_name=model_file_name)
         if end_with_period:
             message += '.'
         return message
@@ -64,7 +52,10 @@ class LessThanExpected(ValueOutsideExpectedRange):
             model_file_name=model_file_name,
             end_with_period=False
         )
-        message = base_message + f', is LESS than the minimum value ({value} < {minimum})'
+        message = base_message + ', is LESS than the minimum value ({value} < {minimum})'.format(
+            value=value,
+            minimum=minimum
+        )
         if end_with_period:
             message += '.'
         super(LessThanExpected, self).__init__(message)
@@ -78,7 +69,10 @@ class MoreThanExpected(ValueOutsideExpectedRange):
             model_file_name=model_file_name,
             end_with_period=False
         )
-        message = base_message + f', is GREATER than the maximum value ({value} > {maximum})'
+        message = base_message + ', is GREATER than the maximum value ({value} > {maximum})'.format(
+            value=value,
+            maximum=maximum
+        )
         if end_with_period:
             message += '.'
         super(MoreThanExpected, self).__init__(message)
@@ -87,20 +81,27 @@ class MoreThanExpected(ValueOutsideExpectedRange):
 class UndefinedZoneError(NameError):
     def __init__(self, zone_number: int):
         super(UndefinedZoneError, self).__init__(
-            f'Error: Zone number: {zone_number} is not defined'
+            'Error: Zone number: {zone_number} is not defined'.format(zone_number=zone_number)
         )
 
 
 class MissingAttributeInKeyword(KeyError):
     def __init__(self, keyword, attribute_name):
         super(MissingAttributeInKeyword, self).__init__(
-            f"The attribute '{attribute_name}' is required for the keyword '{keyword}'"
+            "The attribute '{attribute_name}' is required for the keyword '{keyword}'".format(
+                attribute_name=attribute_name,
+                keyword=keyword
+            )
         )
 
 
 class CrossSectionOutsideRange(ValueError):
     def __init__(self, cross_section_name, cross_section_index, upper_bound):
         super(CrossSectionOutsideRange, self).__init__(
-            f'Cross section index is specified to be: {cross_section_index} for {cross_section_name} cross section, '
-            f'but must be in interval [0, {upper_bound}]'
+            'Cross section index is specified to be: {cross_section_index} for {cross_section_name} cross section, '
+            'but must be in interval [0, {upper_bound}]'.format(
+                cross_section_index=cross_section_index,
+                cross_section_name=cross_section_name,
+                upper_bound=upper_bound
+            )
         )
