@@ -42,13 +42,16 @@ def get_commit_hash() -> str:
 
 def get_version_tag() -> str:
     if LATEST_VERSION:
-        return f'version {LATEST_VERSION}'
+        return 'version {latest_version}'.format(latest_version=LATEST_VERSION)
     build_number = get_build_number()
     if build_number > 0:
-        return f'build {get_build_number()}, on branch \'{BRANCH_NAME}\''
+        return "build {build_number}, on branch '{branch_name}'".format(
+            build_number=get_build_number(),
+            branch_name=BRANCH_NAME
+        )
     else:
         # TODO: other name
-        return f'unknown build, on branch \'{BRANCH_NAME}\''
+        return "unknown build, on branch '{branch_name}'".format(branch_name=BRANCH_NAME)
 
 
 def get_path_to_libraries() -> str:

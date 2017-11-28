@@ -9,7 +9,7 @@ from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSZoneModel import APSZoneModel
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify, getTextCommand
+from src.utils.xml import prettify, getTextCommand, getIntCommand
 
 
 class APSModel:
@@ -86,7 +86,7 @@ class APSModel:
 
     def __init__(
             self, modelFileName=None, rmsProjectName='', rmsWorkflowName='', rmsGaussFieldScriptName='',
-            rmsGridModelName='', rmsZoneParameterName='', rmsFaciesParameterName='', rmsGFJobs=None,
+            rmsGridModelName='', rmsSingleZoneGrid='False', rmsZoneParameterName='', rmsFaciesParameterName='', rmsGFJobs=None,
             rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None,
             zoneModelListMainLevel=None, zoneModelListSecondLevel=None,
             previewZone=0, previewCrossSectionType='IJ', previewCrossSectionIndx=0,
@@ -98,6 +98,7 @@ class APSModel:
         self.__rmsGaussFieldScriptName = rmsGaussFieldScriptName
 
         self.__rmsGridModelName = rmsGridModelName
+        self.__rmsSingleZoneGrid = rmsSingleZoneGrid
         self.__rmsZoneParamName = rmsZoneParameterName
         self.__rmsFaciesParamName = rmsFaciesParameterName
         self.__rmsGFJobs = rmsGFJobs
@@ -187,6 +188,17 @@ class APSModel:
             value = getTextCommand(root, keyword, modelFile=modelFileName)
             self.__setattr__(prefix + variable, value)
 
+        # Read optional keyword which specify whether the gridmodel is a singe zone grid or multi zone grid
+        keyword = 'UseSingleZoneGrid'
+        value = getIntCommand(root, keyword, parentKeyword='',
+                              minValue=0, maxValue=1, defaultValue=0,
+                              modelFile=modelFileName, required=False
+        )
+        if value == 0:
+            self.__rmsSingleZoneGrid = False
+        else:
+            self.__rmsSingleZoneGrid = True
+
         # Read all gauss field jobs and their gauss field 3D parameter names
         self.__rmsGFJobs = APSGaussFieldJobs(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
@@ -195,6 +207,10 @@ class APSModel:
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: RMSGridModel:                       ' + self.__rmsGridModelName)
+            if not self.__rmsSingleZoneGrid:
+                print('Debug output: RMS grid is multi zone grid:        ' + 'Yes')
+            else:
+                print('Debug output: RMS grid is multi zone grid:        ' + 'No')
             print('Debug output: RMSZoneParamName:                   ' + self.__rmsZoneParamName)
             print('Debug output: RMSFaciesParamName:                 ' + self.__rmsFaciesParamName)
             print('Debug output: Name of RMS project read:           ' + self.__rmsProjectName)
@@ -672,8 +688,11 @@ class APSModel:
 
                 for i in range(nGFParamUsed):
                     gfNameUsed = gaussFieldNamesInZoneModel[i]
-                    file.write('Print("Update Gauss field: ","{}"," for zone: ",{})\n'.format(gfNameUsed, zoneNumber))
-
+                    if self.__rmsSingleZoneGrid:
+                        file.write('Print("Update Gauss field: ","{}"," for single zone grid")\n'.format(gfNameUsed))
+                    else:
+                        file.write('Print("Update Gauss field: ","{}"," for zone: ",{})\n'.format(gfNameUsed, zoneNumber))
+                    
                     # Check which rms job this gauss field parameter belongs to
                     for j in range(nJobs):
 
@@ -694,32 +713,66 @@ class APSModel:
                                 power = currentZoneModel.getPower(gfNameUsed)
 
                             file.write('job = "{}"\n'.format(currentJobName))
+                            if self.__rmsSingleZoneGrid:
+                                file.write(
+                                    'paramName = "Group[{}].VariogramType"\n'.format(gfIndx + 1)
+                                )
+                                file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
+                                
+                                file.write(
+                                    'paramName = "Group[{}].VariogramStdDev"\n'.format(gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(1.0))
+                                file.write('ModifyJob(job,paramName,value)\n')
 
-                            file.write(
-                                'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
-                            )
-
-                            file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
-                            file.write(
-                                'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
-                            )
-                            file.write('value = {}\n'.format(1.0))
-                            file.write('ModifyJob(job,paramName,value)\n')
-                            file.write(
-                                'paramName = "Zone[{}].Group[{}].VariogramMainRange"\n'.format(zoneNumber, gfIndx + 1)
-                            )
-                            file.write('value = {}\n'.format(range1))
-                            file.write('ModifyJob(job,paramName,value)\n')
-                            file.write(
-                                'paramName = "Zone[{}].Group[{}].VariogramPerpRange"\n'.format(zoneNumber, gfIndx + 1)
-                            )
-                            file.write('value = {}\n'.format(range2))
-                            file.write('ModifyJob(job,paramName,value)\n')
-                            file.write(
-                                'paramName = "Zone[{}].Group[{}].VariogramVertRange"\n'.format(zoneNumber, gfIndx + 1)
-                            )
-                            file.write('value = {}\n'.format(range3))
-                            file.write('ModifyJob(job,paramName,value)\n')
+                                file.write(
+                                    'paramName = "Group[{}].VariogramMainRange"\n'.format(gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(range1))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                                
+                                file.write(
+                                    'paramName = "Group[{}].VariogramPerpRange"\n'.format(gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(range2))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                                
+                                file.write(
+                                    'paramName = "Group[{}].VariogramVertRange"\n'.format(gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(range3))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                                
+                            else:
+                                file.write(
+                                    'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
+                                )
+                                file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
+                                
+                                file.write(
+                                    'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(1.0))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                                
+                                file.write(
+                                    'paramName = "Zone[{}].Group[{}].VariogramMainRange"\n'.format(zoneNumber, gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(range1))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                                
+                                file.write(
+                                    'paramName = "Zone[{}].Group[{}].VariogramPerpRange"\n'.format(zoneNumber, gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(range2))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                                
+                                file.write(
+                                    'paramName = "Zone[{}].Group[{}].VariogramVertRange"\n'.format(zoneNumber, gfIndx + 1)
+                                )
+                                file.write('value = {}\n'.format(range3))
+                                file.write('ModifyJob(job,paramName,value)\n')
+                            
                             file.write('ApplyJob(job)\n')
                             file.write('\n')
                             break
