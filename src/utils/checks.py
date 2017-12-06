@@ -27,4 +27,4 @@ def isVariogramTypeOK(variogramType, debug_level=Debug.OFF):
         print('       EXPONENTIAL')
         print('       GAUSSIAN')
         print('       GENERAL_EXPONENTIAL')
-        return False
+    return False

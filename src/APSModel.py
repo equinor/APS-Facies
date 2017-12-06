@@ -111,61 +111,62 @@ class APSModel:
             rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionIndx=0,
             previewScale=1.0, debug_level=Debug.OFF):
-        # The following parameters are necessary to define a model:
-        # If a model is created from a model file, the only necessary input is modelFileName
-        #
-        # If the model is created from e.g APSGUI, these parameters must be specified:
-        # rmsProjectName - Name of RMS project which will run a workflow using the APS method
-        # rmsWorkflowName - Name of RMS workflow for APS model
-        # rmsGaussFieldScriptName - temporary file used by the workflow. This file should not be specified
-        #                           my the user but get a default name. It contains the IPL script to
-        #                           create gaussian fields which will run RMS petrosim jobs
-        #                           to create the gaussian fields. This file will not be used
-        #                           when our new gaussian simulation code implemented into the APS src code.
-        # rmsGridModelName - Name of grid model in RMS project.
-        # rmsSingleZoneGrid - Boolean value. True if the RMS grid model specified with rmsGridModelName is a single zone grid and false if not
-        # rmsZoneParameterName - Zone parameter for the grid model in the RMS project.
-        # rmsRegionParameterName - Region parameter for the grid model in the RMS project.
-        # rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
-        # rmsGFJobs -  Object of the GaussFieldJobs which contain list of RMS petrosim jobs and name of
-        #              Gaussian fields each of those RMS jobs creates.
-        #              This is necessary as a link between the gauss fields created in the RMS project and
-        #              the gauss fields used in the APS model. As soon as the new gauss fields code is implemented
-        #              the APS model is no longer dependent on RMS petrosim jobs and this
-        #              structure here will not be necessary anymore.
-        # rmsHorizonRefName - This is name of a Horizon surface which is used to define the 2D grid resolution
-        #                     of 2D surfaces containing variogram azimuth anisotropy angles.
-        #                    This is only necessary as a workaround as long as the project depends on creating
-        #                    gaussian fields using RMS petrosim module, and this will no longer be necessary
-        #                    when the new gaussian field simulation is implemented in the APS code.
-        # rmsHorizonRefNameDataType - Horizon representation data type for horizons.
-        #                             Is used when creating rmsHorizonSurfacies containing variogram anisotropy
-        #                             for azimuth angle. This data will no longer be necessary when the gaussian
-        #                             fields are created by the new gaussian field simulation code to be used in APS model.
-        # mainFaciesTable - Object containing the global facies table with facies names an associated
-        #                   facies code common for the RMS project. All facies to be modelled must be defined
-        #                   in the mainFaciesTable.
-        # zoneModelTable - Disctionary with key = (zoneNumber, regionNumber) containing zoneModels as values.
-        #                  Each zoneModel will be associated with the grid cells in the gridmodel that belongs to
-        #                  a specified zoneNumber and regionNumber. If regionNumber is not used (is equal to 0),
-        #                  the facies realization will be calculated for the grid cells belonging to the specified zone number.
-        #                  The maximum possible zoneModels will be the sum over all defined (zoneNumber,regionNumber) pairs
-        #                  that exist in the gridmodel. It is possible that an APS model is defined for
-        #                  only one (zoneNumber,regionNumber) pair and is not defined any grid cells not satisfying
-        #                  this criteria.
-        # previewZone, previewRegion, previewCrossSectionType, previewCrossSectionIndx:
-        #                  Variables used in the testPreview script and will not be necessary in the APSGUI.
-        #                  As long as there are benefit related to using the testPreview script, these parameters are relevant.
-        # The pair (previewZone, previewRegion) - Zone and region number for the APS zone model to create preview plot for.
-        # previewCrossSectionType - Either IJ, IK, JK for the cross section to make plots for.
-        # previewCrossSectionIndx - If IJ is the cross section, then the previewCrossSectionIndx must be an integer
-        #                           between 1 and nz,
-        #                           if the crossSectionType = IK, then the previewCrossSectionIndx must be
-        #                           an integer number between 1 and NY and so on.
-        # previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
-        # debugLevel - Define amouth of output to the screen during runs
-        #
+        """
+         The following parameters are necessary to define a model:
+         If a model is created from a model file, the only necessary input is modelFileName
         
+         If the model is created from e.g APSGUI, these parameters must be specified:
+         rmsProjectName - Name of RMS project which will run a workflow using the APS method
+         rmsWorkflowName - Name of RMS workflow for APS model
+         rmsGaussFieldScriptName - temporary file used by the workflow. This file should not be specified
+                                   my the user but get a default name. It contains the IPL script to
+                                   create gaussian fields which will run RMS petrosim jobs
+                                   to create the gaussian fields. This file will not be used
+                                   when our new gaussian simulation code implemented into the APS src code.
+         rmsGridModelName - Name of grid model in RMS project.
+         rmsSingleZoneGrid - Boolean value. True if the RMS grid model specified with rmsGridModelName is a single zone grid and false if not
+         rmsZoneParameterName - Zone parameter for the grid model in the RMS project.
+         rmsRegionParameterName - Region parameter for the grid model in the RMS project.
+         rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
+         rmsGFJobs -  Object of the GaussFieldJobs which contain list of RMS petrosim jobs and name of
+                      Gaussian fields each of those RMS jobs creates.
+                      This is necessary as a link between the gauss fields created in the RMS project and
+                      the gauss fields used in the APS model. As soon as the new gauss fields code is implemented
+                      the APS model is no longer dependent on RMS petrosim jobs and this
+                      structure here will not be necessary anymore.
+         rmsHorizonRefName - This is name of a Horizon surface which is used to define the 2D grid resolution
+                             of 2D surfaces containing variogram azimuth anisotropy angles.
+                            This is only necessary as a workaround as long as the project depends on creating
+                            gaussian fields using RMS petrosim module, and this will no longer be necessary
+                            when the new gaussian field simulation is implemented in the APS code.
+         rmsHorizonRefNameDataType - Horizon representation data type for horizons.
+                                     Is used when creating rmsHorizonSurfacies containing variogram anisotropy
+                                     for azimuth angle. This data will no longer be necessary when the gaussian
+                                     fields are created by the new gaussian field simulation code to be used in APS model.
+         mainFaciesTable - Object containing the global facies table with facies names an associated
+                           facies code common for the RMS project. All facies to be modelled must be defined
+                           in the mainFaciesTable.
+         zoneModelTable - Disctionary with key = (zoneNumber, regionNumber) containing zoneModels as values.
+                          Each zoneModel will be associated with the grid cells in the gridmodel that belongs to
+                          a specified zoneNumber and regionNumber. If regionNumber is not used (is equal to 0),
+                          the facies realization will be calculated for the grid cells belonging to the specified zone number.
+                          The maximum possible zoneModels will be the sum over all defined (zoneNumber,regionNumber) pairs
+                          that exist in the gridmodel. It is possible that an APS model is defined for
+                          only one (zoneNumber,regionNumber) pair and is not defined any grid cells not satisfying
+                          this criteria.
+         previewZone, previewRegion, previewCrossSectionType, previewCrossSectionIndx:
+                          Variables used in the testPreview script and will not be necessary in the APSGUI.
+                          As long as there are benefit related to using the testPreview script, these parameters are relevant.
+         The pair (previewZone, previewRegion) - Zone and region number for the APS zone model to create preview plot for.
+         previewCrossSectionType - Either IJ, IK, JK for the cross section to make plots for.
+         previewCrossSectionIndx - If IJ is the cross section, then the previewCrossSectionIndx must be an integer
+                                   between 1 and nz,
+                                   if the crossSectionType = IK, then the previewCrossSectionIndx must be
+                                   an integer number between 1 and NY and so on.
+         previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
+         debugLevel - Define amouth of output to the screen during runs
+        
+        """
         # Local variables
         self.__className = self.__class__.__name__
         self.__rmsProjectName = rmsProjectName
@@ -183,12 +184,9 @@ class APSModel:
         self.__refHorizonReprNameForVariogramTrend = rmsHorizonRefNameDataType
 
         self.__faciesTable = mainFaciesTable
-#        self.__zoneModelList = zoneModelList if zoneModelList else []
         self.__zoneModelTable = zoneModelTable if zoneModelTable else {}
         self.__sortedZoneModelTable = {}
         self.__zoneNumberList = []
-#        self.__zoneModelsSecondLevel = zoneModelListSecondLevel if zoneModelListSecondLevel else []
-#        self.__selectedZoneNumberList = []
         self.__selectedZoneAndRegionNumberTable = {}
         self.__selectAllZonesAndRegions = True
         self.__previewZone = previewZone
@@ -317,9 +315,9 @@ class APSModel:
 
         # --- Zone ---
         if  self.__debug_level >= Debug.VERBOSE:
-            print(' ')
+            print('')
             print('--- Number of specified zone models: {}'.format(str(len(zModels.findall('Zone')))))
-            print(' ')
+            print('')
 
         for zone in zModels.findall('Zone'):
             if zone is None:
@@ -514,15 +512,9 @@ class APSModel:
                 )
 
         if debug_level >= Debug.VERY_VERBOSE:
-            print(' ')
+            print('')
 
         return tree
-
-    #    def __nZones(self):
-    #        if self.__zoneModelList:
-    #            return len(self.__zoneModelList)
-    #        else:
-    #            return 0
 
     def __checkZoneModels(self):
         """
@@ -582,7 +574,7 @@ class APSModel:
                 kw = item[0]
                 val = item[1]
                 print('  {0:30} {1:20}'.format(kw, val))
-            print(' ')
+            print('')
         # End read file
 
         return keywordsFMU

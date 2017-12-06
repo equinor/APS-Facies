@@ -137,7 +137,7 @@ def getCellValuesFilteredOnDiscreteParam(code, valueArray):
     return nDefinedCells, cellIndexDefined
 
 
-def get3DParameter(gridModel, parameterName, debug_level=Debug.SOMEWHAT_VERBOSE):
+def get3DParameter(gridModel, parameterName, debug_level=Debug.OFF):
     """Get 3D parameter from grid model.
     Input:
            gridModel     - Grid model object

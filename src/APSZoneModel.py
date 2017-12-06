@@ -14,7 +14,7 @@ import src.Trunc2D_Cubic_xml
 import src.Trunc3D_bayfill_xml
 import src.utils.constants.simple
 import src.utils.xml
-
+import src.utils.check_variogram_type
 
 importlib.reload(src.APSFaciesProb)
 importlib.reload(src.APSGaussFieldJobs)
@@ -25,6 +25,7 @@ importlib.reload(src.Trunc2D_Cubic_xml)
 importlib.reload(src.Trunc3D_bayfill_xml)
 importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
+importlib.reload(src.utils.check_variogram_type)
 
 from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
@@ -116,7 +117,6 @@ class APSZoneModel:
 
     Private member functions:
        def __interpretXMLTree(ET_Tree)
-       def __isVariogramTypeOK(self,variogramType)
        def __checkConstProbValuesAndNormalize(self)
        def __getGFIndex(self,gfName)
        def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
@@ -129,16 +129,18 @@ class APSZoneModel:
             faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
             debug_level=Debug.OFF, keyResolution=100
     ):
-        # If the object is created by reading the xml tree for model parameters, it is required that
-        # zoneNumber is set to a value > 0 and optionally that regionNumber is set to a value > 0.
-        # The modelFileName is only used for more informative error messages and should also be defined in this case.
-        # None of the other parameters should be defined since they are read from the xml tree.
-        # If regionNumber is > 0 then both zone parameter and region parameter is used to define which grid cells
-        # is to be used when calculating facies. If zoneNumber is 0, the region parameter is not used to
-        # define which grid cells to calculate facies for.
-        #
-        # If the object is not created by reading the xml tree, then the ET_Tree should be None and
-        # modelFileName should not be defined. Then all other parameters must be defined.
+        """
+         If the object is created by reading the xml tree for model parameters, it is required that
+         zoneNumber is set to a value > 0 and optionally that regionNumber is set to a value > 0.
+         The modelFileName is only used for more informative error messages and should also be defined in this case.
+         None of the other parameters should be defined since they are read from the xml tree.
+         If regionNumber is > 0 then both zone parameter and region parameter is used to define which grid cells
+         is to be used when calculating facies. If zoneNumber is 0, the region parameter is not used to
+         define which grid cells to calculate facies for.
+        
+         If the object is not created by reading the xml tree, then the ET_Tree should be None and
+         modelFileName should not be defined. Then all other parameters must be defined.
+        """
         self.__className = self.__class__.__name__
         # Local variables
         self.__zoneNumber = zoneNumber
@@ -317,26 +319,6 @@ class APSZoneModel:
     def hasFacies(self, fName):
         return self.__faciesProbObject.hasFacies(fName)
 
-    @staticmethod
-    def __isVariogramTypeOK(variogramType):
-        isOK = 0
-        if variogramType == 'SPHERICAL':
-            isOK = 1
-        elif variogramType == 'EXPONENTIAL':
-            isOK = 1
-        elif variogramType == 'GAUSSIAN':
-            isOK = 1
-        elif variogramType == 'GENERAL_EXPONENTIAL':
-            isOK = 1
-        if isOK == 0:
-            print('Error: Specified variogram : ' + variogramType + ' is not implemented')
-            print('Error: Allowed variograms are: ')
-            print('       SPHERICAL')
-            print('       EXPONENTIAL')
-            print('       GAUSSIAN')
-            print('       GENERAL_EXPONENTIAL')
-            return False
-        return True
 
     def getZoneNumber(self):
         return self.__zoneNumber
@@ -346,15 +328,6 @@ class APSZoneModel:
 
     def useConstProb(self) -> bool:
         return self.__useConstProb
-
-#    def isMainLevelModel(self):
-#        if self.__faciesLevel == 1:
-#            return True
-#        else:
-#            return False
-
-#    def getMainLevelFacies(self):
-#        return copy.copy(self.__mainLevelFacies)
 
     def getFaciesInZoneModel(self):
         return self.__faciesProbObject.getFaciesInZoneModel()

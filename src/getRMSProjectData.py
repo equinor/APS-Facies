@@ -66,16 +66,6 @@ importlib.reload(xml)
 from src.utils.constants.simple import Debug
 from src.utils.xml import prettify
 
-
-
-#print(set(sys.modules.keys()) & set(globals()))
-#for module in set(sys.modules.keys()) & set(globals()):
-#    try:
-#        importlib.reload(module)
-#    except TypeError:
-#        pass
-
-
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     """
     This function read user specification of which grid model etc to scan from RMS.

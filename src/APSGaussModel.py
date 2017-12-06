@@ -8,11 +8,13 @@ import src.Trend3D_linear_model_xml
 import src.simGauss2D
 import src.utils.constants.simple
 import src.utils.xml
+import src.utils.checks
 
 importlib.reload(src.Trend3D_linear_model_xml)
 importlib.reload(src.simGauss2D)
 importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
+importlib.reload(src.utils.checks)
 
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution

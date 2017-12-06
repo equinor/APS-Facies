@@ -34,8 +34,7 @@ def getTextCommand(parent, keyword, parentKeyword='', defaultText=None, modelFil
         if obj is None:
             raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
-        text0 = obj.text
-        text = text0.strip()
+        text = text.strip()
     else:
         text = defaultText
 
