@@ -1,11 +1,3 @@
-from typing import List, Dict, Iterator, Union
-
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMessageBox
-
-ValueTypes = Union[str, int, float, QColor, QMessageBox.Icon]
-
-
 class Constants(object):
     def __init__(self, constant=None):
         self.constant = None
@@ -35,7 +27,7 @@ class Constants(object):
         return False
 
     @classmethod
-    def constants(cls, local: bool = False, sort: bool = False) -> List[str]:
+    def constants(cls, local: bool = False, sort: bool = False):
         """
          A method for getting the names of the constants defined in the class / category.
         :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
@@ -56,7 +48,7 @@ class Constants(object):
         return all_constants
 
     @classmethod
-    def values(cls, local: bool = False, sort: bool = False) -> List[ValueTypes]:
+    def values(cls, local: bool = False, sort: bool = False):
         """
         Gets the values of the different constants.
         :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
@@ -70,7 +62,7 @@ class Constants(object):
         return [cls.__getattribute__(cls(), constant) for constant in cls.constants(local=local, sort=sort)]
 
     @classmethod
-    def all(cls, local: bool = False) -> Dict[str, ValueTypes]:
+    def all(cls, local: bool = False):
         """
         Gets a dictionary of the constants where the key is the name of the constant, and the value of the constant
         :param local: A flag for getting the constants that are ONLY defined in the particular class, and NOT in in any
@@ -86,7 +78,7 @@ class Constants(object):
         return item in cls._standard_return_attribute()
 
     @classmethod
-    def __iter__(cls) -> Iterator:
+    def __iter__(cls):
         return cls.all().__iter__()
 
     @classmethod
@@ -94,11 +86,11 @@ class Constants(object):
         return len(cls.constants())
 
     @classmethod
-    def __getitem__(cls, item: str) -> ValueTypes:
+    def __getitem__(cls, item: str):
         return cls.__getattribute__(cls(), item)
 
     @classmethod
-    def _standard_return_attribute(cls) -> List[ValueTypes]:
+    def _standard_return_attribute(cls):
         return cls.values()
 
     @staticmethod

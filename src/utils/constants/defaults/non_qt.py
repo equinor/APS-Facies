@@ -10,7 +10,7 @@ class Defaults(Value):
     pass
 
 
-class General(Defaults):
+class GeneralDefaults(Defaults):
     DEBUG = Debug.OFF
     OPERATION_MODE = OperationalMode.EXPERIMENTAL
 
