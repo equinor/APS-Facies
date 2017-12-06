@@ -17,7 +17,7 @@ def has_valid_extension(path: str) -> bool:
     return False
 
 
-def isVariogramTypeOK(variogramType, debug_level: Debug = Debug.OFF):
+def isVariogramTypeOK(variogramType, debug_level=Debug.OFF):
     if variogramType in VariogramType:
         return True
     elif debug_level >= Debug.VERY_VERBOSE:
@@ -28,3 +28,4 @@ def isVariogramTypeOK(variogramType, debug_level: Debug = Debug.OFF):
         print('       GAUSSIAN')
         print('       GENERAL_EXPONENTIAL')
         return False
+    
