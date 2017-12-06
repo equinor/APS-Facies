@@ -10,12 +10,13 @@ from src.gui.wrappers.base_classes.getters.general import get_element, get_eleme
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number_from_numeric_text_field
 from src.resources.ui.Gaussian_ui import Ui_DefineGaussian
 from src.utils.constants.constants import (
-    AzimuthAngle, Constraints, Defaults, DefineGaussianElements, DipAngle,
+    AzimuthAngle, Constraints, DefineGaussianElements, DipAngle,
     MainRange, PerpRange, Power, TrendSettingsLabelsElements, VariogramModelConstants, VariogramModelElements,
     VerticalRange,
 )
+from src.utils.constants.defaults.qt import Checked
 from src.utils.constants.simple import VariogramType
-from src.utils.gui.update import toggle_elements, apply_validator, update_numeric
+from src.utils.gui.update import apply_validator, toggle_elements, update_numeric
 
 
 class DefineGaussian(OkCancelDialog, Ui_DefineGaussian):
@@ -120,7 +121,7 @@ class DefineGaussian(OkCancelDialog, Ui_DefineGaussian):
 
     def _initialize_state(self):
         apply_trend = self._get_apply_trend_checkbox()
-        apply_trend.setCheckState(Defaults.GAUSSIAN_TREND)
+        apply_trend.setCheckState(Checked.GAUSSIAN_TREND)
         self._toggle_trend()
 
     def _toggle_trend(self):
