@@ -1,4 +1,4 @@
-from enum import IntEnum, Enum
+from enum import IntEnum, Enum, auto
 
 
 class Debug(IntEnum):
@@ -15,3 +15,8 @@ class VariogramType(Enum):
     EXPONENTIAL = 2
     GAUSSIAN = 3
     GENERAL_EXPONENTIAL = 4
+
+
+class OperationalMode(Enum):
+    EXPERIMENTAL = auto()
+    NORMAL = auto()

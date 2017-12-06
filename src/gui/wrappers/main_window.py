@@ -22,10 +22,11 @@ from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.testPreview import run_previewer
 from src.utils.checks import is_valid_path
 from src.utils.constants.constants import (
-    Defaults, FaciesSelectionElements, GaussianRandomFieldElements, MainWindowElements,
+    FaciesSelectionElements, GaussianRandomFieldElements, MainWindowElements,
     ModeConstants, OutputFaciesModelNameElements, TruncationLibraryKeys, TruncationLibrarySubKeys,
     TruncationRuleLibraryElements, ZoneSelectionElements,
 )
+from src.utils.constants.defaults.qt import Checked
 from src.utils.constants.environment import ExampleFiles
 from src.utils.gui.getters import get_project_file
 from src.utils.gui.update import toggle_elements
@@ -339,9 +340,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _set_checkboxes_to_defaults(self):
         buttons = {
-            ZoneSelectionElements.TOGGLE:   Defaults.SEPARATE_ZONE_MODELS,
-            FaciesSelectionElements.TOGGLE: Defaults.FACIES_MODELS,
-            MainWindowElements.CONDITION_TO_WELL: Defaults.CONDITION_TO_WELL,
+            ZoneSelectionElements.TOGGLE:         Checked.SEPARATE_ZONE_MODELS,
+            FaciesSelectionElements.TOGGLE:       Checked.FACIES_MODELS,
+            MainWindowElements.CONDITION_TO_WELL: Checked.CONDITION_TO_WELL,
         }
         for key, default in buttons.items():
             check_box = get_element(self, key)
