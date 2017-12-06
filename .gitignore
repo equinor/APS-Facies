@@ -323,3 +323,5 @@ Thumbs.db
 *.py~
 #*#
 *~
+state.db
+mkl/
