@@ -1,5 +1,5 @@
 from src.utils.constants.base import Value
-from src.utils.constants.constants import (
+from src.utils.constants.non_qt import (
     BayfillTruncationRuleElements, CubicTruncationRuleElements, GaussianRandomFieldElements, HideOptions,
     NonCubicTruncationRuleElements,
 )

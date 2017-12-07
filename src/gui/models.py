@@ -3,7 +3,7 @@ from datetime import datetime
 from peewee import *
 from playhouse.sqlite_ext import SqliteExtDatabase
 
-from src.utils.constants.constants import DataBase
+from src.utils.constants.non_qt import DataBase
 
 db = SqliteExtDatabase(DataBase.NAME)
 

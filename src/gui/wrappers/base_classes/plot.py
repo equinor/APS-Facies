@@ -11,7 +11,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.patches import Ellipse
 
-from src.utils.constants.constants import Colors
+from src.utils.constants.qt import Colors
 
 
 class Plot(FigureCanvas, QWidget):

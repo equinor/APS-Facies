@@ -3,7 +3,7 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QColorDialog
 
 from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
-from src.utils.constants.constants import Colors
+from src.utils.constants.qt import Colors
 
 
 class ColorPicker(QColorDialog, OkCancelDialog):

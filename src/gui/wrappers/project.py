@@ -12,7 +12,8 @@ from src.gui.wrappers.base_classes.getters.general import get_element
 from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.main_window import MainWindow
 from src.resources.ui.Project_ui import Ui_ProjectSelection
-from src.utils.constants.constants import MessageIcon, ProjectElements, HideOptions
+from src.utils.constants.non_qt import ProjectElements, HideOptions
+from src.utils.constants.qt import MessageIcon
 from src.utils.constants.defaults.non_qt import GeneralDefaults
 from src.utils.constants.simple import OperationalMode
 from src.utils.mappings import project_parameter_state_key_to_element_key

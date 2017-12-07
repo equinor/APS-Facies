@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QWidget, QLineEdit
 
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
-from src.utils.constants.constants import HideOptions, Constraints
+from src.utils.constants.non_qt import HideOptions, Constraints
 from src.utils.constants.defaults.non_qt import Hide
 from src.utils.numeric import truncate_number
 
