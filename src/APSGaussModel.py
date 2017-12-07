@@ -1,5 +1,4 @@
 #!/bin/env python
-import sys
 import numpy as np
 import importlib
 from xml.etree.ElementTree import Element
@@ -300,7 +299,7 @@ class APSGaussModel:
         return variogram, variogramType
 
     @staticmethod
-    def get_variogram_type(variogram):
+    def get_variogram_type(variogram) -> VariogramType:
         if isinstance(variogram, str):
             name = variogram
         elif isinstance(variogram, Element):
@@ -309,6 +308,7 @@ class APSGaussModel:
             return variogram
         else:
             raise ValueError("Unknown type")
+
         if name == 'SPHERICAL':
             return VariogramType.SPHERICAL
         elif name == 'EXPONENTIAL':
@@ -318,8 +318,7 @@ class APSGaussModel:
         elif name == 'GENERAL_EXPONENTIAL':
             return VariogramType.GENERAL_EXPONENTIAL
         else:
-            print('Error: Unknown variogram type {}'.format(name))
-            return None
+            raise ValueError('Error: Unknown variogram type {}'.format(name))
 
     def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
                    gaussModelList, trendModelList,
@@ -419,7 +418,6 @@ class APSGaussModel:
 
     def getNGaussFields(self):
         return len(self.__variogramForGFModel)
-
 
     def getZoneNumber(self):
         return self.__zoneNumber
