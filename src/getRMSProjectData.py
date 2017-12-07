@@ -319,6 +319,9 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
     zonesAndRegions = {}
     if regionParamName == None:
+        if zoneValues == None:
+            raise ValueError('Zone parameter is not defined or empty')
+
         # Only zone numbers are reported
         for i in range(len(zoneValues)):
             zVal = zoneValues[i]
@@ -326,11 +329,16 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             key = (zVal,rVal)
             if not key in zonesAndRegions:
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: Add (zone,region) = ({},{})'.format(str(zVal), str(rVal)))
+                    print('Debug output: Add zone = ({})'.format(str(zVal)))
                 zonesAndRegions[key] = 1
     else:
         # Both zone numbers and region numbers are reported
-        assert len(zoneValues) == len(regionValues)
+        if zoneValues == None:
+            raise ValueError('Zone parameter is not defined or empty')
+        if regionValues == None:
+            raise ValueError('Region parameter is not defined or empty')
+        if len(zoneValues) != len(regionValues):
+            raise ValueError('Length of zone parameter and region parameter are different. Some inconsistency.')
         for i in range(len(zoneValues)):
             zVal = zoneValues[i]
             rVal = regionValues[i]

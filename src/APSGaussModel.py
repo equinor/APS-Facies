@@ -305,7 +305,7 @@ class APSGaussModel:
         elif isinstance(variogram, VariogramType):
             return variogram
         else:
-            raise ValueError("Unknown type")
+            raise ValueError('Unknown type: {}'.format(str(variogram)))
 
         if name == 'SPHERICAL':
             return VariogramType.SPHERICAL

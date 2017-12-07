@@ -133,6 +133,20 @@ def getCellValuesFilteredOnDiscreteParam(code, valueArray):
     return nDefinedCells, cellIndexDefined
 
 
+def isParameterDefinedWithValuesInRMS(gridModel,parameterName,realNumber):
+    # Check if specified 3D parameter name is defined and has values
+    found = False
+    for p in gridModel.properties:
+        if p.name == parameterName:
+            found = True
+            break
+        
+    if found:
+        p =  gridModel.properties[parameterName]
+        if not p.is_empty(realNumber):
+            return True
+    return False
+
 def get3DParameter(gridModel, parameterName, debug_level=Debug.OFF):
     """Get 3D parameter from grid model.
     Input:
@@ -415,7 +429,7 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
                 text = 'Set parameter to non-shared.'
                 print_debug_information(functionName, text)
                 
-        # Create a new 3D parameter with the specified name
+        # Create a new 3D parameter with the specified name of type float32
         p = gridModel.properties.create(parameterName, roxar.GridPropertyType.continuous, np.float32)
 
         # Initialize the values to 0 for this new 3D parameter
@@ -423,7 +437,7 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
         
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         # Using vector operations for numpy vector:
-        if cellIndexDefined is not None:
+        if nDefinedCells > 0:
             currentValues[cellIndexDefined] = inputValues[cellIndexDefined]
         else:
             currentValues = inputValues
@@ -436,21 +450,19 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
             print_debug_information(functionName, text)
 
         # Parameter exist, but check if it is empty or not
+        currentValues = np.zeros(nActiveCells, np.float32)
         p = gridModel.properties[parameterName]
-        if p.is_empty(realNumber):
-            # Initialize the values to 0 for this new 3D parameter
-            currentValues = np.zeros(nActiveCells, np.float32)
-        else:
-            # The parameter exist and is not empty. Check if it should be initialized or not.
-            if setInitialValues:
-                currentValues = np.zeros(nActiveCells, np.float32)
-            else:
+        if not p.is_empty(realNumber):
+            # Check if the parameter is to updated instead of being initialized to 0
+            if not setInitialValues:
                 currentValues = p.get_values(realNumber)
 
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         # Using vector operations for numpy vector:
-        if cellIndexDefined is not None:
-            currentValues[cellIndexDefined] = inputValues[cellIndexDefined]
+        if nDefinedCells > 0:
+            for i in range(nDefinedCells):
+                indx = cellIndexDefined[i]
+                currentValues[indx] = float(inputValues[indx])
         else:
             currentValues = inputValues
 
@@ -655,7 +667,7 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
     functionName = 'updateDiscrete3DParameterValues'
     if cellIndexDefined is not None:
         assert nDefinedCells == len(cellIndexDefined)
-
+    print('nDefinedCells input: {}'.format(str(nDefinedCells)))
     grid3D = gridModel.get_grid(realNumber)
     nActiveCells = grid3D.defined_cell_count
     assert nActiveCells == len(inputValues)
@@ -693,10 +705,13 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
 
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         # Using vector operations for numpy vector:
-        if cellIndexDefined is not None:
-            currentValues[cellIndexDefined] = inputValues[cellIndexDefined]
+        if nDefinedCells > 0:
+            for i in range(nDefinedCells):
+                indx = cellIndexDefined[i]
+                currentValues[indx] = int(inputValues[indx])
         else:
-            currentValues = inputValues
+            for i in range(len(inputValues)):
+                currentValues[i] = int(inputValues[i])
 
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
@@ -707,26 +722,28 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
             print_debug_information(functionName, text)
 
         # Parameter exist, but check if it is empty or not
+        # Initialize the values to 0
+        currentValues = np.zeros(nActiveCells, np.uint16)
         p = gridModel.properties[parameterName]
-        if p.is_empty(realNumber):
-            # Initialize the values to 0 for this new 3D parameter
-            currentValues = np.zeros(nActiveCells, np.uint16)
-        else:
-            # Check if the parameter is to be initialized or not
-            if setInitialValues:
-                # Initialize the values to 0
-                currentValues = np.zeros(nActiveCells, np.uint16)
-            else:
+        if not p.is_empty(realNumber):
+            # Check if the parameter is to updated instead of being initialized to 0
+            if not setInitialValues:
                 # Keep the existing values for cells that is not updated
                 currentValues = p.get_values(realNumber)
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: Get values from existing 3D parameter: {}'.format(parameterName))
+                    print(repr(currentValues))
 
             
         # Assign values to the defined cells as specified in cellIndexDefined index vector
-        # Using vector operations for numpy vector:
-        if cellIndexDefined is not None:
-            currentValues[cellIndexDefined] = inputValues[cellIndexDefined]
+        print('nDefinedCells: {}'.format(str(nDefinedCells)))
+        if nDefinedCells > 0:
+            for i in range(nDefinedCells):
+                indx = cellIndexDefined[i]
+                currentValues[indx] = int(inputValues[indx])
         else:
-            currentValues = inputValues
+            for i in range(len(inputValues)):
+                currentValues[i] = int(inputValues[i])
 
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)

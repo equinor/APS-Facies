@@ -695,10 +695,10 @@ class APSModel:
         return copy.copy(self.__rmsZoneParamName)
 
     def getRegionParamName(self):
-        if self.__rmsRegionParamName is not None:
+        if self.__rmsRegionParamName != '':
             return copy.copy(self.__rmsRegionParamName)
         else:
-            return None
+            return ''
 
     def debug_level(self):
         return self.__debug_level
@@ -912,7 +912,7 @@ class APSModel:
                             file.write('Print("Update Gauss field: ","{}"," for single zone grid")\n'.format(gfNameUsed))
                     else:
                         if regionNumber > 0:
-                            file.write('Print("Update Gauss field: ","{}"," for zone, region pair: ",({},{}))\n'
+                            file.write('Print("Update Gauss field: ","{}"," for zone, region pair: ({},{})")\n'
                                        ''.format(gfNameUsed, str(zoneNumber), str(regionNumber)))
                         else:
                             file.write('Print("Update Gauss field: ","{}"," for zone: ",{})\n'.format(gfNameUsed, str(zoneNumber)))

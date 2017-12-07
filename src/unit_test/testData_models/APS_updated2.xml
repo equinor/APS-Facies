@@ -276,7 +276,7 @@
         <SeedForPreview> 276787 </SeedForPreview>
       </GaussField>
       <GaussField name="GRF7">
-        <Vario name="SPHERICAL">
+        <Vario name="EXPONENTIAL">
           <MainRange> 3210.0 </MainRange>
           <PerpRange> 543.0 </PerpRange>
           <VertRange> 5.0 </VertRange>
@@ -286,7 +286,7 @@
         <SeedForPreview> 75151556 </SeedForPreview>
       </GaussField>
       <GaussField name="GRF8">
-        <Vario name="SPHERICAL">
+        <Vario name="GAUSSIAN">
           <MainRange> 1204.0 </MainRange>
           <PerpRange> 120.0 </PerpRange>
           <VertRange> 1.2 </VertRange>
@@ -296,12 +296,13 @@
         <SeedForPreview> 75151556 </SeedForPreview>
       </GaussField>
       <GaussField name="GRF9">
-        <Vario name="SPHERICAL">
+        <Vario name="GENERAL_EXPONENTIAL">
           <MainRange> 1308.0 </MainRange>
           <PerpRange> 130.0 </PerpRange>
           <VertRange> 1.3 </VertRange>
           <AzimuthAngle> 40.0 </AzimuthAngle>
           <DipAngle> 0.009 </DipAngle>
+          <Power> 1.4 </Power>
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
       </GaussField>

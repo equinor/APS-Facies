@@ -79,7 +79,7 @@ def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0,
             print('Debug output: In findDefinedCells: Number of active cells for current zoneNumber={} is: {}'
                   ''.format(str(zoneNumber), str(nDefinedCells)))
             
-    return (nDefinedCells, cellIndexDefined)
+    return [nDefinedCells, cellIndexDefined]
 
 
 def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
@@ -284,7 +284,7 @@ def checkAndNormaliseProb(
 def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
                 cellIndexDefined, zoneNumber, simBoxThickness, debug_level=Debug.OFF):
     if trendModelObj.type == 'Trend3D_linear':
-        trendObj = Trend3D_linear.Trend3D_linear(trendModelObj, debug_level)
+        trendObj = Trend3D_linear(trendModelObj, debug_level)
         [minmaxDifference, trendValues] = trendObj.createTrend(
             gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness
         )
@@ -314,7 +314,7 @@ allZoneModels = apsModel.getAllZoneModelsSorted()
 zoneParamName = apsModel.getZoneParamName()
 regionParamName = apsModel.getRegionParamName()
 useRegions = False
-if regionParamName is not None:
+if regionParamName != '':
     useRegions = True
 resultParamName = apsModel.getResultFaciesParamName()
 
@@ -331,15 +331,19 @@ if useRegions:
         print('--- Get RMS region parameter: ' + regionParamName + ' from RMS project ' + rmsProjectName)
     regionValues = gr.getContinuous3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
 
-emptyZoneList = []
-# Find min max zone over all active cells, send an empty zone list which means that all zones are selected
-(minZone, maxZone, avgzone) = gr.calcStatisticsFor3DParameter(
-    gridModel, zoneParamName, emptyZoneList, realNumber, debug_level
-)
-
-# Allocate space for facies realisation and calculated volume fractions
+# Get or initialize array for facies realisation
 nCellsTotal = len(zoneValues)
 faciesReal = np.zeros(nCellsTotal, np.uint16)
+
+# Check if specified facies realization exists and get it if so.
+if gr.isParameterDefinedWithValuesInRMS(gridModel,resultParamName,realNumber):
+    if debug_level >= Debug.VERBOSE:
+        print('--- Get RMS facies parameter which will be updated: {} from RMS project: {}'.format(resultParamName, rmsProjectName))
+    [faciesReal,codeValues] = gr.getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
+else:
+    if debug_level >= Debug.VERBOSE:
+        print('--- Facies parameter: {}  for the result will be created in the RMS project: {}'.format(resultParamName, rmsProjectName))
+
 
 # Gaussian field related lists
 GFNamesAlreadyRead = []
@@ -362,15 +366,16 @@ if debug_level >= Debug.VERY_VERBOSE:
     if apsModel.isAllZoneRegionModelsSelected():
         print('Debug output: All combinations of zone and region is selected to be run')
     else:
-        if useRegions:
-            print('Debug output: Selected (zone,region) pairs to simulate:')
-            for key, zoneModel in allZoneModels.items():
+        print('Debug output: Selected (zone,region) pairs to simulate:')
+        for key, zoneModel in allZoneModels.items():
+            zoneNumber = key[0]
+            regionNumber = key[1]
+            if not apsModel.isSelected(zoneNumber, regionNumber):
+                continue
+            if useRegions:
                 print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
-        else:
-            print('Debug output: Selected zones to simulate:')
-            for key, zoneModel in allZoneModels.items():
+            else:
                 print('    zone={}'.format(str(key[0])))
-
     
 # Loop over all pairs of (zoneNumber, regionNumber) that is specified and selected
 # This loop calculates facies for the given (zoneNumber, regionNumber) combination
@@ -425,7 +430,7 @@ for key, zoneModel in allZoneModels.items():
                 print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
 
     # For current (zone,region) find the active cells
-    (nDefinedCells, cellIndexDefined) = findDefinedCells(zoneValues, zoneNumber, regionValues, regionNumber, debug_level)
+    [nDefinedCells, cellIndexDefined] = findDefinedCells(zoneValues, zoneNumber, regionValues, regionNumber, debug_level)
     if debug_level >= Debug.VERBOSE:
         if useRegions:
             print('--- Number of active cells for (zone,region)=({},{}): {}'
@@ -656,6 +661,8 @@ for key, zoneModel in allZoneModels.items():
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug: Add facies: ' + fName + ' to the list of modelled facies')
 
+
+
 # End loop over zones
 
 print(' ')
@@ -675,15 +682,22 @@ if debug_level >= Debug.VERY_VERBOSE:
 
 # Write facies realisation back to RMS project for all zones that is modelled.
 if debug_level >= Debug.VERBOSE:
-    if useRegions:
+    if apsModel.isAllZoneRegionModelsSelected():
+        print('Debug output: All combinations of zone and region is selected to be run')
+    else:
         print('--- The following (zone,region) numbers are updated in facies realization:')
         for key, zoneModel in allZoneModels.items():
-            print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
-    else:
-        print('--- The following zone numbers are updated in facies realization:')
-        for key, zoneModel in allZoneModels.items():
-            print('    zone={}'.format(str(key[0])))
+            zoneNumber = key[0]
+            regionNumber = key[1]
+            if not apsModel.isSelected(zoneNumber, regionNumber):
+                continue
+            if useRegions:
+                print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
+            else:
+                print('    zone={}'.format(str(key[0])))
 
+# Overwrite the existing facies realization, but note that now the faciesReal should contain values
+# equal to the original facies realization for all cells that is not updated (not belonging to (zones, regions) that is updated)
 gr.updateDiscrete3DParameterValues(
     gridModel, resultParamName, faciesReal, faciesTable=codeNames,
     realNumber=realNumber, isShared=False, setInitialValues=False,
