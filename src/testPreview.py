@@ -13,13 +13,11 @@ from matplotlib.patches import Polygon
 import src.APSDataFromRMS
 import src.APSModel
 import src.utils.exceptions.xml
-import src.utils.constants.simple
 import src.utils.io
 
 importlib.reload(src.APSDataFromRMS)
 importlib.reload(src.APSModel)
 importlib.reload(src.utils.exceptions.xml)
-importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.io)
 
 from src.APSDataFromRMS import APSDataFromRMS

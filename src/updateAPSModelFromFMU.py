@@ -4,10 +4,8 @@
 import importlib
 
 import src.APSModel
-import src.utils.constants.simple
 
 importlib.reload(src.APSModel)
-importlib.reload(src.utils.constants.simple)
 
 from src.APSModel import APSModel
 from src.utils.constants.simple import Debug

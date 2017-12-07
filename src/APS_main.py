@@ -15,12 +15,10 @@ import numpy as np
 import src.APSModel
 import src.generalFunctionsUsingRoxAPI as gr
 import src.Trend3D_linear
-import src.utils.constants.simple
 
 importlib.reload(src.APSModel)
 importlib.reload(gr)
 importlib.reload(src.Trend3D_linear)
-importlib.reload(src.utils.constants.simple)
 
 from src.APSModel import APSModel
 from src.Trend3D_linear import Trend3D_linear

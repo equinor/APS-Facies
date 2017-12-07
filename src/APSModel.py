@@ -11,7 +11,6 @@ import src.APSGaussFieldJobs
 import src.APSMainFaciesTable
 import src.APSZoneModel
 import src.utils.exceptions.xml
-import src.utils.constants.simple
 import src.utils.xml
 import src.utils.numeric
 
@@ -19,7 +18,6 @@ importlib.reload(src.APSGaussFieldJobs)
 importlib.reload(src.APSMainFaciesTable)
 importlib.reload(src.APSZoneModel)
 importlib.reload(src.utils.exceptions.xml)
-importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
 importlib.reload(src.utils.numeric)
 

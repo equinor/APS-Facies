@@ -12,9 +12,7 @@ import src.APSMainFaciesTable
 import src.Trunc2D_Angle_xml
 import src.Trunc2D_Cubic_xml
 import src.Trunc3D_bayfill_xml
-import src.utils.constants.simple
 import src.utils.xml
-import src.utils.checks
 
 importlib.reload(src.APSFaciesProb)
 importlib.reload(src.APSGaussFieldJobs)
@@ -23,9 +21,7 @@ importlib.reload(src.APSMainFaciesTable)
 importlib.reload(src.Trunc2D_Angle_xml)
 importlib.reload(src.Trunc2D_Cubic_xml)
 importlib.reload(src.Trunc3D_bayfill_xml)
-importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
-importlib.reload(src.utils.checks)
 
 from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs

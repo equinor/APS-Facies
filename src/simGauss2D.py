@@ -5,10 +5,8 @@ import numpy as np
 import importlib
 
 import src.utils.constants.environment
-import src.utils.constants.simple
 
 importlib.reload(src.utils.constants.environment)
-importlib.reload(src.utils.constants.simple)
 
 from src.utils.constants.environment import DrawingLibrary
 from src.utils.constants.simple import Debug, VariogramType

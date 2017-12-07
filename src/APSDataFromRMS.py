@@ -6,10 +6,8 @@ import importlib
 import xml.etree.ElementTree as ET
 
 import src.APSMainFaciesTable
-import src.utils.constants.simple
 
 importlib.reload(src.APSMainFaciesTable)
-importlib.reload(src.utils.constants.simple)
 
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug

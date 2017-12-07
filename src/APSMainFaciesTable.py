@@ -6,10 +6,8 @@ import importlib
 from xml.etree.ElementTree import Element
 
 import src.utils.exceptions.xml
-import src.utils.constants.simple
 
 importlib.reload(src.utils.exceptions.xml)
-importlib.reload(src.utils.constants.simple)
 
 from src.utils.exceptions.xml import ReadingXmlError
 from src.utils.constants.simple import Debug

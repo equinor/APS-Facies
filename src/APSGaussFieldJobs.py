@@ -4,10 +4,8 @@ import copy
 import importlib
 from xml.etree.ElementTree import Element
 
-import src.utils.constants.simple
 import src.utils.xml
 
-importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
 
 from src.utils.constants.simple import Debug

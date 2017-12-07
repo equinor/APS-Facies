@@ -55,16 +55,15 @@ import src.generalFunctionsUsingRoxAPI as gr
 import src.APSDataFromRMS as APSDataFromRMS
 import src.APSMainFaciesTable as APSMainFaciesTable 
 import src.utils.xml as xml
-import src.utils.constants.simple as simple
 
 importlib.reload(gr)
 importlib.reload(APSDataFromRMS)
 importlib.reload(APSMainFaciesTable)
-importlib.reload(simple)
 importlib.reload(xml)
 
 from src.utils.constants.simple import Debug
 from src.utils.xml import prettify
+
 
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     """

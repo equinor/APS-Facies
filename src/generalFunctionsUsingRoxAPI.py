@@ -4,10 +4,6 @@ import numpy as np
 import importlib
 import roxar
 
-import src.utils.constants.simple as simple
-
-importlib.reload(simple)
-
 from src.utils.constants.simple import Debug
 
 
