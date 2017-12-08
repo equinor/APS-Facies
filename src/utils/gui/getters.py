@@ -2,11 +2,11 @@ from typing import List
 
 from PyQt5.QtWidgets import QFileDialog, QWidget
 
-from src.utils.constants.constants import Defaults
+from src.utils.constants.defaults.non_qt import APSModelFile
 
 
 def get_project_file(parent=None):
-    openfile = QFileDialog.getOpenFileName(parent=parent, filter=Defaults.FILE_FILTER)
+    openfile = QFileDialog.getOpenFileName(parent=parent, filter=APSModelFile.FILE_FILTER)
     path = openfile[0]
     return path
 

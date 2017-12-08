@@ -6,11 +6,12 @@ from PyQt5.QtWidgets import QWidget
 from src.gui.wrappers.base_classes.getters.general import get_element
 from src.utils.constants.constants import (
     BayfillTruncationRuleConstants, BayfillTruncationRuleElements,
-    CubicTruncationRuleConstants, CubicTruncationRuleElements, Defaults, NonCubicTruncationRuleConstants,
+    CubicTruncationRuleConstants, CubicTruncationRuleElements, NonCubicTruncationRuleConstants,
     NonCubicTruncationRuleElements, ProjectConstants, ProjectElements, TruncationLibraryButtonNameKeys,
     TruncationLibraryKeys, TruncationLibrarySubKeys, TruncationRuleConstants,
     TruncationRuleLibraryElements,
 )
+from src.utils.constants.defaults.non_qt import UI
 
 
 @lru_cache()
@@ -134,7 +135,7 @@ def truncation_library_button_names() -> Dict[
 
 
 def _get_truncation_rule_name(button_name: str) -> str:
-    prefix = Defaults.PREFIX_NAME_OF_BUTTON
+    prefix = UI.PREFIX_NAME_OF_BUTTON
     truncation_rule = button_name[len(prefix):]
     # TODO: Do more?
     return truncation_rule

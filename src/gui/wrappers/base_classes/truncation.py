@@ -13,12 +13,13 @@ from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
 from src.utils.constants.constants import (
-    Angles, BaseNames, CubicTruncationRuleConstants, CubicTruncationRuleElements, Defaults,
-    FaciesLabels, Proportions, TruncationRuleConstants, TruncationRuleLibraryElements,
+    Angles, BaseNames, CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesLabels, Proportions,
+    TruncationRuleConstants, TruncationRuleLibraryElements,
 )
-from src.utils.mappings import truncation_rule_element_key_to_state_key
+from src.utils.constants.defaults.non_qt import UI
 from src.utils.gui.getters import get_attributes, get_elements_with_prefix
-from src.utils.gui.update import toggle_elements, apply_validator, update_numeric
+from src.utils.gui.update import apply_validator, toggle_elements, update_numeric
+from src.utils.mappings import truncation_rule_element_key_to_state_key
 from src.utils.numeric import normalize_number
 
 
@@ -28,11 +29,11 @@ class BaseTruncation(OkCancelDialog):
             state,
             truncation_type: str,
             parent=None,
-            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
-            basename_sliders=Defaults.NAME_OF_SLIDERS,
-            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
-            basename_color_button=Defaults.NAME_OF_COLOR_BUTTON,
-            basename_drop_down=Defaults.NAME_OF_DROP_DOWN,
+            name_of_buttons=UI.NAME_OF_BUTTON_BOX,
+            basename_sliders=UI.NAME_OF_SLIDERS,
+            basename_proportions=UI.NAME_OF_PROPORTIONS,
+            basename_color_button=UI.NAME_OF_COLOR_BUTTON,
+            basename_drop_down=UI.NAME_OF_DROP_DOWN,
             facies_options=None,
             color_options=None,
             names=None,

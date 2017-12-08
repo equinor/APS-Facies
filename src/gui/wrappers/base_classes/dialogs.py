@@ -4,11 +4,11 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QDialogButtonBox, QDialog
 
-from src.utils.constants.constants import Defaults
+from src.utils.constants.defaults.non_qt import UI
 
 
 class GeneralDialog(QDialogButtonBox, QDialog):
-    def __init__(self, parent=None, name_of_buttons=Defaults.NAME_OF_BUTTON_BOX, **kwargs):
+    def __init__(self, parent=None, name_of_buttons=UI.NAME_OF_BUTTON_BOX, **kwargs):
         # TODO: Make name_of_buttons into a constant
         super(GeneralDialog, self).__init__(parent=parent)
         self.valid_buttons = self._get_valid_buttons()
@@ -71,7 +71,7 @@ class GeneralDialog(QDialogButtonBox, QDialog):
 
 
 class OkDialog(GeneralDialog):
-    def __init__(self, parent=None, name_of_buttons=Defaults.NAME_OF_BUTTON_BOX):
+    def __init__(self, parent=None, name_of_buttons=UI.NAME_OF_BUTTON_BOX):
         # TODO: Make name_of_buttons into a constant
         super(OkDialog, self).__init__(parent=parent, name_of_buttons=name_of_buttons)
 
@@ -89,7 +89,7 @@ class OkDialog(GeneralDialog):
 
 
 class OkCancelDialog(OkDialog):
-    def __init__(self, parent=None, name_of_buttons=Defaults.NAME_OF_BUTTON_BOX):
+    def __init__(self, parent=None, name_of_buttons=UI.NAME_OF_BUTTON_BOX):
         super(OkCancelDialog, self).__init__(parent=parent, name_of_buttons=name_of_buttons)
 
     def wire_up(self, ok: Callable = None, cancel: Callable = None) -> None:

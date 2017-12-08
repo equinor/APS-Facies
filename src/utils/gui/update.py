@@ -6,11 +6,12 @@ from PyQt5.QtWidgets import QWidget, QLineEdit
 
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
-from src.utils.constants.constants import Defaults, HideOptions, Constraints
+from src.utils.constants.constants import HideOptions, Constraints
+from src.utils.constants.defaults.non_qt import Hide
 from src.utils.numeric import truncate_number
 
 
-def toggle_elements(toggled: bool, elements: Union[List[QWidget], QWidget], deactivate_or_hide=Defaults.HIDE) -> None:
+def toggle_elements(toggled: bool, elements: Union[List[QWidget], QWidget], deactivate_or_hide=Hide.HIDE) -> None:
     assert deactivate_or_hide in HideOptions()
     if isinstance(elements, list):
         for element in elements:

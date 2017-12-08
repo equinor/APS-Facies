@@ -6,14 +6,14 @@ from src.APSModel import APSModel
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants.constants import (
-    CubicTruncationRuleConstants, CubicTruncationRuleElements, ModeConstants,
-    FaciesSelectionConstants, ModeOptions, ProjectConstants, TruncationRuleConstants,
-    GaussianRandomFieldConstants, Defaults,
+    CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesSelectionConstants, GaussianRandomFieldConstants,
+    ModeConstants, ProjectConstants, TruncationRuleConstants,
 )
-from src.utils.constants.simple import Debug, VariogramType
-
+from src.utils.constants.defaults.non_qt import DatabaseDefaults, Defaults
+from src.utils.constants.simple import Debug, OperationalMode, VariogramType
 # TODO: Rewrite, and split up into several files / folders?
 # TODO: Use SQLite
+from src.utils.methods import get_printable_legal_values_of_enum
 
 
 class State(dict):
@@ -101,17 +101,17 @@ class State(dict):
         return True
 
     def set_experimental_mode(self) -> None:
-        self.set_execution_mode(ModeOptions.EXPERIMENTAL_MODE)
+        self.set_execution_mode(OperationalMode.EXPERIMENTAL)
 
     def set_reading_mode(self) -> None:
-        self.set_execution_mode(ModeOptions.READING_MODE)
+        self.set_execution_mode(OperationalMode.NORMAL)
 
-    def set_execution_mode(self, mode: str) -> None:
-        if mode not in ModeOptions():
+    def set_execution_mode(self, mode: OperationalMode) -> None:
+        if mode not in OperationalMode():
             raise ValueError(
                 "The mode '{mode}' is not a valid mode for execution. Please use one of {options}".format(
                     mode=mode,
-                    options=', '.join(ModeOptions.values())
+                    options=', '.join(get_printable_legal_values_of_enum(OperationalMode))
                 )
             )
         self.__dict__[ModeConstants.EXECUTION_MODE] = mode
@@ -213,7 +213,7 @@ class State(dict):
 
     def _is_valid_reading_mode(self):
         mode = self.get_mode()
-        if mode != ModeOptions.READING_MODE:
+        if mode != OperationalMode.NORMAL:
             # The mode is invalid
             return False
         if not self.has_valid_path():
@@ -246,10 +246,10 @@ class State(dict):
             return None
 
     def is_reading_mode(self):
-        return self.get_mode() == ModeOptions.READING_MODE
+        return self.get_mode() == OperationalMode.NORMAL
 
     def is_experimental_mode(self):
-        return self.get_mode() == ModeOptions.EXPERIMENTAL_MODE
+        return self.get_mode() == OperationalMode.EXPERIMENTAL
 
     def has_valid_path(self) -> bool:
         path = self.get_path()
@@ -286,7 +286,7 @@ class State(dict):
             self,
             facies_name: Union[str, QListWidgetItem],
             key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE,
-            max_facies=Defaults.MAXIMUM_NUMBER_OF_FACIES
+            max_facies=DatabaseDefaults.MAXIMUM_NUMBER_OF_FACIES
     ) -> bool:
         """
         Adds the given name, og list object to the list of (available/selected) facies. The method also reads from the
