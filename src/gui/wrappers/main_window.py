@@ -21,7 +21,7 @@ from src.gui.wrappers.truncation_rule import (
 from src.resources.ui.APS_prototype_ui import Ui_MainWindow
 from src.testPreview import run_previewer
 from src.utils.checks import is_valid_path
-from src.utils.constants.constants import (
+from src.utils.constants.non_qt import (
     FaciesSelectionElements, GaussianRandomFieldElements, MainWindowElements,
     ModeConstants, OutputFaciesModelNameElements, TruncationLibraryKeys, TruncationLibrarySubKeys,
     TruncationRuleLibraryElements, ZoneSelectionElements,

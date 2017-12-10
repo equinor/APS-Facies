@@ -17,8 +17,12 @@ def has_valid_extension(path: str) -> bool:
     return False
 
 
-def isVariogramTypeOK(variogramType, debug_level: Debug = Debug.OFF):
+def isVariogramTypeOK(variogramType: VariogramType, debug_level: Debug=Debug.OFF):
     if variogramType in VariogramType:
+        return True
+    elif variogramType._name_ in VariogramType._member_map_:
+        # Hack because of some strange bug (apparently variogramType is not an instance in VariogramType (class-wise))
+        # even though they are
         return True
     elif debug_level >= Debug.VERY_VERBOSE:
         print('Error: Specified variogram : ' + variogramType.name + ' is not implemented')
@@ -27,4 +31,4 @@ def isVariogramTypeOK(variogramType, debug_level: Debug = Debug.OFF):
         print('       EXPONENTIAL')
         print('       GAUSSIAN')
         print('       GENERAL_EXPONENTIAL')
-        return False
+    return False

@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <RMS_project_data>
   <Project name="testProjectForAPSGUIDevelopment">
-    <Date>Date: 05/11/17 Clock: 22.51.04</Date>
-    <ProjectFile> /project/multiscale/APSGUI/user/olia/testNeslen.rms10.1.1 </ProjectFile>
+    <Date>Date: 06/12/17 Clock: 14.27.24</Date>
+    <ProjectFile> /project/idi/personlig/olia/APSGUI/src/testNeslen.rms </ProjectFile>
     <Seed> 9110244 </Seed>
     <RealisationNumber> 0 </RealisationNumber>
     <WorkflowList>
@@ -45,181 +45,47 @@
       <Workflow> Import_maps_from_bitmaps </Workflow>
     </WorkflowList>
   </Project>
-  <GridModel name="APS_NESLEN_ODM">
-    <Property type="Discrete"> Zone </Property>
-    <Property type="Discrete"> Column </Property>
-    <Property type="Discrete"> Row </Property>
-    <Property type="Discrete"> Layer </Property>
-    <Property type="Continuous"> @dX </Property>
-    <Property type="Continuous"> @dY </Property>
-    <Property type="Continuous"> @dZ </Property>
-    <Property type="Continuous"> GAUS2 </Property>
-    <Property type="Continuous"> GAUS3 </Property>
-    <Property type="Continuous"> R1 </Property>
-    <Property type="Continuous"> TREND1 </Property>
-    <Property type="Continuous"> GAUS1 </Property>
-    <Property type="Continuous"> prob_floodplain </Property>
-    <Property type="Continuous"> prob_subbay </Property>
-    <Property type="Continuous"> prob_wbf </Property>
-    <Property type="Continuous"> prob_bhd </Property>
-    <Property type="Continuous"> prob_lagoon </Property>
-    <Property type="Continuous"> PFLOODPLAIN </Property>
-    <Property type="Continuous"> PSUBBAY </Property>
-    <Property type="Continuous"> PWBF </Property>
-    <Property type="Continuous"> PBHD </Property>
-    <Property type="Continuous"> PLAGOON </Property>
-    <Property type="Discrete"> FSSIT </Property>
-    <Property type="Discrete"> BHDSIT </Property>
-    <Property type="Continuous"> @X </Property>
-    <Property type="Continuous"> @Y </Property>
-    <Property type="Continuous"> @Z </Property>
-    <Property type="Continuous"> SUMPROBCONST </Property>
-    <Property type="Continuous"> p_sum </Property>
-    <Property type="Continuous"> p_floodplain </Property>
-    <Property type="Continuous"> p_subbay </Property>
-    <Property type="Continuous"> p_wbf </Property>
-    <Property type="Continuous"> p_bhd </Property>
-    <Property type="Continuous"> p_lagoon </Property>
-    <Property type="Continuous"> p_sum_norm </Property>
-    <Property type="Continuous"> PS_floodplain </Property>
-    <Property type="Continuous"> PS_subbay </Property>
-    <Property type="Continuous"> PS_WBF </Property>
-    <Property type="Continuous"> PS_BHD </Property>
-    <Property type="Continuous"> PS_Lagoon </Property>
-    <Property type="Continuous"> ps_floodplain </Property>
-    <Property type="Continuous"> ps_subbay </Property>
-    <Property type="Continuous"> ps_wbf </Property>
-    <Property type="Continuous"> ps_bhd </Property>
-    <Property type="Continuous"> ps_lagoon </Property>
-    <Property type="Discrete"> FACIES_NOTREND </Property>
-    <Property type="Continuous"> diffProb_floodplain </Property>
-    <Property type="Continuous"> diffProb_subbay </Property>
-    <Property type="Continuous"> diffProb_wbf </Property>
-    <Property type="Continuous"> diffProb_bhd </Property>
-    <Property type="Discrete"> FACIES_CONST </Property>
-    <Property type="Continuous"> TREND2 </Property>
-    <Property type="Continuous"> TREND3 </Property>
-    <Property type="Continuous"> ALPHA1CUM </Property>
-    <Property type="Continuous"> ALPHA2CUM </Property>
-    <Property type="Continuous"> ALPHA3CUM </Property>
-    <Property type="Continuous"> TG2 </Property>
-    <Property type="Continuous"> TG1 </Property>
-    <Property type="Continuous"> interpolate_prob_floodplain </Property>
-    <Property type="Continuous"> Smoothing_interpolate_prob_FP </Property>
-    <Property type="Continuous"> Smoothing_prob_FP </Property>
-    <Property type="Continuous"> G1 </Property>
-    <Property type="Continuous"> G2 </Property>
-    <Property type="Continuous"> G3 </Property>
-    <Property type="Discrete"> FACIES_GAUSS_COND </Property>
-    <Property type="Continuous"> d1 </Property>
-    <Property type="Continuous"> diffG1 </Property>
-    <Property type="Continuous"> diffG2 </Property>
-    <Property type="Continuous"> diffG3 </Property>
-    <Property type="Continuous"> GF1 </Property>
-    <Property type="Continuous"> GF2 </Property>
-    <Property type="Continuous"> GF3 </Property>
-    <Property type="Continuous"> GF1_with_trend </Property>
-    <Property type="Discrete"> FACIES </Property>
-    <Property type="Discrete"> TestSampling </Property>
-    <Property type="Continuous"> Prob_F4 </Property>
-    <Property type="Continuous"> Prob_F5 </Property>
-    <Property type="Continuous"> Prob_F6 </Property>
-    <Property type="Continuous"> Prob_F7 </Property>
-    <Property type="Continuous"> Prob_F8 </Property>
-    <Property type="Continuous"> Prob_F9 </Property>
-    <Property type="Continuous"> Prob_F10 </Property>
-    <Property type="Continuous"> Prob_F1 </Property>
-    <Property type="Continuous"> Prob_F2 </Property>
-    <Property type="Continuous"> Prob_F3 </Property>
-    <Property type="Continuous"> GF4 </Property>
-    <Property type="Continuous"> GF5 </Property>
+  <GridModel name="Test_Single_zone">
     <Property type="Continuous"> GF6 </Property>
-    <Property type="Continuous"> GF1_transf </Property>
-    <Property type="Continuous"> GF2_transf </Property>
-    <Property type="Continuous"> GF3_transf </Property>
-    <Property type="Continuous"> Trend3DLinear </Property>
-    <Property type="Continuous"> TEST_TREND </Property>
-    <Property type="Continuous"> GF5_transf </Property>
-    <Property type="Discrete"> FaciesRealRenumbered </Property>
-    <Property type="Continuous"> GF4_transf </Property>
-    <Property type="Discrete"> IIndx </Property>
-    <Property type="Discrete"> JIndx </Property>
-    <Property type="Discrete"> KIndx </Property>
-    <Property type="Discrete"> FaciesReal </Property>
-    <Property type="Discrete"> Iindx </Property>
-    <Property type="Discrete"> Jindx </Property>
-    <Property type="Discrete"> DiscreteParam </Property>
     <Property type="Continuous"> GF7 </Property>
     <Property type="Continuous"> GF8 </Property>
     <Property type="Continuous"> GF9 </Property>
+    <Property type="Discrete"> Region </Property>
+    <Property type="Discrete"> Zone </Property>
     <Property type="Continuous"> GF6_transf </Property>
     <Property type="Continuous"> GF7_transf </Property>
     <Property type="Continuous"> GF8_transf </Property>
     <Property type="Continuous"> GF9_transf </Property>
-    <Property type="Continuous"> GF10 </Property>
-    <Property type="Continuous"> GF11 </Property>
-    <Property type="Continuous"> GF12 </Property>
-    <Property type="Continuous"> GF13 </Property>
-    <Property type="Continuous"> GF14 </Property>
-    <Property type="Continuous"> GF10_transf </Property>
-    <Property type="Continuous"> GF11_transf </Property>
-    <Property type="Continuous"> GF12_transf </Property>
-    <Property type="Continuous"> GF13_transf </Property>
-    <Property type="Continuous"> GF14_transf </Property>
-    <Property type="Continuous"> ProbTrend_F1 </Property>
-    <Property type="Continuous"> ProbTrend_cum_F1 </Property>
-    <Property type="Continuous"> ProbTrend_F2 </Property>
-    <Property type="Continuous"> ProbTrend_cum_F2 </Property>
-    <Property type="Continuous"> ProbTrend_F3 </Property>
-    <Property type="Continuous"> ProbTrend_cum_F3 </Property>
-    <Property type="Continuous"> ProbTrend_F4 </Property>
-    <Property type="Continuous"> ProbTrend_cum_F4 </Property>
-    <Property type="Continuous"> ProbTrend_F5 </Property>
-    <Property type="Continuous"> ProbTrend_cum_F5 </Property>
-    <Property type="Continuous"> ProbTrend_cum_sm_F1 </Property>
-    <Property type="Continuous"> ProbTrend_cum_sm_F2 </Property>
-    <Property type="Continuous"> ProbTrend_cum_sm_F3 </Property>
-    <Property type="Continuous"> ProbTrend_cum_sm_F4 </Property>
-    <Property type="Continuous"> ProbTrend_sm_F1 </Property>
-    <Property type="Continuous"> ProbTrend_sm_F2 </Property>
-    <Property type="Continuous"> ProbTrend_sm_F3 </Property>
-    <Property type="Continuous"> ProbTrend_sm_F4 </Property>
-    <Property type="Continuous"> ProbTrend_cum_sm_F5 </Property>
-    <Property type="Continuous"> ProbTrend_sm_F5 </Property>
-    <Property type="Continuous"> sumProbTrend_sm </Property>
-    <Property type="Continuous"> GF15 </Property>
-    <Property type="Continuous"> GF15_transf </Property>
+    <Property type="Discrete"> FaciesReal </Property>
+    <Property type="Continuous"> GF1 </Property>
+    <Property type="Continuous"> GF2 </Property>
+    <Property type="Continuous"> GF3 </Property>
+    <Property type="Continuous"> GF4 </Property>
+    <Property type="Continuous"> GF1_transf </Property>
+    <Property type="Continuous"> GF2_transf </Property>
+    <Property type="Continuous"> GF3_transf </Property>
+    <Property type="Continuous"> GF4_transf </Property>
+    <ZoneAndRegionNumbers regionNumber="2" zoneNumber="1"> </ZoneAndRegionNumbers>
+    <ZoneAndRegionNumbers regionNumber="1" zoneNumber="1"> </ZoneAndRegionNumbers>
     <GaussFieldNames> GF1 </GaussFieldNames>
     <GaussFieldNames> GF2 </GaussFieldNames>
     <GaussFieldNames> GF3 </GaussFieldNames>
     <GaussFieldNames> GF4 </GaussFieldNames>
-    <GaussFieldNames> GF5 </GaussFieldNames>
     <GaussFieldNames> GF6 </GaussFieldNames>
     <GaussFieldNames> GF7 </GaussFieldNames>
     <GaussFieldNames> GF8 </GaussFieldNames>
     <GaussFieldNames> GF9 </GaussFieldNames>
-    <GaussFieldNames> GF10 </GaussFieldNames>
-    <GaussFieldNames> GF11 </GaussFieldNames>
-    <GaussFieldNames> GF12 </GaussFieldNames>
-    <GaussFieldNames> GF13 </GaussFieldNames>
-    <GaussFieldNames> GF14 </GaussFieldNames>
-    <GaussFieldNames> GF15 </GaussFieldNames>
-    <NZones> 6 </NZones>
-    <ZoneName nLayers="15" number="1"> middle_Neslen_1 </ZoneName>
-    <ZoneName nLayers="10" number="2"> middle_Neslen_2 </ZoneName>
-    <ZoneName nLayers="18" number="3"> middle_Neslen_3 </ZoneName>
-    <ZoneName nLayers="10" number="4"> middle_Neslen_4 </ZoneName>
-    <ZoneName nLayers="15" number="5"> middle_Neslen_5 </ZoneName>
-    <ZoneName nLayers="15" number="6"> middle_Neslen_6 </ZoneName>
-    <XSize> 7900.15901803 </XSize>
-    <YSize> 16127.894003 </YSize>
-    <AzimuthAngle> 35.0000004771 </AzimuthAngle>
-    <OrigoX> 643206.280273 </OrigoX>
-    <OrigoY> 4347614.29688 </OrigoY>
+    <NZones> 1 </NZones>
+    <ZoneName nLayers="20" number="1"> middle_Neslen_1 </ZoneName>
+    <XSize> 7899.96449041 </XSize>
+    <YSize> 15999.9242956 </YSize>
+    <AzimuthAngle> 35.0000005602 </AzimuthAngle>
+    <OrigoX> 643242.78125 </OrigoX>
+    <OrigoY> 4347666.47217 </OrigoY>
     <NX> 316 </NX>
-    <NY> 323 </NY>
-    <Xinc> 25.0005032216 </Xinc>
-    <Yinc> 49.9315603809 </Yinc>
+    <NY> 640 </NY>
+    <Xinc> 24.9998876279 </Xinc>
+    <Yinc> 24.9998817119 </Yinc>
   </GridModel>
   <SurfaceTrendDimensions>
     <NX> 803 </NX>
@@ -232,12 +98,7 @@
     <Yinc> 50.0 </Yinc>
     <Rotation> 0.0 </Rotation>
   </SurfaceTrendDimensions>
-  <Horizon> top_middle_Neslen_1 </Horizon>
   <Horizon> top_middle_Neslen_2 </Horizon>
-  <Horizon> top_middle_Neslen_3 </Horizon>
-  <Horizon> top_middle_Neslen_4 </Horizon>
-  <Horizon> top_middle_Neslen_5 </Horizon>
-  <Horizon> top_middle_Neslen_6 </Horizon>
   <MainFaciesTable>
     <Facies name="Lagoon">
       <Code> 1 </Code>

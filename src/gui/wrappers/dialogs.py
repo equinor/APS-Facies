@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QDialogButtonBox
 from src.gui.wrappers.base_classes.dialogs import GeneralDialog
 from src.gui.wrappers.base_classes.getters.general import get_element
 from src.resources.ui.AddFacies_ui import Ui_AddFacies
-from src.utils.constants.constants import AddFaciesElements
+from src.utils.constants.non_qt import AddFaciesElements
 from src.utils.constants.defaults.non_qt import DatabaseDefaults, UI
 
 

@@ -1,8 +1,16 @@
 #!/bin/env python
 import copy
 from xml.etree.ElementTree import Element
-
+import importlib
 import numpy as np
+
+import src.Trunc2D_Base_xml
+import src.utils.numeric
+import src.utils.xml
+
+importlib.reload(src.Trunc2D_Base_xml)
+importlib.reload(src.utils.numeric)
+importlib.reload(src.utils.xml)
 
 from src.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug

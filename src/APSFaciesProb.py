@@ -1,6 +1,14 @@
 #!/bin/env python
+import sys
 import copy
+import importlib
 from xml.etree.ElementTree import Element
+
+import src.utils.numeric
+import src.utils.xml
+
+importlib.reload(src.utils.numeric)
+importlib.reload(src.utils.xml)
 
 from src.utils.constants.simple import Debug
 from src.utils.numeric import isNumber

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QListWidgetItem
 from src.APSModel import APSModel
 from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
-from src.utils.constants.constants import (
+from src.utils.constants.non_qt import (
     CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesSelectionConstants, GaussianRandomFieldConstants,
     ModeConstants, ProjectConstants, TruncationRuleConstants,
 )

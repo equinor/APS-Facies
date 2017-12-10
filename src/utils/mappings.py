@@ -4,7 +4,7 @@ from typing import Dict, List, Set, Union
 from PyQt5.QtWidgets import QWidget
 
 from src.gui.wrappers.base_classes.getters.general import get_element
-from src.utils.constants.constants import (
+from src.utils.constants.non_qt import (
     BayfillTruncationRuleConstants, BayfillTruncationRuleElements,
     CubicTruncationRuleConstants, CubicTruncationRuleElements, NonCubicTruncationRuleConstants,
     NonCubicTruncationRuleElements, ProjectConstants, ProjectElements, TruncationLibraryButtonNameKeys,

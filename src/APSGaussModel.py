@@ -1,7 +1,17 @@
 #!/bin/env python
+import numpy as np
+import importlib
 from xml.etree.ElementTree import Element
 
-import numpy as np
+import src.Trend3D_linear_model_xml
+import src.simGauss2D
+import src.utils.xml
+
+importlib.reload(src.Trend3D_linear_model_xml)
+importlib.reload(src.simGauss2D)
+# importlib.reload(src.utils.constants.simple)
+importlib.reload(src.utils.xml)
+# importlib.reload(src.utils.checks)
 
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
@@ -58,6 +68,7 @@ class APSGaussModel:
     Private functions:
     def __setEmpty(self)
     def __interpretXMLTree(ET_Tree_zone)
+    def __isVariogramTypeOK(self,variogramType)
     def __getGFIndex(self,gfName)
     """
 
@@ -286,7 +297,7 @@ class APSGaussModel:
         return variogram, variogramType
 
     @staticmethod
-    def get_variogram_type(variogram):
+    def get_variogram_type(variogram) -> VariogramType:
         if isinstance(variogram, str):
             name = variogram
         elif isinstance(variogram, Element):
@@ -294,7 +305,8 @@ class APSGaussModel:
         elif isinstance(variogram, VariogramType):
             return variogram
         else:
-            raise ValueError("Unknown type")
+            raise ValueError('Unknown type: {}'.format(str(variogram)))
+
         if name == 'SPHERICAL':
             return VariogramType.SPHERICAL
         elif name == 'EXPONENTIAL':
@@ -304,8 +316,7 @@ class APSGaussModel:
         elif name == 'GENERAL_EXPONENTIAL':
             return VariogramType.GENERAL_EXPONENTIAL
         else:
-            print('Error: Unknown variogram type {}'.format(name))
-            return None
+            raise ValueError('Error: Unknown variogram type {}'.format(name))
 
     def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
                    gaussModelList, trendModelList,
@@ -405,7 +416,6 @@ class APSGaussModel:
 
     def getNGaussFields(self):
         return len(self.__variogramForGFModel)
-
 
     def getZoneNumber(self):
         return self.__zoneNumber

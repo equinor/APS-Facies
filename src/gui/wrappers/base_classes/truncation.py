@@ -12,7 +12,7 @@ from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number
 from src.gui.wrappers.base_classes.pickers.color_picker import ColorPicker
 from src.gui.wrappers.base_classes.setters.color import set_color
 from src.gui.wrappers.base_classes.setters.qt_element_widgets import set_value
-from src.utils.constants.constants import (
+from src.utils.constants.non_qt import (
     Angles, BaseNames, CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesLabels, Proportions,
     TruncationRuleConstants, TruncationRuleLibraryElements,
 )

@@ -9,7 +9,7 @@ from src.gui.wrappers.base_classes.dialogs import OkCancelDialog
 from src.gui.wrappers.base_classes.getters.general import get_element, get_elements
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_number_from_numeric_text_field
 from src.resources.ui.Gaussian_ui import Ui_DefineGaussian
-from src.utils.constants.constants import (
+from src.utils.constants.non_qt import (
     AzimuthAngle, Constraints, DefineGaussianElements, DipAngle,
     MainRange, PerpRange, Power, TrendSettingsLabelsElements, VariogramModelConstants, VariogramModelElements,
     VerticalRange,
