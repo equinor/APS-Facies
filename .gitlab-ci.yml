@@ -75,6 +75,18 @@ start GUI:
   dependencies:
     - build GUI
 
+deploy release:
+  stage: deploy
+  script:
+    - ""
+  only:
+    - tags
+  dependencies:
+    - build GUI
+  artifacts:
+    paths:
+      - artifacts/
+
 deploy release candidate:
   stage: deploy
   script:
