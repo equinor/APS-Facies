@@ -1,9 +1,15 @@
 #!/bin/env python
 import copy
 import sys
+import importlib
+
 from xml.etree.ElementTree import Element
 
-from src.utils.APSExceptions import ReadingXmlError
+import src.utils.exceptions.xml
+
+importlib.reload(src.utils.exceptions.xml)
+
+from src.utils.exceptions.xml import ReadingXmlError
 from src.utils.constants.simple import Debug
 
 

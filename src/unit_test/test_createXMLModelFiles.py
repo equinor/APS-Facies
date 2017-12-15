@@ -2,6 +2,8 @@
 # Python3  test that the model files can be created correctly.
 
 import filecmp
+import collections
+
 
 from src.APSFaciesProb import APSFaciesProb
 from src.APSGaussFieldJobs import APSGaussFieldJobs
@@ -15,14 +17,14 @@ from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
-    NO_VERBOSE_DEBUG
+    NO_VERBOSE_DEBUG,VERY_VERBOSE_DEBUG
 )
 from src.utils.constants.simple import Debug, VariogramType
 
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, debug_level=NO_VERBOSE_DEBUG
+        zoneParamName, faciesRealParamNameResult, fTable, debug_level=VERY_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
@@ -33,7 +35,7 @@ def defineCommonModelParam(
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
     apsmodel.set_debug_level(debug_level)
-
+    print('Debug level: {}'.format(str(apsmodel.debug_level())))
     # Define gauss field jobs
     gfJobObject = APSGaussFieldJobs()
     gfJobNames = ['GRFJob1', 'GRFJob2', 'GRFJob3']
@@ -49,6 +51,7 @@ def defineCommonModelParam(
 def addZoneParam(
         apsmodel,
         zoneNumber=0,
+        regionNumber=0,
         horizonNameForVariogramTrendMap=None,
         simBoxThickness=0.0,
         # Facies prob for zone
@@ -164,7 +167,7 @@ def addZoneParam(
 
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
-        zoneNumber=zoneNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
+        zoneNumber=zoneNumber, regionNumber=regionNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
         horizonNameForVariogramTrendMap=horizonNameForVariogramTrendMap, faciesProbObject=faciesProbObj,
         gaussModelObject=gaussModelObj, truncRuleObject=truncRuleObj, debug_level=debug_level
     )
@@ -172,6 +175,15 @@ def addZoneParam(
     # Add zone to APSModel
     apsmodel.addNewZone(apsZoneModel)
 
+    # Delete zone to APSModel
+    apsmodel.deleteZone(zoneNumber, regionNumber)
+
+    # Add zone to APSModel
+    apsmodel.addNewZone(apsZoneModel)
+
+    # Get zone numbers and region numbers
+    print('Zone numbers:')
+    print(apsmodel.getZoneNumberList())
 
 def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
@@ -217,7 +229,9 @@ def test_create_XMLModelFiles():
     test_case_2()
     test_case_3()
 
-    test_updating_model()
+    test_read_and_write_APSModel()
+    test_updating_model1()
+    test_updating_model2()
 
     test_variogram_generation()
     print('Finished')
@@ -265,14 +279,30 @@ def test_variogram_generation():
     projection = 'yz'
     apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
 
+def test_read_and_write_APSModel():
+    print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
+    modelFile = 'testData_models/APS.xml'
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
+    outfile3 = 'testOut3.xml'
+    apsmodel.writeModel(outfile3, Debug.OFF)
+    reference_file = 'testData_models/APS_sorted.xml'
+    print('Compare file: ' + outfile3 + ' and ' + reference_file)
+    check = filecmp.cmp(outfile3, reference_file)
+    if check:
+        print('Files are equal. OK')
+    else:
+        print('Files are different. NOT OK')
+    assert check is True
 
-def test_updating_model():
-    print('***** Case: Update parameters *****')
+
+def test_updating_model1():
+    print('***** Case: Update parameters case 1 *****')
     # Test updating of model
     modelFile = 'testData_models/APS.xml'
-    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.OFF)
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
     # Do some updates of the model
     zoneNumber = 1
+    regionNumber = 0
     zone = apsmodel.getZoneModel(zoneNumber)
     gaussFieldNames = zone.getUsedGaussFieldNames()
     nGaussFields = len(gaussFieldNames)
@@ -313,7 +343,67 @@ def test_updating_model():
             assertPropertyGetterSetter(gfName, power, zone, 'Power')
     outfile2 = 'testOut2_updated.xml'
     apsmodel.writeModel(outfile2, Debug.OFF)
-    reference_file = 'testData_models/APS_updated.xml'
+    reference_file = 'testData_models/APS_updated1.xml'
+    print('Compare file: ' + outfile2 + ' and ' + reference_file)
+    check = filecmp.cmp(outfile2, reference_file)
+    if check:
+        print('Files are equal. OK')
+    else:
+        print('Files are different. NOT OK')
+    assert check is True
+
+def test_updating_model2():
+    print('***** Case: Update parameters case 2 *****')
+    # Test updating of model
+    modelFile = 'testData_models/APS.xml'
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
+    # Do some updates of the model
+    zoneNumber = 2
+    regionNumber = 4
+    zone = apsmodel.getZoneModel(zoneNumber, regionNumber)
+    gaussFieldNames = zone.getUsedGaussFieldNames()
+    nGaussFields = len(gaussFieldNames)
+    variogramTypeList = [
+        VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
+        VariogramType.GENERAL_EXPONENTIAL, VariogramType.SPHERICAL
+    ]
+    mainRangeList = [2099.0, 3210.0, 1204.0, 1308.0, 1090.0]
+    perpRangeList = [123.0, 543.0, 120.0, 130.0, 215.0]
+    vertRangeList = [1.0, 5.0, 1.2, 1.3, 2.15]
+    azimuthAngleList = [0.0, 90.0, 125.0, 40.0, 50.0]
+    dipAngleList = [0.0, 0.01, 0.005, 0.009, 0.0008]
+    powerList = [1.0, 1.2, 1.3, 1.4, 1.5]
+    for i in range(nGaussFields):
+        gfName = gaussFieldNames[i]
+        if regionNumber > 0:
+            print('Update (zone,region):  ({},{})  Gauss field: {}'.format(str(zoneNumber), str(regionNumber), gfName))
+        else:
+            print('Update zone:  {}  Gauss field: {}'.format(str(zoneNumber), gfName))
+
+        variogramType = variogramTypeList[i]
+        assertPropertyGetterSetter(gfName, variogramType, zone, 'VariogramType')
+
+        mainRange = mainRangeList[i]
+        assertPropertyGetterSetter(gfName, mainRange, zone, 'MainRange')
+
+        perpRange = perpRangeList[i]
+        assertPropertyGetterSetter(gfName, perpRange, zone, 'PerpRange')
+
+        vertRange = vertRangeList[i]
+        assertPropertyGetterSetter(gfName, vertRange, zone, 'VertRange')
+
+        azimuth = azimuthAngleList[i]
+        assertPropertyGetterSetter(gfName, azimuth, zone, 'AnisotropyAzimuthAngle')
+
+        dip = dipAngleList[i]
+        assertPropertyGetterSetter(gfName, dip, zone, 'AnisotropyDipAngle')
+
+        if variogramType == VariogramType.GENERAL_EXPONENTIAL:
+            power = powerList[i]
+            assertPropertyGetterSetter(gfName, power, zone, 'Power')
+    outfile2 = 'testOut2_updated.xml'
+    apsmodel.writeModel(outfile2, Debug.OFF)
+    reference_file = 'testData_models/APS_updated2.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
     check = filecmp.cmp(outfile2, reference_file)
     if check:
@@ -371,15 +461,16 @@ def test_case_1_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_1(apsmodel)
-    selectedZones = [1]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(1)
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    read_write_model(apsmodel, Debug.VERY_VERBOSE)
 
 
 def test_case_1_zone_2():
@@ -396,9 +487,14 @@ def test_case_1_zone_2():
     add_zone_1_for_case_1(apsmodel)
     print('Zone: 2')
     add_zone_2_for_case_1(apsmodel)
-    selectedZones = [1, 2]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(2)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+
+    selectedZoneNumber = 2
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -415,9 +511,10 @@ def test_case_2_zone_1():
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_2(apsmodel)
-    selectedZones = [1]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(1)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -435,9 +532,14 @@ def test_case_2_zone_2():
     add_zone_1_for_case_2(apsmodel)
     print('Zone: 2')
     add_zone_2_for_case_2(apsmodel)
-    selectedZones = [1, 2]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(2)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+
+    selectedZoneNumber = 2
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -453,9 +555,10 @@ def test_case_3_zone_1():
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_3(apsmodel)
-    selectedZones = [1]
-    apsmodel.setSelectedZoneNumberList(selectedZones)
-    apsmodel.setPreviewZoneNumber(1)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
 
 
@@ -463,6 +566,7 @@ def add_zone_1_for_case_1(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=1,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
@@ -503,6 +607,7 @@ def add_zone_2_for_case_1(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=2,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_2',
         simBoxThickness=12.0,
         # Facies prob for zone
@@ -539,6 +644,7 @@ def add_zone_1_for_case_2(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=1,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
@@ -575,6 +681,7 @@ def add_zone_2_for_case_2(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=2,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_2',
         simBoxThickness=12.0,
         # Facies prob for zone
@@ -611,6 +718,7 @@ def add_zone_1_for_case_3(apsmodel):
     addZoneParam(
         apsmodel=apsmodel,
         zoneNumber=1,
+        regionNumber=0,
         horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone

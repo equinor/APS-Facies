@@ -13,9 +13,15 @@ This will include:
 Example input file to be specified before running this script.
 <?xml version="1.0" ?>
 <GetRMSProjectData>
+ 
  <GridModel>
-   APS_NESLEN_ODM
+   <Name> APS_NESLEN_ODM </Name>
+   <ZoneParameter>  Zone </ZoneParameter>
+   <RegionParameter>  Region </RegionParameter>
  </GridModel>
+
+
+
  <WellName name="B2">
    <Trajectory name="Drilled trajectory">
      <Logrun name="log">
@@ -39,20 +45,24 @@ import copy
 import datetime
 import importlib
 import sys
+import numpy as np
+import roxar
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
-import numpy as np
-import roxar
 
 import src.generalFunctionsUsingRoxAPI as gr
-from src import APSDataFromRMS, APSMainFaciesTable
-from src.utils.constants.simple import Debug
-from src.utils.xml import prettify
+import src.APSDataFromRMS as APSDataFromRMS
+import src.APSMainFaciesTable as APSMainFaciesTable 
+import src.utils.xml as xml
 
+importlib.reload(gr)
 importlib.reload(APSDataFromRMS)
 importlib.reload(APSMainFaciesTable)
-importlib.reload(gr)
+importlib.reload(xml)
+
+from src.utils.constants.simple import Debug
+from src.utils.xml import prettify
 
 
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
@@ -71,10 +81,39 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     if gridModelObj is None:
         print('Error: Missing specification of ' + kw)
         sys.exit()
-    text = gridModelObj.text
+        
+    kw1 = 'Name'
+    gridModelNameObj = gridModelObj.find(kw1)
+    if gridModelNameObj is None:
+        print('Error: Missing specification of keyword ' + kw1 + ' under keyword ' + kw)
+        sys.exit()
+    text = gridModelNameObj.text
     gridModelName = text.strip()
+
+    kw3 = 'ZoneParameter'
+    zoneParamNameObj = gridModelObj.find(kw3)
+    if zoneParamNameObj is None:
+        print('Error: Missing specification of keyword ' + kw3 + ' under keyword ' + kw)
+        sys.exit()
+    text = zoneParamNameObj.text
+    zoneParamName = text.strip()
+
+    kw4 = 'RegionParameter'
+    regionParamName=None
+    regionParamNameObj = gridModelObj.find(kw4)
+    if regionParamNameObj is not None:
+        text = regionParamNameObj.text
+        regionParamName = text.strip()
+    else:
+        print('Note: Missing specification of keyword ' + kw4 + ' under keyword ' + kw)
+        print('      You will not be able to use APS models for regions if this is not specified')
+
+
     if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: Grid model:         ' + gridModelName)
+        print('Debug output: Zone parameter:     ' + zoneParamName)
+        if regionParamName is not None:
+            print('Debug output: Region parameter:   ' + regionParamName)
 
     kw = 'GaussFields'
     gfNames = []
@@ -140,7 +179,7 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
         print(
             'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
 
-    return [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
+    return [gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
             wellRefName, trajectoryName, logrunName, logName]
 
 
@@ -157,7 +196,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     :return:
     """
     [
-        gridModelName, gfNames, horizonRefName, horizonRefType,
+        gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType,
         horizonList, wellRefName, trajectoryName, logrunName, logName
     ] = readInputXMLFile(inputFile, debug_level)
 
@@ -196,7 +235,9 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
     tag = 'RealisationNumber'
     realNumberElement = Element(tag)
-    realNumberElement.text = ' ' + str(project.current_realisation) + ' '
+    realizationNumber = project.current_realisation
+    realNumberElement.text = ' ' + str(realizationNumber) + ' '
+
     prElement.append(realNumberElement)
 
     tag = 'WorkflowList'
@@ -232,14 +273,32 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     gmElement = Element('GridModel', attribute)
     topElement.append(gmElement)
 
+    zoneValues = None
+    regionValues = None
     # Scan for all 3D parameters in grid model
     properties = gridModel.properties
     for prop in properties:
         if len(prop.name) > 40:
             # Skip this model. Is probably not a model but a dummy model name
             continue
-        # Check if the property type is integer or float type
         name = prop.name
+
+        
+        # Check if this is the specified zone parameter
+        if name == zoneParamName:
+            # Get the zone parameter values
+            [zoneValues, codeNamesZone] = gr.getDiscrete3DParameterValues(gridModel, name, realNumber=realizationNumber, debug_level=debug_level)
+        # Check if the property type is integer or float type
+
+        if regionParamName is not None:
+            # Check if this is the specified region parameter
+            if name == regionParamName:
+                # Get the region parameter values
+                [regionValues, codeNamesRegion] = gr.getDiscrete3DParameterValues(gridModel, name,realNumber=realizationNumber,  debug_level=debug_level)
+
+                
+        # Check if the property type is integer or float type
+
         isDiscrete = 0
         try:
             # This will return the existing property since it already exist
@@ -258,6 +317,49 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         gmElement.append(propElement)
     # end for properties in gridmodel
 
+    zonesAndRegions = {}
+    if regionParamName == None:
+        if zoneValues == None:
+            raise ValueError('Zone parameter is not defined or empty')
+
+        # Only zone numbers are reported
+        for i in range(len(zoneValues)):
+            zVal = zoneValues[i]
+            rVal = 0
+            key = (zVal,rVal)
+            if not key in zonesAndRegions:
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: Add zone = ({})'.format(str(zVal)))
+                zonesAndRegions[key] = 1
+    else:
+        # Both zone numbers and region numbers are reported
+        if zoneValues == None:
+            raise ValueError('Zone parameter is not defined or empty')
+        if regionValues == None:
+            raise ValueError('Region parameter is not defined or empty')
+        if len(zoneValues) != len(regionValues):
+            raise ValueError('Length of zone parameter and region parameter are different. Some inconsistency.')
+        for i in range(len(zoneValues)):
+            zVal = zoneValues[i]
+            rVal = regionValues[i]
+            key = (zVal,rVal)
+            if not key in zonesAndRegions:
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: Add (zone,region) = ({},{})'.format(str(zVal), str(rVal)))
+                zonesAndRegions[key] = 1
+
+    # Zone and region informatione
+
+    for key, value in zonesAndRegions.items():
+        zNumber = key[0]
+        rNumber = key[1]
+        tag='ZoneAndRegionNumbers'
+        attributes={'zoneNumber':str(zNumber),'regionNumber':str(rNumber)}
+        zoneAndRegionElement = Element(tag, attributes)
+        zoneAndRegionElement.text = ' '
+        gmElement.append(zoneAndRegionElement)        
+
+                
     for name in gfNames:
         gfElement = Element('GaussFieldNames')
         gfElement.text = ' ' + name + ' '
@@ -428,7 +530,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
 
 def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):
-    [gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
+    [gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
      wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, debug_level)
 
     # Get dimensions from the reference map

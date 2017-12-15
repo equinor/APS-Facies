@@ -1,9 +1,4 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMessageBox
-
-from src.utils.constants.base import Key, Value, Icon
-from src.utils.constants.simple import Debug
+from src.utils.constants.base import Key, Value
 
 # TODO: Implement automatic initialization, when accessing a constant
 # Ex. ProjectConstants.PATH_OF_PROJECT_FIL (with, or without () at the end) will give a class instance having that value
@@ -304,35 +299,6 @@ class HideOptions(Value):
     HIDE = 'hide'
 
 
-class Defaults(Value):
-    FILE_EXTENSION = 'xml'
-    FILE_FILTER = 'XML files (*.xml)'
-    PREFIX_NAME_OF_BUTTON = 'm_button_'
-    NAME_OF_BUTTON_BOX = 'm_buttons_ok_cancel'
-    NAME_OF_PROPORTIONS = CubicTruncationRuleElements.PROPORTIONS
-    NAME_OF_SLIDERS = CubicTruncationRuleElements.SLIDERS
-    NAME_OF_COLOR_BUTTON = CubicTruncationRuleElements.COLOR_BUTTON
-    NAME_OF_DROP_DOWN = CubicTruncationRuleElements.DROP_DOWN
-    NAME_OF_ANGLES = NonCubicTruncationRuleElements.ANGLES
-    NAME_OF_SLANTED_FACTOR = BayfillTruncationRuleElements.SLANT_FACTOR
-    OPERATION_MODE = ModeOptions.EXPERIMENTAL_MODE
-    SEPARATE_ZONE_MODELS = Qt.Unchecked
-    FACIES_MODELS = Qt.Unchecked
-    GAUSSIAN_TREND = Qt.Unchecked
-    CONDITION_TO_WELL = Qt.Unchecked
-    HIDE = HideOptions.DISABLE
-    DEBUG = Debug.OFF
-    MAXIMUM_NUMBER_OF_FACIES = GaussianRandomFieldElements.NUMBER_OF_ELEMENTS  # -1 To turn off
-
-
-class MessageIcon(Icon):
-    NO_ICON = QMessageBox.NoIcon
-    QUESTION_ICON = QMessageBox.Question
-    INFORMATION_ICON = QMessageBox.Information
-    WARNING_ICON = QMessageBox.Warning
-    CRITICAL_ICON = QMessageBox.Critical
-
-
 class Constraints(Value):
     MINIMUM = float('-inf')
     MAXIMUM = float('inf')
@@ -394,19 +360,3 @@ class Ranges(Value):
     # Proportion
     PROPORTION_MINIMUM = 0.0
     PROPORTION_MAXIMUM = 1.0
-
-
-class Colors(Value):
-    LAWN_GREEN = QColor('lawngreen')  # Hex code: #7CFC00
-    GRAY = QColor('gray')  # Hex code: #808080
-    DODGER_BLUE = QColor('dodgerblue')  # Hex code: #1E90FF
-    GOLD = QColor('gold')  # Hex code: #D4AF37
-    DARK_ORCHID = QColor('darkorchid')  # Hex code: #9932CC
-    CYAN = QColor('cyan')  # Hex code: #00B7EB
-    FIREBRICK = QColor('firebrick')  # Hex code: #B22222
-    OLIVE_DRAB = QColor('olivedrab')  # Hex code: #6B8E23
-    BLUE = QColor('blue')  # Hex code: #0000FF
-    CRIMSON = QColor('crimson')  # Hex code: #DC143C
-    DARK_ORANGE = QColor('darkorange')  # Hex code: #FF8C00
-    RED = QColor('red')  # Hex code: #FF0000
-    BACKGROUND = QColor('#EFEBE7')

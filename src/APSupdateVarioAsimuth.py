@@ -4,14 +4,16 @@ Python3 script using ROXAPI to update 2D maps for azimuth anisotropy for
 variogram for 3D gaussian field simulation.
 Dependency: ROXAPI
 """
+import sys
 import importlib
 
 import src.generalFunctionsUsingRoxAPI as gr
-from src import APSModel, APSZoneModel
+import src.APSModel as APSModel
+import src.APSZoneModel as APSZoneModel
 
+importlib.reload(gr)
 importlib.reload(APSModel)
 importlib.reload(APSZoneModel)
-importlib.reload(gr)
 
 modelFileName = 'APS.xml'
 print('- Read file: ' + modelFileName)
@@ -19,10 +21,9 @@ apsModel = APSModel.APSModel(modelFileName)
 debug_level = apsModel.debug_level()
 
 horizons = project.horizons
-selectedZoneNumberList = apsModel.getSelectedZoneNumberList()
-
-for zoneNumber in selectedZoneNumberList:
-    zoneModel = apsModel.getZoneModel(zoneNumber)
+allZoneModels = apsModel.getAllZoneModels()
+for key, zoneModel in allZoneModels.items():
+    
     hName = zoneModel.getHorizonNameForVariogramTrendMap()
     gaussFieldNames = zoneModel.getUsedGaussFieldNames()
     for gfName in gaussFieldNames:

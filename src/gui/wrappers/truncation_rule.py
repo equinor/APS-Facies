@@ -3,7 +3,8 @@ from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.resources.ui.TruncRuleCubic_ui import Ui_CubicTruncationRule
 from src.resources.ui.TruncRuleTypeBayfill_ui import Ui_BayfillTruncationRule
 from src.resources.ui.TruncRuleTypeNonCubic_ui import Ui_NonCubicTruncationRule
-from src.utils.constants.constants import BaseNames, Defaults
+from src.utils.constants.non_qt import BaseNames
+from src.utils.constants.defaults.non_qt import UI
 
 
 class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
@@ -12,9 +13,9 @@ class CubicTruncationRule(BaseTruncation, Ui_CubicTruncationRule):
             state: State,
             truncation_type: str,
             parent=None,
-            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
-            basename_sliders=Defaults.NAME_OF_SLIDERS,
-            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
+            name_of_buttons=UI.NAME_OF_BUTTON_BOX,
+            basename_sliders=UI.NAME_OF_SLIDERS,
+            basename_proportions=UI.NAME_OF_PROPORTIONS,
             facies_options=None,
             color_options=None,
             active=None
@@ -42,10 +43,10 @@ class NonCubicTruncationRule(BaseTruncation, Ui_NonCubicTruncationRule):
             state: State,
             truncation_type: str,
             parent=None,
-            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
-            basename_sliders=Defaults.NAME_OF_SLIDERS,
-            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
-            basename_angles=Defaults.NAME_OF_ANGLES,
+            name_of_buttons=UI.NAME_OF_BUTTON_BOX,
+            basename_sliders=UI.NAME_OF_SLIDERS,
+            basename_proportions=UI.NAME_OF_PROPORTIONS,
+            basename_angles=UI.NAME_OF_ANGLES,
             facies_options=None,
             color_options=None,
             active=None
@@ -73,10 +74,10 @@ class BayfillTruncationRule(BaseTruncation, Ui_BayfillTruncationRule):
             self,
             state: State,
             parent=None,
-            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
-            basename_sliders=Defaults.NAME_OF_SLIDERS,
-            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
-            basename_slanted_factor=Defaults.NAME_OF_SLANTED_FACTOR,
+            name_of_buttons=UI.NAME_OF_BUTTON_BOX,
+            basename_sliders=UI.NAME_OF_SLIDERS,
+            basename_proportions=UI.NAME_OF_PROPORTIONS,
+            basename_slanted_factor=UI.NAME_OF_SLANTED_FACTOR,
             facies_options=None,
             color_options=None,
     ):
@@ -105,11 +106,11 @@ class CustomTruncationRule(BaseTruncation):
             self,
             state: State,
             parent=None,
-            name_of_buttons=Defaults.NAME_OF_BUTTON_BOX,
-            basename_sliders=Defaults.NAME_OF_SLIDERS,
-            basename_proportions=Defaults.NAME_OF_PROPORTIONS,
-            basename_color_button=Defaults.NAME_OF_COLOR_BUTTON,
-            basename_drop_down=Defaults.NAME_OF_DROP_DOWN,
+            name_of_buttons=UI.NAME_OF_BUTTON_BOX,
+            basename_sliders=UI.NAME_OF_SLIDERS,
+            basename_proportions=UI.NAME_OF_PROPORTIONS,
+            basename_color_button=UI.NAME_OF_COLOR_BUTTON,
+            basename_drop_down=UI.NAME_OF_DROP_DOWN,
             facies_options=None,
             color_options=None,
             names=None,

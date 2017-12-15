@@ -15,3 +15,13 @@ class VariogramType(Enum):
     EXPONENTIAL = 2
     GAUSSIAN = 3
     GENERAL_EXPONENTIAL = 4
+
+
+class OperationalMode(Enum):
+    EXPERIMENTAL = 0
+    NORMAL = 1
+
+
+def get_legal_values_of_enum(enum):
+    if isinstance(enum, Enum) or isinstance(enum, IntEnum):
+        return {v.value for v in enum.__members__.values()}

@@ -7,7 +7,7 @@ from src.gui.wrappers.base_classes.getters.color import get_color
 from src.gui.wrappers.base_classes.getters.combo_box import get_choice
 from src.gui.wrappers.base_classes.getters.numeric_input_field import get_value_of_numeric_text_field
 from src.gui.wrappers.base_classes.getters.slider import get_value_of_slider
-from src.utils.constants.constants import BaseNames, TruncationRuleLibraryElements, FaciesLabels
+from src.utils.constants.non_qt import BaseNames, TruncationRuleLibraryElements, FaciesLabels
 
 
 def get_value_of_element(element: Union[QLineEdit, QSlider, QPushButton, QComboBox]) -> Union[float, int, QColor, str]:

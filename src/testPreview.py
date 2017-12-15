@@ -4,15 +4,25 @@
 import matplotlib
 import numpy as np
 import scipy
-from typing import List
+import importlib
 
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
+import src.APSDataFromRMS
+import src.APSModel
+import src.utils.exceptions.xml
+import src.utils.io
+
+importlib.reload(src.APSDataFromRMS)
+importlib.reload(src.APSModel)
+importlib.reload(src.utils.exceptions.xml)
+importlib.reload(src.utils.io)
+
 from src.APSDataFromRMS import APSDataFromRMS
 from src.APSModel import APSModel
-from src.utils.APSExceptions import CrossSectionOutsideRange, UndefinedZoneError
+from src.utils.exceptions.xml import CrossSectionOutsideRange, UndefinedZoneError
 from src.utils.constants.simple import Debug
 from src.utils.io import readFile, writeFile
 
@@ -173,16 +183,19 @@ def run_previewer(
         raise ValueError("The given model format is not recognized.")
 
     previewZoneNumber = apsModel.getPreviewZoneNumber()
+    previewRegionNumber = apsModel.getPreviewRegionNumber()
     previewCrossSectionType = apsModel.getPreviewCrossSectionType()
     previewCrossSectionIndx = apsModel.getPreviewCrossSectionIndx()
     previewScale = apsModel.getPreviewScale()
     if debug_level >= Debug.VERY_VERBOSE:
         print(
             'Debug output: previewZoneNumber:       {previewZoneNumber}\n'
+            'Debug output: previewRegionNumber:     {previewRegionNumber}\n'
             'Debug output: previewCrossSectionType: {previewCrossSectionType}\n'
             'Debug output: previewCrossSectionIndx: {previewCrossSectionIndx}\n'
             'Debug output: previewScale:            {previewScale}\n\n'.format(
                 previewZoneNumber=previewZoneNumber,
+                previewRegionNumber=previewRegionNumber,
                 previewCrossSectionType=previewCrossSectionType,
                 previewCrossSectionIndx=previewCrossSectionIndx,
                 previewScale=previewScale
@@ -201,7 +214,8 @@ def run_previewer(
     ny = int(nyFromGrid)
     nz = int(nzFromGrid)
     zoneNumber = previewZoneNumber
-    zoneModel = apsModel.getZoneModel(zoneNumber)
+    regionNumber = previewRegionNumber
+    zoneModel = apsModel.getZoneModel(zoneNumber, regionNumber)
     if zoneModel is None:
         raise UndefinedZoneError(zoneNumber)
     simBoxZsize = zoneModel.getSimBoxThickness()
@@ -585,7 +599,10 @@ def run_previewer(
         left=0.10, wspace=0.15, hspace=0.20, bottom=0.05, top=0.92
     )
     # Label the rows and columns of the table
-    text = 'Zone number: ' + str(zoneNumber) + ' Cross section: ' + previewCrossSectionType
+    if regionNumber > 0:
+        text = 'Zone number: ' + str(zoneNumber) + ' Region number: ' + str(regionNumber)+ ' Cross section: ' + previewCrossSectionType
+    else:
+        text = 'Zone number: ' + str(zoneNumber) + ' Cross section: ' + previewCrossSectionType
     fig.text(0.50, 0.98, text, ha='center')
     for i in range(nFacies):
         p = int(faciesProb[i] * 1000 + 0.5)

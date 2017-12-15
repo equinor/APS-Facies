@@ -1,13 +1,24 @@
 #!/bin/env python
+import numpy as np
+import importlib
 from xml.etree.ElementTree import Element
 
-import numpy as np
+import src.Trend3D_linear_model_xml
+import src.simGauss2D
+import src.utils.xml
+
+importlib.reload(src.Trend3D_linear_model_xml)
+importlib.reload(src.simGauss2D)
+# importlib.reload(src.utils.constants.simple)
+importlib.reload(src.utils.xml)
+# importlib.reload(src.utils.checks)
 
 from src.Trend3D_linear_model_xml import Trend3D_linear_model
 # Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.simGauss2D import simGaussField
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
+from src.utils.checks import isVariogramTypeOK
 
 
 class APSGaussModel:
@@ -277,7 +288,7 @@ class APSGaussModel:
     def get_variogram(self, gf, gfName):
         variogram = getKeyword(gf, 'Vario', 'GaussField', modelFile=self.__modelFileName)
         variogramType = self.get_variogram_type(variogram)
-        if not self.__isVariogramTypeOK(variogramType):
+        if not isVariogramTypeOK(variogramType):
             raise ValueError(
                 'In model file {0} in zone number: {1} in command Vario for gauss field {2}.\n'
                 'Specified variogram type is not defined.'
@@ -286,7 +297,7 @@ class APSGaussModel:
         return variogram, variogramType
 
     @staticmethod
-    def get_variogram_type(variogram):
+    def get_variogram_type(variogram) -> VariogramType:
         if isinstance(variogram, str):
             name = variogram
         elif isinstance(variogram, Element):
@@ -294,7 +305,8 @@ class APSGaussModel:
         elif isinstance(variogram, VariogramType):
             return variogram
         else:
-            raise ValueError("Unknown type")
+            raise ValueError('Unknown type: {}'.format(str(variogram)))
+
         if name == 'SPHERICAL':
             return VariogramType.SPHERICAL
         elif name == 'EXPONENTIAL':
@@ -304,8 +316,7 @@ class APSGaussModel:
         elif name == 'GENERAL_EXPONENTIAL':
             return VariogramType.GENERAL_EXPONENTIAL
         else:
-            print('Error: Unknown variogram type {}'.format(name))
-            return None
+            raise ValueError('Error: Unknown variogram type {}'.format(name))
 
     def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
                    gaussModelList, trendModelList,
@@ -362,7 +373,7 @@ class APSGaussModel:
                 )
 
             variogramType = self.get_variogram_type(item[GTYPE])
-            if not self.__isVariogramTypeOK(variogramType):
+            if not isVariogramTypeOK(variogramType):
                 raise ValueError(
                     'In initialize function for {0} in zone number: {1} for gauss field: {2}. '
                     'Specified variogram type: {3} is not defined.'
@@ -405,19 +416,6 @@ class APSGaussModel:
 
     def getNGaussFields(self):
         return len(self.__variogramForGFModel)
-
-    @staticmethod
-    def __isVariogramTypeOK(variogramType: VariogramType, debug_level: Debug = Debug.OFF):
-        if variogramType in VariogramType:
-            return True
-        elif debug_level >= Debug.VERY_VERBOSE:
-            print('Error: Specified variogram : ' + variogramType.name + ' is not implemented')
-            print('Error: Allowed variograms are: ')
-            print('       SPHERICAL')
-            print('       EXPONENTIAL')
-            print('       GAUSSIAN')
-            print('       GENERAL_EXPONENTIAL')
-        return False
 
     def getZoneNumber(self):
         return self.__zoneNumber
@@ -581,7 +579,7 @@ class APSGaussModel:
     def setVariogramType(self, gaussFieldName, variogramType):
         GTYPE = self.__index_variogram['Type']
         err = 0
-        if self.__isVariogramTypeOK(variogramType):
+        if isVariogramTypeOK(variogramType):
             gfList = self.getUsedGaussFieldNames()
             if gaussFieldName in gfList:
                 indx = self.__getGFIndex(gaussFieldName)
@@ -641,7 +639,7 @@ class APSGaussModel:
         GNAME = self.__index_variogram['Name']
         err = 0
         found = 0
-        if not self.__isVariogramTypeOK(variogramType):
+        if not isVariogramTypeOK(variogramType):
             print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
             raise ValueError('Undefined variogram type specified.')
         if range1 < 0:

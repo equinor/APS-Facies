@@ -1,7 +1,7 @@
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
-from src.utils.APSExceptions import ReadingXmlError, LessThanExpected, MoreThanExpected
+from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected
 
 
 def prettify(elem):
@@ -34,11 +34,11 @@ def getTextCommand(parent, keyword, parentKeyword='', defaultText=None, modelFil
         if obj is None:
             raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
-        text = obj.text
+        text = obj.text.strip()
     else:
         text = defaultText
 
-    return text.strip()
+    return text
 
 
 def getFloatCommand(

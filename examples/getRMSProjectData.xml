@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<GetRMSProjectData>
+  <GridModel>
+    <Name> Test_Single_zone </Name>
+    <ZoneParameter> Zone </ZoneParameter>
+    <RegionParameter> Region </RegionParameter>
+  </GridModel>
+  <GaussFields>
+    GF1 GF2 GF3 GF4 GF6 GF7 GF8 GF9 
+  </GaussFields>
+  <WellName name="B2">
+    <Trajectory name="Drilled trajectory">
+      <Logrun name="log">
+        <LogName>
+          ODM_Facies
+        </LogName>
+      </Logrun>
+    </Trajectory>
+  </WellName>
+  <HorizonReference name="top_middle_Neslen_1" type="DepthSurface">  </HorizonReference>
+  <Horizon> top_middle_Neslen_2 </Horizon>
+
+</GetRMSProjectData>

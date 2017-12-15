@@ -12,7 +12,10 @@ from src.gui.wrappers.base_classes.getters.general import get_element
 from src.gui.wrappers.base_classes.message_box import MessageBox
 from src.gui.wrappers.main_window import MainWindow
 from src.resources.ui.Project_ui import Ui_ProjectSelection
-from src.utils.constants.constants import Defaults, MessageIcon, ModeOptions, ProjectElements, HideOptions
+from src.utils.constants.non_qt import ProjectElements, HideOptions
+from src.utils.constants.qt import MessageIcon
+from src.utils.constants.defaults.non_qt import GeneralDefaults
+from src.utils.constants.simple import OperationalMode
 from src.utils.mappings import project_parameter_state_key_to_element_key
 from src.utils.gui.getters import get_project_file
 from src.utils.gui.update import toggle_elements
@@ -25,7 +28,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         self.retranslateUi(self)
 
         self._state = State()
-        self.default_mode = Defaults.OPERATION_MODE
+        self.default_mode = GeneralDefaults.OPERATION_MODE
         self.wire_up()
 
         self.main_window = None
@@ -83,7 +86,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         self.m_rb_read_rms_project_file.setChecked(toggle_read_project)
         self.m_rb_experimental_mode.setChecked(toggle_experimental)
 
-    def toggle_mode(self, mode: str) -> None:
+    def toggle_mode(self, mode: OperationalMode) -> None:
         self._state.set_execution_mode(mode)
         self.activate_mode()
         if self._state.is_experimental_mode():
@@ -96,7 +99,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         toggle_elements(enable, elements, HideOptions.DISABLE)
 
     def toggle_experimental_mode(self) -> None:
-        self.toggle_mode(mode=ModeOptions.EXPERIMENTAL_MODE)
+        self.toggle_mode(mode=OperationalMode.EXPERIMENTAL)
 
     def toggle_reading_mode(self) -> None:
-        self.toggle_mode(mode=ModeOptions.READING_MODE)
+        self.toggle_mode(mode=OperationalMode.NORMAL)
