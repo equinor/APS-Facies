@@ -86,7 +86,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         self.m_rb_read_rms_project_file.setChecked(toggle_read_project)
         self.m_rb_experimental_mode.setChecked(toggle_experimental)
 
-    def toggle_mode(self, mode: str) -> None:
+    def toggle_mode(self, mode: OperationalMode) -> None:
         self._state.set_execution_mode(mode)
         self.activate_mode()
         if self._state.is_experimental_mode():
@@ -99,7 +99,7 @@ class Project(QMainWindow, Ui_ProjectSelection, OkCancelDialog):
         toggle_elements(enable, elements, HideOptions.DISABLE)
 
     def toggle_experimental_mode(self) -> None:
-        self.toggle_mode(mode=OperationalMode.EXPERIMENTAL_MODE)
+        self.toggle_mode(mode=OperationalMode.EXPERIMENTAL)
 
     def toggle_reading_mode(self) -> None:
-        self.toggle_mode(mode=OperationalMode.READING_MODE)
+        self.toggle_mode(mode=OperationalMode.NORMAL)
