@@ -107,7 +107,7 @@ class State(dict):
         self.set_execution_mode(OperationalMode.NORMAL)
 
     def set_execution_mode(self, mode: OperationalMode) -> None:
-        if mode not in OperationalMode():
+        if mode not in OperationalMode:
             raise ValueError(
                 "The mode '{mode}' is not a valid mode for execution. Please use one of {options}".format(
                     mode=mode,
