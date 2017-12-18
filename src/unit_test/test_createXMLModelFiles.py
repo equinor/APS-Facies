@@ -11,7 +11,7 @@ from src.APSGaussModel import APSGaussModel
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSModel import APSModel
 from src.APSZoneModel import APSZoneModel
-from src.Trend3D_linear_model_xml import Trend3D_linear_model
+from src.Trend3D import Trend3D_linear
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
@@ -108,7 +108,7 @@ def addZoneParam(
         ])
 
         # Set Gauss field trend parameters
-        trendModelObject = Trend3D_linear_model(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+        trendModelObject = Trend3D_linear(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
         trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
         trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 
@@ -257,7 +257,7 @@ def test_variogram_generation():
     gaussModelList = [['GRF1', 'SPHERICAL', mainRange, perpRange, vertRange, azimuth, dip, 1.0]]
     useTrend = 0
     relStdDev = 0.05
-    trendModelObject = Trend3D_linear_model(None, Debug.OFF, None)
+    trendModelObject = Trend3D_linear(None, Debug.OFF, None)
     azimuthTrendAngle = 0.0
     stackingTrendAngle = 0.0
     direct = -1

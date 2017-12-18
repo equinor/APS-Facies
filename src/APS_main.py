@@ -14,14 +14,14 @@ import numpy as np
 
 import src.APSModel
 import src.generalFunctionsUsingRoxAPI as gr
-import src.Trend3D_linear
+import src.Trend3D
 
 importlib.reload(src.APSModel)
 importlib.reload(gr)
-importlib.reload(src.Trend3D_linear)
+importlib.reload(src.Trend3D)
 
 from src.APSModel import APSModel
-from src.Trend3D_linear import Trend3D_linear
+from src.Trend3D import Trend3D, Trend3D
 from src.utils.constants.simple import Debug
 
 
@@ -281,16 +281,16 @@ def checkAndNormaliseProb(
     return [probDefined, nCellWithModifiedProb]
 
 
-def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
-                cellIndexDefined, zoneNumber, simBoxThickness, debug_level=Debug.OFF):
-    if trendModelObj.type == 'Trend3D_linear':
-        trendObj = Trend3D_linear(trendModelObj, debug_level)
-        [minmaxDifference, trendValues] = trendObj.createTrend(
-            gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness
-        )
-    else:
-        raise ValueError('Trend type: ' + trendModelObj.type + ' is not implemented.')
-    return [minmaxDifference, trendValues]
+#def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
+#                cellIndexDefined, zoneNumber, simBoxThickness, debug_level=Debug.OFF):
+#    if trendModelObj.type == 'Trend3D_linear':
+#        #trendObj = Trend3D_linear(trendModelObj, debug_level=debug_level)
+#        [minmaxDifference, trendValues] = trendModelObj.createTrend(
+#            gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness
+#        )
+#    else:
+#        raise ValueError('Trend type: ' + trendModelObj.type + ' is not implemented.')
+#    return [minmaxDifference, trendValues]
 
 
 # --------------- Start main script ------------------------------------------
@@ -450,13 +450,13 @@ for key, zoneModel in allZoneModels.items():
         values = GFAllValues[indx][VAL]
 
         # Add trend to gaussian residual fields
-        [useTrend, trendModelObj, relStdDev] = zoneModel.getTrendRuleModel(gfName)
+        [useTrend, trendModelObj, relStdDev] = zoneModel.getTrendModel(gfName)
 
         if useTrend == 1:
             simBoxThickness = zoneModel.getSimBoxThickness()
             # trendValues contain trend values for the cells belonging to the set defined by cellIndexDefined
-            [minmaxDifference, trendValues] = createTrend(
-                trendModelObj, gridModel, realNumber, nDefinedCells,
+            [minmaxDifference, trendValues] = trendModelObj.createTrend(
+                gridModel, realNumber, nDefinedCells,
                 cellIndexDefined, zoneNumber, simBoxThickness, debug_level
             )
             if debug_level >= Debug.VERBOSE:

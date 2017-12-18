@@ -56,7 +56,7 @@ class APSZoneModel:
        def getAnisotropyDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
-       def getTrendRuleModel(self,gfName)
+       def getTrendModel(self,gfName)
        def getSimBoxThickness(self)
        def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
        def debug_level(self)
@@ -88,7 +88,7 @@ class APSZoneModel:
        def setMainFaciesTable(self,mainFaciesTable)
        def setSimBoxThickness(self,thickness)
        def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,angle,power,
-                                 relStdDev=0.0,trendRuleModelObj=None)
+                                 relStdDev=0.0,trendModelObj=None)
        def removeGaussFieldParam(self,gfName)
        def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
        def removeFaciesWithProbForZone(self,fName)
@@ -116,7 +116,7 @@ class APSZoneModel:
        def __checkConstProbValuesAndNormalize(self)
        def __getGFIndex(self,gfName)
        def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
-       def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
+       def __updateGaussFieldTrendParam(self,gfName,trendModelObj,relStdDev)
     """
 
     def __init__(
@@ -358,11 +358,11 @@ class APSZoneModel:
     def getTruncRule(self):
         return self.__truncRule
 
-    def getTrendRuleModel(self, gfName):
-        return self.__gaussModelObject.getTrendRuleModel(gfName)
+    def getTrendModel(self, gfName):
+        return self.__gaussModelObject.getTrendModel(gfName)
 
-    def getTrendRuleModelObject(self, gfName):
-        return self.__gaussModelObject.getTrendRuleModelObject(gfName)
+    def getTrendModelObject(self, gfName):
+        return self.__gaussModelObject.getTrendModelObject(gfName)
 
     def getSimBoxThickness(self):
         return self.__simBoxThickness
@@ -438,10 +438,10 @@ class APSZoneModel:
         self.__faciesProbObject.removeFaciesWithProbForZone(fName)
 
     def updateGaussFieldParam(self, gfName, variogramType, range1, range2, range3, angle, power,
-                              relStdDev=0.0, trendRuleModelObj=None):
+                              relStdDev=0.0, trendModelObj=None):
         return self.__gaussModelObject.updateGaussFieldParam(
             gfName, variogramType, range1, range2, range3, angle, power,
-            relStdDev, trendRuleModelObj
+            relStdDev, trendModelObj
         )
 
     def updateGaussFieldVariogramParam(self, gfName, variogramType, range1, range2, range3, angle, power):
@@ -452,8 +452,8 @@ class APSZoneModel:
     def removeGaussFieldParam(self, gfName):
         self.__gaussModelObject.removeGaussFieldParam(gfName)
 
-    def updateGaussFieldTrendParam(self, gfName, trendRuleModelObj, relStdDev):
-        self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendRuleModelObj, relStdDev)
+    def updateGaussFieldTrendParam(self, gfName, trendModelObj, relStdDev):
+        self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendModelObj, relStdDev)
 
     def setTruncRule(self, truncRuleObj):
         err = 0
