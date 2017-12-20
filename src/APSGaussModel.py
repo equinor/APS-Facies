@@ -516,12 +516,12 @@ class APSGaussModel:
         TSTD = self.__index_trend['RelStdev']
         item = self.getTrendItem(gfName)
         if item is None:
-            return None
+            return None, None, None
         else:
             useTrend = item[TUSE]
             trendModelObj = item[TOBJ]
             relStdDev = item[TSTD]
-            return [useTrend, trendModelObj, relStdDev]
+            return useTrend, trendModelObj, relStdDev
 
     def getTrendModelObject(self, gfName):
         TOBJ = self.__index_trend['Object']
@@ -941,9 +941,9 @@ class APSGaussModel:
             )
 
             # Calculate trend
-            [useTrend, trendModelObject, relStdDev] = self.getTrendModel(name)
+            useTrend, trendModelObject, relStdDev = self.getTrendModel(name)
             if useTrend == 1:
-                [minMaxDifference, trendField] = trendModelObject.createTrendFor2DProjection(
+                minMaxDifference, trendField = trendModelObject.createTrendFor2DProjection(
                     simBoxXsize, simBoxYsize, simBoxZsize, gridAzimuthAngle,
                     gridNX, gridNY, gridNZ, crossSectionType, crossSectionIndx
                 )
@@ -1113,9 +1113,9 @@ class APSGaussModel:
         else:
             raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
         # angles are azimuth angles (Measured from 2nd axis clockwise)
-        [angle1, range1, angle2, range2] = self.__calcProjection(U)
+        angle1, range1, angle2, range2 = self.__calcProjection(U)
 
-        return [angle1, range1, angle2, range2]
+        return angle1, range1, angle2, range2
 
     def __calcProjection(self, U):
         funcName = '__calcProjection'
@@ -1160,4 +1160,4 @@ class APSGaussModel:
                   ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
 
         # Angles are azimuth angles
-        return [angle1, range1, angle2, range2]
+        return angle1, range1, angle2, range2

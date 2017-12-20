@@ -26,7 +26,6 @@ from src.Trend3D import Trend3D, Trend3D
 from src.utils.constants.simple import Debug
 
 
-
 # Initialise common variables
 functionName = 'APS_main.py'
 
@@ -34,7 +33,7 @@ functionName = 'APS_main.py'
 eps = 0.000001
 
 
-def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0, debug_level=Debug.SOMEWHAT_VERBOSE):
+def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0, debug_level=Debug.OFF):
     """
     For specified zoneNumber, identify which cells belongs to this zone.
     :param zoneValues:  Vector with zone values. The length is the same as the
@@ -80,7 +79,7 @@ def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0,
             print('Debug output: In findDefinedCells: Number of active cells for current zoneNumber={} is: {}'
                   ''.format(str(zoneNumber), str(nDefinedCells)))
             
-    return [nDefinedCells, cellIndexDefined]
+    return nDefinedCells, cellIndexDefined
 
 
 def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
@@ -279,7 +278,7 @@ def checkAndNormaliseProb(
                 '(Total: {})'.format(str(psum))
             )
 
-    return [probDefined, nCellWithModifiedProb]
+    return probDefined, nCellWithModifiedProb
 
 
 #def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
@@ -398,6 +397,7 @@ for key, zoneModel in allZoneModels.items():
             print('- Run model for zone number: ' + str(zoneNumber))
             print(' ')
 
+    zoneModel = apsModel.getZoneModel(zoneNumber)
     # Read trend parameters for truncation parameters
     # zoneModel.getTruncationParam(gridModel,realNumber)
     zoneModel.getTruncationParam(gr.getContinuous3DParameterValues, gridModel, realNumber)
@@ -431,7 +431,7 @@ for key, zoneModel in allZoneModels.items():
                 print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
 
     # For current (zone,region) find the active cells
-    [nDefinedCells, cellIndexDefined] = findDefinedCells(zoneValues, zoneNumber, regionValues, regionNumber, debug_level)
+    nDefinedCells, cellIndexDefined = findDefinedCells(zoneValues, zoneNumber, regionValues, regionNumber, debug_level)
     if debug_level >= Debug.VERBOSE:
         if useRegions:
             print('--- Number of active cells for (zone,region)=({},{}): {}'
@@ -442,6 +442,7 @@ for key, zoneModel in allZoneModels.items():
     # For current zone,transform all gaussian fields used in this zone and update alpha 
     indx = -999
     GFAlphaForCurrentZone = []
+    zList = [zoneNumber - 1]
     for gfName in GFNamesForZone:
         for j in range(len(GFAllValues)):
             gName = GFAllValues[j][NAME]
@@ -451,12 +452,12 @@ for key, zoneModel in allZoneModels.items():
         values = GFAllValues[indx][VAL]
 
         # Add trend to gaussian residual fields
-        [useTrend, trendModelObj, relStdDev] = zoneModel.getTrendModel(gfName)
+        useTrend, trendModelObj, relStdDev = zoneModel.getTrendModel(gfName)
 
         if useTrend == 1:
             simBoxThickness = zoneModel.getSimBoxThickness()
             # trendValues contain trend values for the cells belonging to the set defined by cellIndexDefined
-            [minmaxDifference, trendValues] = trendModelObj.createTrend(
+            minmaxDifference, trendValues = trendModelObj.createTrend(
                 gridModel, realNumber, nDefinedCells,
                 cellIndexDefined, zoneNumber, simBoxThickness, debug_level
             )
@@ -569,7 +570,7 @@ for key, zoneModel in allZoneModels.items():
     # Check and normalise probabilities if necessary for current zone
     if debug_level >= Debug.VERBOSE:
         print('--- Check normalisation of probability fields.')
-    [probDefined, nCellsModifiedProb] = checkAndNormaliseProb(
+    probDefined, nCellsModifiedProb = checkAndNormaliseProb(
         nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined, eps, debug_level
     )
     if debug_level >= Debug.VERBOSE:

@@ -159,7 +159,7 @@ def simGaussFieldAddTrendAndTransform(
         u = float(i) / float(nx * ny)
         transformedValues[indx] = u
 
-    return [transformedValues]
+    return transformedValues
 
 
 def simGaussFieldAddTrendAndTransform2(
@@ -222,7 +222,7 @@ def simGaussFieldAddTrendAndTransform2(
         cumulativeX[i] = v1WithTrend[indx]
         cumulativeY[i] = u
 
-    return [v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY]
+    return v1, v1WithTrend, transformedValues, cumulativeX, cumulativeY
 
 
 def simGaussField(

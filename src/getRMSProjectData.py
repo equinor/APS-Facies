@@ -179,8 +179,10 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
         print(
             'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
 
-    return [gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
-            wellRefName, trajectoryName, logrunName, logName]
+    return (
+        gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
+        wellRefName, trajectoryName, logrunName, logName
+    )
 
 
 def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level=Debug.OFF):
@@ -195,10 +197,10 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     :param debug_level:
     :return:
     """
-    [
-        gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType,
+    (
+        gridModelName, gfNames, horizonRefName, horizonRefType,
         horizonList, wellRefName, trajectoryName, logrunName, logName
-    ] = readInputXMLFile(inputFile, debug_level)
+    ) = readInputXMLFile(inputFile, debug_level)
 
     topElement = Element('RMS_project_data')
 
@@ -369,8 +371,10 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     zoneNames = []
     nLayersPerZone = []
     grid = gridModel.get_grid()
-    [xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, debug_level)
+    (
+        xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
+        azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone
+    ) = gr.getGridAttributes(grid, debug_level)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -530,13 +534,15 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
 
 def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):
-    [gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
-     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, debug_level)
+    (
+        gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
+        wellRefName, trajectoryName, logrunName, logName
+    ) = readInputXMLFile(inputFile, debug_level)
 
     # Get dimensions from the reference map
     # horizons is defined to be a pointer to horizons in RMS by roxapi
     horizons = project.horizons
-    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
+    nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation = gr.get2DMapDimensions(
         horizons, horizonRefName, horizonRefType, debug_level
     )
     # Gauss field names (standard hardcoded names)

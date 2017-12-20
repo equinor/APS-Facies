@@ -477,7 +477,6 @@ class APSZoneModel:
 
     def setHorizonNameForVariogramTrendMap(self, horizonNameForVariogramTrendMap):
         self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVariogramTrendMap)
-        return
 
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
 
@@ -487,15 +486,14 @@ class APSZoneModel:
         VAL = 1
 
         truncObject = self.__truncRule
-        functionName = 'applyTruncations'
         debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
-                'Error: In class: {}. Mismatch in input to applyTruncations '
-                ''.format(self.__className)
+                'Error: In class: {0}\n'
+                'Error: Mismatch in input to applyTruncations'.format(self.__className)
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
@@ -547,7 +545,7 @@ class APSZoneModel:
                     alphaCoord.append(alphaDataArray[cellIndx])
 
                 # Calculate facies realization by applying truncation rules
-                [fCode, fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+                fCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
@@ -604,7 +602,7 @@ class APSZoneModel:
                     alphaDataArray = alphaList[gaussFieldIndx]
                     alphaCoord.append(alphaDataArray[cellIndx])
                 # Calculate facies realization by applying truncation rules
-                [fCode, fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+                fCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
@@ -626,10 +624,9 @@ class APSZoneModel:
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
-        return [faciesReal, volFrac]
+        return faciesReal, volFrac
 
     def XMLAddElement(self, parent):
-
         # Add command Zone and all its children
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)

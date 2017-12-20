@@ -112,7 +112,7 @@ def initialize_write_read(
         raise ValueError('Error: Files are different')
     else:
         print('Files are equal: OK')
-    return [truncRuleA, truncRuleB]
+    return truncRuleA, truncRuleB
 
 
 def getClassName(truncRule):
@@ -262,7 +262,7 @@ def run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
         gaussFieldsInZone, gaussFieldsForBGFacies, sbhd, sf_name, sf_value, useConstTruncParam, ysf
 ):
-    [truncRule, truncRule2] = initialize_write_read(
+    truncRule, truncRule2 = initialize_write_read(
         outputModelFileName1=OUTPUT_MODEL_FILE_NAME1,
         outputModelFileName2=OUTPUT_MODEL_FILE_NAME2,
         fTable=fTable,

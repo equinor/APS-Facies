@@ -1748,7 +1748,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             if self._faciesIsDetermined[indx] == 1:
                 fIndx = self._orderIndex[indx]
                 faciesCode = self._faciesCode[fIndx]
-                return [faciesCode, fIndx]
+                return faciesCode, fIndx
 
         faciesCode = -1
         indx = -1
@@ -1779,7 +1779,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
 
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     @staticmethod
     def __isInsidePolygon(polygon, xInput, yInput):

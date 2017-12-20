@@ -137,11 +137,11 @@ def defineHorizontalAndVerticalResolutionForPlotting(
         previewLX, previewLY, previewLZ
 ):
     if previewCrossSectionType == 'IJ':
-        return [nxPreview, nyPreview, previewLX, previewLY]
+        return nxPreview, nyPreview, previewLX, previewLY
     elif previewCrossSectionType == 'IK':
-        return [nxPreview, nzPreview, previewLX, previewLZ]
+        return nxPreview, nzPreview, previewLX, previewLZ
     elif previewCrossSectionType == 'JK':
-        return [nyPreview, nzPreview, previewLY, previewLZ]
+        return nyPreview, nzPreview, previewLY, previewLZ
     else:
         raise ValueError('Cross section: {} is not defined'.format(previewCrossSectionType))
 
@@ -182,6 +182,7 @@ def run_previewer(
     else:
         raise ValueError("The given model format is not recognized.")
 
+    gridModelName = apsModel.getGridModelName()
     previewZoneNumber = apsModel.getPreviewZoneNumber()
     previewRegionNumber = apsModel.getPreviewRegionNumber()
     previewCrossSectionType = apsModel.getPreviewCrossSectionType()
@@ -236,7 +237,7 @@ def run_previewer(
             )
         )
 
-    [nxPreview, nyPreview, nzPreview] = set2DGridDimension(
+    nxPreview, nyPreview, nzPreview = set2DGridDimension(
         nx, ny, nz, previewCrossSectionType,
         simBoxXsize, simBoxYsize, simBoxZsize, previewScale, debug_level=debug_level
     )
@@ -342,7 +343,7 @@ def run_previewer(
         for m in range(nGaussFields):
             alphaReal = gaussFields[m]
             alphaCoord[m] = alphaReal[i]
-        [_, fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+        faciesCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
 
         facies[i] = fIndx + 1  # Use fIndx+1 as values in the facies plot
         faciesFraction[fIndx] += 1
@@ -508,6 +509,7 @@ def run_previewer(
     # Create the colormap
     cm = matplotlib.colors.ListedColormap(colors, name=cmap_name, N=nFacies)
     bounds = np.linspace(0.5, 0.5 + nFacies, nFacies + 1)
+    ticks = bounds
     labels = faciesNames
     colorNumberPerPolygon = []
     patches = []

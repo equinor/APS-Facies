@@ -1,5 +1,6 @@
 #!/bin/env python
 import sys
+
 import numpy as np
 import importlib
 import roxar
@@ -21,7 +22,7 @@ from src.utils.constants.simple import Debug
 
 def calcStatisticsFor3DParameter(
         gridModel, paramName, zoneNumberList, realNumber=0,
-        debug_level=Debug.SOMEWHAT_VERBOSE
+        debug_level=Debug.OFF
 ):
     """
     Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
@@ -44,7 +45,7 @@ def calcStatisticsFor3DParameter(
         float average is the average value
     """
     functionName = 'calcStatisticsFor3DParameter'
-    [values] = getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level)
+    values = getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level)
 
     maximum = np.max(values)
     minimum = np.min(values)
@@ -60,7 +61,7 @@ def calcStatisticsFor3DParameter(
         text = ' Min: ' + str(minimum) + '  Max: ' + str(maximum) + '  Average: ' + str(average)
         print_debug_information(functionName, text)
 
-    return (minimum, maximum, average)
+    return minimum, maximum, average
 
 
 def calcAverage(nDefinedCells, cellIndexDefined, values):
@@ -133,7 +134,7 @@ def getCellValuesFilteredOnDiscreteParam(code, valueArray):
     return nDefinedCells, cellIndexDefined
 
 
-def isParameterDefinedWithValuesInRMS(gridModel,parameterName,realNumber):
+def isParameterDefinedWithValuesInRMS(gridModel, parameterName, realNumber):
     # Check if specified 3D parameter name is defined and has values
     found = False
     for p in gridModel.properties:
@@ -147,7 +148,8 @@ def isParameterDefinedWithValuesInRMS(gridModel,parameterName,realNumber):
             return True
     return False
 
-def get3DParameter(gridModel, parameterName, debug_level=Debug.OFF):
+
+def get3DParameter(gridModel, parameterName, realNumber=0, debug_level=Debug.OFF):
     """Get 3D parameter from grid model.
     Input:
            gridModel     - Grid model object
@@ -201,7 +203,7 @@ def getContinuous3DParameterValues(gridModel, parameterName, realNumber=0, debug
     return activeCellValues
 
 
-def getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, debug_level=Debug.SOMEWHAT_VERBOSE):
+def getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, debug_level=Debug.OFF):
     """Get array of discrete values (numpy.uint16) from active cells for specified 3D parameter from grid model.
     Input:
            gridModel     - Grid model object.
@@ -231,7 +233,7 @@ def getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, debug_l
     return [activeCellValues, codeNames]
 
 
-def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level=Debug.SOMEWHAT_VERBOSE):
+def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level=Debug.OFF):
     """
     Input:
            gridModel     - Grid model object
@@ -244,7 +246,6 @@ def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug
            Numpy vector with parameter values for the active cells belonging to the specified zones. Note that the output
            is in general not of the same length as a vector with all active cells.
     """
-    functionName = 'getSelectedGridCells'
     allValues = getContinuous3DParameterValues(gridModel, paramName, realNumber, debug_level)
     if len(zoneNumberList) > 0:
         # Get values for the specified zones
@@ -265,9 +266,9 @@ def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug
                     for cIndx in cellNumbers:
                         values.append(allValues[cIndx])
         values = np.asarray(values)
-        return [values]
+        return values
     else:
-        return [allValues]
+        return allValues
 
 
 def modifySelectedGridCells(gridModel, zoneNumberList, realNumber, oldValues, newValues):
@@ -284,11 +285,11 @@ def modifySelectedGridCells(gridModel, zoneNumberList, realNumber, oldValues, ne
                 cellNumbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dimI, dimJ, lr.stop))
                 # Set values for all cells in this layer
                 oldValues[cellNumbers] = newValues[cellNumbers]
-    return [oldValues]
+    return oldValues
 
 
 def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList,
-                                   realNumber=0, isShared=True, debug_level=Debug.SOMEWHAT_VERBOSE):
+                                   realNumber=0, isShared=True, debug_level=Debug.OFF):
     """Set 3D parameter with values for specified grid model.
     Input:
            gridModel     - Grid model object
@@ -335,7 +336,7 @@ def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNu
 
         p = gridModel.properties.create(parameterName, roxar.GridPropertyType.continuous, np.float32)
         currentValues = np.zeros(len(inputValues), np.float32)
-        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
     else:
@@ -359,7 +360,7 @@ def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNu
             raise_error(functionName, text)
 
         currentValues = p.get_values(realNumber)
-        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
     return True
@@ -507,12 +508,11 @@ def combineCodeNames(originalCodeNames, newCodeNames):
                     # The facies name is empty string, assign a name from the new to it
                     originalCodeNames[code] = u
 
-    return [originalCodeNames, error]
-
+    return originalCodeNames, error
 
 
 def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList, codeNames,
-                                 realNumber=0, isShared=True, debug_level=Debug.SOMEWHAT_VERBOSE):
+                                 realNumber=0, isShared=True, debug_level=Debug.OFF):
     """Set discrete 3D parameter with values for specified grid model.
     Input:
            gridModel     - Grid model object
@@ -564,7 +564,7 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
 
         p = gridModel.properties.create(parameterName, roxar.GridPropertyType.discrete, np.uint16)
         currentValues = np.zeros(len(inputValues), np.uint16)
-        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
         p.code_names = codeNames
@@ -588,7 +588,7 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
                 ''.format(functionName)
             )
         currentValues = p.get_values(realNumber)
-        [currentValues] = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
         p.set_values(currentValues, realNumber)
 
         p.set_shared(isShared, realNumber)
@@ -606,7 +606,7 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
         print(originalCodeNames)
         print('codeNames:')
         print(codeNames)
-        [updatedCodeNames, err] = combineCodeNames(originalCodeNames, codeNames)
+        updatedCodeNames, err = combineCodeNames(originalCodeNames, codeNames)
         if err == 1:
             text1 = ' Try to define a new facies code with a facies name that already is used define a new facies name\n'
             text2 = ' for a facies code that already exists when updating facies realisation\n'
@@ -874,11 +874,11 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
     nZones = len(indexer.zonation)
     nLayersPerZone = []
     nLayersPerZone = getNumberOfLayers(grid)
-    [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0] = getGridSimBoxSize(grid, debug_level)
-    return [
+    simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = getGridSimBoxSize(grid, debug_level)
+    return (
         xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength, azimuthAngle, x0, y0,
         dimensions[0], dimensions[1], dimensions[2], nZones, zoneNames, nLayersPerZone
-    ]
+    )
 
 
 def getGridSimBoxSize(grid, debug_level=Debug.OFF):
@@ -906,7 +906,7 @@ def getGridSimBoxSize(grid, debug_level=Debug.OFF):
         print('Debug output: Length in x direction:  ' + str(simBoxXLength))
         print('Debug output: Length in y direction:  ' + str(simBoxYLength))
         print('Debug output: Sim box rotation angle: ' + str(azimuthAngle))
-    return [simBoxXLength, simBoxYLength, azimuthAngle, x0, y0]
+    return simBoxXLength, simBoxYLength, azimuthAngle, x0, y0
 
 
 def createHorizonDataTypeObject(horizons, representationName, debug_level=Debug.OFF):
@@ -986,7 +986,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
         print('  Map nx:   ' + str(nx))
         print('  Map ny:   ' + str(ny))
         print('  Map rotation:   ' + str(rotation))
-    return [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation]
+    return nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation
 
 
 def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,

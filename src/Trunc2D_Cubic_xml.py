@@ -289,7 +289,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         ''.format(modelFileName, self._className)
                     )
 
-                [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                 nPoly += 1
 
                 poly = []
@@ -334,7 +334,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                                                                                                                         'Error: Specified probability fraction in truncation rule is outside [0,1]'
                             )
 
-                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                         nPoly += 1
 
                         poly = []
@@ -375,7 +375,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                                                                                                                                 'Error: Specified probability fraction in truncation rule is outside [0,1]'
                                     )
 
-                                [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                                nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                                 nPoly += 1
 
                                 poly = []
@@ -729,15 +729,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
         for fIndx in range(len(self._faciesInZone)):
             if self._faciesIsDetermined[fIndx] == 1:
                 faciesCode = self._faciesCode[fIndx]
-                return [faciesCode, fIndx]
+                return faciesCode, fIndx
 
         directionL1 = self.__truncStructure[self.__node_index['direction']]
         nodeListL1 = self.__truncStructure[self.__node_index['list of nodes']]
         if directionL1 == 'H':
-            [faciesCode, fIndx] = self.__calcFaciesLevel1H(nodeListL1, alphaCoord)
+            faciesCode, fIndx = self.__calcFaciesLevel1H(nodeListL1, alphaCoord)
         else:
-            [faciesCode, fIndx] = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
-        return [faciesCode, fIndx]
+            faciesCode, fIndx = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
+        return faciesCode, fIndx
 
     def __calcFaciesLevel1V(self, nodeListL1, alphaCoord):
         faciesCode = -1
@@ -751,20 +751,20 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 if x <= itemL1[self.__node_index['x max']]:
                     indx = itemL1[self.__node_index['index']]
                     # Check truncations for overlay facies (call function from base class)
-                    [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
+                    faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                     break
             else:
                 if x <= itemL1[self.__node_index['x max']]:
                     directionL2 = itemL1[self.__node_index['direction']]
                     nodeListL2 = itemL1[self.__node_index['list of nodes']]
                     if directionL2 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2H(nodeListL2, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel2H(nodeListL2, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2V(nodeListL2, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel2V(nodeListL2, alphaCoord)
                     break
         if faciesCode < 0 or fIndx < 0:
             raise ValueError('Programming error. Could not find facies when applying truncation rule')
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def __calcFaciesLevel1H(self, nodeListL1, alphaCoord):
         faciesCode = -1
@@ -777,20 +777,20 @@ class Trunc2D_Cubic(Trunc2D_Base):
             if typeNode == 'F':
                 if y <= itemL1[self.__node_index['y max']]:
                     indx = itemL1[self.__node_index['index']]
-                    [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
+                    faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                     break
             else:
                 if y <= itemL1[self.__node_index['y max']]:
                     directionL2 = itemL1[self.__node_index['direction']]
                     nodeListL2 = itemL1[self.__node_index['list of nodes']]
                     if directionL2 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2H(nodeListL2, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel2H(nodeListL2, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel2V(nodeListL2, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel2V(nodeListL2, alphaCoord)
                     break
         if faciesCode < 0 or fIndx < 0:
             raise ValueError('Programming error. Could not find facies when applying truncation rule')
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def __calcFaciesLevel2H(self, nodeListL2, alphaCoord):
         faciesCode = -1
@@ -803,20 +803,20 @@ class Trunc2D_Cubic(Trunc2D_Base):
             if typeNode == 'F':
                 if y <= itemL2[self.__node_index['y max']]:
                     indx = itemL2[self.__node_index['index']]
-                    [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
+                    faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                     break
             else:
                 if y <= itemL2[self.__node_index['y max']]:
                     directionL3 = itemL2[self.__node_index['direction']]
                     nodeListL3 = itemL2[self.__node_index['list of nodes']]
                     if directionL3 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3H(nodeListL3, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel3H(nodeListL3, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3V(nodeListL3, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel3V(nodeListL3, alphaCoord)
                     break
         if faciesCode < 0 or fIndx < 0:
             raise ValueError('Programming error. Could not find facies when applying truncation rule')
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def __calcFaciesLevel2V(self, nodeListL2, alphaCoord):
         faciesCode = -1
@@ -829,20 +829,20 @@ class Trunc2D_Cubic(Trunc2D_Base):
             if typeNode == 'F':
                 if x <= itemL2[self.__node_index['x max']]:
                     indx = itemL2[self.__node_index['index']]
-                    [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
+                    faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                     break
             else:
                 if x <= itemL2[self.__node_index['x max']]:
                     directionL3 = itemL2[self.__node_index['direction']]
                     nodeListL3 = itemL2[self.__node_index['list of nodes']]
                     if directionL3 == 'H':
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3H(nodeListL3, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel3H(nodeListL3, alphaCoord)
                     else:
-                        [faciesCode, fIndx] = self.__calcFaciesLevel3V(nodeListL3, alphaCoord)
+                        faciesCode, fIndx = self.__calcFaciesLevel3V(nodeListL3, alphaCoord)
                     break
         if faciesCode < 0 or fIndx < 0:
             raise ValueError('Programming error. Could not find facies when applying truncation rule')
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def __calcFaciesLevel3H(self, nodeListL3, alphaCoord):
         faciesCode = -1
@@ -860,11 +860,11 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
             if y <= itemL3[self.__node_index['y max']]:
                 indx = itemL3[self.__node_index['index']]
-                [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
+                faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                 break
         if faciesCode < 0 or fIndx < 0:
             raise ValueError('Programming error. Could not find facies when applying truncation rule')
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def __calcFaciesLevel3V(self, nodeListL3, alphaCoord):
         faciesCode = -1
@@ -881,12 +881,12 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 )
             if x <= itemL3[self.__node_index['x max']]:
                 indx = itemL3[self.__node_index['index']]
-                [faciesCode, fIndx] = self._truncateOverlayFacies(indx, alphaCoord)
+                faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                 break
 
         if faciesCode < 0 or fIndx < 0:
             raise ValueError('Programming error. Could not find facies when applying truncation rule')
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def __calcPolyLevel(self, direction, nodeList, polyLevelAbove, levelNumber):
         TYPE = self.__node_index['type']
@@ -1249,7 +1249,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             if L1 > L1Prev:
                 if L2 == 0:
                     # Create new facies node for L1 level
-                    [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                    nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                     nPoly += 1
                     poly = []
                     nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
@@ -1266,7 +1266,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     nodeListLevel1.append(nodeData)
                     if L3 == 0:
                         # Create L2 facies node
-                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
@@ -1284,7 +1284,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         parentNodeDefinedL2 = 1
 
                         # Create L3 facies node
-                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
@@ -1298,7 +1298,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     if L3 == 0:
 
                         # Create L2 facies node
-                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
@@ -1316,7 +1316,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         parentNodeDefinedL2 = 1
 
                         # Create L3 facies node
-                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
@@ -1331,7 +1331,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     if L3 > L3Prev:
                         # Create L3 facies node
                         self.__useLevel3 = 1
-                        [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                         nPoly += 1
                         poly = []
                         nodeData = ['F', indx, probFrac, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
