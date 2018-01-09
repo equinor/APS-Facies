@@ -3,22 +3,19 @@ import numpy as np
 import importlib
 from xml.etree.ElementTree import Element
 
-from src.Trend3D import Trend3D_linear, Trend3D_elliptic, Trend3D_hyperbolic
+import src.Trend3D
 import src.simGauss2D
 import src.utils.xml
 
-
 importlib.reload(src.simGauss2D)
-# importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
-# importlib.reload(src.utils.checks)
+importlib.reload(src.Trend3D)
 
-# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.simGauss2D import simGaussField
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
 from src.utils.checks import isVariogramTypeOK
-
+from src.Trend3D import Trend3D_linear, Trend3D_elliptic, Trend3D_hyperbolic, Trend3D_rms_param
 
 class APSGaussModel:
     """
@@ -167,6 +164,8 @@ class APSGaussModel:
         """
         for gf in ET_Tree_zone.findall('GaussField'):
             gfName = gf.get('name')
+            if self.__debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Gauss field name: {}'.format(gfName))
             if not gaussFieldJobs.checkGaussFieldName(gfName):
                 raise ValueError(
                     'In model file {0} in zone number: {1} in command GaussField.\n'
@@ -231,11 +230,14 @@ class APSGaussModel:
                     )
                 trendName = trendObjXML.get('name')
                 if trendName == 'Linear3D':
-                    trendModelObj = Trend3D_linear(trendObjXML, self.__debug_level, self.__modelFileName)
+                    trendModelObj = Trend3D_linear(trendObjXML, modelFileName=self.__modelFileName,
+                                                   debug_level=self.__debug_level)
                 elif trendName == 'Elliptic3D':
-                    trendModelObj = Trend3D_elliptic(trendObjXML, self.__debug_level, self.__modelFileName)
+                    trendModelObj = Trend3D_elliptic(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
                 elif trendName == 'Hyperbolic3D':
-                    trendModelObj = Trend3D_hyperbolic(trendObjXML, self.__debug_level, self.__modelFileName)
+                    trendModelObj = Trend3D_hyperbolic(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
+                elif trendName == 'RMSParameter':
+                    trendModelObj = Trend3D_rms_param(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
                 else:
                     raise NameError(
                         'Error in {className}\n'

@@ -33,8 +33,11 @@ class OriginType(Enum):
 
 class TrendType(Enum):
     NONE = 0
-    ELLIPTIC = 1
-    HYPERBOLIC = 2
+    LINEAR = 1
+    ELLIPTIC = 2
+    HYPERBOLIC = 3
+    RMS_PARAM = 4
+
 
 
 def get_legal_values_of_enum(enum):

@@ -1741,9 +1741,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
                      self.__useZ
                      self.__Zm
         """
-        x = alphaCoord[0]
-        y = alphaCoord[1]
-        z = alphaCoord[2]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
+        z = alphaCoord[self._alphaIndxList[2]]
         for indx in range(len(self._faciesInTruncRule)):
             if self._faciesIsDetermined[indx] == 1:
                 fIndx = self._orderIndex[indx]

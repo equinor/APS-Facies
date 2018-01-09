@@ -6,14 +6,16 @@
 #  - linear
 #  - elliptic
 #  - hyperbolic
-#  - sinusoidal
+#  - RMSParameter
 #
 ####################################################################
 # Kari B. Skjerve, karbor@statoil.com
-# 2017
+# Oddvar Lia 
+# 2017/2018
 ####################################################################
 
 import math
+import copy
 import numpy as np
 import importlib 
 from xml.etree.ElementTree import Element
@@ -27,24 +29,46 @@ from src.utils.xml import getFloatCommand, getIntCommand, getTextCommand
 class Trend3D:
     """
     Description: Parent class for Trend3D
+    The following functions must be specified for the sub classes:
+    _calcParam(self)
+    _writeTrendSpecificParam(self)
+    _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc)
     """
     def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+        """
+        Initialize common parameters for all methods implemented in sub classes.
+        These parameters will be defined in sub classes
+
+        """
+        # Depositional direction
         self._azimuth = 0.0
-        self._stackingAngle = 0.0
+
+        # Angle between facies
+        self._stackingAngle = 0.0001
+
+        # Direction of stacking (prograding/retrograding)
         self._direction = 1
+
         self._debug_level = debug_level
         self.type = TrendType.NONE
+
+        # Position of a reference point for the trend function. 
+        # This is in global coordinates for (x,y) and relative to simulation box for the zone for z coordinate.
+        self._xCenter = 0.0
+        self._yCenter = 0.0
+        self._zCenter = 0.0
+        self._xSimBox = 0.0
+        self._ySimBox = 0.0
+        self._zSimBox = 0.0
+        self._startLayer = -1
+        self._endLayer = -1
+
         self._className = self.__class__.__name__
 
-    def _interpretXMLTree(self, trendRuleXML, modelFileName, debug_level=Debug.OFF):
-        # Initialize object form xml tree object trendRuleXML
-
-        if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Trend3D:')
-            print('Debug output: Azimuth:        ' + str(self._azimuth))
-            print('Debug output: Stacking angle: ' + str(self._stackingAngle))
-            print('Debug output: Stacking type:  ' + str(self._direction))
-
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        """
+        Read common parameters from xml tree for all trend types
+        """
         self._azimuth = getFloatCommand(trendRuleXML, 'azimuth', modelFile=modelFileName)
         if self._azimuth < 0.0 or self._azimuth > 360.0:
             raise ValueError(
@@ -74,6 +98,11 @@ class Trend3D:
                 'Error: Stacking angle for linear trend is not within [0,90] degrees.'
                 ''.format(self._className)
             )
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Trend parameters:')
+            print('Debug output:   Azimuth:        ' + str(self._azimuth))
+            print('Debug output:   Stacking angle: ' + str(self._stackingAngle))
+            print('Debug output:   Stacking type:  ' + str(self._direction))
 
     def _XMLAddElementTag(self, trendElement):
         tag = 'azimuth'
@@ -91,7 +120,7 @@ class Trend3D:
         obj.text = ' ' + str(self._stackingAngle) + ' '
         trendElement.append(obj)
 
-    def initialize(self, azimuthAngle, stackingAngle, direction, debug_level=Debug.OFF):
+    def initialize(self, azimuthAngle=0.0, stackingAngle=0.01, direction=1, debug_level=Debug.OFF):
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
@@ -162,30 +191,55 @@ class Trend3D:
         else:
             self._direction = direction
 
-    def _trendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, origin_type=None, origin=None):
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, 
+                        origin_type=None, origin=None):
         if origin is None or origin_type is None:
             x_center, y_center = x0, y0
+            z_center = 0.0 # Top of zone
         elif origin_type == OriginType.RELATIVE:
-            aA = azimuthAngle * math.pi / 180
+            aA = azimuthAngle * math.pi / 180.0
             x_center = (
                 x0
                 + origin[0] * simBoxXLength * math.cos(aA)
                 + origin[1] * simBoxYLength * math.sin(aA)
-            )
+                )
             y_center = (
                 y0
                 - origin[0] * simBoxXLength * math.sin(aA)
                 + origin[1] * simBoxYLength * math.cos(aA)
-            )
+                )
+            z_center = origin[2] * simBoxThickness
         elif origin_type == OriginType.ABSOLUTE:
             x_center, y_center = origin[0], origin[1]
+            z_center = origin[2] * simBoxThickness
         else:
             raise ValueError(
-                'Error: In {}\n'
-                'Error: Origin type must be Relative or Absolute.'
-                ''.format(self._className)
-            )
-        return x_center, y_center
+                'In {}\n'
+                'Origin type must be either {} or {}.'
+                ''.format(self._className, str(OriginType.RELATIVE.name), str(OriginType.ABSOLUTE.name))
+                )
+        self._xCenter = x_center
+        self._yCenter = y_center
+        self._zCenter = z_center
+        self._xSimBox = simBoxXLength
+        self._ySimBox = simBoxYLength
+        self._zSimBox = simBoxThickness
+        
+
+    def _calcParam(self):
+        print('_calcParam  is called from base class: {}'.format(self._className))
+        raise ValueError('Can not use: {} object as a trend object. Use sub classes of this as trend'
+                         ''.format(self.__className))
+
+    def _writeTrendSpecificParam(self):
+        print('_writeTrendSpecificPara  is called from base class: {}'.format(self._className))
+        raise ValueError('Can not use: {} object as a trend object. Use sub classes of this as trend'
+                         ''.format(self.__className))
+
+    def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        print('_trendValueCalculation  is called from base class: {}'.format(self._className))
+        raise ValueError('Can not use: {} object as a trend object. Use sub classes of this as trend'
+                         ''.format(self.__className))
 
     def createTrend(self, gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness):
         """
@@ -203,8 +257,8 @@ class Trend3D:
             (nx, ny, nz) = gridIndexer.dimensions
 
             simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = gr.getGridSimBoxSize(grid3D, self._debug_level)
-
-            xcenter, ycenter = self._trendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength)
+            # Define self._xCenter, self._yCenter for the trend
+            self._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness)
 
             cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
             cellIndices = gridIndexer.get_indices(cellIndexDefined)
@@ -213,52 +267,67 @@ class Trend3D:
             zonation = gridIndexer.zonation
             layerRanges = zonation[zoneNumber - 1]
             n = 0
+            startLayer = 99999999
+            endLayer = -1
             for layer in layerRanges:
+                if startLayer > layer[0]:
+                    startLayer = layer[0]
+                if endLayer < layer[-1]:
+                    endLayer = layer[-1]
+
                 for k in layer:
                     n += 1
             nLayersInZone = n
+
+            # Set start and end layer for this zone
+            self._startLayer = startLayer
+            self._endLayer = endLayer
             zinc = simBoxThickness / nLayersInZone
             if self._debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: In ' + self._className)
                 print('Debug output:  Zone name: ' + zoneName)
                 print('Debug output:  SimboxThickness: ' + str(simBoxThickness))
                 print('Debug output:  Zinc: ' + str(zinc))
-                print('Debug output:  nx, ny, nz: ' + str(nx) + ', ' + str(ny) + ', ' + str(nz))
+                print('Debug output:  nx,ny,nz: ' + str(nx) + ' ' + str(ny) + ' ' + str(nz))
                 print('Debug output:  Number of layers in zone: ' + str(nLayersInZone))
+                print('Debug output:  Start layer in zone: ' + str(startLayer+1))
+                print('Debug output:  End layer in zone: ' + str(endLayer+1))
+                print('Debug output:  Trend type: {}'.format(self.type.name))
+                if self.type != TrendType.RMS_PARAM:
+                    print('Debug output:  Trend azimuth: {}'.format(self._azimuth))
+                    print('Debug output:  StackingAngle: {}'.format(self._stackingAngle)) 
+                    print('Debug output:  Direction: {}'.format(str(self._direction)))
+                    print('Debug output:  x_center: {}'.format(str(self._xCenter)))
+                    print('Debug output:  y_center: {}'.format(str(self._yCenter)))
+                    print('Debug output:  z_center (sim box): {}'.format(str(self._zCenter)))
+                self._writeTrendSpecificParam()
 
-            # Create an empty array with 0 values with correct length
-            # corresponding to all active cells in the grid
-            # values = grid3D.generate_values(np.float32)
-            valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
+                # Create an empty array with 0 values with correct length
+                # corresponding to all active cells in the grid
 
-            # Calculate the 3D trend values
-            alpha, theta = self._AlphaTheta()
-            # TODO: Kari - make functions
+            if self.type == TrendType.RMS_PARAM:
+                print(self.type)
+                # Values for all active cells
+                valuesInActiveCells = gr.getContinuous3DParameterValues(gridModel, self._rmsParamName, 
+                                                                        realNumber, debug_level=self._debug_level)
+                # Values for selected cells (using numpy vectors)
+                valuesInSelectedCells = valuesInActiveCells[cellIndexDefined]
 
-            trendValueInputParams = self._trendValueInputParams()
-            # TODO: Kari - make functions
+            else:
+                valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
+                parametersForTrendCalc = self._calcParam()
+                for indx in range(nDefinedCells):
+                    x = cellCenterPoints[indx, 0]
+                    y = cellCenterPoints[indx, 1]
+                    z = cellCenterPoints[indx, 2]
+                    
+                    i = cellIndices[indx, 0]
+                    j = cellIndices[indx, 1]
+                    k = cellIndices[indx, 2]
+                    
+                    trendValue =self._trendValueCalculation(parametersForTrendCalc, x, y, k, zinc)
+                    valuesInSelectedCells[indx] = trendValue
 
-            kCenter = (cellIndices.max(axis=0)[2] - cellIndices.min(axis=0)[2]) / 2
-
-            for indx in range(nDefinedCells):
-                x = cellCenterPoints[indx, 0]
-                y = cellCenterPoints[indx, 1]
-                z = cellCenterPoints[indx, 2]
-
-                i = cellIndices[indx, 0]
-                j = cellIndices[indx, 1]
-                k = cellIndices[indx, 2]
-
-                # Coordinates relative to a local origo (xmin,ymin) for x,y
-                # The depth coordinate zSimBox is relative to simulation box
-                xRel = x - xcenter
-                yRel = y - ycenter
-                zSimBox = (k - kCenter + 0.5) * zinc
-
-                trendValue = self._trendValue(*trendValueInputParams)
-                # TODO: Kari - make functions
-
-                valuesInSelectedCells[indx] = trendValue
             minValue = valuesInSelectedCells.min()
             maxValue = valuesInSelectedCells.max()
             minmaxDifference = maxValue - minValue
@@ -268,6 +337,8 @@ class Trend3D:
             maxValue = valuesRescaled.max()
             minmaxDifference = maxValue - minValue
         return minmaxDifference, valuesRescaled
+
+
 
     def get_origin_type_from_model_file(self, model_file_name, trendRuleXML):
         origin_type = getTextCommand(
@@ -285,6 +356,7 @@ class Trend3D:
                 ''.format(self._className)
             )
 
+# ----------------------------------------------------------------------------------------------------------
 
 class Trend3D_linear(Trend3D):
     """
@@ -294,17 +366,19 @@ class Trend3D_linear(Trend3D):
 
     def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
         super().__init__(trendRuleXML, modelFileName, debug_level)
-        self.type = 'Trend3D_linear'
-        self._className = 'Trend3D_linear'
+        self.type = TrendType.LINEAR
+        self._className = self.__class__.__name__
 
         if trendRuleXML is not None:
-            self._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
         else:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug info: Create empty object of ' + self._className)
+                print('Debug output: Create empty object of ' + self._className)
 
-    def _interpretXMLTree(self, trendRuleXML, modelFileName, debug_level=Debug.OFF):
-        super()._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
         # Additional input parameters comes here (for other Trend3D-types)
 
     def XMLAddElement(self, parent):
@@ -318,16 +392,9 @@ class Trend3D_linear(Trend3D):
         attribute = {'name': 'Linear3D'}
         tag = 'Trend'
         trendElement = Element(tag, attribute)
-        # Put the xml commands for this truncation rule as the last child for the parent element
         parent.append(trendElement)
 
         super()._XMLAddElementTag(trendElement)
-
-        ## Additional tags dependent on trend type to be added here
-        # tag = 'azimuth'
-        # obj = Element(tag)
-        # obj.text = ' ' + str(self._azimuth) + ' '
-        # trendElement.append(obj)
 
     def initialize(self, azimuthAngle, stackingAngle, direction, debug_level=Debug.OFF):
         super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
@@ -426,10 +493,10 @@ class Trend3D_linear(Trend3D):
 
         return minmaxDifference, valuesRescaled
 
-    def _trendCenter(
-            self, x0, y0, azimuthAngle=None, simBoxXLength=None, simBoxYLength=None, origin_type=None, origin=None
-    ):
-        return x0, y0
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        self._xCenter = x0
+        self._yCenter = y0
+        self._zCenter = 0.0
 
     def _AlphaTheta(self):
         alpha = (90.0 - self._stackingAngle) * np.pi / 180.0
@@ -439,91 +506,38 @@ class Trend3D_linear(Trend3D):
             theta = (self._azimuth + 180.0) * np.pi / 180.0
         return alpha, theta
 
-    def createTrend(self, gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness):
-        """
-        Description: Create trend values for 3D grid zone using Roxar API.
-        """
-        import src.generalFunctionsUsingRoxAPI as gr
-        # Check if specified grid model exists and is not empty
-        if gridModel.is_empty():
-            text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
-            print(text)
-            values = None
+    def _calcParam(self):
+        # Calculate the 3D linear trend parameters
+        alpha, theta = self._AlphaTheta()
+
+        # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
+        if abs(self._stackingAngle) < 0.0000001:
+            xComponent = 0.0
+            yComponent = 0.0
+            zComponent = 1.0
         else:
-            grid3D = gridModel.get_grid(realNumber)
-            gridIndexer = grid3D.simbox_indexer
-            (nx, ny, nz) = gridIndexer.dimensions
-
-            simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = gr.getGridSimBoxSize(grid3D, self._debug_level)
-
-            cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
-            cellIndices = gridIndexer.get_indices(cellIndexDefined)
-
-            zoneName = grid3D.zone_names[zoneNumber - 1]
-            zonation = gridIndexer.zonation
-            layerRanges = zonation[zoneNumber - 1]
-            n = 0
-            for layer in layerRanges:
-                for k in layer:
-                    n += 1
-            nLayersInZone = n
-            zinc = simBoxThickness / nLayersInZone
-            if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: In ' + self._className)
-                print('Debug output:  Zone name: ' + zoneName)
-                print('Debug output:  SimboxThickness: ' + str(simBoxThickness))
-                print('Debug output:  Zinc: ' + str(zinc))
-                print('Debug output:  nx,ny,nz: ' + str(nx) + ' ' + str(ny) + ' ' + str(nz))
-                print('Debug output:  Number of layers in zone: ' + str(nLayersInZone))
-
-                # Create an empty array with 0 values with correct length
-                # corresponding to all active cells in the grid
-            # values = grid3D.generate_values(np.float32)
-            valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
-
-            # Calculate the 3D trend values
-
-            alpha = (90.0 - self._stackingAngle) * np.pi / 180.0
-            if self._direction == 1:
-                theta = self._azimuth * np.pi / 180.0
-            else:
-                theta = (self._azimuth + 180.0) * np.pi / 180.0
-
-            # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
             xComponent = math.cos(alpha) * math.sin(theta)
             yComponent = math.cos(alpha) * math.cos(theta)
             zComponent = math.sin(alpha)
+        parameterForTrendCalculation = [xComponent, yComponent, zComponent]
+        return parameterForTrendCalculation
 
-            if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: In ' + self._className)
-                print('Debug output: normal vector: ({x}, {y}, {z})'.format(x=xComponent, y=yComponent, z=zComponent))
+    def _writeTrendSpecificParam(self):
+        print('')
 
-            for indx in range(nDefinedCells):
-                x = cellCenterPoints[indx, 0]
-                y = cellCenterPoints[indx, 1]
-                z = cellCenterPoints[indx, 2]
+    def _trendValueCalculation(self, parametersForTrendCalc,x, y, k, zinc):
+        xComponent =  parametersForTrendCalc[0]
+        yComponent =  parametersForTrendCalc[1]
+        zComponent =  parametersForTrendCalc[2]
 
-                i = cellIndices[indx, 0]
-                j = cellIndices[indx, 1]
-                k = cellIndices[indx, 2]
+        # Transform the point(0,0,zRel) into a point (x_center, y_center, zRel)
+        zRel = (k - self._startLayer + 0.5) * zinc - self._zCenter 
+        xRel = x - self._xCenter
+        yRel = y - self._yCenter
+        trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
+        return trendValue
 
-                # Coordinates relative to a local origo (xmin,ymin) for x,y
-                # The depth coordinate zSimBox is relative to simulation box
-                xRel = x - x0
-                yRel = y - y0
-                zSimBox = (k + 0.5) * zinc
-                trendValue = xComponent * xRel + yComponent * yRel + zComponent * zSimBox
-                valuesInSelectedCells[indx] = trendValue
-            minValue = valuesInSelectedCells.min()
-            maxValue = valuesInSelectedCells.max()
-            minmaxDifference = maxValue - minValue
-            valuesRescaled = self._direction * valuesInSelectedCells / minmaxDifference
-
-            minValue = valuesRescaled.min()
-            maxValue = valuesRescaled.max()
-            minmaxDifference = maxValue - minValue
-        return minmaxDifference, valuesRescaled
-
+# ----------------------------------------------------------------------------------------------------------
 
 class Trend3D_elliptic(Trend3D):
     """
@@ -534,31 +548,38 @@ class Trend3D_elliptic(Trend3D):
     def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
         super().__init__(trendRuleXML, modelFileName, debug_level)
         self._curvature = 1.0
-        self._origin = [0, 0]
+        self._origin = [0.0, 0.0, 0.0]
         self._origin_type = OriginType.RELATIVE
         self.type = TrendType.ELLIPTIC
         self._className = self.__class__.__name__
 
         if trendRuleXML is not None:
-            self._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
         else:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug info: Create empty object of ' + self._className)
+                print('Debug output: Create empty object of ' + self._className)
 
-    def _interpretXMLTree(self, trendRuleXML, modelFileName, debug_level=Debug.OFF):
-        super()._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        # Stacking angle must be > 0.
+        if abs(self._stackingAngle) < 0.00001:
+            self._stackingAngle = 0.00001
+
         # Additional input parameters comes here (for other Trend3D-types)
         self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False,
                                           defaultValue=1)
-        if self._curvature < 0.0:
+        if self._curvature <= 0.0:
             raise ValueError(
                 'Error: In {}\n'
-                'Error: Curvature for elliptic trend is below 0.'
+                'Error: Curvature for elliptic trend is not positive.'
                 ''.format(self._className)
             )
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0)
-        self._origin = [origin_x, origin_y]
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._origin = [origin_x, origin_y, origin_z]
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
 
     def XMLAddElement(self, parent):
@@ -574,6 +595,760 @@ class Trend3D_elliptic(Trend3D):
         attribute = {'name': 'Elliptic3D'}
         tag = 'Trend'
         trendElement = Element(tag, attribute)
+        parent.append(trendElement)
+
+        super()._XMLAddElementTag(trendElement)
+
+        tag = 'curvature'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._curvature) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_x'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[0]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_y'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[1]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_z_simbox'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[2]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origintype'
+        obj = Element(tag)
+        if self._origin_type == OriginType.RELATIVE:
+            obj.text = ' Relative '
+        elif self._origin_type == OriginType.ABSOLUTE:
+            obj.text = ' Absolute '
+        trendElement.append(obj)
+
+
+
+    def initialize(
+            self, azimuthAngle, stackingAngle, direction, curvature=1.0,
+            origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
+    ):
+        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+        # Add additional for current trend type here
+        if curvature <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Cannot set curvature less than or equal to 0'
+                ''.format(self._className)
+            )
+        if origin is None:
+            origin = [0.0, 0.0, 0.0]
+        if not (isinstance(origin, list) or isinstance(origin, tuple)):
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Origin must be of type array or tuple.'
+                ''.format(self._className)
+            )
+        if not len(origin) == 3:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Origin must have length 3'
+                ''.format(self._className)
+            )
+        for val in origin:
+            if type(val) is int:
+                val = float(val)
+            if type(val) is not float:
+                raise ValueError(
+                    'Error: In {}\n'
+                    'Error: Origin must contain float values'
+                    ''.format(self._className)
+                )
+        if origin_type not in OriginType:
+            raise ValueError(
+                'Error: In {}\n'
+                "Error: Origintype must be either 'Relative' or 'Absolute' "
+                ''.format(self._className)
+            )
+
+        self._curvature = curvature
+        self._origin = origin
+        self._origin_type = origin_type
+
+    def setCurvature(self, curvature):
+        if curvature <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for elliptic trend is not positive.'
+                ''.format(self._className)
+                )
+        self._curvature = curvature
+
+    def setOrigin(self, origin):
+        self._origin = origin
+
+    def setOriginType(self, originType):
+        if originType not in OriginType:
+            raise ValueError(
+                'Error: In {}\n'
+                "Error: Origintype must be either 'Relative' or 'Absolute' "
+                ''.format(self._className)
+            )
+        self._origin_type = originType
+
+    def getCurvature(self):
+        return self._curvature
+
+    def getOrigin(self):
+        return self._origin
+
+    def getOriginType(self):
+        return self._origin_type
+
+
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
+                                self._origin_type, self._origin)
+
+    def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # Elliptic
+        sinTheta = parametersForTrendCalc[0]
+        cosTheta = parametersForTrendCalc[1]
+        tanAlpha = parametersForTrendCalc[2]
+        a = parametersForTrendCalc[3]
+        b = parametersForTrendCalc[4]
+
+        # Transform the point(0,0,zRel) into a point (x_center, y_center, zRel)
+        zRel = (k - self._startLayer + 0.5) * zinc - self._zCenter
+        if zRel != 0.0:
+            L = zRel * tanAlpha
+            x_center = -L * sinTheta + self._xCenter
+            y_center = -L * cosTheta + self._yCenter
+        else:
+            x_center = self._xCenter
+            y_center = self._yCenter
+
+        xRel = x - x_center
+        yRel = y - y_center
+        xRotated = xRel * cosTheta - yRel * sinTheta
+        yRotated = xRel * sinTheta + yRel * cosTheta
+        value = np.sqrt(np.square(xRotated / a) + np.square(yRotated / b))
+        return value
+
+    def _calcParam(self):
+        # Calculate the 3D trend values for Elliptic
+        alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
+        theta = self._azimuth * np.pi / 180.0
+
+        # Elliptic
+        a = 1
+        b = self._curvature
+        sinTheta = math.sin(theta)
+        cosTheta = math.cos(theta)
+        tanAlpha = math.tan(alpha)
+        parametersForTrendCalc = [sinTheta, cosTheta, tanAlpha, a, b]
+        return parametersForTrendCalc
+
+
+    def _writeTrendSpecificParam(self):
+        # Elliptic
+        print('Debug output:  Curvature: {}'.format(str(self._curvature)))
+        print('Debug output:  Origin: ({},{}, {})'.format(str(self._origin[0]), str(self._origin[1]), str(self._origin[2])))
+        print('Debug output:  Origin type: {}'.format(self._origin_type.name))
+
+
+    def createTrendFor2DProjection(
+            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
+            nxPreview, nyPreview, nzPreview, projectionType, crossSectionIndx
+    ):
+
+        xinc = simBoxXsize / nxPreview
+        yinc = simBoxYsize / nyPreview
+        zinc = simBoxZsize / nzPreview
+
+        parametersForTrendCalc = self._calcParam() 
+
+        if projectionType == 'IJ':
+            zRel = (crossSectionIndx + 0.5) * zinc
+            values = np.zeros(nxPreview * nyPreview, float)
+            for i in range(nxPreview):
+                ii = i-nxPreview
+                xRel = (ii + 0.5) * xinc
+                for j in range(nyPreview):
+                    indx = i + j * nxPreview
+                    jj = j-nyPreview
+                    yRel = (jj + 0.5) * yinc
+                    # Elliptic
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        elif projectionType == 'IK':
+            yRel = (crossSectionIndx + 0.5) * yinc
+            values = np.zeros(nxPreview * nzPreview, float)
+            for i in range(nxPreview):
+                ii = i-nxPreview
+                xRel = (ii + 0.5) * xinc
+                for k in range(nzPreview):
+                    indx = i + k * nxPreview
+                    kk = k-nzPreview
+                    zRel = (kk + 0.5) * zinc
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        elif projectionType == 'JK':
+            xRel = (crossSectionIndx + 0.5) * xinc
+            values = np.zeros(nyPreview * nzPreview, float)
+            for j in range(nyPreview):
+                jj = j-nxPreview
+                yRel = (jj + 0.5) * yinc
+                for k in range(nzPreview):
+                    indx = j + k * nyPreview
+                    kk = k-nzPreview
+                    zRel = (kk + 0.5) * zinc
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        else:
+            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
+        minValue = values.min()
+        maxValue = values.max()
+
+        minmaxDifference = maxValue - minValue
+        valuesRescaled = (values - minValue) / minmaxDifference
+
+        minValue = valuesRescaled.min()
+        maxValue = valuesRescaled.max()
+        minmaxDifference = maxValue - minValue
+        minValueInCrossSection = minValue
+        maxValueInCrossSection = maxValue
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
+            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
+
+        return minmaxDifference, valuesRescaled
+
+# ----------------------------------------------------------------------------------------------------------
+
+class Trend3D_hyperbolic(Trend3D):
+    """
+        Description: Create a hyperbolic trend 3D object
+        Input is model parameters.
+    """
+    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+        super().__init__(trendRuleXML, modelFileName, debug_level)
+        self._curvature = 1.1
+        self._origin = [0.0, 0.0, 0.0]
+        self._origin_type = OriginType.RELATIVE
+        self._migrationAngle = 0  # 0 for no migration
+        self.type = TrendType.HYPERBOLIC
+        self._className = self.__class__.__name__
+
+        if trendRuleXML is not None:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
+        else:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Create empty object of ' + self._className)
+
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        # Additional input parameters comes here (for other Trend3D-types)
+        self._curvature = getFloatCommand(
+            trendRuleXML, 'curvature', modelFile=modelFileName, required=False, defaultValue=1
+        )
+        if self._curvature <= 1.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for hyperbolic trend is not greater than 1.0'
+                ''.format(self._className)
+            )
+        self._migrationAngle = getFloatCommand(
+            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+        )
+        if self._migrationAngle <= -90.0 or self._migrationAngle >= 90.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Migration angle must be between -90.0 and +90.0 degrees.'
+                ''.format(self._className)
+                )
+
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._origin = [origin_x, origin_y, origin_z]
+        self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
+
+    def setCurvature(self, curvature):
+        if curvature <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for elliptic trend is not positive.'
+                ''.format(self._className)
+                )
+        self._curvature = curvature
+
+    def setMigrationAngle(self, migrationAngle):
+        if migrationAngle <= -90.0 or migrationAngle >= 90.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Migration angle must be between -90.0 and +90.0 degrees.'
+                ''.format(self._className)
+                )
+        self._migrationAngle = migrationAngle
+
+    def setOrigin(self, origin):
+        self._origin = origin
+
+    def setOriginType(self, originType):
+        if originType not in OriginType:
+            raise ValueError(
+                'Error: In {}\n'
+                "Error: Origintype must be either 'Relative' or 'Absolute' "
+                ''.format(self._className)
+            )
+        self._origin_type = originType
+
+    def getCurvature(self):
+        return self._curvature
+
+    def getMigrationAngle(self):
+        return self._migrationAngle
+
+    def getOrigin(self):
+        return self._origin
+
+    def getOriginType(self):
+        return self._origin_type
+
+
+    def initialize( 
+            self, azimuthAngle, stackingAngle, direction, migrationAngle, curvature,
+            origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
+    ):
+        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+        # Add additional for current trend type here
+        if curvature <= 1.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Cannot set curvature less than or equal to 1'
+                ''.format(self._className)
+            )
+        if migrationAngle <= -90.0 or migrationAngle >= 90.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Migration angle must be between -90.0 and +90.0 degrees.'
+                ''.format(self._className)
+                )
+        if origin is None:
+            origin = [0.0, 0.0, 0.0]
+        if not (isinstance(origin, list) or isinstance(origin, tuple)):
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Origin must be of type array or tuple.'
+                ''.format(self._className)
+            )
+        if not len(origin) == 3:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Origin must have length 3'
+                ''.format(self._className)
+            )
+        for val in origin:
+            if type(val) is int:
+                val = float(val)
+            if type(val) is not float:
+                raise ValueError(
+                    'Error: In {}\n'
+                    'Error: Origin must contain float values'
+                    ''.format(self._className)
+                )
+        if origin_type not in OriginType:
+            raise ValueError(
+                'Error: In {}\n'
+                "Error: Origintype must be either 'Relative' or 'Absolute' "
+                ''.format(self._className)
+            )
+
+        self._curvature = curvature
+        self._migrationAngle = migrationAngle
+        self._origin = origin
+        self._origin_type = origin_type
+
+
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
+                                self._origin_type, self._origin)
+
+    def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # Hyperbolic
+        sinTheta = parametersForTrendCalc[0]
+        cosTheta = parametersForTrendCalc[1]
+        tanAlpha = parametersForTrendCalc[2]
+        tanBeta = parametersForTrendCalc[3]
+        a = parametersForTrendCalc[4]
+        b = parametersForTrendCalc[5]
+
+        zRel = (k -self._startLayer + 0.5) * zinc - self._zCenter
+
+        # The center point is changed by depth. There are two angles that can specify this
+        # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
+        # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
+        # First shift the center point in azimuth direction
+        L = -zRel * tanAlpha
+        x_center = L * sinTheta + self._xCenter
+        y_center = L * cosTheta + self._yCenter
+
+        # Secondly, shift the center point further, but now orthogonal to azimuth direction.
+        L = -zRel * tanBeta
+        x_center = L * cosTheta + x_center
+        y_center = -L * sinTheta + y_center
+
+        xRel = x - x_center
+        yRel = y - y_center
+        xRotatedByTheta = xRel * cosTheta - yRel * sinTheta
+        yRotatedByTheta = xRel * sinTheta + yRel * cosTheta
+
+        if xRotatedByTheta > 0:
+            zeroPoint = a * np.sqrt(1 + np.square(yRotatedByTheta / b))
+        else:
+            zeroPoint = -a * np.sqrt(1 + np.square(yRotatedByTheta / b))
+
+        trendValue = (1.0  - abs(xRotatedByTheta / zeroPoint)) 
+        return trendValue
+
+    def _calcParam(self):
+        # Calculate the 3D trend values
+        assert self._curvature > 1.0
+        assert abs(self._migrationAngle) < 90.0
+        assert abs(self._stackingAngle) > 0.0
+
+        theta = self._azimuth * np.pi / 180.0
+        beta  = self._migrationAngle * np.pi / 180.0
+        alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
+
+        # Hyperbolic
+        sinTheta = math.sin(theta)
+        cosTheta = math.cos(theta)
+        tanBeta  = math.tan(beta)
+        tanAlpha = math.tan(alpha)
+
+        a = self._xSimBox
+        b = self._ySimBox / np.sqrt(np.square(self._curvature) - 1.0)
+
+        parametersForTrendCalc = [sinTheta, cosTheta, tanAlpha, tanBeta, a, b]
+
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Calculated parameters for Hyperbolic trend:')
+            print('Debug output:   sinTheta = {}'.format(str(sinTheta)))
+            print('Debug output:   cosTheta = {}'.format(str(cosTheta)))
+            print('Debug output:   tanAlpha = {}'.format(str(tanAlpha)))
+            print('Debug output:   tanBeta  = {}'.format(str(tanBeta)))
+            print('Debug output:   a = {}'.format(str(a)))
+            print('Debug output:   b = {}'.format(str(b)))
+            print('')
+        return  parametersForTrendCalc
+
+
+
+
+    def _writeTrendSpecificParam(self):
+        print('Debug output:  Curvature: {}'.format(str(self._curvature)))
+        print('Debug output:  Origin: ({},{}, {})'.format(str(self._origin[0]), str(self._origin[1]), str(self._origin[2])))
+        print('Debug output:  Origin type: {}'.format(self._origin_type.name))
+        print('Debug output:  Migration angle: {}'.format(str(self._migrationAngle)))
+
+
+    def XMLAddElement(self, parent):
+        """
+        Add to the parent element a new element with specified tag and attributes.
+            The attributes are a dictionary with {name:value}
+            After this function is called, the parent element has got a new child element
+            for the current class.
+        """
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self._className)
+
+        attribute = {'name': 'Hyperbolic3D'}
+        tag = 'Trend'
+        trendElement = Element(tag, attribute)
+        parent.append(trendElement)
+
+        super()._XMLAddElementTag(trendElement)
+
+        tag = 'curvature'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._curvature) + ' '
+        trendElement.append(obj)
+
+        tag = 'migrationAngle'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._migrationAngle) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_x'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[0]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_y'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[1]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_z_simbox'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[2]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origintype'
+        obj = Element(tag)
+        if self._origin_type == OriginType.RELATIVE:
+            obj.text = ' Relative '
+        elif self._origin_type == OriginType.ABSOLUTE:
+            obj.text = ' Absolute '
+        trendElement.append(obj)
+
+# ----------------------------------------------------------------------------------------------------------
+
+class Trend3D_rms_param(Trend3D):
+    """
+        Description: Create a trend 3D object using a specified RMS 3D continuous parameter
+        Input is model parameters.
+    """
+    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+        self._rmsParamName =None
+        self.type = TrendType.RMS_PARAM
+        self._debug_level = debug_level
+        self._className = self.__class__.__name__
+
+        if trendRuleXML is not None:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
+        else:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Create empty object of ' + self._className)
+
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        text = getTextCommand(trendRuleXML, 'TrendParamName', 'Trend', defaultText=None, modelFile=modelFileName, required=True)
+        self._rmsParamName=copy.copy(text.strip())
+
+    def initialize(self, rmsParamName, debug_level=Debug.OFF):
+        self._rmsParamName=rmsParamName
+        self._debug_level = debug_level
+
+    def _writeTrendSpecificParam(self):
+        print('Debug output:  RMS parameter name for trend values: {}'.format(str(self._rmsParamName)))
+
+    def getTrendParamName(self):
+        return self._rmsParamName
+
+    def setTrendParamName(self, paramName):
+        self._rmsParamName = paramName
+
+    def XMLAddElement(self, parent):
+        """
+        Add to the parent element a new element with specified tag and attributes.
+            The attributes are a dictionary with {name:value}
+            After this function is called, the parent element has got a new child element
+            for the current class.
+        """
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self._className)
+
+        attribute = {'name': 'RMSParameter'}
+        tag = 'Trend'
+        trendElement = Element(tag, attribute)
+        parent.append(trendElement)
+
+        tag = 'TrendParamName'
+        obj = Element(tag)
+        obj.text = ' ' + self._rmsParamName + ' '
+        trendElement.append(obj)
+
+# ----------------------------------------------------------------------------------------------------------
+
+class Trend3D_hyperbolicOLD(Trend3D):
+    """
+        Description: Create a hyperbolic trend 3D object
+        Input is model parameters.
+    """
+    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+        super().__init__(trendRuleXML, modelFileName, debug_level)
+        self._curvature = 1.1
+        self._origin = [0.0, 0.0, 0.0]
+        self._origin_type = OriginType.RELATIVE
+        self._migrationAngle = 0  # 0 for no migration
+        self.type = TrendType.HYPERBOLIC
+        self._className = self.__class__.__name__
+
+        if trendRuleXML is not None:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
+        else:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Create empty object of ' + self._className)
+
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        # Additional input parameters comes here (for other Trend3D-types)
+        self._curvature = getFloatCommand(
+            trendRuleXML, 'curvature', modelFile=modelFileName, required=False, defaultValue=1
+        )
+        if self._curvature <= 1.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for hyperbolic trend is not greater than 1.0'
+                ''.format(self._className)
+            )
+        self._migrationAngle = getFloatCommand(
+            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+        )
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._origin = [origin_x, origin_y, origin_z]
+        self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
+
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
+                                self._origin_type, self._origin)
+
+    def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # Hyperbolic
+        M = parametersForTrendCalc[0]
+        a = parametersForTrendCalc[1]
+        b = parametersForTrendCalc[2]
+        alpha = parametersForTrendCalc[3]
+        xRel = x - self._xCenter
+        yRel = y - self._yCenter
+        zRel = (k + 0.5) * zinc - self._zCenter
+        xorg = np.array([xRel, yRel, zRel])
+        X = np.array(M.dot(xorg))[0]
+        dX = -zRel / math.sin(alpha) * math.tan(self._migrationAngle * math.pi / 180)
+        xp = X[0] - dX
+
+        # Stretch
+        if dX * xp > 0:
+            zeroPoint = a * np.sqrt(1 + np.square(X[1] / b)) - dX
+        else:
+            zeroPoint = a * np.sqrt(1 + np.square(X[1] / b)) + dX
+
+        # Move - use either move or stretch
+        # zeroPoint=(a-dX)*np.sqrt(1+np.square(X[1]/b))
+
+        trendValue = 1.0 - abs(xp) / zeroPoint
+        return trendValue
+
+    def _calcParam(self):
+        assert cellCenterPoints is not None
+        # Calculate the 3D trend values
+        alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
+        theta = self._azimuth * np.pi / 180.0
+
+        # Hyperbolic
+#        b = 1
+#        a = self._curvature
+        xC = math.sin(theta) * math.cos(alpha)
+        yC = math.cos(theta) * math.cos(alpha)
+        zC = math.sin(alpha)
+        # Basis change matrix
+        u2 = np.array([xC, yC, zC])  # Unit vector along hyperbola major axis
+        u1 = np.array([yC, -xC, 0])  # Unit vector perpendicular to u1, in the x-y-plane
+        u3 = np.cross(u1, u2)  # Unit vector perpendicular to u1, u2
+        M = np.concatenate((u1, u2, u3))
+        M = np.matrix(np.reshape(M, (3, 3)))
+
+        imax, jmax, kmax = cellCenterPoints.argmax(axis=0)
+        imin, jmin, kmin = cellCenterPoints.argmin(axis=0)
+
+        xmaxRel = cellCenterPoints[imax, :] - np.array([self._xCenter, self._yCenter, 0])
+        xmax = np.array(M.dot(xmaxRel))[0]
+        xminRel = cellCenterPoints[imin, :] - np.array([self._xCenter, self._yCenter, 0])
+        xmin = np.array(M.dot(xminRel))[0]
+
+        ymaxRel = cellCenterPoints[jmax, :] - np.array([self._xCenter, self._yCenter, 0])
+        ymax = np.array(M.dot(ymaxRel))[0]
+        yminRel = cellCenterPoints[jmin, :] - np.array([self._xCenter, self._yCenter, 0])
+        ymin = np.array(M.dot(yminRel))[0]
+        print('xmin:{}   xmax:{}    ymin:{}  ymax:{}'.format(str(xmin), str(xmax), str(ymin), str(ymax)))
+        xLength = max(abs(xmin[0]), abs(xmax[0]))
+        yLength = max(abs(ymin[1]), abs(ymax[1]))
+        print('xLength:{}   yLength:{}'.format(str(xLength), str(yLength)))
+        a = xLength
+        b = yLength / np.sqrt(np.square(self._curvature) - 1)
+        parametersForTrendCalc = [M, a, b, alpha]
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Calculated parameters for Hyperbolic trend:')
+            print('Debug output:   M= {}'.format(str(M)))
+            print('Debug output:   a= {}'.format(str(a)))
+            print('Debug output:   b= {}'.format(str(b)))
+            print('Debug output:   alpha= {}'.format(str(alpha)))
+            print('')
+        return  parametersForTrendCalc
+
+
+
+
+    def _writeTrendSpecificParam(self):
+        print('Debug output:  Curvature: {}'.format(str(self._curvature)))
+        print('Debug output:  Origin: ({},{}, {})'.format(str(self._origin[0]), str(self._origin[1]), str(self._origin[2])))
+        print('Debug output:  Origin type: {}'.format(self._origin_type.name))
+        print('Debug output:  Migration angle: {}'.format(str(self._migrationAngle)))
+
+
+# ----------------------------------------------------------------------------------------------------------
+class Trend3D_ellipticOld(Trend3D):
+    """
+        Description: Create an elliptic trend 3D object
+        Input is model parameters.
+    """
+
+    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+        super().__init__(trendRuleXML, modelFileName, debug_level)
+        self._curvature = 1.0
+        self._origin = [0.0, 0.0, 0.0]
+        self._origin_type = OriginType.RELATIVE
+        self.type = TrendType.ELLIPTIC_OLD
+        self._className = self.__class__.__name__
+
+        if trendRuleXML is not None:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
+        else:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Create empty object of ' + self._className)
+
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        # Additional input parameters comes here (for other Trend3D-types)
+        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False,
+                                          defaultValue=1)
+        if self._curvature < 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for elliptic trend is below 0.'
+                ''.format(self._className)
+            )
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._origin = [origin_x, origin_y, origin_z]
+        self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
+
+    def XMLAddElement(self, parent):
+        """
+            Add to the parent element a new element with specified tag and attributes.
+            The attributes are a dictionary with {name:value}
+            After this function is called, the parent element has got a new child element
+            for the current class.
+        """
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self._className)
+
+        attribute = {'name': 'Elliptic3D_old'}
+        tag = 'Trend'
+        trendElement = Element(tag, attribute)
         # Put the xml commands for this truncation rule as the last child for the parent element
         parent.append(trendElement)
 
@@ -585,12 +1360,12 @@ class Trend3D_elliptic(Trend3D):
         trendElement.append(obj)
 
     def initialize(
-            self, azimuthAngle, stackingAngle, direction, curvature=1.0,
+            self, azimuthAngle, stackingAngle, direction, migrationAngle, curvature, 
             origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
     ):
         super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
         # Add additional for current trend type here
-        if curvature < 0.0:
+        if curvature <= 1.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Cannot set curvature less than 0'
@@ -630,287 +1405,114 @@ class Trend3D_elliptic(Trend3D):
         self._origin = origin
         self._origin_type = origin_type
 
-    def _trendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, origin_type=None, origin=None):
-        return super()._trendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, self._origin_type, self._origin)
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
+                                self._origin_type, self._origin)
+        
+    def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # EllipticOld
+        M = parametersForTrendCalc[0]
+        a = parametersForTrendCalc[1]
+        b = parametersForTrendCalc[2]
+        alpha = parametersForTrendCalc[3]
 
-    def _AlphaTheta(self):
+        xorg = np.array([xRel, yRel, zRel])
+        X = np.array(M.dot(xorg))[0]
+        value = np.sqrt(np.square(X[0] / a) + np.square(X[1] / b)) * math.cos(alpha) + X[2] * math.sin(alpha)
+        return value
+
+    def _calcParam(self):
+        # Calculate the 3D trend values
         alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
         theta = self._azimuth * np.pi / 180.0
-        return alpha, theta
 
-    def createTrend(self, gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness):
-        """
-        Description: Create trend values for 3D grid zone using Roxar API.
-        """
-        import src.generalFunctionsUsingRoxAPI as gr
-        # Check if specified grid model exists and is not empty
-        if gridModel.is_empty():
-            text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
-            print(text)
-            values = None
+        # Elliptic
+        a = 1
+        b = self._curvature
+        xC = math.sin(theta)
+        yC = math.cos(theta)
+        u1 = np.array([xC, yC, 0])
+        u2 = np.array([-yC, xC, 0])
+        u3 = np.array([0, 0, 1])
+        # Basis change matrix
+        M = np.concatenate((u1, u2, u3))
+        M = np.matrix(np.reshape(M, (3, 3)))
+        parametersForTrendCalc = [M, a, b, alpha]
+        return parametersForTrendCalc
+
+
+    def _writeTrendSpecificParam(self):
+        print('Debug output:  Curvature: {}'.format(str(self._curvature)))
+        print('Debug output:  Origin: ({},{}, {})'.format(str(self._origin[0]), str(self._origin[1]), str(self._origin[2])))
+        print('Debug output:  Origin type: {}'.format(self._origin_type.name))
+
+
+
+    def createTrendFor2DProjection(
+            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
+            nxPreview, nyPreview, nzPreview, projectionType, crossSectionIndx
+    ):
+
+        xinc = simBoxXsize / nxPreview
+        yinc = simBoxYsize / nyPreview
+        zinc = simBoxZsize / nzPreview
+
+        parametersForTrendCalc = self._calcParam() 
+
+        if projectionType == 'IJ':
+            zRel = (crossSectionIndx + 0.5) * zinc
+            values = np.zeros(nxPreview * nyPreview, float)
+            for i in range(nxPreview):
+                ii = i-nxPreview
+                xRel = (ii + 0.5) * xinc
+                for j in range(nyPreview):
+                    indx = i + j * nxPreview
+                    jj = j-nyPreview
+                    yRel = (jj + 0.5) * yinc
+                    # Elliptic old
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        elif projectionType == 'IK':
+            yRel = (crossSectionIndx + 0.5) * yinc
+            values = np.zeros(nxPreview * nzPreview, float)
+            for i in range(nxPreview):
+                ii = i-nxPreview
+                xRel = (ii + 0.5) * xinc
+                for k in range(nzPreview):
+                    indx = i + k * nxPreview
+                    kk = k-nzPreview
+                    zRel = (kk + 0.5) * zinc
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        elif projectionType == 'JK':
+            xRel = (crossSectionIndx + 0.5) * xinc
+            values = np.zeros(nyPreview * nzPreview, float)
+            for j in range(nyPreview):
+                jj = j-nxPreview
+                yRel = (jj + 0.5) * yinc
+                for k in range(nzPreview):
+                    indx = j + k * nyPreview
+                    kk = k-nzPreview
+                    zRel = (kk + 0.5) * zinc
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
         else:
-            grid3D = gridModel.get_grid(realNumber)
-            gridIndexer = grid3D.simbox_indexer
-            (nx, ny, nz) = gridIndexer.dimensions
+            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
+        minValue = values.min()
+        maxValue = values.max()
 
-            simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = gr.getGridSimBoxSize(grid3D, self._debug_level)
+        minmaxDifference = maxValue - minValue
+        valuesRescaled = (values - minValue) / minmaxDifference
 
-            xcenter, ycenter = self._trendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength)
+        minValue = valuesRescaled.min()
+        maxValue = valuesRescaled.max()
+        minmaxDifference = maxValue - minValue
+        minValueInCrossSection = minValue
+        maxValueInCrossSection = maxValue
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
+            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
 
-            cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
-            cellIndices = gridIndexer.get_indices(cellIndexDefined)
-
-            zoneName = grid3D.zone_names[zoneNumber - 1]
-            zonation = gridIndexer.zonation
-            layerRanges = zonation[zoneNumber - 1]
-            n = 0
-            for layer in layerRanges:
-                for k in layer:
-                    n += 1
-            nLayersInZone = n
-            zinc = simBoxThickness / nLayersInZone
-            if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: In ' + self._className)
-                print('Debug output:  Zone name: ' + zoneName)
-                print('Debug output:  SimboxThickness: ' + str(simBoxThickness))
-                print('Debug output:  Zinc: ' + str(zinc))
-                print('Debug output:  nx,ny,nz: ' + str(nx) + ' ' + str(ny) + ' ' + str(nz))
-                print('Debug output:  Number of layers in zone: ' + str(nLayersInZone))
-
-                # Create an empty array with 0 values with correct length
-                # corresponding to all active cells in the grid
-            # values = grid3D.generate_values(np.float32)
-            valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
-
-            # Calculate the 3D trend values
-            alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
-            theta = self._azimuth * np.pi / 180.0
-
-            # Elliptic
-            a = 1
-            b = self._curvature
-            xC = math.sin(theta)
-            yC = math.cos(theta)
-            u1 = np.array([xC, yC, 0])
-            u2 = np.array([-yC, xC, 0])
-            u3 = np.array([0, 0, 1])
-            # Basis change matrix
-            M = np.concatenate((u1, u2, u3))
-            M = np.matrix(np.reshape(M, (3, 3)))
-
-            for indx in range(nDefinedCells):
-                x = cellCenterPoints[indx, 0]
-                y = cellCenterPoints[indx, 1]
-                z = cellCenterPoints[indx, 2]
-
-                i = cellIndices[indx, 0]
-                j = cellIndices[indx, 1]
-                k = cellIndices[indx, 2]
-
-                # Coordinates relative to a local origo (xmin, ymin) for x,y
-                # The depth coordinate zSimBox is relative to simulation box
-                xRel = x - xcenter
-                yRel = y - ycenter
-                zSimBox = (k + 0.5) * zinc
-
-                # Elliptic
-                xorg = np.array([xRel, yRel, zSimBox])
-                X = np.array(M.dot(xorg))[0]
-                trendValue = (
-                    np.sqrt(np.square(X[0] / a) + np.square(X[1] / b)) * math.cos(alpha)
-                    + X[2] * math.sin(alpha)
-                )
-
-                ## For spheroid
-                ## Change basis to a coordinate system where z is the major axis of ellipse
-                # xorg = np.array([xRel, yRel, zSimBox])
-                # X = np.array(M.dot(xorg))[0]
-                # trendValue = (np.square(X[0])+np.square(X[1]))/a+np.square(X[2])/b
-
-                valuesInSelectedCells[indx] = trendValue
-            minValue = valuesInSelectedCells.min()
-            maxValue = valuesInSelectedCells.max()
-            minmaxDifference = maxValue - minValue
-            valuesRescaled = (valuesInSelectedCells - minValue) / minmaxDifference
-            # valuesRescaled = self._direction * valuesInSelectedCells / minmaxDifference
-            # valuesRescaled = valuesInSelectedCells / minmaxDifference
-
-            minValue = valuesRescaled.min()
-            maxValue = valuesRescaled.max()
-            minmaxDifference = maxValue - minValue
         return minmaxDifference, valuesRescaled
 
-
-class Trend3D_hyperbolic(Trend3D):
-    """
-        Description: Create a hyperbolic trend 3D object
-        Input is model parameters.
-    """
-    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
-        super().__init__(trendRuleXML, modelFileName, debug_level)
-        self._curvature = 1.0
-        self._origin = [0, 0, 0]  # Center point of hyperbola
-        self._origin_type = OriginType.RELATIVE
-        self._migrationAngle = 0  # 0 for no migration
-        self.type = TrendType.HYPERBOLIC
-        self._className = self.__class__.__name__
-
-        if trendRuleXML is not None:
-            self._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
-        else:
-            if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug info: Create empty object of ' + self._className)
-
-    def _interpretXMLTree(self, trendRuleXML, modelFileName, debug_level=Debug.OFF):
-        super()._interpretXMLTree(trendRuleXML, modelFileName, debug_level)
-        # Additional input parameters comes here (for other Trend3D-types)
-        self._curvature = getFloatCommand(
-            trendRuleXML, 'curvature', modelFile=modelFileName, required=False, defaultValue=1
-        )
-        if self._curvature < 0.0:
-            raise ValueError(
-                'Error: In {}\n'
-                'Error: Curvature for elliptic trend is below 0.'
-                ''.format(self._className)
-            )
-        self._migrationAngle = getFloatCommand(
-            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
-        )
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0)
-        self._origin = [origin_x, origin_y]
-        self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
-
-    def _trendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, origin_type=None, origin=None):
-        return super()._trendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, self._origin_type, self._origin)
-
-    def _AlphaTheta(self):
-        alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
-        theta = self._azimuth * np.pi / 180.0
-        return alpha, theta
-
-    def createTrend(self, gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness):
-        """
-        Description: Create trend values for 3D grid zone using Roxar API.
-        """
-        import src.generalFunctionsUsingRoxAPI as gr
-        importlib.reload(gr)
-        # Check if specified grid model exists and is not empty
-        if gridModel.is_empty():
-            text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
-            print(text)
-            values = None
-        else:
-            grid3D = gridModel.get_grid(realNumber)
-            gridIndexer = grid3D.simbox_indexer
-            (nx, ny, nz) = gridIndexer.dimensions
-
-            simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = gr.getGridSimBoxSize(grid3D, self._debug_level)
-
-            xcenter, ycenter = self._trendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength)
-
-            cellCenterPoints = grid3D.get_cell_centers(cellIndexDefined)
-            cellIndices = gridIndexer.get_indices(cellIndexDefined)
-
-            zoneName = grid3D.zone_names[zoneNumber - 1]
-            zonation = gridIndexer.zonation
-            layerRanges = zonation[zoneNumber - 1]
-            n = 0
-            for layer in layerRanges:
-                for k in layer:
-                    n += 1
-            nLayersInZone = n
-            zinc = simBoxThickness / nLayersInZone
-            if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: In ' + self._className)
-                print('Debug output:  Zone name: ' + zoneName)
-                print('Debug output:  SimboxThickness: ' + str(simBoxThickness))
-                print('Debug output:  Zinc: ' + str(zinc))
-                print('Debug output:  nx,ny,nz: ' + str(nx) + ' ' + str(ny) + ' ' + str(nz))
-                print('Debug output:  Number of layers in zone: ' + str(nLayersInZone))
-
-            # Create an empty array with 0 values with correct length
-            # corresponding to all active cells in the grid
-            # values = grid3D.generate_values(np.float32)
-            valuesInSelectedCells = np.zeros(nDefinedCells, np.float32)
-
-            # Calculate the 3D trend values
-            alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
-            theta = self._azimuth * np.pi / 180.0
-
-            # Hyperbolic
-            b = 1
-            a = self._curvature
-            xC = math.sin(theta) * math.cos(alpha)
-            yC = math.cos(theta) * math.cos(alpha)
-            zC = math.sin(alpha)
-            # Basis change matrix
-            u2 = np.array([xC, yC, zC])  # Unit vector along hyperbola major axis
-            u1 = np.array([yC, -xC, 0])  # Unit vector perpendicular to u1, in the x-y-plane
-            u3 = np.cross(u1, u2)  # Unit vector perpendicular to u1, u2
-            M = np.concatenate((u1, u2, u3))
-            M = np.matrix(np.reshape(M, (3, 3)))
-
-            imax, jmax, kmax = cellCenterPoints.argmax(axis=0)
-            imin, jmin, kmin = cellCenterPoints.argmin(axis=0)
-
-            xmaxRel = cellCenterPoints[imax, :] - np.array([xcenter, ycenter, 0])
-            xmax = np.array(M.dot(xmaxRel))[0]
-            xminRel = cellCenterPoints[imin, :] - np.array([xcenter, ycenter, 0])
-            xmin = np.array(M.dot(xminRel))[0]
-
-            ymaxRel = cellCenterPoints[jmax, :] - np.array([xcenter, ycenter, 0])
-            ymax = np.array(M.dot(ymaxRel))[0]
-            yminRel = cellCenterPoints[jmin, :] - np.array([xcenter, ycenter, 0])
-            ymin = np.array(M.dot(yminRel))[0]
-
-            xinc = max(abs(xmin[0]), abs(xmax[0]))
-            yinc = max(abs(ymin[1]), abs(ymax[1]))
-            a = xinc
-            b = yinc / np.sqrt(np.square(self._curvature) - 1)
-            kCenter = (cellIndices.max(axis=0)[2] - cellIndices.min(axis=0)[2]) / 2
-
-            for indx in range(nDefinedCells):
-                x = cellCenterPoints[indx, 0]
-                y = cellCenterPoints[indx, 1]
-                z = cellCenterPoints[indx, 2]
-
-                i = cellIndices[indx, 0]
-                j = cellIndices[indx, 1]
-                k = cellIndices[indx, 2]
-
-                # Coordinates relative to a local origo (xmin,ymin) for x,y
-                # The depth coordinate zSimBox is relative to simulation box
-                xRel = x - xcenter
-                yRel = y - ycenter
-                zSimBox = (k - kCenter + 0.5) * zinc
-
-                # Hyperbolic
-
-                xorg = np.array([xRel, yRel, zSimBox])
-                X = np.array(M.dot(xorg))[0]
-
-                dX = -zSimBox / math.sin(alpha) * math.tan(self._migrationAngle * math.pi / 180)
-                xp = X[0] - dX
-
-                # Stretch
-                if dX * xp > 0:
-                    zeroPoint = a * np.sqrt(1 + np.square(X[1] / b)) - dX
-                else:
-                    zeroPoint = a * np.sqrt(1 + np.square(X[1] / b)) + dX
-
-                ## Move - use either move or stretch
-                # zeroPoint=(a-dX)*np.sqrt(1+np.square(X[1]/b))
-
-                trendValue = 1 - abs(xp) / zeroPoint
-
-                valuesInSelectedCells[indx] = trendValue
-            minValue = valuesInSelectedCells.min()
-            maxValue = valuesInSelectedCells.max()
-            minmaxDifference = maxValue - minValue
-            valuesRescaled = (valuesInSelectedCells - minValue) / minmaxDifference
-
-            minValue = valuesRescaled.min()
-            maxValue = valuesRescaled.max()
-            minmaxDifference = maxValue - minValue
-        return minmaxDifference, valuesRescaled
+# ----------------------------------------------------------------------------------------------------------

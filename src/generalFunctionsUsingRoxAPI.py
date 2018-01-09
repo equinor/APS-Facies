@@ -401,7 +401,10 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
 
     grid3D = gridModel.get_grid(realNumber)
     nActiveCells = grid3D.defined_cell_count
-    assert nActiveCells == len(inputValues)
+    if nActiveCells != len(inputValues):
+        raise ValueError('Mismatch in number of active cells={} and length of input array with values = {}'
+                         ''.format(str(nActiveCells), str(len(inputValues)))
+                         )
     
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
@@ -667,7 +670,8 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
     functionName = 'updateDiscrete3DParameterValues'
     if cellIndexDefined is not None:
         assert nDefinedCells == len(cellIndexDefined)
-    print('nDefinedCells input: {}'.format(str(nDefinedCells)))
+    if debug_level >= Debug.VERY_VERBOSE:
+        print('Debug output: nDefinedCells input: {}'.format(str(nDefinedCells)))
     grid3D = gridModel.get_grid(realNumber)
     nActiveCells = grid3D.defined_cell_count
     assert nActiveCells == len(inputValues)
@@ -736,7 +740,6 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
 
             
         # Assign values to the defined cells as specified in cellIndexDefined index vector
-        print('nDefinedCells: {}'.format(str(nDefinedCells)))
         if nDefinedCells > 0:
             for i in range(nDefinedCells):
                 indx = cellIndexDefined[i]

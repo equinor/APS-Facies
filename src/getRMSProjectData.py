@@ -181,7 +181,7 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
 
     return (
         gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
-        wellRefName, trajectoryName, logrunName, logName
+        wellRefName, trajectoryName, logrunName, logName, zoneParamName, regionParamName
     )
 
 
@@ -199,7 +199,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     """
     (
         gridModelName, gfNames, horizonRefName, horizonRefType,
-        horizonList, wellRefName, trajectoryName, logrunName, logName
+        horizonList, wellRefName, trajectoryName, logrunName, logName, zoneParamName, regionParamName
     ) = readInputXMLFile(inputFile, debug_level)
 
     topElement = Element('RMS_project_data')
@@ -536,7 +536,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):
     (
         gridModelName, gfNames, horizonRefName, horizonRefType, horizonList,
-        wellRefName, trajectoryName, logrunName, logName
+        wellRefName, trajectoryName, logrunName, logName, zoneParamName, regionParamName
     ) = readInputXMLFile(inputFile, debug_level)
 
     # Get dimensions from the reference map

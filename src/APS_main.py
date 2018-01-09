@@ -15,14 +15,11 @@ import numpy as np
 
 import src.APSModel
 import src.generalFunctionsUsingRoxAPI as gr
-import src.Trend3D
 
 importlib.reload(src.APSModel)
 importlib.reload(gr)
-importlib.reload(src.Trend3D)
 
 from src.APSModel import APSModel
-from src.Trend3D import Trend3D, Trend3D
 from src.utils.constants.simple import Debug
 
 
@@ -281,17 +278,6 @@ def checkAndNormaliseProb(
     return probDefined, nCellWithModifiedProb
 
 
-#def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
-#                cellIndexDefined, zoneNumber, simBoxThickness, debug_level=Debug.OFF):
-#    if trendModelObj.type == 'Trend3D_linear':
-#        #trendObj = Trend3D_linear(trendModelObj, debug_level=debug_level)
-#        [minmaxDifference, trendValues] = trendModelObj.createTrend(
-#            gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness
-#        )
-#    else:
-#        raise ValueError('Trend type: ' + trendModelObj.type + ' is not implemented.')
-#    return [minmaxDifference, trendValues]
-
 
 # --------------- Start main script ------------------------------------------
 
@@ -349,6 +335,7 @@ else:
 GFNamesAlreadyRead = []
 GFAllValues = []
 GFAllAlpha = []
+GFAllTrendValues = []
 
 # Probability related lists
 probParamNamesAlreadyRead = []
@@ -418,13 +405,17 @@ for key, zoneModel in allZoneModels.items():
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Gauss field parameter: ' + gfName + ' is now being loaded.')
             values = gr.getContinuous3DParameterValues(gridModel, gfName, realNumber, debug_level)
+            GFAllValues.append([gfName, values])
 
             # Allocate space for transformed gauss field property vector alpha
             alpha = np.zeros(len(values), np.float32)
-
-            GFAllValues.append([gfName, values])
             gfNameTrans = gfName + '_transf'
             GFAllAlpha.append([gfNameTrans, alpha])
+
+            # Allocate space for trend
+            trend = np.zeros(len(values), np.float32)
+            gfNameTrend = gfName + '_trend'
+            GFAllTrendValues.append([gfNameTrend, trend])
 
         else:
             if debug_level >= Debug.VERY_VERBOSE:
@@ -450,24 +441,29 @@ for key, zoneModel in allZoneModels.items():
                 indx = j
                 break
         values = GFAllValues[indx][VAL]
-
+        trend  = GFAllTrendValues[indx][VAL]
         # Add trend to gaussian residual fields
         useTrend, trendModelObj, relStdDev = zoneModel.getTrendModel(gfName)
 
         if useTrend == 1:
+            if debug_level >= Debug.VERBOSE:
+                trendTypeName = trendModelObj.type.name
+                if useRegions:
+                    print('--- Calculate trend for: ' + gfName + ' for (zone,region)=({},{})'
+                          ''.format(str(zoneNumber), str(regionNumber)))
+                    print('--- Trend type: {}'.format(trendTypeName))
+                else:
+                    print('--- Calculate trend for: ' + gfName + ' for zone: ' + str(zoneNumber))
+                    print('--- Trend type: {}'.format(trendTypeName))
+
             simBoxThickness = zoneModel.getSimBoxThickness()
             # trendValues contain trend values for the cells belonging to the set defined by cellIndexDefined
             minmaxDifference, trendValues = trendModelObj.createTrend(
                 gridModel, realNumber, nDefinedCells,
-                cellIndexDefined, zoneNumber, simBoxThickness, debug_level
+                cellIndexDefined, zoneNumber, simBoxThickness
             )
-            if debug_level >= Debug.VERBOSE:
-                if useRegions:
-                    print('--- Calculate trend for: ' + gfName + ' for (zone,region)=({},{})'
-                          ''.format(str(zoneNumber), str(regionNumber)))
-                else:
-                    print('--- Calculate trend for: ' + gfName + ' for zone: ' + str(zoneNumber))
 
+            # Calculate trend plus residual
             sigma = relStdDev * minmaxDifference
             residualValues = values[cellIndexDefined]
             val = trendValues + sigma * residualValues
@@ -476,14 +472,32 @@ for key, zoneModel in allZoneModels.items():
                 print('Debug output: Trend minmaxDifference = ' + str(minmaxDifference))
                 print('Debug output: SimBoxThickness = ' + str(simBoxThickness))
                 print('Debug output: RelStdDev = ' + str(relStdDev))
-                # print('Debug output: trendValues:')
-                # print(repr(trendValues))
+                print('Debug output: Sigma = ' + str(sigma))
+#                print('Debug output: trendValues:')
+#                print(repr(trendValues))
                 print(
                     'Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
+                print('Debug output: Residual min,max        : ' + str(sigma * residualValues.min()) + ' ' + str(sigma * residualValues.max()))
                 print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
                 # print('Debug output: Trend + Residual values:')
                 # print(repr(val))
+
+                # Write back to RMS project the untransformed gaussian values with trend for the zone
+                gfNamesUntransformed = gfName + '_untransf'
+                gr.updateContinuous3DParameterValues(gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
+                                                     realNumber,isShared=False, setInitialValues=True, debug_level=debug_level)
+            trend = GFAllTrendValues[indx][VAL]
+            trend[cellIndexDefined] = trendValues
+            GFAllTrendValues[indx][VAL] = trend
+            gfNamesTrend = GFAllTrendValues[indx][NAME]
+            # Write back to RMS project the trend values for the zone
+            gr.updateContinuous3DParameterValues(gridModel, gfNamesTrend, trend, nDefinedCells, cellIndexDefined,
+                                                 realNumber,isShared=False, setInitialValues=True, debug_level=debug_level)
+            if debug_level >= Debug.VERBOSE:
+                if useRegions:
+                    print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrend, str(zoneNumber), str(regionNumber)))
+                else:
+                    print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrend, str(zoneNumber)))
 
         alpha = GFAllAlpha[indx][VAL]
         # Update alpha for current zone
@@ -492,6 +506,7 @@ for key, zoneModel in allZoneModels.items():
                 print('--- Transform: {} for zone: {}'.format(gfName, str(zoneNumber)))
             else:
                 print('--- Transform: {} for (zone, region)=({},{})'.format(gfName, str(zoneNumber), str(regionNumber)))
+
         alpha = transformEmpiric(nDefinedCells, cellIndexDefined, values, alpha)
         GFAllAlpha[indx][VAL] = alpha
         gfNamesTrans = GFAllAlpha[indx][NAME]
@@ -703,7 +718,7 @@ if debug_level >= Debug.VERBOSE:
 gr.updateDiscrete3DParameterValues(
     gridModel, resultParamName, faciesReal, faciesTable=codeNames,
     realNumber=realNumber, isShared=False, setInitialValues=False,
-    debug_level=debug_level
+    debug_level=Debug.OFF
 )
 if debug_level >= Debug.SOMEWHAT_VERBOSE:
     print('- Create or update parameter: ' + resultParamName)

@@ -742,8 +742,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __calcFaciesLevel1V(self, nodeListL1, alphaCoord):
         faciesCode = -1
         fIndx = -1
-        x = alphaCoord[0]
-        y = alphaCoord[1]
+        # Use the alphaIndxList to find the alphaCoordinates that corresponds to alpha1 and alpha2
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
         for i in range(len(nodeListL1)):
             itemL1 = nodeListL1[i]
             typeNode = itemL1[self.__node_index['type']]
@@ -769,8 +770,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __calcFaciesLevel1H(self, nodeListL1, alphaCoord):
         faciesCode = -1
         fIndx = -1
-        x = alphaCoord[0]
-        y = alphaCoord[1]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
         for i in range(len(nodeListL1)):
             itemL1 = nodeListL1[i]
             typeNode = itemL1[self.__node_index['type']]
@@ -795,8 +796,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __calcFaciesLevel2H(self, nodeListL2, alphaCoord):
         faciesCode = -1
         fIndx = -1
-        x = alphaCoord[0]
-        y = alphaCoord[1]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
         for j in range(len(nodeListL2)):
             itemL2 = nodeListL2[j]
             typeNode = itemL2[self.__node_index['type']]
@@ -821,8 +822,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __calcFaciesLevel2V(self, nodeListL2, alphaCoord):
         faciesCode = -1
         fIndx = -1
-        x = alphaCoord[0]
-        y = alphaCoord[1]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
         for j in range(len(nodeListL2)):
             itemL2 = nodeListL2[j]
             typeNode = itemL2[self.__node_index['type']]
@@ -847,7 +848,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __calcFaciesLevel3H(self, nodeListL3, alphaCoord):
         faciesCode = -1
         fIndx = -1
-        y = alphaCoord[1]
+        y = alphaCoord[self._alphaIndxList[1]]
         for k in range(len(nodeListL3)):
             itemL3 = nodeListL3[k]
             typeNode = itemL3[self.__node_index['type']]
@@ -869,7 +870,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __calcFaciesLevel3V(self, nodeListL3, alphaCoord):
         faciesCode = -1
         fIndx = -1
-        x = alphaCoord[0]
+        x = alphaCoord[self._alphaIndxList[0]]
         for k in range(len(nodeListL3)):
             itemL3 = nodeListL3[k]
             typeNode = itemL3[self.__node_index['type']]

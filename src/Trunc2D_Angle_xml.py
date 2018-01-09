@@ -924,8 +924,8 @@ class Trunc2D_Angle(Trunc2D_Base):
         """
         Description: Apply the truncation rule to find facies.
         """
-        x = alphaCoord[0]
-        y = alphaCoord[1]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
         # Check if the facies is deterministic (100% probability) 
         for fIndx in range(len(self._faciesInZone)):
             if self._faciesIsDetermined[fIndx] == 1:
