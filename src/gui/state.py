@@ -9,7 +9,7 @@ from src.utils.constants.non_qt import (
     CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesSelectionConstants, GaussianRandomFieldConstants,
     ModeConstants, ProjectConstants, TruncationRuleConstants,
 )
-from src.utils.constants.defaults.non_qt import DatabaseDefaults, Defaults
+from src.utils.constants.defaults.non_qt import DatabaseDefaults
 from src.utils.constants.simple import Debug, OperationalMode, VariogramType
 # TODO: Rewrite, and split up into several files / folders?
 # TODO: Use SQLite
@@ -301,7 +301,7 @@ class State(dict):
         :rtype: bool
         """
         assert key in [FaciesSelectionConstants.AVAILABLE, FaciesSelectionConstants.SELECTED]
-        assert max_facies <= Defaults.MAXIMUM_NUMBER_OF_FACIES
+        assert max_facies <= DatabaseDefaults.MAXIMUM_NUMBER_OF_FACIES
         if key not in self.__dict__:
             self.__dict__[key] = {}
         if isinstance(facies_name, QListWidgetItem):
