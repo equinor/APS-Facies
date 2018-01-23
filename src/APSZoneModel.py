@@ -56,7 +56,7 @@ class APSZoneModel:
        def getAnisotropyDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
-       def getTrendRuleModel(self,gfName)
+       def getTrendModel(self,gfName)
        def getSimBoxThickness(self)
        def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
        def debug_level(self)
@@ -88,7 +88,7 @@ class APSZoneModel:
        def setMainFaciesTable(self,mainFaciesTable)
        def setSimBoxThickness(self,thickness)
        def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,angle,power,
-                                 relStdDev=0.0,trendRuleModelObj=None)
+                                 relStdDev=0.0,trendModelObj=None)
        def removeGaussFieldParam(self,gfName)
        def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
        def removeFaciesWithProbForZone(self,fName)
@@ -116,7 +116,7 @@ class APSZoneModel:
        def __checkConstProbValuesAndNormalize(self)
        def __getGFIndex(self,gfName)
        def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
-       def __updateGaussFieldTrendParam(self,gfName,trendRuleModelObj,relStdDev)
+       def __updateGaussFieldTrendParam(self,gfName,trendModelObj,relStdDev)
     """
 
     def __init__(
@@ -141,7 +141,6 @@ class APSZoneModel:
         # Local variables
         self.__zoneNumber = zoneNumber
         self.__regionNumber = regionNumber
-        #        self.__mainLevelFacies = inputMainLevelFacies
         self.__useConstProb = useConstProb
         self.__simBoxThickness = simBoxThickness
 
@@ -358,11 +357,11 @@ class APSZoneModel:
     def getTruncRule(self):
         return self.__truncRule
 
-    def getTrendRuleModel(self, gfName):
-        return self.__gaussModelObject.getTrendRuleModel(gfName)
+    def getTrendModel(self, gfName):
+        return self.__gaussModelObject.getTrendModel(gfName)
 
-    def getTrendRuleModelObject(self, gfName):
-        return self.__gaussModelObject.getTrendRuleModelObject(gfName)
+    def getTrendModelObject(self, gfName):
+        return self.__gaussModelObject.getTrendModelObject(gfName)
 
     def getSimBoxThickness(self):
         return self.__simBoxThickness
@@ -438,10 +437,10 @@ class APSZoneModel:
         self.__faciesProbObject.removeFaciesWithProbForZone(fName)
 
     def updateGaussFieldParam(self, gfName, variogramType, range1, range2, range3, angle, power,
-                              relStdDev=0.0, trendRuleModelObj=None):
+                              relStdDev=0.0, trendModelObj=None):
         return self.__gaussModelObject.updateGaussFieldParam(
             gfName, variogramType, range1, range2, range3, angle, power,
-            relStdDev, trendRuleModelObj
+            relStdDev, trendModelObj
         )
 
     def updateGaussFieldVariogramParam(self, gfName, variogramType, range1, range2, range3, angle, power):
@@ -452,8 +451,8 @@ class APSZoneModel:
     def removeGaussFieldParam(self, gfName):
         self.__gaussModelObject.removeGaussFieldParam(gfName)
 
-    def updateGaussFieldTrendParam(self, gfName, trendRuleModelObj, relStdDev):
-        self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendRuleModelObj, relStdDev)
+    def updateGaussFieldTrendParam(self, gfName, trendModelObj, relStdDev):
+        self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendModelObj, relStdDev)
 
     def setTruncRule(self, truncRuleObj):
         err = 0
@@ -465,7 +464,6 @@ class APSZoneModel:
 
     def setHorizonNameForVariogramTrendMap(self, horizonNameForVariogramTrendMap):
         self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVariogramTrendMap)
-        return
 
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
 
@@ -475,15 +473,14 @@ class APSZoneModel:
         VAL = 1
 
         truncObject = self.__truncRule
-        functionName = 'applyTruncations'
         debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
-                'Error: In class: {}. Mismatch in input to applyTruncations '
-                ''.format(self.__className)
+                'Error: In class: {0}\n'
+                'Error: Mismatch in input to applyTruncations'.format(self.__className)
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()
@@ -500,6 +497,10 @@ class APSZoneModel:
 
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
+
+            if self.__debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: faciesProb:')
+                print(repr(faciesProb))
 
             alphaList = []
             for gaussFieldIndx in range(nGaussFields):
@@ -531,7 +532,7 @@ class APSZoneModel:
                     alphaCoord.append(alphaDataArray[cellIndx])
 
                 # Calculate facies realization by applying truncation rules
-                [fCode, fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+                fCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
@@ -588,7 +589,7 @@ class APSZoneModel:
                     alphaDataArray = alphaList[gaussFieldIndx]
                     alphaCoord.append(alphaDataArray[cellIndx])
                 # Calculate facies realization by applying truncation rules
-                [fCode, fIndx] = truncObject.defineFaciesByTruncRule(alphaCoord)
+                fCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
@@ -597,8 +598,6 @@ class APSZoneModel:
             if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
                 nCalc = truncObject.getNCalcTruncMap()
                 nLookup = truncObject.getNLookupTruncMap()
-
-                print(' ')
                 print(
                     '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
                     '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
@@ -611,10 +610,9 @@ class APSZoneModel:
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
-        return [faciesReal, volFrac]
+        return faciesReal, volFrac
 
     def XMLAddElement(self, parent):
-
         # Add command Zone and all its children
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
@@ -653,7 +651,7 @@ class APSZoneModel:
         self.__gaussModelObject.XMLAddElement(zoneElement)
         # Add child command TruncationRule at end of the child list for
         self.__truncRule.XMLAddElement(zoneElement)
-        
+
     def simGaussFieldWithTrendAndTransform(
             self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):

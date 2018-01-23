@@ -1741,14 +1741,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
                      self.__useZ
                      self.__Zm
         """
-        x = alphaCoord[0]
-        y = alphaCoord[1]
-        z = alphaCoord[2]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
+        z = alphaCoord[self._alphaIndxList[2]]
         for indx in range(len(self._faciesInTruncRule)):
             if self._faciesIsDetermined[indx] == 1:
                 fIndx = self._orderIndex[indx]
                 faciesCode = self._faciesCode[fIndx]
-                return [faciesCode, fIndx]
+                return faciesCode, fIndx
 
         faciesCode = -1
         indx = -1
@@ -1779,7 +1779,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
 
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     @staticmethod
     def __isInsidePolygon(polygon, xInput, yInput):

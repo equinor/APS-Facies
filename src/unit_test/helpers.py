@@ -35,11 +35,11 @@ def apply_truncations(
     assert nGaussFieldsInModel == nGaussFields
     alphaFields = []
     fileName = gaussFieldFiles[0]
-    [a, nx, ny] = readFile(fileName)
+    a, nx, ny = readFile(fileName)
     nValues = len(a)
     for n in range(nGaussFields):
         fileName = gaussFieldFiles[n]
-        [a, nx, ny] = readFile(fileName)
+        a, nx, ny = readFile(fileName)
         alphaFields.append(a)
         assert nValues == len(alphaFields[n])
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
@@ -52,7 +52,7 @@ def apply_truncations(
         for n in range(nGaussFields):
             alpha = alphaFields[n]
             alphaCoord[n] = alpha[i]
-        [faciesCode, fIndx] = truncRule.defineFaciesByTruncRule(alphaCoord)
+        faciesCode, fIndx = truncRule.defineFaciesByTruncRule(alphaCoord)
         faciesReal.append(faciesCode)
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('Number of shifts in alpha values for numerical reasons: ' + str(truncRule.getNCountShiftAlpha()))

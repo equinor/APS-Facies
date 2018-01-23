@@ -3,23 +3,19 @@ import numpy as np
 import importlib
 from xml.etree.ElementTree import Element
 
-import src.Trend3D_linear_model_xml
+import src.Trend3D
 import src.simGauss2D
 import src.utils.xml
 
-importlib.reload(src.Trend3D_linear_model_xml)
 importlib.reload(src.simGauss2D)
-# importlib.reload(src.utils.constants.simple)
 importlib.reload(src.utils.xml)
-# importlib.reload(src.utils.checks)
+importlib.reload(src.Trend3D)
 
-from src.Trend3D_linear_model_xml import Trend3D_linear_model
-# Functions to draw 2D gaussian fields with linear trend and transformed to uniform distribution
 from src.simGauss2D import simGaussField
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
 from src.utils.checks import isVariogramTypeOK
-
+from src.Trend3D import Trend3D_linear, Trend3D_elliptic, Trend3D_hyperbolic, Trend3D_rms_param
 
 class APSGaussModel:
     """
@@ -44,8 +40,8 @@ class APSGaussModel:
     def getAnisotropyAzimuthAngle(self,gaussFieldName)
     def getAnisotropyDipAngle(self,gaussFieldName)
     def getPower(self,gaussFieldName)
-    def getTrendRuleModel(self,gfName)
-    def getTrendRuleModelObject(self,gfName)
+    def getTrendModel(self,gfName)
+    def getTrendModelObject(self,gfName)
     def get_debug_level(self)
     def setZoneNumber(self,zoneNumber)
     def setVariogramType(self,gaussFieldName,variogramType)
@@ -57,10 +53,10 @@ class APSGaussModel:
     def setPower(self,gaussFieldName,power)
     def setSeedForPreviewSimulation(self,gfName,seed)
     def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,azimuth,dip,power,
-                              useTrend=0,relStdDev=0.0,trendRuleModelObj=None)
+                              useTrend=0,relStdDev=0.0,trendModelObj=None)
     def updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,azimuth,dip,power)
     def removeGaussFieldParam(self,gfName)
-    def updateGaussFieldTrendParam(self,gfName,useTrend,trendRuleModelObj,relStdDev)
+    def updateGaussFieldTrendParam(self,gfName,useTrend,trendModelObj,relStdDev)
     def XMLAddElement(self,parent)
     def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
                                            gridXSize,gridYSize,gridAzimuthAngle,previewCrossSection)
@@ -122,7 +118,7 @@ class APSGaussModel:
             'Power': 7
         }
         # Dictionary give name to each index in __trendForGFModel list
-        # item in list: [name,useTrend,trendRuleModelObj,relStdDev]
+        # item in list: [name,useTrend,trendModelObj,relStdDev]
         self.__index_trend = {
             'Name': 0,
             'Use trend': 1,
@@ -168,6 +164,8 @@ class APSGaussModel:
         """
         for gf in ET_Tree_zone.findall('GaussField'):
             gfName = gf.get('name')
+            if self.__debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Gauss field name: {}'.format(gfName))
             if not gaussFieldJobs.checkGaussFieldName(gfName):
                 raise ValueError(
                     'In model file {0} in zone number: {1} in command GaussField.\n'
@@ -216,13 +214,13 @@ class APSGaussModel:
 
             # Read trend model for current GF
             trendObjXML = gf.find('Trend')
-            trendRuleModelObj = None
-            useTrend = 0
+            trendModelObj = None
+            useTrend = False
             relStdDev = 0.0
             if trendObjXML is not None:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Read trend')
-                useTrend = 1
+                useTrend = True
 
                 if self.__simBoxThickness <= 0.0:
                     raise ValueError(
@@ -232,7 +230,14 @@ class APSGaussModel:
                     )
                 trendName = trendObjXML.get('name')
                 if trendName == 'Linear3D':
-                    trendRuleModelObj = Trend3D_linear_model(trendObjXML, self.__debug_level, self.__modelFileName)
+                    trendModelObj = Trend3D_linear(trendObjXML, modelFileName=self.__modelFileName,
+                                                   debug_level=self.__debug_level)
+                elif trendName == 'Elliptic3D':
+                    trendModelObj = Trend3D_elliptic(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
+                elif trendName == 'Hyperbolic3D':
+                    trendModelObj = Trend3D_hyperbolic(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
+                elif trendName == 'RMSParameter':
+                    trendModelObj = Trend3D_rms_param(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
                 else:
                     raise NameError(
                         'Error in {className}\n'
@@ -242,12 +247,12 @@ class APSGaussModel:
             else:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: No trend is specified')
-                useTrend = 0
-                trendRuleModelObj = None
+                useTrend = False
+                trendModelObj = None
                 relStdDev = 0
 
             # Read RelstdDev
-            if useTrend == 1:
+            if useTrend == True:
                 relStdDev = getFloatCommand(
                     gf, 'RelStdDev', 'GaussField', 0.0,
                     modelFile=self.__modelFileName
@@ -260,7 +265,7 @@ class APSGaussModel:
             # Add gauss field parameters to data structure
             self.updateGaussFieldParam(
                 gfName, variogramType, range1, range2, range3, azimuth,
-                dip, power, useTrend, relStdDev, trendRuleModelObj
+                dip, power, useTrend, relStdDev, trendModelObj
             )
             # Set preview simulation start seed for gauss field
             self.setSeedForPreviewSimulation(gfName, seed)
@@ -351,7 +356,7 @@ class APSGaussModel:
         self.__mainFaciesTable = mainFaciesTable
 
         # gaussModelList  = list of objects of the form: [gfName,type,range1,range2,range3,azimuth,dip,power]
-        # trendModelList  = list of objects of the form: [gfName,useTrend,trendRuleModelObj,relStdDev]
+        # trendModelList  = list of objects of the form: [gfName,useTrend,trendModelObj,relStdDev]
         # previewSeedList = list of objects of the form: [gfName,seedValue]
         assert len(trendModelList) == len(gaussModelList)
         for i in range(len(gaussModelList)):
@@ -386,7 +391,7 @@ class APSGaussModel:
             dip = item[GDIP]
             power = item[GPOWER]
 
-            trendRuleModelObj = trendItem[TOBJ]
+            trendModelObj = trendItem[TOBJ]
             relStdDev = trendItem[TSTD]
             useTrend = trendItem[TUSE]
             seed = seedItem[SVALUE]
@@ -407,7 +412,7 @@ class APSGaussModel:
             self.updateGaussFieldTrendParam(
                 gfName=gfName,
                 useTrend=useTrend,
-                trendRuleModelObj=trendRuleModelObj,
+                trendModelObj=trendModelObj,
                 relStdDev=relStdDev
             )
 
@@ -493,7 +498,7 @@ class APSGaussModel:
         r = item[GPOWER]
         return r
 
-    def getTrendRuleItem(self, gfName):
+    def getTrendItem(self, gfName):
         TNAME = self.__index_trend['Name']
         found = False
         itemForTrendParam = None
@@ -507,22 +512,22 @@ class APSGaussModel:
         else:
             return itemForTrendParam
 
-    def getTrendRuleModel(self, gfName):
+    def getTrendModel(self, gfName):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
-        item = self.getTrendRuleItem(gfName)
+        item = self.getTrendItem(gfName)
         if item is None:
-            return None
+            return None, None, None
         else:
             useTrend = item[TUSE]
             trendModelObj = item[TOBJ]
             relStdDev = item[TSTD]
-            return [useTrend, trendModelObj, relStdDev]
+            return useTrend, trendModelObj, relStdDev
 
-    def getTrendRuleModelObject(self, gfName):
+    def getTrendModelObject(self, gfName):
         TOBJ = self.__index_trend['Object']
-        item = self.getTrendRuleItem(gfName)
+        item = self.getTrendItem(gfName)
         if item is None:
             return None
         else:
@@ -633,7 +638,7 @@ class APSGaussModel:
 
     def updateGaussFieldParam(
             self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
-            useTrend=0, relStdDev=0.0, trendRuleModelObj=None
+            useTrend=False, relStdDev=0.0, trendModelObj=None
     ):
         # Update or create new gauss field parameter object (with trend)
         GNAME = self.__index_variogram['Name']
@@ -666,7 +671,7 @@ class APSGaussModel:
                 self.updateGaussFieldVariogramParameters(
                     gfName, variogramType, range1, range2, range3, azimuth, dip, power
                 )
-                self.updateGaussFieldTrendParam(gfName, useTrend, trendRuleModelObj, relStdDev)
+                self.updateGaussFieldTrendParam(gfName, useTrend, trendModelObj, relStdDev)
                 found = 1
                 break
         if found == 0:
@@ -674,12 +679,12 @@ class APSGaussModel:
             # But data for trend parameters must be set by another function and default is set here.
             itemVariogram = [gfName, variogramType.name, range1, range2, range3, azimuth, dip, power]
             self.__variogramForGFModel.append(itemVariogram)
-            if trendRuleModelObj is None:
-                useTrend = 0
+            if trendModelObj is None:
+                useTrend = False
                 relStdDev = 0.0
             else:
-                useTrend = 1
-            itemTrend = [gfName, useTrend, trendRuleModelObj, relStdDev]
+                useTrend = True
+            itemTrend = [gfName, useTrend, trendModelObj, relStdDev]
             self.__trendForGFModel.append(itemTrend)
             defaultSeed = 0
             self.__seedForPreviewForGFModel.append([gfName, defaultSeed])
@@ -732,7 +737,7 @@ class APSGaussModel:
             self.__seedForPreviewForGFModel.pop(indx)
         return
 
-    def updateGaussFieldTrendParam(self, gfName, useTrend, trendRuleModelObj, relStdDev):
+    def updateGaussFieldTrendParam(self, gfName, useTrend, trendModelObj, relStdDev):
         # Update trend parameters for existing trend for gauss field model
         # But it does not create new trend object.
         TNAME = self.__index_trend['Name']
@@ -740,7 +745,7 @@ class APSGaussModel:
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
         err = 0
-        if trendRuleModelObj is None:
+        if trendModelObj is None:
             err = 1
         else:
             # Check if gauss field is already defined, then update parameters
@@ -751,7 +756,7 @@ class APSGaussModel:
                     found = 1
                     item[TUSE] = useTrend
                     item[TSTD] = relStdDev
-                    item[TOBJ] = trendRuleModelObj
+                    item[TOBJ] = trendModelObj
                     break
             if found == 0:
                 # This gauss field was not found.
@@ -840,7 +845,7 @@ class APSGaussModel:
                 elem.text = ' ' + str(power) + ' '
                 variogramElement.append(elem)
 
-            if useTrend == 1:
+            if useTrend == True:
                 # Add trend
                 trendObj.XMLAddElement(gfElement)
 
@@ -938,9 +943,9 @@ class APSGaussModel:
             )
 
             # Calculate trend
-            [useTrend, trendModelObject, relStdDev] = self.getTrendRuleModel(name)
-            if useTrend == 1:
-                [minMaxDifference, trendField] = trendModelObject.createTrendFor2DProjection(
+            useTrend, trendModelObject, relStdDev = self.getTrendModel(name)
+            if useTrend == True:
+                minMaxDifference, trendField = trendModelObject.createTrendFor2DProjection(
                     simBoxXsize, simBoxYsize, simBoxZsize, gridAzimuthAngle,
                     gridNX, gridNY, gridNZ, crossSectionType, crossSectionIndx
                 )
@@ -1110,9 +1115,9 @@ class APSGaussModel:
         else:
             raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
         # angles are azimuth angles (Measured from 2nd axis clockwise)
-        [angle1, range1, angle2, range2] = self.__calcProjection(U)
+        angle1, range1, angle2, range2 = self.__calcProjection(U)
 
-        return [angle1, range1, angle2, range2]
+        return angle1, range1, angle2, range2
 
     def __calcProjection(self, U):
         funcName = '__calcProjection'
@@ -1157,4 +1162,4 @@ class APSGaussModel:
                   ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
 
         # Angles are azimuth angles
-        return [angle1, range1, angle2, range2]
+        return angle1, range1, angle2, range2

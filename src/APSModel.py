@@ -262,18 +262,18 @@ class APSModel:
         }
         for keyword, variable in placement.items():
             prefix = '_' + self.__class__.__name__
-            value = getTextCommand(root, keyword, modelFile=modelFileName)
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName)
             self.__setattr__(prefix + variable, value)
 
         # Read optional keyword for region parameter
         keyword = 'RegionParamName'
-        value = getTextCommand(root, keyword, modelFile=modelFileName,required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None,  modelFile=modelFileName, required=False)
         if value is not None:
             self.__rmsRegionParamName = value
             
         # Read optional keyword which specify whether the gridmodel is a singe zone grid or multi zone grid
         keyword = 'UseSingleZoneGrid'
-        value = getIntCommand(root, keyword, parentKeyword='',
+        value = getIntCommand(root, keyword, parentKeyword='APSModel',
                               minValue=0, maxValue=1, defaultValue=0,
                               modelFile=modelFileName, required=False
         )

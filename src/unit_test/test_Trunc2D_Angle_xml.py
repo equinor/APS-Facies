@@ -102,7 +102,7 @@ def initialize_write_read(
         raise ValueError('Error: Files are different')
     else:
         print('Files are equal: OK')
-    return [truncRuleA, truncRuleB]
+    return truncRuleA, truncRuleB
 
 
 def getClassName(truncRule):
@@ -203,6 +203,8 @@ def test_case_3():
     overlayGroup = [alphaList, backgroundList]
     overlayGroups.append(overlayGroup)
 
+    faciesProb = [0.3, 0.2, 0.3, 0.1, 0.1]
+    faciesReferenceFile = get_facies_reference_file_path(3)
     run(
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4'],
@@ -438,7 +440,7 @@ def run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb,
         faciesReferenceFile, gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
 ):
-    [truncRule, truncRule2] = initialize_write_read(
+    truncRule, truncRule2 = initialize_write_read(
         outputModelFileName1=OUTPUT_MODEL_FILE_NAME1,
         outputModelFileName2=OUTPUT_MODEL_FILE_NAME2,
         fTable=fTable, faciesInZone=faciesInZone,

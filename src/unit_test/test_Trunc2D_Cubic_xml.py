@@ -31,6 +31,8 @@ def interpretXMLModelFileAndWrite(
     print('Truncation rule: ' + truncRuleName)
 
     # Get number of required Gauss fields
+    nGaussFields = int(trRule.get('nGFields'))
+    #    print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
 
@@ -102,7 +104,7 @@ def initialize_write_read(
         raise ValueError('Error: Files are different')
     else:
         print('Files are equal: OK')
-    return [truncRuleA, truncRuleB]
+    return truncRuleA, truncRuleB
 
 
 def getClassName(truncRule):
@@ -779,7 +781,7 @@ def run(
         fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
         gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
 ):
-    [truncRule, truncRule2] = initialize_write_read(
+    truncRule, truncRule2 = initialize_write_read(
         outputModelFileName1=OUTPUT_MODEL_FILE_NAME1,
         outputModelFileName2=OUTPUT_MODEL_FILE_NAME2,
         fTable=fTable,
