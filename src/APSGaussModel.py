@@ -215,12 +215,12 @@ class APSGaussModel:
             # Read trend model for current GF
             trendObjXML = gf.find('Trend')
             trendModelObj = None
-            useTrend = 0
+            useTrend = False
             relStdDev = 0.0
             if trendObjXML is not None:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Read trend')
-                useTrend = 1
+                useTrend = True
 
                 if self.__simBoxThickness <= 0.0:
                     raise ValueError(
@@ -247,12 +247,12 @@ class APSGaussModel:
             else:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: No trend is specified')
-                useTrend = 0
+                useTrend = False
                 trendModelObj = None
                 relStdDev = 0
 
             # Read RelstdDev
-            if useTrend == 1:
+            if useTrend == True:
                 relStdDev = getFloatCommand(
                     gf, 'RelStdDev', 'GaussField', 0.0,
                     modelFile=self.__modelFileName
@@ -638,7 +638,7 @@ class APSGaussModel:
 
     def updateGaussFieldParam(
             self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
-            useTrend=0, relStdDev=0.0, trendModelObj=None
+            useTrend=False, relStdDev=0.0, trendModelObj=None
     ):
         # Update or create new gauss field parameter object (with trend)
         GNAME = self.__index_variogram['Name']
@@ -680,10 +680,10 @@ class APSGaussModel:
             itemVariogram = [gfName, variogramType.name, range1, range2, range3, azimuth, dip, power]
             self.__variogramForGFModel.append(itemVariogram)
             if trendModelObj is None:
-                useTrend = 0
+                useTrend = False
                 relStdDev = 0.0
             else:
-                useTrend = 1
+                useTrend = True
             itemTrend = [gfName, useTrend, trendModelObj, relStdDev]
             self.__trendForGFModel.append(itemTrend)
             defaultSeed = 0
@@ -845,7 +845,7 @@ class APSGaussModel:
                 elem.text = ' ' + str(power) + ' '
                 variogramElement.append(elem)
 
-            if useTrend == 1:
+            if useTrend == True:
                 # Add trend
                 trendObj.XMLAddElement(gfElement)
 
@@ -944,7 +944,7 @@ class APSGaussModel:
 
             # Calculate trend
             useTrend, trendModelObject, relStdDev = self.getTrendModel(name)
-            if useTrend == 1:
+            if useTrend == True:
                 minMaxDifference, trendField = trendModelObject.createTrendFor2DProjection(
                     simBoxXsize, simBoxYsize, simBoxZsize, gridAzimuthAngle,
                     gridNX, gridNY, gridNZ, crossSectionType, crossSectionIndx

@@ -445,7 +445,7 @@ for key, zoneModel in allZoneModels.items():
         # Add trend to gaussian residual fields
         useTrend, trendModelObj, relStdDev = zoneModel.getTrendModel(gfName)
 
-        if useTrend == 1:
+        if useTrend:
             if debug_level >= Debug.VERBOSE:
                 trendTypeName = trendModelObj.type.name
                 if useRegions:
@@ -473,14 +473,10 @@ for key, zoneModel in allZoneModels.items():
                 print('Debug output: SimBoxThickness = ' + str(simBoxThickness))
                 print('Debug output: RelStdDev = ' + str(relStdDev))
                 print('Debug output: Sigma = ' + str(sigma))
-#                print('Debug output: trendValues:')
-#                print(repr(trendValues))
                 print(
                     'Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
                 print('Debug output: Residual min,max        : ' + str(sigma * residualValues.min()) + ' ' + str(sigma * residualValues.max()))
                 print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
-                # print('Debug output: Trend + Residual values:')
-                # print(repr(val))
 
                 # Write back to RMS project the untransformed gaussian values with trend for the zone
                 gfNamesUntransformed = gfName + '_untransf'
