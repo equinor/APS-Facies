@@ -1391,3 +1391,10 @@ class Trunc2D_Base:
 #            print('sumProb oppdatert: ' + str(sumProb))
         return faciesProbNew
 
+    def getGaussFieldsInTruncationRule(self):
+        # Return list of the gauss field names actually used in the truncation rule
+        gfUsed = []
+        for i in range(len(self._alphaIndxList)):
+            gfName = self._gaussFieldsInZone[self._alphaIndxList[i]]
+            gfUsed.append(gfName)
+        return gfUsed

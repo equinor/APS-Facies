@@ -255,7 +255,6 @@ class APSModel:
         placement = {
             'RMSProjectName': '__rmsProjectName',
             'RMSWorkflowName': '__rmsWorkflowName',
-            'RMSGaussFieldScriptName': '__rmsGaussFieldScriptName',
             'GridModelName': '__rmsGridModelName',
             'ZoneParamName': '__rmsZoneParamName',
             'ResultFaciesParamName': '__rmsFaciesParamName',
@@ -264,6 +263,12 @@ class APSModel:
             prefix = '_' + self.__class__.__name__
             value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName)
             self.__setattr__(prefix + variable, value)
+
+        # Read optional keyword for IPL script file
+        keyword = 'RMSGaussFieldScriptName'
+        value = getTextCommand(root, keyword, modelFile=modelFileName,required=False)
+        if value is not None:
+            self.__rmsGaussFieldScriptName = value
 
         # Read optional keyword for region parameter
         keyword = 'RegionParamName'
@@ -312,7 +317,7 @@ class APSModel:
             )
 
         # --- Zone ---
-        if  self.__debug_level >= Debug.VERBOSE:
+        if  self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('--- Number of specified zone models: {}'.format(str(len(zModels.findall('Zone')))))
             print('')
@@ -438,9 +443,9 @@ class APSModel:
                     zNumber = key[0]
                     rNumber = key[1]
                     if rNumber == 0:
-                        print('  Zone: {}'.format(str(zNumber)))
+                        print('    Zone: {}'.format(str(zNumber)))
                     else:
-                        print('  Zone: {}  Region: {}'.format(str(zNumber), str(rNumber)))
+                        print('    Zone: {}  Region: {}'.format(str(zNumber), str(rNumber)))
             print('')
             print('------------ End reading model file in APSModel ------------------')
             print('')

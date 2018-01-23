@@ -220,7 +220,7 @@ class APSZoneModel:
                 self.__simBoxThickness = simBoxThickness
 
                 kw = 'HorizonNameVarioTrend'
-                mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName)
+                mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName, required=False)
                 self.__horizonNameForVariogramTrendMap = mapName
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
@@ -366,15 +366,19 @@ class APSZoneModel:
     def getSimBoxThickness(self):
         return self.__simBoxThickness
 
-    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
+#    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
         # Input: get3DParamFunction - Function pointer for function to be applied
         #                             to get 3D parameter from RMS project. Is used
         #                             to avoid calling functions using RoxAPI here.
         #        gridModel - Pointer to grid model object in RMS
         #        NOTE: Will only call the function to read RMS parameter from
         #              truncation rules that has defined this as a possibility.
+#        if not self.__truncRule.useConstTruncModelParam():
+#            self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
+
+    def getTruncationParam(self, gridModel, realNumber):
         if not self.__truncRule.useConstTruncModelParam():
-            self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
+            self.__truncRule.getTruncationParam(gridModel, realNumber)
 
     def get_debug_level(self):
         return self.__debug_level
@@ -390,6 +394,9 @@ class APSZoneModel:
 
     def getConstProbValue(self, fName):
         return self.__faciesProbObject.getConstProbValue(fName)
+
+    def getGaussFieldsInTruncationRule(self):
+        return self.__truncRule.getGaussFieldsInTruncationRule()
 
     def setZoneNumber(self, zoneNumber):
         self.__zoneNumber = zoneNumber
@@ -479,8 +486,8 @@ class APSZoneModel:
         classNameTrunc = truncObject.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
-                'Error: In class: {0}\n'
-                'Error: Mismatch in input to applyTruncations'.format(self.__className)
+                'Error: In class: {}. Mismatch in input to applyTruncations '
+                ''.format(self.__className)
             )
 
         useConstTruncParam = truncObject.useConstTruncModelParam()

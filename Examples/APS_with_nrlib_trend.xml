@@ -1,0 +1,663 @@
+<?xml version="1.0" ?>
+<APSModel>
+  <Preview zoneNumber="2" regionNumber="0" crossSectionType="IJ" crossSectionIndx="5" scale="500">
+  </Preview>
+  <Optimization>
+    <UseMemoization> 1 </UseMemoization>
+    <MemoizationResolution>  100  </MemoizationResolution>
+  </Optimization>
+
+  <SelectedZonesAndRegions>
+    <SelectedZoneWithRegions zone="1">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="2">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="3">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="4">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="5">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="6">  0      </SelectedZoneWithRegions>
+  </SelectedZonesAndRegions>
+
+  <RMSProjectName> testNeslen.rms10 </RMSProjectName>
+  <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
+  <GridModelName> UniformXYZGrid </GridModelName>
+  <ZoneParamName> Zone </ZoneParamName>
+  <ResultFaciesParamName> FaciesReal_level_1 </ResultFaciesParamName>
+  <PrintInfo> 3 </PrintInfo>
+  <MainFaciesTable>
+    <Facies name="F1">
+      <Code> 1 </Code>
+    </Facies>
+    <Facies name="F2">
+      <Code> 2 </Code>
+    </Facies>
+    <Facies name="F3">
+      <Code> 3 </Code>
+    </Facies>
+    <Facies name="F4">
+      <Code> 4 </Code>
+    </Facies>
+    <Facies name="F5">
+      <Code> 5 </Code>
+    </Facies>
+    <Facies name="F6">
+      <Code> 6 </Code>
+    </Facies>
+    <Facies name="F7">
+      <Code> 7 </Code>
+    </Facies>
+    <Facies name="F8">
+      <Code> 8 </Code>
+    </Facies>
+    <Facies name="F9">
+      <Code> 9 </Code>
+    </Facies>
+    <Facies name="F10">
+      <Code> 10 </Code>
+    </Facies>
+  </MainFaciesTable>
+  <ZoneModels>
+    <!--  Zone 1 -->
+    <Zone number="1">
+      <UseConstProb> 0 </UseConstProb>
+      <SimBoxThickness> 4.92  </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> PFLOODPLAIN </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> PSUBBAY </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> PWBF </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> PBHD </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> PLAGOON </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+
+      <GaussField name="GF1">
+        <Vario name="GAUSSIAN">
+          <MainRange> 200.0 </MainRange>
+          <PerpRange> 100.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Linear3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 5.0 </stackAngle>
+        </Trend>  
+        <RelStdDev> 0.04 </RelStdDev>
+        <SeedForPreview> 276787 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF2">
+        <Vario name="GAUSSIAN">
+          <MainRange> 120.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 75151556 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF3">
+        <Vario name="GAUSSIAN">
+          <MainRange> 50.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 8276256 </SeedForPreview>
+      </GaussField>
+
+      <TruncationRule nGFields="3" name="Trunc3D_Bayfill">
+	<BackGroundModel>
+	  <AlphaFields> GF1 GF2 GF3 </AlphaFields>
+	  <UseConstTruncParam> 1 </UseConstTruncParam>
+	  <Floodplain> F1 </Floodplain>
+	  <Subbay> F2 </Subbay>
+	  <WBF> F3 </WBF>
+	  <BHD> F4 </BHD>
+	  <Lagoon> F5 </Lagoon>
+	  <SF> 0.1 </SF>
+	  <YSF>  1.0 </YSF>
+	  <SBHD>  1.0 </SBHD>
+	</BackGroundModel>
+      </TruncationRule>
+    </Zone>
+
+    <!--  Zone 2 -->
+    <Zone number="2">
+      <UseConstProb> 1 </UseConstProb>
+      <SimBoxThickness> 3.0 </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> 0.4 </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+        <Facies name="F6">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+
+      <GaussField name="GF1">
+        <Vario name="MATERN52">
+          <MainRange> 150.0 </MainRange>
+          <PerpRange> 25.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Linear3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 5.0 </stackAngle>
+        </Trend>  
+        <RelStdDev> 0.04 </RelStdDev>
+        <SeedForPreview> 3939276787 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF2">
+        <Vario name="MATERN32">
+          <MainRange> 150.0 </MainRange>
+          <PerpRange> 25.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 80.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 1175151556 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF3">
+        <Vario name="MATERN72">
+          <MainRange> 150.0 </MainRange>
+          <PerpRange> 25.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 13008276256 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF4">
+        <Vario name="GENERAL_EXPONENTIAL">
+          <MainRange> 150.0 </MainRange>
+          <PerpRange> 25.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 170.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+          <Power> 1.95 </Power>
+        </Vario>
+        <SeedForPreview> 88772256 </SeedForPreview>
+      </GaussField>
+
+      <TruncationRule nGFields="3" name="Trunc2D_Angle">
+	<BackGroundModel>
+	  <AlphaFields> GF1 GF2 </AlphaFields>
+          <UseConstTruncParam> 1 </UseConstTruncParam>
+          <Facies name="F1">
+            <Angle> 40.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F2">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F5">
+            <Angle> 180.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F4">
+            <Angle> 75.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F3">
+            <Angle> 75.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+	</BackGroundModel>
+	<OverLayModel>
+          <Group>
+            <AlphaField name="GF3">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <AlphaField name="GF4">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <BackGround> F1 </BackGround>
+            <BackGround> F4 </BackGround>
+          </Group>
+        </OverLayModel>
+      </TruncationRule>
+    </Zone>
+
+    <!--  Zone 3 -->
+    <Zone number="3">
+      <UseConstProb> 0 </UseConstProb>
+      <SimBoxThickness> 5.35 </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> PFLOODPLAIN </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> PSUBBAY </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> PWBF </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> PBHD </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> PLAGOON </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+
+      <GaussField name="GF1">
+        <Vario name="GAUSSIAN">
+          <MainRange> 130.0 </MainRange>
+          <PerpRange> 210.0 </PerpRange>
+          <VertRange> 3.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Elliptic3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 90.0 </stackAngle>
+          <curvature>  2.0 </curvature>
+          <origin_x> 0.5 </origin_x>
+          <origin_y> 0.5 </origin_y>
+          <origintype> 'Relative' </origintype>
+        </Trend>  
+        <RelStdDev> 0.04 </RelStdDev>
+        <SeedForPreview> 9989276787 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF2">
+        <Vario name="GAUSSIAN">
+          <MainRange> 120.0 </MainRange>
+          <PerpRange> 120.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 87875151556 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF3">
+        <Vario name="GAUSSIAN">
+          <MainRange> 50.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 658276256 </SeedForPreview>
+      </GaussField>
+
+      <TruncationRule nGFields="3" name="Trunc3D_Bayfill">
+	<BackGroundModel>
+	  <AlphaFields> GF1 GF2 GF3 </AlphaFields>
+	  <UseConstTruncParam> 1 </UseConstTruncParam>
+	  <Floodplain> F1 </Floodplain>
+	  <Subbay> F2 </Subbay>
+	  <WBF> F3 </WBF>
+	  <BHD> F4 </BHD>
+	  <Lagoon> F5 </Lagoon>
+	  <SF> 0.1 </SF>
+	  <YSF>  1.0 </YSF>
+	  <SBHD>  1.0 </SBHD>
+	</BackGroundModel>
+      </TruncationRule>
+    </Zone>
+
+    <!--  Zone 4 -->
+    <Zone number="4">
+      <UseConstProb> 1 </UseConstProb>
+      <SimBoxThickness> 4.48 </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> 0.4 </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> 0.3 </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> 0.3 </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+
+      <GaussField name="GF1">
+        <Vario name="MATERN32">
+          <MainRange> 100.0 </MainRange>
+          <PerpRange> 10.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="EllipticCone3D">
+          <azimuth> 35.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 90.0 </stackAngle>
+          <curvature>  2.0 </curvature>
+          <migrationAngle> 75.0 </migrationAngle>
+          <relativeSize> 0.1 </relativeSize>
+          <origin_x> 0.5 </origin_x>
+          <origin_y> 0.5 </origin_y>
+          <origintype> 'Relative' </origintype>
+        </Trend>  
+        <RelStdDev> 0.0001 </RelStdDev>
+        <SeedForPreview> 223939276787 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF2">
+        <Vario name="EXPONENTIAL">
+          <MainRange> 100.0 </MainRange>
+          <PerpRange> 10.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 80.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 8787851556 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF3">
+        <Vario name="GAUSSIAN">
+          <MainRange> 100.0 </MainRange>
+          <PerpRange> 10.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 8817786256 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF4">
+        <Vario name="GAUSSIAN">
+          <MainRange> 100.0 </MainRange>
+          <PerpRange> 10.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 170.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Hyperbolic3D">
+          <azimuth> 35.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 90 </stackAngle>
+          <curvature>  2.0 </curvature>
+          <migrationAngle> 0.0 </migrationAngle>
+          <origin_x> 0.5 </origin_x>
+          <origin_y> 0.5 </origin_y>
+          <origintype> 'Relative' </origintype>
+        </Trend>  
+        <RelStdDev> 0.0001 </RelStdDev>
+        <SeedForPreview> 187542256 </SeedForPreview>
+      </GaussField>
+
+      <TruncationRule nGFields="2" name="Trunc2D_Cubic">
+	<BackGroundModel>
+	  <AlphaFields> GF1 GF2 </AlphaFields>
+          <L1 direction="V">
+            <ProbFrac name="F1"> 1.0 </ProbFrac>
+            <ProbFrac name="F2"> 1.0 </ProbFrac>
+            <ProbFrac name="F3"> 1.0 </ProbFrac>
+          </L1>
+	</BackGroundModel>
+      </TruncationRule>
+    </Zone>
+
+    <!--  Zone 5 -->
+    <Zone number="5">
+      <UseConstProb> 1 </UseConstProb>
+      <SimBoxThickness> 4.02 </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> 0.4 </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+        <Facies name="F6">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+
+      <GaussField name="GF1">
+        <Vario name="GAUSSIAN">
+          <MainRange> 100.0 </MainRange>
+          <PerpRange> 32.0 </PerpRange>
+          <VertRange> 4.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Linear3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 5.0 </stackAngle>
+        </Trend>  
+        <RelStdDev> 0.04 </RelStdDev>
+        <SeedForPreview> 1111276787 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF2">
+        <Vario name="GAUSSIAN">
+          <MainRange> 200.0 </MainRange>
+          <PerpRange> 200.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 2661556 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF3">
+        <Vario name="GAUSSIAN">
+          <MainRange> 40.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 344256 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF4">
+        <Vario name="GAUSSIAN">
+          <MainRange> 50.0 </MainRange>
+          <PerpRange> 25.0 </PerpRange>
+          <VertRange> 3.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 332256 </SeedForPreview>
+      </GaussField>
+
+      <TruncationRule nGFields="3" name="Trunc2D_Angle">
+	<BackGroundModel>
+	  <AlphaFields> GF1 GF2 </AlphaFields>
+          <UseConstTruncParam> 1 </UseConstTruncParam>
+          <Facies name="F1">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F2">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F5">
+            <Angle> 180.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F4">
+            <Angle> 90.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F3">
+            <Angle> 75.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+	</BackGroundModel>
+	<OverLayModel>
+          <Group>
+            <AlphaField name="GF3">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <AlphaField name="GF4">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <BackGround> F1 </BackGround>
+            <BackGround> F4 </BackGround>
+          </Group>
+        </OverLayModel>
+      </TruncationRule>
+    </Zone>
+
+    <!--  Zone 6 -->
+    <Zone number="6">
+      <UseConstProb> 1 </UseConstProb>
+      <SimBoxThickness> 4.55 </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> 0.4 </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+        <Facies name="F6">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+
+      <GaussField name="GF1">
+        <Vario name="GAUSSIAN">
+          <MainRange> 20.0 </MainRange>
+          <PerpRange> 72.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Linear3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 5.0 </stackAngle>
+        </Trend>  
+        <RelStdDev> 0.04 </RelStdDev>
+        <SeedForPreview> 166276787 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF2">
+        <Vario name="GAUSSIAN">
+          <MainRange> 22.0 </MainRange>
+          <PerpRange> 92.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 88772661556 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF3">
+        <Vario name="GAUSSIAN">
+          <MainRange> 45.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 7767344256 </SeedForPreview>
+      </GaussField>
+
+      <GaussField name="GF4">
+        <Vario name="GAUSSIAN">
+          <MainRange> 45.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 3.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 665332256 </SeedForPreview>
+      </GaussField>
+
+      <TruncationRule nGFields="3" name="Trunc2D_Angle">
+	<BackGroundModel>
+	  <AlphaFields> GF1 GF2 </AlphaFields>
+          <UseConstTruncParam> 1 </UseConstTruncParam>
+          <Facies name="F1">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F2">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F5">
+            <Angle> 180.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F4">
+            <Angle> 90.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F3">
+            <Angle> 75.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+	</BackGroundModel>
+	<OverLayModel>
+          <Group>
+            <AlphaField name="GF3">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <AlphaField name="GF4">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <BackGround> F1 </BackGround>
+            <BackGround> F4 </BackGround>
+          </Group>
+        </OverLayModel>
+      </TruncationRule>
+    </Zone>
+  </ZoneModels>
+</APSModel>

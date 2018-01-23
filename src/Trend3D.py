@@ -1161,3 +1161,407 @@ class Trend3D_rms_param(Trend3D):
         obj.text = ' ' + self._rmsParamName + ' '
         trendElement.append(obj)
 
+
+
+# ----------------------------------------------------------------------------------------------------------
+
+class Trend3D_elliptic_cone(Trend3D):
+    """
+        Description: Create an elliptic cone trend 3D object where the horiontal cross section of
+                     a iso-surface is elliptic. The ellipse shape is defined by two half axes (a,b).
+                     The ratio b/a = curvature which is a user specified parameter for this trend typ.
+                     The relative size of the half axes for a cross section close to z= 0 and close to z= zoneThickness
+                     (in the zones local simulation box coordinate z for depth from top to base of the zone) may be different.
+                     This means that it is possible to build an elliptic cone if the relative size is different from 1 
+                     and elliptic cylinder if the relative size is 1. If the migration angle is 0 and stacking angle 
+                     is 90.0 degrees, the cone has a vertical center line. 
+                     If the migration angle is different from 0 and/or stacking angle is different from 90.0 degrees, 
+                     the center line has a slope so that the cone is skewed. 
+                     The migration angle different from 0 means that the center point of the ellipse is shifted orthogonal 
+                     to the  azimuth direction while stacking angle different from 90 degrees means that the center line 
+                     is shifted in azimuth direction. A combination means that the ellipse 
+                     (horizontal intersection of an iso-surface of the trend function) is shifted both along and 
+                     orthogonal to azimuth direction.
+
+        Input is model parameters.
+    """
+
+    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+        super().__init__(trendRuleXML, modelFileName, debug_level)
+        self._curvature = 1.0
+        self._relativeSize = 1.0
+        self._migrationAngle = 0  
+        self._origin = [0.0, 0.0, 0.0]
+        self._origin_type = OriginType.RELATIVE
+        self.type = TrendType.ELLIPTIC_CONE
+        self._className = self.__class__.__name__
+
+        if trendRuleXML is not None:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Trend type: {}'.format(self.type))
+            self._interpretXMLTree(trendRuleXML, modelFileName)
+        else:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Create empty object of ' + self._className)
+
+    def _interpretXMLTree(self, trendRuleXML, modelFileName):
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        # Stacking angle must be > 0.
+        if abs(self._stackingAngle) < 0.00001:
+            self._stackingAngle = 0.00001
+
+        # Additional input parameters comes here (for other Trend3D-types)
+        # Curvature
+        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False,
+                                          defaultValue=1)
+        if self._curvature <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for elliptic trend is not positive.'
+                ''.format(self._className)
+            )
+        # Migration angle
+        self._migrationAngle = getFloatCommand(
+            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+        )
+        if self._migrationAngle <= -90.0 or self._migrationAngle >= 90.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Migration angle must be between -90.0 and +90.0 degrees.'
+                ''.format(self._className)
+                )
+        # Relative size
+        self._relativeSize = getFloatCommand(trendRuleXML, 'relativeSize', modelFile=modelFileName, required=False,
+                                             defaultValue=1.0)
+        if self._relativeSize <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: The relative size of the ellipse shape at top and base of a zone must be > 0.'
+                ''.format(self._className)
+            )
+        # Reference point the center line will go through
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._origin = [origin_x, origin_y, origin_z]
+
+        # Type of reference point (relative or absolute coordinate values)
+        self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
+
+    def XMLAddElement(self, parent):
+        """
+            Add to the parent element a new element with specified tag and attributes.
+            The attributes are a dictionary with {name:value}
+            After this function is called, the parent element has got a new child element
+            for the current class.
+        """
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self._className)
+
+        attribute = {'name': 'EllipticCone3D'}
+        tag = 'Trend'
+        trendElement = Element(tag, attribute)
+        parent.append(trendElement)
+
+        super()._XMLAddElementTag(trendElement)
+
+        tag = 'curvature'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._curvature) + ' '
+        trendElement.append(obj)
+
+        tag = 'migrationAngle'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._migrationAngle) + ' '
+        trendElement.append(obj)
+
+        tag = 'relativeSize'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._relativeSize) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_x'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[0]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origin_y'
+        obj = Element(tag)
+        obj.text = ' ' + str(self._origin[1]) + ' '
+        trendElement.append(obj)
+
+        tag = 'origintype'
+        obj = Element(tag)
+        if self._origin_type == OriginType.RELATIVE:
+            obj.text = ' Relative '
+        elif self._origin_type == OriginType.ABSOLUTE:
+            obj.text = ' Absolute '
+        trendElement.append(obj)
+
+
+
+    def initialize(
+            self, azimuthAngle, stackingAngle, direction, migrationAngle=0.0, curvature=1.0, relativeSize=1.0,
+            origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
+    ):
+        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+        # Add additional for current trend type here
+        if curvature <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Cannot set curvature less than or equal to 0'
+                ''.format(self._className)
+            )
+
+        if migrationAngle <= -90.0 or migrationAngle >= 90.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Migration angle must be between -90.0 and +90.0 degrees.'
+                ''.format(self._className)
+                )
+        if relativeSize <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Cannot set relative_size of ellipse at top and base to less than or equal to 0'
+                ''.format(self._className)
+            )
+        
+        if origin is None:
+            origin = [0.0, 0.0, 0.0]
+        if not (isinstance(origin, list) or isinstance(origin, tuple)):
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Origin must be of type array or tuple.'
+                ''.format(self._className)
+            )
+        if not len(origin) == 3:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Origin must have length 3'
+                ''.format(self._className)
+            )
+        for val in origin:
+            if type(val) is int:
+                val = float(val)
+            if type(val) is not float:
+                raise ValueError(
+                    'Error: In {}\n'
+                    'Error: Origin must contain float values'
+                    ''.format(self._className)
+                )
+        if origin_type not in OriginType:
+            raise ValueError(
+                'Error: In {}\n'
+                "Error: Origintype must be either 'Relative' or 'Absolute' "
+                ''.format(self._className)
+            )
+
+        self._curvature = curvature
+        self._migrationAngle = migrationAngle
+        self._relativeSize = relativeSize
+        self._origin = origin
+        self._origin_type = origin_type
+
+    def setCurvature(self, curvature):
+        if curvature <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Curvature for elliptic trend is not positive.'
+                ''.format(self._className)
+                )
+        self._curvature = curvature
+
+        
+    def setMigrationAngle(self, migrationAngle):
+        if migrationAngle <= -90.0 or migrationAngle >= 90.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Migration angle must be between -90.0 and +90.0 degrees.'
+                ''.format(self._className)
+                )
+        self._migrationAngle = migrationAngle
+
+    def setRelativeSizeOfEllipse(self, relativeSize):
+        if relativeSize <= 0.0:
+            raise ValueError(
+                'Error: In {}\n'
+                'Error: Relative size of ellipse at top and base of the zone must be positive.'
+                ''.format(self._className)
+                )
+        self._relativeSize = relativeSize
+
+    def setOrigin(self, origin):
+        self._origin = origin
+
+    def setOriginType(self, originType):
+        if originType not in OriginType:
+            raise ValueError(
+                'Error: In {}\n'
+                "Error: Origintype must be either 'Relative' or 'Absolute' "
+                ''.format(self._className)
+            )
+        self._origin_type = originType
+
+    def getCurvature(self):
+        return self._curvature
+
+
+    def getMigrationAngle(self):
+        return self._migrationAngle
+
+    def getRelativeSize(self):
+        return self._relative_size_top_base
+
+    def getOrigin(self):
+        return self._origin
+
+    def getOriginType(self):
+        return self._origin_type
+
+
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
+                                self._origin_type, self._origin)
+        self._origin[2] = 0.0
+
+
+    def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # Elliptic cone
+        sinTheta = parametersForTrendCalc[0]
+        cosTheta = parametersForTrendCalc[1]
+        tanAlpha = parametersForTrendCalc[2]
+        tanBeta  = parametersForTrendCalc[3]
+        a = parametersForTrendCalc[4]
+        b = parametersForTrendCalc[5]
+
+        zRel = (k -self._startLayer + 0.5) * zinc
+
+        zTop = 0.0
+        zThickness = (self._endLayer - self._startLayer +1) * zinc
+        zBase = zTop + zThickness
+
+        aBase = a
+        aTop  = a * self._relativeSize
+        da = aBase - aTop
+        a = aTop + da * (zRel - zTop) / zThickness
+        b = a * self._curvature
+        
+        # The center point is changed by depth. There are two angles that can specify this
+        # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
+        # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
+        # First shift the center point in azimuth direction
+        L = -zRel * tanAlpha
+        x_center = L * sinTheta + self._xCenter
+        y_center = L * cosTheta + self._yCenter
+
+        # Secondly, shift the center point further, but now orthogonal to azimuth direction.
+        L = zRel * tanBeta
+        x_center = L * cosTheta + x_center
+        y_center = -L * sinTheta + y_center
+
+        xRel = x - x_center
+        yRel = y - y_center
+        xRotatedByTheta = xRel * cosTheta - yRel * sinTheta
+        yRotatedByTheta = xRel * sinTheta + yRel * cosTheta
+
+
+        value = np.sqrt(np.square(xRotatedByTheta / a) + np.square(yRotatedByTheta / b))
+        return value
+
+    def _calculateTrendModelParam(self):
+        # Calculate the 3D trend values for Elliptic cone
+        assert abs(self._migrationAngle) < 90.0
+        assert abs(self._stackingAngle) > 0.0
+        
+        theta = self._azimuth * np.pi / 180.0
+        beta  = self._migrationAngle * np.pi / 180.0
+        alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
+        
+        # Elliptic Cone
+        a = 1
+        b = self._curvature
+        sinTheta = math.sin(theta)
+        cosTheta = math.cos(theta)
+        tanBeta  = math.tan(beta)
+        tanAlpha = math.tan(alpha)
+        
+        parametersForTrendCalc = [sinTheta, cosTheta, tanAlpha, tanBeta, a, b]
+        return parametersForTrendCalc
+
+
+    def _writeTrendSpecificParam(self):
+        # Elliptic cone
+        print('Debug output:  Curvature: {}'.format(str(self._curvature)))
+        print('Debug output:  Migration angle: {}'.format(str(self._migrationAngle)))
+        print('Debug output:  Relative size: {}'.format(str(self._relativeSize)))
+        print('Debug output:  Origin: ({},{}, {})'.format(str(self._origin[0]), str(self._origin[1]), str(self._origin[2])))
+        print('Debug output:  Origin type: {}'.format(self._origin_type.name))
+
+
+    def createTrendFor2DProjection(
+            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
+            nxPreview, nyPreview, nzPreview, projectionType, crossSectionIndx
+    ):
+
+        xinc = simBoxXsize / nxPreview
+        yinc = simBoxYsize / nyPreview
+        zinc = simBoxZsize / nzPreview
+
+        parametersForTrendCalc = self._calculateTrendModelParam() 
+
+        if projectionType == 'IJ':
+            zRel = (crossSectionIndx + 0.5) * zinc
+            values = np.zeros(nxPreview * nyPreview, float)
+            for i in range(nxPreview):
+                ii = i-nxPreview
+                xRel = (ii + 0.5) * xinc
+                for j in range(nyPreview):
+                    indx = i + j * nxPreview
+                    jj = j-nyPreview
+                    yRel = (jj + 0.5) * yinc
+                    # Elliptic
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        elif projectionType == 'IK':
+            yRel = (crossSectionIndx + 0.5) * yinc
+            values = np.zeros(nxPreview * nzPreview, float)
+            for i in range(nxPreview):
+                ii = i-nxPreview
+                xRel = (ii + 0.5) * xinc
+                for k in range(nzPreview):
+                    indx = i + k * nxPreview
+                    kk = k-nzPreview
+                    zRel = (kk + 0.5) * zinc
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        elif projectionType == 'JK':
+            xRel = (crossSectionIndx + 0.5) * xinc
+            values = np.zeros(nyPreview * nzPreview, float)
+            for j in range(nyPreview):
+                jj = j-nxPreview
+                yRel = (jj + 0.5) * yinc
+                for k in range(nzPreview):
+                    indx = j + k * nyPreview
+                    kk = k-nzPreview
+                    zRel = (kk + 0.5) * zinc
+                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
+                    values[indx] = trendValue
+        else:
+            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
+        minValue = values.min()
+        maxValue = values.max()
+
+        minmaxDifference = maxValue - minValue
+        valuesRescaled = (values - minValue) / minmaxDifference
+
+        minValue = valuesRescaled.min()
+        maxValue = valuesRescaled.max()
+        minmaxDifference = maxValue - minValue
+        minValueInCrossSection = minValue
+        maxValueInCrossSection = maxValue
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
+            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
+
+        return minmaxDifference, valuesRescaled
+

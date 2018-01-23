@@ -348,7 +348,6 @@ VAL = 1  # Name of index in items = [ name, values]
 
 # List of modelled facies names
 allFaciesNamesModelled = []
-#selectedZoneNumberList = apsModel.getSelectedZoneNumberList()
 if debug_level >= Debug.VERY_VERBOSE:
     if apsModel.isAllZoneRegionModelsSelected():
         print('Debug output: All combinations of zone and region is selected to be run')
@@ -385,9 +384,9 @@ for key, zoneModel in allZoneModels.items():
             print(' ')
 
     zoneModel = apsModel.getZoneModel(zoneNumber)
+
     # Read trend parameters for truncation parameters
-    # zoneModel.getTruncationParam(gridModel,realNumber)
-    zoneModel.getTruncationParam(gr.getContinuous3DParameterValues, gridModel, realNumber)
+    zoneModel.getTruncationParam(gridModel, realNumber)
 
     useConstProb = zoneModel.useConstProb()
     GFNamesForZone = zoneModel.getUsedGaussFieldNames()
@@ -407,14 +406,29 @@ for key, zoneModel in allZoneModels.items():
             values = gr.getContinuous3DParameterValues(gridModel, gfName, realNumber, debug_level)
             GFAllValues.append([gfName, values])
 
+
             # Allocate space for transformed gauss field property vector alpha
-            alpha = np.zeros(len(values), np.float32)
             gfNameTrans = gfName + '_transf'
+            if gr.isParameterDefinedWithValuesInRMS(gridModel,gfNameTrans,realNumber):
+                if debug_level >= Debug.VERBOSE:
+                    print('--- Get transformed gauss field parameter: {} which will be updated'.format(gfNameTrans))
+                alpha = gr.getContinuous3DParameterValues(gridModel, gfNameTrans, realNumber, debug_level)
+            else:
+                if debug_level >= Debug.VERBOSE:
+                    print('--- Create transformed gauss field parameter: {}'.format(gfNameTrans))
+                alpha = np.zeros(len(values), np.float32)
             GFAllAlpha.append([gfNameTrans, alpha])
 
             # Allocate space for trend
-            trend = np.zeros(len(values), np.float32)
             gfNameTrend = gfName + '_trend'
+            if gr.isParameterDefinedWithValuesInRMS(gridModel,gfNameTrend,realNumber):
+                if debug_level >= Debug.VERBOSE:
+                    print('--- Get trend parameter: {} which will be updated'.format(gfNameTrend))
+                trend = gr.getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
+            else:
+                if debug_level >= Debug.VERBOSE:
+                    print('--- Create trend parameter: {}'.format(gfNameTrend))
+                trend = np.zeros(len(values), np.float32)
             GFAllTrendValues.append([gfNameTrend, trend])
 
         else:
@@ -463,32 +477,35 @@ for key, zoneModel in allZoneModels.items():
                 cellIndexDefined, zoneNumber, simBoxThickness
             )
 
-            # Calculate trend plus residual
+            # Calculate trend plus residual for the cells defined by cellIndexDefined 
+            # and replace the residual values by trend + residual in array: values
             sigma = relStdDev * minmaxDifference
             residualValues = values[cellIndexDefined]
             val = trendValues + sigma * residualValues
+            # updates array values for the selected grid cells
             values[cellIndexDefined] = val
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Trend minmaxDifference = ' + str(minmaxDifference))
                 print('Debug output: SimBoxThickness = ' + str(simBoxThickness))
                 print('Debug output: RelStdDev = ' + str(relStdDev))
                 print('Debug output: Sigma = ' + str(sigma))
-                print(
-                    'Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
+                print('Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
                 print('Debug output: Residual min,max        : ' + str(sigma * residualValues.min()) + ' ' + str(sigma * residualValues.max()))
                 print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
 
-                # Write back to RMS project the untransformed gaussian values with trend for the zone
-                gfNamesUntransformed = gfName + '_untransf'
-                gr.updateContinuous3DParameterValues(gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
-                                                     realNumber,isShared=False, setInitialValues=True, debug_level=debug_level)
+            # Write back to RMS project the untransformed gaussian values with trend for the zone
+            gfNamesUntransformed = gfName + '_untransf'
+            gr.updateContinuous3DParameterValues(gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
+                                                 realNumber, isShared=False, setInitialValues=False, debug_level=debug_level)
             trend = GFAllTrendValues[indx][VAL]
+            # update array trend for the selected grid cells
             trend[cellIndexDefined] = trendValues
             GFAllTrendValues[indx][VAL] = trend
             gfNamesTrend = GFAllTrendValues[indx][NAME]
+
             # Write back to RMS project the trend values for the zone
             gr.updateContinuous3DParameterValues(gridModel, gfNamesTrend, trend, nDefinedCells, cellIndexDefined,
-                                                 realNumber,isShared=False, setInitialValues=True, debug_level=debug_level)
+                                                 realNumber, isShared=False, setInitialValues=False, debug_level=debug_level)
             if debug_level >= Debug.VERBOSE:
                 if useRegions:
                     print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrend, str(zoneNumber), str(regionNumber)))
@@ -512,7 +529,7 @@ for key, zoneModel in allZoneModels.items():
 
         # Write back to RMS project the transformed gaussian values for the zone
         gr.updateContinuous3DParameterValues(gridModel, gfNamesTrans, alpha, nDefinedCells, cellIndexDefined,
-                                             realNumber,isShared=False, setInitialValues=True, debug_level=debug_level)
+                                             realNumber,isShared=False, setInitialValues=False, debug_level=debug_level)
         if debug_level >= Debug.VERBOSE:
             if useRegions:
                 print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrans, str(zoneNumber), str(regionNumber)))

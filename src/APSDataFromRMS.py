@@ -144,7 +144,7 @@ class APSDataFromRMS:
         return self.__data['Zone and region pairs']
 
     def getNumberOfLayersInZone(self, zoneNumber):
-        # item = [zoneNumber, zoneName, nLayers]
+        # item = [zoneNumber, zoneName, nLayers, start, end]
         number_of_layer = 0
         for item in self.__data['Zones']:
             number = item[0]
@@ -152,6 +152,18 @@ class APSDataFromRMS:
                 number_of_layer = item[2]
                 break
         return number_of_layer
+
+    def getStartAndEndLayerInZone(self, zoneNumber):
+        # item = [zoneNumber, zoneName, nLayers, start, end]
+        start_layer = 0
+        end_layer = 0
+        for item in self.__data['Zones']:
+            number = item[0]
+            if number == zoneNumber:
+                start_layer = item[3]
+                end_layer = item[4]
+                break
+        return [start_layer, end_layer]
 
     def getContinuousGridParamNames(self):
         return copy.copy(self.__data['Property list continuous'])
@@ -173,27 +185,37 @@ class APSDataFromRMS:
 
         kw = 'Project'
         prObj = root.find(kw)
+        projectName = None
         if prObj is None:
-            raise ValueError('Error: Missing keyword {}'.format(kw))
-        text = prObj.get('name')
-        projectName = text.strip()
+            print('Keyword {} is not read'.format(kw))
+            #raise ValueError('Error: Missing keyword {}'.format(kw))
+        else:
+            text = prObj.get('name')
+            projectName = text.strip()
         self.__data[self.__keyword_mapping[kw]] = projectName
 
-        kw = 'Seed'
-        seedObj = prObj.find(kw)
-        if seedObj is None:
-            raise ValueError('Error: Missing keyword {}'.format(kw))
-        text = seedObj.text
-        projectSeed = int(text.strip())
-        self.__data['Project seed'] = projectSeed
+        if prObj is not None:
+            kw = 'Seed'
+            seedObj = prObj.find(kw)
+            projectSeed = 0
+            if seedObj is None:
+                print('Keyword {} is not read'.format(kw))
+            #raise ValueError('Error: Missing keyword {}'.format(kw))
+            else:
+                text = seedObj.text
+                projectSeed = int(text.strip())
+            self.__data['Project seed'] = projectSeed
 
-        kw = 'RealisationNumber'
-        realObj = prObj.find(kw)
-        if realObj is None:
-            raise ValueError('Error: Missing keyword {}'.format(kw))
-        text = realObj.text
-        projectRealNumber = int(text.strip())
-        self.__data['Project realization number'] = projectRealNumber
+            kw = 'RealisationNumber'
+            realObj = prObj.find(kw)
+            projectRealNumber = 0
+            if realObj is None:
+                print('Keyword {} is not read'.format(kw))
+            #raise ValueError('Error: Missing keyword {}'.format(kw))
+            else:
+                text = realObj.text
+                projectRealNumber = int(text.strip())
+            self.__data['Project realization number'] = projectRealNumber
 
         kw = 'GridModel'
         gmObj = root.find(kw)
@@ -227,9 +249,13 @@ class APSDataFromRMS:
             zoneNumber = int(text.strip())
             text = zNameObj.get('nLayers')
             nLayers = int(text.strip())
+            text = zNameObj.get('start')
+            start = int(text.strip())
+            text = zNameObj.get('end')
+            end = int(text.strip())
             text = zNameObj.text
             zoneName = text.strip()
-            zones.append([zoneNumber, zoneName, nLayers])
+            zones.append([zoneNumber, zoneName, nLayers, start, end])
         self.__data['Zones'] = zones
 
         kw = 'GaussFieldNames'
@@ -251,12 +277,20 @@ class APSDataFromRMS:
             zoneAndRegionNumbers[key] = 1
         self.__data['Zone and region pairs'] = zoneAndRegionNumbers
 
-        keywords = ['XSize', 'YSize', 'AzimuthAngle', 'OrigoX', 'OrigoY', 'NX', 'NY', 'Xinc', 'Yinc']
+        # Get keywords for variables that are float
+        keywords = ['XSize', 'YSize', 'AzimuthAngle', 'OrigoX', 'OrigoY', 'Xinc', 'Yinc']
         for key in keywords:
-            self.__add_grid(key, gmObj)
+            self.__add_grid(key, 'float', gmObj)
+
+        # Get keywords for variables that are int
+        keywords = ['NX', 'NY']
+        for key in keywords:
+            self.__add_grid(key, 'int', gmObj)
 
         kw = 'HorizonReference'
         hrObj = root.find(kw)
+        horizonRefName = None
+        horizonRefType = None
         if hrObj is not None:
             text = hrObj.get('name')
             horizonRefName = text.strip()
@@ -266,9 +300,15 @@ class APSDataFromRMS:
         kw = 'SurfaceTrendDimensions'
         surfObj = root.find(kw)
         if surfObj is not None:
-            keywords = ['Xmin', 'Xmax', 'Ymin', 'Ymax', 'Rotation', 'NX', 'NY', 'Xinc', 'Yinc']
+            # Add keywords for variables of type float
+            keywords = ['Xmin', 'Xmax', 'Ymin', 'Ymax', 'Rotation', 'Xinc', 'Yinc']
             for key in keywords:
-                self.__add_surfaces(key, surfObj)
+                self.__add_surfaces(key, 'float', surfObj)
+
+            # Add keywords for variables of type int
+            keywords = ['NX', 'NY']
+            for key in keywords:
+                self.__add_surfaces(key, 'int', surfObj)
 
             kw = 'Horizon'
             horizonNames = []
@@ -276,22 +316,29 @@ class APSDataFromRMS:
                 text = hObj.text
                 horizonNames.append(text.strip())
             self.__data['Horizon names'] = horizonNames
-        faciesCodes = {}
-        faciesTable = APSMainFaciesTable(tree, modelFileName=inputFileName, debug_level=self.__debug_level)
+
+        fTableObj = root.find('MainFaciesTable')
+        faciesTable = None
+        if fTableObj is not None:
+#            faciesCodes = {}
+            faciesTable = APSMainFaciesTable(tree, modelFileName=inputFileName, debug_level=self.__debug_level)
         self.__faciesTable = faciesTable
 
-    def __add_surfaces(self, kw, surface):
-        self.__add_to_object(kw, surface, self.__surf)
+    def __add_surfaces(self, kw, value_type, surface):
+        self.__add_to_object(kw, value_type, surface, self.__surf)
 
-    def __add_grid(self, kw, grid):
-        self.__add_to_object(kw, grid, self.__grid)
+    def __add_grid(self, kw, value_type, grid):
+        self.__add_to_object(kw, value_type, grid, self.__grid)
 
-    def __add_to_object(self, keyword, root, storage_object):
+    def __add_to_object(self, keyword, value_type, root, storage_object):
         item = root.find(keyword)
         if item is None:
             raise ValueError('Missing keyword {}'.format(keyword))
         text = item.text
-        value = float(text.strip())
+        if value_type == 'float':
+            value = float(text.strip())
+        elif value_type == 'int':
+            value = int(text.strip())
         key = self.__keyword_mapping[keyword]
         storage_object[key] = value
 
