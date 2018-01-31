@@ -55,7 +55,7 @@ def run_main(
         if not apsModel.isSelected(zoneNumber, regionNumber):
             continue
         gaussFieldNames = []
-        gaussFieldNames = zoneModel.getUsedGaussFieldNames()
+        gaussFieldNames = zoneModel.getGaussFieldsInTruncationRule()
         [start, end] = rmsData.getStartAndEndLayerInZone(zoneNumber)
         nLayers = rmsData.getNumberOfLayersInZone(zoneNumber)
         print(gaussFieldNames)
