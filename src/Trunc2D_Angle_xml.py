@@ -369,17 +369,46 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Check that facies in truncation rule is consistent with facies in zone
         self._checkFaciesForZone()
 
-    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
+#    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
+#        """
+#        Description: This function is used if trends are specified for the angle parameters for this truncation rule.
+#                     The function will use the input function pointer get3DParamFunction to call ROXAPI functions to
+#                     get grids with values for the angles. The function requires knowledge of which RMS grid and realization
+#                     to use in this operation.
+#                     The function pointer get3DParamFunction must be compatible with
+#                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self._debug_level)
+#                     defined in the roxapi dependent module generalFunctionsUsingRoxAPI.
+#        """
+        # Read truncation parameters
+#        self.__faciesBoundaryOrientation = []
+#        if not self.__useConstTruncModelParam:
+#            for k in range(self._nFacies):
+#                item = self.__faciesBoundaryOrientationName[k]
+#                fName = item[0]
+#                paramName = item[1]
+                # Check consistency
+#                if fName == self._faciesInTruncRule[k]:
+                    # Get param values
+#                    if self._debug_level >= Debug.VERBOSE:
+#                        print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
+#                    [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
+#                    self.__faciesBoundaryOrientation.append(values)
+#                else:
+#                    raise ValueError(
+#                        'Error in {}\n'
+#                        'Error: Inconsistency in data structure. Programming error.'
+#                        ''.format(self._className)
+#                    )
+
+    def getTruncationParam(self, gridModel, realNumber):
         """
         Description: This function is used if trends are specified for the angle parameters for this truncation rule.
-                     The function will use the input function pointer get3DParamFunction to call ROXAPI functions to
-                     get grids with values for the angles. The function requires knowledge of which RMS grid and realization
+                     The function will call ROXAPI functions to get grids with values for the angles. 
+                     The function requires knowledge of which RMS grid and realization
                      to use in this operation.
-                     The function pointer get3DParamFunction must be compatible with
-                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self._debug_level)
-                     defined in the roxapi dependent module generalFunctionsUsingRoxAPI.
         """
         # Read truncation parameters
+        import src.generalFunctionsUsingRoxAPI as gr
         self.__faciesBoundaryOrientation = []
         if not self.__useConstTruncModelParam:
             for k in range(self._nFacies):
@@ -391,7 +420,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                     # Get param values
                     if self._debug_level >= Debug.VERBOSE:
                         print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
-                    [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
+                    values = gr.getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
                     self.__faciesBoundaryOrientation.append(values)
                 else:
                     raise ValueError(

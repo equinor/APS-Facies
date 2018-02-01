@@ -43,6 +43,7 @@ check for outdated requirements:
   stage: check requirements
   script:
     - 'eval $MAKE check-requirements'
+  allow_failure: true
 
 linting:
   stage: testing

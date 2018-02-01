@@ -78,7 +78,9 @@ class APSGaussFieldJobs:
             required=False
         )
 
-        obj = getKeyword(root, 'GaussFieldJobNames', 'Root', modelFile=self.__modelFileName)
+        obj = getKeyword(root, 'GaussFieldJobNames', 'Root', modelFile=self.__modelFileName,required=False)
+        if obj is None:
+            return
 
         gfJobs = obj
         gfJobList = []
@@ -198,10 +200,13 @@ class APSGaussFieldJobs:
 
     def checkGaussFieldName(self, gfName):
         text = gfName.strip()
-        if text in self.__gaussFieldNames:
-            return True
+        if len(self.__gaussFieldNames) > 0:
+            if text in self.__gaussFieldNames:
+                return True
+            else:
+                return False
         else:
-            return False
+            return True
 
     def getGaussFieldIndx(self, jobName, gfName):
         found = 0

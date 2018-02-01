@@ -14,6 +14,8 @@ from src.APSZoneModel import APSZoneModel
 from src.Trend3D import Trend3D_linear
 from src.Trend3D import Trend3D_hyperbolic
 from src.Trend3D import Trend3D_elliptic
+from src.Trend3D import Trend3D_elliptic_cone
+from src.Trend3D import Trend3D_rms_param
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
@@ -78,6 +80,7 @@ def addZoneParam(
         trendType=None,
         curvature=None,
         migrationAngle=None,
+        relativeSize=None,
         origin_x=None,
         origin_y=None,
         origin_z_simbox=None,
@@ -128,11 +131,18 @@ def addZoneParam(
             trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], curvature[i], origin, origin_type[i], debug_level)
             trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 
-        elif trendType[i]== TrendType. HYPERBOLIC:
+        elif trendType[i]== TrendType.HYPERBOLIC:
             trendModelObject = Trend3D_hyperbolic(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
             origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
             trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i],
                                         origin, origin_type[i], debug_level)
+            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+
+        elif trendType[i]== TrendType.ELLIPTIC_CONE:
+            trendModelObject = Trend3D_elliptic_cone(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i], 
+                                        relativeSize[i], origin, origin_type[i], debug_level)
             trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 
         elif trendType[i]== TrendType. NONE:
@@ -986,14 +996,15 @@ def add_zone_1_for_case_4(apsmodel):
         dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
         power=[1.8, 1.0, 1.0, 1.95],
         # Trend parameters. One entry in list for each gauss field
-        useTrend=[1, 0, 0, 0],
-        relStdDev=[0.05, 0, 0, 0],
-        azimuthAngle=[125.0, 0.0, 0.0, 0.0],
-        stackingAngle=[0.1, 0.0, 0.0, 0.0],
+        useTrend=[1, 1, 0, 0],
+        relStdDev=[0.05, 0.06, 0, 0],
+        azimuthAngle=[125.0, 80.0, 0.0, 0.0],
+        stackingAngle=[0.1, 0.025, 0.0, 0.0],
         direction=[1, 1, 1, 1],
-        trendType=[TrendType.HYPERBOLIC, TrendType.NONE, TrendType.NONE, TrendType.NONE],
-        curvature=[2.5, 0, 0, 0],
-        migrationAngle=[89.5, 0, 0, 0],
+        trendType=[TrendType.HYPERBOLIC, TrendType.ELLIPTIC_CONE, TrendType.NONE, TrendType.NONE],
+        curvature=[2.5, 2.9, 0, 0],
+        migrationAngle=[89.5, 88.0, 0, 0],
+        relativeSize=[0,1.5,0,0],
         origin_x=[0.5, 0.5, 0.5, 0.5],
         origin_y=[0.0, 0.0, 0.0, 0.0],
         origin_z_simbox=[1.0, 1.0, 1.0, 1.0],

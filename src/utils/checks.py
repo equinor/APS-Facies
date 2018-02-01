@@ -31,4 +31,8 @@ def isVariogramTypeOK(variogramType: VariogramType, debug_level: Debug=Debug.OFF
         print('       EXPONENTIAL')
         print('       GAUSSIAN')
         print('       GENERAL_EXPONENTIAL')
+        print('       MATERN32')
+        print('       MATERN52')
+        print('       MATERN72')
+        print('       CONSTANT')
     return False

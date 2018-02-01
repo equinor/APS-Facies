@@ -15,7 +15,7 @@ from src.simGauss2D import simGaussField
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
 from src.utils.checks import isVariogramTypeOK
-from src.Trend3D import Trend3D_linear, Trend3D_elliptic, Trend3D_hyperbolic, Trend3D_rms_param
+from src.Trend3D import Trend3D_linear, Trend3D_elliptic, Trend3D_hyperbolic, Trend3D_rms_param, Trend3D_elliptic_cone
 
 class APSGaussModel:
     """
@@ -238,6 +238,8 @@ class APSGaussModel:
                     trendModelObj = Trend3D_hyperbolic(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
                 elif trendName == 'RMSParameter':
                     trendModelObj = Trend3D_rms_param(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
+                elif trendName == 'EllipticCone3D':
+                    trendModelObj = Trend3D_elliptic_cone(trendObjXML, modelFileName=self.__modelFileName, debug_level=self.__debug_level)
                 else:
                     raise NameError(
                         'Error in {className}\n'
@@ -311,17 +313,25 @@ class APSGaussModel:
             return variogram
         else:
             raise ValueError('Unknown type: {}'.format(str(variogram)))
-
-        if name == 'SPHERICAL':
+        nameUpper = name.upper()
+        if nameUpper == 'SPHERICAL':
             return VariogramType.SPHERICAL
-        elif name == 'EXPONENTIAL':
+        elif nameUpper == 'EXPONENTIAL':
             return VariogramType.EXPONENTIAL
-        elif name == 'GAUSSIAN':
+        elif nameUpper == 'GAUSSIAN':
             return VariogramType.GAUSSIAN
-        elif name == 'GENERAL_EXPONENTIAL':
+        elif nameUpper == 'GENERAL_EXPONENTIAL':
             return VariogramType.GENERAL_EXPONENTIAL
+        elif nameUpper == 'MATERN32':
+            return VariogramType.MATERN32
+        elif nameUpper == 'MATERN52':
+            return VariogramType.MATERN52
+        elif nameUpper == 'MATERN72':
+            return VariogramType.MATERN72
+        elif nameUpper == 'CONSTANT':
+            return VariogramType.CONSTANT
         else:
-            raise ValueError('Error: Unknown variogram type {}'.format(name))
+            raise ValueError('Error: Unknown variogram type {}'.format(nameUpper))
 
     def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
                    gaussModelList, trendModelList,

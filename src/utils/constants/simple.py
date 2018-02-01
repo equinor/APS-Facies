@@ -15,6 +15,10 @@ class VariogramType(Enum):
     EXPONENTIAL = 2
     GAUSSIAN = 3
     GENERAL_EXPONENTIAL = 4
+    MATERN32 = 5
+    MATERN52 = 6
+    MATERN72 = 7
+    CONSTANT = 8
 
 
 class OperationalMode(Enum):
@@ -24,7 +28,7 @@ class OperationalMode(Enum):
 
 class OriginType(Enum):
     """
-    'RELATIVE' for relative to grid coordinates e.g. [0,0,0] for grid [x_min, x_max, simboxtop].
+    'RELATIVE' for relative coordinates 
     'ABSOLUTE' for coordinates.
     """
     RELATIVE = 1
@@ -37,6 +41,7 @@ class TrendType(Enum):
     ELLIPTIC = 2
     HYPERBOLIC = 3
     RMS_PARAM = 4
+    ELLIPTIC_CONE = 5
 
 
 
