@@ -16,6 +16,8 @@
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
   <PrintInfo> 2 </PrintInfo>
+  <SeedFile> seed.dat </SeedFile>
+  <WriteSeeds> yes </WriteSeeds>
   <MainFaciesTable>
     <Facies name="F1">
       <Code> 1 </Code>

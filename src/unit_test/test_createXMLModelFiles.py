@@ -21,14 +21,14 @@ from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
-    NO_VERBOSE_DEBUG,VERY_VERBOSE_DEBUG
+    NO_VERBOSE_DEBUG,VERY_VERBOSE_DEBUG, SEED_FILE_NAME 
 )
 from src.utils.constants.simple import Debug, VariogramType, OriginType, TrendType
 
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, debug_level=VERY_VERBOSE_DEBUG
+        zoneParamName, faciesRealParamNameResult, seedFileName, fTable, debug_level=VERY_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
@@ -38,6 +38,7 @@ def defineCommonModelParam(
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
+    apsmodel.setSeedFileName(seedFileName)
     apsmodel.set_debug_level(debug_level)
     print('Debug level: {}'.format(str(apsmodel.debug_level())))
     # Define gauss field jobs
@@ -637,7 +638,8 @@ def test_case_1_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.VERY_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -656,7 +658,8 @@ def test_case_1_zone_2():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Two zones
     print('Zone: 1')
@@ -681,7 +684,8 @@ def test_case_2_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
 
     # Only one zone
@@ -701,7 +705,8 @@ def test_case_2_zone_2():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Two zones
     print('Zone: 1')
@@ -726,7 +731,8 @@ def test_case_3_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -744,7 +750,8 @@ def test_case_4_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
