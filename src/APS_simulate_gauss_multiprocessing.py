@@ -187,9 +187,7 @@ def run_simulations(
     modelFile='APS.xml',
     rms_data_file_name='rms_project_data_for_APS_gui.xml',
     outputDir='./tmp_gauss_sim',
-    writeSeedFile=True,
-    writeLogFile=True,
-    seedFileName=None):
+    writeLogFile=True):
     """
     Description: Run gauss simulations for the APS model
 
@@ -199,8 +197,9 @@ def run_simulations(
     print('- Read file: ' + modelFile)
     apsModel = APSModel(modelFile)
     debug_level = apsModel.debug_level()
-
-
+    seedFileName = apsModel.getSeedFileName()
+    writeSeedFile = apsModel.writeSeeds
+    print('Write seed file: '+str(writeSeedFile))
 
     # Get grid dimensions
 
@@ -321,14 +320,10 @@ if __name__ == '__main__':
     rms_data_file_name='rms_project_data_for_APS_gui.xml'
     outputDir='./tmp_gauss_sim'
     writeLogFile=True
-    writeSeedFile=True
-    seedFileName='./seed_list.dat'
 
     run_simulations(
         modelFile=modelFile, 
         rms_data_file_name=rms_data_file_name, 
         outputDir=outputDir, 
-        writeSeedFile=writeSeedFile, 
-        writeLogFile=writeLogFile,
-        seedFileName=seedFileName
+        writeLogFile=writeLogFile
         )

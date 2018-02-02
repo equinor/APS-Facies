@@ -31,7 +31,7 @@ def getProjectRealizationSeed(seedFile):
         raise IOError('Can not open and read seed file: {}'.format(seedFile))
     return seed
 
-def run_simulations(project,  modelFile='APS.xml', realNumber=0, isShared=False, seedFile='seed.dat'):
+def run_simulations(project,  modelFile='APS.xml', realNumber=0, isShared=False):
     """
     Description: Run gauss simulations for the APS model i sequence
     
@@ -41,8 +41,13 @@ def run_simulations(project,  modelFile='APS.xml', realNumber=0, isShared=False,
     print('- Read file: ' + modelFile)
     apsModel = APSModel(modelFile)
     debug_level = apsModel.debug_level()
-
-
+    seedFile = apsModel.getSeedFileName()
+    # When running in single processing mode, there will not be created new start seeds in the RMS multi realization workflow loop
+    # because the start random seed is created once per process, and the process is the same for all realizations in the loop.
+    # Hence always read the start seed in single processing mode.
+    # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file 
+    # before calling the current script.
+    writeSeedFile = False
 
     # Get grid dimensions
     gridModelName = apsModel.getGridModelName()
@@ -59,13 +64,16 @@ def run_simulations(project,  modelFile='APS.xml', realNumber=0, isShared=False,
     regionParamName = apsModel.getRegionParamName()
 
     # Set start seed if it is defined 
-    sfile = Path(seedFile)
-    if sfile.is_file():
-        startSeed = getProjectRealizationSeed(seedFile)
-        nrlib.seed(startSeed)
-    else:
-        print('Warning: seed file is not used or defined. Will create start seed automatically\n'
-              '         This mode can not be used if you want to reproduce realizations later.')
+    if not writeSeedFile:
+        sfile = Path(seedFile)
+        if sfile.is_file():
+            startSeed = getProjectRealizationSeed(seedFile)
+            nrlib.seed(startSeed)
+        else:
+            raise IOError('Seed file: {} is not defined.\n'
+                          'This is required when the model has specified to read the seed from file.'
+                          ''.format(seedFile)
+                          )
 
 
     # Loop over all zones and simulate gauss fields
@@ -150,11 +158,6 @@ def run_simulations(project,  modelFile='APS.xml', realNumber=0, isShared=False,
             # Simulate gauss field. Return numpy 1D vector in F order
             gaussVector = nrlib.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
             gaussResult = np.reshape(gaussVector,(nx,ny,nz),order='F')
-#            gaussResult = copy.copy(tmp)
-#            for i in range(nx):
-#                for j in range(ny):
-#                    for k in range(nz):
-#                        gaussResult[i,j,k] = tmp[nx-i-1,j,nz-k-1]
             gaussResultListForZone.append(gaussResult)
             if debug_level >= Debug.VERBOSE:
                 print('--- Finished running simulation of {} for zone,region: ({},{})'
@@ -162,23 +165,22 @@ def run_simulations(project,  modelFile='APS.xml', realNumber=0, isShared=False,
                 print('')
 
         # End loop over gauss fields for one zone
-#        setContinuous3DParameterValuesInZone(gridModel, gaussFieldNames, gaussResultListForZone, zoneNumber-1,
-#                                             realNumber=realNumber, isShared=isShared, debug_level=debug_level)
         setContinuous3DParameterValuesInZoneRegion(gridModel, gaussFieldNames, gaussResultListForZone, zoneNumber-1, 
                                                    regionNumber=regionNumber, regionParamName=regionParamName,
                                                    realNumber=realNumber, isShared=isShared, debug_level=debug_level)
 
     # End loop over all active zones in the model
+    
+    if writeSeedFile:
+        with open(seedFile,'w') as file:
+            startSeed = nrlib.seed()
+            file.write(str(startSeed))
 
     seedFileLog = 'seedLogFile.dat'
     startSeed = nrlib.seed()
-    if sfile.is_file():
-        with open(seedFileLog,'a') as file:
-            file.write('RealNumber: {}  StartSeed for this realization: {}\n'
-                       ''.format(str(realNumber+1), str(startSeed)))
-    else:
-        with open(seedFileLog,'w') as file:
-            file.write('StartSeed is unknown')
+    with open(seedFileLog,'a') as file:
+        file.write('RealNumber: {}  StartSeed for this realization: {}\n'
+                   ''.format(str(realNumber+1), str(startSeed)))
         
     print('')
     
