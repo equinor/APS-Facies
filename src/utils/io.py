@@ -44,3 +44,28 @@ def readFile(fileName, debug_level=Debug.OFF):
         for i in range(19, len(words)):
             a[i - 19] = float(words[i])
     return a, nx, ny
+
+def writeFileRTF(fileName, a, nx, ny, dx, dy, x0, y0, debug_level=Debug.OFF):
+    # Write in Roxar text format
+    with open(fileName, 'w') as file:
+        outstring = '-996  ' + str(ny) + '  ' + str(dx) + ' ' + str(dy) +'\n'
+        outstring += str(x0) + ' ' + str(x0 + nx*dx) + ' ' + str(y0) + ' ' + str(y0+ny*dy) +'\n'
+        outstring += ' ' + str(nx) + ' ' + ' 0.000000  ' +  str(x0) + ' ' + str(y0) + '\n'
+        outstring += '0     0     0     0     0     0     0\n'
+        count = 0
+        text = ''
+        if debug_level >= Debug.SOMEWHAT_VERBOSE:
+            print('len(a): ' + str(len(a)))
+        for j in range(len(a)):
+            text = text + str(a[j]) + '  '
+            count += 1
+            if count >= 5:
+                text += '\n'
+                outstring += text
+                count = 0
+                text = ''
+        if count > 0:
+            outstring += text + '\n'
+        file.write(outstring)
+    print('Write file: ' + fileName)
+

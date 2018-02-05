@@ -70,7 +70,7 @@ def draw2D(
         debug_level = Debug.ON
 
     global _draw2DLib
-    values = []
+    values = np.zeros(nx*ny,dtype=np.float32)
 
     # Call c/c++ function
     arrayPointer = _draw2DLib.draw2DGaussField(
@@ -81,14 +81,14 @@ def draw2D(
         c_double(angle), c_double(power), c_int(debug_level.value)
     )
 
-    # Assign result to python array
+    # Simulated values are in C index order.
     n = 0
     for i in range(nx):
         for j in range(ny):
             v = float(arrayPointer[n])
-            values.append(v)
+            indx = j + i*ny
+            values[indx] = v
             n += 1
-            # print( 'i,j,value: ' + '(' + str(i) +','+str(j) + '): ' + ' '  + str(values[n-1]))
     return values
 
 
@@ -260,6 +260,7 @@ def simGaussField(
     # Variogram angle input should be azimuth angle in degrees, but angle in simulation algorithm should be
     # relative to first axis.
     azimuth_angle = 90.0 - azimuth_angle
+
     residualField = draw2D(
         nx=nx, ny=ny, xsize=xsize, ysize=ysize, variogram_type=variogram_type, iseed=iseed,
         range1=range_major_axis, range2=range_minor_axis, angle=azimuth_angle, power=power,

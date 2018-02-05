@@ -186,10 +186,7 @@ class APSDataFromRMS:
         kw = 'Project'
         prObj = root.find(kw)
         projectName = None
-        if prObj is None:
-            print('Keyword {} is not read'.format(kw))
-            #raise ValueError('Error: Missing keyword {}'.format(kw))
-        else:
+        if prObj is not None:
             text = prObj.get('name')
             projectName = text.strip()
         self.__data[self.__keyword_mapping[kw]] = projectName

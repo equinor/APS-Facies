@@ -398,6 +398,9 @@ class APSZoneModel:
     def getGaussFieldsInTruncationRule(self):
         return self.__truncRule.getGaussFieldsInTruncationRule()
 
+    def getGaussFieldIndexListInZone(self):
+        return self.__truncRule.getGaussFieldIndexListInZone()
+    
     def setZoneNumber(self, zoneNumber):
         self.__zoneNumber = zoneNumber
         return
@@ -660,9 +663,9 @@ class APSZoneModel:
         self.__truncRule.XMLAddElement(zoneElement)
 
     def simGaussFieldWithTrendAndTransform(
-            self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            self, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
-            nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
+            simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
         )

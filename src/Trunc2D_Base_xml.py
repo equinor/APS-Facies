@@ -1398,3 +1398,7 @@ class Trunc2D_Base:
             gfName = self._gaussFieldsInZone[self._alphaIndxList[i]]
             gfUsed.append(gfName)
         return gfUsed
+
+    def getGaussFieldIndexListInZone(self):
+        return copy.copy(self._alphaIndxList)
+        

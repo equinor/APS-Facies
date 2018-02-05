@@ -302,8 +302,6 @@ if __name__ == '__main__':
         useRegions = True
     resultParamName = apsModel.getResultFaciesParamName()
 
-    gaussFieldScript = apsModel.getRMSGaussFieldScriptName()
-
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
         print('--- Get RMS zone parameter: ' + zoneParamName + ' from RMS project ' + rmsProjectName)

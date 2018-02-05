@@ -4,14 +4,17 @@ import importlib
 from xml.etree.ElementTree import Element
 
 import src.Trend3D
-import src.simGauss2D
+#import src.simGauss2D
+import src.simGauss2D_nrlib
 import src.utils.xml
 
-importlib.reload(src.simGauss2D)
+#importlib.reload(src.simGauss2D)
+importlib.reload(src.simGauss2D_nrlib)
 importlib.reload(src.utils.xml)
 importlib.reload(src.Trend3D)
 
-from src.simGauss2D import simGaussField
+#from src.simGauss2D import simGaussField
+from src.simGauss2D_nrlib import simGaussField
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
 from src.utils.checks import isVariogramTypeOK
@@ -871,51 +874,42 @@ class APSGaussModel:
             gfElement.append(elem)
 
     def simGaussFieldWithTrendAndTransform(
-            self, nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
+            self, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionRelativePos
     ):
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
         SVALUE = self.__index_seed['Seed']
 
-        # Note Note that nx and ny here means the number of grid cells in the two dimensions 
-        # to be simulated as a cross section of the 3D simulation box. Hence it does not mean x and y direction
-        # of the 3D simulation box since the cross section can be IK (or xz) or JK (or yz) and not in general IJ (or
-        # xy).
+        assert 0 <= crossSectionRelativePos <= 1.0
         if crossSectionType == 'IJ':
             gridDim1 = gridNX
             gridDim2 = gridNY
             size1 = simBoxXsize
             size2 = simBoxYsize
-            assert 0 <= crossSectionIndx < gridNZ
-            # crossSectionIndx = int(gridNZ / 2)
             projection = 'xy'
         elif crossSectionType == 'IK':
             gridDim1 = gridNX
             gridDim2 = gridNZ
             size1 = simBoxXsize
             size2 = simBoxZsize
-            assert 0 <= crossSectionIndx < gridNY
-            # crossSectionIndx = int(gridNY / 2)
             projection = 'xz'
         elif crossSectionType == 'JK':
             gridDim1 = gridNY
             gridDim2 = gridNZ
             size1 = simBoxYsize
             size2 = simBoxZsize
-            assert 0 <= crossSectionIndx < gridNX
-            # crossSectionIndx = int(gridNX / 2)
             projection = 'yz'
         else:
             raise ValueError('Undefined cross section {}'.format(crossSectionType))
 
-        gaussFieldNamesForSimulation = self.getUsedGaussFieldNames()
-        assert nGaussFields == len(gaussFieldNamesForSimulation)
-        gaussFields = []
+        gaussFieldNamesInModel = self.getUsedGaussFieldNames()
+        nGaussFields = len(gaussFieldNamesInModel)
+        gaussFieldItems = []
         for i in range(nGaussFields):
             # Find data for specified Gauss field name
-            name = gaussFieldNamesForSimulation[i]
+            name = gaussFieldNamesInModel[i]
             seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
             variogramType = self.getVariogramType(name)
             variogramTypeNumber = self.getVariogramTypeNumber(name)
@@ -926,11 +920,12 @@ class APSGaussModel:
             dipVariogram = self.getAnisotropyDipAngle(name)
             power = self.getPower(name)
             if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Within simGaussFieldWithTrendAndTransformNew')
+                print(' ')
+                print('Debug output: Within simGaussFieldWithTrendAndTransform')
                 print('Debug output: Simulate gauss field: ' + name)
                 print('Debug output: VariogramType: ' + str(variogramType))
-                print('Debug output: VariogramTypeNumber: ' + str(variogramTypeNumber))
                 print('Debug output: Azimuth angle for Main range direction: ' + str(azimuthVariogram))
+                print('Debug output: Azimuth angle for grid: ' + str(gridAzimuthAngle))
                 print('Debug output: Dip angle for Main range direction: ' + str(dipVariogram))
 
                 if variogramType == VariogramType.GENERAL_EXPONENTIAL:
@@ -942,10 +937,13 @@ class APSGaussModel:
             [angle1, range1, angle2, range2] = self.calc2DVariogramFrom3DVariogram(name, gridAzimuthAngle, projection)
             azimuthVariogram = angle1
             if self.__debug_level >= Debug.VERY_VERBOSE:
+                print(' ')
                 print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
                 print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
                 print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
                 print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
+                print('Debug output: (gridDim1, gridDim2) = ({},{})'.format(str(gridDim1), str(gridDim2)))
+                print('Debug output: (Size1, Size2) = ({},  {})'.format(str(size1), str(size2)))
 
             residualField = simGaussField(
                 seedValue, gridDim1, gridDim2, size1, size2, variogramType,
@@ -955,41 +953,47 @@ class APSGaussModel:
             # Calculate trend
             useTrend, trendModelObject, relStdDev = self.getTrendModel(name)
             if useTrend == True:
-                minMaxDifference, trendField = trendModelObject.createTrendFor2DProjection(
+                if self.__debug_level >= Debug.VERBOSE:
+                    print('    - Use Trend: {}'.format(trendModelObject.type.name))
+                minMaxDifference, averageTrend, trendField = trendModelObject.createTrendFor2DProjection(
                     simBoxXsize, simBoxYsize, simBoxZsize, gridAzimuthAngle,
-                    gridNX, gridNY, gridNZ, crossSectionType, crossSectionIndx
+                    gridNX, gridNY, gridNZ, crossSectionType, crossSectionRelativePos
                 )
                 gaussFieldWithTrend = self.__addTrend(
-                    residualField, trendField, relStdDev, minMaxDifference
+                    residualField, trendField, relStdDev, minMaxDifference, averageTrend
                 )
             else:
                 gaussFieldWithTrend = residualField
 
             transField = self.__transformEmpiricDistributionToUniform(gaussFieldWithTrend)
-
-            gaussFields.append(transField)
+            item = [name, transField]
+            gaussFieldItems.append(item)
         # End for        
 
-        return gaussFields
+        return gaussFieldItems
 
-    def __addTrend(self, residualField, trendField, relSigma, trendMaxMinDifference):
+    def __addTrend(self, residualField, trendField, relSigma, trendMaxMinDifference, averageTrend):
         """
-        Description: Calculate standard deviation sigma = relSigma * trendMaxMinDifference
+        Description: Calculate standard deviation sigma = relSigma * trendMaxMinDifference.
         Add trend and residual field  Field = Trend + sigma*residual
         Input residualField and trendField should be 1D float numpy arrays of same size.
         Return is trend plus residual with correct standard deviation as numpy 1D array.
         """
         # Standard deviation
-        sigma = relSigma * trendMaxMinDifference
+        if abs(trendMaxMinDifference) == 0.0:
+            sigma = relSigma * averageTrend
+        else:
+            sigma = relSigma * trendMaxMinDifference
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Relative standard deviation = ' + str(relSigma))
             print('Debug output:  Difference between max value and min value of trend = ' + str(trendMaxMinDifference))
             print('Debug output:  Calculated standard deviation = ' + str(sigma))
             print(' ')
         n = len(trendField)
-        print('len(trendField), len(residualField): ' + str(len(trendField)) + ' ' + str(len(residualField)))
-        assert len(trendField) == len(residualField)
-        gaussFieldWithTrend = np.zeros(n, float)
+        if len(trendField) != len(residualField):
+            raise IOError('Internal error: Mismatch between size of trend field and residual field in __addTrend')
+
+        gaussFieldWithTrend = np.zeros(n, np.float32)
         for i in range(n):
             gaussFieldWithTrend[i] = trendField[i] + residualField[i] * sigma
         return gaussFieldWithTrend
@@ -1009,7 +1013,7 @@ class APSGaussModel:
             print(' ')
 
         nVal = len(inputValues)
-        transformedValues = np.zeros(nVal, float)
+        transformedValues = np.zeros(nVal, np.float32)
         sort_indx = np.argsort(inputValues)
         for i in range(nVal):
             indx = sort_indx[i]
@@ -1027,18 +1031,20 @@ class APSGaussModel:
          principal directions. For variogram ellipsoid the MainRange = A, PerpRange = B, VertRange = C.
          To define the orientation, first define a ellipsoid oriented with 
          MainRange in y direction, PerpRange in x direction and VertRange in z direction.
-         Then rotate this ellipsoid first around z axis with angle defined as AzimuthAngle in clockwise direction.
-         The azimuth angle is the angle between the y axis and the new rotated y' axis.
-         Then rotate the the ellipsoid an angle around the new x' axis. This is the dip angle. The final orientation
-         is then found and the principal axes are (x'',y'',z'') in which the M matrix is diagonal.
+         Then rotate this ellipsoid first around x axis with angle defined as dipAngle in clockwise direction.
+         The dip angle is the angle between the y axis and the new rotated y' axis along the main 
+         principal direction of the ellopsoide.
+         Then rotate the the ellipsoid an angle around the z axis. This is the azimuthAngle. The final orientation
+         is then found and the coordinate system defined by the principal directions for the ellipsoide 
+         are (x'',y'',z'') in which the M matrix is diagonal.
          Note that the coordinate system (x,y,z) is left handed and z axis is pointing 
          downward compared to a right handed coordinate system.
          To define the matrix M in (x,y,z) coordinate system given that we 
          know its half axes in the principal directions, we need the transformation from column vector of (x,y,z)
          which we call V vector to column vector of (x'',y'',z'') which we call V'':
-             V'' =  R_dip * R_azimuth * V   where we call R = R_dip * R_azimuth
-         where R_azimuth is the matrix rotating the ellipse around z axis an angle = azimuth angle
-         and R_dip is the matrix rotating the vector V' = R_azimuth*V around the x' axis and angle = dip angle.
+             V'' =  R_azimuth * R_dip * V   where we call R = R_azimuth * R_dip
+         where R_azimuth is the matrix rotating the ellipsoide around z axis an angle = azimuth angle
+         and R_dip is the matrix rotating the vector V' = R_azimuth*V around the x axis and angle = dip angle.
          The final matrix M in x,y,z coordinates is then transpose(R)*M_diagonal*R.
 
          If we now assume y = 0, then the variogram ellipsoid becomes a variogram ellipse 
@@ -1063,44 +1069,61 @@ class APSGaussModel:
 
         # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
         azimuth = azimuth - gridAzimuthAngle
-        azimuth = azimuth * np.pi / 180.0
+        azimuth = -azimuth * np.pi / 180.0
 
         # Dip angle relative to local simulation box
         dip = self.getAnisotropyDipAngle(gaussFieldName)
-        dip = dip * np.pi / 180.0
+        dip = -dip * np.pi / 180.0
 
         cosTheta = np.cos(azimuth)
         sinTheta = np.sin(azimuth)
         cosDip = np.cos(dip)
         sinDip = np.sin(dip)
 
-        # define R_azimuth matrix:
+
+        # define R_dip matrix
+        # R_dip*V will rotate the vector V by the angle dip around the x-axis.
+        # The vector [0,1,0] (unit vector in y direction)  will get a positive z component if dip angle is positive
+        # (between 0 and 90 degrees).
+        # Note that z axis is down and that the (x,y,z) coordinate system is left-handed.
+        R_dip = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, cosDip, -sinDip],
+            [0.0, sinDip, cosDip]
+        ])
+
+
+        # define R_azimuth matrix
+        # R_azimuth*V will rotate the vector V by the angle azimuth around the z axis.
+        # The vector [0,1,0] (unit vector in y direction) will get positive x component if azimuth angle
+        # is positive (between 0 and 180 degrees)
         R_azimuth = np.array([
-            [cosTheta, -sinTheta, 0.0],
-            [sinTheta, cosTheta, 0.0],
+            [cosTheta, sinTheta, 0.0],
+            [-sinTheta, cosTheta, 0.0],
             [0.0, 0.0, 1.0]
         ])
 
-        # define R_dip matrix
-        R_dip = np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, cosDip, sinDip],
-            [0.0, -sinDip, cosDip]
-        ])
+        # The combination R = R_azimuth * R_dip will
+        # rotate the vector V first by a dip angle around x axis and then by an azimuth angle around z axis
 
         # calculate R matrix
+        #R = R_azimuth.dot(R_dip)
         R = R_dip.dot(R_azimuth)
+
+
         # calculate M matrix in principal coordinates
         M_diag = np.array([
             [1.0 / (rx * rx), 0.0, 0.0],
             [0.0, 1.0 / (ry * ry), 0.0],
             [0.0, 0.0, 1.0 / (rz * rz)]
         ])
-        # calculate M matrix in x,y,z coordinates
+
+        # The M matrix in (x,y,z) coordinates is given by M = transpose(R) * M_diag * R since
+        # [x',y',z'] * M_diag * transpose([x',y',z']) = [x,y,z] *transpose(R) * M_diag * R * transpose([x,y,z])
         tmp = M_diag.dot(R)
         Rt = np.transpose(R)
         M = Rt.dot(tmp)
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             print('Debug output: M:')
             print(M)
             print(' ')
@@ -1131,11 +1154,11 @@ class APSGaussModel:
 
     def __calcProjection(self, U):
         funcName = '__calcProjection'
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             print('Debug output: U:')
             print(U)
         w, v = np.linalg.eigh(U)
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             print('Debug output: Eigenvalues:')
             print(w)
             print('Debug output: Eigenvectors')
@@ -1152,7 +1175,7 @@ class APSGaussModel:
             angle = 90.0
         angle1 = angle
         range1 = np.sqrt(1.0 / w[0])
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
                   ''.format(funcName=funcName, angle=str(angle1), range=str(range1)))
 
@@ -1167,7 +1190,7 @@ class APSGaussModel:
             angle = 90.0
         angle2 = angle
         range2 = np.sqrt(1.0 / w[1])
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
             print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
                   ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
 
