@@ -1,6 +1,6 @@
 from os.path import isfile
 
-from src.utils.constants.defaults.non_qt import APSModelFile
+from src.utils.constants.defaults import APSModelFile
 from src.utils.constants.simple import VariogramType, Debug
 
 

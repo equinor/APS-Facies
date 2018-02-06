@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys
 import argparse
-from PyQt5.QtWidgets import QApplication
 
 from src.utils.constants.environment import get_commit_hash, get_version_tag
-from src.gui.state import State
-from src.gui.wrappers.project import Project
-from src.gui.wrappers.truncation_rule import CubicTruncationRule, NonCubicTruncationRule, BayfillTruncationRule
-from src.gui.wrappers.main_window import MainWindow
-from src.gui.wrappers.define_gaussian import DefineGaussian
 
 parser = argparse.ArgumentParser(
     prog="APS-GUI",
@@ -34,14 +27,7 @@ args = parser.parse_args()
 
 
 def run():
-    app = QApplication(sys.argv)
-    ui = Project()
-    # ui = DefineGaussian(State())
-    # ui = CubicTruncationRule(State(), active=['F1', 'F2', 'F3', 'F4'])
-    ui.show()
-    sys.exit(app.exec_())
-    # TODO: Make sure the folder /tmp/_MEI**** is removed when closing
-    # TODO: Specify --runtime-tmpdir to be somewhere in $HOME?
+    pass
 
 
 if __name__ == '__main__':

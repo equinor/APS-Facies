@@ -1,17 +1,14 @@
 from functools import lru_cache
 from typing import Dict, List, Set, Union
 
-from PyQt5.QtWidgets import QWidget
-
-from src.gui.wrappers.base_classes.getters.general import get_element
-from src.utils.constants.non_qt import (
+from src.utils.constants.__init__ import (
     BayfillTruncationRuleConstants, BayfillTruncationRuleElements,
     CubicTruncationRuleConstants, CubicTruncationRuleElements, NonCubicTruncationRuleConstants,
     NonCubicTruncationRuleElements, ProjectConstants, ProjectElements, TruncationLibraryButtonNameKeys,
     TruncationLibraryKeys, TruncationLibrarySubKeys, TruncationRuleConstants,
     TruncationRuleLibraryElements,
 )
-from src.utils.constants.defaults.non_qt import UI
+from src.utils.constants.defaults import UI
 
 
 @lru_cache()
@@ -139,53 +136,6 @@ def _get_truncation_rule_name(button_name: str) -> str:
     truncation_rule = button_name[len(prefix):]
     # TODO: Do more?
     return truncation_rule
-
-
-@lru_cache()
-def truncation_library_elements(element: QWidget) -> Dict[
-    TruncationLibraryKeys, Dict[TruncationLibrarySubKeys, Union[List[QWidget], QWidget, int]]
-]:
-    button_names = truncation_library_button_names()
-    button_name_key = TruncationLibrarySubKeys.BUTTON_NAME_KEY
-    num_facies_key = TruncationLibrarySubKeys.NUMBER_OF_FACIES_KEY
-    truncation_rule_key = TruncationLibrarySubKeys.TRUNCATION_RULE_NAME
-    return {
-        key: [
-            {
-                button_name_key:     get_element(element, button_information[button_name_key]),
-                num_facies_key:      button_information[num_facies_key],
-                truncation_rule_key: _get_truncation_rule_name(button_information[button_name_key]),
-            }
-            for button_information in button_names[key]
-        ]
-        if isinstance(button_names[key], list)
-        else
-        {
-            button_name_key:     get_element(element, button_names[key][button_name_key]),
-            num_facies_key:      button_names[key][num_facies_key],
-            truncation_rule_key: _get_truncation_rule_name(button_names[key][button_name_key]),
-        }
-        for key in button_names.keys()
-    }
-
-
-@lru_cache()
-def truncation_library_button_to_kind_and_number_of_facies(element: QWidget) -> Dict[
-    QWidget,
-    Dict[
-        Union[TruncationLibraryKeys, TruncationLibrarySubKeys],
-        Union[TruncationLibraryKeys, int]
-    ]
-]:
-    library = truncation_library_elements(element)
-    data = {}
-    for key in library.keys():
-        if isinstance(library[key], list):
-            for button_information in library[key]:
-                _add_button_information(button_information, data, key)
-        else:
-            _add_button_information(library[key], data, key)
-    return data
 
 
 def _add_button_information(button_information, data, key):

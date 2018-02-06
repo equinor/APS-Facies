@@ -39,10 +39,9 @@ class Constants(object):
         :rtype: List[str]
         """
         all_constants = [name for name in dir(cls) if not cls._used_internally(name)]
-        if local:
-            if hasattr(cls.__base__, 'constants'):
-                irrelevant_constants = set(cls.__base__.constants())
-                all_constants = [constant for constant in all_constants if constant not in irrelevant_constants]
+        if local and hasattr(cls.__base__, 'constants'):
+            irrelevant_constants = set(cls.__base__.constants())
+            all_constants = [constant for constant in all_constants if constant not in irrelevant_constants]
         if sort:
             all_constants.sort()
         return all_constants
@@ -108,14 +107,12 @@ class Constants(object):
     @staticmethod
     def _used_internally(name: str) -> bool:
         # FIXME: Return true iff name is all uppercase?
-        if name[0:2] == name[-2:] == '__':
-            # These are 'magic' methods in Python, and thus used internally
-            return True
-        elif name[0] == '_':
-            # Private methods
-            return True
-        elif name.islower():
-            # These are methods in the base class, that are also used internally, and are therefore not constants
+        if (
+                name[0:2] == name[-2:] == '__'  # These are 'magic' methods in Python, and thus used internally
+                or name[0] == '_'  # Private methods
+                or name.islower()
+                # These are methods in the base class, that are also used internally, and are therefore not constants
+        ):
             return True
         else:
             return False
