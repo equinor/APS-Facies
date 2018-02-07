@@ -12,7 +12,6 @@ Description:    Library with functions for standarized error messages,
 */
 
 /*Include Files:*/
-#include <malloc.h>
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
