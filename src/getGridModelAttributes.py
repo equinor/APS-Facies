@@ -110,11 +110,6 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level):
         file.write(root)
     return
 
-    
-
-
-
-
 
 if __name__ == '__main__':
     modelFile = 'APS.xml'
