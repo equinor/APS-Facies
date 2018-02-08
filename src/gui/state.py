@@ -1,15 +1,12 @@
 from typing import List, Union
 
-from PyQt5.QtWidgets import QListWidgetItem
-
 from src.APSModel import APSModel
-from src.gui.wrappers.base_classes.truncation import BaseTruncation
 from src.utils.checks import has_valid_extension, is_valid_path
-from src.utils.constants.non_qt import (
+from src.utils.constants import (
     CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesSelectionConstants, GaussianRandomFieldConstants,
     ModeConstants, ProjectConstants, TruncationRuleConstants,
 )
-from src.utils.constants.defaults.non_qt import DatabaseDefaults
+from src.utils.constants.defaults import DatabaseDefaults
 from src.utils.constants.simple import Debug, OperationalMode, VariogramType
 # TODO: Rewrite, and split up into several files / folders?
 # TODO: Use SQLite
@@ -269,7 +266,7 @@ class State(dict):
                 error_message = 'There is an internal inconsistency error.'
         return error_message
 
-    def select_facies(self, facies: Union[List[str], List[QListWidgetItem], str, QListWidgetItem]) -> None:
+    def select_facies(self, facies: Union[List[str], str]) -> None:
         if isinstance(facies, list):
             for f in facies:
                 self.add_facies(f, key=FaciesSelectionConstants.SELECTED)
@@ -278,13 +275,13 @@ class State(dict):
 
     def remove_select_facies(
             self,
-            facies: Union[List[str], List[int], List[QListWidgetItem], str, int, QListWidgetItem]
+            facies: Union[List[str], List[int], str, int]
     ) -> None:
         self.remove_facies(facies, key=FaciesSelectionConstants.SELECTED)
 
     def add_facies(
             self,
-            facies_name: Union[str, QListWidgetItem],
+            facies_name: str,
             key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE,
             max_facies=DatabaseDefaults.MAXIMUM_NUMBER_OF_FACIES
     ) -> bool:
@@ -304,8 +301,6 @@ class State(dict):
         assert max_facies <= DatabaseDefaults.MAXIMUM_NUMBER_OF_FACIES
         if key not in self.__dict__:
             self.__dict__[key] = {}
-        if isinstance(facies_name, QListWidgetItem):
-            facies_name = facies_name.text()
         if facies_name not in self.__dict__[key]:
             # This check is as it is because the user may try to add an item that already exists, and that's OK
             if 0 <= max_facies <= len(self.__dict__[key]):
@@ -317,7 +312,7 @@ class State(dict):
 
     def remove_facies(
             self,
-            facies: Union[List[int], List[str], List[QListWidgetItem], int, str, QListWidgetItem],
+            facies: Union[List[int], List[str], int, str],
             key: FaciesSelectionConstants = FaciesSelectionConstants.AVAILABLE
     ) -> None:
         if isinstance(facies, list):
@@ -327,8 +322,6 @@ class State(dict):
             self.remove_facies_by_index(facies, key=key)
         elif isinstance(facies, str):
             self.remove_facies_by_name(facies, key=key)
-        elif isinstance(facies, QListWidgetItem):
-            self.remove_facies_by_name(facies.text(), key=key)
         else:
             # TODO: Raise exception?
             pass

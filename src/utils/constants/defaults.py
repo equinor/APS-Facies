@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from src.utils.constants.base import Value
-from src.utils.constants.non_qt import (
+from src.utils.constants import (
     BayfillTruncationRuleElements, CubicTruncationRuleElements, GaussianRandomFieldElements, HideOptions,
     NonCubicTruncationRuleElements,
 )
@@ -44,18 +45,15 @@ class DatabaseDefaults(Defaults):
 
 class ZoneDefaults(Defaults):
     NUMBER = 1
-    pass
 
 
 class RegionDefaults(Defaults):
     NUMBER = 1
-    pass
 
 
 class FaciesDefaults(Defaults):
     CODE = 1
     NAME = 'F1'
-    pass
 
 
 class DefaultGridSize(Defaults):
