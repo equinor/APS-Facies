@@ -576,18 +576,18 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
 
 
 # ----------------  Main ----------------------------------------------------
-scriptName = 'getRMSProjectData.py'
-inputFile = 'getRMSProjectData.xml'
-outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
-debug_level = Debug.OFF
+if __name__ == '__main__':
+    scriptName = 'getRMSProjectData.py'
+    inputFile = 'getRMSProjectData.xml'
+    outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
+    debug_level = Debug.OFF
 
-# Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
-print('Start running APS workflow preparation script')
-print('Read file: ' + inputFile)
+    # Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
+    print('Start running APS workflow preparation script')
+    print('Read file: ' + inputFile)
 
-create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
+    create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
 
-print('Read RMS project and save some data to be read by the APS GUI script')
-scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level)
-print('Finished running: ' + scriptName)
-
+    print('Read RMS project and save some data to be read by the APS GUI script')
+    scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level)
+    print('Finished running: ' + scriptName)

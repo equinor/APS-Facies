@@ -1,7 +1,6 @@
 #!/bin/env python
 import sys
 import numpy as np
-import importlib
 import roxar
 
 from src.utils.constants.simple import Debug
@@ -19,10 +18,7 @@ from src.utils.constants.simple import Debug
 # isOK                         = setDiscrete3DParameterValues(gridModel, parameterName, values, codeNames, realNumber=0, isShared=True, debug_level=1)
 
 
-def calcStatisticsFor3DParameter(
-        gridModel, paramName, zoneNumberList, realNumber=0,
-        debug_level=Debug.SOMEWHAT_VERBOSE
-):
+def calcStatisticsFor3DParameter(gridModel, paramName, zoneNumberList, realNumber=0, debug_level=Debug.OFF):
     """
     Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
     TODO
@@ -78,7 +74,6 @@ def calcAverage(nDefinedCells, cellIndexDefined, values):
     for i in range(nDefinedCells):
         indx = cellIndexDefined[i]
         sumValue += values[indx]
-    # print('value: ' + str(values[indx]))
     average = sumValue / float(nDefinedCells)
     return average
 
@@ -146,6 +141,7 @@ def isParameterDefinedWithValuesInRMS(gridModel, parameterName, realNumber):
             return True
     return False
 
+
 def get3DParameter(gridModel, parameterName, debug_level=Debug.OFF):
     """Get 3D parameter from grid model.
     Input:
@@ -178,7 +174,7 @@ def get3DParameter(gridModel, parameterName, debug_level=Debug.OFF):
     return param
 
 
-def getContinuous3DParameterValues(gridModel, parameterName, realNumber=0, debug_level=Debug.SOMEWHAT_VERBOSE):
+def getContinuous3DParameterValues(gridModel, parameterName, realNumber=0, debug_level=Debug.OFF):
     """Get array of continuous values (numpy.float32) from active cells for specified 3D parameter from grid model.
     Input:
            gridModel     - grid model object
@@ -229,7 +225,7 @@ def getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, debug_l
     return [activeCellValues, codeNames]
 
 
-def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level=Debug.SOMEWHAT_VERBOSE):
+def getSelectedGridCells(gridModel, paramName, zoneNumberList, realNumber, debug_level=Debug.OFF):
     """
     Input:
            gridModel     - Grid model object
@@ -285,7 +281,7 @@ def modifySelectedGridCells(gridModel, zoneNumberList, realNumber, oldValues, ne
 
 
 def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList,
-                                   realNumber=0, isShared=True, debug_level=Debug.SOMEWHAT_VERBOSE):
+                                   realNumber=0, isShared=True, debug_level=Debug.OFF):
     """Set 3D parameter with values for specified grid model.
     Input:
            gridModel     - Grid model object
@@ -362,7 +358,7 @@ def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNu
     return True
 
 def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValuesForZoneList, zoneNumber,
-                                         realNumber=0, isShared=False, debug_level=Debug.SOMEWHAT_VERBOSE):
+                                         realNumber=0, isShared=False, debug_level=Debug.OFF):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
            gridModel     - Grid model object
@@ -389,7 +385,6 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
         text = 'Specified grid model: ' + gridModel.name + ' is empty.'
         print_error(functionName, text)
         return False
-    
 
     # Check if the parameter is defined and create new if not existing
     grid3D = gridModel.get_grid(realNumber)
@@ -403,7 +398,6 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
     ny = dimensions[1]
     nz = dimensions[2]
     zoneName = grid3D.zone_names[zoneNumber]
-    #print('Zone number: {}   Zone Name: {}'.format(str(zoneNumber), zoneName))
     zone_cell_numbers = []
     start_layer = nz
     end_layer = 0
@@ -436,7 +430,6 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
     i_indices = defined_cell_indices[:,0]
     j_indices = defined_cell_indices[:,1]
     k_indices = defined_cell_indices[:,2]
-
 
     # Loop over all parameter names
     for paramIndx in range(len(parameterNameList)):
@@ -492,9 +485,10 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
 
     return True
 
-def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inputValuesForZoneList, zoneNumber, 
-                                               regionNumber=0, regionParamName=None,
-                                               realNumber=0, isShared=False, debug_level=Debug.SOMEWHAT_VERBOSE):
+def setContinuous3DParameterValuesInZoneRegion(
+        gridModel, parameterNameList, inputValuesForZoneList, zoneNumber,
+        regionNumber=0, regionParamName=None, realNumber=0, isShared=False, debug_level=Debug.OFF
+):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
            gridModel     - Grid model object
@@ -523,7 +517,6 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
         text = 'Specified grid model: ' + gridModel.name + ' is empty.'
         print_error(functionName, text)
         return False
-    
 
     # Check if the parameter is defined and create new if not existing
     grid3D = gridModel.get_grid(realNumber)
@@ -537,7 +530,6 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
     ny = dimensions[1]
     nz = dimensions[2]
     zoneName = grid3D.zone_names[zoneNumber]
-    #print('Zone number: {}   Zone Name: {}'.format(str(zoneNumber), zoneName))
     zone_cell_numbers = []
     start_layer = nz
     end_layer = 0
@@ -555,8 +547,6 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
     nLayers = end_layer-start_layer
     # All input data vectors are from the same zone and has the same size
     inputArrayShape = inputValuesForZoneList[0].shape
-    #print('inputArrayShape:')
-    #print(inputArrayShape)
     if nx != inputArrayShape[0] or ny != inputArrayShape[1] or nLayers != inputArrayShape[2]:
         raise IOError('Input array with values has different dimensions than the grid model:\n'
                       'Grid model nx: {}  Input array nx: {}\n'
@@ -604,8 +594,8 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
                     text = 'Set parameter to non-shared.'
                     print_debug_information(functionName, text)
 
-        assert propertyParam != None
-        if  propertyParam.is_empty(realNumber):
+        assert propertyParam is not None
+        if propertyParam.is_empty(realNumber):
             # Initialize to 0 if empty
             #  v = np.zeros(grid3D.defined_cell_count, np.float32)
             v = grid3D.generate_values(np.float32)
@@ -613,7 +603,6 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
 
         # Get current values
         currentValues = propertyParam.get_values(realNumber)
-    
 
         # Assign values from input array into the 3D grid array
         # Note that input array is of dimension (nx,ny,nLayers)
@@ -628,7 +617,7 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
 #                print('(i,j,k)=({},{},{})'.format(str(i), str(j), str(k)))
                 cell_index = (i,j,k)
                 cell_number = indexer.get_cell_numbers(cell_index)
-                if k >= start_layer and k < end_layer:
+                if start_layer <= k < end_layer:
                     if regionParamValues[cell_number] == regionNumber:
                         currentValues[cell_number] = inputValuesForZone[i,j,k - start_layer]
         else:
@@ -646,7 +635,7 @@ def setContinuous3DParameterValuesInZoneRegion(gridModel, parameterNameList, inp
     return True
 
 def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDefinedCells=0, cellIndexDefined=None,
-                                      realNumber=0, isShared=True, setInitialValues=False, debug_level=Debug.SOMEWHAT_VERBOSE):
+                                      realNumber=0, isShared=True, setInitialValues=False, debug_level=Debug.OFF):
     """
     Description:
     Set 3D parameter with continuous values for specified grid model. The input is specified for a subset of all grid cells. 
@@ -701,7 +690,6 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
             found = 1
             break
 
-
     if found == 0:
         if debug_level >= Debug.VERY_VERBOSE:
             text = ' Create specified parameter: ' + parameterName + ' in ' + gridModel.name
@@ -754,7 +742,6 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
         p.set_shared(isShared, realNumber)
 
 
-
 def combineCodeNames(originalCodeNames, newCodeNames):
     error = 0
     codeValList = newCodeNames.keys()
@@ -776,8 +763,6 @@ def combineCodeNames(originalCodeNames, newCodeNames):
             u = newCodeNames.get(code)
             v = originalCodeNames.get(code)
             if u != v:
-
-
                 if len(v) > 0:
                     # Check if the facies name is equal to the code
                     # then it can be overwritten by the new one.
@@ -794,9 +779,8 @@ def combineCodeNames(originalCodeNames, newCodeNames):
     return originalCodeNames, error
 
 
-
 def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList, codeNames,
-                                 realNumber=0, isShared=True, debug_level=Debug.SOMEWHAT_VERBOSE):
+                                 realNumber=0, isShared=True, debug_level=Debug.OFF):
     """Set discrete 3D parameter with values for specified grid model.
     Input:
            gridModel     - Grid model object
@@ -913,9 +897,11 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
             print_debug_information(functionName, text)
             print(p.code_names)
 
-def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefinedCells=0, cellIndexDefined=None,
-                                    faciesTable=None, realNumber=0, isShared=True, 
-                                    setDefaultFaciesNameWhenUndefined=True, setInitialValues=False, debug_level=Debug.SOMEWHAT_VERBOSE):
+def updateDiscrete3DParameterValues(
+        gridModel, parameterName, inputValues, nDefinedCells=0, cellIndexDefined=None,
+        faciesTable=None, realNumber=0, isShared=True, setDefaultFaciesNameWhenUndefined=True,
+        setInitialValues=False, debug_level=Debug.OFF
+):
     """
     Description:
     Set 3D parameter with discrete values for specified grid model. The input is specified for a subset of all grid cells. 
@@ -1030,8 +1016,6 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
         
         originalCodeNames = p.code_names.copy()
 
-
-
         # Calculate updated facies table by combining the existing facies table for the 3D parameter 
         # with facies table for the facies that are modelled for the updated zones
         updatedCodeNames, err = combineCodeNames(originalCodeNames, faciesTable)
@@ -1056,7 +1040,6 @@ def updateDiscrete3DParameterValues(gridModel, parameterName, inputValues, nDefi
                 if updatedCodeNames[code] == '':
                     print('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
                     updatedCodeNames[code] = str(code)
-
 
         # Update the facies table in the discrete 3D parameter
         p.code_names = updatedCodeNames
@@ -1092,6 +1075,7 @@ def getNumberOfLayers(grid):
         number_layers_per_zone.append(number_layers)
     return number_layers_per_zone
 
+
 def getZoneLayerNumbering(gridModel, realNumber=0):
     grid3D = gridModel.get_grid(realNumber)
     indexer = grid3D.simbox_indexer
@@ -1109,9 +1093,9 @@ def getZoneLayerNumbering(gridModel, realNumber=0):
         end = layer_range[-1]
         number_layers += (end + 1 - start)
         number_layers_per_zone.append(number_layers)
-        start_layer_per_zone.append(start)
-        end_layer_per_zone.append(end)
-    return [number_layers_per_zone, start_layer_per_zone, end_layer_per_zone]
+        start_layers_per_zone.append(start)
+        end_layers_per_zone.append(end)
+    return [number_layers_per_zone, start_layers_per_zone, end_layers_per_zone]
 
 
 def getGridAttributes(grid, debug_level=Debug.OFF):
@@ -1362,4 +1346,3 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
                 text = text + ' for variogram azimuth in ' + horizonName
                 text = text + ' Value: ' + str(inputValue)
                 print(text)
-    return
