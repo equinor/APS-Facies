@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from src.APSModel import APSModel
+from src.algorithms.APSModel import APSModel
 from src.utils.checks import has_valid_extension, is_valid_path
 from src.utils.constants import (
     CubicTruncationRuleConstants, CubicTruncationRuleElements, FaciesSelectionConstants, GaussianRandomFieldConstants,

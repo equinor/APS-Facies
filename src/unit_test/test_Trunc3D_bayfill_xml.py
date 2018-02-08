@@ -3,8 +3,8 @@ import filecmp
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from src.APSMainFaciesTable import APSMainFaciesTable
-from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     BAYFILL_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, NO_VERBOSE_DEBUG,
     OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,

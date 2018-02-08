@@ -1,0 +1,7 @@
+// IPL: Run python script as separate process outside RMS roxapi environment
+String command
+String script
+
+command = "./../bin/run_gauss_sim.sh"
+ShellCommand(command)
+Print("Finished running command: " + command)

@@ -328,3 +328,16 @@ state.db
 *cache/
 libraries/nrlib
 .tool-versions
+
+# Symbolic links
+bin/APS_make_gauss_IPL.py
+bin/APS_simulate_gauss_multiprocessing.py
+bin/APS_simulate_gauss_singleprocessing.py
+src/algorithms/APSGaussFieldJobs.py
+src/utils/APSupdateVarioAsimuth.py
+src/utils/roxar/getRMSProjectData.py
+examples/DefineTruncStructure.py
+workflow/Cleanup_tmpdir.ipl
+workflow/APS_simulate_gauss_multiprocessing.ipl
+
+!examples/*

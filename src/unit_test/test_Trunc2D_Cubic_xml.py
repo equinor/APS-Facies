@@ -5,8 +5,8 @@ from xml.etree.ElementTree import Element
 
 import pytest
 
-from src.APSMainFaciesTable import APSMainFaciesTable
-from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.unit_test.constants import (
     CUBIC_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, OUTPUT_MODEL_FILE_NAME1,
     OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,
