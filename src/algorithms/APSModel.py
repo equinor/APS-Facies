@@ -1,32 +1,18 @@
 #!/bin/env python
-import copy
+# -*- coding: utf-8 -*-
 import collections
+import copy
 import datetime
-import importlib
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
-
-import depricated.APSGaussFieldJobs
-import src.algorithms.APSMainFaciesTable
-import src.algorithms.APSZoneModel
-import src.utils.exceptions.xml
-import src.utils.xml
-import src.utils.numeric
-
-importlib.reload(depricated.APSGaussFieldJobs)
-importlib.reload(src.algorithms.APSMainFaciesTable)
-importlib.reload(src.algorithms.APSZoneModel)
-importlib.reload(src.utils.exceptions.xml)
-importlib.reload(src.utils.xml)
-importlib.reload(src.utils.numeric)
 
 from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
-from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify, getTextCommand, getKeyword, getIntCommand
+from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
+from src.utils.xml import getIntCommand, getKeyword, getTextCommand, prettify
 
 
 class APSModel:

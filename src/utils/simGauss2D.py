@@ -1,12 +1,8 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 from ctypes import CDLL, POINTER, c_double, c_float, c_int, c_uint
 
 import numpy as np
-import importlib
-
-import src.utils.constants.environment
-
-importlib.reload(src.utils.constants.environment)
 
 from src.utils.constants.environment import DrawingLibrary
 from src.utils.constants.simple import Debug, VariogramType

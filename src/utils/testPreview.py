@@ -6,28 +6,16 @@ from argparse import ArgumentParser, Namespace
 import matplotlib
 import numpy as np
 import scipy
-import importlib
-
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
-import src.utils.roxar.APSDataFromRMS
-import src.algorithms.APSModel
-import src.utils.exceptions.xml
-import src.utils.io
-from src.utils.methods import get_colors
-
-importlib.reload(src.utils.roxar.APSDataFromRMS)
-importlib.reload(src.algorithms.APSModel)
-importlib.reload(src.utils.exceptions.xml)
-importlib.reload(src.utils.io)
-
-from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
 from src.algorithms.APSModel import APSModel
-from src.utils.exceptions.xml import CrossSectionOutsideRange, UndefinedZoneError
 from src.utils.constants.simple import Debug
+from src.utils.exceptions.xml import UndefinedZoneError
 from src.utils.io import writeFileRTF
+from src.utils.methods import get_colors
+from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
 
 
 def plotGaussField(subplotAxis, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
@@ -629,7 +617,7 @@ def get_argument_parser() -> ArgumentParser:
     return parser
 
 
-def run():
+def run(roxar=None, project=None):
     args = get_arguments()
     run_previewer(**args.__dict__)
 

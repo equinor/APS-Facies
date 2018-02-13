@@ -1,16 +1,11 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 # Python 3 script to make IPL script for simulation of Gauss fields.
-import importlib
-
-import src.algorithms.APSModel
-
-importlib.reload(src.algorithms.APSModel)
 
 from src.algorithms.APSModel import APSModel
 
 
-# --------------- Start main script ------------------------------------------
-if __name__ == '__main__':
+def run(roxar=None, project=None):
     print('Run: APS_make_gauss_IPL ')
     modelFileName = 'APS.xml'
 
@@ -20,3 +15,8 @@ if __name__ == '__main__':
     apsModel.createSimGaussFieldIPL()
 
     print('Finished APS_make_gauss_IPL.py')
+
+
+# --------------- Start main script ------------------------------------------
+if __name__ == '__main__':
+    run()

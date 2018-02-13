@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import filecmp
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element

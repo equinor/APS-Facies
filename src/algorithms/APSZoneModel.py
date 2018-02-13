@@ -1,36 +1,19 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import copy
-import importlib
-import numpy as np
 from xml.etree.ElementTree import Element
 
-import src.algorithms.APSFaciesProb
-import depricated.APSGaussFieldJobs
-import src.algorithms.APSGaussModel
-import src.algorithms.APSMainFaciesTable
-import src.algorithms.Trunc2D_Angle_xml
-import src.algorithms.Trunc2D_Cubic_xml
-import src.algorithms.Trunc3D_bayfill_xml
-import src.utils.xml
+import numpy as np
 
-importlib.reload(src.algorithms.APSFaciesProb)
-importlib.reload(depricated.APSGaussFieldJobs)
-importlib.reload(src.algorithms.APSGaussModel)
-importlib.reload(src.algorithms.APSMainFaciesTable)
-importlib.reload(src.algorithms.Trunc2D_Angle_xml)
-importlib.reload(src.algorithms.Trunc2D_Cubic_xml)
-importlib.reload(src.algorithms.Trunc3D_bayfill_xml)
-importlib.reload(src.utils.xml)
-
-from src.algorithms.APSFaciesProb import APSFaciesProb
 from depricated.APSGaussFieldJobs import APSGaussFieldJobs
+from src.algorithms.APSFaciesProb import APSFaciesProb
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand, getBoolCommand
+from src.utils.xml import getFloatCommand, getIntCommand, getKeyword, getTextCommand, getBoolCommand
 
 
 class APSZoneModel:

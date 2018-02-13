@@ -1,27 +1,16 @@
 #!/bin/env python
-import numpy as np
-import importlib
+# -*- coding: utf-8 -*-
 from xml.etree.ElementTree import Element
 
-import src.algorithms.Trend3D
-# import src.utils.simGauss2D
-import src.utils.simGauss2D_nrlib
-import src.utils.xml
+import numpy as np
 
-# importlib.reload(src.utils.simGauss2D)
-importlib.reload(src.utils.simGauss2D_nrlib)
-importlib.reload(src.utils.xml)
-importlib.reload(src.algorithms.Trend3D)
-
-# from src.utils.simGauss2D import simGaussField
-from src.utils.simGauss2D_nrlib import simGaussField
-from src.utils.constants.simple import Debug, VariogramType
-from src.utils.xml import getKeyword, getFloatCommand, getIntCommand
-from src.utils.checks import isVariogramTypeOK
 from src.algorithms.Trend3D import (
-    Trend3D_linear, Trend3D_elliptic, Trend3D_hyperbolic, Trend3D_rms_param,
-    Trend3D_elliptic_cone,
+    Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear, Trend3D_rms_param,
 )
+from src.utils.checks import isVariogramTypeOK
+from src.utils.constants.simple import Debug, VariogramType
+from src.utils.simGauss2D_nrlib import simGaussField
+from src.utils.xml import getFloatCommand, getIntCommand, getKeyword
 
 
 class APSGaussModel:

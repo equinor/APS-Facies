@@ -1,18 +1,11 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 # This script does not call ROXAR API functions
 
 import os
 import time
 import numpy as np
-import importlib
 import multiprocessing as mp
-
-import src.algorithms.APSModel
-import src.utils.roxar.APSDataFromRMS
-
-importlib.reload(src.algorithms.APSModel)
-importlib.reload(src.utils.roxar.APSDataFromRMS)
-
 
 from src.algorithms.APSModel import APSModel
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
@@ -238,7 +231,7 @@ def run_simulations(
             azimuthValueSimBox = azimuthValue - azimuthAngleGrid
             simBoxThickness = zoneModel.getSimBoxThickness()
 
-            # Calculate grid cell size in z direction
+            # Calculate grid cell size in z direction 
             nz = nLayers
             dz = simBoxThickness/nz
 
@@ -300,15 +293,18 @@ def run_simulations(
     print('')
 
 
-if __name__ == '__main__':
+def run(roxar=None, project=None):
     modelFile = 'APS.xml'
     rms_data_file_name = 'rms_project_data_for_APS_gui.xml'
     outputDir = './tmp_gauss_sim'
     writeLogFile = True
-
     run_simulations(
         modelFile=modelFile,
         rms_data_file_name=rms_data_file_name,
         outputDir=outputDir,
         writeLogFile=writeLogFile
-        )
+    )
+
+
+if __name__ == '__main__':
+    run()

@@ -1,14 +1,10 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import copy
-import importlib
 from xml.etree.ElementTree import Element
 
-import src.utils.xml
-
-importlib.reload(src.utils.xml)
-
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword, getIntCommand
+from src.utils.xml import getIntCommand, getKeyword
 
 
 class APSGaussFieldJobs:

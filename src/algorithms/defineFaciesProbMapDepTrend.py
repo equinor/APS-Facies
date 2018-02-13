@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import importlib
-
 import numpy as np
 
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gf
-from src.algorithms.defineFacies import BaseDefineFacies
 from src.utils.constants.simple import Debug
-
-importlib.reload(gf)
+from .defineFacies import BaseDefineFacies
 
 
 class DefineFaciesProbMapDep(BaseDefineFacies):

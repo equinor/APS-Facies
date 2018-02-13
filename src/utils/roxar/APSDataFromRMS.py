@@ -3,12 +3,7 @@
 # Python 3 script to read data from xml file with RMS information.
 
 import copy
-import importlib
 import xml.etree.ElementTree as ET
-
-import src.algorithms.APSMainFaciesTable
-
-importlib.reload(src.algorithms.APSMainFaciesTable)
 
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug

@@ -10,10 +10,7 @@ from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import APSZoneModel
-from src.algorithms.Trend3D import Trend3D_linear
-from src.algorithms.Trend3D import Trend3D_hyperbolic
-from src.algorithms.Trend3D import Trend3D_elliptic
-from src.algorithms.Trend3D import Trend3D_elliptic_cone
+from src.algorithms.Trend3D import Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
@@ -21,7 +18,7 @@ from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
     NO_VERBOSE_DEBUG, VERY_VERBOSE_DEBUG, SEED_FILE_NAME,
 )
-from src.utils.constants.simple import Debug, VariogramType, OriginType, TrendType
+from src.utils.constants.simple import Debug, OriginType, TrendType, VariogramType
 
 
 def defineCommonModelParam(
@@ -139,8 +136,7 @@ def addZoneParam(
         elif trendType[i] == TrendType.ELLIPTIC_CONE:
             trendModelObject = Trend3D_elliptic_cone(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
             origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
-            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i],
-                                        curvature[i],
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i], 
                                         relativeSize[i], origin, origin_type[i], debug_level)
             trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 
@@ -221,7 +217,6 @@ def addZoneParam(
     # Get zone numbers and region numbers
     print('Zone numbers:')
     print(apsmodel.getZoneNumberList())
-
 
 def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
@@ -319,7 +314,6 @@ def test_variogram_generation():
     projection = 'yz'
     apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
 
-
 def test_read_and_write_APSModel():
     print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
     modelFile = 'testData_models/APS.xml'
@@ -392,7 +386,6 @@ def test_updating_model1():
     else:
         print('Files are different. NOT OK')
     assert check is True
-
 
 def test_updating_model2():
     print('***** Case: Update parameters case 2 *****')
@@ -523,17 +516,17 @@ def test_updating_model3():
 
             trendModelObj = zone.getTrendModelObject(gfName)
             if trendType[i] != TrendType.RMS_PARAM:
-                trendAzimuth = trend_azimuthAngle[i]
+                trendAzimuth =  trend_azimuthAngle[i]
                 getSetTrendParameters(trendAzimuth, trendModelObj, 'Azimuth')
 
-                trendStackingAngle = trend_stackingAngle[i]
+                trendStackingAngle =   trend_stackingAngle[i]
                 getSetTrendParameters(trendStackingAngle, trendModelObj, 'StackingAngle')
 
-                trendStackingDirection = trend_direction[i]
+                trendStackingDirection =   trend_direction[i]
                 getSetTrendParameters(trendStackingDirection, trendModelObj, 'StackingDirection')
 
             if trendType[i] == TrendType.ELLIPTIC:
-                trendCurvature = trend_curvature[i]
+                trendCurvature =  trend_curvature[i]
                 getSetTrendParameters(trendCurvature, trendModelObj, 'Curvature')
 
                 trendOrigin = [trend_origin_x[i], trend_origin_y[i], trend_origin_z_simbox[i]]
@@ -541,11 +534,11 @@ def test_updating_model3():
 
                 trendOriginType = trend_origin_type[i]
                 getSetTrendParameters(trendOriginType, trendModelObj, 'OriginType')
-            elif trendType[i] == TrendType.HYPERBOLIC:
-                trendCurvature = trend_curvature[i]
+            elif  trendType[i] == TrendType.HYPERBOLIC:
+                trendCurvature =  trend_curvature[i]
                 getSetTrendParameters(trendCurvature, trendModelObj, 'Curvature')
 
-                trendMigration = trend_migrationAngle[i]
+                trendMigration =  trend_migrationAngle[i]
                 getSetTrendParameters(trendMigration, trendModelObj, 'MigrationAngle')
 
                 trendOrigin = [trend_origin_x[i], trend_origin_y[i], trend_origin_z_simbox[i]]
@@ -1030,5 +1023,9 @@ def add_zone_1_for_case_4(apsmodel):
     )
 
 
-if __name__ == '__main__':
+def run():
     test_create_XMLModelFiles()
+
+
+if __name__ == '__main__':
+    run()

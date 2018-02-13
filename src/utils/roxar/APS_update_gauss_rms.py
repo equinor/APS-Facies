@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 # This script call ROXAR API functions
 import numpy as np
-import roxar
 
 from src.algorithms.APSModel import APSModel
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
@@ -78,5 +77,10 @@ def run_main(
         print('')
 
 
-if __name__ == '__main__':
+def run(roxar=None, project=None):
     run_main(project)
+
+
+if __name__ == '__main__':
+    import roxar
+    run(roxar, project)

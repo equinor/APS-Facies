@@ -1,21 +1,15 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 # This script use both nrlib and ROXAR API functions and run simulations sequentially and not in parallel
 
-import numpy as np
-import importlib
 from pathlib import Path
+
 import nrlib
-
-import src.algorithms.APSModel
-import src.utils.constants.simple
-import src.utils.roxar.generalFunctionsUsingRoxAPI
-
-importlib.reload(src.algorithms.APSModel)
-importlib.reload(src.utils.roxar.generalFunctionsUsingRoxAPI)
+import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValuesInZoneRegion, getGridAttributes
+from src.utils.roxar.generalFunctionsUsingRoxAPI import getGridAttributes, setContinuous3DParameterValuesInZoneRegion
 
 
 def getProjectRealizationSeed(seedFile):
@@ -182,9 +176,14 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     print('')
 
 
-if __name__ == '__main__':
-    modelFile='APS.xml'
+def run(roxar=None, project=None):
+    modelFile = 'APS.xml'
     realNumber = project.current_realisation
     isShared = False
     run_simulations(project, modelFile=modelFile, realNumber=realNumber, isShared=isShared)
     print('Finished simulation of gaussian fields for APS')
+
+
+if __name__ == '__main__':
+    import roxar
+    run(roxar, project)
