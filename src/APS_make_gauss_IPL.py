@@ -9,13 +9,15 @@ importlib.reload(src.APSModel)
 
 from src.APSModel import APSModel
 
+
 # --------------- Start main script ------------------------------------------
-print('Run: APS_make_gauss_IPL ')
-modelFileName = 'APS.xml'
+if __name__ == '__main__':
+    print('Run: APS_make_gauss_IPL ')
+    modelFileName = 'APS.xml'
 
-print('- Read file: ' + modelFileName)
-apsModel = APSModel(modelFileName)
+    print('- Read file: ' + modelFileName)
+    apsModel = APSModel(modelFileName)
 
-apsModel.createSimGaussFieldIPL()
+    apsModel.createSimGaussFieldIPL()
 
-print('Finished APS_make_gauss_IPL.py')
+    print('Finished APS_make_gauss_IPL.py')

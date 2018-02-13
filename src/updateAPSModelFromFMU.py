@@ -24,8 +24,9 @@ def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, 
 
 
 # -------  Main ----------------
-globalIPLFile = "test_global_include.ipl"
-inputAPSModelFile = "APS.xml"
-outputAPSModelFile = "APS_modified.xml"
-debug_level = Debug.VERY_VERBOSE
-updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, debug_level)
+if __name__ == '__main__':
+    globalIPLFile = "test_global_include.ipl"
+    inputAPSModelFile = "APS.xml"
+    outputAPSModelFile = "APS_modified.xml"
+    debug_level = Debug.VERY_VERBOSE
+    updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, debug_level)

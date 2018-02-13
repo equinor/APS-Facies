@@ -16,6 +16,8 @@
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
   <PrintInfo> 2 </PrintInfo>
+  <SeedFile> seed.dat </SeedFile>
+  <WriteSeeds> yes </WriteSeeds>
   <MainFaciesTable>
     <Facies name="F1">
       <Code> 1 </Code>
@@ -237,6 +239,135 @@
             <ProbFrac> 1.0 </ProbFrac>
           </Facies>
         </BackGroundModel>
+      </TruncationRule>
+    </Zone>
+    <Zone number="2" regionNumber="3">
+      <UseConstProb> 1 </UseConstProb>
+      <SimBoxThickness> 4.0 </SimBoxThickness>
+      <HorizonNameVarioTrend> top_middle_Neslen_3 </HorizonNameVarioTrend>
+      <FaciesProbForModel>
+        <Facies name="F2">
+          <ProbCube> 0.3 </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F1">
+          <ProbCube> 0.3 </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+      <GaussField name="GRF6">
+        <Vario name="SPHERICAL">
+          <MainRange> 5500.0 </MainRange>
+          <PerpRange> 5000.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.01 </DipAngle>
+        </Vario>
+        <Trend name="Linear3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
+        <RelStdDev> 0.06 </RelStdDev>
+        <SeedForPreview> 276787 </SeedForPreview>
+      </GaussField>
+      <GaussField name="GRF7">
+        <Vario name="SPHERICAL">
+          <MainRange> 1500.0 </MainRange>
+          <PerpRange> 1000.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Elliptic3D">
+          <azimuth> 125.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 0.1 </stackAngle>
+          <curvature> 5.0 </curvature>
+          <origin_x> 0.9 </origin_x>
+          <origin_y> 0.9 </origin_y>
+          <origin_z_simbox> 0.9 </origin_z_simbox>
+          <origintype> Relative </origintype>
+        </Trend>
+        <RelStdDev> 0.045 </RelStdDev>
+        <SeedForPreview> 88831556 </SeedForPreview>
+      </GaussField>
+      <GaussField name="GRF8">
+        <Vario name="SPHERICAL">
+          <MainRange> 500.0 </MainRange>
+          <PerpRange> 300.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 135.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="Hyperbolic3D">
+          <azimuth> 35.0 </azimuth>
+          <directionStacking> 1 </directionStacking>
+          <stackAngle> 90.0 </stackAngle>
+          <curvature> 10.5 </curvature>
+          <migrationAngle> 89.9 </migrationAngle>
+          <origin_x> 0.5 </origin_x>
+          <origin_y> 0.0 </origin_y>
+          <origin_z_simbox> 0.0 </origin_z_simbox>
+          <origintype> Relative </origintype>
+        </Trend>
+        <RelStdDev> 0.045 </RelStdDev>
+        <SeedForPreview> 75151556 </SeedForPreview>
+      </GaussField>
+      <GaussField name="GRF9">
+        <Vario name="SPHERICAL">
+          <MainRange> 2500.0 </MainRange>
+          <PerpRange> 300.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 100.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend name="RMSParameter">
+          <TrendParamName> TrendExample </TrendParamName>
+        </Trend>
+        <RelStdDev> 0.045 </RelStdDev>
+        <SeedForPreview> 82765556 </SeedForPreview>
+      </GaussField>
+      <TruncationRule nGFields="4" name="Trunc2D_Angle">
+        <BackGroundModel>
+          <AlphaFields> GRF6 GRF7 </AlphaFields>
+          <UseConstTruncParam> 1 </UseConstTruncParam>
+          <Facies name="F1">
+            <Angle> 135.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F2">
+            <Angle> 45.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F3">
+            <Angle> 45.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+        </BackGroundModel>
+        <OverLayModel>
+          <Group>
+            <AlphaField name="GRF8">
+              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+              <ProbFrac name="F4"> 1.0 </ProbFrac>
+            </AlphaField>
+            <BackGround> F3 </BackGround>
+          </Group>
+          <Group>
+            <AlphaField name="GRF9">
+              <TruncIntervalCenter> 0.9 </TruncIntervalCenter>
+              <ProbFrac name="F5"> 1.0 </ProbFrac>
+            </AlphaField>
+            <BackGround> F1 </BackGround>
+          </Group>
+        </OverLayModel>
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="4">

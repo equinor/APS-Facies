@@ -43,4 +43,4 @@ def readFile(fileName, debug_level=Debug.OFF):
         a = np.zeros(nx * ny, float)
         for i in range(19, len(words)):
             a[i - 19] = float(words[i])
-    return [a, nx, ny]
+    return a, nx, ny

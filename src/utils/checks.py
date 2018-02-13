@@ -1,6 +1,6 @@
 from os.path import isfile
 
-from src.utils.constants.defaults.non_qt import APSModelFile
+from src.utils.constants.defaults import APSModelFile
 from src.utils.constants.simple import VariogramType, Debug
 
 
@@ -31,4 +31,8 @@ def isVariogramTypeOK(variogramType: VariogramType, debug_level: Debug=Debug.OFF
         print('       EXPONENTIAL')
         print('       GAUSSIAN')
         print('       GENERAL_EXPONENTIAL')
+        print('       MATERN32')
+        print('       MATERN52')
+        print('       MATERN72')
+        print('       CONSTANT')
     return False

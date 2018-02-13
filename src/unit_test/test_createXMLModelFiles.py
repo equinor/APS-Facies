@@ -11,20 +11,24 @@ from src.APSGaussModel import APSGaussModel
 from src.APSMainFaciesTable import APSMainFaciesTable
 from src.APSModel import APSModel
 from src.APSZoneModel import APSZoneModel
-from src.Trend3D_linear_model_xml import Trend3D_linear_model
+from src.Trend3D import Trend3D_linear
+from src.Trend3D import Trend3D_hyperbolic
+from src.Trend3D import Trend3D_elliptic
+from src.Trend3D import Trend3D_elliptic_cone
+from src.Trend3D import Trend3D_rms_param
 from src.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
-    NO_VERBOSE_DEBUG,VERY_VERBOSE_DEBUG
+    NO_VERBOSE_DEBUG,VERY_VERBOSE_DEBUG, SEED_FILE_NAME 
 )
-from src.utils.constants.simple import Debug, VariogramType
+from src.utils.constants.simple import Debug, VariogramType, OriginType, TrendType
 
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
-        zoneParamName, faciesRealParamNameResult, fTable, debug_level=VERY_VERBOSE_DEBUG
+        zoneParamName, faciesRealParamNameResult, seedFileName, fTable, debug_level=VERY_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
@@ -34,6 +38,7 @@ def defineCommonModelParam(
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
+    apsmodel.setSeedFileName(seedFileName)
     apsmodel.set_debug_level(debug_level)
     print('Debug level: {}'.format(str(apsmodel.debug_level())))
     # Define gauss field jobs
@@ -73,6 +78,14 @@ def addZoneParam(
         azimuthAngle=None,
         stackingAngle=None,
         direction=None,
+        trendType=None,
+        curvature=None,
+        migrationAngle=None,
+        relativeSize=None,
+        origin_x=None,
+        origin_y=None,
+        origin_z_simbox=None,
+        origin_type=None,
         previewSeed=None,
         # Truncation rule
         truncType=None,
@@ -108,9 +121,36 @@ def addZoneParam(
         ])
 
         # Set Gauss field trend parameters
-        trendModelObject = Trend3D_linear_model(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
-        trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
-        trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+        if trendType[i]== TrendType.LINEAR:
+            trendModelObject = Trend3D_linear(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], debug_level)
+            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+
+        elif trendType[i]== TrendType.ELLIPTIC:
+            trendModelObject = Trend3D_elliptic(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], curvature[i], origin, origin_type[i], debug_level)
+            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+
+        elif trendType[i]== TrendType.HYPERBOLIC:
+            trendModelObject = Trend3D_hyperbolic(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i],
+                                        origin, origin_type[i], debug_level)
+            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+
+        elif trendType[i]== TrendType.ELLIPTIC_CONE:
+            trendModelObject = Trend3D_elliptic_cone(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i], 
+                                        relativeSize[i], origin, origin_type[i], debug_level)
+            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+
+        elif trendType[i]== TrendType. NONE:
+            # Create an arbitary trend object which is not initialized
+            trendModelObject = Trend3D_hyperbolic(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
+            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
+
 
         seedPreviewList.append([gaussFieldsInZone[i], previewSeed[i]])
 
@@ -228,10 +268,12 @@ def test_create_XMLModelFiles():
     test_case_1()
     test_case_2()
     test_case_3()
+    test_case_4()
 
     test_read_and_write_APSModel()
     test_updating_model1()
     test_updating_model2()
+    test_updating_model3()
 
     test_variogram_generation()
     print('Finished')
@@ -257,7 +299,7 @@ def test_variogram_generation():
     gaussModelList = [['GRF1', 'SPHERICAL', mainRange, perpRange, vertRange, azimuth, dip, 1.0]]
     useTrend = 0
     relStdDev = 0.05
-    trendModelObject = Trend3D_linear_model(None, Debug.OFF, None)
+    trendModelObject = Trend3D_linear(None, debug_level=Debug.OFF, modelFileName=None)
     azimuthTrendAngle = 0.0
     stackingTrendAngle = 0.0
     direct = -1
@@ -413,6 +455,122 @@ def test_updating_model2():
     assert check is True
 
 
+def test_updating_model3():
+    print('***** Case: Update parameters case 3 *****')
+    # Test updating of model
+    modelFile = 'testData_models/APS.xml'
+    apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
+    # Do some updates of the model
+    zoneNumber = 2
+    regionNumber = 3
+    zone = apsmodel.getZoneModel(zoneNumber, regionNumber)
+    gaussFieldNames = zone.getUsedGaussFieldNames()
+    nGaussFields = len(gaussFieldNames)
+    variogramTypeList = [
+        VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
+        VariogramType.GENERAL_EXPONENTIAL, VariogramType.SPHERICAL
+    ]
+    mainRangeList = [2099.0, 3210.0, 1204.0, 1308.0]
+    perpRangeList = [123.0, 543.0, 120.0, 130.0]
+    vertRangeList = [1.0, 5.0, 1.2, 1.3]
+    azimuthAngleList = [0.0, 90.0, 125.0, 40.0]
+    dipAngleList = [0.0, 0.01, 0.005, 0.009]
+    powerList = [1.0, 1.2, 1.3, 1.4]
+
+    useTrend=[1,1,1,1,0]
+    relStdDev=[0.01, 0.02, 0.02, 0.03, 0.04]
+    trend_azimuthAngle=[10.0, 25.0, 35.0, 45.0, 55.0]
+    trend_stackingAngle=[89.9, 0.0, 89.5, 0.0, 0.0]
+    trend_direction=[1,1,1,-1, 1]
+    trendType=[TrendType.LINEAR, TrendType.ELLIPTIC, TrendType.HYPERBOLIC, TrendType.RMS_PARAM,TrendType.NONE]
+    trend_curvature=[2.0, 1.0, 2.5, 0.0, 0.0]
+    trend_migrationAngle=[0.0, 0.0, 89.0, 0.0, 0.0]
+    trend_origin_x=[0.0, 0.5, 0.5, 0.7, 0.0]
+    trend_origin_y=[0.0, 0.0, 0.0, 1.0, 0.0]
+    trend_origin_z_simbox=[0.0, 1.0, 0.5, 0.5, 0.0]
+    trend_origin_type=[OriginType.RELATIVE,OriginType.RELATIVE,OriginType.RELATIVE,OriginType.RELATIVE, OriginType.RELATIVE]
+    trend_rms_param_name=['','','','New_trend_param','']
+    for i in range(nGaussFields):
+        gfName = gaussFieldNames[i]
+        if regionNumber > 0:
+            print('Update (zone,region):  ({},{})  Gauss field: {}'.format(str(zoneNumber), str(regionNumber), gfName))
+        else:
+            print('Update zone:  {}  Gauss field: {}'.format(str(zoneNumber), gfName))
+
+        variogramType = variogramTypeList[i]
+        assertPropertyGetterSetter(gfName, variogramType, zone, 'VariogramType')
+
+        mainRange = mainRangeList[i]
+        assertPropertyGetterSetter(gfName, mainRange, zone, 'MainRange')
+
+        perpRange = perpRangeList[i]
+        assertPropertyGetterSetter(gfName, perpRange, zone, 'PerpRange')
+
+        vertRange = vertRangeList[i]
+        assertPropertyGetterSetter(gfName, vertRange, zone, 'VertRange')
+
+        azimuth = azimuthAngleList[i]
+        assertPropertyGetterSetter(gfName, azimuth, zone, 'AnisotropyAzimuthAngle')
+
+        dip = dipAngleList[i]
+        assertPropertyGetterSetter(gfName, dip, zone, 'AnisotropyDipAngle')
+
+        if variogramType == VariogramType.GENERAL_EXPONENTIAL:
+            power = powerList[i]
+            assertPropertyGetterSetter(gfName, power, zone, 'Power')
+            
+        if useTrend[i]:
+
+            trendModelObj = zone.getTrendModelObject(gfName)
+            if trendType[i] != TrendType.RMS_PARAM:
+                trendAzimuth =  trend_azimuthAngle[i]
+                getSetTrendParameters(trendAzimuth, trendModelObj, 'Azimuth')
+
+                trendStackingAngle =   trend_stackingAngle[i]
+                getSetTrendParameters(trendStackingAngle, trendModelObj, 'StackingAngle')
+
+                trendStackingDirection =   trend_direction[i]
+                getSetTrendParameters(trendStackingDirection, trendModelObj, 'StackingDirection')
+            
+            if trendType[i] == TrendType.ELLIPTIC:
+                trendCurvature =  trend_curvature[i]
+                getSetTrendParameters(trendCurvature, trendModelObj, 'Curvature')
+
+                trendOrigin = [trend_origin_x[i], trend_origin_y[i], trend_origin_z_simbox[i]]
+                getSetTrendParameters(trendOrigin, trendModelObj, 'Origin')
+
+                trendOriginType = trend_origin_type[i]
+                getSetTrendParameters(trendOriginType, trendModelObj, 'OriginType')
+            elif  trendType[i] == TrendType.HYPERBOLIC:
+                trendCurvature =  trend_curvature[i]
+                getSetTrendParameters(trendCurvature, trendModelObj, 'Curvature')
+
+                trendMigration =  trend_migrationAngle[i]
+                getSetTrendParameters(trendMigration, trendModelObj, 'MigrationAngle')
+
+                trendOrigin = [trend_origin_x[i], trend_origin_y[i], trend_origin_z_simbox[i]]
+                getSetTrendParameters(trendOrigin, trendModelObj, 'Origin')
+
+                trendOriginType = trend_origin_type[i]
+                getSetTrendParameters(trendOriginType, trendModelObj, 'OriginType')
+
+            elif trendType[i] == TrendType.RMS_PARAM:
+                trendParamName = trend_rms_param_name[i]
+                getSetTrendParameters(trendParamName, trendModelObj, 'TrendParamName')
+                
+            
+    outfile3 = 'testOut3_updated.xml'
+    apsmodel.writeModel(outfile3, Debug.OFF)
+    reference_file = 'testData_models/APS_updated3.xml'
+    print('Compare file: ' + outfile3 + ' and ' + reference_file)
+    check = filecmp.cmp(outfile3, reference_file)
+    if check:
+        print('Files are equal. OK')
+    else:
+        print('Files are different. NOT OK')
+    assert check is True
+
+
 def assertPropertyGetterSetter(gaussianFieldName: str, value: object, zone: APSZoneModel, baseName: str):
     getter = zone.__getattribute__('get' + baseName)
     setter = zone.__getattribute__('set' + baseName)
@@ -421,6 +579,17 @@ def assertPropertyGetterSetter(gaussianFieldName: str, value: object, zone: APSZ
     original = getter(gaussianFieldName)
     setter(gaussianFieldName, value)
     new = getter(gaussianFieldName)
+    print(baseName + ' ' + str(original) + ' -> ' + str(new))
+
+
+def getSetTrendParameters(value, trendObj, baseName):
+    getter = trendObj.__getattribute__('get' + baseName)
+    setter = trendObj.__getattribute__('set' + baseName)
+
+    # TODO: Add an assert!
+    original = getter()
+    setter(value)
+    new = getter()
     print(baseName + ' ' + str(original) + ' -> ' + str(new))
 
 
@@ -454,6 +623,14 @@ def test_case_3():
     test_case_3_zone_1()
 
 
+def test_case_4():
+    print('')
+    print('**** Case number: 4 ****')
+
+    #  --- Zone 1 ---
+    test_case_4_zone_1()
+
+
 def test_case_1_zone_1():
     print('Common parameters')
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
@@ -461,7 +638,8 @@ def test_case_1_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.VERY_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -480,7 +658,8 @@ def test_case_1_zone_2():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Two zones
     print('Zone: 1')
@@ -505,7 +684,8 @@ def test_case_2_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
 
     # Only one zone
@@ -525,7 +705,8 @@ def test_case_2_zone_2():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Two zones
     print('Zone: 1')
@@ -550,11 +731,31 @@ def test_case_3_zone_1():
     defineCommonModelParam(
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
     add_zone_1_for_case_3(apsmodel)
+    selectedZoneNumber = 1
+    selectedRegionNumber = 0
+    apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
+    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+
+def test_case_4_zone_1():
+    print('Common parameters')
+    fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
+    apsmodel = APSModel()
+    defineCommonModelParam(
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME, 
+        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+    )
+    # Only one zone
+    print('Zone: 1')
+    add_zone_1_for_case_4(apsmodel)
     selectedZoneNumber = 1
     selectedRegionNumber = 0
     apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
@@ -588,6 +789,7 @@ def add_zone_1_for_case_1(apsmodel):
         azimuthAngle=[125.0, 0.0],
         stackingAngle=[0.1, 0.0],
         direction=[1, 1],
+        trendType=[TrendType.LINEAR, TrendType.LINEAR],
         previewSeed=[9282727, 96785],
         # Truncation rule
         truncType='Cubic',
@@ -629,6 +831,13 @@ def add_zone_2_for_case_1(apsmodel):
         azimuthAngle=[0.0, 125.0, 0.0],
         stackingAngle=[0.0, 0.1, 0.0],
         direction=[1, -1, 1],
+        trendType=[TrendType.LINEAR, TrendType.ELLIPTIC, TrendType.ELLIPTIC],
+        curvature=[1.0, 2.0, 1.0],
+        migrationAngle=[0, 0, 0],
+        origin_x=[0.5, 0.5, 0.5],
+        origin_y=[0.0, 0.0, 0.0],
+        origin_z_simbox=[0.0, 0.0, 0.0],
+        origin_type=[OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE],
         previewSeed=[8727, 977727, 776785],
         # Truncation rule
         truncType='Angle',
@@ -666,6 +875,13 @@ def add_zone_1_for_case_2(apsmodel):
         azimuthAngle=[125.0, 0.0, 0.0, 0.0],
         stackingAngle=[0.1, 0.0, 0.0, 0.0],
         direction=[1, 1, 1, 1],
+        trendType=[TrendType.HYPERBOLIC, TrendType.ELLIPTIC, TrendType.ELLIPTIC, TrendType.ELLIPTIC],
+        curvature=[2.0, 2.0, 1.0, 1.0],
+        migrationAngle=[88.0, 0, 0, 0],
+        origin_x=[0.5, 0.5, 0.5, 0.5],
+        origin_y=[0.5, 0.0, 0.0, 0.0],
+        origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+        origin_type=[OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE],
         previewSeed=[9282727, 96785, 88760019, 8156827],
         # Truncation rule
         truncType='Cubic',
@@ -703,6 +919,13 @@ def add_zone_2_for_case_2(apsmodel):
         azimuthAngle=[125.0, 0.0, 90.0, 0.0],
         stackingAngle=[0.1, 0.0, 0.01, 0.0],
         direction=[1, 1, -1, 1],
+        trendType=[TrendType.HYPERBOLIC, TrendType.ELLIPTIC, TrendType.ELLIPTIC, TrendType.ELLIPTIC],
+        curvature=[10.0, 2.0, 1.0, 1.0],
+        migrationAngle=[88.0, 0, 0, 0],
+        origin_x=[0.5, 0.5, 0.5, 0.5],
+        origin_y=[0.5, 0.0, 0.0, 0.0],
+        origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+        origin_type=[OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE],
         previewSeed=[9282727, 96785, 88760019, 8156827],
         # Truncation rule
         truncType='Angle',
@@ -740,6 +963,59 @@ def add_zone_1_for_case_3(apsmodel):
         azimuthAngle=[125.0, 0.0, 0.0, 0.0],
         stackingAngle=[0.1, 0.0, 0.0, 0.0],
         direction=[1, 1, 1, 1],
+        trendType=[TrendType.HYPERBOLIC, TrendType.ELLIPTIC, TrendType.ELLIPTIC, TrendType.ELLIPTIC],
+        curvature=[6.1, 2.0, 1.0, 1.0],
+        migrationAngle=[0.0, 0.0, 0.0, 0.0],
+        origin_x=[450000.0, 0.5, 0.5, 0.5],
+        origin_y=[6000000.0, 0.5, 0.0, 0.0],
+        origin_z_simbox=[0.5, 0.0, 0.0, 0.0],
+        origin_type=[OriginType.ABSOLUTE, OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE],
+        previewSeed=[9282727, 96785, 88760019, 8156827],
+        # Truncation rule
+        truncType='Bayfill',
+        alphaFieldNameForBackGroundFacies=['GRF6', 'GRF7', 'GRF8'],
+        sf_value=0.65,
+        ysf=0.5,
+        sbhd=0.55,
+        useConstTruncParam=1,
+        faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
+        debug_level=NO_VERBOSE_DEBUG
+    )
+
+def add_zone_1_for_case_4(apsmodel):
+    addZoneParam(
+        apsmodel=apsmodel,
+        zoneNumber=1,
+        regionNumber=0,
+        horizonNameForVariogramTrendMap='zone_1',
+        simBoxThickness=4.0,
+        # Facies prob for zone
+        faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
+        useConstProb=1,
+        faciesProbList=[0.4, 0.4, 0.03, 0.07, 0.1],
+        # Gauss field parameters. One entry in list for each gauss field
+        gaussFieldsInZone=['GRF6', 'GRF7', 'GRF8', 'GRF9'],
+        gfTypes=['GENERAL_EXPONENTIAL', 'SPHERICAL', 'EXPONENTIAL', 'GENERAL_EXPONENTIAL'],
+        range1=[3000.0, 1500.0, 2500.0, 750.0],
+        range2=[1400.0, 750.0, 800.0, 5200.0],
+        range3=[2.0, 1.0, 4.0, 120.0],
+        azimuthVariogramAngles=[35.0, 125.0, 95.0, 323.0],
+        dipVariogramAngles=[0.01, 0.0, 0.0, 0.02],
+        power=[1.8, 1.0, 1.0, 1.95],
+        # Trend parameters. One entry in list for each gauss field
+        useTrend=[1, 1, 0, 0],
+        relStdDev=[0.05, 0.06, 0, 0],
+        azimuthAngle=[125.0, 80.0, 0.0, 0.0],
+        stackingAngle=[0.1, 0.025, 0.0, 0.0],
+        direction=[1, 1, 1, 1],
+        trendType=[TrendType.HYPERBOLIC, TrendType.ELLIPTIC_CONE, TrendType.NONE, TrendType.NONE],
+        curvature=[2.5, 2.9, 0, 0],
+        migrationAngle=[89.5, 88.0, 0, 0],
+        relativeSize=[0,1.5,0,0],
+        origin_x=[0.5, 0.5, 0.5, 0.5],
+        origin_y=[0.0, 0.0, 0.0, 0.0],
+        origin_z_simbox=[1.0, 1.0, 1.0, 1.0],
+        origin_type=[OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE, OriginType.RELATIVE],
         previewSeed=[9282727, 96785, 88760019, 8156827],
         # Truncation rule
         truncType='Bayfill',

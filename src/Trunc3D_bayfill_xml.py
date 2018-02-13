@@ -456,21 +456,32 @@ class Trunc3D_bayfill(Trunc2D_Base):
         polygons = copy.copy(self.__polygons)
         return polygons
 
-    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
+#    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
         # Input: get3DParamFunction - Pointer to a function to read 3D parameter from RMS
         #        gridModel - Pointer to grid model in RMS
 
         # This function should only be called if the truncation parameter sf is to be spatially varying
-        assert self.__useConstTruncModelParam
+#        assert self.__useConstTruncModelParam
 
+        # Read truncation parameters
+#        paramName = self.__param_sf_name
+#        if self._debug_level >= Debug.VERBOSE:
+#            print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self._className)
+#            print('--- Read RMS parameter: ' + paramName)
+        # Expect that the function points to the function:
+        #  getContinuous3DParameterValues with input: (gridModel,paramName,realNumber,self._debug_level)
+#        [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
+#        self.__param_sf = values
+
+    def getTruncationParam(self, gridModel, realNumber):
+        import src.generalFunctionsUsingRoxAPI as gr
         # Read truncation parameters
         paramName = self.__param_sf_name
         if self._debug_level >= Debug.VERBOSE:
             print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self._className)
             print('--- Read RMS parameter: ' + paramName)
-        # Expect that the function points to the function:
-        #  getContinuous3DParameterValues with input: (gridModel,paramName,realNumber,self._debug_level)
-        [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
+
+        values = gr.getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
         self.__param_sf = values
 
     def faciesIndxPerPolygon(self):
@@ -1741,14 +1752,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
                      self.__useZ
                      self.__Zm
         """
-        x = alphaCoord[0]
-        y = alphaCoord[1]
-        z = alphaCoord[2]
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
+        z = alphaCoord[self._alphaIndxList[2]]
         for indx in range(len(self._faciesInTruncRule)):
             if self._faciesIsDetermined[indx] == 1:
                 fIndx = self._orderIndex[indx]
                 faciesCode = self._faciesCode[fIndx]
-                return [faciesCode, fIndx]
+                return faciesCode, fIndx
 
         faciesCode = -1
         indx = -1
@@ -1779,7 +1790,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
 
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     @staticmethod
     def __isInsidePolygon(polygon, xInput, yInput):

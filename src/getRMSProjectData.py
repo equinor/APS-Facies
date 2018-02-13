@@ -62,7 +62,7 @@ importlib.reload(APSMainFaciesTable)
 importlib.reload(xml)
 
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify
+from src.utils.xml import prettify, getTextCommand, getKeyword
 
 
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
@@ -77,64 +77,59 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     root = tree.getroot()
 
     kw = 'GridModel'
-    gridModelObj = root.find(kw)
-    if gridModelObj is None:
-        print('Error: Missing specification of ' + kw)
-        sys.exit()
-        
+    gridModelObj = getKeyword(root, kw, parentKeyword='', modelFile=None, required=True)
+
     kw1 = 'Name'
-    gridModelNameObj = gridModelObj.find(kw1)
-    if gridModelNameObj is None:
-        print('Error: Missing specification of keyword ' + kw1 + ' under keyword ' + kw)
-        sys.exit()
-    text = gridModelNameObj.text
+    text = getTextCommand(gridModelObj, kw1, parentKeyword=kw, defaultText=None, modelFile=None, required=True) 
     gridModelName = text.strip()
 
     kw3 = 'ZoneParameter'
-    zoneParamNameObj = gridModelObj.find(kw3)
-    if zoneParamNameObj is None:
-        print('Error: Missing specification of keyword ' + kw3 + ' under keyword ' + kw)
-        sys.exit()
-    text = zoneParamNameObj.text
-    zoneParamName = text.strip()
+    text = getTextCommand(gridModelObj, kw3, parentKeyword=kw, defaultText=None, modelFile=None, required=False) 
+    zoneParamName = None
+    if text is not None:
+        zoneParamName = text.strip()
+    else:
+        print('Keyword: {} not used'.format(kw3))
 
     kw4 = 'RegionParameter'
-    regionParamName=None
-    regionParamNameObj = gridModelObj.find(kw4)
-    if regionParamNameObj is not None:
-        text = regionParamNameObj.text
+    text = getTextCommand(gridModelObj, kw4, parentKeyword=kw, defaultText=None, modelFile=None, required=False) 
+    regionParamName = None
+    if text is not None:
         regionParamName = text.strip()
     else:
-        print('Note: Missing specification of keyword ' + kw4 + ' under keyword ' + kw)
-        print('      You will not be able to use APS models for regions if this is not specified')
-
+        print('Keyword: {} not used'.format(kw4))
 
     if debug_level >= Debug.VERY_VERBOSE:
         print('Debug output: Grid model:         ' + gridModelName)
-        print('Debug output: Zone parameter:     ' + zoneParamName)
+        if zoneParamName is not None:
+            print('Debug output: Zone parameter:     ' + zoneParamName)
         if regionParamName is not None:
             print('Debug output: Region parameter:   ' + regionParamName)
 
     kw = 'GaussFields'
+    text = getTextCommand(root, kw, parentKeyword='', defaultText=None, modelFile=None, required=False)
     gfNames = []
-    gfNameObj = root.find(kw)
-    text = gfNameObj.text
-    names = text.split()
-    for i in range(len(names)):
-        name = names[i]
-        gfNames.append(name)
+    if text is not None:
+        names = text.split()
+        for i in range(len(names)):
+            name = names[i]
+            gfNames.append(name)
+    else:
+        print('Keyword: {} not used'.format(kw))
 
     kw = 'HorizonReference'
     hRefObj = root.find(kw)
-    if hRefObj is None:
-        print('Error: Missing specification of ' + kw)
-        sys.exit()
-    text = hRefObj.get('name')
-    horizonRefName = text.strip()
-    text = hRefObj.get('type')
-    horizonRefType = text.strip()
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: Horizon reference:  ' + horizonRefName + ' with type ' + horizonRefType)
+    horizonRefName = None
+    horizonRefType = None
+    if hRefObj is not None:
+        text = hRefObj.get('name')
+        horizonRefName = text.strip()
+        text = hRefObj.get('type')
+        horizonRefType = text.strip()
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Horizon reference:  ' + horizonRefName + ' with type ' + horizonRefType)
+    else:
+        print('Keyword: {} not used'.format(kw))
 
     kw = 'Horizon'
     horizonList = []
@@ -142,45 +137,58 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
         if hObj is not None:
             text = hObj.text
             horizonList.append(text.strip())
+        else:
+            print('Keyword: {} not used'.format(kw))
 
     kw1 = 'WellName'
+    wellRefName = None
+    wellNameRefObj = None
     wellNameRefObj = root.find(kw1)
-    if wellNameRefObj is None:
-        print('Error: Missing specification of ' + kw1)
-        sys.exit()
-    text = wellNameRefObj.get('name')
-    wellRefName = text.strip()
+    if wellNameRefObj is not None:
+        text = wellNameRefObj.get('name')
+        wellRefName = text.strip()
+    else:
+        print('Keyword: {} not used'.format(kw1))
+        trajectoryName = 'Trajectory'
+        logrunName = 'Logrun'
+        logName = 'LogName'
 
-    kw2 = 'Trajectory'
-    trRefObj = wellNameRefObj.find(kw2)
-    if trRefObj is None:
-        print('Error: Missing specification of ' + kw2 + ' under ' + kw1)
-        sys.exit()
-    text = trRefObj.get('name')
-    trajectoryName = text.strip()
+    if wellNameRefObj is not None:
+        kw2 = 'Trajectory'
+        trajectoryName = 'Trajectory'
+        trRefObj = wellNameRefObj.find(kw2)
+        if trRefObj is not None:
+            text = trRefObj.get('name')
+            trajectoryName = text.strip()
+        else:
+            print('Error: Missing keyword: {}'.format(kw2))
 
-    kw3 = 'Logrun'
-    logrunRefObj = trRefObj.find(kw3)
-    if logrunRefObj is None:
-        print('Error: Missing specification of ' + kw3 + ' under ' + kw2)
-        sys.exit()
-    text = logrunRefObj.get('name')
-    logrunName = text.strip()
+        kw3 = 'Logrun'
+        logrunName = 'Logrun'
+        logrunRefObj = trRefObj.find(kw3)
+        if logrunRefObj is not None:
+            text = logrunRefObj.get('name')
+            logrunName = text.strip()
+        else:
+            print('Error: Missing keyword: {}'.format(kw3))
 
-    kw4 = 'LogName'
-    logNameRefObj = logrunRefObj.find(kw4)
-    if logNameRefObj is None:
-        print('Error: Missing specification of ' + kw4 + ' under ' + kw3)
-        sys.exit()
-    text = logNameRefObj.text
-    logName = text.strip()
+        kw4 = 'LogName'
+        logName = 'LogName'
+        logNameRefObj = logrunRefObj.find(kw4)
+        if logrunRefObj is not None:
+            if logNameRefObj is not None:
+                text = logNameRefObj.text
+                logName = text.strip()
+            else:
+                print('Error: Missing keyword: {}'.format(kw4))
 
     if debug_level >= Debug.VERY_VERBOSE:
-        print(
-            'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
+        if wellRefName is not None:
+            print(
+                'Debug output: Well reference:     ' + wellRefName + '   ' + trajectoryName + '   ' + logrunName + '   ' + logName)
 
-    return [gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
-            wellRefName, trajectoryName, logrunName, logName]
+    return (gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
+            wellRefName, trajectoryName, logrunName, logName)
 
 
 def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level=Debug.OFF):
@@ -287,15 +295,18 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         # Check if this is the specified zone parameter
         if name == zoneParamName:
             # Get the zone parameter values
-            [zoneValues, codeNamesZone] = gr.getDiscrete3DParameterValues(gridModel, name, realNumber=realizationNumber, debug_level=debug_level)
+            zoneValues, codeNamesZone = gr.getDiscrete3DParameterValues(gridModel, name, 
+                                                                        realNumber=realizationNumber, 
+                                                                        debug_level=debug_level)
         # Check if the property type is integer or float type
 
         if regionParamName is not None:
             # Check if this is the specified region parameter
             if name == regionParamName:
                 # Get the region parameter values
-                [regionValues, codeNamesRegion] = gr.getDiscrete3DParameterValues(gridModel, name,realNumber=realizationNumber,  debug_level=debug_level)
-
+                regionValues, codeNamesRegion = gr.getDiscrete3DParameterValues(gridModel, name,
+                                                                                realNumber=realizationNumber,  
+                                                                                debug_level=debug_level)
                 
         # Check if the property type is integer or float type
 
@@ -318,24 +329,25 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     # end for properties in gridmodel
 
     zonesAndRegions = {}
-    if regionParamName == None:
-        if zoneValues == None:
-            raise ValueError('Zone parameter is not defined or empty')
+    if regionParamName is None:
+        if zoneParamName is not None:
+            if zoneValues == None:
+                raise ValueError('Zone parameter is not defined or empty')
 
-        # Only zone numbers are reported
-        for i in range(len(zoneValues)):
-            zVal = zoneValues[i]
-            rVal = 0
-            key = (zVal,rVal)
-            if not key in zonesAndRegions:
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: Add zone = ({})'.format(str(zVal)))
-                zonesAndRegions[key] = 1
+            # Only zone numbers are reported
+            for i in range(len(zoneValues)):
+                zVal = zoneValues[i]
+                rVal = 0
+                key = (zVal,rVal)
+                if not key in zonesAndRegions:
+                    if debug_level >= Debug.VERY_VERBOSE:
+                        print('Debug output: Add zone = ({})'.format(str(zVal)))
+                    zonesAndRegions[key] = 1
     else:
         # Both zone numbers and region numbers are reported
-        if zoneValues == None:
+        if zoneValues is None:
             raise ValueError('Zone parameter is not defined or empty')
-        if regionValues == None:
+        if regionValues is None:
             raise ValueError('Region parameter is not defined or empty')
         if len(zoneValues) != len(regionValues):
             raise ValueError('Length of zone parameter and region parameter are different. Some inconsistency.')
@@ -369,8 +381,8 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     zoneNames = []
     nLayersPerZone = []
     grid = gridModel.get_grid()
-    [xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone] = gr.getGridAttributes(grid, debug_level)
+    (xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
+     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone) = gr.getGridAttributes(grid, debug_level)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -381,7 +393,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
     for i in range(len(zoneNames)):
         tag = 'ZoneName'
-        attribute = {'number': str(i + 1), 'nLayers': str(nLayersPerZone[i])}
+        attribute = {'number': str(i + 1), 'nLayers': str(nLayersPerZone[i]), 'start': str(startLayerPerZone[i]), 'end': str(endLayerPerZone[i])}
         name = zoneNames[i]
         zNameObj = Element(tag, attribute)
         zNameObj.text = ' ' + name.strip() + ' '
@@ -434,92 +446,93 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     # Finished writing grid model data
 
 
-    # Start scanning for horizon names and 2D map size information
-    found = 0
-    if horizonRefName in project.horizons:
-        found = 1
-    if found == 0:
-        print('Error: Specified name for reference horizon: ' + horizonRefName + ' is not an existing horizon')
-        sys.exit()
+    if horizonRefName is not None:
+        # Start scanning for horizon names and 2D map size information
+        found = 0
+        if horizonRefName in project.horizons:
+            found = 1
+        if found == 0:
+            print('Error: Specified name for reference horizon: ' + horizonRefName + ' is not an existing horizon')
+            sys.exit()
 
-    found = 0
-    if horizonRefType in project.horizons[horizonRefName]:
-        found = 1
-    if found == 0:
-        print('Error: Specified type for reference horizon: ' + horizonRefType + ' is not defined')
-        sys.exit()
-    # Use the specified reference horizon name and type to get 2D surface grid info
-    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
-        project.horizons, horizonRefName, horizonRefType, debug_level
-    )
-    tag = 'SurfaceTrendDimensions'
-    surfObj = Element(tag)
-    topElement.append(surfObj)
+        found = 0
+        if horizonRefType in project.horizons[horizonRefName]:
+            found = 1
+        if found == 0:
+            print('Error: Specified type for reference horizon: ' + horizonRefType + ' is not defined')
+            sys.exit()
+        # Use the specified reference horizon name and type to get 2D surface grid info
+        [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
+            project.horizons, horizonRefName, horizonRefType, debug_level)
+        tag = 'SurfaceTrendDimensions'
+        surfObj = Element(tag)
+        topElement.append(surfObj)
 
-    tag = 'NX'
-    nxObj = Element(tag)
-    nxObj.text = ' ' + str(nx) + ' '
-    surfObj.append(nxObj)
+        tag = 'NX'
+        nxObj = Element(tag)
+        nxObj.text = ' ' + str(nx) + ' '
+        surfObj.append(nxObj)
 
-    tag = 'NY'
-    nyObj = Element(tag)
-    nyObj.text = ' ' + str(ny) + ' '
-    surfObj.append(nyObj)
+        tag = 'NY'
+        nyObj = Element(tag)
+        nyObj.text = ' ' + str(ny) + ' '
+        surfObj.append(nyObj)
 
-    tag = 'Xmin'
-    xminObj = Element(tag)
-    xminObj.text = ' ' + str(xmin) + ' '
-    surfObj.append(xminObj)
+        tag = 'Xmin'
+        xminObj = Element(tag)
+        xminObj.text = ' ' + str(xmin) + ' '
+        surfObj.append(xminObj)
 
-    tag = 'Xmax'
-    xmaxObj = Element(tag)
-    xmaxObj.text = ' ' + str(xmax) + ' '
-    surfObj.append(xmaxObj)
+        tag = 'Xmax'
+        xmaxObj = Element(tag)
+        xmaxObj.text = ' ' + str(xmax) + ' '
+        surfObj.append(xmaxObj)
 
-    tag = 'Ymin'
-    yminObj = Element(tag)
-    yminObj.text = ' ' + str(ymin) + ' '
-    surfObj.append(yminObj)
+        tag = 'Ymin'
+        yminObj = Element(tag)
+        yminObj.text = ' ' + str(ymin) + ' '
+        surfObj.append(yminObj)
 
-    tag = 'Ymax'
-    ymaxObj = Element(tag)
-    ymaxObj.text = ' ' + str(ymax) + ' '
-    surfObj.append(ymaxObj)
+        tag = 'Ymax'
+        ymaxObj = Element(tag)
+        ymaxObj.text = ' ' + str(ymax) + ' '
+        surfObj.append(ymaxObj)
 
-    tag = 'Xinc'
-    xincObj = Element(tag)
-    xincObj.text = ' ' + str(xinc) + ' '
-    surfObj.append(xincObj)
+        tag = 'Xinc'
+        xincObj = Element(tag)
+        xincObj.text = ' ' + str(xinc) + ' '
+        surfObj.append(xincObj)
 
-    tag = 'Yinc'
-    yincObj = Element(tag)
-    yincObj.text = ' ' + str(yinc) + ' '
-    surfObj.append(yincObj)
+        tag = 'Yinc'
+        yincObj = Element(tag)
+        yincObj.text = ' ' + str(yinc) + ' '
+        surfObj.append(yincObj)
 
-    tag = 'Rotation'
-    rotObj = Element(tag)
-    rotObj.text = ' ' + str(rotation) + ' '
-    surfObj.append(rotObj)
+        tag = 'Rotation'
+        rotObj = Element(tag)
+        rotObj.text = ' ' + str(rotation) + ' '
+        surfObj.append(rotObj)
 
-    for hName in horizonList:
-        tag = 'Horizon'
-        hNameObj = Element(tag)
-        hNameObj.text = ' ' + copy.copy(hName) + ' '
-        topElement.append(hNameObj)
+        for hName in horizonList:
+            tag = 'Horizon'
+            hNameObj = Element(tag)
+            hNameObj.text = ' ' + copy.copy(hName) + ' '
+            topElement.append(hNameObj)
 
     # Find facies names in reference well log
-    well = project.wells[wellRefName]
-    trajectory = well.wellbore.trajectories[trajectoryName]
-    log_run = trajectory.log_runs[logrunName]
-    log_curve = log_run.log_curves[logName]
-    faciesCodeNames = log_curve.get_code_names()
+    if wellRefName is not None:
+        well = project.wells[wellRefName]
+        trajectory = well.wellbore.trajectories[trajectoryName]
+        log_run = trajectory.log_runs[logrunName]
+        log_curve = log_run.log_curves[logName]
+        faciesCodeNames = log_curve.get_code_names()
 
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: Facies names: ')
-        print(faciesCodeNames)
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Facies names: ')
+            print(faciesCodeNames)
 
-    faciesTable = APSMainFaciesTable.APSMainFaciesTable(fTable=faciesCodeNames)
-    faciesTable.XMLAddElement(topElement)
+        faciesTable = APSMainFaciesTable.APSMainFaciesTable(fTable=faciesCodeNames)
+        faciesTable.XMLAddElement(topElement)
     # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
         if debug_level > Debug.SOMEWHAT_VERBOSE:
@@ -530,9 +543,15 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
 
 def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):
-    [gridModelName, zoneParamName, regionParamName, gfNames, horizonRefName, horizonRefType, horizonList,
-     wellRefName, trajectoryName, logrunName, logName] = readInputXMLFile(inputFile, debug_level)
 
+    (gridModelName, zoneParamName, regionParamName, gfNames, 
+     horizonRefName, horizonRefType, horizonList,
+     wellRefName, trajectoryName, logrunName, logName) = readInputXMLFile(inputFile, debug_level)
+
+    if horizonRefName is None or horizonRefType is None:
+        return
+
+    print('Create 2D maps in the horizon container to be used for variogram azimuth angle')
     # Get dimensions from the reference map
     # horizons is defined to be a pointer to horizons in RMS by roxapi
     horizons = project.horizons
@@ -557,26 +576,18 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
 
 
 # ----------------  Main ----------------------------------------------------
-scriptName = 'getRMSProjectData.py'
-inputFile = 'getRMSProjectData.xml'
-outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
-debug_level = Debug.VERY_VERBOSE
+if __name__ == '__main__':
+    scriptName = 'getRMSProjectData.py'
+    inputFile = 'getRMSProjectData.xml'
+    outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
+    debug_level = Debug.OFF
 
-# Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
-print('Start running APS workflow preparation script')
-print('Read file: ' + inputFile)
-print('Create 2D maps in the horizon container to be used for variogram azimuth angle')
-create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
+    # Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
+    print('Start running APS workflow preparation script')
+    print('Read file: ' + inputFile)
 
-print('Read RMS project and save some data to be read by the APS GUI script')
-scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level)
-print('Finished running: ' + scriptName)
+    create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
 
-
-
-# print(' ')
-# print('Start test output')
-# rmsData = APSDataFromRMS.APSDataFromRMS(debug_level)
-# rmsData.readRMSDataFromXMLFile(outputRMSDataFile)
-# rmsData.printData()
-# print('Finished test output')
+    print('Read RMS project and save some data to be read by the APS GUI script')
+    scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level)
+    print('Finished running: ' + scriptName)

@@ -105,7 +105,7 @@ class APSModel:
     def __init__(
             self, modelFileName=None, rmsProjectName='', rmsWorkflowName='', rmsGaussFieldScriptName='',
             rmsGridModelName='', rmsSingleZoneGrid='False', rmsZoneParameterName='', rmsRegionParameterName='',
-            rmsFaciesParameterName='', rmsGFJobs=None,
+            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, rmsGFJobs=None,
             rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionIndx=0,
             previewScale=1.0, debug_level=Debug.OFF):
@@ -176,6 +176,8 @@ class APSModel:
         self.__rmsZoneParamName = rmsZoneParameterName
         self.__rmsRegionParamName = rmsRegionParameterName
         self.__rmsFaciesParamName = rmsFaciesParameterName
+        self.__seedFileName = seedFileName
+        self.writeSeeds = writeSeeds
         self.__rmsGFJobs = rmsGFJobs
 
         self.__refHorizonNameForVariogramTrend = rmsHorizonRefName
@@ -255,25 +257,30 @@ class APSModel:
         placement = {
             'RMSProjectName': '__rmsProjectName',
             'RMSWorkflowName': '__rmsWorkflowName',
-            'RMSGaussFieldScriptName': '__rmsGaussFieldScriptName',
             'GridModelName': '__rmsGridModelName',
             'ZoneParamName': '__rmsZoneParamName',
             'ResultFaciesParamName': '__rmsFaciesParamName',
         }
         for keyword, variable in placement.items():
             prefix = '_' + self.__class__.__name__
-            value = getTextCommand(root, keyword, modelFile=modelFileName)
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName)
             self.__setattr__(prefix + variable, value)
+
+        # Read optional keyword for IPL script file
+        keyword = 'RMSGaussFieldScriptName'
+        value = getTextCommand(root, keyword, modelFile=modelFileName,required=False)
+        if value is not None:
+            self.__rmsGaussFieldScriptName = value
 
         # Read optional keyword for region parameter
         keyword = 'RegionParamName'
-        value = getTextCommand(root, keyword, modelFile=modelFileName,required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None,  modelFile=modelFileName, required=False)
         if value is not None:
             self.__rmsRegionParamName = value
             
-        # Read optional keyword which specify whether the gridmodel is a singe zone grid or multi zone grid
+        # Read optional keyword which specify whether the gridmodel is a single zone grid or multi zone grid
         keyword = 'UseSingleZoneGrid'
-        value = getIntCommand(root, keyword, parentKeyword='',
+        value = getIntCommand(root, keyword, parentKeyword='APSModel',
                               minValue=0, maxValue=1, defaultValue=0,
                               modelFile=modelFileName, required=False
         )
@@ -281,6 +288,19 @@ class APSModel:
             self.__rmsSingleZoneGrid = False
         else:
             self.__rmsSingleZoneGrid = True
+
+        # Read optional keyword to specify name of seed file
+        keyword = 'SeedFile'
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat',  modelFile=modelFileName, required=False)
+        self.__seedFileName = value
+
+        # Read optional keyword to specify the boolean variable writeSeeds
+        keyword = 'WriteSeeds'
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes',  modelFile=modelFileName, required=False)
+        if  value.upper() == 'YES':
+            self.writeSeeds = True
+        else:
+            self.writeSeeds = False
 
         # Read all gauss field jobs and their gauss field 3D parameter names
         self.__rmsGFJobs = APSGaussFieldJobs(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
@@ -312,7 +332,7 @@ class APSModel:
             )
 
         # --- Zone ---
-        if  self.__debug_level >= Debug.VERBOSE:
+        if  self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('--- Number of specified zone models: {}'.format(str(len(zModels.findall('Zone')))))
             print('')
@@ -438,9 +458,9 @@ class APSModel:
                     zNumber = key[0]
                     rNumber = key[1]
                     if rNumber == 0:
-                        print('  Zone: {}'.format(str(zNumber)))
+                        print('    Zone: {}'.format(str(zNumber)))
                     else:
-                        print('  Zone: {}  Region: {}'.format(str(zNumber), str(rNumber)))
+                        print('    Zone: {}  Region: {}'.format(str(zNumber), str(rNumber)))
             print('')
             print('------------ End reading model file in APSModel ------------------')
             print('')
@@ -700,6 +720,9 @@ class APSModel:
         else:
             return ''
 
+    def getSeedFileName(self):
+        return self.__seedFileName
+
     def debug_level(self):
         return self.__debug_level
 
@@ -741,6 +764,9 @@ class APSModel:
 
     def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
+
+    def setSeedFileName(self,name):
+        self.__seedFileName = copy.copy(name)
 
     def set_debug_level(self, debug_level):
         if isinstance(debug_level, str):
@@ -1110,6 +1136,20 @@ class APSModel:
         elem.text = ' ' + str(self.__debug_level.value) + ' '
         root.append(elem)
 
+        tag = 'SeedFile'
+        elem = Element(tag)
+        elem.text = ' ' + str(self.__seedFileName) + ' '
+        root.append(elem)
+
+        tag = 'WriteSeeds'
+        elem = Element(tag)
+        if self.writeSeeds:
+            elem.text = ' ' + 'yes' + ' '
+        else:
+            elem.text = ' ' + 'no' + ' '
+            
+        root.append(elem)
+
         # Add command MainFaciesTable
         self.__faciesTable.XMLAddElement(root)
 
@@ -1147,16 +1187,3 @@ class APSModel:
         with open(outputModelFileName, 'w') as file:
             file.write(rootReformatted)
 
-# def get2DMapRefHorizonName(self):
-#        return copy.copy(self.__refHorizonNameForVariogramTrend)
-#
-#    def get2DMapRefHorizonType(self):
-#        return copy.copy(self.__refHorizonReprNameForVariogramTrend)
-#
-#
-#    def getCellForPreview(self):
-#        if len(self.__previewCell) == 0:
-#            text = 'Error: Must specify indices (I,J,K) for grid cell '
-#            text = text + 'whose probability should be used in previewer as constant probabilities'
-#            sys.exit()
-#        return copy.copy(self.__previewCell)

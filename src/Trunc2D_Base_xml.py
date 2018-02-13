@@ -348,7 +348,7 @@ class Trunc2D_Base:
                 alphaFieldIndxListThisGroup.append(alphaIndx)
                 # print('alphaFieldName: ' + alphaFieldName + ' alphaIndx: ' + str(alphaIndx))
 
-                [nFaciesInTruncRule, indx, fIndx, isNew] = self._addFaciesToTruncRule(overlayFaciesName)
+                nFaciesInTruncRule, indx, fIndx, isNew = self._addFaciesToTruncRule(overlayFaciesName)
                 if isNew:
                     self._orderIndex.append(fIndx)
 
@@ -669,7 +669,7 @@ class Trunc2D_Base:
                                          ''.format(fName))
 
                     # Add the overlay facies to the list of facies for the truncation rule if not already added
-                    [nFacies, indx, fIndx, isNew] = self._addFaciesToTruncRule(fName)
+                    nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
                     overlayFaciesIndxInGroup.append(indx)
                     if isNew == 1:
                         self._orderIndex.append(fIndx)
@@ -919,7 +919,7 @@ class Trunc2D_Base:
                              ''.format(self._className, fName)
                              )
         self._nFaciesInTruncRule = nFaciesInTruncRule
-        return [nFaciesInTruncRule, indx, fIndx, isNew]
+        return nFaciesInTruncRule, indx, fIndx, isNew
 
     def writeContentsInDataStructure(self):
         """
@@ -1286,7 +1286,7 @@ class Trunc2D_Base:
 
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
-        return [faciesCode, fIndx]
+        return faciesCode, fIndx
 
     def _XMLAddElement(self, parent):
         """
@@ -1391,3 +1391,10 @@ class Trunc2D_Base:
 #            print('sumProb oppdatert: ' + str(sumProb))
         return faciesProbNew
 
+    def getGaussFieldsInTruncationRule(self):
+        # Return list of the gauss field names actually used in the truncation rule
+        gfUsed = []
+        for i in range(len(self._alphaIndxList)):
+            gfName = self._gaussFieldsInZone[self._alphaIndxList[i]]
+            gfUsed.append(gfName)
+        return gfUsed

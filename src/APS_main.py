@@ -10,20 +10,17 @@ Output:
 """
 import sys
 import importlib
+
 import numpy as np
 
 import src.APSModel
 import src.generalFunctionsUsingRoxAPI as gr
-import src.Trend3D_linear
 
 importlib.reload(src.APSModel)
 importlib.reload(gr)
-importlib.reload(src.Trend3D_linear)
 
 from src.APSModel import APSModel
-from src.Trend3D_linear import Trend3D_linear
 from src.utils.constants.simple import Debug
-
 
 
 # Initialise common variables
@@ -33,7 +30,7 @@ functionName = 'APS_main.py'
 eps = 0.000001
 
 
-def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0, debug_level=Debug.SOMEWHAT_VERBOSE):
+def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0, debug_level=Debug.OFF):
     """
     For specified zoneNumber, identify which cells belongs to this zone.
     :param zoneValues:  Vector with zone values. The length is the same as the
@@ -79,7 +76,7 @@ def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0,
             print('Debug output: In findDefinedCells: Number of active cells for current zoneNumber={} is: {}'
                   ''.format(str(zoneNumber), str(nDefinedCells)))
             
-    return [nDefinedCells, cellIndexDefined]
+    return nDefinedCells, cellIndexDefined
 
 
 def transformEmpiric(nDefinedCells, cellIndexDefined, gaussValues, alphaValues):
@@ -278,442 +275,471 @@ def checkAndNormaliseProb(
                 '(Total: {})'.format(str(psum))
             )
 
-    return [probDefined, nCellWithModifiedProb]
-
-
-def createTrend(trendModelObj, gridModel, realNumber, nDefinedCells,
-                cellIndexDefined, zoneNumber, simBoxThickness, debug_level=Debug.OFF):
-    if trendModelObj.type == 'Trend3D_linear':
-        trendObj = Trend3D_linear(trendModelObj, debug_level)
-        [minmaxDifference, trendValues] = trendObj.createTrend(
-            gridModel, realNumber, nDefinedCells, cellIndexDefined, zoneNumber, simBoxThickness
-        )
-    else:
-        raise ValueError('Trend type: ' + trendModelObj.type + ' is not implemented.')
-    return [minmaxDifference, trendValues]
+    return probDefined, nCellWithModifiedProb
 
 
 # --------------- Start main script ------------------------------------------
+if __name__ == '__main__':
+    realNumber = project.current_realisation
+    print('Run: APS_trunc  on realisation ' + str(realNumber + 1))
 
-realNumber = project.current_realisation
-print('Run: APS_trunc  on realisation ' + str(realNumber + 1))
+    modelFileName = 'APS.xml'
 
-modelFileName = 'APS.xml'
+    print('- Read file: ' + modelFileName)
+    apsModel = APSModel(modelFileName)
+    debug_level = apsModel.debug_level()
+    rmsProjectName = apsModel.getRMSProjectName()
+    gridModelName = apsModel.getGridModelName()
+    gridModel = project.grid_models[gridModelName]
+    if gridModel.is_empty():
+        raise ValueError('Specified grid model: ' + gridModel.name + ' is empty.')
 
-print('- Read file: ' + modelFileName)
-apsModel = APSModel(modelFileName)
-debug_level = apsModel.debug_level()
-rmsProjectName = apsModel.getRMSProjectName()
-gridModelName = apsModel.getGridModelName()
-gridModel = project.grid_models[gridModelName]
-if gridModel.is_empty():
-    raise ValueError('Specified grid model: ' + gridModel.name + ' is empty.')
+    allZoneModels = apsModel.getAllZoneModelsSorted()
+    zoneParamName = apsModel.getZoneParamName()
+    regionParamName = apsModel.getRegionParamName()
+    useRegions = False
+    if regionParamName != '':
+        useRegions = True
+    resultParamName = apsModel.getResultFaciesParamName()
 
-#zoneNumberList = apsModel.getZoneNumberList()
-allZoneModels = apsModel.getAllZoneModelsSorted()
-zoneParamName = apsModel.getZoneParamName()
-regionParamName = apsModel.getRegionParamName()
-useRegions = False
-if regionParamName != '':
-    useRegions = True
-resultParamName = apsModel.getResultFaciesParamName()
+    gaussFieldScript = apsModel.getRMSGaussFieldScriptName()
 
-gaussFieldScript = apsModel.getRMSGaussFieldScriptName()
-
-# Get zone param values
-if debug_level >= Debug.VERBOSE:
-    print('--- Get RMS zone parameter: ' + zoneParamName + ' from RMS project ' + rmsProjectName)
-zoneValues = gr.getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, debug_level)
-
-regionValues = None
-if useRegions:
+    # Get zone param values
     if debug_level >= Debug.VERBOSE:
-        print('--- Get RMS region parameter: ' + regionParamName + ' from RMS project ' + rmsProjectName)
-    regionValues = gr.getContinuous3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
+        print('--- Get RMS zone parameter: ' + zoneParamName + ' from RMS project ' + rmsProjectName)
+    zoneValues = gr.getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, debug_level)
 
-# Get or initialize array for facies realisation
-nCellsTotal = len(zoneValues)
-faciesReal = np.zeros(nCellsTotal, np.uint16)
-
-# Check if specified facies realization exists and get it if so.
-if gr.isParameterDefinedWithValuesInRMS(gridModel,resultParamName,realNumber):
-    if debug_level >= Debug.VERBOSE:
-        print('--- Get RMS facies parameter which will be updated: {} from RMS project: {}'.format(resultParamName, rmsProjectName))
-    [faciesReal,codeValues] = gr.getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
-else:
-    if debug_level >= Debug.VERBOSE:
-        print('--- Facies parameter: {}  for the result will be created in the RMS project: {}'.format(resultParamName, rmsProjectName))
-
-
-# Gaussian field related lists
-GFNamesAlreadyRead = []
-GFAllValues = []
-GFAllAlpha = []
-
-# Probability related lists
-probParamNamesAlreadyRead = []
-probParamAllValues = []
-# The four lists: probParamAllValues,probParamValuesForFacies,GFAllValues, GFAllAlpha
-# will use a list of items where the item is of the form item =[name,value]
-# Index values are defined by:
-NAME = 0  # Name of index in items = [ name, values]
-VAL = 1  # Name of index in items = [ name, values]
-
-# List of modelled facies names
-allFaciesNamesModelled = []
-#selectedZoneNumberList = apsModel.getSelectedZoneNumberList()
-if debug_level >= Debug.VERY_VERBOSE:
-    if apsModel.isAllZoneRegionModelsSelected():
-        print('Debug output: All combinations of zone and region is selected to be run')
-    else:
-        print('Debug output: Selected (zone,region) pairs to simulate:')
-        for key, zoneModel in allZoneModels.items():
-            zoneNumber = key[0]
-            regionNumber = key[1]
-            if not apsModel.isSelected(zoneNumber, regionNumber):
-                continue
-            if useRegions:
-                print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
-            else:
-                print('    zone={}'.format(str(key[0])))
-    
-# Loop over all pairs of (zoneNumber, regionNumber) that is specified and selected
-# This loop calculates facies for the given (zoneNumber, regionNumber) combination
-for key, zoneModel in allZoneModels.items():
-    zoneNumber = key[0]
-    regionNumber = key[1]
-    if not apsModel.isSelected(zoneNumber, regionNumber):
-        continue
-
+    regionValues = None
     if useRegions:
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print(' ')
-            print('- Run model for (zoneNumber, regionNumber) = ({},{})'
-                  ''.format(str(zoneNumber), str(regionNumber)))
-            print(' ')
+        if debug_level >= Debug.VERBOSE:
+            print('--- Get RMS region parameter: ' + regionParamName + ' from RMS project ' + rmsProjectName)
+        regionValues = gr.getContinuous3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
+
+    # Get or initialize array for facies realisation
+    nCellsTotal = len(zoneValues)
+    faciesReal = np.zeros(nCellsTotal, np.uint16)
+
+    # Check if specified facies realization exists and get it if so.
+    if gr.isParameterDefinedWithValuesInRMS(gridModel,resultParamName,realNumber):
+        if debug_level >= Debug.VERBOSE:
+            print('--- Get RMS facies parameter which will be updated: {} from RMS project: {}'.format(resultParamName, rmsProjectName))
+        [faciesReal,codeValues] = gr.getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
     else:
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print(' ')
-            print('- Run model for zone number: ' + str(zoneNumber))
-            print(' ')
+        if debug_level >= Debug.VERBOSE:
+            print('--- Facies parameter: {}  for the result will be created in the RMS project: {}'.format(resultParamName, rmsProjectName))
 
-    # Read trend parameters for truncation parameters
-    # zoneModel.getTruncationParam(gridModel,realNumber)
-    zoneModel.getTruncationParam(gr.getContinuous3DParameterValues, gridModel, realNumber)
+    # Gaussian field related lists
+    GFNamesAlreadyRead = []
+    GFAllValues = []
+    GFAllAlpha = []
+    GFAllTrendValues = []
 
-    useConstProb = zoneModel.useConstProb()
-    GFNamesForZone = zoneModel.getUsedGaussFieldNames()
-    faciesNamesForZone = zoneModel.getFaciesInZoneModel()
-    nFacies = len(faciesNamesForZone)
+    # Probability related lists
+    probParamNamesAlreadyRead = []
+    probParamAllValues = []
+    # The four lists: probParamAllValues,probParamValuesForFacies,GFAllValues, GFAllAlpha
+    # will use a list of items where the item is of the form item =[name,value]
+    # Index values are defined by:
+    NAME = 0  # Name of index in items = [ name, values]
+    VAL = 1  # Name of index in items = [ name, values]
 
-    if debug_level >= Debug.VERBOSE:
-        for gfName in GFNamesForZone:
-            print('--- Gauss field parameter used for this zone: ' + gfName)
-
-    # Get the gauss field parameter name if not already done.
-    for gfName in GFNamesForZone:
-        if not (gfName in GFNamesAlreadyRead):
-            GFNamesAlreadyRead.append(gfName)
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Gauss field parameter: ' + gfName + ' is now being loaded.')
-            values = gr.getContinuous3DParameterValues(gridModel, gfName, realNumber, debug_level)
-
-            # Allocate space for transformed gauss field property vector alpha
-            alpha = np.zeros(len(values), np.float32)
-
-            GFAllValues.append([gfName, values])
-            gfNameTrans = gfName + '_transf'
-            GFAllAlpha.append([gfNameTrans, alpha])
-
+    # List of modelled facies names
+    allFaciesNamesModelled = []
+    if debug_level >= Debug.VERY_VERBOSE:
+        if apsModel.isAllZoneRegionModelsSelected():
+            print('Debug output: All combinations of zone and region is selected to be run')
         else:
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
+            print('Debug output: Selected (zone,region) pairs to simulate:')
+            for key, zoneModel in allZoneModels.items():
+                zoneNumber = key[0]
+                regionNumber = key[1]
+                if not apsModel.isSelected(zoneNumber, regionNumber):
+                    continue
+                if useRegions:
+                    print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
+                else:
+                    print('    zone={}'.format(str(key[0])))
 
-    # For current (zone,region) find the active cells
-    [nDefinedCells, cellIndexDefined] = findDefinedCells(zoneValues, zoneNumber, regionValues, regionNumber, debug_level)
-    if debug_level >= Debug.VERBOSE:
+    # Loop over all pairs of (zoneNumber, regionNumber) that is specified and selected
+    # This loop calculates facies for the given (zoneNumber, regionNumber) combination
+    for key, zoneModel in allZoneModels.items():
+        zoneNumber = key[0]
+        regionNumber = key[1]
+        if not apsModel.isSelected(zoneNumber, regionNumber):
+            continue
+
         if useRegions:
-            print('--- Number of active cells for (zone,region)=({},{}): {}'
-                  ''.format(str(zoneNumber), str(regionNumber), str(nDefinedCells)))
+            if debug_level >= Debug.SOMEWHAT_VERBOSE:
+                print(' ')
+                print('- Run model for (zoneNumber, regionNumber) = ({},{})'
+                      ''.format(str(zoneNumber), str(regionNumber)))
+                print(' ')
         else:
-            print('--- Number of active cells for zone: ' + str(nDefinedCells))
+            if debug_level >= Debug.SOMEWHAT_VERBOSE:
+                print(' ')
+                print('- Run model for zone number: ' + str(zoneNumber))
+                print(' ')
 
-    # For current zone,transform all gaussian fields used in this zone and update alpha 
-    indx = -999
-    GFAlphaForCurrentZone = []
-    for gfName in GFNamesForZone:
-        for j in range(len(GFAllValues)):
-            gName = GFAllValues[j][NAME]
-            if gName == gfName:
-                indx = j
-                break
-        values = GFAllValues[indx][VAL]
+        zoneModel = apsModel.getZoneModel(zoneNumber)
 
-        # Add trend to gaussian residual fields
-        [useTrend, trendModelObj, relStdDev] = zoneModel.getTrendRuleModel(gfName)
+        # Read trend parameters for truncation parameters
+        zoneModel.getTruncationParam(gridModel, realNumber)
 
-        if useTrend == 1:
-            simBoxThickness = zoneModel.getSimBoxThickness()
-            # trendValues contain trend values for the cells belonging to the set defined by cellIndexDefined
-            [minmaxDifference, trendValues] = createTrend(
-                trendModelObj, gridModel, realNumber, nDefinedCells,
-                cellIndexDefined, zoneNumber, simBoxThickness, debug_level
+        useConstProb = zoneModel.useConstProb()
+        GFNamesForZone = zoneModel.getUsedGaussFieldNames()
+        faciesNamesForZone = zoneModel.getFaciesInZoneModel()
+        nFacies = len(faciesNamesForZone)
+
+        if debug_level >= Debug.VERBOSE:
+            for gfName in GFNamesForZone:
+                print('--- Gauss field parameter used for this zone: ' + gfName)
+
+        # Get the gauss field parameter name if not already done.
+        for gfName in GFNamesForZone:
+            if not (gfName in GFNamesAlreadyRead):
+                GFNamesAlreadyRead.append(gfName)
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: Gauss field parameter: ' + gfName + ' is now being loaded.')
+                values = gr.getContinuous3DParameterValues(gridModel, gfName, realNumber, debug_level)
+                GFAllValues.append([gfName, values])
+
+                # Allocate space for transformed gauss field property vector alpha
+                gfNameTrans = gfName + '_transf'
+                if gr.isParameterDefinedWithValuesInRMS(gridModel, gfNameTrans, realNumber):
+                    if debug_level >= Debug.VERBOSE:
+                        print('--- Get transformed gauss field parameter: {} which will be updated'.format(gfNameTrans))
+                    alpha = gr.getContinuous3DParameterValues(gridModel, gfNameTrans, realNumber, debug_level)
+                else:
+                    if debug_level >= Debug.VERBOSE:
+                        print('--- Create transformed gauss field parameter: {}'.format(gfNameTrans))
+                    alpha = np.zeros(len(values), np.float32)
+                GFAllAlpha.append([gfNameTrans, alpha])
+
+                # Allocate space for trend
+                gfNameTrend = gfName + '_trend'
+                if gr.isParameterDefinedWithValuesInRMS(gridModel,gfNameTrend,realNumber):
+                    if debug_level >= Debug.VERBOSE:
+                        print('--- Get trend parameter: {} which will be updated'.format(gfNameTrend))
+                    trend = gr.getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
+                else:
+                    if debug_level >= Debug.VERBOSE:
+                        print('--- Create trend parameter: {}'.format(gfNameTrend))
+                    trend = np.zeros(len(values), np.float32)
+                GFAllTrendValues.append([gfNameTrend, trend])
+
+            else:
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: Gauss field parameter: ' + gfName + ' is already loaded.')
+
+        # For current (zone,region) find the active cells
+        nDefinedCells, cellIndexDefined = findDefinedCells(zoneValues, zoneNumber, regionValues, regionNumber, debug_level)
+        if debug_level >= Debug.VERBOSE:
+            if useRegions:
+                print('--- Number of active cells for (zone,region)=({},{}): {}'
+                      ''.format(str(zoneNumber), str(regionNumber), str(nDefinedCells)))
+            else:
+                print('--- Number of active cells for zone: ' + str(nDefinedCells))
+
+        # For current zone,transform all gaussian fields used in this zone and update alpha
+        indx = -999
+        GFAlphaForCurrentZone = []
+        zList = [zoneNumber - 1]
+        for gfName in GFNamesForZone:
+            for j in range(len(GFAllValues)):
+                gName = GFAllValues[j][NAME]
+                if gName == gfName:
+                    indx = j
+                    break
+            values = GFAllValues[indx][VAL]
+            trend  = GFAllTrendValues[indx][VAL]
+            # Add trend to gaussian residual fields
+            useTrend, trendModelObj, relStdDev = zoneModel.getTrendModel(gfName)
+
+            if useTrend:
+                if debug_level >= Debug.VERBOSE:
+                    trendTypeName = trendModelObj.type.name
+                    if useRegions:
+                        print('--- Calculate trend for: ' + gfName + ' for (zone,region)=({},{})'
+                              ''.format(str(zoneNumber), str(regionNumber)))
+                        print('--- Trend type: {}'.format(trendTypeName))
+                    else:
+                        print('--- Calculate trend for: ' + gfName + ' for zone: ' + str(zoneNumber))
+                        print('--- Trend type: {}'.format(trendTypeName))
+
+                simBoxThickness = zoneModel.getSimBoxThickness()
+                # trendValues contain trend values for the cells belonging to the set defined by cellIndexDefined
+                minmaxDifference, trendValues = trendModelObj.createTrend(
+                    gridModel, realNumber, nDefinedCells,
+                    cellIndexDefined, zoneNumber, simBoxThickness
+                )
+
+                # Calculate trend plus residual for the cells defined by cellIndexDefined
+                # and replace the residual values by trend + residual in array: values
+                sigma = relStdDev * minmaxDifference
+                residualValues = values[cellIndexDefined]
+                val = trendValues + sigma * residualValues
+                # updates array values for the selected grid cells
+                values[cellIndexDefined] = val
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug output: Trend minmaxDifference = ' + str(minmaxDifference))
+                    print('Debug output: SimBoxThickness = ' + str(simBoxThickness))
+                    print('Debug output: RelStdDev = ' + str(relStdDev))
+                    print('Debug output: Sigma = ' + str(sigma))
+                    print('Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
+                    print('Debug output: Residual min,max        : ' + str(sigma * residualValues.min()) + ' ' + str(sigma * residualValues.max()))
+                    print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
+
+                # Write back to RMS project the untransformed gaussian values with trend for the zone
+                gfNamesUntransformed = gfName + '_untransf'
+                gr.updateContinuous3DParameterValues(gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
+                                                     realNumber, isShared=False, setInitialValues=False, debug_level=debug_level)
+                trend = GFAllTrendValues[indx][VAL]
+                # update array trend for the selected grid cells
+                trend[cellIndexDefined] = trendValues
+                GFAllTrendValues[indx][VAL] = trend
+                gfNamesTrend = GFAllTrendValues[indx][NAME]
+
+                # Write back to RMS project the trend values for the zone
+                gr.updateContinuous3DParameterValues(gridModel, gfNamesTrend, trend, nDefinedCells, cellIndexDefined,
+                                                     realNumber, isShared=False, setInitialValues=False, debug_level=debug_level)
+                if debug_level >= Debug.VERBOSE:
+                    if useRegions:
+                        print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrend, str(zoneNumber), str(regionNumber)))
+                    else:
+                        print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrend, str(zoneNumber)))
+
+            alpha = GFAllAlpha[indx][VAL]
+            # Update alpha for current zone
+            if debug_level >= Debug.VERBOSE:
+                if useRegions:
+                    print('--- Transform: {} for zone: {}'.format(gfName, str(zoneNumber)))
+                else:
+                    print('--- Transform: {} for (zone, region)=({},{})'.format(gfName, str(zoneNumber), str(regionNumber)))
+
+            alpha = transformEmpiric(nDefinedCells, cellIndexDefined, values, alpha)
+            GFAllAlpha[indx][VAL] = alpha
+            gfNamesTrans = GFAllAlpha[indx][NAME]
+
+            # List of transformed values for each facies for current (zone,region)
+            GFAlphaForCurrentZone.append([gfName, alpha])
+
+            # Write back to RMS project the transformed gaussian values for the zone
+            gr.updateContinuous3DParameterValues(
+                gridModel, gfNamesTrans, alpha, nDefinedCells, cellIndexDefined,
+                realNumber, isShared=False, setInitialValues=False, debug_level=debug_level
             )
             if debug_level >= Debug.VERBOSE:
                 if useRegions:
-                    print('--- Calculate trend for: ' + gfName + ' for (zone,region)=({},{})'
-                          ''.format(str(zoneNumber), str(regionNumber)))
+                    print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrans, str(zoneNumber), str(regionNumber)))
                 else:
-                    print('--- Calculate trend for: ' + gfName + ' for zone: ' + str(zoneNumber))
+                    print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrans, str(zoneNumber)))
 
-            sigma = relStdDev * minmaxDifference
-            residualValues = values[cellIndexDefined]
-            val = trendValues + sigma * residualValues
-            values[cellIndexDefined] = val
+        # Get all facies names to be modelled for this zone and corresponding probability parameters
+        probParamValuesForFacies = []
+        for fName in faciesNamesForZone:
+            probParamName = zoneModel.getProbParamName(fName)
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Trend minmaxDifference = ' + str(minmaxDifference))
-                print('Debug output: SimBoxThickness = ' + str(simBoxThickness))
-                print('Debug output: RelStdDev = ' + str(relStdDev))
-                # print('Debug output: trendValues:')
-                # print(repr(trendValues))
-                print(
-                    'Debug output: Min trend, max trend    : ' + str(trendValues.min()) + ' ' + str(trendValues.max()))
-                print('Debug output: Residual min,max        : ' + str(residualValues.min()) + ' ' + str(residualValues.max()))
-                print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
-                # print('Debug output: Trend + Residual values:')
-                # print(repr(val))
-
-        alpha = GFAllAlpha[indx][VAL]
-        # Update alpha for current zone
-        if debug_level >= Debug.VERBOSE:
-            if useRegions:
-                print('--- Transform: {} for zone: {}'.format(gfName, str(zoneNumber)))
-            else:
-                print('--- Transform: {} for (zone, region)=({},{})'.format(gfName, str(zoneNumber), str(regionNumber)))
-        alpha = transformEmpiric(nDefinedCells, cellIndexDefined, values, alpha)
-        GFAllAlpha[indx][VAL] = alpha
-        gfNamesTrans = GFAllAlpha[indx][NAME]
-
-        # List of transformed values for each facies for current (zone,region)
-        GFAlphaForCurrentZone.append([gfName, alpha])
-
-        # Write back to RMS project the transformed gaussian values for the zone
-        gr.updateContinuous3DParameterValues(gridModel, gfNamesTrans, alpha, nDefinedCells, cellIndexDefined,
-                                             realNumber,isShared=False, setInitialValues=True, debug_level=debug_level)
-        if debug_level >= Debug.VERBOSE:
-            if useRegions:
-                print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrans, str(zoneNumber), str(regionNumber)))
-            else:
-                print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrans, str(zoneNumber)))
-
-    # Get all facies names to be modelled for this zone and corresponding probability parameters
-    probParamValuesForFacies = []
-    for fName in faciesNamesForZone:
-        probParamName = zoneModel.getProbParamName(fName)
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Zone: {}  Facies name: {}  Probability: {}'.format(zoneNumber, fName, probParamName))
-        values = []
-        if useConstProb == 1:
-            values.append(float(probParamName))
-            # Add the probability values to a common list containing probabilities for
-            # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
-            probParamAllValues.append([fName, values])
-
-            # Probabilities for each facies for current zone
-            probParamValuesForFacies.append([fName, values])
-        else:
-            if not (probParamName in probParamNamesAlreadyRead):
-                probParamNamesAlreadyRead.append(probParamName)
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print(
-                        'Debug output: Probability parameter: {} is now being loaded for facies: {} for zone: {}'
-                        ''.format(probParamName, fName, zoneNumber)
-                    )
-
-                values = gr.getContinuous3DParameterValues(gridModel, probParamName, realNumber, debug_level)
-
+                print('Debug output: Zone: {}  Facies name: {}  Probability: {}'.format(zoneNumber, fName, probParamName))
+            values = []
+            if useConstProb == 1:
+                values.append(float(probParamName))
                 # Add the probability values to a common list containing probabilities for
                 # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
                 probParamAllValues.append([fName, values])
 
                 # Probabilities for each facies for current zone
                 probParamValuesForFacies.append([fName, values])
-
             else:
-                if debug_level >= Debug.VERY_VERBOSE:
-                    if useRegions:
+                if not (probParamName in probParamNamesAlreadyRead):
+                    probParamNamesAlreadyRead.append(probParamName)
+                    if debug_level >= Debug.VERY_VERBOSE:
                         print(
-                            'Debug output: Probability parameter: {} is already loaded for facies: {} for (zone,region)=({},{})'
-                            ''.format(probParamName, fName, str(zoneNumber), str(regionNumber))
-                        )
-                    else:
-                        print(
-                            'Debug output: Probability parameter: {} is already loaded for facies: {} for zone: {}'
+                            'Debug output: Probability parameter: {} is now being loaded for facies: {} for zone: {}'
                             ''.format(probParamName, fName, zoneNumber)
                         )
 
-                indx = -999
-                # Get the probability values from the common list since it already is loaded
-                for i in range(len(probParamAllValues)):
-                    fN = probParamAllValues[i][NAME]
-                    if fName == fN:
-                        indx = i
-                        break
-                # Probabilities for each facies for current zone
-                values = probParamAllValues[indx][VAL]
-                probParamValuesForFacies.append([fName, values])
+                    values = gr.getContinuous3DParameterValues(gridModel, probParamName, realNumber, debug_level)
 
-    # end for
+                    # Add the probability values to a common list containing probabilities for
+                    # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
+                    probParamAllValues.append([fName, values])
 
-    # Check and normalise probabilities if necessary for current zone
-    if debug_level >= Debug.VERBOSE:
-        print('--- Check normalisation of probability fields.')
-    [probDefined, nCellsModifiedProb] = checkAndNormaliseProb(
-        nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined, eps, debug_level
-    )
-    if debug_level >= Debug.VERBOSE:
-        print('--- Number of cells that are normalised: ' + str(nCellsModifiedProb))
+                    # Probabilities for each facies for current zone
+                    probParamValuesForFacies.append([fName, values])
 
-        # Facies realisation for current zone is updated.
+                else:
+                    if debug_level >= Debug.VERY_VERBOSE:
+                        if useRegions:
+                            print(
+                                'Debug output: Probability parameter: {} is already loaded for facies: {} for (zone,region)=({},{})'
+                                ''.format(probParamName, fName, str(zoneNumber), str(regionNumber))
+                            )
+                        else:
+                            print(
+                                'Debug output: Probability parameter: {} is already loaded for facies: {} for zone: {}'
+                                ''.format(probParamName, fName, zoneNumber)
+                            )
+
+                    indx = -999
+                    # Get the probability values from the common list since it already is loaded
+                    for i in range(len(probParamAllValues)):
+                        fN = probParamAllValues[i][NAME]
+                        if fName == fN:
+                            indx = i
+                            break
+                    # Probabilities for each facies for current zone
+                    values = probParamAllValues[indx][VAL]
+                    probParamValuesForFacies.append([fName, values])
+
+        # end for
+
+        # Check and normalise probabilities if necessary for current zone
         if debug_level >= Debug.VERBOSE:
-            print('--- Truncate transformed Gaussian fields.')
+            print('--- Check normalisation of probability fields.')
+        probDefined, nCellsModifiedProb = checkAndNormaliseProb(
+            nFacies, probParamValuesForFacies, useConstProb, nDefinedCells, cellIndexDefined, eps, debug_level
+        )
+        if debug_level >= Debug.VERBOSE:
+            print('--- Number of cells that are normalised: ' + str(nCellsModifiedProb))
 
-    [faciesReal, volFrac] = zoneModel.applyTruncations(
-        probDefined, GFAlphaForCurrentZone, faciesReal, nDefinedCells, cellIndexDefined
-    )
+            # Facies realisation for current zone is updated.
+            if debug_level >= Debug.VERBOSE:
+                print('--- Truncate transformed Gaussian fields.')
 
-    if debug_level >= Debug.VERBOSE:
-        print(' ')
-        mainFaciesTable = apsModel.getMainFaciesTable()
-        if useConstProb == 1:
-            if useRegions:
-                print(
-                    '--- Zone_number:  Region_number:    Facies_code:   Facies_name:'
-                    '     Volumefraction_specified:    Volumefracion_realisation:'
-                    )
-                for f in range(len(faciesNamesForZone)):
-                    fName = faciesNamesForZone[f]
-                    fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
-                    item = probParamValuesForFacies[f]
-                    if fName != item[NAME]:
-                        raise ValueError('Inconsistencies in data structure in APS_main')
+        [faciesReal, volFrac] = zoneModel.applyTruncations(
+            probDefined, GFAlphaForCurrentZone, faciesReal, nDefinedCells, cellIndexDefined
+        )
 
-                    probValues = item[VAL]
-                    print('{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'.format(
-                            zoneNumber, regionNumber, fCode, fName, probValues[0], volFrac[f])
-                          )
+        if debug_level >= Debug.VERBOSE:
+            print(' ')
+            mainFaciesTable = apsModel.getMainFaciesTable()
+            if useConstProb == 1:
+                if useRegions:
+                    print(
+                        '--- Zone_number:  Region_number:    Facies_code:   Facies_name:'
+                        '     Volumefraction_specified:    Volumefracion_realisation:'
+                        )
+                    for f in range(len(faciesNamesForZone)):
+                        fName = faciesNamesForZone[f]
+                        fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
+                        item = probParamValuesForFacies[f]
+                        if fName != item[NAME]:
+                            raise ValueError('Inconsistencies in data structure in APS_main')
+
+                        probValues = item[VAL]
+                        print('{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'.format(
+                                zoneNumber, regionNumber, fCode, fName, probValues[0], volFrac[f])
+                              )
+                else:
+                    print(
+                        '--- Zone_number:    Facies_code:   Facies_name:'
+                        '     Volumefraction_specified:    Volumefracion_realisation:'
+                        )
+                    for f in range(len(faciesNamesForZone)):
+                        fName = faciesNamesForZone[f]
+                        fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
+                        item = probParamValuesForFacies[f]
+                        if fName != item[NAME]:
+                            raise ValueError('Inconsistencies in data structure in APS_main')
+
+                        probValues = item[VAL]
+                        print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
+                            zoneNumber, fCode, fName, probValues[0], volFrac[f])
+                        )
+
             else:
-                print(
-                    '--- Zone_number:    Facies_code:   Facies_name:'
-                    '     Volumefraction_specified:    Volumefracion_realisation:'
-                    )
-                for f in range(len(faciesNamesForZone)):
-                    fName = faciesNamesForZone[f]
-                    fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
-                    item = probParamValuesForFacies[f]
-                    if fName != item[NAME]:
-                        raise ValueError('Inconsistencies in data structure in APS_main')
-                    
-                    probValues = item[VAL]
-                    print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
-                        zoneNumber, fCode, fName, probValues[0], volFrac[f])
-                    )
-                    
-        else:
-            if useRegions:
-                print(
-                    '--- Zone_number:  Region_number:   Facies_code:   Facies_name:'
-                    '     Volumefraction_realisation  Volumefraction_from_probcube:'
-                    )
-                for f in range(len(faciesNamesForZone)):
-                    fName = faciesNamesForZone[f]
-                    fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
-                    item = probParamValuesForFacies[f]
-                    if fName != item[NAME]:
-                        raise ValueError('Inconsistencies in data structure in APS_main')
-                    
-                    values = item[VAL]
-                    avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
-                    print('{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'.format(
-                            zoneNumber, regionNumber, fCode, fName, volFrac[f], avgProbValue)
-                          )
-            else:
-                print(
-                    '--- Zone_number:    Facies_code:   Facies_name:'
-                    '     Volumefraction_realisation  Volumefraction_from_probcube:'
-                    )
-                for f in range(len(faciesNamesForZone)):
-                    fName = faciesNamesForZone[f]
-                    fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
-                    item = probParamValuesForFacies[f]
-                    if fName != item[NAME]:
-                        raise ValueError('Inconsistencies in data structure in APS_main')
-                    
-                    values = item[VAL]
-                    avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
-                    print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
-                            zoneNumber, fCode, fName, volFrac[f], avgProbValue)
-                          )
-                    
-    for fName in faciesNamesForZone:
-        if fName not in allFaciesNamesModelled:
-            allFaciesNamesModelled.append(fName)
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug: Add facies: ' + fName + ' to the list of modelled facies')
+                if useRegions:
+                    print(
+                        '--- Zone_number:  Region_number:   Facies_code:   Facies_name:'
+                        '     Volumefraction_realisation  Volumefraction_from_probcube:'
+                        )
+                    for f in range(len(faciesNamesForZone)):
+                        fName = faciesNamesForZone[f]
+                        fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
+                        item = probParamValuesForFacies[f]
+                        if fName != item[NAME]:
+                            raise ValueError('Inconsistencies in data structure in APS_main')
 
+                        values = item[VAL]
+                        avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
+                        print('{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'.format(
+                                zoneNumber, regionNumber, fCode, fName, volFrac[f], avgProbValue)
+                              )
+                else:
+                    print(
+                        '--- Zone_number:    Facies_code:   Facies_name:'
+                        '     Volumefraction_realisation  Volumefraction_from_probcube:'
+                        )
+                    for f in range(len(faciesNamesForZone)):
+                        fName = faciesNamesForZone[f]
+                        fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
+                        item = probParamValuesForFacies[f]
+                        if fName != item[NAME]:
+                            raise ValueError('Inconsistencies in data structure in APS_main')
 
+                        values = item[VAL]
+                        avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
+                        print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
+                                zoneNumber, fCode, fName, volFrac[f], avgProbValue)
+                              )
 
-# End loop over zones
+        for fName in faciesNamesForZone:
+            if fName not in allFaciesNamesModelled:
+                allFaciesNamesModelled.append(fName)
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Debug: Add facies: ' + fName + ' to the list of modelled facies')
 
-print(' ')
-
-# Write/update facies realisation
-mainFaciesTable = apsModel.getMainFaciesTable()
-codeNames = {}
-for i in range(len(allFaciesNamesModelled)):
-    fName = allFaciesNamesModelled[i]
-    fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
-    codeNames.update({fCode: fName})
-
-if debug_level >= Debug.VERY_VERBOSE:
-    text = 'Debug output: Facies codes and names before merging with existing facies table for facies realisation:'
-    print(text)
-    print(repr(codeNames))
-
-# Write facies realisation back to RMS project for all zones that is modelled.
-if debug_level >= Debug.VERBOSE:
-    if apsModel.isAllZoneRegionModelsSelected():
-        print('Debug output: All combinations of zone and region is selected to be run')
-    else:
-        print('--- The following (zone,region) numbers are updated in facies realization:')
-        for key, zoneModel in allZoneModels.items():
-            zoneNumber = key[0]
-            regionNumber = key[1]
-            if not apsModel.isSelected(zoneNumber, regionNumber):
-                continue
-            if useRegions:
-                print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
-            else:
-                print('    zone={}'.format(str(key[0])))
-
-# Overwrite the existing facies realization, but note that now the faciesReal should contain values
-# equal to the original facies realization for all cells that is not updated (not belonging to (zones, regions) that is updated)
-gr.updateDiscrete3DParameterValues(
-    gridModel, resultParamName, faciesReal, faciesTable=codeNames,
-    realNumber=realNumber, isShared=False, setInitialValues=False,
-    debug_level=debug_level
-)
-if debug_level >= Debug.SOMEWHAT_VERBOSE:
-    print('- Create or update parameter: ' + resultParamName)
-
-print(' ')
-if debug_level >= Debug.SOMEWHAT_VERBOSE:
-    print('- Updated facies table:')
-    p = gr.get3DParameter(gridModel, resultParamName, debug_level)
-    print('- Facies_name   Facies_code')
-    for key in p.code_names:
-        u = p.code_names.get(key)
-        print('  {0:10}  {1:3d}'.format(u, key))
+    # End loop over zones
 
     print(' ')
-print('Finished APS_main.py')
+
+    # Write/update facies realisation
+    mainFaciesTable = apsModel.getMainFaciesTable()
+    codeNames = {}
+    for i in range(len(allFaciesNamesModelled)):
+        fName = allFaciesNamesModelled[i]
+        fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
+        codeNames.update({fCode: fName})
+
+    if debug_level >= Debug.VERY_VERBOSE:
+        text = 'Debug output: Facies codes and names before merging with existing facies table for facies realisation:'
+        print(text)
+        print(repr(codeNames))
+
+    # Write facies realisation back to RMS project for all zones that is modelled.
+    if debug_level >= Debug.VERBOSE:
+        if apsModel.isAllZoneRegionModelsSelected():
+            print('Debug output: All combinations of zone and region is selected to be run')
+        else:
+            print('--- The following (zone,region) numbers are updated in facies realization:')
+            for key, zoneModel in allZoneModels.items():
+                zoneNumber = key[0]
+                regionNumber = key[1]
+                if not apsModel.isSelected(zoneNumber, regionNumber):
+                    continue
+                if useRegions:
+                    print('    (zone,region)=({},{})'.format(str(key[0]), str(key[1])))
+                else:
+                    print('    zone={}'.format(str(key[0])))
+
+    # Overwrite the existing facies realization, but note that now the faciesReal should contain values
+    # equal to the original facies realization for all cells that is not updated (not belonging to (zones, regions) that is updated)
+    gr.updateDiscrete3DParameterValues(
+        gridModel, resultParamName, faciesReal, faciesTable=codeNames,
+        realNumber=realNumber, isShared=False, setInitialValues=False,
+        debug_level=Debug.OFF
+    )
+    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+        print('- Create or update parameter: ' + resultParamName)
+
+    print(' ')
+    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+        print('- Updated facies table:')
+        p = gr.get3DParameter(gridModel, resultParamName, debug_level)
+        print('- Facies_name   Facies_code')
+        for key in p.code_names:
+            u = p.code_names.get(key)
+            print('  {0:10}  {1:3d}'.format(u, key))
+
+        print(' ')
+    print('Finished APS_main.py')
