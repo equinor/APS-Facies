@@ -3,13 +3,13 @@ from src.utils.exceptions.base import ApsException
 
 class ApsXmlError(ApsException, IOError):
     def __init__(self, message, errors=None):
-        super(ApsXmlError, self).__init__(message=message, errors=errors)
+        super().__init__(message=message, errors=errors)
 
 
 class ReadingXmlError(ApsXmlError, IOError):
     def __init__(self, keyword, parent_keyword=None, model_file_name=None):
         message = self.get_keyword_error_message(keyword, parent_keyword, model_file_name)
-        super(ReadingXmlError, self).__init__(message=message)
+        super().__init__(message=message)
 
     @staticmethod
     def get_keyword_error_message(keyword, parent_keyword=None, model_file_name=None):
@@ -29,8 +29,7 @@ class ReadingXmlError(ApsXmlError, IOError):
 
 class ValueOutsideExpectedRange(ApsXmlError):
     def __init__(self, message, errors=None):
-        super(ValueOutsideExpectedRange, self).__init__(message=message, errors=errors)
-        pass
+        super().__init__(message=message, errors=errors)
 
     @staticmethod
     def get_value_specified_error_message(keyword, parent_keyword=None, model_file_name=None, end_with_period=True):
@@ -58,7 +57,7 @@ class LessThanExpected(ValueOutsideExpectedRange):
         )
         if end_with_period:
             message += '.'
-        super(LessThanExpected, self).__init__(message)
+        super().__init__(message)
 
 
 class MoreThanExpected(ValueOutsideExpectedRange):
@@ -75,19 +74,19 @@ class MoreThanExpected(ValueOutsideExpectedRange):
         )
         if end_with_period:
             message += '.'
-        super(MoreThanExpected, self).__init__(message)
+        super().__init__(message)
 
 
 class UndefinedZoneError(NameError):
     def __init__(self, zone_number: int):
-        super(UndefinedZoneError, self).__init__(
+        super().__init__(
             'Error: Zone number: {zone_number} is not defined'.format(zone_number=zone_number)
         )
 
 
 class MissingAttributeInKeyword(KeyError):
     def __init__(self, keyword, attribute_name):
-        super(MissingAttributeInKeyword, self).__init__(
+        super().__init__(
             "The attribute '{attribute_name}' is required for the keyword '{keyword}'".format(
                 attribute_name=attribute_name,
                 keyword=keyword
@@ -97,7 +96,7 @@ class MissingAttributeInKeyword(KeyError):
 
 class CrossSectionOutsideRange(ValueError):
     def __init__(self, cross_section_name, cross_section_index, upper_bound):
-        super(CrossSectionOutsideRange, self).__init__(
+        super().__init__(
             'Cross section index is specified to be: {cross_section_index} for {cross_section_name} cross section, '
             'but must be in interval [0, {upper_bound}]'.format(
                 cross_section_index=cross_section_index,
