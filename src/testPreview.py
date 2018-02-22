@@ -1,5 +1,7 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 # Python3  test preliminary preview
+from argparse import ArgumentParser, Namespace
 
 import matplotlib
 import numpy as np
@@ -155,7 +157,7 @@ def run_previewer(
         model='APS.xml',
         rms_data_file_name='rms_project_data_for_APS_gui.xml',
         rotate_plot=False,
-        no_sim=False,
+        no_simulation=False,
         write_simulated_fields_to_file=False,
         debug_level=Debug.OFF
 ) -> None:
@@ -164,7 +166,7 @@ def run_previewer(
     :param model:
     :param rms_data_file_name:
     :param rotate_plot:
-    :param no_sim: Is set to True only if one don't want to simulate 2D fields (for test purpose only)
+    :param no_simulation: Is set to True only if one don't want to simulate 2D fields (for test purpose only)
     :param write_simulated_fields_to_file: Is set to 1 if write out simulated 2D fields
     :type write_simulated_fields_to_file: bool
     :param debug_level:
@@ -294,7 +296,7 @@ def run_previewer(
     gaussFields = []
     gridDim1 = 0
     gridDim2 = 0
-    if no_sim:
+    if no_simulation:
         # Read the gauss fields from files
         if nGaussFields >= 2:
             a1 = readFile('a1.dat')
@@ -653,5 +655,28 @@ def _check_preview_section(
             )
 
 
+def get_argument_parser() -> ArgumentParser:
+    parser = ArgumentParser(description="A preliminary previewer for APS GUI")
+    parser.add_argument('model', metavar='FILE', type=str, nargs='?', default='APS.xml', help="The model file to be viewed (default: APS.xml)")
+    parser.add_argument('rms_data_file_name', metavar='DATA', type=str, nargs='?', default='rms_project_data_for_APS_gui.xml', help="The rms data file (default: rms_project_data_for_APS_gui.xml)")
+    parser.add_argument('-r', '--rotate-plot', type=bool, default=False, help="Toggles rotation of plot (default: False)")
+    parser.add_argument('-s', '--no-simulation', type=bool, nargs='?', default=False, help="Turns off simulation (default: False)")
+    parser.add_argument('-w', '--write-simulated-fields-to-file', nargs='?', type=bool, default=False, help="Toggles whether the simulated fileds should be dumped to disk (default: False)")
+    parser.add_argument('-d', '--debug-level', type=int, default=0, help="Sets the verbosity. 0-4, where 0 is least verbose (default: 0)")
+    return parser
+
+
+def run():
+    args = get_arguments()
+    run_previewer(**args.__dict__)
+
+
+def get_arguments() -> Namespace:
+    parser = get_argument_parser()
+    args = parser.parse_args()
+    args.debug_level = Debug(args.debug_level)
+    return args
+
+
 if __name__ == '__main__':
-    run_previewer()
+    run()
