@@ -18,7 +18,6 @@ from src.utils.constants.simple import Debug, VariogramType
 
 # Global object with c/c++ code for simulation of gaussian fields
 _draw2DLib = CDLL(DrawingLibrary.LIBRARY_PATH.value)
-#_draw2DLib = CDLL('./libdraw2D.so')
 
 # Define input data types
 _draw2DLib.draw2DGaussField.argtypes = (
@@ -69,11 +68,6 @@ def draw2D(
         debug_level = Debug.OFF
     elif debug_level >= Debug.ON:
         debug_level = Debug.ON
-    #print('Variogram type: ')
-    #print(variogram_type)
-    #if isinstance(variogram_type, VariogramType):
-    #    variogram_type = variogram_type.value
-    #print(variogram_type)
 
     global _draw2DLib
     values = []
