@@ -410,8 +410,9 @@ def run_previewer(
     gridDim1 = 0
     gridDim2 = 0
     # simulate gauss fields
+    print('nxPreview, nyPreview, nzPreview ({},{},{}): '.format(str(nxPreview), str(nyPreview), str(nzPreview)))
     gaussFieldItems = zoneModel.simGaussFieldWithTrendAndTransform(
-        simBoxXsize, simBoxYsize, simBoxZsize,
+        xLength, yLength, zLength,
         nxPreview, nyPreview, nzPreview, azimuthGridOrientation,
         previewCrossSectionType, previewCrossSectionRelativePos
     )

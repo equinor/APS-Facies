@@ -463,7 +463,7 @@ def getClassName(truncRule):
 def test_Trunc2DCubic(case_number, data):
     print('')
     print('******** Case number: ' + str(case_number) + ' *********')
-    run(**data, faciesReferenceFile=get_cubic_facies_reference_file_path(case_number))
+    run(faciesReferenceFile=get_cubic_facies_reference_file_path(case_number),**data)
 
 
 def run(

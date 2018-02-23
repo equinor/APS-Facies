@@ -151,6 +151,8 @@ class APSDataFromRMS:
             if number == zoneNumber:
                 number_of_layer = item[2]
                 break
+        if number_of_layer == 0:
+            raise ValueError('Zone number {} does not exist in grid model {}'.format(str(zoneNumber), self.getGridModelName()))
         return number_of_layer
 
     def getStartAndEndLayerInZone(self, zoneNumber):

@@ -197,7 +197,13 @@ get-vulnerability-db:
 clean-safety:
 	rm -rf $(VULNERABILITY_DB)
 
-unit-tests: copy-libdraw-to-test run-tests clean-tests
+#unit-tests: copy-libdraw-to-test run-tests clean-tests
+unit-tests: dependencies copy-libdraw-to-test run-tests clean-tests
+
+dependencies: libdraw2D.so requirements.txt
+
+requirements.txt:
+	$(PIP) install -r $(CODE_DIR)/requirements.txt
 
 copy-libdraw-to-test: libdraw2D.so
 

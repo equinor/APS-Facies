@@ -1037,25 +1037,16 @@ class APSGaussModel:
          Then rotate the the ellipsoid an angle around the z axis. This is the azimuthAngle. The final orientation
          is then found and the coordinate system defined by the principal directions for the ellipsoide 
          are (x'',y'',z'') in which the M matrix is diagonal.
-         Note that the coordinate system (x,y,z) is left handed and z axis is pointing 
+         We now define the ellipsoide in this coordinate system with the diagonal M matrix.
+         The goal is now to transform the coordinate from this (x',y',z') system back to (x,y,z) and the the matrix M 
+         in this coordinate system. So the transformation will be the opposite of what was necessary to 
+         rotate the ellipsoide from standard position with principal main axis in y direction and the second 
+         pricipal direction in x direction and the third in z direction.
+         Note also that the coordinate system (x,y,z) is left handed and z axis is pointing 
          downward compared to a right handed coordinate system.
-         To define the matrix M in (x,y,z) coordinate system given that we 
-         know its half axes in the principal directions, we need the transformation from column vector of (x,y,z)
-         which we call V vector to column vector of (x'',y'',z'') which we call V'':
-             V'' =  R_azimuth * R_dip * V   where we call R = R_azimuth * R_dip
-         where R_azimuth is the matrix rotating the ellipsoide around z axis an angle = azimuth angle
-         and R_dip is the matrix rotating the vector V' = R_azimuth*V around the x axis and angle = dip angle.
-         The final matrix M in x,y,z coordinates is then transpose(R)*M_diagonal*R.
 
-         If we now assume y = 0, then the variogram ellipsoid becomes a variogram ellipse 
-         and we can determine the half axes in this ellipse and its orientation by restricting ourself 
-         to the x,z plane and calculate the principal directions of this ellipse. 
-         The diagonal components after diagonalizing this 2x2 matrix is the correlation lengths in 
-         the x,z plane and the rotation of the ellipse in the x,z plane is found from the principal 
-         directions of the ellipse. The correlation lengths and the direction calculated for the ellipse is
-         returned from this function and can be used to simulate a 2D cross section in xz direction. The same can be
-         done
-         for x,y plane with z = 0 and for y,z plane for x = 0.
+         After calculating M in (x,y,z) coordinates, a project is taken into either x,y,or z plane to get the correlation 
+         ellipse in 2D cross section. This correlation ellipse is used when simulating 2D gaussian fields in cross sections.
          """
         funcName = 'calc2DVariogramFrom3DVariogram'
         if self.__debug_level >= Debug.VERY_VERBOSE:
@@ -1069,10 +1060,15 @@ class APSGaussModel:
 
         # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
         azimuth = azimuth - gridAzimuthAngle
-        azimuth = -azimuth * np.pi / 180.0
 
         # Dip angle relative to local simulation box
         dip = self.getAnisotropyDipAngle(gaussFieldName)
+
+        # The transformations R_dip and R_azimuth defined below rotate the ellipsoide FROM standard orientation 
+        # in (x,y,z) TO the final orientation defined by azimuth and dip angles. But we need the inverse transformation
+        # which means that the angles have opposite sign and the rotation matrixes come in opposite order to transform M matrix
+        # FROM (x',y',z') t0 (x,y,z). 
+        azimuth = -azimuth * np.pi / 180.0
         dip = -dip * np.pi / 180.0
 
         cosTheta = np.cos(azimuth)
@@ -1106,20 +1102,18 @@ class APSGaussModel:
         # The combination R = R_azimuth * R_dip will
         # rotate the vector V first by a dip angle around x axis and then by an azimuth angle around z axis
 
-        # calculate R matrix
-        #R = R_azimuth.dot(R_dip)
+        # calculate R matrix to get from (x',y',z') to (x,y,z)
         R = R_dip.dot(R_azimuth)
 
 
-        # calculate M matrix in principal coordinates
+        # calculate M matrix in principal coordinates (x',y',z')
         M_diag = np.array([
             [1.0 / (rx * rx), 0.0, 0.0],
             [0.0, 1.0 / (ry * ry), 0.0],
             [0.0, 0.0, 1.0 / (rz * rz)]
         ])
 
-        # The M matrix in (x,y,z) coordinates is given by M = transpose(R) * M_diag * R since
-        # [x',y',z'] * M_diag * transpose([x',y',z']) = [x,y,z] *transpose(R) * M_diag * R * transpose([x,y,z])
+        # The M matrix in (x,y,z) coordinates is given by M = transpose(R) * M_diag * R
         tmp = M_diag.dot(R)
         Rt = np.transpose(R)
         M = Rt.dot(tmp)
@@ -1127,9 +1121,12 @@ class APSGaussModel:
             print('Debug output: M:')
             print(M)
             print(' ')
-        # calculate eigenvalues and rotation angle in any of the projections xy,xz,yz
+
+
         # Let U be the 2x2 matrix in the projection (where row and column corresponding to 
         # the coordinate that is set to 0 is removed
+
+        # Calculate the projection of the ellipsoide onto the coordinate planes
         if projection == 'xy':
             U = np.array([
                 [M[0, 0], M[0, 1]],
@@ -1147,6 +1144,8 @@ class APSGaussModel:
             ])
         else:
             raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
+        # Calculate half-axes and rotation of the ellipse that results from the 2D projection of the 3D ellipsoide.
+        # This is done by calculating eigenvalues and eigenvectors of the 2D version of the M matrix.
         # angles are azimuth angles (Measured from 2nd axis clockwise)
         angle1, range1, angle2, range2 = self.__calcProjection(U)
 
