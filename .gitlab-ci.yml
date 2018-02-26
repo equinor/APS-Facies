@@ -1,5 +1,5 @@
 image:
-  name: "git.statoil.no:4567/aps/gui/aps-gui:2.0.0"
+  name: "git.statoil.no:4567/aps/gui/aps-gui:2.3.0"
 
 variables:
   GIT_STRATEGY: "fetch"
@@ -21,6 +21,10 @@ stages:
   - generate documentation
   - deploy
   - clean docker
+
+before_script:
+  script:
+    - 'eval $MAKE init'
 
 make documentation:
   stage: generate documentation
