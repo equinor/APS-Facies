@@ -1,5 +1,5 @@
 image:
-  name: "git.statoil.no:4567/aps/gui/aps-gui:2.3.0"
+  name: "git.statoil.no:4567/aps/gui/aps-gui:2.4.1"
 
 variables:
   GIT_STRATEGY: "fetch"
@@ -11,6 +11,7 @@ variables:
   ARTIFACTS:    "$CODE_DIR/artifacts"
   MAKE:         "make --makefile=$CODE_DIR/Makefile"
   RUN:          "/bin/bash -c"
+  MKL_BIN:      "/opt/intel/bin"
 
 stages:
   - check requirements
@@ -23,8 +24,7 @@ stages:
   - clean docker
 
 before_script:
-  script:
-    - 'eval $MAKE init'
+  - 'eval $MAKE init'
 
 make documentation:
   stage: generate documentation
@@ -32,6 +32,7 @@ make documentation:
     - 'eval $MAKE uml-diagrams'
     - 'eval mkdir -p $CI_PROJECT_DIR/uml-diagrams'
     - 'eval mv $CI_PROJECT_DIR/classes_APS-GUI.png $CI_PROJECT_DIR/uml-diagrams'
+  allow_failure: true
   artifacts:
     expire_in: 1 week
     paths:

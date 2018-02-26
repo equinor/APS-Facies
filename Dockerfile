@@ -1,6 +1,6 @@
 FROM git.statoil.no:4567/sdp/sdpsoft/gcc:7.3.0 as gcc
 FROM centos:6
-LABEL version="2.3.0" \
+LABEL version="2.4.1" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -18,10 +18,12 @@ ENV PROXY_PORT=80
 ENV HTTP_PROXY=$PROXY_SCHEME://$PROXY_HOST:$PROXY_PORT
 ENV HTTPS_PROXY=$PROXY_SCHEME://$PROXY_HOST:$PROXY_PORT
 ENV FTP_PROXY=$PROXY_SCHEME://$PROXY_HOST:$PROXY_PORT
+ENV NO_PROXY="git.statoil.no"
 
 ENV http_proxy=$HTTP_PROXY
 ENV https_proxy=$HTTPS_PROXY
 ENV ftp_proxy=$FTP_PROXY
+ENV no_proxy=$NO_PROXY
 
 # Tell yum to use the proxy as well
 RUN echo "proxy=$HTTP_PROXY" >> /etc/yum.conf
@@ -30,7 +32,8 @@ RUN yum update -y \
  && yum install -y wget
 RUN echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
  && echo "http_proxy = $HTTPS_PROXY" >> /etc/wgetrc \
- && echo "ftp_proxy = $HTTP_PROXY" >> /etc/wgetrc \
+ && echo "ftp_proxy = $FTP_PROXY" >> /etc/wgetrc \
+ && echo "no_proxy = $NO_PROXY" >> /etc/wgetrc \
  && echo "use_proxy = on" >> /etc/wgetrc \
  && echo "ca-directory = /etc/pki/ca-trust/source/anchors" >> /etc/wgetrc
 
@@ -85,7 +88,13 @@ ENV TCL_VERSION="8.6.8"
 ENV TK_VERSION=$TCL_VERSION
 # APSW (SQLite wrapper)
 ENV APSW_VERSION="3.21.0-r1"
-ENV APSW_PREFIX=$INSTALL_DIR/apsw-$APSW_VERSION
+# NRlib (FFT and Gaussian simulation)
+ENV NRLIB_VERSION="1.0.1"
+
+ENV INTEL_MKL_VERSION="2018.1.163"
+ENV INTEL_MKL="l_mkl_$INTEL_MKL_VERSION"
+ENV INTEL_MKL_SEED=12414
+ENV INTEL_PREFIX="$SOURCE_DIR/$INTEL_MKL"
 
 # Misc. software
 RUN yum update -y \
@@ -120,7 +129,7 @@ RUN mkdir -p $ROOT_DIR \
              $SOURCE_DIR \
              $INSTALL_DIR \
              $PYTHON_PREFIX \
-             apsw-$APSW_VERSION
+             $INTEL_PREFIX
 
 RUN cd $SOURCE_DIR && wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz
 RUN cd $SOURCE_DIR && wget https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz
@@ -132,6 +141,8 @@ RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/tcl/files/Tcl/$TCL_V
 RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/tcl/files/Tcl/$TK_VERSION/tk"$TK_VERSION"-src.tar.gz
 RUN cd $SOURCE_DIR && wget http://www.bzip.org/$BZIP2_VERSION/bzip2-$BZIP2_VERSION.tar.gz
 RUN cd $SOURCE_DIR && wget https://github.com/rogerbinns/apsw/archive/$APSW_VERSION.tar.gz --output-document=$SOURCE_DIR/apsw-$APSW_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget https://git.statoil.no/sdp/nrlib/repository/v$NRLIB_VERSION/archive.tar.gz --output-document=$SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz
+RUN cd $SOURCE_DIR && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz
 
 
  # Create all build directories
@@ -146,6 +157,7 @@ RUN cd $BUILD_DIR \
     tk-$TK_VERSION \
     bzip2-$BZIP2_VERSION \
     sqlite3-$SQLITE3_VERSION \
+    nrlib-$NRLIB_VERSION \
     apsw-$APSW_VERSION
 
 # Extract everything into build directories
@@ -159,7 +171,10 @@ RUN cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/bzip2-$BZIP2_VERSION.tar.gz -C bzip2-$BZIP2_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz -C sqlite3-$SQLITE3_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/apsw-$APSW_VERSION.tar.gz -C apsw-$APSW_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/zlib-$ZLIB_VERSION.tar.gz -C zlib-$ZLIB_VERSION --strip-components=1
+ && tar -xvf  $SOURCE_DIR/zlib-$ZLIB_VERSION.tar.gz -C zlib-$ZLIB_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz -C nrlib-$NRLIB_VERSION --strip-components=1 \
+ && tar -xvf  $SOURCE_DIR/$INTEL_MKL.tgz -C $INTEL_PREFIX --strip-components=1
+
 
 RUN rm -f $SOURCE_DIR/*.tar.*
 
@@ -266,6 +281,7 @@ RUN cd $BUILD_DIR/python$PYTHON_VERSION \
     --enable-optimizations \
     --enable-profiling  \
     --enable-loadable-sqlite-extensions \
+ && http_proxy='' https_proxy='' \
  && make -j $(nproc) \
  && make install
 
@@ -280,17 +296,11 @@ RUN cd $BUILD_DIR/apsw-$APSW_VERSION \
  && $PYTHON setup.py test
 
 # Install MKL
-ENV INTEL_MKL_VERSION="2018.1.163"
-ENV INTEL_MKL="l_mkl_$INTEL_MKL_VERSION"
-ENV INTEL_MKL_SEED=12414
-ENV INTEL_PREFIX="$SOURCE_DIR/$INTEL_MKL"
-
-RUN mkdir -p $INTEL_PREFIX
-
+ENV INTEL_MKL_PREFIX="/opt/intel"
 # Configure setup
 ENV INTEL_CONFIGURATION="$INTEL_PREFIX/config.txt"
 RUN echo ACCEPT_EULA=accept >> $INTEL_CONFIGURATION \
- && echo PSET_INSTALL_DIR=/opt/intel >> $INTEL_CONFIGURATION \
+ && echo PSET_INSTALL_DIR=$INTEL_MKL_PREFIX >> $INTEL_CONFIGURATION \
  && echo PSET_MODE=install >> $INTEL_CONFIGURATION \
  && echo COMPONENTS="\
 ;intel-comp-l-all-vars__noarch\
@@ -326,12 +336,16 @@ RUN echo ACCEPT_EULA=accept >> $INTEL_CONFIGURATION \
 ;intel-psxe-common__noarch\
 ;intel-compxe-pset" >> $INTEL_CONFIGURATION
 
-RUN cd $SOURCE_DIR && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz \
- && tar -xvf $SOURCE_DIR/$INTEL_MKL.tgz -C $INTEL_PREFIX --strip-components=1 \
- && $INTEL_PREFIX/install.sh --silent $INTEL_CONFIGURATION
+RUN $INTEL_PREFIX/install.sh --silent $INTEL_CONFIGURATION
 
 # PATH updated to inlude openmpi binaries needed to install mpi4py
 ENV PATH "/usr/lib64/openmpi/bin:$PATH"
+
+# Install NRlib
+RUN cd $BUILD_DIR/nrlib-$NRLIB_VERSION \
+ && source $INTEL_MKL_PREFIX/bin/compilervars.sh intel64 \
+ && make build \
+ && make install
 
 ##
 # Final clean-up

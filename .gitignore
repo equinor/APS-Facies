@@ -326,3 +326,5 @@ Thumbs.db
 *~
 state.db
 *cache/
+libraries/nrlib
+.tool-versions
