@@ -119,20 +119,11 @@ check-docker-dependencies:
 copy-source:
 	tar --exclude='$(CODE_DIR)/.git/' --exclude="$(CODE_DIR)/documentation" -cvzf code.tar.gz *
 
-check-requirements: clean-requirements-check install-piprot
+check-requirements:
 	piprot --outdated $(CODE_DIR)/requirements.txt
 
-clean-requirements-check:
-	$(shell piprot safety >/dev/null 2>&1 && pip-autoremove piprot -y)
-
-install-piprot:
-	$(PIP) install piprot
-
-safety-check: clean-safety install-safety get-vulnerability-db
+safety-check: clean-safety get-vulnerability-db
 	safety check --full-report --db $(VULNERABILITY_DB)
-
-install-safety:
-	$(PIP) install safety
 
 get-vulnerability-db:
 	mkdir -p $(VULNERABILITY_DB) && \
@@ -145,7 +136,6 @@ get-vulnerability-db:
 
 clean-safety:
 	rm -rf $(VULNERABILITY_DB)
-	$(shell type safety >/dev/null 2>&1 && pip-autoremove safety -y)
 
 unit-tests: copy-libdraw-to-test run-tests clean-tests
 

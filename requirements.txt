@@ -7,3 +7,6 @@ pip-autoremove==0.9.0
 graphviz==0.8.2
 scipy==1.0.0
 peewee==2.10.2  # norot
+safety==1.7.0
+piprot==0.9.7
+pylint==1.8.2
