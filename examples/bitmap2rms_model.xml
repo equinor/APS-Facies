@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<ConvertBitmapToRMS>
+  <Coordinates>
+    <xmin>   480000  </xmin>
+    <xmax>   493000  </xmax>
+    <ymin>   6688000 </ymin>
+    <ymax>   6710000 </ymax>
+  </Coordinates>
+  <PixelInterval>
+    <nx> 449 </nx>
+    <ny>  757 </ny>
+    <I> 1 449 </I>  <!-- 18 476 -->
+    <J> 1 757 </J>  <!-- 9 841 -->
+  </PixelInterval>
+  <CropToPixelInterval> 1 </CropToPixelInterval> 
+  <MissingCode> 9999900.000 </MissingCode> 
+  <!-- <MissingCode> -1 </MissingCode> -->
+  <ColorCode facies="1"> 20 </ColorCode>
+  <ColorCode facies="2"> 122 </ColorCode>
+  <ColorCode facies="3"> 23 </ColorCode>
+  <ColorCode facies="4"> 199 </ColorCode>
+  <ColorCode facies="5"> 141 </ColorCode> 
+
+<Files>
+    <Input>  Above_FS34_480000x6688000_493000x6710000.bmp </Input>
+    <Output> IFS34.irap </Output>
+  </Files> 
+</ConvertBitmapToRMS>
+
