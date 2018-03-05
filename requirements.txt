@@ -10,5 +10,3 @@ peewee==2.10.2  # norot
 safety==1.7.0
 piprot==0.9.7
 pylint==1.8.2
-git+ssh://git@git.statoil.no/SDP/nrlib.git
-
