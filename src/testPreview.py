@@ -26,7 +26,7 @@ from src.APSDataFromRMS import APSDataFromRMS
 from src.APSModel import APSModel
 from src.utils.exceptions.xml import CrossSectionOutsideRange, UndefinedZoneError
 from src.utils.constants.simple import Debug
-from src.utils.io import readFile, writeFile
+from src.utils.io import readFile, writeFileRTF
 
 
 def defineColors(nFacies):
@@ -46,7 +46,98 @@ def defineColors(nFacies):
     else:
         return []
 
+def plotGaussField(subplotAxis, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                   azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, gridDim1, gridDim2,
+                   plotTicks=True, rotate_plot=False, gridIndexOrder='F'):
 
+    if numberInTruncRule >= len(gaussFieldIndxList):
+        alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
+        # Reshape to a 2D matrix where first index is row, second index is column 
+        if gridIndexOrder=='F':
+            alphaMap  = np.reshape(alphaReal, (gridDim2, gridDim1),'F')
+        else:
+            alphaMap  = np.reshape(alphaReal, (gridDim2, gridDim1),'C')
+        gaussName = 'Not used'
+    else:
+        item = gaussFieldItems[gaussFieldIndxList[numberInTruncRule]]
+        gaussName = item[0]
+        alphaReal = item[1]
+        # Reshape to a 2D matrix where first index is row, second index is column 
+        if gridIndexOrder=='F':
+            alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1),'F')
+        else:
+            alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1),'C')
+    if rotate_plot:
+        rot_im = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
+    else:
+        rot_im = alphaMap
+    if previewCrossSectionType == 'IJ':
+        im = subplotAxis.imshow(rot_im, interpolation='none', aspect='equal', extent=(0.0, xLength,0.0, yLength),
+                                vmin=0.0, vmax=1.0, origin='lower')
+        plt.axis([0.0, xLength, 0.0, yLength])
+    elif previewCrossSectionType == 'IK':
+        im = subplotAxis.imshow(rot_im, interpolation='none', aspect='equal', extent=(0.0, xLength, 0.0, zLength),
+                                vmin=0.0, vmax=1.0, origin='lower')
+        plt.axis([0.0, xLength, zLength, 0.0])
+    else:
+        im = subplotAxis.imshow(rot_im, interpolation='none', aspect='equal', extent=(0.0, yLength, 0.0, zLength),
+                                vmin=0.0, vmax=1.0, origin='lower')
+        plt.axis([0.0, yLength, zLength, 0.0])
+    subplotAxis.set_title(gaussName)
+    if not plotTicks:
+        plt.setp(subplotAxis.get_xticklabels(), visible=False)
+        plt.setp(subplotAxis.get_yticklabels(), visible=False)
+    return im
+
+def crossPlot(subplotAxis, numberInTruncRule1, numberInTruncRule2, gaussFieldItems, gaussFieldIndxList):
+    # Plot crossplot between two specified gauss fields
+    nGaussFieldsInTruncRule = len(gaussFieldIndxList)
+    if numberInTruncRule1 < len(gaussFieldIndxList) and numberInTruncRule2 < len(gaussFieldIndxList):
+        item1 = gaussFieldItems[gaussFieldIndxList[numberInTruncRule1]]
+        gaussName1 = item1[0]
+        alphaReal1 = item1[1]
+        item2 = gaussFieldItems[gaussFieldIndxList[numberInTruncRule2]]
+        gaussName2 = item2[0]
+        alphaReal2 = item2[1]
+
+        plt.scatter(alphaReal1, alphaReal2, alpha=0.15, marker='.', c='b')
+        title = 'Crossplot ' + gaussName1 + '  ' + gaussName2
+        subplotAxis.set_title(title)
+        subplotAxis.set_aspect('equal', 'box')
+        plt.axis([0, 1, 0, 1])
+
+
+def plotFacies(subplotAxis, fmap, nFacies, cmap, azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, plotTicks=True, rotate_plot=False):
+    if rotate_plot:
+        rot_imFac = scipy.ndimage.interpolation.rotate(fmap, azimuthGridOrientation)
+    else:
+        rot_imFac = fmap
+        
+    if previewCrossSectionType == 'IJ':
+        imFac = subplotAxis.imshow(
+            rot_imFac, interpolation='none', aspect='equal', cmap=cmap, clim=(1, nFacies), origin='lower',
+            extent=(0.0, xLength,0.0, yLength)
+        )
+        plt.axis([0.0, xLength, 0.0, yLength])
+    elif previewCrossSectionType == 'IK':
+        imFac = subplotAxis.imshow(
+            rot_imFac, interpolation='none', aspect='equal', cmap=cmap, clim=(1, nFacies), origin='lower',
+            extent=(0.0, xLength,0.0, zLength)
+        )
+        plt.axis([0.0, xLength, zLength, 0.0])
+    else:
+        imFac = subplotAxis.imshow(
+            rot_imFac, interpolation='none', aspect='equal', cmap=cmap, clim=(1, nFacies), origin='lower',
+            extent=(0.0, yLength,0.0, zLength)
+        )
+        plt.axis([0.0, yLength, zLength, 0.0])
+    subplotAxis.set_title('Facies')
+    plt.setp(subplotAxis.get_xticklabels(), visible=False)
+    plt.setp(subplotAxis.get_yticklabels(), visible=False)
+    return imFac
+        
 def set2DGridDimension(
         nx, ny, nz, previewCrossSectionType, previewLX, previewLY, previewLZ,
         previewScale=False, useBestResolution=True, debug_level=Debug.OFF
@@ -59,9 +150,9 @@ def set2DGridDimension(
     nxPreview = nx
     nyPreview = ny
     nzPreview = nz
-    if debug_level >= Debug.VERBOSE:
+    if debug_level >= Debug.VERY_VERBOSE:
         print(
-            'preview LX, LY, LZ, scale: {previewLX}, {previewLY}, {previewLZ}, {previewScale}'.format(
+            'Debug output: preview LX, LY, LZ, scale: {previewLX},  {previewLY},  {previewLZ},  {previewScale}'.format(
                 previewLX=previewLX,
                 previewLY=previewLY,
                 previewLZ=previewLZ,
@@ -73,65 +164,86 @@ def set2DGridDimension(
         previewLZ = previewLZ * previewScale
     dx = previewLX / nx
     dy = previewLY / ny
-    # Use square pixels in IJ plane
-    if useBestResolution:
-        if nx < MIN_NX:
-            nx = MIN_NX
-            dx = previewLX / nx
-        if ny < MIN_NY:
-            ny = MIN_NY
-            dy = previewLY / ny
 
-        if dx < dy:
-            dy = dx
-            nyPreview = int(previewLY / dy) + 1
+    xLength = previewLX
+    yLength = previewLY
+    zLength = previewLZ
+    if previewCrossSectionType == 'IJ':
+        # Use square pixels in IJ plane. Adjust the number of grid cells.
+        if useBestResolution:
+            if nx < MIN_NX:
+                nx = MIN_NX
+                dx = previewLX / nx
+            if ny < MIN_NY:
+                ny = MIN_NY
+                dy = previewLY / ny
+
+            if dx < dy:
+                dy = dx
+                nyPreview = int(previewLY / dy) + 1
+            else:
+                dx = dy
+                nxPreview = int(previewLX / dx) + 1
         else:
-            dx = dy
-            nxPreview = int(previewLX / dx) + 1
-    else:
-        if nx > MAX_NX:
-            nx = MAX_NX
-            dx = previewLX / nx
-        if ny > MAX_NY:
-            ny = MAX_NY
-            dy = previewLY / ny
+            if nx > MAX_NX:
+                nx = MAX_NX
+                dx = previewLX / nx
+            if ny > MAX_NY:
+                ny = MAX_NY
+                dy = previewLY / ny
 
-        if dx < dy:
-            dx = dy
-            nxPreview = int(previewLX / dx) + 1
+            if dx < dy:
+                dx = dy
+                nxPreview = int(previewLX / dx) + 1
+            else:
+                dy = dx
+                nyPreview = int(previewLY / dy) + 1
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output:  dx = {}   dy= {}'.format(str(dx), str(dy)))
+            print('Debug output:  nxPreview = {}  nyPreview = {}'.format(str(nxPreview), str(nyPreview)))
+
+        xLength = previewLX
+        yLength = previewLY
+
+    else:
+        if not previewScale:
+            # Rescale to same size as horizontal
+            if previewCrossSectionType == 'IK':
+                nzPreview = nxPreview
+                zLength = xLength
+            if previewCrossSectionType == 'JK':
+                nzPreview = nyPreview
+                zLength = yLength
+
+            if debug_level >= Debug.VERY_VERBOSE:
+                dx = xLength/nxPreview
+                dy = yLength/nyPreview
+                print('Debug output:  dx = {}   dy= {}'.format(str(dx), str(dy)))
+                print('Debug output:  nxPreview = {}  nyPreview = {}'.format(str(nxPreview), str(nyPreview)))
+
         else:
-            dy = dx
-            nyPreview = int(previewLY / dy) + 1
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('dx = {dx}  dy= {dy}'.format(dx=dx, dy=dy))
+            # Keep ratio between lateral and vertical scale including scaling factor
+            # and define nzPreview to follow this constraint
+            if previewCrossSectionType == 'IK':
+                ratio = previewLZ / previewLX
+                nzPreview = int(nxPreview * ratio) + 1
 
-    if not previewScale:
-        # Rescale to same size as horizontal
-        if previewCrossSectionType == 'IK':
-            nzPreview = nxPreview
-        if previewCrossSectionType == 'JK':
-            nzPreview = nyPreview
+                if debug_level >= Debug.VERY_VERBOSE:
+                    dx = previewLX/nxPreview
+                    dz = previewLZ/nzPreview
+                    print('Debug output:  dx = {}   dz= {}'.format(str(dx), str(dz)))
 
-        if nzPreview < MIN_NZ:
-            nzPreview = MIN_NZ
-    else:
-        # Keep ratio between lateral and vertical scale including scaling factor
-        if previewCrossSectionType == 'IK':
-            ratio = previewLZ / previewLX
-            nzPreview = int(nxPreview * ratio) + 1
-        if previewCrossSectionType == 'JK':
-            ratio = previewLZ / previewLY
-            nzPreview = int(nyPreview * ratio) + 1
+            if previewCrossSectionType == 'JK':
+                ratio = previewLZ / previewLY
+                nzPreview = int(nyPreview * ratio) + 1
 
-    if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print(
-            'nxPreview, nyPreview, nzPreview: {nxPreview}, {nyPreview}, {nzPreview}'.format(
-                nxPreview=nxPreview,
-                nyPreview=nyPreview,
-                nzPreview=nzPreview
-            )
-        )
-    return [nxPreview, nyPreview, nzPreview]
+                if debug_level >= Debug.VERY_VERBOSE:
+                    dy = previewLY/nyPreview
+                    dz = previewLZ/nzPreview
+                    print('Debug output:  dy = {}   dz= {}'.format(str(dy), str(dz)))
+
+    return nxPreview, nyPreview, nzPreview, xLength, yLength, zLength
+
 
 
 def defineHorizontalAndVerticalResolutionForPlotting(
@@ -157,7 +269,6 @@ def run_previewer(
         model='APS.xml',
         rms_data_file_name='rms_project_data_for_APS_gui.xml',
         rotate_plot=False,
-        no_simulation=False,
         write_simulated_fields_to_file=False,
         debug_level=Debug.OFF
 ) -> None:
@@ -183,24 +294,24 @@ def run_previewer(
         apsModel = model
     else:
         raise ValueError("The given model format is not recognized.")
-
+    debug_level = apsModel.debug_level()
     gridModelName = apsModel.getGridModelName()
     previewZoneNumber = apsModel.getPreviewZoneNumber()
     previewRegionNumber = apsModel.getPreviewRegionNumber()
     previewCrossSectionType = apsModel.getPreviewCrossSectionType()
-    previewCrossSectionIndx = apsModel.getPreviewCrossSectionIndx()
+    previewCrossSectionRelativePos = apsModel.getPreviewCrossSectionRelativePos()
     previewScale = apsModel.getPreviewScale()
     if debug_level >= Debug.VERY_VERBOSE:
         print(
             'Debug output: previewZoneNumber:       {previewZoneNumber}\n'
             'Debug output: previewRegionNumber:     {previewRegionNumber}\n'
             'Debug output: previewCrossSectionType: {previewCrossSectionType}\n'
-            'Debug output: previewCrossSectionIndx: {previewCrossSectionIndx}\n'
+            'Debug output: previewCrossSectionRelativePos: {previewCrossSectionRelativePos}\n'
             'Debug output: previewScale:            {previewScale}\n\n'.format(
                 previewZoneNumber=previewZoneNumber,
                 previewRegionNumber=previewRegionNumber,
                 previewCrossSectionType=previewCrossSectionType,
-                previewCrossSectionIndx=previewCrossSectionIndx,
+                previewCrossSectionRelativePos=previewCrossSectionRelativePos,
                 previewScale=previewScale
             )
         )
@@ -225,9 +336,9 @@ def run_previewer(
     if debug_level >= Debug.VERBOSE:
         print(
             '- Grid dimension from RMS grid: nx: {nx} ny:{ny} nz: {nz}\n'
-            '- Size of simulation box: LX: {simBoxXsize} LY:{simBoxYsize} LZ: {simBoxZsize}\n'
+            '- Size of simulation box: LX: {simBoxXsize}    LY:{simBoxYsize}    LZ: {simBoxZsize}\n'
             '- Simulate 2D cross section in: '
-            '{previewCrossSectionType} cross section for index: {previewCrossSectionIndx}'.format(
+            '{previewCrossSectionType} cross section for index: {previewCrossSectionRelativePos}'.format(
                 nx=nx,
                 ny=ny,
                 nz=nz,
@@ -235,28 +346,33 @@ def run_previewer(
                 simBoxYsize=simBoxYsize,
                 simBoxZsize=simBoxZsize,
                 previewCrossSectionType=previewCrossSectionType,
-                previewCrossSectionIndx=previewCrossSectionIndx
+                previewCrossSectionRelativePos=previewCrossSectionRelativePos
             )
         )
 
-    nxPreview, nyPreview, nzPreview = set2DGridDimension(
+    nxPreview, nyPreview, nzPreview, xLength, yLength, zLength = set2DGridDimension(
         nx, ny, nz, previewCrossSectionType,
         simBoxXsize, simBoxYsize, simBoxZsize, previewScale, debug_level=debug_level
     )
-    _check_preview_section(
-        nx, nxPreview, ny, nyPreview, nz, nzPreview, previewCrossSectionIndx, previewCrossSectionType, debug_level
-    )
+    
 
     truncObject = zoneModel.getTruncRule()
     faciesNames = zoneModel.getFaciesInZoneModel()
-    gaussFieldNames = zoneModel.getUsedGaussFieldNames()
+    gaussFieldNamesInModel = zoneModel.getUsedGaussFieldNames()
+    gaussFieldIndxList = zoneModel.getGaussFieldIndexListInZone()
+    nGaussFieldsInModel = len(gaussFieldNamesInModel)
+    nGaussFieldsInTruncRule = len(gaussFieldIndxList)
     if debug_level >= Debug.VERBOSE:
-        print('Gauss field names:')
-        print(repr(gaussFieldNames))
-    assert len(gaussFieldNames) >= 2
+        print('Gauss fields in truncation rule:')
+        for i in range(len(gaussFieldIndxList)):
+            indx = gaussFieldIndxList[i]
+            print('Gauss field number {}:  {}'
+                  ''.format(str(i+1), gaussFieldNamesInModel[indx]))
+
+    assert len(gaussFieldNamesInModel) >= 2
     nFacies = len(faciesNames)
 
-    nGaussFields = len(gaussFieldNames)
+
     useConstProb = zoneModel.useConstProb()
     cellNumber = 0
 
@@ -285,73 +401,73 @@ def run_previewer(
         faciesProb.append(v)
 
     # Calculate truncation map for given facies probabilities
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
-        print('Facies prob:')
-        print(repr(faciesProb))
     truncObject.setTruncRule(faciesProb)
 
     # Write data structure:
     # truncObject.writeContentsInDataStructure()
 
-    gaussFields = []
+    gaussFieldItems = []
     gridDim1 = 0
     gridDim2 = 0
-    if no_simulation:
-        # Read the gauss fields from files
-        if nGaussFields >= 2:
-            a1 = readFile('a1.dat')
-            a2 = readFile('a2.dat')
-        if nGaussFields >= 3:
-            a3 = readFile('a3.dat')
-        if nGaussFields >= 4:
-            a4 = readFile('a4.dat')
-        if nGaussFields >= 5:
-            a5 = readFile('a5.dat')
-        if nGaussFields >= 6:
-            a6 = readFile('a6.dat')
-    else:
-        # simulate gauss fields
-        gaussFields = zoneModel.simGaussFieldWithTrendAndTransform(
-            nGaussFields, simBoxXsize, simBoxYsize, simBoxZsize,
-            nxPreview, nyPreview, nzPreview, azimuthGridOrientation,
-            previewCrossSectionType, previewCrossSectionIndx
-        )
-
-        if previewCrossSectionType == 'IJ':
-            gridDim1 = nxPreview
-            gridDim2 = nyPreview
-        elif previewCrossSectionType == 'IK':
-            gridDim1 = nxPreview
-            gridDim2 = nzPreview
-        elif previewCrossSectionType == 'JK':
-            gridDim1 = nyPreview
-            gridDim2 = nzPreview
-
-        if write_simulated_fields_to_file:
-            if debug_level >= Debug.VERBOSE:
-                print('Write 2D simulated gauss fields: ')
-            for n in range(nGaussFields):
-                gf = gaussFields[n]
-                fileName = 'a' + str(n + 1) + '_' + previewCrossSectionType + '.dat'
-                writeFile(fileName, gf, gridDim1, gridDim2, debug_level)
+    # simulate gauss fields
+    print('nxPreview, nyPreview, nzPreview ({},{},{}): '.format(str(nxPreview), str(nyPreview), str(nzPreview)))
+    gaussFieldItems = zoneModel.simGaussFieldWithTrendAndTransform(
+        xLength, yLength, zLength,
+        nxPreview, nyPreview, nzPreview, azimuthGridOrientation,
+        previewCrossSectionType, previewCrossSectionRelativePos
+    )
+    if previewCrossSectionType == 'IJ':
+        gridDim1 = nxPreview
+        gridDim2 = nyPreview
+        inc1 = simBoxXsize/nxPreview
+        inc2 = simBoxYsize/nyPreview
+    elif previewCrossSectionType == 'IK':
+        gridDim1 = nxPreview
+        gridDim2 = nzPreview
+        inc1 = simBoxXsize/nxPreview
+        inc2 = simBoxZsize/nzPreview
+    elif previewCrossSectionType == 'JK':
+        gridDim1 = nyPreview
+        gridDim2 = nzPreview
+        inc1 = simBoxYsize/nyPreview
+        inc2 = simBoxZsize/nzPreview
+        
+    if write_simulated_fields_to_file:
+        if debug_level >= Debug.VERBOSE:
+            print('Write 2D simulated gauss fields: ')
+            for n in range(nGaussFieldsInModel):
+                item = gaussFieldItems[n]
+                gfName = item[0]
+                gf = item[1]
+                fileName = gfName + '_' + previewCrossSectionType + '.dat'
+                x0 = 0.0
+                y0 = 0.0
+                writeFileRTF(fileName, gf, gridDim1, gridDim2, inc1, inc2, x0, y0, debug_level=Debug.OFF)
 
     facies = np.zeros(gridDim1 * gridDim2, int)
     faciesFraction = np.zeros(nFacies, int)
 
-    gfRealization1 = gaussFields[0]
+    # Find one realization to get the grid size
+    item = gaussFieldItems[0]
+    gfRealization1 = item[1]
     nGridCells = len(gfRealization1)
-    alphaCoord = np.zeros(nGaussFields, np.float32)
+    alphaCoord = np.zeros(nGaussFieldsInModel, np.float32)
     for i in range(nGridCells):
-        for m in range(nGaussFields):
-            alphaReal = gaussFields[m]
+        for m in range(nGaussFieldsInModel):
+            item = gaussFieldItems[m]
+            name = item[0]
+            alphaReal = item[1]
             alphaCoord[m] = alphaReal[i]
-        faciesCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
+            faciesCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
 
         facies[i] = fIndx + 1  # Use fIndx+1 as values in the facies plot
         faciesFraction[fIndx] += 1
 
     if write_simulated_fields_to_file:
-        writeFile('facies2D.dat', facies, gridDim1, gridDim2)
+        x0 = 0.0
+        y0 = 0.0
+        writeFileRTF('facies2D.dat', facies, gridDim1, gridDim2, inc1, inc2, x0, y0)
+
     if debug_level >= Debug.VERY_VERBOSE:
         print('\nFacies name:   Simulated fractions:    Specified fractions:')
         for i in range(nFacies):
@@ -365,12 +481,7 @@ def run_previewer(
     faciesPolygons = truncObject.truncMapPolygons()
     faciesIndxPerPolygon = truncObject.faciesIndxPerPolygon()
 
-    fmap = np.reshape(facies, (gridDim2, gridDim1))  # Reshape to a 2D array with c-index ordering
-    alphaMapList = []
-    for m in range(nGaussFields):
-        alphaReal = gaussFields[m]
-        alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
-        alphaMapList.append(alphaMap)
+    fmap = np.reshape(facies, (gridDim2, gridDim1),'C')  # Reshape to a 2D matrix (gridDim2 = nRows, gridDim1 = nColumns)
 
     # Plot the result
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
@@ -379,123 +490,49 @@ def run_previewer(
 
     # Figure containing the transformed Gaussian fields and facies realization
 
-    # figGauss,(ax1,ax2,ax3,ax4,ax5,ax6) = plt.subplots(1, 6,sharey=True)
 
     # Gauss1 transformed is plotted
+    numberInTruncRule = 0
     ax1 = plt.subplot(2, 6, 1)
-    alphaMap = alphaMapList[0]
-    gaussName = gaussFieldNames[0]
-    if rotate_plot:
-        rot_im1 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
-    else:
-        rot_im1 = alphaMap
-    if previewCrossSectionType == 'IJ':
-        im1 = ax1.imshow(rot_im1, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-        ax1.set_title(gaussName)
-    else:
-        im1 = ax1.imshow(rot_im1, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
-        ax1.set_title(gaussName)
+    im1 = plotGaussField(ax1, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                         azimuthGridOrientation, previewCrossSectionType,
+                         xLength, yLength, zLength, gridDim1, gridDim2, gridIndexOrder='C')
 
     # Gauss2 transformed is plotted
+    numberInTruncRule = 1
     ax2 = plt.subplot(2, 6, 2)
-    alphaMap = alphaMapList[1]
-    gaussName = gaussFieldNames[1]
-    if rotate_plot:
-        rot_im2 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
-    else:
-        rot_im2 = alphaMap
-    if previewCrossSectionType == 'IJ':
-        im2 = ax2.imshow(rot_im2, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-        ax2.set_title(gaussName)
-    else:
-        im2 = ax2.imshow(rot_im2, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
-        ax2.set_title(gaussName)
-    plt.setp(ax2.get_xticklabels(), visible=False)
-    plt.setp(ax2.get_yticklabels(), visible=False)
-
+    plotGaussField(ax2, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                   azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, gridDim1, gridDim2, plotTicks=False, gridIndexOrder='C')
+    
     # Gauss3 transformed is plotted
+    numberInTruncRule = 2
     ax3 = plt.subplot(2, 6, 3)
-    alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
-    alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
-
-    if nGaussFields >= Debug.VERY_VERBOSE:
-        gaussName = gaussFieldNames[2]
-        alphaMap = alphaMapList[2]
-    if rotate_plot:
-        rot_im3 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
-    else:
-        rot_im3 = alphaMap
-    if previewCrossSectionType == 'IJ':
-        im3 = ax3.imshow(rot_im3, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-        ax3.set_title(gaussName)
-    else:
-        im3 = ax3.imshow(rot_im3, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
-        ax3.set_title(gaussName)
-    plt.setp(ax3.get_xticklabels(), visible=False)
-    plt.setp(ax3.get_yticklabels(), visible=False)
+    plotGaussField(ax3, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                   azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, gridDim1, gridDim2, plotTicks=False, gridIndexOrder='C')
 
     # Gauss4 transformed is plotted
+    numberInTruncRule = 3
     ax4 = plt.subplot(2, 6, 7)
-    alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
-    alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
-
-    if nGaussFields >= 4:
-        gaussName = gaussFieldNames[3]
-        alphaMap = alphaMapList[3]
-    if rotate_plot:
-        rot_im4 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
-    else:
-        rot_im4 = alphaMap
-    if previewCrossSectionType == 'IJ':
-        im4 = ax4.imshow(rot_im4, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-        ax4.set_title(gaussName)
-    else:
-        im4 = ax4.imshow(rot_im4, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
-        ax4.set_title(gaussName)
-    plt.setp(ax4.get_xticklabels(), visible=False)
-    plt.setp(ax4.get_yticklabels(), visible=False)
+    plotGaussField(ax4, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                   azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, gridDim1, gridDim2, plotTicks=False, gridIndexOrder='C')
 
     # Gauss5 transformed is plotted
+    numberInTruncRule = 4
     ax5 = plt.subplot(2, 6, 8)
-    alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
-    alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
-
-    if nGaussFields >= 5:
-        gaussName = gaussFieldNames[4]
-        alphaMap = alphaMapList[4]
-    if rotate_plot:
-        rot_im5 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
-    else:
-        rot_im5 = alphaMap
-    if previewCrossSectionType == 'IJ':
-        im5 = ax5.imshow(rot_im5, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-        ax5.set_title(gaussName)
-    else:
-        im5 = ax5.imshow(rot_im5, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
-        ax5.set_title(gaussName)
-    plt.setp(ax5.get_xticklabels(), visible=False)
-    plt.setp(ax5.get_yticklabels(), visible=False)
+    plotGaussField(ax5, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                   azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, gridDim1, gridDim2, plotTicks=False, gridIndexOrder='C')
 
     # Gauss6 transformed is plotted
+    numberInTruncRule = 5
     ax6 = plt.subplot(2, 6, 9)
-    alphaReal = np.zeros(gridDim1 * gridDim2, np.float32)
-    alphaMap = np.reshape(alphaReal, (gridDim2, gridDim1))
+    plotGaussField(ax6, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
+                   azimuthGridOrientation, previewCrossSectionType,
+                   xLength, yLength, zLength, gridDim1, gridDim2, plotTicks=False, gridIndexOrder='C')
 
-    if nGaussFields >= 6:
-        gaussName = gaussFieldNames[5]
-        alphaMap = alphaMapList[5]
-    if rotate_plot:
-        rot_im6 = scipy.ndimage.interpolation.rotate(alphaMap, azimuthGridOrientation)
-    else:
-        rot_im6 = alphaMap
-    if previewCrossSectionType == 'IJ':
-        im6 = ax6.imshow(rot_im6, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='lower')
-        ax6.set_title(gaussName)
-    else:
-        im6 = ax6.imshow(rot_im6, interpolation='none', aspect='equal', vmin=0.0, vmax=1.0, origin='upper')
-        ax6.set_title(gaussName)
-    plt.setp(ax6.get_xticklabels(), visible=False)
-    plt.setp(ax6.get_yticklabels(), visible=False)
 
     # Color legend for the transformed Gaussian fields
     cax1 = fig.add_axes([0.94, 0.52, 0.02, 0.4])
@@ -529,69 +566,36 @@ def run_previewer(
         fName = faciesNames[fIndx]
     axTrunc.set_title('TruncMap')
     axTrunc.set_aspect('equal', 'box')
+    
     # Facies map is plotted
     axFacies = plt.subplot(2, 6, 11)
-    if rotate_plot:
-        rot_imFac = scipy.ndimage.interpolation.rotate(fmap, azimuthGridOrientation)
-    else:
-        rot_imFac = fmap
-    if previewCrossSectionType == 'IJ':
-        imFac = axFacies.imshow(
-            rot_imFac, interpolation='none', aspect='equal', cmap=cm, clim=(1, nFacies), origin='lower'
-        )
-        axFacies.set_title('Facies')
-    else:
-        imFac = axFacies.imshow(
-            rot_imFac, interpolation='none', aspect='equal', cmap=cm, clim=(1, nFacies), origin='upper'
-        )
-        axFacies.set_title('Facies')
+    imFac = plotFacies(axFacies, fmap, nFacies, cm, azimuthGridOrientation, previewCrossSectionType,
+                       xLength, yLength, zLength, plotTicks=False)
 
     # Plot crossplot between GRF1 and GRF2,3,4,5
-    if nGaussFields >= 2:
-        # Cross plot between G1 and G2
-        alphaReal1 = gaussFields[0]
-        alphaReal2 = gaussFields[1]
+    numberInTruncRule1 = 0
+    numberInTruncRule2 = 1
+    if numberInTruncRule1 < nGaussFieldsInTruncRule and numberInTruncRule2 < nGaussFieldsInTruncRule:
         axC1 = plt.subplot(2, 6, 4)
-        plt.scatter(alphaReal1, alphaReal2, alpha=0.15, marker='.', c='b')
-        title = 'Crossplot ' + gaussFieldNames[0] + '  ' + gaussFieldNames[1]
-        axC1.set_title(title)
-        axC1.set_aspect('equal', 'box')
-        plt.axis([0, 1, 0, 1])
-    if nGaussFields >= Debug.VERY_VERBOSE:
-        # Cross plot between G1 and G3
-        alphaReal1 = gaussFields[0]
-        alphaReal3 = gaussFields[2]
+        crossPlot(axC1, numberInTruncRule1, numberInTruncRule2, gaussFieldItems, gaussFieldIndxList)
+        
+    numberInTruncRule1 = 0
+    numberInTruncRule2 = 2
+    if numberInTruncRule1 < nGaussFieldsInTruncRule and numberInTruncRule2 < nGaussFieldsInTruncRule:
         axC2 = plt.subplot(2, 6, 5)
-        plt.scatter(alphaReal1, alphaReal3, alpha=0.15, marker='.', c='b')
-        title = 'Crossplot ' + gaussFieldNames[0] + '  ' + gaussFieldNames[2]
-        axC2.set_title(title)
-        axC2.set_aspect('equal', 'box')
-        plt.axis([0, 1, 0, 1])
-        plt.setp(axC2.get_xticklabels(), visible=False)
-        plt.setp(axC2.get_yticklabels(), visible=False)
-    if nGaussFields >= 4:
-        # Cross plot between G1 and G4
-        alphaReal1 = gaussFields[0]
-        alphaReal4 = gaussFields[3]
+        crossPlot(axC2, numberInTruncRule1, numberInTruncRule2, gaussFieldItems, gaussFieldIndxList)
+
+    numberInTruncRule1 = 0
+    numberInTruncRule2 = 3
+    if numberInTruncRule1 < nGaussFieldsInTruncRule and numberInTruncRule2 < nGaussFieldsInTruncRule:
         axC3 = plt.subplot(2, 6, 6)
-        plt.scatter(alphaReal1, alphaReal4, alpha=0.15, marker='.', c='b')
-        title = 'Crossplot ' + gaussFieldNames[0] + '  ' + gaussFieldNames[3]
-        axC3.set_title(title)
-        axC3.set_aspect('equal', 'box')
-        plt.axis([0, 1, 0, 1])
-        plt.setp(axC3.get_xticklabels(), visible=False)
-        plt.setp(axC3.get_yticklabels(), visible=False)
-    if nGaussFields >= 5:
-        # Cross plot between G1 and G5
-        alphaReal1 = gaussFields[0]
-        alphaReal5 = gaussFields[4]
+        crossPlot(axC3, numberInTruncRule1, numberInTruncRule2, gaussFieldItems, gaussFieldIndxList)
+
+    numberInTruncRule1 = 0
+    numberInTruncRule2 = 4
+    if numberInTruncRule1 < nGaussFieldsInTruncRule and numberInTruncRule2 < nGaussFieldsInTruncRule:
         axC4 = plt.subplot(2, 6, 12)
-        plt.scatter(alphaReal1, alphaReal5, alpha=0.15, marker='.', c='b')
-        title = 'Crossplot ' + gaussFieldNames[0] + '  ' + gaussFieldNames[4]
-        axC4.set_title(title)
-        plt.axis([0, 1, 0, 1])
-        plt.setp(axC4.get_xticklabels(), visible=False)
-        plt.setp(axC4.get_yticklabels(), visible=False)
+        crossPlot(axC4, numberInTruncRule1, numberInTruncRule2, gaussFieldItems, gaussFieldIndxList)
 
     # Color legend for the truncation map and facies plots
     cax2 = fig.add_axes([0.94, 0.05, 0.02, 0.4])
@@ -604,9 +608,18 @@ def run_previewer(
     )
     # Label the rows and columns of the table
     if regionNumber > 0:
-        text = 'Zone number: ' + str(zoneNumber) + ' Region number: ' + str(regionNumber)+ ' Cross section: ' + previewCrossSectionType
+        text = 'Zone number: ' + str(zoneNumber) + '  Region number: ' + str(regionNumber)+ '  Cross section: ' + previewCrossSectionType 
     else:
-        text = 'Zone number: ' + str(zoneNumber) + ' Cross section: ' + previewCrossSectionType
+        text = 'Zone number: ' + str(zoneNumber) + '  Cross section: ' + previewCrossSectionType
+    if previewScale and (previewCrossSectionType=='IK' or previewCrossSectionType=='JK'):
+        text = text + '  Vertical scale: ' + str(previewScale)
+    if previewCrossSectionType=='IJ':
+        text = text + '  Cross section for K = ' + str(previewCrossSectionRelativePos * nzPreview)
+    elif previewCrossSectionType=='IK':
+        text = text + '  Cross section for J = ' + str(previewCrossSectionRelativePos * nyPreview)
+    else:
+        text = text + '  Cross section for I = ' + str(previewCrossSectionRelativePos * nxPreview)
+
     fig.text(0.50, 0.98, text, ha='center')
     for i in range(nFacies):
         p = int(faciesProb[i] * 1000 + 0.5)
@@ -619,48 +632,12 @@ def run_previewer(
         print('Finished testPreview')
 
 
-def _check_preview_section(
-        nx, nxPreview, ny, nyPreview, nz, nzPreview, previewCrossSectionIndx,
-        previewCrossSectionType, debug_level=Debug.OFF
-):
-    if previewCrossSectionType == 'IJ':
-        if not 0 <= previewCrossSectionIndx < nz:
-            raise CrossSectionOutsideRange('IJ', previewCrossSectionIndx, nz - 1)
-        if debug_level >= Debug.VERBOSE:
-            print(
-                '- Preview simulation grid dimension: nx: {nxPreview} ny:{nyPreview}'.format(
-                    nxPreview=nxPreview,
-                    nyPreview=nyPreview
-                )
-            )
-    elif previewCrossSectionType == 'IK':
-        if not 0 <= previewCrossSectionIndx < ny:
-            raise CrossSectionOutsideRange('IK', previewCrossSectionIndx, ny - 1)
-        if debug_level >= Debug.VERBOSE:
-            print(
-                '- Preview simulation grid dimension: nx: {nxPreview} nz:{nzPreview}'.format(
-                    nxPreview=nxPreview,
-                    nzPreview=nzPreview
-                )
-            )
-    elif previewCrossSectionType == 'JK':
-        if not 0 <= previewCrossSectionIndx < nx:
-            raise CrossSectionOutsideRange('JK', previewCrossSectionIndx, nx - 1)
-        if debug_level >= Debug.VERBOSE:
-            print(
-                '- Preview simulation grid dimension: ny: {nyPreview} nz:{nzPreview}'.format(
-                    nyPreview=nyPreview,
-                    nzPreview=nzPreview
-                )
-            )
-
 
 def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(description="A preliminary previewer for APS GUI")
     parser.add_argument('model', metavar='FILE', type=str, nargs='?', default='APS.xml', help="The model file to be viewed (default: APS.xml)")
     parser.add_argument('rms_data_file_name', metavar='DATA', type=str, nargs='?', default='rms_project_data_for_APS_gui.xml', help="The rms data file (default: rms_project_data_for_APS_gui.xml)")
     parser.add_argument('-r', '--rotate-plot', type=bool, default=False, help="Toggles rotation of plot (default: False)")
-    parser.add_argument('-s', '--no-simulation', type=bool, nargs='?', default=False, help="Turns off simulation (default: False)")
     parser.add_argument('-w', '--write-simulated-fields-to-file', nargs='?', type=bool, default=False, help="Toggles whether the simulated fileds should be dumped to disk (default: False)")
     parser.add_argument('-d', '--debug-level', type=int, default=0, help="Sets the verbosity. 0-4, where 0 is least verbose (default: 0)")
     return parser

@@ -16,6 +16,7 @@
 
 import math
 import copy
+import sys
 import numpy as np
 import importlib 
 from xml.etree.ElementTree import Element
@@ -196,7 +197,12 @@ class Trend3D:
         if origin is None or origin_type is None:
             x_center, y_center = x0, y0
             z_center = 0.0 # Top of zone
+            self._xCenterInSimBoxCoordinates = 0.0
+            self._yCenterInSimBoxCoordinates = 0.0
+            self._zCenterInSimBoxCoordinates = 0.0
+
         elif origin_type == OriginType.RELATIVE:
+            # Calculate the global coordinate for x and y for the center point and z coordinate relative to simulation box
             aA = azimuthAngle * math.pi / 180.0
             x_center = (
                 x0
@@ -209,9 +215,18 @@ class Trend3D:
                 + origin[1] * simBoxYLength * math.cos(aA)
                 )
             z_center = origin[2] * simBoxThickness
+            self._xCenterInSimBoxCoordinates = origin[0] * simBoxXLength
+            self._yCenterInSimBoxCoordinates = origin[1] * simBoxYLength
+            self._zCenterInSimBoxCoordinates = z_center
+
         elif origin_type == OriginType.ABSOLUTE:
             x_center, y_center = origin[0], origin[1]
             z_center = origin[2] * simBoxThickness
+            dx = origin[0] -x0
+            dy = origin[1] -y0
+            self._xCenterInSimBoxCoordinates = dx * math.cos(aA) - dy * math.sin(aA)
+            self._yCenterInSimBoxCoordinates = dx * math.sin(aA) + dy * math.cos(aA)
+            self._zCenterInSimBoxCoordinates = z_center
         else:
             raise ValueError(
                 'In {}\n'
@@ -226,7 +241,7 @@ class Trend3D:
         self._zSimBox = simBoxThickness
         
 
-    def _calculateTrendModelParam(self):
+    def _calculateTrendModelParam(self,useRelativeAzimuth=False):
         raise NotImplementedError('Can not use: {} object as a trend object. Use sub classes of this as trend'
                          ''.format(self.__className))
 
@@ -235,6 +250,10 @@ class Trend3D:
                          ''.format(self.__className))
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        raise NotImplementedError('Can not use: {} object as a trend object. Use sub classes of this as trend'
+                         ''.format(self.__className))
+
+    def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
         raise NotImplementedError('Can not use: {} object as a trend object. Use sub classes of this as trend'
                          ''.format(self.__className))
 
@@ -254,6 +273,8 @@ class Trend3D:
             (nx, ny, nz) = gridIndexer.dimensions
 
             simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = gr.getGridSimBoxSize(grid3D, self._debug_level)
+            self._simBoxAzimuth = azimuthAngle
+            
             # Define self._xCenter, self._yCenter for the trend
             self._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness)
 
@@ -335,6 +356,96 @@ class Trend3D:
             minmaxDifference = maxValue - minValue
         return minmaxDifference, valuesRescaled
 
+    def createTrendFor2DProjection(
+            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
+            nxPreview, nyPreview, nzPreview, projectionType, crossSectionRelativePos
+    ):
+        if self.type == TrendType.RMS_PARAM or self.type == TrendType.NONE:
+            print('Preview of Trend of type RMS_PARAM or NONE is not implemented')
+            sys.exit()
+
+        # Define relative azimuth relative to y axis in simulation box coordinates
+        self._relativeAzimuth = self._azimuth -azimuthSimBox
+
+        # Define self._xCenter, self._yCenter for the trend
+        self._setTrendCenter(0.0, 0.0, azimuthSimBox, simBoxXsize, simBoxYsize, simBoxZsize)
+
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output:  Trend type: {}'.format(self.type.name))
+            if self.type != TrendType.RMS_PARAM:
+                print('Debug output:  Trend azimuth: {}'.format(self._azimuth))
+                print('Debug output:  StackingAngle: {}'.format(self._stackingAngle)) 
+                print('Debug output:  Direction: {}'.format(str(self._direction)))
+                print('Debug output:  x_center (sim box): {}'.format(str(self._xCenterInSimBoxCoordinates)))
+                print('Debug output:  y_center (sim box): {}'.format(str(self._yCenterInSimBoxCoordinates)))
+                print('Debug output:  z_center (sim box): {}'.format(str(self._zCenterInSimBoxCoordinates)))
+            self._writeTrendSpecificParam()
+
+        # Calculate parameters used in the trend function. 
+        # Use simulation box coordinates and azimuth must be relative to simulation box
+        parametersForTrendCalc = self._calculateTrendModelParam(useRelativeAzimuth=True)
+        xinc = simBoxXsize / nxPreview
+        yinc = simBoxYsize / nyPreview
+        zinc = simBoxZsize / nzPreview
+
+        # Note: Save trend values for the 2D fields in 1D numpy vector in 'C' sequence
+        if projectionType == 'IJ':
+            k = crossSectionRelativePos * (nzPreview-1)
+            values = np.zeros(nxPreview * nyPreview, float)
+            # values(i,j) as 1D vector
+            for j in range(nyPreview):
+                for i in range(nxPreview):
+                    indx = i + j * nxPreview # Index for 2D matrix where j is row and i is column
+                    trendValue =self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
+                    values[indx] = trendValue
+
+        elif projectionType == 'IK':
+            j = crossSectionRelativePos * (nyPreview-1)
+            values = np.zeros(nxPreview * nzPreview, float)
+            # values(i,k) as 1D vector
+            for k in range(nzPreview):
+                for i in range(nxPreview):
+                    indx = i + k * nxPreview # Index for 2D matrix where k is row and i is column index
+                    trendValue =self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
+                    values[indx] = trendValue
+
+        elif projectionType == 'JK':
+            i = crossSectionRelativePos * (nxPreview-1)
+            values = np.zeros(nyPreview * nzPreview, float)
+            # values(j,k) as 1D vector
+            for k in range(nzPreview):
+                for j in range(nyPreview):
+                    indx = j + k * nyPreview # Index for 2D matrix where k is row and j is column index
+                    trendValue =self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
+                    values[indx] = trendValue
+        else:
+            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
+
+        minValueInCrossSection = values.min()
+        maxValueInCrossSection = values.max()
+        averageTrend = values.mean()
+        minmaxDifference = maxValueInCrossSection - minValueInCrossSection
+        if abs(averageTrend) > 0.00001:
+            if abs(minmaxDifference/averageTrend) < 0.0001:
+                valuesRescaled = np.ones(nxPreview * nyPreview, float)
+                averageTrend = 1.0
+            else:
+                valuesRescaled = (values - minValueInCrossSection)/minmaxDifference
+        else:
+            if abs(minmaxDifference) < 0.00001:
+                valuesRescaled = np.ones(nxPreview * nyPreview, float)
+                averageTrend = 1.0
+            else:
+                valuesRescaled = (values - minValueInCrossSection)/minmaxDifference
+        minValue = valuesRescaled.min()
+        maxValue = valuesRescaled.max()
+        minmaxDifference = maxValue - minValue
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Min value of trend for 2D cross section within simBox before rescaling: ' + str(minValueInCrossSection))
+            print('Debug output: Max value of trend for 2D cross section within simBox before rescaling: ' + str(maxValueInCrossSection))
+            print('Debug output: Difference between max and min value within simBox after rescaling: ' + str(minmaxDifference))
+
+        return minmaxDifference, averageTrend, valuesRescaled
 
 
     def get_origin_type_from_model_file(self, model_file_name, trendRuleXML):
@@ -397,125 +508,49 @@ class Trend3D_linear(Trend3D):
         super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
         # Add additional for current trend type here
 
-    def _calcLinearTrendNormalVector(self, azimuthSimBox):
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+        # Reference point in simulation box coordinates (midpoint of the box)
+        self._xCenter = x0
+        self._yCenter = y0
+        self._zCenter = simBoxThickness/2.0
+
+        # For linear trend, the reference point (xCenter, yCenter, zCenter) is actually irrelevant 
+        # and is choosen to be in the middle of simulation box
+        self._xCenterInSimBoxCoordinates = 0.5
+        self._yCenterInSimBoxCoordinates = 0.5
+        self._zCenterInSimBoxCoordinates = 0.5
+
+
+    def _calculateTrendModelParam(self,useRelativeAzimuth=False):
         """
             Calculate normal vector to iso-surfaces (planes) for constant trend values
             a*(x-x0)+b*(y-y0)+c*(z-z0) = K where K is a constant is such
             an iso surface and [a,b,c] is the normal vector to the plane.
         """
-        # Calculate the 3D trend values
-
-        alpha = (90.0 - self._stackingAngle) * np.pi / 180.0
-        if self._direction == 1:
-            theta = (self._azimuth - azimuthSimBox) * np.pi / 180.0
-        else:
-            theta = (self._azimuth - azimuthSimBox + 180.0) * np.pi / 180.0
-
-        # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
-        xComponent = math.cos(alpha) * math.sin(theta)
-        yComponent = math.cos(alpha) * math.cos(theta)
-        zComponent = math.sin(alpha)
-        return xComponent, yComponent, zComponent
-
-    def createTrendFor2DProjection(
-            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
-            nxPreview, nyPreview, nzPreview, projectionType, crossSectionIndx
-    ):
-
-        xComponent, yComponent, zComponent = self._calcLinearTrendNormalVector(azimuthSimBox)
-        xinc = simBoxXsize / nxPreview
-        yinc = simBoxYsize / nyPreview
-        zinc = simBoxZsize / nzPreview
-
-        if projectionType == 'IJ':
-            zRel = (crossSectionIndx + 0.5) * zinc
-            values = np.zeros(nxPreview * nyPreview, float)
-            for i in range(nxPreview):
-                xRel = (i + 0.5) * xinc
-                for j in range(nyPreview):
-                    indx = i + j * nxPreview
-                    yRel = (j + 0.5) * yinc
-                    trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
-                    values[indx] = trendValue
-        elif projectionType == 'IK':
-            yRel = (crossSectionIndx + 0.5) * yinc
-            values = np.zeros(nxPreview * nzPreview, float)
-            for i in range(nxPreview):
-                xRel = (i + 0.5) * xinc
-                for k in range(nzPreview):
-                    indx = i + k * nxPreview
-                    zRel = (k + 0.5) * zinc
-                    trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
-                    values[indx] = trendValue
-        elif projectionType == 'JK':
-            xRel = (crossSectionIndx + 0.5) * xinc
-            values = np.zeros(nyPreview * nzPreview, float)
-            for j in range(nyPreview):
-                yRel = (j + 0.5) * yinc
-                for k in range(nzPreview):
-                    indx = j + k * nyPreview
-                    zRel = (k + 0.5) * zinc
-                    trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
-                    values[indx] = trendValue
-        else:
-            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
-
-        v1 = 0.0
-        v2 = xComponent * simBoxXsize
-        v3 = yComponent * simBoxYsize
-        v4 = xComponent * simBoxXsize + yComponent * simBoxYsize
-
-        v5 = v1 + zComponent * simBoxZsize
-        v6 = v2 + zComponent * simBoxZsize
-        v7 = v3 + zComponent * simBoxZsize
-        v8 = v4 + zComponent * simBoxZsize
-        w = [v1, v2, v3, v4, v5, v6, v7, v8]
-        minValue = min(w)
-        maxValue = max(w)
-
-        minmaxDifference = maxValue - minValue
-        valuesRescaled = self._direction * values / minmaxDifference
-
-        minValue = minValue / minmaxDifference
-        maxValue = maxValue / minmaxDifference
-        minmaxDifference = maxValue - minValue
-        minValueInCrossSection = min(valuesRescaled)
-        maxValueInCrossSection = max(valuesRescaled)
-        if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Min value of trend within simBox: ' + str(minValue))
-            print('Debug output: Max value of trend within simBox: ' + str(maxValue))
-            print('Debug output: Difference between max and min value within simBox: ' + str(minmaxDifference))
-            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
-            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
-
-        return minmaxDifference, valuesRescaled
-
-    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
-        self._xCenter = x0
-        self._yCenter = y0
-        self._zCenter = 0.0
-
-    def _AlphaTheta(self):
-        alpha = (90.0 - self._stackingAngle) * np.pi / 180.0
-        if self._direction == 1:
-            theta = self._azimuth * np.pi / 180.0
-        else:
-            theta = (self._azimuth + 180.0) * np.pi / 180.0
-        return alpha, theta
-
-    def _calculateTrendModelParam(self):
         # Calculate the 3D linear trend parameters
-        alpha, theta = self._AlphaTheta()
+        # Note that the coordinate system is left handed with z axis down, x from West to East and y axis from South to North
+        # Positive stacking angle means the angle is 90 + stackingAngle relative to z axis
+        alpha = self._stackingAngle * np.pi / 180.0
+        if useRelativeAzimuth:
+            azimuth = self._relativeAzimuth
+        else:
+            azimuth = self._azimuth
+
+        if self._direction == 1:
+            theta = azimuth * np.pi / 180.0
+        else:
+            theta = (azimuth + 180.0) * np.pi / 180.0
 
         # Normal vector to a plane with constant trend value is [xComponent,yComponent,zComponent]
-        if abs(self._stackingAngle) < 0.0000001:
+        if abs(self._stackingAngle) < 0.001:
             xComponent = 0.0
             yComponent = 0.0
             zComponent = 1.0
         else:
-            xComponent = math.cos(alpha) * math.sin(theta)
-            yComponent = math.cos(alpha) * math.cos(theta)
-            zComponent = math.sin(alpha)
+            xComponent = math.sin(alpha) * math.sin(theta)
+            yComponent = math.sin(alpha) * math.cos(theta)
+            zComponent = math.cos(alpha)
+
         parameterForTrendCalculation = [xComponent, yComponent, zComponent]
         return parameterForTrendCalculation
 
@@ -523,17 +558,29 @@ class Trend3D_linear(Trend3D):
         print('')
 
     def _trendValueCalculation(self, parametersForTrendCalc,x, y, k, zinc):
-        xComponent =  parametersForTrendCalc[0]
-        yComponent =  parametersForTrendCalc[1]
-        zComponent =  parametersForTrendCalc[2]
-
-        # Transform the point(0,0,zRel) into a point (x_center, y_center, zRel)
+        # Calculate trend value for point(x,y,z) relative to origo defined by (xCenter, yCenter,zCenter)
+        # Here only a shift in the global x,y coordinates are done. The z coordinate is relative to simulation box.
         zRel = (k - self._startLayer + 0.5) * zinc - self._zCenter 
         xRel = x - self._xCenter
         yRel = y - self._yCenter
-        trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
+        trendValue = self._linearTrendFunction(parametersForTrendCalc, xRel, yRel, zRel)
         return trendValue
 
+    def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
+        # Calculate trend value for point(x,y,z) in simulation box coordinates. 
+        # The origo corresponds to the corner of cell (0,0,startLayer)
+        zRel = (k - self._startLayer + 0.5) * zinc
+        xRel = (i + 0.5) * xinc
+        yRel = (j + 0.5) * yinc
+        trendValue = self._linearTrendFunction(parametersForTrendCalc, xRel, yRel, zRel)
+        return trendValue
+
+    def _linearTrendFunction(self, parametersForTrendCalc, xRel, yRel, zRel):
+        xComponent =  parametersForTrendCalc[0]
+        yComponent =  parametersForTrendCalc[1]
+        zComponent =  parametersForTrendCalc[2]
+        trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
+        return trendValue
 # ----------------------------------------------------------------------------------------------------------
 
 class Trend3D_elliptic(Trend3D):
@@ -565,19 +612,19 @@ class Trend3D_elliptic(Trend3D):
             self._stackingAngle = 0.00001
 
         # Additional input parameters comes here (for other Trend3D-types)
-        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False,
-                                          defaultValue=1)
+        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=True)
         if self._curvature <= 0.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Curvature for elliptic trend is not positive.'
                 ''.format(self._className)
             )
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=True)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=True)
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=True)
         self._origin = [origin_x, origin_y, origin_z]
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
+
 
     def XMLAddElement(self, parent):
         """
@@ -703,27 +750,50 @@ class Trend3D_elliptic(Trend3D):
         return self._origin_type
 
 
-    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
+                        origin_type=None, origin=None):
         super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
                                 self._origin_type, self._origin)
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
         # Elliptic
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z1 = (k - self._startLayer + 0.5) * zinc - self._zCenter
+        x1 = x - self._xCenter
+        y1 = y - self._yCenter
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        trendValue = self._ellipticTrendFunction(parametersForTrendCalc, x1, y1, z1)
+        return trendValue
+
+    def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
+        # Elliptic
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z = (k - self._startLayer + 0.5) * zinc - self._zCenterInSimBoxCoordinates
+        x = (i + 0.5) * xinc - self._xCenterInSimBoxCoordinates
+        y = (j + 0.5) * yinc - self._yCenterInSimBoxCoordinates
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenterInSimBox, yCenterInSimBox, zCenterInSimBox)
+        trendValue = self._ellipticTrendFunction(parametersForTrendCalc, x, y, z)
+        return trendValue
+
+    def _ellipticTrendFunction(self, parametersForTrendCalc, x, y, z):
+        # Input(x,y,z) must be relative to reference point(xCenter, yCenter, zCenter)
         sinTheta = parametersForTrendCalc[0]
         cosTheta = parametersForTrendCalc[1]
         tanAlpha = parametersForTrendCalc[2]
         a = parametersForTrendCalc[3]
         b = parametersForTrendCalc[4]
 
-        # Transform the point(0,0,zRel) into a point (x_center, y_center, zRel)
-        zRel = (k - self._startLayer + 0.5) * zinc - self._zCenter
-        if zRel != 0.0:
-            L = zRel * tanAlpha
-            x_center = -L * sinTheta + self._xCenter
-            y_center = -L * cosTheta + self._yCenter
+        if z != 0.0:
+            L = z * tanAlpha
+            x_center = -L * sinTheta
+            y_center = -L * cosTheta
         else:
-            x_center = self._xCenter
-            y_center = self._yCenter
+            x_center = 0.0
+            y_center = 0.0
 
         xRel = x - x_center
         yRel = y - y_center
@@ -732,10 +802,14 @@ class Trend3D_elliptic(Trend3D):
         value = np.sqrt(np.square(xRotated / a) + np.square(yRotated / b))
         return value
 
-    def _calculateTrendModelParam(self):
+
+    def _calculateTrendModelParam(self,useRelativeAzimuth=False):
         # Calculate the 3D trend values for Elliptic
         alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
-        theta = self._azimuth * np.pi / 180.0
+        if useRelativeAzimuth:
+            theta = self._relativeAzimuth * np.pi / 180.0
+        else:
+            theta = self._azimuth * np.pi / 180.0
 
         # Elliptic
         a = 1
@@ -754,72 +828,6 @@ class Trend3D_elliptic(Trend3D):
         print('Debug output:  Origin type: {}'.format(self._origin_type.name))
 
 
-    def createTrendFor2DProjection(
-            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
-            nxPreview, nyPreview, nzPreview, projectionType, crossSectionIndx
-    ):
-
-        xinc = simBoxXsize / nxPreview
-        yinc = simBoxYsize / nyPreview
-        zinc = simBoxZsize / nzPreview
-
-        parametersForTrendCalc = self._calculateTrendModelParam() 
-
-        if projectionType == 'IJ':
-            zRel = (crossSectionIndx + 0.5) * zinc
-            values = np.zeros(nxPreview * nyPreview, float)
-            for i in range(nxPreview):
-                ii = i-nxPreview
-                xRel = (ii + 0.5) * xinc
-                for j in range(nyPreview):
-                    indx = i + j * nxPreview
-                    jj = j-nyPreview
-                    yRel = (jj + 0.5) * yinc
-                    # Elliptic
-                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
-                    values[indx] = trendValue
-        elif projectionType == 'IK':
-            yRel = (crossSectionIndx + 0.5) * yinc
-            values = np.zeros(nxPreview * nzPreview, float)
-            for i in range(nxPreview):
-                ii = i-nxPreview
-                xRel = (ii + 0.5) * xinc
-                for k in range(nzPreview):
-                    indx = i + k * nxPreview
-                    kk = k-nzPreview
-                    zRel = (kk + 0.5) * zinc
-                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
-                    values[indx] = trendValue
-        elif projectionType == 'JK':
-            xRel = (crossSectionIndx + 0.5) * xinc
-            values = np.zeros(nyPreview * nzPreview, float)
-            for j in range(nyPreview):
-                jj = j-nxPreview
-                yRel = (jj + 0.5) * yinc
-                for k in range(nzPreview):
-                    indx = j + k * nyPreview
-                    kk = k-nzPreview
-                    zRel = (kk + 0.5) * zinc
-                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
-                    values[indx] = trendValue
-        else:
-            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
-        minValue = values.min()
-        maxValue = values.max()
-
-        minmaxDifference = maxValue - minValue
-        valuesRescaled = (values - minValue) / minmaxDifference
-
-        minValue = valuesRescaled.min()
-        maxValue = valuesRescaled.max()
-        minmaxDifference = maxValue - minValue
-        minValueInCrossSection = minValue
-        maxValueInCrossSection = maxValue
-        if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
-            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
-
-        return minmaxDifference, valuesRescaled
 
 # ----------------------------------------------------------------------------------------------------------
 
@@ -970,11 +978,36 @@ class Trend3D_hyperbolic(Trend3D):
         self._origin_type = origin_type
 
 
-    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
+                        origin_type=None, origin=None):
         super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
                                 self._origin_type, self._origin)
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # Hyperbolic
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z1 = (k - self._startLayer + 0.5) * zinc - self._zCenter
+        x1 = x - self._xCenter
+        y1 = y - self._yCenter
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        trendValue = self._hyperbolicTrendFunction(parametersForTrendCalc, x1, y1, z1)
+        return trendValue
+
+    def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
+        # Hyperbolic
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z = (k - self._startLayer + 0.5) * zinc - self._zCenterInSimBoxCoordinates
+        x = (i + 0.5) * xinc - self._xCenterInSimBoxCoordinates
+        y = (j + 0.5) * yinc - self._yCenterInSimBoxCoordinates
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenterInSimBox, yCenterInSimBox, zCenterInSimBox)
+        trendValue = self._hyperbolicTrendFunction(parametersForTrendCalc, x, y, z)
+        return trendValue
+
+    def _hyperbolicTrendFunction(self, parametersForTrendCalc, x, y, z):
         # Hyperbolic
         sinTheta = parametersForTrendCalc[0]
         cosTheta = parametersForTrendCalc[1]
@@ -983,18 +1016,17 @@ class Trend3D_hyperbolic(Trend3D):
         a = parametersForTrendCalc[4]
         b = parametersForTrendCalc[5]
 
-        zRel = (k -self._startLayer + 0.5) * zinc - self._zCenter
 
         # The center point is changed by depth. There are two angles that can specify this
         # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
         # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
         # First shift the center point in azimuth direction
-        L = -zRel * tanAlpha
-        x_center = L * sinTheta + self._xCenter
-        y_center = L * cosTheta + self._yCenter
+        L = -z * tanAlpha
+        x_center = L * sinTheta
+        y_center = L * cosTheta
 
         # Secondly, shift the center point further, but now orthogonal to azimuth direction.
-        L = -zRel * tanBeta
+        L = -z * tanBeta
         x_center = L * cosTheta + x_center
         y_center = -L * sinTheta + y_center
 
@@ -1011,13 +1043,15 @@ class Trend3D_hyperbolic(Trend3D):
         trendValue = (1.0  - abs(xRotatedByTheta / zeroPoint)) 
         return trendValue
 
-    def _calculateTrendModelParam(self):
-        # Calculate the 3D trend values
+    def _calculateTrendModelParam(self, useRelativeAzimuth=False):
+        # Calculate the 3D trend values for Hyperbolic
         assert self._curvature > 1.0
         assert abs(self._migrationAngle) < 90.0
         assert abs(self._stackingAngle) > 0.0
-
-        theta = self._azimuth * np.pi / 180.0
+        if useRelativeAzimuth:
+            theta = self._relativeAzimuth * np.pi / 180.0
+        else:
+            theta = self._azimuth * np.pi / 180.0
         beta  = self._migrationAngle * np.pi / 180.0
         alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
 
@@ -1125,7 +1159,8 @@ class Trend3D_rms_param(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        text = getTextCommand(trendRuleXML, 'TrendParamName', 'Trend', defaultText=None, modelFile=modelFileName, required=True)
+        text = getTextCommand(trendRuleXML, 'TrendParamName', 'Trend', defaultText=None,
+                              modelFile=modelFileName, required=True)
         self._rmsParamName=copy.copy(text.strip())
 
     def initialize(self, rmsParamName, debug_level=Debug.OFF):
@@ -1240,10 +1275,9 @@ class Trend3D_elliptic_cone(Trend3D):
                 ''.format(self._className)
             )
         # Reference point the center line will go through
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
-        self._origin = [origin_x, origin_y, origin_z]
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=True, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=True, defaultValue=0.0)
+        self._origin = [origin_x, origin_y, 0.0]
 
         # Type of reference point (relative or absolute coordinate values)
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
@@ -1419,13 +1453,39 @@ class Trend3D_elliptic_cone(Trend3D):
         return self._origin_type
 
 
-    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
+                        origin_type=None, origin=None):
         super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
                                 self._origin_type, self._origin)
-        self._origin[2] = 0.0
+        self._origin[2] = 1.0
 
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        # Elliptic cone
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z1 = (k - self._startLayer + 0.5) * zinc - self._zCenter
+        x1 = x - self._xCenter
+        y1 = y - self._yCenter
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        trendValue = self._ellipticConeTrendFunction(parametersForTrendCalc, x1, y1, z1, zinc)
+        return trendValue
+
+
+    def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
+        # Elliptic cone
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z = (k - self._startLayer + 0.5) * zinc - self._zCenterInSimBoxCoordinates
+        x = (i + 0.5) * xinc - self._xCenterInSimBoxCoordinates
+        y = (j + 0.5) * yinc - self._yCenterInSimBoxCoordinates
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        trendValue = self._ellipticConeTrendFunction(parametersForTrendCalc, x, y, z, zinc)
+        return trendValue
+
+    def _ellipticConeTrendFunction(self, parametersForTrendCalc, x, y, z, zinc):
         # Elliptic cone
         sinTheta = parametersForTrendCalc[0]
         cosTheta = parametersForTrendCalc[1]
@@ -1434,8 +1494,6 @@ class Trend3D_elliptic_cone(Trend3D):
         a = parametersForTrendCalc[4]
         b = parametersForTrendCalc[5]
 
-        zRel = (k -self._startLayer + 0.5) * zinc
-
         zTop = 0.0
         zThickness = (self._endLayer - self._startLayer +1) * zinc
         zBase = zTop + zThickness
@@ -1443,19 +1501,19 @@ class Trend3D_elliptic_cone(Trend3D):
         aBase = a
         aTop  = a * self._relativeSize
         da = aBase - aTop
-        a = aTop + da * (zRel - zTop) / zThickness
+        a = aTop + da * (z - zTop) / zThickness
         b = a * self._curvature
         
         # The center point is changed by depth. There are two angles that can specify this
         # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
         # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
         # First shift the center point in azimuth direction
-        L = -zRel * tanAlpha
-        x_center = L * sinTheta + self._xCenter
-        y_center = L * cosTheta + self._yCenter
+        L = -z * tanAlpha
+        x_center = L * sinTheta
+        y_center = L * cosTheta
 
         # Secondly, shift the center point further, but now orthogonal to azimuth direction.
-        L = zRel * tanBeta
+        L = z * tanBeta
         x_center = L * cosTheta + x_center
         y_center = -L * sinTheta + y_center
 
@@ -1468,12 +1526,15 @@ class Trend3D_elliptic_cone(Trend3D):
         value = np.sqrt(np.square(xRotatedByTheta / a) + np.square(yRotatedByTheta / b))
         return value
 
-    def _calculateTrendModelParam(self):
+    def _calculateTrendModelParam(self, useRelativeAzimuth=False):
         # Calculate the 3D trend values for Elliptic cone
         assert abs(self._migrationAngle) < 90.0
         assert abs(self._stackingAngle) > 0.0
         
-        theta = self._azimuth * np.pi / 180.0
+        if useRelativeAzimuth:
+            theta = self._relativeAzimuth * np.pi / 180.0
+        else:
+            theta = self._azimuth * np.pi / 180.0
         beta  = self._migrationAngle * np.pi / 180.0
         alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
         
@@ -1498,70 +1559,4 @@ class Trend3D_elliptic_cone(Trend3D):
         print('Debug output:  Origin type: {}'.format(self._origin_type.name))
 
 
-    def createTrendFor2DProjection(
-            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
-            nxPreview, nyPreview, nzPreview, projectionType, crossSectionIndx
-    ):
-
-        xinc = simBoxXsize / nxPreview
-        yinc = simBoxYsize / nyPreview
-        zinc = simBoxZsize / nzPreview
-
-        parametersForTrendCalc = self._calculateTrendModelParam() 
-
-        if projectionType == 'IJ':
-            zRel = (crossSectionIndx + 0.5) * zinc
-            values = np.zeros(nxPreview * nyPreview, float)
-            for i in range(nxPreview):
-                ii = i-nxPreview
-                xRel = (ii + 0.5) * xinc
-                for j in range(nyPreview):
-                    indx = i + j * nxPreview
-                    jj = j-nyPreview
-                    yRel = (jj + 0.5) * yinc
-                    # Elliptic
-                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
-                    values[indx] = trendValue
-        elif projectionType == 'IK':
-            yRel = (crossSectionIndx + 0.5) * yinc
-            values = np.zeros(nxPreview * nzPreview, float)
-            for i in range(nxPreview):
-                ii = i-nxPreview
-                xRel = (ii + 0.5) * xinc
-                for k in range(nzPreview):
-                    indx = i + k * nxPreview
-                    kk = k-nzPreview
-                    zRel = (kk + 0.5) * zinc
-                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
-                    values[indx] = trendValue
-        elif projectionType == 'JK':
-            xRel = (crossSectionIndx + 0.5) * xinc
-            values = np.zeros(nyPreview * nzPreview, float)
-            for j in range(nyPreview):
-                jj = j-nxPreview
-                yRel = (jj + 0.5) * yinc
-                for k in range(nzPreview):
-                    indx = j + k * nyPreview
-                    kk = k-nzPreview
-                    zRel = (kk + 0.5) * zinc
-                    trendValue = self._trendValueCalculation(parametersForTrendCalc,xRel, yRel, zRel)
-                    values[indx] = trendValue
-        else:
-            raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
-        minValue = values.min()
-        maxValue = values.max()
-
-        minmaxDifference = maxValue - minValue
-        valuesRescaled = (values - minValue) / minmaxDifference
-
-        minValue = valuesRescaled.min()
-        maxValue = valuesRescaled.max()
-        minmaxDifference = maxValue - minValue
-        minValueInCrossSection = minValue
-        maxValueInCrossSection = maxValue
-        if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Min value of trend within cross section: ' + str(minValueInCrossSection))
-            print('Debug output: Max value of trend within cross section: ' + str(maxValueInCrossSection))
-
-        return minmaxDifference, valuesRescaled
 

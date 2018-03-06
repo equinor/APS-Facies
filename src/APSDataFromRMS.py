@@ -151,6 +151,8 @@ class APSDataFromRMS:
             if number == zoneNumber:
                 number_of_layer = item[2]
                 break
+        if number_of_layer == 0:
+            raise ValueError('Zone number {} does not exist in grid model {}'.format(str(zoneNumber), self.getGridModelName()))
         return number_of_layer
 
     def getStartAndEndLayerInZone(self, zoneNumber):
@@ -186,10 +188,7 @@ class APSDataFromRMS:
         kw = 'Project'
         prObj = root.find(kw)
         projectName = None
-        if prObj is None:
-            print('Keyword {} is not read'.format(kw))
-            #raise ValueError('Error: Missing keyword {}'.format(kw))
-        else:
+        if prObj is not None:
             text = prObj.get('name')
             projectName = text.strip()
         self.__data[self.__keyword_mapping[kw]] = projectName

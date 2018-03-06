@@ -107,7 +107,7 @@ class APSModel:
             rmsGridModelName='', rmsSingleZoneGrid='False', rmsZoneParameterName='', rmsRegionParameterName='',
             rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, rmsGFJobs=None,
             rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None, zoneModelTable=None,
-            previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionIndx=0,
+            previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
             previewScale=1.0, debug_level=Debug.OFF):
         """
          The following parameters are necessary to define a model:
@@ -152,15 +152,14 @@ class APSModel:
                           that exist in the gridmodel. It is possible that an APS model is defined for
                           only one (zoneNumber,regionNumber) pair and is not defined any grid cells not satisfying
                           this criteria.
-         previewZone, previewRegion, previewCrossSectionType, previewCrossSectionIndx:
+         previewZone, previewRegion, previewCrossSectionType, previewCrossSectionRelativePos:
                           Variables used in the testPreview script and will not be necessary in the APSGUI.
                           As long as there are benefit related to using the testPreview script, these parameters are relevant.
          The pair (previewZone, previewRegion) - Zone and region number for the APS zone model to create preview plot for.
          previewCrossSectionType - Either IJ, IK, JK for the cross section to make plots for.
-         previewCrossSectionIndx - If IJ is the cross section, then the previewCrossSectionIndx must be an integer
-                                   between 1 and nz,
-                                   if the crossSectionType = IK, then the previewCrossSectionIndx must be
-                                   an integer number between 1 and NY and so on.
+         previewCrossSectionRelativePos - The previewCrossSectionRelativePos must be a float number between 0 and 1.
+                                          and mean for IJ cross sections that the cross section correspond to 
+                                          an index = previewCrossSectionRelativePos * nz and similar fo IK and JK cross sections.
          previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
          debugLevel - Define amouth of output to the screen during runs
         
@@ -192,7 +191,7 @@ class APSModel:
         self.__previewZone = previewZone
         self.__previewRegion = previewRegion
         self.__previewCrossSectionType = previewCrossSectionType
-        self.__previewCrossSectionIndx = previewCrossSectionIndx
+        self.__previewCrossSectionRelativePos = previewCrossSectionRelativePos
         self.__previewScale = previewScale
         self.__debug_level = debug_level
 
@@ -244,10 +243,10 @@ class APSModel:
                 raise MissingAttributeInKeyword(kw, 'crossSectionType')
             self.__previewCrossSectionType = text
 
-            text = obj.get('crossSectionIndx')
+            text = obj.get('crossSectionRelativePos')
             if text is None:
-                raise MissingAttributeInKeyword(kw, 'crossSectionIndx')
-            self.__previewCrossSectionIndx = int(text.strip())
+                raise MissingAttributeInKeyword(kw, 'crossSectionRelativePos')
+            self.__previewCrossSectionRelativePos = float(text.strip())
 
             text = obj.get('scale')
             if text is None:
@@ -693,8 +692,8 @@ class APSModel:
     def getPreviewCrossSectionType(self):
         return self.__previewCrossSectionType
 
-    def getPreviewCrossSectionIndx(self):
-        return self.__previewCrossSectionIndx
+    def getPreviewCrossSectionRelativePos(self):
+        return self.__previewCrossSectionRelativePos
 
     def getPreviewScale(self):
         return self.__previewScale
@@ -813,14 +812,14 @@ class APSModel:
         else:
             self.__previewCrossSectionType = crossSectionType
 
-    def setPreviewCrossSectionIndx(self, crossSectionIndx):
-        if crossSectionIndx <= 0:
+    def setPreviewCrossSectionRelativePos(self, crossSectionRelativePos):
+        if not 0<= crossSectionRelativePos <= 1:
             raise ValueError(
-                'Error in setPreviewCrossSectionIndx\n'
-                'Error:  Cross section index must be positive'
+                'Error in setPreviewCrossSectionRelativePos\n'
+                'The specified value must be in the interval [0.0, 1.0]'
             )
         else:
-            self.__previewCrossSectionIndx = crossSectionIndx
+            self.__previewCrossSectionRelativePos = crossSectionRelativePos
 
     def setPreviewScale(self, scale):
         if not (scale > 0.0):
@@ -1058,7 +1057,7 @@ class APSModel:
                 'zoneNumber': str(self.__previewZone),
                 'regionNumber': str(self.__previewRegion),
                 'crossSectionType': str(self.__previewCrossSectionType),
-                'crossSectionIndx': str(self.__previewCrossSectionIndx),
+                'crossSectionRelativePos': str(self.__previewCrossSectionRelativePos),
                 'scale': str(self.__previewScale)
             }
             elem = Element(tag, attribute)
