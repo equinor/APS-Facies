@@ -1,266 +1,185 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import roxar
+
 import copy
-import sys
-import xml.etree.ElementTree as ET
+
 import numpy as np
+
 import src.generalFunctionsUsingRoxAPI as gf
+from src.defineFacies import BaseDefineFacies
 from src.utils.constants.simple import Debug
+from src.utils.exceptions.xml import MissingKeyword
 
-class DefineFaciesProb:
-    def __init__(self,modelFileName,project, debug_level=Debug.OFF):
-        
-        self.__gridModelName=None
-        self.__zoneParamName= None
-        self.__faciesParamName= None
-        self.__probDefinitionMatrix=None
 
-        self.__probParamNamePrefix= None
-        self.__project = project
-        self.__selectedZoneNumbers=None
-        self.__debug_level=debug_level
-        assert(modelFileName)
-        assert(project)
+class DefineFaciesProb(BaseDefineFacies):
+    def __init__(self, model_file_name, project, debug_level=Debug.OFF):
+        super().__init__(model_file_name, project, 'FaciesProbTrend', debug_level)
 
-        self.__interpretXMLModelFile(modelFileName,project, debug_level=self.__debug_level)
+        self.__probability_matrix = []
 
-    def __interpretXMLModelFile(self, modelFileName,project,debug_level=Debug.OFF):
-        print('Read model file: ' + modelFileName)
-        tree = ET.parse(modelFileName)
-        self.__ET_Tree = tree
-        root = tree.getroot()
-
-        kw = 'FaciesProbTrend'
-        obj = root.find(kw)
-        if obj is not None:
-            kw = 'GridModelName'
-            obj2 = obj.find(kw)
-            if obj2 is not None:
-                text = obj2.text
-                self.__gridModelName = copy.copy(text.strip())
-            else:
-                raise IOError(
-                    'Error reading {}'
-                    'Error missing command: {}'.format(modelFileName,kw)
-                    )
-
-            kw = 'ZoneParamName'
-            obj2 = obj.find(kw)
-            if obj2 is not None:
-                text = obj2.text
-                self.__zoneParamName = copy.copy(text.strip())
-            else:
-                raise IOError(
-                    'Error reading {}'
-                    'Error missing command: {}'.format(modelFileName,kw)
-                    )
-
-            kw = 'FaciesParamName'
-            obj2 = obj.find(kw)
-            if obj2 is not None:
-                text = obj2.text
-                self.__faciesParamName = copy.copy(text.strip())
-            else:
-                raise IOError(
-                    'Error reading {}'
-                    'Error missing command: {}'.format(modelFileName,kw)
-                    )
-
-            kw = 'ProbParamNamePrefix'
-            obj2 = obj.find(kw)
-            if obj2 is not None:
-                text = obj2.text
-                self.__probParamNamePrefix = copy.copy(text.strip())
-            else:
-                raise IOError(
-                    'Error reading {}'
-                    'Error missing command: {}'.format(modelFileName,kw)
-                    )
-            kw = 'SelectedZones'
-            self.__selectedZoneNumbers = []
-            zoneList = []
-            obj2 = obj.find(kw)
-            if obj2 is not None:
-                text = obj2.text
-                textList = text.split()
-                for s in textList:
-                    zoneList.append(int(s.strip()))
-                for i in range(len(zoneList)):
-                    zNr = zoneList[i]
-                    # Zone numbers are specified from 1, but need them numbered from 0 
-                    self.__selectedZoneNumbers.append(zNr-1)
-            else:
-                raise IOError(
-                    'Error reading {}'
-                    'Error missing command: {}'.format(modelFileName,kw)
-                    )
-
+    @property
+    def probability_matrix(self):
+        if not self.__probability_matrix:
             kw = 'CondProbMatrix'
-            self.__probDefinitionMatrix = []
-            obj2= obj.find(kw)
-            if obj2 is not None:
+            obj = self._root.find(kw)
+            if obj is not None:
                 kw = 'Line'
-                for objLine in obj2.findall(kw):
-                    if objLine is not None:
-                        text = objLine.text
-                        [text1,text2,text3] = text.split()
-                        fName = copy.copy(text1.strip())
-                        fNameInReal = copy.copy(text2.strip())
+                for line in obj.findall(kw):
+                    if line is not None:
+                        text = line.text
+                        [text1, text2, text3] = text.split()
+                        facies_name = copy.copy(text1.strip())
+                        facies_name_in_real = copy.copy(text2.strip())
                         prob = float(text3.strip())
-                        if debug_level == Debug.VERBOSE:
-                            print('fname, fnameInReal,prob: ' + fName + ' ' + fNameInReal + ' '  + str(prob))
-                        line = [fName, fNameInReal,prob]
-                        self.__probDefinitionMatrix.append(line)
+                        if self.debug_level >= Debug.VERBOSE:
+                            print('fname, fnameInReal,prob: ' + facies_name + ' ' + facies_name_in_real + ' ' + str(prob))
+                        line = [facies_name, facies_name_in_real, prob]
+                        self.__probability_matrix.append(line)
                     else:
-                        raise IOError(
-                            'Error reading {}'
-                            'Error missing command: {}'.format(modelFileName,kw)
-                            )
-
+                        raise MissingKeyword(kw, self._model_file_name)
             else:
-                raise IOError(
-                    'Error reading {}'
-                    'Error missing command: {}'.format(modelFileName,kw)
-                    )
+                raise MissingKeyword(kw, self._model_file_name)
+        return self.__probability_matrix
 
-        else:
-            raise IOError(
-                'Error reading {}'
-                'Error missing command: {}'.format(modelFileName,kw)
-                )
-        
-
-    def calculateFaciesProbParam(self):
+    def calculate_facies_probability_parameter(self, debug_level=Debug.OFF):
         # Get grid model and grid model parameter
         eps = 0.00001
-        debug_level = self.__debug_level
-        realNumber = 0
-        gridModel = self.__project.grid_models[self.__gridModelName]
-        [zoneValues,codeNamesZone] = gf.getDiscrete3DParameterValues(gridModel,self.__zoneParamName,realNumber,debug_level)
-        [faciesRealValues,codeNamesFacies] = gf.getDiscrete3DParameterValues(gridModel,self.__faciesParamName,realNumber,debug_level)
-        minimum = np.min(faciesRealValues)
-        maximum = np.max(faciesRealValues)
+        real_number = 0
+        grid_model = self.project.grid_models[self.grid_model_name]
+        [zone_values, _] = gf.getDiscrete3DParameterValues(
+            grid_model, self.zone_parameter_name, real_number, debug_level
+        )
+        [facies_real_values, code_names_facies] = gf.getDiscrete3DParameterValues(
+            grid_model, self.facies_parameter_name, real_number, debug_level
+        )
 
         # Find facies
-        faciesNames = []
-        faciesNamesInReal = []
-        for item in self.__probDefinitionMatrix:
-            fName = item[0]
-            fNameInReal = item[1]
-            if fName not in faciesNames:
-                faciesNames.append(copy.copy(fName))
+        facies_names = []
+        facies_names_in_real = []
+        for item in self.probability_matrix:
+            facies_name = item[0]
+            facies_name_in_real = item[1]
+            if facies_name not in facies_names:
+                facies_names.append(copy.copy(facies_name))
 
-            if fNameInReal not in faciesNamesInReal:
-                faciesNamesInReal.append(copy.copy(fNameInReal))
+            if facies_name_in_real not in facies_names_in_real:
+                facies_names_in_real.append(copy.copy(facies_name_in_real))
 
-        if debug_level == Debug.VERBOSE:
+        if self.debug_level >= Debug.VERBOSE:
             print('Facies names:')
-            print(repr(faciesNames))
+            print(repr(facies_names))
 
             print('Facies names in input:')
-            print(repr(faciesNamesInReal))
+            print(repr(facies_names_in_real))
 
             print('CodeNamesFacies:')
-            print(repr(codeNamesFacies))
+            print(repr(code_names_facies))
 
-        probIndx = np.zeros(maximum+1,np.int)
-        for i in range(maximum):
-            probIndx[i] = -1
-
-        for  i in range(len(faciesNamesInReal)):
-            fN = faciesNamesInReal[i]
-            for codeVal in range(minimum,maximum+1):
-                if codeVal in codeNamesFacies:
-                    fN2 = codeNamesFacies[codeVal]
-                    if fN == fN2:
-                        probIndx[codeVal] = i
+        prob_index = self.calculate_probability_indices(code_names_facies, facies_names_in_real, facies_real_values)
 
         # probability matrix using indices corresponding to the lists faciesNames and faciesNamesInReal
-        nFacies = len(faciesNames)
-        nFacInReal = len(faciesNamesInReal)
-        probabilities = np.zeros((nFacies,nFacInReal),dtype=np.float32)
-        indx1 = -1
-        indx2 = -1
-        for item in self.__probDefinitionMatrix:
-            fName = item[0]
-            fNameInReal = item[1]
-            prob = item[2]
-            for i in range(nFacies):
-                fN = faciesNames[i]
-                if fName == fN:
-                    indx1 = i
-                    break
+        probabilities = self.calculate_probabilities(facies_names, facies_names_in_real)
+        num_facies = len(facies_names)
+        num_facies_in_real = len(facies_names_in_real)
 
-            for i in range(nFacInReal):
-                fN = faciesNamesInReal[i]
-                if fNameInReal == fN:
-                    indx2 = i
-                    break
-
-            if indx1 < 0 or indx2 < 0:
-                raise ValueError('Error: Inconsistency in program.')
-
-            probabilities[indx1,indx2] = prob
-
-        # Check that probabilites specified are normalized
-        for j in range(nFacInReal):
-            sumProb = 0.0
-            for i in range(nFacies):
-                sumProb += probabilities[i,j]
-            if abs(sumProb-1.0)> eps:
-                raise ValueError('Error: Specified probabilities for facies in regions with name: ' +
-                                 faciesNamesInReal[j] + ' does not sum up to 1.0'
-                                 )
-        if debug_level == Debug.VERBOSE:
+        # Check that probabilities specified are normalized
+        for j in range(num_facies_in_real):
+            sum_prob = sum([probabilities[i, j] for i in range(num_facies)])
+            if abs(sum_prob - 1.0) > eps:
+                raise ValueError(
+                    'Error: Specified probabilities for facies in regions with name: {} does not sum up to 1.0'
+                    ''.format(facies_names_in_real[j])
+                 )
+        if self.debug_level >= Debug.VERBOSE:
             print('Probability matrix')
             print(repr(probabilities))
-        if debug_level == Debug.ON:
+        if self.debug_level >= Debug.ON:
             print('Start calculate new probabilities for selected zones for each specified facies')
-        sumProbValues = np.zeros(len(zoneValues),np.float32)
-        for f in range(nFacies):
-            fName = faciesNames[f]
-            if debug_level == Debug.ON:
-                print('Facies name: ' + fName)
+        sum_probability_values = np.zeros(len(zone_values), np.float32)
+        for f in range(num_facies):
+            facies_name = facies_names[f]
+            if self.debug_level >= Debug.ON:
+                print('Facies name: ' + facies_name)
 
-            parameterName = self.__probParamNamePrefix + '_' +fName
-            if debug_level == Debug.ON:
-                print('Parameter: ' + parameterName)
+            parameter_name = self.probability_parameter_name_prefix + '_' + facies_name
+            if self.debug_level >= Debug.ON:
+                print('Parameter: ' + parameter_name)
 
-            parameterNameCum = self.__probParamNamePrefix + '_cum_' +fName
-            if debug_level == Debug.ON:
-                print('Parameter for cum prob: ' + parameterNameCum)
+            parameter_name_cum = self.probability_parameter_name_prefix + '_cum_' + facies_name
+            if self.debug_level >= Debug.ON:
+                print('Parameter for cum prob: ' + parameter_name_cum)
 
             # Create new array with 0 probabilities for this facies
-            probValues = np.zeros(len(zoneValues),np.float32)
-            n=0
-            for zoneNumber in self.__selectedZoneNumbers:
+            probability_values = np.zeros(len(zone_values), np.float32)
+            for zone_number in self.selected_zone_numbers:
                 # Filter out cells with selected zone numbers
-#                print('Zone number: ' + str(zoneNumber+1))
-                [nDefinedCells,cellIndexDefined] = gf.getCellValuesFilteredOnDiscreteParam(zoneNumber+1,zoneValues)
-                for i in range(nDefinedCells):
-                    indx = cellIndexDefined[i]
-                    codeVal = faciesRealValues[indx]
-                    pIndx = probIndx[codeVal]
-                    probValues[indx] = probabilities[f,pIndx]
+                [num_defined_cells, cell_index] = gf.getCellValuesFilteredOnDiscreteParam(zone_number + 1, zone_values)
+                for i in range(num_defined_cells):
+                    index = cell_index[i]
+                    code = facies_real_values[index]
+                    p_index = prob_index[code]
+                    probability_values[index] = probabilities[f, p_index]
 
             # Calculate cumulative prob of all previously processed facies including current
-            sumProbValues += probValues
+            sum_probability_values += probability_values
 
             # Write the calculated probabilities for the selected zones to 3D parameter
             # If the 3D parameter exist in advance, only the specified zones will be altered
             # while grid cell values for other zones are unchanged. 
-            if not gf.setContinuous3DParameterValues(gridModel,parameterName,probValues,
-                                                     self.__selectedZoneNumbers,realNumber,debug_level=debug_level):
-                raise ValueError('Error: Grid model is empty or can not be updated.')
-                
-            # Write cumulative prob
-            if not gf.setContinuous3DParameterValues(gridModel,parameterNameCum,sumProbValues,
-                                                     self.__selectedZoneNumbers,realNumber,debug_level=debug_level):
+            success = gf.setContinuous3DParameterValues(
+                grid_model, parameter_name, probability_values,
+                self.selected_zone_numbers, real_number, debug_level=self.debug_level
+            )
+            if not success:
                 raise ValueError('Error: Grid model is empty or can not be updated.')
 
-# ---------------------------- Main -----------------------------------------------
-if __name__ == "__main__":
-    modelFileName = 'defineProbTrend.xml'
-    defineFaciesTrend = DefineFaciesProb(modelFileName,project, debug_level=Debug.ON)
-    defineFaciesTrend.calculateFaciesProbParam()
+            # Write cumulative prob
+            success = gf.setContinuous3DParameterValues(
+                grid_model, parameter_name_cum, sum_probability_values,
+                self.selected_zone_numbers, real_number, debug_level=self.debug_level
+            )
+            if not success:
+                raise ValueError('Error: Grid model is empty or can not be updated.')
+
+    @staticmethod
+    def calculate_probability_indices(code_names_facies, facies_names_in_real, facies_real_values):
+        minimum = np.min(facies_real_values)
+        maximum = np.max(facies_real_values)
+
+        prob_index = np.zeros(maximum + 1, np.int)
+        for i in range(maximum):
+            prob_index[i] = -1
+        for i in range(len(facies_names_in_real)):
+            facies_name = facies_names_in_real[i]
+            for code in range(minimum, maximum + 1):
+                if code in code_names_facies and facies_name == code_names_facies[code]:
+                    prob_index[code] = i
+        return prob_index
+
+    def calculate_probabilities(self, facies_names, facies_names_in_real):
+        num_facies = len(facies_names)
+        num_facies_in_real = len(facies_names_in_real)
+
+        probabilities = np.zeros((num_facies, num_facies_in_real), dtype=np.float32)
+        for item in self.probability_matrix:
+            facies_name = item[0]
+            facies_name_in_real = item[1]
+            prob = item[2]
+
+            index1 = facies_names.index(facies_name)
+            index2 = facies_names_in_real.index(facies_name_in_real)
+
+            probabilities[index1, index2] = prob
+        return probabilities
+
+
+def run():
+    model_file_name = 'defineProbTrend.xml'
+    define_facies_trend = DefineFaciesProb(model_file_name, project, debug_level=Debug.OFF)
+    define_facies_trend.calculate_facies_probability_parameter()
     print('Finished running defineFaciesProbTrend')
+
+
+if __name__ == "__main__":
+    run()

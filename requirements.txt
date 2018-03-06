@@ -1,5 +1,6 @@
 matplotlib==2.1.2
 numpy==1.14.1
+pillow==5.0.0
 blessings==1.6.1
 docopt==0.6.2
 pytest==3.4.1

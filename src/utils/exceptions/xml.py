@@ -104,3 +104,12 @@ class CrossSectionOutsideRange(ValueError):
                 upper_bound=upper_bound
             )
         )
+
+
+class MissingKeyword(IOError):
+    def __init__(self, keyword, model_file=None):
+        message = ''
+        if model_file:
+            message = 'Error reading {}\n'.format(model_file)
+        message += 'Error missing command: {}'.format(keyword)
+        super().__init__(message)
