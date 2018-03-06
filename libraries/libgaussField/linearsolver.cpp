@@ -15,13 +15,13 @@
 /* Prototype declarations */
 static double dasum(int *n, double *dx, int *incx);
 
-static int daxpy(int *n, double *da, double *dx, 
+static int daxpy(int *n, double *da, double *dx,
 		  int *incx, double *dy, int *incy);
 
-static double ddot(int *n, double *dx, 
+static double ddot(int *n, double *dx,
 		    int *incx, double *dy, int *incy);
 
-static int dscal(int *n, double *da, 
+static int dscal(int *n, double *da,
 		  double *dx, int *incx);
 
 static int idamax(int *n, double *dx, int *incx);
@@ -45,8 +45,8 @@ static int c__1 = 1;
 /*     send dgeco, dgefa,dgesl from linpack blas */
 /*    Careful! Anything free comes with no guarantee. */
 /*    *** from netlib, Sat Mar 24 21:30:20 MET 1990 *** */
-/* Subroutine */ 
-int dgeco(double *a, int *lda, int *n, int *ipvt, 
+/* Subroutine */
+int dgeco(double *a, int *lda, int *n, int *ipvt,
 	   double *rcond,double *z)
 {
     /* System generated locals */
@@ -101,7 +101,7 @@ int dgeco(double *a, int *lda, int *n, int *ipvt,
 /*                an estimate of the reciprocal condition of  a . */
 /*                for the system  a*x = b , relative perturbations */
 /*                in  a  and  b  of size  epsilon  may cause */
-/*                relative perturbations in  x  of size  epsilon/rcond . 
+/*                relative perturbations in  x  of size  epsilon/rcond .
 */
 /*                if  rcond  is so small that the logical expression */
 /*                           1.0 + rcond .eq. 1.0 */
@@ -317,8 +317,8 @@ L150:
     return 0;
 } /* dgeco */
 
-/* Subroutine */ 
-int dgefa(double *a, 
+/* Subroutine */
+int dgefa(double *a,
 	   int *lda, int *n, int *ipvt, int *info)
 {
     /* System generated locals */
@@ -435,7 +435,7 @@ L10:
 	    a[k + j * a_dim1] = t;
 L20:
 	    i__3 = *n - k;
-	    daxpy(&i__3, &t, &a[k + 1 + k * a_dim1], &c__1, &a[k + 1 + j * 
+	    daxpy(&i__3, &t, &a[k + 1 + k * a_dim1], &c__1, &a[k + 1 + j *
 		    a_dim1], &c__1);
 /* L30: */
 	}
@@ -454,8 +454,8 @@ L70:
     return 0;
 } /* dgefa */
 
-/* Subroutine */ 
-int dgesl(double *a, int *lda, int *n, int *ipvt, 
+/* Subroutine */
+int dgesl(double *a, int *lda, int *n, int *ipvt,
 	   double *b, int *job)
 {
     /* System generated locals */
@@ -674,7 +674,7 @@ L40:
     i__2 = *n;
     for (i = mp1; i <= i__2; i += 6) {
 	dtemp = dtemp + (d__1 = dx[i], fabs(d__1)) + (d__2 = dx[i + 1], fabs(
-		d__2)) + (d__3 = dx[i + 2], fabs(d__3)) + (d__4 = dx[i + 3], 
+		d__2)) + (d__3 = dx[i + 2], fabs(d__3)) + (d__4 = dx[i + 3],
 		fabs(d__4)) + (d__5 = dx[i + 4], fabs(d__5)) + (d__6 = dx[i + 5]
 		, fabs(d__6));
 /* L50: */
@@ -684,8 +684,8 @@ L60:
     return ret_val;
 } /* dasum */
 
-/* Subroutine */ 
-static int daxpy(int *n, double *da, double *dx, 
+/* Subroutine */
+static int daxpy(int *n, double *da, double *dx,
 		  int *incx, double *dy, int *incy)
 {
     /* System generated locals */
@@ -766,7 +766,7 @@ L40:
     return 0;
 } /* daxpy */
 
-static double ddot(int *n, double *dx, 
+static double ddot(int *n, double *dx,
 		    int *incx, double *dy, int *incy)
 {
     /* System generated locals */
@@ -841,7 +841,7 @@ L40:
     mp1 = m + 1;
     i__1 = *n;
     for (i = mp1; i <= i__1; i += 5) {
-	dtemp = dtemp + dx[i] * dy[i] + dx[i + 1] * dy[i + 1] + dx[i + 2] * 
+	dtemp = dtemp + dx[i] * dy[i] + dx[i + 1] * dy[i + 1] + dx[i + 2] *
 		dy[i + 2] + dx[i + 3] * dy[i + 3] + dx[i + 4] * dy[i + 4];
 /* L50: */
     }
@@ -850,8 +850,8 @@ L60:
     return ret_val;
 } /* ddot */
 
-/* Subroutine */ 
-static int dscal(int *n, double *da, 
+/* Subroutine */
+static int dscal(int *n, double *da,
 		  double *dx, int *incx)
 {
     /* System generated locals */
@@ -1001,7 +1001,7 @@ static double d_sign(double *x, double *y)
 
 
 
-/* Subroutine */ 
+/* Subroutine */
 int cholesky_fact(int *i_mdim__,
 		  int *i_dim__,
 		  double *x_mtx__)
@@ -1062,10 +1062,10 @@ int cholesky_fact(int *i_mdim__,
 	    l_r__ = 0.;
 	    i__3 = l_j__ - 1;
 	    for (l_k__ = 1; l_k__ <= i__3; ++l_k__) {
-		l_r__ += x_mtx__[l_i__ + l_k__ * x_mtx_dim1] * x_mtx__[l_j__ 
+		l_r__ += x_mtx__[l_i__ + l_k__ * x_mtx_dim1] * x_mtx__[l_j__
 			+ l_k__ * x_mtx_dim1];
 	    }
-	    x_mtx__[l_i__ + l_j__ * x_mtx_dim1] = (x_mtx__[l_i__ + l_j__ * 
+	    x_mtx__[l_i__ + l_j__ * x_mtx_dim1] = (x_mtx__[l_i__ + l_j__ *
 		    x_mtx_dim1] - l_r__) / x_mtx__[l_j__ + l_j__ * x_mtx_dim1]
 		    ;
 	}

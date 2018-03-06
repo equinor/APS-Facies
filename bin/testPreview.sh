@@ -4,6 +4,9 @@ WRITE_SCREEN='TRUE'
 
 # TODO: Ensure that the paths are properly set
 
+# TODO: Ask user if APS_PATH is not set
+
+
 APS_PATH=/project/idi/personlig/olia/APSGUI
 NRLIB_PATH=/project/multiscale/APSGUI/nrlib/nrlib-dist
 RMS_VERSION=10.1.1

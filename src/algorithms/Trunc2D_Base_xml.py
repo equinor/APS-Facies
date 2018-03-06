@@ -16,7 +16,7 @@ from src.utils.xml import getKeyword, getFloatCommand
 class Trunc2D_Base
 Description: This class is used as a base class for class Trunc2D_Cubic_Multi_OverLay and Trunc2D_Angle_Multi_OverLay.
              It contains common data used by both and common functions related to common data.
-  
+
  Public member functions:
  Constructor:
    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None, debug_level=Debug.OFF,
@@ -122,7 +122,7 @@ class Trunc2D_Base:
         self._orderIndex = []
 
         # A logical (0/1) value per facies to be modelled. Input is index in faciesInZone
-        # The value is 1 for a facies if this facies has probability close to 100% 
+        # The value is 1 for a facies if this facies has probability close to 100%
         # and therefore is determined to be the facies. Is used to make the algorithm more robust.
         # This list is recalculated for each truncation map (for each new facies probability )
         self._faciesIsDetermined = []
@@ -166,7 +166,7 @@ class Trunc2D_Base:
 
         # A 2D list of center point for truncation intervals for the overlay facies defined in all groups for all alpha fields.
         # center = self._centerAlpha[groupIndx][i] where groupIndx refer to the overlay group and i refer to
-        # the alpha field in the group. 
+        # the alpha field in the group.
         self._centerTruncIntervalInGroup = []
 
         # A 2D list with lower truncation value for overlay facies corresponding to specified
@@ -191,12 +191,12 @@ class Trunc2D_Base:
         # to create a geometry for the facies that is composed of geometry for different gaussian fields.
         # It is also possible that the same overlay facies can appear in different overlay facies groups.
         # This makes it possible to have some overlay facies which can appear to overprint many
-        # different background facies while other overlay facies is limited to only a few background facies. 
+        # different background facies while other overlay facies is limited to only a few background facies.
         self._overlayFaciesIndxInGroup = []
 
         # A 2D list with probability fractions for each overlay facies that is specified in any
         # group  (groupIndx) and for any alpha field (i) in the group.
-        # The list elements are probFrac = self._probFracOverlayFacies[groupIndx][i] 
+        # The list elements are probFrac = self._probFracOverlayFacies[groupIndx][i]
         self._probFracOverlayFaciesInGroup = []
 
         # A 2D list with background facies indices for a given overlay facies group
@@ -215,7 +215,6 @@ class Trunc2D_Base:
         # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
         self._keyResolution = 100
 
-
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  debug_level=Debug.OFF,
                  modelFileName=None, nGaussFieldsInBackGroundModel=2):
@@ -233,7 +232,7 @@ class Trunc2D_Base:
             if self._debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Read data from model file in: ' + self._className)
 
-            # Initialize common data for facies to be modelled (specified for the zone) and the 
+            # Initialize common data for facies to be modelled (specified for the zone) and the
             # ordering of the facies in the truncation rule.
             self._setModelledFacies(mainFaciesTable, faciesInZone)
 
@@ -251,7 +250,7 @@ class Trunc2D_Base:
         """
         if mainFaciesTable is not None:
             self._mainFaciesTable = copy.copy(mainFaciesTable)
-            self._nFaciesMain = self._mainFaciesTable.getNFacies()
+            self._nFaciesMain = len(self._mainFaciesTable)
         else:
             raise ValueError(
                 'Error in {}\n'
@@ -388,7 +387,7 @@ class Trunc2D_Base:
         for groupIndx in range(self._nGroups):
             nBackGroundFac += len(self._backgroundFaciesInGroup[groupIndx])
 
-        # Number of background facies for overlay facies can at maximum be all background facies 
+        # Number of background facies for overlay facies can at maximum be all background facies
         assert nBackGroundFac <= self._nBackGroundFacies
 
         checkOverlapForBackGroundFacies = []
@@ -445,7 +444,7 @@ class Trunc2D_Base:
                 # count it and add it to the check list, if equal, ignore it
                 if alphaIndx not in checkIndx:
                     checkIndx.append(alphaIndx)
-                    # Check that this is consistent with self._alphaIndxList 
+                    # Check that this is consistent with self._alphaIndxList
                     assert alphaIndx == self._alphaIndxList[nGaussField]
                     nGaussField += 1
 
@@ -574,17 +573,17 @@ class Trunc2D_Base:
                      using the first two dimensions of the multidimensional unit cube (alpha1 and alpha2). The overlay
                      facies defined to 'overprint' a subset of the background facies. To be able to handle this,
                      the background facies are grouped into non-overlapping sets. No background facies can belong to two
-                     different groups. For each group one can specify arbitrarily many overlay facies, but the sequence 
+                     different groups. For each group one can specify arbitrarily many overlay facies, but the sequence
                      they are specified define the internal truncation of the overlay facies. For each overlay facies
                      there are associated a gaussian field (alpha field) so that each overlay facies can have different geometry.
                      It is also possible to specify that one and the same overlay facies is associated with multiple alpha fields.
                      In this case one has to assign probability fractions for each of them such that the sum is 1.0.
                      It is also possible to define that an overlay facies can be defined for different groups. Also in this case
-                     the sum of probability fractions over all occurrences of the overlay facies in the keyword OverLayModel 
-                     must sum to 1.0. It is also possible to let the same alpha field be used in different groups, 
-                     but it is a requirement that alpha fields related to facies in the same group must be different 
-                     (cannot have two different alpha dimensions related to the same alpha field at the same location 
-                     since this will create linear dependencies between alpha coordinates.) 
+                     the sum of probability fractions over all occurrences of the overlay facies in the keyword OverLayModel
+                     must sum to 1.0. It is also possible to let the same alpha field be used in different groups,
+                     but it is a requirement that alpha fields related to facies in the same group must be different
+                     (cannot have two different alpha dimensions related to the same alpha field at the same location
+                     since this will create linear dependencies between alpha coordinates.)
 
         Input: trRuleXML - Pointer refering to XML tree where to find info about the truncation rule. All derived classes has a
                truncation rule containing the same keywords for overprint facies and associated background facies.
@@ -734,7 +733,7 @@ class Trunc2D_Base:
                     else:
                         checkBGFaciesList.append(indx)
 
-                    # Facies name should be OK now    
+                    # Facies name should be OK now
                     bgFaciesIndxList.append(indx)
 
                 # Define group index for each background facies where facies is specified as index in faciesInTruncRule
@@ -871,7 +870,7 @@ class Trunc2D_Base:
     def _checkFaciesForZone(self):
         """
         Description: Check that the facies for the truncation rule is the same
-                      as defined for the zone. 
+                      as defined for the zone.
         """
         if len(self._faciesInTruncRule) != len(self._faciesInZone):
             raise ValueError(
@@ -925,37 +924,46 @@ class Trunc2D_Base:
         """
         Description: Write contents of data structure for debug purpose.
         """
-        print(' ')
-        print('************  Contents of the data structure common to several truncation algorithms  ***************')
-        print('Eps for facies prob: ' + str(self._epsFaciesProb))
-        print('Main facies table:')
-        print(repr(self._mainFaciesTable))
-        print('Number of facies in main facies table: ' + str(self._nFaciesMain))
-        print('Facies to be modelled: ')
-        print(repr(self._faciesInZone))
-        print('Facies code per facies to be modelled:')
-        print(repr(self._faciesCode))
-        print('Facies in truncation rule:')
-        print(repr(self._faciesInTruncRule))
-        print('Number of facies to be modelled: ' + str(self._nFacies))
-        print('Index array orderIndex: ')
-        print(repr(self._orderIndex))
-        print(
-            'Logical array with 0 for facies which is has probability 100% and 0 for facies with probability less than 100%')
-        print(repr(self._faciesIsDetermined))
-        print('Print info level: ' + str(self._debug_level))
-        print('Is function setTruncRule called? ')
-        print(repr(self._setTruncRuleIsCalled))
-        print('Background facies:')
+        print(self.__repr__())
+
+    def __repr__(self):
+        representation = """
+************  Contents of the data structure common to several truncation algorithms  ***************
+Eps for facies prob: {eps_facies_probability}
+Main facies table:
+{main_facies_table}
+Number of facies in main facies table: {num_facies_main}
+Facies to be modelled:
+{facies_in_zone}
+Facies code per facies to be modelled:
+{facies_code}
+Facies in truncation rule:
+{facies_in_truncation_rule}
+Number of facies to be modelled: {num_facies}'
+Index array orderIndex:
+{order_index}
+Logical array with 0 for facies which is has probability 100% and 0 for facies with probability less than 100%
+{is_facies_determined}
+Print info level: {debug_level}'
+Is function setTruncRule called?
+{truncation_rule_called}
+Background facies:
+""".format(
+            eps_facies_probability=self._epsFaciesProb, main_facies_table=repr(self._mainFaciesTable),
+            num_facies_main=self._nFaciesMain, facies_in_zone=repr(self._faciesInZone),
+            facies_code=repr(self._faciesCode), num_facies=self._nFacies, debug_level=self._debug_level,
+            truncation_rule_called=self._setTruncRuleIsCalled, facies_in_truncation_rule=repr(self._faciesInTruncRule),
+            order_index=self._orderIndex, is_facies_determined=self._faciesIsDetermined
+        )
         for i in range(self._nBackGroundFacies):
             bgFaciesName = self._faciesInTruncRule[i]
-            print('   {}'.format(bgFaciesName))
-        print(' ')
+            representation += '   {}'.format(bgFaciesName)
+        representation += '\n'
         for i in range(self._nGroups):
-            print(' ')
-            nAlpha = len(self._alphaInGroup[i])
-            print('Number of facies polygons in group number {}  is {}'.format(str(i), str(nAlpha)))
-            for j in range(nAlpha):
+            num_alpha = len(self._alphaInGroup[i])
+            representation += '\nNumber of facies polygons in group number {i}  is {num_alpha}'.format(i=i,
+                                                                                                       num_alpha=num_alpha)
+            for j in range(num_alpha):
                 alphaIndx = self._alphaInGroup[i][j]
                 gfName = self._gaussFieldsInZone[alphaIndx]
                 indx = self._overlayFaciesIndxInGroup[i][j]
@@ -963,27 +971,28 @@ class Trunc2D_Base:
                 probFraction = self._probFracOverlayFaciesInGroup[i][j]
                 low = self._lowAlphaInGroup[i][j]
                 high = self._highAlphaInGroup[i][j]
-                print(
-                    'Overlay facies polygon number {} in group {} belongs to facies {} with prob fraction {} and defined by truncation of {}'
-                    ''.format(str(j), str(i), fName, probFraction, gfName)
+                representation += (
+                    'Overlay facies polygon number {j} in group {i} belongs to facies {facies_name}'
+                    ' with prob fraction {probability_fraction} and defined by truncation of {gf_name}\n'
+                    'Overlay facies polygon number {j} in group {i} belongs to facies {facies_name}'
+                    ' and is truncated between {low} and {high}'.format(
+                        j=j, i=i, facies_name=fName, probability_fraction=probFraction,
+                        gf_name=gfName, low=low, high=high
+                    )
                 )
-                print(
-                    'Overlay facies polygon number {} in group {} belongs to facies {} and is truncated between {} and {}'
-                    ''.format(str(j), str(i), fName, str(low), str(high))
-                )
+
             for j in range(len(self._backgroundFaciesInGroup[i])):
                 indx = self._backgroundFaciesInGroup[i][j]
                 fName = self._faciesInTruncRule[indx]
-                print('Group number: {}  Background facies: {}'.format(str(i), fName))
-
-        print(' ')
-        print('Number of alpha variables (gauss fields) used in the truncation rule: {}'
-              ''.format(self._nGaussFieldsInTruncationRule))
+                representation += 'Group number: {i}  Background facies: {facies_name}'.format(i=i, facies_name=fName)
+        representation += '\nNumber of alpha variables (gauss fields) used in the truncation rule: {}'.format(
+            self._nGaussFieldsInTruncationRule
+        )
         for i in range(self._nGaussFieldsInTruncationRule):
             alphaIndx = self._alphaIndxList[i]
             gfName = self._gaussFieldsInZone[alphaIndx]
-            print('Alpha coordinate number {} corresponds to gauss field {}'
-                  ''.format(str(i + 1), gfName))
+            representation += 'Alpha coordinate number {} corresponds to gauss field {}'.format(i + 1, gfName)
+        return representation
 
     def getClassName(self):
         return copy.copy(self._className)
@@ -1061,7 +1070,7 @@ class Trunc2D_Base:
     # TODO: Sjekk ut robusthet av algoritmen i spesialtilfeller med 0 sannsynlighet for en eller flere facies eller hele grupper av facies
     def _modifyBackgroundFaciesArea(self, faciesProb):
         """
-        Description: Calculate area in trunc map which has corrected for overlay facies. 
+        Description: Calculate area in trunc map which has corrected for overlay facies.
                      This function will also set a minimum probability for robustness of truncation algorithms.
         """
         # The array faciesProb contain probability for all facies, a subset are background facies
@@ -1084,7 +1093,7 @@ class Trunc2D_Base:
         if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             print('\n')
             print('Debug output: Calculate modified area for background facies and threshold values for overlay facies:')
-            
+
         for groupIndx in range(self._nGroups):
             # Sum over probability for background facies
             for j in range(len(self._backgroundFaciesInGroup[groupIndx])):
@@ -1103,7 +1112,7 @@ class Trunc2D_Base:
                 assert probFrac > 0.0
                 prob = prob * probFrac
                 sumProbOverlay[groupIndx] += prob
-                
+
             sumProb[groupIndx] = sumProbBackGround[groupIndx] + sumProbOverlay[groupIndx]
             if self._debug_level >= Debug.VERY_VERY_VERBOSE:
                 print(
@@ -1169,10 +1178,6 @@ class Trunc2D_Base:
                         D = D * (1.0 - delta)
                     deltaAlphaThisGroup.append(delta)
 
-                #print('deltaAlpha in group:  {}'.format(str(groupIndx)))
-                #print(repr(deltaAlphaThisGroup))
-                #print('B=' + str(B))
-
                 # If sum of probability for background facies for this group is 0.0, then assign area to the background facies
                 # such that the som of area of the background facies is equal to the sum of probability of background and overlay facies
                 # for this group and also ensure that truncation intervals for overlay facies is defined such that the overlay facies probability
@@ -1197,9 +1202,6 @@ class Trunc2D_Base:
                             area[fIndx] = 0.0
                         else:
                             area[fIndx] = prob / B
-                        #print('B, prob, area: ' + str(B) + ' ' + str(prob) + ' ' + str(area[fIndx]))
-                        #print('area: ')
-                        #print(repr(area))
 
                 for j in range(nAlpha):
                     c = self._centerTruncIntervalInGroup[groupIndx][j]
@@ -1401,4 +1403,42 @@ class Trunc2D_Base:
 
     def getGaussFieldIndexListInZone(self):
         return copy.copy(self._alphaIndxList)
-        
+
+    @staticmethod
+    def _isInsidePolygon(polygon, xInput, yInput):
+        """ Function related to the LBL (Linear Boundary Lines) truncation rule.
+            Take as input a polygon and a point and return 0 or 1 depending on
+            whether the point is inside or outside of the polygon.
+        """
+        # Calculate intersection between a straight line through the input point pt and the closed polygon
+        # in one direction from the point. If the number of intersections are odd number (1,3,5,..),
+        # the point is inside, if the number of intersections are even (0,2,4,..) the point is outside.
+        n = len(polygon)
+        p = polygon[0]
+        x1 = p[0]
+        y1 = p[1]
+        num_intersections_found = 0
+        for i in range(1, n):
+            x0 = x1
+            y0 = y1
+            p = polygon[i]
+            x1 = p[0]
+            y1 = p[1]
+            vyp = y1 - y0
+            vxp = x1 - x0
+            if vyp != 0.0:
+                s = (yInput - y0) / vyp
+                x = x0 + s * vxp
+                t = x - xInput
+                if 0.0 <= s <= 1.0 and t > 0:
+                    # intersection between the line y = pt[1] and the polygon line
+                    # between the points polygon[i-1] and polygon[i] in one direction
+                    # from the point pt
+                    num_intersections_found += 1
+
+        if (num_intersections_found // 2) * 2 != num_intersections_found:
+            # Point pt is inside the closed polygon
+            return True
+        else:
+            # Point pt is outside the closed polygon
+            return False

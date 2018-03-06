@@ -15,7 +15,7 @@ def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, 
     # Create empty APSModel object
     apsModel = APSModel()
 
-    # Read model file and parameter file and update values in xml tree but no data 
+    # Read model file and parameter file and update values in xml tree but no data
     # is put into APSModel data structure but instead an updated XML data tree is returned.
     eTree = apsModel.updateXMLModelFile(inputAPSModelFile, globalIPLFile, debug_level)
 

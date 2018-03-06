@@ -19,7 +19,7 @@ from src.utils.xml import prettify
 
 
 def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=Debug.OFF):
-    # Find grid model 
+    # Find grid model
     grid_models = project.grid_models
     found = False
     gridModel = None
@@ -38,7 +38,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
 
     # Get Grid attributes
     [xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, 
+     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid,
      zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = gr.getGridAttributes(grid, debug_level)
 
     xinc = simBoxXLength/nx
@@ -116,11 +116,13 @@ def run():
     modelFile = 'APS.xml'
     outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
     scriptName = 'getGridModelAttributes'
+
     # Read APS model
     print('- Read file: ' + modelFile)
     apsModel = APSModel(modelFile)
     debug_level = apsModel.debug_level()
     gridModelName = apsModel.getGridModelName()
+
     writeXMLFileGridDimensions(project, gridModelName, outputRMSDataFile, debug_level)
     print('')
     print('Finished running: ' + scriptName)

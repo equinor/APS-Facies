@@ -33,37 +33,37 @@ Syntax:
 	| void *Fmatrix_2d( void * matrix, void *rows)
 	| void *Fmatrix_3d(void *cube, void *matrix, void *array)
 	| void *Fmatrix_4d(void *4dbox, void *cube, void *matrix, void *array)
-	| void *Fmatrix_5d(void *5dbox, void *4dbox, void *cube, 
+	| void *Fmatrix_5d(void *5dbox, void *4dbox, void *cube,
         |                  void *matrix, void *array)
 
-Description: These are various memory (de)allocation routines, all of them 
+Description: These are various memory (de)allocation routines, all of them
   using malloc (or calloc).   'element_size' is the size of the elements to
-  be allocated; i.e sizeof(int) for integers. 'clear' is one if the 
+  be allocated; i.e sizeof(int) for integers. 'clear' is one if the
   array or matrix is to be filled by  zeroes.
 
 
   Mmatrix_1d returns a pointer to an array of (last - start + 1) elements.
-  After the call 
+  After the call
   | a = Mmatrix_1d(1,4,sizeof(int),1)
   a[1] will be the first integer element of the array, a[4] will be the
   last. All elements will be initialized to 0.
 
-  Mmatrix_2d will return a pointer to a two-dimensional 
+  Mmatrix_2d will return a pointer to a two-dimensional
   rectangular matrix allocated
-  in one chunk of memory. 'row_start' and 'row_last' indicates first and last 
-  element of the rows. 
+  in one chunk of memory. 'row_start' and 'row_last' indicates first and last
+  element of the rows.
 
   Mmatrix_3d will return a pointer to a three-dimensional rectangular cube
   allocated in one chunk of memory. 'x_start', 'x_last', 'y_start', 'y_last',
   'z_start' and 'z_last' gives the dimension of the cube.
 
-  Mmatrix_4d will return a pointer to a four-dimensional rectangular 'box' 
+  Mmatrix_4d will return a pointer to a four-dimensional rectangular 'box'
   allocated in one chunk of memory. 'x_start', 'x_last', 'y_start', 'y_last',
   'z_start', 'z_last', 't_start' and 't_last' gives the dimension of the box.
 
-  Mmatrix_5d will return a pointer to a five-dimensional rectangular 'box' 
+  Mmatrix_5d will return a pointer to a five-dimensional rectangular 'box'
   allocated in one chunk of memory. 'x_start', 'x_last', 'y_start', 'y_last',
-  'z_start', 'z_last', 't_start', 't_last','v_start' and 'v_last' 
+  'z_start', 'z_last', 't_start', 't_last','v_start' and 'v_last'
   gives the dimension of the box.
 
   Fmatrix_1d frees the memory allocated by Mmatrix_1d. The adress of the
@@ -77,30 +77,30 @@ Description: These are various memory (de)allocation routines, all of them
   of first cube element, adress of first matrix element, and adress of first
   row.
 
-  Fmatrix_4d frees the memory allocated by Mmatrix_4d. Parameters are adress 
-  of first box element, adress of first cube element, adress of first matrix 
+  Fmatrix_4d frees the memory allocated by Mmatrix_4d. Parameters are adress
+  of first box element, adress of first cube element, adress of first matrix
   element, and adress of first row.
 
-  Fmatrix_5d frees the memory allocated by Mmatrix_5d. Parameters are adress 
-  of first 5box element, adress of first 4box element, adress of first cube 
+  Fmatrix_5d frees the memory allocated by Mmatrix_5d. Parameters are adress
+  of first 5box element, adress of first 4box element, adress of first cube
   element, adress of first matrix element, and adress of first row.
 
-Return value: A suitable pointer  is returned. If no storage 
+Return value: A suitable pointer  is returned. If no storage
  was available, or if routine deallocates memory, returns NULL.
  All Fmatrix routines return NULL.
 Diagnosis: Writes error to standard error if malloc(1) or calloc(1)
 returned error status NULL.
-Examples:  
- | double **a; 
- |    Allocte room for a [0..2][0..8] double precision matrix 
+Examples:
+ | double **a;
+ |    Allocte room for a [0..2][0..8] double precision matrix
  | a = Mmatrix_2d(0,2,0,8,sizeof(double),1);
  |    Free a.
  | a = Fmatrix_2d( &a[0][0], &a[0]);
 Linking: cc progname.c -lutl
-Restrictions: Assumes all pointers have the same size (ok on decstations 
+Restrictions: Assumes all pointers have the same size (ok on decstations
  and suns).
-Hints: Always use row_start and col_start = 0: It will save you problems in 
-the long run. If you insist on offsets, remember to use 
+Hints: Always use row_start and col_start = 0: It will save you problems in
+the long run. If you insist on offsets, remember to use
   &array[row_start, col_start] if the address of the first element is needed.
 Bugs: Compilers and lint might complain about mixing of data-types. Just
       ignore them.
@@ -173,7 +173,7 @@ void *Mmatrix_2d(int i_row_min,
 
   p = *m;			/* p is current row */
   m -= i_row_min;
- 
+
   /* Initialize rowpointers */
   for (i = i_row_min; i <= i_row_max; i++, p += cols*i_element_size)
   {
@@ -291,7 +291,7 @@ void *Mmatrix_4d(int i_x_min,
   p = m[i_x_min][i_y_min][i_z_min];
 
   for (i = i_x_min; i<= i_x_max; i++)
-    for (j = i_y_min; j<=i_y_max; j++) 
+    for (j = i_y_min; j<=i_y_max; j++)
       for (k = i_z_min; k<=i_z_max; k++) {
 	m[i][j][k] = p;
 	m[i][j][k] = m[i][j][k] - i_t_min * i_element_size;
@@ -363,8 +363,8 @@ void *Mmatrix_5d(int i_x_min,
   p = m[i_x_min][i_y_min][i_z_min][i_t_min];
 
   for (i = i_x_min; i<= i_x_max; i++)
-    for (j = i_y_min; j<=i_y_max; j++) 
-      for (k = i_z_min; k<=i_z_max; k++) 
+    for (j = i_y_min; j<=i_y_max; j++)
+      for (k = i_z_min; k<=i_z_max; k++)
         for (l = i_t_min; l<=i_t_max; l++) {
 	m[i][j][k][l] = p;
 	m[i][j][k][l] = m[i][j][k][l] - i_v_min * i_element_size;
@@ -373,7 +373,7 @@ void *Mmatrix_5d(int i_x_min,
 
   for (i=i_x_min; i<=i_x_max; i++)
     for (j=i_y_min; j<=i_y_max; j++)
-      for (k = i_z_min; k<=i_z_max; k++) 
+      for (k = i_z_min; k<=i_z_max; k++)
         m[i][j][k][i_t_max+1] = NULL;
 
   for (i=i_x_min; i<=i_x_max; i++)
@@ -398,7 +398,7 @@ void *Mmatrix_5d(int i_x_min,
 void *Fmatrix_1d(void *array)
 /*
   Frees memory allocated by Mmatrix_1d. Returns 0.
-  Example: 
+  Example:
      double *m;
      m = Mmatrix_1d(0,5,,sizeof(double),0);
      Fmatrix_1d( &m[0] );
@@ -412,7 +412,7 @@ void *Fmatrix_2d(void * i_matrix,
 	       void *i_rows)
 /*
   Frees memory allocated by Mmatrix_2d. Returns 0.
-  Example: 
+  Example:
      double **m;
      m = Mmatrix_2d(0,5,0,5,sizeof(double),0);
      Fmatrix_2d( &m[0][0], &m[0] );
@@ -470,7 +470,7 @@ void *Fmatrix_5d(void *i_5dbox,
    Example:
       double ****m;
       m = Mmatrix_5d(0,5,0,5,0,5,0,5,0,5,sizeof(double),0);
-      m = Fmatrix_5d(&m[0][0][0][0][0], &m[0][0][0][0], &m[0][0][0], 
+      m = Fmatrix_5d(&m[0][0][0][0][0], &m[0][0][0][0], &m[0][0][0],
                      &m[0][0], &m[0]);
 */
 {
@@ -490,13 +490,13 @@ int main()
   int i,j,k,l,n;
   printf("Allokverer en 3x5x4x6 matrise\n"),
   a = Mmatrix_4d(2,4,1,5,3,6,0,5,sizeof(double),0);
-  
+
   for ( i = 2, n = 1; i <= 4; i++)
     for ( j = 1; j <=5; j++)
       for (k = 3; k <= 6; k++)
 	for (l = 0; l<=5; l++, n++)
 	  a[i][j][k][l] = n/10.0;
-  
+
   for (p = &a[2][1][3][0], i = 2; i <=4; i++, printf("\n"))
     for ( j = 1; j <=5; j++, printf("\n"))
       for ( k=3; k <=6; k++, printf("\n"))

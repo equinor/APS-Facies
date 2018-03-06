@@ -145,7 +145,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             assert nGaussFieldInZone >= 3
             self.__interpretXMLTree(trRuleXML, modelFileName)
 
-            # Call base class method to check that facies in truncation rule is 
+            # Call base class method to check that facies in truncation rule is
             # consistent with facies in zone.
             self._checkFaciesForZone()
 
@@ -413,11 +413,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
         print('UseZ: ' + str(self.__useZ))
         print('Zm: ' + str(self.__Zm))
         print('Number of polygons: ' + str(len(self.__polygons)))
-        for i in range(len(self.__polygons)):
-            poly = self.__polygons[i]
-            print('Polygon number: ' + str(i))
-            for j in range(len(poly)):
-                print(repr(poly[j]))
+        for idx, poly in enumerate(self.__polygons):
+            print('Polygon number: ' + str(idx))
+            for p in poly:
+                print(repr(p))
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
 
@@ -447,30 +446,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
             self.__polygons = []
             for indx in range(len(self._faciesInTruncRule)):
                 if self._faciesIsDetermined[indx] == 1:
-                    poly = self.__setUnitSquarePolygon()
+                    poly = self.__unitSquarePolygon()
                     self.__polygons.append(poly)
                 else:
-                    poly = self.__setZeroPolygon()
+                    poly = self.__zeroPolygon()
                     self.__polygons.append(poly)
 
         polygons = copy.copy(self.__polygons)
         return polygons
-
-       # def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
-       #      # Input: get3DParamFunction - Pointer to a function to read 3D parameter from RMS
-       #      #        gridModel - Pointer to grid model in RMS
-       #      # This function should only be called if the truncation parameter sf is to be spatially varying
-       #     assert self.__useConstTruncModelParam
-       #
-       #     # Read truncation parameters
-       #     paramName = self.__param_sf_name
-       #     if self._debug_level >= Debug.VERBOSE:
-       #         print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self._className)
-       #         print('--- Read RMS parameter: ' + paramName)
-       #      # Expect that the function points to the function:
-       #      # getContinuous3DParameterValues with input: (gridModel,paramName,realNumber,self._debug_level)
-       #     [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
-       #     self.__param_sf = values
 
     def getTruncationParam(self, gridModel, realNumber):
         import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
@@ -590,14 +573,14 @@ class Trunc3D_bayfill(Trunc2D_Base):
         return
 
     @staticmethod
-    def __setUnitSquarePolygon():
+    def __unitSquarePolygon():
         """  Create a polygon for the unit square
         """
         poly = [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
         return poly
 
     @staticmethod
-    def __setZeroPolygon():
+    def __zeroPolygon():
         """ Create a small polygon
         """
         poly = [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
@@ -700,9 +683,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         sumProb = P1 + P2 + P3 + P4 + P5
         if sumProb == 0.0:
-            raise ValueError('Error: All input probabilites are <= 0.0')
+            raise ValueError('Error: All input probabilities are <= 0.0')
 
-        if sumProb > (1.0 + eps) or sumProb < (1.0 - eps):
+        if not (1.0 + eps) >= sumProb >= (1.0 - eps):
             print(' Warning: Sum of input probabilities is not equal to 1.0')
             print('          Adjust all probabilities by normalizing the probabilities.')
 
@@ -1223,10 +1206,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         elif fssit == 5:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF)],True) #FP
-            polyFP.append([0.0, 0.0])
-            polyFP.append([X2, YF2])
-            polyFP.append([X1, YF])
-            polyFP.append([0.0, 0.0])
+            polyFP.extend([
+                [0.0, 0.0],
+                [X2, YF2],
+                [X1, YF],
+                [0.0, 0.0],
+                ])
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X3,1.0),(X1,1.0),(X1,YF)],True) #SB
@@ -1764,7 +1749,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         indx = -1
         for i in range(len(self.__polygons)):
             polygon = self.__polygons[i]
-            inside = self.__isInsidePolygon(polygon, x, y)
+            inside = self._isInsidePolygon(polygon, x, y)
             if inside == 0:
                 continue
             else:
@@ -1791,45 +1776,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         return faciesCode, fIndx
 
-    @staticmethod
-    def __isInsidePolygon(polygon, xInput, yInput):
-        """ Function related to the LBL (Linear Boundary Lines) truncation rule.
-            Take as input a polygon and a point and return 0 or 1 depending on
-            whether the point is inside or outside of the polygon.
-        """
-        # Calculate intersection between a straight line through the input point pt and the closed polygon
-        # in one direction from the point. If the number of intersections are odd number (1,3,5,..),
-        # the point is inside, if the number of intersections are even (0,2,4,..) the point is outside.
-        n = len(polygon)
-        p = polygon[0]
-        x1 = p[0]
-        y1 = p[1]
-        nIntersectionsFound = 0
-        for i in range(1, n):
-            x0 = x1
-            y0 = y1
-            p = polygon[i]
-            x1 = p[0]
-            y1 = p[1]
-            vyp = y1 - y0
-            vxp = x1 - x0
-            if vyp != 0.0:
-                s = (yInput - y0) / vyp
-                x = x0 + s * vxp
-                t = x - xInput
-                if 0.0 <= s <= 1.0 and t > 0:
-                    # intersection between the line y = pt[1] and the polygon line
-                    # between the points polygon[i-1] and polygon[i] in one direction
-                    # from the point pt
-                    nIntersectionsFound += 1
-
-        if (nIntersectionsFound // 2) * 2 != nIntersectionsFound:
-            # Point pt is inside the closed polygon
-            return 1
-        else:
-            # Point pt is outside the closed polygon
-            return 0
-
     def setParamSFConst(self, value):
         if value < 0 or value > 1:
             raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
@@ -1839,7 +1785,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def setParamSF(self, paramName):
         self.__param_sf = 0
         self.__param_sf_name = copy.copy(paramName)
-        return
 
     def setParamYSFConst(self, value):
         if value < 0 or value > 1:

@@ -1,8 +1,8 @@
-/*Func: lib_message.h 
+/*Func: lib_message.h
 
 Name:      lib_message.h - Header file
 Syntax:     @lib_message-syntaks
-Description:Function prototypes for library functions in lib_message.c  
+Description:Function prototypes for library functions in lib_message.c
 
 ----------------------------------------------------------------
 */

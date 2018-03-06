@@ -28,7 +28,7 @@ class OperationalMode(Enum):
 
 class OriginType(Enum):
     """
-    'RELATIVE' for relative coordinates 
+    'RELATIVE' for relative coordinates
     'ABSOLUTE' for coordinates.
     """
     RELATIVE = 1

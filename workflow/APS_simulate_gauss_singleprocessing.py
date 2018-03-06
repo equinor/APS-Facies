@@ -30,7 +30,7 @@ def getProjectRealizationSeed(seedFile):
 def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     """
     Description: Run gauss simulations for the APS model i sequence
-    
+
     """
 
     # Read APS model
@@ -41,7 +41,7 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization workflow loop
     # because the start random seed is created once per process, and the process is the same for all realizations in the loop.
     # Hence always read the start seed in single processing mode.
-    # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file 
+    # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file
     # before calling the current script.
     writeSeedFile = False
 
@@ -49,17 +49,17 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     gridModelName = apsModel.getGridModelName()
     gridModel = project.grid_models[gridModelName]
     grid = gridModel.get_grid()
-    [_, _, _, _, _, _, simBoxXLength, simBoxYLength, azimuthAngleGrid, _, _, nx, ny, nz, 
+    [_, _, _, _, _, _, simBoxXLength, simBoxYLength, azimuthAngleGrid, _, _, nx, ny, nz,
      nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = getGridAttributes(grid, Debug.OFF)
 
-    # Calculate grid cell size 
+    # Calculate grid cell size
     dx = simBoxXLength/nx
     dy = simBoxYLength/ny
 
     # Get region parameter name
     regionParamName = apsModel.getRegionParamName()
 
-    # Set start seed if it is defined 
+    # Set start seed if it is defined
     if not writeSeedFile:
         sfile = Path(seedFile)
         if sfile.is_file():
@@ -72,7 +72,7 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
             )
 
     # Loop over all zones and simulate gauss fields
-    allZoneModels = apsModel.getAllZoneModelsSorted()        
+    allZoneModels = apsModel.getAllZoneModelsSorted()
     for key, zoneModel in allZoneModels.items():
         zoneNumber = key[0]
         regionNumber = key[1]
@@ -85,8 +85,8 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
         start = startLayerPerZone[zoneNumber-1]
         end   = endLayerPerZone[zoneNumber-1]
         nLayers = nLayersPerZone[zoneNumber-1]
-   
-        # Calculate grid cell size in z direction 
+
+        # Calculate grid cell size in z direction
         nz = nLayers
         dz =  simBoxThickness/nz
 

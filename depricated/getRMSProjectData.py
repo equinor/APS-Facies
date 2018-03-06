@@ -13,7 +13,7 @@ This will include:
 Example input file to be specified before running this script.
 <?xml version="1.0" ?>
 <GetRMSProjectData>
- 
+
  <GridModel>
    <Name> APS_NESLEN_ODM </Name>
    <ZoneParameter>  Zone </ZoneParameter>
@@ -80,11 +80,11 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     gridModelObj = getKeyword(root, kw, parentKeyword='', modelFile=None, required=True)
 
     kw1 = 'Name'
-    text = getTextCommand(gridModelObj, kw1, parentKeyword=kw, defaultText=None, modelFile=None, required=True) 
+    text = getTextCommand(gridModelObj, kw1, parentKeyword=kw, defaultText=None, modelFile=None, required=True)
     gridModelName = text.strip()
 
     kw3 = 'ZoneParameter'
-    text = getTextCommand(gridModelObj, kw3, parentKeyword=kw, defaultText=None, modelFile=None, required=False) 
+    text = getTextCommand(gridModelObj, kw3, parentKeyword=kw, defaultText=None, modelFile=None, required=False)
     zoneParamName = None
     if text is not None:
         zoneParamName = text.strip()
@@ -92,7 +92,7 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
         print('Keyword: {} not used'.format(kw3))
 
     kw4 = 'RegionParameter'
-    text = getTextCommand(gridModelObj, kw4, parentKeyword=kw, defaultText=None, modelFile=None, required=False) 
+    text = getTextCommand(gridModelObj, kw4, parentKeyword=kw, defaultText=None, modelFile=None, required=False)
     regionParamName = None
     if text is not None:
         regionParamName = text.strip()
@@ -291,12 +291,12 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             continue
         name = prop.name
 
-        
+
         # Check if this is the specified zone parameter
         if name == zoneParamName:
             # Get the zone parameter values
-            zoneValues, codeNamesZone = gr.getDiscrete3DParameterValues(gridModel, name, 
-                                                                        realNumber=realizationNumber, 
+            zoneValues, codeNamesZone = gr.getDiscrete3DParameterValues(gridModel, name,
+                                                                        realNumber=realizationNumber,
                                                                         debug_level=debug_level)
         # Check if the property type is integer or float type
 
@@ -305,9 +305,9 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             if name == regionParamName:
                 # Get the region parameter values
                 regionValues, codeNamesRegion = gr.getDiscrete3DParameterValues(gridModel, name,
-                                                                                realNumber=realizationNumber,  
+                                                                                realNumber=realizationNumber,
                                                                                 debug_level=debug_level)
-                
+
         # Check if the property type is integer or float type
 
         isDiscrete = 0
@@ -369,9 +369,9 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         attributes={'zoneNumber':str(zNumber),'regionNumber':str(rNumber)}
         zoneAndRegionElement = Element(tag, attributes)
         zoneAndRegionElement.text = ' '
-        gmElement.append(zoneAndRegionElement)        
+        gmElement.append(zoneAndRegionElement)
 
-                
+
     for name in gfNames:
         gfElement = Element('GaussFieldNames')
         gfElement.text = ' ' + name + ' '
@@ -544,7 +544,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
 def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):
 
-    (gridModelName, zoneParamName, regionParamName, gfNames, 
+    (gridModelName, zoneParamName, regionParamName, gfNames,
      horizonRefName, horizonRefType, horizonList,
      wellRefName, trajectoryName, logrunName, logName) = readInputXMLFile(inputFile, debug_level)
 

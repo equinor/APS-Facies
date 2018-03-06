@@ -1,12 +1,12 @@
 //
 // PURPOSE Template for definition of 2 dimensional grid or array
-//          
+//
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //         Compilation option HP_UX must be used for HP
 //         Compilation option ARRAY_RANGECHECK should be used
-//         in debug phase and not if optimal performace is wanted.  
-//            
+//         in debug phase and not if optimal performace is wanted.
+//
 //
 
 
@@ -33,7 +33,7 @@ class Grid2D
   void redefine(int istart, int iend, int jstart, int jend);
 
   const T& operator()(int i,int j) const;
- 
+
   int xdim() const;
   int ydim() const;
   int xstart() const;
@@ -51,7 +51,7 @@ class Grid2D
 };
 
 
-#ifdef HP_UX            
+#ifdef HP_UX
 
 //  Here the functions are not inline
 
@@ -65,7 +65,7 @@ checkAllocation(void)const
 		"a 2 dimensional array of size: ",nxdim*nydim);
   }
   return;
-}  
+}
 
 template<class T> void Grid2D<T>::
 checkIndex(int i, int j)const
@@ -97,7 +97,7 @@ redefine(int nx, int ny)
     array = new T[nxdim*nydim];
     checkAllocation();
   }
-  else 
+  else
   {
     array = 0;
   }
@@ -122,7 +122,7 @@ redefine(int istart, int iend, int jstart, int jend)
     array = new T[nxdim*nydim];
     checkAllocation();
   }
-  else 
+  else
   {
     array = 0;
   }
@@ -159,14 +159,14 @@ operator=(const T& t)
 // FUNCTION: getArray
 //
 // PURPOSE Returns the pointer to the internal one-dimensional
-//         array. This function should only be used for 
+//         array. This function should only be used for
 //         avoiding copying into a onedimensional array
 //         in case that is necessary to use in for instance
-//         c library functions. 
+//         c library functions.
 //
 // RETURN VALUE Pointer to the internal array
 //
-// SIDE EFFECTS 
+// SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //
@@ -251,7 +251,7 @@ checkAllocation(void)const
 		"a 2 dimensional array of size: ",nxdim*nydim);
   }
   return;
-}  
+}
 
 template<class T> inline void Grid2D<T>::
 checkIndex(int i, int j)const
@@ -283,7 +283,7 @@ redefine(int nx, int ny)
     array = new T[nxdim*nydim];
     checkAllocation();
   }
-  else 
+  else
   {
     array = 0;
   }
@@ -308,7 +308,7 @@ redefine(int istart, int iend, int jstart, int jend)
     array = new T[nxdim*nydim];
     checkAllocation();
   }
-  else 
+  else
   {
     array = 0;
   }
@@ -345,14 +345,14 @@ operator=(const T& t)
 // FUNCTION: getArray
 //
 // PURPOSE Returns the pointer to the internal one-dimensional
-//         array. This function should only be used for 
+//         array. This function should only be used for
 //         avoiding copying into a onedimensional array
 //         in case that is necessary to use in for instance
-//         c library functions. 
+//         c library functions.
 //
 // RETURN VALUE Pointer to the internal array
 //
-// SIDE EFFECTS 
+// SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //
@@ -452,7 +452,7 @@ Grid2D(int nx, int ny)
     array = new T[nxdim*nydim];
     checkAllocation();
   }
-  else 
+  else
   {
     array = 0;
   }
@@ -478,7 +478,7 @@ Grid2D(int istart, int iend, int jstart, int jend)
     array = new T[nxdim*nydim];
     checkAllocation();
   }
-  else 
+  else
   {
     array = 0;
   }

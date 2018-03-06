@@ -6,7 +6,7 @@
     <UseMemoization> 1 </UseMemoization>
     <MemoizationResolution>  100  </MemoizationResolution>
   </Optimization>
-<!--    
+<!--
   <SelectedZonesAndRegions>
     <SelectedZoneWithRegions zone="1">  1      </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>

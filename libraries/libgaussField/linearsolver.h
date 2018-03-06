@@ -1,15 +1,15 @@
-/*Func: linearsolver 
+/*Func: linearsolver
 
-Name:      linearsolver - Header file 
+Name:      linearsolver - Header file
 Syntax:     @linearsolver-syntaks
-Description:  
+Description:
 
 
 ----------------------------------------------------------------
 */
 
 #if !defined(LINEARSOLVER_H)
-#define LINEARSOLVER_H  1 
+#define LINEARSOLVER_H  1
 
 
 /* Defining symbols */
@@ -23,13 +23,13 @@ extern "C"
 #endif
 
 /*<linearsolver-syntaks:*/
-int dgeco(double *a, int *lda, int *n, int *ipvt, 
+int dgeco(double *a, int *lda, int *n, int *ipvt,
 	   double *rcond,double *z);
 
-int dgefa(double *a, 
+int dgefa(double *a,
 	   int *lda, int *n, int *ipvt, int *info);
 
-int dgesl(double *a, int *lda, int *n, int *ipvt, 
+int dgesl(double *a, int *lda, int *n, int *ipvt,
 	   double *b, int *job);
 
 int cholesky_fact(int *i_mdim,

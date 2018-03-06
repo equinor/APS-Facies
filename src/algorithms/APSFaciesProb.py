@@ -57,7 +57,7 @@ class APSFaciesProb:
         self.__FPROB = 1
 
     def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
-                 debug_level=Debug.OFF, useConstProb=0, zoneNumber=0):
+                 debug_level=Debug.OFF, useConstProb=False, zoneNumber=0):
 
         self.__setEmpty()
 
@@ -91,18 +91,18 @@ class APSFaciesProb:
         for f in facForModel.findall('Facies'):
             text = f.get('name')
             name = text.strip()
-            if self.__mainFaciesTable.checkWithFaciesTable(name):
+            if self.__mainFaciesTable.has_facies_int_facies_table(name):
                 text = getTextCommand(f, 'ProbCube', 'Facies', modelFile=modelFileName)
                 probCubeName = text.strip()
-                if self.__useConstProb == 1:
+                if self.__useConstProb:
                     if not isNumber(probCubeName):
                         raise ValueError(
                             'Error when reading model file: {0}\n'
                             'Error in {1}\n'
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not a number even though '
-                            'useConstProb keyword is set to 1.'
-                            ''.format(modelFileName, self.__className, name, str(self.__zoneNumber))
+                            'useConstProb keyword is set to True.'
+                            ''.format(modelFileName, self.__className, name, self.__zoneNumber)
                         )
                 else:
                     if isNumber(probCubeName):
@@ -111,8 +111,8 @@ class APSFaciesProb:
                             'Error in {1}\n'
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not an RMS parameter name even though '
-                            'useConstProb keyword is set to 0.'
-                            ''.format(modelFileName, self.__className, name, str(self.__zoneNumber))
+                            'useConstProb keyword is set to False.'
+                            ''.format(modelFileName, self.__className, name, self.__zoneNumber)
                         )
 
                 item = [name, probCubeName]
@@ -216,7 +216,7 @@ class APSFaciesProb:
     def findFaciesItem(self, faciesName):
         # Check that facies is defined
         itemWithFacies = None
-        if self.__mainFaciesTable.checkWithFaciesTable(faciesName):
+        if self.__mainFaciesTable.has_facies_int_facies_table(faciesName):
             for item in self.__faciesProbForZoneModel:
                 name = item[self.__FNAME]
                 if name == faciesName:
@@ -228,7 +228,7 @@ class APSFaciesProb:
         err = 0
         # Check that facies is defined
         for fName in faciesList:
-            if not self.__mainFaciesTable.checkWithFaciesTable(fName):
+            if not self.__mainFaciesTable.has_facies_int_facies_table(fName):
                 err = 1
                 break
         if len(faciesList) != len(faciesProbList):
@@ -250,7 +250,7 @@ class APSFaciesProb:
 
     def updateSingleFaciesWithProbForZone(self, faciesName, faciesProbCubeName):
         # Check that facies is defined
-        if not self.__mainFaciesTable.checkWithFaciesTable(faciesName):
+        if not self.__mainFaciesTable.has_facies_int_facies_table(faciesName):
             err = 1
         else:
             err = 0

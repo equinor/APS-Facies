@@ -43,7 +43,7 @@ def interpretXMLModelFileAndWrite(
         trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone, keyResolution=100, debug_level=debug_level,
         modelFileName=modelFileName
     )
-    # Create and write XML tree 
+    # Create and write XML tree
     createXMLTreeAndWriteFile(truncRuleOut, outputModelFileName)
 
     return truncRuleOut

@@ -6,21 +6,21 @@ import importlib
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
-import src.algorithms.APSGaussFieldJobs
+import depricated.APSGaussFieldJobs
 import src.algorithms.APSMainFaciesTable
 import src.algorithms.APSZoneModel
 import src.utils.exceptions.xml
 import src.utils.xml
 import src.utils.numeric
 
-importlib.reload(src.algorithms.APSGaussFieldJobs)
+importlib.reload(depricated.APSGaussFieldJobs)
 importlib.reload(src.algorithms.APSMainFaciesTable)
 importlib.reload(src.algorithms.APSZoneModel)
 importlib.reload(src.utils.exceptions.xml)
 importlib.reload(src.utils.xml)
 importlib.reload(src.utils.numeric)
 
-from src.algorithms.APSGaussFieldJobs import APSGaussFieldJobs
+from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.exceptions.xml import MissingAttributeInKeyword
@@ -111,7 +111,7 @@ class APSModel:
         """
          The following parameters are necessary to define a model:
          If a model is created from a model file, the only necessary input is modelFileName
-        
+
          If the model is created from e.g APSGUI, these parameters must be specified:
          rmsProjectName - Name of RMS project which will run a workflow using the APS method
          rmsWorkflowName - Name of RMS workflow for APS model
@@ -157,11 +157,11 @@ class APSModel:
          The pair (previewZone, previewRegion) - Zone and region number for the APS zone model to create preview plot for.
          previewCrossSectionType - Either IJ, IK, JK for the cross section to make plots for.
          previewCrossSectionRelativePos - The previewCrossSectionRelativePos must be a float number between 0 and 1.
-                                          and mean for IJ cross sections that the cross section correspond to 
+                                          and mean for IJ cross sections that the cross section correspond to
                                           an index = previewCrossSectionRelativePos * nz and similar fo IK and JK cross sections.
          previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
          debugLevel - Define amouth of output to the screen during runs
-        
+
         """
         # Local variables
         self.__className = self.__class__.__name__
@@ -202,7 +202,6 @@ class APSModel:
             return
         self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
 
-
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         tree = ET.parse(modelFileName)
         self.__ET_Tree = tree
@@ -217,7 +216,6 @@ class APSModel:
         else:
             text = obj.text
             self.set_debug_level(text)
-#            self.__debug_level = int(text.strip())
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
@@ -251,7 +249,7 @@ class APSModel:
             if text is None:
                 raise MissingAttributeInKeyword(kw, 'scale')
             self.__previewScale = float(text.strip())
-            
+
         placement = {
             'RMSProjectName': '__rmsProjectName',
             'RMSWorkflowName': '__rmsWorkflowName',
@@ -275,7 +273,7 @@ class APSModel:
         value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None,  modelFile=modelFileName, required=False)
         if value is not None:
             self.__rmsRegionParamName = value
-            
+
         # Read optional keyword which specify whether the gridmodel is a single zone grid or multi zone grid
         keyword = 'UseSingleZoneGrid'
         value = getIntCommand(root, keyword, parentKeyword='APSModel',
@@ -356,7 +354,7 @@ class APSModel:
                                  'Zero as region number means that regions is not used for the zone.\n'
                                  'Can not have negative region number: {}'.format(str(regionNumber))
                                  )
-                
+
             # The model is identified by the combination (zoneNumber, regionNumber)
             zoneModelKey = (zoneNumber, regionNumber)
             if zoneModelKey not in self.__zoneModelTable:
@@ -370,7 +368,7 @@ class APSModel:
                     else:
                         print('Debug output: ---- Read zone model for (zone,region) number: ({},{})'
                               ''.format(str(zoneNumber), str(regionNumber)))
-                        
+
                 zoneModel = APSZoneModel(
                     ET_Tree=self.__ET_Tree,
                     zoneNumber=zoneNumber,
@@ -387,7 +385,7 @@ class APSModel:
                                  ''.format(str(zoneNumber), str(regionNumber))
                                  )
 
-            
+
 
         # --- SelectedZones ---
         kw = 'SelectedZonesAndRegions'
@@ -444,7 +442,7 @@ class APSModel:
             self.__selectAllZonesAndRegions = True
 
         self.__checkZoneModels()
-        
+
         # Define sorted sequence of the zone models
         self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
 
@@ -535,10 +533,10 @@ class APSModel:
     def __checkZoneModels(self):
         """
         Description: Run through all zone models and check that:
-           If a zone model is specified with region number 0, it is not allowed to specify zone models for the same 
-           zone which is individual for regions > 0 as well. The reason is that a zone model with region 0 (which means not using regions) 
+           If a zone model is specified with region number 0, it is not allowed to specify zone models for the same
+           zone which is individual for regions > 0 as well. The reason is that a zone model with region 0 (which means not using regions)
            and zone models for the same zone but specified for individual regions will change facies code in a set of cells in the grid that
-           is common and hence "overwrite" each other. 
+           is common and hence "overwrite" each other.
         """
         zoneNumbers = []
         for key, zoneModel in self.__zoneModelTable.items():
@@ -555,7 +553,7 @@ class APSModel:
             else:
                 # This is a model for a new (zone,region) combination for a new zone number
                 zoneNumbers.append(zNumber)
-                    
+
     @staticmethod
     def __readParamFromFile(inputFile, debug_level=Debug.OFF):
         # Search through the file line for line and skip lines commented out with '//'
@@ -607,7 +605,7 @@ class APSModel:
 
     def isAllZoneRegionModelsSelected(self):
         return self.__selectAllZonesAndRegions
-    
+
     def getSelectedZoneNumberList(self):
         selectedZoneNumberList = []
         keyList = list(self.__selectedZoneAndRegionNumberTable.keys())
@@ -638,7 +636,7 @@ class APSModel:
             return True
         else:
             return False
-    
+
     # Get pointer to zone model object
     def getZoneModel(self, zoneNumber, regionNumber=0):
         key = (zoneNumber, regionNumber)
@@ -653,7 +651,7 @@ class APSModel:
 
     def getAllZoneModelsSorted(self):
         return self.__sortedZoneModelTable
-    
+
     def getGridModelName(self):
         return copy.copy(self.__rmsGridModelName)
 
@@ -852,7 +850,7 @@ class APSModel:
 
         if key in self.__zoneModelTable:
             del self.__zoneModelTable[key]
-        
+
         # Check if the zone number, region number pair is in the selected list
         if key in self.__selectedZoneAndRegionNumberTable:
             del self.__selectedZoneAndRegionNumberTable[key]
@@ -940,7 +938,7 @@ class APSModel:
                                        ''.format(gfNameUsed, str(zoneNumber), str(regionNumber)))
                         else:
                             file.write('Print("Update Gauss field: ","{}"," for zone: ",{})\n'.format(gfNameUsed, str(zoneNumber)))
-                                
+
                     # Check which rms job this gauss field parameter belongs to
                     for j in range(nJobs):
 
@@ -966,7 +964,7 @@ class APSModel:
                                     'paramName = "Group[{}].VariogramType"\n'.format(gfIndx + 1)
                                 )
                                 file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
-                                
+
                                 file.write(
                                     'paramName = "Group[{}].VariogramStdDev"\n'.format(gfIndx + 1)
                                 )
@@ -978,49 +976,49 @@ class APSModel:
                                 )
                                 file.write('value = {}\n'.format(range1))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                                
+
                                 file.write(
                                     'paramName = "Group[{}].VariogramPerpRange"\n'.format(gfIndx + 1)
                                 )
                                 file.write('value = {}\n'.format(range2))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                                
+
                                 file.write(
                                     'paramName = "Group[{}].VariogramVertRange"\n'.format(gfIndx + 1)
                                 )
                                 file.write('value = {}\n'.format(range3))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                                
+
                             else:
                                 file.write(
                                     'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
                                 )
                                 file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
-                                
+
                                 file.write(
                                     'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
                                 )
                                 file.write('value = {}\n'.format(1.0))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                                
+
                                 file.write(
                                     'paramName = "Zone[{}].Group[{}].VariogramMainRange"\n'.format(zoneNumber, gfIndx + 1)
                                 )
                                 file.write('value = {}\n'.format(range1))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                                
+
                                 file.write(
                                     'paramName = "Zone[{}].Group[{}].VariogramPerpRange"\n'.format(zoneNumber, gfIndx + 1)
                                 )
                                 file.write('value = {}\n'.format(range2))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                                
+
                                 file.write(
                                     'paramName = "Zone[{}].Group[{}].VariogramVertRange"\n'.format(zoneNumber, gfIndx + 1)
                                 )
                                 file.write('value = {}\n'.format(range3))
                                 file.write('ModifyJob(job,paramName,value)\n')
-                            
+
                             file.write('ApplyJob(job)\n')
                             file.write('\n')
                             break
@@ -1090,7 +1088,7 @@ class APSModel:
                 elemZoneRegion.text= text
                 elemSelectedZoneAndRegion.append(elemZoneRegion)
 
-                
+
 
         # Add all main commands to the root APSModel
         tag = 'RMSProjectName'
@@ -1145,7 +1143,7 @@ class APSModel:
             elem.text = ' ' + 'yes' + ' '
         else:
             elem.text = ' ' + 'no' + ' '
-            
+
         root.append(elem)
 
         # Add command MainFaciesTable

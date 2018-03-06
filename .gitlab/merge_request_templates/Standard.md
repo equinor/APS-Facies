@@ -45,4 +45,4 @@ Check those applicable, and remove those that are not.
 
 1 :+1:
 
-CC: @karbor @OLIA @SNIS @TBOR
+CC: @OLIA @SNIS @TBOR @OYVVES

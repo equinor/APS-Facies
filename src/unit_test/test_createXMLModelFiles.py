@@ -5,7 +5,7 @@ import filecmp
 
 
 from src.algorithms.APSFaciesProb import APSFaciesProb
-from src.algorithms.APSGaussFieldJobs import APSGaussFieldJobs
+from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSModel import APSModel

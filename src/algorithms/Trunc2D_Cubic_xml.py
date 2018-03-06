@@ -18,7 +18,7 @@ from src.utils.xml import getKeyword
 -----------------------------------------------------------------------
 class Trunc2D_Cubic
 
-Description: This class is derived from Trunc2D_Base which contain common data structure for 
+Description: This class is derived from Trunc2D_Base which contain common data structure for
              truncation algorithms with overlay facies.
 
              A general truncation rule using rectangular polygons for the truncation map is implemented here.
@@ -31,15 +31,15 @@ Description: This class is derived from Trunc2D_Base which contain common data s
              Gaussian fields must be defined. The algorithm also requires that there can be only one
              overprint facies that can "overprint" a background facies. So if e.g. 3 background facies
              are modelled like F1,F2,F3 and 2 overprint facies are specified like F4,F5, then the background facies
-             must be divided into 2 groups like e.g. (F1,F3) and (F2) where one group is overprinted by F4 
-             and the other by F5. It is not possible to the same background facies in two or more groups. 
+             must be divided into 2 groups like e.g. (F1,F3) and (F2) where one group is overprinted by F4
+             and the other by F5. It is not possible to the same background facies in two or more groups.
              It is also possible to define different rectangular polygons from the truncation map
              to belong to the same facies in order to generate truncation rule with non-neighbour
              polygons in the truncation map.
 
  Public member functions:
-  Constructor:    
-    def __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None, 
+  Constructor:
+    def __init__(self,trRuleXML=None, mainFaciesTable=None, faciesInZone=None,
                  nGaussFieldInModel=None, debug_level=Debug.OFF, modelFileName=None)
 
 
@@ -91,10 +91,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self.__truncStructure = []
         self.__useLevel2 = 0
         self.__useLevel3 = 0
-        # The trunc structure contain a tree structure of data for the hierarchy of 
+        # The trunc structure contain a tree structure of data for the hierarchy of
         # how the truncation map is split into rectangular polygons. In this data structure the nodes in the tree
         # is of two types. Either the node data is of form:
-        #     ['N',direction,nodeList,prob,polygon,xmin,xmax,ymin.ymax]  or the form 
+        #     ['N',direction,nodeList,prob,polygon,xmin,xmax,ymin.ymax]  or the form
         #     ['F',indx,     probFrac,prob,polygon,xmin,xmax,ymin,ymax]
 
         # The _node_index dictionary give name to each index in nodeData list
@@ -192,11 +192,11 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # Overlay facies truncation rules are read here. The overlay facies does not
             # have to know anything about how the 2D truncation map defined by the two first
             # transformed gaussian fields looks like. It only need to know which facies in the 2D map
-            # is "background" for each overlay facies. Therefore data structure and methods 
+            # is "background" for each overlay facies. Therefore data structure and methods
             # related to overprint facies is common to several different truncation algorithms.
             self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName, zoneNumber)
 
-            # Call base class method to check that facies in truncation rule is 
+            # Call base class method to check that facies in truncation rule is
             # consistent with facies in zone.
             self._checkFaciesForZone()
 
@@ -387,12 +387,12 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         # End loop over L1 children
 
-        # Number of background facies in total 
+        # Number of background facies in total
         self._nBackGroundFacies = nFacies
 
         # Check that specified probability fractions for each facies when summing over all polygons
         # for a facies is 1.0
-        # Note that overlay facies is not a part of this calculations. 
+        # Note that overlay facies is not a part of this calculations.
         sumProbFrac = np.zeros(self._nBackGroundFacies, np.float32)
         nodeListL1 = truncStructure[NLIST]
         for i in range(len(nodeListL1)):
@@ -725,7 +725,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                             # end if use level 3
 
     def defineFaciesByTruncRule(self, alphaCoord):
-        # Check if the facies is deterministic (100% probability) 
+        # Check if the facies is deterministic (100% probability)
         for fIndx in range(len(self._faciesInZone)):
             if self._faciesIsDetermined[fIndx] == 1:
                 faciesCode = self._faciesCode[fIndx]
@@ -1110,13 +1110,13 @@ class Trunc2D_Cubic(Trunc2D_Base):
         TODO: Update documentation
 
            Description: Initialize the truncation object from input variables.
-                        This function is used when the truncation object is not initialized 
+                        This function is used when the truncation object is not initialized
                         by reading the specification from the model file.
            Input: mainFaciesTable - Specify the global facies table and is used to check that specified facies
                                     is legal.
                   faciesInZone    - List of facies to be modelled for the zone this truncation rule is defined for.
                   gaussFieldsInZone - List of gauss fields defined for the zone.
-                  alphaFieldName1, alphaFieldName2 - Name of the gauss fields corresponding to alpha1 and alpha2 that define 
+                  alphaFieldName1, alphaFieldName2 - Name of the gauss fields corresponding to alpha1 and alpha2 that define
                                                      background facies truncation map.
                   truncStructureList - Contain definition of truncation rule. See details in specification
                                        described for function __setTruncStructure.
@@ -1126,7 +1126,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
-        # Initialize base class variables 
+        # Initialize base class variables
         super()._setEmpty()
 
         # Initialize this class variables
@@ -1154,7 +1154,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __setTruncStructure(self, truncStructureList):
         # Truncation structure specified by list of facies in hierarchical way with items of the form
         # [faciesName,level]
-        # where level is one number for L1 ([1] or [2] ..), two number for L2 ([1,1] [1,2] ...) 
+        # where level is one number for L1 ([1] or [2] ..), two number for L2 ([1,1] [1,2] ...)
         # or for L3 ([2,1,1],[2,1,2]...)
         # item in list is of the form ['Facies',probFrac,L1,L2,L3]
         # Example: The list can be:

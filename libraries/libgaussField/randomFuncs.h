@@ -20,26 +20,26 @@ public:
     RandomGenerator(RandomGenerator &ran);
     RandomGenerator(void);
     virtual ~RandomGenerator();
-    int checkIfSeedIsDefined(void) const;  
+    int checkIfSeedIsDefined(void) const;
     void initialize(void);
     void normal01(double &, double &);
     double unif01(void);
-    double unif(double min,double max);       
+    double unif(double min,double max);
     double normal(double expectation, double stdev);
-    int intProb(int n,const Grid1D<double>& prob);   
-    int iUnif(int min,int max);            
+    int intProb(int n,const Grid1D<double>& prob);
+    int iUnif(int min,int max);
     double triangular(double min, double mode, double max);
 
     int  initMultiNormalWorkSpace(int dimension);
     int  initMultiNormalCovariance(const Grid2D<double> & covMatrix);
-    void multiNormal(const Grid1D<double> & expectation, 
+    void multiNormal(const Grid1D<double> & expectation,
 		     Grid1D<double> & value);
 
     double potentialFromNormal(double expectation, double stdev, double x) const;
-    double potentialFromMultiNormal(const Grid1D<double>& expectation, 
+    double potentialFromMultiNormal(const Grid1D<double>& expectation,
 				    const Grid1D<double>& point) const;
 
-    unsigned  int getSeed(void) const;   
+    unsigned  int getSeed(void) const;
     void setSeed(unsigned  int newSeed);
     void writeSeedFile(char* filename) const;
     double normalTruncated(double mean, double var, double min, double max);
@@ -50,7 +50,7 @@ public:
 protected:
     static unsigned  int seed;
     static int seedIsRead;
-      
+
 private:
 
     // Variables used internally for multinormal distribution

@@ -127,10 +127,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         This constructor can either create a new object by reading the information
         from an XML tree or it can create an empty data structure for such an object.
         If an empty data structure is created, the initialize function must be used.
-        
+
         About data structure:
         All information related to common data which is used by more than one truncation algorithm
-        is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables 
+        is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables
         and data structure for modelling of overlya facies.
         """
         nGaussFieldsInBackGroundModel = 2
@@ -157,11 +157,11 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Overlay facies truncation rules are read here. The overlay facies does not
             # have to know anything about how the 2D truncation map defined by the two first
             # transformed gaussian fields looks like. It only need to know which facies in the 2D map
-            # is "background" for each overlay facies. Therefore data structure and methods 
+            # is "background" for each overlay facies. Therefore data structure and methods
             # related to overprint facies is common to several different truncation algorithms.
             self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName, zoneNumber)
 
-            # Call base class method to check that facies in truncation rule is 
+            # Call base class method to check that facies in truncation rule is
             # consistent with facies in zone.
             self._checkFaciesForZone()
 
@@ -277,7 +277,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__nPolygons = nPolygons
 
         # Check the sum over background facies for probfrac
-        # Note that overlay facies is not a part of this calculations. 
+        # Note that overlay facies is not a part of this calculations.
         for i in range(self._nBackGroundFacies):
             if self._debug_level >= Debug.VERY_VERBOSE:
                 fName = self._faciesInTruncRule[i]
@@ -325,7 +325,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
-        # Initialize base class variables 
+        # Initialize base class variables
         super()._setEmpty()
 
         # Initialize this class variables
@@ -369,41 +369,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Check that facies in truncation rule is consistent with facies in zone
         self._checkFaciesForZone()
 
-#    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
-#        """
-#        Description: This function is used if trends are specified for the angle parameters for this truncation rule.
-#                     The function will use the input function pointer get3DParamFunction to call ROXAPI functions to
-#                     get grids with values for the angles. The function requires knowledge of which RMS grid and realization
-#                     to use in this operation.
-#                     The function pointer get3DParamFunction must be compatible with
-#                     the function getContinuous3DParameterValues(gridModel,paramName,realNumber,self._debug_level)
-#                     defined in the roxapi dependent module generalFunctionsUsingRoxAPI.
-#        """
-#        # Read truncation parameters
-#        self.__faciesBoundaryOrientation = []
-#        if not self.__useConstTruncModelParam:
-#            for k in range(self._nFacies):
-#                item = self.__faciesBoundaryOrientationName[k]
-#                fName = item[0]
-#                paramName = item[1]
-#                # Check consistency
-#                if fName == self._faciesInTruncRule[k]:
-#                    # Get param values
-#                    if self._debug_level >= Debug.VERBOSE:
-#                        print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
-#                    [values] = get3DParamFunction(gridModel, paramName, realNumber, self._debug_level)
-#                    self.__faciesBoundaryOrientation.append(values)
-#                else:
-#                    raise ValueError(
-#                        'Error in {}\n'
-#                        'Error: Inconsistency in data structure. Programming error.'
-#                        ''.format(self._className)
-#                    )
-
     def getTruncationParam(self, gridModel, realNumber):
         """
         Description: This function is used if trends are specified for the angle parameters for this truncation rule.
-                     The function will call ROXAPI functions to get grids with values for the angles. 
+                     The function will call ROXAPI functions to get grids with values for the angles.
                      The function requires knowledge of which RMS grid and realization
                      to use in this operation.
         """
@@ -440,7 +409,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
     @staticmethod
     def __setZeroPolygon():
-        """ 
+        """
         Description: Function related to this truncation rule.
                      Create a dummy 0 size polygon.
         """
@@ -448,8 +417,8 @@ class Trunc2D_Angle(Trunc2D_Base):
         return poly
 
     def __setFaciesLines(self, cellIndx):
-        """ 
-        Description: 
+        """
+        Description:
         Input: Facies names and direction angles
               (measured in anticlockwise direction relative to x-axis)
               for the normal to the facies boundary lines in the truncation map.
@@ -488,7 +457,7 @@ class Trunc2D_Angle(Trunc2D_Base):
          run through  (1,0) for s=0 and (0,1) for s=1 when 0<= alpha <= 90
          run through  (0,1) for s=0 and (1,0) for s=1 when -90<= alpha <= 0
          run through  (1,1) for s=0 and (0,0) for s=1 when -180 <= alpha <= -90
-        
+
         """
         vxLine = []
         vyLine = []
@@ -560,7 +529,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
     @staticmethod
     def __subdividePolygonByLine(polygonPts, vx, vy, x0, y0):
-        """ 
+        """
         Description:
             Input: Polygon and a straight line defined by its direction
                    vector (vx,vy) and reference point (x0,y0).
@@ -660,8 +629,8 @@ class Trunc2D_Angle(Trunc2D_Base):
 
     @staticmethod
     def __polyArea(polygon):
-        """ 
-        Description: 
+        """
+        Description:
             Input: Polygon
             Output: Area of the input polygon.
         """
@@ -681,7 +650,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
     @staticmethod
     def __findSminSmaxForPolygon(polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal):
-        """ 
+        """
         Description:
             Is used to calculate interval for a parameter s.
         """
@@ -718,7 +687,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         return smin, smax
 
     def __defineIntersectionFromProb(self, polygon, vx, vy, vxNormal, vyNormal, x0Normal, y0Normal, faciesProb):
-        """ 
+        """
         Description:
             Intersection between a straight line and a closed polygon is calculated such that
             the area of one of the two polygons that are a result of the split matches as
@@ -733,7 +702,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         if faciesProb < self._epsFaciesProb:
             # The polygon area is 0.0. Define output polygons to be a 0 area polygon as the
             # closest polygon and the original as the one to be further divided.
-            
+
             smin = 0.0
             smax = 0.05
         elif faciesProb > (1 - 0 - self._epsFaciesProb):
@@ -774,21 +743,6 @@ class Trunc2D_Angle(Trunc2D_Base):
                 else:
                     area = self.__polyArea(outputPolyB)
                     closestPolygon = 2
-                #            else:
-                #                if np.abs(area - faciesProb) > tolerance:
-                #                    if area > faciesProb:
-                #                        sHigh = s
-                #                    else:
-                #                        sLow = s
-                #                else:
-                #                    converged = 1
-                #                    break
-                #
-                #                raise ValueError(
-                #                    'Error in {}\n'
-                #                    'Error: When calculating a split of the polygon.'
-                #                    ''.format(self._className)
-                #                )
 
             if self._debug_level >= Debug.VERY_VERY_VERBOSE:
                 print('FaciesProb: {}  Iteration number: {}  Area: {} S: {} SLow: {}  SHigh {}'
@@ -816,46 +770,6 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         return outputPolyA, outputPolyB, closestPolygon
 
-    @staticmethod
-    def __isInsidePolygon(polygon, xInput, yInput):
-        """ 
-        Description:
-            Take as input a polygon and a point and return 0 or 1 depending on
-            whether the point is inside or outside of the polygon.
-        Algorithm: 
-         Calculate intersection between a straight line through the input point pt and the closed polygon
-         in one direction from the point. If the number of intersections are odd number (1,3,5,..),
-         the point is inside, if the number of intersections are even (0,2,4,..) the point is outside.
-        """
-        n = len(polygon)
-        p = polygon[0]
-        x1 = p[0]
-        y1 = p[1]
-        nIntersectionsFound = 0
-        for i in range(1, n):
-            x0 = x1
-            y0 = y1
-            p = polygon[i]
-            x1 = p[0]
-            y1 = p[1]
-            vyp = y1 - y0
-            vxp = x1 - x0
-            if vyp != 0.0:
-                s = (yInput - y0) / vyp
-                x = x0 + s * vxp
-                t = x - xInput
-                if 0.0 <= s <= 1.0 and t >= 0:
-                    # intersection between the line y = pt[1] and the polygon line
-                    # between the points polygon[i-1] and polygon[i] in one direction
-                    # from the point pt
-                    nIntersectionsFound += 1
-        if (nIntersectionsFound // 2) * 2 != nIntersectionsFound:
-            # Point pt is inside the closed polygon
-            return 1
-        else:
-            # Point pt is outside the closed polygon
-            return 0
-
     def setTruncRule(self, faciesProb, cellIndx=0):
         """
         Description:
@@ -867,7 +781,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Check if facies probability is close to 1.0. In this case do not calculate truncation map.
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
-        #        faciesProb = self._setMinimumFaciesProb(faciesProb)
         faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self._keyResolution)
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
@@ -924,7 +837,6 @@ class Trunc2D_Angle(Trunc2D_Base):
                 if i == nPolygons - 2:
                     faciesPolygons.append(polygon)
             else:
-            
                 outPolyA, outPolyB, closestPolygon = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N, y0N, fProb)
                 # Save facies polygons that are complete
                 if closestPolygon == 1:
@@ -955,7 +867,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         """
         x = alphaCoord[self._alphaIndxList[0]]
         y = alphaCoord[self._alphaIndxList[1]]
-        # Check if the facies is deterministic (100% probability) 
+        # Check if the facies is deterministic (100% probability)
         for fIndx in range(len(self._faciesInZone)):
             if self._faciesIsDetermined[fIndx] == 1:
                 faciesCode = self._faciesCode[fIndx]
@@ -966,14 +878,9 @@ class Trunc2D_Angle(Trunc2D_Base):
         inside = 0
         faciesCode = -999
         fIndx = -999
-        #        print(' ')
-        #        print('...nPolygons: {}'.format(str(self.__nPolygons)))
         for i in range(self.__nPolygons):
-            #            print('lengde av self.__faciesPolygons og nPolygons: '  + str(len(self.__faciesPolygons)) + ' ' + str(self.__nPolygons))
             polygon = self.__faciesPolygons[i]
-            #            print(repr(polygon))
-            #            print('i: {} x:{}, y:{}'.format(str(i), str(x), str(y)))
-            inside = self.__isInsidePolygon(polygon, x, y)
+            inside = self._isInsidePolygon(polygon, x, y)
             if inside == 0:
                 continue
             else:
@@ -988,12 +895,6 @@ class Trunc2D_Angle(Trunc2D_Base):
             # Problem to identify which polygon in truncation map the point is within.
             # Try once more but now by minor shift of the input point.
 
-            # print('nPolygons: ' + str(self.__nPolygons))
-            # print('x,y: ' + str(x) + ' '  + str(y))
-            # for i in range(self.__nPolygons):
-            #     poly = self.__faciesPolygons[i]
-            #     print(repr(poly))
-
             # Count the number of times in total for all cells this proble appears.
             self.__nCountShiftBoundaryOrientation += 1
 
@@ -1007,7 +908,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
             for i in range(self.__nPolygons):
                 polygon = self.__faciesPolygons[i]
-                inside = self.__isInsidePolygon(polygon, xNew, yNew)
+                inside = self._isInsidePolygon(polygon, xNew, yNew)
                 if inside == 0:
                     continue
                 else:

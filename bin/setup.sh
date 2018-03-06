@@ -17,7 +17,7 @@ sudo apt-get install --yes make build-essential libssl-dev zlib1g-dev libbz2-dev
 # Install Open GL
 sudo apt-get install --yes freeglut3-dev
 ## Multimedia
-sudo apt-get install --yes libgstreamer1.0-dev 
+sudo apt-get install --yes libgstreamer1.0-dev
 ## Misc
 sudo apt-get install --yes bison flex gperf
 
