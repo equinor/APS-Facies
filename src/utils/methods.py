@@ -1,27 +1,23 @@
 from enum import Enum
-from typing import Dict, TypeVar, Optional, Set, List, Type, Union
 
 from src.utils.exceptions.xml import MissingKeyword
 
 from copy import copy
 
-T = TypeVar('T')
-U = TypeVar('U')
 
-
-def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]:
+def invert_dict(to_be_inverted):
     return {
         to_be_inverted[key]: key for key in to_be_inverted.keys()
     }
 
 
-def get_legal_values_of_enum(enum: Union[Type[Enum], Enum]) -> Optional[Set[object]]:
+def get_legal_values_of_enum(enum):
     if isinstance(enum, Enum):
         return {v.value for v in enum.__members__.values()}
-    return None
+    return set([])
 
 
-def get_printable_legal_values_of_enum(enum: Union[Type[Enum], Enum]) -> List[str]:
+def get_printable_legal_values_of_enum(enum):
     legal_values = get_legal_values_of_enum(enum)
     if legal_values:
         return [str(values) for values in legal_values]
@@ -37,7 +33,7 @@ def get_item_from_model_file(tree, keyword, model_file_name=None):
         raise MissingKeyword(keyword, model_file_name)
 
 
-def get_selected_zones(tree, model_file=None, keyword='SelectedZones'):
+def get_selected_zones(tree, keyword='SelectedZones', model_file=None):
     selected_zone_numbers = []
     zones = []
     obj = tree.find(keyword)
@@ -54,7 +50,7 @@ def get_selected_zones(tree, model_file=None, keyword='SelectedZones'):
         raise MissingKeyword(keyword, model_file)
 
 
-def get_colors(n: int, min_colors: int = 2) -> List[str]:
+def get_colors(n, min_colors=2):
     """
     :param n: The number of colors / facies
     :type n: int
