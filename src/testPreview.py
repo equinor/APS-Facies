@@ -12,10 +12,9 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
-import src.APSDataFromRMS
-import src.APSModel
 import src.utils.exceptions.xml
 import src.utils.io
+from src.utils.methods import get_colors
 
 importlib.reload(src.APSDataFromRMS)
 importlib.reload(src.APSModel)
@@ -24,27 +23,10 @@ importlib.reload(src.utils.io)
 
 from src.APSDataFromRMS import APSDataFromRMS
 from src.APSModel import APSModel
-from src.utils.exceptions.xml import CrossSectionOutsideRange, UndefinedZoneError
+from src.utils.exceptions.xml import UndefinedZoneError
 from src.utils.constants.simple import Debug
-from src.utils.io import readFile, writeFileRTF
+from src.utils.io import writeFileRTF
 
-
-def defineColors(nFacies):
-    """
-
-    :param nFacies:
-    :type nFacies:
-    :return:
-    :rtype:
-    """
-    colors = [
-        'lawngreen', 'grey', 'dodgerblue', 'gold', 'darkorchid', 'cyan', 'firebrick',
-        'olivedrab', 'blue', 'crimson', 'darkorange', 'red'
-    ]
-    if 2 <= nFacies <= len(colors):
-        return colors[:nFacies]
-    else:
-        return []
 
 def plotGaussField(subplotAxis, numberInTruncRule, gaussFieldItems, gaussFieldIndxList,
                    azimuthGridOrientation, previewCrossSectionType,
@@ -89,6 +71,7 @@ def plotGaussField(subplotAxis, numberInTruncRule, gaussFieldItems, gaussFieldIn
         plt.setp(subplotAxis.get_xticklabels(), visible=False)
         plt.setp(subplotAxis.get_yticklabels(), visible=False)
     return im
+
 
 def crossPlot(subplotAxis, numberInTruncRule1, numberInTruncRule2, gaussFieldItems, gaussFieldIndxList):
     # Plot crossplot between two specified gauss fields
@@ -137,7 +120,8 @@ def plotFacies(subplotAxis, fmap, nFacies, cmap, azimuthGridOrientation, preview
     plt.setp(subplotAxis.get_xticklabels(), visible=False)
     plt.setp(subplotAxis.get_yticklabels(), visible=False)
     return imFac
-        
+
+
 def set2DGridDimension(
         nx, ny, nz, previewCrossSectionType, previewLX, previewLY, previewLZ,
         previewScale=False, useBestResolution=True, debug_level=Debug.OFF
@@ -243,7 +227,6 @@ def set2DGridDimension(
                     print('Debug output:  dy = {}   dz= {}'.format(str(dy), str(dz)))
 
     return nxPreview, nyPreview, nzPreview, xLength, yLength, zLength
-
 
 
 def defineHorizontalAndVerticalResolutionForPlotting(
@@ -542,7 +525,7 @@ def run_previewer(
 
     # Truncation map is plotted
     axTrunc = plt.subplot(2, 6, 10)
-    colors = defineColors(nFacies)
+    colors = get_colors(nFacies)
     cmap_name = 'Colormap'
 
     # Create the colormap
@@ -630,7 +613,6 @@ def run_previewer(
     plt.show()
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('Finished testPreview')
-
 
 
 def get_argument_parser() -> ArgumentParser:

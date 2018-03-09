@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<APS_prob_trend>    
+  <FaciesProbTrend>
+    <GridModelName>   APS_NESLEN_ODM </GridModelName> 
+    <ZoneParamName>  Zone </ZoneParamName>
+    <FaciesParamName>  DiscreteParam </FaciesParamName>
+    <ProbParamNamePrefix>  ProbTrend  </ProbParamNamePrefix>
+    <SelectedZones> 1 3 </SelectedZones>
+    <CondProbMatrix>
+      <Line>  F1  A  0.60 </Line>
+      <Line>  F2  A  0.25 </Line>
+      <Line>  F3  A  0.05 </Line>
+      <Line>  F4  A  0.05 </Line>
+      <Line>  F5  A  0.05 </Line>
+
+      <Line>  F1  B  0.15 </Line>
+      <Line>  F2  B  0.65 </Line>
+      <Line>  F3  B  0.10 </Line>
+      <Line>  F4  B  0.05 </Line>
+      <Line>  F5  B  0.05 </Line>
+
+      <Line>  F1  C  0.15 </Line>
+      <Line>  F2  C  0.15 </Line>
+      <Line>  F3  C  0.60 </Line>
+      <Line>  F4  C  0.05 </Line>
+      <Line>  F5  C  0.05 </Line>
+      
+    </CondProbMatrix>
+  </FaciesProbTrend>
+</APS_prob_trend>

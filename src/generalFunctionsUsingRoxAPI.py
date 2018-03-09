@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import sys
 import numpy as np
 import roxar
@@ -136,7 +137,7 @@ def isParameterDefinedWithValuesInRMS(gridModel, parameterName, realNumber):
             break
         
     if found:
-        p =  gridModel.properties[parameterName]
+        p = gridModel.properties[parameterName]
         if not p.is_empty(realNumber):
             return True
     return False
@@ -357,6 +358,7 @@ def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNu
         p.set_shared(isShared, realNumber)
     return True
 
+
 def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValuesForZoneList, zoneNumber,
                                          realNumber=0, isShared=False, debug_level=Debug.OFF):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
@@ -484,6 +486,7 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
         propertyParam.set_values(currentValues, realNumber)
 
     return True
+
 
 def setContinuous3DParameterValuesInZoneRegion(
         gridModel, parameterNameList, inputValuesForZoneList, zoneNumber,
@@ -633,6 +636,7 @@ def setContinuous3DParameterValuesInZoneRegion(
         propertyParam.set_values(currentValues, realNumber)
 
     return True
+
 
 def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDefinedCells=0, cellIndexDefined=None,
                                       realNumber=0, isShared=True, setInitialValues=False, debug_level=Debug.OFF):
