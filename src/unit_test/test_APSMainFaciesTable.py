@@ -1,5 +1,5 @@
 #!/bin/env python
-from src.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 
 
 def test_mainFaciesTable():

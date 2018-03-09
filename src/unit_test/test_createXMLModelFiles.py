@@ -2,22 +2,21 @@
 # Python3  test that the model files can be created correctly.
 
 import filecmp
-import collections
 
-from src.APSFaciesProb import APSFaciesProb
-from src.APSGaussFieldJobs import APSGaussFieldJobs
-from src.APSGaussModel import APSGaussModel
-from src.APSMainFaciesTable import APSMainFaciesTable
-from src.APSModel import APSModel
-from src.APSZoneModel import APSZoneModel
-from src.Trend3D import Trend3D_linear
-from src.Trend3D import Trend3D_hyperbolic
-from src.Trend3D import Trend3D_elliptic
-from src.Trend3D import Trend3D_elliptic_cone
-from src.Trend3D import Trend3D_rms_param
-from src.Trunc2D_Angle_xml import Trunc2D_Angle
-from src.Trunc2D_Cubic_xml import Trunc2D_Cubic
-from src.Trunc3D_bayfill_xml import Trunc3D_bayfill
+
+from src.algorithms.APSFaciesProb import APSFaciesProb
+from src.algorithms.APSGaussFieldJobs import APSGaussFieldJobs
+from src.algorithms.APSGaussModel import APSGaussModel
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.APSModel import APSModel
+from src.algorithms.APSZoneModel import APSZoneModel
+from src.algorithms.Trend3D import Trend3D_linear
+from src.algorithms.Trend3D import Trend3D_hyperbolic
+from src.algorithms.Trend3D import Trend3D_elliptic
+from src.algorithms.Trend3D import Trend3D_elliptic_cone
+from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
+from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
     NO_VERBOSE_DEBUG, VERY_VERBOSE_DEBUG, SEED_FILE_NAME,

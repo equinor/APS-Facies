@@ -1,0 +1,9 @@
+// IPL: Run python script as separate process outside RMS roxapi environment
+String command
+String script
+String temp_dir
+
+temp_dir = "tmp_gauss_sim"  // TODO: Ensure proper path
+command = "rm -rf " + temp_dir + " && echo 'Removed temporary directory: " + temp_dir + "'\n"
+ShellCommand(command)
+Print("Finished running command: " + command)
