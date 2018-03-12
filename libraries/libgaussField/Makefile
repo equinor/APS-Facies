@@ -25,6 +25,8 @@ CODE_DIR ?= $(shell pwd)
 
 ARGS := -fPIC $(OPTIMIZE) -c -Wall
 
+.PHONY: *.o
+
 simGauss2D.o:
 	$(CXX) $(ARGS) -I. -I.. $(CODE_DIR)/simGauss2D.cpp
 
