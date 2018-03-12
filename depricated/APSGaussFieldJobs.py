@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
@@ -43,6 +44,7 @@ class APSGaussFieldJobs:
     """
 
     def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF):
+        warn("deprecated", DeprecationWarning)
         self.__modelFileName = modelFileName
         self.__className = 'APSGaussFieldJobs'
         self.__debug_level = debug_level

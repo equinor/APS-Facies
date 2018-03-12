@@ -1,15 +1,18 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 """
 Python3 script using ROXAPI to update 2D maps for azimuth anisotropy for
 variogram for 3D gaussian field simulation.
 Dependency: ROXAPI
 """
+from warnings import warn
 
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
 from src.algorithms.APSModel import APSModel
 
 
 def run():
+    warn("deprecated", DeprecationWarning)
     modelFileName = 'APS.xml'
     print('- Read file: ' + modelFileName)
     apsModel = APSModel(modelFileName)

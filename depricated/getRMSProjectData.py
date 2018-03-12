@@ -45,6 +45,7 @@ Example input file to be specified before running this script.
 import copy
 import datetime
 import sys
+from warnings import warn
 from xml.etree.ElementTree import Element, parse
 
 import numpy as np
@@ -566,6 +567,7 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
 
 
 def run(roxar=None, project=None):
+    warn("deprecated", DeprecationWarning)
     scriptName = 'getRMSProjectData.py'
     inputFile = 'getRMSProjectData.xml'
     outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
