@@ -7,7 +7,7 @@
     <UseMemoization> 1 </UseMemoization>
     <MemoizationResolution>  100  </MemoizationResolution>
   </Optimization>
-    
+
   <RMSProjectName> testNeslen.rms10 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
   <RMSGaussFieldScriptName> MakeGaussFields.ipl </RMSGaussFieldScriptName>
@@ -552,7 +552,7 @@
             <BackGround> F1 </BackGround>
             <BackGround> F2 </BackGround>
 	  </Group>
-	  
+
 	  <Group>
             <AlphaField name="GF13">
               <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
@@ -568,7 +568,7 @@
             </AlphaField>
             <BackGround> F3 </BackGround>
 	    </Group>
-	  
+
 	  <Group>
             <AlphaField name="GF15">
               <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
@@ -669,7 +669,7 @@
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
       </GaussField>
-      
+
       <GaussField name="GF8">
         <Vario name="SPHERICAL">
           <MainRange> 3500.0 </MainRange>
@@ -680,7 +680,7 @@
         </Vario>
         <SeedForPreview> 887756 </SeedForPreview>
       </GaussField>
-      
+
       <TruncationRule nGFields="3" name="Trunc3D_Bayfill">
 	<BackGroundModel>
 	  <AlphaFields> GF6 GF7 GF8 </AlphaFields>

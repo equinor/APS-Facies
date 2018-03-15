@@ -18,10 +18,10 @@
 
 #define  EPSILON 0.00000001
 
-#define  G_MULTIPLIER  69069 
-#define  G_SHIFT           1 
-#define  G_MODULUS  256*256*256*128 
-#define  G_INVMOD  ( (double) 1 / ((double) G_MODULUS )) / ( (double) 2 ) 
+#define  G_MULTIPLIER  69069
+#define  G_SHIFT           1
+#define  G_MODULUS  256*256*256*128
+#define  G_INVMOD  ( (double) 1 / ((double) G_MODULUS )) / ( (double) 2 )
 
 const double PI =  3.14159265358979323 ;
 
@@ -123,7 +123,7 @@ ________________________________________________________________
 ________________________________________________________________
 Name:		RandomGenerator::~RandomGenerator
 Syntax:		@RandomGenerator::~RandomGenerator-syntax
-Description: Destructor 
+Description: Destructor
 ________________________________________________________________*/
 /*<RandomGenerator::~RandomGenerator-syntax: */
 RandomGenerator::~RandomGenerator(void)
@@ -184,7 +184,7 @@ Example: l_unif = lib_ran_unif01()
 
 ________________________________________________________________*/
 /*<RandomGenerator::unif01-syntax: */
-double RandomGenerator::unif01(void) 
+double RandomGenerator::unif01(void)
 /*>RandomGenerator::unif01-syntax: */
 {
  double l_ran;
@@ -204,7 +204,7 @@ ________________________________________________________________
 Name:		RandomGenerator::unif
 Syntax:		@RandomGenerator::unif-syntax
 Description:
-              Generates a uniform[min,max] variable using 
+              Generates a uniform[min,max] variable using
 	      transformation of a uniform[0,1] variable
 
 Side effects:
@@ -214,7 +214,7 @@ Example: l_unif = lib_ran_unif01()
 
 ________________________________________________________________*/
 /*<RandomGenerator::unif-syntax: */
-double RandomGenerator::unif(double min,double max) 
+double RandomGenerator::unif(double min,double max)
 /*>RandomGenerator::unif-syntax: */
 {
   return min + (max - min) * unif01();
@@ -232,7 +232,7 @@ ________________________________________________________________
 Name:		RandomGenerator::iUnif
 Syntax:		@RandomGenerator::iUnif-syntax
 Description:
-              Generates a variable from uniform distribution for integers 
+              Generates a variable from uniform distribution for integers
 	      in [min,max]  by transformation of a uniform[0,1] variable
 
 Side effects:
@@ -242,7 +242,7 @@ Example: l_unif = lib_ran_unif01()
 
 ________________________________________________________________*/
 /*<RandomGenerator::iUnif-syntax: */
-int RandomGenerator::iUnif(int min,int max) 
+int RandomGenerator::iUnif(int min,int max)
 /*>RandomGenerator::iUnif-syntax: */
 {
   assert(max >= min);
@@ -273,11 +273,11 @@ Description:
 Side effects:
 
 Return value: The pseudo-random number in [0,n], both inclusive.
-Example: 
+Example:
 
 ________________________________________________________________*/
 /*<RandomGenerator::intProb-syntax: */
-int RandomGenerator::intProb(int n,const Grid1D<double>& prob) 
+int RandomGenerator::intProb(int n,const Grid1D<double>& prob)
 /*>RandomGenerator::intProb-syntax: */
 {
   double p = unif01() * prob(n - 1);
@@ -294,9 +294,9 @@ int RandomGenerator::intProb(int n,const Grid1D<double>& prob)
   }
   int i;
   for (i = min; prob(i) < p; i++);
-  
+
   return i;
-  
+
 }	/* end of RandomGenerator::intProb */
 
 
@@ -328,8 +328,8 @@ void RandomGenerator::normal01(double &o_x1, double &o_x2)
   l_u2 = unif01();
 
 /* Then compute two normal(0,1)-numbers: */
-  o_x1 = sqrt(-2.0*log(l_u1)) * cos(2.0*PI*l_u2); 
-  o_x2 = sqrt(-2.0*log(l_u1)) * sin(2.0*PI*l_u2);  
+  o_x1 = sqrt(-2.0*log(l_u1)) * cos(2.0*PI*l_u2);
+  o_x2 = sqrt(-2.0*log(l_u1)) * sin(2.0*PI*l_u2);
   return;
 }
 
@@ -350,7 +350,7 @@ Description:
 Side effects: Initialize internal data working space.
 
 Return value: 0 if allocation OK, 1 if error
-Example: 
+Example:
 
 ________________________________________________________________*/
 /*<RandomGenerator::initMultiNormalWorkSpace-syntax: */
@@ -427,7 +427,7 @@ Side effects: Requires that the function initMultiNormalWorkSpace
 
 Return value: 1 if the covariance matrix specified is not valid.
               0 if OK
-Example: 
+Example:
 
 ________________________________________________________________*/
 /*<RandomGenerator::initMultiNormalCovariance-syntax: */
@@ -441,7 +441,7 @@ initMultiNormalCovariance(const Grid2D<double> & covMatrix)
     int ii,jj;
     for( j = 0; j < dim; j++)
     {
-	jj = j + covMatrix.xstart(); 
+	jj = j + covMatrix.xstart();
 	for( i = 0; i < dim; i++)
 	{
 	    ii = i + covMatrix.xstart();
@@ -456,7 +456,7 @@ initMultiNormalCovariance(const Grid2D<double> & covMatrix)
     double l_a;
 
     lib_matr_eigen(covMatMN, dim, eigenVector, eigenValue, &l_error);
-    if (l_error > 0) 
+    if (l_error > 0)
     {
 	moduleError(KERNEL,"RandomGenerator::initMultiNormalCovariance",
 		    "%s\n%s",
@@ -464,37 +464,37 @@ initMultiNormalCovariance(const Grid2D<double> & covMatrix)
 		    "not all eigenvalues determined.");
 	err = 1;
     }
-    
+
     l_neg_eig = 0;
-    for (l_i=0; l_i <= dim-1; l_i++) 
+    for (l_i=0; l_i <= dim-1; l_i++)
     {
 	l_a = eigenValue[l_i];
-	if (l_a >= 0.0) 
+	if (l_a >= 0.0)
 	{
 	    l_a = sqrt(l_a);
-	    for (l_j=0; l_j <= dim-1; l_j++) 
+	    for (l_j=0; l_j <= dim-1; l_j++)
 		udMN[l_j][l_i] = eigenVector[l_j][l_i] * l_a;
-	} 
-	else 
+	}
+	else
 	{
 	    negative[l_neg_eig] = l_i;
 	    l_neg_eig++;
 	}
     }
-    
-    if (l_neg_eig > 0) 
+
+    if (l_neg_eig > 0)
     {
 	moduleWarning(CORRECT,"RandomGenerator::initMultiNormalCovariance",
 		      "%s\n%d %s",
 		      "Unsuccesful decomposition,",
 		      l_neg_eig,
 		      "negative eigenvalues.");
-	for (l_i=0; l_i < l_neg_eig; l_i++) 
+	for (l_i=0; l_i < l_neg_eig; l_i++)
 	    printf("Eigenvalue no. %d : %f\n",negative[l_i],
 		    eigenValue[negative[l_i]]);
 	err = 1;
     }
-    
+
 /*
     int err = lib_ran_mninit(dim,covMatMN,udMN);
 */
@@ -522,10 +522,10 @@ Description:
 	      and that initMultiNormalWorkSpace defining the dimension
 	      has been called.
 
-Side effects: 
+Side effects:
 
 Return value: void
-Example: 
+Example:
 
 ________________________________________________________________*/
 /*<RandomGenerator::multiNormal-syntax: */
@@ -542,10 +542,10 @@ multiNormal(const Grid1D<double> & expectation, Grid1D<double> & value)
 /* local variables  */
     int i;
     double  x1, x2;
-    
+
     /* Creates dim N(0,1) pseudo-random numbers in lnorm */
-    
-    for (i=0; i<=dim-1; i=i+2) 
+
+    for (i=0; i<=dim-1; i=i+2)
     {
 	normal01(x1,x2);
 	lnorm[i][0] = x1;
@@ -553,16 +553,16 @@ multiNormal(const Grid1D<double> & expectation, Grid1D<double> & value)
     }
     for (i=0; i<=dim-1; i++)
 	le[i][0] = expMN[i];
-    
+
     /* Multiply random-vector lnorm by the SVD decomposition udMN.
        Add the expectation.  */
-    
+
     lib_matr_prod(udMN, lnorm, dim, dim, 1, lmn);
     lib_matr_add(le, dim, 1, lmn);
-    
-    for (i=0; i <= dim-1; i++) 
+
+    for (i=0; i <= dim-1; i++)
 	resultMN[i] = lmn[i][0];
-    
+
 
 
 
@@ -623,7 +623,7 @@ Description:
 		initMultiNormalWorkSpace before that again.
 
 Return value: The potential
-Example: 
+Example:
 
 ________________________________________________________________*/
 /*<RandomGenerator::potentialFromMultiNormal-syntax: */
@@ -635,7 +635,7 @@ potentialFromMultiNormal(const Grid1D<double>& expectation,
     assert(initMN);
     assert(expectation.xdim() == dim);
     assert(point.xdim() == dim);
-    
+
     // Determinant of covariance matrix
     double determinant;
     determinant = 1.0;
@@ -662,7 +662,7 @@ potentialFromMultiNormal(const Grid1D<double>& expectation,
 		q1 = eigenVector[l][j];
 		sum +=  q1*q2*y1*y2*d;
 	    }
-	}    
+	}
     }
 
     sum *= 0.5;
@@ -755,11 +755,11 @@ void RandomGenerator::writeSeedFile(char *filename) const
 //
 // FUNCTION: triangular
 //
-// PURPOSE Generates a triangular(min, mode, max) distributed number. 
-//         If not min <= mode <= max the three numbers will 
+// PURPOSE Generates a triangular(min, mode, max) distributed number.
+//         If not min <= mode <= max the three numbers will
 //         be repermuted to match this requirement.
 //
-// RETURN VALUE A double value  which is distributed according to the 
+// RETURN VALUE A double value  which is distributed according to the
 //              specified triangular distribution
 //
 double RandomGenerator::
@@ -970,12 +970,12 @@ if (ordinate > 1.0 - EPSILON)
 }	/* end of RandomGenerator::normalTruncatedLower */
 
 
-int 
+int
 RandomGenerator::poisson(double lamda) {
   int i = 0;
   double pc = exp(-lamda);
   double p0 = unif01();
-  
+
   while(pc < p0 && pc < 0.9999)
   {
     i++;

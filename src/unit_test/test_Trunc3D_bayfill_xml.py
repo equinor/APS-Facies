@@ -43,7 +43,7 @@ def interpretXMLModelFileAndWrite(
         modelFileName=modelFileName,
         debug_level=debug_level
     )
-    # Create and write XML tree 
+    # Create and write XML tree
     createXMLTreeAndWriteFile(truncRuleOut, outputModelFileName)
 
     return truncRuleOut

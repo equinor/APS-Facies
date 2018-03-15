@@ -5,7 +5,7 @@ import numpy as np
 from xml.etree.ElementTree import Element
 
 import src.algorithms.APSFaciesProb
-import src.algorithms.APSGaussFieldJobs
+import depricated.APSGaussFieldJobs
 import src.algorithms.APSGaussModel
 import src.algorithms.APSMainFaciesTable
 import src.algorithms.Trunc2D_Angle_xml
@@ -14,7 +14,7 @@ import src.algorithms.Trunc3D_bayfill_xml
 import src.utils.xml
 
 importlib.reload(src.algorithms.APSFaciesProb)
-importlib.reload(src.algorithms.APSGaussFieldJobs)
+importlib.reload(depricated.APSGaussFieldJobs)
 importlib.reload(src.algorithms.APSGaussModel)
 importlib.reload(src.algorithms.APSMainFaciesTable)
 importlib.reload(src.algorithms.Trunc2D_Angle_xml)
@@ -23,14 +23,14 @@ importlib.reload(src.algorithms.Trunc3D_bayfill_xml)
 importlib.reload(src.utils.xml)
 
 from src.algorithms.APSFaciesProb import APSFaciesProb
-from src.algorithms.APSGaussFieldJobs import APSGaussFieldJobs
+from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand
+from src.utils.xml import getKeyword, getTextCommand, getFloatCommand, getIntCommand, getBoolCommand
 
 
 class APSZoneModel:
@@ -132,7 +132,7 @@ class APSZoneModel:
          If regionNumber is > 0 then both zone parameter and region parameter is used to define which grid cells
          is to be used when calculating facies. If zoneNumber is 0, the region parameter is not used to
          define which grid cells to calculate facies for.
-        
+
          If the object is not created by reading the xml tree, then the ET_Tree should be None and
          modelFileName should not be defined. Then all other parameters must be defined.
         """
@@ -140,7 +140,7 @@ class APSZoneModel:
         # Local variables
         self.__zoneNumber = zoneNumber
         self.__regionNumber = regionNumber
-        self.__useConstProb = useConstProb
+        self.__useConstProb = bool(useConstProb)
         self.__simBoxThickness = simBoxThickness
 
         self.__faciesProbObject = faciesProbObject
@@ -192,7 +192,7 @@ class APSZoneModel:
             zoneNumber = int(zone.get('number'))
             if zoneNumber <= 0:
                 raise ValueError('Zone number must be a positive integer number')
-            
+
             regionNumberAsText = zone.get('regionNumber')
             if regionNumberAsText is not None:
                 regionNumber = int(regionNumberAsText)
@@ -208,10 +208,10 @@ class APSZoneModel:
             else:
                 if self.__debug_level == Debug.VERY_VERBOSE:
                     print('Debug output: Zone number: {}'.format(str(zoneNumber)))
-                
+
             if zoneNumber == self.__zoneNumber and regionNumber == self.__regionNumber:
 
-                useConstProb = getIntCommand(zone, 'UseConstProb', 'Zone', modelFile=modelFileName)
+                useConstProb = getBoolCommand(zone, 'UseConstProb', 'Zone', model_file_name=modelFileName)
                 self.__useConstProb = useConstProb
 
                 kw = 'SimBoxThickness'
@@ -313,7 +313,6 @@ class APSZoneModel:
     def hasFacies(self, fName):
         return self.__faciesProbObject.hasFacies(fName)
 
-
     def getZoneNumber(self):
         return self.__zoneNumber
 
@@ -399,7 +398,7 @@ class APSZoneModel:
 
     def getGaussFieldIndexListInZone(self):
         return self.__truncRule.getGaussFieldIndexListInZone()
-    
+
     def setZoneNumber(self, zoneNumber):
         self.__zoneNumber = zoneNumber
         return
@@ -499,7 +498,7 @@ class APSZoneModel:
         if debug_level >= Debug.VERBOSE:
             print('--- Truncation rule: ' + classNameTrunc)
 
-        if self.__useConstProb == 1 and useConstTruncParam == 1:
+        if self.__useConstProb and useConstTruncParam:
             # Constant probability
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Using spatially constant probabilities for facies.')
@@ -579,7 +578,7 @@ class APSZoneModel:
                     if np.mod(i, 500000) == 0:
                         print('--- Calculate facies for cell number: {}'.format(str(i)))
 
-                if self.__useConstProb == 1:
+                if self.__useConstProb:
                     for f in range(nFacies):
                         faciesProb[f] = probDefined[f]
                 else:
@@ -638,7 +637,7 @@ class APSZoneModel:
         # Add child command UseConstProb
         tag = 'UseConstProb'
         elem = Element(tag)
-        elem.text = ' ' + str(self.__useConstProb) + ' '
+        elem.text = ' ' + str(int(self.__useConstProb)) + ' '
         zoneElement.append(elem)
 
         # Add child command SimBoxThickness

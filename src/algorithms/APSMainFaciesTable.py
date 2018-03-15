@@ -96,7 +96,7 @@ class APSMainFaciesTable:
             sys.exit()
         return
 
-    def getNFacies(self):
+    def __len__(self):
         return len(self.__faciesTable)
 
     def getClassName(self):
@@ -122,7 +122,7 @@ class APSMainFaciesTable:
     def getFaciesIndx(self, fName):
         found = 0
         fIndx = -999
-        for i in range(self.getNFacies()):
+        for i in range(len(self)):
             fItem = self.__faciesTable[i]
             facName = fItem[self.__NAME]
             if fName == facName:
@@ -164,29 +164,16 @@ class APSMainFaciesTable:
                 self.__faciesTable.pop(i)
                 break
 
-    def checkWithFaciesTable(self, fName):
-        found = 0
-        for fItem in self.__faciesTable:
-            name = fItem[self.__NAME]
-            if fName == name:
-                found = 1
-                break
-        if found == 0:
-            # print('Error: Facies name: ' + fName + ' is not found among specified facies names.')
-            # print('Specified facies names and codes are: \n')
-            # print(repr(self.__faciesTable))
-            return False
-        else:
-            return True
-
-    # -- End of function checkWithFaciesTable
+    def has_facies_int_facies_table(self, fName):
+        facies_names = [item[self.__NAME] for item in self.__faciesTable]
+        return fName in facies_names
 
     def XMLAddElement(self, root):
         tag = 'MainFaciesTable'
         elem = Element(tag)
         root.append(elem)
         ftElement = elem
-        for i in range(self.getNFacies()):
+        for i in range(len(self)):
             fName = self.__faciesTable[i][0]
             fCode = self.__faciesTable[i][1]
             tag = 'Facies'
@@ -201,18 +188,18 @@ class APSMainFaciesTable:
 
     def __checkUniqueFaciesNamesAndCodes(self):
         found = 0
-        for i in range(self.getNFacies()):
+        for i in range(len(self)):
             f1 = self.__faciesTable[i][self.__NAME]
-            for j in range(i + 1, self.getNFacies()):
+            for j in range(i + 1, len(self)):
                 f2 = self.__faciesTable[j][self.__NAME]
                 if f1 == f2:
                     found = 1
                     print('Error: In ' + self.__className)
                     print('Error: Facies name: ' + f1 + ' is specified multiple times')
                     break
-        for i in range(self.getNFacies()):
+        for i in range(len(self)):
             c1 = self.__faciesTable[i][self.__CODE]
-            for j in range(i + 1, self.getNFacies()):
+            for j in range(i + 1, len(self)):
                 c2 = self.__faciesTable[j][self.__CODE]
                 if c1 == c2:
                     found = 1

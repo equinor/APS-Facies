@@ -73,7 +73,7 @@ RETURN VALUE: The pseudo-random number in [0,1], both inclusive.
  *x_seed = G_MULTIPLIER * *x_seed + G_SHIFT;
  l_ran = (double) *x_seed * G_INVMOD;
  return(l_ran);
-} 
+}
 
 
 
@@ -118,7 +118,7 @@ RETURN VALUE: The pseudo-random int in [i_min,i_max], both inclusive.
    l_int = l_int - 1;
 
  return(l_int);
-} 
+}
 
 
 double lib_ran_dunif(
@@ -166,7 +166,7 @@ void lib_ran_norm01(
 
 DESCRIPTION:
 
-Generate two independent normal(0,1)-distributed numbers, using the 
+Generate two independent normal(0,1)-distributed numbers, using the
 Box-Muller method.  Reference: Ripley p.54.
 
 HOW TO USE THE FUNCTION:
@@ -186,8 +186,8 @@ RETURN VALUE: void
   l_u2 = lib_ran_unif01(x_seed);
 
 /* Then compute two normal(0,1)-numbers: */
-  *o_x1 = sqrt(-2.0*log(l_u1)) * cos(2.0*G_PI*l_u2); 
-  *o_x2 = sqrt(-2.0*log(l_u1)) * sin(2.0*G_PI*l_u2);  
+  *o_x1 = sqrt(-2.0*log(l_u1)) * cos(2.0*G_PI*l_u2);
+  *o_x2 = sqrt(-2.0*log(l_u1)) * sin(2.0*G_PI*l_u2);
 }
 
 
@@ -197,9 +197,9 @@ int lib_ran_mninit(
    double **i_cov,   /* The covariance matrix.  */
    double **o_ud)  /* The spectral decomposition: i_cov=o_ud*o_ud' */
 /*FUNC*************************************************************************
- 
-DESCRIPTION: 
-Initializes the matrix o_ud for use in lib_ran_mn.  The matrix o_ud is the 
+
+DESCRIPTION:
+Initializes the matrix o_ud for use in lib_ran_mn.  The matrix o_ud is the
 product of the SVD-decomposition of the covariance matrix i_cov and the
 square root of the eigenvalues.
 This function can be used to check positive definiteness of a covariance
@@ -238,9 +238,9 @@ RETURN VALUE: 0 if ok, 1 if the some eigenvalues undetermined, or i_cov
     l_a = l_eigval[l_i];
     if (l_a >= 0.0) {
       l_a = sqrt(l_a);
-      for (l_j=0; l_j <= i_p-1; l_j++) 
+      for (l_j=0; l_j <= i_p-1; l_j++)
 	o_ud[l_j][l_i] = l_eigvec[l_j][l_i] * l_a;
-    } 
+    }
     else {
       l_negind[l_neg_eig] = l_i;
       l_neg_eig++;
@@ -250,7 +250,7 @@ RETURN VALUE: 0 if ok, 1 if the some eigenvalues undetermined, or i_cov
   if (l_neg_eig > 0) {
     fprintf(stderr,"Error: Unsuccesful decomposition: %d ", l_neg_eig);
     fprintf(stderr,"negative eigenvalue(s):\n");
-    for (l_i=0; l_i < l_neg_eig; l_i++) 
+    for (l_i=0; l_i < l_neg_eig; l_i++)
       fprintf(stderr, "Eigenvalue no. %d : %f\n",l_negind[l_i],
 	      l_eigval[l_negind[l_i]]);
     l_return = 1;
@@ -270,7 +270,7 @@ void lib_ran_mn(int i_p, /* Dimension of the stochastic vector */
 		unsigned int *x_seed,  /*Seed to the random generator */
 		double *o_mn)  /*Multinormal distributed vector */
 /*FUNC*************************************************************************
- 
+
 DESCRIPTION:
 
 Generates a stochastic i_p dimensional vector multinormaly distributed.
@@ -294,7 +294,7 @@ RETURN VALUE:  void
   l_e = (double **) Mmatrix_2d(0,i_p,0,0,sizeof(double),1);
   l_norm = (double **) Mmatrix_2d(0,i_p,0,0,sizeof(double),1);
   l_mn = (double **) Mmatrix_2d(0,i_p,0,0,sizeof(double),1);
- 
+
   /* Creates i_p N(0,1) pseudo-random numbers in l_norm */
 
   for (l_i=0; l_i<=i_p-1; l_i=l_i+2) {
@@ -311,7 +311,7 @@ RETURN VALUE:  void
   lib_matr_prod(i_ud, l_norm, i_p, i_p, 1, l_mn);
   lib_matr_add(l_e, i_p, 1, l_mn);
 
-  for (l_i=0; l_i <= i_p-1; l_i++) 
+  for (l_i=0; l_i <= i_p-1; l_i++)
     o_mn[l_i] = l_mn[l_i][0];
 
   l_mn = (double **)Fmatrix_2d((char **) &l_mn[0][0], (char *)&l_mn[0]);
@@ -329,7 +329,7 @@ double lib_ran_triang(
 
 DESCRIPTION:
 
-Generates a triangular(i_min, i_mode, i_max) distributed number. If not 
+Generates a triangular(i_min, i_mode, i_max) distributed number. If not
 i_min <= i_mode <= i_max the three numbers will be repermuted to match this
 requirement.
 
@@ -486,10 +486,10 @@ RETURN VALUE:  The beta distributed random variable.
   double l_y1, l_y2, l_unif;
   int    l_m;
   double r_beta;
-  
+
   l_y1=0;
   l_y2=0;
-  
+
   for (l_m = 1; l_m <= i_r; l_m++) {
     do {
       l_unif = lib_ran_unif01(x_seed);
@@ -514,13 +514,13 @@ double lib_ran_beta_r(double alpha, double beta,unsigned int *x_seed)
 /*FUNC*************************************************************
 
 Name:		lib_ran_beta_r
-Syntax:		 
-Description:   Generates a beta random value with 
-nonintegral parameters alpha and beta, Using  Theorem 3.6.2 p.82 
-in R. Y. Rubensteins book Simulation and the monte carlo method. 
-Let U_{1} and U_{2} be two uniform variates from U(0,1) and 
-let Y_{1}=U_{1}^{1/alpha} and Y_{2}=U_{2}^{1/beta}. If Y_{1}+Y_{2} >1, 
-then 
+Syntax:
+Description:   Generates a beta random value with
+nonintegral parameters alpha and beta, Using  Theorem 3.6.2 p.82
+in R. Y. Rubensteins book Simulation and the monte carlo method.
+Let U_{1} and U_{2} be two uniform variates from U(0,1) and
+let Y_{1}=U_{1}^{1/alpha} and Y_{2}=U_{2}^{1/beta}. If Y_{1}+Y_{2} >1,
+then
           Y_{1}
 X = --------------- is from Be(alpha,beta)
      Y_{1} + Y_{2}
@@ -544,7 +544,7 @@ X = --------------- is from Be(alpha,beta)
   x=y1/(y1+y2);
 
   return x;
-  
+
 }		/* end of lib_ran_beta_r */
 
 
@@ -558,13 +558,13 @@ Generates a gamma(p,theta) distributed random number (double).  x_seed is seed
 for lib_ran_unif01.
 
 The following properties are used:
- 
+
 If U is uniform[0,1], then -ln(U) is gamma(1,1).
 
 If Y1 is gamma(p,t) and Y2 is gamma(q,t), then Y1 + Y2 is gamma(p+q,t).
-                                    
+
 If Y is gamma(p,1), then Y/t is gamma(p,t).
- 
+
 
 NB: See also lib_ran_gamma, that takes two double parameters!
 
@@ -592,7 +592,7 @@ RETURN VALUE:  The gamma distributed random variable.
 
   return r_gamma;
 }
-  
+
 
 
 
@@ -601,29 +601,29 @@ double lib_ran_gamma(double alpha, double beta,unsigned int *x_seed)
 /*FUNC***************************************************************
 Name:		lib_ran_gamma
 Syntax:		
-Description:  
- 
-Generates a gamma(alpha,beta) distributed random number (double).  
+Description:
+
+Generates a gamma(alpha,beta) distributed random number (double).
 
 x_seed is seed for lib_ran_unif01.
 
 The following properties are used:
- 
+
 If U is uniform[0,1], then -ln(U) is gamma(1,1) or exp(1).
 
 If Y1 is Er(p,t) and Y2 is Er(q,t), then Y1 + Y2 is Er(p+q,t).
-                                    
-If Y is Er(p,1), then Y/t is Er(p,t). Er(*,*) is the Erlang distribution 
+
+If Y is Er(p,1), then Y/t is Er(p,t). Er(*,*) is the Erlang distribution
 which is the same as a gamma distribution with integer parameters.
 
-This routine generates a beta random number (double) with 
-nonintegral parameters alpha and beta using  Theorem 3.6.1 p.72 
+This routine generates a beta random number (double) with
+nonintegral parameters alpha and beta using  Theorem 3.6.1 p.72
 in R. Y. Rubensteins book Simulation and the monte carlo method.
- 
-Let W and V be two independent variates from Be(delta,1-delta) and 
-exp(1), respectively. Then X=1/beta*V*W is a variat with G(delta,beta), 
-0<delta<1. To generate a variate from G(alpha,beta) we generate 
-an Y from Er(m,beta) (Erlang distribution). Then compute X=1/beta*(Y+V*W) 
+
+Let W and V be two independent variates from Be(delta,1-delta) and
+exp(1), respectively. Then X=1/beta*V*W is a variat with G(delta,beta),
+0<delta<1. To generate a variate from G(alpha,beta) we generate
+an Y from Er(m,beta) (Erlang distribution). Then compute X=1/beta*(Y+V*W)
 
 ************************************************************************/
 {
@@ -639,7 +639,7 @@ an Y from Er(m,beta) (Erlang distribution). Then compute X=1/beta*(Y+V*W)
     l_unif = lib_ran_unif01(x_seed);
     r_gamma = r_gamma - log(l_unif);
   }
- 
+
   if (delta > 0.0) {
     l_unif = lib_ran_unif01(x_seed);
     v = - log(l_unif);
@@ -657,8 +657,8 @@ an Y from Er(m,beta) (Erlang distribution). Then compute X=1/beta*(Y+V*W)
 
 /* normalCumProb *********************************************************
 
-DESCRIPTION: Compute PHI(x) with PHI() being the cummulative probability 
-             function for a standard Gaussian distributed variable. It is 
+DESCRIPTION: Compute PHI(x) with PHI() being the cummulative probability
+             function for a standard Gaussian distributed variable. It is
 	     based on the function erfcc given in numerical recipies, page
 	     220 third edition, which garanties a fractional error for
 	     the complementary error function of less than 1.2 * 10^-7.
@@ -677,29 +677,29 @@ double normalCumProb(double x)
 
   z = (x > 0) ? x : (-x);
   t = 1.0 / (1.0 + 0.5 * z);
-  ans = t * exp(- z * z - 1.265512223 + t * 
-        ( 1.00002368 + t * (0.37409196 + t * (0.09678418 + t * 
-	(-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * 
+  ans = t * exp(- z * z - 1.265512223 + t *
+        ( 1.00002368 + t * (0.37409196 + t * (0.09678418 + t *
+	(-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t *
         (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
-  
+
   erfc = (x >= 0.0) ? ans : 2.0 - ans;
 
   phi = 1 - 0.5 * erfc;
-  
+
   return phi;
 }
 
 
-static double yInFunctionPHIMinusuAndphi;  
+static double yInFunctionPHIMinusuAndphi;
          /* variable used by functions: PHIMinusyAndphi and PHI_Inverse   */
 
 
 /* PHI_Inverse ****************************************************************
 
-DESCRIPTION: Compute PHI^{-1}(x) with PHI() being the cummulative probability 
-             function for a standard Gaussian distributed variable. 
+DESCRIPTION: Compute PHI^{-1}(x) with PHI() being the cummulative probability
+             function for a standard Gaussian distributed variable.
              The value is found by numerically solving the equation
-	     
+
 	     f(x) = PHI(x) - y = 0
 
 	     by a Newton-Raphson algorithm.
@@ -728,7 +728,7 @@ double PHI_Inverse(double y)
     {
       lowerLimit = 0.0;
       upperLimit = 1.0;
-      while (normalCumProb(upperLimit) < y) 
+      while (normalCumProb(upperLimit) < y)
 	{
 	  lowerLimit = upperLimit;
 	  upperLimit *= 10.0;
@@ -749,10 +749,10 @@ double PHI_Inverse(double y)
 
   if (normalCumProb(upperLimit) == y) return upperLimit;
   if (normalCumProb(lowerLimit) == y) return lowerLimit;
-  
-  
+
+
   yInFunctionPHIMinusuAndphi = y;
-  
+
   return rtsafe(PHIMinusyAndphi,upperLimit,lowerLimit,1.0e-10,1000);
 }
 
@@ -762,7 +762,7 @@ double PHI_Inverse(double y)
 
 /* PHIMinusyAndphi ************************************************************
 
-DESCRIPTION: computes PHI(x) - y and phi(x) with y being a global variable 
+DESCRIPTION: computes PHI(x) - y and phi(x) with y being a global variable
              and PHI() and phi() being cummulative
              and density of standard Gaussian distribution
 
@@ -774,7 +774,7 @@ RETURN VALUE: none
 ******************************************************************************/
 void PHIMinusyAndphi(double x,double *Phi,double *phi)
 {
-  
+
   *Phi = normalCumProb(x) - yInFunctionPHIMinusuAndphi;
   *phi = exp(- x*x/2.0) / sqrt(2.0*G_PI);
 
@@ -783,7 +783,7 @@ void PHIMinusyAndphi(double x,double *Phi,double *phi)
 
 /* rtsafe *********************************************************************
 
-DESCRIPTION: find roots of specified function by Newton-Raphson algorithm. 
+DESCRIPTION: find roots of specified function by Newton-Raphson algorithm.
              Function is taken from numerical recipes.
 
 SIDE EFFECTS: none
@@ -800,7 +800,7 @@ double rtsafe(void (*funcd)(double,double *,double *),double x1,double x2,double
 
 	(*funcd)(x1,&fl,&df);
 	(*funcd)(x2,&fh,&df);
-	if (fl*fh >= 0.0) 
+	if (fl*fh >= 0.0)
 	  {
 	    printf("Root must be bracketed in RTSAFE\n");
 	    exit(-1);

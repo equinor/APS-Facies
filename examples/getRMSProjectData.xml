@@ -6,7 +6,7 @@
     <RegionParameter> Region </RegionParameter>
   </GridModel>
   <GaussFields>
-    GF1 GF2 GF3 GF4 GF6 GF7 GF8 GF9 
+    GF1 GF2 GF3 GF4 GF6 GF7 GF8 GF9
   </GaussFields>
   <WellName name="B2">
     <Trajectory name="Drilled trajectory">

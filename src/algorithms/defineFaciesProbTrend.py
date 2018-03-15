@@ -124,7 +124,7 @@ class DefineFaciesProb(BaseDefineFacies):
 
             # Write the calculated probabilities for the selected zones to 3D parameter
             # If the 3D parameter exist in advance, only the specified zones will be altered
-            # while grid cell values for other zones are unchanged. 
+            # while grid cell values for other zones are unchanged.
             success = gf.setContinuous3DParameterValues(
                 grid_model, parameter_name, probability_values,
                 self.selected_zone_numbers, real_number, debug_level=self.debug_level

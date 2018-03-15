@@ -4,7 +4,7 @@
 // SPECIAL INSTRUCTIONS & NOTES
 //         Compilation option HP_UX must be used for HP
 //         Compilation option ARRAY_RANGECHECK should be used
-//         in debug phase and not if optimal performace is wanted.  
+//         in debug phase and not if optimal performace is wanted.
 //
 
 
@@ -33,7 +33,7 @@ class Grid1D
   void redefine(int nx);
   void redefine(int istart, int iend);
   void assign(const T* t);
-    
+
 
   const T& operator()(int i) const;
   int xdim() const;
@@ -53,7 +53,7 @@ class Grid1D
 // all functions are inline except the constructors and destructor.
 
 
-#ifdef HP_UX    
+#ifdef HP_UX
 template<class T> void Grid1D<T>::
 checkAllocation(void)const
 {
@@ -64,7 +64,7 @@ checkAllocation(void)const
 		"a 1 dimensional array of size: ",nxdim);
   }
   return;
-}      
+}
 
 template<class T> void Grid1D<T>::
 checkIndex(int i)const
@@ -176,14 +176,14 @@ operator=(const T& t)
 // FUNCTION: getArray
 //
 // PURPOSE Returns the pointer to the internal one-dimensional
-//         array. This function should only be used for 
+//         array. This function should only be used for
 //         avoiding copying into a onedimensional array
 //         in case that is necessary to use in for instance
-//         c library functions. 
+//         c library functions.
 //
 // RETURN VALUE Pointer to the internal array
 //
-// SIDE EFFECTS 
+// SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //
@@ -237,7 +237,7 @@ checkAllocation(void)const
 		"a 1 dimensional array of size: ",nxdim);
   }
   return;
-}      
+}
 
 
 template<class T> inline void Grid1D<T>::
@@ -352,14 +352,14 @@ operator=(const T& t)
 // FUNCTION: getArray
 //
 // PURPOSE Returns the pointer to the internal one-dimensional
-//         array. This function should only be used for 
+//         array. This function should only be used for
 //         avoiding copying into a onedimensional array
 //         in case that is necessary to use in for instance
-//         c library functions. 
+//         c library functions.
 //
 // RETURN VALUE Pointer to the internal array
 //
-// SIDE EFFECTS 
+// SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //

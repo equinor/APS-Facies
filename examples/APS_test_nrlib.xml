@@ -8,12 +8,7 @@
   </Optimization>
 
   <SelectedZonesAndRegions>
-    <SelectedZoneWithRegions zone="1">  0      </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="2">  0      </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="3">  0      </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="4">  0      </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="5">  0      </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="6">  0      </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>
 
   <RMSProjectName> testNeslen.rms10 </RMSProjectName>
@@ -79,25 +74,25 @@
 
       <GaussField name="GF1">
         <Vario name="GAUSSIAN">
-          <MainRange> 200.0 </MainRange>
-          <PerpRange> 100.0 </PerpRange>
-          <VertRange> 2.0 </VertRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
           <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle> 5.0 </stackAngle>
-        </Trend>  
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
         <Vario name="GAUSSIAN">
-          <MainRange> 120.0 </MainRange>
-          <PerpRange> 50.0 </PerpRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -107,8 +102,8 @@
 
       <GaussField name="GF3">
         <Vario name="GAUSSIAN">
-          <MainRange> 50.0 </MainRange>
-          <PerpRange> 50.0 </PerpRange>
+          <MainRange> 500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -158,52 +153,51 @@
       </FaciesProbForModel>
 
       <GaussField name="GF1">
-        <Vario name="MATERN52">
-          <MainRange> 150.0 </MainRange>
-          <PerpRange> 25.0 </PerpRange>
-          <VertRange> 5.0 </VertRange>
+        <Vario name="GAUSSIAN">
+          <MainRange> 5.0 </MainRange>
+          <PerpRange> 150.0 </PerpRange>
+          <VertRange> 10.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
-          <DipAngle> 0.0 </DipAngle>
+          <DipAngle> 45.0 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
           <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle> 5.0 </stackAngle>
-        </Trend>  
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 3939276787 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
-        <Vario name="MATERN32">
-          <MainRange> 150.0 </MainRange>
-          <PerpRange> 25.0 </PerpRange>
-          <VertRange> 5.0 </VertRange>
+        <Vario name="GAUSSIAN">
+          <MainRange> 5.0 </MainRange>
+          <PerpRange> 150.0 </PerpRange>
+          <VertRange> 12.0 </VertRange>
           <AzimuthAngle> 80.0 </AzimuthAngle>
-          <DipAngle> 0.0 </DipAngle>
+          <DipAngle> 45.0 </DipAngle>
         </Vario>
         <SeedForPreview> 1175151556 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF3">
-        <Vario name="MATERN72">
-          <MainRange> 150.0 </MainRange>
-          <PerpRange> 25.0 </PerpRange>
-          <VertRange> 5.0 </VertRange>
+        <Vario name="GAUSSIAN">
+          <MainRange> 5.0 </MainRange>
+          <PerpRange> 150.0 </PerpRange>
+          <VertRange> 12.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
-          <DipAngle> 0.0 </DipAngle>
+          <DipAngle> 45.0 </DipAngle>
         </Vario>
         <SeedForPreview> 13008276256 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF4">
-        <Vario name="GENERAL_EXPONENTIAL">
-          <MainRange> 150.0 </MainRange>
-          <PerpRange> 25.0 </PerpRange>
-          <VertRange> 5.0 </VertRange>
+        <Vario name="GAUSSIAN">
+          <MainRange> 5.0 </MainRange>
+          <PerpRange> 150.0 </PerpRange>
+          <VertRange> 12.0 </VertRange>
           <AzimuthAngle> 170.0 </AzimuthAngle>
-          <DipAngle> 0.0 </DipAngle>
-          <Power> 1.95 </Power>
+          <DipAngle> 45.0 </DipAngle>
         </Vario>
         <SeedForPreview> 88772256 </SeedForPreview>
       </GaussField>
@@ -274,29 +268,25 @@
 
       <GaussField name="GF1">
         <Vario name="GAUSSIAN">
-          <MainRange> 130.0 </MainRange>
-          <PerpRange> 210.0 </PerpRange>
-          <VertRange> 3.0 </VertRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Elliptic3D">
+        <Trend name="Linear3D">
           <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle> 90.0 </stackAngle>
-          <curvature>  2.0 </curvature>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.5 </origin_y>
-          <origintype> 'Relative' </origintype>
-        </Trend>  
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 9989276787 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
         <Vario name="GAUSSIAN">
-          <MainRange> 120.0 </MainRange>
-          <PerpRange> 120.0 </PerpRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -306,8 +296,8 @@
 
       <GaussField name="GF3">
         <Vario name="GAUSSIAN">
-          <MainRange> 50.0 </MainRange>
-          <PerpRange> 50.0 </PerpRange>
+          <MainRange> 500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -340,42 +330,45 @@
           <ProbCube> 0.4 </ProbCube>
         </Facies>
         <Facies name="F2">
-          <ProbCube> 0.3 </ProbCube>
+          <ProbCube> 0.2 </ProbCube>
         </Facies>
         <Facies name="F3">
-          <ProbCube> 0.3 </ProbCube>
+          <ProbCube> 0.2 </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+        <Facies name="F6">
+          <ProbCube> 0.05 </ProbCube>
         </Facies>
       </FaciesProbForModel>
 
       <GaussField name="GF1">
-        <Vario name="MATERN32">
-          <MainRange> 100.0 </MainRange>
-          <PerpRange> 10.0 </PerpRange>
+        <Vario name="GAUSSIAN">
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
-          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="EllipticCone3D">
-          <azimuth> 35.0 </azimuth>
+        <Trend name="Linear3D">
+          <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle> 90.0 </stackAngle>
-          <curvature>  2.0 </curvature>
-          <migrationAngle> 75.0 </migrationAngle>
-          <relativeSize> 0.1 </relativeSize>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.5 </origin_y>
-          <origintype> 'Relative' </origintype>
-        </Trend>  
-        <RelStdDev> 0.0001 </RelStdDev>
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
+        <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 223939276787 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
-        <Vario name="EXPONENTIAL">
-          <MainRange> 100.0 </MainRange>
-          <PerpRange> 10.0 </PerpRange>
-          <VertRange> 1.0 </VertRange>
-          <AzimuthAngle> 80.0 </AzimuthAngle>
+        <Vario name="GAUSSIAN">
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
+          <VertRange> 2.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 8787851556 </SeedForPreview>
@@ -383,8 +376,8 @@
 
       <GaussField name="GF3">
         <Vario name="GAUSSIAN">
-          <MainRange> 100.0 </MainRange>
-          <PerpRange> 10.0 </PerpRange>
+          <MainRange> 4500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -394,35 +387,54 @@
 
       <GaussField name="GF4">
         <Vario name="GAUSSIAN">
-          <MainRange> 100.0 </MainRange>
-          <PerpRange> 10.0 </PerpRange>
-          <VertRange> 1.0 </VertRange>
-          <AzimuthAngle> 170.0 </AzimuthAngle>
+          <MainRange> 4500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
+          <VertRange> 3.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Hyperbolic3D">
-          <azimuth> 35.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 90 </stackAngle>
-          <curvature>  2.0 </curvature>
-          <migrationAngle> 0.0 </migrationAngle>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.5 </origin_y>
-          <origintype> 'Relative' </origintype>
-        </Trend>  
-        <RelStdDev> 0.0001 </RelStdDev>
         <SeedForPreview> 187542256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="2" name="Trunc2D_Cubic">
+      <TruncationRule nGFields="3" name="Trunc2D_Angle">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 </AlphaFields>
-          <L1 direction="V">
-            <ProbFrac name="F1"> 1.0 </ProbFrac>
-            <ProbFrac name="F2"> 1.0 </ProbFrac>
-            <ProbFrac name="F3"> 1.0 </ProbFrac>
-          </L1>
+          <UseConstTruncParam> 1 </UseConstTruncParam>
+          <Facies name="F1">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F2">
+            <Angle> 20.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F5">
+            <Angle> 180.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F4">
+            <Angle> 90.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
+          <Facies name="F3">
+            <Angle> 75.0 </Angle>
+            <ProbFrac> 1.0 </ProbFrac>
+          </Facies>
 	</BackGroundModel>
+	<OverLayModel>
+          <Group>
+            <AlphaField name="GF3">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <AlphaField name="GF4">
+              <TruncIntervalCenter> 0.5 </TruncIntervalCenter>
+              <ProbFrac name="F6"> 0.5 </ProbFrac>
+            </AlphaField>
+            <BackGround> F1 </BackGround>
+            <BackGround> F4 </BackGround>
+          </Group>
+        </OverLayModel>
       </TruncationRule>
     </Zone>
 
@@ -453,25 +465,25 @@
 
       <GaussField name="GF1">
         <Vario name="GAUSSIAN">
-          <MainRange> 100.0 </MainRange>
-          <PerpRange> 32.0 </PerpRange>
-          <VertRange> 4.0 </VertRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
+          <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <Trend name="Linear3D">
           <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle> 5.0 </stackAngle>
-        </Trend>  
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 1111276787 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
         <Vario name="GAUSSIAN">
-          <MainRange> 200.0 </MainRange>
-          <PerpRange> 200.0 </PerpRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -481,8 +493,8 @@
 
       <GaussField name="GF3">
         <Vario name="GAUSSIAN">
-          <MainRange> 40.0 </MainRange>
-          <PerpRange> 50.0 </PerpRange>
+          <MainRange> 4500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -492,8 +504,8 @@
 
       <GaussField name="GF4">
         <Vario name="GAUSSIAN">
-          <MainRange> 50.0 </MainRange>
-          <PerpRange> 25.0 </PerpRange>
+          <MainRange> 4500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 3.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -570,8 +582,8 @@
 
       <GaussField name="GF1">
         <Vario name="GAUSSIAN">
-          <MainRange> 20.0 </MainRange>
-          <PerpRange> 72.0 </PerpRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -579,16 +591,16 @@
         <Trend name="Linear3D">
           <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle> 5.0 </stackAngle>
-        </Trend>  
+          <stackAngle> 0.1 </stackAngle>
+        </Trend>
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 166276787 </SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
         <Vario name="GAUSSIAN">
-          <MainRange> 22.0 </MainRange>
-          <PerpRange> 92.0 </PerpRange>
+          <MainRange> 2000.0 </MainRange>
+          <PerpRange> 2000.0 </PerpRange>
           <VertRange> 2.0 </VertRange>
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -598,8 +610,8 @@
 
       <GaussField name="GF3">
         <Vario name="GAUSSIAN">
-          <MainRange> 45.0 </MainRange>
-          <PerpRange> 50.0 </PerpRange>
+          <MainRange> 4500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 1.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
@@ -609,8 +621,8 @@
 
       <GaussField name="GF4">
         <Vario name="GAUSSIAN">
-          <MainRange> 45.0 </MainRange>
-          <PerpRange> 50.0 </PerpRange>
+          <MainRange> 4500.0 </MainRange>
+          <PerpRange> 500.0 </PerpRange>
           <VertRange> 3.0 </VertRange>
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>

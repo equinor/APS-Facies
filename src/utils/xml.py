@@ -98,3 +98,20 @@ def getIntCommand(
             if value > maxValue:
                 raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
     return value
+
+
+def getBoolCommand(parent, keyword, parent_keyword='', default=False, model_file_name=None, required=True):
+    obj = parent.find(keyword)
+    value = default
+    if required:
+        if obj is None:
+            raise ReadingXmlError(keyword, parent_keyword, model_file_name)
+    if obj is not None:
+        text = obj.text.strip().lower()
+        if text in ['true', '1', 'yes', 'y']:
+            value = True
+        elif text in ['false', '0']:
+            value = False
+        else:
+            raise ReadingXmlError(keyword, parent_keyword, model_file_name)
+    return value

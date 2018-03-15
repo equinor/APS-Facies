@@ -9,9 +9,9 @@
 
   Public module unit(s):
 
-   void lib_matr_update_var(double *i_obs, int i_n, int i_np, 
+   void lib_matr_update_var(double *i_obs, int i_n, int i_np,
                            double *x_mu, double **x_var)
-   void lib_matr_downdate_var(double *i_obs, int i_n, int i_np, 
+   void lib_matr_downdate_var(double *i_obs, int i_n, int i_np,
                            double *x_mu, double **x_var)
    void lib_matr_exp(double **i_mat,int i_n,double i_exp,
                          double **o_mat)
@@ -20,7 +20,7 @@
                           double **o_mat)
    void lib_matr_prodmatvec(double **i_mat, double *i_vec, int i_n1, int i_n2,
                             double *o_vec)
-   void lib_matr_add(double **i_y, int i_n1, int i_n2,double **x_x)  
+   void lib_matr_add(double **i_y, int i_n1, int i_n2,double **x_x)
    void lib_matr_addvec(double *i_y, int i_n, double *x_x)
    void lib_matr_subtract(double **i_x, double **i_y, int i_n1, int i_n2,
                           double **o_z)
@@ -30,12 +30,12 @@
    void lib_matr_eigen(double **i_mat,int i_n,
                             double *o_eigval, int *o_error)
    int lib_matr_cholesky(int i_dim, double **x_mat)
-   void lib_matr_axeqb(int i_dim, double **i_mat, double *x_vec)	    
+   void lib_matr_axeqb(int i_dim, double **i_mat, double *x_vec)
 
   Private module unit(s):
 
   static void lib_matr_tred2(int i_n, double **x_a, double o_d[], double o_e[])
-  static void lib_matr_tqli(double i_e[], int i_n, double **x_z, double x_d[], 
+  static void lib_matr_tqli(double i_e[], int i_n, double **x_z, double x_d[],
                    int *o_error)
   static void lib_matr_evtred2(int i_n, double **x_a,double o_d[],double o_e[])
   static void lib_matr_evtqli(double i_e[], int i_n, double x_d[],int *o_error)
@@ -51,7 +51,7 @@
 /*INCLUDE FILES:*/
 #include <stdlib.h>
 #include <math.h>
-#include "lib_matr.h" 
+#include "lib_matr.h"
 #include "utl.h"
 
 
@@ -93,7 +93,7 @@ RETURN VALUE:
 
  l_n_1 = (double) (i_n - 1);
  l_n = (double) i_n;
- 
+
  for(l_i = 1 ; l_i <= i_np ; l_i++)  {
     for(l_j = 1 ; l_j <= l_i ; l_j++)  {
        x_var[l_i][l_j] = (x_var[l_i][l_j] +
@@ -135,7 +135,7 @@ RETURN VALUE:
 
  l_n_1 = (double) (i_n - 1);
  l_n = (double) i_n;
- 
+
  for(l_i = 1 ; l_i <= i_np ; l_i++)  {
     for(l_j = 1 ; l_j <= l_i ; l_j++)  {
        x_var[l_i][l_j] = x_var[l_i][l_j]*l_n/l_n_1 -
@@ -193,14 +193,14 @@ RETURN VALUE:
     o_mat[l_i][l_j] = l_eigval[0] * l_eigvec[0][l_i] *
                       l_eigvec[0][l_j];
     for(l_k = 1 ; l_k <= i_n-1 ; l_k++)
-       o_mat[l_i][l_j] = o_mat[l_i][l_j] + 
+       o_mat[l_i][l_j] = o_mat[l_i][l_j] +
                          l_eigval[l_k] * l_eigvec[l_k][l_i] *
                          l_eigvec[l_k][l_j];
   }
 
  l_eigval=(double *)Fmatrix_1d((char *)&l_eigval);
  l_eigvec=(double **)Fmatrix_2d((char **)&l_eigvec[0][0], (char*)&l_eigvec[0]);
- 
+
 }
 
 void lib_matr_prod(
@@ -305,8 +305,8 @@ RETURN VALUE: void
 /* local variables */
   int l_i, l_j;
 
-  for (l_i=0; l_i<=i_n1-1; l_i++) 
-    for (l_j=0; l_j<=i_n2-1; l_j++) 
+  for (l_i=0; l_i<=i_n1-1; l_i++)
+    for (l_j=0; l_j<=i_n2-1; l_j++)
       x_x[l_i][l_j] = i_y[l_i][l_j] + x_x[l_i][l_j];
 
 }
@@ -335,14 +335,14 @@ RETURN VALUE: void
 /* local variables */
   int l_i;
 
-  for (l_i=0; l_i<=i_n-1; l_i++) 
+  for (l_i=0; l_i<=i_n-1; l_i++)
       x_x[l_i] = i_y[l_i] + x_x[l_i];
 }
 
 
 void lib_matr_subtract(
    double      **i_x,
-   double      **i_y, 
+   double      **i_y,
    int         i_n1,  /* number of rows */
    int         i_n2,  /* number of columns */
    double      **o_z)
@@ -365,15 +365,15 @@ RETURN VALUE: void
 /* local variables */
   int l_i, l_j;
 
-  for (l_i=0; l_i<=i_n1-1; l_i++) 
-    for (l_j=0; l_j<=i_n2-1; l_j++) 
+  for (l_i=0; l_i<=i_n1-1; l_i++)
+    for (l_j=0; l_j<=i_n2-1; l_j++)
       o_z[l_i][l_j] = i_x[l_i][l_j] - i_y[l_i][l_j];
 }
 
 
 void lib_matr_subtractvec(
    double      *i_x,
-   double      *i_y, 
+   double      *i_y,
    int         i_n,  /* number of rows */
    double      *o_z)
 /*FUNC*******************************************************************
@@ -395,7 +395,7 @@ RETURN VALUE: void
 /* local variables */
   int l_i;
 
-  for (l_i=0; l_i<=i_n-1; l_i++) 
+  for (l_i=0; l_i<=i_n-1; l_i++)
       o_z[l_i] = i_x[l_i] - i_y[l_i];
 }
 
@@ -405,7 +405,7 @@ void  lib_matr_eigen(
    int         i_n,
    double      **o_eigvec,
    double       *o_eigval,
-   int         *o_error) /* 0 if ok, 1 if not all eigenvalues determined. 
+   int         *o_error) /* 0 if ok, 1 if not all eigenvalues determined.
                             input to the function tqli. */
 /*FUNC******************************************************************
 
@@ -437,8 +437,8 @@ RETURN VALUE:
   l_d = (double *) Mmatrix_1d(0,i_n-1, sizeof(double), 1);
   l_e = (double *) Mmatrix_1d(0,i_n-1, sizeof(double), 1);
 
-  for (i=0; i<=i_n-1; i++) 
-    for (j=0; j<=i_n-1; j++) 
+  for (i=0; i<=i_n-1; i++)
+    for (j=0; j<=i_n-1; j++)
       l_mat[i][j] = i_mat[i][j];
 
   lib_matr_tred2(i_n, l_mat, l_d, l_e);
@@ -451,7 +451,7 @@ RETURN VALUE:
     for (j=0; j<=i_n-1; j++)
       o_eigvec[i][j] = l_mat[i][j];
   }
-  
+
   l_mat = (double **)Fmatrix_2d((char **)&l_mat[0][0], (char *)&l_mat[0]);
   l_d = (double *)Fmatrix_1d((char *)&l_d[0]);
   l_e = (double *)Fmatrix_1d((char *)&l_e[0]);
@@ -462,7 +462,7 @@ void  lib_matr_eigenvalues(
    double      **i_mat,
    int         i_n,
    double      *o_eigval,
-   int         *o_error) /* 0 if ok, 1 if not all eigenvalues determined. 
+   int         *o_error) /* 0 if ok, 1 if not all eigenvalues determined.
                             input to the function tqli. */
 /*FUNC******************************************************************
 
@@ -494,8 +494,8 @@ RETURN VALUE:
   l_d = (double *) Mmatrix_1d(0,i_n-1, sizeof(double), 1);
   l_e = (double *) Mmatrix_1d(0,i_n-1, sizeof(double), 1);
 
-  for (i=0; i<=i_n-1; i++) 
-    for (j=0; j<=i_n-1; j++) 
+  for (i=0; i<=i_n-1; i++)
+    for (j=0; j<=i_n-1; j++)
       l_mat[i][j] = i_mat[i][j];
 
   lib_matr_evtred2(i_n, l_mat, l_d, l_e);
@@ -503,9 +503,9 @@ RETURN VALUE:
 
   if (*o_error > 0) return;
 
-  for (i=0; i<=i_n-1; i++) 
+  for (i=0; i<=i_n-1; i++)
     o_eigval[i] = l_d[i];
-  
+
   l_mat = (double **)Fmatrix_2d((char **)&l_mat[0][0], (char *)&l_mat[0]);
   l_d = (double *)Fmatrix_1d((char *)&l_d[0]);
   l_e = (double *)Fmatrix_1d((char *)&l_e[0]);
@@ -520,8 +520,8 @@ double **x_mat) /*The matrix beeing decomposed on input, on output the lower
 
 DESCRIPTION:
 
-Factorizes the positive definite, symmetric matrix 'x_mat' into 
-L * L(transposed), when L is a lower triangular matrix. L is stored in the 
+Factorizes the positive definite, symmetric matrix 'x_mat' into
+L * L(transposed), when L is a lower triangular matrix. L is stored in the
 lower part of 'x_mat' on output.
 
 HOW TO USE THE FUNCTION:
@@ -549,7 +549,7 @@ RETURN VALUE: 0 if everything O.K.
 	for (l_k = 0; l_k < l_j; l_k++)
 	  l_r += x_mat[l_i][l_k] * x_mat[l_j][l_k];
 	x_mat[l_i][l_j] = (x_mat[l_i][l_j] - l_r) / x_mat[l_j][l_j];
-      } 
+      }
       l_r = 0.0;
       for (l_k=0; l_k < l_i; l_k++)
 	  l_r += x_mat[l_i][l_k] * x_mat[l_i][l_k];
@@ -558,7 +558,7 @@ RETURN VALUE: 0 if everything O.K.
 	fprintf(stderr, "Matrix to be Cholesky factorized not valid !\n");
 	r_value = 1;
 	return(r_value);
-      }	  
+      }
       x_mat[l_i][l_i] = sqrt(l_r);
     }
   return(r_value);
@@ -587,14 +587,14 @@ RETURN VALUE: void.
 {
   int l_i, l_j;
   double l_x;
-  
+
   for (l_i = 0; l_i < i_dim; l_i++) {
     l_x = x_vec[l_i];
     for (l_j = 0; l_j < l_i; l_j++)
       l_x -= x_vec[l_j] * i_mat[l_i][l_j];
     x_vec[l_i] = l_x / i_mat[l_i][l_i];
   }
-  
+
   for (l_i = i_dim - 1; l_i >= 0; l_i--) {
     l_x = x_vec[l_i];
     for (l_j = i_dim - 1; l_j > l_i; l_j--)
@@ -610,12 +610,12 @@ static void lib_matr_tred2(int i_n, double **x_a, double o_d[], double o_e[])
 DESCRIPTION:
 
 Householder reduction of a real, symmetric, matrix a[0,...,n-1][0,...,n-1].
-On output, x_a is replaced by the orthogonal matrix Q effecting the 
-transformation. d[0,...,n-1] returns the diagonal elements of the 
+On output, x_a is replaced by the orthogonal matrix Q effecting the
+transformation. d[0,...,n-1] returns the diagonal elements of the
 tridiagonal matrix, and e[0,...,n-1] the off diagonal elements, e[0]=0.
 Several statements, as noted in comments, can be omitted if only eigenvalues
 are to be found, in which case x_a contains no useful information on output.
-Otherwise they are to be included. 
+Otherwise they are to be included.
 This implementation is the same as stated in 'Numerical recipes in C' p. 373,
 except that here the arrays and matrices starts in 0.
 
@@ -670,7 +670,7 @@ RETURN VALUE:
 	    x_a[j][k] -= (f*o_e[k] + g*x_a[i][k]);
 	}
       }
-    } 
+    }
     else
       o_e[i] = x_a[i][l];
     o_d[i] = h;
@@ -693,31 +693,31 @@ RETURN VALUE:
     }
     o_d[i] = x_a[i][i];
     x_a[i][i] = 1.0;
-    for (j=0; j<=l; j++) 
+    for (j=0; j<=l; j++)
       x_a[j][i]=x_a[i][j]=0.0;
   }
 }
-      
 
 
-static void lib_matr_tqli(double i_e[], int i_n, double **x_z, double x_d[], 
+
+static void lib_matr_tqli(double i_e[], int i_n, double **x_z, double x_d[],
 		 int *o_error)
 
 /*FUNC************************************************************************
 
 DESCRIPTION:
 
-QL-algorithm with implicit shifts, to determine the eigenvalues and 
+QL-algorithm with implicit shifts, to determine the eigenvalues and
 eigenvectors of a real, symmetric, tridiagonal matrix, or of a real, symmetric
-matrix previously reduced by 'tred2'. On input x_d[0,...i_n-1] contains the 
-diagonal elements of the tridiagonal matrix. On output, it returns the 
+matrix previously reduced by 'tred2'. On input x_d[0,...i_n-1] contains the
+diagonal elements of the tridiagonal matrix. On output, it returns the
 eigenvalues. The vector i_e[0,...,i_n-1] inputs the subdiagonal elements of the
 tridiagonal matrix, with i_e[0] arbitrary. On output i_e is destroyed. When
 finding only the eigenvalues, several lines may be omitted, as noted in the
 comments. If the eigenvectors of a tridiagonal matrix are desired, the matrix
-x_z[0,...,i_n-1][0,...,i_n-1] is input as the identity matrix. 
-If the eigenvectors of a matrix that has been reduced by 'tred2' are 
-required, then x_z is input as the matrix output by 'tred2'. 
+x_z[0,...,i_n-1][0,...,i_n-1] is input as the identity matrix.
+If the eigenvectors of a matrix that has been reduced by 'tred2' are
+required, then x_z is input as the matrix output by 'tred2'.
 In either case, the kth column of x_z
 returns the normalized eigenvector corresponding to d[k].
 
@@ -792,8 +792,8 @@ static void lib_matr_evtred2(int i_n, double **i_a, double o_d[], double o_e[])
 DESCRIPTION:
 
 Householder reduction of a real, symmetric, matrix a[0,...,n-1][0,...,n-1].
-On output, i_a is replaced by the orthogonal matrix Q effecting the 
-transformation. d[0,...,n-1] returns the diagonal elements of the 
+On output, i_a is replaced by the orthogonal matrix Q effecting the
+transformation. d[0,...,n-1] returns the diagonal elements of the
 tridiagonal matrix, and e[0,...,n-1] the off diagonal elements, e[0]=0.
 Since this function only is used to find eigenvalues, it is the same as the
 function tred2 above except that some statements are omitted, and i_a contains
@@ -848,16 +848,16 @@ RETURN VALUE:
 	    i_a[j][k] -= (f*o_e[k] + g*i_a[i][k]);
 	}
       }
-    } 
+    }
     else
       o_e[i] = i_a[i][l];
     o_d[i] = h;
   }
   o_e[0] = 0.0;
-  for (i=0; i <= i_n-1; i++) 
+  for (i=0; i <= i_n-1; i++)
     o_d[i] = i_a[i][i];
 }
-      
+
 
 
 static void lib_matr_evtqli(double i_e[], int i_n, double x_d[], int *o_error)
@@ -866,16 +866,16 @@ static void lib_matr_evtqli(double i_e[], int i_n, double x_d[], int *o_error)
 
 DESCRIPTION:
 
-QL-algorithm with implicit shifts, to determine the eigenvalues 
+QL-algorithm with implicit shifts, to determine the eigenvalues
 of a real, symmetric, tridiagonal matrix, or of a real, symmetric
-matrix previously reduced by 'tred2'. On input x_d[0,...i_n-1] contains the 
-diagonal elements of the tridiagonal matrix. On output, it returns the 
+matrix previously reduced by 'tred2'. On input x_d[0,...i_n-1] contains the
+diagonal elements of the tridiagonal matrix. On output, it returns the
 eigenvalues. The vector i_e[0,...,i_n-1] inputs the subdiagonal elements of the
-tridiagonal matrix, with i_e[0] arbitrary. On output i_e is destroyed. 
+tridiagonal matrix, with i_e[0] arbitrary. On output i_e is destroyed.
 Since we use this function only to find eigenvalues, it is the same as tqli
 above, except that some statements are omitted
 finding only the eigenvalues, several lines may be omitted, as noted in the
-comments. 
+comments.
 
 HOW TO USE THE FUNCTION:
 
@@ -935,4 +935,4 @@ RETURN VALUE:
   }
 }
 
-  
+

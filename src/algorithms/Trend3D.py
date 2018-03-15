@@ -10,7 +10,7 @@
 #
 ####################################################################
 # Kari B. Skjerve, karbor@statoil.com
-# Oddvar Lia 
+# Oddvar Lia
 # 2017/2018
 ####################################################################
 
@@ -18,7 +18,7 @@ import math
 import copy
 import sys
 import numpy as np
-import importlib 
+import importlib
 from xml.etree.ElementTree import Element
 import src.utils.xml
 importlib.reload(src.utils.xml)
@@ -53,7 +53,7 @@ class Trend3D:
         self._debug_level = debug_level
         self.type = TrendType.NONE
 
-        # Position of a reference point for the trend function. 
+        # Position of a reference point for the trend function.
         # This is in global coordinates for (x,y) and relative to simulation box for the zone for z coordinate.
         self._xCenter = 0.0
         self._yCenter = 0.0
@@ -192,7 +192,7 @@ class Trend3D:
         else:
             self._direction = direction
 
-    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, 
+    def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
                         origin_type=None, origin=None):
         if origin is None or origin_type is None:
             x_center, y_center = x0, y0
@@ -231,7 +231,7 @@ class Trend3D:
             raise ValueError(
                 'In {}\n'
                 'Origin type must be either {} or {}.'
-                ''.format(self._className, str(OriginType.RELATIVE.name), str(OriginType.ABSOLUTE.name))
+                ''.format(self.__className, str(OriginType.RELATIVE.name), str(OriginType.ABSOLUTE.name))
                 )
         self._xCenter = x_center
         self._yCenter = y_center
@@ -251,6 +251,11 @@ class Trend3D:
         )
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
+        raise NotImplementedError(
+            'Can not use: {} object as a trend object. Use sub classes of this as trend'.format(self.__className)
+        )
+
+    def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
         raise NotImplementedError(
             'Can not use: {} object as a trend object. Use sub classes of this as trend'.format(self.__className)
         )
@@ -311,7 +316,7 @@ class Trend3D:
                 print('Debug output:  Trend type: {}'.format(self.type.name))
                 if self.type != TrendType.RMS_PARAM:
                     print('Debug output:  Trend azimuth: {}'.format(self._azimuth))
-                    print('Debug output:  StackingAngle: {}'.format(self._stackingAngle)) 
+                    print('Debug output:  StackingAngle: {}'.format(self._stackingAngle))
                     print('Debug output:  Direction: {}'.format(str(self._direction)))
                     print('Debug output:  x_center: {}'.format(str(self._xCenter)))
                     print('Debug output:  y_center: {}'.format(str(self._yCenter)))
@@ -337,11 +342,11 @@ class Trend3D:
                     x = cellCenterPoints[indx, 0]
                     y = cellCenterPoints[indx, 1]
                     z = cellCenterPoints[indx, 2]
-                    
+
                     i = cellIndices[indx, 0]
                     j = cellIndices[indx, 1]
                     k = cellIndices[indx, 2]
-                    
+
                     trendValue =self._trendValueCalculation(parametersForTrendCalc, x, y, k, zinc)
                     valuesInSelectedCells[indx] = trendValue
 
@@ -747,7 +752,7 @@ class Trend3D_elliptic(Trend3D):
         return self._origin_type
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
-        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness,
                                 self._origin_type, self._origin)
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
@@ -915,7 +920,7 @@ class Trend3D_hyperbolic(Trend3D):
     def getOriginType(self):
         return self._origin_type
 
-    def initialize( 
+    def initialize(
             self, azimuthAngle, stackingAngle, direction, migrationAngle, curvature,
             origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
     ):
@@ -1190,15 +1195,15 @@ class Trend3D_elliptic_cone(Trend3D):
                      The ratio b/a = curvature which is a user specified parameter for this trend typ.
                      The relative size of the half axes for a cross section close to z= 0 and close to z= zoneThickness
                      (in the zones local simulation box coordinate z for depth from top to base of the zone) may be different.
-                     This means that it is possible to build an elliptic cone if the relative size is different from 1 
-                     and elliptic cylinder if the relative size is 1. If the migration angle is 0 and stacking angle 
-                     is 90.0 degrees, the cone has a vertical center line. 
-                     If the migration angle is different from 0 and/or stacking angle is different from 90.0 degrees, 
-                     the center line has a slope so that the cone is skewed. 
-                     The migration angle different from 0 means that the center point of the ellipse is shifted orthogonal 
-                     to the  azimuth direction while stacking angle different from 90 degrees means that the center line 
-                     is shifted in azimuth direction. A combination means that the ellipse 
-                     (horizontal intersection of an iso-surface of the trend function) is shifted both along and 
+                     This means that it is possible to build an elliptic cone if the relative size is different from 1
+                     and elliptic cylinder if the relative size is 1. If the migration angle is 0 and stacking angle
+                     is 90.0 degrees, the cone has a vertical center line.
+                     If the migration angle is different from 0 and/or stacking angle is different from 90.0 degrees,
+                     the center line has a slope so that the cone is skewed.
+                     The migration angle different from 0 means that the center point of the ellipse is shifted orthogonal
+                     to the  azimuth direction while stacking angle different from 90 degrees means that the center line
+                     is shifted in azimuth direction. A combination means that the ellipse
+                     (horizontal intersection of an iso-surface of the trend function) is shifted both along and
                      orthogonal to azimuth direction.
 
         Input is model parameters.
@@ -1208,7 +1213,7 @@ class Trend3D_elliptic_cone(Trend3D):
         super().__init__(trendRuleXML, modelFileName, debug_level)
         self._curvature = 1.0
         self._relativeSize = 1.0
-        self._migrationAngle = 0  
+        self._migrationAngle = 0
         self._origin = [0.0, 0.0, 0.0]
         self._origin_type = OriginType.RELATIVE
         self.type = TrendType.ELLIPTIC_CONE
@@ -1340,7 +1345,7 @@ class Trend3D_elliptic_cone(Trend3D):
                 'Error: Cannot set relative_size of ellipse at top and base to less than or equal to 0'
                 ''.format(self._className)
             )
-        
+
         if origin is None:
             origin = [0.0, 0.0, 0.0]
         if not (isinstance(origin, list) or isinstance(origin, tuple)):
@@ -1432,7 +1437,7 @@ class Trend3D_elliptic_cone(Trend3D):
         return self._origin_type
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
-        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness,
                                 self._origin_type, self._origin)
         self._origin[2] = 1.0
 
@@ -1479,7 +1484,7 @@ class Trend3D_elliptic_cone(Trend3D):
         da = aBase - aTop
         a = aTop + da * (z - zTop) / zThickness
         b = a * self._curvature
-        
+
         # The center point is changed by depth. There are two angles that can specify this
         # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
         # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
@@ -1505,14 +1510,14 @@ class Trend3D_elliptic_cone(Trend3D):
         # Calculate the 3D trend values for Elliptic cone
         assert abs(self._migrationAngle) < 90.0
         assert abs(self._stackingAngle) > 0.0
-        
+
         if useRelativeAzimuth:
             theta = self._relativeAzimuth * np.pi / 180.0
         else:
             theta = self._azimuth * np.pi / 180.0
         beta = self._migrationAngle * np.pi / 180.0
         alpha = self._direction * (90.0 - self._stackingAngle) * np.pi / 180.0
-        
+
         # Elliptic Cone
         a = 1
         b = self._curvature
@@ -1520,7 +1525,7 @@ class Trend3D_elliptic_cone(Trend3D):
         cosTheta = math.cos(theta)
         tanBeta = math.tan(beta)
         tanAlpha = math.tan(alpha)
-        
+
         parametersForTrendCalc = [sinTheta, cosTheta, tanAlpha, tanBeta, a, b]
         return parametersForTrendCalc
 

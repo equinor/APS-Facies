@@ -1,95 +1,39 @@
-FROM git.statoil.no:4567/sdp/sdpsoft/gcc:7.3.0 as gcc
-FROM centos:6
-LABEL version="2.4.1" \
+FROM git.statoil.no:4567/sdp/sdpsoft/centos:6
+LABEL version="2.5.0" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
 
-######################################################################
-#  ___ ___  _____  ____   __  ___ ___ _____ _____ ___ _  _  ___ ___
-# | _ \ _ \/ _ \ \/ /\ \ / / / __| __|_   _|_   _|_ _| \| |/ __/ __|
-# |  _/   / (_) >  <  \ V /  \__ \ _|  | |   | |  | || .` | (_ \__ \
-# |_| |_|_\\___/_/\_\  |_|   |___/___| |_|   |_| |___|_|\_|\___|___/
-#
-######################################################################
-ENV PROXY_SCHEME=http
-ENV PROXY_HOST=www-proxy.statoil.no
-ENV PROXY_PORT=80
-ENV HTTP_PROXY=$PROXY_SCHEME://$PROXY_HOST:$PROXY_PORT
-ENV HTTPS_PROXY=$PROXY_SCHEME://$PROXY_HOST:$PROXY_PORT
-ENV FTP_PROXY=$PROXY_SCHEME://$PROXY_HOST:$PROXY_PORT
-ENV NO_PROXY="git.statoil.no"
-
-ENV http_proxy=$HTTP_PROXY
-ENV https_proxy=$HTTPS_PROXY
-ENV ftp_proxy=$FTP_PROXY
-ENV no_proxy=$NO_PROXY
-
-# Tell yum to use the proxy as well
-RUN echo "proxy=$HTTP_PROXY" >> /etc/yum.conf
-# Install wget and tell wget to use the proxy too
-RUN yum update -y \
- && yum install -y wget
-RUN echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
- && echo "http_proxy = $HTTPS_PROXY" >> /etc/wgetrc \
- && echo "ftp_proxy = $FTP_PROXY" >> /etc/wgetrc \
- && echo "no_proxy = $NO_PROXY" >> /etc/wgetrc \
- && echo "use_proxy = on" >> /etc/wgetrc \
- && echo "ca-directory = /etc/pki/ca-trust/source/anchors" >> /etc/wgetrc
-
-# Download, and install Statoil's Certificates
-ENV STATOIL_CERT="statoil-ca-certificates-1.0-7.el7.noarch.rpm"
-RUN wget http://st-linrhn01.st.statoil.no/pub/$STATOIL_CERT \
- && yum install -y $STATOIL_CERT \
- && rm -f $STATOIL_CERT
-
-#################################################
-#  __  __ ___ ___  ___     __  ___ _  ___   __
-# |  \/  |_ _/ __|/ __|   / / | __| \| \ \ / /
-# | |\/| || |\__ \ (__   / /  | _|| .` |\ V /
-# |_|  |_|___|___/\___| /_/   |___|_|\_| \_/
-#
-#################################################
-ENV ENCODING="en_US.UTF-8"
-ENV LC_ALL=$ENCODING
-ENV LANG=$ENCODING
-
-ENV ROOT_DIR=/software
-ENV BUILD_DIR=$ROOT_DIR/build
-ENV SOURCE_DIR=$ROOT_DIR/source
-ENV INSTALL_DIR=/prog/sdpsoft
-
 ENV GCC_VERSION="7.3.0"
 ENV GCC_PREFIX=$INSTALL_DIR/gcc-$GCC_VERSION
-COPY --from=gcc $GCC_PREFIX $GCC_PREFIX
+COPY --from=git.statoil.no:4567/sdp/sdpsoft/gcc:7.3.0 $GCC_PREFIX $GCC_PREFIX
 ENV PATH="$GCC_PREFIX/bin:$PATH"
 ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib:$LD_LIBRARY_PATH"
 ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib64:$LD_LIBRARY_PATH"
 ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/4.9.4:$LD_LIBRARY_PATH"
 ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/lib64:$LD_LIBRARY_PATH"
 
-ENV PYTHON_VERSION="3.6.1"
-ENV PYTHON_PREFIX=$INSTALL_DIR/python$PYTHON_VERSION
-ENV PIP="$PYTHON_PREFIX/bin/pip3 --proxy $HTTP_PROXY"
-ENV PYTHON="$PYTHON_PREFIX/bin/python3"
-ENV PYTHONOPTIMIZE=x
+ENV PYTHON_VERSION="3.6.1" \
+    PYTHON_PREFIX=$INSTALL_DIR/python$PYTHON_VERSION \
+    PYTHON="$PYTHON_PREFIX/bin/python3" \
+    PIP="$PYTHON -m pip --proxy $HTTP_PROXY" \
+    PYTHONOPTIMIZE=x
 # All running python sould be done with optimized bytecode (-O)
 
 # Python dependencies
-ENV OPENSSL_VERSION="1.1.0g"
-ENV NCURSES_VERSION="6.1"
-ENV READLINE_VERSION="7.0"
-ENV SQLITE3_VERSION="3210000"
-ENV ZLIB_VERSION="1.2.11"
-ENV BZIP2_VERSION="1.0.6"
-
-# TCL_VERSION == TK_VERSION
-ENV TCL_VERSION="8.6.8"
+ENV OPENSSL_VERSION="1.1.0g" \
+    NCURSES_VERSION="6.1" \
+    READLINE_VERSION="7.0" \
+    SQLITE3_VERSION="3220000" \
+    ZLIB_VERSION="1.2.11" \
+    BZIP2_VERSION="1.0.6" \
+    # APSW (SQLite wrapper) \
+    APSW_VERSION="3.22.0-r1" \
+    # NRlib (FFT and Gaussian simulation) \
+    NRLIB_VERSION="1.0.1" \
+    # TCL_VERSION == TK_VERSION \
+    TCL_VERSION="8.6.8"
 ENV TK_VERSION=$TCL_VERSION
-# APSW (SQLite wrapper)
-ENV APSW_VERSION="3.21.0-r1"
-# NRlib (FFT and Gaussian simulation)
-ENV NRLIB_VERSION="1.0.1"
 
 ENV INTEL_MKL_VERSION="2018.1.163"
 ENV INTEL_MKL="l_mkl_$INTEL_MKL_VERSION"
@@ -98,17 +42,12 @@ ENV INTEL_PREFIX="$SOURCE_DIR/$INTEL_MKL"
 
 # Misc. software
 RUN yum update -y \
+ # Install typical build packages
+ && yum groupinstall -y "Development Tools" \
  && yum install -y \
-   git \
-   graphviz
-
-# Install typical build packages
-RUN yum update -y \
- && yum groupinstall -y "Development Tools"
-
-# Install software needed during build of python and pip install
-RUN yum update -y \
- && yum install -y \
+    git \
+    graphviz \
+    # Install software needed during build of python and pip install
     freetype-devel \
     libpng-devel \
     libxml2-devel \
@@ -131,18 +70,19 @@ RUN mkdir -p $ROOT_DIR \
              $PYTHON_PREFIX \
              $INTEL_PREFIX
 
-RUN cd $SOURCE_DIR && wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz
-RUN cd $SOURCE_DIR && wget https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz
-RUN cd $SOURCE_DIR && wget http://zlib.net/zlib-$ZLIB_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget https://sqlite.org/2017/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/tcl/files/Tcl/$TCL_VERSION/tcl"$TCL_VERSION"-src.tar.gz
-RUN cd $SOURCE_DIR && wget https://sourceforge.net/projects/tcl/files/Tcl/$TK_VERSION/tk"$TK_VERSION"-src.tar.gz
-RUN cd $SOURCE_DIR && wget http://www.bzip.org/$BZIP2_VERSION/bzip2-$BZIP2_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget https://github.com/rogerbinns/apsw/archive/$APSW_VERSION.tar.gz --output-document=$SOURCE_DIR/apsw-$APSW_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget https://git.statoil.no/sdp/nrlib/repository/v$NRLIB_VERSION/archive.tar.gz --output-document=$SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz
-RUN cd $SOURCE_DIR && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz
+RUN cd $SOURCE_DIR \
+ && wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz \
+ && wget https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz \
+ && wget http://zlib.net/zlib-$ZLIB_VERSION.tar.gz \
+ && wget http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz \
+ && wget https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz \
+ && wget https://sqlite.org/2018/sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
+ && wget https://sourceforge.net/projects/tcl/files/Tcl/$TCL_VERSION/tcl"$TCL_VERSION"-src.tar.gz \
+ && wget https://sourceforge.net/projects/tcl/files/Tcl/$TK_VERSION/tk"$TK_VERSION"-src.tar.gz \
+ && wget http://www.bzip.org/$BZIP2_VERSION/bzip2-$BZIP2_VERSION.tar.gz \
+ && wget https://github.com/rogerbinns/apsw/archive/$APSW_VERSION.tar.gz --output-document=$SOURCE_DIR/apsw-$APSW_VERSION.tar.gz \
+ && wget https://git.statoil.no/sdp/nrlib/repository/v$NRLIB_VERSION/archive.tar.gz --output-document=$SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz \
+ && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz
 
 
  # Create all build directories
@@ -173,10 +113,9 @@ RUN cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/apsw-$APSW_VERSION.tar.gz -C apsw-$APSW_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/zlib-$ZLIB_VERSION.tar.gz -C zlib-$ZLIB_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz -C nrlib-$NRLIB_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/$INTEL_MKL.tgz -C $INTEL_PREFIX --strip-components=1
-
-
-RUN rm -f $SOURCE_DIR/*.tar.*
+ && tar -xvf  $SOURCE_DIR/$INTEL_MKL.tgz -C $INTEL_PREFIX --strip-components=1 \
+ # Remove downloaded archives
+ && rm -f $SOURCE_DIR/*.tar.*
 
 #################################
 #                               #
@@ -295,7 +234,7 @@ RUN cd $BUILD_DIR/apsw-$APSW_VERSION \
  && $PYTHON setup.py install \
  && $PYTHON setup.py test
 
-# Install MKL
+# Install MKL (prerequisite for nrlib)
 ENV INTEL_MKL_PREFIX="/opt/intel"
 # Configure setup
 ENV INTEL_CONFIGURATION="$INTEL_PREFIX/config.txt"
@@ -349,5 +288,5 @@ RUN cd $BUILD_DIR/nrlib-$NRLIB_VERSION \
 
 ##
 # Final clean-up
-RUN rm -rf $SOURCE_DIR
-RUN rm -rf $BUILD_DIR
+RUN rm -rf $SOURCE_DIR \
+           $BUILD_DIR

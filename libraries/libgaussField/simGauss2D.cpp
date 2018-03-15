@@ -24,11 +24,11 @@
 //
 // PURPOSE: Constructor, version1
 //
-// RETURN VALUE: 
+// RETURN VALUE:
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
 SimGaussField2D::SimGaussField2D(RandomGenerator &ran):
     RandomGenerator(ran)
@@ -44,11 +44,11 @@ SimGaussField2D::SimGaussField2D(RandomGenerator &ran):
 //
 // PURPOSE: Destructor
 //
-// RETURN VALUE: 
+// RETURN VALUE:
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
 SimGaussField2D::~SimGaussField2D(void)
 {
@@ -60,13 +60,13 @@ SimGaussField2D::~SimGaussField2D(void)
 //
 // FUNCTION: setCorrelation
 //
-// PURPOSE: 
+// PURPOSE:
 //
-// RETURN VALUE: 
+// RETURN VALUE:
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
 void SimGaussField2D::setCorrelation(Vario2D *corr)
 {
@@ -99,10 +99,10 @@ void SimGaussField2D::setCorrelation(Vario2D *corr)
 //                               large. In this case error message
 //                               might occur. This happens in particular
 //                               when using gaussian variograms with long
-//                               correlation length. 
+//                               correlation length.
 //
 
-float  *SimGaussField2D::drawGridStandard(int nx, int ny, 
+float  *SimGaussField2D::drawGridStandard(int nx, int ny,
 					  double xsize, double ysize)
 {
   float *resultGrid;
@@ -110,7 +110,7 @@ float  *SimGaussField2D::drawGridStandard(int nx, int ny,
   int m,d;
   assert(correl);
   assert(nx*ny > 4);
-  resultGrid = 0;  
+  resultGrid = 0;
   resultGrid = (float *) calloc(nx*ny,sizeof(float));
 
   m = (int) (log((double) (MAXIM(nx,ny)-1))/log(2.0) + 0.99999) ;
@@ -121,7 +121,7 @@ float  *SimGaussField2D::drawGridStandard(int nx, int ny,
 		"Simulating gaussian field with grid size (%d,%d)",nx,ny);
   moduleMessage(DETAILS,"simGauss2D",
 		"Area of simulated field is (%f,%f)",xsize,ysize);
-  wgrid = 0;              
+  wgrid = 0;
   wgrid = (double *) calloc(m,sizeof(double));
 
   if(resultGrid == NULL || wgrid == NULL){
@@ -172,10 +172,10 @@ float  *SimGaussField2D::drawGridStandard(int nx, int ny,
 //                               large. In this case error message
 //                               might occur. This happens in particular
 //                               when using gaussian variograms with long
-//                               correlation length. 
+//                               correlation length.
 //
 
-float  *SimGaussField2D::drawGridSimple(int nx, int ny, 
+float  *SimGaussField2D::drawGridSimple(int nx, int ny,
 					  double xsize, double ysize)
 {
   float *resultGrid;
@@ -243,10 +243,10 @@ float  *SimGaussField2D::drawGridSimple(int nx, int ny,
 //                               large. In this case error message
 //                               might occur. This happens in particular
 //                               when using gaussian variograms with long
-//                               correlation length. 
+//                               correlation length.
 //
 
-float  *SimGaussField2D::drawGridDetailed(int nx, int ny, 
+float  *SimGaussField2D::drawGridDetailed(int nx, int ny,
 					  double xsize, double ysize)
 {
   float *resultGrid;
@@ -302,7 +302,7 @@ float  *SimGaussField2D::drawGridDetailed(int nx, int ny,
    Modifications done:
 
       -Defined header files
-      -Removed seed and correlation function as parameter to the 
+      -Removed seed and correlation function as parameter to the
        simulation functions and introduced two global variables
        that are pointers to structures for random generator and seed
        and correlation function with parameters.
@@ -312,7 +312,7 @@ float  *SimGaussField2D::drawGridDetailed(int nx, int ny,
       -replaced  the min and max functions by the min and max functions
        used in global_def.h
 
-   Documentation: Use the Fortran version in files: 
+   Documentation: Use the Fortran version in files:
 
                     sim2DdrawGridFortran.f
                     sim2DdrawGridFortran_param.h
@@ -321,7 +321,7 @@ float  *SimGaussField2D::drawGridDetailed(int nx, int ny,
                   as documentation of the converted c code, but take into
 		  account the changes mentioned above.
 */
-  
+
 
 
 /* Common Block Declarations */
@@ -376,17 +376,17 @@ Name:		draw2d_ss_1s
 Syntax:		@draw2d_ss_1s-syntax
 Description:
 
- 	 The program generates a unit variance stochasic field on a grid. 
+ 	 The program generates a unit variance stochasic field on a grid.
 	 The variogram-structure is defined by a correlation function
 	 defined in 'correlation' which is a function from class Correlation.
-	 
 
-	 The dimension of W_GRID is at least (2**dyad_dimension+1)**2, 
-         where dyad_dimension=INT(LOG(MAX(NX,NY)-1)/LOG(2)+.999999). 
+
+	 The dimension of W_GRID is at least (2**dyad_dimension+1)**2,
+         where dyad_dimension=INT(LOG(MAX(NX,NY)-1)/LOG(2)+.999999).
 
 Side effects:
-Return value: 0 OK, 
-              1 error singular covariance matrix, 
+Return value: 0 OK,
+              1 error singular covariance matrix,
               2 dimension error of grid
 
 ________________________________________________________________
@@ -421,13 +421,13 @@ void SimGaussField2D::draw2d_ss_1s(int *i_dx__,
     o_grid_dim1 = *i_dx__;
     o_grid_offset = o_grid_dim1 + 1;
     o_grid__ -= o_grid_offset;
-    
+
     /* Function Body */
     if (*i_nx__ * *i_ny__ <= 1) {
       moduleError(KERNEL,"draw2d_ss_1s",
 		  "Illegal definition of grid size");
     }
-    l_dyaddim__ = (int ) 
+    l_dyaddim__ = (int )
 	(log(MAXIM(*i_nx__,*i_ny__) - (double)1.) / log((double)2.) + (
 	    double).9999);
     l_mxind__ = (int) ldexp(1.0, l_dyaddim__) + 1;
@@ -582,16 +582,16 @@ Name:		draw2d_ss_1o
 Syntax:		@draw2d_ss_1o-syntax
 Description:
 
- 	 The program generates a unit variance stochasic field on a grid. 
+ 	 The program generates a unit variance stochasic field on a grid.
 	 The variogram-structure is defined by a correlation function
 	 defined by the  function 'correlation' in class Correlation.
 
-	 The dimension of W_GRID is at least (2**dyad_dimension+1)**2, 
-         where dyad_dimension=INT(LOG(MAX(NX,NY)-1)/LOG(2)+.999999). 
+	 The dimension of W_GRID is at least (2**dyad_dimension+1)**2,
+         where dyad_dimension=INT(LOG(MAX(NX,NY)-1)/LOG(2)+.999999).
 
 Side effects:
-Return value: 0 OK, 
-              1 error singular covariance matrix, 
+Return value: 0 OK,
+              1 error singular covariance matrix,
               2 dimension error of grid
 
 ________________________________________________________________
@@ -631,7 +631,7 @@ void SimGaussField2D::draw2d_ss_1o(int *i_dx__,
       moduleError(KERNEL,"draw2d_ss_1o",
 		  "Illegal definition of grid size");
     }
-    l_dyaddim__ = (int) 
+    l_dyaddim__ = (int)
 	(log(MAXIM(*i_nx__,*i_ny__) - (double)1.) / log((double)2.) + (
 	    double).9999);
     l_mxind__ = (int) ldexp(1.0, l_dyaddim__) + 1;
@@ -810,7 +810,7 @@ void SimGaussField2D::draw2d_ss_2s(int *i_dx__,
       moduleError(KERNEL,"draw2d_ss_2s",
 		  "Illegal definition of grid size");
     }
-    l_dyaddim__ = (int) 
+    l_dyaddim__ = (int)
 	(log(MAXIM(*i_nx__,*i_ny__) - (double)1.) / log((double)2.) + (
 	    double).9999);
     l_mxind__ = (int) ldexp(1.0, l_dyaddim__) + 1;
@@ -1305,9 +1305,9 @@ US LEVEL*/
 } /* draw2d_ss_2o */
 
 void SimGaussField2D::draw2d_ss_3s(int *i_dx__,
-				   int *i_nx__, 
+				   int *i_nx__,
 				   int *i_ny__,
-				   float *o_grid__, 
+				   float *o_grid__,
 				   double *w_grid__)
 {
     /* System generated locals */
@@ -2720,14 +2720,14 @@ int SimGaussField2D:: init_weights_s(int *i_pattn__,
 	i__2 = *i_n__;
 	for (l_j__ = l_i__ + 1; l_j__ <= i__2; ++l_j__) {
 	    l_dix__ = ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 30) * 30 - 931]
-		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 30) * 30 - 
+		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 30) * 30 -
 		    931];
 	    l_diy__ = ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 60) * 30 - 931]
-		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 60) * 30 - 
+		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 60) * 30 -
 		    931];
-	    l_wmtx__[l_i__ + l_j__ * 30 - 31] = 
+	    l_wmtx__[l_i__ + l_j__ * 30 - 31] =
 	      correl->corr(l_dix__, l_diy__);
-	    l_wmtx__[l_j__ + l_i__ * 30 - 31] = l_wmtx__[l_i__ + l_j__ * 30 - 
+	    l_wmtx__[l_j__ + l_i__ * 30 - 31] = l_wmtx__[l_i__ + l_j__ * 30 -
 		    31];
 	}
     }
@@ -2743,7 +2743,7 @@ int SimGaussField2D:: init_weights_s(int *i_pattn__,
 			"neighbouring grid nodes.");
 	}
 /*
-	dgefa(l_wmtx__, &c__30, i_n__, l_wpivot__, &l_err__); 
+	dgefa(l_wmtx__, &c__30, i_n__, l_wpivot__, &l_err__);
 	if (l_err__ != 0) {
 	    moduleError(KERNEL,"init_weights_s",
 			"%s\n%s\n%s\n%s",
@@ -2759,7 +2759,7 @@ int SimGaussField2D:: init_weights_s(int *i_pattn__,
     l_r__ = (double)1.;
     i__1 = *i_n__;
     for (l_i__ = 1; l_i__ <= i__1; ++l_i__) {
-	ss_cbl__1.c_weights__[*i_pattn__ + l_i__ * 30 - 31] = l_wvec__[l_i__ 
+	ss_cbl__1.c_weights__[*i_pattn__ + l_i__ * 30 - 31] = l_wvec__[l_i__
 		- 1];
 	l_r__ -= l_wvec__[l_i__ - 1] * l_vec__[l_i__ - 1];
     }
@@ -2797,7 +2797,7 @@ int SimGaussField2D:: init_weights_o(int *i_pattn__,
     static double l_r__;
     double rcond;
     double *w;
-    
+
 
     w = (double *) calloc((*i_n__ + 1),sizeof(double));
 
@@ -2813,14 +2813,14 @@ int SimGaussField2D:: init_weights_o(int *i_pattn__,
 	i__2 = *i_n__;
 	for (l_j__ = l_i__ + 1; l_j__ <= i__2; ++l_j__) {
 	    l_dix__ = ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 30) * 30 - 931]
-		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 30) * 30 - 
+		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 30) * 30 -
 		    931];
 	    l_diy__ = ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 60) * 30 - 931]
-		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 60) * 30 - 
+		     - ss_cbl__1.c_patt__[*i_pattn__ + (l_j__ + 60) * 30 -
 		    931];
-	    l_wmtx__[l_i__ + l_j__ * 31 - 32] = 
+	    l_wmtx__[l_i__ + l_j__ * 31 - 32] =
 	      correl->corr(l_dix__, l_diy__);
-	    l_wmtx__[l_j__ + l_i__ * 31 - 32] = l_wmtx__[l_i__ + l_j__ * 31 - 
+	    l_wmtx__[l_j__ + l_i__ * 31 - 32] = l_wmtx__[l_i__ + l_j__ * 31 -
 		    32];
 	}
     }
@@ -2845,7 +2845,7 @@ int SimGaussField2D:: init_weights_o(int *i_pattn__,
 			"neighbouring grid nodes.");
 	}
 /*
-	dgefa(l_wmtx__, &c__31, &i__1, l_wpivot__, &l_err__); 
+	dgefa(l_wmtx__, &c__31, &i__1, l_wpivot__, &l_err__);
 	if (l_err__ != 0) {
 	  moduleError(KERNEL,"init_weights_o",
 		      "Singular covariance matrix");
@@ -2857,7 +2857,7 @@ int SimGaussField2D:: init_weights_o(int *i_pattn__,
     l_r__ = (double)0.;
     i__1 = *i_n__;
     for (l_i__ = 1; l_i__ <= i__1; ++l_i__) {
-	ss_cbl__1.c_weights__[*i_pattn__ + l_i__ * 30 - 31] = l_wvec__[l_i__ 
+	ss_cbl__1.c_weights__[*i_pattn__ + l_i__ * 30 - 31] = l_wvec__[l_i__
 		- 1];
 	l_r__ += l_wvec__[l_i__ - 1] * l_vec__[l_i__ - 1];
     }
@@ -2875,7 +2875,7 @@ int SimGaussField2D:: init_weights_o(int *i_pattn__,
 } /* init_weights_o */
 
 
-int SimGaussField2D:: make_patt(int *i_pattn__, 
+int SimGaussField2D:: make_patt(int *i_pattn__,
 				int *i_lag__,
 				int *i_num__,
 				int *i_dx__,
@@ -2891,10 +2891,10 @@ int SimGaussField2D:: make_patt(int *i_pattn__,
 
 
 int SimGaussField2D:: draw_node(int *i_pattn__,
-				int *i_n__, 
+				int *i_n__,
 				int *i_dim__,
 				int *i_x__,
-				int *i_y__, 
+				int *i_y__,
 				double *x_grid__)
 {
     /* System generated locals */
@@ -2919,11 +2919,11 @@ int SimGaussField2D:: draw_node(int *i_pattn__,
 	    i_pattn__ - 1];
     i__1 = *i_n__;
     for (l_i__ = 2; l_i__ <= i__1; ++l_i__) {
-	l_x__ = *i_x__ + ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 30) * 30 - 
+	l_x__ = *i_x__ + ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 30) * 30 -
 		931];
-	l_y__ = *i_y__ + ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 60) * 30 - 
+	l_y__ = *i_y__ + ss_cbl__1.c_patt__[*i_pattn__ + (l_i__ + 60) * 30 -
 		931];
-	l_r__ += x_grid__[l_x__ + l_y__ * x_grid_dim1] * 
+	l_r__ += x_grid__[l_x__ + l_y__ * x_grid_dim1] *
 		ss_cbl__1.c_weights__[*i_pattn__ + l_i__ * 30 - 31];
     }
     x_grid__[*i_x__ + *i_y__ * x_grid_dim1] = l_r__ + normal(&
@@ -2939,7 +2939,7 @@ DESCRIPTION:
 
 HOW TO USE THE FUNCTION:
 
-SIDE-EFFECTS: 
+SIDE-EFFECTS:
 
 RETURN VALUE: a normal distributed value with variance equal to *var
 
@@ -2947,7 +2947,7 @@ RETURN VALUE: a normal distributed value with variance equal to *var
 double SimGaussField2D:: normal(double *var) {
   static double r1,r2;
   static int refresh = 1;
-  
+
   if (refresh) {
     normal01(r1,r2);
     refresh = 0;
@@ -2997,9 +2997,9 @@ int SimGaussField2D:: inits_grid(int *i_dim__,
 		l_m__ = l_n__ - (l_l__ - 1) * 5;
 		l_dix__ = (l_i__ - l_l__) * l_d__;
 		l_diy__ = (l_j__ - l_m__) * l_d__;
-		l_cmtx__[l_k__ + l_n__ * 25 - 26] = 
+		l_cmtx__[l_k__ + l_n__ * 25 - 26] =
 		  correl->corr(l_dix__, l_diy__);
-		l_cmtx__[l_n__ + l_k__ * 25 - 26] = l_cmtx__[l_k__ + l_n__ * 
+		l_cmtx__[l_n__ + l_k__ * 25 - 26] = l_cmtx__[l_k__ + l_n__ *
 			25 - 26];
 	    }
 	}
@@ -3011,10 +3011,10 @@ int SimGaussField2D:: inits_grid(int *i_dim__,
 	    l_r__ = (double)0.;
 	    i__1 = l_k__;
 	    for (l_l__ = 1; l_l__ <= i__1; ++l_l__) {
-		l_r__ += l_cmtx__[l_k__ + l_l__ * 25 - 26] * l_noise__[l_l__ 
+		l_r__ += l_cmtx__[l_k__ + l_l__ * 25 - 26] * l_noise__[l_l__
 			- 1];
 	    }
-	    o_grid__[l_d__ * (l_i__ - 1) + 1 + (l_d__ * (l_j__ - 1) + 1) * 
+	    o_grid__[l_d__ * (l_i__ - 1) + 1 + (l_d__ * (l_j__ - 1) + 1) *
 		    o_grid_dim1] = l_r__;
 	}
     }
@@ -3060,9 +3060,9 @@ int SimGaussField2D:: inito_grid(int *i_dim__,
 		l_m__ = l_n__ - (l_l__ - 1) * 5;
 		l_dix__ = (l_i__ - l_l__) * l_d__;
 		l_diy__ = (l_j__ - l_m__) * l_d__;
-		l_cmtx__[l_k__ + l_n__ * 25 - 26] = l_c__ - 
+		l_cmtx__[l_k__ + l_n__ * 25 - 26] = l_c__ -
 		  correl->corr(l_dix__,l_diy__);
-		l_cmtx__[l_n__ + l_k__ * 25 - 26] = l_cmtx__[l_k__ + l_n__ * 
+		l_cmtx__[l_n__ + l_k__ * 25 - 26] = l_cmtx__[l_k__ + l_n__ *
 			25 - 26];
 	    }
 	}
@@ -3074,10 +3074,10 @@ int SimGaussField2D:: inito_grid(int *i_dim__,
 	    l_r__ = (double)0.;
 	    i__1 = l_k__;
 	    for (l_l__ = 1; l_l__ <= i__1; ++l_l__) {
-		l_r__ += l_cmtx__[l_k__ + l_l__ * 25 - 26] * l_noise__[l_l__ 
+		l_r__ += l_cmtx__[l_k__ + l_l__ * 25 - 26] * l_noise__[l_l__
 			- 1];
 	    }
-	    o_grid__[l_d__ * (l_i__ - 1) + 1 + (l_d__ * (l_j__ - 1) + 1) * 
+	    o_grid__[l_d__ * (l_i__ - 1) + 1 + (l_d__ * (l_j__ - 1) + 1) *
 		    o_grid_dim1] = l_r__;
 	}
     }

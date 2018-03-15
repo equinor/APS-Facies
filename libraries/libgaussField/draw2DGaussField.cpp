@@ -10,17 +10,17 @@ float * draw2DGaussField(int nx, int ny, double xsize, double ysize,
                          double range1,double range2,double angle,double power,int debugPrint)
 {
         if (debugPrint == 1)
-        {       
+        {
                 cout << "nx: " << nx << endl
                 << "ny: " << ny << endl
                 << "xsize: " << xsize << endl
                 << "ysize: " << ysize << endl
                 << "type: " << type << endl
-                << "seed: " << iseed << endl      
-                << "range1: " << range1 << endl      
-                << "range2: " << range2 << endl      
-                << "power: " << power << endl      
-                << "angle in degree: " << angle << endl;      
+                << "seed: " << iseed << endl
+                << "range1: " << range1 << endl
+                << "range2: " << range2 << endl
+                << "power: " << power << endl
+                << "angle in degree: " << angle << endl;
         }
         angle = angle*PI/180.0; // In radians
 
@@ -47,13 +47,13 @@ float * draw2DGaussField(int nx, int ny, double xsize, double ysize,
                 // GenExponential variogram
                 vario = new GenExpVario2D(range1,range2,angle,1.0,power);
         }
-        else 
+        else
         {
                 // Not OK
                 return NULL;
         }
 
-        
+
         sim2D.setCorrelation(vario);
 
         char ** funcName = (char **) calloc(2,sizeof(char *));
@@ -63,7 +63,7 @@ float * draw2DGaussField(int nx, int ny, double xsize, double ysize,
         strcpy(usage,"simGauss2D");
 
         initMessage(1,funcName,usage);
- 
+
 //        float *grid = sim2D.drawGridDetailed(nx,ny,xsize,ysize);
         float *grid = sim2D.drawGridStandard(nx,ny,xsize,ysize);
 

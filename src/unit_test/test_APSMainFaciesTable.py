@@ -20,8 +20,8 @@ def test_mainFaciesTable():
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6'}
     mainFaciesTable2 = APSMainFaciesTable(fTable=fTable)
 
-    nFacies1 = mainFaciesTable1.getNFacies()
-    nFacies2 = mainFaciesTable2.getNFacies()
+    nFacies1 = len(mainFaciesTable1)
+    nFacies2 = len(mainFaciesTable2)
     assert nFacies1 == nFacies2
 
     for i in range(nFacies1):
@@ -55,10 +55,10 @@ def test_mainFaciesTable():
     for i in range(len(faciesList)):
         fName = faciesList[i]
         if i != 3:
-            check = mainFaciesTable1.checkWithFaciesTable(fName)
+            check = mainFaciesTable1.has_facies_int_facies_table(fName)
             assert check is True
         else:
-            check = mainFaciesTable1.checkWithFaciesTable(fName)
+            check = mainFaciesTable1.has_facies_int_facies_table(fName)
             assert check is False
 
 

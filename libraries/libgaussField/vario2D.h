@@ -1,6 +1,6 @@
 // PURPOSE
 //
-// - Declare the pure abstract Vario2D base class and its derived classes: 
+// - Declare the pure abstract Vario2D base class and its derived classes:
 //    ExpVario2D, SphVario2D, GauVario2D, RatQuadVario2D, Sph2Vario2D,
 //    Sph5Vario2D and WhiteVario2D.
 // - Declare the NestedVario2D class.
@@ -36,7 +36,7 @@ class Vario2D
 	    				const double ang = DEFAULT_ANGLE,
 	    				const double si = DEFAULT_SILL);
                                 Vario2D(Vario2D &vario2D);
-    		virtual 	~Vario2D(); 
+    		virtual 	~Vario2D();
     		virtual double 	corr(const double dx, const double dy) const = 0;
     		virtual double 	corr(const    int dx, const    int dy) const = 0;
     		double	 	vario(const double dx, const double dy) const;
@@ -46,9 +46,9 @@ class Vario2D
     		inline double 	getRange(void) const;
     		inline double 	getSubRange(void) const;
     		inline double 	getAngle(void) const ;
-    		void 		correlationTransf(int nx, int ny, 
+    		void 		correlationTransf(int nx, int ny,
 			   			double xsize, double ysize);
-    		void 		correlationInvTransf(int nx, int ny, 
+    		void 		correlationInvTransf(int nx, int ny,
 			      			double xsize, double ysize);
 		virtual VarioType getType(void) const = 0;
 		virtual double	getPower(void) const = 0;
@@ -57,7 +57,7 @@ class Vario2D
 		inline void	writeRange(FILE* file) const;
 
     	private:
-  
+
     		double 		range;
     		double 		subRange;
     		double 		angle;
@@ -72,10 +72,10 @@ class Vario2D
 
 class ExpVario2D : public Vario2D
 {
-    	public: 
+    	public:
     				ExpVario2D(const double range1,
 	       				const double range2,
-	       				const double ang = DEFAULT_ANGLE, 
+	       				const double ang = DEFAULT_ANGLE,
 	       				const double si = DEFAULT_SILL);
     				~ExpVario2D();
     		double 		corr(const double dx, const double dy) const;
@@ -90,7 +90,7 @@ class SphVario2D : public Vario2D
     	public:
     				SphVario2D(const double range1,
 	       				const double range2,
-	       				const double ang = DEFAULT_ANGLE, 
+	       				const double ang = DEFAULT_ANGLE,
 	       				const double si = DEFAULT_SILL);
     				~SphVario2D();
     		double 		corr(const double dx, const double dy) const;
@@ -105,7 +105,7 @@ class GauVario2D : public Vario2D
     	public:
     				GauVario2D(const double range1,
 	       				const double range2,
-	       				const double ang = DEFAULT_ANGLE, 
+	       				const double ang = DEFAULT_ANGLE,
 	       				const double si = DEFAULT_SILL);
     				~GauVario2D();
     		double 		corr(const double dx, const double dy) const;
@@ -113,13 +113,13 @@ class GauVario2D : public Vario2D
        		VarioType 	getType(void) const;
                 double		getPower(void) const {std::cout << "Error calling getPower\n";return(0);}
 		void            write(FILE* file) const;
-};                                                      
+};
 
 class GenExpVario2D : public Vario2D
 {
-    	public: 
-    				GenExpVario2D(	const double range1, 
-		  			const double range2, 
+    	public:
+    				GenExpVario2D(	const double range1,
+		  			const double range2,
 		 			const double ang = DEFAULT_ANGLE,
 		  			const double si = DEFAULT_SILL,
 		  			const double po = DEFAULT_POWER);
@@ -127,7 +127,7 @@ class GenExpVario2D : public Vario2D
     		double 		corr(const double dx, const double dy) const;
     		double 		corr(const    int dx, const    int dy) const;
     		VarioType 	getType(void) const;
-		double		getPower(void) const {return(power);} 
+		double		getPower(void) const {return(power);}
                 void            write(FILE* file) const;
     private:
     		double		power;
@@ -135,9 +135,9 @@ class GenExpVario2D : public Vario2D
 
 class RatQuadVario2D : public Vario2D
 {
-    	public: 
-    				RatQuadVario2D(const double range1, 
-		   			const double range2, 
+    	public:
+    				RatQuadVario2D(const double range1,
+		   			const double range2,
 		   			const double ang = DEFAULT_ANGLE,
 		   			const double si = DEFAULT_SILL,
 		   			const double po = DEFAULT_POWER);
@@ -157,7 +157,7 @@ class Sph2Vario2D : public Vario2D
     public:
     				Sph2Vario2D(const double range1,
 					const double range2,
-					const double ang = DEFAULT_ANGLE, 
+					const double ang = DEFAULT_ANGLE,
 					const double si = DEFAULT_SILL);
     				~Sph2Vario2D();
     		double 		corr(const double dx, const double dy) const;
@@ -172,7 +172,7 @@ class Sph5Vario2D : public Vario2D
     public:
     				Sph5Vario2D(const double range1,
 	       				const double range2,
-	       				const double ang = DEFAULT_ANGLE, 
+	       				const double ang = DEFAULT_ANGLE,
 	       				const double si = DEFAULT_SILL);
     				~Sph5Vario2D();
     		double 		corr(const double dx, const double dy) const;
@@ -189,7 +189,7 @@ class WhiteVario2D : public Vario2D
     public:
     				WhiteVario2D(const double range1,
 	       				const double range2,
-	       				const double ang = DEFAULT_ANGLE, 
+	       				const double ang = DEFAULT_ANGLE,
 	       				const double si = DEFAULT_SILL);
     				~WhiteVario2D();
    		double 		corr(const double dx, const double dy) const;
@@ -205,7 +205,7 @@ class WhiteVario2D : public Vario2D
 
 
 //
-// FUNCTION : corrDistance  
+// FUNCTION : corrDistance
 //
 // PURPOSE
 //
@@ -216,67 +216,67 @@ class WhiteVario2D : public Vario2D
 //
 // RETURN VALUE
 //
-// SIDE EFFECTS 
-// 
+// SIDE EFFECTS
+//
 //
 // SPECIAL INSTRUCTIONS & NOTES There exists two overloaded versions,
 //       one for grid node inputs (int) and one for general input (double)
-//             
+//
 
-inline double 
+inline double
 Vario2D::corrDistance(	const double dx,
 			const double dy) const
 {
     	return sqrt(txx*dx*dx + tyy*dy*dy + txy*dx*dy);
-} 
+}
 
-inline double 
+inline double
 Vario2D::corrDistance(	const int dx,
-			const int dy) const 
+			const int dy) const
 {
     	return  sqrt(txx*dx*dx + tyy*dy*dy + txy*dx*dy);
-} 
+}
 
 
 //
 // FUNCTION: Vario2D::getAngle
 //
-// PURPOSE: 
+// PURPOSE:
 // To return the angle value.
 //
-// RETURN VALUE: 
+// RETURN VALUE:
 // angle
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
-inline double 
-Vario2D::getAngle(void) const 
+inline double
+Vario2D::getAngle(void) const
 {
     	return angle;
-} 
+}
 
 
 
 //
 // FUNCTION: Vario2D::getRange
 //
-// PURPOSE: 
+// PURPOSE:
 // To return the range value.
 //
-// RETURN VALUE: 
+// RETURN VALUE:
 // range
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
-inline  double 
+inline  double
 Vario2D::getRange(void) const
 {
     	return range;
-} 
+}
 
 //
 // FUNCTION: Vario2D::getSubRange
@@ -287,15 +287,15 @@ Vario2D::getRange(void) const
 // RETURN VALUE
 // subRange
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
-inline  double 
+inline  double
 Vario2D::getSubRange(void) const
 {
     	return subRange;
-} 
+}
 
 //
 // FUNCTION: Vario2D::writeRange
@@ -304,16 +304,16 @@ Vario2D::getSubRange(void) const
 //
 // RETURN VALUE
 //
-// SIDE EFFECTS: 
+// SIDE EFFECTS:
 //
-// SPECIAL INSTRUCTIONS & NOTES: 
+// SPECIAL INSTRUCTIONS & NOTES:
 //
-inline void 
+inline void
 Vario2D::writeRange(FILE* file)const
 {
     	fprintf(file," %f %f %f ",
 	    range,subRange,angle);
     	return;
-} 
+}
 
 #endif

@@ -6,7 +6,7 @@ ________________________________________________________________
 ________________________________________________________________
 
 Name:		lib_message.c - Source file
-Description:    Library with functions for standarized error messages, 
+Description:    Library with functions for standarized error messages,
                 warnings and messages.
 
 */
@@ -33,14 +33,14 @@ static char **stdError;
 int noExitOnError=0;
 
 /* Default values for output level: ERROR/WARNING/MESSAGE = 2
- 
-Level          0               1                   2       
+
+Level          0               1                   2
 ----------------------------------------------------------------
 ERROR:     errors_std     errors_std          errors_details
 
 WARNINGS:     No          warning_serious     warning_all
 
-MESSAGES:     No          message_some        message_details   
+MESSAGES:     No          message_some        message_details
 
 */
 
@@ -67,7 +67,7 @@ Description:    Initialize some global variables used in the functions
                 -noExit: Do not exit on errors in the calling program \\
                 -e level : Set error level, default value 2 \\
                 -w level : Set warning level, default value 2 \\
-                -m level : Set message level, default value 2 
+                -m level : Set message level, default value 2
 
 Side effects: Global variables stdError, errorLevel, warningLevel and
               messageLevel is initialized. \\
@@ -78,15 +78,15 @@ Side effects: Global variables stdError, errorLevel, warningLevel and
 */
 
 /*<initMessage-syntax: */
-void initMessage(int argc, char *argv[], char *usage) 
-/*>initMessage-syntax: */ 
+void initMessage(int argc, char *argv[], char *usage)
+/*>initMessage-syntax: */
 {
   char *ptr;
   int i,error;
 
   progName = (char *) calloc(15,sizeof(char));
   strcpy(progName,"(untitled)");
-  
+
   usageTxt = (char *) calloc(15,sizeof(char));
   strcpy(usageTxt,"No usage");
 
@@ -97,7 +97,7 @@ void initMessage(int argc, char *argv[], char *usage)
     ptr = usage;
     usageTxt = (char *) calloc(strlen(usage) + strlen(progName)+1,sizeof(char));
     sprintf(usageTxt, ptr, progName);
-  
+
 
     for (i=1; i<=argc; i++) {
       if (argv[i]!=0) {
@@ -185,7 +185,7 @@ void moduleError(int errorNumber, const char *function, const char *format, ...)
     fprintf(stderr,"\n");
 
   if (!noExitOnError)
-    exit(1);        
+    exit(1);
 
   fflush(stderr);
 
@@ -228,7 +228,7 @@ void modelFileError(char *format, ...)
     fprintf(stderr,"%s",lastMessage);
     va_end(ap);
   }
-               
+
   fflush(stderr);
 
   return;
@@ -256,7 +256,7 @@ Description:    Write warnings to stdout. \\
                 If warningLevel = 1: Serious warnings \\
                 If warningLevel = 2: All warnings \\
                 \ \\
-                Allowed values for warningType:\\ 
+                Allowed values for warningType:\\
                 CORRECT = Serious warning, should be corrected. \\
                 CHECK   = Not serious, but should be checked.
 Side effects:   Print error message to stderr if warningType illegal
@@ -276,8 +276,8 @@ void moduleWarning(int warningType, const char *function, const char *format, ..
 		"Warning must be of cathegory 'CORRECT' or 'CHECK");
 
   if (((warningLevel == 1) && (warningType == CORRECT)) ||
-      ((warningLevel == 2) && (warningType == CORRECT || 
-			       warningType ==CHECK))) { 
+      ((warningLevel == 2) && (warningType == CORRECT ||
+			       warningType ==CHECK))) {
     fprintf(stdout,"\nWARNING(%s,%s) ", progName,function);
     sprintf(lastMessage,"    - ");
     vsprintf(&lastMessage[6], format, ap);
@@ -290,8 +290,8 @@ void moduleWarning(int warningType, const char *function, const char *format, ..
        }
     }
     va_end(ap);
-  }             
-  
+  }
+
   fflush(stderr);
 
   return;
@@ -318,7 +318,7 @@ Description:    Write messages to stdout. \\
                 If messageLevel = 1: Only runtime status \\
                 If messageLevel = 2: Runtime status and detailed messages\\
                 \ \\
-                Allowed values for mesageType:\\ 
+                Allowed values for mesageType:\\
                 STATUS    = Runtime message\\
                 DETAILS   = Detailed message/information from program
 
@@ -334,13 +334,13 @@ void moduleMessage(int messageType, const char *function, const char *format, ..
   va_list ap;
 
   va_start(ap, format);
-  
+
 
   if (messageType != STATUS && messageType != DETAILS)
     moduleError(NODEFAULT,"moduleMessage",
 		"Message must be of cathegory 'STATUS' or 'DETAILS'");
 
-  if ((messageLevel == 2 && (messageType == STATUS 
+  if ((messageLevel == 2 && (messageType == STATUS
 			     || messageType == DETAILS)) ||
       ((messageLevel == 1) && (messageType == STATUS))) {
     if (messageType == STATUS)
@@ -357,7 +357,7 @@ void moduleMessage(int messageType, const char *function, const char *format, ..
     }
     va_end(ap);
   }
-    
+
   fflush(stdout);
 
   return;
@@ -406,7 +406,7 @@ static void moduleUsage(char *format, ...)
     fprintf(stdout,"%s\n",
 	    "                                         1: Only serious warnings");
     fprintf(stdout,"%s\n",
-	    "                                         2: All warnings)");      
+	    "                                         2: All warnings)");
 
     fprintf(stdout,"%s\n",
 	    "                 -e level (Error level 1: Standard errors ");
@@ -442,7 +442,7 @@ Global or static variables used: errorLevel, warningLevel, messageLevel
 static int checkLevels(int errorLevel, int warningLevel, int messageLevel)
 /*>checkLevels-syntax: */
 {
-  
+
   if (errorLevel != 1 && errorLevel != 2) {
     fprintf(stderr,"Illegal errorLevel\n");
     return 1;
@@ -477,14 +477,14 @@ Global or static variables used: stdError
 */
 
 /*<setStdErrors-syntax: */
-static void setStdErrors() 
+static void setStdErrors()
 /*>setStdErrors-syntax: */
 {
   int i;
   int nStd = NERRORS;
 
   stdError = (char **) calloc(nStd+1,sizeof(char *));
-  for (i=0; i<= nStd; i++) 
+  for (i=0; i<= nStd; i++)
     stdError[i] = (char *) calloc(80,sizeof(char));
 
   strcpy(stdError[NODEFAULT], "\0");
@@ -552,7 +552,7 @@ Global or static variables used: stdError, noExitOnError, errorLevel
 */
 
 /*<moduleErrorLog-syntax: */
-void moduleErrorLog(FILE *logfile,int errorNumber, 
+void moduleErrorLog(FILE *logfile,int errorNumber,
 		    char *function, char *format, ...)
 /*>moduleErrorLog-syntax: */
 {
@@ -560,7 +560,7 @@ void moduleErrorLog(FILE *logfile,int errorNumber,
   va_list ap;
 
   va_start(ap, format);
-  if(logfile == NULL) return;  
+  if(logfile == NULL) return;
 
 
   if (errorLevel == 1 || errorLevel == 2) {
@@ -581,7 +581,7 @@ void moduleErrorLog(FILE *logfile,int errorNumber,
     fprintf(logfile,"\n");
 
 /*  if (!noExitOnError)
-    exit(1);        
+    exit(1);
 */
   fflush(stderr);
 
@@ -610,7 +610,7 @@ Description:    Write warnings to logfile. \\
                 If warningLevel = 1: Serious warnings \\
                 If warningLevel = 2: All warnings \\
                 \ \\
-                Allowed values for warningType:\\ 
+                Allowed values for warningType:\\
                 CORRECT = Serious warning, should be corrected. \\
                 CHECK   = Not serious, but should be checked.
 Side effects:   Print error message to stderr if warningType illegal
@@ -619,7 +619,7 @@ Global or static variables used: warningLevel
 */
 
 /*<moduleWarningLog-syntax: */
-void moduleWarningLog(FILE* logfile,int warningType, 
+void moduleWarningLog(FILE* logfile,int warningType,
 		      char *function, char *format, ...)
 /*>moduleWarningLog-syntax: */
 {
@@ -627,22 +627,22 @@ void moduleWarningLog(FILE* logfile,int warningType,
   va_list ap;
 
   va_start(ap, format);
-  if(logfile == NULL) return;   
+  if(logfile == NULL) return;
 
   if (warningType != CORRECT && warningType != CHECK)
     moduleError(NODEFAULT,"moduleWarning",
 		"Warning must be of cathegory 'CORRECT' or 'CHECK");
 
   if (((warningLevel == 1) && (warningType == CORRECT)) ||
-      ((warningLevel == 2) && (warningType == CORRECT || 
-			       warningType ==CHECK))) { 
+      ((warningLevel == 2) && (warningType == CORRECT ||
+			       warningType ==CHECK))) {
     fprintf(logfile,"\nWARNING(%s,%s) ", progName,function);
     sprintf(lastMessage,"    - ");
     vsprintf(&lastMessage[6], format, ap);
     fprintf(logfile,"\n%s\n",lastMessage);
     va_end(ap);
-  }             
-  
+  }
+
   fflush(stderr);
 
   return;
@@ -669,7 +669,7 @@ Description:    Write MessageLogs to logfile. \\
                 If messageLevel = 1: Only runtime status \\
                 If messageLevel = 2: Runtime status and detailed messages\\
                 \ \\
-                Allowed values for mesageType:\\ 
+                Allowed values for mesageType:\\
                 STATUS    = Runtime message\\
                 DETAILS   = Detailed message/information from program
 
@@ -687,13 +687,13 @@ void moduleMessageLog(FILE* logfile,
   va_list ap;
 
   va_start(ap, format);
-  if(logfile == NULL) return;    
+  if(logfile == NULL) return;
 
   if (messageType != STATUS && messageType != DETAILS)
     moduleError(NODEFAULT,"moduleMessage",
 		"Message must be of cathegory 'STATUS' or 'DETAILS'");
 
-  if ((messageLevel == 2 && (messageType == STATUS 
+  if ((messageLevel == 2 && (messageType == STATUS
 			     || messageType == DETAILS)) ||
       ((messageLevel == 1) && (messageType == STATUS))) {
     if (messageType == STATUS)
@@ -703,7 +703,7 @@ void moduleMessageLog(FILE* logfile,
     fprintf(logfile,"\n%s\n",lastMessage);
     va_end(ap);
   }
-    
+
   fflush(logfile);
 
   return;

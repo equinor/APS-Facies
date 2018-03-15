@@ -47,7 +47,7 @@ def apply_truncations(
         print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
     alphaCoord = np.zeros(nGaussFields, np.float32)
     faciesReal = []
-    # Loop through the gaussfield array in c-index ordering
+    # Loop through the Gaussian field array in c-index ordering
     for i in range(nValues):
         for n in range(nGaussFields):
             alpha = alphaFields[n]
@@ -61,10 +61,9 @@ def apply_truncations(
     # Compare the generated facies realization with the reference for this case
     check = filecmp.cmp(faciesReferenceFile, faciesOutputFile)
     print('Compare file: ' + faciesReferenceFile + ' and file: ' + faciesOutputFile)
-    assert check is True
     if check is False:
         raise ValueError('Error: Files are different')
-    else:
+    elif debug_level >= Debug.ON:
         print('Files are equal: OK')
 
 

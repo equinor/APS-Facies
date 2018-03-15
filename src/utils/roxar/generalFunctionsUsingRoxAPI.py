@@ -135,7 +135,7 @@ def isParameterDefinedWithValuesInRMS(gridModel, parameterName, realNumber):
         if p.name == parameterName:
             found = True
             break
-        
+
     if found:
         p = gridModel.properties[parameterName]
         if not p.is_empty(realNumber):
@@ -206,7 +206,7 @@ def getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, debug_l
            functionName  - Name of python function that call this function (Just for more informative print output).
 
     Output: numpy array with values for each active grid cell for specified 3D parameter
-            and a dictionary object with codeNames and values. If dictionary for code and facies names 
+            and a dictionary object with codeNames and values. If dictionary for code and facies names
             has empty facies names, the facies name is set to the code value to avoid empty facies names.
     """
     functionName = 'getDiscrete3DParameterValues'
@@ -366,13 +366,13 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
            gridModel     - Grid model object
            parameterNameList - List of names of 3D parameter to update.
            inputValuesForZoneList  - A list of numpy 3D arrays. They corresponds to the parameter names in parameterNameList.
-                                     The size of the numpy input arrays are (nx,ny,nLayers) where nx, ny must match 
-                                     the gridModels 3D grid size for the simulation box grid and nLayers must match 
-                                     the number of layers for the zone in simulationx box. Note that since nx, ny 
-                                     are the simulation box grid size, they can be larger than the number of cells 
-                                     reported for the grid in reverse faulted grids. The grid values must be of type 
-                                     numpy.float32. Only the grid cells belonging to the specified zone are updated, 
-                                     and error is raised if the number of grid cells for the zone doesn't match 
+                                     The size of the numpy input arrays are (nx,ny,nLayers) where nx, ny must match
+                                     the gridModels 3D grid size for the simulation box grid and nLayers must match
+                                     the number of layers for the zone in simulationx box. Note that since nx, ny
+                                     are the simulation box grid size, they can be larger than the number of cells
+                                     reported for the grid in reverse faulted grids. The grid values must be of type
+                                     numpy.float32. Only the grid cells belonging to the specified zone are updated,
+                                     and error is raised if the number of grid cells for the zone doesn't match
                                      the size of the input array.
            zoneNumber    - The zone number (counted from 0 in the input)
            realNumber    - Realisation number counted from 0 for the parameter to get.
@@ -447,7 +447,7 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
         if not found:
             # Create new parameter
             propertyParam = gridModel.properties.create(paramName, roxar.GridPropertyType.continuous, np.float32)
-            propertyParam.set_shared(isShared, realNumber) 
+            propertyParam.set_shared(isShared, realNumber)
             if debug_level >= Debug.VERY_VERBOSE:
                 text = 'Create specified parameter: ' + paramName
                 print_debug_information(functionName, text)
@@ -467,7 +467,7 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
 
         # Get current values
         currentValues = propertyParam.get_values(realNumber)
-    
+
         # Create 3D array for all cells in the grid including inactive cells
         new_3D_array = np.zeros((nx,ny,nz), dtype=float,order='F')
 
@@ -481,7 +481,7 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
             new_3D_array[:,:,k] = inputValuesForZone[:,:,k - start_layer]
 
         # Since the cell numbers and the indices all are based on the same range,
-        # it is possible to use numpy vectorization to copy 
+        # it is possible to use numpy vectorization to copy
         currentValues[zone_cell_numbers] = new_3D_array[i_indices, j_indices, k_indices]
         propertyParam.set_values(currentValues, realNumber)
 
@@ -497,13 +497,13 @@ def setContinuous3DParameterValuesInZoneRegion(
            gridModel     - Grid model object
            parameterNameList - List of names of 3D parameter to update.
            inputValuesForZoneList  - A list of numpy 3D arrays. They corresponds to the parameter names in parameterNameList.
-                                     The size of the numpy input arrays are (nx,ny,nLayers) where nx, ny must match 
-                                     the gridModels 3D grid size for the simulation box grid and nLayers must match 
-                                     the number of layers for the zone in simulationx box. Note that since nx, ny 
-                                     are the simulation box grid size, they can be larger than the number of cells 
-                                     reported for the grid in reverse faulted grids. The grid values must be of type 
-                                     numpy.float32. Only the grid cells belonging to the specified zone are updated, 
-                                     and error is raised if the number of grid cells for the zone doesn't match 
+                                     The size of the numpy input arrays are (nx,ny,nLayers) where nx, ny must match
+                                     the gridModels 3D grid size for the simulation box grid and nLayers must match
+                                     the number of layers for the zone in simulationx box. Note that since nx, ny
+                                     are the simulation box grid size, they can be larger than the number of cells
+                                     reported for the grid in reverse faulted grids. The grid values must be of type
+                                     numpy.float32. Only the grid cells belonging to the specified zone are updated,
+                                     and error is raised if the number of grid cells for the zone doesn't match
                                      the size of the input array.
            zoneNumber    - The zone number (counted from 0 in the input)
            regionNumber  - The region number for the grid cells to be updated.
@@ -555,7 +555,7 @@ def setContinuous3DParameterValuesInZoneRegion(
                       'Grid model nx: {}  Input array nx: {}\n'
                       'Grid model ny: {}  Input array ny: {}\n'
                       'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-                      ''.format(str(nx), str(inputArrayShape[0]), str(ny), str(inputArrayShape[1]), 
+                      ''.format(str(nx), str(inputArrayShape[0]), str(ny), str(inputArrayShape[1]),
                                 str(zoneNumber), str(nLayers), str(inputArrayShape[2]))
                       )
 
@@ -586,7 +586,7 @@ def setContinuous3DParameterValuesInZoneRegion(
         if not found:
             # Create new parameter
             propertyParam = gridModel.properties.create(paramName, roxar.GridPropertyType.continuous, np.float32)
-            propertyParam.set_shared(isShared, realNumber) 
+            propertyParam.set_shared(isShared, realNumber)
             if debug_level >= Debug.VERY_VERBOSE:
                 text = 'Create specified parameter: ' + paramName
                 print_debug_information(functionName, text)
@@ -612,7 +612,7 @@ def setContinuous3DParameterValuesInZoneRegion(
         # where nLayers is the number of layers of the input grid
         # These layers must correspond to layer from start_layer untill but not including end_layer
         # in the full 3D grid
-        if regionParamValues is not None: 
+        if regionParamValues is not None:
             for indx in range(len(i_indices)):
                 i = i_indices[indx]
                 j = j_indices[indx]
@@ -630,7 +630,7 @@ def setContinuous3DParameterValuesInZoneRegion(
                 new_3D_array[:,:,k] = inputValuesForZone[:,:,k - start_layer]
 
             # Since the cell numbers and the indices all are based on the same range,
-            # it is possible to use numpy vectorization to copy 
+            # it is possible to use numpy vectorization to copy
             currentValues[zone_cell_numbers] = new_3D_array[i_indices, j_indices, k_indices]
 
         propertyParam.set_values(currentValues, realNumber)
@@ -642,27 +642,27 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
                                       realNumber=0, isShared=True, setInitialValues=False, debug_level=Debug.OFF):
     """
     Description:
-    Set 3D parameter with continuous values for specified grid model. The input is specified for a subset of all grid cells. 
-    This subset is defined by the numpy vector cellIndexDefined and the number of values is nDefinedCells. 
-    Only the subset of cells will be updated unless the parameter setInitialValues is set. In that case all cells not covered 
-    by the cellIndexDefined will be initializes to 0.0. The input numpy vector inputValues has length equal to number of 
-    active grid cells for the grid model and contain the values to be assigned to the 3D parameter with 
+    Set 3D parameter with continuous values for specified grid model. The input is specified for a subset of all grid cells.
+    This subset is defined by the numpy vector cellIndexDefined and the number of values is nDefinedCells.
+    Only the subset of cells will be updated unless the parameter setInitialValues is set. In that case all cells not covered
+    by the cellIndexDefined will be initializes to 0.0. The input numpy vector inputValues has length equal to number of
+    active grid cells for the grid model and contain the values to be assigned to the 3D parameter with
     name parameterName belonging to the grid model with name gridModel.
-    If the grid parameter with name parameterName does not exist, it will be created and assigned value 0 in all 
-    cells except the cells defined by the cellIndexDefined where it will be assigned the values taken from 
+    If the grid parameter with name parameterName does not exist, it will be created and assigned value 0 in all
+    cells except the cells defined by the cellIndexDefined where it will be assigned the values taken from
     the  inputValues vector. If the grid parameter exist, the grid cells with indices defined in cellIndexDefined will be
     updated with values from inputValues.
     :param setInitialValues:
     :param gridModel:   Grid model object
     :param parameterName: Name of 3D parameter to update.
-    :param inputValues:  A numpy array of length equal to nActiveCells where nActiveCells is the number of all grid cells in the 
-                         grid model that is not inactive and will therefore usually be a much longer vector than nDefinedCells. 
-                         Only the values in this vector corresponding to the selected cells defined by cellIndexDefined will be used. 
+    :param inputValues:  A numpy array of length equal to nActiveCells where nActiveCells is the number of all grid cells in the
+                         grid model that is not inactive and will therefore usually be a much longer vector than nDefinedCells.
+                         Only the values in this vector corresponding to the selected cells defined by cellIndexDefined will be used.
                          The values are of type continuous.
-                                        
+
     :param nDefinedCells: Length of the list cellIndexDefined
     :param cellIndexDefined: A list with cell indices in the array of all active cells for the grid model. The subset of cells
-                             defined by this index array are the grid cells to be updated. 
+                             defined by this index array are the grid cells to be updated.
     :param realNumber: Realisation number counted from 0 for the 3D parameter.
     :param isShared:   Is set to true or false if the parameter is to be set to shared or non-shared.
     :param debug_level: Specify how much info is to be printed to screen. (0 - almost nothing output to screen, 3 - much output to screen)
@@ -679,7 +679,7 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
         raise ValueError('Mismatch in number of active cells={} and length of input array with values = {}'
                          ''.format(str(nActiveCells), str(len(inputValues)))
                          )
-    
+
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         raise ValueError(
@@ -705,13 +705,13 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
             else:
                 text = 'Set parameter to non-shared.'
                 print_debug_information(functionName, text)
-                
+
         # Create a new 3D parameter with the specified name of type float32
         p = gridModel.properties.create(parameterName, roxar.GridPropertyType.continuous, np.float32)
 
         # Initialize the values to 0 for this new 3D parameter
         currentValues = np.zeros(nActiveCells, np.float32)
-        
+
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         # Using vector operations for numpy vector:
         if nDefinedCells > 0:
@@ -873,7 +873,7 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
                 print('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
                 originalCodeNames[code] = str(code)
 
-        # Calculate updated facies table by combining the existing facies table for the 3D parameter 
+        # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones
         print('originalCodeNames:')
         print(originalCodeNames)
@@ -910,28 +910,28 @@ def updateDiscrete3DParameterValues(
 ):
     """
     Description:
-    Set 3D parameter with discrete values for specified grid model. The input is specified for a subset of all grid cells. 
-    This subset is defined by the numpy vector cellIndexDefined and the number of values is nDefinedCells. 
-    Only the subset of cells will be updated. The input numpy vector inputValues has length equal to number of 
-    active grid cells for the grid model and contain the values to be assigned to the 3D parameter with 
+    Set 3D parameter with discrete values for specified grid model. The input is specified for a subset of all grid cells.
+    This subset is defined by the numpy vector cellIndexDefined and the number of values is nDefinedCells.
+    Only the subset of cells will be updated. The input numpy vector inputValues has length equal to number of
+    active grid cells for the grid model and contain the values to be assigned to the 3D parameter with
     name parameterName belonging to the grid model with name gridModel.
-    If the grid parameter with name parameterName does not exist, it will be created and assigned value 0 in all 
-    cells except the cells defined by the cellIndexDefined where it will be assigned the values taken from 
+    If the grid parameter with name parameterName does not exist, it will be created and assigned value 0 in all
+    cells except the cells defined by the cellIndexDefined where it will be assigned the values taken from
     the  inputValues vector. If the grid parameter exist, the grid cells with indices defined in cellIndexDefined will be
-    updated with values from inputValues. 
+    updated with values from inputValues.
     :param setInitialValues:
     :param setDefaultFaciesNameWhenUndefined:
     :param faciesTable:
     :param gridModel:   Grid model object
     :param parameterName: Name of 3D parameter to update.
-    :param inputValues:  A numpy array of length equal to nActiveCells where nActiveCells is the number of all grid cells in the 
-                         grid model that is not inactive and will therefore usually be a much longer vector than nDefinedCells. 
-                         Only the values in this vector corresponding to the selected cells defined by cellIndexDefined will be used. 
+    :param inputValues:  A numpy array of length equal to nActiveCells where nActiveCells is the number of all grid cells in the
+                         grid model that is not inactive and will therefore usually be a much longer vector than nDefinedCells.
+                         Only the values in this vector corresponding to the selected cells defined by cellIndexDefined will be used.
                          The values are of type discrete.
-                                        
+
     :param nDefinedCells: Length of the list cellIndexDefined
     :param cellIndexDefined: A list with cell indices in the array of all active cells for the grid model. The subset of cells
-                             defined by this index array are the grid cells to be updated. 
+                             defined by this index array are the grid cells to be updated.
     :param codeNames: A dictionary with code names and code values for the discrete parameter values of the form as in the example:
                       {1: 'F1', 2: 'F2',3: 'F3'}.
                       NOTE: Be sure to input a codeNames dictionary containing all relevant facies for
@@ -974,7 +974,7 @@ def updateDiscrete3DParameterValues(
             else:
                 text = ' Set parameter to non-shared.'
                 print_debug_information(functionName, text)
-                
+
         # Create a new 3D parameter with the specified name
         p = gridModel.properties.create(parameterName, roxar.GridPropertyType.discrete, np.uint16)
 
@@ -1010,7 +1010,7 @@ def updateDiscrete3DParameterValues(
                 currentValues = p.get_values(realNumber)
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Get values from existing 3D parameter: {}'.format(parameterName))
-            
+
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         if nDefinedCells > 0:
             for i in range(nDefinedCells):
@@ -1022,10 +1022,10 @@ def updateDiscrete3DParameterValues(
 
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
-        
+
         originalCodeNames = p.code_names.copy()
 
-        # Calculate updated facies table by combining the existing facies table for the 3D parameter 
+        # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones
         updatedCodeNames, err = combineCodeNames(originalCodeNames, faciesTable)
         if err == 1:
@@ -1296,7 +1296,7 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
 
 def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
                               debug_level=Debug.OFF, xmin=0, ymin=0, xinc=0, yinc=0, nx=0, ny=0, rotation=0):
-    # This function will replace a horizon with specified name and type with a new one with value equal 
+    # This function will replace a horizon with specified name and type with a new one with value equal
     # to the constant value specified in variable inputValue. The 2D grid dimensions can also specified if new maps
     # must created.
     # Find horizon with specified name. Must exist.

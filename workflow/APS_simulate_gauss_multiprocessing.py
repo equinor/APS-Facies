@@ -7,8 +7,6 @@ import numpy as np
 import importlib
 import multiprocessing as mp
 
-
-
 import src.algorithms.APSModel
 import src.utils.roxar.APSDataFromRMS
 
@@ -240,7 +238,7 @@ def run_simulations(
             azimuthValueSimBox = azimuthValue - azimuthAngleGrid
             simBoxThickness = zoneModel.getSimBoxThickness()
 
-            # Calculate grid cell size in z direction 
+            # Calculate grid cell size in z direction
             nz = nLayers
             dz = simBoxThickness/nz
 

@@ -29,11 +29,11 @@ class APSGaussModel:
     Description: This class contain model parameter specification of the gaussian fields to be simulated for a zone.
     The class contain both variogram data and trend data. Both functions to read the parameters from and XML tree
     for the model file and functions to create an object from an initialization function exist.
-    
+
     Constructor:
     def __init__(self,ET_Tree_zone=None, mainFaciesTable= None,modelFileName = None,
                  debug_level=Debug.OFF,zoneNumber=0,simBoxThickness=0)
-    
+
     Public functions:
     def initialize(self,inputZoneNumber,mainFaciesTable,gaussModelList,trendModelList,
                    simBoxThickness,previewSeed,debug_level=Debug.OFF)
@@ -71,7 +71,6 @@ class APSGaussModel:
     Private functions:
     def __setEmpty(self)
     def __interpretXMLTree(ET_Tree_zone)
-    def __isVariogramTypeOK(self,variogramType)
     def __getGFIndex(self,gfName)
     """
 
@@ -154,7 +153,7 @@ class APSGaussModel:
             'Seed': 1
         }
 
-        self.__className = 'APSGaussModel'
+        self.__className = self.__class__.__name__
         self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
         self.__variogramForGFModel = []
@@ -166,8 +165,8 @@ class APSGaussModel:
 
     def __interpretXMLTree(self, ET_Tree_zone, gaussFieldJobs):
         """
-        Description: Read Gauss field models for current zone. 
-        Read trend models for the same gauss fields and start seed for 2D preview simulations. 
+        Description: Read Gauss field models for current zone.
+        Read trend models for the same gauss fields and start seed for 2D preview simulations.
         """
         for gf in ET_Tree_zone.findall('GaussField'):
             gfName = gf.get('name')
@@ -184,17 +183,13 @@ class APSGaussModel:
             # Read variogram for current GF
             variogram, variogramType = self.get_variogram(gf, gfName)
 
-            range1 = getFloatCommand(
-                variogram, 'MainRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
-            )
+            common_variogram_params = {'parentKeyword': 'Vario', 'minValue': 0.0, 'modelFile': self.__modelFileName}
 
-            range2 = getFloatCommand(
-                variogram, 'PerpRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
-            )
+            range1 = getFloatCommand(variogram, 'MainRange', **common_variogram_params)
 
-            range3 = getFloatCommand(
-                variogram, 'VertRange', 'Vario', minValue=0.0, modelFile=self.__modelFileName
-            )
+            range2 = getFloatCommand(variogram, 'PerpRange', **common_variogram_params)
+
+            range3 = getFloatCommand(variogram, 'VertRange', **common_variogram_params)
 
             azimuth = getFloatCommand(
                 variogram, 'AzimuthAngle', 'Vario',
@@ -221,8 +216,6 @@ class APSGaussModel:
 
             # Read trend model for current GF
             trendObjXML = gf.find('Trend')
-            trendModelObj = None
-            useTrend = False
             relStdDev = 0.0
             if trendObjXML is not None:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
@@ -235,29 +228,29 @@ class APSGaussModel:
                         'The use of trend functions requires that simulation box thickness is specified.\n'
                         ''.format(self.__modelFileName, gfName, self.__className)
                     )
-                trendName = trendObjXML.get('name')
+                trend_name = trendObjXML.get('name')
                 common_params = {'modelFileName': self.__modelFileName, 'debug_level': self.__debug_level}
-                if trendName == 'Linear3D':
-                    trendModelObj = Trend3D_linear(trendObjXML, **common_params)
-                elif trendName == 'Elliptic3D':
-                    trendModelObj = Trend3D_elliptic(trendObjXML, **common_params)
-                elif trendName == 'Hyperbolic3D':
-                    trendModelObj = Trend3D_hyperbolic(trendObjXML, **common_params)
-                elif trendName == 'RMSParameter':
-                    trendModelObj = Trend3D_rms_param(trendObjXML, **common_params)
-                elif trendName == 'EllipticCone3D':
-                    trendModelObj = Trend3D_elliptic_cone(trendObjXML, **common_params)
+                if trend_name == 'Linear3D':
+                    trend_model = Trend3D_linear(trendObjXML, **common_params)
+                elif trend_name == 'Elliptic3D':
+                    trend_model = Trend3D_elliptic(trendObjXML, **common_params)
+                elif trend_name == 'Hyperbolic3D':
+                    trend_model = Trend3D_hyperbolic(trendObjXML, **common_params)
+                elif trend_name == 'RMSParameter':
+                    trend_model = Trend3D_rms_param(trendObjXML, **common_params)
+                elif trend_name == 'EllipticCone3D':
+                    trend_model = Trend3D_elliptic_cone(trendObjXML, **common_params)
                 else:
                     raise NameError(
                         'Error in {className}\n'
                         'Error: Specified name of trend function {trendName} is not implemented.'
-                        ''.format(className=self.__className, trendName=trendName)
+                        ''.format(className=self.__className, trendName=trend_name)
                     )
             else:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: No trend is specified')
                 useTrend = False
-                trendModelObj = None
+                trend_model = None
                 relStdDev = 0
 
             # Read RelstdDev
@@ -269,12 +262,11 @@ class APSGaussModel:
 
             # Read preview seed for current GF
             seed = getIntCommand(gf, 'SeedForPreview', 'GaussField', modelFile=self.__modelFileName)
-            item = [gfName, seed]
 
             # Add gauss field parameters to data structure
             self.updateGaussFieldParam(
                 gfName, variogramType, range1, range2, range3, azimuth,
-                dip, power, useTrend, relStdDev, trendModelObj
+                dip, power, useTrend, relStdDev, trend_model
             )
             # Set preview simulation start seed for gauss field
             self.setSeedForPreviewSimulation(gfName, seed)
@@ -662,24 +654,26 @@ class APSGaussModel:
         err = 0
         found = 0
         if not isVariogramTypeOK(variogramType):
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            raise ValueError('Undefined variogram type specified.')
-        if range1 < 0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            raise ValueError('Correlation range < 0.0')
-        if range2 < 0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            raise ValueError('Correlation range < 0.0')
-        if range3 < 0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            raise ValueError('Correlation range < 0.0')
-        if variogramType == VariogramType.GENERAL_EXPONENTIAL:
-            if power < 1.0 or power > 2.0:
-                print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-                raise ValueError('Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0,2.0]')
+            raise ValueError(
+                'Error in {class_name} in updateGaussFieldParam\n'
+                'Undefined variogram type specified.'.format(class_name=self.__className)
+            )
+        if any([range < 0 for range in [range1, range2, range3]]):
+            raise ValueError(
+                'Error in {class_name} in updateGaussFieldParam\n'
+                'Correlation range < 0.0'.format(class_name=self.__className)
+            )
+        if variogramType == VariogramType.GENERAL_EXPONENTIAL and not (1.0 <= power <= 2.0):
+            raise ValueError(
+                'Error in {class_name} in updateGaussFieldParam\n'
+                'Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0, 2.0]'.format(class_name=self.__className)
+            )
         if relStdDev < 0.0:
-            print('Error in ' + self.__className + ' in ' + 'updateGaussFieldParam')
-            raise ValueError('Relative standard deviation used when trends are specified is negative.')
+            raise ValueError(
+                'Error in {class_name} in updateGaussFieldParam\n'
+                'Relative standard deviation used when trends are specified is negative.'
+                ''.format(class_name=self.__className)
+            )
 
         # Check if gauss field is already defined, then update parameters or create new
         for item in self.__variogramForGFModel:
@@ -972,7 +966,7 @@ class APSGaussModel:
             transField = self.__transformEmpiricDistributionToUniform(gaussFieldWithTrend)
             item = [name, transField]
             gaussFieldItems.append(item)
-        # End for        
+        # End for
 
         return gaussFieldItems
 
@@ -1006,9 +1000,9 @@ class APSGaussModel:
         """
         Take input as numpy 1D float array and return numpy 1D float array where
         the values is transformed to uniform distribution.
-        The input array is regarded as outcome of  probability distribution. 
-        The output assigm the empiric percentile from the cumulative empiric distribution 
-        to each array element. This ensure that the probability distribution of the output 
+        The input array is regarded as outcome of  probability distribution.
+        The output assigm the empiric percentile from the cumulative empiric distribution
+        to each array element. This ensure that the probability distribution of the output
         regarded as outcome from a probability distribution is uniform.
         """
         # Transform into uniform distribution
@@ -1030,10 +1024,10 @@ class APSGaussModel:
         """
          Variogram ellipsoid in 3D is defined by a symmetric 3x3 matrix M such that
          transpose(V)*M * V = 1 where transpose(V) = [x,y,z]. The principal directions are found
-         by diagonalization of the matrix. The diagonal matrix has the diagonal matrix elements 
+         by diagonalization of the matrix. The diagonal matrix has the diagonal matrix elements
          D11 = 1/(B*B)  D22 = 1/(A*A)  D33 = 1/(C*C) where A,B,C are the half axes in the three
          principal directions. For variogram ellipsoid the MainRange = A, PerpRange = B, VertRange = C.
-         To define the orientation, first define a ellipsoid oriented with 
+         To define the orientation, first define a ellipsoid oriented with
          MainRange in y direction, PerpRange in x direction and VertRange in z direction.
          Then rotate this ellipsoid first around x axis with angle defined as dipAngle in clockwise direction.
          The dip angle is the angle between the y axis and the new rotated y' axis along the main
@@ -1126,7 +1120,7 @@ class APSGaussModel:
             print(M)
             print('')
 
-        # Let U be the 2x2 matrix in the projection (where row and column corresponding to 
+        # Let U be the 2x2 matrix in the projection (where row and column corresponding to
         # the coordinate that is set to 0 is removed
 
         # Calculate the projection of the ellipsoide onto the coordinate planes
@@ -1166,7 +1160,7 @@ class APSGaussModel:
             print('Debug output: Eigenvectors')
             print(v)
 
-        # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction 
+        # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction
         if v[0, 1] != 0.0:
             angle = np.arctan(v[0, 0] / v[0, 1])
             angle = angle * 180.0 / np.pi
@@ -1181,7 +1175,7 @@ class APSGaussModel:
             print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
                   ''.format(funcName=funcName, angle=str(angle1), range=str(range1)))
 
-        # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction 
+        # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction
         if v[1, 1] != 0.0:
             angle = np.arctan(v[1, 0] / v[1, 1])
             angle = angle * 180.0 / np.pi

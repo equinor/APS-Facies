@@ -14,7 +14,7 @@
 
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 // Vario2D class constructor.
@@ -24,9 +24,9 @@
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 Vario2D::Vario2D(const double range1,
-		 const double range2, 
+		 const double range2,
 		 const double ang,
 		 const double si)
 {
@@ -46,7 +46,7 @@ Vario2D::Vario2D(const double range1,
 
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 // Vario2D class destructor.
@@ -56,7 +56,7 @@ Vario2D::Vario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 Vario2D::~Vario2D()
 {
 }
@@ -68,14 +68,14 @@ Vario2D::~Vario2D()
 //
 // PURPOSE
 //
-// RETURN VALUE 
+// RETURN VALUE
 // Value of variogram for given distance
 //
-// SIDE EFFECTS 
-// 
+// SIDE EFFECTS
+//
 // SPECIAL INSTRUCTIONS & NOTES
 //
-double 
+double
 Vario2D::vario(const double dx,
 		      const double dy) const
 {
@@ -98,17 +98,17 @@ Vario2D::vario(const double dx,
 // RETURN VALUE
 // void
 //
-// SIDE EFFECTS 
+// SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
-void 
+//
+void
 Vario2D::corrFactors(void)
 {
     	double cosRot;
-    	double sinRot;  
+    	double sinRot;
     	double fac1;
-    	double fac2;     
+    	double fac2;
 
     	cosRot = cos(angle);
     	sinRot = sin(angle);
@@ -135,7 +135,7 @@ Vario2D::corrFactors(void)
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 ExpVario2D::ExpVario2D(const double range1,
 		       const double range2,
 		       const double ang,
@@ -157,7 +157,7 @@ ExpVario2D::ExpVario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 ExpVario2D::~ExpVario2D()
 {
 }
@@ -179,21 +179,21 @@ ExpVario2D::~ExpVario2D()
 // SPECIAL INSTRUCTIONS & NOTES
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
-//             
-double 
+//
+double
 ExpVario2D::corr(	const double dx,
 			const double dy) const
 {
     	double dist = corrDistance(dx,dy);
-    	return exp(- 3.0 * dist); 
+    	return exp(- 3.0 * dist);
 }
 
-double 
+double
 ExpVario2D::corr(	const int dx,
 			const int dy) const
 {
   	double dist = corrDistance(dx,dy);
-  	return exp(- 3.0 * dist); 
+  	return exp(- 3.0 * dist);
 }
 
 //
@@ -201,18 +201,18 @@ ExpVario2D::corr(	const int dx,
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 ExpVario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "exponential");
     writeRange(file);
     fprintf(file,"\n");
     return;
-} 
+}
 
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -227,7 +227,7 @@ VarioType
 ExpVario2D::getType(void) const
 {
 	return(exponential);
-}             
+}
 
 //
 // FUNCTION : SphVario2D::SphVario2D
@@ -240,11 +240,11 @@ ExpVario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 SphVario2D::SphVario2D(const double range1,
 		       const double range2,
-		       const double ang, 
-		       const double si) : 
+		       const double ang,
+		       const double si) :
     Vario2D(range1, range2, ang, si)
 {
 }
@@ -262,7 +262,7 @@ SphVario2D::SphVario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 SphVario2D::~SphVario2D()
 {
 }
@@ -284,8 +284,8 @@ SphVario2D::~SphVario2D()
 // SPECIAL INSTRUCTIONS & NOTES
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
-//             
-double 
+//
+double
 SphVario2D::corr(	const double dx,
 			const double dy) const
 {
@@ -301,7 +301,7 @@ SphVario2D::corr(	const double dx,
     }
 }
 
-double 
+double
 SphVario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -319,17 +319,17 @@ SphVario2D::corr(	const int dx,
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 SphVario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "spherical");
     writeRange(file);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -344,7 +344,7 @@ VarioType
 SphVario2D::getType(void) const
 {
 	return(spherical);
-}             
+}
 
 //
 // FUNCTION : GauVario2D::GauVario2D
@@ -357,11 +357,11 @@ SphVario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 GauVario2D::GauVario2D(const double range1,
 		       const double range2,
-		       const double ang, 
-		       const double si) : 
+		       const double ang,
+		       const double si) :
     Vario2D(range1, range2, ang, si)
 {
 }
@@ -379,7 +379,7 @@ GauVario2D::GauVario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 GauVario2D::~GauVario2D()
 {
 }
@@ -401,16 +401,16 @@ GauVario2D::~GauVario2D()
 // SPECIAL INSTRUCTIONS & NOTES
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
-//             
-double 
+//
+double
 GauVario2D::corr(	const double dx,
 			const double dy) const
 {
     double dist = corrDistance(dx,dy);
-    return exp(- 3.0 * dist*dist); 
+    return exp(- 3.0 * dist*dist);
 }
 
-double 
+double
 GauVario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -423,17 +423,17 @@ GauVario2D::corr(	const int dx,
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 GauVario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "gaussian");
     writeRange(file);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -448,7 +448,7 @@ VarioType
 GauVario2D::getType(void) const
 {
 	return(gaussian);
-}             
+}
 
 //
 // FUNCTION : GenExpVario2D::GenExpVario2D
@@ -461,12 +461,12 @@ GauVario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 GenExpVario2D::GenExpVario2D(const double range1,
 			     const double range2,
-			     const double ang, 
+			     const double ang,
 			     const double si,
-			     const double po) : 
+			     const double po) :
     Vario2D(range1, range2, ang, si)
 {
     assert((po > 0.00)&&(po <= 2.00));
@@ -486,7 +486,7 @@ GenExpVario2D::GenExpVario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 GenExpVario2D::~GenExpVario2D()
 {
 }
@@ -509,8 +509,8 @@ GenExpVario2D::~GenExpVario2D()
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
 // The power of the variogram function must be set in the constructor.
-//             
-double 
+//
+double
 GenExpVario2D::corr(	const double dx,
 			const double dy) const
 {
@@ -518,7 +518,7 @@ GenExpVario2D::corr(	const double dx,
     return exp(-3.0 * pow(dist,power));
 }
 
-double 
+double
 GenExpVario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -531,7 +531,7 @@ GenExpVario2D::corr(	const int dx,
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 GenExpVario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "general exponential");
@@ -539,10 +539,10 @@ GenExpVario2D::write(FILE* file)const
     fprintf(file," %f ",power);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -557,7 +557,7 @@ VarioType
 GenExpVario2D::getType(void) const
 {
 	return(general_exponential);
-}             
+}
 
 //
 // FUNCTION : RatQuadVario2D::RatQuadVario2D
@@ -570,12 +570,12 @@ GenExpVario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 RatQuadVario2D::RatQuadVario2D(const double range1,
 			       const double range2,
-			       const double ang, 
+			       const double ang,
 			       const double si,
-			       const double po) : 
+			       const double po) :
     Vario2D(range1, range2, ang, si)
 {
     assert(po > 0.00);
@@ -595,7 +595,7 @@ RatQuadVario2D::RatQuadVario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 RatQuadVario2D::~RatQuadVario2D()
 {
 }
@@ -618,8 +618,8 @@ RatQuadVario2D::~RatQuadVario2D()
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
 // The power of the variogram function must be set in the constructor.
-//             
-double 
+//
+double
 RatQuadVario2D::corr(	const double dx,
 			const double dy) const
 {
@@ -628,7 +628,7 @@ RatQuadVario2D::corr(	const double dx,
     return 1.0/pow(1.0 + scal*dist*dist,power);
 }
 
-double 
+double
 RatQuadVario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -636,13 +636,13 @@ RatQuadVario2D::corr(	const int dx,
     double scal = pow(20.0,(1.0/power)) - 1.0;
     return 1.0/pow(1.0 + scal*dist*dist,power);
 }
- 
+
 //
 // FUNCTION: RatQuadVario2D::write
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 RatQuadVario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "rational quadratic");
@@ -650,10 +650,10 @@ RatQuadVario2D::write(FILE* file)const
     fprintf(file," %f ",power);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -668,7 +668,7 @@ VarioType
 RatQuadVario2D::getType(void) const
 {
 	return(ratquad);
-}      
+}
 
 //
 // FUNCTION : WhiteVario2D::WhiteVario2D
@@ -681,11 +681,11 @@ RatQuadVario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 WhiteVario2D::WhiteVario2D(const double range1,
 			   const double range2,
-			   const double ang, 
-			   const double si) : 
+			   const double ang,
+			   const double si) :
     Vario2D(range1, range2, ang, si)
 {
     TOL = 0.000001;
@@ -704,7 +704,7 @@ WhiteVario2D::WhiteVario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 WhiteVario2D::~WhiteVario2D()
 {
 }
@@ -727,7 +727,7 @@ WhiteVario2D::~WhiteVario2D()
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
 //
-double 
+double
 WhiteVario2D::corr(	const double dx,
 			const double dy) const
 {
@@ -735,9 +735,9 @@ WhiteVario2D::corr(	const double dx,
 	return 1.0;
     else
 	return 0.0;
-} 
+}
 
-double 
+double
 WhiteVario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -745,8 +745,8 @@ WhiteVario2D::corr(	const int dx,
 	return 1.0;
     else
 	return 0.0;
-} 
- 
+}
+
 //
 // FUNCTION: WhiteVario2D::write
 //
@@ -759,10 +759,10 @@ WhiteVario2D::write(FILE* file)const
     writeRange(file);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -777,7 +777,7 @@ VarioType
 WhiteVario2D::getType(void) const
 {
 	return(whitenoise);
-}      
+}
 
 //
 // FUNCTION : Sph2Vario2D::Sph2Vario2D
@@ -790,11 +790,11 @@ WhiteVario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 Sph2Vario2D::Sph2Vario2D(const double range1,
 			 const double range2,
-			 const double ang, 
-			 const double si) : 
+			 const double ang,
+			 const double si) :
     Vario2D(range1, range2, ang, si)
 {
 }
@@ -812,7 +812,7 @@ Sph2Vario2D::Sph2Vario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 Sph2Vario2D::~Sph2Vario2D()
 {
 }
@@ -835,7 +835,7 @@ Sph2Vario2D::~Sph2Vario2D()
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
 //
-double 
+double
 Sph2Vario2D::corr(	const double dx,
 			const double dy) const
 {
@@ -847,7 +847,7 @@ Sph2Vario2D::corr(	const double dx,
       return 0.0;
 }	/* end of Sph2Vario2D::corr */
 
-double 
+double
 Sph2Vario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -864,17 +864,17 @@ Sph2Vario2D::corr(	const int dx,
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 Sph2Vario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "spherical2");
     writeRange(file);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -889,7 +889,7 @@ VarioType
 Sph2Vario2D::getType(void) const
 {
 	return(spherical2);
-}      
+}
 
 //
 // FUNCTION : Sph5Vario2D::Sph5Vario2D
@@ -902,11 +902,11 @@ Sph2Vario2D::getType(void) const
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 Sph5Vario2D::Sph5Vario2D(const double range1,
 			 const double range2,
-			 const double ang, 
-			 const double si) : 
+			 const double ang,
+			 const double si) :
     Vario2D(range1, range2, ang, si)
 {
 }
@@ -924,7 +924,7 @@ Sph5Vario2D::Sph5Vario2D(const double range1,
 // SIDE EFFECTS
 //
 // SPECIAL INSTRUCTIONS & NOTES
-//             
+//
 Sph5Vario2D::~Sph5Vario2D()
 {
 }
@@ -947,7 +947,7 @@ Sph5Vario2D::~Sph5Vario2D()
 // There exists two overloaded versions,
 // one with "int" and one with "double" input parameters.
 //
-double 
+double
 Sph5Vario2D::corr(	const double dx,
 			const double dy) const
 {
@@ -957,9 +957,9 @@ Sph5Vario2D::corr(	const double dx,
       return 1.0 - dist * (1.875 - dist*dist * (1.25 - 0.375*dist*dist));
   else
       return 0.0;
-} 
+}
 
-double 
+double
 Sph5Vario2D::corr(	const int dx,
 			const int dy) const
 {
@@ -969,24 +969,24 @@ Sph5Vario2D::corr(	const int dx,
       return 1.0 - dist * (1.875 - dist*dist * (1.25 - 0.375*dist*dist));
   else
       return 0.0;
-} 
+}
 
 //
 // FUNCTION: Sph5Vario2D::write
 //
 // PURPOSE: Write type and parameters to file
 //
-void 
+void
 Sph5Vario2D::write(FILE* file)const
 {
     fprintf(file,"%s ", "spherical5");
     writeRange(file);
     fprintf(file,"\n");
     return;
-} 
+}
 
 //
-// FUNCTION 
+// FUNCTION
 //
 // PURPOSE
 //
@@ -1001,7 +1001,7 @@ VarioType
 Sph5Vario2D::getType(void) const
 {
 	return(spherical5);
-}      
+}
 
 //
 // FUNCTION: WhiteVario2D::isZero
@@ -1017,7 +1017,7 @@ Sph5Vario2D::getType(void) const
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //
-int 
+int
 WhiteVario2D::isZero(const double dist,
 			 const double tol) const
 {
@@ -1025,15 +1025,15 @@ WhiteVario2D::isZero(const double dist,
 	return 1;
     else
 	return 0;
-} 
+}
 
 
 
 //
 // FUNCTION: Vario2D::correlationTransf
 //
-// PURPOSE 
-// Transform the local parameters for range into 
+// PURPOSE
+// Transform the local parameters for range into
 // rectangular box (0,nx, 0,ny) from (0,xsize,0,ysize).
 // Calls the function corrFactors for calculating
 // some local variables.
@@ -1045,10 +1045,10 @@ WhiteVario2D::isZero(const double dist,
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //
-void 
-Vario2D::correlationTransf(int nx, int ny, 
-				double xsize, double ysize) 
-{ 
+void
+Vario2D::correlationTransf(int nx, int ny,
+				double xsize, double ysize)
+{
 	if(!transformed)
 	{
 		range *= ((double) nx) / xsize;
@@ -1076,9 +1076,9 @@ Vario2D::correlationTransf(int nx, int ny,
 //
 // SPECIAL INSTRUCTIONS & NOTES
 //
-void 
-Vario2D::correlationInvTransf(int nx, int ny, 
-				   double xsize, double ysize) 
+void
+Vario2D::correlationInvTransf(int nx, int ny,
+				   double xsize, double ysize)
 {
  	if(transformed)
 	{
