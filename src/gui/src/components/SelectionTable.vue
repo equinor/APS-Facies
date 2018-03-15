@@ -1,0 +1,80 @@
+<template>
+  <v-container>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      v-model="selectedItems"
+      :item-key="itemKey"
+      :class="tableClass"
+      hide-actions
+      select-all
+      @input="inputChanged"
+    >
+      <template
+        slot="items"
+        slot-scope="props"
+      >
+        <td>
+          <v-checkbox
+            v-model="props.selected"
+            primary
+            hide-details
+          />
+        </td>
+        <td class="text-xs-left">{{ props.item.name }}</td>
+      </template>
+    </v-data-table>
+  </v-container>
+</template>
+
+<script>
+import VueTypes from 'vue-types'
+
+export default {
+  props: {
+    items: VueTypes.arrayOf(VueTypes.shape({
+      name: VueTypes.string,
+      selected: VueTypes.bool
+    }).loose).isRequired,
+
+    headers: VueTypes.arrayOf(VueTypes.shape({
+      text: VueTypes.string.isRequired,
+      value: VueTypes.string.isRequired,
+      align: VueTypes.oneOf(['left', 'center', 'right']),
+      sortable: VueTypes.bool.def(true),
+      class: VueTypes.oneOfType([VueTypes.arrayOf(VueTypes.string), VueTypes.string]),
+      width: VueTypes.string
+    })).isRequired,
+
+    itemKey: VueTypes.string.def('name'),
+
+    tableClass: VueTypes.string.def('elevation-1')
+  },
+
+  data () {
+    return {
+      selectedItems: [],
+      selectedRow: null
+    }
+  },
+
+  methods: {
+    inputChanged (value) {
+      const selectedItems = value.map(item => item.name)
+      this.$emit('selected', selectedItems)
+    },
+
+    defaults () {
+      return {
+        key: 'name',
+        class: 'elevation-1',
+        sortable: true
+      }
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>
