@@ -133,7 +133,7 @@ get-nrlib:
 	rm nrlib-$(NRLIB_VERSION).tar.gz
 
 requirements:
-	$(PIP) install -r $(CODE_DIR)/requirements.txt
+	$(PIP) install -r $(CODE_DIR)/requirements.txt || $(PIP) install --user -r $(CODE_DIR)/requirements.txt
 
 apsw: $(APSW)
 
