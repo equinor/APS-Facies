@@ -66,9 +66,13 @@ def simGaussField(iseed: int, nx: int, ny: int, xsize: float, ysize: float, vari
     nz = 1
 
     # Simulate gauss field. Return numpy 1D vector in F order
-    [nx_padding, ny_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy)
     if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: nx_padding: {}     ny_padding: {}'.format(str(nx_padding), str(ny_padding)))
+        padding = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
+        coordinates = ['x', 'y', 'z']
+        debug_info = 'Debug output: '
+        for i in range(len(padding)):
+            debug_info += 'n{coordinate}_padding: {value}     '.format(coordinate=coordinates[i], value=padding[i])
+        print(debug_info.strip())
 
     # Have to remap the array to get it correct when plotting. That is why switching nx by ny and so on and the remapping
     # of the result vector.
