@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python3  test preliminary preview
 from argparse import ArgumentParser, Namespace
