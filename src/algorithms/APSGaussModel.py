@@ -10,7 +10,7 @@ from src.algorithms.Trend3D import (
 from src.utils.checks import isVariogramTypeOK
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.simGauss2D_nrlib import simGaussField
-from src.utils.xml import getFloatCommand, getIntCommand, getKeyword
+from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword
 
 
 class APSGaussModel:

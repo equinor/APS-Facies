@@ -13,7 +13,7 @@ from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
-from src.utils.xml import getFloatCommand, getIntCommand, getKeyword, getTextCommand, getBoolCommand
+from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword, getTextCommand, getBoolCommand
 
 
 class APSZoneModel:

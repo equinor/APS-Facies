@@ -12,7 +12,7 @@ from src.unit_test.constants import (
 )
 from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, writePolygons
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify
+from src.utils.xmlUtils import prettify
 
 
 def interpretXMLModelFileAndWrite(

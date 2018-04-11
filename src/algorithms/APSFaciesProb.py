@@ -4,7 +4,7 @@ from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
 from src.utils.numeric import isNumber
-from src.utils.xml import getKeyword, getTextCommand
+from src.utils.xmlUtils import getKeyword, getTextCommand
 
 
 class APSFaciesProb:

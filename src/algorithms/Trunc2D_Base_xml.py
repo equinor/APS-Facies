@@ -6,7 +6,7 @@ import copy
 import numpy as np
 
 from src.utils.constants.simple import Debug
-from src.utils.xml import getFloatCommand, getKeyword
+from src.utils.xmlUtils import getFloatCommand, getKeyword
 
 """
 -----------------------------------------------------------------------

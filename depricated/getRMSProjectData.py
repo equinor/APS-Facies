@@ -53,7 +53,7 @@ import numpy as np
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword, getTextCommand, prettify
+from src.utils.xmlUtils import getKeyword, getTextCommand, prettify
 
 
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):

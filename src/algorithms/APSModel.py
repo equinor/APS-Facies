@@ -12,7 +12,7 @@ from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
-from src.utils.xml import getIntCommand, getKeyword, getTextCommand, prettify
+from src.utils.xmlUtils import getIntCommand, getKeyword, getTextCommand, prettify
 
 
 class APSModel:

@@ -7,7 +7,7 @@ import numpy as np
 
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword
+from src.utils.xmlUtils import getKeyword
 
 """
 -----------------------------------------------------------------------

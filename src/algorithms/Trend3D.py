@@ -23,7 +23,7 @@ import sys
 import numpy as np
 
 from src.utils.constants.simple import Debug, OriginType, TrendType
-from src.utils.xml import getFloatCommand, getIntCommand, getTextCommand
+from src.utils.xmlUtils import getFloatCommand, getIntCommand, getTextCommand
 
 
 class Trend3D:

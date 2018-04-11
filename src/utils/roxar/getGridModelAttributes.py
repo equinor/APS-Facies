@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify
+from src.utils.xmlUtils import prettify
 
 
 def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=Debug.OFF):

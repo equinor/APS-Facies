@@ -5,7 +5,7 @@ from warnings import warn
 from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
-from src.utils.xml import getIntCommand, getKeyword
+from src.utils.xmlUtils import getIntCommand, getKeyword
 
 
 class APSGaussFieldJobs:

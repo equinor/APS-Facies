@@ -17,7 +17,7 @@ from src.unit_test.helpers import (
     truncMapPolygons,
 )
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify
+from src.utils.xmlUtils import prettify
 
 
 def interpretXMLModelFileAndWrite(
