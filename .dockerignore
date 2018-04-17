@@ -1,2 +1,6 @@
 .git/
+.idea/
+venv/
+output-virtualbox-iso/
+packer_cache/
 documentation/
