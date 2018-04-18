@@ -341,4 +341,4 @@ workflow/Cleanup_tmpdir.ipl
 workflow/APS_simulate_gauss_multiprocessing.ipl
 
 !examples/*
-*/node_modules/
+src/gui/node_modules/
