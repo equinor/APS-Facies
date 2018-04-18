@@ -1,0 +1,197 @@
+#!/bin/env python3
+#  -*- coding: utf-8 -*-
+"""
+A script to create the stubs of Python scripts that will be used in a RMS workflow.
+The stubs read the various files from disk (in this repo), so that the various workflows do not need to
+be imported whenever there is a change in it, or in one of its dependencies.
+
+This is called when running 'make init', and 'make generate-workflow-files'.
+
+The resulting stubs are given in the 'workflow' directory (which again is inside the root of the repo)
+
+Usage:
+    ./bin/generate_workflow_blocks.py [--read-only]
+    ./generate_workflow_blocks.py [--read-only] <path to project folder>
+"""
+
+from pathlib import Path
+from shutil import copy
+from sys import argv
+
+import os
+
+
+def run():
+    root_path = get_root_path()
+    workflows = get_workflows()
+    for relative_path, items in workflows.items():
+        for file_name in items:
+            create_workflow_block_file(file_name, root_path, relative_path)
+    add_ipl_scripts(root_path)
+
+    if len(argv) > 1 and argv[1] == '--read-only':
+        set_file_attributes(root_path)
+
+
+def get_workflow_block(file_name, root_path, relative_path):
+    template = """#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+\"\"\"
+A template for use in RMS workflow.
+By using this, the files will be loaded at runtime, and there
+is no longer a need to update / import the file into RMS.
+This template refer to {relative_path}/{file_name}.py
+\"\"\"
+
+import roxar
+
+from importlib.machinery import SourceFileLoader
+
+import sys
+
+__author__ = "Sindre Nistad"
+__email__ = "snis@statoil.com"
+__version__ = "0.3.0"
+__status__ = "Draft"
+
+
+# Name of Python file to be executed (excluding .py)
+file_name = '{file_name}'
+
+# The path to the repository's root folder
+root_path = '{root_path}'
+
+# Path to where the file above is located within the repository
+relative_path = '{relative_path}'
+
+
+# Add path to searchable path
+sys.path.append(root_path)
+
+
+# Generating necessary paths
+absolute_path = root_path + '/' + relative_path + '/' + file_name + '.py'
+module_path = relative_path.replace('/', '.') + '.' + file_name
+
+module = SourceFileLoader(module_path, absolute_path).load_module()
+
+module.run(roxar, project)
+"""
+
+    return template.format(file_name=file_name, root_path=root_path.absolute(), relative_path=relative_path)
+
+
+def get_root_path():
+    if len(argv) == 1:
+        return Path('.').absolute()
+    elif len(argv[1]) == '--read-only':
+        return Path(argv[2])
+    else:
+        return Path(argv[1])
+
+
+def get_workflows():
+    return {
+        'bin': [
+            'APS_main',
+            'updateAPSModelFromFMU',
+        ],
+        'depricated': [
+            'APS_make_gauss_IPL',
+            'getRMSProjectData',
+        ],
+        'src/rms_jobs': [
+            'APS_simulate_gauss_multiprocessing',
+            'APS_simulate_gauss_singleprocessing',
+            'defineFaciesProbMapDepTrend',
+            'defineFaciesProbTrend',
+        ],
+        'src/utils': [
+            'testPreview',
+        ],
+        'src/utils/roxar': [
+            'APS_update_gauss_rms',
+            'getGridModelAttributes',
+        ],
+    }
+
+
+def get_workflow_dir(root_path):
+    workflow_dir = root_path / 'workflow'
+    if not _OS.exists(workflow_dir):
+        _OS.makedirs(workflow_dir.absolute())
+    return workflow_dir
+
+
+def create_workflow_block_file(file_name, root_path, relative_path):
+    script_name = file_name + '.py'
+    script_path = root_path / relative_path / script_name
+    assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
+    workflow_dir = get_workflow_dir(root_path)
+    workflow_path = str(workflow_dir / script_name)
+    workflow_block = get_workflow_block(file_name, root_path, relative_path)
+    with open(workflow_path, 'w') as f:
+        f.write(workflow_block)
+
+
+def get_ipl_scripts(root_path):
+    ipl_dir = root_path / 'src/IPL'
+    return [ipl_dir / ipl_script for ipl_script in _OS.listdir(ipl_dir)]
+
+
+def add_ipl_scripts(root_path):
+    ipl_scripts = get_ipl_scripts(root_path)
+    workflow_dir = get_workflow_dir(root_path)
+    for ipl_script in ipl_scripts:
+        _OS.copy(ipl_script.absolute(), workflow_dir.absolute())
+
+
+def set_file_attributes(root_path):
+    workflow_path = get_workflow_dir(root_path).absolute()
+    _set_read_only(workflow_path)
+
+
+def _set_read_only(workflow_path):
+    _OS.chmod(workflow_path)
+    for _, _, files in _OS.walk(workflow_path):
+        for file in files:
+            _OS.chmod(workflow_path / file)
+
+
+class _OS:
+    @staticmethod
+    def walk(path):
+        return os.walk(_OS._get_absolute_path(path))
+
+    @staticmethod
+    def copy(source, target):
+        copy(_OS._get_absolute_path(source), _OS._get_absolute_path(target))
+
+    @staticmethod
+    def exists(path):
+        return _OS._exec(path, os.path.exists)
+
+    @staticmethod
+    def listdir(path):
+        return _OS._exec(path, os.listdir)
+
+    @staticmethod
+    def chmod(path):
+        _OS._exec(path, lambda p: os.chmod(p, 0o555))
+
+    @staticmethod
+    def makedirs(path):
+        _OS._exec(path, os.makedirs)
+
+    @staticmethod
+    def _exec(path, fun):
+        return fun(_OS._get_absolute_path(path))
+
+    @staticmethod
+    def _get_absolute_path(path):
+        return str(path.absolute())
+
+
+if __name__ == '__main__':
+    run()

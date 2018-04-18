@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 # Copyright 2017 Statoil ASA
 #
 # Class for Trends used in APS modelling
@@ -10,21 +11,19 @@
 #
 ####################################################################
 # Kari B. Skjerve, karbor@statoil.com
-# Oddvar Lia
+# Oddvar Lia 
 # 2017/2018
 ####################################################################
 
 import math
+from xml.etree.ElementTree import Element
+
 import copy
 import sys
 import numpy as np
-import importlib
-from xml.etree.ElementTree import Element
-import src.utils.xml
-importlib.reload(src.utils.xml)
 
 from src.utils.constants.simple import Debug, OriginType, TrendType
-from src.utils.xml import getFloatCommand, getIntCommand, getTextCommand
+from src.utils.xmlUtils import getFloatCommand, getIntCommand, getTextCommand
 
 
 class Trend3D:
@@ -752,7 +751,7 @@ class Trend3D_elliptic(Trend3D):
         return self._origin_type
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
-        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness,
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
                                 self._origin_type, self._origin)
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
@@ -920,7 +919,7 @@ class Trend3D_hyperbolic(Trend3D):
     def getOriginType(self):
         return self._origin_type
 
-    def initialize(
+    def initialize( 
             self, azimuthAngle, stackingAngle, direction, migrationAngle, curvature,
             origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
     ):

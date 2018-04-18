@@ -1,21 +1,16 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 """
 Python3  script with roxAPI
 This script will read grid dimensions of the grid for the specified grid model in the model file.
 """
 
-import importlib
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
-import src.algorithms.APSModel
-
 from xml.etree.ElementTree import Element
-from src.utils.constants.simple import Debug
 
-importlib.reload(gr)
-importlib.reload(src.algorithms.APSModel)
-
+import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
 from src.algorithms.APSModel import APSModel
-from src.utils.xml import prettify
+from src.utils.constants.simple import Debug
+from src.utils.xmlUtils import prettify
 
 
 def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=Debug.OFF):
@@ -111,7 +106,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     return
 
 
-def run():
+def run(roxar=None, project=None):
     # TODO: Separate this part into a CLI program
     modelFile = 'APS.xml'
     outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
@@ -129,4 +124,5 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    import roxar
+    run(roxar, project)

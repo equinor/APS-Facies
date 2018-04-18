@@ -64,5 +64,9 @@ def test_mainFaciesTable():
 
 # --------- Main ---------------
 
-if __name__ == '__main__':
+def run():
     test_mainFaciesTable()
+
+
+if __name__ == '__main__':
+    run()

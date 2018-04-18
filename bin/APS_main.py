@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 """
 Dependency: ROXAPI
 Python 3 truncation script to be run in RMS 10 workflow
@@ -8,15 +9,9 @@ Output:
       Facies realisation updated for specified zones.
       Updated 3D parameter for transformed gaussian fields.
 """
-import importlib
-
 import numpy as np
 
-import src.algorithms.APSModel
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
-
-importlib.reload(src.algorithms.APSModel)
-importlib.reload(gr)
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
@@ -276,8 +271,7 @@ def checkAndNormaliseProb(
     return probDefined, nCellWithModifiedProb
 
 
-# --------------- Start main script ------------------------------------------
-if __name__ == '__main__':
+def run(roxar=None, project=None):
     realNumber = project.current_realisation
     print('Run: APS_trunc  on realisation ' + str(realNumber + 1))
 
@@ -742,3 +736,9 @@ if __name__ == '__main__':
 
         print(' ')
     print('Finished APS_main.py')
+
+
+# --------------- Start main script ------------------------------------------
+if __name__ == '__main__':
+    import roxar
+    run(roxar, project)

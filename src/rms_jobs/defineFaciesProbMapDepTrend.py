@@ -1,13 +1,11 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import roxar
-
 from src.algorithms.defineFaciesProbMapDepTrend import DefineFaciesProbMapDep
 from src.utils.constants.simple import Debug
 
 
-def run():
+def run(roxar=None, project=None):
     model_file_name = 'APS_prob_mapdep.xml'
     debug_level = Debug.OFF
     define_facies_trend = DefineFaciesProbMapDep(model_file_name, project)
@@ -17,4 +15,5 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    import roxar
+    run(roxar, project)

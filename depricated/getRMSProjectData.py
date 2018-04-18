@@ -1,4 +1,5 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 """
 Python3  script with roxAPI
 This script will read the RMS project and save all relevant information necessary for the APSGUI.
@@ -43,26 +44,16 @@ Example input file to be specified before running this script.
 
 import copy
 import datetime
-import importlib
 import sys
-import numpy as np
-import roxar
-import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element
+from warnings import warn
+from xml.etree.ElementTree import Element, parse
 
+import numpy as np
 
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
-import src.utils.roxar.APSDataFromRMS as APSDataFromRMS
-import src.algorithms.APSMainFaciesTable as APSMainFaciesTable
-import src.utils.xml as xml
-
-importlib.reload(gr)
-importlib.reload(APSDataFromRMS)
-importlib.reload(APSMainFaciesTable)
-importlib.reload(xml)
-
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
-from src.utils.xml import prettify, getTextCommand, getKeyword
+from src.utils.xmlUtils import getKeyword, getTextCommand, prettify
 
 
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
@@ -73,7 +64,7 @@ def readInputXMLFile(modelFileName, debug_level=Debug.OFF):
     :return:
     """
     # Read model if it is defined
-    tree = ET.parse(modelFileName)
+    tree = parse(modelFileName)
     root = tree.getroot()
 
     kw = 'GridModel'
@@ -531,7 +522,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             print('Debug output: Facies names: ')
             print(faciesCodeNames)
 
-        faciesTable = APSMainFaciesTable.APSMainFaciesTable(fTable=faciesCodeNames)
+        faciesTable = APSMainFaciesTable(fTable=faciesCodeNames)
         faciesTable.XMLAddElement(topElement)
     # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
@@ -575,19 +566,25 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
             )
 
 
-# ----------------  Main ----------------------------------------------------
-if __name__ == '__main__':
+def run(roxar=None, project=None):
+    warn("deprecated", DeprecationWarning)
     scriptName = 'getRMSProjectData.py'
     inputFile = 'getRMSProjectData.xml'
     outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
     debug_level = Debug.OFF
-
     # Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
-    print('Start running APS workflow preparation script')
-    print('Read file: ' + inputFile)
-
+    if debug_level >= Debug.ON:
+        print('Start running APS workflow preparation script')
+        print('Read file: ' + inputFile)
     create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
-
-    print('Read RMS project and save some data to be read by the APS GUI script')
+    if debug_level >= Debug.ON:
+        print('Read RMS project and save some data to be read by the APS GUI script')
     scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_level)
-    print('Finished running: ' + scriptName)
+    if debug_level >= Debug.ON:
+        print('Finished running: ' + scriptName)
+
+
+# ----------------  Main ----------------------------------------------------
+if __name__ == '__main__':
+    import roxar
+    run(roxar, project)

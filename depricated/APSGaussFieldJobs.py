@@ -1,14 +1,11 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import copy
-import importlib
+from warnings import warn
 from xml.etree.ElementTree import Element
 
-import src.utils.xml
-
-importlib.reload(src.utils.xml)
-
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword, getIntCommand
+from src.utils.xmlUtils import getIntCommand, getKeyword
 
 
 class APSGaussFieldJobs:
@@ -47,6 +44,7 @@ class APSGaussFieldJobs:
     """
 
     def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF):
+        warn("deprecated", DeprecationWarning)
         self.__modelFileName = modelFileName
         self.__className = 'APSGaussFieldJobs'
         self.__debug_level = debug_level

@@ -1,15 +1,12 @@
 #!/bin/env python
-import copy
+# -*- coding: utf-8 -*-
 from xml.etree.ElementTree import Element
+
+import copy
 import numpy as np
-import importlib
-
-import src.utils.xml
-
-importlib.reload(src.utils.xml)
 
 from src.utils.constants.simple import Debug
-from src.utils.xml import getKeyword, getFloatCommand
+from src.utils.xmlUtils import getFloatCommand, getKeyword
 
 """
 -----------------------------------------------------------------------
