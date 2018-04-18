@@ -1,5 +1,5 @@
 FROM git.statoil.no:4567/sdp/sdpsoft/centos:6
-LABEL version="2.5.0" \
+LABEL version="2.5.2" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
@@ -13,10 +13,11 @@ ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib64:$LD_LIBRARY_PATH"
 ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/4.9.4:$LD_LIBRARY_PATH"
 ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/lib64:$LD_LIBRARY_PATH"
 
-ENV PYTHON_VERSION="3.6.1" \
-    PYTHON_PREFIX=$INSTALL_DIR/python$PYTHON_VERSION \
-    PYTHON="$PYTHON_PREFIX/bin/python3" \
-    PIP="$PYTHON -m pip --proxy $HTTP_PROXY" \
+ENV PYTHON_VERSION="3.6.1"
+ENV PYTHON_PREFIX=$INSTALL_DIR/python$PYTHON_VERSION
+ENV PYTHON="$PYTHON_PREFIX/bin/python3"
+ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert /etc/ssl/certs/ca-bundle.crt" \
+    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-bundle.crt" \
     PYTHONOPTIMIZE=x
 # All running python sould be done with optimized bytecode (-O)
 
@@ -27,17 +28,17 @@ ENV OPENSSL_VERSION="1.1.0g" \
     SQLITE3_VERSION="3220000" \
     ZLIB_VERSION="1.2.11" \
     BZIP2_VERSION="1.0.6" \
-    # APSW (SQLite wrapper) \
+    # APSW (SQLite wrapper)
     APSW_VERSION="3.22.0-r1" \
-    # NRlib (FFT and Gaussian simulation) \
-    NRLIB_VERSION="1.0.1" \
-    # TCL_VERSION == TK_VERSION \
+    # NRlib (FFT and Gaussian simulation)
+    NRLIB_VERSION="1.0a" \
+    INTEL_MKL_VERSION="2018.1.163" \
+    INTEL_MKL_SEED=12414 \
+    # TCL_VERSION == TK_VERSION
     TCL_VERSION="8.6.8"
 ENV TK_VERSION=$TCL_VERSION
 
-ENV INTEL_MKL_VERSION="2018.1.163"
 ENV INTEL_MKL="l_mkl_$INTEL_MKL_VERSION"
-ENV INTEL_MKL_SEED=12414
 ENV INTEL_PREFIX="$SOURCE_DIR/$INTEL_MKL"
 
 # Misc. software
@@ -59,7 +60,8 @@ RUN yum update -y \
     libpcap-devel \
     xz-devel \
     expat-devel \
-    mesa-libGL-devel
+    mesa-libGL-devel \
+ && yum clean all
 
 
 # Precreate all directories to avoid conflicts
@@ -82,11 +84,9 @@ RUN cd $SOURCE_DIR \
  && wget http://www.bzip.org/$BZIP2_VERSION/bzip2-$BZIP2_VERSION.tar.gz \
  && wget https://github.com/rogerbinns/apsw/archive/$APSW_VERSION.tar.gz --output-document=$SOURCE_DIR/apsw-$APSW_VERSION.tar.gz \
  && wget https://git.statoil.no/sdp/nrlib/repository/v$NRLIB_VERSION/archive.tar.gz --output-document=$SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz \
- && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz
-
-
- # Create all build directories
-RUN cd $BUILD_DIR \
+ && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz \
+    # Create all build directories
+ && cd $BUILD_DIR \
  && mkdir -p \
     python$PYTHON_VERSION \
     openssl-$OPENSSL_VERSION \
@@ -98,10 +98,9 @@ RUN cd $BUILD_DIR \
     bzip2-$BZIP2_VERSION \
     sqlite3-$SQLITE3_VERSION \
     nrlib-$NRLIB_VERSION \
-    apsw-$APSW_VERSION
-
-# Extract everything into build directories
-RUN cd $BUILD_DIR \
+    apsw-$APSW_VERSION \
+    # Extract everything into build directories
+ && cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/Python-$PYTHON_VERSION.tar.xz -C python$PYTHON_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/openssl-"$OPENSSL_VERSION".tar.gz -C openssl-$OPENSSL_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/ncurses-$NCURSES_VERSION.tar.gz -C ncurses-$NCURSES_VERSION --strip-components=1 \
@@ -227,6 +226,10 @@ RUN cd $BUILD_DIR/python$PYTHON_VERSION \
 # Upgrade setuptools
 RUN $PIP install setuptools --upgrade
 
+# Install pipenv
+# FIXME: pipenv 11 does not play nice with docker containers
+RUN $PIP install 'pipenv<11'
+
 # Build, and install APSW binding for SQLite
 # Note, APSW cannot be installed via PIP (yet)
 RUN cd $BUILD_DIR/apsw-$APSW_VERSION \
@@ -273,12 +276,10 @@ RUN echo ACCEPT_EULA=accept >> $INTEL_CONFIGURATION \
 ;intel-mkl-f__x86_64\
 ;intel-mkl-psxe__noarch\
 ;intel-psxe-common__noarch\
-;intel-compxe-pset" >> $INTEL_CONFIGURATION
+;intel-compxe-pset\
+" >> $INTEL_CONFIGURATION
 
 RUN $INTEL_PREFIX/install.sh --silent $INTEL_CONFIGURATION
-
-# PATH updated to inlude openmpi binaries needed to install mpi4py
-ENV PATH "/usr/lib64/openmpi/bin:$PATH"
 
 # Install NRlib
 RUN cd $BUILD_DIR/nrlib-$NRLIB_VERSION \

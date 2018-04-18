@@ -31,6 +31,11 @@ APP_EXAMPLES = ./examples
 APP_LIBRARY = .
 PYTHON ?= $(shell which python)
 PIP ?= $(PYTHON) -m pip
+PYTEST := $(PYTHON) -m pytest
+PIPROT := $(PYTHON) -m piprot
+PYLINT := $(PYTHON) -m pylint
+SAFETY_CHECK := $(PYTHON) -m safety check
+PYREVERSE := $(PYTHON) -m pyreverse
 PYTHON_PREFIX := $(shell dirname $(PYTHON))/..
 IMAGE_VERSION ?= $(shell $(CODE_DIR)/bin/find-version-of-docker-image.sh $(CODE_DIR))
 IMAGE_NAME ?= $(PROJECT_NAME):$(IMAGE_VERSION)
@@ -202,10 +207,10 @@ copy-source:
 	tar --exclude='$(CODE_DIR)/.git/' --exclude="$(CODE_DIR)/documentation" -cvzf code.tar.gz *
 
 check-requirements:
-	piprot --outdated $(CODE_DIR)/requirements.txt
+	$(PIPROT) --outdated $(CODE_DIR)/requirements.txt
 
 safety-check: clean-safety get-vulnerability-db
-	safety check --full-report --db $(VULNERABILITY_DB)
+	$(SAFETY_CHECK) --full-report --db $(VULNERABILITY_DB)
 
 get-vulnerability-db:
 	mkdir -p $(VULNERABILITY_DB) && \
@@ -224,7 +229,7 @@ copy-libdraw-to-test: libdraw2D.so
 
 run-tests: links
 	cd $(TEST_FOLDER) && \
-	pytest --basetemp=$(TEST_FOLDER)
+	$(PYTEST) --basetemp=$(TEST_FOLDER)
 
 clean-tests:
 	rm -rf $(TEST_FOLDER)/.cache && \
@@ -235,9 +240,9 @@ clean-tests:
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams:
 	cd $(CODE_DIR) && \
-	pyreverse -ASmy -k -o png $(ENTRY_POINT) -p APS-GUI
+	$(PYREVERSE) -ASmy -k -o png $(ENTRY_POINT) -p APS-GUI
 
 linting:
-	pylint --jobs=$(NUMBER_OF_PROCESSORS) $(SOURCE_DIR)
+	$(PYLINT) --jobs=$(NUMBER_OF_PROCESSORS) $(SOURCE_DIR)
 
 print-%  : ; @echo $($*)
