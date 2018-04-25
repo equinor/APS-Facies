@@ -370,7 +370,7 @@ def run(roxar=None, project=None):
                 print('- Run model for zone number: ' + str(zoneNumber))
                 print(' ')
 
-        zoneModel = apsModel.getZoneModel(zoneNumber)
+        zoneModel = apsModel.getZoneModel(zoneNumber, regionNumber)
 
         # Read trend parameters for truncation parameters
         zoneModel.getTruncationParam(gridModel, realNumber)
@@ -429,6 +429,11 @@ def run(roxar=None, project=None):
                       ''.format(str(zoneNumber), str(regionNumber), str(nDefinedCells)))
             else:
                 print('--- Number of active cells for zone: ' + str(nDefinedCells))
+        if nDefinedCells == 0:
+            print('Warning: No active grid cells for (zone,region)=({},{})'
+                  ''.format(str(zoneNumber), str(regionNumber)))
+            print('         Skip this zone, region combination')
+            continue
 
         # For current zone,transform all gaussian fields used in this zone and update alpha
         indx = -999
