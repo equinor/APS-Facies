@@ -1,0 +1,27 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+matplotlib = "*"
+numpy = "*"
+pillow = "*"
+scipy = "*"
+"db4f873" = {path = "./libraries/sources/nrlib"}
+
+
+[dev-packages]
+
+pipenv = "*"
+pytest = "*"
+pylint = "*"
+graphviz = "*"
+piprot = "*"
+
+
+[requires]
+

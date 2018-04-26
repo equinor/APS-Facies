@@ -1,37 +1,35 @@
 FROM git.statoil.no:4567/sdp/sdpsoft/centos:6
-LABEL version="2.5.2" \
+LABEL version="2.6.3" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
 
-ENV GCC_VERSION="7.3.0"
+ENV GCC_VERSION="4.9.4"
 ENV GCC_PREFIX=$INSTALL_DIR/gcc-$GCC_VERSION
-COPY --from=git.statoil.no:4567/sdp/sdpsoft/gcc:7.3.0 $GCC_PREFIX $GCC_PREFIX
-ENV PATH="$GCC_PREFIX/bin:$PATH"
-ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib:$LD_LIBRARY_PATH"
-ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib64:$LD_LIBRARY_PATH"
-ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/4.9.4:$LD_LIBRARY_PATH"
-ENV LD_LIBRARY_PATH="$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/lib64:$LD_LIBRARY_PATH"
+COPY --from=git.statoil.no:4567/sdp/sdpsoft/gcc:4.9.4 $GCC_PREFIX $GCC_PREFIX
+ENV PATH="$GCC_PREFIX/bin:$PATH" \
+    CA_FILE="/etc/ssl/certs/ca-bundle.crt" \
+    LD_LIBRARY_PATH="\
+$GCC_PREFIX/lib64:$GCC_PREFIX/lib:\
+$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/${GCC_VERSION}:\
+$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/lib64:\
+${LD_LIBRARY_PATH}"
 
 ENV PYTHON_VERSION="3.6.1"
 ENV PYTHON_PREFIX=$INSTALL_DIR/python$PYTHON_VERSION
 ENV PYTHON="$PYTHON_PREFIX/bin/python3"
-ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert /etc/ssl/certs/ca-bundle.crt" \
-    REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-bundle.crt" \
-    PYTHONOPTIMIZE=x
+ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
+    REQUESTS_CA_BUNDLE="${CA_FILE}" \
+    SSL_CERT_FILE="${CA_FILE}"
 # All running python sould be done with optimized bytecode (-O)
 
 # Python dependencies
 ENV OPENSSL_VERSION="1.1.0g" \
     NCURSES_VERSION="6.1" \
     READLINE_VERSION="7.0" \
-    SQLITE3_VERSION="3220000" \
+    SQLITE3_VERSION="3230100" \
     ZLIB_VERSION="1.2.11" \
     BZIP2_VERSION="1.0.6" \
-    # APSW (SQLite wrapper)
-    APSW_VERSION="3.22.0-r1" \
-    # NRlib (FFT and Gaussian simulation)
-    NRLIB_VERSION="1.0a" \
     INTEL_MKL_VERSION="2018.1.163" \
     INTEL_MKL_SEED=12414 \
     # TCL_VERSION == TK_VERSION
@@ -82,8 +80,6 @@ RUN cd $SOURCE_DIR \
  && wget https://sourceforge.net/projects/tcl/files/Tcl/$TCL_VERSION/tcl"$TCL_VERSION"-src.tar.gz \
  && wget https://sourceforge.net/projects/tcl/files/Tcl/$TK_VERSION/tk"$TK_VERSION"-src.tar.gz \
  && wget http://www.bzip.org/$BZIP2_VERSION/bzip2-$BZIP2_VERSION.tar.gz \
- && wget https://github.com/rogerbinns/apsw/archive/$APSW_VERSION.tar.gz --output-document=$SOURCE_DIR/apsw-$APSW_VERSION.tar.gz \
- && wget https://git.statoil.no/sdp/nrlib/repository/v$NRLIB_VERSION/archive.tar.gz --output-document=$SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz \
  && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz \
     # Create all build directories
  && cd $BUILD_DIR \
@@ -97,8 +93,6 @@ RUN cd $SOURCE_DIR \
     tk-$TK_VERSION \
     bzip2-$BZIP2_VERSION \
     sqlite3-$SQLITE3_VERSION \
-    nrlib-$NRLIB_VERSION \
-    apsw-$APSW_VERSION \
     # Extract everything into build directories
  && cd $BUILD_DIR \
  && tar -xvf  $SOURCE_DIR/Python-$PYTHON_VERSION.tar.xz -C python$PYTHON_VERSION --strip-components=1 \
@@ -109,9 +103,7 @@ RUN cd $SOURCE_DIR \
  && tar -xvf  $SOURCE_DIR/tk"$TK_VERSION"-src.tar.gz -C tk-$TK_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/bzip2-$BZIP2_VERSION.tar.gz -C bzip2-$BZIP2_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz -C sqlite3-$SQLITE3_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/apsw-$APSW_VERSION.tar.gz -C apsw-$APSW_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/zlib-$ZLIB_VERSION.tar.gz -C zlib-$ZLIB_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/nrlib-$NRLIB_VERSION.tar.gz -C nrlib-$NRLIB_VERSION --strip-components=1 \
  && tar -xvf  $SOURCE_DIR/$INTEL_MKL.tgz -C $INTEL_PREFIX --strip-components=1 \
  # Remove downloaded archives
  && rm -f $SOURCE_DIR/*.tar.*
@@ -214,10 +206,8 @@ RUN cd $BUILD_DIR/python$PYTHON_VERSION \
     --with-threads \
     --enable-shared \
     --enable-ipv6 \
-    --enable-unicode=ucs4 \
     --with-doc-strings \
     --enable-optimizations \
-    --enable-profiling  \
     --enable-loadable-sqlite-extensions \
  && http_proxy='' https_proxy='' \
  && make -j $(nproc) \
@@ -229,13 +219,6 @@ RUN $PIP install setuptools --upgrade
 # Install pipenv
 # FIXME: pipenv 11 does not play nice with docker containers
 RUN $PIP install 'pipenv<11'
-
-# Build, and install APSW binding for SQLite
-# Note, APSW cannot be installed via PIP (yet)
-RUN cd $BUILD_DIR/apsw-$APSW_VERSION \
- && $PYTHON setup.py build --enable-all-extensions \
- && $PYTHON setup.py install \
- && $PYTHON setup.py test
 
 # Install MKL (prerequisite for nrlib)
 ENV INTEL_MKL_PREFIX="/opt/intel"
@@ -280,12 +263,6 @@ RUN echo ACCEPT_EULA=accept >> $INTEL_CONFIGURATION \
 " >> $INTEL_CONFIGURATION
 
 RUN $INTEL_PREFIX/install.sh --silent $INTEL_CONFIGURATION
-
-# Install NRlib
-RUN cd $BUILD_DIR/nrlib-$NRLIB_VERSION \
- && source $INTEL_MKL_PREFIX/bin/compilervars.sh intel64 \
- && make build \
- && make install
 
 ##
 # Final clean-up
