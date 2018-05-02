@@ -203,10 +203,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.1 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.1 </stackAngle>
+          </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -269,10 +271,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.01 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.1 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.1 </stackAngle>
+          </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -285,15 +289,17 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Elliptic3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.1 </stackAngle>
-          <curvature> 5.0 </curvature>
-          <origin_x> 0.9 </origin_x>
-          <origin_y> 0.9 </origin_y>
-          <origin_z_simbox> 0.9 </origin_z_simbox>
-          <origintype> Relative </origintype>
+        <Trend>
+          <Elliptic3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.1 </stackAngle>
+            <curvature> 5.0 </curvature>
+            <origin_x> 0.9 </origin_x>
+            <origin_y> 0.9 </origin_y>
+            <origin_z_simbox> 0.9 </origin_z_simbox>
+            <origintype> Relative </origintype>
+          </Elliptic3D>
         </Trend>
         <RelStdDev> 0.045 </RelStdDev>
         <SeedForPreview> 88831556 </SeedForPreview>
@@ -306,16 +312,18 @@
           <AzimuthAngle> 135.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Hyperbolic3D">
-          <azimuth> 35.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 90.0 </stackAngle>
-          <curvature> 10.5 </curvature>
-          <migrationAngle> 89.9 </migrationAngle>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.0 </origin_y>
-          <origin_z_simbox> 0.0 </origin_z_simbox>
-          <origintype> Relative </origintype>
+        <Trend>
+          <Hyperbolic3D>
+            <azimuth> 35.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 90.0 </stackAngle>
+            <curvature> 10.5 </curvature>
+            <migrationAngle> 89.9 </migrationAngle>
+            <origin_x> 0.5 </origin_x>
+            <origin_y> 0.0 </origin_y>
+            <origin_z_simbox> 0.0 </origin_z_simbox>
+            <origintype> Relative </origintype>
+          </Hyperbolic3D>
         </Trend>
         <RelStdDev> 0.045 </RelStdDev>
         <SeedForPreview> 75151556 </SeedForPreview>
@@ -328,8 +336,10 @@
           <AzimuthAngle> 100.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="RMSParameter">
-          <TrendParamName> TrendExample </TrendParamName>
+        <Trend>
+          <RMSParameter>
+            <TrendParamName> TrendExample </TrendParamName>
+          </RMSParameter>
         </Trend>
         <RelStdDev> 0.045 </RelStdDev>
         <SeedForPreview> 82765556 </SeedForPreview>
@@ -398,10 +408,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.01 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.1 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.1 </stackAngle>
+          </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -500,10 +512,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.02 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.1 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.1 </stackAngle>
+          </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -597,10 +611,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.03 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 120.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.15 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 120.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.15 </stackAngle>
+          </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -663,10 +679,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.1 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.1 </stackAngle>
+          </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
