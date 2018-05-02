@@ -88,7 +88,7 @@ class APSModel:
     """
 
     def __init__(
-            self, modelFileName=None, rmsProjectName='', rmsWorkflowName='', rmsGaussFieldScriptName='',
+            self, modelFileName=None, apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='', rmsGaussFieldScriptName='',
             rmsGridModelName='', rmsSingleZoneGrid='False', rmsZoneParameterName='', rmsRegionParameterName='',
             rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, rmsGFJobs=None,
             rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None, zoneModelTable=None,
@@ -151,6 +151,9 @@ class APSModel:
         """
         # Local variables
         self.__className = self.__class__.__name__
+
+        self.__apsModelVersion = apsmodelversion
+
         self.__rmsProjectName = rmsProjectName
         self.__rmsWorkflowName = rmsWorkflowName
         self.__rmsGaussFieldScriptName = rmsGaussFieldScriptName
@@ -192,6 +195,20 @@ class APSModel:
         tree = ET.parse(modelFileName)
         self.__ET_Tree = tree
         root = tree.getroot()
+
+        apsmodelversion = root.get('version')
+        if apsmodelversion is None:
+            raise ValueError(
+                'attribute version is not defined in root element'
+            )
+        else:
+
+            if apsmodelversion != "1.0":
+                raise ValueError(
+                    'Illegal value ( {} ) specified for apsmodelversion (only 1.0 is supported)'.format(apsmodelversion)
+                )
+            else:
+                self.__apsModelVersion = apsmodelversion
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
@@ -1154,7 +1171,7 @@ class APSModel:
         return rootReformatted
 
     def writeModel(self, modelFileName, debug_level=Debug.OFF):
-        top = Element('APSModel')
+        top = Element('APSModel', {'version': self.__apsModelVersion})
         rootUpdated = self.XMLAddElement(top)
         with open(modelFileName, 'w') as file:
             file.write(rootUpdated)
