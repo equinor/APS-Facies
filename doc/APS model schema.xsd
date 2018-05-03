@@ -468,6 +468,7 @@
 		<xs:sequence>
 			<xs:element type="UseConstProbType" name="UseConstProb"/>
 			<xs:element type="PositiveFloat" name="SimBoxThickness"/>
+            <xs:element type="NonEmptyString" name="HorizonNameVarioTrend" />
 			<xs:element type="FaciesProbForModelType" name="FaciesProbForModel"/>
 			<xs:element type="GaussFieldType" name="GaussField" maxOccurs="unbounded" minOccurs="0"/>
 			<xs:element type="TruncationRuleType" name="TruncationRule"/>
