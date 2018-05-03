@@ -465,6 +465,7 @@
 			<xs:element name="Optimization" type="OptimizationType" minOccurs="0" />
 			<xs:element name="RMSProjectName" type="NonEmptyString" />
 			<xs:element name="RMSWorkflowName" type="NonEmptyString" />
+			<xs:element name="RMSGaussFieldScriptName" type="NonEmptyString" />
 			<xs:element name="GridModelName" type="NonEmptyString" />
 			<xs:element name="ZoneParamName" type="NonEmptyString" />
 			<xs:element name="RegionParamName" type="NonEmptyString" minOccurs="0" />
