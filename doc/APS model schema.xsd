@@ -100,9 +100,27 @@
   *****************
   -->
 
+
 	<xs:element name="APSModel" type="APSModelType"/>
 
+    <!--
+    GaussFieldJobNames
+    -->
+    <xs:complexType name="JobType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="GFParam" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="GaussFieldJobNamesType">
+        <xs:sequence>
+        <xs:element type="JobType" name="Job" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
 
+    <!--
+    Preview
+    -->
 	<xs:complexType name="PreviewType">
         <xs:simpleContent>
             <xs:extension base="xs:string">
@@ -115,6 +133,9 @@
         </xs:simpleContent>
     </xs:complexType>
 
+    <!--
+    SelectedZonesAndRegions
+    -->
     <xs:complexType name="SelectedZoneWithRegionsType">
       <xs:simpleContent>
         <xs:extension base="xs:string">
@@ -129,6 +150,9 @@
       </xs:sequence>
     </xs:complexType>
 
+    <!--
+    Optimization
+    -->
 	<xs:complexType name="OptimizationType">
 		<xs:sequence>
 			<!--comment: Both elements in the sequence are optional. Does it make sense to have an element Optimization at all if these are not set?
@@ -189,7 +213,7 @@
 	</xs:complexType>
 
 	<!--
-    ********** Vario ***************************
+    Vario
     -->
 
 	<xs:simpleType name="VarioNameType">
@@ -224,7 +248,7 @@
 	</xs:complexType>
 
 	<!--
-    ************** TrendTypes *****************
+    TrendTypes
     -->
 
 	<xs:complexType name="Linear3DType">
@@ -458,6 +482,9 @@
 		</xs:sequence>
 	</xs:complexType>
 
+    <!--
+    APSModel element
+    -->
 	<xs:complexType name="APSModelType">
 		<xs:sequence>
 			<xs:element name="Preview" type="PreviewType" minOccurs="0" />
@@ -474,6 +501,7 @@
 			<xs:element name="SeedFile" type="NonEmptyString" minOccurs="0"/>
 			<xs:element name="WriteSeeds" type="YesNo" minOccurs="0"/>
 			<xs:element name="MainFaciesTable" type="MainFaciesTableType" />
+            <xs:element name="GaussFieldJobNames" type="GaussFieldJobNamesType" minOccurs="0"/>
 			<xs:element type="ZoneModelsType" name="ZoneModels"/>
 		</xs:sequence>
 		<xs:attribute name="version" use="required">
