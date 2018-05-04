@@ -30,11 +30,12 @@ def interpretXMLModelFileAndWrite(
     trRule = root.find('TruncationRule')
 
     # Get name of truncation rule
-    truncRuleName = trRule.get('name')
+    #truncRuleName = trRule.get('name')
+    truncRuleName = trRule[0].tag
     print('Truncation rule: ' + truncRuleName)
 
     # Get number of required Gauss fields
-    nGaussFields = int(trRule.get('nGFields'))
+    nGaussFields = int(trRule[0].get('nGFields'))
     #    print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)

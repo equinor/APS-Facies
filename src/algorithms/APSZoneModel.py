@@ -235,11 +235,12 @@ class APSZoneModel:
                         'under keyword Zone'
                         ''.format(modelName=modelFileName)
                     )
-                truncRuleName = trRule.get('name')
+                #truncRuleName = trRule.get('name')
+                truncRuleName = trRule[0].tag
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
-                nGaussFieldInModel = int(trRule.get('nGFields'))
+                nGaussFieldInModel = int(trRule[0].get('nGFields'))
                 nGaussFieldInZone = self.__gaussModelObject.getNGaussFields()
                 if nGaussFieldInModel > nGaussFieldInZone:
                     raise ValueError(

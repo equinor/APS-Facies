@@ -115,23 +115,25 @@
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="2" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F3">
-            <Angle> -90.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F1">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="2">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F3">
+              <Angle> -90.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F1">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="1">
@@ -177,23 +179,25 @@
         </Vario>
         <SeedForPreview> 75151556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="2" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F1">
-            <Angle> 135.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="2">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F1">
+              <Angle> 135.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="3">
@@ -298,39 +302,41 @@
         <RelStdDev> 0.045 </RelStdDev>
         <SeedForPreview> 82765556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F1">
-            <Angle> 135.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
-        <OverLayModel>
-          <Group>
-            <AlphaField name="GRF8">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F4"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F3 </BackGround>
-          </Group>
-          <Group>
-            <AlphaField name="GRF9">
-              <TruncIntervalCenter> 0.9 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F1 </BackGround>
-          </Group>
-        </OverLayModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F1">
+              <Angle> 135.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+          <OverLayModel>
+            <Group>
+              <AlphaField name="GRF8">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F4"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F3 </BackGround>
+            </Group>
+            <Group>
+              <AlphaField name="GRF9">
+                <TruncIntervalCenter> 0.9 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F1 </BackGround>
+            </Group>
+          </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="4">
@@ -402,39 +408,41 @@
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F1">
-            <Angle> 135.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
-        <OverLayModel>
-          <Group>
-            <AlphaField name="GRF8">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F4"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F3 </BackGround>
-          </Group>
-          <Group>
-            <AlphaField name="GRF9">
-              <TruncIntervalCenter> 0.9 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F1 </BackGround>
-          </Group>
-        </OverLayModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F1">
+              <Angle> 135.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+          <OverLayModel>
+            <Group>
+              <AlphaField name="GRF8">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F4"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F3 </BackGround>
+            </Group>
+            <Group>
+              <AlphaField name="GRF9">
+                <TruncIntervalCenter> 0.9 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F1 </BackGround>
+            </Group>
+          </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
     <Zone number="4">
@@ -506,40 +514,42 @@
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F1">
-            <Angle> -135.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> 90.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> 45.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
-        <OverLayModel>
-          <Group>
-            <AlphaField name="GRF8">
-              <TruncIntervalCenter> 1.0 </TruncIntervalCenter>
-              <ProbFrac name="F4"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F3 </BackGround>
-          </Group>
-          <Group>
-            <AlphaField name="GRF9">
-              <TruncIntervalCenter> 1.0 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F1 </BackGround>
-            <BackGround> F2 </BackGround>
-          </Group>
-        </OverLayModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F1">
+              <Angle> -135.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> 90.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> 45.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+          <OverLayModel>
+            <Group>
+              <AlphaField name="GRF8">
+                <TruncIntervalCenter> 1.0 </TruncIntervalCenter>
+                <ProbFrac name="F4"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F3 </BackGround>
+            </Group>
+            <Group>
+              <AlphaField name="GRF9">
+                <TruncIntervalCenter> 1.0 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F1 </BackGround>
+              <BackGround> F2 </BackGround>
+            </Group>
+          </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
     <Zone number="1">
@@ -603,48 +613,50 @@
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F1">
-            <Angle> -180.0 </Angle>
-            <ProbFrac> 0.5 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> 180.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F1">
-            <Angle> 0.0 </Angle>
-            <ProbFrac> 0.5 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> 35.0 </Angle>
-            <ProbFrac> 0.7 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> -35.0 </Angle>
-            <ProbFrac> 0.3 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
-        <OverLayModel>
-          <Group>
-            <AlphaField name="GRF8">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F3 </BackGround>
-            <BackGround> F2 </BackGround>
-          </Group>
-          <Group>
-            <AlphaField name="GRF9">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F4"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F1 </BackGround>
-          </Group>
-        </OverLayModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F1">
+              <Angle> -180.0 </Angle>
+              <ProbFrac> 0.5 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> 180.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F1">
+              <Angle> 0.0 </Angle>
+              <ProbFrac> 0.5 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> 35.0 </Angle>
+              <ProbFrac> 0.7 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> -35.0 </Angle>
+              <ProbFrac> 0.3 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+          <OverLayModel>
+            <Group>
+              <AlphaField name="GRF8">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F3 </BackGround>
+              <BackGround> F2 </BackGround>
+            </Group>
+            <Group>
+              <AlphaField name="GRF9">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F4"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F1 </BackGround>
+            </Group>
+          </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
     <Zone number="6" regionNumber="10">
@@ -716,58 +728,60 @@
         </Vario>
         <SeedForPreview> 82765556 </SeedForPreview>
       </GaussField>
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
-        <BackGroundModel>
-          <AlphaFields> GRF6 GRF7 </AlphaFields>
-          <UseConstTruncParam> 1 </UseConstTruncParam>
-          <Facies name="F1">
-            <Angle> -180.0 </Angle>
-            <ProbFrac> 1.0 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> -170.0 </Angle>
-            <ProbFrac> 0.5 </ProbFrac>
-          </Facies>
-          <Facies name="F3">
-            <Angle> -160.0 </Angle>
-            <ProbFrac> 0.5 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> -150.0 </Angle>
-            <ProbFrac> 0.7 </ProbFrac>
-          </Facies>
-          <Facies name="F2">
-            <Angle> -140.0 </Angle>
-            <ProbFrac> 0.3 </ProbFrac>
-          </Facies>
-        </BackGroundModel>
-        <OverLayModel>
-          <Group>
-            <AlphaField name="GRF8">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 0.5 </ProbFrac>
-            </AlphaField>
-            <BackGround> F3 </BackGround>
-          </Group>
-          <Group>
-            <AlphaField name="GRF8">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 0.3 </ProbFrac>
-            </AlphaField>
-            <AlphaField name="GRF9">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F5"> 0.2 </ProbFrac>
-            </AlphaField>
-            <BackGround> F2 </BackGround>
-          </Group>
-          <Group>
-            <AlphaField name="GRF9">
-              <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
-              <ProbFrac name="F4"> 1.0 </ProbFrac>
-            </AlphaField>
-            <BackGround> F1 </BackGround>
-          </Group>
-        </OverLayModel>
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
+          <BackGroundModel>
+            <AlphaFields> GRF6 GRF7 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Facies name="F1">
+              <Angle> -180.0 </Angle>
+              <ProbFrac> 1.0 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> -170.0 </Angle>
+              <ProbFrac> 0.5 </ProbFrac>
+            </Facies>
+            <Facies name="F3">
+              <Angle> -160.0 </Angle>
+              <ProbFrac> 0.5 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> -150.0 </Angle>
+              <ProbFrac> 0.7 </ProbFrac>
+            </Facies>
+            <Facies name="F2">
+              <Angle> -140.0 </Angle>
+              <ProbFrac> 0.3 </ProbFrac>
+            </Facies>
+          </BackGroundModel>
+          <OverLayModel>
+            <Group>
+              <AlphaField name="GRF8">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 0.5 </ProbFrac>
+              </AlphaField>
+              <BackGround> F3 </BackGround>
+            </Group>
+            <Group>
+              <AlphaField name="GRF8">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 0.3 </ProbFrac>
+              </AlphaField>
+              <AlphaField name="GRF9">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F5"> 0.2 </ProbFrac>
+              </AlphaField>
+              <BackGround> F2 </BackGround>
+            </Group>
+            <Group>
+              <AlphaField name="GRF9">
+                <TruncIntervalCenter> 0.0 </TruncIntervalCenter>
+                <ProbFrac name="F4"> 1.0 </ProbFrac>
+              </AlphaField>
+              <BackGround> F1 </BackGround>
+            </Group>
+          </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
   </ZoneModels>
