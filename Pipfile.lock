@@ -21,9 +21,6 @@
             ],
             "version": "==0.10.0"
         },
-        "db4f873": {
-            "path": "./libraries/sources/nrlib"
-        },
         "kiwisolver": {
             "hashes": [
                 "sha256:0ee4ed8b3ae8f5f712b0aa9ebd2858b5b232f1b9a96b0943dceb34df2a223bc3",

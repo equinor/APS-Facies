@@ -1,19 +1,21 @@
 image:
-  name: "git.statoil.no:4567/aps/gui/aps-gui:2.6.3"
+  name: "git.statoil.no:4567/aps/gui/aps-gui:3.0.0"
 
 variables:
-  GIT_STRATEGY: "fetch"
-  HTTP_PROXY:   "http://www-proxy.statoil.no:80"
-  HTTPS_PROXY:  "http://www-proxy.statoil.no:80"
-  FTP_PROXY:    "http://www-proxy.statoil.no:80"
-  NO_PROXY:     "git.statoil.no"
-  CODE_DIR:     "${CI_PROJECT_DIR}"
-  ARTIFACTS:    "${CODE_DIR}/artifacts"
-  MAKE:         "make --makefile=${CODE_DIR}/Makefile"
-  MKL_ROOT:      "/opt/intel/mkl"
-  PYTHON:       "/prog/sdpsoft/python3.6.1/bin/python3"
-  SHELL:        "/bin/bash"
+  GIT_STRATEGY:           "fetch"
+  HTTP_PROXY:             "http://www-proxy.statoil.no:80"
+  HTTPS_PROXY:            "http://www-proxy.statoil.no:80"
+  FTP_PROXY:              "http://www-proxy.statoil.no:80"
+  NO_PROXY:               "git.statoil.no"
+  CODE_DIR:               "${CI_PROJECT_DIR}"
+  ARTIFACTS:              "${CODE_DIR}/artifacts"
+  MAKE:                   "make --makefile=${CODE_DIR}/Makefile"
+  MKL_ROOT:               "/opt/intel/mkl"
+  PYTHON:                 "${CODE_DIR}/.venv/bin/python"
+  SHELL:                  "/bin/bash"
   PIPENV_VENV_IN_PROJECT: "1"
+  DEPLOY_SERVER:          "tr-linrgsn001.tr.statoil.no"
+  DEPLOY_PATH:            "${DEPLOY_SERVER}:/project/res/APSGUI"
 
 stages:
   - init
@@ -26,17 +28,21 @@ stages:
   - deploy
   - clean docker
 
+before_script:
+  - 'export PYTHONPATH="${CODE_DIR}:${PYTHONPATH}"'
+
 initialize:
   stage: init
   variables:
-    BUILD_NRLIB: "yes"
-    BUILD_APSW: "yes"
+    PYTHON:      "/prog/roxar/site/RMS11_beta_latest/rms/versions/statoil_release/bin/LINUX_64/python"
   script:
     - 'eval $MAKE init'
     - 'eval rm -rf ${WORKON_HOME}/nrlib-*'
   artifacts:
     name: build-cache
     paths:
+      - 'Pipfile'
+      - 'Pipfile.lock'
       - '.venv/'
       - 'libs/'
       - 'workflow/'
@@ -60,7 +66,6 @@ vulnerabilities:
   stage: check dependencies
   script:
     - 'eval $MAKE safety-check'
-  allow_failure: true  # Only until fix for pip and pipenv
 
 outdated (Python) dependencies:
   stage: check dependencies
@@ -95,12 +100,12 @@ unit testing:
 build GUI:
   stage: build gui
   script:
-    - 'eval mkdir -p $ARTIFACTS'
-    - 'eval $MAKE build'
+    - 'eval mkdir -p plugin'
+    - 'eval $MAKE build-gui'
   artifacts:
     expire_in: 1 week
     paths:
-      - artifacts/
+      - plugin/
 
 deploy release:
   stage: deploy
