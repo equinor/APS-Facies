@@ -11,7 +11,6 @@ matplotlib = "*"
 numpy = "*"
 pillow = "*"
 scipy = "*"
-"db4f873" = {path = "./libraries/sources/nrlib"}
 
 
 [dev-packages]

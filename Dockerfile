@@ -1,43 +1,77 @@
 FROM git.statoil.no:4567/sdp/sdpsoft/centos:6
-LABEL version="2.6.3" \
+LABEL version="3.0.0" \
       maintainer="snis@statoil.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Statoil ASA"
 
-ENV GCC_VERSION="4.9.4"
-ENV GCC_PREFIX=$INSTALL_DIR/gcc-$GCC_VERSION
-COPY --from=git.statoil.no:4567/sdp/sdpsoft/gcc:4.9.4 $GCC_PREFIX $GCC_PREFIX
-ENV PATH="$GCC_PREFIX/bin:$PATH" \
-    CA_FILE="/etc/ssl/certs/ca-bundle.crt" \
+# Versions
+ENV RMS_VERSION=11.0.0-b8 \
+    GCC_VERSION=4.9.4 \
+    PYTHON_VERSION=3.6 \
+    INTEL_MKL_VERSION=2018.2.199 \
+    INTEL_MKL_SEED=12725 \
+    NODE_VERSION=8.11.1 \
+    NRLIB_VERSION=1.1-r6 \
+    SQLITE_VERSION=3.22.0 \
+    YARN_VERSION=1.5.1
+ENV APSW_VERSION=${SQLITE_VERSION}-r1
+
+# Auxillary (version) information
+ENV NODE_ARCH='x64' \
+    INTEL_MKL="l_mkl_${INTEL_MKL_VERSION}" \
+    RMS_LINUX="LINUX_64" \
+    CA_FILE="/etc/ssl/certs/ca-bundle.crt"
+
+# Prefixes
+ENV GCC_PREFIX=${INSTALL_DIR}/gcc-${GCC_VERSION} \
+    RMS_PREFIX="/prog/roxar/site/RMS11_beta_latest/rms/versions/statoil_release" \
+    DEPENDENCIES_PREFIX="/dependences" \
+    INTEL_PREFIX="${SOURCE_DIR}/${INTEL_MKL}" \
+    INTEL_MKL_PREFIX="/opt/intel" \
+    NODE_PREFIX="${INSTALL_DIR}/node-${NODE_VERSION}"
+ENV RMS_BIN_PREFIX="${RMS_PREFIX}/bin/${RMS_LINUX}" \
+    RMS_LIB_PREFIX="${RMS_PREFIX}/lib/${RMS_LINUX}"
+ENV PYTHON_LIB_PREFIX=$RMS_LIB_PREFIX/python$PYTHON_VERSION \
+    PYTHONPATH=$DEPENDENCIES_PREFIX \
+    MKL_ROOT="${INTEL_MKL_PREFIX}/mkl" \
+    INTEL_CONFIGURATION="${INTEL_PREFIX}/config.txt"
+
+# Paths for executables, and libraries
+
+ENV PATH="\
+/root/.local/bin:\
+${NODE_PREFIX}/bin:\
+${RMS_PREFIX}/linux-amd64-gcc_4_4-release/bin:\
+${RMS_BIN_PREFIX}:\
+${GCC_PREFIX}/bin:\
+${PATH}" \
     LD_LIBRARY_PATH="\
-$GCC_PREFIX/lib64:$GCC_PREFIX/lib:\
-$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/${GCC_VERSION}:\
-$GCC_PREFIX/lib/gcc/x86_64-unknown-linux-gnu/lib64:\
+${RMS_LIB_PREFIX}:\
+${PYTHON_LIB_PREFIX}:\
+${GCC_PREFIX}/lib64:\
+${GCC_PREFIX}/lib:\
+${GCC_PREFIX}/lib/gcc/x86_64-unknown-linux-gnu/${GCC_VERSION}:\
+${GCC_PREFIX}/lib/gcc/x86_64-unknown-linux-gnu/lib64:\
 ${LD_LIBRARY_PATH}"
 
-ENV PYTHON_VERSION="3.6.1"
-ENV PYTHON_PREFIX=$INSTALL_DIR/python$PYTHON_VERSION
-ENV PYTHON="$PYTHON_PREFIX/bin/python3"
+# All of the following envs might not be necessary
+# espescially C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, LIBRARY_PATH and LD_RUN_PATH
+ENV LIBRARY_PATH="${LD_LIBRARY_PATH}" \
+    LD_RUN_PATH="${LD_LIBRARY_PATH}"
+
+# Variables for programs
+ENV PYTHON="$RMS_BIN_PREFIX/python" \
+    NODE="$NODE_PREFIX/bin/node" \
+    NPM="$NODE_PREFIX/bin/npm" \
+    NPX="$NODE_PREFIX/bin/npx" \
+    YARN="$NODE_PREFIX/bin/yarn"
 ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
     REQUESTS_CA_BUNDLE="${CA_FILE}" \
     SSL_CERT_FILE="${CA_FILE}"
-# All running python sould be done with optimized bytecode (-O)
 
-# Python dependencies
-ENV OPENSSL_VERSION="1.1.0g" \
-    NCURSES_VERSION="6.1" \
-    READLINE_VERSION="7.0" \
-    SQLITE3_VERSION="3230100" \
-    ZLIB_VERSION="1.2.11" \
-    BZIP2_VERSION="1.0.6" \
-    INTEL_MKL_VERSION="2018.1.163" \
-    INTEL_MKL_SEED=12414 \
-    # TCL_VERSION == TK_VERSION
-    TCL_VERSION="8.6.8"
-ENV TK_VERSION=$TCL_VERSION
-
-ENV INTEL_MKL="l_mkl_$INTEL_MKL_VERSION"
-ENV INTEL_PREFIX="$SOURCE_DIR/$INTEL_MKL"
+# Add external resources
+COPY --from=git.statoil.no:4567/sdp/sdpsoft/gcc:4.9.4 $GCC_PREFIX $GCC_PREFIX
+ADD rms-${RMS_VERSION}.tar.xz /
 
 # Misc. software
 RUN yum update -y \
@@ -59,200 +93,107 @@ RUN yum update -y \
     xz-devel \
     expat-devel \
     mesa-libGL-devel \
- && yum clean all
-
-
-# Precreate all directories to avoid conflicts
-RUN mkdir -p $ROOT_DIR \
+    # RMS dependencies
+    mesa-libEGL \
+    mesa-libGLU \
+    libXi \
+    libSM \
+    libXrender \
+    libXrandr \
+    libXcomposite \
+    libXcursor \
+    libXt \
+    libXtst \
+    libXScrnSaver \
+    fontconfig \
+    alsa-lib \
+    libgomp \
+ && yum clean all \
+    # Get GPG keys
+ && for key in \
+      # NodeJS
+      # gpg keys listed at https://github.com/nodejs/node#release-team
+      94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
+      FD3A5288F042B6850C66B31F09FE44734EB7990E \
+      71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
+      DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
+      C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
+      B9AE9905FFD7803F25714661B63B535A4C206CA9 \
+      56730D5401028683275BD23C23EFEFE93C4CFFFE \
+      77984A986EBC2AA786BC0F66B01FBB92821C587A \
+      # Yarn
+      6A010C5166006599AA17F08146C2130DFD2497F5 \
+    ; do \
+      gpg --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" || \
+      gpg --keyserver hkp://ipv4.pool.sks-keyservers.net --recv-keys "$key" || \
+      gpg --keyserver hkp://pgp.mit.edu:80 --recv-keys "$key" ; \
+    done \
+    # Precreate all directories to avoid conflicts
+ && mkdir -p $ROOT_DIR \
              $BUILD_DIR \
              $SOURCE_DIR \
+             $NODE_PREFIX \
              $INSTALL_DIR \
-             $PYTHON_PREFIX \
-             $INTEL_PREFIX
-
-RUN cd $SOURCE_DIR \
- && wget https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz \
- && wget https://www.openssl.org/source/openssl-"$OPENSSL_VERSION".tar.gz \
- && wget http://zlib.net/zlib-$ZLIB_VERSION.tar.gz \
- && wget http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz \
- && wget https://ftp.gnu.org/gnu/readline/readline-$READLINE_VERSION.tar.gz \
- && wget https://sqlite.org/2018/sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
- && wget https://sourceforge.net/projects/tcl/files/Tcl/$TCL_VERSION/tcl"$TCL_VERSION"-src.tar.gz \
- && wget https://sourceforge.net/projects/tcl/files/Tcl/$TK_VERSION/tk"$TK_VERSION"-src.tar.gz \
- && wget http://www.bzip.org/$BZIP2_VERSION/bzip2-$BZIP2_VERSION.tar.gz \
- && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/$INTEL_MKL_SEED/$INTEL_MKL.tgz \
+             $DEPENDENCIES_PREFIX \
+             $NRLIB_PREFIX \
+             $INTEL_PREFIX \
+ && cd ${SOURCE_DIR} \
+    # Intel MKL
+ && wget http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/${INTEL_MKL_SEED}/${INTEL_MKL}.tgz \
+    # Node JS
+ && wget https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz \
+    # Yarn
+ && wget https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz \
+    # NRlib
+ && wget https://git.statoil.no/sdp/nrlib/repository/v${NRLIB_VERSION}/archive.tar.gz --output-document=${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz \
+    # APSW
+ && wget https://github.com/rogerbinns/apsw/archive/${APSW_VERSION}.tar.gz --output-document=${SOURCE_DIR}/apsw-${APSW_VERSION}.tar.gz \
+    ## Verify Downloads
+    # Node JS
+ && wget https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt.asc --output-document=${SOURCE_DIR}/NODE_SHASUMS256.txt.asc \
+ && gpg --batch --decrypt --output NODE_SHASUMS256.txt NODE_SHASUMS256.txt.asc \
+ && grep " node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz\$" NODE_SHASUMS256.txt | sha256sum -c - \
+    # Yarn
+ && wget https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz.asc \
+ && gpg --batch --verify yarn-v${YARN_VERSION}.tar.gz.asc yarn-v${YARN_VERSION}.tar.gz \
     # Create all build directories
- && cd $BUILD_DIR \
+ && cd ${BUILD_DIR} \
  && mkdir -p \
-    python$PYTHON_VERSION \
-    openssl-$OPENSSL_VERSION \
-    zlib-$ZLIB_VERSION \
-    ncurses-$NCURSES_VERSION \
-    readline-$READLINE_VERSION \
-    tcl-$TCL_VERSION \
-    tk-$TK_VERSION \
-    bzip2-$BZIP2_VERSION \
-    sqlite3-$SQLITE3_VERSION \
-    # Extract everything into build directories
- && cd $BUILD_DIR \
- && tar -xvf  $SOURCE_DIR/Python-$PYTHON_VERSION.tar.xz -C python$PYTHON_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/openssl-"$OPENSSL_VERSION".tar.gz -C openssl-$OPENSSL_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/ncurses-$NCURSES_VERSION.tar.gz -C ncurses-$NCURSES_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/readline-$READLINE_VERSION.tar.gz -C readline-$READLINE_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/tcl"$TCL_VERSION"-src.tar.gz -C tcl-$TCL_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/tk"$TK_VERSION"-src.tar.gz -C tk-$TK_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/bzip2-$BZIP2_VERSION.tar.gz -C bzip2-$BZIP2_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz -C sqlite3-$SQLITE3_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/zlib-$ZLIB_VERSION.tar.gz -C zlib-$ZLIB_VERSION --strip-components=1 \
- && tar -xvf  $SOURCE_DIR/$INTEL_MKL.tgz -C $INTEL_PREFIX --strip-components=1 \
+    nrlib-${NRLIB_VERSION} \
+    apsw-${APSW_VERSION} \
+    # Extract all downloaded archives
+ && tar -xvf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
+ && tar -xJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
+ && tar -xzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
+ && tar -xvf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
+ && tar -xvf  ${SOURCE_DIR}/apsw-${APSW_VERSION}.tar.gz -C apsw-${APSW_VERSION} --strip-components=1 \
  # Remove downloaded archives
- && rm -f $SOURCE_DIR/*.tar.*
-
-#################################
-#                               #
-# Make prerequisites for Python #
-#                               #
-#################################
-
-# All of the following envs might not be necessary
-# espescially C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, LIBRARY_PATH and LD_RUN_PATH
-ENV LD_LIBRARY_PATH "$PYTHON_PREFIX/lib:$LD_LIBRARY_PATH"
-ENV PATH "$PYTHON_PREFIX/bin:$PATH"
-ENV C_INCLUDE_PATH="$PYTHON_PREFIX/include"
-ENV CPLUS_INCLUDE_PATH="$C_INCLUDE_PATH"
-ENV LIBRARY_PATH="$PYTHON_PREFIX/lib"
-ENV LD_RUN_PATH="$PYTHON_PREFIX/lib"
-
-RUN cd $BUILD_DIR/bzip2-$BZIP2_VERSION \
- # First, build bzip2.so libs
- && make -f Makefile-* \
- && make install prefix=$PYTHON_PREFIX \
- # Then, build bzip2
- && make -f Makefile \
- && make install prefix=$PYTHON_PREFIX
-
-# Make Zlib
-RUN cd $BUILD_DIR/zlib-$ZLIB_VERSION \
- # Install to default path to avoid issues with library linker when published to SDPSoft
- && ./configure --64 \
- && make \
- && make install
-
-# Make OpenSSL
-RUN cd $BUILD_DIR/openssl-$OPENSSL_VERSION \
- && ./config \
-    --prefix=$PYTHON_PREFIX \
-    threads \
-    shared \
-    --openssldir=$PYTHON_PREFIX/openssl \
-    zlib \
- && make depend \
- && make all \
- && make install
-
-ENV OPENSSL_LIBS="-L/$OPENSSL_PREFIX/lib -lssl -lcrypto -I$OPENSSL_PREFIX/include/openssl"
-
-
-RUN cd $BUILD_DIR/ncurses-$NCURSES_VERSION \
- && ./configure \
-    --with-shared \
-    --prefix=$PYTHON_PREFIX \
-    --enable-sp-funcs \
-    --enable-const \
-    --enable-rpath \
-    --enable-ext-mouse \
- && make \
- && make install
-
-RUN cd $BUILD_DIR/readline-$READLINE_VERSION \
- && ./configure --prefix=$PYTHON_PREFIX \
- && make \
- && make install
-
-RUN cd $BUILD_DIR/sqlite3-$SQLITE3_VERSION \
- && ./configure --prefix=$PYTHON_PREFIX \
-                CFLAGS="-O2" \
-                --enable-readline \
-                --enable-threadsafe \
-                --enable-dynamic-extensions \
-                --enable-fts5 \
-                --enable-json1 \
-                --enable-session \
-                --disable-static \
- && make \
- && make install
-
-RUN cd $BUILD_DIR/tcl-$TCL_VERSION/unix \
- && ./configure --prefix=$PYTHON_PREFIX --enable-threads \
- && make \
- && make install
-
-RUN cd $BUILD_DIR/tk-$TK_VERSION/unix \
- && ./configure \
-    --prefix=$PYTHON_PREFIX \
-    --with-threads \
-    --enable-shared \
-    --with-tcl=$BUILD_DIR/tcl-$TCL_VERSION/unix \
- && make \
- && make install
-
-# Build Python
-# Useful build information here: https://hg.python.org/cpython/file/2.7/README
-RUN cd $BUILD_DIR/python$PYTHON_VERSION \
- && ./configure \
-    --prefix=$PYTHON_PREFIX \
-    CPPFLAGS="-O2 -I$PYTHON_PREFIX/include/ncurses -I$PYTHON_PREFIX/include/readline -I$PYTHON_PREFIX/include/openssl" \
-    LDFLAGS="-L$PYTHON_PREFIX/lib -lssl -lcrypto -lsqlite3" \
-    --with-threads \
-    --enable-shared \
-    --enable-ipv6 \
-    --with-doc-strings \
-    --enable-optimizations \
-    --enable-loadable-sqlite-extensions \
- && http_proxy='' https_proxy='' \
- && make -j $(nproc) \
- && make install
-
-# Upgrade setuptools
-RUN $PIP install setuptools --upgrade
-
-# Install pipenv
-# FIXME: pipenv 11 does not play nice with docker containers
-RUN $PIP install 'pipenv<11'
-
-# Install MKL (prerequisite for nrlib)
-ENV INTEL_MKL_PREFIX="/opt/intel"
-# Configure setup
-ENV INTEL_CONFIGURATION="$INTEL_PREFIX/config.txt"
-RUN echo ACCEPT_EULA=accept >> $INTEL_CONFIGURATION \
- && echo PSET_INSTALL_DIR=$INTEL_MKL_PREFIX >> $INTEL_CONFIGURATION \
- && echo PSET_MODE=install >> $INTEL_CONFIGURATION \
+ && rm -f ${SOURCE_DIR}/*.txt* \
+ && rm -f ${SOURCE_DIR}/*.tar.* \
+    # Install MKL (prerequisite for nrlib)
+    # Configure setup
+ && echo ACCEPT_EULA=accept                     >> $INTEL_CONFIGURATION \
+ && echo PSET_INSTALL_DIR=${INTEL_MKL_PREFIX}   >> $INTEL_CONFIGURATION \
+ && echo PSET_MODE=install                      >> $INTEL_CONFIGURATION \
+ && echo SIGNING_ENABLED=yes                    >> $INTEL_CONFIGURATION \
+ && echo ARCH_SELECTED=INTEL64                  >> $INTEL_CONFIGURATION \
  && echo COMPONENTS="\
 ;intel-comp-l-all-vars__noarch\
 ;intel-comp-nomcu-vars__noarch\
-;intel-openmp__x86_64\
-;intel-tbb-libs__x86_64\
 ;intel-mkl-common__noarch\
 ;intel-mkl-installer-license__noarch\
 ;intel-mkl-core__x86_64\
 ;intel-mkl-core-rt__x86_64\
 ;intel-mkl-gnu__x86_64\
 ;intel-mkl-gnu-rt__x86_64\
-;intel-mkl-cluster__x86_64\
-;intel-mkl-cluster-common__noarch\
-;intel-mkl-cluster-rt__x86_64\
 ;intel-mkl-common-ps__noarch\
 ;intel-mkl-core-ps__x86_64\
 ;intel-mkl-common-c__noarch\
 ;intel-mkl-core-c__x86_64\
 ;intel-mkl-common-c-ps__noarch\
-;intel-mkl-cluster-c__noarch\
-;intel-mkl-tbb__x86_64\
-;intel-mkl-tbb-rt__x86_64\
 ;intel-mkl-gnu-c__x86_64\
 ;intel-mkl-common-f__noarch\
 ;intel-mkl-core-f__x86_64\
-;intel-mkl-cluster-f__noarch\
 ;intel-mkl-gnu-f-rt__x86_64\
 ;intel-mkl-gnu-f__x86_64\
 ;intel-mkl-f95-common__noarch\
@@ -260,11 +201,36 @@ RUN echo ACCEPT_EULA=accept >> $INTEL_CONFIGURATION \
 ;intel-mkl-psxe__noarch\
 ;intel-psxe-common__noarch\
 ;intel-compxe-pset\
-" >> $INTEL_CONFIGURATION
-
-RUN $INTEL_PREFIX/install.sh --silent $INTEL_CONFIGURATION
-
-##
-# Final clean-up
-RUN rm -rf $SOURCE_DIR \
-           $BUILD_DIR
+"                                               >> $INTEL_CONFIGURATION \
+ && $INTEL_PREFIX/install.sh --silent $INTEL_CONFIGURATION \
+    ###################
+    #                 #
+    # Python packages #
+    #                 #
+    ###################
+    # Install pipenv
+    # FIXME: pipenv 11 does not play nice with docker containers
+ && $PIP install --user pipenv \
+    # Install NRlib to dependencies collection
+ && cd ${BUILD_DIR}/nrlib-${NRLIB_VERSION} \
+ && MKLROOT=/opt/intel/mkl \
+    make build \
+         tests \
+ && mv nrlib.*.so $DEPENDENCIES_PREFIX \
+    # Install APSW to dependencies collection
+ && cd ${BUILD_DIR}/apsw-${APSW_VERSION} \
+ && CFLAGS="-std=c11" \
+    $PYTHON setup.py fetch --version $SQLITE_VERSION --all \
+                     build --enable-all-extensions \
+                     build_ext --force --inplace \
+                     test \
+ && mv apsw.*.so $DEPENDENCIES_PREFIX \
+    ##
+    # Final clean-up
+ && rm -rf $SOURCE_DIR \
+           $BUILD_DIR \
+           $(find $NODE_PREFIX -name *.cmd) \
+           $NODE_PREFIX/CHANGELOG.md \
+           $NODE_PREFIX/LICENSE \
+           $NODE_PREFIX/README.md \
+           $NODE_PREFIX/package.json

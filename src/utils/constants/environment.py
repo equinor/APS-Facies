@@ -70,3 +70,7 @@ class ExampleFiles(Enum):
 
 class DrawingLibrary(Enum):
     LIBRARY_PATH = get_path_to_libraries() + '/libdraw2D.so'
+
+
+class API(Enum):
+    URL = 'rms/api/'

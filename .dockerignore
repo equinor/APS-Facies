@@ -1,6 +1,7 @@
 .git/
 .idea/
 venv/
+src/gui/node_modules/
 output-virtualbox-iso/
 packer_cache/
 documentation/
