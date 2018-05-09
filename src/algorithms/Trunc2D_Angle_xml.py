@@ -286,7 +286,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 )
 
     def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-                   truncStructure, overlayGroups=None, useConstTruncParam=False, debug_level=Debug.OFF):
+                   truncStructure, overlayGroups=None, useConstTruncParam=True, keyResolution=209, debug_level=Debug.OFF):
         """
         Initialize the truncation object from input variables.
                   debug_level - an integer number from 0 to 3 defining how much to be printed to screen during runs.
@@ -320,6 +320,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Initialize base class variables
         super()._setEmpty()
+        self._keyResolution = keyResolution
 
         # Initialize this class variables
         self.__setEmpty()

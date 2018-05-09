@@ -213,8 +213,7 @@ class Trunc2D_Base:
         self._keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 debug_level=Debug.OFF,
-                 modelFileName=None, nGaussFieldsInBackGroundModel=2):
+                 debug_level=Debug.OFF, modelFileName=None, nGaussFieldsInBackGroundModel=2):
         """
         Base class constructor.
         """
@@ -989,7 +988,7 @@ Background facies:
         for i in range(self._nGaussFieldsInTruncationRule):
             alphaIndx = self._alphaIndxList[i]
             gfName = self._gaussFieldsInZone[alphaIndx]
-            representation += 'Alpha coordinate number {} corresponds to gauss field {}'.format(i + 1, gfName)
+            representation += '\nAlpha coordinate number {} corresponds to gauss field {}'.format(i + 1, gfName)
         return representation
 
     def getClassName(self):
@@ -1360,7 +1359,6 @@ Background facies:
         faciesProbNew = []
         sumProb = 0.0
         dValue = 1.0/keyResolution
-        # minProb = 1.0
         maxProb = 0.0
         for i in range(len(faciesProb)):
             p = faciesProb[i]
@@ -1374,21 +1372,17 @@ Background facies:
                 indxMax = i
             faciesProbNew.append(pNew)
         if sumProb > (0.9999 + dValue):
-            # print('sumProb: ' + str(sumProb))
             faciesProbNew[indxMax] -= dValue
             sumProb -= dValue
             if sumProb > (0.9999 + dValue):
                 faciesProbNew[indxMax] -= dValue
                 sumProb -= dValue
-            # print('sumProb oppdatert: ' + str(sumProb))
         elif sumProb < (1.0001 - dValue):
-            # print('sumProb: ' + str(sumProb))
             faciesProbNew[indxMax] += dValue
             sumProb += dValue
             if sumProb < (1.0001- dValue):
                 faciesProbNew[indxMax] += dValue
                 sumProb += dValue
-            # print('sumProb oppdatert: ' + str(sumProb))
         return faciesProbNew
 
     def getGaussFieldsInTruncationRule(self):
