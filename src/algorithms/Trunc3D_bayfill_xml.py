@@ -473,18 +473,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # After this function is called, the parent element has got a new child element
         # for the current class.
         nGF = self._nGaussFieldsInTruncationRule
-        # attribute = {
-        #     'name': 'Trunc3D_Bayfill',
-        #     'nGFields': str(nGF)
-        # }
-        # tag = 'TruncationRule'
-        # trRuleElement = Element(tag, attribute)
-        # # Put the xml commands for this truncation rule as the last child for the parent element
-        # parent.append(trRuleElement)
-        #
-        # tag = 'BackGroundModel'
-        # bgModelElement = Element(tag)
-        # trRuleElement.append(bgModelElement)
 
         trRuleElement = Element('TruncationRule')
         parent.append(trRuleElement)

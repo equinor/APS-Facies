@@ -1020,18 +1020,6 @@ class Trunc2D_Angle(Trunc2D_Base):
             print('Debug output: call XMLADDElement from ' + self._className)
 
         nGF = self._nGaussFieldsInTruncationRule
-        # attribute = {
-        #     'name': 'Trunc2D_Angle',
-        #     'nGFields': str(nGF)
-        # }
-        # tag = 'TruncationRule'
-        # trRuleElement = Element(tag, attribute)
-        # # Put the xml commands for this truncation rule as the last child for the parent element
-        # parent.append(trRuleElement)
-        #
-        # tag = 'BackGroundModel'
-        # bgModelElement = Element(tag)
-        # trRuleElement.append(bgModelElement)
 
         trRuleElement = Element('TruncationRule')
         # Put the xml commands for this truncation rule as the last child for the parent element

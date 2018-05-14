@@ -1357,17 +1357,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # for the current class.
         nGF = self._nGaussFieldsInTruncationRule
 
-        # attribute = {
-        #     'name': 'Trunc2D_Cubic',
-        #     'nGFields': str(nGF)}
-        # tag = 'TruncationRule'
-        # trRuleElement = Element(tag, attribute)
-        # parent.append(trRuleElement)
-        #
-        # tag = 'BackGroundModel'
-        # bgModelElement = Element(tag)
-        # trRuleElement.append(bgModelElement)
-
         trRuleElement = Element('TruncationRule')
         parent.append(trRuleElement)
 

@@ -243,25 +243,6 @@ class APSGaussModel:
                         'Error: Specified name of trend function {trendName} is not implemented.'
                         ''.format(className=self.__className, trendName=trend_name.tag)
                     )
-
-                # trend_name = trendObjXML.get('name')
-                # common_params = {'modelFileName': self.__modelFileName, 'debug_level': self.__debug_level}
-                # if trend_name == 'Linear3D':
-                #     trend_model = Trend3D_linear(trendObjXML, **common_params)
-                # elif trend_name == 'Elliptic3D':
-                #     trend_model = Trend3D_elliptic(trendObjXML, **common_params)
-                # elif trend_name == 'Hyperbolic3D':
-                #     trend_model = Trend3D_hyperbolic(trendObjXML, **common_params)
-                # elif trend_name == 'RMSParameter':
-                #     trend_model = Trend3D_rms_param(trendObjXML, **common_params)
-                # elif trend_name == 'EllipticCone3D':
-                #     trend_model = Trend3D_elliptic_cone(trendObjXML, **common_params)
-                # else:
-                #     raise NameError(
-                #         'Error in {className}\n'
-                #         'Error: Specified name of trend function {trendName} is not implemented.'
-                #         ''.format(className=self.__className, trendName=trend_name)
-                #     )
             else:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: No trend is specified')
