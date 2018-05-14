@@ -5,7 +5,7 @@
 <!-- Zone parameter: Zone  -->
 <!-- Facies realization parameter: FaciesReal_case1  -->
 
-<APSModel>
+<APSModel version="1.0">
   <Preview zoneNumber="6" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
   </Preview>
   <Optimization>
@@ -93,15 +93,17 @@
           <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTH"> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Elliptic3D">
-          <azimuth> 35.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 0.25 </stackAngle>
-          <curvature kw="APS_1_0_GF_GF2_TREND_CURVATURE">  1.5 </curvature>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.0 </origin_y>
-          <origin_z_simbox> 0.5 </origin_z_simbox>
-          <origintype> 'Relative' </origintype>
+        <Trend>
+          <Elliptic3D>
+            <azimuth> 35.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 0.25 </stackAngle>
+            <curvature kw="APS_1_0_GF_GF2_TREND_CURVATURE">  1.5 </curvature>
+            <origin_x> 0.5 </origin_x>
+            <origin_y> 0.0 </origin_y>
+            <origin_z_simbox> 0.5 </origin_z_simbox>
+            <origintype> 'Relative' </origintype>
+          </Elliptic3D>
         </Trend>  
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
@@ -127,23 +129,26 @@
           <DipAngle> 0.0 </DipAngle>
         </Vario>
 <!--
-        <Trend name="EllipticCone3D">
-          <azimuth> 80.0 </azimuth>
-          <directionStacking> -1 </directionStacking>
-          <stackAngle> 89.0 </stackAngle>
-          <migrationAngle> 0.0 </migrationAngle>
-          <curvature> 3.0 </curvature>
-          <relativeSize> 0.3 </relativeSize>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.5 </origin_y>
-          <origintype> 'Relative' </origintype>
+        <Trend>
+          <EllipticCone3D>
+            <azimuth> 80.0 </azimuth>
+            <directionStacking> -1 </directionStacking>
+            <stackAngle> 89.0 </stackAngle>
+            <migrationAngle> 0.0 </migrationAngle>
+            <curvature> 3.0 </curvature>
+            <relativeSize> 0.3 </relativeSize>
+            <origin_x> 0.5 </origin_x>
+            <origin_y> 0.5 </origin_y>
+            <origintype> 'Relative' </origintype>
+          </EllipticCone3D>
         </Trend>
         <RelStdDev> 0.05 </RelStdDev>
 -->
         <SeedForPreview> 8276256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="3" name="Trunc3D_Bayfill">
+      <TruncationRule >
+        <Trunc3D_Bayfill nGFields="3">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 GF3 </AlphaFields>
 	  <UseConstTruncParam> 1 </UseConstTruncParam>
@@ -156,6 +161,7 @@
 	  <YSF kw="APS_1_0_TRUNC_BAYFILL_YSF">  0.5 </YSF>
 	  <SBHD kw="APS_1_0_TRUNC_BAYFILL_SBHD">  0.1 </SBHD>
 	</BackGroundModel>
+        </Trunc3D_BayfillX
       </TruncationRule>
     </Zone>
 
@@ -192,10 +198,12 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 1.5 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 1.5 </stackAngle>
+          </Linear3D>
         </Trend>  
         <RelStdDev> 0.01 </RelStdDev>
         <SeedForPreview> 3939276787 </SeedForPreview>
@@ -236,7 +244,8 @@
         <SeedForPreview> 88772256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 </AlphaFields>
           <UseConstTruncParam> 1 </UseConstTruncParam>
@@ -275,6 +284,7 @@
             <BackGround> F4 </BackGround>
           </Group>
         </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
 
@@ -305,16 +315,18 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Hyperbolic3D">
-          <azimuth> 35.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 90 </stackAngle>
-          <curvature>  2.0 </curvature>
-          <migrationAngle> 0.0 </migrationAngle>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.0 </origin_y>
-          <origin_z_simbox> 1.0 </origin_z_simbox>
-          <origintype> 'Relative' </origintype>
+        <Trend>
+          <Hyperbolic3D>
+            <azimuth> 35.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 90 </stackAngle>
+            <curvature>  2.0 </curvature>
+            <migrationAngle> 0.0 </migrationAngle>
+            <origin_x> 0.5 </origin_x>
+            <origin_y> 0.0 </origin_y>
+            <origin_z_simbox> 1.0 </origin_z_simbox>
+            <origintype> 'Relative' </origintype>
+          </Hyperbolic3D>
         </Trend>  
         <RelStdDev> 0.025 </RelStdDev>
         <SeedForPreview> 9989276787 </SeedForPreview>
@@ -342,7 +354,8 @@
       </GaussField>
 
 
-      <TruncationRule nGFields="2" name="Trunc2D_Cubic">
+      <TruncationRule>
+        <Trunc2D_Cubic  nGFields="2">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 </AlphaFields>
           <L1 direction="V">
@@ -354,6 +367,7 @@
             </L2>
           </L1>
 	</BackGroundModel>
+        </Trunc2D_Cubic>
       </TruncationRule>
     </Zone>
 
@@ -387,16 +401,18 @@
           <AzimuthAngle> 35.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Hyperbolic3D">
-          <azimuth> 35.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 90 </stackAngle>
-          <curvature>  2.0 </curvature>
-          <migrationAngle> 0.0 </migrationAngle>
-          <origin_x> 0.5 </origin_x>
-          <origin_y> 0.0 </origin_y>
-          <origin_z_simbox> 1.0 </origin_z_simbox>
-          <origintype> 'Relative' </origintype>
+        <Trend>
+          <Hyperbolic3D>
+            <azimuth> 35.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 90 </stackAngle>
+            <curvature>  2.0 </curvature>
+            <migrationAngle> 0.0 </migrationAngle>
+            <origin_x> 0.5 </origin_x>
+            <origin_y> 0.0 </origin_y>
+            <origin_z_simbox> 1.0 </origin_z_simbox>
+            <origintype> 'Relative' </origintype>
+          </Hyperbolic3D>
         </Trend>  
         <RelStdDev> 0.025 </RelStdDev>
         <SeedForPreview> 9989276787 </SeedForPreview>
@@ -434,7 +450,8 @@
         <SeedForPreview> 187542256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="4" name="Trunc2D_Cubic">
+      <TruncationRule>
+        <Trunc2D_Cubic nGFields="4">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 </AlphaFields>
           <L1 direction="V">
@@ -464,6 +481,7 @@
             <BackGround> F1 </BackGround>
           </Group>
         </OverLayModel>
+        </Trunc2D_Cubic>
       </TruncationRule>
     </Zone>
 
@@ -500,10 +518,12 @@
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 5.0 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 5.0 </stackAngle>
+          </Linear3D>
         </Trend>  
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 1111276787 </SeedForPreview>
@@ -542,7 +562,8 @@
         <SeedForPreview> 76533236 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 </AlphaFields>
           <UseConstTruncParam> 1 </UseConstTruncParam>
@@ -580,6 +601,7 @@
             <BackGround> F1 </BackGround>
           </Group>
         </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
 
@@ -616,10 +638,12 @@
           <AzimuthAngle> 125.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
-          <azimuth> 125.0 </azimuth>
-          <directionStacking> 1 </directionStacking>
-          <stackAngle> 5.0 </stackAngle>
+        <Trend>
+          <Linear3D>
+            <azimuth> 125.0 </azimuth>
+            <directionStacking> 1 </directionStacking>
+            <stackAngle> 5.0 </stackAngle>
+          </Linear3D>
         </Trend>  
         <RelStdDev> 0.04 </RelStdDev>
         <SeedForPreview> 166276787 </SeedForPreview>
@@ -658,7 +682,8 @@
         <SeedForPreview> 665332256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="4" name="Trunc2D_Angle">
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="4">
 	<BackGroundModel>
 	  <AlphaFields> GF1 GF2 </AlphaFields>
           <UseConstTruncParam> 1 </UseConstTruncParam>
@@ -695,6 +720,7 @@
             <BackGround> F1 </BackGround>
           </Group>
         </OverLayModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
   </ZoneModels>

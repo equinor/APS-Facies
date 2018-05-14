@@ -7,7 +7,7 @@
 <!-- Region parameter: Region (which is a copy of a facies realization) -->
 <!-- Facies realization parameter: FaciesReal_case1  -->
 
-<APSModel>
+<APSModel version="1.0">
   <Preview zoneNumber="1" regionNumber="1" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
   </Preview>
   <Optimization>
@@ -127,7 +127,8 @@
         <SeedForPreview> 8276256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="2" name="Trunc2D_Angle">
+      <TruncationRule>
+        <Trunc2D_Angle nGFields="2">
 	<BackGroundModel>
 	  <AlphaFields> GF10 GF12 </AlphaFields>
           <UseConstTruncParam> 1 </UseConstTruncParam>
@@ -144,6 +145,7 @@
             <ProbFrac> 1.0 </ProbFrac>
           </Facies>
 	</BackGroundModel>
+        </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
 
@@ -168,10 +170,12 @@
           <AzimuthAngle> 315.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
-        <Trend name="Linear3D">
+        <Trend>
+          <Linear3D>
           <azimuth> 0.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 1.5 </stackAngle>
+          </Linear3D>
         </Trend>  
         <RelStdDev> 0.01 </RelStdDev>
         <SeedForPreview> 999987 </SeedForPreview>
@@ -199,7 +203,8 @@
         <SeedForPreview> 18181256 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="2" name="Trunc2D_Cubic">
+      <TruncationRule>
+        <Trunc2D_Cubic nGFields="2">
 	<BackGroundModel>
 	  <AlphaFields> GF11 GF12 </AlphaFields>
           <L1 direction="H">
@@ -211,6 +216,7 @@
             </L2>
           </L1>
 	</BackGroundModel>
+        </Trunc2D_Cubic>
       </TruncationRule>
     </Zone>
 
@@ -249,7 +255,8 @@
         <SeedForPreview> 87875151556 </SeedForPreview>
       </GaussField>
 
-      <TruncationRule nGFields="2" name="Trunc2D_Cubic">
+      <TruncationRule>
+        <Trunc2D_Cubic nGFields="2">
 	<BackGroundModel>
 	  <AlphaFields> GF10 GF11 </AlphaFields>
           <L1 direction="V">
@@ -261,6 +268,7 @@
             </L2>
           </L1>
 	</BackGroundModel>
+        </Trunc2D_Cubic>
       </TruncationRule>
     </Zone>
   </ZoneModels>
