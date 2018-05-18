@@ -5,7 +5,6 @@ from xml.etree.ElementTree import Element
 
 import numpy as np
 
-from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSFaciesProb import APSFaciesProb
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
@@ -21,12 +20,15 @@ class APSZoneModel:
     Keep data structure for a zone
 
     Public member functions:
-      Constructor:  def __init__(self,ET_Tree= None,inputZoneNumber=0,
-                                 inputMainLevelFacies=None,modelFileName=None)
+       def __init__(self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
+            useConstProb=False, simBoxThickness=10.0, 
+            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
+            debug_level=Debug.OFF, keyResolution=100)
+
      --- Get functions ---
        def getZoneNumber(self)
+       def getRegionNumber(self)
        def useConstProb(self)
-       def getMainLevelFacies(self)
        def getFaciesInZoneModel(self)
        def getUsedGaussFieldNames(self)
        def getVariogramType(self,gaussFieldName)
@@ -38,51 +40,42 @@ class APSZoneModel:
        def getAnisotropyDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
-       def getTrendModel(self,gfName)
+       def getTrendModel(self,gfName
+       def getTrendModelObject(self, gfName)
        def getSimBoxThickness(self)
-       def getTruncationParam(self,get3DParamFunction,gridModel,realNumber)
-       def debug_level(self)
+       def get_debug_level(self)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
-       def getHorizonNameForVariogramTrendMap(self)
-
+       def getGaussFieldsInTruncationRule(self)
+       def getGaussFieldIndexListInZone(self)
 
        ---  Set functions ---
        def setZoneNumber(self,zoneNumber)
        def setVariogramType(self,gaussFieldName,variogramType)
-       def setRange1(self,gaussFieldName,range1)
-       def setRange2(self,gaussFieldName,range2)
-       def setRange3(self,gaussFieldName,range3)
+       def setMainRange(self,gaussFieldName,range1)
+       def setPerpRange(self,gaussFieldName,range2)
+       def setVertRange(self,gaussFieldName,range3)
        def setAnisotropyAzimuthAngle(self,gaussFieldName,angle)
-      def setAnisotropyDipAngle(self,gaussFieldName,angle)
-
-     ---  Set functions ---
-       def setZoneNumber(self,zoneNumber)
-       def setVariogramType(self,gaussFieldName,variogramType)
-       def setRange1(self,gaussFieldName,range1)
-       def setRange2(self,gaussFieldName,range2)
-       def setRange3(self,gaussFieldName,range3)
-       def setAngle(self,gaussFieldName,angle)
-       def setPower(self,gaussFieldName,power)
-       def setUseConstProb(self)
-       def setSeedForPreviewSimulation(self)
-       def setMainFaciesTable(self,mainFaciesTable)
+       def setAnisotropyDipAngle(self,gaussFieldName,angle)
+       def setPower(self, gaussFieldName, power)
+       def setUseConstProb(self, useConstProb)
+       def setSeedForPreviewSimulation(self, gfName, seed)
        def setSimBoxThickness(self,thickness)
        def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,angle,power,
                                  relStdDev=0.0,trendModelObj=None)
+       def updateGaussFieldVariogramParam(self, gfName, variogramType, range1, range2, range3, angle, power)
        def removeGaussFieldParam(self,gfName)
+       def updateGaussFieldTrendParam(self, gfName, trendModelObj, relStdDev)
        def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
        def removeFaciesWithProbForZone(self,fName)
        def setTruncRule(self,truncRuleObj)
-       def setHorizonNameForVariogramTrendMap(self,horizonNameForVariogramTrendMap)
 
      ---  Calculate function ---
        def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
        def simGaussFieldWithTrendAndTransform(
-           self, nGaussFields, gridDimNx, gridDimNy,
-           gridXSize, gridYSize, gridAzimuthAngle
-        )
+            self, simBoxXsize, simBoxYsize, simBoxZsize,
+            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx)
 
 
      ---  write XML tree ---
@@ -94,7 +87,7 @@ class APSZoneModel:
        def isMainLevelModel(self)
 
     Private member functions:
-       def __interpretXMLTree(ET_Tree)
+       def __interpretXMLTree(self, ET_Tree, modelFileName)
        def __checkConstProbValuesAndNormalize(self)
        def __getGFIndex(self,gfName)
        def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
@@ -103,7 +96,7 @@ class APSZoneModel:
 
     def __init__(
             self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
-            useConstProb=False, simBoxThickness=10.0, horizonNameForVariogramTrendMap=None,
+            useConstProb=False, simBoxThickness=10.0, 
             faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
             debug_level=Debug.OFF, keyResolution=100
     ):
@@ -130,7 +123,6 @@ class APSZoneModel:
         self.__gaussModelObject = gaussModelObject
 
         self.__truncRule = truncRuleObject
-        self.__horizonNameForVariogramTrendMap = horizonNameForVariogramTrendMap
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
 
@@ -138,6 +130,7 @@ class APSZoneModel:
             self.__interpretXMLTree(ET_Tree, modelFileName)
 
     def __interpretXMLTree(self, ET_Tree, modelFileName):
+        ''' The input XML tree is interpreted and values put into the data structure.'''
         #  Get root of xml tree for model specification
         root = ET_Tree.getroot()
 
@@ -166,7 +159,6 @@ class APSZoneModel:
                 self.__keyResolution = 0
 
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
-        gaussFieldJobs = APSGaussFieldJobs(ET_Tree, modelFileName)
 
         regionNumber = 0
         zoneNumber   = 0
@@ -201,19 +193,12 @@ class APSZoneModel:
                 simBoxThickness = getFloatCommand(zone, kw, 'Zone', minValue=0.0, modelFile=modelFileName)
                 self.__simBoxThickness = simBoxThickness
 
-                kw = 'HorizonNameVarioTrend'
-                mapName = getTextCommand(zone, kw, 'Zone', modelFile=modelFileName, required=False)
-                self.__horizonNameForVariogramTrendMap = mapName
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zoneNumber))
                     print('Debug output: From APSZoneModel: RegionNumber:    ' + str(regionNumber))
                     print('Debug output: From APSZoneModel: useConstProb:    ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
-                    text = 'Debug output: From APSZoneModel: Horizon name to be used for saving \n'
-                    text += '              azimuth variogram trend for this zone: '
-                    text += str(self.__horizonNameForVariogramTrendMap)
-                    print(text)
 
                 # Read facies probabilities
                 self.__faciesProbObject = APSFaciesProb(
@@ -222,7 +207,7 @@ class APSZoneModel:
                 )
                 # Read Gauss Fields model parameters
                 self.__gaussModelObject = APSGaussModel(
-                    zone, mainFaciesTable, gaussFieldJobs, modelFileName,
+                    zone, mainFaciesTable, modelFileName,
                     self.__debug_level, self.__zoneNumber, self.__simBoxThickness
                 )
 
@@ -347,25 +332,12 @@ class APSZoneModel:
     def getSimBoxThickness(self):
         return self.__simBoxThickness
 
-#    def getTruncationParam(self, get3DParamFunction, gridModel, realNumber):
-        # Input: get3DParamFunction - Function pointer for function to be applied
-        #                             to get 3D parameter from RMS project. Is used
-        #                             to avoid calling functions using RoxAPI here.
-        #        gridModel - Pointer to grid model object in RMS
-        #        NOTE: Will only call the function to read RMS parameter from
-        #              truncation rules that has defined this as a possibility.
-#        if not self.__truncRule.useConstTruncModelParam():
-#            self.__truncRule.getTruncationParam(get3DParamFunction, gridModel, realNumber)
-
     def getTruncationParam(self, gridModel, realNumber):
         if not self.__truncRule.useConstTruncModelParam():
             self.__truncRule.getTruncationParam(gridModel, realNumber)
 
     def get_debug_level(self):
         return self.__debug_level
-
-    def getHorizonNameForVariogramTrendMap(self):
-        return copy.copy(self.__horizonNameForVariogramTrendMap)
 
     def getProbParamName(self, fName):
         return self.__faciesProbObject.getProbParamName(fName)
@@ -453,11 +425,9 @@ class APSZoneModel:
             self.__truncRule = truncRuleObj
         return err
 
-    def setHorizonNameForVariogramTrendMap(self, horizonNameForVariogramTrendMap):
-        self.__horizonNameForVariogramTrendMap = copy.copy(horizonNameForVariogramTrendMap)
-
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
-
+        ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
+            The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
         # GFAlphaList has items =[name,valueArray]
         # Use NAME and VAL as index names
         NAME = 0
@@ -604,7 +574,7 @@ class APSZoneModel:
         return faciesReal, volFrac
 
     def XMLAddElement(self, parent):
-        # Add command Zone and all its children
+        ''' Add command Zone and all its children to the XML tree'''
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
@@ -629,13 +599,6 @@ class APSZoneModel:
         elem.text = ' ' + str(self.__simBoxThickness) + ' '
         zoneElement.append(elem)
 
-        # Add child command HorizonNameVarioTrend
-        if self.__horizonNameForVariogramTrendMap is not None:
-            tag = 'HorizonNameVarioTrend'
-            elem = Element(tag)
-            elem.text = ' ' + self.__horizonNameForVariogramTrendMap + ' '
-            zoneElement.append(elem)
-
         # Add child command FaciesProbForModel
         self.__faciesProbObject.XMLAddElement(zoneElement)
         # Add child command GaussField
@@ -646,6 +609,7 @@ class APSZoneModel:
     def simGaussFieldWithTrendAndTransform(
             self, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
+        ''' Simulate 2D gauss field using specified trend'''
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
             simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx

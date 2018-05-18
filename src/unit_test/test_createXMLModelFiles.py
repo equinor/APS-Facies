@@ -2,7 +2,6 @@
 # Python3  test that the model files can be created correctly.
 
 from src.algorithms.APSFaciesProb import APSFaciesProb
-from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSModel import APSModel
@@ -20,26 +19,19 @@ from src.utils.constants.simple import Debug, OriginType, TrendType, VariogramTy
 
 
 def defineCommonModelParam(
-        apsmodel, rmsProject, rmsWorkflow, gaussFieldSimScript, gridModelName,
+        apsmodel, rmsProject, rmsWorkflow,  gridModelName,
         zoneParamName, faciesRealParamNameResult, seedFileName, fTable, debug_level=VERY_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
     apsmodel.setRmsProjectName(rmsProject)
     apsmodel.setRmsWorkflowName(rmsWorkflow)
-    apsmodel.setGaussFieldScriptName(gaussFieldSimScript)
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
     apsmodel.setSeedFileName(seedFileName)
     apsmodel.set_debug_level(debug_level)
     print('Debug level: {}'.format(str(apsmodel.debug_level())))
-    # Define gauss field jobs
-    gfJobObject = APSGaussFieldJobs()
-    gfJobNames = ['GRFJob1', 'GRFJob2', 'GRFJob3']
-    gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5'], ['GRF6', 'GRF7', 'GRF8', 'GRF9']]
-    gfJobObject.initialize(gfJobNames=gfJobNames, gfNamesPerJob=gfNamesPerJob, debug_level=debug_level)
-    apsmodel.setGaussFieldJobs(gfJobObject)
 
     # Define main facies table
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
@@ -50,7 +42,6 @@ def addZoneParam(
         apsmodel,
         zoneNumber=0,
         regionNumber=0,
-        horizonNameForVariogramTrendMap=None,
         simBoxThickness=0.0,
         # Facies prob for zone
         faciesInZone=None,
@@ -94,7 +85,6 @@ def addZoneParam(
         debug_level=Debug.OFF
 ):
     mainFaciesTable = apsmodel.getMainFaciesTable()
-    gaussFieldJobs = apsmodel.getGaussFieldJobs()
 
     # Define facies probabilities
     faciesProbObj = APSFaciesProb()
@@ -147,7 +137,7 @@ def addZoneParam(
 
     gaussModelObj = APSGaussModel()
     gaussModelObj.initialize(
-        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, gaussFieldJobs=gaussFieldJobs,
+        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, 
         gaussModelList=gaussModelList, trendModelList=trendModelList, simBoxThickness=simBoxThickness,
         previewSeedList=seedPreviewList, debug_level=debug_level
     )
@@ -199,7 +189,7 @@ def addZoneParam(
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
         zoneNumber=zoneNumber, regionNumber=regionNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
-        horizonNameForVariogramTrendMap=horizonNameForVariogramTrendMap, faciesProbObject=faciesProbObj,
+        faciesProbObject=faciesProbObj,
         gaussModelObject=gaussModelObj, truncRuleObject=truncRuleObj, debug_level=debug_level
     )
 
@@ -278,10 +268,6 @@ def test_variogram_generation():
     # Define main facies table
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
-    gfJobs = APSGaussFieldJobs()
-    gfJobNames = ['Job1', 'Job2']
-    gfNamesPerJob = [['GRF1', 'GRF2'], ['GRF3', 'GRF4', 'GRF5']]
-    gfJobs.initialize(gfJobNames, gfNamesPerJob)
     mainRange = 1000
     perpRange = 100
     vertRange = 1.0
@@ -301,7 +287,7 @@ def test_variogram_generation():
     prevSeedList = [['GRF1', 92828]]
     debug_level = Debug.VERY_VERBOSE
     apsGaussModel.initialize(
-        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, gaussFieldJobs=gfJobs,
+        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, 
         gaussModelList=gaussModelList, trendModelList=trendModelList, simBoxThickness=simBoxThickness,
         previewSeedList=prevSeedList, debug_level=debug_level
     )
@@ -629,7 +615,7 @@ def test_case_1_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.VERY_VERBOSE
@@ -649,7 +635,7 @@ def test_case_1_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -675,7 +661,7 @@ def test_case_2_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -696,7 +682,7 @@ def test_case_2_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -722,7 +708,7 @@ def test_case_3_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -742,7 +728,7 @@ def test_case_4_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, gaussFieldSimScript=GAUSS_FIELD_SIM_SCRIPT,
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -762,7 +748,6 @@ def add_zone_1_for_case_1(apsmodel):
         apsmodel=apsmodel,
         zoneNumber=1,
         regionNumber=0,
-        horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
         faciesInZone=['F1', 'F2'],
@@ -804,7 +789,6 @@ def add_zone_2_for_case_1(apsmodel):
         apsmodel=apsmodel,
         zoneNumber=2,
         regionNumber=0,
-        horizonNameForVariogramTrendMap='zone_2',
         simBoxThickness=12.0,
         # Facies prob for zone
         faciesInZone=['F3', 'F1', 'F2'],
@@ -848,7 +832,6 @@ def add_zone_1_for_case_2(apsmodel):
         apsmodel=apsmodel,
         zoneNumber=1,
         regionNumber=0,
-        horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
         faciesInZone=['F1', 'F2', 'F5', 'F7'],
@@ -892,7 +875,6 @@ def add_zone_2_for_case_2(apsmodel):
         apsmodel=apsmodel,
         zoneNumber=2,
         regionNumber=0,
-        horizonNameForVariogramTrendMap='zone_2',
         simBoxThickness=12.0,
         # Facies prob for zone
         faciesInZone=['F3', 'F1', 'F2', 'F5', 'F6', 'F7'],
@@ -936,7 +918,6 @@ def add_zone_1_for_case_3(apsmodel):
         apsmodel=apsmodel,
         zoneNumber=1,
         regionNumber=0,
-        horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
         faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],
@@ -982,7 +963,6 @@ def add_zone_1_for_case_4(apsmodel):
         apsmodel=apsmodel,
         zoneNumber=1,
         regionNumber=0,
-        horizonNameForVariogramTrendMap='zone_1',
         simBoxThickness=4.0,
         # Facies prob for zone
         faciesInZone=['F1', 'F2', 'F5', 'F7', 'F3'],

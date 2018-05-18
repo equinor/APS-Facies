@@ -6,7 +6,6 @@ import datetime
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug
@@ -22,7 +21,14 @@ class APSModel:
     Class member variables:
 
     Public member functions:
-      Constructor: def __init__(self,modelFileName= None)
+      def __init__(
+            self, modelFileName=None,  apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='', 
+            rmsGridModelName='', rmsZoneParameterName='', rmsRegionParameterName='',
+            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, 
+            mainFaciesTable=None, zoneModelTable=None,
+            previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
+            previewScale=1.0, debug_level=Debug.OFF):
+
 
       def updateXMLModelFile(self, modelFileName, parameterFileName, debug_level=Debug.OFF)
                 - Read xml model file and IPL parameter file and write
@@ -46,40 +52,59 @@ class APSModel:
 
        def getXmlTree(self)
        def getRoot(self)
+       def isAllZoneRegionModelsSelected(self)
        def getSelectedZoneNumberList(self)
-       def getZoneModel(self,zoneNumber,regionNumber=None)
+       def getSelectedRegionNumberListForSpecifiedZoneNumber(self,zoneNumber)
+       def isSelected(self, zoneNumber, regionNumber)
+       def getZoneModel(self,zoneNumber,regionNumber=0)
+       def getAllZoneModels(self)
+       def getAllZoneModelsSorted(self)
        def getGridModelName(self)
        def getResultFaciesParamName(self)
        def getZoneNumberList(self)
+       def getRegionNumberListForSpecifiedZoneNumber(self,zoneNumber)
        def getPreviewZoneNumber(self)
+       def getPreviewRegionNumber(self)
+       def getPreviewCrossSectionType(self)
+       def getPreviewCrossSectionRelativePos(self)
+       def getPreviewScale(self)
        def getAllGaussFieldNamesUsed(self)
        def getZoneParamName(self)
+       def getRegionParamName(self)       
+       def getSeedFileName(self)
        def debug_level(self)
        def getMainFaciesTable(self)
        def getRMSProjectName(self)
-       def getRMSGaussFieldScriptName(self)
        def getAllProbParam(self)
 
       Set data and update data structure:
 
        def setRmsProjectName(self,name)
        def setRmsWorkflowName(self,name)
-       def setGaussFieldScriptName(self,name)
        def setRmsGridModelName(self,name)
        def setRmsZoneParamName(self,name)
        def setRmsResultFaciesParamName(self,name)
        def set_debug_level(self,debug_level)
-       def setSelectedZoneNumberList(self,selectedZoneNumbers)
-       def setPreviewZoneNumber(self,zoneNumber)
+       def setSelectedZoneAndRegionNumber(self, selectedZoneNumber,selectedRegionNumber=0)
+       def setPreviewZoneAndRegionNumber(self, zoneNumber,regionNumber=0)
+       def setPreviewCrossSectionType(self, crossSectionType)
+       def setPreviewCrossSectionRelativePos(self, crossSectionRelativePos)
+       def setPreviewScale(self, scale)
        def addNewZone(self,zoneObject)
        def deleteZone(self,zoneNumber)
        def setMainFaciesTable(self,faciesTableObj)
-       def setGaussFieldJobs(self,gfJobObject)
 
 
     Private member functions:
-     def __interpretXMLModelFile(self,modelFileName)
+     def __interpretXMLModelFile(self,modelFileName, debug_level)
                  - Read xml file and put the data into data structure
+     def __checkZoneModels(self)
+                 - Check that an APSModel does not have specifications of zone models for (zone,region) pairs that are overlapping.
+                   Hence, it is not allowed to specify (zone=1, region=0) and (zone=1, region=0). 
+                   The first (zone=1, region=0) means that the zone  model specification is defined for all grid cells in zone=1. 
+                   The second (zone=1, region=1) means that the zone model is defined for those grid cells belonging to zone=1 
+                   and at the same time to region=1. It follows that all grid cells belonging to zone=1 and region=1 
+                   have two different models which is not unique and not allowed. 
 
      def __readParamFromFile(self,inputFile,debug_level)
                  - Read IPL include file to get updated model parameters from FMU
@@ -88,10 +113,10 @@ class APSModel:
     """
 
     def __init__(
-            self, modelFileName=None, apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='', rmsGaussFieldScriptName='',
-            rmsGridModelName='', rmsSingleZoneGrid='False', rmsZoneParameterName='', rmsRegionParameterName='',
-            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, rmsGFJobs=None,
-            rmsHorizonRefName='', rmsHorizonRefNameDataType='', mainFaciesTable=None, zoneModelTable=None,
+            self, modelFileName=None, apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='',
+            rmsGridModelName='', rmsZoneParameterName='', rmsRegionParameterName='',
+            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, 
+            mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
             previewScale=1.0, debug_level=Debug.OFF):
         """
@@ -101,31 +126,13 @@ class APSModel:
          If the model is created from e.g APSGUI, these parameters must be specified:
          rmsProjectName - Name of RMS project which will run a workflow using the APS method
          rmsWorkflowName - Name of RMS workflow for APS model
-         rmsGaussFieldScriptName - temporary file used by the workflow. This file should not be specified
-                                   my the user but get a default name. It contains the IPL script to
-                                   create gaussian fields which will run RMS petrosim jobs
-                                   to create the gaussian fields. This file will not be used
-                                   when our new gaussian simulation code implemented into the APS src code.
          rmsGridModelName - Name of grid model in RMS project.
-         rmsSingleZoneGrid - Boolean value. True if the RMS grid model specified with rmsGridModelName is a single zone grid and false if not
          rmsZoneParameterName - Zone parameter for the grid model in the RMS project.
          rmsRegionParameterName - Region parameter for the grid model in the RMS project.
          rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
-         rmsGFJobs -  Object of the GaussFieldJobs which contain list of RMS petrosim jobs and name of
-                      Gaussian fields each of those RMS jobs creates.
-                      This is necessary as a link between the gauss fields created in the RMS project and
-                      the gauss fields used in the APS model. As soon as the new gauss fields code is implemented
-                      the APS model is no longer dependent on RMS petrosim jobs and this
-                      structure here will not be necessary anymore.
-         rmsHorizonRefName - This is name of a Horizon surface which is used to define the 2D grid resolution
-                             of 2D surfaces containing variogram azimuth anisotropy angles.
-                            This is only necessary as a workaround as long as the project depends on creating
-                            gaussian fields using RMS petrosim module, and this will no longer be necessary
-                            when the new gaussian field simulation is implemented in the APS code.
-         rmsHorizonRefNameDataType - Horizon representation data type for horizons.
-                                     Is used when creating rmsHorizonSurfacies containing variogram anisotropy
-                                     for azimuth angle. This data will no longer be necessary when the gaussian
-                                     fields are created by the new gaussian field simulation code to be used in APS model.
+         seedFileName - Name of seed file to be used. Used by scripts for simulation of gaussian fields. 
+         writeSeeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read. 
+                      Used by scripts simulationg gaussian fields.
          mainFaciesTable - Object containing the global facies table with facies names an associated
                            facies code common for the RMS project. All facies to be modelled must be defined
                            in the mainFaciesTable.
@@ -134,8 +141,8 @@ class APSModel:
                           a specified zoneNumber and regionNumber. If regionNumber is not used (is equal to 0),
                           the facies realization will be calculated for the grid cells belonging to the specified zone number.
                           The maximum possible zoneModels will be the sum over all defined (zoneNumber,regionNumber) pairs
-                          that exist in the gridmodel. It is possible that an APS model is defined for
-                          only one (zoneNumber,regionNumber) pair and is not defined any grid cells not satisfying
+                          that exist in the gridmodel. It is possible (but not very useful) that an APS model is defined for
+                          only one (zoneNumber,regionNumber) pair and there does not exist any grid cells satisfying
                           this criteria.
          previewZone, previewRegion, previewCrossSectionType, previewCrossSectionRelativePos:
                           Variables used in the testPreview script and will not be necessary in the APSGUI.
@@ -156,19 +163,12 @@ class APSModel:
 
         self.__rmsProjectName = rmsProjectName
         self.__rmsWorkflowName = rmsWorkflowName
-        self.__rmsGaussFieldScriptName = rmsGaussFieldScriptName
-
         self.__rmsGridModelName = rmsGridModelName
-        self.__rmsSingleZoneGrid = rmsSingleZoneGrid
         self.__rmsZoneParamName = rmsZoneParameterName
         self.__rmsRegionParamName = rmsRegionParameterName
         self.__rmsFaciesParamName = rmsFaciesParameterName
         self.__seedFileName = seedFileName
         self.writeSeeds = writeSeeds
-        self.__rmsGFJobs = rmsGFJobs
-
-        self.__refHorizonNameForVariogramTrend = rmsHorizonRefName
-        self.__refHorizonReprNameForVariogramTrend = rmsHorizonRefNameDataType
 
         self.__faciesTable = mainFaciesTable
         self.__zoneModelTable = zoneModelTable if zoneModelTable else {}
@@ -265,28 +265,12 @@ class APSModel:
             value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName)
             self.__setattr__(prefix + variable, value)
 
-        # Read optional keyword for IPL script file
-        keyword = 'RMSGaussFieldScriptName'
-        value = getTextCommand(root, keyword, modelFile=modelFileName,required=False)
-        if value is not None:
-            self.__rmsGaussFieldScriptName = value
-
         # Read optional keyword for region parameter
         keyword = 'RegionParamName'
         value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None,  modelFile=modelFileName, required=False)
         if value is not None:
             self.__rmsRegionParamName = value
 
-        # Read optional keyword which specify whether the gridmodel is a single zone grid or multi zone grid
-        keyword = 'UseSingleZoneGrid'
-        value = getIntCommand(root, keyword, parentKeyword='APSModel',
-                              minValue=0, maxValue=1, defaultValue=0,
-                              modelFile=modelFileName, required=False
-        )
-        if value == 0:
-            self.__rmsSingleZoneGrid = False
-        else:
-            self.__rmsSingleZoneGrid = True
 
         # Read optional keyword to specify name of seed file
         keyword = 'SeedFile'
@@ -301,24 +285,16 @@ class APSModel:
         else:
             self.writeSeeds = False
 
-        # Read all gauss field jobs and their gauss field 3D parameter names
-        self.__rmsGFJobs = APSGaussFieldJobs(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
-
         # Read all facies names available
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: RMSGridModel:                       ' + self.__rmsGridModelName)
-            if not self.__rmsSingleZoneGrid:
-                print('Debug output: RMS grid is multi zone grid:        ' + 'Yes')
-            else:
-                print('Debug output: RMS grid is multi zone grid:        ' + 'No')
             print('Debug output: RMSZoneParamName:                   ' + self.__rmsZoneParamName)
             print('Debug output: RMSFaciesParamName:                 ' + self.__rmsFaciesParamName)
             print('Debug output: RMSRegionParamName:                 ' + self.__rmsRegionParamName)
             print('Debug output: Name of RMS project read:           ' + self.__rmsProjectName)
             print('Debug output: Name of RMS workflow read:          ' + self.__rmsWorkflowName)
-            print('Debug output: Name of RMS gauss field IPL script: ' + self.__rmsGaussFieldScriptName)
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
@@ -732,9 +708,6 @@ class APSModel:
     def getRMSProjectName(self):
         return copy.copy(self.__rmsProjectName)
 
-    def getRMSGaussFieldScriptName(self):
-        return copy.copy(self.__rmsGaussFieldScriptName)
-
     def getAllProbParam(self):
         allProbList = []
         for key, zoneModel in self.__zoneModelTable.items():
@@ -751,9 +724,6 @@ class APSModel:
 
     def setRmsWorkflowName(self, name):
         self.__rmsWorkflowName = copy.copy(name)
-
-    def setGaussFieldScriptName(self, name):
-        self.__rmsGaussFieldScriptName = copy.copy(name)
 
     def setRmsGridModelName(self, name):
         self.__rmsGridModelName = copy.copy(name)
@@ -862,182 +832,6 @@ class APSModel:
     def setMainFaciesTable(self, faciesTableObj):
         self.__faciesTable = faciesTableObj
 
-    # Set gauss field job to refer to the input gauss field job object
-    def setGaussFieldJobs(self, gfJobObject):
-        self.__rmsGFJobs = copy.deepcopy(gfJobObject)
-
-    def getGaussFieldJobs(self):
-        return copy.copy(self.__rmsGFJobs)
-
-    def createSimGaussFieldIPL(self):
-        print('Call createSimGaussFieldIPL')
-        print('Write file: {}'.format(self.__rmsGaussFieldScriptName))
-        outputFileName = self.__rmsGaussFieldScriptName
-        gridModelName = self.__rmsGridModelName
-        zoneNumberList = self.getZoneNumberList()
-        nZones = len(zoneNumberList)
-        jobObject = self.__rmsGFJobs
-        nJobs = jobObject.getNumberOfGFJobs()
-        jobNames = jobObject.getGaussFieldJobNames()
-
-        with open(outputFileName, 'w') as file:
-            file.write('// IPL: {}\n'.format(outputFileName))
-            file.write('// IPL:  Run RMS jobs to create gaussian fields for the APS method\n')
-            file.write('// Created by: Python script APSModel.py\n')
-
-            d = datetime.datetime.today().strftime("%d/%m/%y")
-            t = datetime.datetime.now().strftime("%H.%M.%S")
-            file.write('// Date: {} Clock: {}\n'.format(d, t))
-
-            file.write('// --- Declarations ---\n')
-            file.write('Job job\n')
-            file.write('String gridModelName\n')
-            file.write('String jobName,fullJobName\n')
-            file.write('String varioType\n')
-            file.write('String scriptName\n')
-            file.write('String paramName\n')
-            file.write('Int    nZones\n')
-            file.write('Float    value\n')
-            file.write('GridModel gm\n')
-            file.write(' \n')
-            file.write('// --- Assignments  ---\n')
-            file.write('scriptName    = "{}"\n'.format(outputFileName))
-            file.write('gridModelName = "{}"\n'.format(gridModelName))
-            file.write('nZones        = {}\n'.format(nZones))
-
-            file.write(' \n')
-            file.write('// --- Executable code ---\n')
-            file.write('GetGridModel(gridModelName,gm)\n')
-            file.write(' \n')
-            file.write(' \n')
-
-            updateJob = []
-            for j in range(nJobs):
-                updateJob.append(0)
-
-            for key, zoneModel in self.__zoneModelTable.items():
-                zoneNumber = key[0]
-                regionNumber = key[1]
-                print('In createSimGaussFieldIPL: Write IPL commands to generate model for (zoneNumber, regionNumber)=({},{})'
-                      ''.format(str(zoneNumber), str(regionNumber)))
-                currentZoneModel = zoneModel
-                if not self.isSelected(zoneNumber, regionNumber):
-                    continue
-                file.write('// --- RMS gauss simulation settings for zone and region number ({},{}) ---\n'.format(str(zoneNumber),str(regionNumber)))
-                gaussFieldNamesInZoneModel = currentZoneModel.getUsedGaussFieldNames()
-                nGFParamUsed = len(gaussFieldNamesInZoneModel)
-
-                for i in range(nGFParamUsed):
-                    gfNameUsed = gaussFieldNamesInZoneModel[i]
-                    if self.__rmsSingleZoneGrid:
-                        if regionNumber > 0:
-                            file.write('Print("Update Gauss field: ","{}"," for single zone grid for region number: {}")\n'
-                                       ''.format(gfNameUsed, str(regionNumber)))
-                        else:
-                            file.write('Print("Update Gauss field: ","{}"," for single zone grid")\n'.format(gfNameUsed))
-                    else:
-                        if regionNumber > 0:
-                            file.write('Print("Update Gauss field: ","{}"," for zone, region pair: ({},{})")\n'
-                                       ''.format(gfNameUsed, str(zoneNumber), str(regionNumber)))
-                        else:
-                            file.write('Print("Update Gauss field: ","{}"," for zone: ",{})\n'.format(gfNameUsed, str(zoneNumber)))
-
-                    # Check which rms job this gauss field parameter belongs to
-                    for j in range(nJobs):
-
-                        currentJobName = jobNames[j]
-                        if jobObject.checkGaussFieldNameInJob(currentJobName, gfNameUsed):
-                            updateJob[j] = 1
-                            # This job must be updated with variogram parameters
-                            # for current zone number
-                            gfIndx = jobObject.getGaussFieldIndx(currentJobName, gfNameUsed)
-                            variogramType = currentZoneModel.getVariogramType(gfNameUsed)
-                            variogramName = variogramType.name
-                            range1 = currentZoneModel.getMainRange(gfNameUsed)
-                            range2 = currentZoneModel.getPerpRange(gfNameUsed)
-                            range3 = currentZoneModel.getVertRange(gfNameUsed)
-                            # TODO: power is UNUSED
-                            power = 1.0
-                            if variogramType == 'GEN_EXPONENTIAL':
-                                power = currentZoneModel.getPower(gfNameUsed)
-
-                            file.write('job = "{}"\n'.format(currentJobName))
-                            if self.__rmsSingleZoneGrid:
-                                file.write(
-                                    'paramName = "Group[{}].VariogramType"\n'.format(gfIndx + 1)
-                                )
-                                file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
-
-                                file.write(
-                                    'paramName = "Group[{}].VariogramStdDev"\n'.format(gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(1.0))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                                file.write(
-                                    'paramName = "Group[{}].VariogramMainRange"\n'.format(gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(range1))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                                file.write(
-                                    'paramName = "Group[{}].VariogramPerpRange"\n'.format(gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(range2))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                                file.write(
-                                    'paramName = "Group[{}].VariogramVertRange"\n'.format(gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(range3))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                            else:
-                                file.write(
-                                    'paramName = "Zone[{}].Group[{}].VariogramType"\n'.format(zoneNumber, gfIndx + 1)
-                                )
-                                file.write('ModifyJob(job,paramName,"{}")\n'.format(variogramName))
-
-                                file.write(
-                                    'paramName = "Zone[{}].Group[{}].VariogramStdDev"\n'.format(zoneNumber, gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(1.0))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                                file.write(
-                                    'paramName = "Zone[{}].Group[{}].VariogramMainRange"\n'.format(zoneNumber, gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(range1))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                                file.write(
-                                    'paramName = "Zone[{}].Group[{}].VariogramPerpRange"\n'.format(zoneNumber, gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(range2))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                                file.write(
-                                    'paramName = "Zone[{}].Group[{}].VariogramVertRange"\n'.format(zoneNumber, gfIndx + 1)
-                                )
-                                file.write('value = {}\n'.format(range3))
-                                file.write('ModifyJob(job,paramName,value)\n')
-
-                            file.write('ApplyJob(job)\n')
-                            file.write('\n')
-                            break
-            # End for zone
-            file.write('// --- Execute jobs ---\n')
-            for j in range(nJobs):
-                if updateJob[j] == 1:
-                    currentJobName = jobNames[j]
-                    file.write('fullJobName = gridModelName + ".Grid." + "{}"\n'.format(currentJobName))
-                    file.write('job = "{}"\n'.format(currentJobName))
-                    file.write('Print("Start running job: ",fullJobName)\n')
-                    file.write('ExecuteJob(job)\n')
-
-            file.write('\n')
-            file.write('Print("Finished IPL script: ","{}")\n'.format(outputFileName))
-            file.write('// --------------- End script -----------------\n')
 
     def XMLAddElement(self, root):
         """
@@ -1104,11 +898,6 @@ class APSModel:
         elem.text = ' ' + self.__rmsWorkflowName.strip() + ' '
         root.append(elem)
 
-        tag = 'RMSGaussFieldScriptName'
-        elem = Element(tag)
-        elem.text = ' ' + self.__rmsGaussFieldScriptName.strip() + ' '
-        root.append(elem)
-
         tag = 'GridModelName'
         elem = Element(tag)
         elem.text = ' ' + self.__rmsGridModelName.strip() + ' '
@@ -1151,9 +940,6 @@ class APSModel:
 
         # Add command MainFaciesTable
         self.__faciesTable.XMLAddElement(root)
-
-        # Add command GaussFieldJobNames
-        self.__rmsGFJobs.XMLAddElement(root)
 
         # Add command ZoneModels
         tag = 'ZoneModels'
