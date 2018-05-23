@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
@@ -17,9 +18,8 @@ def getKeyword(parent, keyword, parentKeyword='', modelFile=None, required=True)
     or None is returned if the keyword is not required.
     """
     obj = parent.find(keyword)
-    if required:
-        if obj is None:
-            raise ReadingXmlError(keyword, parentKeyword, modelFile)
+    if required and obj is None:
+        raise ReadingXmlError(keyword, parentKeyword, modelFile)
     return obj
 
 
@@ -30,9 +30,8 @@ def getTextCommand(parent, keyword, parentKeyword='', defaultText=None, modelFil
     If the keyword is not required and the keyword is not found, the default text is returned.
     """
     obj = parent.find(keyword)
-    if required:
-        if obj is None:
-            raise ReadingXmlError(keyword, parentKeyword, modelFile)
+    if required and obj is None:
+        raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text.strip()
     else:
@@ -56,18 +55,15 @@ def getFloatCommand(
 
     obj = parent.find(keyword)
     value = defaultValue
-    if required:
-        if obj is None:
-            raise ReadingXmlError(keyword, parentKeyword, modelFile)
+    if required and obj is None:
+        raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text
         value = float(text.strip())
-        if minValue is not None:
-            if value < minValue:
-                raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
-        if maxValue is not None:
-            if value > maxValue:
-                raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
+        if minValue is not None and value < minValue:
+            raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
+        if maxValue is not None and value > maxValue:
+            raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
     return value
 
 
@@ -85,27 +81,23 @@ def getIntCommand(
     """
     obj = parent.find(keyword)
     value = defaultValue
-    if required:
-        if obj is None:
-            raise ReadingXmlError(keyword, parentKeyword, modelFile)
+    if required and obj is None:
+        raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text
         value = int(text.strip())
-        if minValue is not None:
-            if value < minValue:
-                raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
-        if maxValue is not None:
-            if value > maxValue:
-                raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
+        if minValue is not None and value < minValue:
+            raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
+        if maxValue is not None and value > maxValue:
+            raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
     return value
 
 
 def getBoolCommand(parent, keyword, parent_keyword='', default=False, model_file_name=None, required=True):
     obj = parent.find(keyword)
     value = default
-    if required:
-        if obj is None:
-            raise ReadingXmlError(keyword, parent_keyword, model_file_name)
+    if required and obj is None:
+        raise ReadingXmlError(keyword, parent_keyword, model_file_name)
     if obj is not None:
         text = obj.text.strip().lower()
         if text in ['true', '1', 'yes', 'y']:
