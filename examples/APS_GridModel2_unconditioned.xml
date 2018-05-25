@@ -91,15 +91,17 @@
                     <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTH">0.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
-                <Trend name="Elliptic3D">
-                    <azimuth>315.0</azimuth>
-                    <directionStacking>1</directionStacking>
-                    <stackAngle>0.25</stackAngle>
-                    <curvature kw="APS_1_0_GF_GF2_TREND_CURVATURE">1.5</curvature>
-                    <origin_x>0.5</origin_x>
-                    <origin_y>0.0</origin_y>
-                    <origin_z_simbox>0.5</origin_z_simbox>
-                    <origintype>'Relative'</origintype>
+                <Trend>
+                    <Elliptic3D>
+                        <azimuth>315.0</azimuth>
+                        <directionStacking>1</directionStacking>
+                        <stackAngle>0.25</stackAngle>
+                        <curvature kw="APS_1_0_GF_GF2_TREND_CURVATURE">1.5</curvature>
+                        <origin_x>0.5</origin_x>
+                        <origin_y>0.0</origin_y>
+                        <origin_z_simbox>0.5</origin_z_simbox>
+                        <origintype>'Relative'</origintype>
+                    </Elliptic3D>
                 </Trend>
                 <RelStdDev>0.02</RelStdDev>
                 <SeedForPreview>276787</SeedForPreview>
