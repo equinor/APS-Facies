@@ -53,6 +53,7 @@ import numpy as np
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_prefix
 from src.utils.xmlUtils import getKeyword, getTextCommand, prettify
 
 
@@ -566,11 +567,12 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
             )
 
 
-def run(roxar=None, project=None):
+def run(roxar=None, project=None, **kwargs):
     warn("deprecated", DeprecationWarning)
-    scriptName = 'getRMSProjectData.py'
-    inputFile = 'getRMSProjectData.xml'
-    outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
+    prefix = get_prefix(**kwargs)
+    scriptName = prefix + '/' + 'getRMSProjectData.py'
+    inputFile = prefix + '/' + 'getRMSProjectData.xml'
+    outputRMSDataFile = prefix + '/' + 'rms_project_data_for_APS_gui.xml'
     debug_level = Debug.OFF
     # Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
     if debug_level >= Debug.ON:

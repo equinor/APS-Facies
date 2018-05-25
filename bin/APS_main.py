@@ -18,6 +18,8 @@ from src.utils.constants.simple import Debug
 
 
 # Initialise common variables
+from src.utils.methods import get_model_file_name
+
 functionName = 'APS_main.py'
 
 # Tolerance
@@ -271,11 +273,11 @@ def checkAndNormaliseProb(
     return probDefined, nCellWithModifiedProb
 
 
-def run(roxar=None, project=None):
+def run(roxar=None, project=None, **kwargs):
     realNumber = project.current_realisation
     print('Run: APS_trunc  on realisation ' + str(realNumber + 1))
 
-    modelFileName = 'APS.xml'
+    modelFileName = get_model_file_name(**kwargs)
 
     print('- Read file: ' + modelFileName)
     apsModel = APSModel(modelFileName)

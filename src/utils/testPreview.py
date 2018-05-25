@@ -617,7 +617,7 @@ def get_argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(roxar=None, project=None):
+def run(roxar=None, project=None, **kwargs):
     args = get_arguments()
     run_previewer(**args.__dict__)
 

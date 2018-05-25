@@ -42,8 +42,3 @@ class TrendType(Enum):
     HYPERBOLIC = 3
     RMS_PARAM = 4
     ELLIPTIC_CONE = 5
-
-
-def get_legal_values_of_enum(enum):
-    if isinstance(enum, Enum) or isinstance(enum, IntEnum):
-        return {v.value for v in enum.__members__.values()}

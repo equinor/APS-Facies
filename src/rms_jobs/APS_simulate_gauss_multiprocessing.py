@@ -8,6 +8,7 @@ import numpy as np
 import multiprocessing as mp
 
 from src.algorithms.APSModel import APSModel
+from src.utils.methods import get_model_file_name, get_rms_project_data_file, get_run_parameters
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
 from src.utils.constants.simple import Debug
 
@@ -231,7 +232,7 @@ def run_simulations(
             azimuthValueSimBox = azimuthValue - azimuthAngleGrid
             simBoxThickness = zoneModel.getSimBoxThickness()
 
-            # Calculate grid cell size in z direction 
+            # Calculate grid cell size in z direction
             nz = nLayers
             dz = simBoxThickness/nz
 
@@ -293,16 +294,14 @@ def run_simulations(
     print('')
 
 
-def run(roxar=None, project=None):
-    modelFile = 'APS.xml'
-    rms_data_file_name = 'rms_project_data_for_APS_gui.xml'
-    outputDir = './tmp_gauss_sim'
-    writeLogFile = True
+def run(roxar=None, project=None,):
+    model_file, rms_data_file_name, _, output_dir, _ = get_run_parameters(**kwargs)
+    write_log_file = True
     run_simulations(
-        modelFile=modelFile,
+        modelFile=model_file,
         rms_data_file_name=rms_data_file_name,
-        outputDir=outputDir,
-        writeLogFile=writeLogFile
+        outputDir=output_dir,
+        writeLogFile=write_log_file
     )
 
 

@@ -3,11 +3,12 @@
 
 from src.algorithms.defineFaciesProbMapDepTrend import DefineFaciesProbMapDep
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_debug_level, get_prefix
 
 
-def run(roxar=None, project=None):
-    model_file_name = 'APS_prob_mapdep.xml'
-    debug_level = Debug.OFF
+def run(roxar=None, project=None, **kwargs):
+    model_file_name = get_prefix(**kwargs) + '/' + 'APS_prob_mapdep.xml'
+    debug_level = get_debug_level(**kwargs)
     define_facies_trend = DefineFaciesProbMapDep(model_file_name, project)
     define_facies_trend.calculate_facies_probability_parameter()
     if debug_level >= Debug.ON:

@@ -10,6 +10,7 @@ from xml.etree.ElementTree import Element
 import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_run_parameters
 from src.utils.xmlUtils import prettify
 
 
@@ -106,21 +107,20 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     return
 
 
-def run(roxar=None, project=None):
+def run(roxar=None, project=None, **kwargs):
     # TODO: Separate this part into a CLI program
-    modelFile = 'APS.xml'
-    outputRMSDataFile = 'rms_project_data_for_APS_gui.xml'
-    scriptName = 'getGridModelAttributes'
+
+    model_file, output_rms_data_file, _, _, _ = get_run_parameters(**kwargs)
 
     # Read APS model
-    print('- Read file: ' + modelFile)
-    apsModel = APSModel(modelFile)
-    debug_level = apsModel.debug_level()
-    gridModelName = apsModel.getGridModelName()
+    print('- Read file: ' + model_file)
+    aps_model = APSModel(model_file)
+    debug_level = aps_model.debug_level()
+    grid_model_name = aps_model.getGridModelName()
 
-    writeXMLFileGridDimensions(project, gridModelName, outputRMSDataFile, debug_level)
+    writeXMLFileGridDimensions(project, grid_model_name, output_rms_data_file, debug_level)
     print('')
-    print('Finished running: ' + scriptName)
+    print('Finished running: ' + __file__)
 
 
 if __name__ == '__main__':
