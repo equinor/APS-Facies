@@ -54,29 +54,30 @@ import sys
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@statoil.com"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __status__ = "Draft"
 
 # Keywords to pass along to the various modules
 kwargs = {{
-    'debug_level': 0,  # Legal values: 0..4 (0 is off, while 4 is very verbose)
+    # Legal values: 0..4 (0 is off, while 4 is very verbose)
+    'debug_level': 0,
     'use_prefix_as_fallback': True,
+    # Prefix for the location of model files (if absolute paths are not given)
     'prefix': '{root_path}',
-    # Various model file names
+    # APS model file
     'model_file_name': '{root_path}/APS.xml',
     'output_rms_data_file': '{root_path}/rms_project_data_for_APS_gui.xml',
     'global_ipl_file': '{root_path}/test_global_include.ipl',
 }}
 
-# Name of Python file to be executed (excluding .py)
-file_name = '{file_name}'
-
 # The path to the repository's root folder
 root_path = '{root_path}'
 
-# Path to where the file above is located within the repository
+# Path to where the file bellow is located within the repository
 relative_path = '{relative_path}'
 
+# Name of Python file to be executed (excluding .py)
+file_name = '{file_name}'
 
 # Add path to searchable path
 sys.path.append(root_path)
