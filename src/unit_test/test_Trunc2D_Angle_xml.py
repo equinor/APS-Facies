@@ -25,7 +25,6 @@ def interpretXMLModelFileAndWrite(
     trRule = root.find('TruncationRule')
 
     # Get name of truncation rule
-    #truncRuleName = trRule.get('name')
     truncRuleName = trRule[0].tag
     print('Truncation rule: ' + truncRuleName)
 
