@@ -453,7 +453,7 @@ class Trend3D:
 
     def get_origin_type_from_model_file(self, model_file_name, trendRuleXML):
         origin_type = getTextCommand(
-            trendRuleXML, 'origintype', modelFile=model_file_name, required=False, defaultText="Relative"
+            trendRuleXML[0], 'origintype', modelFile=model_file_name, required=False, defaultText="Relative"
         )
         origin_type = origin_type.strip('\"\'')
         if origin_type.lower() == 'relative':
@@ -490,7 +490,7 @@ class Trend3D_linear(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
         # Additional input parameters comes here (for other Trend3D-types)
 
     def XMLAddElement(self, parent):
@@ -501,12 +501,18 @@ class Trend3D_linear(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        attribute = {'name': 'Linear3D'}
-        tag = 'Trend'
-        trendElement = Element(tag, attribute)
-        parent.append(trendElement)
+        # attribute = {'name': 'Linear3D'}
+        # tag = 'Trend'
+        # trendElement = Element(tag, attribute)
+        # parent.append(trendElement)
 
-        super()._XMLAddElementTag(trendElement)
+        # super()._XMLAddElementTag(trendElement)
+
+        trendElement = Element('Trend')
+        parent.append(trendElement)
+        linear3DElement = Element('Linear3D')
+        trendElement.append(linear3DElement)
+        super()._XMLAddElementTag(linear3DElement)
 
     def initialize(self, azimuthAngle, stackingAngle, direction, debug_level=Debug.OFF):
         super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
@@ -610,22 +616,22 @@ class Trend3D_elliptic(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
         # Stacking angle must be > 0.
         if abs(self._stackingAngle) < 0.00001:
             self._stackingAngle = 0.00001
 
         # Additional input parameters comes here (for other Trend3D-types)
-        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=True)
+        self._curvature = getFloatCommand(trendRuleXML[0], 'curvature', modelFile=modelFileName, required=True)
         if self._curvature <= 0.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Curvature for elliptic trend is not positive.'
                 ''.format(self._className)
             )
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=True)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=True)
-        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=True)
+        origin_x = getFloatCommand(trendRuleXML[0], 'origin_x', modelFile=modelFileName, required=True)
+        origin_y = getFloatCommand(trendRuleXML[0], 'origin_y', modelFile=modelFileName, required=True)
+        origin_z = getFloatCommand(trendRuleXML[0], 'origin_z_simbox', modelFile=modelFileName, required=True)
         self._origin = [origin_x, origin_y, origin_z]
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
 
@@ -639,32 +645,42 @@ class Trend3D_elliptic(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        attribute = {'name': 'Elliptic3D'}
-        tag = 'Trend'
-        trendElement = Element(tag, attribute)
-        parent.append(trendElement)
+        # attribute = {'name': 'Elliptic3D'}
+        # tag = 'Trend'
+        # trendElement = Element(tag, attribute)
+        # parent.append(trendElement)
+        #
+        # super()._XMLAddElementTag(trendElement)
 
-        super()._XMLAddElementTag(trendElement)
+        trendElement = Element('Trend')
+        parent.append(trendElement)
+        elliptic3DElement = Element('Elliptic3D')
+        trendElement.append(elliptic3DElement)
+        super()._XMLAddElementTag(elliptic3DElement)
 
         tag = 'curvature'
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
-        trendElement.append(obj)
+        #trendElement.append(obj)
+        elliptic3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        elliptic3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        elliptic3DElement.append(obj)
 
         tag = 'origin_z_simbox'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[2]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        elliptic3DElement.append(obj)
 
         tag = 'origintype'
         obj = Element(tag)
@@ -672,7 +688,8 @@ class Trend3D_elliptic(Trend3D):
             obj.text = ' Relative '
         elif self._origin_type == OriginType.ABSOLUTE:
             obj.text = ' Absolute '
-        trendElement.append(obj)
+        #trendElement.append(obj)
+        elliptic3DElement.append(obj)
 
     def initialize(
             self, azimuthAngle, stackingAngle, direction, curvature=1.0,
@@ -850,10 +867,10 @@ class Trend3D_hyperbolic(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
         # Additional input parameters comes here (for other Trend3D-types)
         self._curvature = getFloatCommand(
-            trendRuleXML, 'curvature', modelFile=modelFileName, required=False, defaultValue=1
+            trendRuleXML[0], 'curvature', modelFile=modelFileName, required=False, defaultValue=1
         )
         if self._curvature <= 1.0:
             raise ValueError(
@@ -862,7 +879,7 @@ class Trend3D_hyperbolic(Trend3D):
                 ''.format(self._className)
             )
         self._migrationAngle = getFloatCommand(
-            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+            trendRuleXML[0], 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
         )
         if self._migrationAngle <= -90.0 or self._migrationAngle >= 90.0:
             raise ValueError(
@@ -871,9 +888,9 @@ class Trend3D_hyperbolic(Trend3D):
                 ''.format(self._className)
                 )
 
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_x = getFloatCommand(trendRuleXML[0], 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML[0], 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_z = getFloatCommand(trendRuleXML[0], 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
         self._origin = [origin_x, origin_y, origin_z]
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
 
@@ -1085,37 +1102,48 @@ class Trend3D_hyperbolic(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        attribute = {'name': 'Hyperbolic3D'}
-        tag = 'Trend'
-        trendElement = Element(tag, attribute)
-        parent.append(trendElement)
+        # attribute = {'name': 'Hyperbolic3D'}
+        # tag = 'Trend'
+        # trendElement = Element(tag, attribute)
+        # parent.append(trendElement)
+        #
+        # super()._XMLAddElementTag(trendElement)
 
-        super()._XMLAddElementTag(trendElement)
+        trendElement = Element('Trend')
+        parent.append(trendElement)
+        hyperbolic3DElement = Element('Hyperbolic3D')
+        trendElement.append(hyperbolic3DElement)
+        super()._XMLAddElementTag(hyperbolic3DElement)
 
         tag = 'curvature'
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
-        trendElement.append(obj)
+        #trendElement.append(obj)
+        hyperbolic3DElement.append(obj)
 
         tag = 'migrationAngle'
         obj = Element(tag)
         obj.text = ' ' + str(self._migrationAngle) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        hyperbolic3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        hyperbolic3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        hyperbolic3DElement.append(obj)
 
         tag = 'origin_z_simbox'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[2]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        hyperbolic3DElement.append(obj)
 
         tag = 'origintype'
         obj = Element(tag)
@@ -1123,7 +1151,8 @@ class Trend3D_hyperbolic(Trend3D):
             obj.text = ' Relative '
         elif self._origin_type == OriginType.ABSOLUTE:
             obj.text = ' Absolute '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        hyperbolic3DElement.append(obj)
 
 # ----------------------------------------------------------------------------------------------------------
 
@@ -1148,7 +1177,7 @@ class Trend3D_rms_param(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        text = getTextCommand(trendRuleXML, 'TrendParamName', 'Trend', defaultText=None, modelFile=modelFileName, required=True)
+        text = getTextCommand(trendRuleXML[0], 'TrendParamName', 'Trend', defaultText=None, modelFile=modelFileName, required=True)
         self._rmsParamName = copy.copy(text.strip())
 
     def initialize(self, rmsParamName, debug_level=Debug.OFF):
@@ -1174,15 +1203,24 @@ class Trend3D_rms_param(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        attribute = {'name': 'RMSParameter'}
-        tag = 'Trend'
-        trendElement = Element(tag, attribute)
-        parent.append(trendElement)
+        # attribute = {'name': 'RMSParameter'}
+        # tag = 'Trend'
+        # trendElement = Element(tag, attribute)
+        # parent.append(trendElement)
+        #
+        # tag = 'TrendParamName'
+        # obj = Element(tag)
+        # obj.text = ' ' + self._rmsParamName + ' '
+        # trendElement.append(obj)
 
-        tag = 'TrendParamName'
-        obj = Element(tag)
-        obj.text = ' ' + self._rmsParamName + ' '
-        trendElement.append(obj)
+        trendElement = Element('Trend')
+        parent.append(trendElement)
+        RMSParameterElement = Element('RMSParameter')
+        trendElement.append(RMSParameterElement)
+        TrendParamNameElement = Element('TrendParamName')
+        TrendParamNameElement.text = ' ' + self._rmsParamName + ' '
+        RMSParameterElement.append(TrendParamNameElement)
+
 
 # ----------------------------------------------------------------------------------------------------------
 
@@ -1227,14 +1265,14 @@ class Trend3D_elliptic_cone(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML, modelFileName)
+        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
         # Stacking angle must be > 0.
         if abs(self._stackingAngle) < 0.00001:
             self._stackingAngle = 0.00001
 
         # Additional input parameters comes here (for other Trend3D-types)
         # Curvature
-        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False,
+        self._curvature = getFloatCommand(trendRuleXML[0], 'curvature', modelFile=modelFileName, required=False,
                                           defaultValue=1)
         if self._curvature <= 0.0:
             raise ValueError(
@@ -1244,7 +1282,7 @@ class Trend3D_elliptic_cone(Trend3D):
             )
         # Migration angle
         self._migrationAngle = getFloatCommand(
-            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+            trendRuleXML[0], 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
         )
         if self._migrationAngle <= -90.0 or self._migrationAngle >= 90.0:
             raise ValueError(
@@ -1253,7 +1291,7 @@ class Trend3D_elliptic_cone(Trend3D):
                 ''.format(self._className)
                 )
         # Relative size
-        self._relativeSize = getFloatCommand(trendRuleXML, 'relativeSize', modelFile=modelFileName, required=False,
+        self._relativeSize = getFloatCommand(trendRuleXML[0], 'relativeSize', modelFile=modelFileName, required=False,
                                              defaultValue=1.0)
         if self._relativeSize <= 0.0:
             raise ValueError(
@@ -1262,8 +1300,8 @@ class Trend3D_elliptic_cone(Trend3D):
                 ''.format(self._className)
             )
         # Reference point the center line will go through
-        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=True, defaultValue=0.0)
-        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=True, defaultValue=0.0)
+        origin_x = getFloatCommand(trendRuleXML[0], 'origin_x', modelFile=modelFileName, required=True, defaultValue=0.0)
+        origin_y = getFloatCommand(trendRuleXML[0], 'origin_y', modelFile=modelFileName, required=True, defaultValue=0.0)
         self._origin = [origin_x, origin_y, 0.0]
 
         # Type of reference point (relative or absolute coordinate values)
@@ -1279,37 +1317,48 @@ class Trend3D_elliptic_cone(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        attribute = {'name': 'EllipticCone3D'}
-        tag = 'Trend'
-        trendElement = Element(tag, attribute)
-        parent.append(trendElement)
+        # attribute = {'name': 'EllipticCone3D'}
+        # tag = 'Trend'
+        # trendElement = Element(tag, attribute)
+        # parent.append(trendElement)
 
-        super()._XMLAddElementTag(trendElement)
+        #super()._XMLAddElementTag(trendElement)
+
+        trendElement = Element('Trend')
+        parent.append(trendElement)
+        EllipticCone3DElement = Element('EllipticCone3D')
+        trendElement.append(EllipticCone3DElement)
+        super()._XMLAddElementTag(EllipticCone3DElement)
 
         tag = 'curvature'
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
-        trendElement.append(obj)
+        #trendElement.append(obj)
+        EllipticCone3DElement.append(obj)
 
         tag = 'migrationAngle'
         obj = Element(tag)
         obj.text = ' ' + str(self._migrationAngle) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        EllipticCone3DElement.append(obj)
 
         tag = 'relativeSize'
         obj = Element(tag)
         obj.text = ' ' + str(self._relativeSize) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        EllipticCone3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        EllipticCone3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        EllipticCone3DElement.append(obj)
 
         tag = 'origintype'
         obj = Element(tag)
@@ -1317,7 +1366,8 @@ class Trend3D_elliptic_cone(Trend3D):
             obj.text = ' Relative '
         elif self._origin_type == OriginType.ABSOLUTE:
             obj.text = ' Absolute '
-        trendElement.append(obj)
+        # trendElement.append(obj)
+        EllipticCone3DElement.append(obj)
 
     def initialize(
             self, azimuthAngle, stackingAngle, direction, migrationAngle=0.0, curvature=1.0, relativeSize=1.0,

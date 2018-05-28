@@ -217,23 +217,31 @@ class APSGaussModel:
                         'The use of trend functions requires that simulation box thickness is specified.\n'
                         ''.format(self.__modelFileName, gfName, self.__className)
                     )
-                trend_name = trendObjXML.get('name')
+
+                # checking first child of element Trend to determine the type of Trend
+                trend_name = trendObjXML[0];
+                if trend_name is None:
+                    raise ValueError(
+                        'In model file {0} in keyword Trend for gauss field name: {1}\n'
+                        'No actual Trend is specified.\n'
+                        ''.format(self.__modelFileName, gfName, self.__className)
+                    )
                 common_params = {'modelFileName': self.__modelFileName, 'debug_level': self.__debug_level}
-                if trend_name == 'Linear3D':
+                if trend_name.tag == 'Linear3D':
                     trend_model = Trend3D_linear(trendObjXML, **common_params)
-                elif trend_name == 'Elliptic3D':
+                elif trend_name.tag == 'Elliptic3D':
                     trend_model = Trend3D_elliptic(trendObjXML, **common_params)
-                elif trend_name == 'Hyperbolic3D':
+                elif trend_name.tag == 'Hyperbolic3D':
                     trend_model = Trend3D_hyperbolic(trendObjXML, **common_params)
-                elif trend_name == 'RMSParameter':
+                elif trend_name.tag == 'RMSParameter':
                     trend_model = Trend3D_rms_param(trendObjXML, **common_params)
-                elif trend_name == 'EllipticCone3D':
+                elif trend_name.tag == 'EllipticCone3D':
                     trend_model = Trend3D_elliptic_cone(trendObjXML, **common_params)
                 else:
                     raise NameError(
                         'Error in {className}\n'
                         'Error: Specified name of trend function {trendName} is not implemented.'
-                        ''.format(className=self.__className, trendName=trend_name)
+                        ''.format(className=self.__className, trendName=trend_name.tag)
                     )
             else:
                 if self.__debug_level >= Debug.VERY_VERBOSE:

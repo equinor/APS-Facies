@@ -537,7 +537,8 @@ class Trunc2D_Base:
         self._gaussFieldsInZone = copy.copy(gaussFieldsInZone)
         # print('gaussFieldsInZone: ')
         # print(repr(self._gaussFieldsInZone))
-        bgmObj = getKeyword(trRuleXML, 'BackGroundModel', 'TruncationRule', modelFileName, required=True)
+        trRuleTypeXML = trRuleXML[0];
+        bgmObj = getKeyword(trRuleXML[0], 'BackGroundModel', trRuleTypeXML.tag, modelFileName, required=True)
 
         alphaFieldsObj = getKeyword(bgmObj, 'AlphaFields', 'BackGroundModel', modelFileName, required=True)
         text = alphaFieldsObj.text

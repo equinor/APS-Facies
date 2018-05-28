@@ -181,7 +181,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # Read truncation rule for background facies from xml tree.
             # Here the hierarchy of polygons in the 2D truncation map defined by the two
             # first transformed gaussian fields is defined. This is specific for the Cubic truncations.
-            self.__interpretXMLTree(trRuleXML, modelFileName)
+            self.__interpretXMLTree(trRuleXML[0], modelFileName)
 
             # Call base class method to read truncation rule for overlay facies.
             # Overlay facies truncation rules are read here. The overlay facies does not
@@ -189,7 +189,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # transformed gaussian fields looks like. It only need to know which facies in the 2D map
             # is "background" for each overlay facies. Therefore data structure and methods
             # related to overprint facies is common to several different truncation algorithms.
-            self._interpretXMLTree_overlay_facies(trRuleXML, modelFileName, zoneNumber)
+            self._interpretXMLTree_overlay_facies(trRuleXML[0], modelFileName, zoneNumber)
 
             # Call base class method to check that facies in truncation rule is
             # consistent with facies in zone.
@@ -1356,16 +1356,18 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # After this function is called, the parent element has got a new child element
         # for the current class.
         nGF = self._nGaussFieldsInTruncationRule
-        attribute = {
-            'name': 'Trunc2D_Cubic',
-            'nGFields': str(nGF)}
-        tag = 'TruncationRule'
-        trRuleElement = Element(tag, attribute)
+
+        trRuleElement = Element('TruncationRule')
         parent.append(trRuleElement)
+
+        attribute = {
+            'nGFields': str(nGF)}
+        trRuleTypeElement = Element('Trunc2D_Cubic', attribute)
+        trRuleElement.append(trRuleTypeElement)
 
         tag = 'BackGroundModel'
         bgModelElement = Element(tag)
-        trRuleElement.append(bgModelElement)
+        trRuleTypeElement.append(bgModelElement)
 
         tag = 'AlphaFields'
         alphaFieldsElement = Element(tag)
@@ -1429,4 +1431,4 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             nodeElementL3Below.text = ' ' + str(probFrac) + ' '
                             nodeElementL3.append(nodeElementL3Below)
 
-        super()._XMLAddElement(trRuleElement)
+        super()._XMLAddElement(trRuleTypeElement)
