@@ -464,7 +464,7 @@ def getClassName(truncRule):
 def test_Trunc2DCubic(case_number, data):
     print('')
     print('******** Case number: ' + str(case_number) + ' *********')
-    run(faciesReferenceFile=get_cubic_facies_reference_file_path(case_number),**data)
+    run(faciesReferenceFile=get_cubic_facies_reference_file_path(case_number), **data)
 
 
 def run(
@@ -502,4 +502,4 @@ def run(
 
 
 if __name__ == '__main__':
-    test_Trunc2DCubic()
+    pytest.main([__file__])

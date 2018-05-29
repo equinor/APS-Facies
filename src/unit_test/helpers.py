@@ -1,4 +1,7 @@
-import filecmp
+# -*- coding: utf-8 -*-
+from genericpath import exists
+
+from filecmp import cmp
 
 import numpy as np
 
@@ -59,12 +62,18 @@ def apply_truncations(
     writeFile(faciesOutputFile, faciesReal, nx, ny)
 
     # Compare the generated facies realization with the reference for this case
-    check = filecmp.cmp(faciesReferenceFile, faciesOutputFile)
+    check = compare(faciesOutputFile, faciesReferenceFile)
     print('Compare file: ' + faciesReferenceFile + ' and file: ' + faciesOutputFile)
     if check is False:
         raise ValueError('Error: Files are different')
     elif debug_level >= Debug.ON:
         print('Files are equal: OK')
+
+
+def compare(facies_output_file, facies_reference_file):
+    if not exists(facies_reference_file):
+        facies_reference_file = 'src/unit_test/' + facies_reference_file
+    return cmp(facies_reference_file, facies_output_file)
 
 
 def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):
@@ -82,7 +91,7 @@ def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFil
     writePolygons(outPolyFile2, polygons)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
-    check = filecmp.cmp(outPolyFile1, outPolyFile2)
+    check = compare(outPolyFile1, outPolyFile2)
     print('Compare file: ' + outPolyFile1 + ' and file: ' + outPolyFile2)
     assert check is True
     if check is False:
@@ -113,3 +122,9 @@ def writePolygons(fileName, polygons, debug_level=Debug.OFF):
 def get_cubic_facies_reference_file_path(testCase):
     faciesReferenceFile = 'testData_Cubic/test_case_' + str(testCase) + '.dat'
     return faciesReferenceFile
+
+
+def get_model_file_path(modelFile):
+    if not exists(modelFile):
+        modelFile = 'src/unit_test/' + modelFile
+    return modelFile

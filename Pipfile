@@ -20,7 +20,8 @@ pytest = "*"
 pylint = "*"
 graphviz = "*"
 piprot = "*"
-
+monkeytype = "*"
+mypy = "*"
 
 [requires]
 

@@ -1,9 +1,6 @@
 #!/bin/env python
 # Python3  test that the model files can be created correctly.
 
-import filecmp
-
-
 from src.algorithms.APSFaciesProb import APSFaciesProb
 from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSGaussModel import APSGaussModel
@@ -18,6 +15,7 @@ from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
     NO_VERBOSE_DEBUG, VERY_VERBOSE_DEBUG, SEED_FILE_NAME,
 )
+from src.unit_test.helpers import compare, get_model_file_path
 from src.utils.constants.simple import Debug, OriginType, TrendType, VariogramType
 
 
@@ -136,7 +134,7 @@ def addZoneParam(
         elif trendType[i] == TrendType.ELLIPTIC_CONE:
             trendModelObject = Trend3D_elliptic_cone(trendRuleXML=None, debug_level=debug_level, modelFileName=None)
             origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
-            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i], 
+            trendModelObject.initialize(azimuthAngle[i], stackingAngle[i], direction[i], migrationAngle[i], curvature[i],
                                         relativeSize[i], origin, origin_type[i], debug_level)
             trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i]])
 
@@ -218,6 +216,7 @@ def addZoneParam(
     print('Zone numbers:')
     print(apsmodel.getZoneNumberList())
 
+
 def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
     apsmodel.writeModel(outfile1, debug_level=debug_level)
@@ -227,7 +226,7 @@ def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile2 = 'testOut2.xml'
     apsmodel2.writeModel(outfile2, debug_level=debug_level)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
-    check = filecmp.cmp(outfile1, outfile2)
+    check = compare(outfile1, outfile2)
 
     if check:
         print('Files are equal. OK')
@@ -244,7 +243,7 @@ def read_write_model_update(debug_level=Debug.OFF):
     outfile2 = 'testOut2.xml'
     apsmodel2.writeModel(outfile2, debug_level)
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
-    check = filecmp.cmp(outfile1, outfile2)
+    check = compare(outfile1, outfile2)
 
     if check:
         print('Files are equal. OK')
@@ -314,15 +313,16 @@ def test_variogram_generation():
     projection = 'yz'
     apsGaussModel.calc2DVariogramFrom3DVariogram(gfName, gridAzimuthAngle, projection)
 
+
 def test_read_and_write_APSModel():
     print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
-    modelFile = 'testData_models/APS.xml'
+    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
     outfile3 = 'testOut3.xml'
     apsmodel.writeModel(outfile3, Debug.OFF)
     reference_file = 'testData_models/APS_sorted.xml'
     print('Compare file: ' + outfile3 + ' and ' + reference_file)
-    check = filecmp.cmp(outfile3, reference_file)
+    check = compare(outfile3, reference_file)
     if check:
         print('Files are equal. OK')
     else:
@@ -333,7 +333,7 @@ def test_read_and_write_APSModel():
 def test_updating_model1():
     print('***** Case: Update parameters case 1 *****')
     # Test updating of model
-    modelFile = 'testData_models/APS.xml'
+    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
     # Do some updates of the model
     zoneNumber = 1
@@ -380,17 +380,18 @@ def test_updating_model1():
     apsmodel.writeModel(outfile2, Debug.OFF)
     reference_file = 'testData_models/APS_updated1.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
-    check = filecmp.cmp(outfile2, reference_file)
+    check = compare(outfile2, reference_file)
     if check:
         print('Files are equal. OK')
     else:
         print('Files are different. NOT OK')
     assert check is True
 
+
 def test_updating_model2():
     print('***** Case: Update parameters case 2 *****')
     # Test updating of model
-    modelFile = 'testData_models/APS.xml'
+    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
     # Do some updates of the model
     zoneNumber = 2
@@ -440,7 +441,7 @@ def test_updating_model2():
     apsmodel.writeModel(outfile2, Debug.OFF)
     reference_file = 'testData_models/APS_updated2.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
-    check = filecmp.cmp(outfile2, reference_file)
+    check = compare(outfile2, reference_file)
     if check:
         print('Files are equal. OK')
     else:
@@ -451,7 +452,7 @@ def test_updating_model2():
 def test_updating_model3():
     print('***** Case: Update parameters case 3 *****')
     # Test updating of model
-    modelFile = 'testData_models/APS.xml'
+    modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(modelFileName=modelFile, debug_level=Debug.VERY_VERBOSE)
     # Do some updates of the model
     zoneNumber = 2
@@ -555,7 +556,7 @@ def test_updating_model3():
     apsmodel.writeModel(outfile3, Debug.OFF)
     reference_file = 'testData_models/APS_updated3.xml'
     print('Compare file: ' + outfile3 + ' and ' + reference_file)
-    check = filecmp.cmp(outfile3, reference_file)
+    check = compare(outfile3, reference_file)
     if check:
         print('Files are equal. OK')
     else:
