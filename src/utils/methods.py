@@ -71,7 +71,7 @@ def get_colors(n, min_colors=2):
 
 
 def get_model_file_name(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['modelFileName', 'model_file_name'], default_name='APS.xml')
+    return _get_file_name(kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model'], default_name='APS.xml')
 
 
 def get_rms_project_data_file(**kwargs):

@@ -14,7 +14,7 @@ from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import UndefinedZoneError
 from src.utils.io import writeFileRTF
-from src.utils.methods import get_colors
+from src.utils.methods import get_colors, get_run_parameters
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
 
 
@@ -244,7 +244,8 @@ def run_previewer(
         rotate_plot=False,
         no_simulation=False,
         write_simulated_fields_to_file=False,
-        debug_level=Debug.OFF
+        debug_level=Debug.OFF,
+        **kwargs
 ) -> None:
     """
 
@@ -618,8 +619,9 @@ def get_argument_parser() -> ArgumentParser:
 
 
 def run(roxar=None, project=None, **kwargs):
-    args = get_arguments()
-    run_previewer(**args.__dict__)
+    model, rms_data_file_name, _, _, debug_level = get_run_parameters(**kwargs)
+    [kwargs.pop(item, None) for item in ['model', 'rms_data_file_name', 'debug_level']]
+    run_previewer(model=model, rms_data_file_name=rms_data_file_name, debug_level=debug_level, **kwargs)
 
 
 def get_arguments() -> Namespace:
@@ -630,4 +632,5 @@ def get_arguments() -> Namespace:
 
 
 if __name__ == '__main__':
-    run()
+    args = get_arguments()
+    run(**args.__dict__)
