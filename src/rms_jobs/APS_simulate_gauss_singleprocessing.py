@@ -9,6 +9,7 @@ import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_model_file_name
 from src.utils.roxar.generalFunctionsUsingRoxAPI import getGridAttributes, setContinuous3DParameterValuesInZoneRegion
 
 
@@ -176,11 +177,11 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     print('')
 
 
-def run(roxar=None, project=None):
-    modelFile = 'APS.xml'
-    realNumber = project.current_realisation
-    isShared = False
-    run_simulations(project, modelFile=modelFile, realNumber=realNumber, isShared=isShared)
+def run(roxar=None, project=None, **kwargs):
+    model_file = get_model_file_name(**kwargs)
+    real_number = project.current_realisation
+    is_shared = False
+    run_simulations(project, modelFile=model_file, realNumber=real_number, isShared=is_shared)
     print('Finished simulation of gaussian fields for APS')
 
 

@@ -4,6 +4,7 @@
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_run_parameters
 
 
 def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, debug_level=Debug.OFF):
@@ -19,12 +20,10 @@ def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, 
 
 
 # -------  Main ----------------
-def run(roxar=None, project=None):
-    globalIPLFile = "test_global_include.ipl"
-    inputAPSModelFile = "APS.xml"
-    outputAPSModelFile = "APS_modified.xml"
-    debug_level = Debug.VERY_VERBOSE
-    updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, debug_level)
+def run(roxar=None, project=None, **kwargs):
+    input_aps_model_file, _, global_ipl_file, _, debug_level = get_run_parameters(**kwargs)
+    output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
+    updateAPSModelFromFMU(global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level)
 
 
 if __name__ == '__main__':

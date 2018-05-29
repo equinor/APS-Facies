@@ -4,6 +4,7 @@
 import numpy as np
 
 from src.algorithms.APSModel import APSModel
+from src.utils.methods import get_run_parameters
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
 from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValuesInZone
 from src.utils.constants.simple import Debug
@@ -77,8 +78,9 @@ def run_main(
         print('')
 
 
-def run(roxar=None, project=None):
-    run_main(project)
+def run(roxar=None, project=None, **kwargs):
+    model_file, rms_data_file_name, _, input_dir, _ = get_run_parameters(**kwargs)
+    run_main(project, model_file=model_file, rms_data_file_name=rms_data_file_name, inputDir=input_dir)
 
 
 if __name__ == '__main__':
