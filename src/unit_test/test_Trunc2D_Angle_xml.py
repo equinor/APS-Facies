@@ -49,8 +49,9 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
     # Build an XML tree with top as root
     # from truncation object and write it
     assert truncRuleInput is not None
+    fmu_attributes = []
     top = Element('TEST_TruncationRule')
-    truncRuleInput.XMLAddElement(top)
+    truncRuleInput.XMLAddElement(top, 1, 1, fmu_attributes)
     rootReformatted = prettify(top)
     print('Write file: ' + outputModelFileName)
     with open(outputModelFileName, 'w') as file:
@@ -165,7 +166,7 @@ def test_case_1():
     run(
         fTable={2: 'F2', 1: 'F1', 3: 'F3'},
         faciesInZone=['F1', 'F2', 'F3'],
-        truncStructure=[['F3', -90.0, 1.0], ['F2', +45.0, 1.0], ['F1', +45.0, 1.0]],
+        truncStructure=[['F3', -90.0, 1.0, True], ['F2', +45.0, 1.0, False], ['F1', +45.0, 1.0, True]],
         faciesInTruncRule=['F3', 'F2', 'F1'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4'],
         gaussFieldsForBGFacies=['GF1', 'GF2'],
@@ -179,7 +180,7 @@ def test_case_2():
     run(
         fTable={2: 'F2', 1: 'F1', 3: 'F3'},
         faciesInZone=['F2', 'F3', 'F1'],
-        truncStructure=[['F1', +135.0, 1.0], ['F2', +45.0, 1.0], ['F3', +45.0, 1.0]],
+        truncStructure=[['F1', +135.0, 1.0, True], ['F2', +45.0, 1.0, True], ['F3', +45.0, 1.0, False]],
         faciesInTruncRule=['F1', 'F2', 'F3'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4'],
         gaussFieldsForBGFacies=['GF1', 'GF2'],
@@ -209,7 +210,7 @@ def test_case_3():
     run(
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4'],
-        truncStructure=[['F1', +135.0, 1.0], ['F2', +45.0, 1.0], ['F3', +45.0, 1.0]],
+        truncStructure=[['F1', +135.0, 1.0, False], ['F2', +45.0, 1.0, True], ['F3', +45.0, 1.0, True]],
         faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F4'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6'],
         gaussFieldsForBGFacies=['GF1', 'GF2'],
@@ -237,7 +238,7 @@ def test_case_4():
     run(
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4'],
-        truncStructure=[['F1', -135.0, 1.0], ['F3', +90.0, 1.0], ['F2', +45.0, 1.0]],
+        truncStructure=[['F1', -135.0, 1.0, True], ['F3', +90.0, 1.0, False], ['F2', +45.0, 1.0, True]],
         faciesInTruncRule=['F1', 'F3', 'F2', 'F5', 'F4'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6'],
         gaussFieldsForBGFacies=['GF1', 'GF2'],
@@ -266,7 +267,7 @@ def test_case_5():
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4'],
         truncStructure=[
-            ['F1', -180.0, 0.5], ['F3', +180.0, 1.0], ['F1', 0.0, 0.5], ['F2', 35.0, 0.7], ['F2', -35.0, 0.3]
+            ['F1', -180.0, 0.5, False], ['F3', +180.0, 1.0, True], ['F1', 0.0, 0.5, True], ['F2', 35.0, 0.7, False], ['F2', -35.0, 0.3, True]
         ],
         faciesInTruncRule=['F1', 'F3', 'F2', 'F5', 'F4'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4'],
@@ -296,7 +297,7 @@ def test_case_6():
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4'],
         truncStructure=[
-            ['F1', -180.0, 1.0], ['F3', -170.0, 0.5], ['F3', -160.0, 0.5], ['F2', -150.0, 0.7], ['F2', -140.0, 0.3]
+            ['F1', -180.0, 1.0, True], ['F3', -170.0, 0.5, True], ['F3', -160.0, 0.5, True], ['F2', -150.0, 0.7, False], ['F2', -140.0, 0.3, True]
         ],
         faciesInTruncRule=['F1', 'F3', 'F2', 'F5', 'F4'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4'],
@@ -332,8 +333,8 @@ def test_case_7():
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7', 8: 'F8'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4', 'F6', 'F7', 'F8'],
         truncStructure=[
-            ['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
-            ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]
+            ['F1', -180.0, 0.5, True], ['F3', -170.0, 0.5, True], ['F7', 10.0, 1.0, True], ['F1', -60.0, 0.5, True],
+            ['F3', -160.0, 0.5, False], ['F2', -150.0, 0.05, False], ['F2', +140.0, 0.95, False], ['F6', 120.0, 1.0, True]
         ],
         faciesInTruncRule=['F1', 'F3', 'F7', 'F2', 'F6', 'F5', 'F4', 'F8'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6'],
@@ -376,8 +377,8 @@ def test_case_8():
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7', 8: 'F8'},
         faciesInZone=['F2', 'F3', 'F1', 'F5', 'F4', 'F6', 'F7', 'F8'],
         truncStructure=[
-            ['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
-            ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]
+            ['F1', -180.0, 0.5, True], ['F3', -170.0, 0.5, False], ['F7', 10.0, 1.0, True], ['F1', -60.0, 0.5, True],
+            ['F3', -160.0, 0.5, False], ['F2', -150.0, 0.05, True], ['F2', +140.0, 0.95, False], ['F6', 120.0, 1.0, True]
         ],
         faciesInTruncRule=['F1', 'F3', 'F7', 'F2', 'F6', 'F5', 'F4', 'F8'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6'],
@@ -420,8 +421,8 @@ def test_case_9():
         fTable={1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7', 8: 'F8'},
         faciesInZone=['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'],
         truncStructure=[
-            ['F1', -180.0, 0.5], ['F3', -170.0, 0.5], ['F7', 10.0, 1.0], ['F1', -60.0, 0.5],
-            ['F3', -160.0, 0.5], ['F2', -150.0, 0.05], ['F2', +140.0, 0.95], ['F6', 120.0, 1.0]
+            ['F1', -180.0, 0.5, False], ['F3', -170.0, 0.5, True], ['F7', 10.0, 1.0, True], ['F1', -60.0, 0.5, True],
+            ['F3', -160.0, 0.5, True], ['F2', -150.0, 0.05, False], ['F2', +140.0, 0.95, True], ['F6', 120.0, 1.0, True]
         ],
         faciesInTruncRule=['F1', 'F3', 'F7', 'F2', 'F6', 'F5', 'F4', 'F8'],
         gaussFieldsInZone=['GF1', 'GF2', 'GF3', 'GF4', 'GF5', 'GF6'],

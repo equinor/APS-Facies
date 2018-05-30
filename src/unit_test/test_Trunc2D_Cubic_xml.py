@@ -55,7 +55,8 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
     # from truncation object and write it
     assert truncRuleInput is not None
     top = Element('TEST_TruncationRule')
-    truncRuleInput.XMLAddElement(top)
+    fmu_attributes = []
+    truncRuleInput.XMLAddElement(top, 1, 1, fmu_attributes)
     rootReformatted = prettify(top)
     print('Write file: ' + outputModelFileName)
     with open(outputModelFileName, 'w') as file:

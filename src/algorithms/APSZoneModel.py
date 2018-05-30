@@ -36,8 +36,8 @@ class APSZoneModel:
        def getMainRange(self,gaussFieldName)
        def getPerpRange(self,gaussFieldName)
        def getVertRange(self,gaussFieldName)
-       def getAnisotropyAzimuthAngle(self,gaussFieldName)
-       def getAnisotropyDipAngle(self,gaussFieldName)
+       def getAzimuthAngle(self,gaussFieldName)
+       def getDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
        def getTrendModel(self,gfName
@@ -56,8 +56,8 @@ class APSZoneModel:
        def setMainRange(self,gaussFieldName,range1)
        def setPerpRange(self,gaussFieldName,range2)
        def setVertRange(self,gaussFieldName,range3)
-       def setAnisotropyAzimuthAngle(self,gaussFieldName,angle)
-       def setAnisotropyDipAngle(self,gaussFieldName,angle)
+       def setAzimuthAngle(self,gaussFieldName,angle)
+       def setDipAngle(self,gaussFieldName,angle)
        def setPower(self, gaussFieldName, power)
        def setUseConstProb(self, useConstProb)
        def setSeedForPreviewSimulation(self, gfName, seed)
@@ -305,20 +305,38 @@ class APSZoneModel:
     def getMainRange(self, gaussFieldName):
         return self.__gaussModelObject.getMainRange(gaussFieldName)
 
+    def getMainRangeFmuUpdatable(self, gaussFieldName):
+        return self.__gaussModelObject.getMainRangeFmuUpdatable(gaussFieldName)
+
     def getPerpRange(self, gaussFieldName):
         return self.__gaussModelObject.getPerpRange(gaussFieldName)
+
+    def getPerpRangeFmuUpdatable(self, gaussFieldName):
+        return self.__gaussModelObject.getPerpRangeFmuUpdatable(gaussFieldName)
 
     def getVertRange(self, gaussFieldName):
         return self.__gaussModelObject.getVertRange(gaussFieldName)
 
-    def getAnisotropyAzimuthAngle(self, gaussFieldName):
-        return self.__gaussModelObject.getAnisotropyAzimuthAngle(gaussFieldName)
+    def getVertRangeFmuUpdatable(self, gaussFieldName):
+        return self.__gaussModelObject.getVertRangeFmuUpdatable(gaussFieldName)
 
-    def getAnisotropyDipAngle(self, gaussFieldName):
-        return self.__gaussModelObject.getAnisotropyDipAngle(gaussFieldName)
+    def getAzimuthAngle(self, gaussFieldName):
+        return self.__gaussModelObject.getAzimuthAngle(gaussFieldName)
+
+    def getAzimuthAngleFmuUpdatable(self, gaussFieldName):
+        return self.__gaussModelObject.getAzimuthAngleFmuUpdatable(gaussFieldName)
+
+    def getDipAngle(self, gaussFieldName):
+        return self.__gaussModelObject.getDipAngle(gaussFieldName)
+
+    def getDipAngleFmuUpdatable(self, gaussFieldName):
+        return self.__gaussModelObject.getDipAngleFmuUpdatable(gaussFieldName)
 
     def getPower(self, gaussFieldName):
         return self.__gaussModelObject.getPower(gaussFieldName)
+
+    def getPowerFmuUpdatable(self, gaussFieldName):
+        return self.__gaussModelObject.getPowerFmuUpdatable(gaussFieldName)
 
     def getTruncRule(self):
         return self.__truncRule
@@ -364,20 +382,44 @@ class APSZoneModel:
     def setMainRange(self, gaussFieldName, range1):
         return self.__gaussModelObject.setMainRange(gaussFieldName, range1)
 
+    def setMainRangeFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setMainRangeFmuUpdatable(gaussFieldName, value)
+
     def setPerpRange(self, gaussFieldName, range2):
         return self.__gaussModelObject.setPerpRange(gaussFieldName, range2)
+
+    def setPerpRangeFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setPerpRangeFmuUpdatable(gaussFieldName, value)
 
     def setVertRange(self, gaussFieldName, range3):
         return self.__gaussModelObject.setVertRange(gaussFieldName, range3)
 
-    def setAnisotropyAzimuthAngle(self, gaussFieldName, angle):
-        return self.__gaussModelObject.setAnisotropyAzimuthAngle(gaussFieldName, angle)
+    def setVertRangeFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setVertRangeFmuUpdatable(gaussFieldName, value)
 
-    def setAnisotropyDipAngle(self, gaussFieldName, angle):
-        return self.__gaussModelObject.setAnisotropyDipAngle(gaussFieldName, angle)
+    def setAzimuthAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setAzimuthAngle(gaussFieldName, angle)
+
+    def setAzimuthAngleFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setAzimuthAngleFmuUpdatable(gaussFieldName, value)
+
+    def setDipAngle(self, gaussFieldName, angle):
+        return self.__gaussModelObject.setDipAngle(gaussFieldName, angle)
+
+    def setDipAngleFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setDipAngleFmuUpdatable(gaussFieldName, value)
 
     def setPower(self, gaussFieldName, power):
         return self.__gaussModelObject.setPower(gaussFieldName, power)
+
+    def setPowerFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setPowerFmuUpdatable(gaussFieldName, value)
+
+    def setRelStdDev(self, gaussFieldName, relStdDev):
+        return self.__gaussModelObject.setRelStdDev(gaussFieldName, relStdDev)
+
+    def setRelStdDevFmuUpdatable(self, gaussFieldName, value):
+        return self.__gaussModelObject.setRelStdDevFmuUpdatable(gaussFieldName, value)
 
     def setUseConstProb(self, useConstProb):
         self.__useConstProb = useConstProb
@@ -573,11 +615,11 @@ class APSZoneModel:
             volFrac[f] = volFrac[f] / float(nDefinedCells)
         return faciesReal, volFrac
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         ''' Add command Zone and all its children to the XML tree'''
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
-
+            
         tag = 'Zone'
         if self.__regionNumber <= 0:
             attribute = {'number': str(self.__zoneNumber)}
@@ -602,9 +644,9 @@ class APSZoneModel:
         # Add child command FaciesProbForModel
         self.__faciesProbObject.XMLAddElement(zoneElement)
         # Add child command GaussField
-        self.__gaussModelObject.XMLAddElement(zoneElement)
+        self.__gaussModelObject.XMLAddElement(zoneElement, fmu_attributes)
         # Add child command TruncationRule at end of the child list for
-        self.__truncRule.XMLAddElement(zoneElement)
+        self.__truncRule.XMLAddElement(zoneElement, self.__zoneNumber, self.__regionNumber, fmu_attributes)
 
     def simGaussFieldWithTrendAndTransform(
             self, simBoxXsize, simBoxYsize, simBoxZsize,

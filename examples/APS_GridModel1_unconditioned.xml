@@ -87,10 +87,10 @@
 
             <GaussField name="GF1">
                 <Vario name="GAUSSIAN">
-                    <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAIN_RANGE">1500.0</MainRange>
-                    <PerpRange kw="APS_1_0_GF_GF1_RESIDUAL_PERP_RANGE">1500.0</PerpRange>
-                    <VertRange kw="APS_1_0_GF_GF1_RESIDUAL_VERT_RANGE">5.0</VertRange>
-                    <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTH">35.0</AzimuthAngle>
+                    <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAINRANGE">1500.0</MainRange>
+                    <PerpRange kw="APS_1_0_GF_GF1_RESIDUAL_PERPRANGE">1500.0</PerpRange>
+                    <VertRange kw="APS_1_0_GF_GF1_RESIDUAL_VERTRANGE">5.0</VertRange>
+                    <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTHANGLE">35.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
                 <Trend>
@@ -111,10 +111,10 @@
 
             <GaussField name="GF2">
                 <Vario name="GAUSSIAN">
-                    <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAIN_RANGE">1000.0</MainRange>
+                    <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE">1000.0</MainRange>
                     <PerpRange>1000.0</PerpRange>
                     <VertRange>5.0</VertRange>
-                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTH">305.0</AzimuthAngle>
+                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">305.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
                 <SeedForPreview>75151556</SeedForPreview>

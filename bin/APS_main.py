@@ -53,8 +53,11 @@ def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0,
     cellIndexDefined = []
     nCellsTotal = len(zoneValues)
     if regionNumber > 0:
-        # Regions number is used when it is positive integer
-        assert len(zoneValues) == len(regionValues)
+        if len(zoneValues) != len(regionValues):
+            raise ValueError('Zone number: {}  Region number: {}.\n'
+                          'Number of grid cells with this zone number: {}\n'
+                          'Number of grid cells with this region number: {}'
+                          ''.format(str(zoneNumber), str(regionNumber), str(len(zoneValues)), str(len(regionValues))))
 
     y1_defined = []
     if regionNumber > 0:
@@ -454,7 +457,7 @@ def run(roxar=None, project=None, **kwargs):
             values = GFAllValues[indx][VAL]
             trend = GFAllTrendValues[indx][VAL]
             # Add trend to gaussian residual fields
-            useTrend, trendModelObj, relStdDev = zoneModel.getTrendModel(gfName)
+            useTrend, trendModelObj, relStdDev, relStdDevFMU = zoneModel.getTrendModel(gfName)
 
             if useTrend:
                 if debug_level >= Debug.VERBOSE:

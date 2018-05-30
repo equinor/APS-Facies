@@ -833,7 +833,7 @@ class APSModel:
         self.__faciesTable = faciesTableObj
 
 
-    def XMLAddElement(self, root):
+    def XMLAddElement(self, root, fmu_attributes):
         """
         Add a command specifying which zone to use in for preview
         :param root:
@@ -873,11 +873,12 @@ class APSModel:
                 elemZoneRegion = Element(tag,attributes)
 
                 rList = self.getSelectedRegionNumberListForSpecifiedZoneNumber(zNumber)
-                text = ' '
+                text = ''
                 useRegion = 1
                 if len(rList) == 1:
                     if rList[0] == 0:
                         useRegion =0
+                        text = text + ' ' + str(0) + ' '
                 if useRegion == 1:
                     for j in range(len(rList)):
                         rNumber = rList[j]
@@ -951,18 +952,24 @@ class APSModel:
 
         for key, zoneModel in self.__sortedZoneModelTable.items():
             # Add command Zone
-            zoneModel.XMLAddElement(zoneListElement)
+            zoneModel.XMLAddElement(zoneListElement, fmu_attributes)
         root.append(zoneListElement)
         rootReformatted = prettify(root)
         return rootReformatted
 
-    def writeModel(self, modelFileName, debug_level=Debug.OFF):
+    def writeModel(self, modelFileName, attributesFileName, debug_level=Debug.OFF):
+        fmu_attributes = list()
         top = Element('APSModel', {'version': self.__apsModelVersion})
-        rootUpdated = self.XMLAddElement(top)
+        rootUpdated = self.XMLAddElement(top, fmu_attributes)
         with open(modelFileName, 'w') as file:
             file.write(rootUpdated)
         if debug_level >= Debug.VERY_VERBOSE:
             print('Write file: ' + modelFileName)
+        with open(attributesFileName, 'w') as attsFile:
+            for fmu_attribute in fmu_attributes:
+                attsFile.write("%s\n" % fmu_attribute)
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Write file: ' + attributesFileName)
 
     @staticmethod
     def writeModelFromXMLRoot(inputETree, outputModelFileName):

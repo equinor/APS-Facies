@@ -2,11 +2,11 @@
 <APSModel version="1.0">
   <Preview crossSectionRelativePos="0.5" crossSectionType="IJ" regionNumber="0" scale="500.0" zoneNumber="5"/>
   <SelectedZonesAndRegions>
-    <SelectedZoneWithRegions zone="2">  1  4 </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="2">  1  4 </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="4"> </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="5"> </SelectedZoneWithRegions>
-    <SelectedZoneWithRegions zone="6">  10 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="2"> 1  4 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="2"> 1  4 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="4"> 0 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="5"> 0 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="6"> 10 </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>
   <RMSProjectName> testNeslen.rms10 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
@@ -270,10 +270,10 @@
             <azimuth> 125.0 </azimuth>
             <directionStacking> 1 </directionStacking>
             <stackAngle> 0.1 </stackAngle>
-            <curvature> 5.0 </curvature>
-            <origin_x> 0.9 </origin_x>
-            <origin_y> 0.9 </origin_y>
-            <origin_z_simbox> 0.9 </origin_z_simbox>
+            <curvature kw="APS_2_3_GF_GRF7_TREND_CURVATURE"> 5.0 </curvature>
+            <origin_x kw="APS_2_3_GF_GRF7_TREND_ORIGIN_X"> 0.9 </origin_x>
+            <origin_y kw="APS_2_3_GF_GRF7_TREND_ORIGIN_Y"> 0.9 </origin_y>
+            <origin_z_simbox kw="APS_2_3_GF_GRF7_TREND_ORIGIN_Z_SIMBOX"> 0.9 </origin_z_simbox>
             <origintype> Relative </origintype>
           </Elliptic3D>
         </Trend>
@@ -293,11 +293,11 @@
             <azimuth> 35.0 </azimuth>
             <directionStacking> 1 </directionStacking>
             <stackAngle> 90.0 </stackAngle>
-            <curvature> 10.5 </curvature>
-            <migrationAngle> 89.9 </migrationAngle>
-            <origin_x> 0.5 </origin_x>
-            <origin_y> 0.0 </origin_y>
-            <origin_z_simbox> 0.0 </origin_z_simbox>
+            <curvature kw="APS_2_3_GF_GRF8_TREND_CURVATURE"> 10.5 </curvature>
+            <migrationAngle kw="APS_2_3_GF_GRF8_TREND_MIGRATIONANGLE"> 89.9 </migrationAngle>
+            <origin_x kw="APS_2_3_GF_GRF8_TREND_ORIGIN_X"> 0.5 </origin_x>
+            <origin_y kw="APS_2_3_GF_GRF8_TREND_ORIGIN_Y"> 0.0 </origin_y>
+            <origin_z_simbox kw="APS_2_3_GF_GRF8_TREND_ORIGIN_Z_SIMBOX"> 0.0 </origin_z_simbox>
             <origintype> Relative </origintype>
           </Hyperbolic3D>
         </Trend>
@@ -584,17 +584,17 @@
       </FaciesProbForModel>
       <GaussField name="GRF6">
         <Vario name="SPHERICAL">
-          <MainRange> 3000.0 </MainRange>
-          <PerpRange> 2000.0 </PerpRange>
-          <VertRange> 5.0 </VertRange>
-          <AzimuthAngle> 35.0 </AzimuthAngle>
-          <DipAngle> 0.03 </DipAngle>
+          <MainRange kw="APS_5_0_GF_GRF6_RESIDUAL_MAINRANGE"> 3000.0 </MainRange>
+          <PerpRange kw="APS_5_0_GF_GRF6_RESIDUAL_PERPRANGE"> 2000.0 </PerpRange>
+          <VertRange kw="APS_5_0_GF_GRF6_RESIDUAL_VERTRANGE"> 5.0 </VertRange>
+          <AzimuthAngle kw="APS_5_0_GF_GRF6_RESIDUAL_AZIMUTHANGLE"> 35.0 </AzimuthAngle>
+          <DipAngle kw="APS_5_0_GF_GRF6_RESIDUAL_DIPANGLE"> 0.03 </DipAngle>
         </Vario>
         <Trend>
           <Linear3D>
-            <azimuth> 120.0 </azimuth>
+            <azimuth kw="APS_5_0_GF_GRF6_TREND_AZIMUTH"> 120.0 </azimuth>
             <directionStacking> 1 </directionStacking>
-            <stackAngle> 0.15 </stackAngle>
+            <stackAngle kw="APS_5_0_GF_GRF6_TREND_STACKANGLE"> 0.15 </stackAngle>
           </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>

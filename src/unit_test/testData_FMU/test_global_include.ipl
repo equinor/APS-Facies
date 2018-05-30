@@ -1,0 +1,20 @@
+someUnrelatedValue=4
+//a comment to be ignored
+someMalformdedKeyValuepair = //True
+And another one
+APS_5_0_GF_GRF6_RESIDUAL_MAINRANGE =  4000.0      // changed from 3000.0
+APS_5_0_GF_GRF6_RESIDUAL_PERPRANGE =  3000.0      // changed from 2000.0
+APS_5_0_GF_GRF6_RESIDUAL_VERTRANGE =  6.0         //changed from 5.0
+APS_5_0_GF_GRF6_RESIDUAL_AZIMUTHANGLE =  36.0     //changed from 35.0
+APS_5_0_GF_GRF6_RESIDUAL_DIPANGLE =  0.04         //changed from 0.03
+APS_5_0_GF_GRF6_TREND_AZIMUTH =  130.0            //changed from 120.0
+APS_5_0_GF_GRF6_TREND_STACKANGLE =  0.16          //changed from 0.15
+APS_2_3_GF_GRF7_TREND_CURVATURE =  6            //changed from 5
+APS_2_3_GF_GRF7_TREND_ORIGIN_X =   0.8          //changed from 0.9
+APS_2_3_GF_GRF7_TREND_ORIGIN_Y =   0.8          //changed from 0.9
+APS_2_3_GF_GRF7_TREND_ORIGIN_Z_SIMBOX =   0.8   //changed from 0.9
+APS_2_3_GF_GRF8_TREND_CURVATURE =  10.6         //changed from 10.5
+APS_2_3_GF_GRF8_TREND_MIGRATIONANGLE =  89.8    //changed from 89.9
+APS_2_3_GF_GRF8_TREND_ORIGIN_X =   0.6          //changed from 0.5
+APS_2_3_GF_GRF8_TREND_ORIGIN_Y =   0.1          //changed from 0.0
+APS_2_3_GF_GRF8_TREND_ORIGIN_Z_SIMBOX =   0.1   //changed from 0.0
