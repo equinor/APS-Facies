@@ -1,18 +1,18 @@
-FROM git.statoil.no:4567/sdp/sdpsoft/centos:6
-LABEL version="3.0.0" \
-      maintainer="snis@statoil.com" \
+FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
+LABEL version="3.0.2" \
+      maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
-      "com.statoil.vendor"="Statoil ASA"
+      "com.statoil.vendor"="Equinor ASA"
 
 # Versions
-ENV RMS_VERSION=11.0.0-b8 \
+ENV RMS_VERSION=11.0.0-b9 \
     GCC_VERSION=4.9.4 \
     PYTHON_VERSION=3.6 \
     INTEL_MKL_VERSION=2018.2.199 \
     INTEL_MKL_SEED=12725 \
     NODE_VERSION=8.11.1 \
     NRLIB_VERSION=1.1-r6 \
-    SQLITE_VERSION=3.22.0 \
+    SQLITE_VERSION=3.23.1 \
     YARN_VERSION=1.5.1
 ENV APSW_VERSION=${SQLITE_VERSION}-r1
 
@@ -70,7 +70,7 @@ ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
     SSL_CERT_FILE="${CA_FILE}"
 
 # Add external resources
-COPY --from=git.statoil.no:4567/sdp/sdpsoft/gcc:4.9.4 $GCC_PREFIX $GCC_PREFIX
+COPY --from=git.equinor.com:4567/sdp/sdpsoft/gcc:4.9.4 $GCC_PREFIX $GCC_PREFIX
 ADD rms-${RMS_VERSION}.tar.xz /
 
 # Misc. software
@@ -145,7 +145,7 @@ RUN yum update -y \
     # Yarn
  && wget https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz \
     # NRlib
- && wget https://git.statoil.no/sdp/nrlib/repository/v${NRLIB_VERSION}/archive.tar.gz --output-document=${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz \
+ && wget https://git.equinor.com/sdp/nrlib/repository/v${NRLIB_VERSION}/archive.tar.gz --output-document=${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz \
     # APSW
  && wget https://github.com/rogerbinns/apsw/archive/${APSW_VERSION}.tar.gz --output-document=${SOURCE_DIR}/apsw-${APSW_VERSION}.tar.gz \
     ## Verify Downloads

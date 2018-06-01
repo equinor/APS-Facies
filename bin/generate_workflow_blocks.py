@@ -53,7 +53,7 @@ from importlib.machinery import SourceFileLoader
 import sys
 
 __author__ = "Sindre Nistad"
-__email__ = "snis@statoil.com"
+__email__ = "snis@equinor.com"
 __version__ = "0.4.1"
 __status__ = "Draft"
 

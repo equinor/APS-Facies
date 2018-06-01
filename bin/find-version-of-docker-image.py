@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # A Utility that extracts the version from a Dockerfile's label
-# Written by Sindre Nistad, snis@statoil.com
+# Written by Sindre Nistad, snis@equinor.com
 # Usage: ./find-version-of-docker-image.py [folder in which the Docker file is]
 
 from sys import argv
