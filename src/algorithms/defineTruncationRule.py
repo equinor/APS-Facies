@@ -6,6 +6,7 @@
 # --------------------------------------------------------
 import copy
 import sys
+import collections
 import numpy as np
 import matplotlib
 
@@ -251,14 +252,20 @@ class DefineTruncationRule:
             
         with open(outputFile, 'w') as file:
             
-            for name, truncStructItem in self.__tableCubic.items():
+            sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubic.items()))
+
+#            for name, truncStructItem in self.__tableCubic.items():
+            for name, truncStructItem in sortedDictionaryCubic.items():
                 nPoly = len(truncStructItem)-1
                 outString = 'Cubic ' + name + ' ' + str(nPoly) +' '
                 outString = outString + ' ' + str(truncStructItem)
                 file.write(outString)
                 file.write('\n')
 
-            for name, truncStructItem in self.__tableNonCubic.items():
+            sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubic.items()))
+
+#            for name, truncStructItem in self.__tableNonCubic.items():
+            for name, truncStructItem in sortedDictionaryNonCubic.items():
                 nPoly = len(truncStructItem)
                 outString = 'NonCubic ' + name + ' ' + str(nPoly) +' '
                 outString = outString + ' ' + str(truncStructItem)
@@ -267,7 +274,9 @@ class DefineTruncationRule:
 
             ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
             BACKGROUND_LIST_INDX = OverlayGroupIndices.BACKGROUND_LIST_INDX
-            for name, overlayGroups in self.__tableOverlay.items():
+            sortedDictionaryOverlay = collections.OrderedDict(sorted(self.__tableOverlay.items()))
+#            for name, overlayGroups in self.__tableOverlay.items():
+            for name, overlayGroups in sortedDictionaryOverlay.items():
                 nGroups = len(overlayGroups)
                 outString = 'Overlay ' + name + ' ' + str(nGroups) +' '
                 for n in range(nGroups):
@@ -283,7 +292,9 @@ class DefineTruncationRule:
                 
             NAME_BG_INDX = CubicAndOverlayIndices.NAME_BG_INDX
             NAME_OL_INDX = CubicAndOverlayIndices.NAME_OL_INDX     
-            for name, truncStructItemWithOverlay in self.__tableCubicAndOverlay.items():
+            sortedDictionaryCubicAndOverlay = collections.OrderedDict(sorted(self.__tableCubicAndOverlay.items()))
+#            for name, truncStructItemWithOverlay in self.__tableCubicAndOverlay.items():
+            for name, truncStructItemWithOverlay in sortedDictionaryCubicAndOverlay.items():
                 nameBG = truncStructItemWithOverlay[NAME_BG_INDX]
                 nameOL = truncStructItemWithOverlay[NAME_OL_INDX]
                 outString ='CubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
@@ -291,8 +302,10 @@ class DefineTruncationRule:
                 file.write('\n')
 
             NAME_BG_INDX = NonCubicAndOverlayIndices.NAME_BG_INDX
-            NAME_OL_INDX = NonCubicAndOverlayIndices.NAME_OL_INDX     
-            for name, truncStructItemWithOverlay in self.__tableNonCubicAndOverlay.items():
+            NAME_OL_INDX = NonCubicAndOverlayIndices.NAME_OL_INDX  
+            sortedDictionaryNonCubicAndOverlay = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))   
+#            for name, truncStructItemWithOverlay in self.__tableNonCubicAndOverlay.items():
+            for name, truncStructItemWithOverlay in sortedDictionaryNonCubicAndOverlay.items():
                 nameBG = truncStructItemWithOverlay[NAME_BG_INDX]
                 nameOL = truncStructItemWithOverlay[NAME_OL_INDX]
                 outString ='NonCubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
@@ -717,7 +730,7 @@ class DefineTruncationRule:
             raise KeyError('Overlay facies truncation rule setting: {} is not defined'.format(nameOL))
 
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
-        self.__checkConsistencyBetweenBackGroundCubicAndOverlay(truncStructBG, overlayGroups)
+        self.__checkConsistencyBetweenBackGroundCubicAndOverlay(nameBG, nameOL, truncStructBG, overlayGroups)
 
         # Create new Cubic setting with overlay
         truncStructCubicWithOverlay = [nameBG, nameOL, truncStructBG, overlayGroups]
@@ -757,7 +770,7 @@ class DefineTruncationRule:
 
 
 
-    def __checkConsistencyBetweenBackGroundCubicAndOverlay(self, truncStructBG, overlayGroups):
+    def __checkConsistencyBetweenBackGroundCubicAndOverlay(self, nameBG, nameOL, truncStructBG, overlayGroups):
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         bgFacies = []
         FACIES_NAME_INDX_BG = CubicPolygonIndices.FACIES_NAME_INDX
@@ -1476,3 +1489,7 @@ if __name__ == '__main__':
     rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1',removeDependentBG=True, removeDependentOL=True)
     
     rules.writeFile('out4.dat')
+    rulesFromFile = DefineTruncationRule(truncRuleDir)
+    rulesFromFile.readFile("truncation_settings.dat")
+    rulesFromFile.createAllCubicPlots()
+    
