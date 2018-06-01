@@ -921,7 +921,7 @@ class DefineTruncationRule:
                     del self.__tableOverlay[nameOL]
 
 
-    def getListOfSettings(self, truncType, nBackgroundFacies, nOverlayFacies):
+    def getListOfSettings(self, truncType, nBackgroundFacies, nOverlayFacies=0):
         settingsList = []
         if truncType == 'Cubic':
             for key, item in self.__tableCubic.items():
@@ -1408,12 +1408,6 @@ if __name__ == '__main__':
 
     rules.writeFile('out3.dat')
 
-    # Remove a truncation setting
-#    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
-    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1',removeDependentBG=True, removeDependentOL=True)
-    
-    rules.writeFile('out4.dat')
-
     # Create plots for all truncation settings
     rules.createOverviewPlotCubic('Cubic_rules')
     rules.createOverviewPlotNonCubic('NonCubic_rules')
@@ -1425,15 +1419,60 @@ if __name__ == '__main__':
     rules.createAllCubicXMLTemplatesWithOverlayFacies()
     rules.createAllNonCubicXMLTemplatesWithOverlayFacies()
 
+
+
+    for nBackgroundFacies in range(1,6):
+        print('List of settings for Cubic with background facies: {}' 
+              ''.format(str(nBackgroundFacies)))
+
+        nOverlayFacies = 0
+        settingsList = rules.getListOfSettings('Cubic', nBackgroundFacies)
+        for i in range(len(settingsList)):
+            item = settingsList[i]
+            key = item[0]
+            fileName = item[2]
+            print('{} {}'.format(key, fileName))
+
+        for nOverlayFacies in range(5):
+            print('List of settings for Cubic with background facies: {}   and overlay facies: {}' 
+                  ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
+
+            settingsList = rules.getListOfSettings('CubicAndOverlay', nBackgroundFacies, nOverlayFacies)
+            for i in range(len(settingsList)):
+                item = settingsList[i]
+                key = item[0]
+                fileName = item[2]
+                print('{} {}'.format(key, fileName))
+
+    for nBackgroundFacies in range(1,6):
+        print('List of settings for NonCubic with background facies: {}' 
+              ''.format(str(nBackgroundFacies)))
+
+        nOverlayFacies = 0
+        settingsList = rules.getListOfSettings('NonCubic', nBackgroundFacies)
+        for i in range(len(settingsList)):
+            item = settingsList[i]
+            key = item[0]
+            fileName = item[2]
+            print('{} {}'.format(key, fileName))
+
+
+        for nOverlayFacies in range(5):
+            print('List of settings for NonCubic with background facies: {}   and overlay facies: {}' 
+                  ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
+
+            settingsList = rules.getListOfSettings('NonCubicAndOverlay', nBackgroundFacies, nOverlayFacies)
+            for i in range(len(settingsList)):
+                item = settingsList[i]
+                key = item[0]
+                fileName = item[2]
+                print('{} {}'.format(key, fileName))
+
+
     
-    nBackgroundFacies = 3
-    nOverlayFacies = 0
-    settingsList = rules.getListOfSettings('CubicAndOverlay', nBackgroundFacies, nOverlayFacies)
-    print('List of settings for Cubic with Overlay with {} background facies and {} overlay facies.'
-          ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
-    for i in range(len(settingsList)):
-        item = settingsList[i]
-        key = item[0]
-        fileName = item[2]
-        print('{} {}'.format(key, fileName))
+
+    # Remove a truncation setting
+#    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
+    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1',removeDependentBG=True, removeDependentOL=True)
     
+    rules.writeFile('out4.dat')
