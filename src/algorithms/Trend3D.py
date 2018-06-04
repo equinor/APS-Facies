@@ -10,8 +10,8 @@
 #  - RMSParameter
 #
 ####################################################################
-# Kari B. Skjerve, karbor@statoil.com
-# Oddvar Lia 
+# Kari B. Skjerve, karbor@equinor.com
+# Oddvar Lia, olia@equinor.com
 # 2017/2018
 ####################################################################
 
