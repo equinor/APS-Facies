@@ -933,39 +933,37 @@ class DefineTruncationRule:
                     print('  Remove: {}'.format(nameOL)) 
                     del self.__tableOverlay[nameOL]
 
-
-    def getListOfSettings(self, truncType, nBackgroundFacies, nOverlayFacies=0):
+    def __appendToList(self, dictionary, truncType, nBackgroundFacies, nOverlayFacies):
         settingsList = []
+        for key, item in dictionary.items():
+            nBG = self.__getNBackgroundFacies(truncType, item)
+            nOL = self.__getNOverlayFacies(truncType, item)
+            truncMapPlotFile = self.__directory +'/' + key + '.png'
+            if nBackgroundFacies == 0:
+                settingsList.append([key, item, truncMapPlotFile])
+            elif nBackgroundFacies == nBG and nOverlayFacies == nOL:
+                settingsList.append([key, item, truncMapPlotFile])
+        return settingsList
+
+    def getListOfSettings(self, truncType, nBackgroundFacies=0, nOverlayFacies=0):
         if truncType == 'Cubic':
-            for key, item in self.__tableCubic.items():
-                nBG = self.__getNBackgroundFacies(truncType, item)
-                truncMapPlotFile = self.__directory +'/' + key + '.png'
-                if nBackgroundFacies == nBG:
-                    settingsList.append([key, item, truncMapPlotFile])
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableCubic.items()))
+            settingsList = self.__appendToList(sortedDictionary, truncType, nBackgroundFacies, nOverlayFacies)
         elif truncType == 'NonCubic':
-            for key, item in self.__tableNonCubic.items():
-                nBG = self.__getNBackgroundFacies(truncType, item)
-                truncMapPlotFile = self.__directory +'/' + key + '.png'
-                if nBackgroundFacies == nBG:
-                    settingsList.append([key, item, truncMapPlotFile])
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableNonCubic.items()))
+            settingsList = self.__appendToList(sortedDictionary, truncType, nBackgroundFacies, nOverlayFacies)
         elif truncType == 'CubicAndOverlay':
-            for key, items in self.__tableCubicAndOverlay.items():
-                nBG = self.__getNBackgroundFacies(truncType, items)
-                nOL = self.__getNOverlayFacies(truncType, items)
-                truncMapPlotFile = self.__directory +'/' + key + '.png'
-                if nBackgroundFacies == nBG and nOverlayFacies == nOL:
-                    settingsList.append([key, items, truncMapPlotFile])
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableCubicAndOverlay.items()))
+            settingsList = self.__appendToList(sortedDictionary, truncType, nBackgroundFacies, nOverlayFacies)
         elif truncType == 'NonCubicAndOverlay':
-            for key, items in self.__tableNonCubicAndOverlay.items():
-                nBG = self.__getNBackgroundFacies(truncType, items)
-                nOL = self.__getNOverlayFacies(truncType, items)
-                truncMapPlotFile = self.__directory +'/' + key + '.png'
-                if nBackgroundFacies == nBG and nOverlayFacies == nOL:
-                    settingsList.append([key, items, truncMapPlotFile])
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))
+            settingsList = self.__appendToList(sortedDictionary, truncType, nBackgroundFacies, nOverlayFacies)
         else:
-            raise ValueError('Truncation type {} is not defined.'.format(truncType))
+            raise ValueError(
+                'Truncation type {} is not defined.'.format(truncType))
 
         return settingsList
+
 
     def __getNBackgroundFacies(self, truncType, item):
         backgroundFaciesList = []
@@ -1035,7 +1033,7 @@ class DefineTruncationRule:
         return nOverlayFacies
         
     
-    def makeTruncationMapPlot(self, name):
+    def makeTruncationMapPlot(self, name, writePngFile=True):
         ''' Create truncation map plot using same probability for each facies'''
         truncObj = self.getTruncationRuleObject(name)
         faciesNames = truncObj.getFaciesInTruncRule()
@@ -1078,11 +1076,14 @@ class DefineTruncationRule:
         axTrunc.set_title(name)
         axTrunc.set_aspect('equal', 'box')
         plotFileName = name + '.png'
-        if self.__directory != '':
-            plotFileName = self.__directory + '/' + name + '.png'
-        print('Write file: {}'.format(plotFileName))
-        fig.savefig(plotFileName)
-        plt.close(fig)
+        if writePngFile:
+            if self.__directory != '':
+                plotFileName = self.__directory + '/' + name + '.png'
+            print('Write file: {}'.format(plotFileName))
+            fig.savefig(plotFileName)
+            plt.close(fig)
+        else:
+            plt.show()
 
     def __makeTruncationMapSubPlot(self, name, fig, Nrow, Ncol, indx):
         ''' Create truncation map plot using same probability for each facies'''
@@ -1127,22 +1128,26 @@ class DefineTruncationRule:
 
     def createAllCubicPlots(self):
         ''' Make truncation map plots for all specified settings for Cubic truncation rule in dictionarly'''
-        for name, truncStructItem in self.__tableCubic.items():
+        sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubic.items()))
+        for name, truncStructItem in sortedDictionaryCubic.items():
             self.makeTruncationMapPlot(name)
 
     def createAllCubicWithOverlayPlots(self):
         ''' Make truncation map plots for all specified settings for Cubic truncation rule with overlay facies in dictionarly'''
-        for name, truncStructItem in self.__tableCubicOverlay.items():
+        sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubicAndOverlay.items()))
+        for name, truncStructItem in sortedDictionaryCubic.items():
             self.makeTruncationMapPlot(name)
 
     def createAllNonCubicPlots(self):
         ''' Make truncation map plots for all specified settings for NonCubic truncation rule in dictionarly'''
-        for name, truncStructItem in self.__tableNonCubic.items():
+        sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubic.items()))
+        for name, truncStructItem in sortedDictionaryNonCubic.items():
             self.makeTruncationMapPlot(name)
 
     def createAllNonCubicWithOverlayPlots(self):
         ''' Make truncation map plots for all specified settings for NonCubic truncation rule with overlay facies in dictionarly'''
-        for name, truncStructItem in self.__tableNonCubicOverlay.items():
+        sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))
+        for name, truncStructItem in sortedDictionaryNonCubic.items():
             self.makeTruncationMapPlot(name)
 
     def createAllCubicXMLTemplates(self):
@@ -1186,7 +1191,8 @@ class DefineTruncationRule:
         Ncol = 10
         indx = 1
         fig = plt.figure(figsize=[20.0, 10.0],frameon=False)
-        for name, truncStructItem in self.__tableCubic.items():
+        sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubic.items()))
+        for name, truncStructItem in  sortedDictionaryCubic.items():
             self.__makeTruncationMapSubPlot(name, fig, Nrow, Ncol, indx)
             indx = indx +1
 
@@ -1204,7 +1210,8 @@ class DefineTruncationRule:
         Ncol = 10
         indx = 1
         fig = plt.figure(figsize=[20.0, 10.0],frameon=False)
-        for name, truncStructItem in self.__tableCubicAndOverlay.items():
+        sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubicAndOverlay.items()))
+        for name, truncStructItem in sortedDictionaryCubic.items():
             self.__makeTruncationMapSubPlot(name, fig, Nrow, Ncol, indx)
             indx = indx +1
 
@@ -1222,7 +1229,8 @@ class DefineTruncationRule:
         Ncol = 10
         indx = 1
         fig = plt.figure(figsize=[20.0, 10.0],frameon=False)
-        for name, truncStructItem in self.__tableNonCubic.items():
+        sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubic.items()))
+        for name, truncStructItem in sortedDictionaryNonCubic.items():
             self.__makeTruncationMapSubPlot(name, fig, Nrow, Ncol, indx)
             indx = indx +1
         
@@ -1241,7 +1249,8 @@ class DefineTruncationRule:
         Ncol = 10
         indx = 1
         fig = plt.figure(figsize=[20.0, 10.0],frameon=False)
-        for name, truncStructItem in self.__tableNonCubicAndOverlay.items():
+        sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))
+        for name, truncStructItem in  sortedDictionaryNonCubic.items():
             self.__makeTruncationMapSubPlot(name, fig, Nrow, Ncol, indx)
             indx = indx +1
         
@@ -1483,7 +1492,6 @@ if __name__ == '__main__':
 
 
     
-
     # Remove a truncation setting
 #    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
     rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1',removeDependentBG=True, removeDependentOL=True)
