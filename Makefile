@@ -347,10 +347,12 @@ run-tests: links
 	$(PY.TEST) --basetemp=$(TEST_FOLDER)
 
 clean-tests:
-	rm -rf $(TEST_FOLDER)/.cache && \
-	rm -f  $(TEST_FOLDER)/*.dat  && \
-	rm -f  $(TEST_FOLDER)/*.xml && \
-	rm -f  $(TEST_FOLDER)/libdraw2D.so
+	cd $(TEST_FOLDER) && \
+	rm -rf .cache && \
+	rm -f  *.dat \
+	       *.xml \
+	       *.png \
+	       libdraw2D.so
 
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams: uml-main-program
