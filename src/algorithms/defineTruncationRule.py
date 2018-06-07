@@ -5,7 +5,6 @@
 # Description: Handle truncation rule settings
 # --------------------------------------------------------
 import copy
-import sys
 import collections
 import numpy as np
 import matplotlib
@@ -19,7 +18,7 @@ from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.constants_truncation_rules import (
-    OverlayGroupIndices, OverlayPolygonIndices, CubicStructIndices, CubicPolygonIndices,
+    OverlayGroupIndices, OverlayPolygonIndices, CubicPolygonIndices,
     NonCubicPolygonIndices, CubicAndOverlayIndices, NonCubicAndOverlayIndices
 )
 from src.utils.methods import get_colors
@@ -1165,7 +1164,6 @@ class DefineTruncationRule:
                 outputFileName = self.__directory + '/' + name + '.xml'
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
-
     def createAllCubicXMLTemplatesWithOverlayFacies(self):
         ''' Make template xml files containing all Cubic truncation rule settings with overlay facies.'''
         for name, truncStructItem in self.__tableCubicAndOverlay.items():
@@ -1182,11 +1180,11 @@ class DefineTruncationRule:
                 outputFileName = self.__directory + '/' + name + '.xml'
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
-    def createOverviewPlotCubic(self,plotName):
+    def createOverviewPlotCubic(self, plotName):
         ''' Create plots of all specified Cubic settings in one common plot'''
         self._create_overview_plot(plotName, self.__tableCubic)
 
-    def createOverviewPlotCubicWithOverlay(self,plotName):
+    def createOverviewPlotCubicWithOverlay(self, plotName):
         ''' Create plots of all specified Cubic settings with overlay facies in one common plot'''
         self._create_overview_plot(plotName, self.__tableCubicAndOverlay)
 
@@ -1226,7 +1224,6 @@ if __name__ == '__main__':
     # Create new entries for truncation settings and add to file
     truncRuleDir = 'truncRuleSettings'
     rules = DefineTruncationRule(truncRuleDir)
-
 
     # Create and add setting for Cubic truncation rule without overlay facies
     # This settings is for the case with 3 facies, one per polygon
@@ -1333,7 +1330,6 @@ if __name__ == '__main__':
     rulesRead.readFile('out1.dat')
     rulesRead.writeFile('out2.dat')
 
-
     # Add new truncation rule to the first truncation rule settings object
 
     # Create and add setting for Cubic truncation rule without overlay facies
@@ -1356,7 +1352,7 @@ if __name__ == '__main__':
     L2 = 1
     L3 = 2
     rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-    
+
     faciesName='F01'
     probFrac = 0.5
     L1 = 1
@@ -1393,12 +1389,9 @@ if __name__ == '__main__':
     rules.createOverviewPlotCubicWithOverlay('Cubic_rules_with_overlay')
     rules.createOverviewPlotNonCubicWithOverlay('NonCubic_rules_with_overlay')
 
-
     rules.createAllNonCubicXMLTemplates()
     rules.createAllCubicXMLTemplatesWithOverlayFacies()
     rules.createAllNonCubicXMLTemplatesWithOverlayFacies()
-
-
 
     for nBackgroundFacies in range(1,6):
         print('List of settings for Cubic with background facies: {}' 
@@ -1435,7 +1428,6 @@ if __name__ == '__main__':
             fileName = item[2]
             print('{} {}'.format(key, fileName))
 
-
         for nOverlayFacies in range(5):
             print('List of settings for NonCubic with background facies: {}   and overlay facies: {}' 
                   ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
@@ -1447,12 +1439,9 @@ if __name__ == '__main__':
                 fileName = item[2]
                 print('{} {}'.format(key, fileName))
 
-
-
-
     # Remove a truncation setting
-#    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
-    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1',removeDependentBG=True, removeDependentOL=True)
+    # rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
+    rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1', removeDependentBG=True, removeDependentOL=True)
 
     rules.writeFile('out4.dat')
     rulesFromFile = DefineTruncationRule(truncRuleDir)
