@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from PIL import Image
+
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
@@ -7,7 +9,7 @@ from typing import (
     Any,
     List,
     Union,
-)
+    Callable)
 
 TruncationRule = Union[Trunc2D_Angle, Trunc3D_bayfill, Trunc2D_Cubic]
 
@@ -21,7 +23,13 @@ def apply_truncations(
 ) -> None: ...
 
 
-def compare(facies_output_file: str, facies_reference_file: str) -> bool: ...
+def compare(source: str, reference: str) -> bool: ...
+def compare_image(source: Union[str, Image], reference: Union[str, Image]) -> bool: ...
+
+def assert_identical_files(source: str, reference: str) -> None: ...
+def assert_equal_image_content_files(source: str, reference: str) -> None: ...
+
+def _assert_compare_files(source: str, reference: str, func: Callable[str, str]): ...
 
 
 def getFaciesInTruncRule(

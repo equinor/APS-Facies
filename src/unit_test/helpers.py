@@ -2,6 +2,7 @@
 from genericpath import exists
 
 from filecmp import cmp
+from PIL import ImageChops, Image
 
 import numpy as np
 
@@ -70,10 +71,10 @@ def apply_truncations(
         print('Files are equal: OK')
 
 
-def compare(facies_output_file, facies_reference_file):
-    if not exists(facies_reference_file):
-        facies_reference_file = 'src/unit_test/' + facies_reference_file
-    return cmp(facies_reference_file, facies_output_file)
+def compare(source, reference):
+    if not exists(reference):
+        reference = 'source/unit_test/' + reference
+    return cmp(reference, source)
 
 
 def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):
@@ -128,3 +129,29 @@ def get_model_file_path(modelFile):
     if not exists(modelFile):
         modelFile = 'src/unit_test/' + modelFile
     return modelFile
+
+
+def assert_identical_files(source, reference):
+    _assert_compare_files(source, reference, compare)
+
+
+def assert_equal_image_content_files(source, reference):
+    _assert_compare_files(source, reference, compare_image)
+
+
+def compare_image(source, reference):
+    if isinstance(source, str):
+        source = Image.open(source)
+    if isinstance(reference, str):
+        reference = Image.open(reference)
+    return ImageChops.difference(source, reference).getbbox() is None
+
+
+def _assert_compare_files(source, reference, func):
+    print('Compare file: ' + source + ' and ' + reference)
+    check = func(source, reference)
+    if check:
+        print('Files are equal. OK')
+    else:
+        print('Files are different. NOT OK')
+    assert check is True
