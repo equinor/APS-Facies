@@ -729,7 +729,9 @@ class DefineTruncationRule:
             raise KeyError('Overlay facies truncation rule setting: {} is not defined'.format(nameOL))
 
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
-        self.__checkConsistencyBetweenBackGroundCubicAndOverlay(nameBG, nameOL, truncStructBG, overlayGroups)
+        if not self.__checkConsistencyBetweenBackGroundCubicAndOverlay(truncStructBG, overlayGroups):
+            raise ValueError('Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
+                             ''.format(nameBG, nameOL))
 
         # Create new Cubic setting with overlay
         truncStructCubicWithOverlay = [nameBG, nameOL, truncStructBG, overlayGroups]
@@ -757,7 +759,9 @@ class DefineTruncationRule:
             raise KeyError('Overlay facies truncation rule setting: {} is not defined'.format(nameOL))
 
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
-        self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(truncStructBG, overlayGroups)
+        if not self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(truncStructBG, overlayGroups):
+            raise ValueError('Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
+                             ''.format(nameBG, nameOL))
 
         # Create new NonCubic setting with overlay
         truncStructNonCubicWithOverlay = [nameBG, nameOL, truncStructBG, overlayGroups]
@@ -769,7 +773,39 @@ class DefineTruncationRule:
 
 
 
-    def __checkConsistencyBetweenBackGroundCubicAndOverlay(self, nameBG, nameOL, truncStructBG, overlayGroups):
+    def __checkConsistencyBetweenBackGroundCubicAndOverlay(self, truncStructBG, overlayGroups):
+        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
+        bgFacies = []
+        FACIES_NAME_INDX_BG = CubicPolygonIndices.FACIES_NAME_INDX
+        ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
+        BACKGROUND_LIST_INDX = OverlayGroupIndices.BACKGROUND_LIST_INDX
+        ALPHA_NAME_INDX = OverlayPolygonIndices.ALPHA_NAME_INDX
+        FACIES_NAME_INDX_OL = OverlayPolygonIndices.FACIES_NAME_INDX
+        for i in range(len(truncStructBG)):
+            poly = truncStructBG[i]
+            fName = poly[FACIES_NAME_INDX_BG]
+            if fName not in bgFacies:
+                bgFacies.append(fName)
+
+        for n in range(len(overlayGroups)):
+            groupItem = overlayGroups[n]
+            alphaList = groupItem[ALPHA_LIST_INDX]
+            backgroundListForGroup = groupItem[BACKGROUND_LIST_INDX]
+            for fName in backgroundListForGroup:
+                if fName not in bgFacies:
+                    return False
+            for i in range(len(alphaList)):
+                alphaItem = alphaList[i]
+                alphaName = alphaItem[ALPHA_NAME_INDX]
+                fName = alphaItem[FACIES_NAME_INDX_OL]
+                if fName in bgFacies:
+                    return False
+                if alphaName == 'GRF01' or alphaName == 'GRF02':
+                    return False
+
+        return True
+
+    def __checkConsistencyBetweenBackGroundCubicAndOverlayOld(self, nameBG, nameOL, truncStructBG, overlayGroups):
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         bgFacies = []
         FACIES_NAME_INDX_BG = CubicPolygonIndices.FACIES_NAME_INDX
@@ -806,6 +842,37 @@ class DefineTruncationRule:
                                      ''.format(nameOL, nameBG))
 
     def __checkConsistencyBetweenBackGroundNonCubicAndOverlay(self, truncStructBG, overlayGroups):
+        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
+        bgFacies = []
+        FACIES_NAME_INDX_BG = NonCubicPolygonIndices.FACIES_NAME_INDX
+        ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
+        BACKGROUND_LIST_INDX = OverlayGroupIndices.BACKGROUND_LIST_INDX
+        ALPHA_NAME_INDX = OverlayPolygonIndices.ALPHA_NAME_INDX
+        FACIES_NAME_INDX_OL = OverlayPolygonIndices.FACIES_NAME_INDX
+        for i in range(len(truncStructBG)):
+            poly = truncStructBG[i]
+            fName = poly[FACIES_NAME_INDX_BG]
+            if fName not in bgFacies:
+                bgFacies.append(fName)
+
+        for n in range(len(overlayGroups)):
+            groupItem = overlayGroups[n]
+            alphaList = groupItem[ALPHA_LIST_INDX]
+            backgroundListForGroup = groupItem[BACKGROUND_LIST_INDX]
+            for fName in backgroundListForGroup:
+                if fName not in bgFacies:
+                    return False
+            for i in range(len(alphaList)):
+                alphaItem = alphaList[i]
+                alphaName = alphaItem[ALPHA_NAME_INDX]
+                fName = alphaItem[FACIES_NAME_INDX_OL]
+                if fName in bgFacies:
+                    return False
+                if alphaName == 'GRF01' or alphaName == 'GRF02':
+                    return False
+        return True
+    
+    def __checkConsistencyBetweenBackGroundNonCubicAndOverlayOld(self, truncStructBG, overlayGroups):
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         bgFacies = []
         FACIES_NAME_INDX_BG = NonCubicPolygonIndices.FACIES_NAME_INDX
@@ -957,6 +1024,11 @@ class DefineTruncationRule:
         elif truncType == 'NonCubicAndOverlay':
             sortedDictionary = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))
             settingsList = self.__appendToList(sortedDictionary, truncType, nBackgroundFacies, nOverlayFacies)
+        elif truncType == 'Overlay':
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableOverlay.items()))
+            settingsList = []
+            for key, item in sortedDictionary.items():
+                settingsList.append([key, item, ''])
         else:
             raise ValueError(
                 'Truncation type {} is not defined.'.format(truncType))
@@ -1030,6 +1102,37 @@ class DefineTruncationRule:
             nOverlayFacies = len(overlayFaciesList)
         return nOverlayFacies
 
+    def getListOfOverlaySettings(self, name):
+        """ Find truncation settings for background facies. Specified name is name of truncation setting of either type Cubic or NonCubic"""
+        itemCubic = None
+        itemNonCubic = None
+        overlay_setting_list = []        
+        try:
+            itemCubic = self.__tableCubic[name]
+        except:
+            try:
+                itemNonCubic = self.__tableNonCubic[name]
+            except:
+                raise KeyError('Truncation setting with name {} is not defined.'
+                               ''.format(name))
+        
+        if itemCubic != None:
+            # Search for all overlay settings that are consistent with background model
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableOverlay.items()))
+            for key, itemOverlay in sortedDictionary.items():
+                if self.__checkConsistencyBetweenBackGroundCubicAndOverlay(itemCubic, itemOverlay):
+                    overlay_setting_list.append(key)
+        elif itemNonCubic != None:
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableOverlay.items()))
+            for key, itemOverlay in sortedDictionary.items():
+                if self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(itemNonCubic, itemOverlay):
+                    overlay_setting_list.append(key)
+        else:
+            raise ValueError(
+                'Specified truncation setting {} is not defined.'
+                ''.format(name))
+
+        return overlay_setting_list
 
     def makeTruncationMapPlot(self, name):
         ''' Create truncation map plot using same probability for each facies'''

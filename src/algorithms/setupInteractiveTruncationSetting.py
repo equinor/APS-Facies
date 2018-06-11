@@ -113,6 +113,68 @@ def addCommandNonCubic(rules):
         
     rules.addTruncationRuleSettingsNonCubic(name, truncStructureNonCubic)
 
+def addCommandOverlay(rules):
+    name = input('Give a name for the new Overlay truncation setting: ')
+    text = 'Number of overlay groups'
+    nGroups = getInteger(text,minVal=1)
+    group_list = []
+    for groupIndx in range(nGroups):
+        text = 'Number of polygons for group {}: '.format(str(groupIndx+1))
+        nPoly = getInteger(text,minVal=1)
+        alphaList = []
+        bgFaciesList = []
+        for i in range(nPoly):
+            faciesName = input('Facies name for {} and polygon {}...............: '.format(str(groupIndx+1), str(i+1)))
+            alphaName  = input('GRF name for {} and polygon {}..................: '.format(str(groupIndx+1), str(i+1)))
+            text       = input('Probability fraction for {} and polygon {}......: '.format(str(groupIndx+1), str(i+1)))
+            probFrac = float(text)
+            text       = input('Center point of interval for {} and polygon {}..: '.format(str(groupIndx+1), str(i+1)))
+            centerPoint = float(text)
+            alphaList = rules.addPolygonToAlphaList(alphaName, faciesName, probFrac=probFrac, centerPoint=centerPoint, alphaList=alphaList)
+        text = ' Number of background facies for group {}'.format(str(groupIndx+1)) 
+        nBackgroundFacies = getInteger(text,minVal=1)
+        bgFacies = input('Background facies for group {} : '.format(str(groupIndx+1)))
+        bgFaciesList.append(bgFacies)
+        group_list = rules.addOverlayGroupSettings(alphaList, bgFaciesList, overlayGroups=group_list)
+
+    rules.addTruncationRuleSettingsOverlay(name, group_list)
+
+
+def addCommandCubicAndOverlay(rules):
+    name = input('Give a name for the new Cubic truncation setting with overlay facies: ')
+    cubicName = input('Name of Cubic setting: ')
+    
+    list_overlay_settings = rules.getListOfOverlaySettings(cubicName)
+    print('Overlay settings consistent with specified background facies setting.')
+    for i in range(len(list_overlay_settings)):
+        nameOverlay = list_overlay_settings[i]
+        print(nameOverlay)
+
+    finished = False
+    while not finished:
+        overlayName = input('Name of Overlay setting: ')
+        if overlayName in list_overlay_settings:
+            finished = True
+            
+    rules.addTruncationRuleSettingsCubicWithOverlay(name, cubicName, overlayName)
+
+def addCommandNonCubicAndOverlay(rules):
+    name = input('Give a name for the new NonCubic truncation setting with overlay facies: ')
+    nonCubicName = input('Name of NonCubic setting: ')
+    list_overlay_settings = rules.getListOfOverlaySettings(nonCubicName)
+    print('Overlay settings consistent with specified background facies setting.')
+    for i in range(len(list_overlay_settings)):
+        nameOverlay = list_overlay_settings[i]
+        print(nameOverlay)
+
+    finished = False
+    while not finished:
+        overlayName = input('Name of Overlay setting: ')
+        if overlayName in list_overlay_settings:
+            finished = True
+            
+    rules.addTruncationRuleSettingsNonCubicWithOverlay(name, nonCubicName, overlayName)
+
 
 def addCommand(rules):
     finished = False
@@ -120,12 +182,24 @@ def addCommand(rules):
         typeTrunc = input('Add truncation setting for:\n'
                           '  Cubic (C)\n'
                           '  NonCubic (N)\n'
+                          '  Overlay (A)\n'
+                          '  CubicAndOverlay (CA)\n'
+                          '  NonCubicAndOverlay (NA)\n'
                           '  :')
         if typeTrunc == 'Cubic' or typeTrunc == 'C' or typeTrunc == 'c':
             addCommandCubic(rules)
             finished = True
         elif typeTrunc == 'NonCubic' or typeTrunc == 'N' or typeTrunc == 'n':
             addCommandNonCubic(rules)
+            finished = True
+        elif typeTrunc == 'Overlay' or typeTrunc == 'A' or typeTrunc == 'a':
+            addCommandOverlay(rules)
+            finished = True
+        elif typeTrunc == 'CubicAndOverlay' or typeTrunc == 'CA' or typeTrunc == 'ca':
+            addCommandCubicAndOverlay(rules)
+            finished = True
+        elif typeTrunc == 'NonCubicAndOverlay' or typeTrunc == 'NA' or typeTrunc == 'na':
+            addCommandNonCubicAndOverlay(rules)
             finished = True
 
 def readCommand(rules):
@@ -158,6 +232,7 @@ def listCommand(rules):
                           '  NonCubic (N)\n'
                           '  Cubic with overlay (CA)\n'
                           '  NonCubic with overlay (NA)\n'
+                          '  Overlay (A)\n'
                           '  Background with N facies and overlay with M facies  (B)\n'
                           '  :')
         if typeTrunc == 'Cubic' or typeTrunc == 'C' or typeTrunc == 'c':
@@ -189,6 +264,14 @@ def listCommand(rules):
             settings_list = rules.getListOfSettings(typeTrunc)
 
             print('NonCubic truncation settings with overlay facies:')
+            printListOfSettings(settings_list)
+            finished = True
+
+        elif typeTrunc == 'Overlay' or typeTrunc == 'A' or typeTrunc == 'a':
+            typeTrunc = 'Overlay'
+            settings_list = rules.getListOfSettings(typeTrunc)
+
+            print('Overlay truncation settings:')
             printListOfSettings(settings_list)
             finished = True
 
