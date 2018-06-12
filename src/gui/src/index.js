@@ -9,6 +9,9 @@ import store from './store'
 import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons/iconfont/material-icons.css'
 
+import 'ag-grid/dist/styles/ag-grid.css'
+import 'ag-grid/dist/styles/ag-theme-balham.css'
+
 Vue.use(Vuetify)
 Vue.config.productionTip = process.env.NODE_ENV !== 'production'
 

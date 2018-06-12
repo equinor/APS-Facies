@@ -35,6 +35,10 @@ export default {
       }
     }
   },
+
+  beforeMount () {
+    this.$store.dispatch('fetchGridModels')
+  }
 }
 </script>
 

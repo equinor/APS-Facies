@@ -6,10 +6,15 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    availableGridModels: rms.gridModels,
+    availableGridModels: [],
     availableZones: rms.zones,
     availableFacies: rms.facies,
     selectedGridModel: null,
+    selectedZones: [],
+    selectedRegions: [],
+    currentZone: null,
+    currentRegion: null,
+    currentFacies: null,
   },
 
   strict: process.env.NODE_ENV !== 'production',
@@ -18,6 +23,19 @@ export default new Vuex.Store({
     availableGridModelNames: (state) => {
       return state.availableGridModels
     },
+  },
+
+  methods: {
+    promiseSimpleCommit (commit, commitment, data, check = true, error = '') {
+      return new Promise((resolve, reject) => {
+        if (check) {
+          commit(commitment, data)
+          resolve(data)
+        } else {
+          reject(error)
+        }
+      })
+    }
   },
 
   actions: {
@@ -30,6 +48,26 @@ export default new Vuex.Store({
           reject(new Error('Selected grid model must be valid.'))
         }
       })
+    },
+    selectZones: ({commit, promiseSimpleCommit}, zones) => {
+      return promiseSimpleCommit(commit, 'selectedZones', zones)
+    },
+    selectRegions: ({commit, promiseSimpleCommit}, regions) => {
+      return promiseSimpleCommit(commit, 'selectedRegions', regions)
+    },
+    currentZone: ({commit, promiseSimpleCommit}, zone) => {
+      return promiseSimpleCommit(commit, 'currentZone', zone)
+    },
+    currentRegion: ({commit, promiseSimpleCommit}, region) => {
+      return promiseSimpleCommit(commit, 'currentRegion', region)
+    },
+    currentFacies: ({commit, promiseSimpleCommit}, facies) => {
+      return promiseSimpleCommit(commit, 'currentFacies', facies)
+    },
+    fetchGridModels: ({commit}) => {
+      rms.gridModels.then(result => {
+        commit('availableGridModels', result)
+      })
     }
   },
 
@@ -37,5 +75,23 @@ export default new Vuex.Store({
     gridModel: (state, selectedGridModel) => {
       state.selectedGridModel = selectedGridModel
     },
+    availableGridModels: (state, gridModels) => {
+      state.availableGridModels = gridModels
+    },
+    selectedZones: (state, selectedZones) => {
+      state.selectedZones = selectedZones
+    },
+    selectedRegions: (state, selectedRegions) => {
+      state.selectedRegions = selectedRegions
+    },
+    currentZone: (state, currentZone) => {
+      state.currentZone = currentZone
+    },
+    currentRegion: (state, currentRegion) => {
+      state.currentRegion = currentRegion
+    },
+    currentFacies: (state, currentFacies) => {
+      state.currentFacies = currentFacies
+    }
   },
 })

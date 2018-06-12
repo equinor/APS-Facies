@@ -6,17 +6,8 @@
   >
     <GridModel/>
     <div v-if="gridModel">
-      <v-expansion-panel expand>
-        <v-expansion-panel-content
-          v-for="{panel, name} in panels"
-          :key="name"
-        >
-          <div slot="header">{{ name }}</div>
-          <v-card>
-            <v-container :is="panel"/>
-          </v-card>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+      <zone-region/>
+      <facies-table/>
     </div>
   </v-container>
 </template>

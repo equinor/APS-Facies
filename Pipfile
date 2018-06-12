@@ -18,5 +18,6 @@ graphviz = "*"
 piprot = "*"
 monkeytype = "*"
 mypy = "*"
+python-box = "*"
 
 [requires]

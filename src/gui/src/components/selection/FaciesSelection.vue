@@ -1,48 +1,64 @@
 <template>
-  <v-container>
-    <v-data-table
-      :headers="headers"
-      :items="items"
-      class="elevation-1"
-    >
-      <template
-        slot="items"
-        slot-scope="props"
-      >
-        <td class="text-xs-right">{{ props.item.name }}</td>
-        <td class="text-xs-right">{{ props.item.code }}</td>
-        <td class="text-xs-right"><Swatches v-model="props.item.color"/></td>
-      </template>
-    </v-data-table>
-  </v-container>
+  <div>
+    <facies-table
+      :raw-data="availableFacies"
+      :column-definitions="columnDefinitions"
+      :on-row-clicked="selectedFaciesRow"
+      :additional-grid-options="additionalGridOptions"
+    />
+    <div>
+      <v-btn color="info">Add Facies</v-btn>
+      <v-btn color="warning">Remove Facies</v-btn>
+    </div>
+  </div>
 </template>
 
 <script>
-import ItemTable from '@/components/ItemTable'
-import Swatches from 'vue-swatches'
+import GridTable from '@/components/table/ClickableRowTable'
+import ColorPicker from '@/components/ColorPicker'
+import ColorRenderer from '@/components/ColorRenderer'
+
+// TODO: Ensure change of color is done as a commit / action
+// Look for onRow/Data/CellChanged
 
 export default {
   components: {
-    ItemTable,
-    Swatches
+    FaciesTable: GridTable,
   },
 
   data () {
     return {
-      headers: [
-        {text: 'Facies', value: 'name'},
-        {text: 'Code', value: 'code'},
-        {text: 'Color', value: 'color'}
-      ],
-      items: this.availableFacies()
+      additionalGridOptions: {
+        singleClickEdit: true,
+      },
+      columnDefinitions: [
+        {headerName: 'Name', field: 'name'},
+        {headerName: 'Code', field: 'code', maxWidth: 75},
+        {
+          headerName: 'Color',
+          field: 'color',
+          cellRendererFramework: ColorRenderer,
+          cellEditorFramework: ColorPicker,
+          cellStyle: (params) => { return {backgroundColor: params.value} },
+          editable: true,
+          maxWidth: 75
+        }
+      ]
+    }
+  },
+
+  computed: {
+    availableFacies () {
+      return this.$store.state.availableFacies
     }
   },
 
   methods: {
-    availableFacies () {
-      return this.$store.state.availableFacies.map(item => {
-        return {...item, value: false}
-      })
+    selectedFaciesRow (event) {
+      const clickedCell = event.api.getFocusedCell()
+      if (clickedCell.column.getColId() !== 'color') {
+        console.log(event.data)
+      }
     }
   }
 }

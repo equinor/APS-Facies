@@ -1,86 +1,76 @@
 <template>
   <div>
-    <SelectionTable
-      :headers="getHeaders('Zone')"
-      :items="items"
-      @selected="updateSelectedZones"
+    <selectable-table
+      :raw-data="availableZones"
+      :on-selection-changed="selectedZones"
+      :on-row-clicked="currentZone"
+      header-name="Zone"
     />
-    <v-checkbox
-      v-if="selectedZoneHasRegions"
-      :label="'Include Regions'"
-      v-model="useRegions"
-    />
-    <SelectionTable
-      v-if="useRegions"
-      :headers="getHeaders('Region')"
-      :items="availableRegions"
-      @selected="updateSelectedRegions"
-    />
+    <v-form>
+      <v-checkbox
+        v-model="useRegions"
+        label="Use regions?"
+      />
+    </v-form>
+    <div v-if="useRegions">
+      <selectable-table
+        :raw-data="availableRegions"
+        :on-selection-changed="selectedRegions"
+        :on-row-clicked="currentRegion"
+        header-name="Region"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import SelectionTable from '@/components/SelectionTable'
+import SelectableTable from '@/components/table/SelectableTable'
 
 export default {
   components: {
-    SelectionTable
+    SelectableTable
   },
 
   data () {
     return {
-      items: this.availableZones(),
-      selectedZones: [],
       useRegions: false,
-      selectedRegions: []
     }
   },
 
   computed: {
-    selectedZone () {
-      return this.selectedZones.slice(-1).pop()
-    },
-
     availableRegions () {
-      if (this.selectedZone && this.selectedZone.regions) {
-        return this.selectedZone.regions.map(x => {
-          return {...x, selected: false}
-        })
-      } else {
-        return []
-      }
+      return []
     },
-
-    selectedZoneHasRegions () {
-      return this.availableRegions.length > 0
+    availableZones () {
+      return this.getRawData().map(item => {
+        return {id: item.id, name: item.name}
+      })
     },
   },
 
   methods: {
-    availableZones () {
-      return this.$store.state.availableZones.map(x => {
-        return {...x, selected: false}
-      })
+    getRawData () {
+      // const zones = this.$store.state.availableZones
+      return this.$store.state.availableZones
     },
-
-    updateSelectedZones (value) {
-      this.selectedZones = value.map(name => this.availableZones().find(item => item.name === name))
+    _dispatchSelectedRows  (event, action) {
+      this.$store.dispatch(action, event.api.getSelectedRows())
     },
-
-    updateSelectedRegions (value) {
-      //
+    _dispatchCurrentSelected (event, action) {
+      this.$store.dispatch(action, event.data)
     },
-
-    getHeaders (text) {
-      return [
-        {
-          text: text,
-          align: 'left',
-          sortable: true,
-          value: 'name'
-        }
-      ]
-    }
+    selectedZones (event) {
+      this._dispatchSelectedRows(event, 'selectZones')
+    },
+    selectedRegions (event) {
+      this._dispatchSelectedRows(event, 'selectRegions')
+    },
+    currentZone (event) {
+      this._dispatchCurrentSelected(event, 'currentZone')
+    },
+    currentRegion (event) {
+      this._dispatchCurrentSelected(event, 'currentRegion')
+    },
   }
 }
 </script>
