@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.1.1" \
+LABEL version="3.1.2" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -8,8 +8,8 @@ LABEL version="3.1.1" \
 ENV RMS_VERSION=11.0.0-b9 \
     PYTHON_VERSION=3.6 \
     TCL_VERSION=8.6 \
-    INTEL_MKL_VERSION=2018.2.199 \
-    INTEL_MKL_SEED=12725 \
+    INTEL_MKL_VERSION=2018.3.222 \
+    INTEL_MKL_SEED=13005 \
     NODE_VERSION=8.11.3 \
     NRLIB_VERSION=1.1-r6 \
     SQLITE_VERSION=3.23.1 \
