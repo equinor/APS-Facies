@@ -1,5 +1,5 @@
 image:
-  name: "git.equinor.com:4567/aps/gui/aps-gui:3.0.2"
+  name: "git.equinor.com:4567/aps/gui/aps-gui:3.0.3"
 
 variables:
   GIT_STRATEGY:           "fetch"
@@ -16,6 +16,7 @@ variables:
   PIPENV_VENV_IN_PROJECT: "1"
   DEPLOY_SERVER:          "tr-linrgsn001.tr.statoil.no"
   DEPLOY_PATH:            "${DEPLOY_SERVER}:/project/res/APSGUI"
+  SYSTEM_INSTALL_PIPENV:  "yes"
 
 stages:
   - init

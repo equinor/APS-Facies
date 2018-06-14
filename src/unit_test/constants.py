@@ -16,6 +16,7 @@ OUT_POLY_FILE1 = 'test_Trunc_polygons1.dat'
 OUT_POLY_FILE2 = 'test_Trunc_polygons2.dat'
 FACIES_OUTPUT_FILE = 'facies2D.dat'
 USE_CONST_TRUNC_PARAM = 1
+KEYRESOLUTION = 100
 ANGLE_GAUSS_FIELD_FILES = [
     'testData_Angle/a1.dat', 'testData_Angle/a2.dat', 'testData_Angle/a3.dat',
     'testData_Angle/a4.dat', 'testData_Angle/a5.dat', 'testData_Angle/a6.dat'

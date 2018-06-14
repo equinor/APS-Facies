@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.0.2" \
+LABEL version="3.0.3" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -8,18 +8,21 @@ LABEL version="3.0.2" \
 ENV RMS_VERSION=11.0.0-b9 \
     GCC_VERSION=4.9.4 \
     PYTHON_VERSION=3.6 \
+    TCL_VERSION=8.6 \
     INTEL_MKL_VERSION=2018.2.199 \
     INTEL_MKL_SEED=12725 \
     NODE_VERSION=8.11.1 \
     NRLIB_VERSION=1.1-r6 \
     SQLITE_VERSION=3.23.1 \
     YARN_VERSION=1.5.1
-ENV APSW_VERSION=${SQLITE_VERSION}-r1
+ENV APSW_VERSION=${SQLITE_VERSION}-r1 \
+    TK_VERSION=${TCL_VERSION}
 
 # Auxillary (version) information
 ENV NODE_ARCH='x64' \
     INTEL_MKL="l_mkl_${INTEL_MKL_VERSION}" \
     RMS_LINUX="LINUX_64" \
+    RMS_LINUX_LONG="linux-amd64-gcc_4_4-release/" \
     CA_FILE="/etc/ssl/certs/ca-bundle.crt"
 
 # Prefixes
@@ -30,8 +33,10 @@ ENV GCC_PREFIX=${INSTALL_DIR}/gcc-${GCC_VERSION} \
     INTEL_MKL_PREFIX="/opt/intel" \
     NODE_PREFIX="${INSTALL_DIR}/node-${NODE_VERSION}"
 ENV RMS_BIN_PREFIX="${RMS_PREFIX}/bin/${RMS_LINUX}" \
+    ROXAR_RMS_ROOT="${RMS_PREFIX}/${RMS_LINUX_LONG}"\
     RMS_LIB_PREFIX="${RMS_PREFIX}/lib/${RMS_LINUX}"
 ENV PYTHON_LIB_PREFIX=$RMS_LIB_PREFIX/python$PYTHON_VERSION \
+    PYTHONUSERBASE="/root/.roxar/rms-11/python" \
     PYTHONPATH=$DEPENDENCIES_PREFIX \
     MKL_ROOT="${INTEL_MKL_PREFIX}/mkl" \
     INTEL_CONFIGURATION="${INTEL_PREFIX}/config.txt"
@@ -41,11 +46,14 @@ ENV PYTHON_LIB_PREFIX=$RMS_LIB_PREFIX/python$PYTHON_VERSION \
 ENV PATH="\
 /root/.local/bin:\
 ${NODE_PREFIX}/bin:\
-${RMS_PREFIX}/linux-amd64-gcc_4_4-release/bin:\
+${ROXAR_RMS_ROOT}/bin:\
 ${RMS_BIN_PREFIX}:\
+${PYTHONUSERBASE}/bin:\
 ${GCC_PREFIX}/bin:\
 ${PATH}" \
     LD_LIBRARY_PATH="\
+${ROXAR_RMS_ROOT}/lib:\
+${ROXAR_RMS_ROOT}/bin:\
 ${RMS_LIB_PREFIX}:\
 ${PYTHON_LIB_PREFIX}:\
 ${GCC_PREFIX}/lib64:\
@@ -57,6 +65,9 @@ ${LD_LIBRARY_PATH}"
 # All of the following envs might not be necessary
 # espescially C_INCLUDE_PATH, CPLUS_INCLUDE_PATH, LIBRARY_PATH and LD_RUN_PATH
 ENV LIBRARY_PATH="${LD_LIBRARY_PATH}" \
+    LDFLAGS="-L${ROXAR_RMS_ROOT}/lib" \
+    TCL_LIBRARY="${ROXAR_RMS_ROOT}/lib/tcl${TCL_VERSION}"\
+    TK_LIBRARY="${ROXAR_RMS_ROOT}/lib/tk${TK_VERSION}" \
     LD_RUN_PATH="${LD_LIBRARY_PATH}"
 
 # Variables for programs
@@ -218,6 +229,7 @@ RUN yum update -y \
          tests \
  && mv nrlib.*.so $DEPENDENCIES_PREFIX \
     # Install APSW to dependencies collection
+    # TODO: Add cython before apsw to get extension?
  && cd ${BUILD_DIR}/apsw-${APSW_VERSION} \
  && CFLAGS="-std=c11" \
     $PYTHON setup.py fetch --version $SQLITE_VERSION --all \

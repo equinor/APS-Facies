@@ -1,0 +1,29 @@
+Cubic C01 3  ['H', ['F01', 1.0, 1, 0, 0], ['F02', 1.0, 2, 1, 0], ['F03', 1.0, 2, 2, 0]]
+Cubic C02 4  ['V', ['F01', 1.0, 1, 1, 0], ['F02', 1.0, 1, 2, 0], ['F03', 1.0, 2, 1, 0], ['F04', 1.0, 2, 2, 0]]
+Cubic C03 5  ['H', ['F01', 1.0, 1, 0, 0], ['F02', 1.0, 2, 1, 1], ['F03', 1.0, 2, 1, 2], ['F04', 1.0, 2, 2, 0], ['F05', 1.0, 3, 0, 0]]
+Cubic C04 5  ['V', ['F01', 1.0, 1, 1, 1], ['F02', 1.0, 1, 1, 2], ['F03', 1.0, 1, 1, 3], ['F04', 1.0, 1, 2, 0], ['F05', 1.0, 2, 0, 0]]
+Cubic C05 6  ['V', ['F01', 1.0, 1, 0, 0], ['F02', 1.0, 2, 1, 1], ['F03', 1.0, 2, 1, 2], ['F04', 1.0, 2, 2, 0], ['F05', 1.0, 2, 3, 0], ['F06', 1.0, 3, 0, 0]]
+Overlay A01 1  1 1 [[[['GRF03', 'S01', 1.0, 0.0]], ['F01']]]
+Overlay A02 2  1 1 1 1 [[[['GRF03', 'S01', 1.0, 0.0]], ['F01']], [[['GRF03', 'S02', 1.0, 0.0]], ['F02']]]
+Overlay A03 1  1 1 [[[['GRF03', 'S03', 1.0, 0.5]], ['F02']]]
+Overlay A04 3  1 1 2 1 1 1 [[[['GRF03', 'S01', 0.35, 1.0]], ['F01']], [[['GRF03', 'S01', 0.3, 0.0], ['GRF04', 'S01', 0.2, 0.0]], ['F02']], [[['GRF03', 'S01', 0.15, 0.0]], ['F03']]]
+CubicAndOverlay C01_A01  C01 A01
+CubicAndOverlay C01_A02  C01 A02
+CubicAndOverlay C01_A03  C01 A03
+CubicAndOverlay C01_A04  C01 A04
+CubicAndOverlay C02_A01  C02 A01
+CubicAndOverlay C02_A02  C02 A02
+CubicAndOverlay C02_A03  C02 A03
+CubicAndOverlay C02_A04  C02 A04
+CubicAndOverlay C03_A01  C03 A01
+CubicAndOverlay C03_A02  C03 A02
+CubicAndOverlay C03_A03  C03 A03
+CubicAndOverlay C03_A04  C03 A04
+CubicAndOverlay C04_A01  C04 A01
+CubicAndOverlay C04_A02  C04 A02
+CubicAndOverlay C04_A03  C04 A03
+CubicAndOverlay C04_A04  C04 A04
+CubicAndOverlay C05_A01  C05 A01
+CubicAndOverlay C05_A02  C05 A02
+CubicAndOverlay C05_A03  C05 A03
+CubicAndOverlay C05_A04  C05 A04
