@@ -10,6 +10,7 @@ from src.algorithms.Trend3D import (
 from src.utils.checks import isVariogramTypeOK
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.simGauss2D_nrlib import simGaussField
+#from src.utils.simGauss2D import simGaussField
 from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword
 
 
@@ -63,7 +64,7 @@ class APSGaussModel:
     def __getGFIndex(self,gfName)
     """
 
-    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, gaussFieldJobs=None, modelFileName=None,
+    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
                  debug_level=Debug.OFF, zoneNumber=0, simBoxThickness=0):
         """
         Description: Can create empty object or object with data read from xml tree representing the model file.
@@ -86,10 +87,11 @@ class APSGaussModel:
             self.__modelFileName = modelFileName
             self.__debug_level = debug_level
 
-            self.__interpretXMLTree(ET_Tree_zone, gaussFieldJobs)
+            self.__interpretXMLTree(ET_Tree_zone)
 
     def __setEmpty(self):
-
+        ''' Initialize variables for the class'''
+        
         # Dictionary give xml keyword for each variable
         self.__xml_keyword = {
             'MainRange': 'MainRange',
@@ -152,7 +154,7 @@ class APSGaussModel:
         self.__zoneNumber = 0
         self.__modelFileName = None
 
-    def __interpretXMLTree(self, ET_Tree_zone, gaussFieldJobs):
+    def __interpretXMLTree(self, ET_Tree_zone):
         """
         Description: Read Gauss field models for current zone.
         Read trend models for the same gauss fields and start seed for 2D preview simulations.
@@ -161,13 +163,6 @@ class APSGaussModel:
             gfName = gf.get('name')
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Gauss field name: {}'.format(gfName))
-            if not gaussFieldJobs.checkGaussFieldName(gfName):
-                raise ValueError(
-                    'In model file {0} in zone number: {1} in command GaussField.\n'
-                    'Specified name of Gauss field:  {2} is not defined in any of '
-                    'the specified gauss field simulation jobs'
-                    ''.format(self.__modelFileName, str(self.__zoneNumber), gfName)
-                )
 
             # Read variogram for current GF
             variogram, variogramType = self.get_variogram(gf, gfName)
@@ -329,7 +324,7 @@ class APSGaussModel:
         else:
             raise ValueError('Error: Unknown variogram type {}'.format(nameUpper))
 
-    def initialize(self, inputZoneNumber, mainFaciesTable, gaussFieldJobs,
+    def initialize(self, inputZoneNumber, mainFaciesTable, 
                    gaussModelList, trendModelList,
                    simBoxThickness, previewSeedList, debug_level=Debug.OFF):
 
@@ -375,13 +370,6 @@ class APSGaussModel:
             assert item[GNAME] == seedItem[SNAME]
 
             gfName = item[GNAME]
-            if not gaussFieldJobs.checkGaussFieldName(gfName):
-                raise ValueError(
-                    'In zone number: {0} in command GaussField. '
-                    'Specified name of Gauss field:  {1} is not defined in any of '
-                    'the specified gauss field simulation jobs'
-                    ''.format(str(self.__zoneNumber), gfName)
-                )
 
             variogramType = self.get_variogram_type(item[GTYPE])
             if not isVariogramTypeOK(variogramType):
@@ -872,6 +860,13 @@ class APSGaussModel:
             self, simBoxXsize, simBoxYsize, simBoxZsize,
             gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionRelativePos
     ):
+        ''' This function is used to create 2D simulation of horizontal or vertical cross sections. The gauss simulation is 2D
+            and the correlation ellipsoid for the 3D variogram is projected into the specified cross section in 2D.
+            The 3D trend definition is used to calculate an 2D cross section of the trend in the specified horizontal or vertical cross section grid plane
+            specified by crossSectionRelativePos which is a number between 0 and 1.
+            Here 0 means smallest grid index and 1 means largest grid index for the specified cross section direction (IJ plane, IK, plane or JK plane).
+            The trend and residual gauss field is added using the specified relative standard deviation and the resulting gaussian field with trend is
+            transformed by empiric transformation such that the histogram over all simulated values in the 2D grid become uniform between 0 and 1.'''
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']

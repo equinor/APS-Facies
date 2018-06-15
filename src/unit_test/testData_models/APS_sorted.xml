@@ -10,7 +10,6 @@
   </SelectedZonesAndRegions>
   <RMSProjectName> testNeslen.rms10 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
-  <RMSGaussFieldScriptName> MakeGaussFields.ipl </RMSGaussFieldScriptName>
   <GridModelName> APS_NESLEN_ODM </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
   <RegionParamName> Region </RegionParamName>
@@ -50,35 +49,10 @@
       <Code> 10 </Code>
     </Facies>
   </MainFaciesTable>
-  <GaussFieldJobNames>
-    <Job name="GRF_1_2">
-      <GFParam> GRF1 </GFParam>
-      <GFParam> GRF2 </GFParam>
-    </Job>
-    <Job name="GRF_3_5">
-      <GFParam> GRF3 </GFParam>
-      <GFParam> GRF4 </GFParam>
-      <GFParam> GRF5 </GFParam>
-    </Job>
-    <Job name="GRF_6_9">
-      <GFParam> GRF6 </GFParam>
-      <GFParam> GRF7 </GFParam>
-      <GFParam> GRF8 </GFParam>
-      <GFParam> GRF9 </GFParam>
-    </Job>
-    <Job name="GRF_10_14">
-      <GFParam> GRF10 </GFParam>
-      <GFParam> GRF11 </GFParam>
-      <GFParam> GRF12 </GFParam>
-      <GFParam> GRF13 </GFParam>
-      <GFParam> GRF14 </GFParam>
-    </Job>
-  </GaussFieldJobNames>
   <ZoneModels>
     <Zone number="1">
       <UseConstProb> 0 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_5 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F2">
           <ProbCube> ProbTrend_sm_F2 </ProbCube>
@@ -185,7 +159,6 @@
     <Zone number="2" regionNumber="1">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_2 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F2">
           <ProbCube> 0.01 </ProbCube>
@@ -249,7 +222,6 @@
     <Zone number="2" regionNumber="3">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_3 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F2">
           <ProbCube> 0.3 </ProbCube>
@@ -388,7 +360,6 @@
     <Zone number="2" regionNumber="4">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_3 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F2">
           <ProbCube> 0.3 </ProbCube>
@@ -494,7 +465,6 @@
     <Zone number="4">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_4 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F2">
           <ProbCube> 0.3 </ProbCube>
@@ -601,7 +571,6 @@
     <Zone number="5">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_1 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F1">
           <ProbCube> 0.50 </ProbCube>
@@ -665,7 +634,6 @@
     <Zone number="6" regionNumber="10">
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
-      <HorizonNameVarioTrend> top_middle_Neslen_6 </HorizonNameVarioTrend>
       <FaciesProbForModel>
         <Facies name="F2">
           <ProbCube> 0.2 </ProbCube>
