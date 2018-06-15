@@ -33,13 +33,12 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     grid = gridModel.get_grid()
 
     # Get Grid attributes
-    [xmin, xmax, ymin, ymax, zmin, zmax, simBoxXLength, simBoxYLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid,
+    [_, _, _, _, _, _, simBoxXLength, simBoxYLength,
+     azimuthAngle, x0, y0, nx, ny, _, _,
      zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = gr.getGridAttributes(grid, debug_level)
 
     xinc = simBoxXLength/nx
     yinc = simBoxYLength/ny
-
 
     # Create xml tree with output
     topElement = Element('RMS_grid_model_data')
@@ -55,56 +54,27 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
         zNameObj.text = ' ' + name.strip() + ' '
         gmElement.append(zNameObj)
 
-    tag = 'XSize'
-    xsObj = Element(tag)
-    xsObj.text = ' ' + str(simBoxXLength) + ' '
-    gmElement.append(xsObj)
+    tags = [
+        ('XSize', simBoxXLength),
+        ('YSize', simBoxYLength),
+        ('AzimuthAngle', azimuthAngle),
+        ('OrigoX', x0),
+        ('OrigoY', y0),
+        ('NX', nx),
+        ('NY', ny),
+        ('Xinc', xinc),
+        ('Yinc', yinc),
+    ]
 
-    tag = 'YSize'
-    ysObj = Element(tag)
-    ysObj.text = ' ' + str(simBoxYLength) + ' '
-    gmElement.append(ysObj)
-
-    tag = 'AzimuthAngle'
-    azimuthObj = Element(tag)
-    azimuthObj.text = ' ' + str(azimuthAngle) + ' '
-    gmElement.append(azimuthObj)
-
-    tag = 'OrigoX'
-    x0_obj = Element(tag)
-    x0_obj.text = ' ' + str(x0) + ' '
-    gmElement.append(x0_obj)
-
-    tag = 'OrigoY'
-    y0_obj = Element(tag)
-    y0_obj.text = ' ' + str(y0) + ' '
-    gmElement.append(y0_obj)
-
-    tag = 'NX'
-    nxObj = Element(tag)
-    nxObj.text = ' ' + str(nx) + ' '
-    gmElement.append(nxObj)
-
-    tag = 'NY'
-    nyObj = Element(tag)
-    nyObj.text = ' ' + str(ny) + ' '
-    gmElement.append(nyObj)
-
-    tag = 'Xinc'
-    xincObj = Element(tag)
-    xincObj.text = ' ' + str(xinc) + ' '
-    gmElement.append(xincObj)
-
-    tag = 'Yinc'
-    yincObj = Element(tag)
-    yincObj.text = ' ' + str(yinc) + ' '
-    gmElement.append(yincObj)
+    for tag, value in tags:
+        element = Element(tag)
+        element.text = ' {0} '.format(value)
+        gmElement.append(element)
 
     with open(outputFile, 'w') as file:
         print('- Write file: ' + outputFile)
         root = prettify(topElement)
         file.write(root)
-    return
 
 
 def run(roxar=None, project=None, **kwargs):
