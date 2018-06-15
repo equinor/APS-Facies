@@ -11,7 +11,7 @@ from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
-from src.utils.xmlUtils import getIntCommand, getKeyword, getTextCommand, prettify
+from src.utils.xmlUtils import getIntCommand, getKeyword, getTextCommand, prettify, prettify2
 
 
 class APSModel:
@@ -968,7 +968,8 @@ class APSModel:
     def writeModelFromXMLRoot(inputETree, outputModelFileName):
         print('Write file: ' + outputModelFileName)
         root = inputETree.getroot()
-        rootReformatted = prettify(root)
+        rootReformatted = prettify2(root)
         with open(outputModelFileName, 'w') as file:
             file.write(rootReformatted)
+            file.write('\n')
 

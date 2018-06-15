@@ -10,6 +10,12 @@ def prettify(elem):
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ", newl="\n")
 
+def prettify2(elem):
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="", newl="")
+
+
 
 def getKeyword(parent, keyword, parentKeyword='', modelFile=None, required=True):
     """
