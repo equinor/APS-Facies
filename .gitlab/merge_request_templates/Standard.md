@@ -1,6 +1,8 @@
 ### Reasons for making this change
 
+<!--
 Please describe them here
+-->
 
 ### Related issues
 
@@ -31,7 +33,9 @@ Add link(s) to any LeanKit cards that are of relevance
 
 ### Checklist
 
+<!--
 Check those applicable, and remove those that are not.
+-->
 
 * [ ] **I'm updating documentation**
   - [ ] I've checked the rendering of the Markdown text I've added
@@ -45,4 +49,4 @@ Check those applicable, and remove those that are not.
 
 1 :+1:
 
-CC: @OLIA @SNIS @TBOR @OYVVES
+CC: @OLIA @SNIS @INGUNNR @OYVVES
