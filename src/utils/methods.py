@@ -128,3 +128,22 @@ def get_run_parameters(**kwargs):
     debug_level = get_debug_level(**kwargs)
     input_dir = base_path + '/tmp_gauss_sim'
     return model_file, rms_data_file, global_ipl_file, input_dir, debug_level
+
+
+def calcAverage(nDefinedCells, cellIndexDefined, values):
+    """
+    Calculates average of the values array.
+    Input:
+           nDefinedCells  - Number of selected cells to average.
+           cellIndexDefined - Array of cell indices to cells to be averaged.
+           realNumber     - Realisation number counted from 0 for the parameter to get.
+
+    Output:
+            average  - average value
+    """
+    sumValue = 0.0
+    for i in range(nDefinedCells):
+        indx = cellIndexDefined[i]
+        sumValue += values[indx]
+    average = sumValue / float(nDefinedCells)
+    return average

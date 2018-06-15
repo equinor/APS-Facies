@@ -78,7 +78,7 @@ from PIL import Image
 from matplotlib.colors import LinearSegmentedColormap
 
 from src.utils.constants.simple import Debug
-from src.utils.methods import get_colors, get_item_from_model_file
+from src.utils.methods import get_colors
 
 
 def isOneByteColor(c):

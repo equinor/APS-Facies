@@ -4,7 +4,8 @@ import copy
 
 import numpy as np
 
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gf
+from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
+from src.utils.roxar.grid_model import getCellValuesFilteredOnDiscreteParam, getDiscrete3DParameterValues
 from src.algorithms.defineFacies import BaseDefineFacies
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingKeyword
@@ -45,10 +46,10 @@ class DefineFaciesProb(BaseDefineFacies):
         eps = 0.00001
         real_number = 0
         grid_model = self.project.grid_models[self.grid_model_name]
-        [zone_values, _] = gf.getDiscrete3DParameterValues(
+        [zone_values, _] = getDiscrete3DParameterValues(
             grid_model, self.zone_parameter_name, real_number, debug_level
         )
-        [facies_real_values, code_names_facies] = gf.getDiscrete3DParameterValues(
+        [facies_real_values, code_names_facies] = getDiscrete3DParameterValues(
             grid_model, self.facies_parameter_name, real_number, debug_level
         )
 
@@ -112,7 +113,7 @@ class DefineFaciesProb(BaseDefineFacies):
             probability_values = np.zeros(len(zone_values), np.float32)
             for zone_number in self.selected_zone_numbers:
                 # Filter out cells with selected zone numbers
-                [num_defined_cells, cell_index] = gf.getCellValuesFilteredOnDiscreteParam(zone_number + 1, zone_values)
+                [num_defined_cells, cell_index] = getCellValuesFilteredOnDiscreteParam(zone_number + 1, zone_values)
                 for i in range(num_defined_cells):
                     index = cell_index[i]
                     code = facies_real_values[index]
@@ -125,7 +126,7 @@ class DefineFaciesProb(BaseDefineFacies):
             # Write the calculated probabilities for the selected zones to 3D parameter
             # If the 3D parameter exist in advance, only the specified zones will be altered
             # while grid cell values for other zones are unchanged.
-            success = gf.setContinuous3DParameterValues(
+            success = setContinuous3DParameterValues(
                 grid_model, parameter_name, probability_values,
                 self.selected_zone_numbers, real_number, debug_level=self.debug_level
             )
@@ -133,7 +134,7 @@ class DefineFaciesProb(BaseDefineFacies):
                 raise ValueError('Error: Grid model is empty or can not be updated.')
 
             # Write cumulative prob
-            success = gf.setContinuous3DParameterValues(
+            success = setContinuous3DParameterValues(
                 grid_model, parameter_name_cum, sum_probability_values,
                 self.selected_zone_numbers, real_number, debug_level=self.debug_level
             )

@@ -50,7 +50,10 @@ from xml.etree.ElementTree import Element, parse
 
 import numpy as np
 
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
+from src.utils.roxar.generalFunctionsUsingRoxAPI import (
+    get2DMapDimensions, setConstantValueInHorizon, createHorizonDataTypeObject
+)
+from src.utils.roxar.grid_model import getDiscrete3DParameterValues, getGridAttributes
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
 from src.utils.methods import get_prefix
@@ -283,22 +286,21 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             continue
         name = prop.name
 
-
         # Check if this is the specified zone parameter
         if name == zoneParamName:
             # Get the zone parameter values
-            zoneValues, codeNamesZone = gr.getDiscrete3DParameterValues(gridModel, name,
-                                                                        realNumber=realizationNumber,
-                                                                        debug_level=debug_level)
+            zoneValues, codeNamesZone = getDiscrete3DParameterValues(gridModel, name,
+                                                                     realization_number=realizationNumber,
+                                                                     debug_level=debug_level)
         # Check if the property type is integer or float type
 
         if regionParamName is not None:
             # Check if this is the specified region parameter
             if name == regionParamName:
                 # Get the region parameter values
-                regionValues, codeNamesRegion = gr.getDiscrete3DParameterValues(gridModel, name,
-                                                                                realNumber=realizationNumber,
-                                                                                debug_level=debug_level)
+                regionValues, codeNamesRegion = getDiscrete3DParameterValues(gridModel, name,
+                                                                             realization_number=realizationNumber,
+                                                                             debug_level=debug_level)
 
         # Check if the property type is integer or float type
 
@@ -374,7 +376,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     nLayersPerZone = []
     grid = gridModel.get_grid()
     (xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone) = gr.getGridAttributes(grid, debug_level)
+     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone) = getGridAttributes(grid, debug_level)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -454,7 +456,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             print('Error: Specified type for reference horizon: ' + horizonRefType + ' is not defined')
             sys.exit()
         # Use the specified reference horizon name and type to get 2D surface grid info
-        [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
+        [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = get2DMapDimensions(
             project.horizons, horizonRefName, horizonRefType, debug_level)
         tag = 'SurfaceTrendDimensions'
         surfObj = Element(tag)
@@ -547,7 +549,7 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
     # Get dimensions from the reference map
     # horizons is defined to be a pointer to horizons in RMS by roxapi
     horizons = project.horizons
-    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = gr.get2DMapDimensions(
+    [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = get2DMapDimensions(
         horizons, horizonRefName, horizonRefType, debug_level
     )
     # Gauss field names (standard hardcoded names)
@@ -558,10 +560,10 @@ def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.O
         for gfName in gaussFieldNames:
             reprName = gfName + '_VarioAzimuthTrend'
             # Create new horizon data type for this gauss field if not already existing
-            gr.createHorizonDataTypeObject(horizons, reprName, debug_level)
+            createHorizonDataTypeObject(horizons, reprName, debug_level)
 
             # Set the value in the map to the constant azimuth value
-            gr.setConstantValueInHorizon(
+            setConstantValueInHorizon(
                 horizons, hName, reprName, azimuthValue, debug_level,
                 xmin, ymin, xinc, yinc, nx, ny, rotation
             )

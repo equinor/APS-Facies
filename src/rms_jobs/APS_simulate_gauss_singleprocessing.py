@@ -10,7 +10,8 @@ import numpy as np
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.methods import get_model_file_name
-from src.utils.roxar.generalFunctionsUsingRoxAPI import getGridAttributes, setContinuous3DParameterValuesInZoneRegion
+from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValuesInZoneRegion
+from src.utils.roxar.grid_model import getGridAttributes
 
 
 def getProjectRealizationSeed(seedFile):

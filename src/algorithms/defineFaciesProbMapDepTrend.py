@@ -2,9 +2,10 @@
 
 import numpy as np
 
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gf
+from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
+from src.utils.roxar.grid_model import getDiscrete3DParameterValues
 from src.utils.constants.simple import Debug
-from .defineFacies import BaseDefineFacies
+from src.algorithms.defineFacies import BaseDefineFacies
 
 
 class DefineFaciesProbMapDep(BaseDefineFacies):
@@ -44,10 +45,10 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         grid_3d = grid_model.get_grid(real_number)
         indexer = grid_3d.simbox_indexer
         dim_i, dim_j, dim_k = indexer.dimensions
-        [zone_values, _] = gf.getDiscrete3DParameterValues(
+        [zone_values, _] = getDiscrete3DParameterValues(
             grid_model, self.zone_parameter_name, real_number, debug_level=debug_level
         )
-        [map_facies, facies_code_names] = gf.getDiscrete3DParameterValues(
+        [map_facies, facies_code_names] = getDiscrete3DParameterValues(
             grid_model, self.facies_parameter_name, real_number, debug_level=debug_level
         )
 
@@ -123,7 +124,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         # Write the calculated probabilities for the selected zones to 3D parameter
         # If the 3D parameter exist in advance, only the specified zones will be altered
         # while grid cell values for other zones are unchanged.
-        gf.setContinuous3DParameterValues(
+        setContinuous3DParameterValues(
             grid_model, "stripeNumber", stripe_number, self.selected_zone_numbers, real_number, debug_level=debug_level
         )
         for facies_idx in range(len(facies_values)):
@@ -133,7 +134,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
                 parameter_name = self.probability_parameter_name_prefix + '_' + facies_name
                 if self.debug_level >= Debug.ON:
                     print(parameter_name, facies)
-                success = gf.setContinuous3DParameterValues(
+                success = setContinuous3DParameterValues(
                     grid_model, parameter_name, probabilities[:, facies_idx],
                     self.selected_zone_numbers, real_number, debug_level=debug_level
                 )

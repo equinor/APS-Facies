@@ -11,8 +11,13 @@ Output:
 """
 import numpy as np
 
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
+from src.utils.roxar.generalFunctionsUsingRoxAPI import (
+    updateContinuous3DParameterValues, updateDiscrete3DParameterValues,
+)
+from src.utils.roxar.grid_model import get3DParameter, getContinuous3DParameterValues, \
+    isParameterDefinedWithValuesInRMS, getDiscrete3DParameterValues
 
+from src.utils.methods import calcAverage
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 
@@ -299,23 +304,23 @@ def run(roxar=None, project=None, **kwargs):
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
         print('--- Get RMS zone parameter: ' + zoneParamName + ' from RMS project ' + rmsProjectName)
-    zoneValues = gr.getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, debug_level)
+    zoneValues = getContinuous3DParameterValues(gridModel, zoneParamName, realNumber, debug_level)
 
     regionValues = None
     if useRegions:
         if debug_level >= Debug.VERBOSE:
             print('--- Get RMS region parameter: ' + regionParamName + ' from RMS project ' + rmsProjectName)
-        regionValues = gr.getContinuous3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
+        regionValues = getContinuous3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
 
     # Get or initialize array for facies realisation
     nCellsTotal = len(zoneValues)
     faciesReal = np.zeros(nCellsTotal, np.uint16)
 
     # Check if specified facies realization exists and get it if so.
-    if gr.isParameterDefinedWithValuesInRMS(gridModel, resultParamName, realNumber):
+    if isParameterDefinedWithValuesInRMS(gridModel, resultParamName, realNumber):
         if debug_level >= Debug.VERBOSE:
             print('--- Get RMS facies parameter which will be updated: {} from RMS project: {}'.format(resultParamName, rmsProjectName))
-        [faciesReal, _] = gr.getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
+        [faciesReal, _] = getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
     else:
         if debug_level >= Debug.VERBOSE:
             print('--- Facies parameter: {}  for the result will be created in the RMS project: {}'.format(resultParamName, rmsProjectName))
@@ -392,15 +397,15 @@ def run(roxar=None, project=None, **kwargs):
                 GFNamesAlreadyRead.append(gfName)
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Gauss field parameter: ' + gfName + ' is now being loaded.')
-                values = gr.getContinuous3DParameterValues(gridModel, gfName, realNumber, debug_level)
+                values = getContinuous3DParameterValues(gridModel, gfName, realNumber, debug_level)
                 GFAllValues.append([gfName, values])
 
                 # Allocate space for transformed gauss field property vector alpha
                 gfNameTrans = gfName + '_transf'
-                if gr.isParameterDefinedWithValuesInRMS(gridModel, gfNameTrans, realNumber):
+                if isParameterDefinedWithValuesInRMS(gridModel, gfNameTrans, realNumber):
                     if debug_level >= Debug.VERBOSE:
                         print('--- Get transformed gauss field parameter: {} which will be updated'.format(gfNameTrans))
-                    alpha = gr.getContinuous3DParameterValues(gridModel, gfNameTrans, realNumber, debug_level)
+                    alpha = getContinuous3DParameterValues(gridModel, gfNameTrans, realNumber, debug_level)
                 else:
                     if debug_level >= Debug.VERBOSE:
                         print('--- Create transformed gauss field parameter: {}'.format(gfNameTrans))
@@ -409,10 +414,10 @@ def run(roxar=None, project=None, **kwargs):
 
                 # Allocate space for trend
                 gfNameTrend = gfName + '_trend'
-                if gr.isParameterDefinedWithValuesInRMS(gridModel, gfNameTrend, realNumber):
+                if isParameterDefinedWithValuesInRMS(gridModel, gfNameTrend, realNumber):
                     if debug_level >= Debug.VERBOSE:
                         print('--- Get trend parameter: {} which will be updated'.format(gfNameTrend))
-                    trend = gr.getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
+                    trend = getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
                 else:
                     if debug_level >= Debug.VERBOSE:
                         print('--- Create trend parameter: {}'.format(gfNameTrend))
@@ -487,7 +492,7 @@ def run(roxar=None, project=None, **kwargs):
 
                 # Write back to RMS project the untransformed gaussian values with trend for the zone
                 gfNamesUntransformed = gfName + '_untransf'
-                gr.updateContinuous3DParameterValues(
+                updateContinuous3DParameterValues(
                     gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
                     realNumber, isShared=False, setInitialValues=False,debug_level=debug_level
                 )
@@ -498,7 +503,7 @@ def run(roxar=None, project=None, **kwargs):
                 gfNamesTrend = GFAllTrendValues[indx][NAME]
 
                 # Write back to RMS project the trend values for the zone
-                gr.updateContinuous3DParameterValues(
+                updateContinuous3DParameterValues(
                     gridModel, gfNamesTrend, trend, nDefinedCells, cellIndexDefined,
                     realNumber, isShared=False, setInitialValues=False, debug_level=debug_level
                 )
@@ -524,7 +529,7 @@ def run(roxar=None, project=None, **kwargs):
             GFAlphaForCurrentZone.append([gfName, alpha])
 
             # Write back to RMS project the transformed gaussian values for the zone
-            gr.updateContinuous3DParameterValues(
+            updateContinuous3DParameterValues(
                 gridModel, gfNamesTrans, alpha, nDefinedCells, cellIndexDefined,
                 realNumber, isShared=False, setInitialValues=False, debug_level=debug_level
             )
@@ -558,7 +563,7 @@ def run(roxar=None, project=None, **kwargs):
                             ''.format(probParamName, fName, zoneNumber)
                         )
 
-                    values = gr.getContinuous3DParameterValues(gridModel, probParamName, realNumber, debug_level)
+                    values = getContinuous3DParameterValues(gridModel, probParamName, realNumber, debug_level)
 
                     # Add the probability values to a common list containing probabilities for
                     # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
@@ -661,7 +666,7 @@ def run(roxar=None, project=None, **kwargs):
                             raise ValueError('Inconsistencies in data structure in APS_main')
 
                         values = item[VAL]
-                        avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
+                        avgProbValue = calcAverage(nDefinedCells, cellIndexDefined, values)
                         print('{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'.format(
                             zoneNumber, regionNumber, fCode, fName, volFrac[f], avgProbValue)
                         )
@@ -678,7 +683,7 @@ def run(roxar=None, project=None, **kwargs):
                             raise ValueError('Inconsistencies in data structure in APS_main')
 
                         values = item[VAL]
-                        avgProbValue = gr.calcAverage(nDefinedCells, cellIndexDefined, values)
+                        avgProbValue = calcAverage(nDefinedCells, cellIndexDefined, values)
                         print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
                             zoneNumber, fCode, fName, volFrac[f], avgProbValue)
                         )
@@ -724,7 +729,7 @@ def run(roxar=None, project=None, **kwargs):
 
     # Overwrite the existing facies realization, but note that now the faciesReal should contain values
     # equal to the original facies realization for all cells that is not updated (not belonging to (zones, regions) that is updated)
-    gr.updateDiscrete3DParameterValues(
+    updateDiscrete3DParameterValues(
         gridModel, resultParamName, faciesReal, faciesTable=codeNames,
         realNumber=realNumber, isShared=False, setInitialValues=False,
         debug_level=Debug.OFF
@@ -735,7 +740,7 @@ def run(roxar=None, project=None, **kwargs):
     print(' ')
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('- Updated facies table:')
-        p = gr.get3DParameter(gridModel, resultParamName, debug_level)
+        p = get3DParameter(gridModel, resultParamName, debug_level)
         print('- Facies_name   Facies_code')
         for key in p.code_names:
             u = p.code_names.get(key)

@@ -7,7 +7,7 @@ This script will read grid dimensions of the grid for the specified grid model i
 
 from xml.etree.ElementTree import Element
 
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
+from src.utils.roxar.grid_model import getGridAttributes
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.methods import get_run_parameters
@@ -35,7 +35,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     # Get Grid attributes
     [_, _, _, _, _, _, simBoxXLength, simBoxYLength,
      azimuthAngle, x0, y0, nx, ny, _, _,
-     zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = gr.getGridAttributes(grid, debug_level)
+     zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = getGridAttributes(grid, debug_level)
 
     xinc = simBoxXLength/nx
     yinc = simBoxYLength/ny

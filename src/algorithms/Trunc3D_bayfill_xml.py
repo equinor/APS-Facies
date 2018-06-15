@@ -6,6 +6,7 @@ from xml.etree.ElementTree import Element
 
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
+from src.utils.roxar.grid_model import getContinuous3DParameterValues
 from src.utils.xmlUtils import getKeyword
 
 """
@@ -450,14 +451,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
         return polygons
 
     def getTruncationParam(self, gridModel, realNumber):
-        import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
         # Read truncation parameters
         paramName = self.__param_sf_name
         if self._debug_level >= Debug.VERBOSE:
             print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self._className)
             print('--- Read RMS parameter: ' + paramName)
 
-        values = gr.getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
+        values = getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
         self.__param_sf = values
 
     def faciesIndxPerPolygon(self):
