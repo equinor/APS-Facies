@@ -8,7 +8,7 @@ import numpy as np
 import multiprocessing as mp
 
 from src.algorithms.APSModel import APSModel
-from src.utils.methods import get_model_file_name, get_rms_project_data_file, get_run_parameters
+from src.utils.methods import get_run_parameters
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
 from src.utils.constants.simple import Debug
 
@@ -294,7 +294,7 @@ def run_simulations(
     print('')
 
 
-def run(roxar=None, project=None,):
+def run(roxar=None, project=None, **kwargs):
     model_file, rms_data_file_name, _, output_dir, _ = get_run_parameters(**kwargs)
     write_log_file = True
     run_simulations(

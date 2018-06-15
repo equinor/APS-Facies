@@ -79,3 +79,13 @@ def writeFileRTF(fileName, a, nx, ny, dx, dy, x0, y0, debug_level=Debug.OFF):
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('Write file: ' + fileName)
 
+
+def print_debug_information(function_name, text):
+    if function_name in [' ', '']:
+        print('Debug output: {text}\n'.format(text=text))
+    else:
+        print('Debug output in {function_name}: {text}\n'.format(function_name=function_name, text=text))
+
+
+def print_error(function_name, text):
+    print('Error in {function_name}: {text}'.format(function_name=function_name, text=text))

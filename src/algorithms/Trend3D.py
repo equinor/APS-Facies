@@ -23,6 +23,7 @@ import sys
 import numpy as np
 
 from src.utils.constants.simple import Debug, OriginType, TrendType
+from src.utils.roxar.grid_model import getGridSimBoxSize, getContinuous3DParameterValues
 from src.utils.xmlUtils import getFloatCommand, getIntCommand, getTextCommand
 
 
@@ -193,6 +194,7 @@ class Trend3D:
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
                         origin_type=None, origin=None):
+        aA = azimuthAngle * math.pi / 180.0
         if origin is None or origin_type is None:
             x_center, y_center = x0, y0
             z_center = 0.0  # Top of zone
@@ -202,17 +204,16 @@ class Trend3D:
 
         elif origin_type == OriginType.RELATIVE:
             # Calculate the global coordinate for x and y for the center point and z coordinate relative to simulation box
-            aA = azimuthAngle * math.pi / 180.0
             x_center = (
                 x0
                 + origin[0] * simBoxXLength * math.cos(aA)
                 + origin[1] * simBoxYLength * math.sin(aA)
-                )
+            )
             y_center = (
                 y0
                 - origin[0] * simBoxXLength * math.sin(aA)
                 + origin[1] * simBoxYLength * math.cos(aA)
-                )
+            )
             z_center = origin[2] * simBoxThickness
             self._xCenterInSimBoxCoordinates = origin[0] * simBoxXLength
             self._yCenterInSimBoxCoordinates = origin[1] * simBoxYLength
@@ -231,7 +232,7 @@ class Trend3D:
                 'In {}\n'
                 'Origin type must be either {} or {}.'
                 ''.format(self.__className, str(OriginType.RELATIVE.name), str(OriginType.ABSOLUTE.name))
-                )
+            )
         self._xCenter = x_center
         self._yCenter = y_center
         self._zCenter = z_center
@@ -263,7 +264,6 @@ class Trend3D:
         """
         Description: Create trend values for 3D grid zone using Roxar API.
         """
-        import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
         # Check if specified grid model exists and is not empty
         if gridModel.is_empty():
             text = 'Error: Specified grid model: ' + gridModel.name + ' is empty.'
@@ -274,7 +274,7 @@ class Trend3D:
             gridIndexer = grid3D.simbox_indexer
             (nx, ny, nz) = gridIndexer.dimensions
 
-            simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = gr.getGridSimBoxSize(grid3D, self._debug_level)
+            simBoxXLength, simBoxYLength, azimuthAngle, x0, y0 = getGridSimBoxSize(grid3D, self._debug_level)
             self._simBoxAzimuth = azimuthAngle
 
             # Define self._xCenter, self._yCenter for the trend
@@ -328,7 +328,7 @@ class Trend3D:
             if self.type == TrendType.RMS_PARAM:
                 print(self.type)
                 # Values for all active cells
-                valuesInActiveCells = gr.getContinuous3DParameterValues(
+                valuesInActiveCells = getContinuous3DParameterValues(
                     gridModel, self._rmsParamName,  realNumber, debug_level=self._debug_level
                 )
                 # Values for selected cells (using numpy vectors)
@@ -768,7 +768,7 @@ class Trend3D_elliptic(Trend3D):
         return self._origin_type
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
-        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness, 
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness,
                                 self._origin_type, self._origin)
 
     def _trendValueCalculation(self, parametersForTrendCalc, x, y, k, zinc):
@@ -936,7 +936,7 @@ class Trend3D_hyperbolic(Trend3D):
     def getOriginType(self):
         return self._origin_type
 
-    def initialize( 
+    def initialize(
             self, azimuthAngle, stackingAngle, direction, migrationAngle, curvature,
             origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
     ):

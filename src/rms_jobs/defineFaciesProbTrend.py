@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from src.algorithms.defineFaciesProbTrend import DefineFaciesProb
-from src.utils.constants.simple import Debug
 from src.utils.methods import get_prefix, get_debug_level
 
 

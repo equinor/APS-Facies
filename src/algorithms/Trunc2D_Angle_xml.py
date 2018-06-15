@@ -8,6 +8,7 @@ import numpy as np
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.numeric import isNumber
+from src.utils.roxar.grid_model import getContinuous3DParameterValues
 from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand
 
 
@@ -371,7 +372,6 @@ class Trunc2D_Angle(Trunc2D_Base):
                      to use in this operation.
         """
         # Read truncation parameters
-        import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
         self.__faciesBoundaryOrientation = []
         if not self.__useConstTruncModelParam:
             for k in range(self._nFacies):
@@ -383,7 +383,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                     # Get param values
                     if self._debug_level >= Debug.VERBOSE:
                         print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
-                    values = gr.getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
+                    values = getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
                     self.__faciesBoundaryOrientation.append(values)
                 else:
                     raise ValueError(

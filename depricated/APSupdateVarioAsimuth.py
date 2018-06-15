@@ -6,8 +6,9 @@ variogram for 3D gaussian field simulation.
 Dependency: ROXAPI
 """
 from warnings import warn
+import roxar
 
-import src.utils.roxar.generalFunctionsUsingRoxAPI as gr
+from src.utils.roxar.generalFunctionsUsingRoxAPI import setConstantValueInHorizon
 from src.algorithms.APSModel import APSModel
 
 
@@ -31,7 +32,7 @@ def run():
 
             # Set the value in the map to the constant azimuth value.
             # Assume that the map already exist.
-            gr.setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, debug_level)
+            setConstantValueInHorizon(horizons, hName, reprName, azimuthValue, debug_level)
     print('- Finished updating variogram azimuth trend maps in RMS project')
 
 

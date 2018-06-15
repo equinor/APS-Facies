@@ -8,3 +8,10 @@ class InconsistencyError(ApsException):
             "Error: Inconsistency"
             "".format(class_name=class_name)
         )
+
+
+def raise_error(function_name, text):
+    raise ValueError(
+        'Error in {function_name}: {text}'
+        ''.format(function_name=function_name, text=text)
+    )
