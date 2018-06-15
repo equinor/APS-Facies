@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.1.2" \
+LABEL version="3.1.3" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -233,6 +233,11 @@ RUN yum update -y \
  && rm -rf $SOURCE_DIR \
            $BUILD_DIR \
            $INTEL_MKL_PREFIX \
+           /root/anaconda-ks.cfg \
+           /root/*.log* \
+           /root/.virtualenvs \
+           /root/.local \
+           /root/.cache \
            $(find $NODE_PREFIX -name *.cmd) \
            $NODE_PREFIX/CHANGELOG.md \
            $NODE_PREFIX/LICENSE \
