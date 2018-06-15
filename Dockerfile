@@ -1,20 +1,19 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.0.3" \
+LABEL version="3.1.2" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
 
 # Versions
 ENV RMS_VERSION=11.0.0-b9 \
-    GCC_VERSION=4.9.4 \
     PYTHON_VERSION=3.6 \
     TCL_VERSION=8.6 \
-    INTEL_MKL_VERSION=2018.2.199 \
-    INTEL_MKL_SEED=12725 \
-    NODE_VERSION=8.11.1 \
+    INTEL_MKL_VERSION=2018.3.222 \
+    INTEL_MKL_SEED=13005 \
+    NODE_VERSION=8.11.3 \
     NRLIB_VERSION=1.1-r6 \
     SQLITE_VERSION=3.23.1 \
-    YARN_VERSION=1.5.1
+    YARN_VERSION=1.6.0
 ENV APSW_VERSION=${SQLITE_VERSION}-r1 \
     TK_VERSION=${TCL_VERSION}
 
@@ -26,9 +25,8 @@ ENV NODE_ARCH='x64' \
     CA_FILE="/etc/ssl/certs/ca-bundle.crt"
 
 # Prefixes
-ENV GCC_PREFIX=${INSTALL_DIR}/gcc-${GCC_VERSION} \
-    RMS_PREFIX="/prog/roxar/site/RMS11_beta_latest/rms/versions/statoil_release" \
-    DEPENDENCIES_PREFIX="/dependences" \
+ENV RMS_PREFIX="/prog/roxar/site/RMS11_beta_latest/rms/versions/statoil_release" \
+    DEPENDENCIES_PREFIX="/dependencies" \
     INTEL_PREFIX="${SOURCE_DIR}/${INTEL_MKL}" \
     INTEL_MKL_PREFIX="/opt/intel" \
     NODE_PREFIX="${INSTALL_DIR}/node-${NODE_VERSION}"
@@ -49,17 +47,12 @@ ${NODE_PREFIX}/bin:\
 ${ROXAR_RMS_ROOT}/bin:\
 ${RMS_BIN_PREFIX}:\
 ${PYTHONUSERBASE}/bin:\
-${GCC_PREFIX}/bin:\
 ${PATH}" \
     LD_LIBRARY_PATH="\
 ${ROXAR_RMS_ROOT}/lib:\
 ${ROXAR_RMS_ROOT}/bin:\
 ${RMS_LIB_PREFIX}:\
 ${PYTHON_LIB_PREFIX}:\
-${GCC_PREFIX}/lib64:\
-${GCC_PREFIX}/lib:\
-${GCC_PREFIX}/lib/gcc/x86_64-unknown-linux-gnu/${GCC_VERSION}:\
-${GCC_PREFIX}/lib/gcc/x86_64-unknown-linux-gnu/lib64:\
 ${LD_LIBRARY_PATH}"
 
 # All of the following envs might not be necessary
@@ -81,7 +74,6 @@ ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
     SSL_CERT_FILE="${CA_FILE}"
 
 # Add external resources
-COPY --from=git.equinor.com:4567/sdp/sdpsoft/gcc:4.9.4 $GCC_PREFIX $GCC_PREFIX
 ADD rms-${RMS_VERSION}.tar.xz /
 
 # Misc. software
@@ -231,8 +223,7 @@ RUN yum update -y \
     # Install APSW to dependencies collection
     # TODO: Add cython before apsw to get extension?
  && cd ${BUILD_DIR}/apsw-${APSW_VERSION} \
- && CFLAGS="-std=c11" \
-    $PYTHON setup.py fetch --version $SQLITE_VERSION --all \
+ && $PYTHON setup.py fetch --version $SQLITE_VERSION --all \
                      build --enable-all-extensions \
                      build_ext --force --inplace \
                      test \
@@ -241,6 +232,7 @@ RUN yum update -y \
     # Final clean-up
  && rm -rf $SOURCE_DIR \
            $BUILD_DIR \
+           $INTEL_MKL_PREFIX \
            $(find $NODE_PREFIX -name *.cmd) \
            $NODE_PREFIX/CHANGELOG.md \
            $NODE_PREFIX/LICENSE \
