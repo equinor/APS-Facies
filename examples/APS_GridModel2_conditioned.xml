@@ -67,19 +67,19 @@
             <SimBoxThickness>10.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>Prob_F1_prob</ProbCube>
+                    <ProbCube>Prob_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>Prob_F2_prob</ProbCube>
+                    <ProbCube>Prob_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>Prob_F3_prob</ProbCube>
+                    <ProbCube>Prob_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>Prob_F4_prob</ProbCube>
+                    <ProbCube>Prob_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>Prob_F5_prob</ProbCube>
+                    <ProbCube>Prob_F5</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -170,22 +170,22 @@
             <SimBoxThickness>4.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>Prob_F1_prob</ProbCube>
+                    <ProbCube>Prob_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>Prob_F2_prob</ProbCube>
+                    <ProbCube>Prob_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>Prob_F3_prob</ProbCube>
+                    <ProbCube>Prob_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>Prob_F4_prob</ProbCube>
+                    <ProbCube>Prob_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>Prob_F5_prob</ProbCube>
+                    <ProbCube>Prob_F5</ProbCube>
                 </Facies>
                 <Facies name="F6">
-                    <ProbCube>Prob_F6_prob</ProbCube>
+                    <ProbCube>Prob_F6</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -290,16 +290,16 @@
             <SimBoxThickness>10.35</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>Prob_F1_prob</ProbCube>
+                    <ProbCube>Prob_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>Prob_F2_prob</ProbCube>
+                    <ProbCube>Prob_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>Prob_F3_prob</ProbCube>
+                    <ProbCube>Prob_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>Prob_F4_prob</ProbCube>
+                    <ProbCube>Prob_F4</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -373,19 +373,19 @@
             <SimBoxThickness>20.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>Prob_F1_prob</ProbCube>
+                    <ProbCube>Prob_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>Prob_F2_prob</ProbCube>
+                    <ProbCube>Prob_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>Prob_F3_prob</ProbCube>
+                    <ProbCube>Prob_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>Prob_F4_prob</ProbCube>
+                    <ProbCube>Prob_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>Prob_F5_prob</ProbCube>
+                    <ProbCube>Prob_F5</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
