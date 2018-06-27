@@ -372,7 +372,7 @@ check-node-dependencies:
 safety-check:
 	$(PIPENV) check
 
-unit-tests: run-tests clean-tests
+unit-tests: clean-tests run-tests clean-tests
 
 run-tests: links
 	cd $(TEST_FOLDER) && \
@@ -404,17 +404,14 @@ run-python-linting:
 javascript-linting:
 	$(YARN) lint
 
-web-dev:
-	$(YARN) dev
-
 web-start: package.json
-	$(YARN) start
+	$(YARN) serve
 
 web-e2e:
-	$(YARN) e2e
+	$(YARN) test:e2e
 
 web-test:
-	$(YARN) test
+	$(YARN) test:unit
 
 web-lint:
 	$(YARN) lint
@@ -422,13 +419,13 @@ web-lint:
 web-build:
 	$(YARN) build
 
-web-install-dev: package.json node-types
+web-install-dev: package.json
 
-node-types:
-	npx types-installer install
-
+CYPRESS_VERSION := 3.0.2
 package.json:
-	$(YARN) install --dev
+	wget "http://download.cypress.io/desktop/$(CYPRESS_VERSION)?platform=linux64" --output-document="$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip"
+	CYPRESS_INSTALL_BINARY=$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip $(YARN) install --dev
+	rm -f $(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip
 
 
 # TODO: Add versioning to the plugin file
