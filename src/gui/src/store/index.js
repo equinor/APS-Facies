@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import rms from '@/api/rms'
+import { promiseSimpleCommit, compareFacies, indexOfFacies } from '@/store/utils'
 
 Vue.use(Vuex)
 
@@ -25,19 +26,6 @@ export default new Vuex.Store({
     },
   },
 
-  methods: {
-    promiseSimpleCommit (commit, commitment, data, check = true, error = '') {
-      return new Promise((resolve, reject) => {
-        if (check) {
-          commit(commitment, data)
-          resolve(data)
-        } else {
-          reject(error)
-        }
-      })
-    }
-  },
-
   actions: {
     selectGridModel: ({getters, commit}, {selectedGridModel}) => {
       return new Promise((resolve, reject) => {
@@ -49,20 +37,37 @@ export default new Vuex.Store({
         }
       })
     },
-    selectZones: ({commit, promiseSimpleCommit}, zones) => {
+    selectZones: ({commit}, zones) => {
       return promiseSimpleCommit(commit, 'selectedZones', zones)
     },
-    selectRegions: ({commit, promiseSimpleCommit}, regions) => {
+    selectRegions: ({commit}, regions) => {
       return promiseSimpleCommit(commit, 'selectedRegions', regions)
     },
-    currentZone: ({commit, promiseSimpleCommit}, zone) => {
+    currentZone: ({commit}, zone) => {
       return promiseSimpleCommit(commit, 'currentZone', zone)
     },
-    currentRegion: ({commit, promiseSimpleCommit}, region) => {
+    currentRegion: ({commit}, region) => {
       return promiseSimpleCommit(commit, 'currentRegion', region)
     },
-    currentFacies: ({commit, promiseSimpleCommit}, facies) => {
+    currentFacies: ({commit}, facies) => {
       return promiseSimpleCommit(commit, 'currentFacies', facies)
+    },
+    removeSelectedFacies: ({commit, state}) => {
+      const selectedFacies = state.currentFacies
+      const faciesIndex = state.availableFacies.findIndex(facies => compareFacies(selectedFacies, facies))
+      if (faciesIndex >= 0) {
+        commit('removeFacies', faciesIndex)
+      }
+    },
+    faciesChanged: ({commit, state}, facies) => {
+      let faciesIndex = indexOfFacies(state, facies)
+      if (faciesIndex >= 0) {
+        commit('replaceFacies', {index: faciesIndex, facies})
+      } else {
+        commit('addFacies', facies)
+        faciesIndex = indexOfFacies(state, facies)
+      }
+      return faciesIndex
     },
     fetchGridModels: ({commit}) => {
       rms.gridModels.then(result => {
@@ -92,6 +97,15 @@ export default new Vuex.Store({
     },
     currentFacies: (state, currentFacies) => {
       state.currentFacies = currentFacies
-    }
+    },
+    replaceFacies: (state, {index, facies}) => {
+      state.availableFacies[index] = facies
+    },
+    addFacies: (state, facies) => {
+      state.availableFacies.push(facies)
+    },
+    removeFacies: (state, index) => {
+      state.availableFacies.splice(index, 1)
+    },
   },
 })

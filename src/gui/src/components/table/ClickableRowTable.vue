@@ -3,6 +3,7 @@
     :raw-data="rawData"
     :column-definitions="columnDefinitions"
     :additional-grid-options="gridOptions"
+    @grid-api-ready="passGridApiAlong"
   />
 </template>
 
@@ -14,6 +15,7 @@ export default Vue.extend({
   components: {
     GridTable
   },
+
   props: {
     rawData: {
       type: Array,
@@ -40,12 +42,19 @@ export default Vue.extend({
       gridOptions: {}
     }
   },
+
   beforeMount () {
     this.gridOptions = {
       ...this.additionalGridOptions,
       onRowClicked: (event) => { this.onRowClicked(event) },
     }
-  }
+  },
+
+  methods: {
+    passGridApiAlong (api) {
+      this.$emit('grid-api-ready', api)
+    }
+  },
 })
 </script>
 

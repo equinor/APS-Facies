@@ -1,13 +1,11 @@
 <template>
-  <div class="form__field">
-    <color-picker
-      v-model="color"
-      :colors="colors"
-      :inline="true"
-      popover-to="left"
-      swatches-size="30"
-    />
-  </div>
+  <color-picker
+    v-model="color"
+    :colors="colors"
+    :inline="true"
+    popover-to="left"
+    swatches-size="30"
+  />
 </template>
 
 <script>
@@ -49,7 +47,7 @@ export default Vue.extend({
   methods: {
     getValue () {
       // TODO: Dispatch an action saying the facies table / a single facies has changed
-      return typeof this.color === 'string' ? this.color : this.color.hex
+      return this.color
     },
     isPopup () {
       return true

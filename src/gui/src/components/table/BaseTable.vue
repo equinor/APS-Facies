@@ -4,6 +4,7 @@
     :gridOptions="gridOptions"
     :style="tableStyle"
     :class="agTheme"
+    :on-grid-ready="onGridReady"
     ag-row-hover
   />
 </template>
@@ -48,34 +49,45 @@ export default Vue.extend({
 
   data () {
     return {
-      gridOptions: {}
+      gridOptions: {},
+      gridApi: null,
     }
   },
 
   beforeMount () {
     this.gridOptions = {
-      ...this.additionalGridOptions,
       defaultColDef: {
         width: this.defaultColumnWidth
       },
       context: {
         componentParent: this
       },
-      onGridReady: function (params) {
-        params.api.sizeColumnsToFit()
-
-        window.addEventListener('resize', function () {
-          setTimeout(function () {
-            params.api.sizeColumnsToFit()
-          })
-        })
-      },
       // Various flags
       enableColResize: true,
+      ...this.additionalGridOptions,
     }
 
     this.gridOptions.columnDefs = this.columnDefinitions
     this.gridOptions.rowData = this.rawData
+  },
+
+  methods: {
+    onGridReady: function (params) {
+      const gridApi = params.api
+      gridApi.sizeColumnsToFit()
+
+      window.addEventListener('resize', function () {
+        setTimeout(function () {
+          gridApi.sizeColumnsToFit()
+        })
+      })
+      this.gridApiReady(gridApi)
+    },
+
+    gridApiReady (api) {
+      this.gridApi = api
+      this.$emit('grid-api-ready', api)
+    },
   },
 })
 </script>
