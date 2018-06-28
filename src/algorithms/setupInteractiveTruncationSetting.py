@@ -345,6 +345,9 @@ def mapCommand(rules):
             rules.createAllNonCubicPlots()
             rules.createAllCubicWithOverlayPlots()
             rules.createAllNonCubicWithOverlayPlots()
+            rules.createOverviewPlotCubic('Cubic_overview')
+            rules.createOverviewPlotNonCubic('NonCubic_overview')
+
         else:
             rules.makeTruncationMapPlot(name, writePngFile=False)
         

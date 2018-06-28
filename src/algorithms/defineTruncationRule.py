@@ -1134,7 +1134,7 @@ class DefineTruncationRule:
 
         return overlay_setting_list
 
-    def makeTruncationMapPlot(self, name):
+    def makeTruncationMapPlot(self, name, writePngFile=True):
         ''' Create truncation map plot using same probability for each facies'''
         truncObj = self.getTruncationRuleObject(name)
         faciesNames = truncObj.getFaciesInTruncRule()
