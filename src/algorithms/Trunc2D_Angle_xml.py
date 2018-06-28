@@ -9,7 +9,8 @@ from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.numeric import isNumber
 from src.utils.roxar.grid_model import getContinuous3DParameterValues
-from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand
+from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand, isFMUUpdatable, createFMUvariableNameForNonCubicTruncation
+
 
 
 class Trunc2D_Angle(Trunc2D_Base):
@@ -85,6 +86,9 @@ class Trunc2D_Angle(Trunc2D_Base):
         # and in case trend parameters are used for truncation parameters,
         # each element in the list is a 3D parameter with values.
         self.__faciesBoundaryOrientation = []
+
+        #List of booleans indicating wether or not Angle (Faciesboundaryorientation) is fmu_updatable
+        self.__faciesBoundaryOrientation_is_fmu_updatable = []
 
         self.__probFracPerPolygon = []
         self.__nPolygons = 0
@@ -241,6 +245,9 @@ class Trunc2D_Angle(Trunc2D_Base):
             else:
                 paramNameAlpha = copy.copy(text.strip())
                 self.__faciesBoundaryOrientationName.append([fName, paramNameAlpha])
+            #checking if the current angle is fmu_updatable.
+            self.__faciesBoundaryOrientation_is_fmu_updatable.append(isFMUUpdatable(faciesObj, kw2))
+
 
             kw3 = 'ProbFrac'
             # Input prob fraction must be in interval [0,1] and for each facies this fraction must
@@ -340,12 +347,14 @@ class Trunc2D_Angle(Trunc2D_Base):
         for item in truncStructure:
             fName = item[0]
             probFrac = item[2]
+            is_fmu_updatable = item[3]
             if self.__useConstTruncModelParam:
                 angle = float(item[1])
                 self.__faciesBoundaryOrientation.append(angle)
             else:
                 angleTrendParamName = copy.copy(item[1])
                 self.__faciesBoundaryOrientationName.append(angleTrendParamName)
+            self.__faciesBoundaryOrientation_is_fmu_updatable.append(is_fmu_updatable)
 
             nFaciesInTruncRule, indx, fIndx, isNewFacies = self._addFaciesToTruncRule(fName)
             self.__faciesIndxPerPolygon.append(indx)
@@ -959,6 +968,9 @@ class Trunc2D_Angle(Trunc2D_Base):
         faciesIndxPerPoly = copy.copy(self.__faciesIndxPerPolygon)
         return faciesIndxPerPoly
 
+    def getNumberOfPolygonsInTruncationMap(self):
+        return len(self.__faciesBoundaryOrientation)
+
     def setAngle(self, polygonNumber, angle):
         err = 0
         if not self.__useConstTruncModelParam:
@@ -1009,7 +1021,11 @@ class Trunc2D_Angle(Trunc2D_Base):
                     self.__faciesBoundaryOrientationName.append([' ', ' '])
                 self.__useConstTruncModelParam = False
 
-    def XMLAddElement(self, parent):
+    def setAngleFmuUpdatable(self, polygonNumber, value):
+        if self.__useConstTruncModelParam:
+            self.__faciesBoundaryOrientation_is_fmu_updatable[polygonNumber] = value
+
+    def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
         """
         Description:
          Add to the parent element a new element with specified tag and attributes.
@@ -1058,6 +1074,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             indx = item[0]
             probFrac = item[1]
             fName = self._faciesInTruncRule[indx]
+            is_fmu_updatable = self.__faciesBoundaryOrientation_is_fmu_updatable[k]
 
             tag = 'Facies'
             attribute = {'name': fName}
@@ -1071,6 +1088,10 @@ class Trunc2D_Angle(Trunc2D_Base):
                 item = self.__faciesBoundaryOrientationName[k]
                 angleParamName = copy.copy(item[1])
                 angleElement.text = ' ' + angleParamName + ' '
+            if is_fmu_updatable:
+                fmu_attribute = createFMUvariableNameForNonCubicTruncation(k+1, zone_number, region_number);
+                fmu_attributes.append(fmu_attribute)
+                angleElement.attrib = dict(kw=fmu_attribute)
             fElement.append(angleElement)
 
             tag = 'ProbFrac'

@@ -1,3 +1,4 @@
+#!/bin/env python
 # -*- coding: utf-8 -*-
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
@@ -113,3 +114,41 @@ def getBoolCommand(parent, keyword, parent_keyword='', default=False, model_file
         else:
             raise ReadingXmlError(keyword, parent_keyword, model_file_name)
     return value
+
+
+def isFMUUpdatable(parent, keyword):
+    obj = parent.find(keyword)
+    if obj is not None:
+        kwAttribute = obj.get('kw')
+        if kwAttribute is not None:
+            return True
+    return False
+
+
+def createFMUvariableNameForTrend(keyword, zone_number, region_number, grf_name):
+    if region_number is not None:
+        return 'APS_{}_{}_GF_{}_TREND_{}'.format(zone_number, region_number, grf_name, keyword.upper())
+    else:
+        return 'APS_{}_{}_GF_{}_TREND_{}'.format(zone_number, str(0), grf_name, keyword.upper())
+
+
+def createFMUvariableNameForResidual(keyword, zone_number, region_number, grf_name):
+    if region_number is not None:
+        return 'APS_{}_{}_GF_{}_RESIDUAL_{}'.format(zone_number, region_number, grf_name, keyword.upper())
+    else:
+        return 'APS_{}_{}_GF_{}_RESIDUAL_{}'.format(zone_number, str(0), grf_name, keyword.upper())
+
+
+def createFMUvariableNameForBayfillTruncation(keyword, zone_number, region_number):
+    if region_number is not None:
+        return 'APS_{}_{}_TRUNC_BAYFILL_{}'.format(zone_number, region_number, keyword.upper())
+    else:
+        return 'APS_{}_{}_TRUNC_BAYFILL_{}'.format(zone_number, str(0), keyword.upper())
+
+
+def createFMUvariableNameForNonCubicTruncation(index, zone_number, region_number):
+    if region_number is not None:
+        return 'APS_{}_{}_TRUNC_NONCUBIC_POLYNUMBER_{}_ANGLE'.format(zone_number, region_number, index)
+    else:
+        return 'APS_{}_{}_TRUNC_NONCUBIC_POLYNUMBER_{}_ANGLE'.format(zone_number, str(0), index)
+

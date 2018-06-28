@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from xml.etree.ElementTree import Element
 
+import numbers
 import numpy as np
 
 from src.algorithms.Trend3D import (
@@ -10,8 +11,8 @@ from src.algorithms.Trend3D import (
 from src.utils.checks import isVariogramTypeOK
 from src.utils.constants.simple import Debug, VariogramType
 from src.utils.simGauss2D_nrlib import simGaussField
-#from src.utils.simGauss2D import simGaussField
-from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword
+from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword, isFMUUpdatable, createFMUvariableNameForResidual, createFMUvariableNameForTrend
+
 
 
 class APSGaussModel:
@@ -34,8 +35,8 @@ class APSGaussModel:
     def getMainRange(self,gaussFieldName)
     def getPerpRange(self,gaussFieldName)
     def getVertRange(self,gaussFieldName)
-    def getAnisotropyAzimuthAngle(self,gaussFieldName)
-    def getAnisotropyDipAngle(self,gaussFieldName)
+    def getAzimuthAngle(self,gaussFieldName)
+    def getDipAngle(self,gaussFieldName)
     def getPower(self,gaussFieldName)
     def getTrendModel(self,gfName)
     def getTrendModelObject(self,gfName)
@@ -45,8 +46,8 @@ class APSGaussModel:
     def setRange1(self,gaussFieldName,range1)
     def setRange2(self,gaussFieldName,range2)
     def setRange3(self,gaussFieldName,range3)
-    def setAnisotropyAzimuthAngle(self,gaussFieldName)
-    def setAnisotropyDipAngle(self,gaussFieldName)
+    def setAzimuthAngle(self,gaussFieldName)
+    def setDipAngle(self,gaussFieldName)
     def setPower(self,gaussFieldName,power)
     def setSeedForPreviewSimulation(self,gfName,seed)
     def updateGaussFieldParam(self,gfName,variogramType,range1,range2,range3,azimuth,dip,power,
@@ -69,6 +70,15 @@ class APSGaussModel:
         """
         Description: Can create empty object or object with data read from xml tree representing the model file.
         """
+
+        self._isMainRangeFMUUpdatable = False
+        self._isPerpRangeFMUUpdatable = False
+        self._isVertRangeFMUUpdatable = False
+        self._isAzimuthAngleFMUUpdatable = False
+        self._isDipAngleFMUUpdatable = False
+        self._isPowerFMUUpdatable = False
+        self._isRelStdDevFMUUpdatable = False
+
         self.__setEmpty()
 
         if ET_Tree_zone is not None:
@@ -112,15 +122,22 @@ class APSGaussModel:
             'VertRange': 4,
             'AzimuthAngle': 5,
             'DipAngle': 6,
-            'Power': 7
+            'Power': 7,
+            'MainRangeFMUUpdatable': 8,
+            'PerpRangeFMUUpdatable': 9,
+            'VertRangeFMUUpdatable': 10,
+            'AzimuthAngleFMUUpdatable': 11,
+            'DipAngleFMUUpdatable': 12,
+            'PowerFMUUpdatable': 13
         }
         # Dictionary give name to each index in __trendForGFModel list
-        # item in list: [name,useTrend,trendModelObj,relStdDev]
+        # item in list: [name,useTrend,trendModelObj,relStdDev, relStdDevFMU]
         self.__index_trend = {
             'Name': 0,
             'Use trend': 1,
             'Object': 2,
-            'RelStdev': 3
+            'RelStdev': 3,
+            'RelStdevFMU': 4
         }
         # Dictionaries of legal value ranges for gauss field parameters
         self.__minValue = {
@@ -159,6 +176,8 @@ class APSGaussModel:
         Description: Read Gauss field models for current zone.
         Read trend models for the same gauss fields and start seed for 2D preview simulations.
         """
+        zone_number = ET_Tree_zone.get("number");
+        region_number = ET_Tree_zone.get("regionNumber");
         for gf in ET_Tree_zone.findall('GaussField'):
             gfName = gf.get('name')
             if self.__debug_level >= Debug.VERY_VERBOSE:
@@ -170,10 +189,13 @@ class APSGaussModel:
             common_variogram_params = {'parentKeyword': 'Vario', 'minValue': 0.0, 'modelFile': self.__modelFileName}
 
             range1 = getFloatCommand(variogram, 'MainRange', **common_variogram_params)
+            range1_fmuUpdatable = isFMUUpdatable(variogram, 'MainRange')
 
             range2 = getFloatCommand(variogram, 'PerpRange', **common_variogram_params)
+            range2_fmuUpdatable = isFMUUpdatable(variogram, 'PerpRange')
 
             range3 = getFloatCommand(variogram, 'VertRange', **common_variogram_params)
+            range3_fmuUpdatable = isFMUUpdatable(variogram, 'VertRange')
 
             azimuth = getFloatCommand(
                 variogram, 'AzimuthAngle', 'Vario',
@@ -181,6 +203,7 @@ class APSGaussModel:
                 maxValue=self.__maxValue['AzimuthAngle'],
                 modelFile=self.__modelFileName
             )
+            azimuth_fmuUpdatable = isFMUUpdatable(variogram, 'AzimuthAngle')
 
             dip = getFloatCommand(
                 variogram, 'DipAngle', 'Vario',
@@ -188,6 +211,7 @@ class APSGaussModel:
                 maxValue=self.__maxValue['DipAngle'],
                 modelFile=self.__modelFileName
             )
+            dip_fmuUpdatabable = isFMUUpdatable(variogram, 'DipAngle')
 
             power = 1.0
             if variogramType == VariogramType.GENERAL_EXPONENTIAL:
@@ -197,10 +221,12 @@ class APSGaussModel:
                     maxValue=self.__maxValue['Power'],
                     modelFile=self.__modelFileName
                 )
+            power_fmuUpdatabable = isFMUUpdatable(variogram, 'Power')
 
             # Read trend model for current GF
             trendObjXML = gf.find('Trend')
             relStdDev = 0.0
+            relStdDevFMU = False
             if trendObjXML is not None:
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Read trend')
@@ -221,17 +247,18 @@ class APSGaussModel:
                         'No actual Trend is specified.\n'
                         ''.format(self.__modelFileName, gfName, self.__className)
                     )
-                common_params = {'modelFileName': self.__modelFileName, 'debug_level': self.__debug_level}
+                common_params = {'zone_number': zone_number, 'region_number': region_number, 'gf_name': gfName,
+                                 'modelFileName': self.__modelFileName, 'debug_level': self.__debug_level}
                 if trend_name.tag == 'Linear3D':
-                    trend_model = Trend3D_linear(trendObjXML, **common_params)
+                    trend_model = Trend3D_linear(trendObjXML.find('Linear3D'), **common_params)
                 elif trend_name.tag == 'Elliptic3D':
-                    trend_model = Trend3D_elliptic(trendObjXML, **common_params)
+                    trend_model = Trend3D_elliptic(trendObjXML.find('Elliptic3D'), **common_params)
                 elif trend_name.tag == 'Hyperbolic3D':
-                    trend_model = Trend3D_hyperbolic(trendObjXML, **common_params)
+                    trend_model = Trend3D_hyperbolic(trendObjXML.find('Hyperbolic3D'), **common_params)
                 elif trend_name.tag == 'RMSParameter':
-                    trend_model = Trend3D_rms_param(trendObjXML, **common_params)
+                    trend_model = Trend3D_rms_param(trendObjXML.find('RMSParameter'), **common_params)
                 elif trend_name.tag == 'EllipticCone3D':
-                    trend_model = Trend3D_elliptic_cone(trendObjXML, **common_params)
+                    trend_model = Trend3D_elliptic_cone(trendObjXML.find('EllipticCone3D'), **common_params)
                 else:
                     raise NameError(
                         'Error in {className}\n'
@@ -243,7 +270,8 @@ class APSGaussModel:
                     print('Debug output: No trend is specified')
                 useTrend = False
                 trend_model = None
-                relStdDev = 0
+                relStdDev = 0.0
+                relStdDevFMU = False
 
             # Read RelstdDev
             if useTrend:
@@ -251,6 +279,7 @@ class APSGaussModel:
                     gf, 'RelStdDev', 'GaussField', 0.0,
                     modelFile=self.__modelFileName
                 )
+                relStdDevFMU = isFMUUpdatable(gf, 'RelStdDev')
 
             # Read preview seed for current GF
             seed = getIntCommand(gf, 'SeedForPreview', 'GaussField', modelFile=self.__modelFileName)
@@ -258,7 +287,8 @@ class APSGaussModel:
             # Add gauss field parameters to data structure
             self.updateGaussFieldParam(
                 gfName, variogramType, range1, range2, range3, azimuth,
-                dip, power, useTrend, relStdDev, trend_model
+                dip, power, range1_fmuUpdatable, range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable,
+                dip_fmuUpdatabable, power_fmuUpdatabable, useTrend, relStdDev, relStdDevFMU, trend_model
             )
             # Set preview simulation start seed for gauss field
             self.setSeedForPreviewSimulation(gfName, seed)
@@ -343,10 +373,18 @@ class APSGaussModel:
         GDIP = self.__index_variogram['DipAngle']
         GPOWER = self.__index_variogram['Power']
 
+        GRANGE1_FMUUPDATABLE = self.__index_variogram['MainRangeFMUUpdatable']
+        GRANGE2_FMUUPDATABLE = self.__index_variogram['PerpRangeFMUUpdatable']
+        GRANGE3_FMUUPDATABLE = self.__index_variogram['VertRangeFMUUpdatable']
+        GAZIMUTH_FMUUPDATABLE = self.__index_variogram['AzimuthAngleFMUUpdatable']
+        GDIP_FMUUPDATABLE = self.__index_variogram['DipAngleFMUUpdatable']
+        POWER_FMUUPDATABLE = self.__index_variogram['PowerFMUUpdatable']
+
         TNAME = self.__index_trend['Name']
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
+        TSTDFMU = self.__index_trend['RelStdevFMU']
 
         SNAME = self.__index_seed['Name']
         SVALUE = self.__index_seed['Seed']
@@ -357,7 +395,7 @@ class APSGaussModel:
         self.__mainFaciesTable = mainFaciesTable
 
         # gaussModelList  = list of objects of the form: [gfName,type,range1,range2,range3,azimuth,dip,power]
-        # trendModelList  = list of objects of the form: [gfName,useTrend,trendModelObj,relStdDev]
+        # trendModelList  = list of objects of the form: [gfName,useTrend,trendModelObj,relStdDev, relStdDevFMU]
         # previewSeedList = list of objects of the form: [gfName,seedValue]
         assert len(trendModelList) == len(gaussModelList)
         for i in range(len(gaussModelList)):
@@ -385,8 +423,16 @@ class APSGaussModel:
             dip = item[GDIP]
             power = item[GPOWER]
 
+            range1_fmuUpdatable = item[GRANGE1_FMUUPDATABLE]
+            range2_fmuUpdatable = item[GRANGE2_FMUUPDATABLE]
+            range3_fmuUpdatable = item[GRANGE3_FMUUPDATABLE]
+            azimuth_fmuUpdatable = item[GAZIMUTH_FMUUPDATABLE]
+            dip_fmuUpdatabable = item[GDIP_FMUUPDATABLE]
+            power_fmuUpdatabable = item[POWER_FMUUPDATABLE]
+
             trendModelObj = trendItem[TOBJ]
             relStdDev = trendItem[TSTD]
+            relStdDevFmu = trendItem[TSTDFMU]
             useTrend = trendItem[TUSE]
             seed = seedItem[SVALUE]
 
@@ -399,7 +445,13 @@ class APSGaussModel:
                 range3=range3,
                 azimuth=azimuth,
                 dip=dip,
-                power=power
+                power=power,
+                range1_fmuUpdatable=range1_fmuUpdatable,
+                range2_fmuUpdatable=range2_fmuUpdatable,
+                range3_fmuUpdatable=range3_fmuUpdatable,
+                azimuth_fmuUpdatable=azimuth_fmuUpdatable,
+                dip_fmuUpdatabable=dip_fmuUpdatabable,
+                power_fmuUpdatabable=power_fmuUpdatabable
             )
 
             # Set trend model parameters for this gauss field
@@ -407,7 +459,8 @@ class APSGaussModel:
                 gfName=gfName,
                 useTrend=useTrend,
                 trendModelObj=trendModelObj,
-                relStdDev=relStdDev
+                relStdDev=relStdDev,
+                relStdDevFMU=relStdDevFmu
             )
 
             # Set preview simulation start seed for gauss field
@@ -445,6 +498,12 @@ class APSGaussModel:
             raise ValueError('Variogram data for gauss field name: {} is not found.'.format(gaussFieldName))
         return itemWithParameters
 
+    def __get_property(self, gaussFieldName, keyword):
+        index = self.__index_variogram[keyword]
+        item = self.findGaussFieldParameterItem(gaussFieldName)
+        r = item[index]
+        return r
+
     def getVariogramType(self, gaussFieldName):
         GTYPE = self.__index_variogram['Type']
         item = self.findGaussFieldParameterItem(gaussFieldName)
@@ -457,40 +516,41 @@ class APSGaussModel:
         return variogramTypeNumber
 
     def getMainRange(self, gaussFieldName):
-        GRANGE1 = self.__index_variogram['MainRange']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GRANGE1]
-        return r
+        return self.__get_property(gaussFieldName, 'MainRange')
+
+
+    def getMainRangeFmuUpdatable(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'MainRangeFMUUpdatable')
 
     def getPerpRange(self, gaussFieldName):
-        GRANGE2 = self.__index_variogram['PerpRange']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GRANGE2]
-        return r
+        return self.__get_property(gaussFieldName, 'PerpRange')
+
+    def getPerpRangeFmuUpdatable(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'PerpRangeFMUUpdatable')
 
     def getVertRange(self, gaussFieldName):
-        GRANGE3 = self.__index_variogram['VertRange']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GRANGE3]
-        return r
+        return self.__get_property(gaussFieldName, 'VertRange')
 
-    def getAnisotropyAzimuthAngle(self, gaussFieldName):
-        GAZIMUTH = self.__index_variogram['AzimuthAngle']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GAZIMUTH]
-        return r
+    def getVertRangeFmuUpdatable(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'VertRangeFMUUpdatable')
 
-    def getAnisotropyDipAngle(self, gaussFieldName):
-        GDIP = self.__index_variogram['DipAngle']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GDIP]
-        return r
+    def getAzimuthAngle(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'AzimuthAngle')
+
+    def getAzimuthAngleFmuUpdatable(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'AzimuthAngleFMUUpdatable')
+
+    def getDipAngle(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'DipAngle') 
+
+    def getDipAngleFmuUpdatable(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'DipAngleFMUUpdatable')
 
     def getPower(self, gaussFieldName):
-        GPOWER = self.__index_variogram['Power']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[GPOWER]
-        return r
+        return self.__get_property(gaussFieldName, 'Power')
+
+    def getPowerFmuUpdatable(self, gaussFieldName):
+        return self.__get_property(gaussFieldName, 'PowerFMUUpdatable')
 
     def getTrendItem(self, gfName):
         TNAME = self.__index_trend['Name']
@@ -510,14 +570,16 @@ class APSGaussModel:
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
+        TSTDFMU = self.__index_trend['RelStdevFMU']
         item = self.getTrendItem(gfName)
         if item is None:
-            return None, None, None
+            return None, None, None, None
         else:
             useTrend = item[TUSE]
             trendModelObj = item[TOBJ]
             relStdDev = item[TSTD]
-            return useTrend, trendModelObj, relStdDev
+            relStdDevFMU = item[TSTDFMU]
+            return useTrend, trendModelObj, relStdDev, relStdDevFMU
 
     def getTrendModelObject(self, gfName):
         TOBJ = self.__index_trend['Object']
@@ -548,23 +610,28 @@ class APSGaussModel:
         return
 
     def setValue(self, gaussFieldName, variableName, value, checkMax=False):
-        # Minimum allowed value
-        minValue = self.__minValue[variableName]
-
-        # Max allowed value
-        maxValue = 0.0
-        if checkMax:
-            maxValue = self.__maxValue[variableName]
 
         # index to where the variable is located in the __varioFORGFModel
         variableIndex = self.__index_variogram[variableName]
 
         err = 0
-        if value < minValue:
-            err = 1
-        if checkMax:
-            if value > maxValue:
+
+        if not isinstance(value, bool):
+
+            # Minimum allowed value
+            minValue = self.__minValue[variableName]
+
+            # Max allowed value
+            maxValue = 0.0
+            if checkMax:
+                maxValue = self.__maxValue[variableName]
+
+            if value < minValue:
                 err = 1
+            if checkMax:
+                if value > maxValue:
+                    err = 1
+
         if err == 0:
             gfList = self.getUsedGaussFieldNames()
             if gaussFieldName in gfList:
@@ -573,6 +640,7 @@ class APSGaussModel:
                 item[variableIndex] = value
             else:
                 err = 1
+
         return err
 
     def setVariogramType(self, gaussFieldName, variogramType):
@@ -594,24 +662,96 @@ class APSGaussModel:
         err = self.setValue(gaussFieldName, 'MainRange', range1)
         return err
 
+    def setMainRangeFmuUpdatable(self, gaussFieldName, value):
+        err = self.setValue(gaussFieldName, 'MainRangeFMUUpdatable', value)
+        return err
+
     def setPerpRange(self, gaussFieldName, range2):
         err = self.setValue(gaussFieldName, 'PerpRange', range2)
+        return err
+
+    def setPerpRangeFmuUpdatable(self, gaussFieldName, value):
+        err = self.setValue(gaussFieldName, 'PerpRangeFMUUpdatable', value)
         return err
 
     def setVertRange(self, gaussFieldName, range3):
         err = self.setValue(gaussFieldName, 'VertRange', range3)
         return err
 
-    def setAnisotropyAzimuthAngle(self, gaussFieldName, azimuth):
+    def setVertRangeFmuUpdatable(self, gaussFieldName, value):
+        err = self.setValue(gaussFieldName, 'VertRangeFMUUpdatable', value)
+        return err
+
+    def setAzimuthAngle(self, gaussFieldName, azimuth):
         err = self.setValue(gaussFieldName, 'AzimuthAngle', azimuth, checkMax=True)
         return err
 
-    def setAnisotropyDipAngle(self, gaussFieldName, dip):
+    def setAzimuthAngleFmuUpdatable(self, gaussFieldName, value):
+        err = self.setValue(gaussFieldName, 'AzimuthAngleFMUUpdatable', value)
+        return err
+
+    def setDipAngle(self, gaussFieldName, dip):
         err = self.setValue(gaussFieldName, 'DipAngle', dip, checkMax=True)
+        return err
+
+    def setDipAngleFmuUpdatable(self, gaussFieldName, value):
+        err = self.setValue(gaussFieldName, 'DipAngleFMUUpdatable', value)
         return err
 
     def setPower(self, gaussFieldName, power):
         err = self.setValue(gaussFieldName, 'Power', power, checkMax=True)
+        return err
+
+    def setPowerFmuUpdatable(self, gaussFieldName, value):
+        err = self.setValue(gaussFieldName, 'PowerFMUUpdatable', value)
+        return err
+
+    def setRelStdDev(self, gaussFieldName, relStdDev):
+        # Update trend parameters relStdDev for existing trend for gauss field model
+        TNAME = self.__index_trend['Name']
+        TUSE = self.__index_trend['Use trend']
+        TSTD = self.__index_trend['RelStdev']
+        TSTD_FMU = self.__index_trend['RelStdevFMU']
+        err = 0
+
+        # Check if gauss field is already defined, then update parameters
+        found = 0
+        for item in self.__trendForGFModel:
+            name = item[TNAME]
+            if name == gfName:
+                found = 1
+                useTrend = item[TUSE]
+                if useTrend:
+                    # Set updated value for relStdDev
+                    item[TSTD] = relStdDev
+                    break
+        if found == 0:
+            # This gauss field was not found.
+            err = 1
+        return err
+
+    def setRelStdDevFmuUpdatable(self, gaussFieldName, value):
+        # Set FMU update tag on parameter
+        TNAME = self.__index_trend['Name']
+        TUSE = self.__index_trend['Use trend']
+        TSTD = self.__index_trend['RelStdev']
+        TSTD_FMU = self.__index_trend['RelStdevFMU']
+        err = 0
+
+        # Check if gauss field is already defined, then update parameters
+        found = 0
+        for item in self.__trendForGFModel:
+            name = item[TNAME]
+            if name == gaussFieldName:
+                found = 1
+                useTrend = item[TUSE]
+                if useTrend:
+                    # Set updated value for relStdDev
+                    item[TSTD_FMU] = value
+                    break
+        if found == 0:
+            # This gauss field was not found.
+            err = 1
         return err
 
     def setSeedForPreviewSimulation(self, gfName, seed):
@@ -632,7 +772,8 @@ class APSGaussModel:
 
     def updateGaussFieldParam(
             self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
-            useTrend=False, relStdDev=0.0, trendModelObj=None
+                range1_fmuUpdatable, range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable,
+                dip_fmuUpdatabable, power_fmuUpdatabable, useTrend=False, relStdDev=0.0, relStdDevFMU=False, trendModelObj=None
     ):
         # Update or create new gauss field parameter object (with trend)
         GNAME = self.__index_variogram['Name']
@@ -665,28 +806,34 @@ class APSGaussModel:
             name = item[GNAME]
             if name == gfName:
                 self.updateGaussFieldVariogramParameters(
-                    gfName, variogramType, range1, range2, range3, azimuth, dip, power
-                )
-                self.updateGaussFieldTrendParam(gfName, useTrend, trendModelObj, relStdDev)
+                    gfName, variogramType, range1, range2, range3, azimuth, dip, power, range1_fmuUpdatable,
+                    range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable, dip_fmuUpdatabable,
+                    power_fmuUpdatabable)
+                self.updateGaussFieldTrendParam(gfName, useTrend, trendModelObj, relStdDev, relStdDevFMU)
                 found = 1
                 break
         if found == 0:
             # Create data for a new gauss field for both variogram  data and trend data
             # But data for trend parameters must be set by another function and default is set here.
-            itemVariogram = [gfName, variogramType.name, range1, range2, range3, azimuth, dip, power]
+            itemVariogram = [gfName, variogramType.name, range1, range2, range3, azimuth, dip, power,
+                             range1_fmuUpdatable, range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable,
+                             dip_fmuUpdatabable, power_fmuUpdatabable]
             self.__variogramForGFModel.append(itemVariogram)
             if trendModelObj is None:
                 useTrend = False
                 relStdDev = 0.0
+                relStdDevFMU = False
             else:
                 useTrend = True
-            itemTrend = [gfName, useTrend, trendModelObj, relStdDev]
+            itemTrend = [gfName, useTrend, trendModelObj, relStdDev, relStdDevFMU]
             self.__trendForGFModel.append(itemTrend)
             defaultSeed = 0
             self.__seedForPreviewForGFModel.append([gfName, defaultSeed])
         return err
 
-    def updateGaussFieldVariogramParameters(self, gfName, variogramType, range1, range2, range3, azimuth, dip, power):
+    def updateGaussFieldVariogramParameters(self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
+                                            range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable,
+                                            azimuth_fmu_updatable, dip_fmu_updatable, power_fmu_updatable ):
         # Update gauss field variogram parameters for existing gauss field model
         # But it does not create new object.
         GNAME = self.__index_variogram['Name']
@@ -697,6 +844,13 @@ class APSGaussModel:
         GAZIMUTH = self.__index_variogram['AzimuthAngle']
         GDIP = self.__index_variogram['DipAngle']
         GPOWER = self.__index_variogram['Power']
+
+        GRANGE1FMUUPDATABLE = self.__index_variogram['MainRangeFMUUpdatable']
+        GRANGE2FMUUPDATABLE = self.__index_variogram['PerpRangeFMUUpdatable']
+        GRANGE3FMUUPDATABLE = self.__index_variogram['VertRangeFMUUpdatable']
+        GAZIMUTHFMUUPDATABLE = self.__index_variogram['AzimuthAngleFMUUpdatable']
+        GDIPFMUUPDATABLE = self.__index_variogram['DipAngleFMUUpdatable']
+        GPOWERFMUUPDATABLE = self.__index_variogram['PowerFMUUpdatable']
 
         err = 0
         found = 0
@@ -712,7 +866,12 @@ class APSGaussModel:
                 item[GAZIMUTH] = azimuth
                 item[GDIP] = dip
                 item[GPOWER] = power
-                break
+                item[GRANGE1FMUUPDATABLE] = range1_fmu_updatable
+                item[GRANGE2FMUUPDATABLE] = range2_fmu_updatable
+                item[GRANGE3FMUUPDATABLE] = range3_fmu_updatable
+                item[GAZIMUTHFMUUPDATABLE] = azimuth_fmu_updatable
+                item[GDIPFMUUPDATABLE] = dip_fmu_updatable
+                item[GPOWERFMUUPDATABLE] = power_fmu_updatable
         if found == 0:
             err = 1
         return err
@@ -733,13 +892,14 @@ class APSGaussModel:
             self.__seedForPreviewForGFModel.pop(indx)
         return
 
-    def updateGaussFieldTrendParam(self, gfName, useTrend, trendModelObj, relStdDev):
+    def updateGaussFieldTrendParam(self, gfName, useTrend, trendModelObj, relStdDev, relStdDevFMU):
         # Update trend parameters for existing trend for gauss field model
         # But it does not create new trend object.
         TNAME = self.__index_trend['Name']
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
+        TSTDFMU = self.__index_trend['RelStdevFMU']
         err = 0
         if trendModelObj is None:
             err = 1
@@ -753,13 +913,14 @@ class APSGaussModel:
                     item[TUSE] = useTrend
                     item[TSTD] = relStdDev
                     item[TOBJ] = trendModelObj
+                    item[TSTDFMU] = relStdDevFMU
                     break
             if found == 0:
                 # This gauss field was not found.
                 err = 1
         return err
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         GNAME = self.__index_variogram['Name']
         GTYPE = self.__index_variogram['Type']
         GRANGE1 = self.__index_variogram['MainRange']
@@ -769,10 +930,18 @@ class APSGaussModel:
         GDIP = self.__index_variogram['DipAngle']
         GPOWER = self.__index_variogram['Power']
 
+        GRANGE1FMUUPDATABLE = self.__index_variogram['MainRangeFMUUpdatable']
+        GRANGE2FMUUPDATABLE = self.__index_variogram['PerpRangeFMUUpdatable']
+        GRANGE3FMUUPDATABLE = self.__index_variogram['VertRangeFMUUpdatable']
+        GAZIMUTHFMUUPDATABLE = self.__index_variogram['AzimuthAngleFMUUpdatable']
+        GDIPFMUUPDATABLE = self.__index_variogram['DipAngleFMUUpdatable']
+        GPOWERFMUUPDATABLE = self.__index_variogram['PowerFMUUpdatable']
+
         TNAME = self.__index_trend['Name']
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
+        TSTDFMU = self.__index_trend['RelStdevFMU']
 
         SNAME = self.__index_seed['Name']
         SVALUE = self.__index_seed['Seed']
@@ -792,11 +961,19 @@ class APSGaussModel:
             dip = self.__variogramForGFModel[i][GDIP]
             power = self.__variogramForGFModel[i][GPOWER]
 
+            range1_fmu_updatable = self.__variogramForGFModel[i][GRANGE1FMUUPDATABLE]
+            range2_fmu_updatable = self.__variogramForGFModel[i][GRANGE2FMUUPDATABLE]
+            range3_fmu_updatable = self.__variogramForGFModel[i][GRANGE3FMUUPDATABLE]
+            azimuth_fmu_updatable = self.__variogramForGFModel[i][GAZIMUTHFMUUPDATABLE]
+            dip_fmu_updatable = self.__variogramForGFModel[i][GDIPFMUUPDATABLE]
+            power_fmu_updatable = self.__variogramForGFModel[i][GPOWERFMUUPDATABLE]
+
             if gfName != self.__trendForGFModel[i][TNAME]:
                 raise ValueError('Error in class: ' + self.__className + ' in ' + 'XMLAddElement')
             useTrend = self.__trendForGFModel[i][TUSE]
             trendObj = self.__trendForGFModel[i][TOBJ]
             relStdDev = self.__trendForGFModel[i][TSTD]
+            relStdDevFMU = self.__trendForGFModel[i][TSTDFMU]
 
             tag = 'GaussField'
             attribute = {'name': gfName}
@@ -813,41 +990,71 @@ class APSGaussModel:
             tag = self.__xml_keyword['MainRange']
             elem = Element(tag)
             elem.text = ' ' + str(range1) + ' '
+            if range1_fmu_updatable:
+                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
+                fmu_attributes.append(fmu_attribute)
+                elem.attrib = dict(kw=fmu_attribute)
             variogramElement.append(elem)
 
             tag = self.__xml_keyword['PerpRange']
             elem = Element(tag)
             elem.text = ' ' + str(range2) + ' '
+            if range2_fmu_updatable:
+                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
+                fmu_attributes.append(fmu_attribute)
+                elem.attrib = dict(kw=fmu_attribute)
             variogramElement.append(elem)
 
             tag = self.__xml_keyword['VertRange']
             elem = Element(tag)
             elem.text = ' ' + str(range3) + ' '
+            if range3_fmu_updatable:
+                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
+                fmu_attributes.append(fmu_attribute)
+                elem.attrib = dict(kw=fmu_attribute)
             variogramElement.append(elem)
 
             tag = self.__xml_keyword['AzimuthAngle']
             elem = Element(tag)
             elem.text = ' ' + str(azimuth) + ' '
+            if azimuth_fmu_updatable:
+                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
+                fmu_attributes.append(fmu_attribute)
+                elem.attrib = dict(kw=fmu_attribute)
             variogramElement.append(elem)
 
             tag = self.__xml_keyword['DipAngle']
             elem = Element(tag)
             elem.text = ' ' + str(dip) + ' '
+            if dip_fmu_updatable:
+                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
+                fmu_attributes.append(fmu_attribute)
+                elem.attrib = dict(kw=fmu_attribute)
             variogramElement.append(elem)
 
             if variogramType in ['GENERAL_EXPONENTIAL', VariogramType.GENERAL_EXPONENTIAL]:
                 tag = self.__xml_keyword['Power']
                 elem = Element(tag)
                 elem.text = ' ' + str(power) + ' '
+                if power_fmu_updatable:
+                    fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'),
+                                                                     parent.get('regionNumber'), gfName)
+                    fmu_attributes.append(fmu_attribute)
+                    elem.attrib = dict(kw=fmu_attribute)
                 variogramElement.append(elem)
 
             if useTrend:
                 # Add trend
-                trendObj.XMLAddElement(gfElement)
+                trendObj.XMLAddElement(gfElement, fmu_attributes)
 
                 tag = 'RelStdDev'
                 elem = Element(tag)
                 elem.text = ' ' + str(relStdDev) + ' '
+                if relStdDevFMU:
+                    fmu_attribute = createFMUvariableNameForTrend(tag, parent.get('number'),
+                                                                  parent.get('regionNumber'), gfName)
+                    fmu_attributes.append(fmu_attribute)
+                    elem.attrib = dict(kw=fmu_attribute)
                 gfElement.append(elem)
 
             tag = 'SeedForPreview'
@@ -870,6 +1077,7 @@ class APSGaussModel:
         TUSE = self.__index_trend['Use trend']
         TOBJ = self.__index_trend['Object']
         TSTD = self.__index_trend['RelStdev']
+        TSTDFMU = self.__index_trend['RelStdevFMU']
         SVALUE = self.__index_seed['Seed']
 
         assert 0 <= crossSectionRelativePos <= 1.0
@@ -906,8 +1114,8 @@ class APSGaussModel:
             mainRange = self.getMainRange(name)
             perpRange = self.getPerpRange(name)
             vertRange = self.getVertRange(name)
-            azimuthVariogram = self.getAnisotropyAzimuthAngle(name)
-            dipVariogram = self.getAnisotropyDipAngle(name)
+            azimuthVariogram = self.getAzimuthAngle(name)
+            dipVariogram = self.getDipAngle(name)
             power = self.getPower(name)
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('')
@@ -941,7 +1149,7 @@ class APSGaussModel:
             )
 
             # Calculate trend
-            useTrend, trendModelObject, relStdDev = self.getTrendModel(name)
+            useTrend, trendModelObject, relStdDev, relStdDevFMU = self.getTrendModel(name)
             if useTrend:
                 if self.__debug_level >= Debug.VERBOSE:
                     print('    - Use Trend: {}'.format(trendModelObject.type.name))
@@ -1046,13 +1254,13 @@ class APSGaussModel:
         rz = self.getVertRange(gaussFieldName)
 
         # Azimuth relative to global x,y,z coordinates
-        azimuth = self.getAnisotropyAzimuthAngle(gaussFieldName)
+        azimuth = self.getAzimuthAngle(gaussFieldName)
 
         # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
         azimuth = azimuth - gridAzimuthAngle
 
         # Dip angle relative to local simulation box
-        dip = self.getAnisotropyDipAngle(gaussFieldName)
+        dip = self.getDipAngle(gaussFieldName)
 
         # The transformations R_dip and R_azimuth defined below rotate the ellipsoide FROM standard orientation
         # in (x,y,z) TO the final orientation defined by azimuth and dip angles. But we need the inverse transformation
@@ -1066,7 +1274,6 @@ class APSGaussModel:
         cosDip = np.cos(dip)
         sinDip = np.sin(dip)
 
-
         # define R_dip matrix
         # R_dip*V will rotate the vector V by the angle dip around the x-axis.
         # The vector [0,1,0] (unit vector in y direction)  will get a positive z component if dip angle is positive
@@ -1077,7 +1284,6 @@ class APSGaussModel:
             [0.0, cosDip, -sinDip],
             [0.0, sinDip, cosDip]
         ])
-
 
         # define R_azimuth matrix
         # R_azimuth*V will rotate the vector V by the angle azimuth around the z axis.
@@ -1094,7 +1300,6 @@ class APSGaussModel:
 
         # calculate R matrix to get from (x',y',z') to (x,y,z)
         R = R_dip.dot(R_azimuth)
-
 
         # calculate M matrix in principal coordinates (x',y',z')
         M_diag = np.array([
@@ -1184,3 +1389,4 @@ class APSGaussModel:
 
         # Angles are azimuth angles
         return angle1, range1, angle2, range2
+

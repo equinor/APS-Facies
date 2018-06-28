@@ -57,3 +57,35 @@ def getTextCommand(
 
 
 def prettify(elem: Element) -> str: ...
+
+def isFMUUpdatable(
+    parent:Element,
+    keyword: str
+) -> bool
+
+def createFMUvariableNameForTrend(
+    keyword:str,
+    zone_number:str,
+    region_number:str
+    grf_name:str
+) -> str
+
+def createFMUvariableNameForResidual(
+    keyword:str,
+    zone_number:str,
+    region_number:str
+    grf_name:str
+) -> str
+
+def createFMUvariableNameForBayfillTruncation(
+        keyword:str,
+        zone_number:str,
+        region_number:str
+) -> str
+
+
+def createFMUvariableNameForNonCubicTruncation(
+        keyword:str,
+        zone_number:str,
+        region_number:str
+) -> str

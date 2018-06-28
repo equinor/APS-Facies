@@ -24,7 +24,7 @@ import numpy as np
 
 from src.utils.constants.simple import Debug, OriginType, TrendType
 from src.utils.roxar.grid_model import getGridSimBoxSize, getContinuous3DParameterValues
-from src.utils.xmlUtils import getFloatCommand, getIntCommand, getTextCommand
+from src.utils.xmlUtils import getFloatCommand, getIntCommand, getTextCommand, isFMUUpdatable, createFMUvariableNameForTrend
 
 
 class Trend3D:
@@ -43,9 +43,11 @@ class Trend3D:
         """
         # Depositional direction
         self._azimuth = 0.0
+        self._isAzimutFMUUpdatable = False
 
         # Angle between facies
         self._stackingAngle = 0.0001
+        self._isStackAngleFMUUpdatable = False
 
         # Direction of stacking (prograding/retrograding)
         self._direction = 1
@@ -77,6 +79,7 @@ class Trend3D:
                 'Error: Azimuth angle for linear trend is not within [0,360] degrees.'
                 ''.format(self.__className)
             )
+        self._isAzimutFMUUpdatable = isFMUUpdatable(trendRuleXML, 'azimuth')
 
         self._direction = getIntCommand(trendRuleXML, 'directionStacking', modelFile=modelFileName)
         if self._direction != -1 and self._direction != 1:
@@ -92,23 +95,30 @@ class Trend3D:
         self._stackingAngle = getFloatCommand(
             trendRuleXML, 'stackAngle', modelFile=modelFileName
         )
-
         if self._stackingAngle < 0.0 or self._stackingAngle > 90.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Stacking angle for linear trend is not within [0,90] degrees.'
                 ''.format(self.__className)
             )
+        self._isStackAngleFMUUpdatable = isFMUUpdatable(trendRuleXML, 'stackAngle')
+
+
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Trend parameters:')
             print('Debug output:   Azimuth:        ' + str(self._azimuth))
             print('Debug output:   Stacking angle: ' + str(self._stackingAngle))
             print('Debug output:   Stacking type:  ' + str(self._direction))
 
-    def _XMLAddElementTag(self, trendElement):
+    def _XMLAddElementTag(self, trendElement, zone_number, region_number, gf_name, fmu_attributes):
+
         tag = 'azimuth'
         obj = Element(tag)
         obj.text = ' ' + str(self._azimuth) + ' '
+        if self._isAzimutFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, zone_number, region_number, gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         trendElement.append(obj)
 
         tag = 'directionStacking'
@@ -119,9 +129,14 @@ class Trend3D:
         tag = 'stackAngle'
         obj = Element(tag)
         obj.text = ' ' + str(self._stackingAngle) + ' '
+        if self._isStackAngleFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, zone_number, region_number, gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         trendElement.append(obj)
 
-    def initialize(self, azimuthAngle=0.0, stackingAngle=0.01, direction=1, debug_level=Debug.OFF):
+    def initialize(self, azimuthAngle=0.0, azimuthAngleFmuUpdatable=False, stackingAngle=0.01,
+                   stackingAngleFmuUpdatable=False, direction=1, debug_level=Debug.OFF):
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
@@ -144,7 +159,9 @@ class Trend3D:
                 ''.format(self.__className)
             )
         self._azimuth = azimuthAngle
+        self._isAzimutFMUUpdatable = azimuthAngleFmuUpdatable
         self._stackingAngle = stackingAngle
+        self._isStackAngleFMUUpdatable = stackingAngleFmuUpdatable
         self._direction = direction
         self._debug_level = debug_level
         if self._debug_level >= Debug.VERY_VERBOSE:
@@ -172,6 +189,9 @@ class Trend3D:
         else:
             self._azimuth = angle
 
+    def setAzimuthFmuUpdatable(self, value):
+        self._isAzimutFMUUpdatable = value
+
     def setStackingAngle(self, stackingAngle):
         if stackingAngle < 0.0 or stackingAngle > 90.0:
             raise ValueError(
@@ -181,6 +201,9 @@ class Trend3D:
             )
         else:
             self._stackingAngle = stackingAngle
+
+    def setStackingAngleFmuUpdatable(self, value):
+        self._isStackAngleFMUUpdatable = value
 
     def setStackingDirection(self, direction):
         if direction != -1 and direction != 1:
@@ -453,7 +476,7 @@ class Trend3D:
 
     def get_origin_type_from_model_file(self, model_file_name, trendRuleXML):
         origin_type = getTextCommand(
-            trendRuleXML[0], 'origintype', modelFile=model_file_name, required=False, defaultText="Relative"
+            trendRuleXML, 'origintype', modelFile=model_file_name, required=False, defaultText="Relative"
         )
         origin_type = origin_type.strip('\"\'')
         if origin_type.lower() == 'relative':
@@ -476,10 +499,15 @@ class Trend3D_linear(Trend3D):
         Input is model parameters.
     """
 
-    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+    def __init__(self, trendRuleXML, zone_number, region_number, gf_name, modelFileName=None, debug_level=Debug.OFF):
+
         super().__init__(trendRuleXML, modelFileName, debug_level)
+
         self.type = TrendType.LINEAR
         self._className = self.__class__.__name__
+        self._zone_number = zone_number
+        self._region_number = region_number
+        self._gf_name = gf_name
 
         if trendRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
@@ -490,10 +518,10 @@ class Trend3D_linear(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
         # Additional input parameters comes here (for other Trend3D-types)
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         # Add to the parent element a new element with specified tag and attributes.
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
@@ -501,21 +529,14 @@ class Trend3D_linear(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        # attribute = {'name': 'Linear3D'}
-        # tag = 'Trend'
-        # trendElement = Element(tag, attribute)
-        # parent.append(trendElement)
-
-        # super()._XMLAddElementTag(trendElement)
-
         trendElement = Element('Trend')
         parent.append(trendElement)
         linear3DElement = Element('Linear3D')
         trendElement.append(linear3DElement)
-        super()._XMLAddElementTag(linear3DElement)
+        super()._XMLAddElementTag(linear3DElement, self._zone_number, self._region_number, self._gf_name, fmu_attributes)
 
-    def initialize(self, azimuthAngle, stackingAngle, direction, debug_level=Debug.OFF):
-        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+    def initialize(self, azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable, direction, debug_level=Debug.OFF):
+        super().initialize(azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable, direction, debug_level)
         # Add additional for current trend type here
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
@@ -599,10 +620,17 @@ class Trend3D_elliptic(Trend3D):
         Input is model parameters.
     """
 
-    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+    def __init__(self, trendRuleXML, zone_number, region_number, gf_name, modelFileName=None, debug_level=Debug.OFF):
         super().__init__(trendRuleXML, modelFileName, debug_level)
+        self._zone_number = zone_number
+        self._region_number = region_number
+        self._gf_name = gf_name
         self._curvature = 1.0
+        self._isCurvatureFMUUpdatable = False
         self._origin = [0.0, 0.0, 0.0]
+        self._isOriginXFMUUpdatable = False
+        self._isOriginYFMUUpdatable = False
+        self._isOriginZFMUUpdatable = False
         self._origin_type = OriginType.RELATIVE
         self.type = TrendType.ELLIPTIC
         self._className = self.__class__.__name__
@@ -616,26 +644,34 @@ class Trend3D_elliptic(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
         # Stacking angle must be > 0.
         if abs(self._stackingAngle) < 0.00001:
             self._stackingAngle = 0.00001
 
         # Additional input parameters comes here (for other Trend3D-types)
-        self._curvature = getFloatCommand(trendRuleXML[0], 'curvature', modelFile=modelFileName, required=True)
+        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=True)
         if self._curvature <= 0.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Curvature for elliptic trend is not positive.'
                 ''.format(self._className)
             )
-        origin_x = getFloatCommand(trendRuleXML[0], 'origin_x', modelFile=modelFileName, required=True)
-        origin_y = getFloatCommand(trendRuleXML[0], 'origin_y', modelFile=modelFileName, required=True)
-        origin_z = getFloatCommand(trendRuleXML[0], 'origin_z_simbox', modelFile=modelFileName, required=True)
+        self._isCurvatureFMUUpdatable = isFMUUpdatable(trendRuleXML, 'curvature')
+
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=True)
+        self._isOriginXFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_x')
+
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=True)
+        self._isOriginYFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_y')
+
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=True)
+        self._isOriginZFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_z_simbox')
+
         self._origin = [origin_x, origin_y, origin_z]
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         """
             Add to the parent element a new element with specified tag and attributes.
             The attributes are a dictionary with {name:value}
@@ -645,41 +681,46 @@ class Trend3D_elliptic(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        # attribute = {'name': 'Elliptic3D'}
-        # tag = 'Trend'
-        # trendElement = Element(tag, attribute)
-        # parent.append(trendElement)
-        #
-        # super()._XMLAddElementTag(trendElement)
-
         trendElement = Element('Trend')
         parent.append(trendElement)
         elliptic3DElement = Element('Elliptic3D')
         trendElement.append(elliptic3DElement)
-        super()._XMLAddElementTag(elliptic3DElement)
+        super()._XMLAddElementTag(elliptic3DElement, self._zone_number, self._region_number, self._gf_name, fmu_attributes)
 
         tag = 'curvature'
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
-        #trendElement.append(obj)
+        if self._isCurvatureFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginXFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginYFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
 
         tag = 'origin_z_simbox'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[2]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginZFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
 
         tag = 'origintype'
@@ -688,14 +729,13 @@ class Trend3D_elliptic(Trend3D):
             obj.text = ' Relative '
         elif self._origin_type == OriginType.ABSOLUTE:
             obj.text = ' Absolute '
-        #trendElement.append(obj)
         elliptic3DElement.append(obj)
 
     def initialize(
-            self, azimuthAngle, stackingAngle, direction, curvature=1.0,
-            origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
-    ):
-        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+            self, azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable, direction,
+            curvature=1.0, curvatureFmuUpdatable=False, origin=None, originFmuUpdatable=False, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF):
+        super().initialize(azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable,
+                           direction, debug_level)
         # Add additional for current trend type here
         if curvature <= 0.0:
             raise ValueError(
@@ -734,7 +774,11 @@ class Trend3D_elliptic(Trend3D):
             )
 
         self._curvature = curvature
+        self._isCurvatureFMUUpdatable = curvatureFmuUpdatable
         self._origin = origin
+        self._isOriginXFMUUpdatable = originFmuUpdatable
+        self._isOriginYFMUUpdatable = originFmuUpdatable
+        self._isOriginZFMUUpdatable = originFmuUpdatable
         self._origin_type = origin_type
 
     def setCurvature(self, curvature):
@@ -746,8 +790,20 @@ class Trend3D_elliptic(Trend3D):
                 )
         self._curvature = curvature
 
+    def setCurvatureFmuUpdatable(self, value):
+        self._isCurvatureFMUUpdatable = value
+
     def setOrigin(self, origin):
         self._origin = origin
+
+    def setOriginXFmuUpdatable(self, value):
+        self._isOriginXFMUUpdatable = value
+
+    def setOriginYFmuUpdatable(self, value):
+        self._isOriginYFMUUpdatable = value
+
+    def setOriginZFmuUpdatable(self, value):
+        self._isOriginZFMUUpdatable = value
 
     def setOriginType(self, originType):
         if originType not in OriginType:
@@ -849,12 +905,20 @@ class Trend3D_hyperbolic(Trend3D):
         Description: Create a hyperbolic trend 3D object
         Input is model parameters.
     """
-    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+    def __init__(self, trendRuleXML, zone_number, region_number, gf_name, modelFileName=None, debug_level=Debug.OFF):
         super().__init__(trendRuleXML, modelFileName, debug_level)
+        self._zone_number = zone_number
+        self._region_number = region_number
+        self._gf_name = gf_name
         self._curvature = 1.1
+        self._isCurvatureFMUUpdatable = False
         self._origin = [0.0, 0.0, 0.0]
+        self._isOriginXFMUUpdatable = False
+        self._isOriginYFMUUpdatable = False
+        self._isOriginZFMUUpdatable = False
         self._origin_type = OriginType.RELATIVE
         self._migrationAngle = 0  # 0 for no migration
+        self._isMigrationAngleFMUUpdatable = False
         self.type = TrendType.HYPERBOLIC
         self._className = self.__class__.__name__
 
@@ -867,20 +931,22 @@ class Trend3D_hyperbolic(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
+
         # Additional input parameters comes here (for other Trend3D-types)
-        self._curvature = getFloatCommand(
-            trendRuleXML[0], 'curvature', modelFile=modelFileName, required=False, defaultValue=1
-        )
+        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False, defaultValue=1)
         if self._curvature <= 1.0:
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Curvature for hyperbolic trend is not greater than 1.0'
                 ''.format(self._className)
             )
+        self._isCurvatureFMUUpdatable = isFMUUpdatable(trendRuleXML, 'curvature')
+
         self._migrationAngle = getFloatCommand(
-            trendRuleXML[0], 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
         )
+        self._isMigrationAngleFMUUpdatable = isFMUUpdatable(trendRuleXML, 'migrationAngle')
         if self._migrationAngle <= -90.0 or self._migrationAngle >= 90.0:
             raise ValueError(
                 'Error: In {}\n'
@@ -888,9 +954,16 @@ class Trend3D_hyperbolic(Trend3D):
                 ''.format(self._className)
                 )
 
-        origin_x = getFloatCommand(trendRuleXML[0], 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_y = getFloatCommand(trendRuleXML[0], 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
-        origin_z = getFloatCommand(trendRuleXML[0], 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._isOriginXFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_x')
+
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=False, defaultValue=0.0)
+        self._isOriginZFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_z_simbox')
+
+        self._isOriginYFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_y')
+
+        origin_z = getFloatCommand(trendRuleXML, 'origin_z_simbox', modelFile=modelFileName, required=False, defaultValue=0.0)
+
         self._origin = [origin_x, origin_y, origin_z]
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
 
@@ -903,6 +976,9 @@ class Trend3D_hyperbolic(Trend3D):
                 )
         self._curvature = curvature
 
+    def setCurvatureFmuUpdatable(self, value):
+        self._isCurvatureFMUUpdatable = value
+
     def setMigrationAngle(self, migrationAngle):
         if migrationAngle <= -90.0 or migrationAngle >= 90.0:
             raise ValueError(
@@ -912,8 +988,20 @@ class Trend3D_hyperbolic(Trend3D):
                 )
         self._migrationAngle = migrationAngle
 
+    def setMigrationAngleFmuUpdatable(self, value):
+        self._isMigrationAngleFMUUpdatable = value
+
     def setOrigin(self, origin):
         self._origin = origin
+
+    def setOriginXFmuUpdatable(self, value):
+        self._isOriginXFMUUpdatable = value
+
+    def setOriginYFmuUpdatable(self, value):
+        self._isOriginYFMUUpdatable = value
+
+    def setOriginZFmuUpdatable(self, value):
+        self._isOriginZFMUUpdatable = value
 
     def setOriginType(self, originType):
         if originType not in OriginType:
@@ -937,10 +1025,10 @@ class Trend3D_hyperbolic(Trend3D):
         return self._origin_type
 
     def initialize(
-            self, azimuthAngle, stackingAngle, direction, migrationAngle, curvature,
-            origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
-    ):
-        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+            self, azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable,
+            direction, migrationAngle, migrationAngleFmuUpdatable, curvature, curvatureFmuUpdatable, origin=None, originFmuUpdatable=False, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF):
+        super().initialize(azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable,
+                           direction, debug_level)
         # Add additional for current trend type here
         if curvature <= 1.0:
             raise ValueError(
@@ -985,8 +1073,13 @@ class Trend3D_hyperbolic(Trend3D):
             )
 
         self._curvature = curvature
+        self._isCurvatureFMUUpdatable = curvatureFmuUpdatable
         self._migrationAngle = migrationAngle
+        self._isMigrationAngleFMUUpdatable = migrationAngleFmuUpdatable
         self._origin = origin
+        self._isOriginXFMUUpdatable = originFmuUpdatable
+        self._isOriginYFMUUpdatable = originFmuUpdatable
+        self._isOriginZFMUUpdatable = originFmuUpdatable
         self._origin_type = origin_type
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
@@ -1092,7 +1185,7 @@ class Trend3D_hyperbolic(Trend3D):
         print('Debug output:  Origin type: {}'.format(self._origin_type.name))
         print('Debug output:  Migration angle: {}'.format(str(self._migrationAngle)))
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         """
         Add to the parent element a new element with specified tag and attributes.
             The attributes are a dictionary with {name:value}
@@ -1102,47 +1195,55 @@ class Trend3D_hyperbolic(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        # attribute = {'name': 'Hyperbolic3D'}
-        # tag = 'Trend'
-        # trendElement = Element(tag, attribute)
-        # parent.append(trendElement)
-        #
-        # super()._XMLAddElementTag(trendElement)
-
         trendElement = Element('Trend')
         parent.append(trendElement)
         hyperbolic3DElement = Element('Hyperbolic3D')
         trendElement.append(hyperbolic3DElement)
-        super()._XMLAddElementTag(hyperbolic3DElement)
+        super()._XMLAddElementTag(hyperbolic3DElement, self._zone_number, self._region_number, self._gf_name, fmu_attributes)
 
         tag = 'curvature'
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
-        #trendElement.append(obj)
+        if self._isCurvatureFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
 
         tag = 'migrationAngle'
         obj = Element(tag)
         obj.text = ' ' + str(self._migrationAngle) + ' '
-        # trendElement.append(obj)
+        if self._isMigrationAngleFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name))
         hyperbolic3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginXFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name))
         hyperbolic3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginYFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
 
         tag = 'origin_z_simbox'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[2]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginZFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
 
         tag = 'origintype'
@@ -1162,7 +1263,7 @@ class Trend3D_rms_param(Trend3D):
         Description: Create a trend 3D object using a specified RMS 3D continuous parameter
         Input is model parameters.
     """
-    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+    def __init__(self, trendRuleXML, zone_number, region_number, gf_name, modelFileName=None, debug_level=Debug.OFF):
         self._rmsParamName = None
         self.type = TrendType.RMS_PARAM
         self._debug_level = debug_level
@@ -1177,7 +1278,7 @@ class Trend3D_rms_param(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        text = getTextCommand(trendRuleXML[0], 'TrendParamName', 'Trend', defaultText=None, modelFile=modelFileName, required=True)
+        text = getTextCommand(trendRuleXML, 'TrendParamName', 'Trend', defaultText=None, modelFile=modelFileName, required=True)
         self._rmsParamName = copy.copy(text.strip())
 
     def initialize(self, rmsParamName, debug_level=Debug.OFF):
@@ -1193,7 +1294,7 @@ class Trend3D_rms_param(Trend3D):
     def setTrendParamName(self, paramName):
         self._rmsParamName = paramName
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         """
         Add to the parent element a new element with specified tag and attributes.
             The attributes are a dictionary with {name:value}
@@ -1202,16 +1303,6 @@ class Trend3D_rms_param(Trend3D):
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
-
-        # attribute = {'name': 'RMSParameter'}
-        # tag = 'Trend'
-        # trendElement = Element(tag, attribute)
-        # parent.append(trendElement)
-        #
-        # tag = 'TrendParamName'
-        # obj = Element(tag)
-        # obj.text = ' ' + self._rmsParamName + ' '
-        # trendElement.append(obj)
 
         trendElement = Element('Trend')
         parent.append(trendElement)
@@ -1246,13 +1337,20 @@ class Trend3D_elliptic_cone(Trend3D):
         Input is model parameters.
     """
 
-    def __init__(self, trendRuleXML, modelFileName=None, debug_level=Debug.OFF):
+    def __init__(self, trendRuleXML, zone_number, region_number, gf_name, modelFileName=None, debug_level=Debug.OFF):
         super().__init__(trendRuleXML, modelFileName, debug_level)
-        self._curvature = 1.0
+        self._zone_number = zone_number
+        self._region_number = region_number
+        self._gf_name = gf_name
         self._relativeSize = 1.0
         self._migrationAngle = 0
         self._origin = [0.0, 0.0, 0.0]
         self._origin_type = OriginType.RELATIVE
+        self._isCurvatureFMUUpdatable = False
+        self._isMigrationAngleFMUUpdatable = False
+        self._isRelativeSizeFMUUpdatable = False
+        self._isOriginXFMUUpdatable = False
+        self._isOriginYFMUUpdatable = False
         self.type = TrendType.ELLIPTIC_CONE
         self._className = self.__class__.__name__
 
@@ -1265,14 +1363,14 @@ class Trend3D_elliptic_cone(Trend3D):
                 print('Debug output: Create empty object of ' + self._className)
 
     def _interpretXMLTree(self, trendRuleXML, modelFileName):
-        super()._interpretXMLTree(trendRuleXML[0], modelFileName)
+        super()._interpretXMLTree(trendRuleXML, modelFileName)
         # Stacking angle must be > 0.
         if abs(self._stackingAngle) < 0.00001:
             self._stackingAngle = 0.00001
 
         # Additional input parameters comes here (for other Trend3D-types)
         # Curvature
-        self._curvature = getFloatCommand(trendRuleXML[0], 'curvature', modelFile=modelFileName, required=False,
+        self._curvature = getFloatCommand(trendRuleXML, 'curvature', modelFile=modelFileName, required=False,
                                           defaultValue=1)
         if self._curvature <= 0.0:
             raise ValueError(
@@ -1280,9 +1378,11 @@ class Trend3D_elliptic_cone(Trend3D):
                 'Error: Curvature for elliptic trend is not positive.'
                 ''.format(self._className)
             )
+        self._isCurvatureFMUUpdatable = isFMUUpdatable(trendRuleXML, 'curvature')
+
         # Migration angle
         self._migrationAngle = getFloatCommand(
-            trendRuleXML[0], 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
+            trendRuleXML, 'migrationAngle', modelFile=modelFileName, required=False, defaultValue=0
         )
         if self._migrationAngle <= -90.0 or self._migrationAngle >= 90.0:
             raise ValueError(
@@ -1290,8 +1390,10 @@ class Trend3D_elliptic_cone(Trend3D):
                 'Error: Migration angle must be between -90.0 and +90.0 degrees.'
                 ''.format(self._className)
                 )
+        self._isMigrationAngleFMUUpdatable = isFMUUpdatable(trendRuleXML, 'migrationAngle')
+
         # Relative size
-        self._relativeSize = getFloatCommand(trendRuleXML[0], 'relativeSize', modelFile=modelFileName, required=False,
+        self._relativeSize = getFloatCommand(trendRuleXML, 'relativeSize', modelFile=modelFileName, required=False,
                                              defaultValue=1.0)
         if self._relativeSize <= 0.0:
             raise ValueError(
@@ -1299,15 +1401,21 @@ class Trend3D_elliptic_cone(Trend3D):
                 'Error: The relative size of the ellipse shape at top and base of a zone must be > 0.'
                 ''.format(self._className)
             )
+        self._isRelativeSizeFMUUpdatable = isFMUUpdatable(trendRuleXML, 'relativeSize')
+
         # Reference point the center line will go through
-        origin_x = getFloatCommand(trendRuleXML[0], 'origin_x', modelFile=modelFileName, required=True, defaultValue=0.0)
-        origin_y = getFloatCommand(trendRuleXML[0], 'origin_y', modelFile=modelFileName, required=True, defaultValue=0.0)
+        origin_x = getFloatCommand(trendRuleXML, 'origin_x', modelFile=modelFileName, required=True, defaultValue=0.0)
+        self._isOriginXFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_x')
+
+        origin_y = getFloatCommand(trendRuleXML, 'origin_y', modelFile=modelFileName, required=True, defaultValue=0.0)
+        self._isOriginYFMUUpdatable = isFMUUpdatable(trendRuleXML, 'origin_x')
+
         self._origin = [origin_x, origin_y, 0.0]
 
         # Type of reference point (relative or absolute coordinate values)
         self._origin_type = self.get_origin_type_from_model_file(modelFileName, trendRuleXML)
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, fmu_attributes):
         """
             Add to the parent element a new element with specified tag and attributes.
             The attributes are a dictionary with {name:value}
@@ -1317,47 +1425,55 @@ class Trend3D_elliptic_cone(Trend3D):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
-        # attribute = {'name': 'EllipticCone3D'}
-        # tag = 'Trend'
-        # trendElement = Element(tag, attribute)
-        # parent.append(trendElement)
-
-        #super()._XMLAddElementTag(trendElement)
-
         trendElement = Element('Trend')
         parent.append(trendElement)
         EllipticCone3DElement = Element('EllipticCone3D')
         trendElement.append(EllipticCone3DElement)
-        super()._XMLAddElementTag(EllipticCone3DElement)
+        super()._XMLAddElementTag(EllipticCone3DElement, self._zone_number, self._region_number, self._gf_name, fmu_attributes)
 
         tag = 'curvature'
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
-        #trendElement.append(obj)
+        if self._isCurvatureFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
 
         tag = 'migrationAngle'
         obj = Element(tag)
         obj.text = ' ' + str(self._migrationAngle) + ' '
-        # trendElement.append(obj)
+        if self._isMigrationAngleFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
 
         tag = 'relativeSize'
         obj = Element(tag)
         obj.text = ' ' + str(self._relativeSize) + ' '
-        # trendElement.append(obj)
+        if self._isRelativeSizeFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginXFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
-        # trendElement.append(obj)
+        if self._isOriginYFMUUpdatable:
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
 
         tag = 'origintype'
@@ -1366,14 +1482,15 @@ class Trend3D_elliptic_cone(Trend3D):
             obj.text = ' Relative '
         elif self._origin_type == OriginType.ABSOLUTE:
             obj.text = ' Absolute '
-        # trendElement.append(obj)
         EllipticCone3DElement.append(obj)
 
     def initialize(
-            self, azimuthAngle, stackingAngle, direction, migrationAngle=0.0, curvature=1.0, relativeSize=1.0,
-            origin=None, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF
-    ):
-        super().initialize(azimuthAngle, stackingAngle, direction, debug_level)
+            self, azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable, direction,
+            migrationAngle=0.0, migrationAngleFmuUpdatable=False, curvature=1.0, curvatureFmuUpdatable=False,
+            relativeSize=1.0, relativeSizeFmuUpdatable=False,
+            origin=None, originFmuUpdatable=False, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF):
+        super().initialize(azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable,
+                           direction, debug_level)
         # Add additional for current trend type here
         if curvature <= 0.0:
             raise ValueError(
@@ -1426,9 +1543,14 @@ class Trend3D_elliptic_cone(Trend3D):
             )
 
         self._curvature = curvature
+        self._isCurvatureFMUUpdatable = curvatureFmuUpdatable
         self._migrationAngle = migrationAngle
+        self._isMigrationAngleFMUUpdatable = migrationAngleFmuUpdatable
         self._relativeSize = relativeSize
+        self._isRelativeSizeFMUUpdatable = relativeSizeFmuUpdatable
         self._origin = origin
+        self._isOriginXFMUUpdatable = originFmuUpdatable
+        self._isOriginYFMUUpdatable = originFmuUpdatable
         self._origin_type = origin_type
 
     def setCurvature(self, curvature):
@@ -1440,6 +1562,9 @@ class Trend3D_elliptic_cone(Trend3D):
                 )
         self._curvature = curvature
 
+    def setCurvatureFmuUpdatable(self, value):
+        self._isCurvatureFMUUpdatable = value
+
     def setMigrationAngle(self, migrationAngle):
         if migrationAngle <= -90.0 or migrationAngle >= 90.0:
             raise ValueError(
@@ -1449,6 +1574,9 @@ class Trend3D_elliptic_cone(Trend3D):
                 )
         self._migrationAngle = migrationAngle
 
+    def setMigrationAngleFmuUpdatable(self, value):
+        self._isMigrationAngleFMUUpdatable = value
+
     def setRelativeSizeOfEllipse(self, relativeSize):
         if relativeSize <= 0.0:
             raise ValueError(
@@ -1457,6 +1585,9 @@ class Trend3D_elliptic_cone(Trend3D):
                 ''.format(self._className)
                 )
         self._relativeSize = relativeSize
+
+    def setRelativeSizeOfEllipseFmuUpdatable(self, value):
+        self._isRelativeSizeFMUUpdatable = value
 
     def setOrigin(self, origin):
         self._origin = origin
@@ -1469,6 +1600,15 @@ class Trend3D_elliptic_cone(Trend3D):
                 ''.format(self._className)
             )
         self._origin_type = originType
+
+    def setOriginXFmuUpdatable(self, value):
+        self._isOriginXFMUUpdatable = value
+
+    def setOriginYFmuUpdatable(self, value):
+        self._isOriginYFMUUpdatable = value
+
+    def setOriginZFmuUpdatable(self, value):
+        self._isOriginZFMUUpdatable = value
 
     def getCurvature(self):
         return self._curvature

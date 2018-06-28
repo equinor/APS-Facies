@@ -16,8 +16,8 @@
   </Optimization>
 
   <SelectedZonesAndRegions>
-    <SelectedZoneWithRegions zone="1">  1 2      </SelectedZoneWithRegions> 
-    <SelectedZoneWithRegions zone="4">  2      </SelectedZoneWithRegions> 
+    <SelectedZoneWithRegions zone="1"> 1 2 </SelectedZoneWithRegions> 
+    <SelectedZoneWithRegions zone="4"> 2 </SelectedZoneWithRegions> 
   </SelectedZonesAndRegions>
 
   <RMSProjectName> testAPSWorkflow.rms10.1.3 </RMSProjectName>
@@ -96,10 +96,10 @@
 
       <GaussField name="GF10">
         <Vario name="GAUSSIAN">
-          <MainRange kw="APS_1_1_GF_GF10_RESIDUAL_MAINRANGE"> 200.0 </MainRange>
-          <PerpRange kw="APS_1_1_GF_GF10_RESIDUAL_PERPRANGE"> 200.0 </PerpRange>
-          <VertRange kw="APS_1_1_GF_GF10_RESIDUAL_VERTRANGE"> 3.0 </VertRange>
-          <AzimuthAngle kw="APS_1_0_GF_GF10_RESIDUAL_AZIMUTHANGLE"> 0.0 </AzimuthAngle>
+          <MainRange> 200.0 </MainRange>
+          <PerpRange> 200.0 </PerpRange>
+          <VertRange> 3.0 </VertRange>
+          <AzimuthAngle> 0.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 993276787 </SeedForPreview>
@@ -107,10 +107,10 @@
 
       <GaussField name="GF11">
         <Vario name="MATERN32">
-          <MainRange kw="APS_1_1_GF_GF11_RESIDUAL_MAINRANGE"> 450.0 </MainRange>
+          <MainRange> 450.0 </MainRange>
           <PerpRange> 150.0 </PerpRange>
           <VertRange> 5.0 </VertRange>
-          <AzimuthAngle kw="APS_1_1_GF_GF11_RESIDUAL_AZIMUTHANGLE"> 90.0 </AzimuthAngle>
+          <AzimuthAngle> 90.0 </AzimuthAngle>
           <DipAngle> 0.0 </DipAngle>
         </Vario>
         <SeedForPreview> 876556 </SeedForPreview>

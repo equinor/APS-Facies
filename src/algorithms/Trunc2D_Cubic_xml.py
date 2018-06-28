@@ -1341,7 +1341,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             L3Prev = L3
         self.__truncStructure = truncStructure
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
         TYPE = self.__node_index['type']

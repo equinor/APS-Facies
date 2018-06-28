@@ -95,8 +95,8 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
         gaussResultListForZone = []
         for i in range(len(gaussFieldNames)):
             gaussFieldName = gaussFieldNames[i]
-            azimuth = zoneModel.getAnisotropyAzimuthAngle(gaussFieldName)
-            dip     = zoneModel.getAnisotropyDipAngle(gaussFieldName)
+            azimuth = zoneModel.getAzimuthAngle(gaussFieldName)
+            dip     = zoneModel.getDipAngle(gaussFieldName)
             power = zoneModel.getPower(gaussFieldName)
             variogramType = zoneModel.getVariogramType(gaussFieldName)
             vName = variogramType.name

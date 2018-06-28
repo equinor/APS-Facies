@@ -77,11 +77,11 @@
       
       <GaussField name="GF1">
         <Vario name="GAUSSIAN">
-          <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAIN_RANGE"> 750.0 </MainRange>
-          <PerpRange kw="APS_1_0_GF_GF1_RESIDUAL_PERP_RANGE"> 650.0 </PerpRange>
-          <VertRange kw="APS_1_0_GF_GF1_RESIDUAL_VERT_RANGE"> 4.5 </VertRange>
-          <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTH">0.0</AzimuthAngle>
-          <DipAngle kw="APS_1_0_GF_GF1_RESIDUAL_DIP"> 0.0 </DipAngle>
+          <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAINRANGE"> 750.0 </MainRange>
+          <PerpRange kw="APS_1_0_GF_GF1_RESIDUAL_PERPRANGE"> 650.0 </PerpRange>
+          <VertRange kw="APS_1_0_GF_GF1_RESIDUAL_VERTRANGE"> 4.5 </VertRange>
+          <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTHANGLE">0.0</AzimuthAngle>
+          <DipAngle kw="APS_1_0_GF_GF1_RESIDUAL_DIPANGLE"> 0.0 </DipAngle>
         </Vario>
         <Trend>
           <Elliptic3D>
@@ -89,9 +89,9 @@
             <directionStacking>1</directionStacking>
             <stackAngle kw="APS_1_0_GF_GF1_TREND_STACKANGLE"> 0.30 </stackAngle>
             <curvature kw="APS_1_0_GF_GF1_TREND_CURVATURE"> 1.7 </curvature>
-            <origin_x kw="APS_1_0_GF_GF1_TREND_XORIGO"> 0.6 </origin_x>
-            <origin_y kw="APS_1_0_GF_GF1_TREND_YORIGO"> 0.1 </origin_y>
-            <origin_z_simbox kw="APS_1_0_GF_GF1_TREND_ZORIGO"> 0.4 </origin_z_simbox>
+            <origin_x kw="APS_1_0_GF_GF1_TREND_ORIGIN_X"> 0.6 </origin_x>
+            <origin_y kw="APS_1_0_GF_GF1_TREND_ORIGIN_Y"> 0.1 </origin_y>
+            <origin_z_simbox kw="APS_1_0_GF_GF1_TREND_ORIGIN_Z_SIMBOX"> 0.4 </origin_z_simbox>
             <origintype>'Relative'</origintype>
           </Elliptic3D>
         </Trend>
@@ -101,10 +101,10 @@
       
       <GaussField name="GF2">
         <Vario name="MATERN32">
-          <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAIN_RANGE"> 800.0 </MainRange>
+          <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE"> 800.0 </MainRange>
           <PerpRange>750.0</PerpRange>
           <VertRange>5.0</VertRange>
-          <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTH"> 320.0 </AzimuthAngle>
+          <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE"> 320.0 </AzimuthAngle>
           <DipAngle>0.0</DipAngle>
         </Vario>
         <SeedForPreview>75151556</SeedForPreview>

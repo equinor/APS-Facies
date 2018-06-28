@@ -221,8 +221,8 @@ def run_simulations(
         processes = []
         for i in range(len(gaussFieldNames)):
             gaussFieldName = gaussFieldNames[i]
-            azimuthValue = zoneModel.getAnisotropyAzimuthAngle(gaussFieldName)
-            dipValue     = zoneModel.getAnisotropyDipAngle(gaussFieldName)
+            azimuthValue = zoneModel.getAzimuthAngle(gaussFieldName)
+            dipValue     = zoneModel.getDipAngle(gaussFieldName)
             power = zoneModel.getPower(gaussFieldName)
             variogramType = zoneModel.getVariogramType(gaussFieldName)
             mainRange = zoneModel.getMainRange(gaussFieldName)

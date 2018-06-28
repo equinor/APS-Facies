@@ -7,7 +7,8 @@ from xml.etree.ElementTree import Element
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.roxar.grid_model import getContinuous3DParameterValues
-from src.utils.xmlUtils import getKeyword
+from src.utils.xmlUtils import getKeyword, isFMUUpdatable, createFMUvariableNameForBayfillTruncation
+
 
 """
 ------------ Truncation map for Bayfill ----------------------------------
@@ -88,8 +89,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         # Internal data structure
         self.__param_sf = []
+        self._is_param_sf_fmuupdatable = False
         self.__param_ysf = 0
+        self._is_param_ysf_fmuupdatable = False
         self.__param_sbhd = 0
+        self._is_param_sbhd_fmuupdatable = False
         self.__param_sf_name = ''
 
         self.__polygons = []
@@ -261,8 +265,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
             text = SFObj.text
             if self.__useConstTruncModelParam:
                 self.__param_sf = float(text.strip())
+                self._is_param_sf_fmuupdatable = isFMUUpdatable(bgmObj, kw)
             else:
                 self.__param_sf_name = copy.copy(text.strip())
+
 
         kw = 'YSF'
         YSFObj = bgmObj.find(kw)
@@ -276,6 +282,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         else:
             text = YSFObj.text
             self.__param_ysf = float(text.strip())
+            self._is_param_ysf_fmuupdatable = isFMUUpdatable(bgmObj, kw)
 
         kw = 'SBHD'
         SBHDObj = bgmObj.find(kw)
@@ -289,6 +296,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         else:
             text = SBHDObj.text
             self.__param_sbhd = float(text.strip())
+            self._is_param_sbhd_fmuupdatable = isFMUUpdatable(bgmObj, kw)
 
         # Check that 5 facies is defined and find the orderIndex
         if self._nFacies != 5:
@@ -324,7 +332,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def initialize(
             self, mainFaciesTable, faciesInZone, faciesInTruncRule, gaussFieldsInZone,
-            alphaFieldNameForBackGroundFacies, sf_value, sf_name, ysf, sbhd, useConstTruncParam, debug_level=Debug.OFF
+            alphaFieldNameForBackGroundFacies, sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level=Debug.OFF
     ):
         """
         Initialize the truncation object from input variables.
@@ -354,12 +362,17 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if self.__useConstTruncModelParam:
             self.__param_sf = sf_value
             self.__param_sf_name = ''
+            self._is_param_sf_fmuupdatable = sf_fmu_updatable
         else:
             self.__param_sf = 0
             self.__param_sf_name = copy.copy(sf_name)
 
+
         self.__param_ysf = float(ysf)
+        self._is_param_ysf_fmuupdatable = ysf_fmu_updatable
+
         self.__param_sbhd = float(sbhd)
+        self._is_param_sbhd_fmuupdatable = sbhd_fmu_updatable
 
         # Check that facies in truncation rule is consistent with facies in zone
         self._checkFaciesForZone()
@@ -464,7 +477,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
@@ -533,6 +546,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         tag = 'SF'
         obj = Element(tag)
+        if self._is_param_sf_fmuupdatable:
+            fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         if self.__useConstTruncModelParam:
             obj.text = ' ' + str(self.__param_sf) + ' '
         else:
@@ -542,11 +559,19 @@ class Trunc3D_bayfill(Trunc2D_Base):
         tag = 'YSF'
         obj = Element(tag)
         obj.text = ' ' + ' ' + str(self.__param_ysf) + ' '
+        if self._is_param_ysf_fmuupdatable:
+            fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
 
         tag = 'SBHD'
         obj = Element(tag)
         obj.text = ' ' + ' ' + str(self.__param_sbhd) + ' '
+        if self._is_param_sbhd_fmuupdatable:
+            fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
+            fmu_attributes.append(fmu_attribute)
+            obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
 
     def __setMinimumFaciesProb(self, faciesProb):
@@ -580,6 +605,33 @@ class Trunc3D_bayfill(Trunc2D_Base):
         """
         poly = [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
         return poly
+
+    def setSFParam(self, sfValue):
+        if 0 <= sfValue <= 1.0:
+            self.__param_sf = sfValue
+        else:
+            raise ValueError('SF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
+
+    def setSFParamFmuUpdatable(self, value):
+         self._is_param_sf_fmuupdatable = value
+
+    def setYSFParam(self, ysfValue):
+        if 0 <= ysfValue <= 1.0:
+            self.__param_ysf = ysfValue
+        else:
+            raise ValueError('YSF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
+
+    def setYSFParamFmuUpdatable(self, value):
+         self._is_param_ysf_fmuupdatable = value
+
+    def setSBHDParam(self, sbhdValue):
+        if 0 <= sbhdValue <= 1.0:
+            self.__param_sbhd = sbhdValue
+        else:
+            raise ValueError('SBHD parameter for Bayfill truncation rule must be between 0.0 and 1.0')
+
+    def setSBHDParamFmuUpdatable(self, value):
+         self._is_param_sbhd_fmuupdatable = value
 
     def setTruncRule(self, faciesProb, cellIndx=0):
         """setTruncRule: Calculate internal parameters and polygons that define the truncation rule.
