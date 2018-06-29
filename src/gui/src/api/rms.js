@@ -25,18 +25,19 @@ const api = typeof rms !== 'undefined' ? rms.uipy : {
 const gridModels = api.get_grid_names()
 
 const zones = [
-  {id: 1, name: 'ZoneC'},
-  {id: 2, name: 'TopC_BaseA'},
-  {id: 3, name: 'ZoneB'},
-  {id: 4, name: 'ZoneA'},
-]
-
-const regions = [
-  {id: 1, name: 'Region 1'},
-  {id: 2, name: 'Region 2'},
-  {id: 3, name: 'Region 3'},
-  {id: 4, name: 'Region 4'},
-  {id: 5, name: 'Region 5'},
+  {id: 1, name: 'ZoneC', regions: [{id: 1, name: 'Region 1'}, {id: 2, name: 'Region 2'}]},
+  {id: 2, name: 'TopC_BaseA', regions: []},
+  {id: 3, name: 'ZoneB', regions: []},
+  {
+    id: 4,
+    name: 'ZoneA',
+    regions: [
+      {id: 1, name: 'Region 1'},
+      {id: 2, name: 'Region 2'},
+      {id: 3, name: 'Region 3'},
+      {id: 4, name: 'Region 4'},
+      {id: 5, name: 'Region 5'},
+    ]},
 ]
 
 const facies = [
@@ -57,6 +58,5 @@ const facies = [
 export default {
   gridModels,
   zones,
-  regions,
   facies,
 }

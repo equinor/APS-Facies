@@ -25,6 +25,8 @@ import GridTable from 'Components/table/ClickableRowTable'
 import ColorPicker from 'Components/table/cell-renderer/ColorPicker'
 import ColorRenderer from 'Components/table/cell-renderer/ColorRenderer'
 
+import { forceRefresh } from '@/utils/grid'
+
 // TODO: Ensure change of color is done as a commit / action
 // Look for onRow/Data/CellChanged
 
@@ -127,7 +129,7 @@ export default {
       return {code, name, color}
     },
     forceUpdateGrid () {
-      this.gridApi.setRowData(this.availableFacies)
+      forceRefresh(this.gridApi, this.availableFacies)
     }
   }
 }

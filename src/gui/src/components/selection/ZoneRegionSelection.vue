@@ -18,6 +18,7 @@
         :on-selection-changed="selectedRegions"
         :on-row-clicked="currentRegion"
         header-name="Region"
+        @grid-api-ready="setRegionGridApi"
       />
     </div>
   </div>
@@ -25,6 +26,7 @@
 
 <script>
 import SelectableTable from '@/components/table/SelectableTable'
+import { forceRefresh } from '@/utils/grid'
 
 export default {
   components: {
@@ -34,30 +36,40 @@ export default {
   data () {
     return {
       useRegions: false,
+      gridApis: {},
     }
   },
 
   computed: {
     availableRegions () {
-      return []
+      const currentZone = this.$store.state.currentZone
+      if (currentZone) {
+        if (currentZone.regions.length > 0) {
+          return currentZone.regions
+        } else {
+          // The given zone has not regions
+          // TODO: Give message saying the zone has no regions
+        }
+      } else {
+        // No zone has been selected
+        // TODO: Give message saying you have to select a zone
+      }
+      return currentZone ? currentZone.regions : []
     },
     availableZones () {
-      return this.getRawData().map(item => {
-        return {id: item.id, name: item.name}
-      })
+      return this.getRawData()
     },
   },
 
   methods: {
     getRawData () {
-      // const zones = this.$store.state.availableZones
       return this.$store.state.availableZones
     },
     _dispatchSelectedRows  (event, action) {
-      this.$store.dispatch(action, event.api.getSelectedRows())
+      return this.$store.dispatch(action, event.api.getSelectedRows())
     },
     _dispatchCurrentSelected (event, action) {
-      this.$store.dispatch(action, event.data)
+      return this.$store.dispatch(action, event.data)
     },
     selectedZones (event) {
       this._dispatchSelectedRows(event, 'selectZones')
@@ -66,10 +78,17 @@ export default {
       this._dispatchSelectedRows(event, 'selectRegions')
     },
     currentZone (event) {
-      this._dispatchCurrentSelected(event, 'currentZone')
+      this._dispatchCurrentSelected(event, 'currentZone').then(() => {
+        if (this.useRegions) {
+          forceRefresh(this.gridApis.region, this.availableRegions)
+        }
+      })
     },
     currentRegion (event) {
       this._dispatchCurrentSelected(event, 'currentRegion')
+    },
+    setRegionGridApi (api) {
+      this.gridApis.region = api
     },
   }
 }

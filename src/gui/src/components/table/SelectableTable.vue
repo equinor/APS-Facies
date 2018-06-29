@@ -4,6 +4,7 @@
     :column-definitions="columnDefinitions"
     :additional-grid-options="additionalGridOptions"
     :on-row-clicked="onRowClicked"
+    @grid-api-ready="passGridApiAlong"
   />
 </template>
 
@@ -39,6 +40,7 @@ export default Vue.extend({
 
   data () {
     return {
+      gridApi: null,
       columnDefinitions: [
         {
           headerName: 'Use',
@@ -59,8 +61,12 @@ export default Vue.extend({
   },
 
   methods: {
+    passGridApiAlong (api) {
+      this.gridApi = api
+      this.$emit('grid-api-ready', api)
+    },
     getSelectedRows () {
-      return this.$children[0].$data.gridOptions.api.getSelectedRows()
+      return this.gridApi.getSelectedRows()
     }
   },
 })
