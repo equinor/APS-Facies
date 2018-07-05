@@ -1,4 +1,4 @@
-import { promiseSimpleCommit } from '@/store/utils'
+import { promiseSimpleCommit, fetchParameterHelper } from '@/store/utils'
 import rms from '@/api/rms'
 
 export default {
@@ -9,18 +9,13 @@ export default {
     selected: null,
   },
 
-  modules: {},
-
   actions: {
     select: ({commit, dispatch}, regionParameter) => {
       return promiseSimpleCommit(commit, 'CURRENT', regionParameter)
         .then(() => dispatch('regions/fetch', null, { root: true }))
     },
-    fetch: ({commit, rootGetters}) => {
-      return rms.regionParameters(rootGetters.gridModel)
-        .then(result => {
-          commit('AVAILABLE', result)
-        })
+    fetch: ({commit, dispatch, rootGetters}) => {
+      return fetchParameterHelper(commit, dispatch, rms.regionParameters(rootGetters.gridModel))
     },
   },
 

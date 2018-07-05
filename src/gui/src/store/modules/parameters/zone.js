@@ -1,4 +1,4 @@
-import { promiseSimpleCommit } from '@/store/utils'
+import { promiseSimpleCommit, fetchParameterHelper } from '@/store/utils'
 import rms from '@/api/rms'
 
 export default {
@@ -15,13 +15,7 @@ export default {
         .then(() => dispatch('zones/fetch', null, { root: true }))
     },
     fetch: ({commit, dispatch, rootGetters}) => {
-      return rms.zoneParameters(rootGetters.gridModel)
-        .then(result => {
-          commit('AVAILABLE', result)
-          if (result.length === 1) {
-            dispatch('select', result[0])
-          }
-        })
+      return fetchParameterHelper(commit, dispatch, rms.zoneParameters(rootGetters.gridModel))
     },
   },
 
