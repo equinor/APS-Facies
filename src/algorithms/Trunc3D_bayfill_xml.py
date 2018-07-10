@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import copy
 import math
+
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
@@ -97,7 +99,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__param_sf_name = ''
 
         self.__polygons = []
-        self.__useZ = 0
+        self.__useZ = False
         self.__Zm = 0
 
         # Tolerance used for probabilities
@@ -299,7 +301,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             self._is_param_sbhd_fmuupdatable = isFMUUpdatable(bgmObj, kw)
 
         # Check that 5 facies is defined and find the orderIndex
-        if self._nFacies != 5:
+        if self.num_facies_in_zone != 5:
             raise ValueError(
                 'Error when reading model file: {}\n'
                 'Error: Read truncation rule: {}\n'
@@ -367,7 +369,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
             self.__param_sf = 0
             self.__param_sf_name = copy.copy(sf_name)
 
-
         self.__param_ysf = float(ysf)
         self._is_param_ysf_fmuupdatable = ysf_fmu_updatable
 
@@ -396,20 +397,20 @@ class Trunc3D_bayfill(Trunc2D_Base):
         print('Eps: ' + str(self.__eps))
         print('Main facies table:')
         print(repr(self._mainFaciesTable))
-        print('Number of facies in main facies table: ' + str(self._nFaciesMain))
-        print('Facies to be modelled: ')
+        print('Number of facies in main facies table: ' + str(self.num_global_facies))
+        print('Facies to be modelled:')
         print(repr(self._faciesInZone))
         print('Facies code per facies to be modelled:')
         print(repr(self._faciesCode))
         print('Facies in truncation rule:')
         print(repr(self._faciesInTruncRule))
-        print('Number of facies to be modelled:' + str(self._nFacies))
-        print('Index array orderIndex: ')
+        print('Number of facies to be modelled:' + str(self.num_facies_in_zone))
+        print('Index array orderIndex:')
         print(repr(self._orderIndex))
         print('Facies index for facies which has 100% probability')
         print(repr(self._faciesIsDetermined))
         print('Print info level: ' + str(self._debug_level))
-        print('Is function setTruncRule called? ')
+        print('Is function setTruncRule called?')
         print(repr(self._setTruncRuleIsCalled))
         print('Number of Gauss fields in model: ' + str(3))
         if self.__useConstTruncModelParam:
@@ -485,7 +486,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        nGF = self._nGaussFieldsInTruncationRule
+        nGF = self.getNGaussFieldsInModel()
 
         trRuleElement = Element('TruncationRule')
         parent.append(trRuleElement)
@@ -705,7 +706,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         Xm2 = 0.0
 
         if P1 < 0.0 or P2 < 0.0 or P3 < 0.0 or P4 < 0.0 or P5 < 0.0:
-            print(' Warning: Negative probabilities as input. Is set to 0.')
+            warn(' Warning: Negative probabilities as input. Is set to 0.')
             if P1 < 0.0:
                 P1 = 0.0
             if P2 < 0.0:
@@ -1126,9 +1127,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         # Truncation rule depends on 3rd field if bhdsit <= 3
         if bhdsit <= 3:
-            useZ = 1
+            useZ = True
         else:
-            useZ = 0
+            useZ = False
 
         # Calculate polygons for each facies in the plane defined by the first and second field
         polygons = []
@@ -1824,7 +1825,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         return faciesCode, fIndx
 
     def setParamSFConst(self, value):
-        if value < 0 or value > 1:
+        if not (0 <= value <= 1):
             raise ValueError("Error: The value must be between 0 and 1 (inclusive)")
         else:
             self.__param_sf = value

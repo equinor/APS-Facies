@@ -335,7 +335,7 @@ class ConvertBitMapToRMS:
         print(' jStart: ' + str(self.__iStart))
         print(' jEnd: ' + str(self.__iEnd))
         if np.abs((self.__xinc - self.__yinc) / self.__xinc) > 0.05:
-            print('Warnings: ')
+            print('Warnings:')
             print(' Pixel dimension (xinc, yinc) is different in x and y direction. Is this correct?')
             print(' Or are there something wrong with the coordinates that are specified?')
 

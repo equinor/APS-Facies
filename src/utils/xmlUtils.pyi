@@ -56,36 +56,38 @@ def getTextCommand(
 ) -> Optional[str]: ...
 
 
-def prettify(elem: Element) -> str: ...
+def prettify(elem: Element, indent: str = " ", new_line: str = "\n") -> str: ...
+
+def minify(elem: Element) -> str: ...
+
 
 def isFMUUpdatable(
     parent:Element,
     keyword: str
-) -> bool
+) -> bool: ...
 
 def createFMUvariableNameForTrend(
-    keyword:str,
-    zone_number:str,
-    region_number:str
-    grf_name:str
-) -> str
+    keyword: str,
+    grf_name: str,
+    zone_number: str,
+    region_number: Optional[int] = None,
+) -> str: ...
 
 def createFMUvariableNameForResidual(
-    keyword:str,
-    zone_number:str,
-    region_number:str
-    grf_name:str
-) -> str
+    keyword: str,
+    grf_name: str,
+    zone_number: int,
+    region_number: Optional[int] = None,
+) -> str: ...
 
 def createFMUvariableNameForBayfillTruncation(
-        keyword:str,
-        zone_number:str,
-        region_number:str
-) -> str
-
+        keyword: str,
+        zone_number: int,
+        region_number: Optional[int] = None,
+) -> str: ...
 
 def createFMUvariableNameForNonCubicTruncation(
-        keyword:str,
-        zone_number:str,
-        region_number:str
-) -> str
+        index: int,
+        zone_number: int,
+        region_number: Optional[int] = None,
+) -> str: ...

@@ -49,13 +49,13 @@ def apply_truncations(
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('nValues: ' + str(nValues))
         print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
-    alphaCoord = np.zeros(nGaussFields, np.float32)
+    alphaCoord = {}
     faciesReal = []
     # Loop through the Gaussian field array in c-index ordering
     for i in range(nValues):
         for n in range(nGaussFields):
             alpha = alphaFields[n]
-            alphaCoord[n] = alpha[i]
+            alphaCoord[truncRule._alphaIndxList[n]] = alpha[i]
         faciesCode, fIndx = truncRule.defineFaciesByTruncRule(alphaCoord)
         faciesReal.append(faciesCode)
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
@@ -73,7 +73,7 @@ def apply_truncations(
 
 def compare(source, reference):
     if not exists(reference):
-        reference = 'source/unit_test/' + reference
+        reference = 'src/unit_test/' + reference
     return cmp(reference, source)
 
 

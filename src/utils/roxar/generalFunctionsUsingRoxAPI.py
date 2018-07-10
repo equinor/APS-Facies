@@ -586,9 +586,9 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
             text1 = ' Try to define a new facies code with a facies name that already is used define a new facies name\n'
             text2 = ' for a facies code that already exists when updating facies realisation\n'
             print_error(functionName, '\n' + text1 + text2)
-            print('Original facies codes from RMS project: ')
+            print('Original facies codes from RMS project:')
             print(repr(originalCodeNames))
-            print('New facies codes specified in current APS model: ')
+            print('New facies codes specified in current APS model:')
             print(repr(codeNames))
 
             raise ValueError(
@@ -734,9 +734,9 @@ def updateDiscrete3DParameterValues(
             text1 = ' Try to define a new facies code with a facies name that already is used or define a new facies name\n'
             text2 = ' for a facies code that already exists when updating facies realisation\n'
             print_error(functionName, '\n' + text1 + text2)
-            print('Original facies codes from RMS project: ')
+            print('Original facies codes from RMS project:')
             print(repr(originalCodeNames))
-            print('New facies codes specified in current APS model: ')
+            print('New facies codes specified in current APS model:')
             print(repr(faciesTable))
 
             raise ValueError(

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from numpy import float64, ndarray
+
+from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Dict
 from xml.etree.ElementTree import Element
 
 
-class Trunc2D_Angle:
+class Trunc2D_Angle(Trunc2D_Base):
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,
@@ -17,9 +19,17 @@ class Trunc2D_Angle:
         debug_level: int = Debug.OFF,
         modelFileName: Optional[str] = None,
         zoneNumber: Optional[int] = None
+    ): ...
+    num_polygons: int
+    def XMLAddElement(
+        self,
+        parent: Element,
+        zone_number: Optional[int],
+        region_number: Optional[int],
+        fmu_attributes: Optional[List[str]],
     ) -> None: ...
-    def XMLAddElement(self, parent: Element, zone_number:str, region_number:str, fmu_attributes:List[str]) -> None: ...
     def defineFaciesByTruncRule(self, alphaCoord: ndarray) -> Tuple[int, int]: ...
+    def faciesIndxPerPolygon(self) -> List[int]: ...
     def getClassName(self) -> str: ...
     def initialize(
         self,
@@ -27,9 +37,10 @@ class Trunc2D_Angle:
         faciesInZone: List[str],
         gaussFieldsInZone: List[str],
         alphaFieldNameForBackGroundFacies: List[str],
-        truncStructure: List[List[Union[str, float]]],
+        truncStructure: List[List[Union[str, float, bool]]],
         overlayGroups: Optional[List[List[Union[List[List[Union[str, float]]], List[str]]]]] = None,
-        useConstTruncParam: int = False,
+        useConstTruncParam: int = True,
+        keyResolution: int = 209,
         debug_level: Debug = Debug.OFF
     ) -> None: ...
     def setTruncRule(self, faciesProb: List[float], cellIndx: int = 0) -> None: ...

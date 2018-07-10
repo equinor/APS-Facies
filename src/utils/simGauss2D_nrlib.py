@@ -7,9 +7,9 @@ import numpy as np
 from src.utils.constants.simple import Debug, VariogramType
 
 
-def simGaussField(iseed: int, nx: int, ny: int, xsize: float, ysize: float, variogram_type: VariogramType,
-                  range_major_axis: float, range_minor_axis: float, azimuth_angle: float, power: float = None,
-                  debug_level: Debug = Debug.OFF
+def simGaussField(iseed, nx, ny, xsize, ysize, variogram_type,
+                  range_major_axis, range_minor_axis, azimuth_angle, power=None,
+                  debug_level=Debug.OFF
                   ):
     """
     Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
@@ -54,11 +54,11 @@ def simGaussField(iseed: int, nx: int, ny: int, xsize: float, ysize: float, vari
 
     # Define variogram
     variogram_name = variogram_type.name.upper()
-    if variogram_name == 'GENERAL_EXPONENTIAL':
+    kwargs = {'main_range': range_major_axis, 'perp_range': range_minor_axis, 'azimuth': azimuth_angle}
+    if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
         assert power is not None
-        simVariogram = nrlib.variogram(variogram_name, main_range=range_major_axis, perp_range=range_minor_axis, azimuth=azimuth_angle, power=power)
-    else:
-        simVariogram = nrlib.variogram(variogram_name, main_range=range_major_axis, perp_range=range_minor_axis, azimuth=azimuth_angle)
+        kwargs['power'] = power
+    sim_variogram = nrlib.variogram(variogram_name, **kwargs)
 
     dx = xsize / nx
     dy = ysize / ny
@@ -67,7 +67,7 @@ def simGaussField(iseed: int, nx: int, ny: int, xsize: float, ysize: float, vari
 
     # Simulate gauss field. Return numpy 1D vector in F order
     if debug_level >= Debug.VERY_VERBOSE:
-        padding = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
+        padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
         coordinates = ['x', 'y', 'z']
         debug_info = 'Debug output: '
         for i in range(len(padding)):
@@ -76,7 +76,7 @@ def simGaussField(iseed: int, nx: int, ny: int, xsize: float, ysize: float, vari
 
     # Have to remap the array to get it correct when plotting. That is why switching nx by ny and so on and the remapping
     # of the result vector.
-    gauss_vector = nrlib.simulate(simVariogram, nx, dx, ny, dy)
+    gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy)
     a = np.reshape(gauss_vector, (nx, ny), 'F')
     gauss_vector = np.reshape(a, (nx * ny), 'F')
     return gauss_vector

@@ -4,6 +4,8 @@
 # class DefineTruncationRule
 # Description: Handle truncation rule settings
 # --------------------------------------------------------
+from sys import argv
+
 import copy
 import collections
 import numpy as np
@@ -26,6 +28,7 @@ from src.utils.xmlUtils import prettify
 
 from xml.etree.ElementTree import Element
 
+
 class DefineTruncationRule:
     """
     This class read truncation rule settings for Cubic or NonCubic truncation rules
@@ -35,7 +38,8 @@ class DefineTruncationRule:
     - enable GUI to write user defined truncation rule settings to file
     - enable GUI to create mini pictures (icons) for truncation rule settings
     """
-    def __init__(self, directory=''):
+
+    def __init__(self, directory='', debug_level=Debug.VERBOSE):
         ''' Dictionaries for Cubic and NonCubic settings and Cubic and NonCubic with overlay truncation settings.
             Data structure:
             Background truncation model of type 'Cubic':
@@ -144,7 +148,6 @@ class DefineTruncationRule:
               nameOL = itemNonCubicOverlay[NAME_OL_INDX]
               itemNonCubic = itemNonCubicOverlay[STRUCT_NONCUBIC_INDX]
               overlayGroups = itemNonCubicOverlay[OVERLAYGROUP_INDX]
-
         '''
         # Table Cubic contains items of type Cubic which is a truncation model for background facies.
         # An item = [direction, polygon, polygon, polygon, ...]
@@ -182,7 +185,7 @@ class DefineTruncationRule:
         self.__tableNonCubicAndOverlay = {}
 
         self.__inputFileName = None
-        self.debug_level = Debug.VERBOSE
+        self.debug_level = debug_level
         self.__directory = directory
 
     def readFile(self, inputFileName):
@@ -203,41 +206,40 @@ class DefineTruncationRule:
                     finished = True
                 else:
                     words = line.split()
-                    if len(words) > 0:
-                        if words[0] != '#':
-                            ruleType = words[0]
+                    if len(words) > 0 and words[0] != '#':
+                        ruleType = words[0]
 
-                            if ruleType == 'Cubic':
-                                name = words[1]
-                                truncStructureCubic = self.__getTruncSettingsCubicFromFile(words)
-                                self.__tableCubic[name] = truncStructureCubic
-                            elif ruleType == 'NonCubic':
-                                name = words[1]
-                                truncStructureNonCubic = self.__getTruncSettingsNonCubicFromFile(words)
-                                self.__tableNonCubic[name] = truncStructureNonCubic
-                            elif ruleType == 'Overlay':
-                                name = words[1]
-                                overlayGroups = self.__getTruncSettingsOverlayFromFile(words)
-                                self.__tableOverlay[name] = overlayGroups
-                            elif ruleType == 'CubicAndOverlay':
-                                name = words[1]
-                                nameBG = words[2]
-                                nameOL = words[3]
-                                truncStructureCubic = self.__tableCubic[nameBG]
-                                overlayGroups = self.__tableOverlay[nameOL]
-                                item = [nameBG, nameOL, truncStructureCubic, overlayGroups]
-                                self.__tableCubicAndOverlay[name] = item
-                            elif ruleType == 'NonCubicAndOverlay':
-                                name = words[1]
-                                nameBG = words[2]
-                                nameOL = words[3]
-                                truncStructureNonCubic = self.__tableNonCubic[nameBG]
-                                overlayGroups = self.__tableOverlay[nameOL]
-                                item = [nameBG, nameOL, truncStructureNonCubic, overlayGroups]
-                                self.__tableNonCubicAndOverlay[name] = item
-                            else:
-                                print('File format error in  {}'.format(inputFile))
-                                raiseIOError('File format error in  {}'.format(inputFile))
+                        if ruleType == 'Cubic':
+                            name = words[1]
+                            truncStructureCubic = self.__getTruncSettingsCubicFromFile(words)
+                            self.__tableCubic[name] = truncStructureCubic
+                        elif ruleType == 'NonCubic':
+                            name = words[1]
+                            truncStructureNonCubic = self.__getTruncSettingsNonCubicFromFile(words)
+                            self.__tableNonCubic[name] = truncStructureNonCubic
+                        elif ruleType == 'Overlay':
+                            name = words[1]
+                            overlayGroups = self.__getTruncSettingsOverlayFromFile(words)
+                            self.__tableOverlay[name] = overlayGroups
+                        elif ruleType == 'CubicAndOverlay':
+                            name = words[1]
+                            nameBG = words[2]
+                            nameOL = words[3]
+                            truncStructureCubic = self.__tableCubic[nameBG]
+                            overlayGroups = self.__tableOverlay[nameOL]
+                            item = [nameBG, nameOL, truncStructureCubic, overlayGroups]
+                            self.__tableCubicAndOverlay[name] = item
+                        elif ruleType == 'NonCubicAndOverlay':
+                            name = words[1]
+                            nameBG = words[2]
+                            nameOL = words[3]
+                            truncStructureNonCubic = self.__tableNonCubic[nameBG]
+                            overlayGroups = self.__tableOverlay[nameOL]
+                            item = [nameBG, nameOL, truncStructureNonCubic, overlayGroups]
+                            self.__tableNonCubicAndOverlay[name] = item
+                        else:
+                            print('File format error in  {}'.format(inputFile))
+                            raise IOError('File format error in  {}'.format(inputFile))
 
     def writeFile(self, outputFileName):
         ''' Write dictionaries with truncation rule settings to file for background facies and overlay facies
@@ -253,20 +255,20 @@ class DefineTruncationRule:
 
             sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubic.items()))
 
-#            for name, truncStructItem in self.__tableCubic.items():
+            # for name, truncStructItem in self.__tableCubic.items():
             for name, truncStructItem in sortedDictionaryCubic.items():
-                nPoly = len(truncStructItem)-1
-                outString = 'Cubic ' + name + ' ' + str(nPoly) +' '
+                nPoly = len(truncStructItem) - 1
+                outString = 'Cubic ' + name + ' ' + str(nPoly) + ' '
                 outString = outString + ' ' + str(truncStructItem)
                 file.write(outString)
                 file.write('\n')
 
             sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubic.items()))
 
-#            for name, truncStructItem in self.__tableNonCubic.items():
+            # for name, truncStructItem in self.__tableNonCubic.items():
             for name, truncStructItem in sortedDictionaryNonCubic.items():
                 nPoly = len(truncStructItem)
-                outString = 'NonCubic ' + name + ' ' + str(nPoly) +' '
+                outString = 'NonCubic ' + name + ' ' + str(nPoly) + ' '
                 outString = outString + ' ' + str(truncStructItem)
                 file.write(outString)
                 file.write('\n')
@@ -274,10 +276,10 @@ class DefineTruncationRule:
             ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
             BACKGROUND_LIST_INDX = OverlayGroupIndices.BACKGROUND_LIST_INDX
             sortedDictionaryOverlay = collections.OrderedDict(sorted(self.__tableOverlay.items()))
-#            for name, overlayGroups in self.__tableOverlay.items():
+            # for name, overlayGroups in self.__tableOverlay.items():
             for name, overlayGroups in sortedDictionaryOverlay.items():
                 nGroups = len(overlayGroups)
-                outString = 'Overlay ' + name + ' ' + str(nGroups) +' '
+                outString = 'Overlay ' + name + ' ' + str(nGroups) + ' '
                 for n in range(nGroups):
                     overlayGroupItem = overlayGroups[n]
                     alphaList = overlayGroupItem[ALPHA_LIST_INDX]
@@ -292,27 +294,26 @@ class DefineTruncationRule:
             NAME_BG_INDX = CubicAndOverlayIndices.NAME_BG_INDX
             NAME_OL_INDX = CubicAndOverlayIndices.NAME_OL_INDX
             sortedDictionaryCubicAndOverlay = collections.OrderedDict(sorted(self.__tableCubicAndOverlay.items()))
-#            for name, truncStructItemWithOverlay in self.__tableCubicAndOverlay.items():
+            # for name, truncStructItemWithOverlay in self.__tableCubicAndOverlay.items():
             for name, truncStructItemWithOverlay in sortedDictionaryCubicAndOverlay.items():
                 nameBG = truncStructItemWithOverlay[NAME_BG_INDX]
                 nameOL = truncStructItemWithOverlay[NAME_OL_INDX]
-                outString ='CubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
+                outString = 'CubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
                 file.write(outString)
                 file.write('\n')
 
             NAME_BG_INDX = NonCubicAndOverlayIndices.NAME_BG_INDX
             NAME_OL_INDX = NonCubicAndOverlayIndices.NAME_OL_INDX
             sortedDictionaryNonCubicAndOverlay = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))
-#            for name, truncStructItemWithOverlay in self.__tableNonCubicAndOverlay.items():
+            # for name, truncStructItemWithOverlay in self.__tableNonCubicAndOverlay.items():
             for name, truncStructItemWithOverlay in sortedDictionaryNonCubicAndOverlay.items():
                 nameBG = truncStructItemWithOverlay[NAME_BG_INDX]
                 nameOL = truncStructItemWithOverlay[NAME_OL_INDX]
-                outString ='NonCubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
+                outString = 'NonCubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
                 file.write(outString)
                 file.write('\n')
 
-
-    def __getTruncSettingsCubicFromFile(self,words):
+    def __getTruncSettingsCubicFromFile(self, words):
         ''' Read details about Cubic truncation rule settings. Is used in function to read settings'''
         nPoly = int(words[2])
         if words[3][2] == 'H':
@@ -322,55 +323,54 @@ class DefineTruncationRule:
         else:
             raise IOError('Format error for word number 4 in file {}'.format(self.__inputFileName))
 
-
         truncItem = []
         truncItem.append(direction)
         m = 4
         for i in range(nPoly):
             faciesName = copy.copy(words[m][2:5])
 
-            n = len(words[m+1])
-            probFrac = float(words[m+1][:n-1])
+            n = len(words[m + 1])
+            probFrac = float(words[m + 1][:n - 1])
 
-            n = len(words[m+2])
-            L1 = int(words[m+2][:n-1])
+            n = len(words[m + 2])
+            L1 = int(words[m + 2][:n - 1])
 
-            n = len(words[m+3])
-            L2 = int(words[m+3][:n-1])
+            n = len(words[m + 3])
+            L2 = int(words[m + 3][:n - 1])
 
-            n = len(words[m+4])
-            L3 = int(words[m+4][:n-2])
+            n = len(words[m + 4])
+            L3 = int(words[m + 4][:n - 2])
 
-            m = m+5
+            m = m + 5
             polygonItem = [faciesName, probFrac, L1, L2, L3]
             truncItem.append(polygonItem)
 
         return truncItem
 
-    def __getTruncSettingsNonCubicFromFile(self,words):
+    def __getTruncSettingsNonCubicFromFile(self, words):
         ''' Read details about NonCubic truncation rule settings. Is used in function to read settings'''
         nPoly = int(words[2])
         truncItem = []
 
         m = 3
         for i in range(nPoly):
-            if i==0:
+            if i == 0:
                 faciesName = copy.copy(words[m][3:6])
             else:
                 faciesName = copy.copy(words[m][2:5])
-            n = len(words[m+1])
-            angle = float(words[m+1][:n-1])
+            n = len(words[m + 1])
+            angle = float(words[m + 1][:n - 1])
 
-            n = len(words[m+2])
-            probFrac = float(words[m+2][:n-2])
+            n = len(words[m + 2])
+            probFrac = float(words[m + 2][:n - 2])
 
-            m = m+3
+            m = m + 3
             polygonItem = [faciesName, angle, probFrac]
             truncItem.append(polygonItem)
 
         return truncItem
 
-    def __getTruncSettingsOverlayFromFile(self,words):
+    def __getTruncSettingsOverlayFromFile(self, words):
         ''' Read details about overlay facies truncation rule settings. Is used in function to read settings'''
         nGroups = int(words[2])
         nPolyInGroup = []
@@ -397,18 +397,18 @@ class DefineTruncationRule:
                         alphaFieldName = words[m][4:9]
                 m = m + 1
 
-                fName =  words[m][1:4]
+                fName = words[m][1:4]
                 m = m + 1
 
                 wlen = len(words[m])
-                probFrac = float(words[m][:wlen-1])
+                probFrac = float(words[m][:wlen - 1])
                 m = m + 1
 
                 wlen = len(words[m])
-                if i == (nPolyInGroup[n]-1):
-                    centerPoint = float(words[m][:wlen-3])
+                if i == (nPolyInGroup[n] - 1):
+                    centerPoint = float(words[m][:wlen - 3])
                 else:
-                    centerPoint = float(words[m][:wlen-2])
+                    centerPoint = float(words[m][:wlen - 2])
                 m = m + 1
 
                 alphaItem = [alphaFieldName, fName, probFrac, centerPoint]
@@ -416,7 +416,7 @@ class DefineTruncationRule:
 
             # Read background facies for the group
             for k in range(nBackgroundFaciesInGroup[n]):
-                if k==0:
+                if k == 0:
                     bgFaciesName = copy.copy(words[m][2:5])
                 else:
                     wlen = len(words[m])
@@ -440,34 +440,34 @@ class DefineTruncationRule:
         itemNonCubicOverlay = None
         try:
             itemCubic = self.__tableCubic[name]
-        except:
+        except KeyError:
             try:
                 itemNonCubic = self.__tableNonCubic[name]
-            except:
+            except KeyError:
                 try:
                     itemCubicOverlay = self.__tableCubicAndOverlay[name]
-                except:
+                except KeyError:
                     try:
                         itemNonCubicOverlay = self.__tableNonCubicAndOverlay[name]
-                    except:
+                    except KeyError:
                         return None
 
-        if itemCubic != None:
+        if itemCubic is not None:
             if self.debug_level >= Debug.VERBOSE:
                 print('Debug output: Create truncation object of type Cubic from truncation setting with name: {}'.format(name))
             truncStructureList = itemCubic
-            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList,'Cubic')
+            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList, 'Cubic')
             overlayGroups = None
             truncObj = Trunc2D_Cubic()
-            truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone,alphaFieldNameForBackGroundFacies,
+            truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
                                 truncStructureList, overlayGroups=overlayGroups, debug_level=self.debug_level)
 
-        if itemCubicOverlay != None:
+        if itemCubicOverlay is not None:
             if self.debug_level >= Debug.VERBOSE:
                 print('Debug output: Create truncation object of type Cubic with overlay facies from truncation setting with name: {}'.format(name))
 
-            NAME_BG_INDX =  CubicAndOverlayIndices.NAME_BG_INDX
-            NAME_OL_INDX =  CubicAndOverlayIndices.NAME_OL_INDX
+            NAME_BG_INDX = CubicAndOverlayIndices.NAME_BG_INDX
+            NAME_OL_INDX = CubicAndOverlayIndices.NAME_OL_INDX
             STRUCT_CUBIC_INDX = CubicAndOverlayIndices.STRUCT_CUBIC_INDX
             OVERLAYGROUP_INDX = CubicAndOverlayIndices.OVERLAYGROUP_INDX
 
@@ -476,33 +476,35 @@ class DefineTruncationRule:
             truncStructureList = itemCubicOverlay[STRUCT_CUBIC_INDX]
             overlayGroups = itemCubicOverlay[OVERLAYGROUP_INDX]
 
-            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList,'Cubic')
+            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList, 'Cubic')
             if self.__checkOverlayFacies(faciesInZone, overlayGroups):
                 gaussFieldsInZone, faciesInZone = self.__updateGaussFieldNamesandFaciesInZoneForOverlay(overlayGroups, gaussFieldsInZone, faciesInZone)
                 truncObj = Trunc2D_Cubic()
-                truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone,alphaFieldNameForBackGroundFacies,
-                                truncStructureList, overlayGroups=overlayGroups, debug_level=self.debug_level)
+                truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
+                                    truncStructureList, overlayGroups=overlayGroups, debug_level=self.debug_level)
             else:
-                raise IOError('Inconsistent facies specification for truncation rulw with overlay facies.'
-                              'Either: specified background facies for overlay facies groups is not defined in background facies truncation rule.'
-                              'Or: specified overlay facies is equal to background facies')
+                raise IOError(
+                    'Inconsistent facies specification for truncation rulw with overlay facies.'
+                    'Either: specified background facies for overlay facies groups is not defined in background facies truncation rule.'
+                    'Or: specified overlay facies is equal to background facies'
+                )
 
-        if itemNonCubic != None:
+        if itemNonCubic is not None:
             if self.debug_level >= Debug.VERBOSE:
                 print('Debug output: Create truncation object of type NonCubic from truncation setting with name: {}'.format(name))
             truncStructureList = itemNonCubic
-            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList,'NonCubic')
+            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList, 'NonCubic')
             overlayGroups = None
             truncObj = Trunc2D_Angle()
-            truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone,alphaFieldNameForBackGroundFacies,
+            truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
                                 truncStructureList, overlayGroups=overlayGroups, debug_level=self.debug_level)
 
-        if itemNonCubicOverlay != None:
+        if itemNonCubicOverlay is not None:
             if self.debug_level >= Debug.VERBOSE:
                 print('Debug output: Create truncation object of type NonCubic with overlay facies from truncation setting with name: {}'.format(name))
 
-            NAME_BG_INDX =  NonCubicAndOverlayIndices.NAME_BG_INDX
-            NAME_OL_INDX =  NonCubicAndOverlayIndices.NAME_OL_INDX
+            NAME_BG_INDX = NonCubicAndOverlayIndices.NAME_BG_INDX
+            NAME_OL_INDX = NonCubicAndOverlayIndices.NAME_OL_INDX
             STRUCT_NONCUBIC_INDX = NonCubicAndOverlayIndices.STRUCT_NONCUBIC_INDX
             OVERLAYGROUP_INDX = NonCubicAndOverlayIndices.OVERLAYGROUP_INDX
 
@@ -511,11 +513,11 @@ class DefineTruncationRule:
             truncStructureList = itemNonCubicOverlay[STRUCT_NONCUBIC_INDX]
             overlayGroups = itemNonCubicOverlay[OVERLAYGROUP_INDX]
 
-            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList,'NonCubic')
+            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(truncStructureList, 'NonCubic')
             if self.__checkOverlayFacies(faciesInZone, overlayGroups):
                 gaussFieldsInZone, faciesInZone = self.__updateGaussFieldNamesandFaciesInZoneForOverlay(overlayGroups, gaussFieldsInZone, faciesInZone)
                 truncObj = Trunc2D_Angle()
-                truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone,alphaFieldNameForBackGroundFacies,
+                truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
                                     truncStructureList, overlayGroups=overlayGroups, debug_level=self.debug_level)
             else:
                 raise IOError('Inconsistent facies specification for truncation rulw with overlay facies.'
@@ -531,39 +533,39 @@ class DefineTruncationRule:
         endIndx = 0
         FACIES_NAME_INDX = -999
         if truncType == 'Cubic':
-            nPolygons = len(truncStructureList)-1
+            nPolygons = len(truncStructureList) - 1
             startIndx = 1
-            endIndx = nPolygons+1
-            FACIES_NAME_INDX =  CubicPolygonIndices.FACIES_NAME_INDX
+            endIndx = nPolygons + 1
+            FACIES_NAME_INDX = CubicPolygonIndices.FACIES_NAME_INDX
         elif truncType == 'NonCubic':
             nPolygons = len(truncStructureList)
             startIndx = 0
             endIndx = nPolygons
-            FACIES_NAME_INDX =  NonCubicPolygonIndices.FACIES_NAME_INDX
+            FACIES_NAME_INDX = NonCubicPolygonIndices.FACIES_NAME_INDX
 
         fNameList = []
         fTable = {}
 
-        for i in range(startIndx,endIndx):
+        for i in range(startIndx, endIndx):
             polyItem = truncStructureList[i]
             fName = polyItem[FACIES_NAME_INDX]
             # Add the facies name only if it is not already within the list
             if fName not in fNameList:
                 fNameList.append(fName)
-                fTable[i-startIndx+1] = fName
+                fTable[i - startIndx + 1] = fName
 
         # Define default values for name of gauss fields, facies
         faciesInZone = fNameList
         mainFaciesTable = APSMainFaciesTable(fTable=fTable)
-        gaussFieldsInZone = ['GRF01','GRF02']
-        alphaFieldNameForBackGroundFacies = ['GRF01','GRF02']
+        gaussFieldsInZone = ['GRF01', 'GRF02']
+        alphaFieldNameForBackGroundFacies = ['GRF01', 'GRF02']
         return mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies
 
-    def __checkOverlayFacies(self,backgroundFaciesList, overlayGroups):
+    def __checkOverlayFacies(self, backgroundFaciesList, overlayGroups):
         ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
-        BACKGROUND_LIST_INDX =  OverlayGroupIndices.BACKGROUND_LIST_INDX
+        BACKGROUND_LIST_INDX = OverlayGroupIndices.BACKGROUND_LIST_INDX
         FACIES_NAME_INDX = OverlayPolygonIndices.FACIES_NAME_INDX
-        if overlayGroups != None:
+        if overlayGroups is not None:
             for n in range(len(overlayGroups)):
                 groupItem = overlayGroups[n]
                 alphaList = groupItem[ALPHA_LIST_INDX]
@@ -589,7 +591,7 @@ class DefineTruncationRule:
         ALPHA_NAME_INDX = OverlayPolygonIndices.ALPHA_NAME_INDX
         FACIES_NAME_INDX = OverlayPolygonIndices.FACIES_NAME_INDX
 
-        if overlayGroups != None:
+        if overlayGroups is not None:
             for n in range(len(overlayGroups)):
                 groupItem = overlayGroups[n]
                 alphaList = groupItem[ALPHA_LIST_INDX]
@@ -609,7 +611,6 @@ class DefineTruncationRule:
 
         return gaussFieldNameList, faciesNameList
 
-
     def writeTruncRuleToXmlFile(self, name, outputFileName):
         ''' Build an XML tree with top as root from truncation object and write it'''
         truncRuleObj = self.getTruncationRuleObject(name)
@@ -624,10 +625,8 @@ class DefineTruncationRule:
     def initNewTruncationRuleSettingsCubic(self, direction):
         ''' Initialize new truncation rule settings.
             Call this function as the first function when creating an new settings for Cubic rules.'''
-        if direction == 'H':
-            truncStructureCubic = ['H']
-        else:
-            truncStructureCubic = ['V']
+        assert direction in ['H', 'V']
+        truncStructureCubic = [direction]
         return truncStructureCubic
 
     def addPolygonToTruncationRuleSettingsCubic(self, truncStructureCubic, faciesName, probFrac, L1, L2, L3):
@@ -635,9 +634,8 @@ class DefineTruncationRule:
             Use this function repeatedly to add the polygons for one Cubic settings.
             NOTE: Add polygons in correct order sorted by first L1, then L2 then L3.'''
 
-        polyItem = [faciesName, probFrac, L1 ,L2, L3]
+        polyItem = [faciesName, probFrac, L1, L2, L3]
         truncStructureCubic.append(polyItem)
-
 
     def addTruncationRuleSettingsCubic(self, name, truncStructureSetting, replace=False):
         ''' Add a truncation rule settings for Cubic rule to the truncation rule settings dictionary
@@ -651,8 +649,6 @@ class DefineTruncationRule:
             # Check if the name is used
             if not name in self.__tableCubic:
                 self.__tableCubic[name] = truncStructureSetting
-
-
 
     def initNewTruncationRuleSettingsNonCubic(self):
         ''' Initialize new truncation rule settings.
@@ -678,24 +674,21 @@ class DefineTruncationRule:
             self.__tableNonCubic[name] = truncStructureSetting
         else:
             # Check if the name is used
-            if not name in self.__tableNonCubic:
+            if name not in self.__tableNonCubic:
                 self.__tableNonCubic[name] = truncStructureSetting
-
-
 
     def addPolygonToAlphaList(self, alphaName, faciesName, probFrac=1.0, centerPoint=0.0, alphaList=None):
         ''' Function to add a polygon with associated alpha field name, facies name etc to list for one overlay group'''
-        if alphaList==None:
+        if alphaList is None:
             alphaList = []
             alphaList.append([alphaName, faciesName, probFrac, centerPoint])
         else:
             alphaList.append([alphaName, faciesName, probFrac, centerPoint])
         return alphaList
 
-
     def addOverlayGroupSettings(self, alphaList, backgroundFaciesListForGroup, overlayGroups=None):
         ''' Function to add a new overlay group to the list of overlay groups.'''
-        if overlayGroups == None:
+        if overlayGroups is None:
             overlayGroups = []
             overlayGroups.append([alphaList, backgroundFaciesListForGroup])
         else:
@@ -708,9 +701,8 @@ class DefineTruncationRule:
             self.__tableOverlay[name] = overlayGroups
         else:
             # Check if the name is used
-            if not name in self.__tableOverlay:
+            if name not in self.__tableOverlay:
                 self.__tableOverlay[name] = overlayGroups
-
 
     def addTruncationRuleSettingsCubicWithOverlay(self, name, nameBG, nameOL, replace=False):
         ''' Add a truncation rule settings to the truncation rule settings dictionary
@@ -721,17 +713,19 @@ class DefineTruncationRule:
         '''
         try:
             truncStructBG = self.__tableCubic[nameBG]
-        except:
+        except KeyError:
             raise KeyError('Background facies truncation rule setting: {} is not defined'.format(nameBG))
         try:
             overlayGroups = self.__tableOverlay[nameOL]
-        except:
+        except KeyError:
             raise KeyError('Overlay facies truncation rule setting: {} is not defined'.format(nameOL))
 
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         if not self.__checkConsistencyBetweenBackGroundCubicAndOverlay(truncStructBG, overlayGroups):
-            raise ValueError('Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
-                             ''.format(nameBG, nameOL))
+            raise ValueError(
+                'Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
+                ''.format(nameBG, nameOL)
+            )
 
         # Create new Cubic setting with overlay
         truncStructCubicWithOverlay = [nameBG, nameOL, truncStructBG, overlayGroups]
@@ -740,7 +734,6 @@ class DefineTruncationRule:
         else:
             if name not in self.__tableCubicAndOverlay:
                 self.__tableCubicAndOverlay[name] = truncStructCubicWithOverlay
-
 
     def addTruncationRuleSettingsNonCubicWithOverlay(self, name, nameBG, nameOL, replace=False):
         ''' Add a truncation rule settings to the truncation rule settings dictionary
@@ -751,17 +744,19 @@ class DefineTruncationRule:
         '''
         try:
             truncStructBG = self.__tableNonCubic[nameBG]
-        except:
+        except KeyError:
             raise KeyError('Background facies truncation rule setting: {} is not defined'.format(nameBG))
         try:
             overlayGroups = self.__tableOverlay[nameOL]
-        except:
+        except KeyError:
             raise KeyError('Overlay facies truncation rule setting: {} is not defined'.format(nameOL))
 
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         if not self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(truncStructBG, overlayGroups):
-            raise ValueError('Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
-                             ''.format(nameBG, nameOL))
+            raise ValueError(
+                'Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
+                ''.format(nameBG, nameOL)
+            )
 
         # Create new NonCubic setting with overlay
         truncStructNonCubicWithOverlay = [nameBG, nameOL, truncStructBG, overlayGroups]
@@ -770,8 +765,6 @@ class DefineTruncationRule:
         else:
             if name not in self.__tableNonCubicAndOverlay:
                 self.__tableNonCubicAndOverlay[name] = truncStructNonCubicWithOverlay
-
-
 
     def __checkConsistencyBetweenBackGroundCubicAndOverlay(self, truncStructBG, overlayGroups):
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
@@ -802,7 +795,6 @@ class DefineTruncationRule:
                     return False
                 if alphaName == 'GRF01' or alphaName == 'GRF02':
                     return False
-
         return True
 
     def __checkConsistencyBetweenBackGroundCubicAndOverlayOld(self, nameBG, nameOL, truncStructBG, overlayGroups):
@@ -837,9 +829,10 @@ class DefineTruncationRule:
                                      'is already defined as background facies in Cubic rule with name {} '
                                      ''.format(fName, nameOL, nameBG))
                 if alphaName == 'GRF01' or alphaName == 'GRF02':
-                    raise ValueError('Alpha field names can not be the same in overlay facies truncation settings in {} '
-                                     'as for background facies truncation settings in {} '
-                                     ''.format(nameOL, nameBG))
+                    raise ValueError(
+                        'Alpha field names can not be the same in overlay facies truncation settings in {} '
+                        'as for background facies truncation settings in {} '
+                        ''.format(nameOL, nameBG))
 
     def __checkConsistencyBetweenBackGroundNonCubicAndOverlay(self, truncStructBG, overlayGroups):
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
@@ -871,50 +864,13 @@ class DefineTruncationRule:
                 if alphaName == 'GRF01' or alphaName == 'GRF02':
                     return False
         return True
-    
-    def __checkConsistencyBetweenBackGroundNonCubicAndOverlayOld(self, truncStructBG, overlayGroups):
-        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
-        bgFacies = []
-        FACIES_NAME_INDX_BG = NonCubicPolygonIndices.FACIES_NAME_INDX
-        ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
-        BACKGROUND_LIST_INDX = OverlayGroupIndices.BACKGROUND_LIST_INDX
-        ALPHA_NAME_INDX = OverlayPolygonIndices.ALPHA_NAME_INDX
-        FACIES_NAME_INDX_OL = OverlayPolygonIndices.FACIES_NAME_INDX
-        for i in range(len(truncStructBG)):
-            poly = truncStructBG[i]
-            fName = poly[FACIES_NAME_INDX_BG]
-            if fName not in bgFacies:
-                bgFacies.append(fName)
 
-        for n in range(len(overlayGroups)):
-            groupItem = overlayGroups[n]
-            alphaList = groupItem[ALPHA_LIST_INDX]
-            backgroundListForGroup = groupItem[BACKGROUND_LIST_INDX]
-            for fName in backgroundListForGroup:
-                if fName not in bgFacies:
-                    raise ValueError('Specified background facies name {} in overlay facies rule {} '
-                                     'does not exist as facies in Cubic rule with name {} '
-                                     ''.format(fName, nameOL, nameBG))
-            for i in range(len(alphaList)):
-                alphaItem = alphaList[i]
-                alphaName = alphaItem[ALPHA_NAME_INDX]
-                fName = alphaItem[FACIES_NAME_INDX_OL]
-                if fName in bgFacies:
-                    raise ValueError('Specified overlay facies name {} in overlay facies rule {} '
-                                     'is already defined as background facies in Cubic rule with name {} '
-                                     ''.format(fName, nameOL, nameBG))
-                if alphaName == 'GRF01' or alphaName == 'GRF02':
-                    raise ValueError('Alpha field names can not be the same in overlay facies truncation settings in {} '
-                                     'as for background facies truncation settings in {} '
-                                     ''.format(nameOL, nameBG))
-
-    def removeTruncationRuleSettings(self,name,removeDependentBG=False, removeDependentOL=False):
+    def removeTruncationRuleSettings(self, name, removeDependentBG=False, removeDependentOL=False):
         ''' Remove a truncation setting from dictionary. If a truncation rule using overlay facies is removed, it will not remove
             the background settings which still will be available for truncation rule settings without overlay. '''
 
-
         if name in self.__tableCubic:
-            NAME_BG_INDX =  CubicAndOverlayIndices.NAME_BG_INDX
+            NAME_BG_INDX = CubicAndOverlayIndices.NAME_BG_INDX
             # Check that this setting is not used in settings with overlay facies
             isUsed = False
             for key, itemCubicOverlay in self.__tableCubicAndOverlay.items():
@@ -927,11 +883,11 @@ class DefineTruncationRule:
                 del self.__tableCubic[name]
 
         if name in self.__tableNonCubic:
-            NAME_BG_INDX =  NonCubicAndOverlayIndices.NAME_BG_INDX
+            NAME_BG_INDX = NonCubicAndOverlayIndices.NAME_BG_INDX
             # Check that this setting is not used in settings with overlay facies
             isUsed = False
             for key, itemNonCubicOvelay in self.__tableNonCubicAndOverlay.items():
-                nameBG = itemNonCubicOverlay[NAME_BG_INDX]
+                nameBG = itemNonCubicOvelay[NAME_BG_INDX]
                 if name == nameBG:
                     isUsed = True
                     break
@@ -940,8 +896,8 @@ class DefineTruncationRule:
                 del self.__tableNonCubic[name]
 
         if name in self.__tableNonCubicAndOverlay:
-            NAME_BG_INDX =  NonCubicAndOverlayIndices.NAME_BG_INDX
-            NAME_OL_INDX =  NonCubicAndOverlayIndices.NAME_OL_INDX
+            NAME_BG_INDX = NonCubicAndOverlayIndices.NAME_BG_INDX
+            NAME_OL_INDX = NonCubicAndOverlayIndices.NAME_OL_INDX
             itemNonCubicOverlay = self.__tableNonCubicAndOverlay[name]
             nameBG = itemNonCubicOverlay[NAME_BG_INDX]
             nameOL = itemNonCubicOverlay[NAME_OL_INDX]
@@ -959,19 +915,17 @@ class DefineTruncationRule:
 
             print('Remove: {}'.format(name))
             del self.__tableNonCubicAndOverlay[name]
-            if removeDependentBG:
-                if not isUsedBG:
-                    print('  Remove: {}'.format(nameBG))
-                    del self.__tableNonCubic[nameBG]
+            if removeDependentBG and not isUsedBG:
+                print('  Remove: {}'.format(nameBG))
+                del self.__tableNonCubic[nameBG]
 
-            if removeDependentOL:
-                if not isUsedOL:
-                    print('  Remove: {}'.format(nameOL))
-                    del self.__tableOverlay[nameOL]
+            if removeDependentOL and not isUsedOL:
+                print('  Remove: {}'.format(nameOL))
+                del self.__tableOverlay[nameOL]
 
         if name in self.__tableCubicAndOverlay:
-            NAME_BG_INDX =  CubicAndOverlayIndices.NAME_BG_INDX
-            NAME_OL_INDX =  CubicAndOverlayIndices.NAME_OL_INDX
+            NAME_BG_INDX = CubicAndOverlayIndices.NAME_BG_INDX
+            NAME_OL_INDX = CubicAndOverlayIndices.NAME_OL_INDX
             itemCubicOverlay = self.__tableCubicAndOverlay[name]
             nameBG = itemCubicOverlay[NAME_BG_INDX]
             nameOL = itemCubicOverlay[NAME_OL_INDX]
@@ -989,22 +943,20 @@ class DefineTruncationRule:
 
             print('Remove: {}'.format(name))
             del self.__tableCubicAndOverlay[name]
-            if removeDependentBG:
-                if not isUsedBG:
-                    print('  Remove: {}'.format(nameBG))
-                    del self.__tableCubic[nameBG]
+            if removeDependentBG and not isUsedBG:
+                print('  Remove: {}'.format(nameBG))
+                del self.__tableCubic[nameBG]
 
-            if removeDependentOL:
-                if not isUsedOL:
-                    print('  Remove: {}'.format(nameOL))
-                    del self.__tableOverlay[nameOL]
+            if removeDependentOL and not isUsedOL:
+                print('  Remove: {}'.format(nameOL))
+                del self.__tableOverlay[nameOL]
 
     def __appendToList(self, dictionary, truncType, nBackgroundFacies, nOverlayFacies):
         settingsList = []
         for key, item in dictionary.items():
             nBG = self.__getNBackgroundFacies(truncType, item)
             nOL = self.__getNOverlayFacies(truncType, item)
-            truncMapPlotFile = self.__directory +'/' + key + '.png'
+            truncMapPlotFile = self.__directory + '/' + key + '.png'
             if nBackgroundFacies == 0:
                 settingsList.append([key, item, truncMapPlotFile])
             elif nBackgroundFacies == nBG and nOverlayFacies == nOL:
@@ -1086,8 +1038,8 @@ class DefineTruncationRule:
                 OVERLAYGROUP_INDX = CubicAndOverlayIndices.OVERLAYGROUP_INDX
             elif truncType == 'NonCubicAndOverlay':
                 OVERLAYGROUP_INDX = NonCubicAndOverlayIndices.OVERLAYGROUP_INDX
-            ALPHA_LIST_INDX      = OverlayGroupIndices.ALPHA_LIST_INDX
-            FACIES_NAME_INDX     = OverlayPolygonIndices.FACIES_NAME_INDX
+            ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
+            FACIES_NAME_INDX = OverlayPolygonIndices.FACIES_NAME_INDX
             overlayGroups = item[OVERLAYGROUP_INDX]
 
             for i in range(len(overlayGroups)):
@@ -1106,7 +1058,7 @@ class DefineTruncationRule:
         """ Find truncation settings for background facies. Specified name is name of truncation setting of either type Cubic or NonCubic"""
         itemCubic = None
         itemNonCubic = None
-        overlay_setting_list = []        
+        overlay_setting_list = []
         try:
             itemCubic = self.__tableCubic[name]
         except:
@@ -1115,14 +1067,14 @@ class DefineTruncationRule:
             except:
                 raise KeyError('Truncation setting with name {} is not defined.'
                                ''.format(name))
-        
-        if itemCubic != None:
+
+        if itemCubic is not None:
             # Search for all overlay settings that are consistent with background model
             sortedDictionary = collections.OrderedDict(sorted(self.__tableOverlay.items()))
             for key, itemOverlay in sortedDictionary.items():
                 if self.__checkConsistencyBetweenBackGroundCubicAndOverlay(itemCubic, itemOverlay):
                     overlay_setting_list.append(key)
-        elif itemNonCubic != None:
+        elif itemNonCubic is not None:
             sortedDictionary = collections.OrderedDict(sorted(self.__tableOverlay.items()))
             for key, itemOverlay in sortedDictionary.items():
                 if self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(itemNonCubic, itemOverlay):
@@ -1141,17 +1093,16 @@ class DefineTruncationRule:
         faciesProb = []
         nFacies = len(faciesNames)
         for i in range(nFacies):
-            faciesProb.append(1.0/float(nFacies))
+            faciesProb.append(1.0 / float(nFacies))
         truncObj.setTruncRule(faciesProb)
-        faciesPolygons =  truncObj.truncMapPolygons()
+        faciesPolygons = truncObj.truncMapPolygons()
         faciesIndxPerPolygon = truncObj.faciesIndxPerPolygon()
         faciesOrdering = truncObj.getFaciesOrderIndexList()
 
-
         # Truncation map is plotted
-        fig = plt.figure(figsize=[2.0, 2.0],frameon=False)
+        fig = plt.figure(figsize=[2.0, 2.0], frameon=False)
         plt.axis('off')
-        axTrunc = plt.subplot(1,1,1)
+        axTrunc = plt.subplot(1, 1, 1)
         colors = get_colors(nFacies)
         cmap_name = 'Colormap'
 
@@ -1176,10 +1127,10 @@ class DefineTruncationRule:
             fName = faciesNames[fIndx]
         axTrunc.set_title(name)
         axTrunc.set_aspect('equal', 'box')
-        plotFileName = name + '.png'
         if writePngFile:
+            plotFileName = name + '.png'
             if self.__directory != '':
-                plotFileName = self.__directory + '/' + name + '.png'
+                plotFileName = self.__directory + '/' + plotFileName
             print('Write file: {}'.format(plotFileName))
             fig.savefig(plotFileName)
             plt.close(fig)
@@ -1193,12 +1144,11 @@ class DefineTruncationRule:
         faciesProb = []
         nFacies = len(faciesNames)
         for i in range(nFacies):
-            faciesProb.append(1.0/float(nFacies))
+            faciesProb.append(1.0 / float(nFacies))
         truncObj.setTruncRule(faciesProb)
-        faciesPolygons =  truncObj.truncMapPolygons()
+        faciesPolygons = truncObj.truncMapPolygons()
         faciesIndxPerPolygon = truncObj.faciesIndxPerPolygon()
         faciesOrdering = truncObj.getFaciesOrderIndexList()
-
 
         # Truncation map is plotted
         plt.axis('off')
@@ -1321,91 +1271,58 @@ class DefineTruncationRule:
         plt.close(fig)
 
 
-if __name__ == '__main__':
+def run_example():
     # Example how to use this class
-
-    # Create new entries for truncation settings and add to file
-    truncRuleDir = 'truncRuleSettings'
+    if len(argv) == 1:
+        # Create new entries for truncation settings and add to file
+        truncRuleDir = 'truncRuleSettings'
+    else:
+        truncRuleDir = argv[1]
     rules = DefineTruncationRule(truncRuleDir)
-
     # Create and add setting for Cubic truncation rule without overlay facies
     # This settings is for the case with 3 facies, one per polygon
     # Step 1: Initiate
     direction = 'H'
     truncStructureCubic = rules.initNewTruncationRuleSettingsCubic(direction)
-
     # Step 2: Add polygons with facies and probability fraction
-    faciesName='F01'
-    probFrac = 1.0
-    L1 = 1
-    L2 = 1
-    L3 = 0
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
-    faciesName='F02'
-    probFrac = 1.0
-    L1 = 1
-    L2 = 2
-    L3 = 0
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
-    faciesName='F03'
-    probFrac = 1.0
-    L1 = 2
-    L2 = 0
-    L3 = 0
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
+    polygons = [
+        ('F01', 1.0, 1, 1, 0),
+        ('F02', 1.0, 1, 2, 0),
+        ('F03', 1.0, 2, 0, 0),
+    ]
+    for faciesName, probFrac, L1, L2, L3 in polygons:
+        rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
     # Step 3: Add the truncation setting to the object of type DefineTruncationRule
     nameBG = 'C_example_1'
     rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
-
     # Optional step 4: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(nameBG)
-
     # -----------
-
     # Create and add setting for NonCubic truncation rule with overlay facies
     # This settings is for the case with 4 polygons and 4 facies for background truncation rule of type NonCubic
     # and 2 overlay facies.
     # Step 1: Initiate
     truncStructureNonCubic = rules.initNewTruncationRuleSettingsNonCubic()
-
     # Step 2.1: Add polygons with facies and probability fraction
-    faciesName='F01'
-    probFrac = 1.0
-    angle = 45.0
-    rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, faciesName, angle, probFrac)
-
-    faciesName='F02'
-    probFrac = 1.0
-    angle = -65.0
-    rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, faciesName, angle, probFrac)
-
-    faciesName='F03'
-    probFrac = 1.0
-    angle = -120.0
-    rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, faciesName, angle, probFrac)
-
-    faciesName='F04'
-    probFrac = 1.0
-    angle = 0.0
-    rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, faciesName, angle, probFrac)
-
+    polygons = [
+        ('F01', 1.0, 45.0),
+        ('F02', 1.0, -65.0),
+        ('F03', 1.0, -120.0),
+        ('F04', 1.0, 0.0),
+    ]
+    for faciesName, probFrac, angle in polygons:
+        rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, faciesName, angle, probFrac)
     # Step 2.2: Add the truncation setting for the background facies to the object of type DefineTruncationRule
     nameBG = 'N_example_1'
     rules.addTruncationRuleSettingsNonCubic(nameBG, truncStructureNonCubic)
-
     # Optional step 2.3: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(nameBG)
-
     # Step 3.1:
     # Define settings for one overlay group with two background facies and two polygons with the same overlay facies
     alphaList = rules.addPolygonToAlphaList('GRF03', 'F05', 0.5, 0.0)
     alphaList = rules.addPolygonToAlphaList('GRF04', 'F05', 0.5, 0.0, alphaList)
     backgroundFaciesListForGroup = ['F01', 'F02']
     overlayGroups = rules.addOverlayGroupSettings(alphaList, backgroundFaciesListForGroup)
-
     # Define settings for one overlay group with one background facies and one polygons with overlay facies
     alphaList = rules.addPolygonToAlphaList('GRF05', 'F06', 1.0, 0.0)
     backgroundFaciesListForGroup = ['F03']
@@ -1413,91 +1330,51 @@ if __name__ == '__main__':
     # Step 3.2: Add the overlayGroup list as a setting for overlay facies
     nameOL = 'A_example_1'
     rules.addTruncationRuleSettingsOverlay(nameOL, overlayGroups)
-
     # Step 4: Add a truncation rule using the background facies setting for NonCubic with name nameBG
     # and overlay facies setting with name nameOL as a new truncation rule settings
     name = 'NonCubic_1_with_overlay_1'
     rules.addTruncationRuleSettingsNonCubicWithOverlay(name, nameBG, nameOL)
-
     # Optional step 5: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(name)
-
     # ------
-
     # Write rules to file
     rules.writeFile('out1.dat')
-
     # Read rules from file into new data object
-    truncRuleDir = 'truncRuleSettings'
     rulesRead = DefineTruncationRule(truncRuleDir)
     rulesRead.readFile('out1.dat')
     rulesRead.writeFile('out2.dat')
-
     # Add new truncation rule to the first truncation rule settings object
-
     # Create and add setting for Cubic truncation rule without overlay facies
     # This settings is for the case with 3 facies, one per polygon
     # Step 1: Initiate
     direction = 'V'
     truncStructureCubic = rules.initNewTruncationRuleSettingsCubic(direction)
-
     # Step 2: Add polygons with facies and probability fraction
-    faciesName='F01'
-    probFrac = 0.5
-    L1 = 1
-    L2 = 1
-    L3 = 1
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
-    faciesName='F02'
-    probFrac = 0.5
-    L1 = 1
-    L2 = 1
-    L3 = 2
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
-    faciesName='F01'
-    probFrac = 0.5
-    L1 = 1
-    L2 = 2
-    L3 = 0
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
-    faciesName='F03'
-    probFrac = 1.0
-    L1 = 2
-    L2 = 1
-    L3 = 0
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
-    faciesName='F02'
-    probFrac = 0.5
-    L1 = 2
-    L2 = 2
-    L3 = 0
-    rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
-
+    polygons = [
+        ('F01', 0.5, 1, 1, 1),
+        ('F02', 0.5, 1, 1, 2),
+        ('F01', 0.5, 1, 2, 0),
+        ('F03', 1.0, 2, 1, 0),
+        ('F02', 0.5, 2, 2, 0),
+    ]
+    for faciesName, probFrac, L1, L2, L3 in polygons:
+        rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, faciesName, probFrac, L1, L2, L3)
     # Step 3: Add the truncation setting to the object of type DefineTruncationRule
     nameBG = 'C_example_2'
     rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
-
     # Optional step 4: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(nameBG)
-
     rules.writeFile('out3.dat')
-
     # Create plots for all truncation settings
     rules.createOverviewPlotCubic('Cubic_rules')
     rules.createOverviewPlotNonCubic('NonCubic_rules')
     rules.createOverviewPlotCubicWithOverlay('Cubic_rules_with_overlay')
     rules.createOverviewPlotNonCubicWithOverlay('NonCubic_rules_with_overlay')
-
     rules.createAllNonCubicXMLTemplates()
     rules.createAllCubicXMLTemplatesWithOverlayFacies()
     rules.createAllNonCubicXMLTemplatesWithOverlayFacies()
-
-    for nBackgroundFacies in range(1,6):
-        print('List of settings for Cubic with background facies: {}' 
+    for nBackgroundFacies in range(1, 6):
+        print('List of settings for Cubic with background facies: {}'
               ''.format(str(nBackgroundFacies)))
 
         nOverlayFacies = 0
@@ -1509,7 +1386,7 @@ if __name__ == '__main__':
             print('{} {}'.format(key, fileName))
 
         for nOverlayFacies in range(5):
-            print('List of settings for Cubic with background facies: {}   and overlay facies: {}' 
+            print('List of settings for Cubic with background facies: {}   and overlay facies: {}'
                   ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
 
             settingsList = rules.getListOfSettings('CubicAndOverlay', nBackgroundFacies, nOverlayFacies)
@@ -1518,9 +1395,8 @@ if __name__ == '__main__':
                 key = item[0]
                 fileName = item[2]
                 print('{} {}'.format(key, fileName))
-
-    for nBackgroundFacies in range(1,6):
-        print('List of settings for NonCubic with background facies: {}' 
+    for nBackgroundFacies in range(1, 6):
+        print('List of settings for NonCubic with background facies: {}'
               ''.format(str(nBackgroundFacies)))
 
         nOverlayFacies = 0
@@ -1532,7 +1408,7 @@ if __name__ == '__main__':
             print('{} {}'.format(key, fileName))
 
         for nOverlayFacies in range(5):
-            print('List of settings for NonCubic with background facies: {}   and overlay facies: {}' 
+            print('List of settings for NonCubic with background facies: {}   and overlay facies: {}'
                   ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
 
             settingsList = rules.getListOfSettings('NonCubicAndOverlay', nBackgroundFacies, nOverlayFacies)
@@ -1541,13 +1417,14 @@ if __name__ == '__main__':
                 key = item[0]
                 fileName = item[2]
                 print('{} {}'.format(key, fileName))
-
     # Remove a truncation setting
     # rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
     rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1', removeDependentBG=True, removeDependentOL=True)
-
     rules.writeFile('out4.dat')
     rulesFromFile = DefineTruncationRule(truncRuleDir)
     rulesFromFile.readFile("truncation_settings.dat")
     rulesFromFile.createAllCubicPlots()
 
+
+if __name__ == '__main__':
+    run_example()

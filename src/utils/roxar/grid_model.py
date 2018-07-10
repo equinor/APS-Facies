@@ -211,7 +211,7 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
         if code_names[code] == '':
             code_names[code] = str(code)
 
-    return [active_cell_values, code_names]
+    return active_cell_values, code_names
 
 
 def modifySelectedGridCells(grid_model, zone_number_list, realization_number, old_values, new_values):
@@ -407,7 +407,7 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
         if debug_level >= Debug.VERY_VERBOSE:
             layers_text = "{}-{} ".format(str(start + 1), str(end + 1))
             print('Zone{}: "{}", Layers {} ({} layers)'.format(str(i), zone_name, layers_text, num_layers_in_zone))
-            print(' ')
+            print('')
     num_zones = len(indexer.zonation)
     sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid, debug_level)
     return (

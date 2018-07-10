@@ -80,7 +80,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def __setEmpty(self):
 
         # Specific variables for class Trunc2D_Cubic
-        self._className = 'Trunc2D_Cubic'
+        self._className = self.__class__.__name__
 
         # Variables containing truncations for the 2D truncation map
         self.__truncStructure = []
@@ -112,7 +112,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
-
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  keyResolution=209, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
@@ -201,7 +200,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 print(repr(self._orderIndex))
                 print('Debug output: Facies code for facies in zone')
                 print(repr(self._faciesCode))
-                print(' ')
+                print('')
                 print('Debug output: Gauss fields in zone:')
                 print(repr(self._gaussFieldsInZone))
                 print('Debug output: Gauss fields for each alpha coordinate:')
@@ -232,7 +231,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         PFRAC = self.__node_index['probability fraction']
 
         truncStructure = []
-        nFacies = 0
         nPoly = 0
         # Keyword BackGroundModel
         bgmObj = getKeyword(trRuleXML, 'BackGroundModel', 'TruncationRule', modelFileName, required=True)
@@ -261,7 +259,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         kw3 = 'L2'
         kw4 = 'L3'
         for childL1 in L1Obj:
-            # print('Child L1 tag and attribute: ')
+            # print('Child L1 tag and attribute:')
             # print(childL1.tag,childL1.attrib)
             if childL1.tag == kw2:
                 text = childL1.get('name')
@@ -307,7 +305,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
                 # Loop over all child elements directly under L2 level
                 for childL2 in childL1:
-                    # print('Child L2 tag and attribute: ')
+                    # print('Child L2 tag and attribute:')
                     # print(childL2.tag,childL2.attrib)
                     if childL2.tag == kw2:
                         text = childL2.get('name')
@@ -317,15 +315,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         if fName not in self._faciesInZone:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                                                                    'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                        'Error: Specified facies name in truncation rule: ' + fName +
+                                'Error: Read truncation rule: ' + self._className + '\n'
+                                'Error: Specified facies name in truncation rule: ' + fName +
                                 ' is not defined for this zone.'
                             )
                         elif probFrac < 0.0 or probFrac > 1.0:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
-                                                                                    'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                        'Error: Specified probability fraction in truncation rule is outside [0,1]'
+                                'Error: Read truncation rule: ' + self._className + '\n'
+                                'Error: Specified probability fraction in truncation rule is outside [0,1]'
                             )
 
                         nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
@@ -348,7 +346,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
                         # Loop over all child elements directly under L3 level
                         for childL3 in childL2:
-                            # print('Child L3 tag and attribute: ')
+                            # print('Child L3 tag and attribute:')
                             # print(childL3.tag,childL3.attrib)
                             if childL3.tag == kw2:
                                 text = childL3.get('name')
@@ -358,15 +356,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                 if not (fName in self._faciesInZone):
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                                                                            'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                                'Error: Specified facies name in truncation rule: ' + fName +
+                                        'Error: Read truncation rule: ' + self._className + '\n'
+                                        'Error: Specified facies name in truncation rule: ' + fName +
                                         ' is not defined for this zone.'
                                     )
-                                if probFrac < 0.0 or probFrac > 1.0:
+                                if not (0.0 <= probFrac <= 1.0):
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
-                                                                                            'Error: Read truncation rule: ' + self._className + '\n'
-                                                                                                                                                'Error: Specified probability fraction in truncation rule is outside [0,1]'
+                                        'Error: Read truncation rule: ' + self._className + '\n'
+                                        'Error: Specified probability fraction in truncation rule is outside [0,1]'
                                     )
 
                                 nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
@@ -382,7 +380,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # End loop over L1 children
 
         # Number of background facies in total
-        self._nBackGroundFacies = nFacies
+        self._nBackGroundFacies = self.num_facies_in_truncation_rule
 
         # Check that specified probability fractions for each facies when summing over all polygons
         # for a facies is 1.0
@@ -412,7 +410,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             sumProbFrac[indx] += probFrac
 
         # Check the sum over background facies for probfrac
-        for i in range(self._nBackGroundFacies):
+        for i in range(self.num_facies_in_truncation_rule):
             fName = self._faciesInTruncRule[i]
             if self._debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Sum prob frac for facies {0} is: {1}'.format(fName, str(sumProbFrac[i])))
@@ -431,7 +429,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Write common contents from base class
         super().writeContentsInDataStructure()
 
-        print(' ')
+        print('')
         print('************  Contents specific to the "Cubic algorithm" *****************')
         print('Truncation structure:')
         for i in range(len(self.__truncStructure)):
@@ -1137,7 +1135,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self.__setTruncStructure(truncStructureList)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Background facies defined: ')
+            print('Debug output: Background facies defined:')
             print(repr(self._faciesInTruncRule))
 
         # Call base class function to fill data structure with overlay facies
@@ -1192,7 +1190,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         nodeList = None
         poly = None
         nPoly = 0
-        nFacies = 0
         truncStructure = ['N', directionL1, nodeList, 0.0, poly, 0.0, 1.0, 0.0, 1.0]
         nodeListLevel1 = []
         truncStructure[self.__node_index['list of nodes']] = nodeListLevel1
@@ -1354,7 +1351,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # The attributes are a dictionary with {name:value}
         # After this function is called, the parent element has got a new child element
         # for the current class.
-        nGF = self._nGaussFieldsInTruncationRule
+        nGF = self.getNGaussFieldsInModel()
 
         trRuleElement = Element('TruncationRule')
         parent.append(trRuleElement)

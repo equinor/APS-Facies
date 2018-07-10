@@ -2,17 +2,642 @@
 # -*- coding: utf-8 -*-
 from xml.etree.ElementTree import Element
 
-import numbers
 import numpy as np
 
 from src.algorithms.Trend3D import (
     Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear, Trend3D_rms_param,
 )
 from src.utils.checks import isVariogramTypeOK
-from src.utils.constants.simple import Debug, VariogramType
+from src.utils.constants.simple import Debug, VariogramType, CrossSectionType
 from src.utils.simGauss2D_nrlib import simGaussField
-from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword, isFMUUpdatable, createFMUvariableNameForResidual, createFMUvariableNameForTrend
+from src.utils.xmlUtils import (
+    getFloatCommand, getIntCommand, getKeyword, isFMUUpdatable,
+    createFMUvariableNameForResidual, createFMUvariableNameForTrend
+)
 
+# Dictionaries of legal value ranges for gauss field parameters
+from src.utils.records import VariogramRecord, SeedRecord, TrendRecord
+
+_minimum_value = {
+    'main': 0.0,
+    'perpendicular': 0.0,
+    'vertical': 0.0,
+    'azimuth': 0.0,
+    'dip': 0.0,
+    'power': 1.0,
+    'relative_std_dev': 0.0,
+}
+
+_maximum_value = {
+    'azimuth': 360.0,
+    'dip': 90.0,
+    'power': 2.0,
+}
+
+
+class GaussianFieldSimulation:
+    __slots__ = '_name', '_field', '_cross_section', '_grid_azimuth_angle', '_grid_size', '_simulation_box_size'
+
+    def __init__(self, name, field, cross_section, grid_azimuth_angle, grid_size, simulation_box_size):
+        self._name = name
+        self._field = field
+        self._cross_section = cross_section
+        self._grid_azimuth_angle = grid_azimuth_angle
+        self._grid_size = grid_size
+        self._simulation_box_size = simulation_box_size
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def field(self):
+        return self._field
+
+    @property
+    def cross_section(self):
+        return self._cross_section
+
+    @property
+    def grid_azimuth_angle(self):
+        return self._grid_azimuth_angle
+
+    @property
+    def grid_size(self):
+        return self._grid_size
+
+    @property
+    def simulation_box_size(self):
+        return self._simulation_box_size
+
+
+class GaussianField:
+    def __init__(self, name, variogram=None, trend=None, seed=0):
+        # TODO: Make sane default values for variogram and trend
+        if trend is None:
+            trend = Trend(name, use_trend=False)
+        self._name = name
+        self._variogram = variogram
+        self._trend = trend
+        self._seed = seed
+
+    @property
+    def seed(self):
+        return self._seed
+
+    @seed.setter
+    def seed(self, value):
+        # TODO: This probably should not be done
+        self._seed = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def variogram(self):
+        return self._variogram
+
+    @variogram.setter
+    def variogram(self, value):
+        # TODO: Verify
+        self._variogram = value
+
+    @property
+    def trend(self):
+        return self._trend
+
+    @trend.setter
+    def trend(self, value):
+        # TODO: Verify
+        self._trend = value
+
+    def __getitem__(self, item):
+        try:
+            return getattr(self, item)
+        except AttributeError:
+            val = self.variogram[item]
+            if val is not None:
+                return val
+            else:
+                try:
+                    return getattr(self.trend, item)
+                except AttributeError:
+                    raise AttributeError("The Gaussian Field ('{}') has no attribute {}".format(self.name, item))
+
+    def _simulate(self, cross_section, grid_azimuth_angle, grid_size, simulation_box_size, debug_level=Debug.OFF):
+        grid_dimensions, sizes, projection, = _get_projection_parameters(cross_section.type, grid_size, simulation_box_size)
+        # Find data for specified Gauss field name
+        seed_value = self.seed
+        variogram_type = self.variogram.type
+        power = self.variogram.power.value
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('')
+            print('Debug output: Within simGaussFieldWithTrendAndTransform')
+            print('Debug output: Simulate gauss field: ' + self.name)
+            print('Debug output: VariogramType: ' + str(variogram_type))
+            print('Debug output: Azimuth angle for Main range direction: ' + str(self.variogram.angles.azimuth))
+            print('Debug output: Azimuth angle for grid: ' + str(grid_azimuth_angle))
+            print('Debug output: Dip angle for Main range direction: ' + str(self.variogram.angles.dip))
+
+            if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
+                print('Debug output: Power    : ' + str(power))
+
+            print('Debug output: Seed value: ' + str(seed_value))
+        # Calculate 2D projection of the correlation ellipsoid
+        angle1, range1, angle2, range2 = self.variogram.calc_2d_variogram_from_3d_variogram(grid_azimuth_angle, projection, debug_level)
+        azimuth_variogram = angle1
+        if debug_level >= Debug.VERY_VERBOSE:
+            print(
+                '\nDebug output: Range1 in projection: {projection} : {range1}\n'
+                'Debug output: Range2 in projection: {projection} : {range2}\n'
+                'Debug output: Angle from vertical axis for Range1 direction: {angle1}\n'
+                'Debug output: Angle from vertical axis for Range2 direction: {angle2}\n'
+                'Debug output: (gridDim1, gridDim2) = ({gridDim1},{gridDim2})\n'
+                'Debug output: (Size1, Size2) = ({size1},  {size2})'
+                ''.format(
+                    projection=projection,
+                    range1=range1, range2=range2,
+                    angle1=angle1, angle2=angle2,
+                    gridDim1=grid_dimensions[0], gridDim2=grid_dimensions[1],
+                    size1=sizes[0], size2=sizes[1]
+                )
+            )
+        residual_field = simGaussField(
+            seed_value, grid_dimensions[0], grid_dimensions[1], sizes[0], sizes[1], variogram_type,
+            range1, range2, azimuth_variogram, power, debug_level
+        )
+        # Calculate trend
+        _, use_trend, trend_model, relative_std_dev, _ = self.trend.as_list()
+        if use_trend:
+            if debug_level >= Debug.VERBOSE:
+                print('    - Use Trend: {}'.format(trend_model.type.name))
+            min_max_difference, average_trend, trend_field = trend_model.createTrendFor2DProjection(
+                simulation_box_size, grid_azimuth_angle, grid_size, cross_section.type, cross_section.relative_position
+            )
+            gauss_field_with_trend = _add_trend(
+                residual_field, trend_field, relative_std_dev, min_max_difference, average_trend, debug_level
+            )
+        else:
+            gauss_field_with_trend = residual_field
+        trans_field = _transform_empiric_distribution_to_uniform(gauss_field_with_trend, debug_level)
+        return trans_field
+
+    def simulate(self, cross_section, grid_azimuth_angle, grid_size, simulation_box_size, debug_level=Debug.OFF):
+        return GaussianFieldSimulation(
+            name=self.name,
+            field=self._simulate(cross_section, grid_azimuth_angle, grid_size, simulation_box_size, debug_level),
+            cross_section=cross_section,
+            grid_azimuth_angle=grid_azimuth_angle,
+            grid_size=grid_size,
+            simulation_box_size=simulation_box_size,
+        )
+
+
+def _make_ranged_property(name, error_template, minimum=None, maximum=None, additional_validator=None, show_given_value=True):
+    if additional_validator is None:
+        def additional_validator(self, value):
+            return True
+    if minimum is None:
+        minimum = _minimum_value[name]
+    if maximum is None:
+        maximum = _maximum_value[name]
+
+    class Property:
+        __slots__ = '_' + name
+
+        def __init__(self):
+            setattr(self, '_' + name, None)
+
+        def get(self):
+            return getattr(self, '_' + name)
+
+        def set(self, value):
+            if not isinstance(value, FmuProperty):
+                try:
+                    updatable = getattr(self, '_' + name).updatable
+                except AttributeError:
+                    updatable = False
+                value = FmuProperty(value, updatable)
+            if minimum <= value.value <= maximum and additional_validator(self, value):
+                setattr(self, '_' + name, value)
+            else:
+                template = error_template
+                if show_given_value:
+                    template += '({value} was given)'
+                raise ValueError(
+                    template.format(name=name, min=minimum, max=maximum, value=value.value)
+                )
+    return property(fget=Property.get, fset=Property.set)
+
+
+def _make_simple_property(name, check, error_message):
+    class Property:
+        __slots__ = '_' + name
+
+        def __init__(self):
+            setattr(self, '_' + name, None)
+
+        def get(self):
+            return getattr(self, '_' + name)
+
+        def set(self, value):
+            if check(self, value):
+                setattr(self, '_' + name, value)
+            else:
+                raise ValueError(error_message)
+
+    return property(fget=Property.get, fset=Property.set)
+
+
+def _make_trend(name):
+    def is_model_and_rel_std_dev_set(self, value):
+        if value:
+            return self.model is not None and self.relative_std_dev is not None
+        return True
+    return _make_simple_property(name, is_model_and_rel_std_dev_set, 'While trend is used, a trend model MUST be given, and the relative std.dev. must be given')
+
+
+def _make_angle(name):
+    return _make_bounded_property(name, _minimum_value[name], _maximum_value[name], 'The {name} angle MUST be between {min}°, and {max}°.')
+
+
+def _make_bounded_property(name, minimum, maximum, error_template, additional_validator=None):
+    return _make_ranged_property(name, error_template, minimum, maximum, additional_validator)
+
+
+def _make_lower_bounded_property(name, additional_validator=None):
+    return _make_ranged_property(name, '{name} MUST be greater than (or equal to) 0', _minimum_value[name], float('inf'), additional_validator)
+
+
+class FmuProperty:
+    __slots__ = 'value', 'updatable'
+
+    def __init__(self, value, updatable=False):
+        # TODO: Ensure value is number, and updatable is boolean
+        self.value = value
+        self.updatable = updatable
+
+    def __str__(self):
+        return str(self.value)
+
+    def __repr__(self):
+        return '(' + str(self.value) + ', ' + str(self.updatable) + ')'
+
+
+class CrossSection:
+    __slots__ = '_type', '_relative_position'
+
+    def __init__(self, type, relative_position):
+        self._type = None
+        self._relative_position = None
+
+        self.type = type
+        self.relative_position = relative_position
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, value):
+        if value not in CrossSectionType:
+            value = CrossSectionType[value]
+        self._type = value
+
+    @property
+    def relative_position(self):
+        return self._relative_position
+
+    @relative_position.setter
+    def relative_position(self, value):
+        if not (0 <= value <= 1):
+            raise ValueError(
+                'The specified value must be in the interval [0.0, 1.0]'
+            )
+        self._relative_position = value
+
+
+class Ranges:
+    __slots__ = '_main', '_perpendicular', '_vertical'
+
+    def __init__(self, main, perpendicular, vertical):
+        self.main = main
+        self.perpendicular = perpendicular
+        self.vertical = vertical
+
+    main = _make_lower_bounded_property('main')
+    perpendicular = _make_lower_bounded_property('perpendicular')
+    vertical = _make_lower_bounded_property('vertical')
+
+    @property
+    def range1(self):
+        return self.main
+
+    @range1.setter
+    def range1(self, value):
+        self.main = value
+
+    @property
+    def range2(self):
+        return self.perpendicular
+
+    @range2.setter
+    def range2(self, value):
+        self.perpendicular = value
+
+    @property
+    def range3(self):
+        return self.vertical
+
+    @range3.setter
+    def range3(self, value):
+        self.vertical = value
+
+
+class Angles:
+    __slots__ = '_azimuth', '_dip'
+
+    def __init__(self, azimuth, dip):
+        self.azimuth = azimuth
+        self.dip = dip
+
+    azimuth = _make_angle('azimuth')
+    dip = _make_angle('dip')
+
+
+class Trend:
+    # __slots__ = '_name', '_use_trend', '_model', '_relative_std_dev'
+
+    def __init__(self, name, use_trend=False, model=None, relative_std_dev=None):
+        if relative_std_dev is None:
+            relative_std_dev = FmuProperty(1.0, False)
+        self._name = name
+        self._model = model
+        self.relative_std_dev = relative_std_dev
+        self.use_trend = use_trend
+
+    relative_srd_dev = _make_lower_bounded_property('relative_std_dev')
+    use_trend = _make_trend('use_trend')
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, value):
+        if value is None:
+            self.use_trend = False
+        self._model = value
+
+    @classmethod
+    def from_definition(cls, definition):
+        definition = TrendRecord._make(definition)
+        return cls(
+            name=definition.Name,
+            use_trend=definition.UseTrend,
+            model=definition.Object,
+            relative_std_dev=FmuProperty(definition.RelStdev, definition.RelStdevFMU),
+        )
+
+    def as_list(self):
+        return [
+            self.name,
+            self.use_trend,
+            self.model,
+            self.relative_std_dev.value,
+            self.relative_std_dev.updatable,
+        ]
+
+
+class Variogram:
+    def __init__(self, name, type, ranges, angles, power=None):
+        if power is None:
+            power = FmuProperty(_minimum_value['power'], False)
+        self.name = name
+        self._type = type
+        self.ranges = ranges
+        self.angles = angles
+        self.power = power
+
+    power = _make_ranged_property('power', 'power must be between {min}, and {max}')
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, value):
+        if not isVariogramTypeOK(value):
+            raise ValueError('The given variogram is not valid ({})'.format(value))
+        elif (
+                value == VariogramType.GENERAL_EXPONENTIAL
+                and not (_minimum_value['power'] <= self.power.value <= _maximum_value['power'])
+        ):
+            raise ValueError("While using 'GENERAL_EXPONENTIAL' variogram, 'power' MUST be in [1, 2]")
+        self._type = value
+
+    @classmethod
+    def from_definition(cls, definition):
+        definition = VariogramRecord._make(definition)
+        if isinstance(definition.Type, str):
+            variogram_type = VariogramType[definition.Type]
+        else:
+            variogram_type = definition.Type
+        return cls(
+            name=definition.Name,
+            type=variogram_type,
+            ranges=Ranges(
+                main=FmuProperty(definition.MainRange, definition.MainRangeFMUUpdatable),
+                perpendicular=FmuProperty(definition.PerpRange, definition.PerpRangeFMUUpdatable),
+                vertical=FmuProperty(definition.VertRange, definition.VertRangeFMUUpdatable),
+            ),
+            angles=Angles(
+                azimuth=FmuProperty(definition.AzimuthAngle, definition.AzimuthAngleFMUUpdatable),
+                dip=FmuProperty(definition.DipAngle, definition.DipAngleFMUUpdatable),
+            ),
+            power=FmuProperty(definition.Power, definition.PowerFMUUpdatable),
+        )
+
+    @staticmethod
+    def __mapping__():
+        return {
+            'Name': 0,
+            'Type': 1,
+            'MainRange': 2,
+            'PerpRange': 3,
+            'VertRange': 4,
+            'AzimuthAngle': 5,
+            'DipAngle': 6,
+            'Power': 7,
+            'MainRangeFMUUpdatable': 8,
+            'PerpRangeFMUUpdatable': 9,
+            'VertRangeFMUUpdatable': 10,
+            'AzimuthAngleFMUUpdatable': 11,
+            'DipAngleFMUUpdatable': 12,
+            'PowerFMUUpdatable': 13,
+        }
+
+    def __getitem__(self, item):
+        if isinstance(item, str) and item in self.__mapping__():
+            return self.as_list()[self.__mapping__()[item]]
+        elif isinstance(item, int) and 0 <= item < len(self.as_list()):
+            return self.as_list()[item]
+        elif hasattr(self, item):
+            return getattr(self, item)
+        elif hasattr(self.ranges, item):
+            return getattr(self.ranges, item)
+        elif hasattr(self.angles, item):
+            return getattr(self.angles, item)
+        else:
+            return None
+
+    def as_list(self):
+        return [
+            self.name,
+            self.type.name,
+            self.ranges.main.value,
+            self.ranges.perpendicular.value,
+            self.ranges.vertical.value,
+            self.angles.azimuth.value,
+            self.angles.dip.value,
+            self.power.value,
+            self.ranges.main.updatable,
+            self.ranges.perpendicular.updatable,
+            self.ranges.vertical.updatable,
+            self.angles.azimuth.updatable,
+            self.angles.dip.updatable,
+            self.power.updatable,
+        ]
+
+    def calc_2d_variogram_from_3d_variogram(self, grid_azimuth_angle, projection, debug_level=Debug.OFF):
+        """
+         Variogram ellipsoid in 3D is defined by a symmetric 3x3 matrix M such that
+         transpose(V)*M * V = 1 where transpose(V) = [x,y,z]. The principal directions are found
+         by diagonalization of the matrix. The diagonal matrix has the diagonal matrix elements
+         D11 = 1/(B*B)  D22 = 1/(A*A)  D33 = 1/(C*C) where A,B,C are the half axes in the three
+         principal directions. For variogram ellipsoid the MainRange = A, PerpRange = B, VertRange = C.
+         To define the orientation, first define a ellipsoid oriented with
+         MainRange in y direction, PerpRange in x direction and VertRange in z direction.
+         Then rotate this ellipsoid first around x axis with angle defined as dipAngle in clockwise direction.
+         The dip angle is the angle between the y axis and the new rotated y' axis along the main
+         principal direction of the ellipsoid.
+         Then rotate the the ellipsoid an angle around the z axis. This is the azimuthAngle. The final orientation
+         is then found and the coordinate system defined by the principal directions for the ellipsoid
+         are (x'',y'',z'') in which the M matrix is diagonal.
+         We now define the ellipsoid in this coordinate system with the diagonal M matrix.
+         The goal is now to transform the coordinate from this (x',y',z') system back to (x,y,z) and the the matrix M
+         in this coordinate system. So the transformation will be the opposite of what was necessary to
+         rotate the ellipsoid from standard position with principal main axis in y direction and the second
+         pprincipal direction in x direction and the third in z direction.
+         Note also that the coordinate system (x,y,z) is left handed and z axis is pointing
+         downward compared to a right handed coordinate system.
+
+         After calculating M in (x,y,z) coordinates, a project is taken into either x,y,or z plane to get the correlation
+         ellipse in 2D cross section. This correlation ellipse is used when simulating 2D gaussian fields in cross sections.
+         """
+        func_name = self.calc_2d_variogram_from_3d_variogram.__name__
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Function: {}'.format(func_name))
+        ry = self.ranges.main.value
+        rx = self.ranges.perpendicular.value
+        rz = self.ranges.vertical.value
+
+        # Azimuth relative to global x,y,z coordinates
+        azimuth = self.angles.azimuth.value
+
+        # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
+        azimuth = azimuth - grid_azimuth_angle
+
+        # Dip angle relative to local simulation box
+        dip = self.angles.dip.value
+
+        # The transformations R_dip and R_azimuth defined below rotate the ellipsoid FROM standard orientation
+        # in (x,y,z) TO the final orientation defined by azimuth and dip angles. But we need the inverse transformation
+        # which means that the angles have opposite sign and the rotation matrixes come in opposite order to transform M matrix
+        # FROM (x',y',z') t0 (x,y,z).
+        azimuth = -azimuth * np.pi / 180.0
+        dip = -dip * np.pi / 180.0
+
+        cos_theta = np.cos(azimuth)
+        sin_theta = np.sin(azimuth)
+        cos_dip = np.cos(dip)
+        sin_dip = np.sin(dip)
+
+        # define R_dip matrix
+        # R_dip*V will rotate the vector V by the angle dip around the x-axis.
+        # The vector [0,1,0] (unit vector in y direction)  will get a positive z component if dip angle is positive
+        # (between 0 and 90 degrees).
+        # Note that z axis is down and that the (x,y,z) coordinate system is left-handed.
+        R_dip = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, cos_dip, -sin_dip],
+            [0.0, sin_dip, cos_dip]
+        ])
+
+        # define R_azimuth matrix
+        # R_azimuth*V will rotate the vector V by the angle azimuth around the z axis.
+        # The vector [0,1,0] (unit vector in y direction) will get positive x component if azimuth angle
+        # is positive (between 0 and 180 degrees)
+        R_azimuth = np.array([
+            [cos_theta, sin_theta, 0.0],
+            [-sin_theta, cos_theta, 0.0],
+            [0.0, 0.0, 1.0]
+        ])
+
+        # The combination R = R_azimuth * R_dip will
+        # rotate the vector V first by a dip angle around x axis and then by an azimuth angle around z axis
+
+        # calculate R matrix to get from (x',y',z') to (x,y,z)
+        R = R_dip.dot(R_azimuth)
+
+        # calculate M matrix in principal coordinates (x',y',z')
+        M_diag = np.array([
+            [1.0 / (rx * rx), 0.0, 0.0],
+            [0.0, 1.0 / (ry * ry), 0.0],
+            [0.0, 0.0, 1.0 / (rz * rz)]
+        ])
+
+        # The M matrix in (x,y,z) coordinates is given by M = transpose(R) * M_diag * R
+        tmp = M_diag.dot(R)
+        Rt = np.transpose(R)
+        M = Rt.dot(tmp)
+        if debug_level >= Debug.VERY_VERY_VERBOSE:
+            print('Debug output: M:')
+            print(M)
+            print('')
+
+        # Let U be the 2x2 matrix in the projection (where row and column corresponding to
+        # the coordinate that is set to 0 is removed
+
+        # Calculate the projection of the ellipsoid onto the coordinate planes
+        if projection == 'xy':
+            U = np.array([
+                [M[0, 0], M[0, 1]],
+                [M[0, 1], M[1, 1]]
+            ])
+        elif projection == 'xz':
+            U = np.array([
+                [M[0, 0], M[0, 2]],
+                [M[0, 2], M[2, 2]]
+            ])
+        elif projection == 'yz':
+            U = np.array([
+                [M[1, 1], M[1, 2]],
+                [M[1, 2], M[2, 2]]
+            ])
+        else:
+            raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
+        # Calculate half-axes and rotation of the ellipse that results from the 2D projection of the 3D ellipsoid.
+        # This is done by calculating eigenvalues and eigenvectors of the 2D version of the M matrix.
+        # angles are azimuth angles (Measured from 2nd axis clockwise)
+        angle1, range1, angle2, range2 = _calculate_projection(U, debug_level=debug_level)
+
+        return angle1, range1, angle2, range2
 
 
 class APSGaussModel:
@@ -25,11 +650,12 @@ class APSGaussModel:
     def __init__(self,ET_Tree_zone=None, mainFaciesTable= None,modelFileName = None,
                  debug_level=Debug.OFF,zoneNumber=0,simBoxThickness=0)
 
+    Properties
+      used_gaussian_field_names
+
     Public functions:
     def initialize(self,inputZoneNumber,mainFaciesTable,gaussModelList,trendModelList,
                    simBoxThickness,previewSeed,debug_level=Debug.OFF)
-    def getZoneNumber(self)
-    def getUsedGaussFieldNames(self)
     def getVariogramType(self,gaussFieldName)
     def getVariogramTypeNumber(self,gaussFieldName)
     def getMainRange(self,gaussFieldName)
@@ -40,7 +666,6 @@ class APSGaussModel:
     def getPower(self,gaussFieldName)
     def getTrendModel(self,gfName)
     def getTrendModelObject(self,gfName)
-    def get_debug_level(self)
     def setZoneNumber(self,zoneNumber)
     def setVariogramType(self,gaussFieldName,variogramType)
     def setRange1(self,gaussFieldName,range1)
@@ -56,13 +681,13 @@ class APSGaussModel:
     def removeGaussFieldParam(self,gfName)
     def updateGaussFieldTrendParam(self,gfName,useTrend,trendModelObj,relStdDev)
     def XMLAddElement(self,parent)
-    def simGaussFieldWithTrendAndTransform(self,nGaussFields,gridDimNx,gridDimNy,
-                                           gridXSize,gridYSize,gridAzimuthAngle,previewCrossSection)
+    def simGaussFieldWithTrendAndTransform(
+        self, nGaussFields, (gridDimNx, gridDimNy, gridDimNz),
+        (gridXSize, gridYSize, gridZSize), gridAzimuthAngle, previewCrossSection
+    )
 
     Private functions:
-    def __setEmpty(self)
     def __interpretXMLTree(ET_Tree_zone)
-    def __getGFIndex(self,gfName)
     """
 
     def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
@@ -71,258 +696,184 @@ class APSGaussModel:
         Description: Can create empty object or object with data read from xml tree representing the model file.
         """
 
-        self._isMainRangeFMUUpdatable = False
-        self._isPerpRangeFMUUpdatable = False
-        self._isVertRangeFMUUpdatable = False
-        self._isAzimuthAngleFMUUpdatable = False
-        self._isDipAngleFMUUpdatable = False
-        self._isPowerFMUUpdatable = False
-        self._isRelStdDevFMUUpdatable = False
+        # Dictionary give xml keyword for each variable
+        self.__xml_keyword = {
+            'main': 'MainRange',
+            'perpendicular': 'PerpRange',
+            'vertical': 'VertRange',
+            'azimuth': 'AzimuthAngle',
+            'dip': 'DipAngle',
+            'power': 'Power',
+            'relative_std_dev': 'RelStdDev',
+        }
 
-        self.__setEmpty()
+        self._gaussian_models = {}
+
+        self.__class_name = self.__class__.__name__
+        self.__debug_level = Debug.OFF
+        self.__main_facies_table = None
+        self.__sim_box_thickness = 0
+        self.zone_number = 0
+        self.__model_file_name = None
 
         if ET_Tree_zone is not None:
             # Get data from xml tree
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Call init ' + self.__className + ' and read from xml file')
+                print('Debug output: Call init ' + self.__class_name + ' and read from xml file')
 
             assert mainFaciesTable
             assert zoneNumber
             assert simBoxThickness
             assert modelFileName
 
-            self.__mainFaciesTable = mainFaciesTable
-            self.__zoneNumber = zoneNumber
-            self.__simBoxThickness = simBoxThickness
-            self.__modelFileName = modelFileName
+            self.__main_facies_table = mainFaciesTable
+            self.__zone_number = zoneNumber
+            self.__sim_box_thickness = simBoxThickness
+            self.__model_file_name = modelFileName
             self.__debug_level = debug_level
 
             self.__interpretXMLTree(ET_Tree_zone)
-
-    def __setEmpty(self):
-        ''' Initialize variables for the class'''
-        
-        # Dictionary give xml keyword for each variable
-        self.__xml_keyword = {
-            'MainRange': 'MainRange',
-            'PerpRange': 'PerpRange',
-            'VertRange': 'VertRange',
-            'AzimuthAngle': 'AzimuthAngle',
-            'DipAngle': 'DipAngle',
-            'Power': 'Power'
-        }
-
-        # Dictionary give name to each index in __varioForGFModel list
-        # item in list: [name,type,range1,range2,range3,azimuth,dip,power]
-        self.__index_variogram = {
-            'Name': 0,
-            'Type': 1,
-            'MainRange': 2,
-            'PerpRange': 3,
-            'VertRange': 4,
-            'AzimuthAngle': 5,
-            'DipAngle': 6,
-            'Power': 7,
-            'MainRangeFMUUpdatable': 8,
-            'PerpRangeFMUUpdatable': 9,
-            'VertRangeFMUUpdatable': 10,
-            'AzimuthAngleFMUUpdatable': 11,
-            'DipAngleFMUUpdatable': 12,
-            'PowerFMUUpdatable': 13
-        }
-        # Dictionary give name to each index in __trendForGFModel list
-        # item in list: [name,useTrend,trendModelObj,relStdDev, relStdDevFMU]
-        self.__index_trend = {
-            'Name': 0,
-            'Use trend': 1,
-            'Object': 2,
-            'RelStdev': 3,
-            'RelStdevFMU': 4
-        }
-        # Dictionaries of legal value ranges for gauss field parameters
-        self.__minValue = {
-            'MainRange': 0.0,
-            'PerpRange': 0.0,
-            'VertRange': 0.0,
-            'AzimuthAngle': 0.0,
-            'DipAngle': 0.0,
-            'Power': 1.0
-        }
-        self.__maxValue = {
-            'AzimuthAngle': 360.0,
-            'DipAngle': 90.0,
-            'Power': 2.0
-        }
-
-        # Dictionary give name to each index in __seedForPreviewForGFModel
-        # item in list: [name,value]
-        self.__index_seed = {
-            'Name': 0,
-            'Seed': 1
-        }
-
-        self.__className = self.__class__.__name__
-        self.__debug_level = Debug.OFF
-        self.__mainFaciesTable = None
-        self.__variogramForGFModel = []
-        self.__trendForGFModel = []
-        self.__seedForPreviewForGFModel = []
-        self.__simBoxThickness = 0
-        self.__zoneNumber = 0
-        self.__modelFileName = None
 
     def __interpretXMLTree(self, ET_Tree_zone):
         """
         Description: Read Gauss field models for current zone.
         Read trend models for the same gauss fields and start seed for 2D preview simulations.
         """
-        zone_number = ET_Tree_zone.get("number");
-        region_number = ET_Tree_zone.get("regionNumber");
+        zone_number = ET_Tree_zone.get("number")
+        region_number = ET_Tree_zone.get("regionNumber")
         for gf in ET_Tree_zone.findall('GaussField'):
-            gfName = gf.get('name')
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Gauss field name: {}'.format(gfName))
+            gf_name = gf.get('name')
+            if self.debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Gauss field name: {}'.format(gf_name))
 
             # Read variogram for current GF
-            variogram, variogramType = self.get_variogram(gf, gfName)
+            variogram, variogram_type = self.get_variogram(gf, gf_name)
 
-            common_variogram_params = {'parentKeyword': 'Vario', 'minValue': 0.0, 'modelFile': self.__modelFileName}
+            range1, range1_fmu_updatable = self._get_value_from_xml('main', variogram)
+            range2, range2_fmu_updatable = self._get_value_from_xml('perpendicular', variogram)
+            range3, range3_fmu_updatable = self._get_value_from_xml('vertical', variogram)
 
-            range1 = getFloatCommand(variogram, 'MainRange', **common_variogram_params)
-            range1_fmuUpdatable = isFMUUpdatable(variogram, 'MainRange')
-
-            range2 = getFloatCommand(variogram, 'PerpRange', **common_variogram_params)
-            range2_fmuUpdatable = isFMUUpdatable(variogram, 'PerpRange')
-
-            range3 = getFloatCommand(variogram, 'VertRange', **common_variogram_params)
-            range3_fmuUpdatable = isFMUUpdatable(variogram, 'VertRange')
-
-            azimuth = getFloatCommand(
-                variogram, 'AzimuthAngle', 'Vario',
-                minValue=self.__minValue['AzimuthAngle'],
-                maxValue=self.__maxValue['AzimuthAngle'],
-                modelFile=self.__modelFileName
-            )
-            azimuth_fmuUpdatable = isFMUUpdatable(variogram, 'AzimuthAngle')
-
-            dip = getFloatCommand(
-                variogram, 'DipAngle', 'Vario',
-                minValue=self.__minValue['DipAngle'],
-                maxValue=self.__maxValue['DipAngle'],
-                modelFile=self.__modelFileName
-            )
-            dip_fmuUpdatabable = isFMUUpdatable(variogram, 'DipAngle')
+            azimuth, azimuth_fmu_updatable = self._get_value_from_xml('azimuth', variogram)
+            dip, dip_fmu_updatable = self._get_value_from_xml('dip', variogram)
 
             power = 1.0
-            if variogramType == VariogramType.GENERAL_EXPONENTIAL:
-                power = getFloatCommand(
-                    variogram, 'Power', 'Vario',
-                    minValue=self.__minValue['Power'],
-                    maxValue=self.__maxValue['Power'],
-                    modelFile=self.__modelFileName
-                )
-            power_fmuUpdatabable = isFMUUpdatable(variogram, 'Power')
+            if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
+                power, _ = self._get_value_from_xml('power', variogram)
+            power_fmu_updatable = isFMUUpdatable(variogram, 'Power')
 
             # Read trend model for current GF
-            trendObjXML = gf.find('Trend')
-            relStdDev = 0.0
-            relStdDevFMU = False
-            if trendObjXML is not None:
-                if self.__debug_level >= Debug.VERY_VERBOSE:
+            trend_xml_obj = gf.find('Trend')
+            relative_std_dev = 0.0
+            rel_std_dev_fmu_updatable = False
+            if trend_xml_obj is not None:
+                if self.debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Read trend')
-                useTrend = True
+                use_trend = True
 
-                if self.__simBoxThickness <= 0.0:
+                if self.__sim_box_thickness <= 0.0:
                     raise ValueError(
                         'In model file {0} in keyword Trend for gauss field name: {1}\n'
                         'The use of trend functions requires that simulation box thickness is specified.\n'
-                        ''.format(self.__modelFileName, gfName, self.__className)
+                        ''.format(self.__model_file_name, gf_name, self.__class_name)
                     )
 
                 # checking first child of element Trend to determine the type of Trend
-                trend_name = trendObjXML[0];
+                trend_name = trend_xml_obj[0]
                 if trend_name is None:
                     raise ValueError(
                         'In model file {0} in keyword Trend for gauss field name: {1}\n'
                         'No actual Trend is specified.\n'
-                        ''.format(self.__modelFileName, gfName, self.__className)
+                        ''.format(self.__model_file_name, gf_name, self.__class_name)
                     )
-                common_params = {'zone_number': zone_number, 'region_number': region_number, 'gf_name': gfName,
-                                 'modelFileName': self.__modelFileName, 'debug_level': self.__debug_level}
-                if trend_name.tag == 'Linear3D':
-                    trend_model = Trend3D_linear(trendObjXML.find('Linear3D'), **common_params)
-                elif trend_name.tag == 'Elliptic3D':
-                    trend_model = Trend3D_elliptic(trendObjXML.find('Elliptic3D'), **common_params)
-                elif trend_name.tag == 'Hyperbolic3D':
-                    trend_model = Trend3D_hyperbolic(trendObjXML.find('Hyperbolic3D'), **common_params)
-                elif trend_name.tag == 'RMSParameter':
-                    trend_model = Trend3D_rms_param(trendObjXML.find('RMSParameter'), **common_params)
-                elif trend_name.tag == 'EllipticCone3D':
-                    trend_model = Trend3D_elliptic_cone(trendObjXML.find('EllipticCone3D'), **common_params)
-                else:
+                common_params = {
+                    'zone_number': zone_number,
+                    'region_number': region_number,
+                    'gf_name': gf_name,
+                    'modelFileName': self.__model_file_name,
+                    'debug_level': self.debug_level
+                }
+
+                trend_models = {
+                    'Linear3D': Trend3D_linear,
+                    'Elliptic3D': Trend3D_elliptic,
+                    'Hyperbolic3D': Trend3D_hyperbolic,
+                    'RMSParameter': Trend3D_rms_param,
+                    'EllipticCone3D': Trend3D_elliptic_cone,
+                }
+                try:
+                    trend_model = trend_models[trend_name.tag](trend_xml_obj.find(trend_name.tag), **common_params)
+                except KeyError:
                     raise NameError(
                         'Error in {className}\n'
                         'Error: Specified name of trend function {trendName} is not implemented.'
-                        ''.format(className=self.__className, trendName=trend_name.tag)
+                        ''.format(className=self.__class_name, trendName=trend_name.tag)
                     )
             else:
-                if self.__debug_level >= Debug.VERY_VERBOSE:
+                if self.debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: No trend is specified')
-                useTrend = False
+                use_trend = False
                 trend_model = None
-                relStdDev = 0.0
-                relStdDevFMU = False
+                relative_std_dev = 0.0
+                rel_std_dev_fmu_updatable = False
 
-            # Read RelstdDev
-            if useTrend:
-                relStdDev = getFloatCommand(
-                    gf, 'RelStdDev', 'GaussField', 0.0,
-                    modelFile=self.__modelFileName
-                )
-                relStdDevFMU = isFMUUpdatable(gf, 'RelStdDev')
+            # Read relative std.dev.
+            if use_trend:
+                relative_std_dev, rel_std_dev_fmu_updatable = self._get_value_from_xml('relative_std_dev', gf)
 
             # Read preview seed for current GF
-            seed = getIntCommand(gf, 'SeedForPreview', 'GaussField', modelFile=self.__modelFileName)
+            seed = getIntCommand(gf, 'SeedForPreview', 'GaussField', modelFile=self.__model_file_name)
 
             # Add gauss field parameters to data structure
             self.updateGaussFieldParam(
-                gfName, variogramType, range1, range2, range3, azimuth,
-                dip, power, range1_fmuUpdatable, range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable,
-                dip_fmuUpdatabable, power_fmuUpdatabable, useTrend, relStdDev, relStdDevFMU, trend_model
+                gf_name, variogram_type, range1, range2, range3, azimuth,
+                dip, power, range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable, azimuth_fmu_updatable,
+                dip_fmu_updatable, power_fmu_updatable, use_trend, relative_std_dev, rel_std_dev_fmu_updatable, trend_model
             )
             # Set preview simulation start seed for gauss field
-            self.setSeedForPreviewSimulation(gfName, seed)
+            self.setSeedForPreviewSimulation(gf_name, seed)
 
         # End loop over gauss fields for current zone model
 
-        if self.__variogramForGFModel is None:
+        if self._gaussian_models is None:
             raise NameError(
                 'Error when reading model file: {modelName}\n'
                 'Error: Missing keyword GaussField under '
                 'keyword Zone'
-                ''.format(modelName=self.__modelFileName)
+                ''.format(modelName=self.__model_file_name)
             )
 
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Gauss field variogram parameter for current zone model:')
-            print(repr(self.__variogramForGFModel))
+            print([repr(grf.variogram) for grf in self._gaussian_models.values()])
 
             print('Debug output:Gauss field trend parameter for current zone model:')
-            print(repr(self.__trendForGFModel))
+            print([repr(grf.trend) for grf in self._gaussian_models.values()])
 
             print('Debug output: Gauss field preview seed for current zone model:')
-            print(repr(self.__seedForPreviewForGFModel))
+            print([(name, grf.seed) for name, grf in self._gaussian_models.items()])
 
-    def get_variogram(self, gf, gfName):
-        variogram = getKeyword(gf, 'Vario', 'GaussField', modelFile=self.__modelFileName)
-        variogramType = self.get_variogram_type(variogram)
-        if not isVariogramTypeOK(variogramType):
+    def _get_value_from_xml(self, property_name, xml_tree):
+        kwargs = {'parentKeyword': 'Vario', 'modelFile': self.__model_file_name}
+        if property_name in _maximum_value:
+            kwargs['maxValue'] = _maximum_value[property_name]
+        if property_name in _minimum_value:
+            kwargs['minValue'] = _minimum_value[property_name]
+
+        keyword = self.__xml_keyword[property_name]
+        value = getFloatCommand(xml_tree, keyword, **kwargs)
+        fmu_updatable = isFMUUpdatable(xml_tree, keyword)
+        return value, fmu_updatable
+
+    def get_variogram(self, gf, gf_name):
+        variogram = getKeyword(gf, 'Vario', 'GaussField', modelFile=self.__model_file_name)
+        variogram_type = self.get_variogram_type(variogram)
+        if not isVariogramTypeOK(variogram_type):
             raise ValueError(
                 'In model file {0} in zone number: {1} in command Vario for gauss field {2}.\n'
                 'Specified variogram type is not defined.'
-                ''.format(self.__modelFileName, self.__zoneNumber, gfName)
+                ''.format(self.__model_file_name, self.zone_number, gf_name)
             )
-        return variogram, variogramType
+        return variogram, variogram_type
 
     @staticmethod
     def get_variogram_type(variogram) -> VariogramType:
@@ -334,190 +885,81 @@ class APSGaussModel:
             return variogram
         else:
             raise ValueError('Unknown type: {}'.format(str(variogram)))
-        nameUpper = name.upper()
-        if nameUpper == 'SPHERICAL':
-            return VariogramType.SPHERICAL
-        elif nameUpper == 'EXPONENTIAL':
-            return VariogramType.EXPONENTIAL
-        elif nameUpper == 'GAUSSIAN':
-            return VariogramType.GAUSSIAN
-        elif nameUpper == 'GENERAL_EXPONENTIAL':
-            return VariogramType.GENERAL_EXPONENTIAL
-        elif nameUpper == 'MATERN32':
-            return VariogramType.MATERN32
-        elif nameUpper == 'MATERN52':
-            return VariogramType.MATERN52
-        elif nameUpper == 'MATERN72':
-            return VariogramType.MATERN72
-        elif nameUpper == 'CONSTANT':
-            return VariogramType.CONSTANT
-        else:
-            raise ValueError('Error: Unknown variogram type {}'.format(nameUpper))
+        name = name.upper()
+        try:
+            return VariogramType[name]
+        except KeyError:
+            raise ValueError('Error: Unknown variogram type {}'.format(name))
 
-    def initialize(self, inputZoneNumber, mainFaciesTable, 
-                   gaussModelList, trendModelList,
-                   simBoxThickness, previewSeedList, debug_level=Debug.OFF):
+    def initialize(
+            self, zone_number, main_facies_table, gauss_model_list, trend_model_list,
+            sim_box_thickness, preview_seed_list, debug_level=Debug.OFF):
 
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call the initialize function in ' + self.__className)
+            print('Debug output: Call the initialize function in ' + self.__class_name)
 
-        # Set default values
-        self.__setEmpty()
-
-        GNAME = self.__index_variogram['Name']
-        GTYPE = self.__index_variogram['Type']
-        GRANGE1 = self.__index_variogram['MainRange']
-        GRANGE2 = self.__index_variogram['PerpRange']
-        GRANGE3 = self.__index_variogram['VertRange']
-        GAZIMUTH = self.__index_variogram['AzimuthAngle']
-        GDIP = self.__index_variogram['DipAngle']
-        GPOWER = self.__index_variogram['Power']
-
-        GRANGE1_FMUUPDATABLE = self.__index_variogram['MainRangeFMUUpdatable']
-        GRANGE2_FMUUPDATABLE = self.__index_variogram['PerpRangeFMUUpdatable']
-        GRANGE3_FMUUPDATABLE = self.__index_variogram['VertRangeFMUUpdatable']
-        GAZIMUTH_FMUUPDATABLE = self.__index_variogram['AzimuthAngleFMUUpdatable']
-        GDIP_FMUUPDATABLE = self.__index_variogram['DipAngleFMUUpdatable']
-        POWER_FMUUPDATABLE = self.__index_variogram['PowerFMUUpdatable']
-
-        TNAME = self.__index_trend['Name']
-        TUSE = self.__index_trend['Use trend']
-        TOBJ = self.__index_trend['Object']
-        TSTD = self.__index_trend['RelStdev']
-        TSTDFMU = self.__index_trend['RelStdevFMU']
-
-        SNAME = self.__index_seed['Name']
-        SVALUE = self.__index_seed['Seed']
-
-        self.__zoneNumber = inputZoneNumber
+        self.zone_number = zone_number
         self.__debug_level = debug_level
-        self.__simBoxThickness = simBoxThickness
-        self.__mainFaciesTable = mainFaciesTable
+        self.__sim_box_thickness = sim_box_thickness
+        self.__main_facies_table = main_facies_table
 
-        # gaussModelList  = list of objects of the form: [gfName,type,range1,range2,range3,azimuth,dip,power]
-        # trendModelList  = list of objects of the form: [gfName,useTrend,trendModelObj,relStdDev, relStdDevFMU]
-        # previewSeedList = list of objects of the form: [gfName,seedValue]
-        assert len(trendModelList) == len(gaussModelList)
-        for i in range(len(gaussModelList)):
-            item = gaussModelList[i]
-            if len(item) != len(self.__index_variogram):
-                raise ValueError('Programming error: Input list items in gaussModelList is not of correct length')
-            trendItem = trendModelList[i]
-            seedItem = previewSeedList[i]
-            assert item[GNAME] == trendItem[TNAME]
-            assert item[GNAME] == seedItem[SNAME]
+        # gauss_model_list  = list of objects of the form: [gfName,type,range1,range2,range3,azimuth,dip,power]
+        # trend_model_list  = list of objects of the form: [gfName,useTrend,trendModelObj,relStdDev, relStdDevFMU]
+        # preview_seed_list = list of objects of the form: [gfName,seedValue]
+        assert len(trend_model_list) == len(gauss_model_list)
+        for i in range(len(gauss_model_list)):
+            try:
+                variogram = VariogramRecord._make(gauss_model_list[i])
+            except TypeError:
+                raise ValueError('Programming error: Input list items in gauss_model_list is not of correct length')
+            trend = TrendRecord._make(trend_model_list[i])
+            seed = SeedRecord._make(preview_seed_list[i])
+            assert variogram.Name == trend.Name
+            assert variogram.Name == seed.Name
 
-            gfName = item[GNAME]
-
-            variogramType = self.get_variogram_type(item[GTYPE])
-            if not isVariogramTypeOK(variogramType):
-                raise ValueError(
-                    'In initialize function for {0} in zone number: {1} for gauss field: {2}. '
-                    'Specified variogram type: {3} is not defined.'
-                    ''.format(self.__className, self.__zoneNumber, gfName, variogramType.name)
-                )
-            range1 = item[GRANGE1]
-            range2 = item[GRANGE2]
-            range3 = item[GRANGE3]
-            azimuth = item[GAZIMUTH]
-            dip = item[GDIP]
-            power = item[GPOWER]
-
-            range1_fmuUpdatable = item[GRANGE1_FMUUPDATABLE]
-            range2_fmuUpdatable = item[GRANGE2_FMUUPDATABLE]
-            range3_fmuUpdatable = item[GRANGE3_FMUUPDATABLE]
-            azimuth_fmuUpdatable = item[GAZIMUTH_FMUUPDATABLE]
-            dip_fmuUpdatabable = item[GDIP_FMUUPDATABLE]
-            power_fmuUpdatabable = item[POWER_FMUUPDATABLE]
-
-            trendModelObj = trendItem[TOBJ]
-            relStdDev = trendItem[TSTD]
-            relStdDevFmu = trendItem[TSTDFMU]
-            useTrend = trendItem[TUSE]
-            seed = seedItem[SVALUE]
-
-            # Set variogram parameters for this gauss field
-            self.updateGaussFieldParam(
-                gfName=gfName,
-                variogramType=variogramType,
-                range1=range1,
-                range2=range2,
-                range3=range3,
-                azimuth=azimuth,
-                dip=dip,
-                power=power,
-                range1_fmuUpdatable=range1_fmuUpdatable,
-                range2_fmuUpdatable=range2_fmuUpdatable,
-                range3_fmuUpdatable=range3_fmuUpdatable,
-                azimuth_fmuUpdatable=azimuth_fmuUpdatable,
-                dip_fmuUpdatabable=dip_fmuUpdatabable,
-                power_fmuUpdatabable=power_fmuUpdatabable
+            self._gaussian_models[variogram.Name] = GaussianField(
+                name=variogram.Name,
+                # Set variogram parameters for this gauss field
+                variogram=Variogram.from_definition(variogram),
+                # Set trend model parameters for this gauss field
+                trend=Trend.from_definition(trend),
+                # Set preview simulation start seed for gauss field
+                seed=seed.Seed,
             )
 
-            # Set trend model parameters for this gauss field
-            self.updateGaussFieldTrendParam(
-                gfName=gfName,
-                useTrend=useTrend,
-                trendModelObj=trendModelObj,
-                relStdDev=relStdDev,
-                relStdDevFMU=relStdDevFmu
-            )
+    @property
+    def num_gaussian_fields(self):
+        return len(self._gaussian_models)
 
-            # Set preview simulation start seed for gauss field
-            self.setSeedForPreviewSimulation(gfName=gfName, seed=seed)
+    @property
+    def zone_number(self):
+        return self.__zone_number
 
-    def getNGaussFields(self):
-        return len(self.__variogramForGFModel)
+    @zone_number.setter
+    def zone_number(self, value):
+        self.__zone_number = value
 
-    def getZoneNumber(self):
-        return self.__zoneNumber
-
-    def getUsedGaussFieldNames(self):
-        gfNames = []
-        GNAME = self.__index_variogram['Name']
-        nGF = len(self.__variogramForGFModel)
-        for i in range(nGF):
-            item = self.__variogramForGFModel[i]
-            name = item[GNAME]
-            gfNames.append(name)
-        return gfNames
+    @property
+    def used_gaussian_field_names(self):
+        return [name for name in self._gaussian_models]
 
     def findGaussFieldParameterItem(self, gaussFieldName):
-        GNAME = self.__index_variogram['Name']
-        nGF = len(self.__variogramForGFModel)
-        found = False
-        itemWithParameters = None
-        for i in range(nGF):
-            item = self.__variogramForGFModel[i]
-            name = item[GNAME]
-            if name == gaussFieldName:
-                itemWithParameters = item
-                found = True
-                break
-        if not found:
+        try:
+            return self.get_variogram_model(gaussFieldName)
+        except KeyError:
             raise ValueError('Variogram data for gauss field name: {} is not found.'.format(gaussFieldName))
-        return itemWithParameters
 
     def __get_property(self, gaussFieldName, keyword):
-        index = self.__index_variogram[keyword]
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        r = item[index]
-        return r
+        return self.get_variogram_model(gaussFieldName)[keyword]
 
     def getVariogramType(self, gaussFieldName):
-        GTYPE = self.__index_variogram['Type']
-        item = self.findGaussFieldParameterItem(gaussFieldName)
-        variogramType = self.get_variogram_type(item[GTYPE])
-        return variogramType
+        return self.get_variogram_model(gaussFieldName).type
 
     def getVariogramTypeNumber(self, gaussFieldName):
-        variogramType = self.getVariogramType(gaussFieldName)
-        variogramTypeNumber = variogramType.value
-        return variogramTypeNumber
+        return self.getVariogramType(gaussFieldName).value
 
     def getMainRange(self, gaussFieldName):
         return self.__get_property(gaussFieldName, 'MainRange')
-
 
     def getMainRangeFmuUpdatable(self, gaussFieldName):
         return self.__get_property(gaussFieldName, 'MainRangeFMUUpdatable')
@@ -541,7 +983,7 @@ class APSGaussModel:
         return self.__get_property(gaussFieldName, 'AzimuthAngleFMUUpdatable')
 
     def getDipAngle(self, gaussFieldName):
-        return self.__get_property(gaussFieldName, 'DipAngle') 
+        return self.__get_property(gaussFieldName, 'DipAngle')
 
     def getDipAngleFmuUpdatable(self, gaussFieldName):
         return self.__get_property(gaussFieldName, 'DipAngleFMUUpdatable')
@@ -553,840 +995,406 @@ class APSGaussModel:
         return self.__get_property(gaussFieldName, 'PowerFMUUpdatable')
 
     def getTrendItem(self, gfName):
-        TNAME = self.__index_trend['Name']
-        found = False
-        itemForTrendParam = None
-        for item in self.__trendForGFModel:
-            name = item[TNAME]
-            if name == gfName:
-                found = True
-                itemForTrendParam = item
-        if not found:
+        try:
+            return self._gaussian_models[gfName].trend
+        except KeyError:
             return None
-        else:
-            return itemForTrendParam
 
     def getTrendModel(self, gfName):
-        TUSE = self.__index_trend['Use trend']
-        TOBJ = self.__index_trend['Object']
-        TSTD = self.__index_trend['RelStdev']
-        TSTDFMU = self.__index_trend['RelStdevFMU']
-        item = self.getTrendItem(gfName)
-        if item is None:
+        trend = self.getTrendItem(gfName)
+        if trend is None:
             return None, None, None, None
         else:
-            useTrend = item[TUSE]
-            trendModelObj = item[TOBJ]
-            relStdDev = item[TSTD]
-            relStdDevFMU = item[TSTDFMU]
-            return useTrend, trendModelObj, relStdDev, relStdDevFMU
+            return trend.use_trend, trend.model, trend.relative_std_dev.value, trend.relative_std_dev.updatable
 
     def getTrendModelObject(self, gfName):
-        TOBJ = self.__index_trend['Object']
         item = self.getTrendItem(gfName)
         if item is None:
             return None
         else:
-            trendModelObj = item[TOBJ]
-            return trendModelObj
+            return item.model
 
-    def get_debug_level(self):
+    def get_variogram_model(self, name):
+        try:
+            return self._gaussian_models[name].variogram
+        except KeyError:
+            return None
+
+    @property
+    def debug_level(self):
         return self.__debug_level
 
-    def __getGFIndex(self, gfName):
-        GNAME = self.__index_variogram['Name']
-
-        indx = -1
-        for i in range(len(self.__variogramForGFModel)):
-            item = self.__variogramForGFModel[i]
-            gf = item[GNAME]
-            if gf == gfName:
-                indx = i
-                break
-        return indx
-
-    def setZoneNumber(self, zoneNumber):
-        self.__zoneNumber = zoneNumber
-        return
-
-    def setValue(self, gaussFieldName, variableName, value, checkMax=False):
-
-        # index to where the variable is located in the __varioFORGFModel
-        variableIndex = self.__index_variogram[variableName]
-
-        err = 0
-
-        if not isinstance(value, bool):
-
-            # Minimum allowed value
-            minValue = self.__minValue[variableName]
-
-            # Max allowed value
-            maxValue = 0.0
-            if checkMax:
-                maxValue = self.__maxValue[variableName]
-
-            if value < minValue:
-                err = 1
-            if checkMax:
-                if value > maxValue:
-                    err = 1
-
-        if err == 0:
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__variogramForGFModel[indx]
-                item[variableIndex] = value
-            else:
-                err = 1
-
-        return err
+    @debug_level.setter
+    def debug_level(self, value):
+        self.__debug_level = value
 
     def setVariogramType(self, gaussFieldName, variogramType):
-        GTYPE = self.__index_variogram['Type']
-        err = 0
-        if isVariogramTypeOK(variogramType):
-            gfList = self.getUsedGaussFieldNames()
-            if gaussFieldName in gfList:
-                indx = self.__getGFIndex(gaussFieldName)
-                item = self.__variogramForGFModel[indx]
-                item[GTYPE] = variogramType
-            else:
-                err = 1
-        else:
-            err = 1
-        return err
+        self.get_variogram_model(gaussFieldName).type = variogramType
 
     def setMainRange(self, gaussFieldName, range1):
-        err = self.setValue(gaussFieldName, 'MainRange', range1)
-        return err
+        self.get_variogram_model(gaussFieldName).ranges.main.value = range1
 
     def setMainRangeFmuUpdatable(self, gaussFieldName, value):
-        err = self.setValue(gaussFieldName, 'MainRangeFMUUpdatable', value)
-        return err
+        self.get_variogram_model(gaussFieldName).ranges.main.updatable = value
 
     def setPerpRange(self, gaussFieldName, range2):
-        err = self.setValue(gaussFieldName, 'PerpRange', range2)
-        return err
+        self.get_variogram_model(gaussFieldName).ranges.perpendicular.value = range2
 
     def setPerpRangeFmuUpdatable(self, gaussFieldName, value):
-        err = self.setValue(gaussFieldName, 'PerpRangeFMUUpdatable', value)
-        return err
+        self.get_variogram_model(gaussFieldName).ranges.perpendicular.updatable = value
 
     def setVertRange(self, gaussFieldName, range3):
-        err = self.setValue(gaussFieldName, 'VertRange', range3)
-        return err
+        self.get_variogram_model(gaussFieldName).ranges.vertical.value = range3
 
     def setVertRangeFmuUpdatable(self, gaussFieldName, value):
-        err = self.setValue(gaussFieldName, 'VertRangeFMUUpdatable', value)
-        return err
+        self.get_variogram_model(gaussFieldName).ranges.vertical.updatable = value
 
     def setAzimuthAngle(self, gaussFieldName, azimuth):
-        err = self.setValue(gaussFieldName, 'AzimuthAngle', azimuth, checkMax=True)
-        return err
+        self.get_variogram_model(gaussFieldName).angles.azimuth.value = azimuth
 
     def setAzimuthAngleFmuUpdatable(self, gaussFieldName, value):
-        err = self.setValue(gaussFieldName, 'AzimuthAngleFMUUpdatable', value)
-        return err
+        self.get_variogram_model(gaussFieldName).angles.azimuth.updatable = value
 
     def setDipAngle(self, gaussFieldName, dip):
-        err = self.setValue(gaussFieldName, 'DipAngle', dip, checkMax=True)
-        return err
+        self.get_variogram_model(gaussFieldName).angles.dip.value = dip
 
     def setDipAngleFmuUpdatable(self, gaussFieldName, value):
-        err = self.setValue(gaussFieldName, 'DipAngleFMUUpdatable', value)
-        return err
+        self.get_variogram_model(gaussFieldName).angles.dip.updatable = value
 
     def setPower(self, gaussFieldName, power):
-        err = self.setValue(gaussFieldName, 'Power', power, checkMax=True)
-        return err
+        self.get_variogram_model(gaussFieldName).power.value = power
 
     def setPowerFmuUpdatable(self, gaussFieldName, value):
-        err = self.setValue(gaussFieldName, 'PowerFMUUpdatable', value)
-        return err
+        self.get_variogram_model(gaussFieldName).power.updatable = value
 
     def setRelStdDev(self, gaussFieldName, relStdDev):
-        # Update trend parameters relStdDev for existing trend for gauss field model
-        TNAME = self.__index_trend['Name']
-        TUSE = self.__index_trend['Use trend']
-        TSTD = self.__index_trend['RelStdev']
-        TSTD_FMU = self.__index_trend['RelStdevFMU']
-        err = 0
-
-        # Check if gauss field is already defined, then update parameters
-        found = 0
-        for item in self.__trendForGFModel:
-            name = item[TNAME]
-            if name == gfName:
-                found = 1
-                useTrend = item[TUSE]
-                if useTrend:
-                    # Set updated value for relStdDev
-                    item[TSTD] = relStdDev
-                    break
-        if found == 0:
-            # This gauss field was not found.
-            err = 1
-        return err
+        return self._set_relative_std_dev(gaussFieldName, value=relStdDev)
 
     def setRelStdDevFmuUpdatable(self, gaussFieldName, value):
-        # Set FMU update tag on parameter
-        TNAME = self.__index_trend['Name']
-        TUSE = self.__index_trend['Use trend']
-        TSTD = self.__index_trend['RelStdev']
-        TSTD_FMU = self.__index_trend['RelStdevFMU']
-        err = 0
+        return self._set_relative_std_dev(gaussFieldName, updatable=value)
 
+    def _set_relative_std_dev(self, gaussian_field_name, value=None, updatable=None):
+        # Update trend parameters relStdDev for existing trend for gauss field model
+        err = 0
         # Check if gauss field is already defined, then update parameters
-        found = 0
-        for item in self.__trendForGFModel:
-            name = item[TNAME]
-            if name == gaussFieldName:
-                found = 1
-                useTrend = item[TUSE]
-                if useTrend:
-                    # Set updated value for relStdDev
-                    item[TSTD_FMU] = value
-                    break
-        if found == 0:
+        try:
+            trend = self._gaussian_models[gaussian_field_name].trend
+            if trend.use_trend:
+                # Set updated value for relStdDev
+                if value is None:
+                    value = trend.relative_std_dev.value
+                if updatable is None:
+                    updatable = trend.relative_std_dev.updatable
+                trend.relative_std_dev = FmuProperty(value, updatable)
+        except KeyError:
             # This gauss field was not found.
             err = 1
         return err
 
-    def setSeedForPreviewSimulation(self, gfName, seed):
-        SNAME = self.__index_seed['Name']
-        SVALUE = self.__index_seed['Seed']
+    def setSeedForPreviewSimulation(self, gf_name, seed):
         err = 0
-        found = 0
-        for i in range(len(self.__seedForPreviewForGFModel)):
-            item = self.__seedForPreviewForGFModel[i]
-            name = item[SNAME]
-            if name == gfName:
-                found = 1
-                item[SVALUE] = seed
-                break
-        if found == 0:
+        if gf_name in self._gaussian_models:
+            self._gaussian_models[gf_name].seed = seed
+        else:
             err = 1
         return err
 
     def updateGaussFieldParam(
-            self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
-                range1_fmuUpdatable, range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable,
-                dip_fmuUpdatabable, power_fmuUpdatabable, useTrend=False, relStdDev=0.0, relStdDevFMU=False, trendModelObj=None
+            self, gf_name, variogram_type, range1, range2, range3, azimuth, dip, power,
+            range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable, azimuth_fmu_updatable,
+            dip_fmu_updatable, power_fmu_updatable, use_trend=False, rel_std_dev=0.0,
+            rel_std_dev_fmu_updatable=False, trend_model_obj=None
     ):
         # Update or create new gauss field parameter object (with trend)
-        GNAME = self.__index_variogram['Name']
-        err = 0
-        found = 0
-        if not isVariogramTypeOK(variogramType):
+        if not isVariogramTypeOK(variogram_type):
             raise ValueError(
                 'Error in {class_name} in updateGaussFieldParam\n'
-                'Undefined variogram type specified.'.format(class_name=self.__className)
+                'Undefined variogram type specified.'.format(class_name=self.__class_name)
             )
         if any([range < 0 for range in [range1, range2, range3]]):
             raise ValueError(
                 'Error in {class_name} in updateGaussFieldParam\n'
-                'Correlation range < 0.0'.format(class_name=self.__className)
+                'Correlation range < 0.0'.format(class_name=self.__class_name)
             )
-        if variogramType == VariogramType.GENERAL_EXPONENTIAL and not (1.0 <= power <= 2.0):
+        if variogram_type == VariogramType.GENERAL_EXPONENTIAL and not (1.0 <= power <= 2.0):
             raise ValueError(
                 'Error in {class_name} in updateGaussFieldParam\n'
-                'Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0, 2.0]'.format(class_name=self.__className)
+                'Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0, 2.0]'.format(class_name=self.__class_name)
             )
-        if relStdDev < 0.0:
+        if rel_std_dev < 0.0:
             raise ValueError(
                 'Error in {class_name} in updateGaussFieldParam\n'
                 'Relative standard deviation used when trends are specified is negative.'
-                ''.format(class_name=self.__className)
+                ''.format(class_name=self.__class_name)
             )
 
         # Check if gauss field is already defined, then update parameters or create new
-        for item in self.__variogramForGFModel:
-            name = item[GNAME]
-            if name == gfName:
-                self.updateGaussFieldVariogramParameters(
-                    gfName, variogramType, range1, range2, range3, azimuth, dip, power, range1_fmuUpdatable,
-                    range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable, dip_fmuUpdatabable,
-                    power_fmuUpdatabable)
-                self.updateGaussFieldTrendParam(gfName, useTrend, trendModelObj, relStdDev, relStdDevFMU)
-                found = 1
-                break
-        if found == 0:
-            # Create data for a new gauss field for both variogram  data and trend data
-            # But data for trend parameters must be set by another function and default is set here.
-            itemVariogram = [gfName, variogramType.name, range1, range2, range3, azimuth, dip, power,
-                             range1_fmuUpdatable, range2_fmuUpdatable, range3_fmuUpdatable, azimuth_fmuUpdatable,
-                             dip_fmuUpdatabable, power_fmuUpdatabable]
-            self.__variogramForGFModel.append(itemVariogram)
-            if trendModelObj is None:
-                useTrend = False
-                relStdDev = 0.0
-                relStdDevFMU = False
+        if gf_name not in self._gaussian_models:
+            if trend_model_obj is None:
+                use_trend = False
+                rel_std_dev = 0.0
+                rel_std_dev_fmu_updatable = False
             else:
-                useTrend = True
-            itemTrend = [gfName, useTrend, trendModelObj, relStdDev, relStdDevFMU]
-            self.__trendForGFModel.append(itemTrend)
-            defaultSeed = 0
-            self.__seedForPreviewForGFModel.append([gfName, defaultSeed])
-        return err
+                use_trend = True
+            self._gaussian_models[gf_name] = GaussianField(gf_name)
+        # Create data for a new gauss field for both variogram  data and trend data
+        # But data for trend parameters must be set by another function and default is set here.
+        self._gaussian_models[gf_name].variogram = Variogram.from_definition([
+            gf_name, variogram_type, range1, range2, range3, azimuth, dip, power,
+            range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable, azimuth_fmu_updatable,
+            dip_fmu_updatable, power_fmu_updatable
+        ])
 
-    def updateGaussFieldVariogramParameters(self, gfName, variogramType, range1, range2, range3, azimuth, dip, power,
-                                            range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable,
-                                            azimuth_fmu_updatable, dip_fmu_updatable, power_fmu_updatable ):
+        self._gaussian_models[gf_name].trend = self.create_gauss_field_trend(
+            gf_name, use_trend, trend_model_obj, rel_std_dev, rel_std_dev_fmu_updatable
+        )
+
+    def updateGaussFieldVariogramParameters(
+            self, gf_name, variogram_type, range1, range2, range3, azimuth, dip, power,
+            range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable,
+            azimuth_fmu_updatable, dip_fmu_updatable, power_fmu_updatable):
         # Update gauss field variogram parameters for existing gauss field model
         # But it does not create new object.
-        GNAME = self.__index_variogram['Name']
-        GTYPE = self.__index_variogram['Type']
-        GRANGE1 = self.__index_variogram['MainRange']
-        GRANGE2 = self.__index_variogram['PerpRange']
-        GRANGE3 = self.__index_variogram['VertRange']
-        GAZIMUTH = self.__index_variogram['AzimuthAngle']
-        GDIP = self.__index_variogram['DipAngle']
-        GPOWER = self.__index_variogram['Power']
-
-        GRANGE1FMUUPDATABLE = self.__index_variogram['MainRangeFMUUpdatable']
-        GRANGE2FMUUPDATABLE = self.__index_variogram['PerpRangeFMUUpdatable']
-        GRANGE3FMUUPDATABLE = self.__index_variogram['VertRangeFMUUpdatable']
-        GAZIMUTHFMUUPDATABLE = self.__index_variogram['AzimuthAngleFMUUpdatable']
-        GDIPFMUUPDATABLE = self.__index_variogram['DipAngleFMUUpdatable']
-        GPOWERFMUUPDATABLE = self.__index_variogram['PowerFMUUpdatable']
-
         err = 0
-        found = 0
         # Check that gauss field is already defined, then update parameters.
-        for item in self.__variogramForGFModel:
-            name = item[GNAME]
-            if name == gfName:
-                found = 1
-                item[GTYPE] = variogramType.name
-                item[GRANGE1] = range1
-                item[GRANGE2] = range2
-                item[GRANGE3] = range3
-                item[GAZIMUTH] = azimuth
-                item[GDIP] = dip
-                item[GPOWER] = power
-                item[GRANGE1FMUUPDATABLE] = range1_fmu_updatable
-                item[GRANGE2FMUUPDATABLE] = range2_fmu_updatable
-                item[GRANGE3FMUUPDATABLE] = range3_fmu_updatable
-                item[GAZIMUTHFMUUPDATABLE] = azimuth_fmu_updatable
-                item[GDIPFMUUPDATABLE] = dip_fmu_updatable
-                item[GPOWERFMUUPDATABLE] = power_fmu_updatable
-        if found == 0:
+        if gf_name in self._gaussian_models:
+            self._gaussian_models[gf_name].variogram = Variogram.from_definition([
+                gf_name, variogram_type, range1, range2, range3, azimuth, dip, power,
+                range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable,
+                azimuth_fmu_updatable, dip_fmu_updatable, power_fmu_updatable
+            ])
+        else:
             err = 1
         return err
 
     def removeGaussFieldParam(self, gfName):
-        GNAME = self.__index_variogram['Name']
-        indx = -1
-        for i in range(len(self.__variogramForGFModel)):
-            item = self.__variogramForGFModel[i]
-            name = item[GNAME]
-            if name == gfName:
-                indx = i
-                break
-        if indx != -1:
-            # Remove from list
-            self.__variogramForGFModel.pop(indx)
-            self.__trendForGFModel.pop(indx)
-            self.__seedForPreviewForGFModel.pop(indx)
-        return
+        # Remove from dicts
+        self._gaussian_models.pop(gfName, None)
 
-    def updateGaussFieldTrendParam(self, gfName, useTrend, trendModelObj, relStdDev, relStdDevFMU):
+    def updateGaussFieldTrendParam(self, gf_name, use_trend, trend_model_obj, rel_std_dev, rel_std_dev_fmu_updatable):
         # Update trend parameters for existing trend for gauss field model
         # But it does not create new trend object.
-        TNAME = self.__index_trend['Name']
-        TUSE = self.__index_trend['Use trend']
-        TOBJ = self.__index_trend['Object']
-        TSTD = self.__index_trend['RelStdev']
-        TSTDFMU = self.__index_trend['RelStdevFMU']
         err = 0
-        if trendModelObj is None:
+        if trend_model_obj is None:
             err = 1
         else:
             # Check if gauss field is already defined, then update parameters
-            found = 0
-            for item in self.__trendForGFModel:
-                name = item[TNAME]
-                if name == gfName:
-                    found = 1
-                    item[TUSE] = useTrend
-                    item[TSTD] = relStdDev
-                    item[TOBJ] = trendModelObj
-                    item[TSTDFMU] = relStdDevFMU
-                    break
-            if found == 0:
+            if gf_name in self._gaussian_models:
+                self._gaussian_models[gf_name].trend = Trend(
+                    name=gf_name,
+                    use_trend=use_trend,
+                    model=trend_model_obj,
+                    relative_std_dev=FmuProperty(rel_std_dev, rel_std_dev_fmu_updatable)
+                )
+            else:
                 # This gauss field was not found.
                 err = 1
         return err
 
+    @staticmethod
+    def create_gauss_field_trend(gf_name, use_trend, trend_model_obj, rel_std_dev, rel_std_dev_fmu_updatable):
+        return Trend(
+            name=gf_name,
+            use_trend=use_trend,
+            model=trend_model_obj,
+            relative_std_dev=FmuProperty(rel_std_dev, rel_std_dev_fmu_updatable)
+        )
+
     def XMLAddElement(self, parent, fmu_attributes):
-        GNAME = self.__index_variogram['Name']
-        GTYPE = self.__index_variogram['Type']
-        GRANGE1 = self.__index_variogram['MainRange']
-        GRANGE2 = self.__index_variogram['PerpRange']
-        GRANGE3 = self.__index_variogram['VertRange']
-        GAZIMUTH = self.__index_variogram['AzimuthAngle']
-        GDIP = self.__index_variogram['DipAngle']
-        GPOWER = self.__index_variogram['Power']
-
-        GRANGE1FMUUPDATABLE = self.__index_variogram['MainRangeFMUUpdatable']
-        GRANGE2FMUUPDATABLE = self.__index_variogram['PerpRangeFMUUpdatable']
-        GRANGE3FMUUPDATABLE = self.__index_variogram['VertRangeFMUUpdatable']
-        GAZIMUTHFMUUPDATABLE = self.__index_variogram['AzimuthAngleFMUUpdatable']
-        GDIPFMUUPDATABLE = self.__index_variogram['DipAngleFMUUpdatable']
-        GPOWERFMUUPDATABLE = self.__index_variogram['PowerFMUUpdatable']
-
-        TNAME = self.__index_trend['Name']
-        TUSE = self.__index_trend['Use trend']
-        TOBJ = self.__index_trend['Object']
-        TSTD = self.__index_trend['RelStdev']
-        TSTDFMU = self.__index_trend['RelStdevFMU']
-
-        SNAME = self.__index_seed['Name']
-        SVALUE = self.__index_seed['Seed']
-
-        if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self.__className)
+        if self.debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: call XMLADDElement from ' + self.__class_name)
 
         # Add child command GaussField
-        nGaussFieldsForModel = len(self.__variogramForGFModel)
-        for i in range(nGaussFieldsForModel):
-            gfName = self.__variogramForGFModel[i][GNAME]
-            variogramType = self.__variogramForGFModel[i][GTYPE]
-            range1 = self.__variogramForGFModel[i][GRANGE1]
-            range2 = self.__variogramForGFModel[i][GRANGE2]
-            range3 = self.__variogramForGFModel[i][GRANGE3]
-            azimuth = self.__variogramForGFModel[i][GAZIMUTH]
-            dip = self.__variogramForGFModel[i][GDIP]
-            power = self.__variogramForGFModel[i][GPOWER]
+        for grf in self._gaussian_models.values():
+            gf_name = grf.name
+            variogram = grf.variogram
+            variogram_type = variogram.type
 
-            range1_fmu_updatable = self.__variogramForGFModel[i][GRANGE1FMUUPDATABLE]
-            range2_fmu_updatable = self.__variogramForGFModel[i][GRANGE2FMUUPDATABLE]
-            range3_fmu_updatable = self.__variogramForGFModel[i][GRANGE3FMUUPDATABLE]
-            azimuth_fmu_updatable = self.__variogramForGFModel[i][GAZIMUTHFMUUPDATABLE]
-            dip_fmu_updatable = self.__variogramForGFModel[i][GDIPFMUUPDATABLE]
-            power_fmu_updatable = self.__variogramForGFModel[i][GPOWERFMUUPDATABLE]
-
-            if gfName != self.__trendForGFModel[i][TNAME]:
-                raise ValueError('Error in class: ' + self.__className + ' in ' + 'XMLAddElement')
-            useTrend = self.__trendForGFModel[i][TUSE]
-            trendObj = self.__trendForGFModel[i][TOBJ]
-            relStdDev = self.__trendForGFModel[i][TSTD]
-            relStdDevFMU = self.__trendForGFModel[i][TSTDFMU]
+            if gf_name != grf.variogram.name or gf_name != grf.trend.name:
+                raise ValueError('Error in class: ' + self.__class_name + ' in XMLAddElement')
+            trend = grf.trend
+            use_trend = trend.use_trend
+            trend_obj = trend.model
 
             tag = 'GaussField'
-            attribute = {'name': gfName}
+            attribute = {'name': gf_name}
             elem = Element(tag, attribute)
             parent.append(elem)
-            gfElement = elem
+            gf_element = elem
 
             tag = 'Vario'
-            attribute = {'name': variogramType if isinstance(variogramType, str) else variogramType.name}
+            attribute = {'name': variogram_type if isinstance(variogram_type, str) else variogram_type.name}
             elem = Element(tag, attribute)
-            gfElement.append(elem)
-            variogramElement = elem
+            gf_element.append(elem)
+            variogram_element = elem
 
-            tag = self.__xml_keyword['MainRange']
-            elem = Element(tag)
-            elem.text = ' ' + str(range1) + ' '
-            if range1_fmu_updatable:
-                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
-                fmu_attributes.append(fmu_attribute)
-                elem.attrib = dict(kw=fmu_attribute)
-            variogramElement.append(elem)
+            properties = ['main', 'perpendicular', 'vertical', 'azimuth', 'dip']
 
-            tag = self.__xml_keyword['PerpRange']
-            elem = Element(tag)
-            elem.text = ' ' + str(range2) + ' '
-            if range2_fmu_updatable:
-                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
-                fmu_attributes.append(fmu_attribute)
-                elem.attrib = dict(kw=fmu_attribute)
-            variogramElement.append(elem)
+            for prop in properties:
+                self._add_xml_element(gf_name, prop, parent, variogram_element, fmu_attributes, createFMUvariableNameForResidual)
 
-            tag = self.__xml_keyword['VertRange']
-            elem = Element(tag)
-            elem.text = ' ' + str(range3) + ' '
-            if range3_fmu_updatable:
-                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
-                fmu_attributes.append(fmu_attribute)
-                elem.attrib = dict(kw=fmu_attribute)
-            variogramElement.append(elem)
+            if variogram_type in ['GENERAL_EXPONENTIAL', VariogramType.GENERAL_EXPONENTIAL]:
+                self._add_xml_element(gf_name, 'power', parent, variogram_element, fmu_attributes, createFMUvariableNameForResidual)
 
-            tag = self.__xml_keyword['AzimuthAngle']
-            elem = Element(tag)
-            elem.text = ' ' + str(azimuth) + ' '
-            if azimuth_fmu_updatable:
-                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
-                fmu_attributes.append(fmu_attribute)
-                elem.attrib = dict(kw=fmu_attribute)
-            variogramElement.append(elem)
-
-            tag = self.__xml_keyword['DipAngle']
-            elem = Element(tag)
-            elem.text = ' ' + str(dip) + ' '
-            if dip_fmu_updatable:
-                fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'), parent.get('regionNumber'), gfName)
-                fmu_attributes.append(fmu_attribute)
-                elem.attrib = dict(kw=fmu_attribute)
-            variogramElement.append(elem)
-
-            if variogramType in ['GENERAL_EXPONENTIAL', VariogramType.GENERAL_EXPONENTIAL]:
-                tag = self.__xml_keyword['Power']
-                elem = Element(tag)
-                elem.text = ' ' + str(power) + ' '
-                if power_fmu_updatable:
-                    fmu_attribute = createFMUvariableNameForResidual(tag, parent.get('number'),
-                                                                     parent.get('regionNumber'), gfName)
-                    fmu_attributes.append(fmu_attribute)
-                    elem.attrib = dict(kw=fmu_attribute)
-                variogramElement.append(elem)
-
-            if useTrend:
+            if use_trend:
                 # Add trend
-                trendObj.XMLAddElement(gfElement, fmu_attributes)
+                trend_obj.XMLAddElement(gf_element, fmu_attributes)
 
-                tag = 'RelStdDev'
-                elem = Element(tag)
-                elem.text = ' ' + str(relStdDev) + ' '
-                if relStdDevFMU:
-                    fmu_attribute = createFMUvariableNameForTrend(tag, parent.get('number'),
-                                                                  parent.get('regionNumber'), gfName)
-                    fmu_attributes.append(fmu_attribute)
-                    elem.attrib = dict(kw=fmu_attribute)
-                gfElement.append(elem)
+                self._add_xml_element(gf_name, 'relative_std_dev', parent, gf_element, fmu_attributes, createFMUvariableNameForTrend)
 
             tag = 'SeedForPreview'
             elem = Element(tag)
-            seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
-            elem.text = ' ' + str(seedValue) + ' '
-            gfElement.append(elem)
+            seed = grf.seed
+            elem.text = ' ' + str(seed) + ' '
+            gf_element.append(elem)
+
+    def _add_xml_element(self, gf_name, property_name, parent, xml_element, fmu_attributes, create_fmu_variable):
+        zone_number = parent.get('number')
+        region_number = parent.get('regionNumber')
+        tag = self.__xml_keyword[property_name]
+        value = self._gaussian_models[gf_name][property_name]
+        elem = Element(tag)
+        elem.text = ' ' + str(value) + ' '
+        if value.updatable:
+            fmu_attribute = create_fmu_variable(tag, gf_name, zone_number, region_number)
+            fmu_attributes.append(fmu_attribute)
+            elem.attrib = dict(kw=fmu_attribute)
+        xml_element.append(elem)
 
     def simGaussFieldWithTrendAndTransform(
-            self, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionRelativePos
+            self, simulation_box_size, grid_size, grid_azimuth_angle, cross_section
     ):
-        ''' This function is used to create 2D simulation of horizontal or vertical cross sections. The gauss simulation is 2D
+        """ This function is used to create 2D simulation of horizontal or vertical cross sections. The gauss simulation is 2D
             and the correlation ellipsoid for the 3D variogram is projected into the specified cross section in 2D.
             The 3D trend definition is used to calculate an 2D cross section of the trend in the specified horizontal or vertical cross section grid plane
-            specified by crossSectionRelativePos which is a number between 0 and 1.
+            specified by cross_section.relative_position which is a number between 0 and 1.
             Here 0 means smallest grid index and 1 means largest grid index for the specified cross section direction (IJ plane, IK, plane or JK plane).
             The trend and residual gauss field is added using the specified relative standard deviation and the resulting gaussian field with trend is
-            transformed by empiric transformation such that the histogram over all simulated values in the 2D grid become uniform between 0 and 1.'''
-        TUSE = self.__index_trend['Use trend']
-        TOBJ = self.__index_trend['Object']
-        TSTD = self.__index_trend['RelStdev']
-        TSTDFMU = self.__index_trend['RelStdevFMU']
-        SVALUE = self.__index_seed['Seed']
+            transformed by empiric transformation such that the histogram over all simulated values in the 2D grid become uniform between 0 and 1."""
 
-        assert 0 <= crossSectionRelativePos <= 1.0
-        if crossSectionType == 'IJ':
-            gridDim1 = gridNX
-            gridDim2 = gridNY
-            size1 = simBoxXsize
-            size2 = simBoxYsize
-            projection = 'xy'
-        elif crossSectionType == 'IK':
-            gridDim1 = gridNX
-            gridDim2 = gridNZ
-            size1 = simBoxXsize
-            size2 = simBoxZsize
-            projection = 'xz'
-        elif crossSectionType == 'JK':
-            gridDim1 = gridNY
-            gridDim2 = gridNZ
-            size1 = simBoxYsize
-            size2 = simBoxZsize
-            projection = 'yz'
-        else:
-            raise ValueError('Undefined cross section {}'.format(crossSectionType))
-
-        gaussFieldNamesInModel = self.getUsedGaussFieldNames()
-        nGaussFields = len(gaussFieldNamesInModel)
-        gaussFieldItems = []
-        for i in range(nGaussFields):
-            # Find data for specified Gauss field name
-            name = gaussFieldNamesInModel[i]
-            seedValue = self.__seedForPreviewForGFModel[i][SVALUE]
-            variogramType = self.getVariogramType(name)
-            variogramTypeNumber = self.getVariogramTypeNumber(name)
-            mainRange = self.getMainRange(name)
-            perpRange = self.getPerpRange(name)
-            vertRange = self.getVertRange(name)
-            azimuthVariogram = self.getAzimuthAngle(name)
-            dipVariogram = self.getDipAngle(name)
-            power = self.getPower(name)
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('')
-                print('Debug output: Within simGaussFieldWithTrendAndTransform')
-                print('Debug output: Simulate gauss field: ' + name)
-                print('Debug output: VariogramType: ' + str(variogramType))
-                print('Debug output: Azimuth angle for Main range direction: ' + str(azimuthVariogram))
-                print('Debug output: Azimuth angle for grid: ' + str(gridAzimuthAngle))
-                print('Debug output: Dip angle for Main range direction: ' + str(dipVariogram))
-
-                if variogramType == VariogramType.GENERAL_EXPONENTIAL:
-                    print('Debug output: Power    : ' + str(power))
-
-                print('Debug output: Seed value: ' + str(seedValue))
-
-            # Calculate 2D projection of the correlation ellipsoid
-            [angle1, range1, angle2, range2] = self.calc2DVariogramFrom3DVariogram(name, gridAzimuthAngle, projection)
-            azimuthVariogram = angle1
-            if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('')
-                print('Debug output: Range1 in projection: ' + projection + ' : ' + str(range1))
-                print('Debug output: Range2 in projection: ' + projection + ' : ' + str(range2))
-                print('Debug output: Angle from vertical axis for Range1 direction: ' + str(angle1))
-                print('Debug output: Angle from vertical axis for Range2 direction: ' + str(angle2))
-                print('Debug output: (gridDim1, gridDim2) = ({},{})'.format(str(gridDim1), str(gridDim2)))
-                print('Debug output: (Size1, Size2) = ({},  {})'.format(str(size1), str(size2)))
-
-            residualField = simGaussField(
-                seedValue, gridDim1, gridDim2, size1, size2, variogramType,
-                range1, range2, azimuthVariogram, power, self.__debug_level
+        gauss_field_items = []
+        for grf in self._gaussian_models.values():
+            gauss_field_items.append(
+                grf.simulate(cross_section, grid_azimuth_angle, grid_size, simulation_box_size, self.debug_level),
             )
+        return gauss_field_items
 
-            # Calculate trend
-            useTrend, trendModelObject, relStdDev, relStdDevFMU = self.getTrendModel(name)
-            if useTrend:
-                if self.__debug_level >= Debug.VERBOSE:
-                    print('    - Use Trend: {}'.format(trendModelObject.type.name))
-                minMaxDifference, averageTrend, trendField = trendModelObject.createTrendFor2DProjection(
-                    simBoxXsize, simBoxYsize, simBoxZsize, gridAzimuthAngle,
-                    gridNX, gridNY, gridNZ, crossSectionType, crossSectionRelativePos
-                )
-                gaussFieldWithTrend = self.__addTrend(
-                    residualField, trendField, relStdDev, minMaxDifference, averageTrend
-                )
-            else:
-                gaussFieldWithTrend = residualField
+    def calc2DVariogramFrom3DVariogram(self, name, grid_azimuth_angle, projection):
+        return self._gaussian_models[name].variogram.calc_2d_variogram_from_3d_variogram(grid_azimuth_angle, projection, self.debug_level)
 
-            transField = self.__transformEmpiricDistributionToUniform(gaussFieldWithTrend)
-            item = [name, transField]
-            gaussFieldItems.append(item)
-        # End for
 
-        return gaussFieldItems
+def _get_projection_parameters(cross_section_type, grid_size, simulation_box_size):
+    x_sim_box_size, y_sim_box_size, z_sim_box_size = simulation_box_size
+    x_grid, y_grid, z_grid = grid_size
+    if cross_section_type == CrossSectionType.IJ:
+        grid_dimensions = (x_grid, y_grid)
+        size = (x_sim_box_size, y_sim_box_size)
+        projection = 'xy'
+    elif cross_section_type == CrossSectionType.IK:
+        grid_dimensions = (x_grid, z_grid)
+        size = (x_sim_box_size, z_sim_box_size)
+        projection = 'xz'
+    elif cross_section_type == CrossSectionType.JK:
+        grid_dimensions = (y_grid, z_grid)
+        size = (y_sim_box_size, z_sim_box_size)
+        projection = 'yz'
+    else:
+        raise ValueError('Undefined cross section {}'.format(cross_section_type.name))
+    return grid_dimensions, size, projection
 
-    def __addTrend(self, residualField, trendField, relSigma, trendMaxMinDifference, averageTrend):
-        """
-        Description: Calculate standard deviation sigma = relSigma * trendMaxMinDifference.
-        Add trend and residual field  Field = Trend + sigma*residual
-        Input residualField and trendField should be 1D float numpy arrays of same size.
-        Return is trend plus residual with correct standard deviation as numpy 1D array.
-        """
-        # Standard deviation
-        if abs(trendMaxMinDifference) == 0.0:
-            sigma = relSigma * averageTrend
-        else:
-            sigma = relSigma * trendMaxMinDifference
-        if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output:  Relative standard deviation = ' + str(relSigma))
-            print('Debug output:  Difference between max value and min value of trend = ' + str(trendMaxMinDifference))
-            print('Debug output:  Calculated standard deviation = ' + str(sigma))
-            print(' ')
-        n = len(trendField)
-        if len(trendField) != len(residualField):
-            raise IOError('Internal error: Mismatch between size of trend field and residual field in __addTrend')
 
-        gaussFieldWithTrend = np.zeros(n, np.float32)
-        for i in range(n):
-            gaussFieldWithTrend[i] = trendField[i] + residualField[i] * sigma
-        return gaussFieldWithTrend
+def _add_trend(residual_field, trend_field, rel_sigma, trend_max_min_difference, average_trend, debug_level=Debug.OFF):
+    """
+    Description: Calculate standard deviation sigma = rel_sigma * trend_max_min_difference.
+    Add trend and residual field  Field = Trend + sigma*residual
+    Input residual_field and trend_field should be 1D float numpy arrays of same size.
+    Return is trend plus residual with correct standard deviation as numpy 1D array.
+    """
+    # Standard deviation
+    if abs(trend_max_min_difference) == 0.0:
+        sigma = rel_sigma * average_trend
+    else:
+        sigma = rel_sigma * trend_max_min_difference
+    if debug_level >= Debug.VERY_VERBOSE:
+        print('Debug output:  Relative standard deviation = ' + str(rel_sigma))
+        print('Debug output:  Difference between max value and min value of trend = ' + str(trend_max_min_difference))
+        print('Debug output:  Calculated standard deviation = ' + str(sigma))
+        print('')
+    n = len(trend_field)
+    if len(trend_field) != len(residual_field):
+        raise IOError('Internal error: Mismatch between size of trend field and residual field in _addTrend')
 
-    def __transformEmpiricDistributionToUniform(self, inputValues):
-        """
-        Take input as numpy 1D float array and return numpy 1D float array where
-        the values is transformed to uniform distribution.
-        The input array is regarded as outcome of  probability distribution.
-        The output assigm the empiric percentile from the cumulative empiric distribution
-        to each array element. This ensure that the probability distribution of the output
-        regarded as outcome from a probability distribution is uniform.
-        """
-        # Transform into uniform distribution
-        if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output:  Transform 2D Gauss field by empiric transformation to uniform distribution')
-            print(' ')
+    gauss_field_with_trend = np.zeros(n, np.float32)
+    for i in range(n):
+        gauss_field_with_trend[i] = trend_field[i] + residual_field[i] * sigma
+    return gauss_field_with_trend
 
-        nVal = len(inputValues)
-        transformedValues = np.zeros(nVal, np.float32)
-        sort_indx = np.argsort(inputValues)
-        for i in range(nVal):
-            indx = sort_indx[i]
-            u = float(i) / float(nVal)
-            transformedValues[indx] = u
 
-        return transformedValues
+def _transform_empiric_distribution_to_uniform(values, debug_level=Debug.OFF):
+    """
+    Take input as numpy 1D float array and return numpy 1D float array where
+    the values is transformed to uniform distribution.
+    The input array is regarded as outcome of  probability distribution.
+    The output assign the empiric percentile from the cumulative empiric distribution
+    to each array element. This ensure that the probability distribution of the output
+    regarded as outcome from a probability distribution is uniform.
+    """
+    # Transform into uniform distribution
+    if debug_level >= Debug.VERY_VERBOSE:
+        print('Debug output:  Transform 2D Gauss field by empiric transformation to uniform distribution\n')
 
-    def calc2DVariogramFrom3DVariogram(self, gaussFieldName, gridAzimuthAngle, projection):
-        """
-         Variogram ellipsoid in 3D is defined by a symmetric 3x3 matrix M such that
-         transpose(V)*M * V = 1 where transpose(V) = [x,y,z]. The principal directions are found
-         by diagonalization of the matrix. The diagonal matrix has the diagonal matrix elements
-         D11 = 1/(B*B)  D22 = 1/(A*A)  D33 = 1/(C*C) where A,B,C are the half axes in the three
-         principal directions. For variogram ellipsoid the MainRange = A, PerpRange = B, VertRange = C.
-         To define the orientation, first define a ellipsoid oriented with
-         MainRange in y direction, PerpRange in x direction and VertRange in z direction.
-         Then rotate this ellipsoid first around x axis with angle defined as dipAngle in clockwise direction.
-         The dip angle is the angle between the y axis and the new rotated y' axis along the main
-         principal direction of the ellopsoide.
-         Then rotate the the ellipsoid an angle around the z axis. This is the azimuthAngle. The final orientation
-         is then found and the coordinate system defined by the principal directions for the ellipsoide
-         are (x'',y'',z'') in which the M matrix is diagonal.
-         We now define the ellipsoide in this coordinate system with the diagonal M matrix.
-         The goal is now to transform the coordinate from this (x',y',z') system back to (x,y,z) and the the matrix M
-         in this coordinate system. So the transformation will be the opposite of what was necessary to
-         rotate the ellipsoide from standard position with principal main axis in y direction and the second
-         pricipal direction in x direction and the third in z direction.
-         Note also that the coordinate system (x,y,z) is left handed and z axis is pointing
-         downward compared to a right handed coordinate system.
+    n = len(values)
+    transformed = np.zeros(n, np.float32)
+    sort_index = np.argsort(values)
+    for i in range(n):
+        index = sort_index[i]
+        u = float(i) / float(n)
+        transformed[index] = u
 
-         After calculating M in (x,y,z) coordinates, a project is taken into either x,y,or z plane to get the correlation
-         ellipse in 2D cross section. This correlation ellipse is used when simulating 2D gaussian fields in cross sections.
-         """
-        funcName = 'calc2DVariogramFrom3DVariogram'
-        if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Function: {}'.format(funcName))
-        ry = self.getMainRange(gaussFieldName)
-        rx = self.getPerpRange(gaussFieldName)
-        rz = self.getVertRange(gaussFieldName)
+    return transformed
 
-        # Azimuth relative to global x,y,z coordinates
-        azimuth = self.getAzimuthAngle(gaussFieldName)
 
-        # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
-        azimuth = azimuth - gridAzimuthAngle
+def _calculate_projection(U, debug_level=Debug.OFF):
+    func_name = _calculate_projection.__name__
+    if debug_level >= Debug.VERY_VERY_VERBOSE:
+        print('Debug output: U:')
+        print(U)
+    w, v = np.linalg.eigh(U)
+    if debug_level >= Debug.VERY_VERY_VERBOSE:
+        print('Debug output: Eigenvalues:')
+        print(w)
+        print('Debug output: Eigenvectors')
+        print(v)
 
-        # Dip angle relative to local simulation box
-        dip = self.getDipAngle(gaussFieldName)
+    # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction
+    if v[0, 1] != 0.0:
+        angle = np.arctan(v[0, 0] / v[0, 1])
+        angle = angle * 180.0 / np.pi
+        if angle < 0.0:
+            angle = angle + 180.0
+    else:
+        # y component is 0, hence the direction is defined by the x axis
+        angle = 90.0
+    angle1 = angle
+    range1 = np.sqrt(1.0 / w[0])
+    if debug_level >= Debug.VERY_VERY_VERBOSE:
+        print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
+              ''.format(funcName=func_name, angle=angle1, range=range1))
 
-        # The transformations R_dip and R_azimuth defined below rotate the ellipsoide FROM standard orientation
-        # in (x,y,z) TO the final orientation defined by azimuth and dip angles. But we need the inverse transformation
-        # which means that the angles have opposite sign and the rotation matrixes come in opposite order to transform M matrix
-        # FROM (x',y',z') t0 (x,y,z).
-        azimuth = -azimuth * np.pi / 180.0
-        dip = -dip * np.pi / 180.0
+    # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction
+    if v[1, 1] != 0.0:
+        angle = np.arctan(v[1, 0] / v[1, 1])
+        angle = angle * 180.0 / np.pi
+        if angle < 0.0:
+            angle = angle + 180.0
+    else:
+        # y component is 0, hence the direction is defined by the x axis
+        angle = 90.0
+    angle2 = angle
+    range2 = np.sqrt(1.0 / w[1])
+    if debug_level >= Debug.VERY_VERY_VERBOSE:
+        print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
+              ''.format(funcName=func_name, angle=angle2, range=range2))
 
-        cosTheta = np.cos(azimuth)
-        sinTheta = np.sin(azimuth)
-        cosDip = np.cos(dip)
-        sinDip = np.sin(dip)
-
-        # define R_dip matrix
-        # R_dip*V will rotate the vector V by the angle dip around the x-axis.
-        # The vector [0,1,0] (unit vector in y direction)  will get a positive z component if dip angle is positive
-        # (between 0 and 90 degrees).
-        # Note that z axis is down and that the (x,y,z) coordinate system is left-handed.
-        R_dip = np.array([
-            [1.0, 0.0, 0.0],
-            [0.0, cosDip, -sinDip],
-            [0.0, sinDip, cosDip]
-        ])
-
-        # define R_azimuth matrix
-        # R_azimuth*V will rotate the vector V by the angle azimuth around the z axis.
-        # The vector [0,1,0] (unit vector in y direction) will get positive x component if azimuth angle
-        # is positive (between 0 and 180 degrees)
-        R_azimuth = np.array([
-            [cosTheta, sinTheta, 0.0],
-            [-sinTheta, cosTheta, 0.0],
-            [0.0, 0.0, 1.0]
-        ])
-
-        # The combination R = R_azimuth * R_dip will
-        # rotate the vector V first by a dip angle around x axis and then by an azimuth angle around z axis
-
-        # calculate R matrix to get from (x',y',z') to (x,y,z)
-        R = R_dip.dot(R_azimuth)
-
-        # calculate M matrix in principal coordinates (x',y',z')
-        M_diag = np.array([
-            [1.0 / (rx * rx), 0.0, 0.0],
-            [0.0, 1.0 / (ry * ry), 0.0],
-            [0.0, 0.0, 1.0 / (rz * rz)]
-        ])
-
-        # The M matrix in (x,y,z) coordinates is given by M = transpose(R) * M_diag * R
-        tmp = M_diag.dot(R)
-        Rt = np.transpose(R)
-        M = Rt.dot(tmp)
-        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
-            print('Debug output: M:')
-            print(M)
-            print('')
-
-        # Let U be the 2x2 matrix in the projection (where row and column corresponding to
-        # the coordinate that is set to 0 is removed
-
-        # Calculate the projection of the ellipsoide onto the coordinate planes
-        if projection == 'xy':
-            U = np.array([
-                [M[0, 0], M[0, 1]],
-                [M[0, 1], M[1, 1]]
-            ])
-        elif projection == 'xz':
-            U = np.array([
-                [M[0, 0], M[0, 2]],
-                [M[0, 2], M[2, 2]]
-            ])
-        elif projection == 'yz':
-            U = np.array([
-                [M[1, 1], M[1, 2]],
-                [M[1, 2], M[2, 2]]
-            ])
-        else:
-            raise ValueError('Unknown projection for calculation of 2D variogram ellipse from 3D variogram ellipsoid')
-        # Calculate half-axes and rotation of the ellipse that results from the 2D projection of the 3D ellipsoide.
-        # This is done by calculating eigenvalues and eigenvectors of the 2D version of the M matrix.
-        # angles are azimuth angles (Measured from 2nd axis clockwise)
-        angle1, range1, angle2, range2 = self.__calcProjection(U)
-
-        return angle1, range1, angle2, range2
-
-    def __calcProjection(self, U):
-        funcName = '__calcProjection'
-        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
-            print('Debug output: U:')
-            print(U)
-        w, v = np.linalg.eigh(U)
-        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
-            print('Debug output: Eigenvalues:')
-            print(w)
-            print('Debug output: Eigenvectors')
-            print(v)
-
-        # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction
-        if v[0, 1] != 0.0:
-            angle = np.arctan(v[0, 0] / v[0, 1])
-            angle = angle * 180.0 / np.pi
-            if angle < 0.0:
-                angle = angle + 180.0
-        else:
-            # y component is 0, hence the direction is defined by the x axis
-            angle = 90.0
-        angle1 = angle
-        range1 = np.sqrt(1.0 / w[0])
-        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
-            print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
-                  ''.format(funcName=funcName, angle=str(angle1), range=str(range1)))
-
-        # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction
-        if v[1, 1] != 0.0:
-            angle = np.arctan(v[1, 0] / v[1, 1])
-            angle = angle * 180.0 / np.pi
-            if angle < 0.0:
-                angle = angle + 180.0
-        else:
-            # y component is 0, hence the direction is defined by the x axis
-            angle = 90.0
-        angle2 = angle
-        range2 = np.sqrt(1.0 / w[1])
-        if self.__debug_level >= Debug.VERY_VERY_VERBOSE:
-            print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
-                  ''.format(funcName=funcName, angle=str(angle2), range=str(range2)))
-
-        # Angles are azimuth angles
-        return angle1, range1, angle2, range2
-
+    # Angles are azimuth angles
+    return angle1, range1, angle2, range2

@@ -330,14 +330,14 @@ class APSDataFromRMS:
         print('Project seed: ' + str(self.__data['Project seed']))
         print('Project realisation number: ' + str(self.__data['Project realization number']))
         print('Grid model name: ' + self.__data['Grid model name'])
-        print('Grid zones: ')
+        print('Grid zones:')
         for item in self.__data['Zones']:
             zoneName = item[1]
             zoneNumber = item[0]
             nLayers = item[2]
             print('  Zone number: {0} Zone name: {1}  Number of layers: {2}'.format(str(zoneNumber), zoneName,
                                                                                     str(nLayers)))
-        print(' ')
+        print('')
         print('Grid dimensions:')
         print('  NX:       ' + str(self.__grid['nx']))
         print('  NY:       ' + str(self.__grid['ny']))
@@ -346,17 +346,17 @@ class APSDataFromRMS:
         print('  Xinc:     ' + str(self.__grid['x inc']))
         print('  Yinc:     ' + str(self.__grid['y inc']))
         print('  Rotation: ' + str(self.__grid['azimuth angle']))
-        print(' ')
-        print('Property parameters: ')
+        print('')
+        print('Property parameters:')
         for propName in self.__data['Property list continuous']:
             print('  ' + propName)
         for propName in self.__data['Property list discrete']:
             print('  ' + propName)
-        print(' ')
-        print('Horizon names: ')
+        print('')
+        print('Horizon names:')
         for hName in self.__data['Horizon names']:
             print('  ' + hName)
-        print(' ')
+        print('')
         print('Surface grid dimension:')
         print('  NX:       ' + str(self.__surf['nx']))
         print('  NY:       ' + str(self.__surf['ny']))
@@ -367,7 +367,7 @@ class APSDataFromRMS:
         print('  xinc:     ' + str(self.__surf['x inc']))
         print('  yinc:     ' + str(self.__surf['y inc']))
         print('  Rotation: ' + str(self.__surf['rotation']))
-        print(' ')
+        print('')
         print('Facies table:')
         fTable = self.__faciesTable.getFaciesTable()
         for item in fTable:

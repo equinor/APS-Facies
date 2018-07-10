@@ -289,18 +289,18 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         # Check if this is the specified zone parameter
         if name == zoneParamName:
             # Get the zone parameter values
-            zoneValues, codeNamesZone = getDiscrete3DParameterValues(gridModel, name,
-                                                                     realization_number=realizationNumber,
-                                                                     debug_level=debug_level)
+            zoneValues, codeNamesZone = getDiscrete3DParameterValues(
+                gridModel, name, realization_number=realizationNumber, debug_level=debug_level
+            )
         # Check if the property type is integer or float type
 
         if regionParamName is not None:
             # Check if this is the specified region parameter
             if name == regionParamName:
                 # Get the region parameter values
-                regionValues, codeNamesRegion = getDiscrete3DParameterValues(gridModel, name,
-                                                                             realization_number=realizationNumber,
-                                                                             debug_level=debug_level)
+                regionValues, codeNamesRegion = getDiscrete3DParameterValues(
+                    gridModel, name, realization_number=realizationNumber, debug_level=debug_level
+                )
 
         # Check if the property type is integer or float type
 
@@ -332,8 +332,8 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             for i in range(len(zoneValues)):
                 zVal = zoneValues[i]
                 rVal = 0
-                key = (zVal,rVal)
-                if not key in zonesAndRegions:
+                key = (zVal, rVal)
+                if key not in zonesAndRegions:
                     if debug_level >= Debug.VERY_VERBOSE:
                         print('Debug output: Add zone = ({})'.format(str(zVal)))
                     zonesAndRegions[key] = 1
@@ -348,23 +348,22 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         for i in range(len(zoneValues)):
             zVal = zoneValues[i]
             rVal = regionValues[i]
-            key = (zVal,rVal)
-            if not key in zonesAndRegions:
+            key = (zVal, rVal)
+            if key not in zonesAndRegions:
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Add (zone,region) = ({},{})'.format(str(zVal), str(rVal)))
                 zonesAndRegions[key] = 1
 
-    # Zone and region informatione
+    # Zone and region information
 
     for key, value in zonesAndRegions.items():
         zNumber = key[0]
         rNumber = key[1]
         tag='ZoneAndRegionNumbers'
-        attributes={'zoneNumber':str(zNumber),'regionNumber':str(rNumber)}
+        attributes={'zoneNumber': str(zNumber), 'regionNumber': str(rNumber)}
         zoneAndRegionElement = Element(tag, attributes)
         zoneAndRegionElement.text = ' '
         gmElement.append(zoneAndRegionElement)
-
 
     for name in gfNames:
         gfElement = Element('GaussFieldNames')
@@ -375,8 +374,10 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     zoneNames = []
     nLayersPerZone = []
     grid = gridModel.get_grid()
-    (xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-     azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone) = getGridAttributes(grid, debug_level)
+    (
+        xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
+        azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone
+    ) = getGridAttributes(grid, debug_level)
     xinc = xLength / nx
     yinc = yLength / ny
 
@@ -438,7 +439,6 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     yincObj.text = ' ' + str(yinc) + ' '
     gmElement.append(yincObj)
     # Finished writing grid model data
-
 
     if horizonRefName is not None:
         # Start scanning for horizon names and 2D map size information
@@ -522,7 +522,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         faciesCodeNames = log_curve.get_code_names()
 
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Facies names: ')
+            print('Debug output: Facies names:')
             print(faciesCodeNames)
 
         faciesTable = APSMainFaciesTable(fTable=faciesCodeNames)

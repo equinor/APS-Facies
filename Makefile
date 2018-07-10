@@ -352,6 +352,7 @@ clean-tests:
 	rm -f  *.dat \
 	       *.xml \
 	       *.png \
+	       fmu_attributes.txt \
 	       libdraw2D.so
 
 # TODO: Add diagrams for Previewer, and other files / classes of interest

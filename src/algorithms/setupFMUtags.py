@@ -4,6 +4,7 @@ from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, VariogramType, TrendType
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 
+
 def read_selected_fmu_variables(input_selected_FMU_variable_file):
     fmu_variables = []
     with open(input_selected_FMU_variable_file, 'r') as file:
@@ -26,7 +27,7 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
                 keyword2 = words[5]
                 if keyword2 == 'RESIDUAL':
                     var_name = words[6].strip()
-                elif  keyword2 == 'TREND':
+                elif keyword2 == 'TREND':
                     var_name = words[6].strip()
                 elif keyword2 == 'POLYNUMBER':
                     poly_number = int(words[6])
@@ -36,11 +37,12 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
                 elif keyword2 == 'TREND':
                     fmu_var = ['TREND', zone, region, gauss_name, var_name]
                 elif keyword == 'TRUNC' and keyword2 == 'POLYNUMBER':
-                    fmu_var = ['TRUNC', zone, region, trunc_name, poly_number] 
+                    fmu_var = ['TRUNC', zone, region, trunc_name, poly_number]
                 elif keyword == 'TRUNC':
                     fmu_var = ['TRUNC', zone, region, trunc_name, var_name]
                 fmu_variables.append(fmu_var)
     return fmu_variables
+
 
 def setAllAsFmuUpdatable(input_model_file, output_model_file, tagged_variable_file):
     aps_model = APSModel(input_model_file)
@@ -50,7 +52,7 @@ def setAllAsFmuUpdatable(input_model_file, output_model_file, tagged_variable_fi
         zone_number = key[0]
         region_number = key[1]
         if aps_model.isSelected(zone_number, region_number):
-            gauss_names_for_zone = zoneModel.getUsedGaussFieldNames()
+            gauss_names_for_zone = zoneModel.used_gaussian_field_names
             for i in range(len(gauss_names_for_zone)):
                 gauss_name = gauss_names_for_zone[i]
 
@@ -86,8 +88,8 @@ def setAllAsFmuUpdatable(input_model_file, output_model_file, tagged_variable_fi
                         trendModelObj.setOriginYFmuUpdatable(value)
                         trendModelObj.setMigrationAngleFmuUpdatable(value)
                         trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(value)
-                    
-            trunc_rule = zoneModel.getTruncRule()
+
+            trunc_rule = zoneModel.truncation_rule
             if trunc_rule._className == 'Trunc2D_Angle':
                 nPoly = trunc_rule.getNumberOfPolygonsInTruncationMap()
                 for polygon_number in range(nPoly):
@@ -98,7 +100,6 @@ def setAllAsFmuUpdatable(input_model_file, output_model_file, tagged_variable_fi
                 trunc_rule.setSBHDParamFmuUpdatable(value)
 
     aps_model.writeModel(output_model_file, tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
-
 
 
 def setSelectedAsFmuUpdatable(input_model_file, output_model_file, selected_variables, tagged_variable_file):
@@ -121,7 +122,6 @@ def setSelectedAsFmuUpdatable(input_model_file, output_model_file, selected_vari
             if trunc_name == 'NONCUBIC':
                 poly_number = int(fmu_variable[4])
 
-        
         zoneModel = aps_model.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
         if aps_model.isSelected(zone_number, region_number):
             if var_type == 'RESIDUAL':
@@ -167,7 +167,7 @@ def setSelectedAsFmuUpdatable(input_model_file, output_model_file, selected_vari
                             trendModelObj.setOriginYFmuUpdatable(value)
                         elif var_name == 'ORIGIN_Z_SIMBOX':
                             trendModelObj.setOriginZFmuUpdatable(value)
-                    elif  trendModelObj.type == TrendType.ELLIPTIC_CONE:
+                    elif trendModelObj.type == TrendType.ELLIPTIC_CONE:
                         if var_name == 'CURVATURE':
                             trendModelObj.setCurvatureFmuUpdatable(value)
                         elif var_name == 'MIGRATIONANGLE':
@@ -182,16 +182,16 @@ def setSelectedAsFmuUpdatable(input_model_file, output_model_file, selected_vari
                         zoneModel.setRelStdDevFmuUpdatable(gauss_name, value)
 
             elif var_type == 'TRUNC':
-                trunc_rule = zoneModel.getTruncRule()
+                trunc_rule = zoneModel.truncation_rule
                 if trunc_name == 'NONCUBIC':
                     # setAnglwFMUUpdatable take polygon_number counting from 0
                     trunc_rule.setAngleFmuUpdatable(poly_number-1, value)
-                elif  trunc_name == 'BAYFILL':
+                elif trunc_name == 'BAYFILL':
                     if var_name == 'SF':
                         trunc_rule.setSFParamFmuUpdatable(value)
-                    elif  var_name == 'YSF':
+                    elif var_name == 'YSF':
                         trunc_rule.setYSFParamFmuUpdatable(value)
-                    elif  var_name == 'SBHD':
+                    elif var_name == 'SBHD':
                         trunc_rule.setSBHDParamFmuUpdatable(value)
 
     aps_model.writeModel(output_model_file, tagged_variable_file, debug_level=Debug.VERY_VERBOSE)

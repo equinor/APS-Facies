@@ -98,7 +98,7 @@ class APSFaciesProb:
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not a number even though '
                             'useConstProb keyword is set to True.'
-                            ''.format(modelFileName, self.__className, name, self.__zoneNumber)
+                            ''.format(modelFileName, self.__className, name, self.zone_number)
                         )
                 else:
                     if isNumber(probCubeName):
@@ -108,7 +108,7 @@ class APSFaciesProb:
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not an RMS parameter name even though '
                             'useConstProb keyword is set to False.'
-                            ''.format(modelFileName, self.__className, name, self.__zoneNumber)
+                            ''.format(modelFileName, self.__className, name, self.zone_number)
                         )
 
                 item = [name, probCubeName]
@@ -120,7 +120,7 @@ class APSFaciesProb:
                     'Error in {1}\n'
                     'Error in keyword: FaciesProbForModel in zone number: {2}. Facies name: {3}\n'
                     '                  is not defined in main facies table in command APSMainFaciesTable'
-                    ''.format(modelFileName, self.__className, str(self.__zoneNumber), name)
+                    ''.format(modelFileName, self.__className, self.zone_number, name)
                 )
 
         if self.__faciesProbForZoneModel is None:
@@ -128,13 +128,13 @@ class APSFaciesProb:
                 'Error when reading model file: {0}\n'
                 'Error: Missing keyword Facies under keyword FaciesProbForModel'
                 ' in zone number: {1}\n'
-                ''.format(modelFileName, self.__zoneNumber)
+                ''.format(modelFileName, self.zone_number)
             )
 
-        self.__checkConstProbValuesAndNormalize(self.__zoneNumber)
+        self.__checkConstProbValuesAndNormalize(self.zone_number)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: From ' + self.__className + ': Facies prob for current zone model: ')
+            print('Debug output: From ' + self.__className + ': Facies prob for current zone model:')
             print(repr(self.__faciesProbForZoneModel))
 
     def initialize(self, faciesList, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, debug_level=Debug.OFF):
@@ -211,6 +211,10 @@ class APSFaciesProb:
             raise ValueError(
                 'Can not call getConstProbValue when useConstProb = 0'
             )
+
+    @property
+    def zone_number(self):
+        return self.__zoneNumber
 
     def getFaciesInZoneModel(self):
         return copy.copy(self.__faciesInZoneModel)

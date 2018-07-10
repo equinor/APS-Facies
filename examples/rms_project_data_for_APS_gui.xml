@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<RMS_grid_model_data>
+  <GridModel name="GridModel2">
+    <ZoneName end="45" nLayers="46" number="1" start="0"> top_model_top_upper_Neslen </ZoneName>
+    <ZoneName end="136" nLayers="91" number="2" start="46"> top_upper_Neslen_top_lower_Neslen </ZoneName>
+    <ZoneName end="211" nLayers="75" number="3" start="137"> top_lower_Neslen_top_Buck_Tounge </ZoneName>
+    <ZoneName end="249" nLayers="38" number="4" start="212"> top_Buck_Tounge_top_Mancos_shale </ZoneName>
+    <XSize> 5000.639735283471 </XSize>
+    <YSize> 6001.205044975044 </YSize>
+    <AzimuthAngle> -45.00000020602467 </AzimuthAngle>
+    <OrigoX> 658325.0516357422 </OrigoX>
+    <OrigoY> 4350646.056640625 </OrigoY>
+    <NX> 100 </NX>
+    <NY> 120 </NY>
+    <Xinc> 50.00639735283471 </Xinc>
+    <Yinc> 50.0100420414587 </Yinc>
+  </GridModel>
+</RMS_grid_model_data>

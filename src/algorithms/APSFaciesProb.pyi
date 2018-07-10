@@ -6,6 +6,7 @@ from xml.etree.ElementTree import Element
 
 
 class APSFaciesProb:
+    zone_number: int
     def __init__(
         self,
         ET_Tree_zone: Optional[Element] = None,

@@ -19,10 +19,9 @@ import math
 from xml.etree.ElementTree import Element
 
 import copy
-import sys
 import numpy as np
 
-from src.utils.constants.simple import Debug, OriginType, TrendType
+from src.utils.constants.simple import Debug, OriginType, TrendType, CrossSectionType
 from src.utils.roxar.grid_model import getGridSimBoxSize, getContinuous3DParameterValues
 from src.utils.xmlUtils import getFloatCommand, getIntCommand, getTextCommand, isFMUUpdatable, createFMUvariableNameForTrend
 
@@ -46,7 +45,7 @@ class Trend3D:
         self._isAzimutFMUUpdatable = False
 
         # Angle between facies
-        self._stackingAngle = 0.0001
+        self._stackingAngle = 0.0
         self._isStackAngleFMUUpdatable = False
 
         # Direction of stacking (prograding/retrograding)
@@ -95,7 +94,7 @@ class Trend3D:
         self._stackingAngle = getFloatCommand(
             trendRuleXML, 'stackAngle', modelFile=modelFileName
         )
-        if self._stackingAngle < 0.0 or self._stackingAngle > 90.0:
+        if not (0.0 <= self._stackingAngle <= 90.0):
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Stacking angle for linear trend is not within [0,90] degrees.'
@@ -103,12 +102,14 @@ class Trend3D:
             )
         self._isStackAngleFMUUpdatable = isFMUUpdatable(trendRuleXML, 'stackAngle')
 
-
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Trend parameters:')
             print('Debug output:   Azimuth:        ' + str(self._azimuth))
             print('Debug output:   Stacking angle: ' + str(self._stackingAngle))
             print('Debug output:   Stacking type:  ' + str(self._direction))
+
+    def XMLAddElement(self, parent, fmu_attributes):
+        raise NotImplementedError
 
     def _XMLAddElementTag(self, trendElement, zone_number, region_number, gf_name, fmu_attributes):
 
@@ -116,7 +117,7 @@ class Trend3D:
         obj = Element(tag)
         obj.text = ' ' + str(self._azimuth) + ' '
         if self._isAzimutFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, zone_number, region_number, gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, gf_name, zone_number, region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         trendElement.append(obj)
@@ -130,29 +131,29 @@ class Trend3D:
         obj = Element(tag)
         obj.text = ' ' + str(self._stackingAngle) + ' '
         if self._isStackAngleFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, zone_number, region_number, gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, gf_name, zone_number, region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         trendElement.append(obj)
 
-    def initialize(self, azimuthAngle=0.0, azimuthAngleFmuUpdatable=False, stackingAngle=0.01,
+    def initialize(self, azimuthAngle=0.0, azimuthAngleFmuUpdatable=False, stackingAngle=0.0,
                    stackingAngleFmuUpdatable=False, direction=1, debug_level=Debug.OFF):
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self._className)
 
-        if azimuthAngle < 0.0 or azimuthAngle > 360.0:
+        if not (0.0 <= azimuthAngle <= 360.0):
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Cannot set azimuth angle for linear trend outside interval [0,360] degrees.'
                 ''.format(self.__className)
             )
-        if stackingAngle < 0.0 or stackingAngle > 90.0:
+        if not (0.0 <= stackingAngle <= 90.0):
             raise ValueError(
                 'Error in {}\n'
                 'Error: Cannot set stacking angle to be outside interval [0,90] degrees.'
                 ''.format(self.__className)
             )
-        if direction != -1 and direction != 1:
+        if direction not in [-1, 1]:
             raise ValueError(
                 'Error in {}\n'
                 'Error: Cannot set stacking type to be a number different from -1 and 1.'
@@ -180,7 +181,7 @@ class Trend3D:
         return self._direction
 
     def setAzimuth(self, angle):
-        if angle < 0.0 or angle > 360.0:
+        if not (0.0 <= angle <= 360.0):
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Cannot set azimuth angle for linear trend outside interval [0,360] degrees'
@@ -193,7 +194,7 @@ class Trend3D:
         self._isAzimutFMUUpdatable = value
 
     def setStackingAngle(self, stackingAngle):
-        if stackingAngle < 0.0 or stackingAngle > 90.0:
+        if not (0.0 <= stackingAngle <= 90.0):
             raise ValueError(
                 'Error in {}\n'
                 'Error: Cannot set stacking angle to be outside interval [0,90] degrees.'
@@ -206,7 +207,7 @@ class Trend3D:
         self._isStackAngleFMUUpdatable = value
 
     def setStackingDirection(self, direction):
-        if direction != -1 and direction != 1:
+        if direction not in [-1, 1]:
             raise ValueError(
                 'Error in {}\n'
                 'Error: Cannot set stacking type to be a number different from -1 and 1.'
@@ -383,15 +384,16 @@ class Trend3D:
         return minmaxDifference, valuesRescaled
 
     def createTrendFor2DProjection(
-            self, simBoxXsize, simBoxYsize, simBoxZsize, azimuthSimBox,
-            nxPreview, nyPreview, nzPreview, projectionType, crossSectionRelativePos
+            self, sim_box_size, azimuthSimBox,
+            preview_size, projectionType, crossSectionRelativePos
     ):
+        simBoxXsize, simBoxYsize, simBoxZsize = sim_box_size
+        nxPreview, nyPreview, nzPreview = preview_size
         if self.type == TrendType.RMS_PARAM or self.type == TrendType.NONE:
-            print('Preview of Trend of type RMS_PARAM or NONE is not implemented')
-            sys.exit()
+            raise ValueError('Preview of Trend of type RMS_PARAM or NONE is not implemented')
 
         # Define relative azimuth relative to y axis in simulation box coordinates
-        self._relativeAzimuth = self._azimuth -azimuthSimBox
+        self._relativeAzimuth = self._azimuth - azimuthSimBox
 
         # Define self._xCenter, self._yCenter for the trend
         self._setTrendCenter(0.0, 0.0, azimuthSimBox, simBoxXsize, simBoxYsize, simBoxZsize)
@@ -415,34 +417,34 @@ class Trend3D:
         zinc = simBoxZsize / nzPreview
 
         # Note: Save trend values for the 2D fields in 1D numpy vector in 'C' sequence
-        if projectionType == 'IJ':
+        if projectionType == CrossSectionType.IJ:
             k = crossSectionRelativePos * (nzPreview-1)
             values = np.zeros(nxPreview * nyPreview, float)
             # values(i,j) as 1D vector
             for j in range(nyPreview):
                 for i in range(nxPreview):
-                    indx = i + j * nxPreview # Index for 2D matrix where j is row and i is column
-                    trendValue =self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
+                    indx = i + j * nxPreview  # Index for 2D matrix where j is row and i is column
+                    trendValue = self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
                     values[indx] = trendValue
 
-        elif projectionType == 'IK':
+        elif projectionType == CrossSectionType.IK:
             j = crossSectionRelativePos * (nyPreview-1)
             values = np.zeros(nxPreview * nzPreview, float)
             # values(i,k) as 1D vector
             for k in range(nzPreview):
                 for i in range(nxPreview):
-                    indx = i + k * nxPreview # Index for 2D matrix where k is row and i is column index
-                    trendValue =self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
+                    indx = i + k * nxPreview  # Index for 2D matrix where k is row and i is column index
+                    trendValue = self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
                     values[indx] = trendValue
 
-        elif projectionType == 'JK':
+        elif projectionType == CrossSectionType.JK:
             i = crossSectionRelativePos * (nxPreview-1)
             values = np.zeros(nyPreview * nzPreview, float)
             # values(j,k) as 1D vector
             for k in range(nzPreview):
                 for j in range(nyPreview):
-                    indx = j + k * nyPreview # Index for 2D matrix where k is row and j is column index
-                    trendValue =self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
+                    indx = j + k * nyPreview  # Index for 2D matrix where k is row and j is column index
+                    trendValue = self._trendValueCalculationSimBox(parametersForTrendCalc, i, j, k, xinc, yinc, zinc)
                     values[indx] = trendValue
         else:
             raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
@@ -472,7 +474,6 @@ class Trend3D:
             print('Debug output: Difference between max and min value within simBox after rescaling: ' + str(minmaxDifference))
 
         return minmaxDifference, averageTrend, valuesRescaled
-
 
     def get_origin_type_from_model_file(self, model_file_name, trendRuleXML):
         origin_type = getTextCommand(
@@ -606,9 +607,9 @@ class Trend3D_linear(Trend3D):
         return trendValue
 
     def _linearTrendFunction(self, parametersForTrendCalc, xRel, yRel, zRel):
-        xComponent =  parametersForTrendCalc[0]
-        yComponent =  parametersForTrendCalc[1]
-        zComponent =  parametersForTrendCalc[2]
+        xComponent = parametersForTrendCalc[0]
+        yComponent = parametersForTrendCalc[1]
+        zComponent = parametersForTrendCalc[2]
         trendValue = xComponent * xRel + yComponent * yRel + zComponent * zRel
         return trendValue
 # ----------------------------------------------------------------------------------------------------------
@@ -691,7 +692,7 @@ class Trend3D_elliptic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
         if self._isCurvatureFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
@@ -700,7 +701,7 @@ class Trend3D_elliptic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
         if self._isOriginXFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
@@ -709,7 +710,7 @@ class Trend3D_elliptic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
         if self._isOriginYFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
@@ -718,7 +719,7 @@ class Trend3D_elliptic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[2]) + ' '
         if self._isOriginZFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         elliptic3DElement.append(obj)
@@ -1026,7 +1027,8 @@ class Trend3D_hyperbolic(Trend3D):
 
     def initialize(
             self, azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable,
-            direction, migrationAngle, migrationAngleFmuUpdatable, curvature, curvatureFmuUpdatable, origin=None, originFmuUpdatable=False, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF):
+            direction, migrationAngle, migrationAngleFmuUpdatable, curvature, curvatureFmuUpdatable, origin=None,
+            originFmuUpdatable=False, origin_type=OriginType.RELATIVE, debug_level=Debug.OFF):
         super().initialize(azimuthAngle, azimuthAngleFmuUpdatable, stackingAngle, stackingAngleFmuUpdatable,
                            direction, debug_level)
         # Add additional for current trend type here
@@ -1205,7 +1207,7 @@ class Trend3D_hyperbolic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
         if self._isCurvatureFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
@@ -1214,25 +1216,25 @@ class Trend3D_hyperbolic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._migrationAngle) + ' '
         if self._isMigrationAngleFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
-            obj.attrib = dict(kw=createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name))
+            obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
 
         tag = 'origin_x'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
         if self._isOriginXFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
-            obj.attrib = dict(kw=createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name))
+            obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
 
         tag = 'origin_y'
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
         if self._isOriginYFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
@@ -1241,7 +1243,7 @@ class Trend3D_hyperbolic(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[2]) + ' '
         if self._isOriginZFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         hyperbolic3DElement.append(obj)
@@ -1435,7 +1437,7 @@ class Trend3D_elliptic_cone(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._curvature) + ' '
         if self._isCurvatureFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
@@ -1444,7 +1446,7 @@ class Trend3D_elliptic_cone(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._migrationAngle) + ' '
         if self._isMigrationAngleFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
@@ -1453,7 +1455,7 @@ class Trend3D_elliptic_cone(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._relativeSize) + ' '
         if self._isRelativeSizeFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
@@ -1462,7 +1464,7 @@ class Trend3D_elliptic_cone(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[0]) + ' '
         if self._isOriginXFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
@@ -1471,7 +1473,7 @@ class Trend3D_elliptic_cone(Trend3D):
         obj = Element(tag)
         obj.text = ' ' + str(self._origin[1]) + ' '
         if self._isOriginYFMUUpdatable:
-            fmu_attribute = createFMUvariableNameForTrend(tag, self._zone_number, self._region_number, self._gf_name)
+            fmu_attribute = createFMUvariableNameForTrend(tag, self._gf_name, self._zone_number, self._region_number)
             fmu_attributes.append(fmu_attribute)
             obj.attrib = dict(kw=fmu_attribute)
         EllipticCone3DElement.append(obj)
@@ -1499,7 +1501,7 @@ class Trend3D_elliptic_cone(Trend3D):
                 ''.format(self._className)
             )
 
-        if migrationAngle <= -90.0 or migrationAngle >= 90.0:
+        if not (-90.0 < migrationAngle < 90.0):
             raise ValueError(
                 'Error: In {}\n'
                 'Error: Migration angle must be between -90.0 and +90.0 degrees.'
@@ -1626,7 +1628,7 @@ class Trend3D_elliptic_cone(Trend3D):
         return self._origin_type
 
     def _setTrendCenter(self, x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness, origin_type=None, origin=None):
-        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength,simBoxThickness,
+        super()._setTrendCenter(x0, y0, azimuthAngle, simBoxXLength, simBoxYLength, simBoxThickness,
                                 self._origin_type, self._origin)
         self._origin[2] = 1.0
 
@@ -1641,7 +1643,6 @@ class Trend3D_elliptic_cone(Trend3D):
         # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
         trendValue = self._ellipticConeTrendFunction(parametersForTrendCalc, x1, y1, z1, zinc)
         return trendValue
-
 
     def _trendValueCalculationSimBox(self, parametersForTrendCalc, i, j, k, xinc, yinc, zinc):
         # Elliptic cone

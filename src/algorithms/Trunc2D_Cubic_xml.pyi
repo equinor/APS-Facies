@@ -1,11 +1,13 @@
 from numpy import float64, ndarray
+
+from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
 from typing import List, Optional, Tuple, Union
 from xml.etree.ElementTree import Element
 
 
-class Trunc2D_Cubic:
+class Trunc2D_Cubic(Trunc2D_Base):
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,
@@ -13,10 +15,10 @@ class Trunc2D_Cubic:
         faciesInZone: Optional[List[str]] = None,
         gaussFieldsInZone: Optional[List[str]] = None,
         keyResolution: int = 100,
-        debug_level: int = Debug.OFF,
+        debug_level: Debug = Debug.OFF,
         modelFileName: Optional[str] = None,
         zoneNumber: Optional[int] = None
-    ) -> None: ...
+    ): ...
     def XMLAddElement(self, parent: Element, zone_number:str, region_number:str, fmu_attributes:List[str]) -> None: ...
     def defineFaciesByTruncRule(self, alphaCoord: ndarray) -> Tuple[int, int]: ...
     def getClassName(self) -> str: ...

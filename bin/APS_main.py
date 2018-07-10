@@ -370,15 +370,15 @@ def run(roxar=None, project=None, **kwargs):
 
         if useRegions:
             if debug_level >= Debug.SOMEWHAT_VERBOSE:
-                print(' ')
+                print('')
                 print('- Run model for (zoneNumber, regionNumber) = ({},{})'
                       ''.format(str(zoneNumber), str(regionNumber)))
-                print(' ')
+                print('')
         else:
             if debug_level >= Debug.SOMEWHAT_VERBOSE:
-                print(' ')
+                print('')
                 print('- Run model for zone number: ' + str(zoneNumber))
-                print(' ')
+                print('')
 
         zoneModel = apsModel.getZoneModel(zoneNumber, regionNumber)
 
@@ -386,7 +386,7 @@ def run(roxar=None, project=None, **kwargs):
         zoneModel.getTruncationParam(gridModel, realNumber)
 
         useConstProb = zoneModel.useConstProb()
-        GFNamesForZone = zoneModel.getUsedGaussFieldNames()
+        GFNamesForZone = zoneModel.used_gaussian_field_names
         faciesNamesForZone = zoneModel.getFaciesInZoneModel()
         nFacies = len(faciesNamesForZone)
 
@@ -619,7 +619,7 @@ def run(roxar=None, project=None, **kwargs):
         )
 
         if debug_level >= Debug.VERBOSE:
-            print(' ')
+            print('')
             mainFaciesTable = apsModel.getMainFaciesTable()
             if useConstProb == 1:
                 if useRegions:
@@ -699,7 +699,7 @@ def run(roxar=None, project=None, **kwargs):
 
     # End loop over zones
 
-    print(' ')
+    print('')
 
     # Write/update facies realisation
     mainFaciesTable = apsModel.getMainFaciesTable()
@@ -740,7 +740,7 @@ def run(roxar=None, project=None, **kwargs):
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('- Create or update parameter: ' + resultParamName)
 
-    print(' ')
+    print('')
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('- Updated facies table:')
         p = get3DParameter(gridModel, resultParamName, debug_level)
@@ -749,7 +749,7 @@ def run(roxar=None, project=None, **kwargs):
             u = p.code_names.get(key)
             print('  {0:10}  {1:3d}'.format(u, key))
 
-        print(' ')
+        print('')
     print('Finished APS_main.py')
 
 

@@ -181,10 +181,10 @@ def run_simulations(
     # Read APS model
     print('- Read file: ' + modelFile)
     apsModel = APSModel(modelFile)
-    debug_level = apsModel.debug_level()
-    seedFileName = apsModel.getSeedFileName()
+    debug_level = apsModel.debug_level
+    seedFileName = apsModel.seed_file_name
     writeSeedFile = apsModel.writeSeeds
-    print('Write seed file: '+str(writeSeedFile))
+    print('Write seed file: ' + str(writeSeedFile))
 
     # Get grid dimensions
 

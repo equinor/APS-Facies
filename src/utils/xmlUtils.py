@@ -1,21 +1,20 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from functools import wraps
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
 
 from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected
 
 
-def prettify(elem):
+def prettify(elem, indent="  ", new_line="\n"):
     rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="  ", newl="\n")
+    return reparsed.toprettyxml(indent=indent, newl=new_line)
 
-def prettify2(elem):
-    rough_string = ET.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent="", newl="")
 
+def minify(elem):
+    return prettify(elem, indent="", new_line="")
 
 
 def getKeyword(parent, keyword, parentKeyword='', modelFile=None, required=True):
@@ -125,30 +124,29 @@ def isFMUUpdatable(parent, keyword):
     return False
 
 
-def createFMUvariableNameForTrend(keyword, zone_number, region_number, grf_name):
-    if region_number is not None:
-        return 'APS_{}_{}_GF_{}_TREND_{}'.format(zone_number, region_number, grf_name, keyword.upper())
-    else:
-        return 'APS_{}_{}_GF_{}_TREND_{}'.format(zone_number, str(0), grf_name, keyword.upper())
+def _coerce_none_to_integers(func):
+    @wraps(func)
+    def wrapper(*args):
+        coerced = [arg if arg is not None else 0 for arg in args]
+        return func(*coerced)
+    return wrapper
 
 
-def createFMUvariableNameForResidual(keyword, zone_number, region_number, grf_name):
-    if region_number is not None:
-        return 'APS_{}_{}_GF_{}_RESIDUAL_{}'.format(zone_number, region_number, grf_name, keyword.upper())
-    else:
-        return 'APS_{}_{}_GF_{}_RESIDUAL_{}'.format(zone_number, str(0), grf_name, keyword.upper())
+@_coerce_none_to_integers
+def createFMUvariableNameForTrend(keyword, grf_name, zone_number, region_number=None):
+    return 'APS_{}_{}_GF_{}_TREND_{}'.format(zone_number, region_number, grf_name, keyword.upper())
 
 
-def createFMUvariableNameForBayfillTruncation(keyword, zone_number, region_number):
-    if region_number is not None:
-        return 'APS_{}_{}_TRUNC_BAYFILL_{}'.format(zone_number, region_number, keyword.upper())
-    else:
-        return 'APS_{}_{}_TRUNC_BAYFILL_{}'.format(zone_number, str(0), keyword.upper())
+@_coerce_none_to_integers
+def createFMUvariableNameForResidual(keyword, grf_name, zone_number, region_number=None):
+    return 'APS_{}_{}_GF_{}_RESIDUAL_{}'.format(zone_number, region_number, grf_name, keyword.upper())
 
 
-def createFMUvariableNameForNonCubicTruncation(index, zone_number, region_number):
-    if region_number is not None:
-        return 'APS_{}_{}_TRUNC_NONCUBIC_POLYNUMBER_{}_ANGLE'.format(zone_number, region_number, index)
-    else:
-        return 'APS_{}_{}_TRUNC_NONCUBIC_POLYNUMBER_{}_ANGLE'.format(zone_number, str(0), index)
+@_coerce_none_to_integers
+def createFMUvariableNameForBayfillTruncation(keyword, zone_number, region_number=None):
+    return 'APS_{}_{}_TRUNC_BAYFILL_{}'.format(zone_number, region_number, keyword.upper())
 
+
+@_coerce_none_to_integers
+def createFMUvariableNameForNonCubicTruncation(index, zone_number, region_number=None):
+    return 'APS_{}_{}_TRUNC_NONCUBIC_POLYNUMBER_{}_ANGLE'.format(zone_number, region_number, index)

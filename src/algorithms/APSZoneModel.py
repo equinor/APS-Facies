@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
@@ -21,16 +22,19 @@ class APSZoneModel:
 
     Public member functions:
        def __init__(self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
-            useConstProb=False, simBoxThickness=10.0, 
+            useConstProb=False, simBoxThickness=10.0,
             faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
             debug_level=Debug.OFF, keyResolution=100)
 
+     --- Properties ---
+       debug_level
+       zone_number
+       region_number
+       used_gaussian_field_names
+
      --- Get functions ---
-       def getZoneNumber(self)
-       def getRegionNumber(self)
        def useConstProb(self)
        def getFaciesInZoneModel(self)
-       def getUsedGaussFieldNames(self)
        def getVariogramType(self,gaussFieldName)
        def getVariogramTypeNumber(self,gaussFieldName)
        def getMainRange(self,gaussFieldName)
@@ -43,7 +47,6 @@ class APSZoneModel:
        def getTrendModel(self,gfName
        def getTrendModelObject(self, gfName)
        def getSimBoxThickness(self)
-       def get_debug_level(self)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
@@ -51,7 +54,6 @@ class APSZoneModel:
        def getGaussFieldIndexListInZone(self)
 
        ---  Set functions ---
-       def setZoneNumber(self,zoneNumber)
        def setVariogramType(self,gaussFieldName,variogramType)
        def setMainRange(self,gaussFieldName,range1)
        def setPerpRange(self,gaussFieldName,range2)
@@ -74,8 +76,8 @@ class APSZoneModel:
      ---  Calculate function ---
        def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
        def simGaussFieldWithTrendAndTransform(
-            self, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx)
+            self, (simBoxXsize, simBoxYsize, simBoxZsize),
+            (gridNX, gridNY, gridNZ), gridAzimuthAngle, crossSectionType, crossSectionIndx)
 
 
      ---  write XML tree ---
@@ -89,14 +91,13 @@ class APSZoneModel:
     Private member functions:
        def __interpretXMLTree(self, ET_Tree, modelFileName)
        def __checkConstProbValuesAndNormalize(self)
-       def __getGFIndex(self,gfName)
        def __updateGaussFieldVariogramParam(self,gfName,variogramType,range1,range2,range3,angle,power)
        def __updateGaussFieldTrendParam(self,gfName,trendModelObj,relStdDev)
     """
 
     def __init__(
             self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
-            useConstProb=False, simBoxThickness=10.0, 
+            useConstProb=False, simBoxThickness=10.0,
             faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
             debug_level=Debug.OFF, keyResolution=100
     ):
@@ -114,6 +115,7 @@ class APSZoneModel:
         """
         self.__className = self.__class__.__name__
         # Local variables
+        self.__trunc_rule = None
         self.__zoneNumber = zoneNumber
         self.__regionNumber = regionNumber
         self.__useConstProb = bool(useConstProb)
@@ -122,7 +124,7 @@ class APSZoneModel:
         self.__faciesProbObject = faciesProbObject
         self.__gaussModelObject = gaussModelObject
 
-        self.__truncRule = truncRuleObject
+        self.truncation_rule = truncRuleObject
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
 
@@ -145,14 +147,15 @@ class APSZoneModel:
         # Optimization parameters
         obj = getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
         if obj is not None:
-            useMemoization = getIntCommand(obj, 'UseMemoization', 'Optimization',
-                                           minValue=0, maxValue=1, defaultValue=1,
-                                           modelFile=modelFileName, required=False)
+            useMemoization = getIntCommand(
+                obj, 'UseMemoization', 'Optimization',
+                minValue=0, maxValue=1, defaultValue=1, modelFile=modelFileName, required=False
+            )
 
-            nIntervalForProbabilityInMemoizationKey = getIntCommand(obj, 'MemoizationResolution', 'Optimization',
-                                                                    minValue=100, maxValue=10000,
-                                                                    defaultValue=100, modelFile=modelFileName,
-                                                                    required=False)
+            nIntervalForProbabilityInMemoizationKey = getIntCommand(
+                obj, 'MemoizationResolution', 'Optimization',
+                minValue=100, maxValue=10000, defaultValue=100, modelFile=modelFileName, required=False
+            )
             if useMemoization == 1:
                 self.__keyResolution = nIntervalForProbabilityInMemoizationKey
             else:
@@ -160,8 +163,6 @@ class APSZoneModel:
 
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
 
-        regionNumber = 0
-        zoneNumber   = 0
         zoneModels = getKeyword(root, 'ZoneModels', 'Root', modelFile=modelFileName)
         for zone in zoneModels.findall('Zone'):
             zoneNumber = int(zone.get('number'))
@@ -184,7 +185,7 @@ class APSZoneModel:
                 if self.__debug_level == Debug.VERY_VERBOSE:
                     print('Debug output: Zone number: {}'.format(str(zoneNumber)))
 
-            if zoneNumber == self.__zoneNumber and regionNumber == self.__regionNumber:
+            if zoneNumber == self.zone_number and regionNumber == self.__regionNumber:
 
                 useConstProb = getBoolCommand(zone, 'UseConstProb', 'Zone', model_file_name=modelFileName)
                 self.__useConstProb = useConstProb
@@ -192,7 +193,6 @@ class APSZoneModel:
                 kw = 'SimBoxThickness'
                 simBoxThickness = getFloatCommand(zone, kw, 'Zone', minValue=0.0, modelFile=modelFileName)
                 self.__simBoxThickness = simBoxThickness
-
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zoneNumber))
@@ -203,12 +203,12 @@ class APSZoneModel:
                 # Read facies probabilities
                 self.__faciesProbObject = APSFaciesProb(
                     zone, mainFaciesTable, modelFileName,
-                    self.__debug_level, self.__useConstProb, self.__zoneNumber
+                    self.__debug_level, self.__useConstProb, self.zone_number
                 )
                 # Read Gauss Fields model parameters
                 self.__gaussModelObject = APSGaussModel(
                     zone, mainFaciesTable, modelFileName,
-                    self.__debug_level, self.__zoneNumber, self.__simBoxThickness
+                    self.__debug_level, self.zone_number, self.__simBoxThickness
                 )
 
                 # Read truncation rule for zone model
@@ -225,8 +225,7 @@ class APSZoneModel:
                     print('Debug output: TruncRuleName: ' + truncRuleName)
 
                 nGaussFieldInModel = int(trRule[0].get('nGFields'))
-                nGaussFieldInZone = self.__gaussModelObject.getNGaussFields()
-                if nGaussFieldInModel > nGaussFieldInZone:
+                if nGaussFieldInModel > self.__gaussModelObject.num_gaussian_fields:
                     raise ValueError(
                         'Error: In {className}\n'
                         'Error: Number of specified RMS gaussian field 3D parameters in truncation rule {nGFTruncRule}\n'
@@ -239,24 +238,24 @@ class APSZoneModel:
                     )
                 else:
                     faciesInZone = self.__faciesProbObject.getFaciesInZoneModel()
-                    gaussFieldsInZone = self.__gaussModelObject.getUsedGaussFieldNames()
+                    gaussFieldsInZone = self.__gaussModelObject.used_gaussian_field_names
                     if truncRuleName == 'Trunc3D_Bayfill':
-                        self.__truncRule = Trunc3D_bayfill(
+                        self.truncation_rule = Trunc3D_bayfill(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                             self.__debug_level, modelFileName
                         )
 
                     elif truncRuleName == 'Trunc2D_Angle':
-                        self.__truncRule = Trunc2D_Angle(
+                        self.truncation_rule = Trunc2D_Angle(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                             self.__keyResolution,
-                            self.__debug_level, modelFileName, self.__zoneNumber
+                            self.__debug_level, modelFileName, self.zone_number
                         )
                     elif truncRuleName == 'Trunc2D_Cubic':
-                        self.__truncRule = Trunc2D_Cubic(
+                        self.truncation_rule = Trunc2D_Cubic(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                             self.__keyResolution,
-                            self.__debug_level, modelFileName, self.__zoneNumber
+                            self.debug_level, modelFileName, self.zone_number
                         )
                     else:
                         raise NameError(
@@ -268,23 +267,27 @@ class APSZoneModel:
 
                     if self.__debug_level >= Debug.VERY_VERBOSE:
                         text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
-                        text += self.__truncRule.getClassName()
+                        text += self.truncation_rule.getClassName()
                         print(text)
-                        print('Debug output: APSZoneModel: Facies in truncation rule: ')
-                        print(repr(self.__truncRule.getFaciesInTruncRule()))
+                        print('Debug output: APSZoneModel: Facies in truncation rule:')
+                        print(repr(self.truncation_rule.getFaciesInTruncRule()))
                 break
                 # End if zone number
         # End for zone
 
-        return
-
     def hasFacies(self, fName):
         return self.__faciesProbObject.hasFacies(fName)
 
-    def getZoneNumber(self):
+    @property
+    def zone_number(self):
         return self.__zoneNumber
 
-    def getRegionNumber(self):
+    @zone_number.setter
+    def zone_number(self, value):
+        self.__zoneNumber = value
+
+    @property
+    def region_number(self):
         return self.__regionNumber
 
     def useConstProb(self) -> bool:
@@ -293,8 +296,9 @@ class APSZoneModel:
     def getFaciesInZoneModel(self):
         return self.__faciesProbObject.getFaciesInZoneModel()
 
-    def getUsedGaussFieldNames(self):
-        return self.__gaussModelObject.getUsedGaussFieldNames()
+    @property
+    def used_gaussian_field_names(self):
+        return self.__gaussModelObject.used_gaussian_field_names
 
     def getVariogramType(self, gaussFieldName):
         return copy.copy(self.__gaussModelObject.getVariogramType(gaussFieldName))
@@ -338,8 +342,15 @@ class APSZoneModel:
     def getPowerFmuUpdatable(self, gaussFieldName):
         return self.__gaussModelObject.getPowerFmuUpdatable(gaussFieldName)
 
-    def getTruncRule(self):
-        return self.__truncRule
+    @property
+    def truncation_rule(self):
+        return self.__trunc_rule
+
+    @truncation_rule.setter
+    def truncation_rule(self, value):
+        if value is None:
+            warn('The truncation rule cannot be None for a zone model')
+        self.__trunc_rule = value
 
     def getTrendModel(self, gfName):
         return self.__gaussModelObject.getTrendModel(gfName)
@@ -351,11 +362,16 @@ class APSZoneModel:
         return self.__simBoxThickness
 
     def getTruncationParam(self, gridModel, realNumber):
-        if not self.__truncRule.useConstTruncModelParam():
-            self.__truncRule.getTruncationParam(gridModel, realNumber)
+        if not self.truncation_rule.useConstTruncModelParam():
+            self.truncation_rule.getTruncationParam(gridModel, realNumber)
 
-    def get_debug_level(self):
+    @property
+    def debug_level(self):
         return self.__debug_level
+
+    @debug_level.setter
+    def debug_level(self, value):
+        self.__debug_level = value
 
     def getProbParamName(self, fName):
         return self.__faciesProbObject.getProbParamName(fName)
@@ -367,14 +383,10 @@ class APSZoneModel:
         return self.__faciesProbObject.getConstProbValue(fName)
 
     def getGaussFieldsInTruncationRule(self):
-        return self.__truncRule.getGaussFieldsInTruncationRule()
+        return self.truncation_rule.getGaussFieldsInTruncationRule()
 
     def getGaussFieldIndexListInZone(self):
-        return self.__truncRule.getGaussFieldIndexListInZone()
-
-    def setZoneNumber(self, zoneNumber):
-        self.__zoneNumber = zoneNumber
-        return
+        return self.truncation_rule.getGaussFieldIndexListInZone()
 
     def setVariogramType(self, gaussFieldName, variogramType):
         return self.__gaussModelObject.setVariogramType(gaussFieldName, variogramType)
@@ -423,7 +435,6 @@ class APSZoneModel:
 
     def setUseConstProb(self, useConstProb):
         self.__useConstProb = useConstProb
-        return
 
     def setSeedForPreviewSimulation(self, gfName, seed):
         return self.__gaussModelObject.setSeedForPreviewSimulation(gfName, seed)
@@ -459,14 +470,6 @@ class APSZoneModel:
     def updateGaussFieldTrendParam(self, gfName, trendModelObj, relStdDev):
         self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendModelObj, relStdDev)
 
-    def setTruncRule(self, truncRuleObj):
-        err = 0
-        if truncRuleObj is None:
-            err = 1
-        else:
-            self.__truncRule = truncRuleObj
-        return err
-
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
         ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
             The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
@@ -475,18 +478,17 @@ class APSZoneModel:
         NAME = 0
         VAL = 1
 
-        truncObject = self.__truncRule
         debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
-        classNameTrunc = truncObject.getClassName()
+        classNameTrunc = self.truncation_rule.getClassName()
         if len(probDefined) != nFacies:
             raise ValueError(
                 'Error: In class: {}. Mismatch in input to applyTruncations '
                 ''.format(self.__className)
             )
 
-        useConstTruncParam = truncObject.useConstTruncModelParam()
+        useConstTruncParam = self.truncation_rule.useConstTruncModelParam()
         nGaussFields = len(GFAlphaList)
         faciesProb = np.zeros(nFacies, np.float32)
         volFrac = np.zeros(nFacies, np.float32)
@@ -516,7 +518,7 @@ class APSZoneModel:
 
             # Calculate truncation rules
             # The truncation map/cube is constant and does not vary from cell to cell
-            truncObject.setTruncRule(faciesProb)
+            self.truncation_rule.setTruncRule(faciesProb)
 
             for i in range(nDefinedCells):
                 if debug_level == Debug.VERBOSE:
@@ -535,7 +537,7 @@ class APSZoneModel:
                     alphaCoord.append(alphaDataArray[cellIndx])
 
                 # Calculate facies realization by applying truncation rules
-                fCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
+                fCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
@@ -559,10 +561,10 @@ class APSZoneModel:
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
-                        truncRuleName = truncObject.getClassName()
+                        truncRuleName = self.truncation_rule.getClassName()
                         if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
-                            nCalc = truncObject.getNCalcTruncMap()
-                            nLookup = truncObject.getNLookupTruncMap()
+                            nCalc = self.truncation_rule.getNCalcTruncMap()
+                            nLookup = self.truncation_rule.getNLookupTruncMap()
                             print('--- Calculate facies for cell number: {}    New truncation cubes: {}    Re-used truncation cubes: {}'
                                   ''.format(str(i), str(nCalc), str(nLookup))
                                   )
@@ -583,7 +585,7 @@ class APSZoneModel:
                 # Calculate truncation rules
                 # The truncation map/cube vary from cell to cell.
                 cellIndx = cellIndexDefined[i]
-                truncObject.setTruncRule(faciesProb, cellIndx)
+                self.truncation_rule.setTruncRule(faciesProb, cellIndx)
 
                 alphaCoord = []
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
@@ -592,22 +594,22 @@ class APSZoneModel:
                     alphaDataArray = alphaList[gaussFieldIndx]
                     alphaCoord.append(alphaDataArray[cellIndx])
                 # Calculate facies realization by applying truncation rules
-                fCode, fIndx = truncObject.defineFaciesByTruncRule(alphaCoord)
+                fCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
         if self.__debug_level >= Debug.VERBOSE:
-            truncRuleName = truncObject.getClassName()
+            truncRuleName = self.truncation_rule.getClassName()
             if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
-                nCalc = truncObject.getNCalcTruncMap()
-                nLookup = truncObject.getNLookupTruncMap()
+                nCalc = self.truncation_rule.getNCalcTruncMap()
+                nLookup = self.truncation_rule.getNLookupTruncMap()
                 print(
                     '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
                     '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
                     ''.format(truncRuleName, str(nCalc), str(nLookup))
                 )
                 if truncRuleName == 'Trunc2D_Angle':
-                    nCount = truncObject.getNCountShiftAlpha()
+                    nCount = self.truncation_rule.getNCountShiftAlpha()
                     print('Debug output: Small shifts of values for orientation of facies boundary lines are done {} number of times for numerical reasons.'
                           ''.format(str(nCount)))
 
@@ -619,12 +621,12 @@ class APSZoneModel:
         ''' Add command Zone and all its children to the XML tree'''
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
-            
+
         tag = 'Zone'
         if self.__regionNumber <= 0:
-            attribute = {'number': str(self.__zoneNumber)}
+            attribute = {'number': str(self.zone_number)}
         else:
-            attribute = {'number': str(self.__zoneNumber), 'regionNumber': str(self.__regionNumber)}
+            attribute = {'number': str(self.zone_number), 'regionNumber': str(self.__regionNumber)}
         elem = Element(tag, attribute)
         zoneElement = elem
         parent.append(zoneElement)
@@ -646,13 +648,11 @@ class APSZoneModel:
         # Add child command GaussField
         self.__gaussModelObject.XMLAddElement(zoneElement, fmu_attributes)
         # Add child command TruncationRule at end of the child list for
-        self.__truncRule.XMLAddElement(zoneElement, self.__zoneNumber, self.__regionNumber, fmu_attributes)
+        self.truncation_rule.XMLAddElement(zoneElement, self.zone_number, self.__regionNumber, fmu_attributes)
 
     def simGaussFieldWithTrendAndTransform(
-            self, simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx):
-        ''' Simulate 2D gauss field using specified trend'''
+            self, simulation_box_size, grid_size, gridAzimuthAngle, crossSection):
+        """ Simulate 2D gauss field using specified trend"""
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
-            simBoxXsize, simBoxYsize, simBoxZsize,
-            gridNX, gridNY, gridNZ, gridAzimuthAngle, crossSectionType, crossSectionIndx
+            simulation_box_size, grid_size, gridAzimuthAngle, crossSection
         )

@@ -1,20 +1,16 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 matplotlib = "*"
 numpy = "*"
 pillow = "*"
 scipy = "*"
-
+bokeh = "*"
 
 [dev-packages]
-
 pipenv = "*"
 pytest = "*"
 pylint = "*"
@@ -24,4 +20,3 @@ monkeytype = "*"
 mypy = "*"
 
 [requires]
-
