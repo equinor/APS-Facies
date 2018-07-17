@@ -17,7 +17,7 @@ const compareFacies = (facies, other, beStrict = false) => {
   return equal
 }
 
-const indexOfFacies = (state, facies) => { return state.availableFacies.findIndex(item => compareFacies(item, facies)) }
+const indexOfFacies = (state, facies) => { return state.available.findIndex(item => compareFacies(item, facies)) }
 
 export {
   promiseSimpleCommit,

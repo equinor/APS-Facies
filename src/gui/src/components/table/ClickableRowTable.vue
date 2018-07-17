@@ -9,7 +9,9 @@
 
 <script>
 import Vue from 'vue'
+import VueTypes from 'vue-types'
 import GridTable from '@/components/table/BaseTable'
+// import {rawDataType} from 'Utils/typing'
 
 export default Vue.extend({
   components: {
@@ -17,24 +19,10 @@ export default Vue.extend({
   },
 
   props: {
-    rawData: {
-      type: Array,
-      required: true
-    },
-    columnDefinitions: {
-      type: Array,
-      required: true
-    },
-    additionalGridOptions: {
-      type: Object,
-      required: false,
-      default: () => {}
-    },
-    onRowClicked: {
-      type: Function,
-      required: false,
-      default: (event) => {}
-    }
+    rawData: VueTypes.arrayOf(VueTypes.object).isRequired,
+    columnDefinitions: VueTypes.arrayOf(VueTypes.object).isRequired,
+    additionalGridOptions: VueTypes.object.def({}),
+    onRowClicked: VueTypes.func.def(event => {}),
   },
 
   data () {

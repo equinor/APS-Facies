@@ -1,9 +1,7 @@
 <template>
   <div>
     <facies-table
-      :raw-data="faciesTable"
-      :column-definitions="columnDefinitions"
-      :additional-grid-options="additionalGridOptions"
+      :raw-data="availableFacies"
       @grid-api-ready="setGridApi"
     />
     <div>
@@ -21,57 +19,32 @@
 </template>
 
 <script>
-import GridTable from 'Components/table/ClickableRowTable'
-import ColorPicker from 'Components/table/cell-renderer/ColorPicker'
-import ColorRenderer from 'Components/table/cell-renderer/ColorRenderer'
+import FaciesTable from 'Components/table/FaciesTable'
 
 import { forceRefresh } from '@/utils/grid'
 
 // TODO: Ensure change of color is done as a commit / action
 // Look for onRow/Data/CellChanged
 
-const maximumColumnWidth = 75
-
 export default {
   components: {
-    FaciesTable: GridTable,
+    FaciesTable,
   },
 
   data () {
     return {
       faciesTable: [],
       gridApi: null,
-      additionalGridOptions: {
-        deltaRowDataMode: true,
-        rowSelection: 'single',
-        getRowNodeId: data => { return data.code },
-        onSelectionChanged: event => { this.selectedFaciesRow(event) },
-        columnTypes: {
-          'editable': {editable: true, onCellValueChanged: (event) => { this.faciesChanged(event) }}, // FIXME: Ensure the grid itself do not update values
-          'narrow': {maxWidth: maximumColumnWidth},
-          'colorCell': {cellRendererFramework: ColorRenderer, cellEditorFramework: ColorPicker, cellStyle: (params) => { return {backgroundColor: params.value} }},
-          'onceClickable': {singleClickEdit: true}, // FIXME: Ensure works
-        }
-      },
-      columnDefinitions: [
-        {headerName: 'Name', field: 'name', type: 'editable'},
-        {headerName: 'Code', field: 'code', type: ['editable', 'narrow']},
-        {headerName: 'Color', field: 'color', type: ['editable', 'narrow', 'colorCell', 'onceClickable']}
-      ]
     }
   },
 
   computed: {
     availableFacies () {
-      return this.$store.state.availableFacies
+      return this.$store.state.facies.available
     },
     selectedFacies () {
-      return this.$store.state.currentFacies
+      return this.$store.state.facies.current
     }
-  },
-
-  created () {
-    this.faciesTable = this.availableFacies
   },
 
   methods: {
@@ -80,7 +53,7 @@ export default {
     },
     add () {
       const emptyFacies = this.newFacies()
-      this.$store.dispatch('faciesChanged', emptyFacies)
+      this.$store.dispatch('facies/changed', emptyFacies)
         .then(index => {
           this.forceUpdateGrid()
           this.gridApi.startEditingCell({
@@ -90,34 +63,17 @@ export default {
         })
     },
     remove () {
-      this.$store.dispatch('removeSelectedFacies')
+      this.$store.dispatch('facies/removeSelectedFacies')
         .then(() => {
           this.forceUpdateGrid()
-          this.$store.dispatch('currentFacies', null)
+          this.$store.dispatch('facies/current', null)
         })
-    },
-    faciesChanged (event) {
-      this.$store.dispatch('faciesChanged', event.data)
-    },
-    selectedFaciesRow (event) {
-      const selectedRows = event.api.getSelectedRows()
-      if (selectedRows.length > 0) {
-        const clickedCell = event.api.getFocusedCell()
-        if (clickedCell.column.getColId() === 'color') {
-          // TODO: Abort selection animation
-          // event.api.deselectAll()
-        } else {
-          this.$store.dispatch('currentFacies', selectedRows[0])
-        }
-      } else {
-        //
-      }
     },
     newFacies (code = -1, name = null, color = null) {
       if (code < 0) {
-        code = 1 + this.$store.state.availableFacies
+        code = 1 + this.$store.state.facies.available
           .map(facies => facies.code)
-          .reduce((a, b) => Math.max(a, b))
+          .reduce((a, b) => Math.max(a, b), 0)
       }
       if (name === null) {
         name = `F${code}`

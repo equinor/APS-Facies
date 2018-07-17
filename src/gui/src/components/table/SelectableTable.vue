@@ -10,6 +10,7 @@
 
 <script>
 import Vue from 'vue'
+import VueTypes from 'vue-types'
 import ClickableRowTable from '@/components/table/ClickableRowTable'
 
 export default Vue.extend({
@@ -18,24 +19,10 @@ export default Vue.extend({
   },
 
   props: {
-    rawData: {
-      type: Array,
-      required: true
-    },
-    headerName: {
-      type: String,
-      required: true
-    },
-    onSelectionChanged: {
-      type: Function,
-      required: false,
-      default: (event) => {}
-    },
-    onRowClicked: {
-      type: Function,
-      required: false,
-      default: (event) => {}
-    }
+    rawData: VueTypes.arrayOf(VueTypes.object).isRequired,
+    headerName: VueTypes.string.isRequired,
+    onSelectionChanged: VueTypes.func.def(event => {}),
+    onRowClicked: VueTypes.func.def(event => {}),
   },
 
   data () {

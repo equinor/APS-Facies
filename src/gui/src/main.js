@@ -6,6 +6,7 @@ import router from './router'
 import store from './store'
 import './plugins/vuetify'
 import './plugins/ag-grid'
+import './plugins/axios'
 
 Vue.config.productionTip = process.env.NODE_ENV !== 'production'
 

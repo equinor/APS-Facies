@@ -60,6 +60,11 @@ PYLINT := $(RUN) pylint
 SAFETY_CHECK := $(PIPENV) check
 PYREVERSE := $(RUN) pyreverse
 
+VUE_APP_APS_PROTOCOL := http
+VUE_APP_APS_SERVER := localhost
+VUE_APP_APS_API_PORT ?= 5000
+VUE_APP_APS_GUI_PORT ?= 8080
+
 # TODO?: SETUP.PY := PYTHONPATH=$(PYTHONPATH) $(PYTHON) setup.py ?
 PYTHON_PREFIX := $(shell dirname $(PYTHON))/..
 IMAGE_VERSION ?= $(shell $(BIN_DIR)/find-version-of-docker-image.py $(CODE_DIR))
@@ -405,7 +410,8 @@ javascript-linting:
 	$(YARN) lint
 
 web-start: package.json
-	$(YARN) serve
+	$(YARN) serve --port=$(VUE_APP_GUI_PORT) \
+	              --host=$(VUE_APP_APS_SERVER)
 
 web-e2e:
 	$(YARN) test:e2e
@@ -427,6 +433,13 @@ package.json:
 	CYPRESS_INSTALL_BINARY=$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip $(YARN) install --dev
 	rm -f $(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip
 
+
+run-rms.uipy-mock:
+	FLASK_APP=$(SOURCE_DIR)/api/app.py \
+	FLASK_ENV=development \
+	APS_MODE='develop' \
+	flask run --port=$(VUE_APP_API_PORT) \
+	         --host=$(VUE_APP_APS_SERVER)
 
 # TODO: Add versioning to the plugin file
 deploy:

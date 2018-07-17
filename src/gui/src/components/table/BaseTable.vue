@@ -2,6 +2,7 @@
   <!-- eslint-disable vue/attribute-hyphenation -->
   <ag-grid-vue
     :gridOptions="gridOptions"
+    :rowData="rawData"
     :style="tableStyle"
     :class="agTheme"
     :on-grid-ready="onGridReady"
@@ -68,7 +69,7 @@ export default Vue.extend({
     }
 
     this.gridOptions.columnDefs = this.columnDefinitions
-    this.gridOptions.rowData = this.rawData
+    // this.gridOptions.rowData = this.rawData
   },
 
   methods: {
