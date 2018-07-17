@@ -8,7 +8,6 @@ matplotlib = "*"
 numpy = "*"
 pillow = "*"
 scipy = "*"
-bokeh = "*"
 
 [dev-packages]
 pipenv = "*"
@@ -18,5 +17,9 @@ graphviz = "*"
 piprot = "*"
 monkeytype = "*"
 mypy = "*"
+python-box = "*"
+flask = "*"
+dataclasses = "*"
+flask-cors = "*"
 
 [requires]

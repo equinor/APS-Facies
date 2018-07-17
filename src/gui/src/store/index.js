@@ -1,41 +1,58 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import rms from '@/api/rms'
+import gridModels from '@/store/modules/gridModels'
+import zones from '@/store/modules/zones'
+import regions from '@/store/modules/regions'
+import facies from '@/store/modules/facies'
+import parameters from '@/store/modules/parameters'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    availableGridModels: rms.gridModels,
-    availableZones: rms.zones,
-    availableFacies: rms.facies,
-    selectedGridModel: null,
   },
 
   strict: process.env.NODE_ENV !== 'production',
 
-  getters: {
-    availableGridModelNames: (state) => {
-      return state.availableGridModels
-    },
+  modules: {
+    gridModels,
+    zones,
+    regions,
+    facies,
+    parameters,
   },
 
   actions: {
-    selectGridModel: ({getters, commit}, {selectedGridModel}) => {
-      return new Promise((resolve, reject) => {
-        if (getters.availableGridModelNames.includes(selectedGridModel)) {
-          commit('gridModel', selectedGridModel)
-          resolve(selectedGridModel)
-        } else {
-          reject(new Error('Selected grid model must be valid.'))
-        }
-      })
-    }
   },
 
   mutations: {
-    gridModel: (state, selectedGridModel) => {
-      state.selectedGridModel = selectedGridModel
+  },
+
+  getters: {
+    // These are the 'current' of the various modules
+    gridModel: (state) => {
+      return state.gridModels.current
     },
+    zone: (state) => {
+      return state.zones.current
+    },
+    region: (state) => {
+      return state.regions.current
+    },
+    facies: (state) => {
+      return state.facies.current
+    },
+    zoneParameter: (state) => {
+      return state.parameters.zone.selected
+    },
+    regionParameter: (state) => {
+      return state.parameters.region.selected
+    },
+    blockedWellParameter: (state) => {
+      return state.parameters.blockedWell.selected
+    },
+    blockedWellLogParameter: (state) => {
+      return state.parameters.blockedWellLog.selected
+    }
   },
 })

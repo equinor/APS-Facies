@@ -2,35 +2,51 @@
   <v-container
     align-start
     justify-start
-    fluid
   >
     <GridModel/>
-    <div v-if="gridModel">
-      <v-expansion-panel expand>
-        <v-expansion-panel-content
-          v-for="{panel, name} in panels"
-          :key="name"
+    <div v-if="currentGridModel">
+      <zone-parameter/>
+      <div v-if="zoneParameter">
+        <zone-region/>
+        <div
+          v-if="hasWellParameters"
         >
-          <div slot="header">{{ name }}</div>
-          <v-card>
-            <v-container :is="panel"/>
-          </v-card>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+          <choose-blocked-well-parameter/>
+          <choose-blocked-well-log-parameter
+            v-if="hasBlockedWellParameter"
+          />
+          <div
+            v-if="hasBlockedWellLogParameter"
+          >
+            <facies-selection/>
+          </div>
+        </div>
+        <div
+          v-else
+        >
+          <facies-selection/>
+        </div>
+      </div>
     </div>
   </v-container>
 </template>
 
 <script>
 import ZoneRegion from '@/components/selection/ZoneRegionSelection'
-import GridModel from '@/components/selection/ChooseGridModel'
-import FaciesTable from '@/components/selection/FaciesSelection'
+import GridModel from '@/components/selection/dropdown/ChooseGridModel'
+import ZoneParameter from '@/components/selection/dropdown/ChooseZoneParameter'
+import FaciesSelection from '@/components/selection/FaciesSelection'
+import ChooseBlockedWellParameter from 'Components/selection/dropdown/ChooseBlockedWellParameter'
+import ChooseBlockedWellLogParameter from 'Components/selection/dropdown/ChooseBlockedWellLogParameter'
 
 export default {
   components: {
     ZoneRegion,
     GridModel,
-    FaciesTable
+    ZoneParameter,
+    ChooseBlockedWellParameter,
+    ChooseBlockedWellLogParameter,
+    FaciesSelection
   },
 
   data () {
@@ -43,12 +59,25 @@ export default {
     panels () {
       return [
         { panel: ZoneRegion, name: 'Zones' },
-        { panel: FaciesTable, name: 'Facies' }
+        { panel: FaciesSelection, name: 'Facies' }
       ]
     },
+    hasWellParameters () {
+      return this.$store.state.parameters.blockedWell.available.length > 0
+    },
+    hasBlockedWellLogParameter () {
+      return !!this.$store.getters.blockedWellLogParameter
+    },
+    hasBlockedWellParameter () {
+      return !!this.$store.getters.blockedWellParameter
+    },
 
-    gridModel () {
-      return this.$store.state.selectedGridModel
+    zoneParameter () {
+      return this.$store.state.parameters.zone.selected
+    },
+
+    currentGridModel () {
+      return this.$store.state.gridModels.current
     }
   }
 }

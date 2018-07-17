@@ -522,6 +522,7 @@ libraries/nrlib
 !examples/*
 !src/gui/build/*
 !info.xml
+!src/gui/build/
 workflow/
 aps_gui/
 

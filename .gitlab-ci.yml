@@ -39,6 +39,7 @@ initialize:
   script:
     - 'eval $MAKE init'
     - 'eval rm -rf ${WORKON_HOME}/nrlib-*'
+    - 'eval rm -f  ${CODE_DIR}/libraries/libgaussField/*.o'
   artifacts:
     name: build-cache
     paths:

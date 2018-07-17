@@ -1,86 +1,94 @@
 <template>
   <div>
-    <SelectionTable
-      :headers="getHeaders('Zone')"
-      :items="items"
-      @selected="updateSelectedZones"
-    />
-    <v-checkbox
-      v-if="selectedZoneHasRegions"
-      :label="'Include Regions'"
-      v-model="useRegions"
-    />
-    <SelectionTable
-      v-if="useRegions"
-      :headers="getHeaders('Region')"
-      :items="availableRegions"
-      @selected="updateSelectedRegions"
-    />
+    <zone-selection/>
+    <v-layout
+      v-if="canShowRegions"
+      row
+    >
+      <v-form>
+        <v-checkbox
+          v-model="useRegions"
+          label="Use regions?"
+        />
+        <!--TODO: Add selection of region parameter-->
+      </v-form>
+      <choose-region-parameter
+        :disabled="!useRegions"
+      />
+    </v-layout>
+    <div v-if="useRegions">
+      <selectable-table
+        :raw-data="availableRegions"
+        :on-selection-changed="selectedRegions"
+        :on-row-clicked="setCurrentRegion"
+        header-name="Region"
+        @grid-api-ready="setRegionGridApi"
+      />
+    </div>
   </div>
 </template>
 
 <script>
-import SelectionTable from '@/components/SelectionTable'
+import SelectableTable from '@/components/table/SelectableTable'
+import ZoneSelection from '@/components/selection/ZoneSelection'
+import ChooseRegionParameter from '@/components/selection/dropdown/ChooseRegionParameter'
+import { forceRefresh } from '@/utils/grid'
 
 export default {
   components: {
-    SelectionTable
+    SelectableTable,
+    ChooseRegionParameter,
+    ZoneSelection
   },
 
   data () {
     return {
-      items: this.availableZones(),
-      selectedZones: [],
       useRegions: false,
-      selectedRegions: []
+      gridApis: {},
     }
   },
 
   computed: {
-    selectedZone () {
-      return this.selectedZones.slice(-1).pop()
-    },
-
     availableRegions () {
-      if (this.selectedZone && this.selectedZone.regions) {
-        return this.selectedZone.regions.map(x => {
-          return {...x, selected: false}
-        })
-      } else {
-        return []
-      }
+      return this.$store.state.regions.available
     },
-
-    selectedZoneHasRegions () {
-      return this.availableRegions.length > 0
+    availableZones () {
+      return this.$store.state.zones.available
+    },
+    canShowRegions () {
+      return !!this.$store.state.zones.current
     },
   },
 
   methods: {
-    availableZones () {
-      return this.$store.state.availableZones.map(x => {
-        return {...x, selected: false}
+    _dispatchSelectedRows  (event, type) {
+      return this.$store.dispatch(type + '/select', event.api.getSelectedRows())
+    },
+    _dispatchCurrentSelected (event, action) {
+      return this.$store.dispatch(action, event.data)
+    },
+    selectedZones (event) {
+      this._dispatchSelectedRows(event, 'zones')
+    },
+    selectedRegions (event) {
+      this._dispatchSelectedRows(event, 'regions')
+    },
+    setCurrentZone (event) {
+      this._dispatchCurrentSelected(event, 'zones/current').then(() => {
+        if (this.useRegions) {
+          forceRefresh(this.gridApis.region, this.availableRegions)
+        }
       })
     },
-
-    updateSelectedZones (value) {
-      this.selectedZones = value.map(name => this.availableZones().find(item => item.name === name))
+    setCurrentRegion (event) {
+      this._dispatchCurrentSelected(event, 'regions/current')
     },
-
-    updateSelectedRegions (value) {
-      //
+    setRegionGridApi (api) {
+      this.gridApis.region = api
     },
-
-    getHeaders (text) {
-      return [
-        {
-          text: text,
-          align: 'left',
-          sortable: true,
-          value: 'name'
-        }
-      ]
-    }
+    setZoneGridApi (api) {
+      this.gridApis.zone = api
+    },
   }
 }
 </script>

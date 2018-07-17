@@ -189,8 +189,7 @@ class DefineTruncationRule:
         self.__directory = directory
 
     def readFile(self, inputFileName):
-        ''' Read ascii file with definition of truncation rule settings for background facies.
-        '''
+        ''' Read ascii file with definition of truncation rule settings for background facies.'''
 
         self.__inputFileName = copy.copy(inputFileName)
         finished = False
@@ -242,8 +241,7 @@ class DefineTruncationRule:
                             raise IOError('File format error in  {}'.format(inputFile))
 
     def writeFile(self, outputFileName):
-        ''' Write dictionaries with truncation rule settings to file for background facies and overlay facies
-        '''
+        ''' Write dictionaries with truncation rule settings to file for background facies and overlay facies.'''
         if self.__directory != '':
             outputFile = self.__directory + '/' + outputFileName
         else:
@@ -1295,14 +1293,18 @@ def run_example():
     # Step 3: Add the truncation setting to the object of type DefineTruncationRule
     nameBG = 'C_example_1'
     rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
+
     # Optional step 4: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(nameBG)
+
     # -----------
+
     # Create and add setting for NonCubic truncation rule with overlay facies
     # This settings is for the case with 4 polygons and 4 facies for background truncation rule of type NonCubic
     # and 2 overlay facies.
     # Step 1: Initiate
     truncStructureNonCubic = rules.initNewTruncationRuleSettingsNonCubic()
+
     # Step 2.1: Add polygons with facies and probability fraction
     polygons = [
         ('F01', 1.0, 45.0),
@@ -1312,17 +1314,20 @@ def run_example():
     ]
     for faciesName, probFrac, angle in polygons:
         rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, faciesName, angle, probFrac)
+
     # Step 2.2: Add the truncation setting for the background facies to the object of type DefineTruncationRule
     nameBG = 'N_example_1'
     rules.addTruncationRuleSettingsNonCubic(nameBG, truncStructureNonCubic)
     # Optional step 2.3: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(nameBG)
+
     # Step 3.1:
     # Define settings for one overlay group with two background facies and two polygons with the same overlay facies
     alphaList = rules.addPolygonToAlphaList('GRF03', 'F05', 0.5, 0.0)
     alphaList = rules.addPolygonToAlphaList('GRF04', 'F05', 0.5, 0.0, alphaList)
     backgroundFaciesListForGroup = ['F01', 'F02']
     overlayGroups = rules.addOverlayGroupSettings(alphaList, backgroundFaciesListForGroup)
+
     # Define settings for one overlay group with one background facies and one polygons with overlay facies
     alphaList = rules.addPolygonToAlphaList('GRF05', 'F06', 1.0, 0.0)
     backgroundFaciesListForGroup = ['F03']
@@ -1330,25 +1335,31 @@ def run_example():
     # Step 3.2: Add the overlayGroup list as a setting for overlay facies
     nameOL = 'A_example_1'
     rules.addTruncationRuleSettingsOverlay(nameOL, overlayGroups)
+
     # Step 4: Add a truncation rule using the background facies setting for NonCubic with name nameBG
     # and overlay facies setting with name nameOL as a new truncation rule settings
     name = 'NonCubic_1_with_overlay_1'
     rules.addTruncationRuleSettingsNonCubicWithOverlay(name, nameBG, nameOL)
+
     # Optional step 5: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(name)
     # ------
     # Write rules to file
     rules.writeFile('out1.dat')
+
     # Read rules from file into new data object
     rulesRead = DefineTruncationRule(truncRuleDir)
     rulesRead.readFile('out1.dat')
     rulesRead.writeFile('out2.dat')
+
     # Add new truncation rule to the first truncation rule settings object
+
     # Create and add setting for Cubic truncation rule without overlay facies
     # This settings is for the case with 3 facies, one per polygon
     # Step 1: Initiate
     direction = 'V'
     truncStructureCubic = rules.initNewTruncationRuleSettingsCubic(direction)
+
     # Step 2: Add polygons with facies and probability fraction
     polygons = [
         ('F01', 0.5, 1, 1, 1),
@@ -1364,12 +1375,15 @@ def run_example():
     rules.addTruncationRuleSettingsCubic(nameBG, truncStructureCubic)
     # Optional step 4: Make an icon plot of the truncation setting
     rules.makeTruncationMapPlot(nameBG)
+
     rules.writeFile('out3.dat')
+
     # Create plots for all truncation settings
     rules.createOverviewPlotCubic('Cubic_rules')
     rules.createOverviewPlotNonCubic('NonCubic_rules')
     rules.createOverviewPlotCubicWithOverlay('Cubic_rules_with_overlay')
     rules.createOverviewPlotNonCubicWithOverlay('NonCubic_rules_with_overlay')
+
     rules.createAllNonCubicXMLTemplates()
     rules.createAllCubicXMLTemplatesWithOverlayFacies()
     rules.createAllNonCubicXMLTemplatesWithOverlayFacies()
@@ -1417,9 +1431,11 @@ def run_example():
                 key = item[0]
                 fileName = item[2]
                 print('{} {}'.format(key, fileName))
+
     # Remove a truncation setting
     # rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1')
     rules.removeTruncationRuleSettings('NonCubic_1_with_overlay_1', removeDependentBG=True, removeDependentOL=True)
+
     rules.writeFile('out4.dat')
     rulesFromFile = DefineTruncationRule(truncRuleDir)
     rulesFromFile.readFile("truncation_settings.dat")
