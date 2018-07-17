@@ -1,4 +1,17 @@
-from enum import IntEnum, Enum
+# -*- coding: utf-8 -*-
+from enum import IntEnum, Enum, EnumMeta
+
+
+class BaseMeta(EnumMeta):
+    def __contains__(cls, member):
+        return (
+                super().__contains__(member)
+                or member in cls.__members__
+        )
+
+
+class BaseEnum(Enum, metaclass=BaseMeta):
+    pass
 
 
 class Debug(IntEnum):
@@ -42,3 +55,9 @@ class TrendType(Enum):
     HYPERBOLIC = 3
     RMS_PARAM = 4
     ELLIPTIC_CONE = 5
+
+
+class CrossSectionType(Enum):
+    IJ = 1
+    IK = 2
+    JK = 3

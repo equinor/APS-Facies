@@ -32,8 +32,8 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     # Read APS model
     print('- Read file: ' + modelFile)
     apsModel = APSModel(modelFile)
-    debug_level = apsModel.debug_level()
-    seedFile = apsModel.getSeedFileName()
+    debug_level = apsModel.debug_level
+    seedFile = apsModel.seed_file_name
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization workflow loop
     # because the start random seed is created once per process, and the process is the same for all realizations in the loop.
     # Hence always read the start seed in single processing mode.

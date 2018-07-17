@@ -33,7 +33,7 @@ def read_key_values_from_file_as_dict(input_file):
                 if len(parts) == 3:
                     key = parts[0].strip()
                     value = parts[2].strip()
-                    if len(key) > 0 and len(value) > 0 :
+                    if len(key) > 0 and len(value) > 0:
                         key_value_dict[key] = value
     return key_value_dict
 
@@ -65,7 +65,9 @@ def test_case_with_no_fmu_markers_set():
 
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
 
+
 def test_case_with_all_fmu_markers_set():
+
 
     aps_model = get_apsmodel_with_all_fmu_markers()
 
@@ -95,7 +97,7 @@ def check_expected_key_value_set_correlates_to_xml_output(out_file, expected_key
 
 def test_global_include_file_has_all_necessary_update_values(original_values, update_values):
 
-    #This is testing that all fmu attributes that we expect to test in this test is actually also represented in the test_global_include.ipl file
+    # This is testing that all fmu attributes that we expect to test in this test is actually also represented in the test_global_include.ipl file
     assert set(original_values.keys()).issubset(set(update_values.keys()))
 
 
@@ -107,7 +109,7 @@ def test_all_element_values_are_correctly_updated(original_values, update_values
     parsed_output_file = ET.parse('testData_models/APS_FMUupdated.xml')
     new_values = read_values_from_xml_tree(parsed_output_file)
 
-    filtered_keys = original_values.keys() & update_values.keys() #Filtering out keys not related to updatable FMU values in the model file
+    filtered_keys = original_values.keys() & update_values.keys()  # Filtering out keys not related to updatable FMU values in the model file
     for key in filtered_keys:
         original_value = original_values[key]
         expected_value = update_values[key]

@@ -1,46 +1,63 @@
 # -*- coding: utf-8 -*-
+from src.algorithms.APSGaussModel import CrossSection
 from depricated.APSGaussFieldJobs import APSGaussFieldJobs
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
-from src.utils.constants.simple import Debug
-from typing import List, Optional, Union
+from src.utils.constants.simple import Debug, CrossSectionType
+from typing import Any, List, Optional, Union
 from xml.etree.ElementTree import Element
 
 
 class APSModel:
     def __init__(
-        self,
-        modelFileName: Optional[str] = None,
-        rmsProjectName: str = '',
-        rmsWorkflowName: str = '',
-        rmsGaussFieldScriptName: str = '',
-        rmsGridModelName: str = '',
-        rmsSingleZoneGrid: str = 'False',
-        rmsZoneParameterName: str = '',
-        rmsRegionParameterName: str = '',
-        rmsFaciesParameterName: str = '',
-        seedFileName: str = 'seed.dat',
-        writeSeeds: bool = True,
-        rmsGFJobs: None = None,
-        rmsHorizonRefName: str = '',
-        rmsHorizonRefNameDataType: str = '',
-        mainFaciesTable: None = None,
-        zoneModelTable: None = None,
-        previewZone: int = 0,
-        previewRegion: int = 0,
-        previewCrossSectionType: str = 'IJ',
-        previewCrossSectionRelativePos: float = 0.5,
-        previewScale: float = 1.0,
-        debug_level: Debug = Debug.OFF
+            self,
+            modelFileName: Optional[str] = None,
+            apsmodelversion: str = '1.0',
+            rmsProjectName: str = '',
+            rmsWorkflowName: str = '',
+            rmsGaussFieldScriptName: str = '',
+            rmsGridModelName: str = '',
+            rmsSingleZoneGrid: str = 'False',
+            rmsZoneParameterName: str = '',
+            rmsRegionParameterName: str = '',
+            rmsFaciesParameterName: str = '',
+            seedFileName: str = 'seed.dat',
+            writeSeeds: bool = True,
+            rmsGFJobs: None = None,
+            rmsHorizonRefName: str = '',
+            rmsHorizonRefNameDataType: str = '',
+            mainFaciesTable: None = None,
+            zoneModelTable: None = None,
+            previewZone: int = 0,
+            previewRegion: int = 0,
+            previewCrossSectionType: str = 'IJ',
+            previewCrossSectionRelativePos: float = 0.5,
+            previewScale: float = 1.0,
+            debug_level: Debug = Debug.OFF
     ) -> None: ...
-    def XMLAddElement(self, root: Element) -> str: ...
+    debug_level: Debug
+    seed_file_name: str
+    preview_scale: float
+    preview_cross_section_type: CrossSectionType
+    preview_cross_section_relative_position: float
+    __preview_cross_section: CrossSection
+    preview_cross_section: CrossSection
+    def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
+    def updateXMLModelFile(self, modelFileName, parameterFileName, debug_level=Debug.OFF): ...
+    def __checkZoneModels(self) -> None: ...
+    def getXmlTree(self): ...
+    def getRoot(self): ...
+    def XMLAddElement(self, root: Element, fmu_attributes: List[Any]) -> str: ...
     def addNewZone(self, zoneObject: APSZoneModel) -> None: ...
-    def debug_level(self) -> Debug: ...
     def deleteZone(self, zoneNumber: int, regionNumber: int = 0) -> None: ...
     def getGaussFieldJobs(self) -> APSGaussFieldJobs: ...
     def getMainFaciesTable(self) -> APSMainFaciesTable: ...
+    def getPreviewRegionNumber(self) -> int: ...
+    def getPreviewZoneNumber(self) -> int: ...
     def getSelectedRegionNumberListForSpecifiedZoneNumber(self, zoneNumber: int) -> List[int]: ...
     def getSelectedZoneNumberList(self) -> List[int]: ...
+    def isAllZoneRegionModelsSelected(self): ...
+    def isSelected(self, zoneNumber, regionNumber) -> bool: ...
     def getZoneModel(self, zoneNumber: int, regionNumber: int = 0) -> APSZoneModel: ...
     def getZoneNumberList(self) -> List[int]: ...
     def setGaussFieldJobs(self, gfJobObject: APSGaussFieldJobs) -> None: ...
@@ -54,5 +71,9 @@ class APSModel:
     def setRmsZoneParamName(self, name: str) -> None: ...
     def setSeedFileName(self, name: str) -> None: ...
     def setSelectedZoneAndRegionNumber(self, selectedZoneNumber: int, selectedRegionNumber: int = 0) -> None: ...
-    def set_debug_level(self, debug_level: Union[str, Debug]) -> None: ...
-    def writeModel(self, modelFileName: str, debug_level: Debug = Debug.OFF) -> None: ...
+    def writeModel(self, modelFileName: str, attributesFileName: str, debug_level: Debug = Debug.OFF) -> None: ...
+    @staticmethod
+    def __readParamFromFile(inputFile: str, debug_level: Debug = Debug.OFF): ...
+    @staticmethod
+    def writeModelFromXMLRoot(inputETree, outputModelFileName): ...
+

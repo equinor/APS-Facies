@@ -10,7 +10,7 @@ from os.path import abspath
 
 def get_root_path():
     if len(argv) == 1:
-        root_path = abspath('.')
+        root_path = abspath('..')
     else:
         root_path = argv[1]
         if root_path[-1] == '/':
@@ -21,7 +21,7 @@ def get_root_path():
 def get_docker_image_version(dockerfile):
     with open(dockerfile, 'r') as f:
         for line in f:
-            words = line.split(' ')
+            words = line.split()
             if words and words[0].lower() == 'label':
                 label = words[1]
                 version = label.lstrip('version=').strip('"').strip("'")

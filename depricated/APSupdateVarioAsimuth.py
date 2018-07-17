@@ -23,7 +23,7 @@ def run():
     for key, zoneModel in allZoneModels.items():
 
         hName = zoneModel.getHorizonNameForVariogramTrendMap()
-        gaussFieldNames = zoneModel.getUsedGaussFieldNames()
+        gaussFieldNames = zoneModel.used_gaussian_field_names
         for gfName in gaussFieldNames:
             reprName = gfName + '_VarioAzimuthTrend'
 

@@ -29,9 +29,9 @@ def defineCommonModelParam(
     apsmodel.setRmsGridModelName(gridModelName)
     apsmodel.setRmsZoneParamName(zoneParamName)
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
-    apsmodel.setSeedFileName(seedFileName)
-    apsmodel.set_debug_level(debug_level)
-    print('Debug level: {}'.format(str(apsmodel.debug_level())))
+    apsmodel.seed_file_name = seedFileName
+    apsmodel.debug_level = debug_level
+    print('Debug level: {}'.format(str(apsmodel.debug_level)))
 
     # Define main facies table
     mainFaciesTable = APSMainFaciesTable(fTable=fTable)
@@ -167,9 +167,9 @@ def addZoneParam(
 
     gaussModelObj = APSGaussModel()
     gaussModelObj.initialize(
-        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, 
-        gaussModelList=gaussModelList, trendModelList=trendModelList, simBoxThickness=simBoxThickness,
-        previewSeedList=seedPreviewList, debug_level=debug_level
+        zone_number=zoneNumber, main_facies_table=mainFaciesTable,
+        gauss_model_list=gaussModelList, trend_model_list=trendModelList, sim_box_thickness=simBoxThickness,
+        preview_seed_list=seedPreviewList, debug_level=debug_level
     )
 
     # Define truncation rule model
@@ -334,9 +334,9 @@ def test_variogram_generation():
     prevSeedList = [['GRF1', 92828]]
     debug_level = Debug.VERY_VERBOSE
     apsGaussModel.initialize(
-        inputZoneNumber=zoneNumber, mainFaciesTable=mainFaciesTable, 
-        gaussModelList=gaussModelList, trendModelList=trendModelList, simBoxThickness=simBoxThickness,
-        previewSeedList=prevSeedList, debug_level=debug_level
+        zone_number=zoneNumber, main_facies_table=mainFaciesTable,
+        gauss_model_list=gaussModelList, trend_model_list=trendModelList, sim_box_thickness=simBoxThickness,
+        preview_seed_list=prevSeedList, debug_level=debug_level
     )
     gridAzimuthAngle = 0.0
     projection = 'xy'
@@ -373,7 +373,7 @@ def test_updating_model1():
     zoneNumber = 1
     regionNumber = 0
     zone = apsmodel.getZoneModel(zoneNumber)
-    gaussFieldNames = zone.getUsedGaussFieldNames()
+    gaussFieldNames = zone.used_gaussian_field_names
     nGaussFields = len(gaussFieldNames)
     variogramTypeList = [
         VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
@@ -435,7 +435,6 @@ def test_updating_model1():
             powerFmuUpdatable = powerFmuUpdatableList[i]
             assertPropertyGetterSetter(gfName, powerFmuUpdatable, zone, 'PowerFmuUpdatable')
 
-
     outfile2 = 'testOut2_updated.xml'
     attributes_file = 'fmu_attributes.txt'
     apsmodel.writeModel(outfile2, attributes_file, Debug.OFF)
@@ -458,7 +457,7 @@ def test_updating_model2():
     zoneNumber = 2
     regionNumber = 4
     zone = apsmodel.getZoneModel(zoneNumber, regionNumber)
-    gaussFieldNames = zone.getUsedGaussFieldNames()
+    gaussFieldNames = zone.used_gaussian_field_names
     nGaussFields = len(gaussFieldNames)
     variogramTypeList = [
         VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
@@ -520,7 +519,7 @@ def test_updating_model3():
     zoneNumber = 2
     regionNumber = 3
     zone = apsmodel.getZoneModel(zoneNumber, regionNumber)
-    gaussFieldNames = zone.getUsedGaussFieldNames()
+    gaussFieldNames = zone.used_gaussian_field_names
     nGaussFields = len(gaussFieldNames)
     variogramTypeList = [
         VariogramType.SPHERICAL, VariogramType.EXPONENTIAL, VariogramType.GAUSSIAN,
@@ -582,10 +581,10 @@ def test_updating_model3():
                 trendAzimuth =  trend_azimuthAngle[i]
                 getSetTrendParameters(trendAzimuth, trendModelObj, 'Azimuth')
 
-                trendStackingAngle =   trend_stackingAngle[i]
+                trendStackingAngle = trend_stackingAngle[i]
                 getSetTrendParameters(trendStackingAngle, trendModelObj, 'StackingAngle')
 
-                trendStackingDirection =   trend_direction[i]
+                trendStackingDirection = trend_direction[i]
                 getSetTrendParameters(trendStackingDirection, trendModelObj, 'StackingDirection')
 
             if trendType[i] == TrendType.ELLIPTIC:
@@ -698,7 +697,7 @@ def get_case_1_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.VERY_VERBOSE
@@ -718,7 +717,7 @@ def get_case_1_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -744,7 +743,7 @@ def get_case_2_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -765,7 +764,7 @@ def get_case_2_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -791,7 +790,7 @@ def get_case_3_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -811,7 +810,7 @@ def get_case_4_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW, 
+        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
         fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
@@ -892,7 +891,7 @@ def add_zone_1_for_case_1(apsmodel):
         powerFmuUpdatable=[False, False],
         # Trend parameters. One entry in list for each gauss field
         useTrend=[1, 0],
-        relStdDev=[0.05, 0],
+        relStdDev=[0.05, 0.0],
         relStdDevFmuUpdatable=[True, True],
         azimuthAngle=[125.0, 0.0],
         stackingAngle=[0.1, 0.0],
@@ -1379,7 +1378,7 @@ def add_bayfill_zone_with_all_fmu_markers(apsmodel):
         regionNumber=0,
         simBoxThickness=4.0,
         # Facies prob for zone
-        faciesInZone=['F1', 'F2', 'F3', 'F4', 'F5'], #Må ha 5 facies for Bayfill
+        faciesInZone=['F1', 'F2', 'F3', 'F4', 'F5'],  # Må ha 5 facies for Bayfill
         useConstProb=1,
         faciesProbList=[0.4, 0.6, 0.0, 0.0, 0.0],
         # Gauss field parameters. One entry in list for each gauss field

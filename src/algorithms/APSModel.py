@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 import collections
 import copy
-import datetime
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 
+from src.algorithms.APSGaussModel import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
-from src.utils.xmlUtils import getIntCommand, getKeyword, getTextCommand, prettify, prettify2
+from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify
 
 
 class APSModel:
@@ -22,9 +22,9 @@ class APSModel:
 
     Public member functions:
       def __init__(
-            self, modelFileName=None,  apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='', 
+            self, modelFileName=None,  apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='',
             rmsGridModelName='', rmsZoneParameterName='', rmsRegionParameterName='',
-            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, 
+            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True,
             mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
             previewScale=1.0, debug_level=Debug.OFF):
@@ -48,6 +48,14 @@ class APSModel:
       def writeModelFromXMLRoot(self,inputETree,outputModelFileName)
                 - Write specified xml tree to file
 
+      Properties:
+        debug_level
+        seed_file_name
+        preview_scale
+        preview_cross_section
+        preview_cross_section_type
+        preview_cross_section_relative_position
+
       Get data from data structure:
 
        def getXmlTree(self)
@@ -65,14 +73,10 @@ class APSModel:
        def getRegionNumberListForSpecifiedZoneNumber(self,zoneNumber)
        def getPreviewZoneNumber(self)
        def getPreviewRegionNumber(self)
-       def getPreviewCrossSectionType(self)
-       def getPreviewCrossSectionRelativePos(self)
-       def getPreviewScale(self)
        def getAllGaussFieldNamesUsed(self)
        def getZoneParamName(self)
-       def getRegionParamName(self)       
+       def getRegionParamName(self)
        def getSeedFileName(self)
-       def debug_level(self)
        def getMainFaciesTable(self)
        def getRMSProjectName(self)
        def getAllProbParam(self)
@@ -84,12 +88,8 @@ class APSModel:
        def setRmsGridModelName(self,name)
        def setRmsZoneParamName(self,name)
        def setRmsResultFaciesParamName(self,name)
-       def set_debug_level(self,debug_level)
        def setSelectedZoneAndRegionNumber(self, selectedZoneNumber,selectedRegionNumber=0)
        def setPreviewZoneAndRegionNumber(self, zoneNumber,regionNumber=0)
-       def setPreviewCrossSectionType(self, crossSectionType)
-       def setPreviewCrossSectionRelativePos(self, crossSectionRelativePos)
-       def setPreviewScale(self, scale)
        def addNewZone(self,zoneObject)
        def deleteZone(self,zoneNumber)
        def setMainFaciesTable(self,faciesTableObj)
@@ -100,11 +100,11 @@ class APSModel:
                  - Read xml file and put the data into data structure
      def __checkZoneModels(self)
                  - Check that an APSModel does not have specifications of zone models for (zone,region) pairs that are overlapping.
-                   Hence, it is not allowed to specify (zone=1, region=0) and (zone=1, region=0). 
-                   The first (zone=1, region=0) means that the zone  model specification is defined for all grid cells in zone=1. 
-                   The second (zone=1, region=1) means that the zone model is defined for those grid cells belonging to zone=1 
-                   and at the same time to region=1. It follows that all grid cells belonging to zone=1 and region=1 
-                   have two different models which is not unique and not allowed. 
+                   Hence, it is not allowed to specify (zone=1, region=0) and (zone=1, region=0).
+                   The first (zone=1, region=0) means that the zone  model specification is defined for all grid cells in zone=1.
+                   The second (zone=1, region=1) means that the zone model is defined for those grid cells belonging to zone=1
+                   and at the same time to region=1. It follows that all grid cells belonging to zone=1 and region=1
+                   have two different models which is not unique and not allowed.
 
      def __readParamFromFile(self,inputFile,debug_level)
                  - Read IPL include file to get updated model parameters from FMU
@@ -115,7 +115,7 @@ class APSModel:
     def __init__(
             self, modelFileName=None, apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='',
             rmsGridModelName='', rmsZoneParameterName='', rmsRegionParameterName='',
-            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True, 
+            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True,
             mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
             previewScale=1.0, debug_level=Debug.OFF):
@@ -130,8 +130,8 @@ class APSModel:
          rmsZoneParameterName - Zone parameter for the grid model in the RMS project.
          rmsRegionParameterName - Region parameter for the grid model in the RMS project.
          rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
-         seedFileName - Name of seed file to be used. Used by scripts for simulation of gaussian fields. 
-         writeSeeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read. 
+         seedFileName - Name of seed file to be used. Used by scripts for simulation of gaussian fields.
+         writeSeeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read.
                       Used by scripts simulationg gaussian fields.
          mainFaciesTable - Object containing the global facies table with facies names an associated
                            facies code common for the RMS project. All facies to be modelled must be defined
@@ -167,7 +167,7 @@ class APSModel:
         self.__rmsZoneParamName = rmsZoneParameterName
         self.__rmsRegionParamName = rmsRegionParameterName
         self.__rmsFaciesParamName = rmsFaciesParameterName
-        self.__seedFileName = seedFileName
+        self.__seed_file_name = seedFileName
         self.writeSeeds = writeSeeds
 
         self.__faciesTable = mainFaciesTable
@@ -178,8 +178,7 @@ class APSModel:
         self.__selectAllZonesAndRegions = True
         self.__previewZone = previewZone
         self.__previewRegion = previewRegion
-        self.__previewCrossSectionType = previewCrossSectionType
-        self.__previewCrossSectionRelativePos = previewCrossSectionRelativePos
+        self.__preview_cross_section = CrossSection(previewCrossSectionType, previewCrossSectionRelativePos)
         self.__previewScale = previewScale
         self.__debug_level = debug_level
 
@@ -196,19 +195,19 @@ class APSModel:
         self.__ET_Tree = tree
         root = tree.getroot()
 
-        apsmodelversion = root.get('version')
-        if apsmodelversion is None:
+        apsmodel_version = root.get('version')
+        if apsmodel_version is None:
             raise ValueError(
                 'attribute version is not defined in root element'
             )
         else:
 
-            if apsmodelversion != "1.0":
+            if apsmodel_version != "1.0":
                 raise ValueError(
-                    'Illegal value ( {} ) specified for apsmodelversion (only 1.0 is supported)'.format(apsmodelversion)
+                    'Illegal value ( {} ) specified for apsmodelversion (only 1.0 is supported)'.format(apsmodel_version)
                 )
             else:
-                self.__apsModelVersion = apsmodelversion
+                self.__apsModelVersion = apsmodel_version
 
         # --- PrintInfo ---
         kw = 'PrintInfo'
@@ -218,7 +217,7 @@ class APSModel:
             self.__debug_level = debug_level
         else:
             text = obj.text
-            self.set_debug_level(text)
+            self.debug_level = text
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
@@ -241,12 +240,12 @@ class APSModel:
             text = obj.get('crossSectionType')
             if text is None:
                 raise MissingAttributeInKeyword(kw, 'crossSectionType')
-            self.__previewCrossSectionType = text
+            self.__preview_cross_section.type = text
 
             text = obj.get('crossSectionRelativePos')
             if text is None:
                 raise MissingAttributeInKeyword(kw, 'crossSectionRelativePos')
-            self.__previewCrossSectionRelativePos = float(text.strip())
+            self.__preview_cross_section.relative_position = float(text.strip())
 
             text = obj.get('scale')
             if text is None:
@@ -267,20 +266,22 @@ class APSModel:
 
         # Read optional keyword for region parameter
         keyword = 'RegionParamName'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None,  modelFile=modelFileName, required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None, modelFile=modelFileName,
+                               required=False)
         if value is not None:
             self.__rmsRegionParamName = value
 
-
         # Read optional keyword to specify name of seed file
         keyword = 'SeedFile'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat',  modelFile=modelFileName, required=False)
-        self.__seedFileName = value
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat', modelFile=modelFileName,
+                               required=False)
+        self.__seed_file_name = value
 
         # Read optional keyword to specify the boolean variable writeSeeds
         keyword = 'WriteSeeds'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes',  modelFile=modelFileName, required=False)
-        if  value.upper() == 'YES':
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=modelFileName,
+                               required=False)
+        if value.upper() == 'YES':
             self.writeSeeds = True
         else:
             self.writeSeeds = False
@@ -294,7 +295,7 @@ class APSModel:
             print('Debug output: RMSFaciesParamName:                 ' + self.__rmsFaciesParamName)
             print('Debug output: RMSRegionParamName:                 ' + self.__rmsRegionParamName)
             print('Debug output: Name of RMS project read:           ' + self.__rmsProjectName)
-            print('Debug output: Name of RMS workflow read:          ' + self.__rmsWorkflowName)
+            print('Debug output: Name of RMS workflow read:           ' + self.__rmsWorkflowName)
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
@@ -307,7 +308,7 @@ class APSModel:
             )
 
         # --- Zone ---
-        if  self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('--- Number of specified zone models: {}'.format(str(len(zModels.findall('Zone')))))
             print('')
@@ -358,24 +359,23 @@ class APSModel:
                 # and must be added to the dictionary
                 self.__zoneModelTable[zoneModelKey] = zoneModel
             else:
-                raise ValueError('Can not have two or more entries of  keyword Zone with the same '
-                                 'zoneNumber and regionNumber.\n'
-                                 'Can not have multiple specification of (zoneNumber, regionNumber) = ({},{})'
-                                 ''.format(str(zoneNumber), str(regionNumber))
-                                 )
-
-
+                raise ValueError(
+                    'Can not have two or more entries of  keyword Zone with the same '
+                    'zoneNumber and regionNumber.\n'
+                    'Can not have multiple specification of (zoneNumber, regionNumber) = ({},{})'
+                    ''.format(str(zoneNumber), str(regionNumber))
+                )
 
         # --- SelectedZones ---
         kw = 'SelectedZonesAndRegions'
-        obj = getKeyword(root,kw,modelFile=modelFileName,required=False)
+        obj = getKeyword(root, kw, modelFile=modelFileName, required=False)
         if obj is not None:
             # The keyword is specified. This means that in general a subset of
             # all zones and region combinations are selected.
             # Read this sub set of zone and region combinations.
             self.__selectAllZonesAndRegions = False
             kw2 = 'SelectedZoneWithRegions'
-            objSelectedZone=None
+            objSelectedZone = None
             for objSelectedZone in obj.findall(kw2):
                 text = objSelectedZone.get('zone')
                 zNumber = int(text.strip())
@@ -402,9 +402,10 @@ class APSModel:
                             rNumber = int(w2)
                             zoneModel = self.getZoneModel(zoneNumber=zNumber, regionNumber=rNumber)
                             if zoneModel is None:
-                                raise ValueError('Can not select to use zone model with zone number: {} and region number: {} '
-                                                 'This zone model is not defined'
-                                                 ''.format(str(zNumber), str(rNumber))
+                                raise ValueError(
+                                    'Can not select to use zone model with zone number: {} and region number: {} '
+                                    'This zone model is not defined'
+                                    ''.format(str(zNumber), str(rNumber))
                                 )
                             # A model for this (zoneNumber,regionNumber) pair is defined
                             selectedKey = (zNumber, rNumber)
@@ -429,7 +430,7 @@ class APSModel:
             if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
                 print('- Zone models are defined for the following combination '
                       'of zone and region numbers:')
-                for key , value in self.__sortedZoneModelTable.items():
+                for key, value in self.__sortedZoneModelTable.items():
                     zNumber = key[0]
                     rNumber = key[1]
                     if rNumber == 0:
@@ -452,7 +453,7 @@ class APSModel:
         if debug_level > Debug.SOMEWHAT_VERBOSE:
             print('')
             print('-- Model parameters marked as possible to update when running in batch mode')
-            print('Keyword:                        Tag:                Value: ')
+            print('Keyword:                        Tag:                Value:')
         keywordsDefinedForUpdating = []
         for obj in root.findall(".//*[@kw]"):
             keyWord = obj.get('kw')
@@ -479,7 +480,7 @@ class APSModel:
                     # set new value
                     item[1] = ' ' + value.strip() + ' '
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output:  Keywords and values that is updated in xml tree: ')
+            print('Debug output:  Keywords and values that is updated in xml tree:')
 
         for obj in root.findall(".//*[@kw]"):
             keyWord = obj.get('kw')
@@ -524,7 +525,7 @@ class APSModel:
             if zNumber in zoneNumbers:
                 if rNumber == 0:
                     raise ValueError(
-                    'There exists more than one zone model for zone: {}'.format(str(zNumber))
+                        'There exists more than one zone model for zone: {}'.format(str(zNumber))
                     )
                 else:
                     # This is a model for a new region for an existing zone number that has several regions
@@ -572,6 +573,69 @@ class APSModel:
 
         return keywordsFMU
 
+    # ----- Properties ----
+    @property
+    def debug_level(self):
+        return self.__debug_level
+
+    @debug_level.setter
+    def debug_level(self, debug_level):
+        if isinstance(debug_level, str):
+            debug_level = int(debug_level.strip())
+        if isinstance(debug_level, int):
+            debug_level = Debug(debug_level)
+        if debug_level not in Debug:
+            debug_level = Debug.OFF
+        self.__debug_level = debug_level
+
+    @property
+    def seed_file_name(self):
+        return self.__seed_file_name
+
+    @seed_file_name.setter
+    def seed_file_name(self, name):
+        self.__seed_file_name = copy.copy(name)
+
+    @property
+    def preview_scale(self):
+        return self.__previewScale
+
+    @preview_scale.setter
+    def preview_scale(self, scale):
+        if not (scale > 0.0):
+            raise ValueError(
+                'Error in {} in setPreviewScale\n'
+                'Error:  Scale factor must be > 0'
+            )
+        else:
+            self.__previewScale = scale
+
+    @property
+    def preview_cross_section(self):
+        return self.__preview_cross_section
+
+    @property
+    def preview_cross_section_type(self):
+        return self.__preview_cross_section.type
+
+    @preview_cross_section_type.setter
+    def preview_cross_section_type(self, type):
+        if not (type in ['IJ', 'IK', 'JK']):
+            raise ValueError(
+                'Error in preview_cross_section_type\n'
+                'Error:  Cross section is not IJ, IK or JK.'
+            )
+        else:
+            self.__preview_cross_section.type = type
+
+    @property
+    def preview_cross_section_relative_position(self):
+        return self.__preview_cross_section.relative_position
+
+    @preview_cross_section_relative_position.setter
+    def preview_cross_section_relative_position(self, relative_position):
+        self.__preview_cross_section.relative_position = relative_position
+
     #  ---- Get functions -----
     def getXmlTree(self):
         tree = self.__ET_Tree
@@ -584,6 +648,7 @@ class APSModel:
 
     def isAllZoneRegionModelsSelected(self):
         return self.__selectAllZonesAndRegions
+    # Get pointer to zone model object
 
     def getSelectedZoneNumberList(self):
         selectedZoneNumberList = []
@@ -595,7 +660,7 @@ class APSModel:
                 selectedZoneNumberList.append(zNumber)
         return copy.copy(selectedZoneNumberList)
 
-    def getSelectedRegionNumberListForSpecifiedZoneNumber(self,zoneNumber):
+    def getSelectedRegionNumberListForSpecifiedZoneNumber(self, zoneNumber):
         selectedRegionNumberList = []
         keyList = sorted(list(self.__selectedZoneAndRegionNumberTable.keys()))
         for i in range(len(keyList)):
@@ -616,7 +681,6 @@ class APSModel:
         else:
             return False
 
-    # Get pointer to zone model object
     def getZoneModel(self, zoneNumber, regionNumber=0):
         key = (zoneNumber, regionNumber)
         try:
@@ -647,7 +711,7 @@ class APSModel:
                 zoneNumberList.append(zNumber)
         return zoneNumberList
 
-    def getRegionNumberListForSpecifiedZoneNumber(self,zoneNumber):
+    def getRegionNumberListForSpecifiedZoneNumber(self, zoneNumber):
         regionNumberList = []
         keyList = list(self.__zoneModelTable.keys())
         for i in range(len(keyList)):
@@ -665,20 +729,11 @@ class APSModel:
     def getPreviewRegionNumber(self):
         return self.__previewRegion
 
-    def getPreviewCrossSectionType(self):
-        return self.__previewCrossSectionType
-
-    def getPreviewCrossSectionRelativePos(self):
-        return self.__previewCrossSectionRelativePos
-
-    def getPreviewScale(self):
-        return self.__previewScale
-
     def getAllGaussFieldNamesUsed(self):
         gfAllZones = []
         for key, zoneModel in self.__zoneModelTable.items():
-            print('In getAllGaussFieldNamesUsed: key=({},{})'.format(str(key[0]),str(key[1])))
-            gfNames = zoneModel.getUsedGaussFieldNames()
+            print('In getAllGaussFieldNamesUsed: key=({},{})'.format(key[0], key[1]))
+            gfNames = zoneModel.used_gaussian_field_names
             for gf in gfNames:
                 # Add the gauss field name to the list if it not already is in the list
                 print('Gauss field name: {}'.format(gf))
@@ -689,36 +744,30 @@ class APSModel:
     def getZoneParamName(self):
         return copy.copy(self.__rmsZoneParamName)
 
+    # Get pointer to facies table object
     def getRegionParamName(self):
         if self.__rmsRegionParamName != '':
             return copy.copy(self.__rmsRegionParamName)
         else:
             return ''
 
-    def getSeedFileName(self):
-        return self.__seedFileName
-
-    def debug_level(self):
-        return self.__debug_level
-
-    # Get pointer to facies table object
     def getMainFaciesTable(self):
         return self.__faciesTable
 
     def getRMSProjectName(self):
         return copy.copy(self.__rmsProjectName)
 
+    # ----- Set functions -----
     def getAllProbParam(self):
         allProbList = []
         for key, zoneModel in self.__zoneModelTable.items():
-            print('In getAllProbParam: key=({},{})'.format(str(key[0]),str(key[1])))
+            print('In getAllProbParam: key=({},{})'.format(str(key[0]), str(key[1])))
             probParamList = zoneModel.getAllProbParamForZone()
             for pName in probParamList:
                 if pName not in allProbList:
                     allProbList.append(pName)
         return allProbList
 
-    # ----- Set functions -----
     def setRmsProjectName(self, name):
         self.__rmsProjectName = copy.copy(name)
 
@@ -734,34 +783,22 @@ class APSModel:
     def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
 
-    def setSeedFileName(self,name):
-        self.__seedFileName = copy.copy(name)
-
-    def set_debug_level(self, debug_level):
-        if isinstance(debug_level, str):
-            debug_level = int(debug_level.strip())
-        if isinstance(debug_level, int):
-            debug_level = Debug(debug_level)
-        if debug_level not in Debug:
-            debug_level = Debug.OFF
-        self.__debug_level = debug_level
-
-    def setSelectedZoneAndRegionNumber(self, selectedZoneNumber,selectedRegionNumber=0):
+    def setSelectedZoneAndRegionNumber(self, selectedZoneNumber, selectedRegionNumber=0):
         """
         Description: Select a new pair of (zoneNumber, regionNumber) which has not been already selected.
         """
         # Check that the specified pair (selectedZoneNumber, selectedRegionNumber) is an existing zone model
         key = (selectedZoneNumber, selectedRegionNumber)
         if key in self.__zoneModelTable:
-            if not key in self.__selectedZoneAndRegionNumberTable:
+            if key not in self.__selectedZoneAndRegionNumberTable:
                 self.__selectedZoneAndRegionNumberTable[key] = 1
         else:
             raise ValueError(
                 'Can not select (zoneNumber, regionNumber) = ({},{}) since the zone model does not exist'
                 ''.format(str(selectedZoneNumber), str(selectedRegionNumber))
-                )
+            )
 
-    def setPreviewZoneAndRegionNumber(self, zoneNumber,regionNumber=0):
+    def setPreviewZoneAndRegionNumber(self, zoneNumber, regionNumber=0):
         key = (zoneNumber, regionNumber)
         if key in self.__zoneModelTable:
             self.__previewZoneNumber = zoneNumber
@@ -771,55 +808,31 @@ class APSModel:
                 'Error in {} in setPreviewZoneNumber\n'
                 'Error:  (zoneNumber, regionNumber) = ({},{}) is not defined in the model'
                 ''.format(self.__className, str(zoneNumber), str(regionNumber))
-                )
-
-    def setPreviewCrossSectionType(self, crossSectionType):
-        if not (crossSectionType == 'IJ' or crossSectionType == 'IK' or crossSectionType == 'JK'):
-            raise ValueError(
-                'Error in setPreviewCrossSectionType\n'
-                'Error:  Cross section is not IJ, IK or JK.'
             )
-        else:
-            self.__previewCrossSectionType = crossSectionType
-
-    def setPreviewCrossSectionRelativePos(self, crossSectionRelativePos):
-        if not 0<= crossSectionRelativePos <= 1:
-            raise ValueError(
-                'Error in setPreviewCrossSectionRelativePos\n'
-                'The specified value must be in the interval [0.0, 1.0]'
-            )
-        else:
-            self.__previewCrossSectionRelativePos = crossSectionRelativePos
-
-    def setPreviewScale(self, scale):
-        if not (scale > 0.0):
-            raise ValueError(
-                'Error in {} in setPreviewScale\n'
-                'Error:  Scale factor must be > 0'
-            )
-        else:
-            self.__previewScale = scale
 
     def addNewZone(self, zoneObject):
-        zoneNumber = zoneObject.getZoneNumber()
-        regionNumber = zoneObject.getRegionNumber()
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        zoneNumber = zoneObject.zone_number
+        regionNumber = zoneObject.region_number
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call addNewZone')
-            print('Debug output: From addNewZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber), str(regionNumber)))
+            print('Debug output: From addNewZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber),
+                                                                                             str(regionNumber)))
         key = (zoneNumber, regionNumber)
-        if not key in self.__zoneModelTable:
+        if key not in self.__zoneModelTable:
             self.__zoneModelTable[key] = zoneObject
         else:
-            raise ValueError('Can not add zone with (zoneNumber,regionNumber)=({},{})to the APSModel\n'
-                             'A zone with this zone and region number already exist.'
-                             ''.format(str(zoneNumber), str(regionNumber))
-                             )
+            raise ValueError(
+                'Can not add zone with (zoneNumber,regionNumber)=({},{})to the APSModel\n'
+                'A zone with this zone and region number already exist.'
+                ''.format(str(zoneNumber), str(regionNumber))
+            )
 
     def deleteZone(self, zoneNumber, regionNumber=0):
         key = (zoneNumber, regionNumber)
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call deleteZone')
-            print('Debug output: From deleteZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber), str(regionNumber)))
+            print('Debug output: From deleteZone: (ZoneNumber, regionNumber)=({},{})'.format(str(zoneNumber),
+                                                                                             str(regionNumber)))
 
         if key in self.__zoneModelTable:
             del self.__zoneModelTable[key]
@@ -832,7 +845,6 @@ class APSModel:
     def setMainFaciesTable(self, faciesTableObj):
         self.__faciesTable = faciesTableObj
 
-
     def XMLAddElement(self, root, fmu_attributes):
         """
         Add a command specifying which zone to use in for preview
@@ -842,7 +854,7 @@ class APSModel:
         :rtype:
         """
         # TODO: This is temporary solution
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         if self.__previewZone > 0:
@@ -850,8 +862,8 @@ class APSModel:
             attribute = {
                 'zoneNumber': str(self.__previewZone),
                 'regionNumber': str(self.__previewRegion),
-                'crossSectionType': str(self.__previewCrossSectionType),
-                'crossSectionRelativePos': str(self.__previewCrossSectionRelativePos),
+                'crossSectionType': str(self.preview_cross_section_type.name),
+                'crossSectionRelativePos': str(self.preview_cross_section_relative_position),
                 'scale': str(self.__previewScale)
             }
             elem = Element(tag, attribute)
@@ -868,76 +880,40 @@ class APSModel:
                 zNumber = key[0]
                 rNumber = key[1]
                 tag = 'SelectedZoneWithRegions'
-                attributes= {'zone':str(zNumber)}
+                attributes = {'zone': str(zNumber)}
                 text = ''
-                elemZoneRegion = Element(tag,attributes)
+                elemZoneRegion = Element(tag, attributes)
 
                 rList = self.getSelectedRegionNumberListForSpecifiedZoneNumber(zNumber)
                 text = ''
-                useRegion = 1
-                if len(rList) == 1:
-                    if rList[0] == 0:
-                        useRegion =0
-                        text = text + ' ' + str(0) + ' '
-                if useRegion == 1:
+                useRegion = True
+                if len(rList) == 1 and rList[0] == 0:
+                    useRegion = False
+                    text += ' ' + str(0) + ' '
+                if useRegion:
                     for j in range(len(rList)):
                         rNumber = rList[j]
-                        text = text + ' ' + str(rNumber) + ' '
-                elemZoneRegion.text= text
+                        text += ' ' + str(rNumber) + ' '
+                elemZoneRegion.text = text
                 elemSelectedZoneAndRegion.append(elemZoneRegion)
 
-
-
         # Add all main commands to the root APSModel
-        tag = 'RMSProjectName'
-        elem = Element(tag)
-        elem.text = ' ' + self.__rmsProjectName.strip() + ' '
-        root.append(elem)
+        tags = [
+            ('RMSProjectName', self.__rmsProjectName.strip()),
+            ('RMSWorkflowName', self.__rmsWorkflowName.strip()),
+            ('GridModelName', self.__rmsGridModelName.strip()),
+            ('ZoneParamName', self.__rmsZoneParamName.strip()),
+            ('RegionParamName', self.__rmsRegionParamName.strip()),
+            ('ResultFaciesParamName', self.__rmsFaciesParamName.strip()),
+            ('PrintInfo', str(self.debug_level.value)),
+            ('SeedFile', self.seed_file_name),
+            ('WriteSeeds', 'yes' if self.writeSeeds else 'no'),
+        ]
 
-        tag = 'RMSWorkflowName'
-        elem = Element(tag)
-        elem.text = ' ' + self.__rmsWorkflowName.strip() + ' '
-        root.append(elem)
-
-        tag = 'GridModelName'
-        elem = Element(tag)
-        elem.text = ' ' + self.__rmsGridModelName.strip() + ' '
-        root.append(elem)
-
-        tag = 'ZoneParamName'
-        elem = Element(tag)
-        elem.text = ' ' + self.__rmsZoneParamName.strip() + ' '
-        root.append(elem)
-
-        tag = 'RegionParamName'
-        elem = Element(tag)
-        if self.__rmsRegionParamName != '':
-            elem.text = ' ' + self.__rmsRegionParamName.strip() + ' '
+        for tag, value in tags:
+            elem = Element(tag)
+            elem.text = ' ' + value + ' '
             root.append(elem)
-
-        tag = 'ResultFaciesParamName'
-        elem = Element(tag)
-        elem.text = ' ' + self.__rmsFaciesParamName.strip() + ' '
-        root.append(elem)
-
-        tag = 'PrintInfo'
-        elem = Element(tag)
-        elem.text = ' ' + str(self.__debug_level.value) + ' '
-        root.append(elem)
-
-        tag = 'SeedFile'
-        elem = Element(tag)
-        elem.text = ' ' + str(self.__seedFileName) + ' '
-        root.append(elem)
-
-        tag = 'WriteSeeds'
-        elem = Element(tag)
-        if self.writeSeeds:
-            elem.text = ' ' + 'yes' + ' '
-        else:
-            elem.text = ' ' + 'no' + ' '
-
-        root.append(elem)
 
         # Add command MainFaciesTable
         self.__faciesTable.XMLAddElement(root)
@@ -975,8 +951,7 @@ class APSModel:
     def writeModelFromXMLRoot(inputETree, outputModelFileName):
         print('Write file: ' + outputModelFileName)
         root = inputETree.getroot()
-        rootReformatted = prettify2(root)
+        rootReformatted = minify(root)
         with open(outputModelFileName, 'w') as file:
             file.write(rootReformatted)
             file.write('\n')
-

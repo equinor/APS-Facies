@@ -3,7 +3,8 @@
 from src.algorithms.defineTruncationRule import DefineTruncationRule
 from src.utils.numeric import isNumber
 
-def getInteger(text,minVal=0):
+
+def getInteger(text, minVal=0):
     ok = False
     n = 0
     while not ok:
@@ -16,6 +17,7 @@ def getInteger(text,minVal=0):
                 ok = False
     return n
 
+
 def addCommandCubic(rules):
     name = input('Give a name for the new Cubic truncation setting: ')
     direction = input('Split direction for level 1  (H/V): ')
@@ -23,21 +25,21 @@ def addCommandCubic(rules):
     while direction != 'H' and direction != 'V' and direction != 'h' and direction != 'v':
         direction = input('Split direction for level 1  (H/V): ')
 
-    nLevel1 = getInteger('Number of L1 polygons: ',minVal=2)
+    nLevel1 = getInteger('Number of L1 polygons: ', minVal=2)
     nLevel2 = []
     nLevel3 = []
     for i in range(nLevel1):
-        m = getInteger('Number of L2 polygons this L1 polygon ({}, {}, {}) is split into:'.format(str(i+1), 0, 0), minVal=0)
+        m = getInteger('Number of L2 polygons this L1 polygon ({}, {}, {}) is split into:'.format(i + 1, 0, 0), minVal=0)
         if m == 0:
             m = 1
-        nLevel2.append(m)        
+        nLevel2.append(m)
         nLevel3.append([])
     for i in range(nLevel1):
         for j in range(nLevel2[i]):
             if nLevel2[i] <= 1:
                 k = 1
             elif nLevel2[i] > 1:
-                k = getInteger('Number of L3 polygons this L2 polygon ({}, {}, {}) is split into:'.format(str(i+1),str(j+1), 0),minVal=0)
+                k = getInteger('Number of L3 polygons this L2 polygon ({}, {}, {}) is split into:'.format(i + 1, j + 1, 0), minVal=0)
                 if k == 0:
                     k = 1
             nLevel3[i].append(k)
@@ -47,22 +49,22 @@ def addCommandCubic(rules):
     for i in range(nLevel1):
         for j in range(nLevel2[i]):
             for k in range(nLevel3[i][j]):
-                L1 = i+1
-                L2 = j+1
+                L1 = i + 1
+                L2 = j + 1
                 if nLevel2[i] == 1:
                     L2 = 0
-                L3 = k+1
+                L3 = k + 1
                 if nLevel3[i][j] == 1:
                     L3 = 0
 
-                fName = input('Facies name for polygon ({}, {}, {}): '
-                              ''. format(str(L1), str(L2), str(L3)))
+                fName = input('Facies name for polygon ({}, {}, {}): '. format(L1, L2, L3))
                 ok = False
                 while not ok:
-                    probFrac_string = input('Probability fraction of facies {} in polygon ({}, {}, {}): '
-                                     ''. format(fName, str(L1), str(L2), str(L3)))
+                    probFrac_string = input(
+                        'Probability fraction of facies {} in polygon ({}, {}, {}): '
+                        ''. format(fName, L1, L2, L3))
                     probFrac = float(probFrac_string)
-                    if probFrac >= 0.0 and probFrac <= 1.0:
+                    if 0.0 <= probFrac <= 1.0:
                         ok = True
 
                 rules.addPolygonToTruncationRuleSettingsCubic(truncStructureCubic, fName, probFrac, L1, L2, L3)
@@ -78,8 +80,7 @@ def addCommandNonCubic(rules):
     truncStructureNonCubic = rules.initNewTruncationRuleSettingsNonCubic()
     polygon_list = []
     for i in range(nPolygons):
-        fName = input('Facies name for polygon number {}: '
-                              ''. format(str(i+1)))
+        fName = input('Facies name for polygon number {}: '. format(i + 1))
 
         angle = 0.0
         probFrac = 1.0
@@ -88,7 +89,7 @@ def addCommandNonCubic(rules):
             tmp_string = input('Angle: ')
             try:
                 angle = float(tmp_string)
-                if angle < -180.0 or angle > 180.0:
+                if not (-180.0 <= angle <= 180.0):
                     print('Angle must be in interval [-180.0, 180.0] degrees')
                 else:
                     ok = True
@@ -100,18 +101,18 @@ def addCommandNonCubic(rules):
             tmp_string = input('Probability fraction: ')
             try:
                 probFrac = float(tmp_string)
-                if probFrac < 0.0 or probFrac> 1.0:
+                if not (0.0 <= probFrac <= 1.0):
                     print('Probability fraction must be in interval [0.0, 1.0]')
                 else:
                     ok = True
             except:
                 ok = False
 
-
         poly = [fName, angle, probFrac]
         rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, fName, angle, probFrac)
-        
+
     rules.addTruncationRuleSettingsNonCubic(name, truncStructureNonCubic)
+
 
 def addCommandOverlay(rules):
     name = input('Give a name for the new Overlay truncation setting: ')
@@ -124,16 +125,16 @@ def addCommandOverlay(rules):
         alphaList = []
         bgFaciesList = []
         for i in range(nPoly):
-            faciesName = input('Facies name for {} and polygon {}...............: '.format(str(groupIndx+1), str(i+1)))
-            alphaName  = input('GRF name for {} and polygon {}..................: '.format(str(groupIndx+1), str(i+1)))
-            text       = input('Probability fraction for {} and polygon {}......: '.format(str(groupIndx+1), str(i+1)))
+            faciesName = input('Facies name for {} and polygon {}...............: '.format(groupIndx + 1, i + 1))
+            alphaName  = input('GRF name for {} and polygon {}..................: '.format(groupIndx + 1, i + 1))
+            text       = input('Probability fraction for {} and polygon {}......: '.format(groupIndx + 1, i + 1))
             probFrac = float(text)
-            text       = input('Center point of interval for {} and polygon {}..: '.format(str(groupIndx+1), str(i+1)))
+            text       = input('Center point of interval for {} and polygon {}..: '.format(groupIndx + 1, i + 1))
             centerPoint = float(text)
             alphaList = rules.addPolygonToAlphaList(alphaName, faciesName, probFrac=probFrac, centerPoint=centerPoint, alphaList=alphaList)
-        text = ' Number of background facies for group {}'.format(str(groupIndx+1)) 
-        nBackgroundFacies = getInteger(text,minVal=1)
-        bgFacies = input('Background facies for group {} : '.format(str(groupIndx+1)))
+        text = ' Number of background facies for group {}'.format(groupIndx + 1)
+        nBackgroundFacies = getInteger(text, minVal=1)
+        bgFacies = input('Background facies for group {} : '.format(groupIndx + 1))
         bgFaciesList.append(bgFacies)
         group_list = rules.addOverlayGroupSettings(alphaList, bgFaciesList, overlayGroups=group_list)
 
@@ -143,7 +144,7 @@ def addCommandOverlay(rules):
 def addCommandCubicAndOverlay(rules):
     name = input('Give a name for the new Cubic truncation setting with overlay facies: ')
     cubicName = input('Name of Cubic setting: ')
-    
+
     list_overlay_settings = rules.getListOfOverlaySettings(cubicName)
     print('Overlay settings consistent with specified background facies setting.')
     for i in range(len(list_overlay_settings)):
@@ -155,8 +156,9 @@ def addCommandCubicAndOverlay(rules):
         overlayName = input('Name of Overlay setting: ')
         if overlayName in list_overlay_settings:
             finished = True
-            
+
     rules.addTruncationRuleSettingsCubicWithOverlay(name, cubicName, overlayName)
+
 
 def addCommandNonCubicAndOverlay(rules):
     name = input('Give a name for the new NonCubic truncation setting with overlay facies: ')
@@ -172,50 +174,54 @@ def addCommandNonCubicAndOverlay(rules):
         overlayName = input('Name of Overlay setting: ')
         if overlayName in list_overlay_settings:
             finished = True
-            
+
     rules.addTruncationRuleSettingsNonCubicWithOverlay(name, nonCubicName, overlayName)
 
 
 def addCommand(rules):
     finished = False
     while not finished:
-        typeTrunc = input('Add truncation setting for:\n'
-                          '  Cubic (C)\n'
-                          '  NonCubic (N)\n'
-                          '  Overlay (A)\n'
-                          '  CubicAndOverlay (CA)\n'
-                          '  NonCubicAndOverlay (NA)\n'
-                          '  :')
-        if typeTrunc == 'Cubic' or typeTrunc == 'C' or typeTrunc == 'c':
+        typeTrunc = input(
+            'Add truncation setting for:\n'
+            '  Cubic (C)\n'
+            '  NonCubic (N)\n'
+            '  Overlay (A)\n'
+            '  CubicAndOverlay (CA)\n'
+            '  NonCubicAndOverlay (NA)\n'
+            '  :'
+        )
+        if typeTrunc in ['Cubic', 'C', 'c']:
             addCommandCubic(rules)
             finished = True
-        elif typeTrunc == 'NonCubic' or typeTrunc == 'N' or typeTrunc == 'n':
+        elif typeTrunc in ['NonCubic', 'N', 'n']:
             addCommandNonCubic(rules)
             finished = True
-        elif typeTrunc == 'Overlay' or typeTrunc == 'A' or typeTrunc == 'a':
+        elif typeTrunc in ['Overlay', 'A', 'a']:
             addCommandOverlay(rules)
             finished = True
-        elif typeTrunc == 'CubicAndOverlay' or typeTrunc == 'CA' or typeTrunc == 'ca':
+        elif typeTrunc in ['CubicAndOverlay', 'CA', 'ca']:
             addCommandCubicAndOverlay(rules)
             finished = True
-        elif typeTrunc == 'NonCubicAndOverlay' or typeTrunc == 'NA' or typeTrunc == 'na':
+        elif typeTrunc in ['NonCubicAndOverlay', 'NA', 'na']:
             addCommandNonCubicAndOverlay(rules)
             finished = True
+
 
 def readCommand(rules):
     finished = False
     while not finished:
-        try:
-            inputFileName = input('Specify filename or quit (q): ')
-            if inputFileName == 'q':
+            input_file_name = input('Specify filename or quit (q): ')
+            if input_file_name == 'q':
                 finished = True
             else:
-                rules.readFile(inputFileName)
-                print('')
-                finished = True
-        except:
-            print('Can not open or read the file {}'. format(inputFileName))
-    
+                try:
+                    rules.readFile(input_file_name)
+                    print('')
+                    finished = True
+                except (FileNotFoundError, IOError):
+                    print('Can not open or read the file {}'. format(input_file_name))
+
+
 def printListOfSettings(settings_list):
     for i in range(len(settings_list)):
         item = settings_list[i]
@@ -227,15 +233,17 @@ def printListOfSettings(settings_list):
 def listCommand(rules):
     finished = False
     while not finished:
-        typeTrunc = input('Type of truncation settings to list to screen:\n'
-                          '  Cubic (C)\n'
-                          '  NonCubic (N)\n'
-                          '  Cubic with overlay (CA)\n'
-                          '  NonCubic with overlay (NA)\n'
-                          '  Overlay (A)\n'
-                          '  Background with N facies and overlay with M facies  (B)\n'
-                          '  :')
-        if typeTrunc == 'Cubic' or typeTrunc == 'C' or typeTrunc == 'c':
+        typeTrunc = input(
+            'Type of truncation settings to list to screen:\n'
+            '  Cubic (C)\n'
+            '  NonCubic (N)\n'
+            '  Cubic with overlay (CA)\n'
+            '  NonCubic with overlay (NA)\n'
+            '  Overlay (A)\n'
+            '  Background with N facies and overlay with M facies  (B)\n'
+            '  :'
+        )
+        if typeTrunc in ['Cubic', 'C', 'c']:
             typeTrunc = 'Cubic'
             settings_list = rules.getListOfSettings(typeTrunc)
 
@@ -243,7 +251,7 @@ def listCommand(rules):
             printListOfSettings(settings_list)
             finished = True
 
-        elif typeTrunc == 'NonCubic' or typeTrunc == 'N' or typeTrunc == 'n':
+        elif typeTrunc in ['NonCubic', 'N', 'n']:
             typeTrunc = 'NonCubic'
             settings_list = rules.getListOfSettings(typeTrunc)
 
@@ -251,7 +259,7 @@ def listCommand(rules):
             printListOfSettings(settings_list)
             finished = True
 
-        elif typeTrunc == 'CubicAndOverlay' or typeTrunc == 'CA' or typeTrunc == 'ca':
+        elif typeTrunc in ['CubicAndOverlay', 'CA', 'ca']:
             typeTrunc = 'CubicAndOverlay'
             settings_list = rules.getListOfSettings(typeTrunc)
 
@@ -259,7 +267,7 @@ def listCommand(rules):
             printListOfSettings(settings_list)
             finished = True
 
-        elif typeTrunc == 'NonCubicAndOverlay' or typeTrunc == 'NA' or typeTrunc == 'na':
+        elif typeTrunc in ['NonCubicAndOverlay', 'NA', 'na']:
             typeTrunc = 'NonCubicAndOverlay'
             settings_list = rules.getListOfSettings(typeTrunc)
 
@@ -267,7 +275,7 @@ def listCommand(rules):
             printListOfSettings(settings_list)
             finished = True
 
-        elif typeTrunc == 'Overlay' or typeTrunc == 'A' or typeTrunc == 'a':
+        elif typeTrunc in ['Overlay', 'A', 'a']:
             typeTrunc = 'Overlay'
             settings_list = rules.getListOfSettings(typeTrunc)
 
@@ -275,7 +283,7 @@ def listCommand(rules):
             printListOfSettings(settings_list)
             finished = True
 
-        elif typeTrunc == 'B' or typeTrunc == 'b':
+        elif typeTrunc in ['B', 'b']:
             ok = False
             nBG = 0
             nOL = 0
@@ -285,7 +293,7 @@ def listCommand(rules):
                     nBG = int(tmp_string)
                     if nBG > 0:
                         ok = True
-                except:
+                except ValueError:
                     ok = False
 
             ok = False
@@ -295,7 +303,7 @@ def listCommand(rules):
                     nOL = int(tmp_string)
                     if nOL >= 0:
                         ok = True
-                except:
+                except ValueError:
                     ok = False
 
             settings_list_cubic = []
@@ -334,13 +342,15 @@ def listCommand(rules):
 def mapCommand(rules):
     finished = False
     while not finished:
-        name = input('Plot all settings (A)\n'
-                     'Plot specific setting, give name\n'
-                     'Quit (Q) : ')
-        
-        if name == 'Q' or name == 'q' or name == 'Quit' or name == 'quit':
+        name = input(
+            'Plot all settings (A)\n'
+            'Plot specific setting, give name\n'
+            'Quit (Q) : '
+        )
+
+        if name in ['Q', 'q', 'Quit', 'quit']:
             finished = True
-        elif name == 'A' or name == 'a':
+        elif name in ['A', 'a']:
             rules.createAllCubicPlots()
             rules.createAllNonCubicPlots()
             rules.createAllCubicWithOverlayPlots()
@@ -350,14 +360,17 @@ def mapCommand(rules):
 
         else:
             rules.makeTruncationMapPlot(name, writePngFile=False)
-        
+
+
 def removeCommand(rules):
     finished = False
     while not finished:
-        name = input('Name of rule to remove: \n'
-                     'Quit (Q): ')
-        
-        if name == 'Q' or name == 'q' or name == 'Quit' or name == 'quit':
+        name = input(
+            'Name of rule to remove: \n'
+            'Quit (Q): '
+        )
+
+        if name in ['Q', 'q', 'Quit', 'quit']:
             finished = True
         else:
             try:
@@ -366,37 +379,40 @@ def removeCommand(rules):
             except:
                 finished = False
 
+
 def run():
 
     rules = DefineTruncationRule()
 
     finished = False
     while not finished:
-        command = input('Specify command:\n'
-                        '  Read from file (R)\n'
-                        '  Write file (W)\n'
-                        '  List rules (L)\n'
-                        '  Show truncation map (M)\n'
-                        '  Add new setting (N)\n'
-                        '  Remove setting (Del)\n'
-                        '  Quit\n'
-                        '  :') 
-        if command == 'Quit' or command == 'Q' or command == 'q':
+        command = input(
+            'Specify command:\n'
+            '  Read from file (R)\n'
+            '  Write file (W)\n'
+            '  List rules (L)\n'
+            '  Show truncation map (M)\n'
+            '  Add new setting (N)\n'
+            '  Remove setting (Del)\n'
+            '  Quit\n'
+            '  :'
+        )
+        if command in ['Quit', 'Q', 'q']:
             finished = True
-        elif command == 'New' or command == 'N' or command == 'n':
+        elif command in ['New', 'N', 'n']:
             addCommand(rules)
-        elif command == 'Read' or command == 'R' or command == 'r':
+        elif command in ['Read', 'R', 'r']:
             readCommand(rules)
         elif command == 'Del':
             removeCommand(rules)
-        elif command == 'Map'or command == 'M' or command == 'm':
+        elif command in ['Map', 'M', 'm']:
             mapCommand(rules)
-        elif command == 'List' or command == 'L' or command == 'l':
+        elif command in ['List', 'L', 'l']:
             listCommand(rules)
-        elif command == 'Write' or command == 'W' or command == 'w':
+        elif command in ['Write', 'W', 'w']:
             outputFile = input('Name of file to save/update truncation settings: ')
             rules.writeFile(outputFile)
-                
+
 
 if __name__ == '__main__':
     run()

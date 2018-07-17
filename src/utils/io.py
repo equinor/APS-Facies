@@ -54,19 +54,21 @@ def readFile(fileName, debug_level=Debug.OFF):
     return a, nx, ny
 
 
-def writeFileRTF(fileName, a, nx, ny, dx, dy, x0, y0, debug_level=Debug.OFF):
+def writeFileRTF(file_name, data, dimensions, increments, x0, y0, debug_level=Debug.OFF):
+    nx, ny = dimensions
+    dx, dy = increments
     # Write in Roxar text format
-    with open(fileName, 'w') as file:
+    with open(file_name, 'w') as file:
         outstring = '-996  ' + str(ny) + '  ' + str(dx) + ' ' + str(dy) + '\n'
-        outstring += str(x0) + ' ' + str(x0 + nx*dx) + ' ' + str(y0) + ' ' + str(y0+ny*dy) + '\n'
+        outstring += str(x0) + ' ' + str(x0 + nx * dx) + ' ' + str(y0) + ' ' + str(y0 + ny * dy) + '\n'
         outstring += ' ' + str(nx) + ' ' + ' 0.000000  ' + str(x0) + ' ' + str(y0) + '\n'
         outstring += '0     0     0     0     0     0     0\n'
         count = 0
         text = ''
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('len(a): ' + str(len(a)))
-        for j in range(len(a)):
-            text = text + str(a[j]) + '  '
+            print('len(data): ' + str(len(data)))
+        for j in range(len(data)):
+            text = text + str(data[j]) + '  '
             count += 1
             if count >= 5:
                 text += '\n'
@@ -77,7 +79,7 @@ def writeFileRTF(fileName, a, nx, ny, dx, dy, x0, y0, debug_level=Debug.OFF):
             outstring += text + '\n'
         file.write(outstring)
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
-        print('Write file: ' + fileName)
+        print('Write file: ' + file_name)
 
 
 def print_debug_information(function_name, text):

@@ -108,7 +108,7 @@ def simGaussFieldAddTrendAndTransform(
     sigma1 = 1.0
     if useTrend:
         if debug_level >= Debug.VERY_VERBOSE:
-            print('    - Add trend 2D Gauss field ')
+            print('    - Add trend 2D Gauss field')
         dx = 1.0 / float(nx - 1)
         dy = 1.0 / float(ny - 1)
         ang1 = trendAzimuth * np.pi / 180.0
@@ -141,7 +141,7 @@ def simGaussFieldAddTrendAndTransform(
     # Transform into uniform distribution
     if debug_level >= Debug.VERY_VERBOSE:
         print('    - Transform 2D Gauss field')
-        print(' ')
+        print('')
     transformedValues = np.zeros(nx * ny, float)
     sort_indx = np.argsort(v1Trend)
     for i in range(len(v1Trend)):
@@ -202,7 +202,7 @@ def simGaussFieldAddTrendAndTransform2(
 
     # Transform into uniform distribution
     print('    - Transform Gauss field')
-    print(' ')
+    print('')
     transformedValues = np.zeros(nx * ny, float)
     sort_indx = np.argsort(v1WithTrend)
     for i in range(len(v1)):

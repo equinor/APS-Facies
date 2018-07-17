@@ -138,7 +138,7 @@ class APSGaussFieldJobs:
             print('Debug output: Number of gauss field names: ' + str(self.__nGFNames))
             print('Debug output: Job names:')
             print(repr(self.__jobNames))
-            print('Debug output: Gauss field names per job: ')
+            print('Debug output: Gauss field names per job:')
             print(repr(self.__gaussFieldNamesPerJob))
 
     def initialize(self, gfJobNames, gfNamesPerJob, debug_level=Debug.OFF):
