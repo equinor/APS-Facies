@@ -29,6 +29,11 @@ REMOVE_APS_GUI_TEMP_FOLDER :=
 ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
+ALLWAYS_INSTALL_WEB_DEPENDENCIES ?= yes
+PACKAGE.JSON :=
+ifeq ($(ALLWAYS_INSTALL_WEB_DEPENDENCIES),yes)
+PACKAGE.JSON := package.json
+endif
 PLUGIN_NAME := aps_gui
 PLUGIN_PREFIX ?=
 PLUGIN_BIN := $(PLUGIN_NAME).plugin
@@ -77,7 +82,7 @@ MAIN.PY := $(PYTHON_API_DIR)/main.py
 INFO.XML := $(CODE_DIR)/info.xml
 
 MKDIR := mkdir -p
-REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -ie 's/^from src/from .static.py/g'
+REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -e 's/^from src/from .static.py/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI
@@ -205,7 +210,7 @@ clean-build-dir:
 clean-plugin:
 	rm -rf $(PLUGIN_DIR) $(PLUGIN_DIR).plugin
 
-build-front-end: package.json build-dir
+build-front-end: $(PACKAGE.JSON) build-dir
 	$(YARN) build && \
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
 
@@ -410,7 +415,7 @@ run-python-linting:
 javascript-linting:
 	$(YARN) lint
 
-web-start: package.json
+web-start: $(PACKAGE.JSON)
 	$(YARN) serve --port=$(VUE_APP_APS_GUI_PORT) \
 	              --host=$(VUE_APP_APS_SERVER)
 
@@ -426,9 +431,9 @@ web-lint:
 web-build:
 	$(YARN) build
 
-web-install-dev: package.json
+web-install-dev: $(PACKAGE.JSON)
 
-CYPRESS_VERSION := 3.0.2
+CYPRESS_VERSION := 3.1.0
 package.json:
 	wget "http://download.cypress.io/desktop/$(CYPRESS_VERSION)?platform=linux64" --output-document="$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip"
 	CYPRESS_INSTALL_BINARY=$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip $(YARN) install --dev

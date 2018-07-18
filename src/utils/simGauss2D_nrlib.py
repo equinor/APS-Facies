@@ -74,8 +74,8 @@ def simGaussField(iseed, nx, ny, xsize, ysize, variogram_type,
             debug_info += 'n{coordinate}_padding: {value}     '.format(coordinate=coordinates[i], value=padding[i])
         print(debug_info.strip())
 
-    # Have to remap the array to get it correct when plotting. That is why switching nx by ny and so on and the remapping
-    # of the result vector.
+    # Have to remap the array to get it correct when plotting.
+    # That is why switching nx by ny and so on and the remapping of the result vector.
     gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy)
     a = np.reshape(gauss_vector, (nx, ny), 'F')
     gauss_vector = np.reshape(a, (nx * ny), 'F')

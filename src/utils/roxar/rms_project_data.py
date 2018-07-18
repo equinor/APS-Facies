@@ -1,5 +1,10 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from src.algorithms.APSGaussModel import (
+    GaussianField, Variogram, Ranges, Angles, Trend, GaussianFieldSimulationSettings,
+)
+from src.algorithms.properties import CrossSection
+from src.utils.constants.simple import VariogramType, MinimumValues, MaximumValues, TrendType, Direction, OriginType
 
 
 def empty_if_none(func):
@@ -12,6 +17,15 @@ def empty_if_none(func):
     return wrapper
 
 
+def _option_mapping():
+    return {
+        'variogram': VariogramType,
+        'origin': OriginType,
+        'stacking_direction': Direction,
+        'trend': TrendType,
+    }
+
+
 class RMSData:
     def __init__(self, roxar, project):
         self.roxar = roxar
@@ -19,6 +33,9 @@ class RMSData:
 
     def is_discrete(self, _property):
         return _property.type == self.roxar.GridPropertyType.discrete
+
+    def is_continuous(self, _property):
+        return _property.type == self.roxar.GridPropertyType.continuous
 
     def get_grid_models(self):
         return self.project.grid_models
@@ -36,18 +53,21 @@ class RMSData:
     def get_region_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_region_parameter)
 
+    def get_rms_trend_parameters(self, grid_model_name):
+        return self._get_parameter_names(grid_model_name, self.is_trend_parameter)
+
     def _get_parameter_names(self, grid_model_name, check):
         grid_model = self.get_grid_model(grid_model_name)
         return [parameter.name for parameter in grid_model.properties if check(parameter)]
 
-    def get_zones(self, grid_name, zone_parameter):
-        grid_model = self.get_grid_model(grid_name)
+    def get_zones(self, grid_model_name, zone_parameter):
+        grid_model = self.get_grid_model(grid_model_name)
         zones = self.get_code_names(grid_model.properties[zone_parameter])
         return zones
 
-    def get_regions(self, grid_name, zone_name, region_parameter):
+    def get_regions(self, grid_model_name, zone_name, region_parameter):
         # TODO: Ensure that available regions depends on zone
-        grid_model = self.get_grid_model(grid_name)
+        grid_model = self.get_grid_model(grid_model_name)
         regions = self.get_code_names(grid_model.properties[region_parameter])
         return regions
 
@@ -65,6 +85,9 @@ class RMSData:
             and any([name != '' for name in param.code_names.values()])
             and len(param.code_names) > 0
         )
+
+    def is_trend_parameter(self, param):
+        return self.is_continuous(param)
 
     def _get_blocked_well_set(self, grid_model_name):
         return self.get_grid_model(grid_model_name).blocked_wells_set
@@ -93,6 +116,56 @@ class RMSData:
         # Get facies property
         facies_property = blocked_wells.properties[facies_log_name]
         return self.get_code_names(facies_property)
+
+    @staticmethod
+    def simulate_gaussian_field(name, variogram, trend, settings=None):
+        if trend is None:
+            trend = {}
+        if settings is None:
+            settings = GaussianFieldSimulationSettings(
+                cross_section=CrossSection('IJ', 0.5),
+                grid_azimuth=0,
+                grid_size=(100, 100, 1),
+                simulation_box_size=(100, 100, 1),
+                seed=0,
+            )
+        else:
+            settings = GaussianFieldSimulationSettings.from_dict(**settings)
+        grid_index_order = 'C'
+        simulation = GaussianField(
+            name=name,
+            variogram=Variogram(
+                name=name,
+                type=variogram['type'],
+                ranges=Ranges(
+                    **variogram['range']
+                ),
+                angles=Angles(
+                    **variogram['angle']
+                ),
+                power=variogram['power'],
+            ),
+            trend=Trend.from_dict(name, **trend),
+            settings=settings,
+        ).simulate()
+        data = simulation.field_as_matrix(grid_index_order)
+        return data.tolist()
+
+    @staticmethod
+    def get_constant(_property, _type='min,max'):
+        res = {}
+        for item in _type.lower().split(','):
+            if item in ['min', 'minimum']:
+                res['min'] = MinimumValues[_property]
+            elif item in ['max', 'maximum']:
+                res['max'] = MaximumValues[_property]
+            else:
+                raise ValueError('The property type \'{}\' is not known'.format(item))
+        return res
+
+    @staticmethod
+    def get_options(_type):
+        return [item.name for item in _option_mapping()[_type]]
 
     @staticmethod
     def get_code_names(_property):
@@ -303,7 +376,10 @@ def all_log_curves_with_name(project, name):
 
 
 def search(project, name):
-    """Display all log curves with a specific name. This function displays the well name, trajectory name, log run name and log curve name of matching log curves found in the project. """
+    """
+        Display all log curves with a specific name. This function displays the well name, trajectory name,
+        log run name and log curve name of matching log curves found in the project.
+    """
     for log_curve in all_log_curves_with_name(project, name):
         print("{} : {} : {} : {}".format(log_curve.log_run.trajectory.wellbore.name, log_curve.log_run.trajectory.name,
                                          log_curve.log_run.name, log_curve.name))

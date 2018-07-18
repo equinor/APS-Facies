@@ -68,7 +68,6 @@ def test_case_with_no_fmu_markers_set():
 
 def test_case_with_all_fmu_markers_set():
 
-
     aps_model = get_apsmodel_with_all_fmu_markers()
 
     out_file = 'aps_model_with_all_fmu_markers.xml'

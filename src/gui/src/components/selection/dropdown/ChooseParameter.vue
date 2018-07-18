@@ -11,7 +11,7 @@
 
 <script>
 import VueTypes from 'vue-types'
-import BaseDropdown from '@/components/selection/dropdown/BaseDropdown'
+import BaseDropdown from 'Components/selection/dropdown/BaseDropdown'
 
 export default {
   components: {
@@ -42,7 +42,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-
-</style>

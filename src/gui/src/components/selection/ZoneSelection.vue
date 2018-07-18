@@ -1,6 +1,6 @@
 <template>
   <selectable-table
-    :raw-data="availableZones"
+    :row-data="availableZones"
     :on-selection-changed="selectedZones"
     :on-row-clicked="setCurrentZone"
     header-name="Zone"
@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import SelectableTable from '@/components/table/SelectableTable'
+import SelectableTable from 'Components/table/SelectableTable'
 
 export default {
   components: {
@@ -25,7 +25,8 @@ export default {
 
   computed: {
     availableZones () {
-      return this.$store.state.zones.available
+      const zones = this.$store.state.zones.available
+      return Object.keys(zones).map(id => { return {id, name: zones[`${id}`].name} })
     }
   },
 
@@ -42,7 +43,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

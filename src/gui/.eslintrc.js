@@ -1,5 +1,7 @@
 // http://eslint.org/docs/user-guide/configuring
 
+const verbosity = process.env.NODE_ENV === 'production' ? 'error' : 'off'
+
 module.exports = {
   root: true,
   env: {
@@ -28,7 +30,7 @@ module.exports = {
     'generator-star-spacing': 0,
     // allow debugger during development
     'comma-dangle': ['error', 'only-multiline'],
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+    'no-console': verbosity,
+    'no-debugger': verbosity,
   }
 }

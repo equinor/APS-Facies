@@ -108,22 +108,22 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
 
             if debug_level >= Debug.VERBOSE:
                 print('---  Simulate: {}  for zone: {}  for region: {}'
-                      ''.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
+                      ''.format(gaussFieldName, zoneNumber, regionNumber))
             if debug_level >= Debug.VERY_VERBOSE:
-                print('     Zone,region             : ({},{})'.format(str(zoneNumber), str(regionNumber)))
+                print('     Zone,region             : ({},{})'.format(zoneNumber, regionNumber))
                 print('     Gauss field name        : {}'.format(gaussFieldName))
                 print('     Variogram type          : {}'.format(vName))
-                print('     Main range              : {}'.format(str(mainRange)))
-                print('     Perpendicular range     : {}'.format(str(perpRange)))
-                print('     Vertical range          : {}'.format(str(vertRange)))
-                print('     Azimuth angle in sim box: {}'.format(str(azimuthValueSimBox)))
-                print('     Dip angle               : {}'.format(str(dip)))
-                print('     NX                      : {}'.format(str(nx)))
-                print('     NY                      : {}'.format(str(ny)))
-                print('     NZ for this zone        : {}'.format(str(nz)))
-                print('     DX                      : {}'.format(str(dx)))
-                print('     DY                      : {}'.format(str(dy)))
-                print('     DZ for this zone        : {}'.format(str(dz)))
+                print('     Main range              : {}'.format(mainRange))
+                print('     Perpendicular range     : {}'.format(perpRange))
+                print('     Vertical range          : {}'.format(vertRange))
+                print('     Azimuth angle in sim box: {}'.format(azimuthValueSimBox))
+                print('     Dip angle               : {}'.format(dip))
+                print('     NX                      : {}'.format(nx))
+                print('     NY                      : {}'.format(ny))
+                print('     NZ for this zone        : {}'.format(nz))
+                print('     DX                      : {}'.format(dx))
+                print('     DY                      : {}'.format(dy))
+                print('     DZ for this zone        : {}'.format(dz))
 
             # Define variogram
             variogramName = vName.lower()

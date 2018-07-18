@@ -1,4 +1,4 @@
-import rms from '@/api/rms'
+import rms from 'Api/rms'
 
 export default {
   namespaced: true,
@@ -13,9 +13,11 @@ export default {
       return new Promise((resolve, reject) => {
         if (state.available.includes(gridModel)) {
           commit('CURRENT', gridModel)
-          dispatch('parameters/zone/fetch', null, { root: true })
-          dispatch('parameters/region/fetch', null, { root: true })
-          dispatch('parameters/blockedWell/fetch', null, { root: true })
+          const parameters = ['zone', 'region', 'blockedWell', 'rmsTrend']
+          parameters.forEach(param => {
+            dispatch(`parameters/${param}/fetch`, null, { root: true })
+          })
+          dispatch('zones/current', {id: null}, { root: true })
           resolve(gridModel)
         } else {
           reject(new Error('Selected grid model must be valid.'))

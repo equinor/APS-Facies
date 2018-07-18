@@ -1,18 +1,10 @@
 <template>
-  <v-container>
-    <v-flex
-      xs12
-      sm6
-      d-flex
-    >
-      <v-select
-        :items="items"
-        v-model="selected"
-        :label="label"
-        :disabled="disabled"
-      />
-    </v-flex>
-  </v-container>
+  <v-select
+    :items="items"
+    v-model="selected"
+    :label="label"
+    :disabled="disabled"
+  />
 </template>
 
 <script>
@@ -39,7 +31,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

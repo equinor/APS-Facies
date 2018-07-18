@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from numpy import float64, ndarray
+
+from src.algorithms.properties import FmuProperty, CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trend3D import (
     Trend3D_elliptic,
@@ -10,7 +12,7 @@ from src.algorithms.Trend3D import (
     Trend3D,
 )
 from src.utils.constants.simple import Debug, VariogramType, CrossSectionType
-from typing import List, Optional, Tuple, Union, TypeVar, Generic, NewType, Dict, Callable
+from typing import List, Optional, Tuple, Union, TypeVar, NewType, Dict, Callable
 from xml.etree.ElementTree import Element
 
 from src.utils.records import TrendRecord, VariogramRecord
@@ -27,44 +29,49 @@ T = TypeVar('T')
 GaussianFieldName = NewType('GaussianFieldName', str)
 
 
-def _make_ranged_property(
-        name: str,
-        error_template: str,
-        minimum: Optional[Number] = None,
-        maximum: Optional[Number] = None,
-        additional_validator: Optional[Callable] = None,
-        show_given_value: bool=True,
-) -> property: ...
-def _make_bounded_property(
-        name: str,
-        minimum: Number,
-        maximum: Number,
-        error_template: str,
-        additional_validator: Optional[Callable] = None,
-) -> property: ...
-def _make_lower_bounded_property(
-        name: str,
-        additional_validator: Optional[Callable] = None
-) -> property: ...
-def _make_trend(name: str) -> property: ...
-def _make_angle(name: str) -> property: ...
+class GaussianFieldSimulationSettings:
+    cross_section: CrossSection
+    grid_azimuth: float
+    grid_size: GridSize
+    simulation_box_size: SimulationBoxSize
+    seed: int
+    dimensions: Tuple[int, int]
+    def __init__(
+            self,
+            cross_section: CrossSection,
+            grid_azimuth: float,
+            grid_size: GridSize,
+            simulation_box_size: SimulationBoxSize,
+            seed: int,
+    ): ...
+    def merge(
+            self,
+            cross_section: Optional[CrossSection] = None,
+            grid_azimuth: Optional[float] = None,
+            grid_size: Optional[GridSize] = None,
+            simulation_box_size: Optional[SimulationBoxSize] = None,
+            seed: Optional[int] = None,
+    ) -> GaussianFieldSimulationSettings: ...
+    @classmethod
+    def from_dict(cls, **kwargs) -> GaussianFieldSimulationSettings: ...
+
 
 class GaussianFieldSimulation:
     def __init__(
             self,
             name: GaussianFieldName,
             field: ndarray,
-            cross_section: CrossSection,
-            grid_azimuth_angle: float,
-            grid_size: GridSize,
-            simulation_box_size: SimulationBoxSize,
+            settings: GaussianFieldSimulationSettings,
     ) -> None: ...
     name: GaussianFieldName
     field: ndarray
+    settings: GaussianFieldSimulationSettings
     cross_section: CrossSection
-    grid_azimuth_angle: float
+    grid_azimuth: float
     grid_size: GridSize
     simulation_box_size: SimulationBoxSize
+    def field_as_matrix(self, grid_index_order: str = 'C') -> ndarray: ...
+
 
 class GaussianField:
     def __init__(
@@ -72,55 +79,31 @@ class GaussianField:
             name: Union[GaussianFieldName, str],
             variogram: Optional[Variogram] = None,
             trend: Optional[Trend] = None,
-            seed: int = 0,
+            seed: Optional[int] = None,
+            settings: Optional[GaussianFieldSimulationSettings] = None
     ) -> None: ...
     name: GaussianFieldName
     variogram: Variogram
     trend: Trend
     seed: int
+    settings: Optional[GaussianFieldSimulationSettings]
     def __getitem__(self, item): ...
     def _simulate(
             self,
-            cross_section: CrossSection,
-            grid_azimuth_angle: float,
-            grid_size: GridSize,
-            simulation_box_size: SimulationBoxSize,
+            cross_section: Optional[CrossSection] = None,
+            grid_azimuth: Optional[float] = None,
+            grid_size: Optional[GridSize] = None,
+            simulation_box_size: Optional[SimulationBoxSize] = None,
             debug_level: Debug = Debug.OFF
     ) -> ndarray: ...
     def simulate(
             self,
-            cross_section: CrossSection,
-            grid_azimuth_angle: float,
-            grid_size: GridSize,
-            simulation_box_size: SimulationBoxSize,
+            cross_section: Optional[CrossSection] = None,
+            grid_azimuth: Optional[float] = None,
+            grid_size: Optional[GridSize] = None,
+            simulation_box_size: Optional[SimulationBoxSize] = None,
             debug_level: Debug = Debug.OFF
     ) -> GaussianFieldSimulation: ...
-
-
-class FmuProperty(Generic[T]):
-    value: T
-    updatable: bool
-    def __init__(self, value: T, updatable: bool = False) -> None: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
-    # def __lt__(self, other: FmuProperty) -> bool: ...
-    # def __eq__(self, other: FmuProperty) -> bool: ...
-
-
-class CrossSection:
-    _type: CrossSectionType
-    _relative_position: float
-    def __init__(
-            self,
-            type: Union[CrossSectionType, str],
-            relative_position: float
-    ) -> None: ...
-
-    @property
-    def type(self) -> CrossSectionType: ...
-    @type.setter
-    def type(self, value: Union[str, CrossSectionType]) -> None: ...
-    relative_position: float
 
 
 MainRange = FmuProperty[int]
@@ -168,10 +151,14 @@ class Trend:
     relative_std_dev: FmuProperty[float]
     @classmethod
     def from_definition(cls, definition: Union[TrendRecord, List]) -> Trend: ...
-    def as_list(self) -> List: ...
-
+    def as_list(self) -> Tuple[GaussianFieldName, bool, Optional[Trend3D], float, bool]: ...
+    @classmethod
+    def from_dict(cls, name: GaussianFieldName, use: bool = False, **kwargs) -> Trend: ...
+    @staticmethod
+    def get_model(**kwargs) -> Trend3D: ...
 
 class Variogram:
+    types: VariogramType
     def __init__(
             self,
             name: Union[GaussianFieldName, str],
@@ -195,7 +182,7 @@ class Variogram:
     def __mapping__() -> Dict[str, int]: ...
     def calc_2d_variogram_from_3d_variogram(
         self,
-        grid_azimuth_angle: float,
+        grid_azimuth: float,
         projection: str,
         debug_level: Debug = Debug.OFF,
     ) -> Tuple[float64, float64, float64, float64]: ...
@@ -220,11 +207,10 @@ class APSGaussModel:
         mainFaciesTable: Optional[APSMainFaciesTable] = None,
         modelFileName: Optional[str] = None,
         debug_level: int = Debug.OFF,
-        zoneNumber: int = 0,
         simBoxThickness: Number = 0
     ) -> None: ...
     def __interpretXMLTree(self, ET_Tree_zone): ...
-    def XMLAddElement(self, parent: Element, fmu_attributes: List[str]) -> None: ...
+    def XMLAddElement(self, parent: Element, zone_number: int, region_number: int, fmu_attributes: List[str]) -> None: ...
     def findGaussFieldParameterItem(self, gaussFieldName: GaussianFieldName) -> List[Union[str, float, bool]]: ...
     def getAzimuthAngle(self, gaussFieldName: GaussianFieldName) -> float: ...
     def getDipAngle(self, gaussFieldName: GaussianFieldName) -> float: ...
@@ -236,6 +222,7 @@ class APSGaussModel:
     def __get_property(self, gaussFieldName: GaussianFieldName, keyword: str) -> Union[str, float, bool]: ...
     def getTrendItem(self, gfName: GaussianFieldName ) -> Trend: ...
     def getTrendModel(self, gfName: GaussianFieldName) -> Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param]: ...
+    def hasTrendModel(self, gfName: GaussianFieldName) -> bool: ...
     def getTrendModelObject(self, gfName: GaussianFieldName) -> Trend3D: ...
     def getVariogramType(self, gaussFieldName: GaussianFieldName) -> VariogramType: ...
     def getVariogramTypeNumber(self, gaussFieldName: GaussianFieldName) -> int: ...
@@ -244,7 +231,8 @@ class APSGaussModel:
     def get_variogram(
         self,
         gf: Element,
-        gf_name: GaussianFieldName
+        gf_name: GaussianFieldName,
+        zone_number: int,
     ) -> Tuple[Element, VariogramType]: ...
     def get_variogram_model(self, name: GaussianFieldName) -> Variogram: ...
     @staticmethod
@@ -253,7 +241,6 @@ class APSGaussModel:
     ) -> VariogramType: ...
     def initialize(
         self,
-        zone_number: int,
         main_facies_table: APSMainFaciesTable,
         gauss_model_list: List[List[Union[str, float, bool]]],
         trend_model_list: Union[List[Union[List[Union[str, int, Trend3D_hyperbolic, float]], List[Union[str, int, Trend3D_elliptic]]]], List[Union[List[Union[str, int, Trend3D_hyperbolic, float]], List[Union[str, int, Trend3D_elliptic_cone, float]], List[Union[str, int, Trend3D_hyperbolic]]]], List[Union[List[Union[str, int, Trend3D_linear]], List[Union[str, int, Trend3D_elliptic, float]], List[Union[str, int, Trend3D_elliptic]]]], List[Union[List[Union[str, int, Trend3D_linear, float]], List[Union[str, int, Trend3D_linear]]]], List[Union[List[Union[str, int, Trend3D_hyperbolic, float]], List[Union[str, int, Trend3D_elliptic]], List[Union[str, int, Trend3D_elliptic, float]]]]],
@@ -303,20 +290,20 @@ class APSGaussModel:
         self,
         simulation_box_size: SimulationBoxSize,
         grid_size: GridSize,
-        grid_azimuth_angle: float,
+        grid_azimuth: float,
         cross_section: CrossSection,
     ) -> List[GaussianField]: ...
     def calc2DVariogramFrom3DVariogram(
             self,
             name: GaussianFieldName,
-            grid_azimuth_angle: float,
+            grid_azimuth: float,
             projection: str,
     ) -> Tuple[float64, float64, float64, float64]: ...
     @staticmethod
     def _get_projection_parameters(
-            cross_section_type,
-            grid_size,
-            simulation_box_size
+            cross_section_type: CrossSectionType,
+            grid_size: GridSize,
+            simulation_box_size: SimulationBoxSize,
     ) -> Tuple[Tuple[int, int], Tuple[float, float], str]: ...
     @staticmethod
     def create_gauss_field_trend(

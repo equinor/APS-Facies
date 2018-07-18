@@ -57,7 +57,104 @@ class TrendType(Enum):
     ELLIPTIC_CONE = 5
 
 
+class TrendParameter(Enum):
+    AZIMUTH = 'anisotropy_azimuth_angle'
+    STACKING = 'stacking_angle'
+    DIRECTION = 'stacking_direction'
+    CURVATURE = 'curvature'
+    MIGRATION = 'migration_angle'
+    ORIGIN = 'origin'
+    ORIGIN_TYPE = 'origin_type'
+    RELATIVE_SIZE = 'relative_size_of_ellipse'
+    RMS_PARAMETER = 'rms_parameter_name'
+
+
 class CrossSectionType(Enum):
     IJ = 1
     IK = 2
     JK = 3
+
+
+class Direction(IntEnum):
+    # TODO: Ensure correct directions
+    # Direction of stacking (prograding / retrograding)
+    PROGRADING = 1
+    RETROGRADING = -1
+
+
+class GettableClass(type):
+    def __getitem__(cls, item):
+        return cls()[item]
+
+    def __contains__(cls, item):
+        return item in cls()
+
+
+class Values(metaclass=GettableClass):
+    MAIN_RANGE = NotImplemented
+    PERPENDICULAR_RANGE = NotImplemented
+    VERTICAL_RANGE = NotImplemented
+    AZIMUTH_ANGLE_ANISOTROPY = NotImplemented
+    DIP_ANGLE = NotImplemented
+    POWER = NotImplemented
+    RELATIVE_STD_DEV = NotImplemented
+    # Trend
+    AZIMUTH_ANGLE_DEPOSITIONAL = NotImplemented
+    STACKING_ANGLE = NotImplemented
+    CURVATURE = NotImplemented
+    MIGRATION_ANGLE = NotImplemented
+    RELATIVE_ELLIPSE_SIZE = NotImplemented
+
+    @property
+    def mapping(self):
+        return {
+            'main': self.MAIN_RANGE,
+            'perpendicular': self.PERPENDICULAR_RANGE,
+            'vertical': self.VERTICAL_RANGE,
+            'azimuth': self.AZIMUTH_ANGLE_ANISOTROPY,
+            'dip': self.DIP_ANGLE,
+            'power': self.POWER,
+            'relative_std_dev': self.RELATIVE_STD_DEV,
+            # Trends
+            'depositional_direction': self.AZIMUTH_ANGLE_DEPOSITIONAL,
+            'stacking_angle': self.STACKING_ANGLE,
+            'curvature': self.CURVATURE,
+            'migration_angle': self.MIGRATION_ANGLE,
+            'relative_size_of_ellipse': self.RELATIVE_ELLIPSE_SIZE,
+        }
+
+    def __getitem__(self, item):
+        return self.mapping[item]
+
+    def __contains__(self, item):
+        return item in self.mapping
+
+
+class MinimumValues(Values):
+    MAIN_RANGE = 0.0
+    PERPENDICULAR_RANGE = 0.0
+    VERTICAL_RANGE = 0.0
+    AZIMUTH_ANGLE_ANISOTROPY = 0.0
+    DIP_ANGLE = 0.0
+    POWER = 1.0
+    RELATIVE_STD_DEV = 0.0
+    AZIMUTH_ANGLE_DEPOSITIONAL = 0.0
+    STACKING_ANGLE = 0.0
+    CURVATURE = 0.0
+    MIGRATION_ANGLE = -90.0
+    RELATIVE_ELLIPSE_SIZE = 0.0
+
+
+class MaximumValues(Values):
+    MAIN_RANGE = float('inf')
+    PERPENDICULAR_RANGE = float('inf')
+    VERTICAL_RANGE = float('inf')
+    AZIMUTH_ANGLE_ANISOTROPY = 360.0
+    DIP_ANGLE = 90.0
+    POWER = 2.0
+    RELATIVE_STD_DEV = float('inf')
+    AZIMUTH_ANGLE_DEPOSITIONAL = 360.0
+    STACKING_ANGLE = 90.0
+    CURVATURE = float('inf')
+    MIGRATION_ANGLE = 90.0
+    RELATIVE_ELLIPSE_SIZE = float('inf')

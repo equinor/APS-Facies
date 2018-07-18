@@ -1,7 +1,7 @@
 <template>
   <div>
     <facies-table
-      :raw-data="availableFacies"
+      :row-data="availableFacies"
       @grid-api-ready="setGridApi"
     />
     <div>
@@ -21,7 +21,7 @@
 <script>
 import FaciesTable from 'Components/table/FaciesTable'
 
-import { forceRefresh } from '@/utils/grid'
+import { forceRefresh } from 'Utils/grid'
 
 // TODO: Ensure change of color is done as a commit / action
 // Look for onRow/Data/CellChanged
@@ -90,7 +90,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

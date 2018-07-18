@@ -48,7 +48,12 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
 
     for i in range(len(zoneNames)):
         tag = 'ZoneName'
-        attribute = {'number': str(i + 1), 'nLayers': str(nLayersPerZone[i]), 'start': str(startLayerPerZone[i]), 'end': str(endLayerPerZone[i])}
+        attribute = {
+            'number': str(i + 1),
+            'nLayers': str(nLayersPerZone[i]),
+            'start': str(startLayerPerZone[i]),
+            'end': str(endLayerPerZone[i])
+        }
         name = zoneNames[i]
         zNameObj = Element(tag, attribute)
         zNameObj.text = ' ' + name.strip() + ' '

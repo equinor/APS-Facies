@@ -189,6 +189,10 @@ def run_previewer(
     [
         nxFromGrid, nyFromGrid, _, _, simBoxXsize, simBoxYsize, _, _, azimuthGridOrientation
     ] = rmsData.getGridSize()
+    if not 0.0 <= azimuthGridOrientation <= 360.0:
+        azimuthGridOrientation = azimuthGridOrientation % 360.0
+
+
     nzFromGrid = rmsData.getNumberOfLayersInZone(preview_zone_number)
     nx = int(nxFromGrid)
     ny = int(nyFromGrid)
@@ -270,8 +274,10 @@ def run_previewer(
     # truncObject.writeContentsInDataStructure()
 
     # simulate gauss fields
-    nxPreview, nyPreview, nzPreview = preview_size
-    print('nxPreview, nyPreview, nzPreview ({},{},{}): '.format(nxPreview, nyPreview, nzPreview))
+    nx_preview, ny_preview, nz_preview = preview_size
+    if debug_level >= Debug.VERBOSE:
+        print('Debug output: nxPreview, nyPreview, nzPreview ({},{},{}): '.format(nx_preview, ny_preview, nz_preview))
+        print('Debug output: azimuthGridOrientation: ' + str(azimuthGridOrientation))
     gauss_field_items = zoneModel.simGaussFieldWithTrendAndTransform(
         lengths, preview_size, azimuthGridOrientation, preview_cross_section
     )
@@ -286,7 +292,7 @@ def run_previewer(
         x0 = 0.0
         y0 = 0.0
         if debug_level >= Debug.VERBOSE:
-            print('Write 2D simulated gauss fields:')
+            print('Debug output: Write 2D simulated gauss fields:')
             for gaussian_field in gauss_field_items:
                 file_name = gaussian_field.name + '_' + preview_cross_section.type.name + '.dat'
                 writeFileRTF(file_name, gaussian_field.field, grid_dimensions, increments, x0, y0, debug_level=debug_level)
@@ -360,11 +366,11 @@ def run_previewer(
     if preview_scale and (cross_section == 'IK' or cross_section == 'JK'):
         text += '  Vertical scale: ' + str(preview_scale)
     if cross_section == 'IJ':
-        text += '  Cross section for K = ' + str(preview_cross_section.relative_position * nzPreview)
+        text += '  Cross section for K = ' + str(preview_cross_section.relative_position * nz_preview)
     elif cross_section == 'IK':
-        text += '  Cross section for J = ' + str(preview_cross_section.relative_position * nyPreview)
+        text += '  Cross section for J = ' + str(preview_cross_section.relative_position * ny_preview)
     else:
-        text += '  Cross section for I = ' + str(preview_cross_section.relative_position * nxPreview)
+        text += '  Cross section for I = ' + str(preview_cross_section.relative_position * nx_preview)
 
     fig.text(0.50, 0.98, text, ha='center')
     for i in range(nFacies):

@@ -2,32 +2,34 @@
 # -*- coding: utf-8 -*-
 # Python3 script to update APS model file from global IPL include file
 from src.algorithms.APSModel import APSModel
-from src.utils.constants.simple import Debug, VariogramType, TrendType
+from src.utils.constants.simple import Debug
 from src.utils.roxar.fmu_tags import get_list_of_aps_uncertainty_parameters, set_selected_as_fmu_updatable
 from src.utils.methods import get_run_parameters
 """
-    Description: This script uses Roxar API to read RMS table with parameters. The parameter names are specified using the 
-                 RMS uncertainty functionality related to workflows, and uses the functionality 'Additional uncertainties' to 
-                 add parameters  that is to be assigned values in the RMS uncertainty setup. NOTE: A requirement is that the
-                 naming convention that is adopted for FMU taggable variables in APS model files is used. This means that 
-                 the naming of the parameters must follow the same rules as the name of the 'tagget' variables that 
-                 is to be updated by FMU. If other names are used, they will be ignored and no updates of the model file will happen.
+Description:
+    This script uses Roxar API to read RMS table with parameters. The parameter names are specified using the
+    RMS uncertainty functionality related to workflows, and uses the functionality 'Additional uncertainties' to
+    add parameters  that is to be assigned values in the RMS uncertainty setup. NOTE: A requirement is that the
+    naming convention that is adopted for FMU taggable variables in APS model files is used. This means that
+    the naming of the parameters must follow the same rules as the name of the 'tagged' variables that
+    is to be updated by FMU. If other names are used, they will be ignored and no updates of the model file will happen.
 
-    Example: Assume you want to use the RMS uncertainty module to update MainRange parameter for Gauss field GRF04 in zone number 2 and region number 4. 
-             The naming convention is then to use the variable name: APS_2_4_GF_GRF04_RESIDUAL_MAINRANGE   
-             The following must be done for the APS model to be updated:
-             1. This variable name is used in the RMS uncertainty setup by using 'Additional uncertainties'. 
-             2. A probability distribution is specified for this variable in the uncertainty setup panel and a RMS table is created. 
-             3. The input to the updateAPSModelFromUncertainty script is the name of the RMS uncertainty table containing the generated values for the APS parameter 
-                and a list which in this example contain one variable name, the name 'APS_2_4_GF_GRF04_RESIDUAL_MAINRANGE'.
-             4. The input APS mode must have the attribute  kw="APS_2_4_GF_GRF04_RESIDUAL_MAINRANGE" for the xml keyword for the parameter 
-                in the model file. (We also call this attribute a FMU tag).
-                Usually the parameters in the model file to be updated is defined in the APSGUI as FMU tagged variable. 
-                It is also possible to tag the parameter manually by editing the APS model file or use a script to do that. 
+Example:
+    Assume you want to use the RMS uncertainty module to update MainRange parameter for Gauss field GRF04 in zone number 2 and region number 4.
+    The naming convention is then to use the variable name: APS_2_4_GF_GRF04_RESIDUAL_MAINRANGE
+    The following must be done for the APS model to be updated:
+    1. This variable name is used in the RMS uncertainty setup by using 'Additional uncertainties'.
+    2. A probability distribution is specified for this variable in the uncertainty setup panel and a RMS table is created.
+    3. The input to the updateAPSModelFromUncertainty script is the name of the RMS uncertainty table containing the generated values for the APS parameter
+       and a list which in this example contain one variable name, the name 'APS_2_4_GF_GRF04_RESIDUAL_MAINRANGE'.
+    4. The input APS mode must have the attribute  kw="APS_2_4_GF_GRF04_RESIDUAL_MAINRANGE" for the xml keyword for the parameter
+       in the model file. (We also call this attribute a FMU tag).
+       Usually the parameters in the model file to be updated is defined in the APSGUI as FMU tagged variable.
+       It is also possible to tag the parameter manually by editing the APS model file or use a script to do that.
 """
 
 
-def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_model_file, 
+def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_model_file,
                                       write_output_file_with_parameter_names=False, debug_level=Debug.OFF):
     """ Script that get values for specified parameter names from a RMS uncertainty table with parameters and updates an APS model file.
         Input: project - The global variable project from Roxar API.
@@ -36,7 +38,6 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
                realisation_number - Which project realisation number in RMS is to be used.
                input_aps_model_file - Name of APS model file
                output_aps_model_file - Name of updated APS model file
-
     """
     # Read model file to get workflow name
     apsModel = APSModel(input_aps_model_file)
@@ -47,15 +48,14 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
         output_file_with_parameter_names = None
 
     # Create empty APSModel object
-    apsModel = None
     apsModel = APSModel()
     # Read model file and get parameter values from rms table and update values in xml tree but no data
     # is put into APSModel data structure but instead an updated XML data tree is returned.
 
     # Get current realisation
-    realisation_number =  project.current_realisation
+    realisation_number = project.current_realisation
 
-    # Get uncertainty variables defined for the specified workflow which is specific for APS 
+    # Get uncertainty variables defined for the specified workflow which is specific for APS
     # The parameter name must start with APS_ and follow the standard for FMU tagged variables for APS
     uncertainty_variable_names = get_list_of_aps_uncertainty_parameters(project, workflow_name)
     debug_level = Debug.ON
@@ -65,32 +65,37 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
             print(s)
         print('')
     # Tag all relevant parameters as FMU updatable and write out a new model file containing the tags
-    set_selected_as_fmu_updatable(input_aps_model_file, output_aps_model_file,  
+    set_selected_as_fmu_updatable(input_aps_model_file, output_aps_model_file,
                                   uncertainty_variable_names, output_file_with_parameter_names)
 
     # Read the values of the tagged variables from RMS table corresponding to the specified workflow
-    # Use the tagged model file and update this file with new values and write it out again, 
+    # Use the tagged model file and update this file with new values and write it out again,
     # now with updated values for the tagged parameters
-    eTree = apsModel.updateXMLModelFile(modelFileName=output_aps_model_file, parameterFileName=None,
-                                        project=project, 
-                                        workflow_name=workflow_name,
-                                        uncertainty_variable_names=uncertainty_variable_names, 
-                                        realisation_number=realisation_number, 
-                                        debug_level=debug_level)
+    eTree = apsModel.updateXMLModelFile(
+        modelFileName=output_aps_model_file,
+        parameterFileName=None,
+        project=project,
+        workflow_name=workflow_name,
+        uncertainty_variable_names=uncertainty_variable_names,
+        realisation_number=realisation_number,
+        debug_level=debug_level
+    )
 
     # Write the updated XML tree for the model parameters to a new file
     apsModel.writeModelFromXMLRoot(eTree, output_aps_model_file)
+
 
 # -------  Main ----------------
 def run(roxar=None, project=None, **kwargs):
     input_aps_model_file, _, _, _, debug_level = get_run_parameters(**kwargs)
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
-    write_output_file_with_parameter_names=False
+    write_output_file_with_parameter_names = False
     if debug_level >= Debug.ON:
         print('Update model file {} from RMS uncertainty table {]'.format(input_aps_model_file, workflow_name))
-        write_output_file_with_parameter_names=True
+        write_output_file_with_parameter_names = True
 
-    update_aps_model_from_uncertainty(project, input_aps_model_file,  output_aps_model_file, 
-                                      debug_level=debug_level)
+    update_aps_model_from_uncertainty(project, input_aps_model_file,  output_aps_model_file, debug_level=debug_level)
+
+
 if __name__ == '__main__':
     run()

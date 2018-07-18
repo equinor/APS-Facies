@@ -26,7 +26,7 @@ def run_main(
     # Read APS model
     print('- Read file: ' + model_file)
     apsModel = APSModel(model_file)
-    debug_level = apsModel.debug_level()
+    debug_level = apsModel.debug_level
 
     # Get grid dimensions
     gridModelName = apsModel.getGridModelName()

@@ -1,5 +1,5 @@
-import rms from '@/api/rms'
-import { promiseSimpleCommit, compareFacies, indexOfFacies } from '@/store/utils'
+import rms from 'Api/rms'
+import { promiseSimpleCommit, compareFacies, indexOfFacies } from 'Store/utils'
 
 export default {
   namespaced: true,
@@ -49,7 +49,7 @@ export default {
       state.current = currentFacies
     },
     REPLACE: (state, {index, facies}) => {
-      state.available[index] = facies
+      state.available[`${index}`] = facies
     },
     ADD: (state, facies) => {
       state.available.push(facies)

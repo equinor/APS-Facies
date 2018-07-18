@@ -1,38 +1,37 @@
 <template>
-  <div>
-    <zone-selection/>
+  <v-layout column>
+    <v-flex xs12>
+      <zone-selection/>
+    </v-flex>
     <v-layout
       v-if="canShowRegions"
       row
     >
-      <v-form>
-        <v-checkbox
-          v-model="useRegions"
-          label="Use regions?"
-        />
-        <!--TODO: Add selection of region parameter-->
-      </v-form>
+      <v-checkbox
+        v-model="useRegions"
+        label="Use regions?"
+      />
+      <!--TODO: Add selection of region parameter-->
       <choose-region-parameter
         :disabled="!useRegions"
       />
     </v-layout>
-    <div v-if="useRegions">
+    <div v-if="!!$store.state.parameters.region.selected">
       <selectable-table
-        :raw-data="availableRegions"
+        :row-data="availableRegions"
         :on-selection-changed="selectedRegions"
         :on-row-clicked="setCurrentRegion"
         header-name="Region"
         @grid-api-ready="setRegionGridApi"
       />
     </div>
-  </div>
+  </v-layout>
 </template>
 
 <script>
-import SelectableTable from '@/components/table/SelectableTable'
-import ZoneSelection from '@/components/selection/ZoneSelection'
-import ChooseRegionParameter from '@/components/selection/dropdown/ChooseRegionParameter'
-import { forceRefresh } from '@/utils/grid'
+import SelectableTable from 'Components/table/SelectableTable'
+import ZoneSelection from 'Components/selection/ZoneSelection'
+import ChooseRegionParameter from 'Components/selection/dropdown/ChooseRegionParameter'
 
 export default {
   components: {
@@ -50,10 +49,7 @@ export default {
 
   computed: {
     availableRegions () {
-      return this.$store.state.regions.available
-    },
-    availableZones () {
-      return this.$store.state.zones.available
+      return this.$store.getters.zone.regions.available
     },
     canShowRegions () {
       return !!this.$store.state.zones.current
@@ -67,21 +63,18 @@ export default {
     _dispatchCurrentSelected (event, action) {
       return this.$store.dispatch(action, event.data)
     },
-    selectedZones (event) {
-      this._dispatchSelectedRows(event, 'zones')
-    },
     selectedRegions (event) {
-      this._dispatchSelectedRows(event, 'regions')
+      return this.$store.dispatch('zones/regions/select', {zone: this.$store.state.zones.current, regions: event.api.getSelectedRows()})
     },
-    setCurrentZone (event) {
-      this._dispatchCurrentSelected(event, 'zones/current').then(() => {
-        if (this.useRegions) {
-          forceRefresh(this.gridApis.region, this.availableRegions)
-        }
-      })
-    },
+    // setCurrentZone (event) {
+    //   this._dispatchCurrentSelected(event, 'zones/current').then(() => {
+    //     if (this.useRegions) {
+    //       forceRefresh(this.gridApis.region, this.availableRegions)
+    //     }
+    //   })
+    // },
     setCurrentRegion (event) {
-      this._dispatchCurrentSelected(event, 'regions/current')
+      this._dispatchCurrentSelected(event, 'zones/regions/current')
     },
     setRegionGridApi (api) {
       this.gridApis.region = api
@@ -92,7 +85,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

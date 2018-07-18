@@ -17,7 +17,7 @@ def run():
     modelFileName = 'APS.xml'
     print('- Read file: ' + modelFileName)
     apsModel = APSModel(modelFileName)
-    debug_level = apsModel.debug_level()
+    debug_level = apsModel.debug_level
     horizons = project.horizons
     allZoneModels = apsModel.getAllZoneModels()
     for key, zoneModel in allZoneModels.items():

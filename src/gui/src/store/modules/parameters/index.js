@@ -1,7 +1,8 @@
-import zone from '@/store/modules/parameters/zone'
-import region from '@/store/modules/parameters/region'
-import blockedWell from '@/store/modules/parameters/blockedWell'
-import blockedWellLog from '@/store/modules/parameters/blockedWellLog'
+import zone from 'Store/modules/parameters/zone'
+import region from 'Store/modules/parameters/region'
+import blockedWell from 'Store/modules/parameters/blockedWell'
+import blockedWellLog from 'Store/modules/parameters/blockedWellLog'
+import rmsTrend from 'Store/modules/parameters/rmsTrend'
 
 export default {
   namespaced: true,
@@ -11,6 +12,7 @@ export default {
     region,
     blockedWell,
     blockedWellLog,
+    rmsTrend,
   },
   actions: {},
   mutations: {},

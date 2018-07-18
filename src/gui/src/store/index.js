@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import gridModels from '@/store/modules/gridModels'
-import zones from '@/store/modules/zones'
-import regions from '@/store/modules/regions'
-import facies from '@/store/modules/facies'
-import parameters from '@/store/modules/parameters'
+import gridModels from 'Store/modules/gridModels'
+import zones from 'Store/modules/zones'
+import facies from 'Store/modules/facies'
+import gaussianRandomFields from 'Store/modules/gaussianRandomFields'
+import parameters from 'Store/modules/parameters'
+import constants from 'Store/modules/constants'
 
 Vue.use(Vuex)
 
@@ -17,9 +18,10 @@ export default new Vuex.Store({
   modules: {
     gridModels,
     zones,
-    regions,
     facies,
+    gaussianRandomFields,
     parameters,
+    constants,
   },
 
   actions: {
@@ -34,10 +36,10 @@ export default new Vuex.Store({
       return state.gridModels.current
     },
     zone: (state) => {
-      return state.zones.current
+      return state.zones.available[`${state.zones.current}`]
     },
-    region: (state) => {
-      return state.regions.current
+    region: (state, getters) => {
+      // return getters.zone ? getters.zone.regions.current : null
     },
     facies: (state) => {
       return state.facies.current
@@ -53,6 +55,9 @@ export default new Vuex.Store({
     },
     blockedWellLogParameter: (state) => {
       return state.parameters.blockedWellLog.selected
+    },
+    field: (state) => (id) => {
+      return state.gaussianRandomFields.fields[`${id}`]
     }
   },
 })

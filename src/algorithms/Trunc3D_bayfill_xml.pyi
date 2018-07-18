@@ -33,8 +33,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
         alphaFieldNameForBackGroundFacies: List[str],
         sf_value: float,
         sf_name: Optional[str],
+        sf_fmu_updatable: bool,
         ysf: float,
+        ysf_fmu_updatable: bool,
         sbhd: float,
+        sbhd_fmu_updatable: bool,
         useConstTruncParam: int,
         debug_level: Debug = Debug.OFF
     ) -> None: ...

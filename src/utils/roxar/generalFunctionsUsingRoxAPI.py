@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import numpy as np
+from warnings import warn
+
 import roxar
 
 from src.utils.constants.simple import Debug
@@ -19,7 +21,7 @@ from src.utils.constants.simple import Debug
 # isOK                         = setDiscrete3DParameterValues(gridModel, parameterName, values, codeNames, realNumber=0, isShared=True, debug_level=1)
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information, print_error
-from src.utils.roxar.grid_model import get3DParameter, modifySelectedGridCells, combineCodeNames
+from src.utils.roxar.grid_model import get3DParameter, modifySelectedGridCells, update_code_names
 
 
 def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList,
@@ -88,7 +90,7 @@ def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNu
             p.set_values(v, realNumber)
 
         # Get all active cell values
-        p = get3DParameter(gridModel, parameterName, debug_level)
+        p = get3DParameter(gridModel, parameterName)
         if p.is_empty(realNumber):
             text = ' Specified parameter: ' + parameterName + ' is empty for realisation ' + str(realNumber)
             raise_error(functionName, text)
@@ -377,7 +379,7 @@ def setContinuous3DParameterValuesInZoneRegion(
     return True
 
 
-def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDefinedCells=0, cellIndexDefined=None,
+def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cellIndexDefined=None,
                                       realNumber=0, isShared=True, setInitialValues=False, debug_level=Debug.OFF):
     """
     Description:
@@ -399,7 +401,6 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
                          Only the values in this vector corresponding to the selected cells defined by cellIndexDefined will be used.
                          The values are of type continuous.
 
-    :param nDefinedCells: Length of the list cellIndexDefined
     :param cellIndexDefined: A list with cell indices in the array of all active cells for the grid model. The subset of cells
                              defined by this index array are the grid cells to be updated.
     :param realNumber: Realisation number counted from 0 for the 3D parameter.
@@ -409,14 +410,13 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
     """
 
     functionName = updateContinuous3DParameterValues.__name__
-    if cellIndexDefined is not None:
-        assert nDefinedCells == len(cellIndexDefined)
+    nDefinedCells = len(cellIndexDefined)
 
     grid3D = gridModel.get_grid(realNumber)
     nActiveCells = grid3D.defined_cell_count
     if nActiveCells != len(inputValues):
         raise ValueError('Mismatch in number of active cells={} and length of input array with values = {}'
-                         ''.format(str(nActiveCells), str(len(inputValues)))
+                         ''.format(nActiveCells, len(inputValues))
                          )
 
     # Check if specified grid model exists and is not empty
@@ -468,10 +468,9 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, nDe
         # Parameter exist, but check if it is empty or not
         currentValues = np.zeros(nActiveCells, np.float32)
         p = gridModel.properties[parameterName]
-        if not p.is_empty(realNumber):
+        if not p.is_empty(realNumber) and not setInitialValues:
             # Check if the parameter is to updated instead of being initialized to 0
-            if not setInitialValues:
-                currentValues = p.get_values(realNumber)
+            currentValues = p.get_values(realNumber)
 
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         # Using vector operations for numpy vector:
@@ -556,7 +555,7 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
             p.set_values(v, realNumber)
 
         # Get all active cell values
-        p = get3DParameter(gridModel, parameterName, debug_level)
+        p = get3DParameter(gridModel, parameterName)
         if p.is_empty(realNumber):
             raise ValueError(
                 'In function {0}.  Some inconsistency in program.'
@@ -567,38 +566,22 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
         p.set_values(currentValues, realNumber)
 
         p.set_shared(isShared, realNumber)
-        originalCodeNames = p.code_names.copy()
+        code_names = p.code_names
 
-        codeValList = originalCodeNames.keys()
-        for code in codeValList:
-            if originalCodeNames[code] == '':
-                print('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
-                originalCodeNames[code] = str(code)
+        for code in code_names.keys():
+            if code_names[code] == '':
+                warn('There exists facies codes without facies names. Set facies name equal to facies code')
+                code_names[code] = str(code)
 
         # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones
         print('originalCodeNames:')
-        print(originalCodeNames)
+        print(code_names)
         print('codeNames:')
         print(codeNames)
-        updatedCodeNames, err = combineCodeNames(originalCodeNames, codeNames)
-        if err == 1:
-            text1 = ' Try to define a new facies code with a facies name that already is used define a new facies name\n'
-            text2 = ' for a facies code that already exists when updating facies realisation\n'
-            print_error(functionName, '\n' + text1 + text2)
-            print('Original facies codes from RMS project:')
-            print(repr(originalCodeNames))
-            print('New facies codes specified in current APS model:')
-            print(repr(codeNames))
-
-            raise ValueError(
-                'In function {}. Try to define a new facies code with a facies name that already is used.\n'
-                'or define a new facies name for a facies code that already exists when updating facies realisation'
-                ''.format(functionName)
-            )
-
         # Update the facies table in the discrete 3D parameter
-        p.code_names = updatedCodeNames
+        update_code_names(code_names, codeNames)
+
         if debug_level >= Debug.VERY_VERBOSE:
             text = 'Updated facies table: '
             print_debug_information(functionName, text)
@@ -725,35 +708,20 @@ def updateDiscrete3DParameterValues(
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
 
-        originalCodeNames = p.code_names.copy()
+        code_names = p.code_names
 
         # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones
-        updatedCodeNames, err = combineCodeNames(originalCodeNames, faciesTable)
-        if err == 1:
-            text1 = ' Try to define a new facies code with a facies name that already is used or define a new facies name\n'
-            text2 = ' for a facies code that already exists when updating facies realisation\n'
-            print_error(functionName, '\n' + text1 + text2)
-            print('Original facies codes from RMS project:')
-            print(repr(originalCodeNames))
-            print('New facies codes specified in current APS model:')
-            print(repr(faciesTable))
-
-            raise ValueError(
-                'In function {}. Try to define a new facies code with a facies name that already is used.\n'
-                'or define a new facies name for a facies code that already exists when updating facies realisation'
-                ''.format(functionName)
-            )
+        # Update the facies table in the discrete 3D parameter
+        update_code_names(code_names, faciesTable)
 
         if setDefaultFaciesNameWhenUndefined:
-            codeValList = updatedCodeNames.keys()
+            codeValList = code_names.keys()
             for code in codeValList:
-                if updatedCodeNames[code] == '':
+                if code_names[code] == '':
                     print('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
-                    updatedCodeNames[code] = str(code)
+                    code_names[code] = str(code)
 
-        # Update the facies table in the discrete 3D parameter
-        p.code_names = updatedCodeNames
         if debug_level >= Debug.VERY_VERBOSE:
             text = 'Updated facies table: '
             print_debug_information(functionName, text)
