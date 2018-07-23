@@ -5,7 +5,8 @@
   "author": "Sindre Nistad <snis@equinor.com>",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve:gui": "vue-cli-service serve",
+    "serve:api": "make -C ../.. run-rms.uipy-mock",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
