@@ -59,6 +59,7 @@ PIPROT := $(RUN) piprot
 PYLINT := $(RUN) pylint
 SAFETY_CHECK := $(PIPENV) check
 PYREVERSE := $(RUN) pyreverse
+FLASK := $(RUN) flask
 
 VUE_APP_APS_PROTOCOL := http
 VUE_APP_APS_SERVER := localhost
@@ -410,7 +411,7 @@ javascript-linting:
 	$(YARN) lint
 
 web-start: package.json
-	$(YARN) serve --port=$(VUE_APP_GUI_PORT) \
+	$(YARN) serve --port=$(VUE_APP_APS_GUI_PORT) \
 	              --host=$(VUE_APP_APS_SERVER)
 
 web-e2e:
@@ -438,8 +439,8 @@ run-rms.uipy-mock:
 	FLASK_APP=$(SOURCE_DIR)/api/app.py \
 	FLASK_ENV=development \
 	APS_MODE='develop' \
-	flask run --port=$(VUE_APP_API_PORT) \
-	         --host=$(VUE_APP_APS_SERVER)
+	$(FLASK) run --port=$(VUE_APP_APS_API_PORT) \
+	             --host=$(VUE_APP_APS_SERVER)
 
 # TODO: Add versioning to the plugin file
 deploy:
