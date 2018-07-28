@@ -36,6 +36,7 @@ class BaseDefineFacies:
         self.__facies_parameter_name = None
         self.__probability_parameter_name_prefix = None
         self.__selected_zone_numbers = None
+        self.__use_const_prob_from_vol_fraction = None
 
     @property
     def project(self):
@@ -52,6 +53,11 @@ class BaseDefineFacies:
 
     @xml_property('ProbParamNamePrefix')
     def probability_parameter_name_prefix(self): pass
+
+    @xml_property('UseConstantProbFromVolumeFraction')
+    def use_const_prob_from_vol_fraction(self): pass
+
+
 
     @property
     def selected_zone_numbers(self):

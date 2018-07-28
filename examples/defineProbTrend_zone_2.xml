@@ -5,7 +5,7 @@
     <ZoneParamName>  Zone </ZoneParamName>
     <FaciesParamName>  DiscreteParam </FaciesParamName>
     <ProbParamNamePrefix>  ProbTrend  </ProbParamNamePrefix>
-    <SelectedZones> 1 </SelectedZones>
+    <SelectedZones> 2 </SelectedZones>
     <UseConstantProbFromVolumeFraction> 0 </UseConstantProbFromVolumeFraction>
     <CondProbMatrix>
       <Line>  F1  A  0.90 </Line>

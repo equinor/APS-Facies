@@ -1353,15 +1353,20 @@ Background facies:
             key = tuple(keyList)
         return key
 
+
     @staticmethod
-    def _makeRoundOfFaciesProb(faciesProb, keyResolution):
+    def _makeRoundOfFaciesProb(faciesProb, resolution):
+        '''Calculate round off of facies probabilities and adjusted 
+           so that the round off values also are close to normalised '''
         faciesProbNew = []
         sumProb = 0.0
-        dValue = 1.0/keyResolution
+        if resolution <= 0:
+            raise ValueError('Must have resolution (integer number) larger than 1, typical 100)')
+        dValue = 1.0/resolution
         maxProb = 0.0
         for i in range(len(faciesProb)):
             p = faciesProb[i]
-            pNew = int(keyResolution * p + 0.5) / keyResolution
+            pNew = int(resolution * p + 0.5) / resolution
             sumProb += pNew
             # if minProb > pNew:
             #    minProb = pNew

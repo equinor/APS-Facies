@@ -5,21 +5,21 @@
     <ZoneParamName>  Zone </ZoneParamName>
     <FaciesParamName>  DiscreteParam </FaciesParamName>
     <ProbParamNamePrefix>  ProbTrend  </ProbParamNamePrefix>
-    <SelectedZones> 1 </SelectedZones>
+    <SelectedZones> 6 </SelectedZones>
     <UseConstantProbFromVolumeFraction> 0 </UseConstantProbFromVolumeFraction>
     <CondProbMatrix>
-      <Line>  F1  A  0.90 </Line>
+      <Line>  F1  A  0.85 </Line>
       <Line>  F2  A  0.05 </Line>
       <Line>  F3  A  0.0 </Line>
       <Line>  F4  A  0.0 </Line>
       <Line>  F5  A  0.05 </Line>
-      <Line>  F6  A  0.0 </Line>
+      <Line>  F6  A  0.05 </Line>
 
       <Line>  F1  B  0.025 </Line>
-      <Line>  F2  B  0.90 </Line>
+      <Line>  F2  B  0.85 </Line>
       <Line>  F3  B  0.025 </Line>
       <Line>  F4  B  0.0 </Line>
-      <Line>  F5  B  0.0 </Line>
+      <Line>  F5  B  0.05 </Line>
       <Line>  F6  B  0.05 </Line>
 
       <Line>  F1  C  0.0 </Line>
@@ -32,9 +32,9 @@
       <Line>  F1  D  0.0 </Line>
       <Line>  F2  D  0.0 </Line>
       <Line>  F3  D  0.05 </Line>
-      <Line>  F4  D  0.95 </Line>
-      <Line>  F5  D  0.0 </Line>
-      <Line>  F6  D  0.0 </Line>
+      <Line>  F4  D  0.90 </Line>
+      <Line>  F5  D  0.025 </Line>
+      <Line>  F6  D  0.025 </Line>
     </CondProbMatrix>
   </FaciesProbTrend>
 </APS_prob_trend>
