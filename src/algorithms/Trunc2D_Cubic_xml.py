@@ -113,8 +113,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
 
+        self.__roundOffResolution = 209
+
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 keyResolution=209, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
+                 debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
         """
         This constructor can either create a new object by reading the information
         from an XML tree or it can create an empty data structure for such an object.
@@ -166,11 +168,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                          debug_level, modelFileName, nGaussFieldsInBackGroundModel)
         self.__setEmpty()
-        self._keyResolution = keyResolution
-        if keyResolution == 0:
-            self._useMemoization = False
-        else:
-            self._useMemoization = True
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
@@ -474,41 +471,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Check if facies probability is close to 1.0. In this case do not calculate truncation map.
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
-        # faciesProb = self._setMinimumFaciesProb(faciesProb)
-        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self._keyResolution)
-        # print('FaciesProbRoundOff: {}'.format(str(faciesProbRoundOff)))
-        # print('KeyResolution in setTruncRule: ' + str(self._keyResolution))
+        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__roundOffResolution)
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
-        area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
 
-        if self._useMemoization:
-            key = self._makeKey(faciesProb, self._keyResolution)
+        area = self._modifyBackgroundFaciesArea(faciesProb)
 
-            if key not in self._memo:
-                self._nCalc += 1
-
-                # Call methods specific for this truncation rule with corrected area due to overprint facies
-                self.__calcProbForEachNode(area)
-                self.__calcThresholdValues()
-
-                truncStructure = copy.deepcopy(self.__truncStructure)
-                polygons = copy.deepcopy(self.__polygons)
-                fIndxPerPolygon = copy.deepcopy(self.__fIndxPerPolygon)
-                truncationObject = [
-                    truncStructure, self.__useLevel2, self.__useLevel3, self.__nPoly(), polygons, fIndxPerPolygon
-                ]
-
-                self._memo[key] = truncationObject
-            else:
-                self._nLookup += 1
-                truncationObject = self._memo[key]
-                self.__truncStructure = truncationObject[0]
-                self.__useLevel2 = truncationObject[1]
-                self.__useLevel3 = truncationObject[2]
-                # self.__nPoly = truncationObject[3]
-                self.__polygons = truncationObject[4]
-                self.__fIndxPerPolygon = truncationObject[5]
+        # Call methods specific for this truncation rule with corrected area due to overprint facies
+        self.__calcProbForEachNode(area)
+        self.__calcThresholdValues()
 
         if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             self.__writeDataForTruncRule()
@@ -721,7 +692,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
             if self._faciesIsDetermined[fIndx] == 1:
                 faciesCode = self._faciesCode[fIndx]
                 return faciesCode, fIndx
-
         directionL1 = self.__truncStructure[self.__node_index['direction']]
         nodeListL1 = self.__truncStructure[self.__node_index['list of nodes']]
         if directionL1 == 'H':
@@ -1096,7 +1066,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         return fIndxList
 
     def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-                   truncStructureList, overlayGroups=None, keyResolution = 209, debug_level=Debug.OFF):
+                   truncStructureList, overlayGroups=None, debug_level=Debug.OFF):
         """
         TODO: Update documentation
 
@@ -1119,7 +1089,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         # Initialize base class variables
         super()._setEmpty()
-        self._keyResolution = keyResolution
 
         # Initialize this class variables
         self.__setEmpty()

@@ -1007,6 +1007,14 @@ class APSGaussModel:
         else:
             return trend.use_trend, trend.model, trend.relative_std_dev.value, trend.relative_std_dev.updatable
 
+    def hasTrendModel(self, gfName):
+        trend = self.getTrendItem(gfName)
+        if trend is None:
+            return False
+        elif not trend.use_trend:
+            return False
+        return True
+
     def getTrendModelObject(self, gfName):
         item = self.getTrendItem(gfName)
         if item is None:

@@ -85,7 +85,7 @@ def run(roxar=None, project=None, **kwargs):
     # Read APS model
     print('- Read file: ' + model_file)
     aps_model = APSModel(model_file)
-    debug_level = aps_model.debug_level()
+    debug_level = aps_model.debug_level
     grid_model_name = aps_model.getGridModelName()
 
     writeXMLFileGridDimensions(project, grid_model_name, output_rms_data_file, debug_level)

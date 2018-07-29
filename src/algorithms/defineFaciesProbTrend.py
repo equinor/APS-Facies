@@ -1,3 +1,4 @@
+#!/bin/env python
 # -*- coding: utf-8 -*-
 
 import copy
@@ -43,6 +44,13 @@ class DefineFaciesProb(BaseDefineFacies):
 
     def calculate_facies_probability_parameter(self, debug_level=Debug.OFF):
         # Get grid model and grid model parameter
+        self.debug_level = Debug.ON
+        use_const_prob_trend = int(self.use_const_prob_from_vol_fraction)
+        if self.debug_level >= Debug.ON:
+            if  use_const_prob_trend == 0:
+                print('Calculate probability cubes having trends in each zone defined by the RMS discrete 3D parameter input')
+            else:
+                print('Calculate probability cubes which have constant values in each zone as average probability (volume fraction)')
         eps = 0.00001
         real_number = 0
         grid_model = self.project.grid_models[self.grid_model_name]
@@ -96,6 +104,7 @@ class DefineFaciesProb(BaseDefineFacies):
         if self.debug_level >= Debug.ON:
             print('Start calculate new probabilities for selected zones for each specified facies')
         sum_probability_values = np.zeros(len(zone_values), np.float32)
+
         for f in range(num_facies):
             facies_name = facies_names[f]
             if self.debug_level >= Debug.ON:
@@ -114,11 +123,29 @@ class DefineFaciesProb(BaseDefineFacies):
             for zone_number in self.selected_zone_numbers:
                 # Filter out cells with selected zone numbers
                 [num_defined_cells, cell_index] = getCellValuesFilteredOnDiscreteParam(zone_number + 1, zone_values)
-                for i in range(num_defined_cells):
-                    index = cell_index[i]
-                    code = facies_real_values[index]
-                    p_index = prob_index[code]
-                    probability_values[index] = probabilities[f, p_index]
+                if use_const_prob_trend == 0:
+                    for i in range(num_defined_cells):
+                        index = cell_index[i]
+                        code = facies_real_values[index]
+                        p_index = prob_index[code]
+                        probability_values[index] = probabilities[f, p_index]
+                else:
+                    sum_facies_prob = 0
+                    for i in range(num_defined_cells):
+                        index = cell_index[i]
+                        code = facies_real_values[index]
+                        p_index = prob_index[code]
+                        weight = probabilities[f, p_index]
+                        sum_facies_prob = sum_facies_prob +  weight
+                    prob_average = sum_facies_prob/num_defined_cells
+                    if self.debug_level >= Debug.ON:
+                        print('Average probability (volume fraction) for facies {} zone {}  is: {}'
+                              ''.format(facies_name, zone_number+1, prob_average))
+
+                    for i in range(num_defined_cells):
+                        index = cell_index[i]
+                        probability_values[index] = prob_average
+
 
             # Calculate cumulative prob of all previously processed facies including current
             sum_probability_values += probability_values

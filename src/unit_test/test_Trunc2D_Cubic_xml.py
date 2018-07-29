@@ -41,7 +41,7 @@ def interpretXMLModelFileAndWrite(
 
     # Create truncation rule object from input data, not read from file
     truncRuleOut = Trunc2D_Cubic(
-        trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone, keyResolution, debug_level=debug_level,
+        trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level=debug_level,
         modelFileName=modelFileName
     )
     # Create and write XML tree
@@ -73,7 +73,7 @@ def createTrunc(
     truncRuleOut = Trunc2D_Cubic()
     truncRuleOut.initialize(
         mainFaciesTable, faciesInZone, gaussFieldsInZone, gaussFieldsForBGFacies,
-        truncStructure, overlayGroups, keyResolution, debug_level
+        truncStructure, overlayGroups, debug_level
     )
 
     # Build an xml tree with the data and write it to file

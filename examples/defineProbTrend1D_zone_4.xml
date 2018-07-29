@@ -5,8 +5,8 @@
     <ZoneParamName>  Zone </ZoneParamName>
     <FaciesParamName>  DiscreteParam </FaciesParamName>
     <ProbParamNamePrefix>  ProbTrend  </ProbParamNamePrefix>
-    <SelectedZones> 1  </SelectedZones>-->
-    <ZoneDepositionAzimuthValues> 35   </ZoneDepositionAzimuthValues>
+    <SelectedZones> 4  </SelectedZones>
+    <ZoneDepositionAzimuthValues> 125   </ZoneDepositionAzimuthValues>
     <!-- Either one azimuth value used for all zones or one value per zone -->
   </FaciesProbMapDepTrend>
 </APS_prob_trend>

@@ -28,7 +28,8 @@ from src.utils.methods import get_model_file_name
 functionName = 'APS_main.py'
 
 # Tolerance
-eps = 0.000001
+eps = 0.0001
+tolerance_of_probability_normalisation = 0.01
 
 
 def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0, debug_level=Debug.OFF):
@@ -235,16 +236,26 @@ def checkAndNormaliseProb(
                 text = '--- Normalise probability cubes.'
                 print(text)
 
-            zeroProbSum = 0
+            unacceptable_prob_normalisation = 0
+            min_acceptable_prob_sum = 1.0 - tolerance_of_probability_normalisation
+            max_acceptable_prob_sum = 1.0 + tolerance_of_probability_normalisation
+            largest_prob_sum = 0.0
+            smallest_prob_sum = 1.0
             for i in range(nDefinedCells):
-                if psum[i] < 10 * eps:
-                    zeroProbSum += 1
+                if smallest_prob_sum > psum[i]:
+                    smallest_prob_sum = psum[i]
+                if largest_prob_sum < psum[i]:
+                    largest_prob_sum = psum[i]
 
-            if zeroProbSum > 0:
+                if not (min_acceptable_prob_sum <= psum[i] <= max_acceptable_prob_sum):
+                    unacceptable_prob_normalisation += 1
+
+            if unacceptable_prob_normalisation > 0:
                 raise ValueError(
-                    'Error: Sum of input facies probabilities is less than: {} in: {} cells.\n'
-                    '       Cannot normalize probabilities. Check your input!'
-                    ''.format(10 * eps, zeroProbSum)
+                    'Sum of input facies probabilities is either less than: {} or larger than: {} in: {} cells.\n'
+                    'Input probabilities should be normalised and the sum close to 1.0 but found a minimum value of: {} and a maximum value of: {}\n'
+                    'Check input probabilities!'
+                    ''.format(min_acceptable_prob_sum, max_acceptable_prob_sum, unacceptable_prob_normalisation, smallest_prob_sum, largest_prob_sum)
                 )
             for f in range(nFacies):
                 p = probDefined[f]  # Points to array of probabilities
@@ -289,7 +300,7 @@ def run(roxar=None, project=None, **kwargs):
 
     print('- Read file: ' + modelFileName)
     apsModel = APSModel(modelFileName)
-    debug_level = apsModel.debug_level()
+    debug_level = apsModel.debug_level
     rmsProjectName = apsModel.getRMSProjectName()
     gridModelName = apsModel.getGridModelName()
     gridModel = project.grid_models[gridModelName]
@@ -416,16 +427,18 @@ def run(roxar=None, project=None, **kwargs):
                 GFAllAlpha.append([gfNameTrans, alpha])
 
                 # Allocate space for trend
-                gfNameTrend = gfName + '_trend'
-                if isParameterDefinedWithValuesInRMS(gridModel, gfNameTrend, realNumber):
-                    if debug_level >= Debug.VERBOSE:
-                        print('--- Get trend parameter: {} which will be updated'.format(gfNameTrend))
-                    trend = getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
-                else:
-                    if debug_level >= Debug.VERBOSE:
-                        print('--- Create trend parameter: {}'.format(gfNameTrend))
-                    trend = np.zeros(len(values), np.float32)
-                GFAllTrendValues.append([gfNameTrend, trend])
+                # Check if it is necessary to get 3D RMS parameter containing trend parameter (used for QC purpose)
+                if zoneModel.hasTrendModel(gfName):
+                    gfNameTrend = gfName + '_trend'
+                    if isParameterDefinedWithValuesInRMS(gridModel, gfNameTrend, realNumber):
+                        if debug_level >= Debug.VERBOSE:
+                            print('--- Get trend parameter: {} which will be updated'.format(gfNameTrend))
+                            trend = getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
+                    else:
+                        if debug_level >= Debug.VERBOSE:
+                            print('--- Create trend parameter: {}'.format(gfNameTrend))
+                        trend = np.zeros(len(values), np.float32)
+                    GFAllTrendValues.append([gfNameTrend, trend])
 
             else:
                 if debug_level >= Debug.VERY_VERBOSE:
@@ -455,11 +468,12 @@ def run(roxar=None, project=None, **kwargs):
                     indx = j
                     break
             values = GFAllValues[indx][VAL]
-            trend = GFAllTrendValues[indx][VAL]
-            # Add trend to gaussian residual fields
-            useTrend, trendModelObj, relStdDev, relStdDevFMU = zoneModel.getTrendModel(gfName)
+            if zoneModel.hasTrendModel(gfName):
+                trend = GFAllTrendValues[indx][VAL]
+                # Add trend to gaussian residual fields
+                useTrend, trendModelObj, relStdDev, relStdDevFMU = zoneModel.getTrendModel(gfName)
 
-            if useTrend:
+#            if useTrend:
                 if debug_level >= Debug.VERBOSE:
                     trendTypeName = trendModelObj.type.name
                     if useRegions:

@@ -254,7 +254,6 @@ class APSZoneModel:
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.truncation_rule = Trunc2D_Cubic(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                            self.__keyResolution,
                             self.debug_level, modelFileName, self.zone_number
                         )
                     else:
@@ -360,6 +359,9 @@ class APSZoneModel:
 
     def getSimBoxThickness(self):
         return self.__simBoxThickness
+
+    def hasTrendModel(self, gfName):
+        return self.__gaussModelObject.hasTrendModel(gfName)
 
     def getTruncationParam(self, gridModel, realNumber):
         if not self.truncation_rule.useConstTruncModelParam():
@@ -562,7 +564,7 @@ class APSZoneModel:
                 if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
                         truncRuleName = self.truncation_rule.getClassName()
-                        if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
+                        if truncRuleName == 'Trunc2D_Angle':
                             nCalc = self.truncation_rule.getNCalcTruncMap()
                             nLookup = self.truncation_rule.getNLookupTruncMap()
                             print('--- Calculate facies for cell number: {}    New truncation cubes: {}    Re-used truncation cubes: {}'
@@ -600,7 +602,7 @@ class APSZoneModel:
 
         if self.__debug_level >= Debug.VERBOSE:
             truncRuleName = self.truncation_rule.getClassName()
-            if truncRuleName == 'Trunc2D_Angle' or truncRuleName == 'Trunc2D_Cubic':
+            if truncRuleName == 'Trunc2D_Angle':
                 nCalc = self.truncation_rule.getNCalcTruncMap()
                 nLookup = self.truncation_rule.getNLookupTruncMap()
                 print(
@@ -608,10 +610,11 @@ class APSZoneModel:
                     '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
                     ''.format(truncRuleName, str(nCalc), str(nLookup))
                 )
-                if truncRuleName == 'Trunc2D_Angle':
-                    nCount = self.truncation_rule.getNCountShiftAlpha()
-                    print('Debug output: Small shifts of values for orientation of facies boundary lines are done {} number of times for numerical reasons.'
-                          ''.format(str(nCount)))
+
+                nCount = self.truncation_rule.getNCountShiftAlpha()
+                print('--- In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
+                      '    are done {} number of times for numerical reasons.'
+                      ''.format(truncRuleName, str(nCount)))
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
