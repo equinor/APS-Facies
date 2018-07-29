@@ -30,6 +30,7 @@ functionName = 'APS_main.py'
 # Tolerance
 eps = 0.0001
 tolerance_of_probability_normalisation = 0.01
+write_trends_to_rms_for_QC_purpose = True
 
 
 def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0, debug_level=Debug.OFF):
@@ -53,23 +54,19 @@ def findDefinedCells(zoneValues, zoneNumber, regionValues=None,  regionNumber=0,
     nDefinedCells = 0
     cellIndexDefined = []
     nCellsTotal = len(zoneValues)
-    if regionNumber > 0:
+    if regionValues is not None:
         if len(zoneValues) != len(regionValues):
-            raise ValueError('Zone number: {}  Region number: {}.\n'
-                          'Number of grid cells with this zone number: {}\n'
-                          'Number of grid cells with this region number: {}'
-                          ''.format(str(zoneNumber), str(regionNumber), str(len(zoneValues)), str(len(regionValues))))
+            raise ValueError('Number of grid cells in zone parameter is {}  and in region parameter is {}\n'
+                             'They must be of same length.'
+                             ''.format(str(len(zoneValues)), str(len(regionValues))))
 
     y1_defined = []
-    if regionNumber > 0:
+    if regionValues is not None:
         # Use both zone number and region number to define selected cells
         for i in range(nCellsTotal):
             if zoneValues[i] == zoneNumber and regionValues[i] == regionNumber:
                 cellIndexDefined.append(i)
                 nDefinedCells += 1
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: In findDefinedCells: Number of active cells for current (zoneNumber, regionNumber)=({},{}): {}'
-                  ''.format(str(zoneNumber), str(regionNumber), str(nDefinedCells)))
 
     else:
         # Only zone number is used to define selected cells
@@ -324,17 +321,19 @@ def run(roxar=None, project=None, **kwargs):
     if useRegions:
         if debug_level >= Debug.VERBOSE:
             print('--- Get RMS region parameter: ' + regionParamName + ' from RMS project ' + rmsProjectName)
-        regionValues = getContinuous3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
-
+        if isParameterDefinedWithValuesInRMS(gridModel, regionParamName, realNumber):
+            [regionValues, _] = getDiscrete3DParameterValues(gridModel, regionParamName, realNumber, debug_level)
+        else:
+            raise ValueError('Specified region parameter: ' + regionParamName + ' is not defined or empty')
     # Get or initialize array for facies realisation
     nCellsTotal = len(zoneValues)
     faciesReal = np.zeros(nCellsTotal, np.uint16)
-
+    codeNamesForInput = {}
     # Check if specified facies realization exists and get it if so.
     if isParameterDefinedWithValuesInRMS(gridModel, resultParamName, realNumber):
         if debug_level >= Debug.VERBOSE:
             print('--- Get RMS facies parameter which will be updated: {} from RMS project: {}'.format(resultParamName, rmsProjectName))
-        [faciesReal, _] = getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
+        [faciesReal, codeNamesForInput] = getDiscrete3DParameterValues(gridModel, resultParamName, realNumber, debug_level)
     else:
         if debug_level >= Debug.VERBOSE:
             print('--- Facies parameter: {}  for the result will be created in the RMS project: {}'.format(resultParamName, rmsProjectName))
@@ -426,17 +425,22 @@ def run(roxar=None, project=None, **kwargs):
                     alpha = np.zeros(len(values), np.float32)
                 GFAllAlpha.append([gfNameTrans, alpha])
 
-                # Allocate space for trend
-                # Check if it is necessary to get 3D RMS parameter containing trend parameter (used for QC purpose)
-                if zoneModel.hasTrendModel(gfName):
+                if write_trends_to_rms_for_QC_purpose:
+                    # Allocate space for possible trends to write to RMS regardless of whether trend is used or not in the model
+                    # Note that the trend parameter read contains all grid cell values for all zones so even if sone zones don't use
+                    # this trend, others may use it. It will be read only once for the whole grid anyway.
                     gfNameTrend = gfName + '_trend'
+
+                    # Read 3D RMS parameter containing trend parameter if this parameter exist. It will be updated if any trend is created.
+                    # Alternatively if it does not exist in RMS, create space for trend as RMS 3D parameters.
+                    # Note the RMS 3D parameter for trend values is create only for QC purpose only. 
+                    if debug_level >= Debug.VERBOSE:
+                        print('--- Read and write calculated trends to RMS for QC purpose. ')
                     if isParameterDefinedWithValuesInRMS(gridModel, gfNameTrend, realNumber):
                         if debug_level >= Debug.VERBOSE:
-                            print('--- Get trend parameter: {} which will be updated'.format(gfNameTrend))
-                            trend = getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
+                            print('--- Get RMS parameter: {} which may be updated for QC purpose if trends are used'.format(gfNameTrend))
+                        trend = getContinuous3DParameterValues(gridModel, gfNameTrend, realNumber, debug_level)
                     else:
-                        if debug_level >= Debug.VERBOSE:
-                            print('--- Create trend parameter: {}'.format(gfNameTrend))
                         trend = np.zeros(len(values), np.float32)
                     GFAllTrendValues.append([gfNameTrend, trend])
 
@@ -468,12 +472,13 @@ def run(roxar=None, project=None, **kwargs):
                     indx = j
                     break
             values = GFAllValues[indx][VAL]
+
             if zoneModel.hasTrendModel(gfName):
-                trend = GFAllTrendValues[indx][VAL]
                 # Add trend to gaussian residual fields
+                trend = GFAllTrendValues[indx][VAL]
+
                 useTrend, trendModelObj, relStdDev, relStdDevFMU = zoneModel.getTrendModel(gfName)
 
-#            if useTrend:
                 if debug_level >= Debug.VERBOSE:
                     trendTypeName = trendModelObj.type.name
                     if useRegions:
@@ -507,28 +512,30 @@ def run(roxar=None, project=None, **kwargs):
                     print('Debug output: Residual min,max        : ' + str(sigma * residualValues.min()) + ' ' + str(sigma * residualValues.max()))
                     print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
 
-                # Write back to RMS project the untransformed gaussian values with trend for the zone
-                gfNamesUntransformed = gfName + '_untransf'
-                updateContinuous3DParameterValues(
-                    gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
-                    realNumber, isShared=False, setInitialValues=False,debug_level=debug_level
-                )
-                trend = GFAllTrendValues[indx][VAL]
-                # update array trend for the selected grid cells
-                trend[cellIndexDefined] = trendValues
-                GFAllTrendValues[indx][VAL] = trend
-                gfNamesTrend = GFAllTrendValues[indx][NAME]
+                if write_trends_to_rms_for_QC_purpose:
+                    # Write back to RMS project the untransformed gaussian values with trend for the zone
+                    gfNamesUntransformed = gfName + '_untransf'
+                    updateContinuous3DParameterValues(
+                        gridModel, gfNamesUntransformed, values, nDefinedCells, cellIndexDefined,
+                        realNumber, isShared=False, setInitialValues=False,debug_level=debug_level
+                     )
+                    trend = GFAllTrendValues[indx][VAL]
+                
+                    # update array trend for the selected grid cells
+                    trend[cellIndexDefined] = trendValues
+                    GFAllTrendValues[indx][VAL] = trend
+                    gfNamesTrend = GFAllTrendValues[indx][NAME]
 
-                # Write back to RMS project the trend values for the zone
-                updateContinuous3DParameterValues(
-                    gridModel, gfNamesTrend, trend, nDefinedCells, cellIndexDefined,
-                    realNumber, isShared=False, setInitialValues=False, debug_level=debug_level
-                )
-                if debug_level >= Debug.VERBOSE:
-                    if useRegions:
-                        print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrend, str(zoneNumber), str(regionNumber)))
-                    else:
-                        print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrend, str(zoneNumber)))
+                    # Write back to RMS project the trend values for the zone
+                    updateContinuous3DParameterValues(
+                        gridModel, gfNamesTrend, trend, nDefinedCells, cellIndexDefined,
+                        realNumber, isShared=False, setInitialValues=False, debug_level=debug_level
+                    )
+                    if debug_level >= Debug.VERBOSE:
+                        if useRegions:
+                            print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(gfNamesTrend, str(zoneNumber), str(regionNumber)))
+                        else:
+                            print('--- Create or update parameter: {} for zone number: {}'.format(gfNamesTrend, str(zoneNumber)))
 
             alpha = GFAllAlpha[indx][VAL]
             # Update alpha for current zone
@@ -717,7 +724,9 @@ def run(roxar=None, project=None, **kwargs):
 
     # Write/update facies realisation
     mainFaciesTable = apsModel.getMainFaciesTable()
-    codeNames = {}
+    print(codeNamesForInput)
+    codeNames = codeNamesForInput.copy()
+#    print(codeNames)
     for i in range(len(allFaciesNamesModelled)):
         fName = allFaciesNamesModelled[i]
         fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
