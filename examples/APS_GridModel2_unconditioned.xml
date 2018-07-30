@@ -25,7 +25,7 @@
     <GridModelName>GridModel2</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
     <ResultFaciesParamName>FaciesReal_unconditioned</ResultFaciesParamName>
-    <PrintInfo>3</PrintInfo>
+    <PrintInfo>2</PrintInfo>
     <SeedFile>seed.dat</SeedFile>
     <WriteSeeds>yes</WriteSeeds>
     <MainFaciesTable>

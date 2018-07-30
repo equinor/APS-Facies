@@ -3,6 +3,7 @@
 from xml.etree.ElementTree import Element
 
 import numpy as np
+from collections import OrderedDict
 
 from src.algorithms.Trend3D import (
     Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear, Trend3D_rms_param,
@@ -941,7 +942,10 @@ class APSGaussModel:
 
     @property
     def used_gaussian_field_names(self):
-        return [name for name in self._gaussian_models]
+        # Require that this function always return the values in the same order since the ordering 
+        # is used to define list indices  
+        sorted_dictionary = OrderedDict(sorted(self._gaussian_models.items()))
+        return [name for name in sorted_dictionary]
 
     def findGaussFieldParameterItem(self, gaussFieldName):
         try:
@@ -1011,9 +1015,8 @@ class APSGaussModel:
         trend = self.getTrendItem(gfName)
         if trend is None:
             return False
-        elif not trend.use_trend:
-            return False
-        return True
+        else:
+            return trend.use_trend
 
     def getTrendModelObject(self, gfName):
         item = self.getTrendItem(gfName)
@@ -1152,7 +1155,6 @@ class APSGaussModel:
             range1_fmu_updatable, range2_fmu_updatable, range3_fmu_updatable, azimuth_fmu_updatable,
             dip_fmu_updatable, power_fmu_updatable
         ])
-
         self._gaussian_models[gf_name].trend = self.create_gauss_field_trend(
             gf_name, use_trend, trend_model_obj, rel_std_dev, rel_std_dev_fmu_updatable
         )
