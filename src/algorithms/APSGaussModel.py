@@ -708,7 +708,7 @@ class APSGaussModel:
             'relative_std_dev': 'RelStdDev',
         }
 
-        self._gaussian_models = {}
+        self._gaussian_models = OrderedDict()
 
         self.__class_name = self.__class__.__name__
         self.__debug_level = Debug.OFF
@@ -942,8 +942,8 @@ class APSGaussModel:
 
     @property
     def used_gaussian_field_names(self):
-        # Require that this function always return the values in the same order since the ordering 
-        # is used to define list indices  
+        # Require that this function always return the values in the same order since the ordering
+        # is used to define list indices
         sorted_dictionary = OrderedDict(sorted(self._gaussian_models.items()))
         return [name for name in sorted_dictionary]
 
