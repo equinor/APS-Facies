@@ -1,4 +1,24 @@
 #!/bin/env python
+'''
+Description:
+            This script can be used to create new facies log from a specified (original) facies log for blocked wells. 
+            The new facies logs can be defined by combining facies existing in the original logs such that two or more facies in the original facies log
+            are combined into one new facies in the new log.
+
+Input:      Name of grid model,
+            name of blocked well set,
+            name of original facies log,
+            python dictionary code_names for original facies log. The format is a python dictionary with code as key and name as value.
+            name of new facies log,
+            python dictionary code_names for new combined facies log. The format is a python dictionary with code as key and name as value.
+            python dictionary with facies names from original facies log as key and for each key the name of the facies name from the new facies log is specified.
+
+            Comments: The dictionary associating original facies names with new facies names define which original facies names are combined 
+            and what the combined facies name is.
+
+Output:     New blocked well facies log with combined facies (re-defined) facies.
+
+''' 
 import roxar
 import numpy as np
 from src.utils.roxar.modifyBlockedWellData import createCombinedFaciesLogForBlockedWells
