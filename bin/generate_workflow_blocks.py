@@ -109,6 +109,7 @@ def get_workflows():
         'bin': [
             'APS_main',
             'updateAPSModelFromFMU',
+            'updateAPSModelFromUncertaintyTable',
         ],
         'depricated': [
             'APS_make_gauss_IPL',

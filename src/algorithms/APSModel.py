@@ -441,7 +441,9 @@ class APSModel:
             print('------------ End reading model file in APSModel ------------------')
             print('')
 
-    def updateXMLModelFile(self, modelFileName, parameterFileName, debug_level=Debug.OFF):
+    def updateXMLModelFile(self, modelFileName=None, parameterFileName=None,
+                           project=None, workflow_name=None, uncertainty_variable_names=None,
+                           realisation_number=0, debug_level=Debug.OFF):
         # Read XML model file
         tree = ET.parse(modelFileName)
         root = tree.getroot()
@@ -464,7 +466,14 @@ class APSModel:
                 print('{0:30} {1:20}  {2:10}'.format(keyWord, tag, value))
 
         # Read keywords from parameterFileName (Global IPL include file with variables updated by FMU/ERT)
-        keywordsRead = self.__readParamFromFile(parameterFileName, debug_level)
+        if parameterFileName != None:
+            keywordsRead = self.__readParamFromFile(parameterFileName, debug_level)
+        else:
+            assert project
+            assert workflow_name
+            assert uncertainty_variable_names
+            keywordsRead = self.__getParamFromRMSTable(project, workflow_name, uncertainty_variable_names,
+                                                       realisation_number)
         # keywordsRead = [name,value]
 
         # Set new values
@@ -573,6 +582,7 @@ class APSModel:
 
         return keywordsFMU
 
+
     # ----- Properties ----
     @property
     def debug_level(self):
@@ -635,6 +645,23 @@ class APSModel:
     @preview_cross_section_relative_position.setter
     def preview_cross_section_relative_position(self, relative_position):
         self.__preview_cross_section.relative_position = relative_position
+
+    @staticmethod
+    def __getParamFromRMSTable(project, workflow_name, uncertainty_variable_names, realisation_number, debug_level=Debug.OFF):
+        """ Get values from RMS uncertainty table"""
+        import roxar
+        wf = project.workflows[workflow_name]
+        rms_table_name = wf.report_table_name
+        parametersUncertainty = []
+        for i in range(len(uncertainty_variable_names)):
+            name = uncertainty_variable_names[i]
+            value = project.workflows.get_uncertainty(table_name=rms_table_name,
+                                                      uncertainty_name=name,
+                                                      realisation=realisation_number)
+            item = [name, str(value)]
+            parametersUncertainty.append(item)
+        return parametersUncertainty
+
 
     #  ---- Get functions -----
     def getXmlTree(self):
@@ -756,6 +783,9 @@ class APSModel:
 
     def getRMSProjectName(self):
         return copy.copy(self.__rmsProjectName)
+
+    def getRMSWorkflowName(self):
+        return copy.copy(self.__rmsWorkflowName)
 
     # ----- Set functions -----
     def getAllProbParam(self):
@@ -933,7 +963,7 @@ class APSModel:
         rootReformatted = prettify(root)
         return rootReformatted
 
-    def writeModel(self, modelFileName, attributesFileName, debug_level=Debug.OFF):
+    def writeModel(self, modelFileName, attributesFileName=None, debug_level=Debug.OFF):
         fmu_attributes = list()
         top = Element('APSModel', {'version': self.__apsModelVersion})
         rootUpdated = self.XMLAddElement(top, fmu_attributes)
@@ -941,11 +971,12 @@ class APSModel:
             file.write(rootUpdated)
         if debug_level >= Debug.VERY_VERBOSE:
             print('Write file: ' + modelFileName)
-        with open(attributesFileName, 'w') as attsFile:
-            for fmu_attribute in fmu_attributes:
-                attsFile.write("%s\n" % fmu_attribute)
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('Write file: ' + attributesFileName)
+        if attributesFileName is not None:
+            with open(attributesFileName, 'w') as attsFile:
+                for fmu_attribute in fmu_attributes:
+                    attsFile.write("%s\n" % fmu_attribute)
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('Write file: ' + attributesFileName)
 
     @staticmethod
     def writeModelFromXMLRoot(inputETree, outputModelFileName):

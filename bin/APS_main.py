@@ -724,9 +724,8 @@ def run(roxar=None, project=None, **kwargs):
 
     # Write/update facies realisation
     mainFaciesTable = apsModel.getMainFaciesTable()
-    print(codeNamesForInput)
+
     codeNames = codeNamesForInput.copy()
-#    print(codeNames)
     for i in range(len(allFaciesNamesModelled)):
         fName = allFaciesNamesModelled[i]
         fCode = mainFaciesTable.getFaciesCodeForFaciesName(fName)
