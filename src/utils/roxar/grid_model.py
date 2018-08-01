@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-
+from roxar import GridPropertyType
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
@@ -199,13 +199,16 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
     """
     function_name = getDiscrete3DParameterValues.__name__
     param = get3DParameter(grid_model, parameter_name, debug_level)
+    # Check that parameter is defined and not empty
     if param.is_empty(realization_number):
         text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number)
         raise_error(function_name, text)
-
+    # Check that parameter_name refer to a discrete parameter
+    if param.type  is not GridPropertyType.discrete:
+        text = ' Specified parameter: ' + parameter_name + ' is not a discrete parametertype'
+        raise_error(function_name, text)
     active_cell_values = param.get_values(realization_number)
     code_names = param.code_names
-
     code_val_list = code_names.keys()
     for code in code_val_list:
         if code_names[code] == '':
