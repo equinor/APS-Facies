@@ -7,11 +7,20 @@ from src.utils.parsing import parse_signature
 from src.api.ui import call
 
 
+def _get_environ(variable_name, default,  divider=':'):
+    return environ.get(variable_name, default).split(divider)
+
+
 def _get_client_url():
-    protocol = environ.get('VUE_APP_APS_PROTOCOL', 'http')
-    server = environ.get('VUE_APP_APS_SERVER', 'localhost')
-    port = environ.get('VUE_APP_APS_GUI_PORT', '8080')
-    return '{protocol}://{server}:{port}'.format(protocol=protocol, server=server, port=port)
+    protocols = _get_environ('VUE_APP_APS_PROTOCOL', 'http:https')
+    servers = _get_environ('VUE_APP_APS_SERVER', 'localhost')
+    ports = _get_environ('VUE_APP_APS_GUI_PORT', '8080')
+    return [
+        '{protocol}://{server}:{port}'.format(protocol=protocol, server=server, port=port)
+        for protocol in protocols
+        for server in servers
+        for port in ports
+    ]
 
 
 app = Flask(__name__)

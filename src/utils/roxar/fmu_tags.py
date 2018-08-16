@@ -5,6 +5,7 @@
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, VariogramType, TrendType
 
+
 def get_list_of_aps_uncertainty_parameters(project, workflow_name):
     wf = project.workflows[workflow_name]
     param_list = []
@@ -14,6 +15,7 @@ def get_list_of_aps_uncertainty_parameters(project, workflow_name):
         if words[0] == 'APS':
             param_list.append(param.name)
     return param_list
+
 
 def read_selected_fmu_variables(input_selected_FMU_variable_file):
     fmu_variables = []
@@ -37,7 +39,7 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
                 keyword2 = words[5]
                 if keyword2 == 'RESIDUAL':
                     var_name = words[6].strip()
-                elif  keyword2 == 'TREND':
+                elif keyword2 == 'TREND':
                     var_name = words[6].strip()
                 elif keyword2 == 'POLYNUMBER':
                     poly_number = int(words[6])
@@ -47,11 +49,12 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
                 elif keyword2 == 'TREND':
                     fmu_var = ['TREND', zone, region, gauss_name, var_name]
                 elif keyword == 'TRUNC' and keyword2 == 'POLYNUMBER':
-                    fmu_var = ['TRUNC', zone, region, trunc_name, poly_number] 
+                    fmu_var = ['TRUNC', zone, region, trunc_name, poly_number]
                 elif keyword == 'TRUNC':
                     fmu_var = ['TRUNC', zone, region, trunc_name, var_name]
                 fmu_variables.append(fmu_var)
     return fmu_variables
+
 
 def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variable_file=None):
     aps_model = APSModel(input_model_file)
@@ -97,7 +100,7 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
                         trendModelObj.setOriginYFmuUpdatable(value)
                         trendModelObj.setMigrationAngleFmuUpdatable(value)
                         trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(value)
-                    
+
             trunc_rule = zoneModel.getTruncRule()
             if trunc_rule._className == 'Trunc2D_Angle':
                 nPoly = trunc_rule.getNumberOfPolygonsInTruncationMap()
@@ -109,7 +112,6 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
                 trunc_rule.setSBHDParamFmuUpdatable(value)
 
     aps_model.writeModel(output_model_file, attributesFileName=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
-
 
 
 def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_variables, tagged_variable_file=None):
@@ -210,7 +212,7 @@ def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_
                 if trunc_name == 'NONCUBIC':
                     # setAnglwFMUUpdatable take polygon_number counting from 0
                     trunc_rule.setAngleFmuUpdatable(poly_number-1, value)
-                elif  trunc_name == 'BAYFILL':
+                elif trunc_name == 'BAYFILL':
                     if var_name == 'SF':
                         trunc_rule.setSFParamFmuUpdatable(value)
                     elif  var_name == 'YSF':

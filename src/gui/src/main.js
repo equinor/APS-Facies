@@ -7,6 +7,7 @@ import store from './store'
 import './plugins/vuetify'
 import './plugins/ag-grid'
 import './plugins/axios'
+import './plugins/validation'
 
 Vue.config.productionTip = process.env.NODE_ENV !== 'production'
 

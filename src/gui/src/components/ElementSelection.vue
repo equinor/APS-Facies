@@ -3,7 +3,7 @@
     align-start
     justify-start
   >
-    <GridModel/>
+    <grid-model/>
     <div v-if="currentGridModel">
       <zone-parameter/>
       <div v-if="zoneParameter">
@@ -32,10 +32,10 @@
 </template>
 
 <script>
-import ZoneRegion from '@/components/selection/ZoneRegionSelection'
-import GridModel from '@/components/selection/dropdown/ChooseGridModel'
-import ZoneParameter from '@/components/selection/dropdown/ChooseZoneParameter'
-import FaciesSelection from '@/components/selection/FaciesSelection'
+import ZoneRegion from 'Components/selection/ZoneRegionSelection'
+import GridModel from 'Components/selection/dropdown/ChooseGridModel'
+import ZoneParameter from 'Components/selection/dropdown/ChooseZoneParameter'
+import FaciesSelection from 'Components/selection/FaciesSelection'
 import ChooseBlockedWellParameter from 'Components/selection/dropdown/ChooseBlockedWellParameter'
 import ChooseBlockedWellLogParameter from 'Components/selection/dropdown/ChooseBlockedWellLogParameter'
 
@@ -56,12 +56,6 @@ export default {
   },
 
   computed: {
-    panels () {
-      return [
-        { panel: ZoneRegion, name: 'Zones' },
-        { panel: FaciesSelection, name: 'Facies' }
-      ]
-    },
     hasWellParameters () {
       return this.$store.state.parameters.blockedWell.available.length > 0
     },
@@ -82,7 +76,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

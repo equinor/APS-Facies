@@ -1,0 +1,39 @@
+<template>
+  <storable-numeric-field
+    :grf-id="grfId"
+    :property-type="propertyType"
+    :ranges="ranges"
+    :sub-property-type="coordinateAxis"
+    :label="shownLabel"
+    :arrow-step="arrowStep"
+    allow-negative
+    trend
+  />
+</template>
+
+<script>
+import VueTypes from 'vue-types'
+import StorableNumericField from 'Components/specification/StorableNumericField'
+import { notEmpty } from 'Utils'
+
+export default {
+  components: {
+    StorableNumericField
+  },
+
+  props: {
+    grfId: VueTypes.string.isRequired,
+    originType: VueTypes.string.isRequired,
+    coordinateAxis: VueTypes.string.isRequired,
+    label: VueTypes.string.def(''),
+  },
+
+  computed: {
+    propertyType () { return 'origin' },
+    isRelative () { return this.originType === 'RELATIVE' },
+    ranges () { return this.isRelative ? {min: 0, max: 1} : {min: -Infinity, max: Infinity} },
+    shownLabel () { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() },
+    arrowStep () { return this.isRelative ? 0.001 : 1 },
+  },
+}
+</script>

@@ -3,8 +3,10 @@
 from functools import wraps
 from xml.dom import minidom
 from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import Element
 
 from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected
+from src.utils.constants.simple import OriginType
 
 
 def prettify(elem, indent="  ", new_line="\n"):
@@ -15,6 +17,29 @@ def prettify(elem, indent="  ", new_line="\n"):
 
 def minify(elem):
     return prettify(elem, indent="", new_line="")
+
+
+def get_fmu_value_from_xml(xml_tree, keyword, _type=float, **kwargs):
+    types = {
+        float: getFloatCommand,
+        int: getIntCommand,
+    }
+    value = types[_type](xml_tree, keyword, **kwargs)
+    fmu_updatable = isFMUUpdatable(xml_tree, keyword)
+    return value, fmu_updatable
+
+
+def get_origin_type_from_model_file(trend_rule_xml, model_file_name):
+    origin_type = getTextCommand(
+        trend_rule_xml, 'origintype', modelFile=model_file_name, required=False, defaultText="Relative"
+    )
+    origin_type = origin_type.strip('\"\'')
+    if origin_type.lower() == 'relative':
+        return OriginType.RELATIVE
+    elif origin_type.lower() == 'absolute':
+        return OriginType.ABSOLUTE
+    else:
+        raise ValueError('Error: Origin type must be Relative or Absolute.')
 
 
 def getKeyword(parent, keyword, parentKeyword='', modelFile=None, required=True):
@@ -122,6 +147,16 @@ def isFMUUpdatable(parent, keyword):
         if kwAttribute is not None:
             return True
     return False
+
+
+def fmu_xml_element(tag, value, updatable, zone_number, region_number, gf_name, fmu_creator, fmu_attributes):
+    obj = Element(tag)
+    obj.text = ' ' + str(value) + ' '
+    if updatable:
+        fmu_attribute = fmu_creator(tag, gf_name, zone_number, region_number)
+        fmu_attributes.append(fmu_attribute)
+        obj.attrib = dict(kw=fmu_attribute)
+    return obj
 
 
 def _coerce_none_to_integers(func):

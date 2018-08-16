@@ -5,47 +5,121 @@ from xml.etree.ElementTree import Element
 import numpy as np
 from collections import OrderedDict
 
+from src.algorithms.properties import (
+    make_ranged_property, make_trend_property, make_angle_property, make_lower_bounded_property, FmuProperty,
+    CrossSection
+)
 from src.algorithms.Trend3D import (
     Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear, Trend3D_rms_param,
 )
 from src.utils.checks import isVariogramTypeOK
-from src.utils.constants.simple import Debug, VariogramType, CrossSectionType
+from src.utils.constants.simple import (
+    Debug, VariogramType, CrossSectionType, MinimumValues, MaximumValues, TrendType,
+    Direction, OriginType,
+)
 from src.utils.simGauss2D_nrlib import simGaussField
 from src.utils.xmlUtils import (
-    getFloatCommand, getIntCommand, getKeyword, isFMUUpdatable,
-    createFMUvariableNameForResidual, createFMUvariableNameForTrend
+    getIntCommand, getKeyword, isFMUUpdatable, createFMUvariableNameForResidual,
+    createFMUvariableNameForTrend, get_fmu_value_from_xml,
 )
 
 # Dictionaries of legal value ranges for gauss field parameters
 from src.utils.records import VariogramRecord, SeedRecord, TrendRecord
 
-_minimum_value = {
-    'main': 0.0,
-    'perpendicular': 0.0,
-    'vertical': 0.0,
-    'azimuth': 0.0,
-    'dip': 0.0,
-    'power': 1.0,
-    'relative_std_dev': 0.0,
-}
 
-_maximum_value = {
-    'azimuth': 360.0,
-    'dip': 90.0,
-    'power': 2.0,
-}
+class Point3D(tuple):
+    def __new__(cls, **kwargs):
+        point = (kwargs['x'], kwargs['y'], kwargs['z'])
+        return super().__new__(cls, point)
+
+
+class GaussianFieldSimulationSettings:
+    __slots__ = '_cross_section', '_grid_azimuth', '_grid_size', '_simulation_box_size', '_seed'
+    # TODO: Fill in remaining data
+
+    def __init__(self, cross_section, grid_azimuth, grid_size, simulation_box_size, seed):
+        assert isinstance(cross_section, CrossSection)
+        assert 0 <= grid_azimuth <= 360
+        assert all([isinstance(coor, int) for coor in grid_size]) and len(grid_size) == 3
+        assert all([isinstance(coor, (float, int)) for coor in simulation_box_size]) and len(simulation_box_size) == 3
+        assert isinstance(seed, int)
+
+        self._cross_section = cross_section
+        self._grid_azimuth = grid_azimuth
+        self._grid_size = grid_size
+        self._simulation_box_size = simulation_box_size
+        self._seed = seed
+
+    @property
+    def cross_section(self):
+        return self._cross_section
+
+    @property
+    def grid_azimuth(self):
+        return self._grid_azimuth
+
+    @property
+    def grid_size(self):
+        return self._grid_size
+
+    @property
+    def simulation_box_size(self):
+        return self._simulation_box_size
+
+    @property
+    def seed(self):
+        return self._seed
+
+    @property
+    def dimensions(self):
+        grid_size = self.grid_size
+        mapping = {
+            CrossSectionType.IJ: (grid_size[0], grid_size[1]),
+            CrossSectionType.IK: (grid_size[0], grid_size[2]),
+            CrossSectionType.JK: (grid_size[1], grid_size[2]),
+        }
+        try:
+            return mapping[self.cross_section.type]
+        except KeyError:
+            raise NotImplementedError
+
+    def merge(self, cross_section=None, grid_azimuth=None, grid_size=None, simulation_box_size=None, seed=None):
+        if cross_section is None:
+            cross_section = self.cross_section
+        if grid_azimuth is None:
+            grid_azimuth = self.grid_azimuth
+        if grid_size is None:
+            grid_size = self.grid_size
+        if simulation_box_size is None:
+            simulation_box_size = self.simulation_box_size
+        if seed is None:
+            seed = self.seed
+        return GaussianFieldSimulationSettings(
+            cross_section=cross_section,
+            grid_azimuth=grid_azimuth,
+            grid_size=grid_size,
+            simulation_box_size=simulation_box_size,
+            seed=seed,
+        )
+
+    @classmethod
+    def from_dict(cls, **kwargs):
+        return cls(
+            cross_section=CrossSection.from_dict(**kwargs['crossSection']),
+            grid_azimuth=kwargs['gridAzimuth'],
+            grid_size=Point3D(**kwargs['gridSize']),
+            simulation_box_size=Point3D(**kwargs['simulationBox']),
+            seed=kwargs['seed']['value'],
+        )
 
 
 class GaussianFieldSimulation:
-    __slots__ = '_name', '_field', '_cross_section', '_grid_azimuth_angle', '_grid_size', '_simulation_box_size'
+    __slots__ = '_name', '_field', '_settings'
 
-    def __init__(self, name, field, cross_section, grid_azimuth_angle, grid_size, simulation_box_size):
+    def __init__(self, name, field, settings):
         self._name = name
         self._field = field
-        self._cross_section = cross_section
-        self._grid_azimuth_angle = grid_azimuth_angle
-        self._grid_size = grid_size
-        self._simulation_box_size = simulation_box_size
+        self._settings = settings
 
     @property
     def name(self):
@@ -56,39 +130,55 @@ class GaussianFieldSimulation:
         return self._field
 
     @property
-    def cross_section(self):
-        return self._cross_section
+    def settings(self):
+        return self._settings
 
     @property
-    def grid_azimuth_angle(self):
-        return self._grid_azimuth_angle
+    def cross_section(self):
+        return self._settings.cross_section
+
+    @property
+    def grid_azimuth(self):
+        return self._settings.grid_azimuth
 
     @property
     def grid_size(self):
-        return self._grid_size
+        return self._settings.grid_size
 
     @property
     def simulation_box_size(self):
-        return self._simulation_box_size
+        return self._settings.simulation_box_size
+
+    def field_as_matrix(self, grid_index_order='C'):
+        return np.reshape(self.field, self.settings.dimensions, grid_index_order)
 
 
 class GaussianField:
-    def __init__(self, name, variogram=None, trend=None, seed=0):
+    def __init__(self, name, variogram=None, trend=None, seed=None, settings=None):
         # TODO: Make sane default values for variogram and trend
         if trend is None:
             trend = Trend(name, use_trend=False)
+        if all([_ is None for _ in [seed, settings]]):
+            seed = 0
+        if all([_ is not None for _ in [seed, settings]]):
+            settings = settings.merge(seed=seed)
         self._name = name
         self._variogram = variogram
         self._trend = trend
         self._seed = seed
+        self._settings = settings
 
     @property
     def seed(self):
+        if self._seed is None:
+            return self._settings.seed
         return self._seed
 
     @seed.setter
     def seed(self, value):
         # TODO: This probably should not be done
+        if self.settings is not None:
+            self._settings = self.settings.merge(seed=value)
         self._seed = value
 
     @property
@@ -113,6 +203,16 @@ class GaussianField:
         # TODO: Verify
         self._trend = value
 
+    @property
+    def settings(self):
+        return self._settings
+
+    @settings.setter
+    def settings(self, value):
+        if not (isinstance(value, GaussianFieldSimulationSettings) or value is None):
+            raise TypeError('Settings must be of type "GaussianFieldSimulationSettings", or None')
+        self._settings = value
+
     def __getitem__(self, item):
         try:
             return getattr(self, item)
@@ -126,8 +226,13 @@ class GaussianField:
                 except AttributeError:
                     raise AttributeError("The Gaussian Field ('{}') has no attribute {}".format(self.name, item))
 
-    def _simulate(self, cross_section, grid_azimuth_angle, grid_size, simulation_box_size, debug_level=Debug.OFF):
-        grid_dimensions, sizes, projection, = _get_projection_parameters(cross_section.type, grid_size, simulation_box_size)
+    def _simulate(self, cross_section=None, grid_azimuth=None, grid_size=None, simulation_box_size=None, debug_level=Debug.OFF):
+        if self.settings is None:
+            settings = GaussianFieldSimulationSettings(cross_section, grid_azimuth, grid_size, simulation_box_size)
+        else:
+            settings = self.settings.merge(cross_section, grid_azimuth, grid_size, simulation_box_size)
+
+        grid_dimensions, sizes, projection, = _get_projection_parameters(settings.cross_section.type, settings.grid_size, settings.simulation_box_size)
         # Find data for specified Gauss field name
         seed_value = self.seed
         variogram_type = self.variogram.type
@@ -138,7 +243,7 @@ class GaussianField:
             print('Debug output: Simulate gauss field: ' + self.name)
             print('Debug output: VariogramType: ' + str(variogram_type))
             print('Debug output: Azimuth angle for Main range direction: ' + str(self.variogram.angles.azimuth))
-            print('Debug output: Azimuth angle for grid: ' + str(grid_azimuth_angle))
+            print('Debug output: Azimuth angle for grid: ' + str(settings.grid_azimuth))
             print('Debug output: Dip angle for Main range direction: ' + str(self.variogram.angles.dip))
 
             if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
@@ -146,7 +251,8 @@ class GaussianField:
 
             print('Debug output: Seed value: ' + str(seed_value))
         # Calculate 2D projection of the correlation ellipsoid
-        angle1, range1, angle2, range2 = self.variogram.calc_2d_variogram_from_3d_variogram(grid_azimuth_angle, projection, debug_level)
+        angle1, range1, angle2, range2 = self.variogram.calc_2d_variogram_from_3d_variogram(
+            settings.grid_azimuth, projection, debug_level)
         azimuth_variogram = angle1
         if debug_level >= Debug.VERY_VERBOSE:
             print(
@@ -174,7 +280,7 @@ class GaussianField:
             if debug_level >= Debug.VERBOSE:
                 print('    - Use Trend: {}'.format(trend_model.type.name))
             min_max_difference, average_trend, trend_field = trend_model.createTrendFor2DProjection(
-                simulation_box_size, grid_azimuth_angle, grid_size, cross_section.type, cross_section.relative_position
+                settings.simulation_box_size, settings.grid_azimuth, settings.grid_size, settings.cross_section
             )
             gauss_field_with_trend = _add_trend(
                 residual_field, trend_field, relative_std_dev, min_max_difference, average_trend, debug_level
@@ -184,139 +290,16 @@ class GaussianField:
         trans_field = _transform_empiric_distribution_to_uniform(gauss_field_with_trend, debug_level)
         return trans_field
 
-    def simulate(self, cross_section, grid_azimuth_angle, grid_size, simulation_box_size, debug_level=Debug.OFF):
+    def simulate(self, cross_section=None, grid_azimuth=None, grid_size=None, simulation_box_size=None, debug_level=Debug.OFF):
+        if self.settings is None:
+            self.settings = GaussianFieldSimulationSettings(cross_section, grid_azimuth, grid_size, simulation_box_size, self.seed)
+        else:
+            self.settings = self.settings.merge(cross_section, grid_azimuth)
         return GaussianFieldSimulation(
             name=self.name,
-            field=self._simulate(cross_section, grid_azimuth_angle, grid_size, simulation_box_size, debug_level),
-            cross_section=cross_section,
-            grid_azimuth_angle=grid_azimuth_angle,
-            grid_size=grid_size,
-            simulation_box_size=simulation_box_size,
+            field=self._simulate(),
+            settings=self.settings,
         )
-
-
-def _make_ranged_property(name, error_template, minimum=None, maximum=None, additional_validator=None, show_given_value=True):
-    if additional_validator is None:
-        def additional_validator(self, value):
-            return True
-    if minimum is None:
-        minimum = _minimum_value[name]
-    if maximum is None:
-        maximum = _maximum_value[name]
-
-    class Property:
-        __slots__ = '_' + name
-
-        def __init__(self):
-            setattr(self, '_' + name, None)
-
-        def get(self):
-            return getattr(self, '_' + name)
-
-        def set(self, value):
-            if not isinstance(value, FmuProperty):
-                try:
-                    updatable = getattr(self, '_' + name).updatable
-                except AttributeError:
-                    updatable = False
-                value = FmuProperty(value, updatable)
-            if minimum <= value.value <= maximum and additional_validator(self, value):
-                setattr(self, '_' + name, value)
-            else:
-                template = error_template
-                if show_given_value:
-                    template += '({value} was given)'
-                raise ValueError(
-                    template.format(name=name, min=minimum, max=maximum, value=value.value)
-                )
-    return property(fget=Property.get, fset=Property.set)
-
-
-def _make_simple_property(name, check, error_message):
-    class Property:
-        __slots__ = '_' + name
-
-        def __init__(self):
-            setattr(self, '_' + name, None)
-
-        def get(self):
-            return getattr(self, '_' + name)
-
-        def set(self, value):
-            if check(self, value):
-                setattr(self, '_' + name, value)
-            else:
-                raise ValueError(error_message)
-
-    return property(fget=Property.get, fset=Property.set)
-
-
-def _make_trend(name):
-    def is_model_and_rel_std_dev_set(self, value):
-        if value:
-            return self.model is not None and self.relative_std_dev is not None
-        return True
-    return _make_simple_property(name, is_model_and_rel_std_dev_set, 'While trend is used, a trend model MUST be given, and the relative std.dev. must be given')
-
-
-def _make_angle(name):
-    return _make_bounded_property(name, _minimum_value[name], _maximum_value[name], 'The {name} angle MUST be between {min}°, and {max}°.')
-
-
-def _make_bounded_property(name, minimum, maximum, error_template, additional_validator=None):
-    return _make_ranged_property(name, error_template, minimum, maximum, additional_validator)
-
-
-def _make_lower_bounded_property(name, additional_validator=None):
-    return _make_ranged_property(name, '{name} MUST be greater than (or equal to) 0', _minimum_value[name], float('inf'), additional_validator)
-
-
-class FmuProperty:
-    __slots__ = 'value', 'updatable'
-
-    def __init__(self, value, updatable=False):
-        # TODO: Ensure value is number, and updatable is boolean
-        self.value = value
-        self.updatable = updatable
-
-    def __str__(self):
-        return str(self.value)
-
-    def __repr__(self):
-        return '(' + str(self.value) + ', ' + str(self.updatable) + ')'
-
-
-class CrossSection:
-    __slots__ = '_type', '_relative_position'
-
-    def __init__(self, type, relative_position):
-        self._type = None
-        self._relative_position = None
-
-        self.type = type
-        self.relative_position = relative_position
-
-    @property
-    def type(self):
-        return self._type
-
-    @type.setter
-    def type(self, value):
-        if value not in CrossSectionType:
-            value = CrossSectionType[value]
-        self._type = value
-
-    @property
-    def relative_position(self):
-        return self._relative_position
-
-    @relative_position.setter
-    def relative_position(self, value):
-        if not (0 <= value <= 1):
-            raise ValueError(
-                'The specified value must be in the interval [0.0, 1.0]'
-            )
-        self._relative_position = value
 
 
 class Ranges:
@@ -327,9 +310,9 @@ class Ranges:
         self.perpendicular = perpendicular
         self.vertical = vertical
 
-    main = _make_lower_bounded_property('main')
-    perpendicular = _make_lower_bounded_property('perpendicular')
-    vertical = _make_lower_bounded_property('vertical')
+    main = make_lower_bounded_property('main', strictly_greater=True)
+    perpendicular = make_lower_bounded_property('perpendicular', strictly_greater=True)
+    vertical = make_lower_bounded_property('vertical', strictly_greater=True)
 
     @property
     def range1(self):
@@ -363,8 +346,8 @@ class Angles:
         self.azimuth = azimuth
         self.dip = dip
 
-    azimuth = _make_angle('azimuth')
-    dip = _make_angle('dip')
+    azimuth = make_angle_property('azimuth')
+    dip = make_angle_property('dip')
 
 
 class Trend:
@@ -373,13 +356,15 @@ class Trend:
     def __init__(self, name, use_trend=False, model=None, relative_std_dev=None):
         if relative_std_dev is None:
             relative_std_dev = FmuProperty(1.0, False)
+        elif isinstance(relative_std_dev, dict):
+            relative_std_dev = FmuProperty(relative_std_dev['value'], relative_std_dev['updatable'])
         self._name = name
         self._model = model
         self.relative_std_dev = relative_std_dev
         self.use_trend = use_trend
 
-    relative_srd_dev = _make_lower_bounded_property('relative_std_dev')
-    use_trend = _make_trend('use_trend')
+    relative_srd_dev = make_lower_bounded_property('relative_std_dev')
+    use_trend = make_trend_property('use_trend')
 
     @property
     def name(self):
@@ -406,26 +391,128 @@ class Trend:
         )
 
     def as_list(self):
-        return [
+        return (
             self.name,
             self.use_trend,
             self.model,
             self.relative_std_dev.value,
             self.relative_std_dev.updatable,
-        ]
+        )
+
+    @classmethod
+    def from_dict(cls, name, use=False, **kwargs):
+        try:
+            relative_std_dev = kwargs.pop('relativeStdDev')
+        except KeyError:
+            relative_std_dev = None
+        if use:
+            model = cls.get_model(**kwargs)
+        else:
+            model = None
+        return cls(
+            name=name,
+            use_trend=use,
+            model=model,
+            relative_std_dev=relative_std_dev
+        )
+
+    @staticmethod
+    def get_model(**kwargs):
+        kwargs = _map_js_to_py(**kwargs)
+        _type = kwargs['type']
+        trend_models = {
+            TrendType.RMS_PARAM: Trend3D_rms_param,
+            TrendType.LINEAR: Trend3D_linear,
+            TrendType.ELLIPTIC: Trend3D_elliptic,
+            TrendType.ELLIPTIC_CONE: Trend3D_elliptic_cone,
+            TrendType.HYPERBOLIC: Trend3D_hyperbolic,
+        }
+        if _type == TrendType.NONE:
+            # TODO: Refactor Trend3D, so as to return an empty Trend3D object?
+            return None
+        else:
+            return trend_models[_type](**kwargs)
+
+
+def _map_js_to_py(add_empty=False, **kwargs):
+    res = {}
+    for key, value in kwargs.items():
+        if key == 'type':
+            try:
+                _type = getattr(TrendType, value)
+            except AttributeError:
+                _type = TrendType.NONE
+            res['type'] = _type
+        elif key == 'angle':
+            suffix = '_angle'
+            for _key, _value in kwargs[key].items():
+                _add_parameter(_key + suffix, _value, res, add_empty)
+        elif key == 'stackingDirection':
+            try:
+                direction = getattr(Direction, value)
+                res['direction'] = direction
+            except AttributeError:
+                if add_empty:
+                    res['direction'] = None
+        elif key == 'parameter':
+            _add_parameter('rms_parameter_name', value, res, add_empty)
+        elif key == 'curvature':
+            _add_parameter('curvature', value, res, add_empty)
+        elif key == 'origin':
+            _type = getattr(OriginType, value['type'], None)
+            x, x_updatable = _get_value(value['x'])
+            y, y_updatable = _get_value(value['y'])
+            z, z_updatable = _get_value(value['z'])
+            origin = []
+            updatable = []
+            for v, u in [(x, x_updatable), (y, y_updatable), (z, z_updatable)]:
+                if v is not None or add_empty:
+                    origin.append(v)
+                    updatable.append(u)
+            if len(origin) > 0 or add_empty:
+                res['origin'] = tuple(origin)
+                res['origin_fmu_updatable'] = tuple(updatable)
+            if _type is not None or add_empty:
+                res['origin_type'] = _type
+        elif key == 'relativeSize':
+            _add_parameter('relative_size', value, res, add_empty)
+        else:
+            raise NotImplementedError
+    return res
+
+
+def _get_value(value):
+    if isinstance(value, dict):
+        return value['value'], value['updatable']
+    return value, None
+
+
+def _add_parameter(name, value, res, add_emtpy=False):
+    if value is not None or add_emtpy:
+        if isinstance(value, dict):
+            _value, updatable = _get_value(value)
+            if _value is not None or add_emtpy:
+                res[name] = _value
+                res[name + '_fmu_updatable'] = updatable
+        else:
+            res[name] = value
 
 
 class Variogram:
+    types = VariogramType
+
     def __init__(self, name, type, ranges, angles, power=None):
+        self._type = None
+
         if power is None:
-            power = FmuProperty(_minimum_value['power'], False)
+            power = FmuProperty(MinimumValues['power'], False)
         self.name = name
-        self._type = type
+        self.power = power
+        self.type = type
         self.ranges = ranges
         self.angles = angles
-        self.power = power
 
-    power = _make_ranged_property('power', 'power must be between {min}, and {max}')
+    power = make_ranged_property('power', 'power must be between {min}, and {max}')
 
     @property
     def type(self):
@@ -437,9 +524,11 @@ class Variogram:
             raise ValueError('The given variogram is not valid ({})'.format(value))
         elif (
                 value == VariogramType.GENERAL_EXPONENTIAL
-                and not (_minimum_value['power'] <= self.power.value <= _maximum_value['power'])
+                and not (MinimumValues['power'] <= self.power.value <= MaximumValues['power'])
         ):
             raise ValueError("While using 'GENERAL_EXPONENTIAL' variogram, 'power' MUST be in [1, 2]")
+        if isinstance(value, str):
+            value = VariogramType[value]
         self._type = value
 
     @classmethod
@@ -515,7 +604,7 @@ class Variogram:
             self.power.updatable,
         ]
 
-    def calc_2d_variogram_from_3d_variogram(self, grid_azimuth_angle, projection, debug_level=Debug.OFF):
+    def calc_2d_variogram_from_3d_variogram(self, grid_azimuth, projection, debug_level=Debug.OFF):
         """
          Variogram ellipsoid in 3D is defined by a symmetric 3x3 matrix M such that
          transpose(V)*M * V = 1 where transpose(V) = [x,y,z]. The principal directions are found
@@ -547,12 +636,13 @@ class Variogram:
         ry = self.ranges.main.value
         rx = self.ranges.perpendicular.value
         rz = self.ranges.vertical.value
+        assert all([r > 0 for r in [rx, ry, rz]])
 
         # Azimuth relative to global x,y,z coordinates
         azimuth = self.angles.azimuth.value
 
         # Azimuth relative to local coordinate system defined by the orientation of the grid (simulation box)
-        azimuth = azimuth - grid_azimuth_angle
+        azimuth = azimuth - grid_azimuth
 
         # Dip angle relative to local simulation box
         dip = self.angles.dip.value
@@ -692,7 +782,7 @@ class APSGaussModel:
     """
 
     def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
-                 debug_level=Debug.OFF, zoneNumber=0, simBoxThickness=0):
+                 debug_level=Debug.OFF, simBoxThickness=0):
         """
         Description: Can create empty object or object with data read from xml tree representing the model file.
         """
@@ -714,7 +804,7 @@ class APSGaussModel:
         self.__debug_level = Debug.OFF
         self.__main_facies_table = None
         self.__sim_box_thickness = 0
-        self.zone_number = 0
+        self.__zone_number = 0
         self.__model_file_name = None
 
         if ET_Tree_zone is not None:
@@ -723,12 +813,10 @@ class APSGaussModel:
                 print('Debug output: Call init ' + self.__class_name + ' and read from xml file')
 
             assert mainFaciesTable
-            assert zoneNumber
             assert simBoxThickness
             assert modelFileName
 
             self.__main_facies_table = mainFaciesTable
-            self.__zone_number = zoneNumber
             self.__sim_box_thickness = simBoxThickness
             self.__model_file_name = modelFileName
             self.__debug_level = debug_level
@@ -748,7 +836,7 @@ class APSGaussModel:
                 print('Debug output: Gauss field name: {}'.format(gf_name))
 
             # Read variogram for current GF
-            variogram, variogram_type = self.get_variogram(gf, gf_name)
+            variogram, variogram_type = self.get_variogram(gf, gf_name, zone_number)
 
             range1, range1_fmu_updatable = self._get_value_from_xml('main', variogram)
             range2, range2_fmu_updatable = self._get_value_from_xml('perpendicular', variogram)
@@ -787,10 +875,7 @@ class APSGaussModel:
                         ''.format(self.__model_file_name, gf_name, self.__class_name)
                     )
                 common_params = {
-                    'zone_number': zone_number,
-                    'region_number': region_number,
-                    'gf_name': gf_name,
-                    'modelFileName': self.__model_file_name,
+                    'model_file_name': self.__model_file_name,
                     'debug_level': self.debug_level
                 }
 
@@ -802,7 +887,7 @@ class APSGaussModel:
                     'EllipticCone3D': Trend3D_elliptic_cone,
                 }
                 try:
-                    trend_model = trend_models[trend_name.tag](trend_xml_obj.find(trend_name.tag), **common_params)
+                    trend_model = trend_models[trend_name.tag].from_xml(trend_xml_obj.find(trend_name.tag), **common_params)
                 except KeyError:
                     raise NameError(
                         'Error in {className}\n'
@@ -855,24 +940,22 @@ class APSGaussModel:
 
     def _get_value_from_xml(self, property_name, xml_tree):
         kwargs = {'parentKeyword': 'Vario', 'modelFile': self.__model_file_name}
-        if property_name in _maximum_value:
-            kwargs['maxValue'] = _maximum_value[property_name]
-        if property_name in _minimum_value:
-            kwargs['minValue'] = _minimum_value[property_name]
+        if property_name in MaximumValues:
+            kwargs['maxValue'] = MaximumValues[property_name]
+        if property_name in MinimumValues:
+            kwargs['minValue'] = MinimumValues[property_name]
 
         keyword = self.__xml_keyword[property_name]
-        value = getFloatCommand(xml_tree, keyword, **kwargs)
-        fmu_updatable = isFMUUpdatable(xml_tree, keyword)
-        return value, fmu_updatable
+        return get_fmu_value_from_xml(xml_tree, keyword, **kwargs)
 
-    def get_variogram(self, gf, gf_name):
+    def get_variogram(self, gf, gf_name, zone_number):
         variogram = getKeyword(gf, 'Vario', 'GaussField', modelFile=self.__model_file_name)
         variogram_type = self.get_variogram_type(variogram)
         if not isVariogramTypeOK(variogram_type):
             raise ValueError(
                 'In model file {0} in zone number: {1} in command Vario for gauss field {2}.\n'
                 'Specified variogram type is not defined.'
-                ''.format(self.__model_file_name, self.zone_number, gf_name)
+                ''.format(self.__model_file_name, zone_number, gf_name)
             )
         return variogram, variogram_type
 
@@ -893,13 +976,12 @@ class APSGaussModel:
             raise ValueError('Error: Unknown variogram type {}'.format(name))
 
     def initialize(
-            self, zone_number, main_facies_table, gauss_model_list, trend_model_list,
+            self, main_facies_table, gauss_model_list, trend_model_list,
             sim_box_thickness, preview_seed_list, debug_level=Debug.OFF):
 
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__class_name)
 
-        self.zone_number = zone_number
         self.__debug_level = debug_level
         self.__sim_box_thickness = sim_box_thickness
         self.__main_facies_table = main_facies_table
@@ -1210,7 +1292,7 @@ class APSGaussModel:
             relative_std_dev=FmuProperty(rel_std_dev, rel_std_dev_fmu_updatable)
         )
 
-    def XMLAddElement(self, parent, fmu_attributes):
+    def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
         if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__class_name)
 
@@ -1248,7 +1330,7 @@ class APSGaussModel:
 
             if use_trend:
                 # Add trend
-                trend_obj.XMLAddElement(gf_element, fmu_attributes)
+                trend_obj.XMLAddElement(gf_element, zone_number, region_number, gf_name, fmu_attributes)
 
                 self._add_xml_element(gf_name, 'relative_std_dev', parent, gf_element, fmu_attributes, createFMUvariableNameForTrend)
 
@@ -1272,7 +1354,7 @@ class APSGaussModel:
         xml_element.append(elem)
 
     def simGaussFieldWithTrendAndTransform(
-            self, simulation_box_size, grid_size, grid_azimuth_angle, cross_section
+            self, simulation_box_size, grid_size, grid_azimuth, cross_section
     ):
         """ This function is used to create 2D simulation of horizontal or vertical cross sections. The gauss simulation is 2D
             and the correlation ellipsoid for the 3D variogram is projected into the specified cross section in 2D.
@@ -1285,12 +1367,12 @@ class APSGaussModel:
         gauss_field_items = []
         for grf in self._gaussian_models.values():
             gauss_field_items.append(
-                grf.simulate(cross_section, grid_azimuth_angle, grid_size, simulation_box_size, self.debug_level),
+                grf.simulate(cross_section, grid_azimuth, grid_size, simulation_box_size, self.debug_level),
             )
         return gauss_field_items
 
-    def calc2DVariogramFrom3DVariogram(self, name, grid_azimuth_angle, projection):
-        return self._gaussian_models[name].variogram.calc_2d_variogram_from_3d_variogram(grid_azimuth_angle, projection, self.debug_level)
+    def calc2DVariogramFrom3DVariogram(self, name, grid_azimuth, projection):
+        return self._gaussian_models[name].variogram.calc_2d_variogram_from_3d_variogram(grid_azimuth, projection, self.debug_level)
 
 
 def _get_projection_parameters(cross_section_type, grid_size, simulation_box_size):

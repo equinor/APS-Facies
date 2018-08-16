@@ -173,14 +173,15 @@ class APSZoneModel:
             if regionNumberAsText is not None:
                 regionNumber = int(regionNumberAsText)
                 if regionNumber < 0:
-                    raise ValueError('Region number must be positive integer if region is used.\n'
-                                     'Zero as region number means that regions is not used for the zone.\n'
-                                     'Can not have negative region number: {}'.format(str(regionNumber))
-                                     )
+                    raise ValueError(
+                        'Region number must be positive integer if region is used.\n'
+                        'Zero as region number means that regions is not used for the zone.\n'
+                        'Can not have negative region number: {}'.format(regionNumber)
+                    )
             else:
                 regionNumber = 0
             if self.__debug_level == Debug.VERY_VERBOSE:
-                    print('Debug output: Zone number: {}  Region number: {}'.format(str(zoneNumber), str(regionNumber)))
+                    print('Debug output: Zone number: {}  Region number: {}'.format(zoneNumber, regionNumber))
             else:
                 if self.__debug_level == Debug.VERY_VERBOSE:
                     print('Debug output: Zone number: {}'.format(str(zoneNumber)))
@@ -208,7 +209,7 @@ class APSZoneModel:
                 # Read Gauss Fields model parameters
                 self.__gaussModelObject = APSGaussModel(
                     zone, mainFaciesTable, modelFileName,
-                    self.__debug_level, self.zone_number, self.__simBoxThickness
+                    self.__debug_level, self.__simBoxThickness
                 )
 
                 # Read truncation rule for zone model
@@ -232,7 +233,7 @@ class APSZoneModel:
                         '       is larger than number of gauss fields {nGFModel} specified for the zone'
                         ''.format(
                             className=self.__className,
-                            nGFTruncRule=str(nGaussFieldInModel),
+                            nGFTruncRule=nGaussFieldInModel,
                             nGFModel=truncRuleName
                         )
                     )
@@ -608,7 +609,7 @@ class APSZoneModel:
                 print(
                     '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
                     '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
-                    ''.format(truncRuleName, str(nCalc), str(nLookup))
+                    ''.format(truncRuleName, nCalc, nLookup)
                 )
 
                 nCount = self.truncation_rule.getNCountShiftAlpha()
@@ -622,14 +623,14 @@ class APSZoneModel:
 
     def XMLAddElement(self, parent, fmu_attributes):
         ''' Add command Zone and all its children to the XML tree'''
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
         tag = 'Zone'
-        if self.__regionNumber <= 0:
+        if self.region_number <= 0:
             attribute = {'number': str(self.zone_number)}
         else:
-            attribute = {'number': str(self.zone_number), 'regionNumber': str(self.__regionNumber)}
+            attribute = {'number': str(self.zone_number), 'regionNumber': str(self.region_number)}
         elem = Element(tag, attribute)
         zoneElement = elem
         parent.append(zoneElement)
@@ -649,9 +650,9 @@ class APSZoneModel:
         # Add child command FaciesProbForModel
         self.__faciesProbObject.XMLAddElement(zoneElement)
         # Add child command GaussField
-        self.__gaussModelObject.XMLAddElement(zoneElement, fmu_attributes)
+        self.__gaussModelObject.XMLAddElement(zoneElement, self.zone_number, self.region_number, fmu_attributes)
         # Add child command TruncationRule at end of the child list for
-        self.truncation_rule.XMLAddElement(zoneElement, self.zone_number, self.__regionNumber, fmu_attributes)
+        self.truncation_rule.XMLAddElement(zoneElement, self.zone_number, self.region_number, fmu_attributes)
 
     def simGaussFieldWithTrendAndTransform(
             self, simulation_box_size, grid_size, gridAzimuthAngle, crossSection):

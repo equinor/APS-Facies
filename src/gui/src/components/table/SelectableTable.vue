@@ -1,6 +1,6 @@
 <template>
   <clickable-row-table
-    :raw-data="rawData"
+    :row-data="rowData"
     :column-definitions="columnDefinitions"
     :additional-grid-options="additionalGridOptions"
     :on-row-clicked="onRowClicked"
@@ -11,7 +11,7 @@
 <script>
 import Vue from 'vue'
 import VueTypes from 'vue-types'
-import ClickableRowTable from '@/components/table/ClickableRowTable'
+import ClickableRowTable from 'Components/table/ClickableRowTable'
 
 export default Vue.extend({
   components: {
@@ -19,7 +19,7 @@ export default Vue.extend({
   },
 
   props: {
-    rawData: VueTypes.arrayOf(VueTypes.object).isRequired,
+    rowData: VueTypes.arrayOf(VueTypes.object).isRequired,
     headerName: VueTypes.string.isRequired,
     onSelectionChanged: VueTypes.func.def(event => {}),
     onRowClicked: VueTypes.func.def(event => {}),
@@ -31,11 +31,11 @@ export default Vue.extend({
       columnDefinitions: [
         {
           headerName: 'Use',
-          field: 'id',
+          field: 'rowId',
           width: 30,
           headerCheckboxSelection: true,
           headerCheckboxSelectionFilteredOnly: true,
-          checkboxSelection: true
+          checkboxSelection: true,
         },
         {headerName: this.headerName, field: 'name'},
       ],
@@ -58,7 +58,3 @@ export default Vue.extend({
   },
 })
 </script>
-
-<style scoped>
-
-</style>

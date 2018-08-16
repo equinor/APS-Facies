@@ -1,18 +1,25 @@
 <template>
   <v-app id="app">
-    <ToolBar/>
+    <tool-bar/>
     <router-view/>
   </v-app>
 </template>
 
 <script>
-import ToolBar from '@/components/TheToolBar'
+import ToolBar from 'Components/TheToolBar'
 
 export default {
   name: 'App',
   components: {
     ToolBar
-  }
+  },
+
+  beforeMount () {
+    // Fetch various parameters
+    this.$store.dispatch('gridModels/fetch')
+    this.$store.dispatch('constants/fetch')
+    this.$store.dispatch('gaussianRandomFields/init')
+  },
 }
 </script>
 

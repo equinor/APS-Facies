@@ -35,41 +35,41 @@ def simulateGauss(
     dy = simParamObject['dy']
     dz = simParamObject['dz']
     if logFileName is not None:
-        file = open(logFileName,'w')
+        file = open(logFileName, 'w')
         file.write('\n')
-        file.write('    Zone,region             : ({},{})'.format(str(zoneNumber), str(regionNumber)))
+        file.write('    Zone,region             : ({},{})'.format(zoneNumber, regionNumber))
         file.write('    Gauss field name        : {}\n'.format(gaussFieldName))
         file.write('    Variogram type          : {}\n'.format(variogramType.name))
-        file.write('    Main range              : {}\n'.format(str(mainRange)))
-        file.write('    Perpendicular range     : {}\n'.format(str(perpRange)))
-        file.write('    Vertical range          : {}\n'.format(str(vertRange)))
-        file.write('    Azimuth angle in sim box: {}\n'.format(str(azimuth)))
-        file.write('    Dip angle               : {}\n'.format(str(dip)))
-        file.write('    NX                      : {}\n'.format(str(nx)))
-        file.write('    NY                      : {}\n'.format(str(ny)))
-        file.write('    NZ for this zone        : {}\n'.format(str(nz)))
-        file.write('    DX                      : {}\n'.format(str(dx)))
-        file.write('    DY                      : {}\n'.format(str(dy)))
-        file.write('    DZ for this zone        : {}\n'.format(str(dz)))
+        file.write('    Main range              : {}\n'.format(mainRange))
+        file.write('    Perpendicular range     : {}\n'.format(perpRange))
+        file.write('    Vertical range          : {}\n'.format(vertRange))
+        file.write('    Azimuth angle in sim box: {}\n'.format(azimuth))
+        file.write('    Dip angle               : {}\n'.format(dip))
+        file.write('    NX                      : {}\n'.format(nx))
+        file.write('    NY                      : {}\n'.format(ny))
+        file.write('    NZ for this zone        : {}\n'.format(nz))
+        file.write('    DX                      : {}\n'.format(dx))
+        file.write('    DY                      : {}\n'.format(dy))
+        file.write('    DZ for this zone        : {}\n'.format(dz))
 
     if debug_level >= Debug.VERBOSE:
         print('')
-        print('    Call simulateGauss for (zone,region): ({},{}) for field: {}'.format(str(zoneNumber), str(regionNumber), gaussFieldName))
+        print('    Call simulateGauss for (zone,region): ({},{}) for field: {}'.format(zoneNumber, regionNumber, gaussFieldName))
     if debug_level >= Debug.VERY_VERBOSE:
-        print('    Zone,region             : ({},{})'.format(str(zoneNumber), str(regionNumber)))
+        print('    Zone,region             : ({},{})'.format(zoneNumber, regionNumber))
         print('    Gauss field name        : {}'.format(gaussFieldName))
         print('    Variogram type          : {}'.format(variogramType.name))
-        print('    Main range              : {}'.format(str(mainRange)))
-        print('    Perpendicular range     : {}'.format(str(perpRange)))
-        print('    Vertical range          : {}'.format(str(vertRange)))
-        print('    Azimuth angle in sim box: {}'.format(str(azimuth)))
-        print('    Dip angle               : {}'.format(str(dip)))
-        print('    NX                      : {}'.format(str(nx)))
-        print('    NY                      : {}'.format(str(ny)))
-        print('    NZ for this zone        : {}'.format(str(nz)))
-        print('    DX                      : {}'.format(str(dx)))
-        print('    DY                      : {}'.format(str(dy)))
-        print('    DZ for this zone        : {}'.format(str(dz)))
+        print('    Main range              : {}'.format(mainRange))
+        print('    Perpendicular range     : {}'.format(perpRange))
+        print('    Vertical range          : {}'.format(vertRange))
+        print('    Azimuth angle in sim box: {}'.format(azimuth))
+        print('    Dip angle               : {}'.format(dip))
+        print('    NX                      : {}'.format(nx))
+        print('    NY                      : {}'.format(ny))
+        print('    NZ for this zone        : {}'.format(nz))
+        print('    DX                      : {}'.format(dx))
+        print('    DY                      : {}'.format(dy))
+        print('    DZ for this zone        : {}'.format(dz))
 
     variogramMapping = {
         'EXPONENTIAL': 'exponential',
@@ -86,8 +86,8 @@ def simulateGauss(
         # Read start seed from seed file for current gauss field, zone and region
         # Initialize start seed
         try:
-            with open(seedFileName,'r') as sfile:
-                inputString =  sfile.read()
+            with open(seedFileName, 'r') as sfile:
+                inputString = sfile.read()
                 words = inputString.split()
                 startSeed = -1
                 for i in range(len(words)):

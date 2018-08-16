@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import BaseDropdown from '@/components/selection/dropdown/BaseDropdown'
+import BaseDropdown from 'Components/selection/dropdown/BaseDropdown'
 
 export default {
   components: {
@@ -21,10 +21,6 @@ export default {
     },
   },
 
-  beforeMount () {
-    this.$store.dispatch('gridModels/fetch')
-  },
-
   methods: {
     getter () {
       return this.$store.state.gridModels.current
@@ -35,7 +31,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-
-</style>

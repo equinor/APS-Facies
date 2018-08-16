@@ -1,6 +1,6 @@
 <template>
   <clickable-table
-    :raw-data="rawData"
+    :row-data="rowData"
     :column-definitions="columnDefinitions"
     :additional-grid-options="additionalGridOptions"
     @grid-api-ready="setGridApi"
@@ -24,7 +24,7 @@ export default {
   },
 
   props: {
-    rawData: VueTypes.arrayOf(VueTypes.object).isRequired
+    rowData: VueTypes.arrayOf(VueTypes.object).isRequired
   },
 
   data () {
@@ -73,7 +73,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

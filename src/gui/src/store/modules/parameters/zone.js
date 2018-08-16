@@ -1,5 +1,5 @@
-import { promiseSimpleCommit, fetchParameterHelper } from '@/store/utils'
-import rms from '@/api/rms'
+import { promiseSimpleCommit, fetchParameterHelper } from 'Store/utils'
+import rms from 'Api/rms'
 
 export default {
   namespaced: true,

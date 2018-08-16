@@ -31,11 +31,11 @@ def defineCommonModelParam(
     apsmodel.setRmsResultFaciesParamName(faciesRealParamNameResult)
     apsmodel.seed_file_name = seedFileName
     apsmodel.debug_level = debug_level
-    print('Debug level: {}'.format(str(apsmodel.debug_level)))
+    print('Debug level: {}'.format(apsmodel.debug_level))
 
     # Define main facies table
-    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
-    apsmodel.setMainFaciesTable(mainFaciesTable)
+    main_facies_table = APSMainFaciesTable(fTable=fTable)
+    apsmodel.setMainFaciesTable(main_facies_table)
 
 
 def addZoneParam(
@@ -100,12 +100,12 @@ def addZoneParam(
         sbhd_fmu_updatable=None,
         debug_level=Debug.OFF
 ):
-    mainFaciesTable = apsmodel.getMainFaciesTable()
+    main_facies_table = apsmodel.getMainFaciesTable()
 
     # Define facies probabilities
-    faciesProbObj = APSFaciesProb()
-    faciesProbObj.initialize(
-        faciesList=faciesInZone, faciesProbList=faciesProbList, mainFaciesTable=mainFaciesTable,
+    facies_probabilities = APSFaciesProb()
+    facies_probabilities.initialize(
+        faciesList=faciesInZone, faciesProbList=faciesProbList, mainFaciesTable=main_facies_table,
         useConstProb=useConstProb, zoneNumber=zoneNumber, debug_level=debug_level
     )
 
@@ -123,51 +123,76 @@ def addZoneParam(
 
         # Set Gauss field trend parameters
         if trendType[i] == TrendType.LINEAR:
-            trendModelObject = Trend3D_linear(trendRuleXML=None, zone_number=zoneNumber, region_number=regionNumber, gf_name=gaussFieldsInZone[i], debug_level=debug_level, modelFileName=None)
-            trendModelObject.initialize(azimuthAngle[i], azimuthAngleFmuUpdatable[i], stackingAngle[i],
-                                        stackingAngleFmuUpdatable[i], direction[i], debug_level)
-            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i],
-                                   relStdDevFmuUpdatable[i]])
+            trend_model = Trend3D_linear(
+                azimuthAngle[i], azimuthAngleFmuUpdatable[i],
+                stackingAngle[i], stackingAngleFmuUpdatable[i],
+                direction[i], debug_level
+            )
+            trendModelList.append(
+                [gaussFieldsInZone[i], useTrend[i], trend_model, relStdDev[i], relStdDevFmuUpdatable[i]]
+            )
 
         elif trendType[i] == TrendType.ELLIPTIC:
-            trendModelObject = Trend3D_elliptic(trendRuleXML=None, zone_number=zoneNumber, region_number=regionNumber, gf_name=gaussFieldsInZone[i], debug_level=debug_level, modelFileName=None)
-            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
-            trendModelObject.initialize(azimuthAngle[i], azimuthAngleFmuUpdatable[i], stackingAngle[i],
-                                        stackingAngleFmuUpdatable[i], direction[i], curvature[i],
-                                        curvatureFmuUpdatable[i], origin, originFmuUpdatable[i], origin_type[i], debug_level)
-            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i],
-                                   relStdDevFmuUpdatable[i]])
+            origin = (origin_x[i], origin_y[i], origin_z_simbox[i])
+            trend_model = Trend3D_elliptic(
+                azimuthAngle[i], azimuthAngleFmuUpdatable[i],
+                stackingAngle[i], stackingAngleFmuUpdatable[i],
+                curvature[i], curvatureFmuUpdatable[i],
+                origin, originFmuUpdatable[i],
+                origin_type[i],
+                direction[i],
+                debug_level
+            )
+            trendModelList.append(
+                [gaussFieldsInZone[i], useTrend[i], trend_model, relStdDev[i], relStdDevFmuUpdatable[i]]
+            )
 
         elif trendType[i] == TrendType.HYPERBOLIC:
-            trendModelObject = Trend3D_hyperbolic(trendRuleXML=None, zone_number=zoneNumber, region_number=regionNumber, gf_name=gaussFieldsInZone[i], debug_level=debug_level, modelFileName=None)
-            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
-            trendModelObject.initialize(azimuthAngle[i], azimuthAngleFmuUpdatable[i], stackingAngle[i],
-                                        stackingAngleFmuUpdatable[i], direction[i], migrationAngle[i],
-                                        migrationAngleFmuUpdatable[i],
-                                        curvature[i], curvatureFmuUpdatable[i], origin, originFmuUpdatable[i], origin_type[i], debug_level)
-            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i],
-                                   relStdDevFmuUpdatable[i]])
+            origin = (origin_x[i], origin_y[i], origin_z_simbox[i])
+            trend_model = Trend3D_hyperbolic(
+                azimuthAngle[i], azimuthAngleFmuUpdatable[i],
+                stackingAngle[i], stackingAngleFmuUpdatable[i],
+                curvature[i], curvatureFmuUpdatable[i],
+                migrationAngle[i], migrationAngleFmuUpdatable[i],
+                origin, originFmuUpdatable[i],
+                origin_type[i],
+                direction[i],
+                debug_level
+            )
+            trendModelList.append(
+                [gaussFieldsInZone[i], useTrend[i], trend_model, relStdDev[i], relStdDevFmuUpdatable[i]]
+            )
 
         elif trendType[i] == TrendType.ELLIPTIC_CONE:
-            trendModelObject = Trend3D_elliptic_cone(trendRuleXML=None, zone_number=zoneNumber, region_number=regionNumber, gf_name=gaussFieldsInZone[i], debug_level=debug_level, modelFileName=None)
-            origin = [origin_x[i], origin_y[i], origin_z_simbox[i]]
-            trendModelObject.initialize(azimuthAngle[i], azimuthAngleFmuUpdatable[i], stackingAngle[i],
-                                        stackingAngleFmuUpdatable[i], direction[i], migrationAngle[i],
-                                        migrationAngleFmuUpdatable[i],
-                                        curvature[i], curvatureFmuUpdatable[i],
-                                        relativeSize[i], relativeSizeFmuUpdatable[0], origin, originFmuUpdatable[i], origin_type[i], debug_level)
-            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i], relStdDevFmuUpdatable[i]])
+            origin = (origin_x[i], origin_y[i], origin_z_simbox[i])
+            trend_model = Trend3D_elliptic_cone(
+                azimuthAngle[i], azimuthAngleFmuUpdatable[i],
+                stackingAngle[i], stackingAngleFmuUpdatable[i],
+                curvature[i], curvatureFmuUpdatable[i],
+                migrationAngle[i], migrationAngleFmuUpdatable[i],
+                relativeSize[i], relativeSizeFmuUpdatable[0],
+                origin, originFmuUpdatable[i],
+                origin_type[i],
+                direction[i],
+                debug_level
+            )
+            trendModelList.append(
+                [gaussFieldsInZone[i], useTrend[i], trend_model, relStdDev[i], relStdDevFmuUpdatable[i]]
+            )
 
         elif trendType[i] == TrendType.NONE:
             # Create an arbitary trend object which is not initialized
-            trendModelObject = Trend3D_hyperbolic(trendRuleXML=None, zone_number=zoneNumber, region_number=regionNumber, gf_name=gaussFieldsInZone[i], debug_level=debug_level, modelFileName=None)
-            trendModelList.append([gaussFieldsInZone[i], useTrend[i], trendModelObject, relStdDev[i], relStdDevFmuUpdatable[i]])
+            # TODO: Make instance of Trend3D?
+            trend_model = Trend3D_hyperbolic()
+            trendModelList.append(
+                [gaussFieldsInZone[i], useTrend[i], trend_model, relStdDev[i], relStdDevFmuUpdatable[i]]
+            )
 
         seedPreviewList.append([gaussFieldsInZone[i], previewSeed[i]])
 
-    gaussModelObj = APSGaussModel()
-    gaussModelObj.initialize(
-        zone_number=zoneNumber, main_facies_table=mainFaciesTable,
+    gauss_model = APSGaussModel()
+    gauss_model.initialize(
+        main_facies_table=main_facies_table,
         gauss_model_list=gaussModelList, trend_model_list=trendModelList, sim_box_thickness=simBoxThickness,
         preview_seed_list=seedPreviewList, debug_level=debug_level
     )
@@ -177,7 +202,7 @@ def addZoneParam(
     if truncType == 'Cubic':
         truncRuleObj = Trunc2D_Cubic()
         truncRuleObj.initialize(
-            mainFaciesTable=mainFaciesTable,
+            mainFaciesTable=main_facies_table,
             faciesInZone=faciesInZone,
             gaussFieldsInZone=gaussFieldsInZone,
             alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
@@ -189,7 +214,7 @@ def addZoneParam(
     elif truncType == 'Angle':
         truncRuleObj = Trunc2D_Angle()
         truncRuleObj.initialize(
-            mainFaciesTable=mainFaciesTable,
+            mainFaciesTable=main_facies_table,
             faciesInZone=faciesInZone,
             gaussFieldsInZone=gaussFieldsInZone,
             alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
@@ -201,7 +226,7 @@ def addZoneParam(
     elif truncType == 'Bayfill':
         truncRuleObj = Trunc3D_bayfill()
         truncRuleObj.initialize(
-            mainFaciesTable=mainFaciesTable,
+            mainFaciesTable=main_facies_table,
             faciesInZone=faciesInZone,
             faciesInTruncRule=faciesInTruncRule,
             gaussFieldsInZone=gaussFieldsInZone,
@@ -222,8 +247,8 @@ def addZoneParam(
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
         zoneNumber=zoneNumber, regionNumber=regionNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
-        faciesProbObject=faciesProbObj,
-        gaussModelObject=gaussModelObj, truncRuleObject=truncRuleObj, debug_level=debug_level
+        faciesProbObject=facies_probabilities,
+        gaussModelObject=gauss_model, truncRuleObject=truncRuleObj, debug_level=debug_level
     )
 
     # Add zone to APSModel
@@ -321,22 +346,20 @@ def test_variogram_generation():
     useTrend = 0
     relStdDev = 0.05
     relStdDevFmuUpdatable = True
-    trendModelObject = Trend3D_linear(None, zone_number=zoneNumber, region_number=None, gf_name=gfName,
-                                      debug_level=Debug.OFF, modelFileName=None)
-    azimuthTrendAngle = 0.0
-    stackingTrendAngle = 0.0
-    azimuthTrendAngleFmuUpdatable = True
-    stackingTrendAngleFmuUpdatable = True
-    direct = -1
-    trendModelObject.initialize(azimuthTrendAngle, azimuthTrendAngleFmuUpdatable, stackingTrendAngle, stackingTrendAngleFmuUpdatable, direct)
+    trendModelObject = Trend3D_linear(
+        azimuth_angle=0.0,
+        stacking_angle=0.0,
+        azimuth_angle_fmu_updatable=True,
+        stacking_angle_fmu_updatable=True,
+        direction=-1,
+    )
     trendModelList = [['GRF1', useTrend, trendModelObject, relStdDev, relStdDevFmuUpdatable]]
     simBoxThickness = 100.0
     prevSeedList = [['GRF1', 92828]]
     debug_level = Debug.VERY_VERBOSE
     apsGaussModel.initialize(
-        zone_number=zoneNumber, main_facies_table=mainFaciesTable,
-        gauss_model_list=gaussModelList, trend_model_list=trendModelList, sim_box_thickness=simBoxThickness,
-        preview_seed_list=prevSeedList, debug_level=debug_level
+        main_facies_table=mainFaciesTable, gauss_model_list=gaussModelList, trend_model_list=trendModelList,
+        sim_box_thickness=simBoxThickness, preview_seed_list=prevSeedList, debug_level=debug_level
     )
     gridAzimuthAngle = 0.0
     projection = 'xy'
@@ -578,40 +601,40 @@ def test_updating_model3():
 
             trendModelObj = zone.getTrendModelObject(gfName)
             if trendType[i] != TrendType.RMS_PARAM:
-                trendAzimuth =  trend_azimuthAngle[i]
-                getSetTrendParameters(trendAzimuth, trendModelObj, 'Azimuth')
+                trendAzimuth = trend_azimuthAngle[i]
+                getSetTrendParameters(trendAzimuth, trendModelObj, 'azimuth')
 
                 trendStackingAngle = trend_stackingAngle[i]
-                getSetTrendParameters(trendStackingAngle, trendModelObj, 'StackingAngle')
+                getSetTrendParameters(trendStackingAngle, trendModelObj, 'stacking_angle')
 
                 trendStackingDirection = trend_direction[i]
-                getSetTrendParameters(trendStackingDirection, trendModelObj, 'StackingDirection')
+                getSetTrendParameters(trendStackingDirection, trendModelObj, 'stacking_direction')
 
             if trendType[i] == TrendType.ELLIPTIC:
-                trendCurvature =  trend_curvature[i]
-                getSetTrendParameters(trendCurvature, trendModelObj, 'Curvature')
+                trendCurvature = trend_curvature[i]
+                getSetTrendParameters(trendCurvature, trendModelObj, 'curvature')
 
                 trendOrigin = [trend_origin_x[i], trend_origin_y[i], trend_origin_z_simbox[i]]
-                getSetTrendParameters(trendOrigin, trendModelObj, 'Origin')
+                getSetTrendParameters(trendOrigin, trendModelObj, 'origin')
 
                 trendOriginType = trend_origin_type[i]
-                getSetTrendParameters(trendOriginType, trendModelObj, 'OriginType')
-            elif  trendType[i] == TrendType.HYPERBOLIC:
-                trendCurvature =  trend_curvature[i]
-                getSetTrendParameters(trendCurvature, trendModelObj, 'Curvature')
+                getSetTrendParameters(trendOriginType, trendModelObj, 'origin_type')
+            elif trendType[i] == TrendType.HYPERBOLIC:
+                trendCurvature = trend_curvature[i]
+                getSetTrendParameters(trendCurvature, trendModelObj, 'curvature')
 
-                trendMigration =  trend_migrationAngle[i]
-                getSetTrendParameters(trendMigration, trendModelObj, 'MigrationAngle')
+                trendMigration = trend_migrationAngle[i]
+                getSetTrendParameters(trendMigration, trendModelObj, 'migration_angle')
 
                 trendOrigin = [trend_origin_x[i], trend_origin_y[i], trend_origin_z_simbox[i]]
-                getSetTrendParameters(trendOrigin, trendModelObj, 'Origin')
+                getSetTrendParameters(trendOrigin, trendModelObj, 'origin')
 
                 trendOriginType = trend_origin_type[i]
-                getSetTrendParameters(trendOriginType, trendModelObj, 'OriginType')
+                getSetTrendParameters(trendOriginType, trendModelObj, 'origin_type')
 
             elif trendType[i] == TrendType.RMS_PARAM:
                 trendParamName = trend_rms_param_name[i]
-                getSetTrendParameters(trendParamName, trendModelObj, 'TrendParamName')
+                getSetTrendParameters(trendParamName, trendModelObj, 'trend_parameter_name')
 
     outfile3 = 'testOut3_updated.xml'
     attributes_file = 'fmu_attributes.txt'
@@ -626,31 +649,27 @@ def test_updating_model3():
     assert check is True
 
 
-def assertPropertyGetterSetter(gaussianFieldName: str, value: object, zone: APSZoneModel, baseName: str):
-    getter = zone.__getattribute__('get' + baseName)
-    setter = zone.__getattribute__('set' + baseName)
+def assertPropertyGetterSetter(gaussian_field_name: str, value: object, zone: APSZoneModel, base_name: str):
+    getter = zone.__getattribute__('get' + base_name)
+    setter = zone.__getattribute__('set' + base_name)
 
     # TODO: Add an assert!
-    original = getter(gaussianFieldName)
-    setter(gaussianFieldName, value)
-    new = getter(gaussianFieldName)
-    print(baseName + ' ' + str(original) + ' -> ' + str(new))
+    original = getter(gaussian_field_name)
+    setter(gaussian_field_name, value)
+    new = getter(gaussian_field_name)
+    print(base_name + ' ' + str(original) + ' -> ' + str(new))
 
 
-def getSetTrendParameters(value, trendObj, baseName):
-    getter = trendObj.__getattribute__('get' + baseName)
-    setter = trendObj.__getattribute__('set' + baseName)
-
-    # TODO: Add an assert!
-    original = getter()
-    setter(value)
-    new = getter()
-    print(baseName + ' ' + str(original) + ' -> ' + str(new))
+def getSetTrendParameters(value, trend, _property):
+    original = getattr(trend, _property)
+    setattr(trend, _property, value)
+    new = getattr(trend, _property)
+    assert value == new
+    print(_property + ' ' + str(original) + ' -> ' + str(new))
 
 
 def test_case_1():
-    print('')
-    print('**** Case number: 1 ****')
+    print('\n**** Case number: 1 ****')
 
     #  --- Zone 1 ---
     apsmodel = get_case_1_zone_1()
@@ -662,8 +681,7 @@ def test_case_1():
 
 
 def test_case_2():
-    print('')
-    print('**** Case number: 2 ****')
+    print('\n**** Case number: 2 ****')
 
     #  --- Zone 1 ---
     apsmodel = get_case_2_zone_1()
@@ -675,8 +693,7 @@ def test_case_2():
 
 
 def test_case_3():
-    print('')
-    print('**** Case number: 3 ****')
+    print('\n**** Case number: 3 ****')
 
     #  --- Zone 1 ---
     apsmodel = get_case_3_zone_1()
@@ -684,8 +701,7 @@ def test_case_3():
 
 
 def test_case_4():
-    print('')
-    print('**** Case number: 4 ****')
+    print('\n**** Case number: 4 ****')
 
     #  --- Zone 1 ---
     apsmodel = get_case_4_zone_1()
@@ -843,6 +859,7 @@ def get_apsmodel_with_no_fmu_markers():
     apsmodel.setSelectedZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     apsmodel.setPreviewZoneAndRegionNumber(selectedZoneNumber, selectedRegionNumber)
     return apsmodel
+
 
 def get_apsmodel_with_all_fmu_markers():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5'}

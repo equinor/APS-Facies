@@ -1,7 +1,5 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from src.algorithms.APSModel import APSModel
-from src.utils.constants.simple import Debug, VariogramType, TrendType
 from src.utils.roxar.fmu_tags import read_selected_fmu_variables,  set_all_as_fmu_updatable,  set_selected_as_fmu_updatable
 
 

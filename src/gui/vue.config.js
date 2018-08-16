@@ -27,7 +27,10 @@ module.exports = {
     resolve: {
       alias: {
         'Components': '@/components',
-        'Utils': '@/testUtilities',
+        'Api': '@/api',
+        'Store': '@/store',
+        'Pages': '@/pages',
+        'Utils': '@/utils',
         'Tables': 'Components/table',
       }
     }

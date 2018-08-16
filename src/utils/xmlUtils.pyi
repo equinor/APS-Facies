@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-from typing import Optional, Union
+from typing import Optional, Union, Any, List, Callable, Tuple
 from xml.etree.ElementTree import Element
+
+from src.algorithms.APSGaussModel import GaussianFieldName
+from src.utils.constants.simple import OriginType
 
 
 def getBoolCommand(
@@ -60,16 +63,31 @@ def prettify(elem: Element, indent: str = " ", new_line: str = "\n") -> str: ...
 
 def minify(elem: Element) -> str: ...
 
+def get_fmu_value_from_xml(xml_tree: Element, keyword: str, **kwargs) -> Tuple[float, bool]: ...
+
+def get_origin_type_from_model_file(trend_rule_xml: Element, model_file_name: str) -> OriginType: ...
 
 def isFMUUpdatable(
     parent:Element,
     keyword: str
 ) -> bool: ...
 
+def fmu_xml_element(
+        tag: str,
+        value: Any,
+        updatable: bool,
+        zone_number: int,
+        region_number: int,
+        gf_name: GaussianFieldName,
+        fmu_creator: Callable[[str, str, int, int], Any],
+        fmu_attributes: List
+):
+
+
 def createFMUvariableNameForTrend(
     keyword: str,
     grf_name: str,
-    zone_number: str,
+    zone_number: int,
     region_number: Optional[int] = None,
 ) -> str: ...
 

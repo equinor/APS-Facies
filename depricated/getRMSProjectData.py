@@ -359,7 +359,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
     for key, value in zonesAndRegions.items():
         zNumber = key[0]
         rNumber = key[1]
-        tag='ZoneAndRegionNumbers'
+        tag = 'ZoneAndRegionNumbers'
         attributes={'zoneNumber': str(zNumber), 'regionNumber': str(rNumber)}
         zoneAndRegionElement = Element(tag, attributes)
         zoneAndRegionElement.text = ' '
@@ -394,124 +394,64 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         zNameObj.text = ' ' + name.strip() + ' '
         gmElement.append(zNameObj)
 
-    tag = 'XSize'
-    xsObj = Element(tag)
-    xsObj.text = ' ' + str(xLength) + ' '
-    gmElement.append(xsObj)
-
-    tag = 'YSize'
-    ysObj = Element(tag)
-    ysObj.text = ' ' + str(yLength) + ' '
-    gmElement.append(ysObj)
-
-    tag = 'AzimuthAngle'
-    azimuthObj = Element(tag)
-    azimuthObj.text = ' ' + str(azimuthAngle) + ' '
-    gmElement.append(azimuthObj)
-
-    tag = 'OrigoX'
-    x0_obj = Element(tag)
-    x0_obj.text = ' ' + str(x0) + ' '
-    gmElement.append(x0_obj)
-
-    tag = 'OrigoY'
-    y0_obj = Element(tag)
-    y0_obj.text = ' ' + str(y0) + ' '
-    gmElement.append(y0_obj)
-
-    tag = 'NX'
-    nxObj = Element(tag)
-    nxObj.text = ' ' + str(nx) + ' '
-    gmElement.append(nxObj)
-
-    tag = 'NY'
-    nyObj = Element(tag)
-    nyObj.text = ' ' + str(ny) + ' '
-    gmElement.append(nyObj)
-
-    tag = 'Xinc'
-    xincObj = Element(tag)
-    xincObj.text = ' ' + str(xinc) + ' '
-    gmElement.append(xincObj)
-
-    tag = 'Yinc'
-    yincObj = Element(tag)
-    yincObj.text = ' ' + str(yinc) + ' '
-    gmElement.append(yincObj)
+    tags = [
+        ('XSize', xLength),
+        ('YSize', yLength),
+        ('AzimuthAngle', azimuthAngle),
+        ('OrigoX', x0),
+        ('OrigoY', y0),
+        ('NX', nx),
+        ('NY', ny),
+        ('Xinc', xinc),
+        ('Yinc', yinc),
+    ]
+    for tag, value in tags:
+        xml_element = Element(tag)
+        xml_element.text = ' ' + str(value) + ' '
+        gmElement.append(xml_element)
     # Finished writing grid model data
 
     if horizonRefName is not None:
         # Start scanning for horizon names and 2D map size information
-        found = 0
+        found = False
         if horizonRefName in project.horizons:
-            found = 1
-        if found == 0:
-            print('Error: Specified name for reference horizon: ' + horizonRefName + ' is not an existing horizon')
-            sys.exit()
+            found = True
+        if not found:
+            raise ValueError('Error: Specified name for reference horizon: ' + horizonRefName + ' is not an existing horizon')
 
-        found = 0
+        found = False
         if horizonRefType in project.horizons[horizonRefName]:
-            found = 1
-        if found == 0:
-            print('Error: Specified type for reference horizon: ' + horizonRefType + ' is not defined')
-            sys.exit()
+            found = True
+        if not found:
+            raise ValueError('Error: Specified type for reference horizon: ' + horizonRefType + ' is not defined')
         # Use the specified reference horizon name and type to get 2D surface grid info
         [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation] = get2DMapDimensions(
             project.horizons, horizonRefName, horizonRefType, debug_level)
         tag = 'SurfaceTrendDimensions'
-        surfObj = Element(tag)
-        topElement.append(surfObj)
+        surface_element = Element(tag)
+        topElement.append(surface_element)
 
-        tag = 'NX'
-        nxObj = Element(tag)
-        nxObj.text = ' ' + str(nx) + ' '
-        surfObj.append(nxObj)
+        tags = [
+            ('NX', nx),
+            ('NY', ny),
+            ('Xmin', xmin),
+            ('Xmax', xmax),
+            ('Ymin', ymin),
+            ('Ymax', ymax),
+            ('Xinc', xinc),
+            ('Yinc', yinc),
+            ('Rotation', rotation),
+        ]
+        for tag, value in tags:
+            xml_element = Element(tag)
+            xml_element.text = ' ' + str(value) + ' '
+            surface_element.append(xml_element)
 
-        tag = 'NY'
-        nyObj = Element(tag)
-        nyObj.text = ' ' + str(ny) + ' '
-        surfObj.append(nyObj)
-
-        tag = 'Xmin'
-        xminObj = Element(tag)
-        xminObj.text = ' ' + str(xmin) + ' '
-        surfObj.append(xminObj)
-
-        tag = 'Xmax'
-        xmaxObj = Element(tag)
-        xmaxObj.text = ' ' + str(xmax) + ' '
-        surfObj.append(xmaxObj)
-
-        tag = 'Ymin'
-        yminObj = Element(tag)
-        yminObj.text = ' ' + str(ymin) + ' '
-        surfObj.append(yminObj)
-
-        tag = 'Ymax'
-        ymaxObj = Element(tag)
-        ymaxObj.text = ' ' + str(ymax) + ' '
-        surfObj.append(ymaxObj)
-
-        tag = 'Xinc'
-        xincObj = Element(tag)
-        xincObj.text = ' ' + str(xinc) + ' '
-        surfObj.append(xincObj)
-
-        tag = 'Yinc'
-        yincObj = Element(tag)
-        yincObj.text = ' ' + str(yinc) + ' '
-        surfObj.append(yincObj)
-
-        tag = 'Rotation'
-        rotObj = Element(tag)
-        rotObj.text = ' ' + str(rotation) + ' '
-        surfObj.append(rotObj)
-
-        for hName in horizonList:
+        for horizon_name in horizonList:
             tag = 'Horizon'
-            hNameObj = Element(tag)
-            hNameObj.text = ' ' + copy.copy(hName) + ' '
-            topElement.append(hNameObj)
+            horizon_element = Element(tag)
+            horizon_element.text = ' ' + copy.copy(horizon_name) + ' '
+            topElement.append(horizon_element)
 
     # Find facies names in reference well log
     if wellRefName is not None:
@@ -519,21 +459,20 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         trajectory = well.wellbore.trajectories[trajectoryName]
         log_run = trajectory.log_runs[logrunName]
         log_curve = log_run.log_curves[logName]
-        faciesCodeNames = log_curve.get_code_names()
+        facies_code_names = log_curve.get_code_names()
 
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Facies names:')
-            print(faciesCodeNames)
+            print(facies_code_names)
 
-        faciesTable = APSMainFaciesTable(fTable=faciesCodeNames)
-        faciesTable.XMLAddElement(topElement)
+        facies_table = APSMainFaciesTable(fTable=facies_code_names)
+        facies_table.XMLAddElement(topElement)
     # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
         if debug_level > Debug.SOMEWHAT_VERBOSE:
             print('Write file: ' + outputRMSDataFile)
         root = prettify(topElement)
         file.write(root)
-    return
 
 
 def create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level=Debug.OFF):

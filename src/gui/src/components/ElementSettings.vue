@@ -1,13 +1,14 @@
 <template>
   <div>
-    <h1>Settings</h1>
+    <gaussian-random-fields/>
   </div>
 </template>
 
 <script>
-export default {}
+import GaussianRandomFields from 'Components/specification/GaussianRandomField/multiple'
+export default {
+  components: {
+    GaussianRandomFields
+  }
+}
 </script>
-
-<style scoped>
-
-</style>

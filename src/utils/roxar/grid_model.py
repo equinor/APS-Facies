@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from roxar import GridPropertyType
+
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
+
+from roxar import GridPropertyType
 
 
 def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, realization_number=0, debug_level=Debug.OFF):
@@ -47,36 +49,27 @@ def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, r
     return minimum, maximum, average
 
 
-def get3DParameter(grid_model, parameter_name, debug_level=Debug.OFF):
+def get3DParameter(grid_model, parameter_name):
     """Get 3D parameter from grid model.
     Input:
            grid_model     - Grid model object
            parameter_name - Name of 3D parameter to get.
-           debug_level     - (value 0,1,2 or 3) and specify how much info is to be printed to screen.
            function_name  - Name of python function that call this function (Just for more informative print output).
 
     Output: parameter object
     """
-    function_name = get3DParameter.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty():
-        text = 'Specified grid model: ' + grid_model.name + ' is empty.'
-        raise_error(function_name, text)
+        raise ValueError("Expected non-empty grid model, but was empty. (Grid Model: '{}')".format(grid_model.name))
 
     # Check if specified parameter name exists.
-    found = 0
-    for p in grid_model.properties:
-        if p.name == parameter_name:
-            found = 1
-            break
+    if parameter_name not in grid_model.properties:
+        raise ValueError(
+            "The parameter '{}' was expected in grid model '{}', but does not exist."
+            "".format(parameter_name, grid_model.name)
+        )
 
-    if found == 0:
-        text = ' Specified parameter: ' + parameter_name + ' does not exist.'
-        raise_error(function_name, text)
-
-    param = grid_model.properties[parameter_name]
-
-    return param
+    return grid_model.properties[parameter_name]
 
 
 def getContinuous3DParameterValues(grid_model, parameter_name, realization_number=0, debug_level=Debug.OFF):
@@ -91,7 +84,7 @@ def getContinuous3DParameterValues(grid_model, parameter_name, realization_numbe
     Output: numpy array with values for each active grid cell for specified 3D parameter.
     """
     function_name = getContinuous3DParameterValues.__name__
-    param = get3DParameter(grid_model, parameter_name, debug_level)
+    param = get3DParameter(grid_model, parameter_name)
     if param.is_empty(realization_number):
         text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number)
         raise_error(function_name, text)
@@ -198,14 +191,14 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
             has empty facies names, the facies name is set to the code value to avoid empty facies names.
     """
     function_name = getDiscrete3DParameterValues.__name__
-    param = get3DParameter(grid_model, parameter_name, debug_level)
+    param = get3DParameter(grid_model, parameter_name)
     # Check that parameter is defined and not empty
     if param.is_empty(realization_number):
         text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number)
         raise_error(function_name, text)
     # Check that parameter_name refer to a discrete parameter
-    if param.type  is not GridPropertyType.discrete:
-        text = ' Specified parameter: ' + parameter_name + ' is not a discrete parametertype'
+    if param.type is not GridPropertyType.discrete:
+        text = ' Specified parameter: ' + parameter_name + ' is not a discrete parameter'
         raise_error(function_name, text)
     active_cell_values = param.get_values(realization_number)
     code_names = param.code_names
@@ -234,22 +227,20 @@ def modifySelectedGridCells(grid_model, zone_number_list, realization_number, ol
     return old_values
 
 
-def combineCodeNames(old_code_names, new_code_names):
-    error = 0
+def update_code_names(old_code_names, new_code_names):
     code_val_list = new_code_names.keys()
     for code in code_val_list:
-        if not (code in old_code_names):
+        if code not in old_code_names:
             # New code
             u = new_code_names.get(code)
             for k in old_code_names:
                 v = old_code_names.get(k)
                 if u == v:
                     # The facies name for this code already exist
-                    error = 1
-                    break
+                    raise ValueError('The facies name "{}" already exists for facies code{}'.format(u, code))
+
             item = {code: u}
             old_code_names.update(item)
-            # error is 1 if the new facies code to be added to the original one has a facies name that already is used
         else:
             # not a new code
             u = new_code_names.get(code)
@@ -261,14 +252,15 @@ def combineCodeNames(old_code_names, new_code_names):
                     if v == str(code):
                         old_code_names[code] = u
                     else:
-                        # The code has different names in the existing original and the new codeNames dictionary
-                        error = 1
-                        break
+                        # The code has different names in the existing original and the new code_names dictionary
+                        raise ValueError(
+                            'The facies code {code} has a different name in the new and original'
+                            ' ({old_name}, and {new_name} respectively)'
+                            ''.format(code=code, old_name=v, new_name=u)
+                        )
                 else:
                     # The facies name is empty string, assign a name from the new to it
                     old_code_names[code] = u
-
-    return old_code_names, error
 
 
 def getGridSimBoxSize(grid, debug_level=Debug.OFF):
@@ -409,8 +401,7 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
         # Indexes start with 0, so add 1 to give user-friendly output
         if debug_level >= Debug.VERY_VERBOSE:
             layers_text = "{}-{} ".format(str(start + 1), str(end + 1))
-            print('Zone{}: "{}", Layers {} ({} layers)'.format(str(i), zone_name, layers_text, num_layers_in_zone))
-            print('')
+            print('Zone{}: "{}", Layers {} ({} layers)\n'.format(i, zone_name, layers_text, num_layers_in_zone))
     num_zones = len(indexer.zonation)
     sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid, debug_level)
     return (

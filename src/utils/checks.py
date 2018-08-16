@@ -2,10 +2,16 @@
 from src.utils.constants.simple import VariogramType, Debug
 
 
-def isVariogramTypeOK(variogramType: VariogramType, debug_level: Debug=Debug.OFF):
-    if variogramType in VariogramType:
+def isVariogramTypeOK(_type, debug_level=Debug.OFF):
+    if isinstance(_type, str):
+        try:
+            VariogramType[_type]
+        except KeyError:
+            return False
         return True
-    elif variogramType._name_ in VariogramType._member_map_:
+    elif _type in VariogramType:
+        return True
+    elif _type._name_ in VariogramType._member_map_:
         # Hack because of some strange bug (apparently variogramType is not an instance in VariogramType (class-wise))
         # even though they are
         return True
@@ -20,5 +26,5 @@ Error: Allowed variograms are:
        MATERN52
        MATERN72
        CONSTANT
-'''.format(variogram_type=variogramType.name))
+'''.format(variogram_type=_type.name))
     return False

@@ -1,5 +1,5 @@
 /**
- * Mock of the demo project 'Emerald_10_1.pro'
+ * Mock of the rms.uipy object available in RMS 11
  */
 import {rms as mock} from './roxar'
 // eslint-disable-next-line no-undef
@@ -14,4 +14,8 @@ export default {
   blockedWellParameters: (gridName) => api.call('get_blocked_well_set_names', gridName),
   blockedWellLogParameters: (gridName, blockedWellName) => api.call('get_blocked_well_logs', gridName, blockedWellName),
   facies: (gridName, blockedWellName, blockedWellLogName) => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName),
+  trendParameters: (gridName) => api.call('get_rms_trend_parameters', gridName),
+  constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
+  options: (name) => api.call('get_options', name),
+  simulateGaussianField: (name, variogram, trend, settings) => api.call('simulate_gaussian_field', name, variogram, trend, settings),
 }
