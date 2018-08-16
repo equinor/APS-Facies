@@ -717,9 +717,9 @@ class Trunc2D_Angle(Trunc2D_Base):
         sHigh = smax
         sLow = smin
         nmax = 20
-        tolerance = 0.0025
-        tolerance2 = 0.005
-        converged = 0
+        tolerance = 0.005
+        tolerance2 = 0.01
+        converged = False
         closestPolygon = 0
         isSplit = 0
         outputPolyA = None
@@ -758,18 +758,26 @@ class Trunc2D_Angle(Trunc2D_Base):
                 else:
                     sLow = s
             else:
-                converged = 1
+                converged = True
                 break
         # End for
-        if converged == 0:
-            print('area, prob: ' + str(area) + ' ' + str(faciesProb))
-            if np.abs(area - faciesProb) > tolerance2:
-                print('Warning message: Not converged')
-                print('area, prob: ' + str(area) + ' ' + str(faciesProb))
-
-                print(repr(outputPolyA))
-                print(repr(outputPolyB))
-                print('')
+        if not converged:
+            if self._debug_level >= Debug.VERY_VERBOSE:
+                if np.abs(area - faciesProb) > tolerance:
+                    print('Warning message: Calculating truncation map for Non-cubic is not converged with tolerance {}'.format(tolerance))
+                    print('                 Calculated area of one polygon: {}.  Specified probability for the polygon: {}.'
+                          ''.format(area, faciesProb))
+                    print(repr(outputPolyA))
+                    print(repr(outputPolyB))
+                    print('')
+            elif self._debug_level >= Debug.ON:
+                if np.abs(area - faciesProb) > tolerance2:
+                    print('Warning message: Calculating truncation map for Non-cubic is not converged with tolerance {}'.format(tolerance2))
+                    print('                 Calculated area of one polygon: {}.  Specified probability for the polygon: {}.'
+                          ''.format(area, faciesProb))
+                    print(repr(outputPolyA))
+                    print(repr(outputPolyB))
+                    print('')
 
         return outputPolyA, outputPolyB, closestPolygon
 

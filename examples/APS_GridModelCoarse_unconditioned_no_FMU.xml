@@ -15,7 +15,7 @@
 
   <RMSProjectName> testAPSWorkflow.rms10.1.3 </RMSProjectName>
   <RMSWorkflowName> Test_APS_uncertainty_workflow </RMSWorkflowName>
-  <GridModelName> GridModel2 </GridModelName>
+  <GridModelName> GridModelCoarse </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
   <ResultFaciesParamName> FaciesReal_unconditioned_sim </ResultFaciesParamName>
   <PrintInfo> 0 </PrintInfo>

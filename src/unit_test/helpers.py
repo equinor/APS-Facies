@@ -5,6 +5,7 @@ from filecmp import cmp
 from PIL import ImageChops, Image
 
 import numpy as np
+import os
 
 from src.utils.constants.simple import Debug
 from src.utils.io import writeFile, readFile
@@ -66,6 +67,8 @@ def apply_truncations(
     check = compare(faciesOutputFile, faciesReferenceFile)
     print('Compare file: ' + faciesReferenceFile + ' and file: ' + faciesOutputFile)
     if check is False:
+        fileName = faciesReferenceFile + '_' + faciesOutputFile + '.tmp'
+        os.rename(faciesOutputFile, fileName)
         raise ValueError('Error: Files are different')
     elif debug_level >= Debug.ON:
         print('Files are equal: OK')

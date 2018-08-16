@@ -111,7 +111,9 @@ def simulateGauss(
         except:
             raise IOError('Can not open and read seed file: {}'.format(seedFileName))
 
-    nrlib.seed(startSeed)
+        if debug_level >= Debug.ON:
+            print('-  Start seed: ' + str(startSeed))
+        startSeed = nrlib.seed(startSeed)
 
     # Define variogram
     variogramName = variogramMapping[variogramType.name]
@@ -184,7 +186,12 @@ def run_simulations(
     debug_level = apsModel.debug_level
     seedFileName = apsModel.seed_file_name
     writeSeedFile = apsModel.writeSeeds
-    print('Write seed file: ' + str(writeSeedFile))
+    if writeSeedFile:
+        if debug_level >= Debug.ON:
+            print('Write seed file: ' + str(seedFileName))
+    else:
+        if debug_level >= Debug.ON:
+            print('Read seed file: ' + str(seedFileName))
 
     # Get grid dimensions
 
@@ -192,7 +199,7 @@ def run_simulations(
 
     if debug_level >= Debug.VERBOSE:
         print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
-    rmsData = APSDataFromRMS()
+    rmsData = APSDataFromRMS(debug_level=debug_level)
 
     rmsData.readRMSDataFromXMLFile(rms_data_file_name)
     gridModelNameFromRMSData = rmsData.getGridModelName()
@@ -208,7 +215,7 @@ def run_simulations(
     dy = simBoxYLength/ny
 
     # Loop over all zones and simulate gauss fields
-    allZoneModels = apsModel.sorted_zone_models()
+    allZoneModels = apsModel.sorted_zone_models
     for key, zoneModel in allZoneModels.items():
         zoneNumber = key[0]
         regionNumber = key[1]
@@ -270,7 +277,9 @@ def run_simulations(
 
         # Submit simulations of all gauss fields for current zone,region model and wait for the result
         # 'Run processes'
-        for p in processes:
+        for i in range(len(processes)):
+            p = processes[i]
+            gaussFieldName = gaussFieldNames[i]
             print('- Start simulate: {} for zone: {} for region: {}'.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
             p.start()
             # Wait at least one second before continuing to ensure that automatically generated start seed values are different
@@ -285,7 +294,6 @@ def run_simulations(
     if writeSeedFile:
         # Make one seed file for all gauss simulations which can be used to reproduce the realizations
         command = 'cat ' + outputDir + '/' + 'seed_* > ' + seedFileName
-        print('command: ' + command)
         os.system(command)
         if debug_level >= Debug.ON:
             print('- Write seed file: {}'.format(seedFileName))

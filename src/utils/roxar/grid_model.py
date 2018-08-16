@@ -1,3 +1,4 @@
+#!/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
 
@@ -7,6 +8,60 @@ from src.utils.io import print_debug_information
 
 from roxar import GridPropertyType
 
+
+def find_defined_cells(zone_values, zone_number, region_values=None, region_number=0, debug_level=Debug.OFF):
+    """
+    For specified zone_number, identify which cells belongs to this zone.
+    :param zone_values:  Vector with zone values. The length is the same as the
+                        number of active cells (physical cells) in the whole 3D grid.
+    :param region_values:  Vector with region values. The length is the same as the
+                        number of active cells (physical cells) in the whole 3D grid.
+    :param zone_number:  The zone number (counting from 1) that is used to define which cells to be selected.
+    :param region_number: The region number (counting from 1) that is used to define which cells to be selected.
+    :param debug_level: Debug level
+    :returns:  cell_index_defined
+        WHERE
+        len(num_defined_cells)  is number of selected and active (physical cells) belonging to the specified zone and region
+        combination.
+        list cell_index_defined  is index array. The length is num_defined_cells. The content is cell index which
+                               is used in the grid parameter vectors zoneValues, regionValues and all other parameter
+                                vectors containing cell values for the selected and active (physical) cells for the grid.
+    """
+    cell_index_defined = []
+    num_cells_total = len(zone_values)
+    if region_number > 0 and len(zone_values) != len(region_values):
+        raise ValueError(
+            'Zone number: {}  Region number: {}.\n'
+            'Number of grid cells with this zone number: {}\n'
+            'Number of grid cells with this region number: {}'
+            ''.format(zone_number, region_number, len(zone_values), len(region_values))
+        )
+
+    if region_number > 0:
+        # Use both zone number and region number to define selected cells
+        for i in range(num_cells_total):
+            if zone_values[i] == zone_number and region_values[i] == region_number:
+                cell_index_defined.append(i)
+        if debug_level >= Debug.VERY_VERBOSE:
+            print(
+                'Debug output: In find_defined_cells: Number of active cells for current '
+                '(zone_number, region_number)=({},{}): {}'
+                ''.format(zone_number, region_number, len(cell_index_defined))
+            )
+
+    else:
+        # Only zone number is used to define selected cells
+        for i in range(num_cells_total):
+            if zone_values[i] == zone_number:
+
+                cell_index_defined.append(i)
+        if debug_level >= Debug.VERY_VERBOSE:
+            print(
+                'Debug output: In find_defined_cells: Number of active cells for current zone_number={} is: {}'
+                ''.format(zone_number, len(cell_index_defined))
+            )
+
+    return cell_index_defined
 
 def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, realization_number=0, debug_level=Debug.OFF):
     """
@@ -211,19 +266,25 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
 
 
 def modifySelectedGridCells(grid_model, zone_number_list, realization_number, old_values, new_values):
-    # Is used to set new values in existing 3D parameter
-    # for selected cells defined by a list of zone numbers
+    ''' Updates an input numpy array old_values with values from the input numpy array new_values for those indices
+        that corresponds to grid cells in the zones defined in the zone_number_list.  
+        If the list of zone numbers is empty, this means that ALL zones are updated, 
+        and has the same effect as if all zones are specified in the list.
+    '''
     grid = grid_model.get_grid(realization_number)
     indexer = grid.simbox_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
-    for zone_index in indexer.zonation:
-        if zone_index in zone_number_list:
-            layer_ranges = indexer.zonation[zone_index]
-            for lr in layer_ranges:
-                # Get all the cell numbers for the layer range
-                cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
-                # Set values for all cells in this layer
-                old_values[cell_numbers] = new_values[cell_numbers]
+    if len(zone_number_list) > 0: 
+        for zone_index in indexer.zonation:
+            if zone_index in zone_number_list:
+                layer_ranges = indexer.zonation[zone_index]
+                for lr in layer_ranges:
+                    # Get all the cell numbers for the layer range
+                    cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
+                    # Set values for all cells in this layer
+                    old_values[cell_numbers] = new_values[cell_numbers]
+    else:
+        old_values = new_values
     return old_values
 
 

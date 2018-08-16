@@ -29,7 +29,7 @@
 
     <RMSProjectName>testAPSWorkflow.rms10.1.3</RMSProjectName>
     <RMSWorkflowName>Example_APS_gridmodel1_unconditioned</RMSWorkflowName>
-    <GridModelName>GridModel1</GridModelName>
+    <GridModelName>GridModelFine</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
     <ResultFaciesParamName>FaciesReal_unconditioned_using_linear_prob_trend</ResultFaciesParamName>
     <PrintInfo>3</PrintInfo>

@@ -526,10 +526,16 @@ class APSZoneModel:
             for i in range(nDefinedCells):
                 if debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                        if i == 0:
+                            print('--- Calculate facies')
+                        else:
+                            print('--- Calculate facies for cell number: {}'.format(str(i)))
                 elif debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
-                        print('--- Calculate facies for cell number: ' + str(i))
+                        if i == 0:
+                            print('--- Calculate facies')
+                        else:
+                            print('--- Calculate facies for cell number: {}'.format(str(i)))
 
                 cellIndx = cellIndexDefined[i]
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
@@ -572,11 +578,17 @@ class APSZoneModel:
                                   ''.format(str(i), str(nCalc), str(nLookup))
                                   )
                         else:
-                            print('--- Calculate facies for cell number: {}'.format(str(i)))
+                            if i == 0:
+                                print('--- Calculate facies')
+                            else:
+                                print('--- Calculate facies for cell number: {}'.format(str(i)))
 
                 elif debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
-                        print('--- Calculate facies for cell number: {}'.format(str(i)))
+                        if i == 0:
+                            print('--- Calculate facies')
+                        else:
+                            print('--- Calculate facies for cell number: {}'.format(str(i)))
 
                 if self.__useConstProb:
                     for f in range(nFacies):

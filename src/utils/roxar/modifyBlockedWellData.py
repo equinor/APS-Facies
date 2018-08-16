@@ -1,6 +1,7 @@
 #!/bin/env python
 import roxar
 import numpy as np
+from src.utils.constants.simple import  ProbabilityTolerances, Debug
 
 def getBlockedWells(project, grid_model_name,bw_name):
     """ Get blocked wells """
@@ -56,8 +57,15 @@ def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked
     return code_names, facies_log_values
 
 
-def createProbabilityLogs(project, grid_model_name, bw_name='BW', facies_log_name='Facies', additional_unobserved_facies_list = None, 
-                          prefix_prob_logs='Prob_',realization_number=0):
+def createProbabilityLogs(project, grid_model_name, 
+                          bw_name='BW', 
+                          facies_log_name='Facies', 
+                          additional_unobserved_facies_list=None, 
+                          output_facies_names=None,
+                          conditional_prob_facies=None,
+                          prefix_prob_logs='Prob_',
+                          realization_number=0,
+                          debug_level=Debug.OFF):
     """ Get Facies log from blocked wells and create probability logs that have values 0.0 or 1.0 for each facies.
         It is possible to specify a list of additional facies names for facies that should be modelled, but is not observed.
         Probability logs for these uncobserved facies will only contain 0 as value since the facies is not observed.  """
@@ -66,31 +74,70 @@ def createProbabilityLogs(project, grid_model_name, bw_name='BW', facies_log_nam
     blocked_wells = getBlockedWells(project, grid_model_name,bw_name)
     if blocked_wells == None:
         return
-    # Loop over all facies name in facies log and create a probability log for each of them
-    for code, name in code_names.items():
-        prob_log_name = prefix_prob_logs + '_' + str(name)
-        print('Create blocked well log for {}'.format(prob_log_name))
-        prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
-        prob_values = blocked_wells.generate_values(discrete=False, fill_value=-1.0)
-        for i in range(len(facies_log_values)):
-            faciesCode = facies_log_values[i]
-            if faciesCode == code:
-                # This grid cell in the blocked well is of matching facies as the facies for the probability log
-                # Assign 1.0 as probability for this cell in the blocked well
-                prob_values[i] = 1.0
-            else:
-                # This grid cell in the blocked well is not matching facies as the facies for the probability log
-                # Assign 0.0 as probability for this cell in the blocked well
-                prob_values[i] = 0.0
-        prob_log.set_values(prob_values)
 
-    # Add probability logs for facies that are not observed in wells and therefore have 0 as probabilily in the blocked well logs
-    for fName in additional_unobserved_facies_list:
-        prob_log_name = prefix_prob_logs + '_' + str(fName)
-        print('Create blocked well log for {}'.format(prob_log_name))
-        prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
-        prob_values = blocked_wells.generate_values(discrete=False, fill_value=0.0)
-        prob_log.set_values(prob_values)
+
+    if conditional_prob_facies is None:
+        # Loop over all facies name in facies log and create a probability log binary values  (0 or 1) for each facies
+        for code, name in code_names.items():
+            prob_log_name = prefix_prob_logs + '_' + str(name)
+            print('Create blocked well log for {}'.format(prob_log_name))
+            prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
+            prob_values = blocked_wells.generate_values(discrete=False, fill_value=-1.0)
+
+
+            for i in range(len(facies_log_values)):
+                faciesCode = facies_log_values[i]
+                if faciesCode == code:
+                    # This grid cell in the blocked well is of matching facies as the facies for the probability log
+                    # Assign 1.0 as probability for this cell in the blocked well
+                    prob_values[i] = 1.0
+                else:
+                    # This grid cell in the blocked well is not matching facies as the facies for the probability log
+                    # Assign 0.0 as probability for this cell in the blocked well
+                    prob_values[i] = 0.0
+            prob_log.set_values(prob_values)
+
+        # Add probability logs for facies that are not observed in wells and therefore have 0 as probabilily in the blocked well logs
+        for fName in additional_unobserved_facies_list:
+            prob_log_name = prefix_prob_logs + '_' + str(fName)
+            print('Create blocked well log for {}'.format(prob_log_name))
+            prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
+            prob_values = blocked_wells.generate_values(discrete=False, fill_value=0.0)
+            prob_log.set_values(prob_values)
+    else:
+        # Check input consistency
+
+        for code, name in code_names.items():
+            sum_prob = 0.0
+            for output_name in output_facies_names:
+                key = (output_name, name)
+                prob = conditional_prob_facies[key]
+                sum_prob = sum_prob + prob
+            if abs(sum_prob -1.0) > ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION:
+                raise ValueError('Sum of the conditional probabilities conditioned to {} is {} and not 1.0. Check specification.'.format(name, sum_prob))
+
+        # Loop over all output facies names and create a probability log with probabilities depending on facies in input log. In this case
+        # the probabilties for the output logs does not necessarily have ot contain only 0 or 1. 
+        for output_name in output_facies_names:
+            prob_log_name = prefix_prob_logs + '_' + str(output_name)
+            if debug_level >= Debug.ON:
+                print('Create blocked well log for {}'.format(prob_log_name))
+            prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
+            prob_values = blocked_wells.generate_values(discrete=False, fill_value=-1.0)
+
+            for code, name in code_names.items():
+                key = (output_name, name)
+                prob_value = conditional_prob_facies[key]
+                for i in range(len(facies_log_values)):
+                    faciesCode = facies_log_values[i]
+                    if faciesCode == code:
+                        # This grid cell in the blocked well is of matching facies as the facies for the probability log
+                        # Assign the specified probability for the output facies 
+                        prob_values[i] = prob_value
+            prob_log.set_values(prob_values)
+
+
+
 
 def createCombinedFaciesLogForBlockedWells(project, grid_model_name, bw_name, original_facies_log_name, original_code_names, 
                                            new_facies_log_name, new_code_names, mapping_between_original_and_new):

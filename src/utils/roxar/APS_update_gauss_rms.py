@@ -33,7 +33,7 @@ def run_main(
 
     if debug_level >= Debug.VERBOSE:
         print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
-    rmsData = APSDataFromRMS()
+    rmsData = APSDataFromRMS(debug_level=debug_level)
 
     rmsData.readRMSDataFromXMLFile(rms_data_file_name)
     gridModelNameFromRMSData = rmsData.getGridModelName()
@@ -55,8 +55,6 @@ def run_main(
             continue
         gaussFieldNames = zoneModel.getGaussFieldsInTruncationRule()
         nLayers = rmsData.getNumberOfLayersInZone(zoneNumber)
-        if debug_level >= Debug.ON:
-            print(gaussFieldNames)
         gaussResultListForZone = []
         for i in range(len(gaussFieldNames)):
             gaussFieldName = gaussFieldNames[i]

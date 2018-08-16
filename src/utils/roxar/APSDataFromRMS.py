@@ -174,7 +174,8 @@ class APSDataFromRMS:
         prObj = root.find(kw)
         projectName = None
         if prObj is None:
-            print('Keyword {} is not read'.format(kw))
+            if self.__debug_level >= Debug.VERBOSE:
+                print('Keyword {} is not read'.format(kw))
         else:
             text = prObj.get('name')
             projectName = text.strip()
@@ -185,7 +186,8 @@ class APSDataFromRMS:
             seedObj = prObj.find(kw)
             projectSeed = 0
             if seedObj is None:
-                print('Keyword {} is not read'.format(kw))
+                if self.__debug_level >= Debug.VERBOSE:
+                    print('Keyword {} is not read'.format(kw))
             else:
                 text = seedObj.text
                 projectSeed = int(text.strip())
@@ -195,7 +197,8 @@ class APSDataFromRMS:
             realObj = prObj.find(kw)
             projectRealNumber = 0
             if realObj is None:
-                print('Keyword {} is not read'.format(kw))
+                if self.__debug_level >= Debug.VERBOSE:
+                    print('Keyword {} is not read'.format(kw))
             else:
                 text = realObj.text
                 projectRealNumber = int(text.strip())

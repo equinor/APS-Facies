@@ -9,24 +9,24 @@
     <Preview zoneNumber="6" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
     </Preview>
     <Optimization>
-        <UseMemoization>1</UseMemoization>
-        <MemoizationResolution>100</MemoizationResolution>
+        <UseMemoization>0</UseMemoization>
+        <MemoizationResolution>109</MemoizationResolution>
     </Optimization>
 
     <SelectedZonesAndRegions>
-        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions>
-        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions> 
+        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions> 
         <SelectedZoneWithRegions zone="3">0</SelectedZoneWithRegions>
-        <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions>
-        <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions> 
+        <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>  
         <SelectedZoneWithRegions zone="6">0</SelectedZoneWithRegions>
     </SelectedZonesAndRegions>
 
     <RMSProjectName>testAPSWorkflow.rms10.1.3</RMSProjectName>
     <RMSWorkflowName>Example_APS_gridmodel1_unconditioned</RMSWorkflowName>
-    <GridModelName>GridModel1</GridModelName>
+    <GridModelName>GridModelFine</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
-    <ResultFaciesParamName>FaciesReal_unconditioned</ResultFaciesParamName>
+    <ResultFaciesParamName>FaciesReal_unconditioned_using_prob_trend</ResultFaciesParamName>
     <PrintInfo>3</PrintInfo>
     <SeedFile>seed.dat</SeedFile>
     <WriteSeeds>yes</WriteSeeds>
@@ -65,26 +65,25 @@
     <ZoneModels>
         <!--  Zone 1 -->
         <Zone number="1">
-            <UseConstProb>1</UseConstProb>
+            <UseConstProb>0</UseConstProb>
             <SimBoxThickness>10.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>0.4</ProbCube>
+                    <ProbCube>ProbTrend_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.3</ProbCube>
+                    <ProbCube>ProbTrend_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>0.15</ProbCube>
+                    <ProbCube>ProbTrend_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>0.05</ProbCube>
+                    <ProbCube>ProbTrend_F5</ProbCube>
                 </Facies>
             </FaciesProbForModel>
-
             <GaussField name="GF1">
                 <Vario name="GAUSSIAN">
                     <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAINRANGE">1500.0</MainRange>
@@ -93,6 +92,7 @@
                     <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTHANGLE">35.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
+                <!--
                 <Trend>
                     <Elliptic3D>
                         <azimuth>35.0</azimuth>
@@ -106,6 +106,7 @@
                     </Elliptic3D>
                 </Trend>
                 <RelStdDev>0.04</RelStdDev>
+                -->
                 <SeedForPreview>276787</SeedForPreview>
             </GaussField>
 
@@ -122,10 +123,10 @@
 
             <GaussField name="GF3">
                 <Vario name="GAUSSIAN">
-                    <MainRange>500.0</MainRange>
-                    <PerpRange>500.0</PerpRange>
+                    <MainRange>3500.0</MainRange>
+                    <PerpRange>150.0</PerpRange>
                     <VertRange>5.0</VertRange>
-                    <AzimuthAngle>125.0</AzimuthAngle>
+                    <AzimuthAngle>35.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
                 <!--
@@ -148,45 +149,52 @@
             </GaussField>
 
             <TruncationRule>
-                <Trunc3D_Bayfill nGFields="3">
+                <Trunc2D_Cubic nGFields="3">
                     <BackGroundModel>
-                        <AlphaFields>GF1 GF2 GF3</AlphaFields>
-                        <UseConstTruncParam>1</UseConstTruncParam>
-                        <Floodplain>F1</Floodplain>
-                        <Subbay>F2</Subbay>
-                        <WBF>F3</WBF>
-                        <BHD>F4</BHD>
-                        <Lagoon>F5</Lagoon>
-                        <SF kw="APS_1_0_TRUNC_BAYFILL_SF">0.5</SF>
-                        <YSF kw="APS_1_0_TRUNC_BAYFILL_YSF">0.5</YSF>
-                        <SBHD kw="APS_1_0_TRUNC_BAYFILL_SBHD">0.1</SBHD>
+                        <AlphaFields>GF1 GF2</AlphaFields>
+                        <L1 direction="V">
+                            <ProbFrac name="F1">1.0</ProbFrac>
+                            <ProbFrac name="F2">1.0</ProbFrac>
+                            <ProbFrac name="F3">1.0</ProbFrac>
+                            <ProbFrac name="F4">1.0</ProbFrac>
+                        </L1>
                     </BackGroundModel>
-                </Trunc3D_Bayfill>
+                    <OverLayModel>
+                        <Group>
+                            <AlphaField name="GF3">
+                                <TruncIntervalCenter>0.0</TruncIntervalCenter>
+                                <ProbFrac name="F5">1.0</ProbFrac>
+                            </AlphaField>
+                            <BackGround>F1</BackGround>
+                            <BackGround>F2</BackGround>
+                        </Group>
+                    </OverLayModel>
+                </Trunc2D_Cubic>
             </TruncationRule>
         </Zone>
 
         <!--  Zone 2 -->
         <Zone number="2">
-            <UseConstProb>1</UseConstProb>
+            <UseConstProb>0</UseConstProb>
             <SimBoxThickness>4.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>0.4</ProbCube>
+                    <ProbCube>ProbTrend_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.3</ProbCube>
+                    <ProbCube>ProbTrend_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>0.10</ProbCube>
+                    <ProbCube>ProbTrend_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>0.05</ProbCube>
+                    <ProbCube>ProbTrend_F5</ProbCube>
                 </Facies>
                 <Facies name="F6">
-                    <ProbCube>0.05</ProbCube>
+                    <ProbCube>ProbTrend_F6</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -198,6 +206,7 @@
                     <AzimuthAngle>35.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
+                <!--
                 <Trend>
                     <Linear3D>
                         <azimuth>125.0</azimuth>
@@ -206,6 +215,7 @@
                     </Linear3D>
                 </Trend>
                 <RelStdDev>0.01</RelStdDev>
+                -->
                 <SeedForPreview>3939276787</SeedForPreview>
             </GaussField>
 
@@ -290,20 +300,20 @@
 
         <!--  Zone 3 -->
         <Zone number="3">
-            <UseConstProb>1</UseConstProb>
+            <UseConstProb>0</UseConstProb>
             <SimBoxThickness>10.35</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>0.3</ProbCube>
+                    <ProbCube>ProbTrend_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.4</ProbCube>
+                    <ProbCube>ProbTrend_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>0.2</ProbCube>
+                    <ProbCube>ProbTrend_F4</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -315,6 +325,7 @@
                     <AzimuthAngle>35.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
+                <!--
                 <Trend>
                     <Hyperbolic3D>
                         <azimuth>35.0</azimuth>
@@ -329,6 +340,7 @@
                     </Hyperbolic3D>
                 </Trend>
                 <RelStdDev>0.025</RelStdDev>
+                -->
                 <SeedForPreview>9989276787</SeedForPreview>
             </GaussField>
             <GaussField name="GF2">
@@ -373,23 +385,23 @@
 
         <!--  Zone 4 -->
         <Zone number="4">
-            <UseConstProb>1</UseConstProb>
+            <UseConstProb>0</UseConstProb>
             <SimBoxThickness>10.35</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>0.3</ProbCube>
+                    <ProbCube>ProbTrend_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.3</ProbCube>
+                    <ProbCube>ProbTrend_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>0.2</ProbCube>
+                    <ProbCube>ProbTrend_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F5</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -401,6 +413,7 @@
                     <AzimuthAngle>35.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
+                <!--
                 <Trend>
                     <Hyperbolic3D>
                         <azimuth>35.0</azimuth>
@@ -415,6 +428,7 @@
                     </Hyperbolic3D>
                 </Trend>
                 <RelStdDev>0.025</RelStdDev>
+                -->
                 <SeedForPreview>9989276787</SeedForPreview>
             </GaussField>
             <GaussField name="GF2">
@@ -478,7 +492,7 @@
                                 <TruncIntervalCenter>0.5</TruncIntervalCenter>
                                 <ProbFrac name="F5">0.5</ProbFrac>
                             </AlphaField>
-                            <BackGround>F1</BackGround>
+                            <BackGround>F3</BackGround>
                         </Group>
                     </OverLayModel>
                 </Trunc2D_Cubic>
@@ -487,26 +501,26 @@
 
         <!--  Zone 5 -->
         <Zone number="5">
-            <UseConstProb>1</UseConstProb>
+            <UseConstProb>0</UseConstProb>
             <SimBoxThickness>4.02</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>0.4</ProbCube>
+                    <ProbCube>ProbTrend_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>0.2</ProbCube>
+                    <ProbCube>ProbTrend_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.2</ProbCube>
+                    <ProbCube>ProbTrend_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>0.05</ProbCube>
+                    <ProbCube>ProbTrend_F5</ProbCube>
                 </Facies>
                 <Facies name="F6">
-                    <ProbCube>0.05</ProbCube>
+                    <ProbCube>ProbTrend_F6</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -518,6 +532,7 @@
                     <AzimuthAngle>125.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
+                <!--
                 <Trend>
                     <Linear3D>
                         <azimuth>125.0</azimuth>
@@ -526,6 +541,7 @@
                     </Linear3D>
                 </Trend>
                 <RelStdDev>0.04</RelStdDev>
+                -->
                 <SeedForPreview>1111276787</SeedForPreview>
             </GaussField>
 
@@ -607,26 +623,26 @@
 
         <!--  Zone 6 -->
         <Zone number="6">
-            <UseConstProb>1</UseConstProb>
+            <UseConstProb>0</UseConstProb>
             <SimBoxThickness>4.55</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
-                    <ProbCube>0.4</ProbCube>
+                    <ProbCube>ProbTrend_F1</ProbCube>
                 </Facies>
                 <Facies name="F2">
-                    <ProbCube>0.1</ProbCube>
+                    <ProbCube>ProbTrend_F2</ProbCube>
                 </Facies>
                 <Facies name="F3">
-                    <ProbCube>0.15</ProbCube>
+                    <ProbCube>ProbTrend_F3</ProbCube>
                 </Facies>
                 <Facies name="F4">
-                    <ProbCube>0.15</ProbCube>
+                    <ProbCube>ProbTrend_F4</ProbCube>
                 </Facies>
                 <Facies name="F5">
-                    <ProbCube>0.10</ProbCube>
+                    <ProbCube>ProbTrend_F5</ProbCube>
                 </Facies>
                 <Facies name="F6">
-                    <ProbCube>0.10</ProbCube>
+                    <ProbCube>ProbTrend_F6</ProbCube>
                 </Facies>
             </FaciesProbForModel>
 
@@ -638,6 +654,7 @@
                     <AzimuthAngle>125.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
+                <!--
                 <Trend>
                     <Linear3D>
                         <azimuth>125.0</azimuth>
@@ -646,6 +663,7 @@
                     </Linear3D>
                 </Trend>
                 <RelStdDev>0.04</RelStdDev>
+                -->
                 <SeedForPreview>166276787</SeedForPreview>
             </GaussField>
 

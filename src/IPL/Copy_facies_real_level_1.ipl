@@ -1,0 +1,33 @@
+// IPL: Create a copy of facies realisation before it will be updated.
+Parameter f1, f2
+String faciesParamName_level_1, faciesParamName_merged, gridModelName
+GridModel gm
+Int n,i
+String code_name
+
+Include("/project/res/etc/IPL/iplib/STutilities1.iplib")
+
+// -----------------------------------------------------------------------
+gridModelName = "GridModelCoarse"
+faciesParamName_level_1 = "FaciesReal_unconditioned"
+faciesParamName_merged = "FaciesReal_unconditioned_merged"
+
+// ------------------------------------------------------------------------
+GetGridModel(gridModelName, gm)
+f1 = STgetParameter(gm, faciesParamName_level_1)
+f2 = CreateDiscreteParameter(gm)
+f2 = f1
+n = GetNumberOfCodes(f1)
+//FOR i FROM 1 TO n DO
+//   code_name = GetCodeName(f1,i)
+//   SetCodeName(f2,i,code_name)
+//   Print("Code name: ",code_name, " ",i)
+//ENDFOR
+SetCodeName(f2,1,"F1")
+SetCodeName(f2,2,"F2")
+SetCodeName(f2,3,"F3")
+SetCodeName(f2,4,"F4")
+SetCodeName(f2,5,"F5")
+SetCodeName(f2,6,"F6")
+
+STsetParameter(gm, faciesParamName_merged, f2)
