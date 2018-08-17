@@ -19,6 +19,7 @@ VariogramRecord = namedtuple(
         'PowerFMUUpdatable'
     ]
 )
+
 SeedRecord = namedtuple(
     'SeedRecord', [
         'Name',
@@ -33,5 +34,19 @@ TrendRecord = namedtuple(
         'Object',
         'RelStdev',
         'RelStdevFMU'
+    ]
+)
+
+FaciesRecord = namedtuple(
+    'FaciesRecord', [
+        'Name',
+        'Code'
+    ]
+)
+
+FaciesProbabilityRecord = namedtuple(
+    'FaciesProbabilityRecord', [
+        'Name',
+        'Probability'
     ]
 )

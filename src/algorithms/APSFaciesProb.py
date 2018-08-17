@@ -1,10 +1,44 @@
 # -*- coding: utf-8 -*-
 import copy
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
 from src.utils.numeric import isNumber
 from src.utils.xmlUtils import getKeyword, getTextCommand
+from src.utils.records import FaciesProbabilityRecord
+
+
+class FaciesProbability:
+    __slots__ = '_name', '_probability'
+
+    def __init__(self, name, probability):
+        self._name = name
+        self._probability = probability
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def probability(self):
+        return self._probability
+
+    @probability.setter
+    def probability(self, value):
+        self._probability = value
+
+    @classmethod
+    def from_definition(cls, definition):
+        definition = FaciesProbabilityRecord._make(definition)
+        return cls(
+            name=definition.Name,
+            probability=definition.Probability,
+        )
 
 
 class APSFaciesProb:
@@ -34,16 +68,16 @@ class APSFaciesProb:
 
 
     Private functions:
-        def __setEmpty(self)
         def __interpretXMLTree(self,ET_Tree_zone,modelFileName)
         def __checkConstProbValuesAndNormalize(self,zoneNumber)
         def __roundOffProb(self, resolutionRoundOff=100)
     """
 
-    def __setEmpty(self):
-        self.__className = self.__class__.__name__
+    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
+                 debug_level=Debug.OFF, useConstProb=False, zoneNumber=0):
+
+        self.__class_name = self.__class__.__name__
         self.__faciesProbForZoneModel = []
-        self.__faciesInZoneModel = []
         self.__useConstProb = 0
         self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
@@ -51,11 +85,6 @@ class APSFaciesProb:
 
         self.__FNAME = 0
         self.__FPROB = 1
-
-    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
-                 debug_level=Debug.OFF, useConstProb=False, zoneNumber=0):
-
-        self.__setEmpty()
 
         if ET_Tree_zone is not None:
             self.__useConstProb = useConstProb
@@ -65,17 +94,20 @@ class APSFaciesProb:
 
             # Get data from xml tree
             if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Call init ' + self.__className + ' and read from xml file')
+                print('Debug output: Call init ' + self.__class_name + ' and read from xml file')
             self.__interpretXMLTree(ET_Tree_zone, modelFileName)
 
             # End __init__
+
+    @property
+    def facies_in_zone_model(self):
+        return [facies.name for facies in self.__faciesProbForZoneModel]
 
     def __interpretXMLTree(self, ET_Tree_zone, modelFileName):
         assert self.__mainFaciesTable is not None
         assert ET_Tree_zone is not None
 
         self.__faciesProbForZoneModel = []
-        self.__faciesInZoneModel = []
 
         # Read Facies probability cubes for current zone model
         kw = 'FaciesProbForModel'
@@ -88,38 +120,37 @@ class APSFaciesProb:
             name = text.strip()
             if self.__mainFaciesTable.has_facies_int_facies_table(name):
                 text = getTextCommand(f, 'ProbCube', 'Facies', modelFile=modelFileName)
-                probCubeName = text.strip()
+                prob_cube_name = text.strip()
                 if self.__useConstProb:
-                    if not isNumber(probCubeName):
+                    if not isNumber(prob_cube_name):
                         raise ValueError(
                             'Error when reading model file: {0}\n'
                             'Error in {1}\n'
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not a number even though '
                             'useConstProb keyword is set to True.'
-                            ''.format(modelFileName, self.__className, name, self.zone_number)
+                            ''.format(modelFileName, self.__class_name, name, self.zone_number)
                         )
                 else:
-                    if isNumber(probCubeName):
+                    if isNumber(prob_cube_name):
                         raise ValueError(
                             'Error when reading model file: {0}\n'
                             'Error in {1}\n'
                             'Error in keyword: FaciesProbForModel for facies name: {2} in zone number: {3}\n'
                             '                  The specified probability is not an RMS parameter name even though '
                             'useConstProb keyword is set to False.'
-                            ''.format(modelFileName, self.__className, name, self.zone_number)
+                            ''.format(modelFileName, self.__class_name, name, self.zone_number)
                         )
 
-                item = [name, probCubeName]
+                item = FaciesProbability(name, prob_cube_name)
                 self.__faciesProbForZoneModel.append(item)
-                self.__faciesInZoneModel.append(name)
             else:
                 raise NameError(
                     'Error when reading model file: {0}\n'
                     'Error in {1}\n'
                     'Error in keyword: FaciesProbForModel in zone number: {2}. Facies name: {3}\n'
                     '                  is not defined in main facies table in command APSMainFaciesTable'
-                    ''.format(modelFileName, self.__className, self.zone_number, name)
+                    ''.format(modelFileName, self.__class_name, self.zone_number, name)
                 )
 
         if self.__faciesProbForZoneModel is None:
@@ -133,15 +164,14 @@ class APSFaciesProb:
         self.__checkConstProbValuesAndNormalize(self.zone_number)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: From ' + self.__className + ': Facies prob for current zone model:')
+            print('Debug output: From ' + self.__class_name + ': Facies prob for current zone model:')
             print(repr(self.__faciesProbForZoneModel))
 
     def initialize(self, faciesList, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, debug_level=Debug.OFF):
         ''' Initialize an APSFaciesProb object. '''
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call the initialize function in ' + self.__className)
+            print('Debug output: Call the initialize function in ' + self.__class_name)
 
-        self.__setEmpty()
         self.__useConstProb = useConstProb
         self.__zoneNumber = zoneNumber
         self.__debug_level = debug_level
@@ -149,82 +179,61 @@ class APSFaciesProb:
         self.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
     def __roundOffProb(self, resolutionRoundOff=100):
-        ''' Round off the probability value to nearest value which is a mutiple of resolutionRoundOff
+        ''' Round off the probability value to nearest value which is a multiple of resolutionRoundOff
             if it is specified as a constant value'''
-        if self.__useConstProb == 1:
-            for i in range(len(self.__faciesProbForZoneModel)):
-                item = self.__faciesProbForZoneModel[i]
-                prob = float(item[self.__FPROB])
+        if self.__useConstProb:
+            for item in self.__faciesProbForZoneModel:
+                prob = float(item.probability)
                 probNew = int(prob * resolutionRoundOff + 0.5) / resolutionRoundOff
-                item[self.__FPROB] = probNew
+                item.probability = probNew
 
     def __checkConstProbValuesAndNormalize(self, zoneNumber):
         ''' Normalize probabilities for the case that constant probabilities is specified.'''
-        if self.__useConstProb == 1:
+        if self.__useConstProb:
             sumProb = 0.0
-            for i in range(len(self.__faciesProbForZoneModel)):
-                item = self.__faciesProbForZoneModel[i]
-                prob = float(item[self.__FPROB])
+            for item in self.__faciesProbForZoneModel:
+                prob = float(item.probability)
                 sumProb += prob
             if abs(sumProb - 1.0) > 0.001:
-                print('Warning in ' + self.__className)
-                text = 'Warning: Specified constant probabilities sum up to: ' + str(sumProb)
-                text = text + ' and not 1.0 in zone ' + str(zoneNumber)
-                print(text)
-                print('Warning: The specified probabilities will be normalized.')
+                warn('Specified constant probabilities sum up to: {} and not 1.0 in zone {}'.format(sumProb, zoneNumber))
+                warn('The specified probabilities will be normalized.')
                 for i in range(len(self.__faciesProbForZoneModel)):
                     item = self.__faciesProbForZoneModel[i]
                     prob = float(item[self.__FPROB])
-                    normalizedProb = prob / sumProb
-                    item[self.__FPROB] = str(normalizedProb)
+                    normalized_prob = prob / sumProb
+                    item.probability = str(normalized_prob)
 
     def getAllProbParamForZone(self):
         ''' Return list of name of all specified RMS probability parameter names'''
-        found = 0
         allProbParamList = []
         for item in self.__faciesProbForZoneModel:
-            probParamName = item[self.__FPROB]
-            if self.__useConstProb == 0:
-                if not probParamName in allProbParamList:
+            probParamName = item.name
+            if not self.__useConstProb:
+                if probParamName not in allProbParamList:
                     allProbParamList.append(probParamName)
         return allProbParamList
 
-    def getConstProbValue(self, fName):
+    def getConstProbValue(self, facies_name):
         ''' Return probability (a number) for specified facies name. This is done when the specified probabilities are constants (numbers)'''
-        if self.__useConstProb == 1:
-            found = 0
-            probCubeName = '0.0'
+        if self.__useConstProb:
             for item in self.__faciesProbForZoneModel:
-                fN = item[self.__FNAME]
-                if fN == fName:
-                    probCubeName = item[self.__FPROB]
-                    found = 1
-                    break
-            if found == 0:
-                raise ValueError(
-                    'Probability for facies {} is not found'
-                    ''.format(fName)
-                )
-            return float(probCubeName)
-        else:
-            raise ValueError(
-                'Can not call getConstProbValue when useConstProb = 0'
-            )
+                fN = item.name
+                if fN == facies_name:
+                    return float(item.probability)
+            raise ValueError('Probability for facies {} is not found'.format(facies_name))
+        raise ValueError('Can not call getConstProbValue when useConstProb = 0')
 
     @property
     def zone_number(self):
         return self.__zoneNumber
 
-    def getFaciesInZoneModel(self):
-        return copy.copy(self.__faciesInZoneModel)
-
-    def findFaciesItem(self, faciesName):
+    def findFaciesItem(self, facies_name):
         # Check that facies is defined
         itemWithFacies = None
-        if self.__mainFaciesTable.has_facies_int_facies_table(faciesName):
+        if self.__mainFaciesTable.has_facies_int_facies_table(facies_name):
             for item in self.__faciesProbForZoneModel:
-                name = item[self.__FNAME]
-                if name == faciesName:
+                name = item.name
+                if name == facies_name:
                     itemWithFacies = item
                     break
         return itemWithFacies
@@ -247,12 +256,10 @@ class APSFaciesProb:
             item = self.findFaciesItem(fName)
             if item is None:
                 # insert new facies
-                item = [fName, fProbName]
-                self.__faciesProbForZoneModel.append(item)
-                self.__faciesInZoneModel.append(fName)
+                self.__faciesProbForZoneModel.append(FaciesProbability(fName, fProbName))
             else:
                 # Update facies probability cube name
-                item[self.__FPROB] = fProbName
+                item.probability = fProbName
         return err
 
     def updateSingleFaciesWithProbForZone(self, faciesName, faciesProbCubeName):
@@ -266,12 +273,10 @@ class APSFaciesProb:
             itemWithFacies = self.findFaciesItem(faciesName)
             if itemWithFacies is None:
                 # insert new facies
-                itemWithFacies = [faciesName, faciesProbCubeName]
-                self.__faciesProbForZoneModel.append(itemWithFacies)
-                self.__faciesInZoneModel.append(faciesName)
+                self.__faciesProbForZoneModel.append(FaciesProbability(faciesName, faciesProbCubeName))
             else:
                 # Update facies probability cube name
-                itemWithFacies[self.__FPROB] = faciesProbCubeName
+                itemWithFacies.probability = faciesProbCubeName
         return err
 
     def removeFaciesWithProbForZone(self, fName):
@@ -279,63 +284,40 @@ class APSFaciesProb:
         indx = -999
         for i in range(len(self.__faciesProbForZoneModel)):
             item = self.__faciesProbForZoneModel[i]
-            name = item[self.__FNAME]
+            name = item.name
             if fName == name:
                 indx = i
                 break
         if indx != -999:
             # Remove data for this facies
             self.__faciesProbForZoneModel.pop(indx)
-            self.__faciesInZoneModel.pop(indx)
         return
 
-    def hasFacies(self, fName):
+    def hasFacies(self, facies_name):
         ''' Check that facies with specified name exist'''
-        n = len(self.__faciesProbForZoneModel)
-        found = 0
-        for i in range(n):
-            item = self.__faciesProbForZoneModel[i]
-            faciesName = item[self.__FNAME]
-            if fName == faciesName:
-                found = 1
-                break
-        if found == 0:
-            return False
-        else:
-            return True
+        for item in self.__faciesProbForZoneModel:
+            _facies_name = item.name
+            if facies_name == _facies_name:
+                return True
+        return False
 
     def getProbParamName(self, fName):
         ''' Get probability parameter name for given facies name'''
-        found = 0
-        probCubeName = None
         for item in self.__faciesProbForZoneModel:
-            fN = item[self.__FNAME]
-            if fN == fName:
-                probCubeName = item[self.__FPROB]
-                found = 1
-                break
-        if found == 0:
-            return None
-        else:
-            return copy.copy(probCubeName)
+            if item.name == fName:
+                return item.probability
+        return None
 
     def XMLAddElement(self, parent):
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self.__className)
+            print('Debug output: call XMLADDElement from ' + self.__class_name)
 
         # Add command FaciesProbForModel
-        tag = 'FaciesProbForModel'
-        elem = Element(tag)
-        parent.append(elem)
-        fProbElement = elem
-        for i in range(len(self.__faciesProbForZoneModel)):
-            fName = self.__faciesProbForZoneModel[i][self.__FNAME]
-            fProb = self.__faciesProbForZoneModel[i][self.__FPROB]
-            tag = 'Facies'
-            attribute = {'name': fName}
-            fElement = Element(tag, attribute)
-            fProbElement.append(fElement)
-            tag = 'ProbCube'
-            pElement = Element(tag)
-            pElement.text = ' ' + str(fProb) + ' '
-            fElement.append(pElement)
+        facies_probability = Element('FaciesProbForModel')
+        parent.append(facies_probability)
+        for item in self.__faciesProbForZoneModel:
+            facies = Element('Facies', {'name': item.name})
+            facies_probability.append(facies)
+            probability = Element('ProbCube')
+            probability.text = ' ' + str(item.probability) + ' '
+            facies.append(probability)

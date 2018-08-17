@@ -23,15 +23,14 @@ from src.utils.roxar.modifyBlockedWellData import createProbabilityLogs
 
 def run(roxar=None, project=None, **kwargs):
     # -------- Project/user specific assignment to be set by the user -----------
-    grid_model_name = 'GridModelFine'
-    blocked_wells_set_name = 'BW'
-    input_facies_log_name = 'Deterministic_facies'
-    prefix_prob_logs = 'Prob'
-    assign_binary_probabilities = False
-
+    grid_model_name = kwargs['grid_model_name']
+    blocked_wells_set_name = kwargs['blocked_wells_set_name']
+    input_facies_log_name = kwargs['input_facies_log_name']
+    prefix_prob_logs = kwargs['prefix_prob_logs']
+    assign_binary_probabilities = kwargs['assign_binary_probabilities']
     # Case: assign_binary_probabilities = True
     # Optionally specify additional output facies logs for facies names not observed in the facies log
-    additional_unobserved_facies_list = []
+    additional_unobserved_facies_list = kwargs.get('additional_unobserved_facies_list', [])
 
     # Case: assign_binary_probabilities = False
     # In this case the user must specify a probability for each facies in the output probability logs.
@@ -40,33 +39,31 @@ def run(roxar=None, project=None, **kwargs):
     # Also specify conditioned probability for new facies given observed facies in input facies log
     output_facies_names = ['F1', 'F2', 'F3', 'F4', 'F5']
     conditional_prob_facies = {
-        ('F1', 'A'): 1.0,
-        ('F2', 'A'): 0.0,
+        ('F1', 'A'): 0.95,
+        ('F2', 'A'): 0.05,
         ('F3', 'A'): 0.0,
         ('F4', 'A'): 0.0,
         ('F5', 'A'): 0.0,
 
-        ('F1', 'B'): 0.0,
-        ('F2', 'B'): 1.0,
-        ('F3', 'B'): 0.0,
+        ('F1', 'B'): 0.05,
+        ('F2', 'B'): 0.90,
+        ('F3', 'B'): 0.05,
         ('F4', 'B'): 0.0,
         ('F5', 'B'): 0.0,
 
         ('F1', 'C'): 0.0,
-        ('F2', 'C'): 0.0,
-        ('F3', 'C'): 1.0,
-        ('F4', 'C'): 0.0,
-        ('F5', 'C'): 0.0,
+        ('F2', 'C'): 0.05,
+        ('F3', 'C'): 0.75,
+        ('F4', 'C'): 0.15,
+        ('F5', 'C'): 0.05,
 
         ('F1', 'D'): 0.0,
-        ('F2', 'D'): 0.0,
+        ('F2', 'D'): 0.1,
         ('F3', 'D'): 0.0,
-        ('F4', 'D'): 0.5,
-        ('F5', 'D'): 0.5
+        ('F4', 'D'): 0.9,
+        ('F5', 'D'): 0.0,
     }
-
     #  ------- End of user specific input --------------------------------------
-
     if assign_binary_probabilities:
         print('Calculate probability logs as binary logs')
 
@@ -95,4 +92,12 @@ def run(roxar=None, project=None, **kwargs):
 if __name__ == '__main__':
     import roxar
 
-    run(roxar, project)
+    run(
+        roxar, project,
+        grid_model_name='GridModelCoarse',
+        blocked_wells_set_name='BW',
+        input_facies_log_name='Deterministic_facies',
+        prefix_prob_logs='Prob',
+        assign_binary_probabilities=False,
+        additional_unobserved_facies_list=[],
+    )

@@ -16,8 +16,8 @@
   </Optimization>
 
   <SelectedZonesAndRegions>
-    <SelectedZoneWithRegions zone="1"> 1 2 </SelectedZoneWithRegions> 
-    <SelectedZoneWithRegions zone="4"> 2 </SelectedZoneWithRegions> 
+    <SelectedZoneWithRegions zone="1"> 1 2 </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="4"> 2 </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>
 
   <RMSProjectName> testAPSWorkflow.rms10.1.3 </RMSProjectName>
@@ -176,7 +176,7 @@
           <directionStacking> 1 </directionStacking>
           <stackAngle> 1.5 </stackAngle>
           </Linear3D>
-        </Trend>  
+        </Trend>
         <RelStdDev> 0.01 </RelStdDev>
         <SeedForPreview> 999987 </SeedForPreview>
       </GaussField>

@@ -847,17 +847,12 @@ class Trunc2D_Base:
         Description: Check if facies probability is close to 1.0. Return True or False.
                      This function is used to check if it is necessary to calculate truncation map or not.
         """
-        isDetermined = 0
         for fIndx in range(len(faciesProb)):
             self._faciesIsDetermined[fIndx] = 0
             if faciesProb[fIndx] > (1.0 - self._epsFaciesProb):
                 self._faciesIsDetermined[fIndx] = 1
-                isDetermined = 1
-                break
-        if isDetermined == 1:
-            return True
-        else:
-            return False
+                return True
+        return False
 
     def _checkFaciesForZone(self):
         """
@@ -1356,7 +1351,7 @@ Background facies:
 
     @staticmethod
     def _makeRoundOfFaciesProb(faciesProb, resolution):
-        '''Calculate round off of facies probabilities and adjusted 
+        '''Calculate round off of facies probabilities and adjusted
            so that the round off values also are close to normalised '''
         faciesProbNew = []
         sumProb = 0.0

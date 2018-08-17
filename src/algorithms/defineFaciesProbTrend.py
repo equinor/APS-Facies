@@ -47,7 +47,7 @@ class DefineFaciesProb(BaseDefineFacies):
         self.debug_level = Debug.ON
         use_const_prob_trend = int(self.use_const_prob_from_vol_fraction)
         if self.debug_level >= Debug.ON:
-            if  use_const_prob_trend == 0:
+            if not use_const_prob_trend:
                 print('Calculate probability cubes having trends in each zone defined by the RMS discrete 3D parameter input')
             else:
                 print('Calculate probability cubes which have constant values in each zone as average probability (volume fraction)')
@@ -136,7 +136,7 @@ class DefineFaciesProb(BaseDefineFacies):
                         code = facies_real_values[index]
                         p_index = prob_index[code]
                         weight = probabilities[f, p_index]
-                        sum_facies_prob = sum_facies_prob +  weight
+                        sum_facies_prob = sum_facies_prob + weight
                     prob_average = sum_facies_prob/num_defined_cells
                     if self.debug_level >= Debug.ON:
                         print('Average probability (volume fraction) for facies {} zone {}  is: {}'
@@ -145,7 +145,6 @@ class DefineFaciesProb(BaseDefineFacies):
                     for i in range(num_defined_cells):
                         index = cell_index[i]
                         probability_values[index] = prob_average
-
 
             # Calculate cumulative prob of all previously processed facies including current
             sum_probability_values += probability_values

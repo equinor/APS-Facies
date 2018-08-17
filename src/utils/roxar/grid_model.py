@@ -119,7 +119,8 @@ def get3DParameter(grid_model, parameter_name):
         raise ValueError("Expected non-empty grid model, but was empty. (Grid Model: '{}')".format(grid_model.name))
 
     # Check if specified parameter name exists.
-    if parameter_name not in grid_model.properties:
+    found = any([param.name == parameter_name for param in grid_model.properties])
+    if not found:
         raise ValueError(
             "The parameter '{}' was expected in grid model '{}', but does not exist."
             "".format(parameter_name, grid_model.name)

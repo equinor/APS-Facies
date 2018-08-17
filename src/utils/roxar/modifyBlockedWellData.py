@@ -1,9 +1,11 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 import roxar
 import numpy as np
 from src.utils.constants.simple import  ProbabilityTolerances, Debug
 
-def getBlockedWells(project, grid_model_name,bw_name):
+
+def getBlockedWells(project, grid_model_name, bw_name):
     """ Get blocked wells """
     grid_model = project.grid_models[grid_model_name]
     if grid_model.is_empty():
@@ -13,10 +15,11 @@ def getBlockedWells(project, grid_model_name,bw_name):
     blocked_wells = blocked_wells_set[bw_name]
     return blocked_wells
 
+
 def getFaciesTableFromBlockedWells(project, grid_model_name, blocked_wells_set_name, facies_log_name, realization_number=0):
     """ Get blocked well of type discrete and return dictionary with facies codes and names."""
     # Get blocked wells
-    blocked_wells =  getBlockedWells(project, grid_model_name, bw_name)
+    blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
     if blocked_wells is not None:
         if blocked_wells.is_empty(realization_number):
             return None
@@ -32,11 +35,12 @@ def getFaciesTableFromBlockedWells(project, grid_model_name, blocked_wells_set_n
     else:
         return None
 
+
 def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked_wells_set_name, facies_log_name, realization_number=0):
     """ Get blocked well of type discrete and return dictionary with facies codes and names and facies log values in numpy array"""
 
-    blocked_wells =  getBlockedWells(project, grid_model_name, blocked_wells_set_name)
-    if blocked_wells == None:
+    blocked_wells = getBlockedWells(project, grid_model_name, blocked_wells_set_name)
+    if blocked_wells is None:
         return None, None
     if blocked_wells.is_empty(realization_number):
         print('Error: Specified blocked wells {} in grid model {} for realization {} is empty'
@@ -72,9 +76,8 @@ def createProbabilityLogs(project, grid_model_name,
 
     code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, facies_log_name, realization_number)
     blocked_wells = getBlockedWells(project, grid_model_name,bw_name)
-    if blocked_wells == None:
+    if blocked_wells is None:
         return
-
 
     if conditional_prob_facies is None:
         # Loop over all facies name in facies log and create a probability log binary values  (0 or 1) for each facies
@@ -137,18 +140,16 @@ def createProbabilityLogs(project, grid_model_name,
             prob_log.set_values(prob_values)
 
 
-
-
-def createCombinedFaciesLogForBlockedWells(project, grid_model_name, bw_name, original_facies_log_name, original_code_names, 
+def createCombinedFaciesLogForBlockedWells(project, grid_model_name, bw_name, original_facies_log_name, original_code_names,
                                            new_facies_log_name, new_code_names, mapping_between_original_and_new):
     # Original facies log code and name table and log values
     code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, original_facies_log_name)
-    if code_names == None:
+    if code_names is None:
         return
     # Check that code_names and original_code_names are identical
     if code_names != original_code_names:
         print('Error: Specified facies table (code_names) for original facies log is different from facies table in original facies log')
-        return 
+        return
     # Create space for new facies log
     blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
     new_facies_log = blocked_wells.properties.create(new_facies_log_name, roxar.GridPropertyType.discrete, np.int32)
@@ -161,7 +162,7 @@ def createCombinedFaciesLogForBlockedWells(project, grid_model_name, bw_name, or
         original_code = None
         for code, name in original_code_names.items():
             if name == original_facies:
-                originalCode = code
+                original_code = code
                 found = True
                 break
         if not found:
@@ -172,15 +173,14 @@ def createCombinedFaciesLogForBlockedWells(project, grid_model_name, bw_name, or
         new_code = None
         for code, name in new_code_names.items():
             if name == new_facies:
-                newCode = code
+                new_code = code
                 found = True
                 break
         if not found:
             print('Error: The facies name {} is not found in new facies log'.format(new_facies))
             return
-        
-        new_code_for_old_code[originalCode] = newCode
 
+        new_code_for_old_code[original_code] = new_code
 
     # For each new facies
     for i in range(len(facies_log_values)):

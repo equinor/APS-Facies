@@ -87,7 +87,9 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
 
 # -------  Main ----------------
 def run(roxar=None, project=None, **kwargs):
-    input_aps_model_file, _, _, _, debug_level = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    input_aps_model_file = params['model_file']
+    debug_level = params['debug_level']
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
     write_output_file_with_parameter_names = False
     if debug_level >= Debug.ON:

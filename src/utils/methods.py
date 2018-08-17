@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from enum import Enum
 
 from src.utils.constants.simple import Debug
@@ -70,8 +71,8 @@ def get_colors(n, min_colors=2):
         return []
 
 
-def get_model_file_name(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model'], default_name='APS.xml')
+def get_model_file_name(_default_name='APS.xml', **kwargs):
+    return _get_file_name(kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model_file', 'model'], default_name=_default_name)
 
 
 def get_rms_project_data_file(**kwargs):
@@ -93,6 +94,26 @@ def get_debug_level(**kwargs):
         return Debug(debug_level)
     else:
         return debug_level
+
+
+def get_fmu_variables_file(**kwargs):
+    return _get_file_name(kwargs, legal_kwargs=['fmu_variables_file', 'input_selected_fmu_variable_file'], default_name='examples/FMU_selected_variables.dat')
+
+
+def get_output_model_file(**kwargs):
+    return _get_file_name(kwargs, legal_kwargs=['output_model_file'], default_name='APS_with_FMU_tags.xml')
+
+
+def get_tagged_variables_file(**kwargs):
+    return _get_file_name(kwargs, legal_kwargs=['tagged_variable_file'], default_name='examples/FMU_tagged_variables.dat')
+
+
+def get_tag_all_variables(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['tag_all_variables'], default_value=True)
+
+
+def get_write_log_file(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['write_log_file'], default_value=True)
 
 
 def _get_file_name(kwargs, legal_kwargs, default_name):
@@ -120,14 +141,55 @@ def get_prefix(**kwargs):
     return base_path
 
 
+# TODO: Make more generic; dict with precise names?
+def get_grid_model_name(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['grid_model', 'grid_model_name'], default_value='GridModel2')
+
+
+def get_blocked_well_name(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['blocked_well', 'blocked_well_name'], default_value='BW')
+
+
+def get_facies_log_name(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['facies_log', 'facies_log_name'], default_value='Facies')
+
+
+def get_probability_log_prefix(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['probability_log_prefix', 'prefix_prob_log'], default_value='Prob')
+
+
+def get_additional_unobserved_facies(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['additional_unobserved_facies'], default_value=['F6'])
+
+
+def get_facies_code(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['facies_code'], default_value=0)
+
+
+def get_run_test_script(**kwargs):
+    return _get_value(kwargs, legal_kwargs=['run_test_script'], default_value=False)
+
+
 def get_run_parameters(**kwargs):
-    base_path = get_prefix(**kwargs)
-    model_file = get_model_file_name(**kwargs)
-    rms_data_file = get_rms_project_data_file(**kwargs)
-    global_ipl_file = get_global_ipl_file(**kwargs)
-    debug_level = get_debug_level(**kwargs)
-    input_dir = base_path + '/tmp_gauss_sim'
-    return model_file, rms_data_file, global_ipl_file, input_dir, debug_level
+    return {
+        'model_file': get_model_file_name(**kwargs),
+        'output_model_file': get_output_model_file(**kwargs),
+        'rms_data_file': get_rms_project_data_file(**kwargs),
+        'global_include_file': get_global_ipl_file(**kwargs),
+        'tagged_variables_file': get_tagged_variables_file(**kwargs),
+        'tag_all_variables': get_tag_all_variables(**kwargs),
+        'fmu_variables_file': get_fmu_variables_file(**kwargs),
+        'write_log_file': get_write_log_file(**kwargs),
+        'input_directory': get_prefix(**kwargs) + '/tmp_gauss_sim',
+        'grid_model_name': get_grid_model_name(**kwargs),
+        'blocked_wells_set_name': get_blocked_well_name(**kwargs),
+        'facies_log_name': get_facies_log_name(**kwargs),
+        'prefix_prob_logs': get_probability_log_prefix(**kwargs),
+        'additional_unobserved_facies_list': get_additional_unobserved_facies(**kwargs),
+        'facies_code': get_facies_code(**kwargs),
+        'run_test_script': get_run_test_script(**kwargs),
+        'debug_level': get_debug_level(**kwargs),
+    }
 
 
 def calc_average(cell_index_defined, values):

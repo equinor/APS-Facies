@@ -1,10 +1,40 @@
 # -*- coding: utf-8 -*-
 from src.utils.constants.simple import Debug
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple, Iterator
 from xml.etree.ElementTree import Element, ElementTree
+
+from src.utils.records import FaciesRecord
+
+
+FaciesName = str
+FaciesCode = int
+
+
+class Facies:
+    name: str
+    code: int
+    def __init__(self, name: str, code: int): ...
+    @classmethod
+    def from_definition(cls, definition: Union[
+        FaciesRecord,
+        Tuple[str, int],
+        List[Union[str, int]],
+    ]) -> Facies: ...
+    def to_list(self) -> Tuple[FaciesName, FaciesCode]: ...
+
+
+class FaciesTable(list):
+    _facies: List[Facies]
+    def __init__(self, facies: Optional[List[Facies]] = None): ...
+    def __iter__(self) -> Iterator: ...
+    def __len__(self) -> int: ...
+    def append(self, facies: Facies) -> None: ...
+    def pop(self, facies: Union[int, FaciesName]) -> Facies: ...
 
 
 class APSMainFaciesTable:
+    __faciesTable: FaciesTable
+    __class_name: str
     def __init__(
         self,
         ET_Tree: Optional[ElementTree] = None,
@@ -13,6 +43,7 @@ class APSMainFaciesTable:
         debug_level: Debug = Debug.OFF
     ) -> None: ...
     def __len__(self) -> int: ...
+    def __interpretXMLTree(self, ET_Tree: ElementTree) -> None: ...
     def XMLAddElement(self, root: Element) -> None: ...
     def addFacies(self, faciesName: str, code: int) -> int: ...
     def getClassName(self) -> str: ...

@@ -77,7 +77,10 @@ def run_main(
 
 
 def run(roxar=None, project=None, **kwargs):
-    model_file, rms_data_file_name, _, input_dir, _ = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    model_file = params['model_file']
+    rms_data_file_name = params['rms_data_file']
+    input_dir = params['input_directory']
     run_main(project, model_file=model_file, rms_data_file_name=rms_data_file_name, inputDir=input_dir)
 
 

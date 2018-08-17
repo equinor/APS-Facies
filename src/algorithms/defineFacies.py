@@ -57,8 +57,6 @@ class BaseDefineFacies:
     @xml_property('UseConstantProbFromVolumeFraction')
     def use_const_prob_from_vol_fraction(self): pass
 
-
-
     @property
     def selected_zone_numbers(self):
         if self.__selected_zone_numbers is None:

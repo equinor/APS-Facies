@@ -32,16 +32,21 @@ const fetchParameterHelper = (commit, dispatch, promise) => {
 }
 
 const mirrorZoneRegions = store => {
-  store.subscribe(({type, payload}, state) => {
+  store.subscribe(({ type, payload }, state) => {
     if (
       type.startsWith('zones') &&
       state.regions.use &&
       !!state.zones.current
     ) {
-      if (type === 'zones/REGIONS') store.commit('regions/AVAILABLE', {regions: payload.regions})
-      else if (type === 'zones/CURRENT') store.commit('regions/AVAILABLE', {regions: state.zones.available[`${payload.id}`].regions})
-      else {
-        // TODO: Handle other cases that MAY be relevant
+      if (type === 'zones/REGIONS') {
+        store.commit('regions/AVAILABLE', { regions: payload.regions })
+      } else if (type === 'zones/CURRENT') {
+        store.commit('regions/AVAILABLE', { regions: state.zones.available[`${payload.id}`].regions })
+      } else if (type === 'zones/SELECTED') {
+        // Nothing to do.
+        // Handled by zone's selected action
+      } else {
+        throw new Error(`Unsupported commit type, ${type}`)
       }
     }
   })

@@ -33,3 +33,13 @@ class TrendRecord(NamedTuple):
 class SeedRecord(NamedTuple):
     Name: GaussianFieldName
     Seed: int
+
+
+class FaciesRecord(NamedTuple):
+    Name: str
+    Code: int
+
+
+class FaciesProbabilityRecord(NamedTuple):
+    Name: str
+    Probability: Union[str, float]

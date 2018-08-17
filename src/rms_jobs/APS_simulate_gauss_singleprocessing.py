@@ -87,10 +87,10 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
         dz =  simBoxThickness/nz
 
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('-- Zone: {}'.format(str(zoneNumber)))
+            print('-- Zone: {}'.format(zoneNumber))
         if debug_level >= Debug.VERBOSE:
             print('--   Grid layers: {}     Start layer: {}     End layer: {}'
-                  ''.format(str(nLayers), str(start+1), str(end+1)))
+                  ''.format(nLayers, start + 1, end + 1))
 
         gaussResultListForZone = []
         for i in range(len(gaussFieldNames)):
@@ -142,9 +142,9 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
             if debug_level >= Debug.VERY_VERBOSE:
                 [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
                 print('Debug output: Grid dimensions with padding for simulation:')
-                print('     nx: {}   nx with padding: {}'.format(str(nx), str(nx_padding)))
-                print('     ny: {}   ny with padding: {}'.format(str(ny), str(ny_padding)))
-                print('     nz: {}   nz with padding: {}'.format(str(nz), str(nz_padding)))
+                print('     nx: {}   nx with padding: {}'.format(nx, nx_padding))
+                print('     ny: {}   ny with padding: {}'.format(ny, ny_padding))
+                print('     nz: {}   nz with padding: {}'.format(nz, nz_padding))
 
             # Simulate gauss field. Return numpy 1D vector in F order
             gaussVector = nrlib.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
@@ -152,7 +152,7 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
             gaussResultListForZone.append(gaussResult)
             if debug_level >= Debug.VERBOSE:
                 print('--- Finished running simulation of {} for zone,region: ({},{})'
-                      ''.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
+                      ''.format(gaussFieldName, zoneNumber, regionNumber))
                 print('')
 
         # End loop over gauss fields for one zone

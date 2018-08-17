@@ -14,10 +14,10 @@
   </Optimization>
 
   <SelectedZonesAndRegions>
-    <SelectedZoneWithRegions zone="1">  0      </SelectedZoneWithRegions> 
-    <SelectedZoneWithRegions zone="2">  0      </SelectedZoneWithRegions> 
-    <SelectedZoneWithRegions zone="3">  0      </SelectedZoneWithRegions> 
-    <SelectedZoneWithRegions zone="4">  0      </SelectedZoneWithRegions> 
+    <SelectedZoneWithRegions zone="1">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="2">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="3">  0      </SelectedZoneWithRegions>
+    <SelectedZoneWithRegions zone="4">  0      </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>
 
   <RMSProjectName> testAPSSynthetic.rms11_build8 </RMSProjectName>
@@ -100,7 +100,7 @@
           <origin_y> 0.0 </origin_y>
           <origin_z_simbox> 0.5 </origin_z_simbox>
           <origintype> 'Relative' </origintype>
-        </Trend>  
+        </Trend>
         <RelStdDev> 0.02 </RelStdDev>
         <SeedForPreview> 276787 </SeedForPreview>
       </GaussField>
@@ -194,7 +194,7 @@
           <azimuth> 315.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 1.5 </stackAngle>
-        </Trend>  
+        </Trend>
         <RelStdDev> 0.01 </RelStdDev>
         <SeedForPreview> 3939276787 </SeedForPreview>
       </GaussField>
@@ -310,7 +310,7 @@
           <origin_y> 0.5 </origin_y>
           <origin_z_simbox> 1.0 </origin_z_simbox>
           <origintype> 'Relative' </origintype>
-        </Trend>  
+        </Trend>
         <RelStdDev> 0.05 </RelStdDev>
         <SeedForPreview> 9989276787 </SeedForPreview>
       </GaussField>
@@ -392,7 +392,7 @@
           <origin_y> 0.5 </origin_y>
           <origin_z_simbox> 1.0 </origin_z_simbox>
           <origintype> 'Relative' </origintype>
-        </Trend>  
+        </Trend>
         <RelStdDev> 0.05 </RelStdDev>
         <SeedForPreview> 9989276787 </SeedForPreview>
       </GaussField>

@@ -21,7 +21,10 @@ def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, 
 
 # -------  Main ----------------
 def run(roxar=None, project=None, **kwargs):
-    input_aps_model_file, _, global_ipl_file, _, debug_level = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    input_aps_model_file = params['model_file']
+    global_ipl_file = params['global_include_file']
+    debug_level = params['debug_level']
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
     updateAPSModelFromFMU(global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level)
 

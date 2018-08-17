@@ -303,8 +303,11 @@ def run_simulations(
 
 
 def run(roxar=None, project=None, **kwargs):
-    model_file, rms_data_file_name, _, output_dir, _ = get_run_parameters(**kwargs)
-    write_log_file = True
+    params = get_run_parameters(**kwargs)
+    model_file = params['model_file']
+    rms_data_file_name = params['rms_data_file']
+    output_dir = params['input_directory']
+    write_log_file = params['write_log_file']
     run_simulations(
         modelFile=model_file,
         rms_data_file_name=rms_data_file_name,
