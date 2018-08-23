@@ -208,7 +208,7 @@ def run_simulations(
     dy = simBoxYLength/ny
 
     # Loop over all zones and simulate gauss fields
-    allZoneModels = apsModel.getAllZoneModelsSorted()
+    allZoneModels = apsModel.sorted_zone_models()
     for key, zoneModel in allZoneModels.items():
         zoneNumber = key[0]
         regionNumber = key[1]

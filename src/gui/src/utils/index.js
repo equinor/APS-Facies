@@ -1,5 +1,13 @@
+const makeData = (items, _class) => {
+  const data = {}
+  for (const item of items) {
+    const instance = new _class(item)
+    data[instance.id] = instance
+  }
+  return data
+}
+
 const hasValidChildren = component => {
-  // FIXME: The copying of array may potentially be a bottleneck
   let children = component.$children.slice()
   while (children.length > 0) {
     const child = children.shift()
@@ -13,15 +21,18 @@ const hasValidChildren = component => {
   return true
 }
 
-const notEmpty = property => !(typeof property === 'undefined' || property === null || property === '')
+const isEmpty = property => (typeof property === 'undefined' || property === null || property === '')
+const notEmpty = property => !isEmpty(property)
 
 const getRandomInt = max => Math.floor(Math.random() * max)
 
 const newSeed = () => getRandomInt(Math.pow(2, 64) - 1)
 
 export {
+  makeData,
   hasValidChildren,
   getRandomInt,
   newSeed,
+  isEmpty,
   notEmpty
 }

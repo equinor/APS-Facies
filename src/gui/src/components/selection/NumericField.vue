@@ -50,7 +50,7 @@ import Vue from 'vue'
 import VueTypes from 'vue-types'
 import {required as requiredField, between, numeric} from 'vuelidate/lib/validators'
 import {updatableType, nullableNumber} from 'Utils/typing'
-import {notEmpty} from 'Utils'
+import {notEmpty, isEmpty} from 'Utils'
 
 export default Vue.extend({
   props: {
@@ -186,7 +186,7 @@ export default Vue.extend({
       this.emitChange(numericValue)
     },
     getValue (val) {
-      return !notEmpty(val)
+      return isEmpty(val)
         ? null
         : typeof val.value !== 'undefined'
           ? val.value
@@ -194,7 +194,7 @@ export default Vue.extend({
     },
     getUpdatable (val) {
       const defaultValue = false
-      return !notEmpty(val)
+      return isEmpty(val)
         ? defaultValue
         : typeof val.updatable !== 'undefined'
           ? val.updatable

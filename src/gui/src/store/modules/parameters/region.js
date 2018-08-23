@@ -12,9 +12,13 @@ export default {
   actions: {
     select: ({commit, dispatch}, regionParameter) => {
       return promiseSimpleCommit(commit, 'CURRENT', regionParameter)
-        .then(() => dispatch('regions/fetch', null, { root: true }))
+        .then(() => {
+          dispatch('regions/use', {use: !!regionParameter}, { root: true })
+          dispatch('regions/fetch', null, { root: true })
+        })
     },
     fetch: ({commit, dispatch, rootGetters}) => {
+      commit('CURRENT', null)
       return fetchParameterHelper(commit, dispatch, rms.regionParameters(rootGetters.gridModel))
     },
   },

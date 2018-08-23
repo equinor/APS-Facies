@@ -12,6 +12,7 @@
 
 <script>
 import Vue from 'vue'
+import VueTypes from 'vue-types'
 import { AgGridVue } from 'ag-grid-vue'
 
 export default Vue.extend({
@@ -20,38 +21,21 @@ export default Vue.extend({
   },
 
   props: {
-    rowData: {
-      type: Array,
-      required: true
-    },
-    columnDefinitions: {
-      type: Array,
-      required: true
-    },
-    tableStyle: {
-      type: String,
-      default: 'width: 30rem; height: 10rem;'
-    },
-    agTheme: {
-      type: String,
-      default: 'ag-theme-balham'
-    },
-    defaultColumnWidth: {
-      type: Number,
-      required: false,
-      default: 100
-    },
-    additionalGridOptions: {
-      type: Object,
-      required: false,
-      default: () => {}
-    }
+    rowData: VueTypes.array.isRequired,
+    columnDefinitions: VueTypes.array.isRequired,
+    agTheme: VueTypes.string.def('ag-theme-balham'),
+    defaultColumnWidth: VueTypes.integer.def(100),
+    additionalGridOptions: VueTypes.object,
   },
 
   data () {
     return {
       gridOptions: {},
       gridApi: null,
+      tableStyle: {
+        width: '30rem',
+        height: '10rem',
+      },
     }
   },
 
@@ -69,25 +53,27 @@ export default Vue.extend({
     }
 
     this.gridOptions.columnDefs = this.columnDefinitions
-    // this.gridOptions.rowData = this.rowData
+  },
+
+  mounted () {
+    this.resize()
   },
 
   methods: {
-    onGridReady: function (params) {
+    onGridReady (params) {
       const gridApi = params.api
       gridApi.sizeColumnsToFit()
 
-      window.addEventListener('resize', function () {
-        setTimeout(function () {
-          gridApi.sizeColumnsToFit()
-        })
-      })
       this.gridApiReady(gridApi)
     },
 
     gridApiReady (api) {
       this.gridApi = api
       this.$emit('grid-api-ready', api)
+    },
+
+    resize () {
+      this.tableStyle.width = this.$parent.$el.clientWidth
     },
   },
 })

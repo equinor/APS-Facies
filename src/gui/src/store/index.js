@@ -2,10 +2,12 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import gridModels from 'Store/modules/gridModels'
 import zones from 'Store/modules/zones'
+import regions from 'Store/modules/regions'
 import facies from 'Store/modules/facies'
 import gaussianRandomFields from 'Store/modules/gaussianRandomFields'
 import parameters from 'Store/modules/parameters'
 import constants from 'Store/modules/constants'
+import {mirrorZoneRegions} from 'Store/utils'
 
 Vue.use(Vuex)
 
@@ -15,9 +17,14 @@ export default new Vuex.Store({
 
   strict: process.env.NODE_ENV !== 'production',
 
+  plugins: [
+    mirrorZoneRegions,
+  ],
+
   modules: {
     gridModels,
     zones,
+    regions,
     facies,
     gaussianRandomFields,
     parameters,
@@ -36,10 +43,10 @@ export default new Vuex.Store({
       return state.gridModels.current
     },
     zone: (state) => {
-      return state.zones.available[`${state.zones.current}`]
+      return state.zones.current ? state.zones.available[`${state.zones.current}`] : null
     },
-    region: (state, getters) => {
-      // return getters.zone ? getters.zone.regions.current : null
+    region: (state) => {
+      return state.regions.use ? state.regions.available[`${state.regions.current}`] : null
     },
     facies: (state) => {
       return state.facies.current
@@ -58,6 +65,13 @@ export default new Vuex.Store({
     },
     field: (state) => (id) => {
       return state.gaussianRandomFields.fields[`${id}`]
-    }
+    },
+    // These are the 'available' for various modules / properties
+    zones: (state) => {
+      return state.zones.available
+    },
+    regions: (state) => {
+      return state.regions.available
+    },
   },
 })
