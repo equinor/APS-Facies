@@ -43,6 +43,14 @@ class APSModel:
     __preview_cross_section: CrossSection
     preview_cross_section: CrossSection
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
+    @classmethod
+    def from_string(cls, xml_content: str) -> APSModel: ...
+    def __interpretTree(
+            self,
+            root:          Element,
+            debug_level:   Debug         = Debug.OFF,
+            modelFileName: Optional[str] = None
+    ) -> None: ...
     def updateXMLModelFile(
             self,
             modelFileName:              Optional[str]       = None,

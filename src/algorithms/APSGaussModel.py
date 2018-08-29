@@ -814,7 +814,6 @@ class APSGaussModel:
 
             assert mainFaciesTable
             assert simBoxThickness
-            assert modelFileName
 
             self.__main_facies_table = mainFaciesTable
             self.__sim_box_thickness = simBoxThickness

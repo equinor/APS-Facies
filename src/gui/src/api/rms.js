@@ -18,4 +18,5 @@ export default {
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
   options: (name) => api.call('get_options', name),
   simulateGaussianField: (name, variogram, trend, settings) => api.call('simulate_gaussian_field', name, variogram, trend, settings),
+  isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
 }

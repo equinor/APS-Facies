@@ -3,7 +3,6 @@
 import collections
 import copy
 import xml.etree.ElementTree as ET
-from xml.etree.ElementTree import Element
 
 from src.algorithms.APSGaussModel import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
@@ -207,10 +206,20 @@ class APSModel:
         self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
 
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
-        tree = ET.parse(modelFileName)
-        self.__ET_Tree = tree
-        root = tree.getroot()
+        root = ET.parse(modelFileName).getroot()
+        self.__interpretTree(root, debug_level, modelFileName)
 
+    @classmethod
+    def from_string(cls, xml_content):
+        root = ET.fromstring(xml_content)
+        return cls().__interpretTree(root, Debug.VERY_VERBOSE)
+
+    def __interpretTree(self, root, debug_level=Debug.OFF, modelFileName=None):
+        self.__ET_Tree = ET.ElementTree(root)
+        if root.tag != 'APSModel':
+            raise ValueError(
+                'The root element must be APSModel'
+            )
         apsmodel_version = root.get('version')
         if apsmodel_version is None:
             raise ValueError('attribute version is not defined in root element')
@@ -906,7 +915,7 @@ class APSModel:
                 'crossSectionRelativePos': str(self.preview_cross_section_relative_position),
                 'scale': str(self.__previewScale)
             }
-            elem = Element(tag, attribute)
+            elem = ET.Element(tag, attribute)
             root.append(elem)
 
         # If selected zone list is defined (has elements) write them to a keyword
@@ -914,7 +923,7 @@ class APSModel:
         if len(selectedZoneNumberList) > 0:
             sortedSelectedZoneAndRegionNumberTable = collections.OrderedDict(sorted(self.__selectedZoneAndRegionNumberTable.items()))
             tag = 'SelectedZonesAndRegions'
-            elemSelectedZoneAndRegion = Element(tag)
+            elemSelectedZoneAndRegion = ET.Element(tag)
             root.append(elemSelectedZoneAndRegion)
             for key, selected in sortedSelectedZoneAndRegionNumberTable.items():
                 zNumber = key[0]
@@ -922,7 +931,7 @@ class APSModel:
                 tag = 'SelectedZoneWithRegions'
                 attributes = {'zone': str(zNumber)}
                 text = ''
-                elemZoneRegion = Element(tag, attributes)
+                elemZoneRegion = ET.Element(tag, attributes)
 
                 rList = self.getSelectedRegionNumberListForSpecifiedZoneNumber(zNumber)
                 text = ''
@@ -951,7 +960,7 @@ class APSModel:
         ]
 
         for tag, value in tags:
-            elem = Element(tag)
+            elem = ET.Element(tag)
             elem.text = ' ' + value + ' '
             root.append(elem)
 
@@ -960,7 +969,7 @@ class APSModel:
 
         # Add command ZoneModels
         tag = 'ZoneModels'
-        zoneListElement = Element(tag)
+        zoneListElement = ET.Element(tag)
 
         if len(self.__zoneModelTable.items()) > 0 and len(self.__sortedZoneModelTable.items()) == 0:
             # Define sorted sequence of the zone models
@@ -975,7 +984,7 @@ class APSModel:
 
     def writeModel(self, modelFileName, attributesFileName=None, debug_level=Debug.OFF):
         fmu_attributes = list()
-        top = Element('APSModel', {'version': self.__aps_model_version})
+        top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
         with open(modelFileName, 'w') as file:
             file.write(root_updated)

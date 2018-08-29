@@ -27,7 +27,7 @@ app = Flask(__name__)
 cors = CORS(app, origins=_get_client_url())
 
 
-@app.route('/<signature>', methods=['GET'])
+@app.route('/<path:signature>', methods=['GET'])
 def call_python(signature: str):
     method_name, args = parse_signature(signature)
     return jsonify(call(method_name, *args))
