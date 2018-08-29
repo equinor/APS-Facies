@@ -6,6 +6,12 @@ from src.algorithms.APSGaussModel import (
 from src.algorithms.properties import CrossSection
 from src.utils.constants.simple import VariogramType, MinimumValues, MaximumValues, TrendType, Direction, OriginType
 
+from src.algorithms.APSModel import APSModel
+
+from base64 import b64decode
+
+from src.utils.exceptions.xml import ApsXmlError
+
 
 def empty_if_none(func):
     def wrapper(*args):
@@ -170,6 +176,20 @@ class RMSData:
     @staticmethod
     def get_code_names(_property):
         return [{'code': code, 'name': name} for code, name in _property.code_names.items()]
+
+    @staticmethod
+    def is_aps_model_valid(encoded_xml):
+        valid = True
+        error = ''
+        try:
+            APSModel.from_string(b64decode(encoded_xml))
+        except (ValueError, ApsXmlError) as e:
+            valid = False
+            error = str(e)
+        except (Exception) as e:
+            valid = False
+            error = str(e)
+        return {'valid': valid, 'error': error}
 
 
 def list_all_wells(project):

@@ -72,7 +72,6 @@ class APSFaciesProb:
 
     def __interpretXMLTree(self, ET_Tree_zone, modelFileName):
         assert self.__mainFaciesTable is not None
-        assert modelFileName is not None
         assert ET_Tree_zone is not None
 
         self.__faciesProbForZoneModel = []
