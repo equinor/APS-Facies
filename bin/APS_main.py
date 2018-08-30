@@ -311,12 +311,10 @@ def run(
     if grid_model.is_empty():
         raise ValueError('Specified grid model: ' + grid_model.name + ' is empty.')
 
-    all_zone_models = aps_model.getAllZoneModelsSorted()
+    all_zone_models = aps_model.sorted_zone_models
     zone_param_name = aps_model.getZoneParamName()
     region_param_name = aps_model.getRegionParamName()
-    use_regions = False
-    if region_param_name != '':
-        use_regions = True
+    use_regions = region_param_name != ''
     result_param_name = aps_model.getResultFaciesParamName()
 
     # Get zone param values
@@ -429,7 +427,7 @@ def run(
                     # Allocate space for possible trends to write to RMS regardless of whether
                     #  trend is used or not in the model
                     # Note that the trend parameter read contains all grid cell values for all zones
-                    #  so even if sone zones don't use # this trend, others may use it. It will be read
+                    #  so even if some zones don't use # this trend, others may use it. It will be read
                     #  only once for the whole grid anyway.
                     gf_name_trend = gf_name + '_trend'
 

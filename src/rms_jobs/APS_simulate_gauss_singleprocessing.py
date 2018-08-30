@@ -68,7 +68,7 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
             )
 
     # Loop over all zones and simulate gauss fields
-    allZoneModels = apsModel.getAllZoneModelsSorted()
+    allZoneModels = apsModel.sorted_zone_models()
     for key, zoneModel in allZoneModels.items():
         zoneNumber = key[0]
         regionNumber = key[1]

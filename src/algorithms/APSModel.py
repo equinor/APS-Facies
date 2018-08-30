@@ -65,7 +65,7 @@ class APSModel:
        def isSelected(self, zoneNumber, regionNumber)
        def getZoneModel(self,zoneNumber,regionNumber=0)
        def getAllZoneModels(self)
-       def getAllZoneModelsSorted(self)
+       def sorted_zone_models(self)
        def getGridModelName(self)
        def getResultFaciesParamName(self)
        def getZoneNumberList(self)
@@ -187,7 +187,6 @@ class APSModel:
 
         self.__faciesTable = mainFaciesTable
         self.__zoneModelTable = zoneModelTable if zoneModelTable else {}
-        self.__sortedZoneModelTable = {}
         self.__zoneNumberList = []
         self.__selectedZoneAndRegionNumberTable = {}
         self.__selectAllZonesAndRegions = True
@@ -198,12 +197,8 @@ class APSModel:
         self.__debug_level = debug_level
 
         # Read model if it is defined
-        if modelFileName is None:
-            if len(self.__zoneModelTable) > 0:
-                # Define sorted sequence of the zone models
-                self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
-            return
-        self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
+        if modelFileName is not None:
+            self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
 
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         root = ET.parse(modelFileName).getroot()
@@ -444,14 +439,11 @@ class APSModel:
 
         self.__checkZoneModels()
 
-        # Define sorted sequence of the zone models
-        self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
-
         if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
             if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
                 print('- Zone models are defined for the following combination '
                       'of zone and region numbers:')
-                for key, value in self.__sortedZoneModelTable.items():
+                for key, value in self.sorted_zone_models.items():
                     zone_number = key[0]
                     region_number = key[1]
                     if region_number == 0:
@@ -740,8 +732,10 @@ class APSModel:
     def getAllZoneModels(self):
         return self.__zoneModelTable
 
-    def getAllZoneModelsSorted(self):
-        return self.__sortedZoneModelTable
+    @property
+    def sorted_zone_models(self):
+        # Define sorted sequence of the zone models
+        return collections.OrderedDict(sorted(self.__zoneModelTable.items()))
 
     def getGridModelName(self):
         return copy.copy(self.__rmsGridModelName)
@@ -971,11 +965,7 @@ class APSModel:
         tag = 'ZoneModels'
         zoneListElement = ET.Element(tag)
 
-        if len(self.__zoneModelTable.items()) > 0 and len(self.__sortedZoneModelTable.items()) == 0:
-            # Define sorted sequence of the zone models
-            self.__sortedZoneModelTable = collections.OrderedDict(sorted(self.__zoneModelTable.items()))
-
-        for key, zoneModel in self.__sortedZoneModelTable.items():
+        for key, zoneModel in self.sorted_zone_models.items():
             # Add command Zone
             zoneModel.XMLAddElement(zoneListElement, fmu_attributes)
         root.append(zoneListElement)

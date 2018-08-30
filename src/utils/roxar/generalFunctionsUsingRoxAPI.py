@@ -482,6 +482,7 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cel
             currentValues = inputValues
 
         p.set_values(currentValues, realNumber)
+        # TODO: Is set_shared REALLY necessary?
         p.set_shared(isShared, realNumber)
 
 

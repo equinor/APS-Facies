@@ -1,41 +1,74 @@
 import { promiseSimpleCommit } from 'Store/utils'
+import { Region } from 'Store/utils/domain'
+import { makeData, isEmpty } from 'Utils'
 import rms from 'Api/rms'
+import { SELECTED_ITEMS } from 'Store/mutations'
 
 export default {
   namespaced: true,
 
   state: {
-    available: [],
-    selected: [],
+    available: {},
     current: null,
+    use: false,
   },
 
   modules: {},
 
   actions: {
-    select: ({commit}, regions) => {
-      return promiseSimpleCommit(commit, 'SELECTED', regions)
-    },
-    current: ({commit}, region) => {
-      return promiseSimpleCommit(commit, 'CURRENT', region)
-    },
-    fetch: ({commit, rootGetters}) => {
-      return rms.regions(rootGetters.gridModel, rootGetters.zone.name, rootGetters.regionParameter)
-        .then(regions => {
-          commit('AVAILABLE', regions)
+    select: ({commit, dispatch, state}, items) => {
+      const ids = items.map(item => item.id)
+      const regions = {}
+      for (const id in state.available) {
+        const region = state.available[`${id}`]
+        regions[`${id}`] = new Region({
+          _id: id,
+          code: region.code,
+          name: region.name,
+          selected: ids.indexOf(id) >= 0
         })
+      }
+      dispatch('zones/update', {regions}, { root: true })
+      return Promise.resolve(ids)
+    },
+    current: ({commit}, {id}) => {
+      return promiseSimpleCommit(commit, 'CURRENT', {id})
+    },
+    fetch: ({dispatch, commit, rootState, rootGetters, state}, zoneId) => {
+      if (state.use) {
+        if (isEmpty(zoneId)) {
+          Object.keys(rootState.zones.available)
+            .forEach(id => {
+              const zone = rootState.zones.available[`${id}`]
+              return rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter)
+                .then(regions => {
+                  dispatch('zones/update', {zoneId: id, regions: makeData(regions, Region)}, { root: true })
+                })
+            })
+          zoneId = rootState.zones.current
+        }
+        return Promise.resolve(
+          zoneId
+            ? rootState.zones.available[`${zoneId}`].regions
+            : []
+        )
+      }
+    },
+    use: ({commit, state, rootGetters}, {use}) => {
+      commit('USE', use)
     },
   },
 
   mutations: {
-    AVAILABLE: (state, regions) => {
+    AVAILABLE: (state, {regions}) => {
       state.available = regions
     },
-    SELECTED: (state, regions) => {
-      state.selected = regions
+    SELECTED: SELECTED_ITEMS,
+    CURRENT: (state, {id}) => {
+      state.current = id
     },
-    CURRENT: (state, region) => {
-      state.current = region
+    USE: (state, value) => {
+      state.use = value
     },
   },
 

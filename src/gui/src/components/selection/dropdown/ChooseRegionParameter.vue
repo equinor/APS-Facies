@@ -1,13 +1,20 @@
 <template>
-  <choose-parameter
-    :disabled="disabled"
-    parameter-type="region"
-    label="Region parameter"
-  />
+  <v-layout
+    row
+  >
+    <v-checkbox
+      v-model="useRegions"
+      label="Use regions?"
+    />
+    <choose-parameter
+      :disabled="!useRegions"
+      parameter-type="region"
+      label="Region parameter"
+    />
+  </v-layout>
 </template>
 
 <script>
-import VueTypes from 'vue-types'
 import ChooseParameter from 'Components/selection/dropdown/ChooseParameter'
 
 export default {
@@ -15,8 +22,16 @@ export default {
     ChooseParameter
   },
 
-  props: {
-    disabled: VueTypes.bool.def(false)
-  },
+  computed: {
+    useRegions: {
+      cache: false,
+      get: function () {
+        return this.$store.state.regions.use
+      },
+      set: function (value) {
+        this.$store.dispatch('regions/use', {use: value})
+      }
+    },
+  }
 }
 </script>

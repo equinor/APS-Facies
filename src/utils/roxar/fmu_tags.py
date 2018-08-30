@@ -59,7 +59,7 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
 def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variable_file=None):
     aps_model = APSModel(input_model_file)
     value = True
-    all_zone_models = aps_model.getAllZoneModelsSorted()
+    all_zone_models = aps_model.sorted_zone_models()
     for key, zoneModel in all_zone_models.items():
         zone_number = key[0]
         region_number = key[1]

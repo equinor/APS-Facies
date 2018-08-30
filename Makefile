@@ -416,8 +416,8 @@ javascript-linting:
 	$(YARN) lint
 
 web-start: $(PACKAGE.JSON)
-	$(YARN) serve --port=$(VUE_APP_APS_GUI_PORT) \
-	              --host=$(VUE_APP_APS_SERVER)
+	$(YARN) serve:gui --port=$(VUE_APP_APS_GUI_PORT) \
+	                  --host=$(VUE_APP_APS_SERVER)
 
 web-e2e:
 	$(YARN) test:e2e
