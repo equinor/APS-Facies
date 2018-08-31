@@ -158,3 +158,7 @@ class MaximumValues(Values):
     CURVATURE = float('inf')
     MIGRATION_ANGLE = 90.0
     RELATIVE_ELLIPSE_SIZE = float('inf')
+
+class ProbabilityTolerances(Values):
+    MAX_ALLOWED_DEVIATION_BEFORE_ERROR = 0.2
+    MAX_DEVIATION_BEFORE_ACTION = 0.001

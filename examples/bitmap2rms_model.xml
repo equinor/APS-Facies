@@ -1,29 +1,37 @@
 <?xml version="1.0" ?>
 <ConvertBitmapToRMS>
   <Coordinates>
-    <xmin>   480000  </xmin>
-    <xmax>   493000  </xmax>
-    <ymin>   6688000 </ymin>
-    <ymax>   6710000 </ymax>
+    <xmin>   643400  </xmin>
+    <xmax>   658400   </xmax>
+    <ymin>   4343950 </ymin>
+    <ymax>   4359800 </ymax>
   </Coordinates>
   <PixelInterval>
-    <nx> 449 </nx>
-    <ny>  757 </ny>
-    <I> 1 449 </I>  <!-- 18 476 -->
-    <J> 1 757 </J>  <!-- 9 841 -->
+    <nx> 1152 </nx>
+    <ny> 1152 </ny>
+    <I> 220 770 </I>  
+    <J> 550 1100 </J>  
   </PixelInterval>
   <CropToPixelInterval> 1 </CropToPixelInterval> 
   <MissingCode> 9999900.000 </MissingCode> 
   <!-- <MissingCode> -1 </MissingCode> -->
-  <ColorCode facies="1"> 20 </ColorCode>
-  <ColorCode facies="2"> 122 </ColorCode>
-  <ColorCode facies="3"> 23 </ColorCode>
-  <ColorCode facies="4"> 199 </ColorCode>
-  <ColorCode facies="5"> 141 </ColorCode> 
+  <ColorCode facies="1"> 232 </ColorCode>
+  <ColorCode facies="2"> 113 </ColorCode>
+  <ColorCode facies="3"> 79 </ColorCode>
+  <ColorCode facies="4"> 251 </ColorCode>
 
-<Files>
-    <Input>  Above_FS34_480000x6688000_493000x6710000.bmp </Input>
-    <Output> IFS34.irap </Output>
+
+  <Files>
+    <Input>  examples/img/bitmap/B1.bmp </Input>
+    <Output> B1.irap </Output>
+  </Files> 
+  <Files>
+    <Input>  examples/img/bitmap/B2.bmp </Input>
+    <Output> B2.irap </Output>
+  </Files> 
+  <Files>
+    <Input>  examples/img/bitmap/B3.bmp </Input>
+    <Output> B3.irap </Output>
   </Files> 
 </ConvertBitmapToRMS>
 

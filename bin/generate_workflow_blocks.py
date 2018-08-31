@@ -120,6 +120,7 @@ def get_workflows():
             'APS_simulate_gauss_singleprocessing',
             'defineFaciesProbMapDepTrend',
             'defineFaciesProbTrend',
+            'APS_normalize_prob_cubes',
         ],
         'src/utils': [
             'testPreview',

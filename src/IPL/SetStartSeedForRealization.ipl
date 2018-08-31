@@ -1,13 +1,17 @@
-// IPL: Get startr seed from project realization in RMS and write to seed file. 
+// IPL: Get start seed from project realization in RMS and write to seed file. 
 //      The seed file will be used to set start seed for gaussian simulations.
 
 Int projectRealizationSeed
-String seedFileName
+String seedFileName, command
 File file
 
 
 projectRealizationSeed = GetCurrentSeed()
 seedFileName = "seed.dat"
+
+// Remove seedFile before writing a new in case seed.dat is a symbolic link to another file
+command = "rm -f " + seedFileName
+ShellCommand(command)
 
 OpenFile(file,seedFileName,"WRITE")
 WriteLine(file,projectRealizationSeed)

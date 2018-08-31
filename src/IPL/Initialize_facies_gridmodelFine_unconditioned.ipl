@@ -1,0 +1,19 @@
+// Initialize facies realisation to 0
+String paramName, gridModelName
+Parameter facies
+GridModel gm
+Include("/project/res/etc/IPL/iplib/STutilities1.iplib")
+
+gridModelName = "GridModelFine"
+paramName = "FaciesReal_unconditioned"
+
+
+// ------------------------------------------------------------------------
+GetGridModel(gridModelName, gm)
+SetCurrentRealisation(1) // Must run for realisation number 1
+Print("Initialize realisation number 1")
+facies = CreateDiscreteParameter(gm)
+facies = 0
+SetCodeName(facies,0,"Undefined")
+STsetParameter(gm, paramName, facies)
+

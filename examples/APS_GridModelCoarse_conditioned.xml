@@ -21,8 +21,8 @@
     </SelectedZonesAndRegions>
 
     <RMSProjectName>testAPSWorkflow.rms10.1.3</RMSProjectName>
-    <RMSWorkflowName>Example_APS_gridmodel2_conditioned</RMSWorkflowName>
-    <GridModelName>GridModel2</GridModelName>
+    <RMSWorkflowName>Example_APS_gridmodelCoarse_conditioned</RMSWorkflowName>
+    <GridModelName>GridModelCoarse</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
     <ResultFaciesParamName>FaciesReal_conditioned</ResultFaciesParamName>
     <PrintInfo>3</PrintInfo>

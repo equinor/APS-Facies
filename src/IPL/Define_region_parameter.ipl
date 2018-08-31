@@ -1,0 +1,25 @@
+// IPL: Create region parameter from facies realisation
+Parameter facies, region
+String faciesParamName, regionParamName, gridModelName
+GridModel gm
+
+
+Include("/project/res/etc/IPL/iplib/STutilities1.iplib")
+
+// -----------------------------------------------------------------------
+gridModelName = "GridModelCoarse"
+faciesParamName = "FaciesReal_unconditioned"
+regionParamName = "Region"
+
+// ------------------------------------------------------------------------
+GetGridModel(gridModelName, gm)
+facies = STgetParameter(gm, faciesParamName)
+region = CreateDiscreteParameter(gm)
+region = facies
+SetCodeName(region,1,"A")
+SetCodeName(region,2,"B")
+SetCodeName(region,3,"C")
+SetCodeName(region,4,"D")
+SetCodeName(region,5,"E")
+SetCodeName(region,6,"F")
+STsetParameter(gm, regionParamName, region)

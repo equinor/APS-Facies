@@ -806,7 +806,6 @@ class APSModel:
     def getAllProbParam(self):
         allProbList = []
         for key, zoneModel in self.__zoneModelTable.items():
-            print('In getAllProbParam: key=({},{})'.format(str(key[0]), str(key[1])))
             probParamList = zoneModel.getAllProbParamForZone()
             for pName in probParamList:
                 if pName not in allProbList:
