@@ -1,75 +1,164 @@
 <template>
-  <clickable-table
-    :row-data="rowData"
-    :column-definitions="columnDefinitions"
-    :additional-grid-options="additionalGridOptions"
-    @grid-api-ready="setGridApi"
-  />
+  <v-data-table
+    :headers="headers"
+    :items="facies"
+    item-key="name"
+    class="elevation-1"
+    hide-actions
+  >
+    <template
+      slot="headerCell"
+      slot-scope="props"
+    >
+      <v-tooltip bottom>
+        <span slot="activator">
+          {{ props.header.text }}
+        </span>
+        <span>
+          {{ props.header.text }}
+        </span>
+      </v-tooltip>
+    </template>
+    <template
+      slot="items"
+      slot-scope="props"
+    >
+      <tr @click="() => current(props.item)">
+        <td class="text-xs-left">
+          <v-edit-dialog
+            lazy
+          >
+            <highlight-current-item
+              :item="props.item"
+              field="name"
+            />
+            <v-text-field
+              slot="input"
+              v-model="props.item.name"
+              label="Edit"
+              single-line
+              @keydown.enter="() => changeName(props.item)"
+            />
+          </v-edit-dialog>
+        </td>
+        <td class="text-xs-left">
+          <highlight-current-item
+            :item="props.item"
+            field="code"
+          />
+        </td>
+        <td
+          :style="{backgroundColor: props.item.color}"
+          @click.stop="props.expanded = !props.expanded"
+        />
+      </tr>
+    </template>
+    <template
+      slot="expand"
+      slot-scope="props"
+    >
+      <swatches
+        :value="props.item.color"
+        :colors="availableColors"
+        inline
+        popover-to="left"
+        swatches-size="30"
+        @input="color => changeColor(props.item, color)"
+      />
+    </template>
+  </v-data-table>
 </template>
 
 <script>
-import VueTypes from 'vue-types'
-import ClickableTable from 'Components/table/ClickableRowTable'
-import ColorPicker from 'Components/table/cell-renderer/ColorPicker'
-import ColorRenderer from 'Components/table/cell-renderer/ColorRenderer'
-
-// TODO: Ensure change of color is done as a commit / action
-// Look for onRow/Data/CellChanged
-
-const maximumColumnWidth = 75
+import { mapState } from 'vuex'
+import Swatches from 'vue-swatches'
+import HighlightCurrentItem from 'Components/baseComponents/HighlightCurrentItem'
 
 export default {
   components: {
-    ClickableTable,
+    HighlightCurrentItem,
+    Swatches,
   },
 
   props: {
-    rowData: VueTypes.arrayOf(VueTypes.object).isRequired
   },
 
   data () {
     return {
-      additionalGridOptions: {
-        deltaRowDataMode: true,
-        rowSelection: 'single',
-        getRowNodeId: data => { return data.code },
-        onSelectionChanged: event => { this.selectedFaciesRow(event) },
-        columnTypes: {
-          'editable': {editable: true, onCellValueChanged: (event) => { this.faciesChanged(event) }}, // FIXME: Ensure the grid itself do not update values
-          'narrow': {maxWidth: maximumColumnWidth},
-          'colorCell': {cellRendererFramework: ColorRenderer, cellEditorFramework: ColorPicker, cellStyle: (params) => { return {backgroundColor: params.value} }},
-          'onceClickable': {singleClickEdit: true}, // FIXME: Ensure works
+      headers: [
+        {
+          text: 'Facies',
+          align: 'left',
+          sortable: false,
+          value: 'name',
+        },
+        {
+          text: 'Code',
+          align: 'left',
+          sortable: false,
+          value: 'code',
+        },
+        {
+          text: 'Color',
+          align: 'left',
+          sortable: false,
+          value: 'color',
         }
-      },
-      columnDefinitions: [
-        {headerName: 'Facies', field: 'name', type: 'editable'},
-        {headerName: 'Code', field: 'code', type: ['editable', 'narrow']},
-        {headerName: 'Color', field: 'color', type: ['editable', 'narrow', 'colorCell', 'onceClickable']}
-      ]
+      ],
     }
   },
 
+  computed: {
+    ...mapState({
+      facies: state => Object.keys(state.facies.available)
+        .map(id => {
+          const facies = state.facies.available[`${id}`]
+          return {
+            id,
+            name: facies.name,
+            code: facies.code,
+            color: facies.color,
+            current: id === state.facies.current,
+          }
+        }),
+    }),
+    availableColors () {
+      return this.$store.state.constants.faciesColors.available
+    },
+  },
+
   methods: {
-    setGridApi (api) {
-      this.$emit('grid-api-ready', api)
-    },
-    faciesChanged (event) {
-      this.$store.dispatch('facies/changed', event.data)
-    },
-    selectedFaciesRow (event) {
-      const selectedRows = event.api.getSelectedRows()
-      if (selectedRows.length > 0) {
-        const clickedCell = event.api.getFocusedCell()
-        if (clickedCell.column.getColId() === 'color') {
-          // TODO: Abort selection animation
-          // event.api.deselectAll()
-        } else {
-          this.$store.dispatch('facies/current', selectedRows[0])
-        }
+    changeColor (facies, color) {
+      if (facies.color !== color) {
+        // Only dispatch when the color *actually* changes
+        return this.$store.dispatch('facies/changed', {
+          facies: {
+            id: facies.id,
+            code: facies.code,
+            name: facies.name,
+            color,
+          }
+        })
       } else {
-        //
+        return Promise.resolve(facies)
       }
     },
-  }
+    current ({ id }) {
+      this.$store.dispatch('facies/current', { id })
+    },
+    changeName (value) {
+      const facies = {
+        id: value.id,
+        name: value.name,
+        code: value.code,
+        color: value.color,
+      }
+      if (facies.name === '') {
+        facies.name = `F${value.code}`
+      }
+      return this.$store.dispatch('facies/changed', { facies })
+    },
+  },
+
 }
 </script>

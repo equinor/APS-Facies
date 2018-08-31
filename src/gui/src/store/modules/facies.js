@@ -1,61 +1,72 @@
+import Vue from 'vue'
 import rms from 'Api/rms'
-import { promiseSimpleCommit, compareFacies, indexOfFacies } from 'Store/utils'
+import { promiseSimpleCommit } from 'Store/utils'
+import { makeData, isEmpty } from 'Utils'
+import { Facies } from 'Store/utils/domain'
 
 export default {
   namespaced: true,
 
   state: {
-    available: [],
+    available: {},
     current: null,
   },
 
   modules: {},
 
   actions: {
-    current: ({commit}, facies) => {
-      return promiseSimpleCommit(commit, 'CURRENT', facies)
+    current: ({ commit }, { id }) => {
+      return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    removeSelectedFacies: ({commit, state}) => {
-      const selectedFacies = state.current
-      const faciesIndex = state.available.findIndex(facies => compareFacies(selectedFacies, facies))
-      if (faciesIndex >= 0) {
-        commit('REMOVE', faciesIndex)
+    removeSelectedFacies: ({ commit, dispatch, state }) => {
+      return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
+        .then(() => {
+          dispatch('current', { id: null })
+        })
+    },
+    new: ({ dispatch, state, rootState }, { code, name, color }) => {
+      if (isEmpty(code) || code < 0) {
+        code = 1 + Object.values(state.available)
+          .map(facies => facies.code)
+          .reduce((a, b) => Math.max(a, b), 0)
       }
-    },
-    changed: ({commit, state}, facies) => {
-      let faciesIndex = indexOfFacies(state, facies)
-      if (faciesIndex >= 0) {
-        commit('REPLACE', {index: faciesIndex, facies})
-      } else {
-        commit('ADD', facies)
-        faciesIndex = indexOfFacies(state, facies)
+      if (isEmpty(name)) {
+        name = `F${code}`
       }
-      return faciesIndex
+      if (isEmpty(color)) {
+        const colors = rootState.constants.faciesColors.available
+        color = colors[code % colors.length]
+      }
+      dispatch('changed', { facies: new Facies({ code, name, color }) })
     },
-    fetch: ({commit, rootGetters}) => {
+    changed: ({ commit, state }, { facies }) => {
+      return promiseSimpleCommit(commit, 'UPDATE', { facies }, () => facies.hasOwnProperty('id'))
+    },
+    fetch: ({ commit, rootGetters, rootState }) => {
       return rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
         .then(facies => {
-          // TODO: Add colors
-          commit('AVAILABLE', facies)
+          // TODO: Add colors (properly)
+          for (let i = 0; i < facies.length; i++) {
+            facies[i].color = rootState.constants.faciesColors.available[i]
+          }
+          const data = makeData(facies, Facies)
+          commit('AVAILABLE', { facies: data })
         })
     },
   },
 
   mutations: {
-    AVAILABLE: (state, facies) => {
+    AVAILABLE: (state, { facies }) => {
       state.available = facies
     },
-    CURRENT: (state, currentFacies) => {
-      state.current = currentFacies
+    CURRENT: (state, { id }) => {
+      state.current = id
     },
-    REPLACE: (state, {index, facies}) => {
-      state.available[`${index}`] = facies
+    UPDATE: (state, { facies }) => {
+      Vue.set(state.available, facies.id, facies)
     },
-    ADD: (state, facies) => {
-      state.available.push(facies)
-    },
-    REMOVE: (state, index) => {
-      state.available.splice(index, 1)
+    REMOVE: (state, { id }) => {
+      Vue.delete(state.available, id)
     },
   },
 

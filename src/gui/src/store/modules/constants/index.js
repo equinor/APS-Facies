@@ -1,5 +1,6 @@
 import ranges from './ranges'
 import options from './options'
+import faciesColors from './faciesColors'
 
 export default {
   namespaced: true,
@@ -9,15 +10,19 @@ export default {
   modules: {
     ranges,
     options,
+    faciesColors,
   },
 
   actions: {
-    fetch ({dispatch}) {
+    fetch ({ dispatch }) {
       // Ranged values (min/max)
       dispatch('ranges/fetch')
 
       // Get available options
       dispatch('options/fetch')
+
+      // Get the standard colors for facies
+      dispatch('faciesColors/fetch')
     }
   },
 
