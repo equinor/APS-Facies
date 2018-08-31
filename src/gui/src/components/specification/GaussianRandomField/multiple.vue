@@ -18,12 +18,10 @@
             v-show="isOpen"
             xs2
           >
-            <v-btn
-              icon
-              @click.stop="addField"
-            >
-              <v-icon>add_box</v-icon>
-            </v-btn>
+            <icon-button
+              icon="add_box"
+              @click="addField"
+            />
           </v-flex>
         </v-layout>
       </div>
@@ -75,9 +73,12 @@
 import GaussianRandomField from '@/components/specification/GaussianRandomField'
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog'
 import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName'
+import IconButton from '@/components/selection/IconButton'
+
 
 export default {
   components: {
+    IconButton,
     GaussianFieldName,
     ConfirmationDialog,
     GaussianRandomField,
