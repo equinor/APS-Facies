@@ -113,23 +113,23 @@ class APSModel:
 
     def __init__(
             self,
-            modelFileName=None,
+            model_file_name=None,
             aps_model_version='1.0',
-            rmsProjectName='',
-            rmsWorkflowName='',
-            rmsGridModelName='',
-            rmsZoneParameterName='',
-            rmsRegionParameterName='',
-            rmsFaciesParameterName='',
-            seedFileName='seed.dat',
-            writeSeeds=True,
-            mainFaciesTable=None,
-            zoneModelTable=None,
-            previewZone=0,
-            previewRegion=0,
-            previewCrossSectionType='IJ',
-            previewCrossSectionRelativePos=0.5,
-            previewScale=1.0,
+            rms_project_name=None,
+            rms_workflow_name=None,
+            rms_grid_model_name=None,
+            rms_zone_parameter_name=None,
+            rms_region_parameter_name=None,
+            rms_facies_parameter_name=None,
+            seed_file_name='seed.dat',
+            write_seeds=True,
+            main_facies_table=None,
+            zone_model_table=None,
+            preview_zone=0,
+            preview_region=0,
+            preview_cross_section_type='IJ',
+            preview_cross_section_relative_pos=0.5,
+            preview_scale=1.0,
             debug_level=Debug.OFF
     ):
         """
@@ -137,11 +137,12 @@ class APSModel:
          If a model is created from a model file, the only necessary input is modelFileName
 
          If the model is created from e.g APSGUI, these parameters must be specified:
-         rmsProjectName - Name of RMS project which will run a workflow using the APS method
-         rmsWorkflowName - Name of RMS workflow for APS model
+         rmsProjectName - Name of RMS project which will run a workflow using the APS method (Now Optional)
+         rmsWorkflowName - Name of RMS workflow for APS model (Now Optional)
          rmsGridModelName - Name of grid model in RMS project.
          rmsZoneParameterName - Zone parameter for the grid model in the RMS project.
-         rmsRegionParameterName - Region parameter for the grid model in the RMS project.
+         rmsRegionParameterName - Region parameter for the grid model in the RMS project (Optional if there are no sones
+             with regions.
          rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
          seedFileName - Name of seed file to be used. Used by scripts for simulation of gaussian fields.
          writeSeeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read.
@@ -176,29 +177,30 @@ class APSModel:
 
         self.__ET_Tree = None
 
-        self.__rmsProjectName = rmsProjectName
-        self.__rmsWorkflowName = rmsWorkflowName
-        self.__rmsGridModelName = rmsGridModelName
-        self.__rmsZoneParamName = rmsZoneParameterName
-        self.__rmsRegionParamName = rmsRegionParameterName
-        self.__rmsFaciesParamName = rmsFaciesParameterName
-        self.__seed_file_name = seedFileName
-        self.writeSeeds = writeSeeds
+        self.__rmsProjectName = rms_project_name
+        self.__rmsWorkflowName = rms_workflow_name
+        self.__rmsGridModelName = rms_grid_model_name
+        self.__rmsZoneParamName = rms_zone_parameter_name
+        self.__rmsRegionParamName = rms_region_parameter_name
+        self.__rmsFaciesParamName = rms_facies_parameter_name
+        self.__seed_file_name = seed_file_name
+        self.writeSeeds = write_seeds
 
-        self.__faciesTable = mainFaciesTable
-        self.__zoneModelTable = zoneModelTable if zoneModelTable else {}
+        self.__faciesTable = main_facies_table
+        self.__zoneModelTable = zone_model_table if zone_model_table else {}
+        self.__sortedZoneModelTable = {}
         self.__zoneNumberList = []
         self.__selectedZoneAndRegionNumberTable = {}
         self.__selectAllZonesAndRegions = True
-        self.__previewZone = previewZone
-        self.__previewRegion = previewRegion
-        self.__preview_cross_section = CrossSection(previewCrossSectionType, previewCrossSectionRelativePos)
-        self.__previewScale = previewScale
+        self.__previewZone = preview_zone
+        self.__previewRegion = preview_region
+        self.__preview_cross_section = CrossSection(preview_cross_section_type, preview_cross_section_relative_pos)
+        self.__previewScale = preview_scale
         self.__debug_level = debug_level
 
         # Read model if it is defined
-        if modelFileName is not None:
-            self.__interpretXMLModelFile(modelFileName, debug_level=debug_level)
+        if model_file_name is not None:
+            self.__interpretXMLModelFile(model_file_name, debug_level=debug_level)
 
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         root = ET.parse(modelFileName).getroot()
@@ -268,21 +270,30 @@ class APSModel:
                 raise MissingAttributeInKeyword(kw, 'scale')
             self.__previewScale = float(text.strip())
 
-        placement = {
-            'RMSProjectName': '__rmsProjectName',
-            'RMSWorkflowName': '__rmsWorkflowName',
-            'GridModelName': '__rmsGridModelName',
-            'ZoneParamName': '__rmsZoneParamName',
-            'ResultFaciesParamName': '__rmsFaciesParamName',
-        }
-        for keyword, variable in placement.items():
+        placement = [
+            ('RMSProjectName', '__rmsProjectName', False),
+            ('RMSWorkflowName', '__rmsWorkflowName', False),
+            ('GridModelName', '__rmsGridModelName', True),
+            ('ZoneParamName', '__rmsZoneParamName', True),
+            ('ResultFaciesParamName', '__rmsFaciesParamName', True),
+        ]
+        for keyword, variable, required in placement:
             prefix = '_' + self.__class__.__name__
-            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName)
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName, required=required)
             self.__setattr__(prefix + variable, value)
 
-        # Read optional keyword for region parameter
+        # Read keyword for region parameter
+        # Note that the keyword is required if there are zones in the zone model where the zone has
+        # attribute regionNumber, otherwise not.
+        zones_with_region_attr = self.__ET_Tree.findall('//Zone[@regionNumber]')
         keyword = 'RegionParamName'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText=None, modelFile=modelFileName, required=False)
+        value = getTextCommand(
+            root, keyword,
+            parentKeyword='APSModel',
+            defaultText=None,
+            modelFile=modelFileName,
+            required=len(zones_with_region_attr) > 0
+        )
         if value is not None:
             self.__rmsRegionParamName = value
 
@@ -303,12 +314,12 @@ class APSModel:
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: RMSGridModel:                       ' + self.__rmsGridModelName)
-            print('Debug output: RMSZoneParamName:                   ' + self.__rmsZoneParamName)
-            print('Debug output: RMSFaciesParamName:                 ' + self.__rmsFaciesParamName)
-            print('Debug output: RMSRegionParamName:                 ' + self.__rmsRegionParamName)
-            print('Debug output: Name of RMS project read:           ' + self.__rmsProjectName)
-            print('Debug output: Name of RMS workflow read:           ' + self.__rmsWorkflowName)
+            print('Debug output: RMSGridModel:                       %s', self.__rmsGridModelName)
+            print('Debug output: RMSZoneParamName:                   %s', self.__rmsZoneParamName)
+            print('Debug output: RMSFaciesParamName:                 %s', self.__rmsFaciesParamName)
+            print('Debug output: RMSRegionParamName:                 %s', self.__rmsRegionParamName)
+            print('Debug output: Name of RMS project read:           %s', self.__rmsProjectName)
+            print('Debug output: Name of RMS workflow read:          %s', self.__rmsWorkflowName)
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
@@ -824,6 +835,17 @@ class APSModel:
     def setRmsZoneParamName(self, name):
         self.__rmsZoneParamName = copy.copy(name)
 
+    def setRmsRegionParamName(self, name):
+        if not name:
+            for key, zoneModel in self.__zoneModelTable.items():
+                region_number = key[1]
+                current_zone_has_at_least_one_region = 0 < region_number
+                if current_zone_has_at_least_one_region:
+                    raise ValueError(
+                        'RegionParamName must be given when there is at least one zone in the model with region Number)'
+                    )
+        self.__rmsRegionParamName = copy.copy(name)
+
     def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
 
@@ -857,6 +879,8 @@ class APSModel:
     def addNewZone(self, zoneObject):
         zoneNumber = zoneObject.zone_number
         regionNumber = zoneObject.region_number
+        if regionNumber > 0 and not self.__rmsRegionParamName:
+            raise ValueError('Cannot add zone with region number into a model where regionParamName is not specified')
         if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call addNewZone')
             print('Debug output: From addNewZone: (ZoneNumber, regionNumber)=({},{})'.format(zoneNumber, regionNumber))
@@ -941,21 +965,22 @@ class APSModel:
 
         # Add all main commands to the root APSModel
         tags = [
-            ('RMSProjectName', self.__rmsProjectName.strip()),
-            ('RMSWorkflowName', self.__rmsWorkflowName.strip()),
-            ('GridModelName', self.__rmsGridModelName.strip()),
-            ('ZoneParamName', self.__rmsZoneParamName.strip()),
-            ('RegionParamName', self.__rmsRegionParamName.strip()),
-            ('ResultFaciesParamName', self.__rmsFaciesParamName.strip()),
+            ('RMSProjectName', self.__rmsProjectName),
+            ('RMSWorkflowName', self.__rmsWorkflowName),
+            ('GridModelName', self.__rmsGridModelName),
+            ('ZoneParamName', self.__rmsZoneParamName),
+            ('RegionParamName', self.__rmsRegionParamName),
+            ('ResultFaciesParamName', self.__rmsFaciesParamName),
             ('PrintInfo', str(self.debug_level.value)),
             ('SeedFile', self.seed_file_name),
             ('WriteSeeds', 'yes' if self.writeSeeds else 'no'),
         ]
 
         for tag, value in tags:
-            elem = ET.Element(tag)
-            elem.text = ' ' + value + ' '
-            root.append(elem)
+            if value:
+                elem = ET.Element(tag)
+                elem.text = ' ' + value.strip() + ' '
+                root.append(elem)
 
         # Add command MainFaciesTable
         self.__faciesTable.XMLAddElement(root)

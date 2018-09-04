@@ -491,11 +491,12 @@
 			<xs:element name="Preview" type="PreviewType" minOccurs="0" />
             <xs:element name="SelectedZonesAndRegions" type="SelectedZonesAndRegionsType" minOccurs="0"/>
 			<xs:element name="Optimization" type="OptimizationType" minOccurs="0" />
-			<xs:element name="RMSProjectName" type="NonEmptyString" />
-			<xs:element name="RMSWorkflowName" type="NonEmptyString" />
+			<xs:element name="RMSProjectName" type="NonEmptyString" minOccurs="0"/>
+			<xs:element name="RMSWorkflowName" type="NonEmptyString" minOccurs="0"/>
 			<xs:element name="RMSGaussFieldScriptName" type="NonEmptyString" />
 			<xs:element name="GridModelName" type="NonEmptyString" />
 			<xs:element name="ZoneParamName" type="NonEmptyString" />
+            <!--Actually, Region param name is mandatory if there is at least one region with zoneNumber > 0 -->
 			<xs:element name="RegionParamName" type="NonEmptyString" minOccurs="0" />
 			<xs:element name="ResultFaciesParamName" type="NonEmptyString" />
 			<xs:element name="PrintInfo" type="PrintInfoType" />
