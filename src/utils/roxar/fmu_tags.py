@@ -59,12 +59,12 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
 def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variable_file=None):
     aps_model = APSModel(input_model_file)
     value = True
-    all_zone_models = aps_model.sorted_zone_models()
+    all_zone_models = aps_model.sorted_zone_models
     for key, zoneModel in all_zone_models.items():
         zone_number = key[0]
         region_number = key[1]
         if aps_model.isSelected(zone_number, region_number):
-            gauss_names_for_zone = zoneModel.getUsedGaussFieldNames()
+            gauss_names_for_zone = zoneModel.used_gaussian_field_names
             for i in range(len(gauss_names_for_zone)):
                 gauss_name = gauss_names_for_zone[i]
 
@@ -101,7 +101,7 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
                         trendModelObj.setMigrationAngleFmuUpdatable(value)
                         trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(value)
 
-            trunc_rule = zoneModel.getTruncRule()
+            trunc_rule = zoneModel.truncation_rule
             if trunc_rule._className == 'Trunc2D_Angle':
                 nPoly = trunc_rule.getNumberOfPolygonsInTruncationMap()
                 for polygon_number in range(nPoly):
