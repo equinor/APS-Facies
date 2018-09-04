@@ -15,8 +15,6 @@
   "dependencies": {
     "@mdi/font": "^2.4.85",
     "@statnett/vue-plotly": "^0.2.0",
-    "ag-grid": "^18.0.1",
-    "ag-grid-vue": "^18.0.0",
     "material-design-icons-iconfont": "^3.0.3",
     "plotly.js-dist": "^1.39.2",
     "uuid": "^3.3.2",

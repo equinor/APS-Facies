@@ -39,7 +39,10 @@
           v-if="showName"
           class="text-xs-left"
         >
-          <span :class="props.item.current ? 'font-weight-bold' : ''">{{ props.item.itemName }}</span>
+          <highlight-current-item
+            :item="props.item"
+            field="itemName"
+          />
         </td>
         <td
           v-if="showCode"
@@ -54,8 +57,15 @@
 
 <script>
 import VueTypes from 'vue-types'
+import { mapState } from 'vuex'
+
+import HighlightCurrentItem from 'Components/baseComponents/HighlightCurrentItem'
 
 export default {
+  components: {
+    HighlightCurrentItem,
+  },
+
   props: {
     headerName: VueTypes.string.isRequired,
     itemType: VueTypes.string.isRequired,
@@ -71,21 +81,23 @@ export default {
   },
 
   computed: {
-    state () { return this.$store.state[`${this.itemType}s`] },
-    items () {
-      const items = this.state.available
-      return Object.keys(items).map(id => {
-        const item = items[`${id}`]
-        return {
-          id,
-          name: id, // Hack to overcome vuetify's requirement of 'name' being defined, and unique
-          itemName: item.name,
-          code: item.code,
-          selected: item.selected,
-          current: id === this.state.current,
-        }
-      })
-    },
+    ...mapState({
+      items: function (state) {
+        const items = state[`${this.itemType}s`].available
+        return Object.keys(items)
+          .map(id => {
+            const item = items[`${id}`]
+            return {
+              id,
+              name: id, // Hack to overcome vuetify's requirement of 'name' being defined, and unique
+              itemName: item.name,
+              code: item.code,
+              selected: item.selected,
+              current: id === state[`${this.itemType}s`].current,
+            }
+          })
+      }
+    }),
     selected: {
       get: function () { return Object.values(this.items).filter(item => item.selected) },
       set: function (value) { this.$store.dispatch(`${this.itemType}s/select`, value) },
@@ -113,7 +125,7 @@ export default {
 
   methods: {
     current (id) {
-      this.$store.dispatch(`${this.itemType}s/current`, {id})
+      this.$store.dispatch(`${this.itemType}s/current`, { id })
     }
   }
 
