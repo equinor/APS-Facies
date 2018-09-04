@@ -16,23 +16,23 @@ class APSModel:
     __class_name: str
     def __init__(
             self,
-            modelFileName: Optional[str] = None,
+            model_file_name: Optional[str] = None,
             aps_model_version: str = '1.0',
-            rmsProjectName: str = '',
-            rmsWorkflowName: str = '',
-            rmsGridModelName: str = '',
-            rmsZoneParameterName: str = '',
-            rmsRegionParameterName: str = '',
-            rmsFaciesParameterName: str = '',
-            seedFileName: str = 'seed.dat',
-            writeSeeds: bool = True,
-            mainFaciesTable: Optional[] = None,
-            zoneModelTable: Optional[] = None,
-            previewZone: int = 0,
-            previewRegion: int = 0,
-            previewCrossSectionType: str = 'IJ',
-            previewCrossSectionRelativePos: float = 0.5,
-            previewScale: float = 1.0,
+            rms_project_name: str = '',
+            rms_workflow_name: str = '',
+            rms_grid_model_name: str = '',
+            rms_zone_parameter_name: str = '',
+            rms_region_parameter_name: str = '',
+            rms_facies_parameter_name: str = '',
+            seed_file_name: str = 'seed.dat',
+            write_seeds: bool = True,
+            main_facies_table: Optional[] = None,
+            zone_model_table: Optional[] = None,
+            preview_zone: int = 0,
+            preview_region: int = 0,
+            preview_cross_section_type: str = 'IJ',
+            preview_cross_section_relative_pos: float = 0.5,
+            preview_scale: float = 1.0,
             debug_level: Debug = Debug.OFF
     ) -> None: ...
     debug_level: Debug
@@ -93,6 +93,7 @@ class APSModel:
     def setRmsResultFaciesParamName(self, name: str) -> None: ...
     def setRmsWorkflowName(self, name: str) -> None: ...
     def setRmsZoneParamName(self, name: str) -> None: ...
+    def setRmsRegionParamName(self, name: str) -> None: ...
     def setSelectedZoneAndRegionNumber(self, selectedZoneNumber: int, selectedRegionNumber: int = 0) -> None: ...
     def writeModel(self, modelFileName: str, attributesFileName: str, debug_level: Debug = Debug.OFF) -> None: ...
     @staticmethod

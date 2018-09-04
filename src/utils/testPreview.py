@@ -157,7 +157,7 @@ def run_previewer(
         if isinstance(model, str):
             print('- Read file: ' + model)
     if isinstance(model, str):
-        apsModel = APSModel(modelFileName=model)
+        apsModel = APSModel(model_file_name=model)
     elif isinstance(model, APSModel):
         apsModel = model
     else:
