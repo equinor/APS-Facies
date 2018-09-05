@@ -194,7 +194,7 @@ class DefineTruncationRule:
         self.__inputFileName = copy.copy(inputFileName)
         finished = False
         print('Read file with truncation rules: {}'.format(inputFileName))
-        if self.__directory != '':
+        if self.__directory:
             inputFile = self.__directory + '/' + self.__inputFileName
         else:
             inputFile = self.__inputFileName
@@ -242,7 +242,7 @@ class DefineTruncationRule:
 
     def writeFile(self, outputFileName):
         ''' Write dictionaries with truncation rule settings to file for background facies and overlay facies.'''
-        if self.__directory != '':
+        if self.__directory:
             outputFile = self.__directory + '/' + outputFileName
         else:
             outputFile = outputFileName
@@ -1127,7 +1127,7 @@ class DefineTruncationRule:
         axTrunc.set_aspect('equal', 'box')
         if writePngFile:
             plotFileName = name + '.png'
-            if self.__directory != '':
+            if self.__directory:
                 plotFileName = self.__directory + '/' + plotFileName
             print('Write file: {}'.format(plotFileName))
             fig.savefig(plotFileName)
@@ -1203,7 +1203,7 @@ class DefineTruncationRule:
         ''' Make template xml files containing all Cubic truncation rule settings.'''
         for name, truncStructItem in self.__tableCubic.items():
             outputFileName = name + '.xml'
-            if self.__directory != '':
+            if self.__directory:
                 outputFileName = self.__directory + '/' + name + '.xml'
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
@@ -1211,7 +1211,7 @@ class DefineTruncationRule:
         ''' Make template xml files containing all NonCubic truncation rule settings.'''
         for name, truncStructItem in self.__tableNonCubic.items():
             outputFileName = name + '.xml'
-            if self.__directory != '':
+            if self.__directory:
                 outputFileName = self.__directory + '/' + name + '.xml'
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
@@ -1219,7 +1219,7 @@ class DefineTruncationRule:
         ''' Make template xml files containing all Cubic truncation rule settings with overlay facies.'''
         for name, truncStructItem in self.__tableCubicAndOverlay.items():
             outputFileName = name + '.xml'
-            if self.__directory != '':
+            if self.__directory:
                 outputFileName = self.__directory + '/' + name + '.xml'
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
@@ -1227,7 +1227,7 @@ class DefineTruncationRule:
         ''' Make template xml files containing all NonCubic truncation rule settings with overlay facies.'''
         for name, truncStructItem in self.__tableNonCubicAndOverlay.items():
             outputFileName = name + '.xml'
-            if self.__directory != '':
+            if self.__directory:
                 outputFileName = self.__directory + '/' + name + '.xml'
             self.writeTruncRuleToXmlFile(name, outputFileName)
 
@@ -1261,7 +1261,7 @@ class DefineTruncationRule:
             self.__makeTruncationMapSubPlot(truncation_name, fig, rows, cols, indx)
             indx += 1
         plot_file_name = plot_name + '.png'
-        if self.__directory != '':
+        if self.__directory:
             plot_file_name = self.__directory + '/' + plot_name + '.png'
         print('Write file: {}'.format(plot_file_name))
         plt.axis('off')
@@ -1389,7 +1389,7 @@ def run_example():
     rules.createAllNonCubicXMLTemplatesWithOverlayFacies()
     for nBackgroundFacies in range(1, 6):
         print('List of settings for Cubic with background facies: {}'
-              ''.format(str(nBackgroundFacies)))
+              ''.format(nBackgroundFacies))
 
         nOverlayFacies = 0
         settingsList = rules.getListOfSettings('Cubic', nBackgroundFacies)
@@ -1401,7 +1401,7 @@ def run_example():
 
         for nOverlayFacies in range(5):
             print('List of settings for Cubic with background facies: {}   and overlay facies: {}'
-                  ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
+                  ''.format(nBackgroundFacies, nOverlayFacies))
 
             settingsList = rules.getListOfSettings('CubicAndOverlay', nBackgroundFacies, nOverlayFacies)
             for i in range(len(settingsList)):
@@ -1411,7 +1411,7 @@ def run_example():
                 print('{} {}'.format(key, fileName))
     for nBackgroundFacies in range(1, 6):
         print('List of settings for NonCubic with background facies: {}'
-              ''.format(str(nBackgroundFacies)))
+              ''.format(nBackgroundFacies))
 
         nOverlayFacies = 0
         settingsList = rules.getListOfSettings('NonCubic', nBackgroundFacies)
@@ -1423,7 +1423,7 @@ def run_example():
 
         for nOverlayFacies in range(5):
             print('List of settings for NonCubic with background facies: {}   and overlay facies: {}'
-                  ''.format(str(nBackgroundFacies), str(nOverlayFacies)))
+                  ''.format(nBackgroundFacies, nOverlayFacies))
 
             settingsList = rules.getListOfSettings('NonCubicAndOverlay', nBackgroundFacies, nOverlayFacies)
             for i in range(len(settingsList)):

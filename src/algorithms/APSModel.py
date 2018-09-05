@@ -799,7 +799,7 @@ class APSModel:
 
     # Get pointer to facies table object
     def getRegionParamName(self):
-        if self.__rmsRegionParamName != '':
+        if self.__rmsRegionParamName:
             return copy.copy(self.__rmsRegionParamName)
         else:
             return ''
