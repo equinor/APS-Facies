@@ -264,7 +264,7 @@ def run(
     all_zone_models = aps_model.sorted_zone_models
     zone_param_name = aps_model.getZoneParamName()
     region_param_name = aps_model.getRegionParamName()
-    use_regions = region_param_name != ''
+    use_regions = bool(region_param_name)
     result_param_name = aps_model.getResultFaciesParamName()
 
     # Get zone param values

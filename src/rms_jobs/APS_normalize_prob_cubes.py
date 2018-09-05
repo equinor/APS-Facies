@@ -173,7 +173,7 @@ def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_
 
     # Read region parameter from RMS
     region_values = None
-    if region_param_name != '':
+    if region_param_name:
         region_values, _ = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number)
 
     # Get list of all zone models
