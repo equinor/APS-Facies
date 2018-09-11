@@ -5,7 +5,7 @@ from src.utils.roxar.fmu_tags import read_selected_fmu_variables,  set_all_as_fm
 
 if __name__ == '__main__':
     input_model_file = 'APS.xml'
-    input_selected_FMU_variable_file = 'FMU_selected_variables.dat'
+    input_selected_FMU_variable_file = 'examples/FMU_selected_variables.dat'
     output_model_file = 'APS_with_FMU_tags.xml'
     tagged_variable_file = 'FMU_tagged_variables.dat'
     tag_all_variables = True
