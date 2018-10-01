@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import NumericField from 'Components/selection/NumericField'
 import VueTypes from 'vue-types'
+import NumericField from '@/components/selection/NumericField'
 
 const getValue = (field, property, subProperty) => {
   return field[`${property}`].hasOwnProperty(subProperty)

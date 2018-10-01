@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import SelectionTable from 'Components/table/SelectionTable'
+import SelectionTable from '@/components/table/SelectionTable'
 
 export default {
   components: {

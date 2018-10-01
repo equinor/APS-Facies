@@ -28,7 +28,7 @@
 </template>
 <script>
 import VueTypes from 'vue-types'
-import StorableNumericField from 'Components/specification/StorableNumericField'
+import StorableNumericField from '@/components/specification/StorableNumericField'
 
 export default {
   components: {

@@ -48,9 +48,9 @@
 <script>
 import Vue from 'vue'
 import VueTypes from 'vue-types'
-import {required as requiredField, between, numeric} from 'vuelidate/lib/validators'
-import {updatableType, nullableNumber} from 'Utils/typing'
-import {notEmpty, isEmpty} from 'Utils'
+import { required as requiredField, between, numeric } from 'vuelidate/lib/validators'
+import { updatableType, nullableNumber } from '@/utils/typing'
+import { notEmpty, isEmpty } from '@/utils'
 
 export default Vue.extend({
   props: {
@@ -104,7 +104,7 @@ export default Vue.extend({
         ? this.ranges
         : this.valueType !== '' && this.$store.state.constants.ranges.hasOwnProperty(this.valueType)
           ? this.$store.state.constants.ranges[this.valueType]
-          : {max: Infinity, min: this.allowNegative ? -Infinity : 0}
+          : { max: Infinity, min: this.allowNegative ? -Infinity : 0 }
     },
     max () {
       return this.constants.max
@@ -152,8 +152,8 @@ export default Vue.extend({
       const payload = this.value === null || typeof this.value.value === 'undefined'
         ? Number(value)
         : typeof value === 'boolean'
-          ? {value: Number(this.fieldValue), updatable: value}
-          : {value: Number(value), updatable: this.updatable}
+          ? { value: Number(this.fieldValue), updatable: value }
+          : { value: Number(value), updatable: this.updatable }
       this.$v.fieldValue.$touch()
       this.$emit('input', payload)
     },

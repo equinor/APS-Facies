@@ -81,8 +81,8 @@
 <script>
 import { mapState } from 'vuex'
 import VueTypes from 'vue-types'
-import {notEmpty} from 'Utils'
-import OriginSpecification from 'Components/specification/Trend/Origin'
+import { notEmpty } from '@/utils'
+import OriginSpecification from '@/components/specification/Trend/Origin'
 import {
   StackingAngleSpecification,
   CurvatureSpecification,
@@ -90,7 +90,7 @@ import {
   MigrationAngle,
   RelativeSizeOfEllipse,
   RelativeStandardDeviation,
-} from 'Components/specification/Trend/InputFields'
+} from '@/components/specification/Trend/InputFields'
 
 export default {
   components: {

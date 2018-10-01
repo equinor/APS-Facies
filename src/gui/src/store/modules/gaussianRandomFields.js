@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import uuidv4 from 'uuid/v4'
-import { newSeed } from 'Utils'
+import { newSeed } from '@/utils'
 
 const emptyUpdatableValue = () => {
   return {value: null, updatable: false}

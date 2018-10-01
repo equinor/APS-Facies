@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import ChooseParameter from 'Components/selection/dropdown/ChooseParameter'
+import ChooseParameter from '@/components/selection/dropdown/ChooseParameter'
 
 export default {
   components: {

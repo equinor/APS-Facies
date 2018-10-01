@@ -1,8 +1,8 @@
-import { promiseSimpleCommit } from 'Store/utils'
-import { Region } from 'Store/utils/domain'
-import { makeData, isEmpty } from 'Utils'
-import rms from 'Api/rms'
-import { SELECTED_ITEMS } from 'Store/mutations'
+import { promiseSimpleCommit } from '@/store/utils'
+import { Region } from '@/store/utils/domain'
+import { makeData, isEmpty } from '@/utils'
+import rms from '@/api/rms'
+import { SELECTED_ITEMS } from '@/store/mutations'
 
 export default {
   namespaced: true,

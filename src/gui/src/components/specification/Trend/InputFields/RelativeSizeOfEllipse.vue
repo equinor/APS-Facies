@@ -10,7 +10,7 @@
 
 <script>
 import VueTypes from 'vue-types'
-import StorableNumericField from 'Components/specification/StorableNumericField'
+import StorableNumericField from '@/components/specification/StorableNumericField'
 
 // TODO: Ensure the unit of '%' is correct, and consistent e.g. 100% -> 1
 export default {

@@ -9,11 +9,11 @@
 </template>
 
 <script>
-import ChooseRegionParameter from 'Components/selection/dropdown/ChooseRegionParameter'
+import ChooseRegionParameter from '@/components/selection/dropdown/ChooseRegionParameter'
 import RegionSelection from './RegionSelection'
 import ZoneSelection from './ZoneSelection'
 
-import { notEmpty } from 'Utils'
+import { notEmpty } from '@/utils'
 
 export default {
   components: {

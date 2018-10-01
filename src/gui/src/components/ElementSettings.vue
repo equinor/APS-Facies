@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import GaussianRandomFields from 'Components/specification/GaussianRandomField/multiple'
+import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple'
 export default {
   components: {
     GaussianRandomFields

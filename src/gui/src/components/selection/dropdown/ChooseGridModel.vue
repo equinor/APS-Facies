@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import BaseDropdown from 'Components/selection/dropdown/BaseDropdown'
+import BaseDropdown from '@/components/selection/dropdown/BaseDropdown'
 
 export default {
   components: {

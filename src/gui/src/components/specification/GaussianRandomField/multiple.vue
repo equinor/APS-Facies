@@ -63,9 +63,9 @@
 </template>
 
 <script>
-import GaussianRandomField from 'Components/specification/GaussianRandomField'
-import ConfirmationDialog from 'Components/specification/GaussianRandomField/ConfirmationDialog'
-import GaussianFieldName from 'Components/specification/GaussianRandomField/GaussianFieldName'
+import GaussianRandomField from '@/components/specification/GaussianRandomField'
+import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog'
+import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName'
 
 export default {
   components: {

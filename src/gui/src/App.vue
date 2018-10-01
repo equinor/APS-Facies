@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import ToolBar from 'Components/TheToolBar'
+import ToolBar from '@/components/TheToolBar'
 
 export default {
   name: 'App',

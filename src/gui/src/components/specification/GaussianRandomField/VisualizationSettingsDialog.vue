@@ -145,8 +145,8 @@
 </template>
 
 <script>
-import NumericField from 'Components/selection/NumericField'
-import { newSeed } from 'Utils'
+import NumericField from '@/components/selection/NumericField'
+import { newSeed } from '@/utils'
 
 export default {
   components: {
