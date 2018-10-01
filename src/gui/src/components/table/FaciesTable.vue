@@ -72,7 +72,7 @@
 <script>
 import { mapState } from 'vuex'
 import Swatches from 'vue-swatches'
-import HighlightCurrentItem from 'Components/baseComponents/HighlightCurrentItem'
+import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 
 export default {
   components: {

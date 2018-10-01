@@ -32,12 +32,12 @@
 </template>
 
 <script>
-import ZoneRegion from 'Components/selection/ZoneRegionSelection'
-import GridModel from 'Components/selection/dropdown/ChooseGridModel'
-import ZoneParameter from 'Components/selection/dropdown/ChooseZoneParameter'
-import FaciesSelection from 'Components/selection/FaciesSelection'
-import ChooseBlockedWellParameter from 'Components/selection/dropdown/ChooseBlockedWellParameter'
-import ChooseBlockedWellLogParameter from 'Components/selection/dropdown/ChooseBlockedWellLogParameter'
+import ZoneRegion from '@/components/selection/ZoneRegionSelection'
+import GridModel from '@/components/selection/dropdown/ChooseGridModel'
+import ZoneParameter from '@/components/selection/dropdown/ChooseZoneParameter'
+import FaciesSelection from '@/components/selection/FaciesSelection'
+import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter'
+import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter'
 
 export default {
   components: {

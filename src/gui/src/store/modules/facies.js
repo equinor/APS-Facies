@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import rms from 'Api/rms'
-import { promiseSimpleCommit } from 'Store/utils'
-import { makeData, isEmpty } from 'Utils'
-import { Facies } from 'Store/utils/domain'
+import rms from '@/api/rms'
+import { promiseSimpleCommit } from '@/store/utils'
+import { makeData, isEmpty } from '@/utils'
+import { Facies } from '@/store/utils/domain'
 
 export default {
   namespaced: true,

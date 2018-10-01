@@ -59,7 +59,7 @@
 import VueTypes from 'vue-types'
 import { mapState } from 'vuex'
 
-import HighlightCurrentItem from 'Components/baseComponents/HighlightCurrentItem'
+import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 
 export default {
   components: {

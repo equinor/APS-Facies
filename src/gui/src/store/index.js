@@ -1,13 +1,13 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import gridModels from 'Store/modules/gridModels'
-import zones from 'Store/modules/zones'
-import regions from 'Store/modules/regions'
-import facies from 'Store/modules/facies'
-import gaussianRandomFields from 'Store/modules/gaussianRandomFields'
-import parameters from 'Store/modules/parameters'
-import constants from 'Store/modules/constants'
-import {mirrorZoneRegions} from 'Store/utils'
+import gridModels from '@/store/modules/gridModels'
+import zones from '@/store/modules/zones'
+import regions from '@/store/modules/regions'
+import facies from '@/store/modules/facies'
+import gaussianRandomFields from '@/store/modules/gaussianRandomFields'
+import parameters from '@/store/modules/parameters'
+import constants from '@/store/modules/constants'
+import { mirrorZoneRegions } from '@/store/utils'
 
 Vue.use(Vuex)
 

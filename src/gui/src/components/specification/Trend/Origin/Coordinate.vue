@@ -13,8 +13,8 @@
 
 <script>
 import VueTypes from 'vue-types'
-import StorableNumericField from 'Components/specification/StorableNumericField'
-import { notEmpty } from 'Utils'
+import StorableNumericField from '@/components/specification/StorableNumericField'
+import { notEmpty } from '@/utils'
 
 export default {
   components: {

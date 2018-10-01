@@ -9,7 +9,7 @@
 <script>
 import VueTypes from 'vue-types'
 import VuePlot from '@statnett/vue-plotly'
-import {notEmpty} from 'Utils'
+import { notEmpty } from '@/utils'
 
 const axis = {
   ticks: '',

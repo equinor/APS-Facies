@@ -66,14 +66,17 @@
 <script>
 import { mapState } from 'vuex'
 import VueTypes from 'vue-types'
-import GaussianPlot from 'Components/GaussianPlot'
-import rms from 'Api/rms'
-import TrendSpecification from 'Components/specification/Trend'
-import { hasValidChildren, notEmpty } from 'Utils'
-import RangeSpecification from 'Components/specification/GaussianRandomField/Range'
-import AnisotropyDirection from 'Components/specification/GaussianRandomField/AnisotropyDirection'
-import Power from 'Components/specification/GaussianRandomField/Power'
-import VisualizationSettingsDialog from 'Components/specification/GaussianRandomField/VisualizationSettingsDialog'
+
+import rms from '@/api/rms'
+
+import { hasValidChildren, notEmpty } from '@/utils'
+
+import GaussianPlot from '@/components/GaussianPlot'
+import TrendSpecification from '@/components/specification/Trend'
+import RangeSpecification from '@/components/specification/GaussianRandomField/Range'
+import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection'
+import Power from '@/components/specification/GaussianRandomField/Power'
+import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
 
 export default {
   name: 'GaussianRandomField',

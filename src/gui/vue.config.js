@@ -22,17 +22,4 @@ module.exports = {
   },
 
   lintOnSave: true,
-
-  configureWebpack: {
-    resolve: {
-      alias: {
-        'Components': '@/components',
-        'Api': '@/api',
-        'Store': '@/store',
-        'Pages': '@/pages',
-        'Utils': '@/utils',
-        'Tables': 'Components/table',
-      }
-    }
-  }
 }

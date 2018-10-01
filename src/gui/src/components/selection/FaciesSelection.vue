@@ -17,7 +17,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import FaciesTable from 'Components/table/FaciesTable'
+import FaciesTable from '@/components/table/FaciesTable'
 
 export default {
   components: {

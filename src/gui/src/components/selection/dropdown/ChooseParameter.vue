@@ -11,7 +11,7 @@
 
 <script>
 import VueTypes from 'vue-types'
-import BaseDropdown from 'Components/selection/dropdown/BaseDropdown'
+import BaseDropdown from '@/components/selection/dropdown/BaseDropdown'
 
 export default {
   components: {

@@ -9,10 +9,10 @@
 </template>
 
 <script>
-import Selection from 'Components/ElementSelection'
-import Settings from 'Components/ElementSettings'
-import Preview from 'Components/ElementPreview'
-import GaussianRandomFields from 'Components/specification/GaussianRandomField/multiple'
+import Selection from '@/components/ElementSelection'
+import Settings from '@/components/ElementSettings'
+import Preview from '@/components/ElementPreview'
+import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple'
 
 export default {
   components: {

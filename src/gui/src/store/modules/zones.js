@@ -1,8 +1,8 @@
-import { promiseSimpleCommit } from 'Store/utils'
-import { Zone } from 'Store/utils/domain'
-import { SELECTED_ITEMS } from 'Store/mutations'
-import rms from 'Api/rms'
-import { makeData, isEmpty, notEmpty } from 'Utils'
+import { promiseSimpleCommit } from '@/store/utils'
+import { Zone } from '@/store/utils/domain'
+import { SELECTED_ITEMS } from '@/store/mutations'
+import rms from '@/api/rms'
+import { makeData, isEmpty, notEmpty } from '@/utils'
 
 export default {
   namespaced: true,

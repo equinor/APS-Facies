@@ -1,4 +1,4 @@
-import rms from 'Api/rms'
+import rms from '@/api/rms'
 
 export default {
   namespaced: true,
