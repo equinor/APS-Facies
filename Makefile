@@ -490,22 +490,8 @@ web-build:
 
 web-install-dev: $(PACKAGE.JSON)
 
-CYPRESS_VERSION := 3.1.0
-INSTALLED_CYPRESS := $(shell echo $(shell (npx cypress --version)) | sed -e 's/.*version: //g')
-
-GET_CYPRESS := $(EMPTY)
-LINK_CYPRESS := $(EMPTY)
-REMOVE_TEMP_CYPRESS := $(EMPTY)
-ifneq ($(CYPRESS_VERSION),$(INSTALLED_CYPRESS))
-GET_CYPRESS := wget "http://download.cypress.io/desktop/$(CYPRESS_VERSION)?platform=linux64" --output-document="$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip"
-LINK_CYPRESS := CYPRESS_INSTALL_BINARY=$(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip
-REMOVE_TEMP_CYPRESS := rm -f $(LIB_PREFIX)/cypress-$(CYPRESS_VERSION).zip
-endif
-
 package.json:
-	$(GET_CYPRESS)
-	$(LINK_CYPRESS) $(YARN) install --dev
-	$(REMOVE_TEMP_CYPRESS)
+	$(YARN) install --dev
 
 
 run-rms.uipy-mock:
