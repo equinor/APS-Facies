@@ -13,7 +13,7 @@ export default {
   },
 
   actions: {
-    select: ({commit, dispatch, state, rootState}, selected) => {
+    select: ({ commit, dispatch, state, rootState }, selected) => {
       const ids = selected.map(zone => zone.id)
       for (const id in state.available) {
         // TODO: Make sure all regions are also selected, of regions is in use (and this zone has regions)
@@ -23,20 +23,20 @@ export default {
           const zone = state.available[`${id}`]
           Object.keys(state.available[`${zone.id}`].regions)
             .forEach(regionId => {
-              commit('REGION_SELECTED', {zoneId: id, regionId, toggled})
+              commit('REGION_SELECTED', { zoneId: id, regionId, toggled })
               if (!toggled && regionId === rootState.regions.current) {
-                dispatch('regions/current', {id: null}, { root: true })
+                dispatch('regions/current', { id: null }, { root: true })
               }
             })
         }
-        commit('SELECTED', {id, toggled})
+        commit('SELECTED', { id, toggled })
       }
       return Promise.resolve(ids)
     },
-    current: ({commit}, {id}) => {
-      return promiseSimpleCommit(commit, 'CURRENT', {id})
+    current: ({ commit }, { id }) => {
+      return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    fetch: ({commit, dispatch, state, rootGetters}) => {
+    fetch: ({ commit, dispatch, state, rootGetters }) => {
       return rms.zones(rootGetters.gridModel, rootGetters.zoneParameter)
         .then(zones => {
           const data = makeData(zones, Zone)
@@ -48,17 +48,17 @@ export default {
           commit('AVAILABLE', data)
         })
     },
-    update ({commit, dispatch, state}, {zones, zoneId, regions}) {
+    update ({ commit, dispatch, state }, { zones, zoneId, regions }) {
       if (isEmpty(zones) && notEmpty(regions)) {
         // We are setting/updating the regions for `zone`
         if (isEmpty(zoneId)) zoneId = state.current
-        commit('REGIONS', {zoneId, regions})
+        commit('REGIONS', { zoneId, regions })
         // All regions selected
-        if (Object.values(regions).every(region => region.selected)) commit('SELECTED', {id: zoneId, toggled: true})
+        if (Object.values(regions).every(region => region.selected)) commit('SELECTED', { id: zoneId, toggled: true })
         // Some region(s) selected
-        else if (Object.values(regions).some(region => region.selected)) commit('SELECTED', {id: zoneId, toggled: 'intermediate'})
+        else if (Object.values(regions).some(region => region.selected)) commit('SELECTED', { id: zoneId, toggled: 'intermediate' })
         // No regions selected
-        else commit('SELECTED', {id: zoneId, toggled: false})
+        else commit('SELECTED', { id: zoneId, toggled: false })
       } else {
         // TODO?
       }
@@ -70,13 +70,13 @@ export default {
       state.available = zones
     },
     SELECTED: SELECTED_ITEMS,
-    CURRENT: (state, {id}) => {
+    CURRENT: (state, { id }) => {
       state.current = id
     },
-    REGIONS: (state, {zoneId, regions}) => {
+    REGIONS: (state, { zoneId, regions }) => {
       state.available[`${zoneId}`].regions = regions
     },
-    REGION_SELECTED: (state, {zoneId, regionId, toggled}) => {
+    REGION_SELECTED: (state, { zoneId, regionId, toggled }) => {
       state.available[`${zoneId}`].regions[`${regionId}`].selected = toggled
     },
   },

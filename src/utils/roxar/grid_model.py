@@ -63,6 +63,7 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
 
     return cell_index_defined
 
+
 def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, realization_number=0, debug_level=Debug.OFF):
     """
     Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
@@ -84,13 +85,13 @@ def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, r
         float maximum is the maximum value
         float average is the average value
     """
-    function_name = calcStatisticsFor3DParameter.__name__
     values = getSelectedGridCells(grid_model, parameter_name, zone_number_list, realization_number, debug_level)
 
     maximum = np.max(values)
     minimum = np.min(values)
     average = np.average(values)
     if debug_level >= Debug.VERY_VERBOSE:
+        function_name = calcStatisticsFor3DParameter.__name__
         if len(zone_number_list) > 0:
             text = ' Calculate min, max, average for parameter: ' + parameter_name + ' for selected zones '
             print_debug_information(function_name, text)
@@ -267,14 +268,14 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
 
 def modifySelectedGridCells(grid_model, zone_number_list, realization_number, old_values, new_values):
     ''' Updates an input numpy array old_values with values from the input numpy array new_values for those indices
-        that corresponds to grid cells in the zones defined in the zone_number_list.  
-        If the list of zone numbers is empty, this means that ALL zones are updated, 
+        that corresponds to grid cells in the zones defined in the zone_number_list.
+        If the list of zone numbers is empty, this means that ALL zones are updated,
         and has the same effect as if all zones are specified in the list.
     '''
     grid = grid_model.get_grid(realization_number)
     indexer = grid.simbox_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
-    if len(zone_number_list) > 0: 
+    if len(zone_number_list) > 0:
         for zone_index in indexer.zonation:
             if zone_index in zone_number_list:
                 layer_ranges = indexer.zonation[zone_index]

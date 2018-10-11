@@ -5,7 +5,6 @@
     :no-data-text="noDataText"
     v-model="selected"
     item-key="name"
-    select-all
     class="elevation-1"
     hide-actions
   >
@@ -76,7 +75,12 @@ export default {
 
   data () {
     return {
-      headers: [],
+      headers: [{
+        text: 'Use',
+        align: 'left',
+        sortable: false,
+        value: 'selected',
+      }],
     }
   },
 

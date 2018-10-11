@@ -11,6 +11,7 @@ from src.algorithms.APSModel import APSModel
 from base64 import b64decode
 
 from src.utils.exceptions.xml import ApsXmlError
+from src.utils.roxar.grid_model import calcStatisticsFor3DParameter
 
 
 def empty_if_none(func):
@@ -62,6 +63,9 @@ class RMSData:
     def get_rms_trend_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_trend_parameter)
 
+    def get_probability_cube_parameters(self, grid_model_name):
+        return self._get_parameter_names(grid_model_name, self.is_probability_cube)
+
     def _get_parameter_names(self, grid_model_name, check):
         grid_model = self.get_grid_model(grid_model_name)
         return [parameter.name for parameter in grid_model.properties if check(parameter)]
@@ -95,6 +99,12 @@ class RMSData:
     def is_trend_parameter(self, param):
         return self.is_continuous(param)
 
+    def is_probability_cube(self, param):
+        return (
+            self.is_continuous(param)
+            and param.name.lower().startswith('prob')
+        )
+
     def _get_blocked_well_set(self, grid_model_name):
         return self.get_grid_model(grid_model_name).blocked_wells_set
 
@@ -104,6 +114,19 @@ class RMSData:
     def get_blocked_well(self, grid_model_name, blocked_well_name):
         block_wells = self._get_blocked_well_set(grid_model_name)
         return block_wells[blocked_well_name]
+
+    def calculate_average_of_probability_cube(self, grid_model_name, probability_cube_parameters, zones=None):
+        if zones is None:
+            zones = []
+        averages = {}
+        for probability_cube in probability_cube_parameters:
+            _, _, average = calcStatisticsFor3DParameter(
+                grid_model=self.project.grid_models[grid_model_name],
+                parameter_name=probability_cube,
+                zone_number_list=zones
+            )
+            averages[probability_cube] = float(average)
+        return averages
 
     @empty_if_none
     def get_blocked_well_logs(self, grid_model_name, blocked_well_name):

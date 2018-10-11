@@ -7,6 +7,20 @@ const makeData = (items, _class) => {
   return data
 }
 
+function selectItems ({ items, state, _class }) {
+  const ids = items.map(item => item.id)
+  const obj = {}
+  for (const id in state.available) {
+    const item = state.available[`${id}`]
+    obj[`${id}`] = new _class({
+      _id: id,
+      ...item,
+      selected: ids.indexOf(id) >= 0
+    })
+  }
+  return obj
+}
+
 const hasValidChildren = component => {
   let children = component.$children.slice()
   while (children.length > 0) {
@@ -30,6 +44,7 @@ const newSeed = () => getRandomInt(Math.pow(2, 64) - 1)
 
 export {
   makeData,
+  selectItems,
   hasValidChildren,
   getRandomInt,
   newSeed,

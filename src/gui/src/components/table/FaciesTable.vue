@@ -2,6 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="facies"
+    v-model="selected"
     item-key="name"
     class="elevation-1"
     hide-actions
@@ -24,6 +25,14 @@
       slot-scope="props"
     >
       <tr @click="() => current(props.item)">
+        <td>
+          <v-checkbox
+            v-model="props.selected"
+            :indeterminate="props.item.selected === 'intermediate'"
+            primary
+            hide-details
+          />
+        </td>
         <td class="text-xs-left">
           <v-edit-dialog
             lazy
@@ -87,6 +96,12 @@ export default {
     return {
       headers: [
         {
+          text: 'Use',
+          align: 'left',
+          sortable: false,
+          value: 'selected',
+        },
+        {
           text: 'Facies',
           align: 'left',
           sortable: false,
@@ -118,10 +133,15 @@ export default {
             name: facies.name,
             code: facies.code,
             color: facies.color,
+            selected: facies.selected,
             current: id === state.facies.current,
           }
         }),
     }),
+    selected: {
+      get: function () { return Object.values(this.facies).filter(item => item.selected) },
+      set: function (value) { this.$store.dispatch('facies/select', value) },
+    },
     availableColors () {
       return this.$store.state.constants.faciesColors.available
     },

@@ -1,25 +1,26 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
+
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.methods import get_model_file_name
+from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
 from src.utils.roxar.grid_model import (
-    getContinuous3DParameterValues,  getDiscrete3DParameterValues,
+    getContinuous3DParameterValues, getDiscrete3DParameterValues,
     find_defined_cells,
 )
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
 
 
 def check_and_normalise_probability(
-    probability_values_per_rms_param,
-    probability_parameter_per_facies,
-    facies_names_for_zone,
-    cell_index_defined,
-    tolerance_of_probability_normalisation = 0.1,
-    eps=0.001,
-    debug_level=Debug.ON
-    ):
+        probability_values_per_rms_param,
+        probability_parameter_per_facies,
+        facies_names_for_zone,
+        cell_index_defined,
+        tolerance_of_probability_normalisation=0.1,
+        eps=0.001,
+        debug_level=Debug.OFF
+):
     """
     Check that probability values are valid probabilities.
     If the probabilities are not normalised, but the deviation from 1.0 for the
@@ -54,7 +55,6 @@ def check_and_normalise_probability(
     :return: integer with number of grid cells for which the probabilities are re-calculated to be normalised.
     """
     num_defined_cells = len(cell_index_defined)
-    probabilities_selected_cells = np.zeros(num_defined_cells, np.float32)
     sum_probabilities_selected_cells = np.zeros(num_defined_cells, np.float32)
     num_cell_with_modified_probability = 0
 
@@ -82,18 +82,18 @@ def check_and_normalise_probability(
             elif v > 1.0:
                 probabilities_selected_cells[i] = 1.0
         if num_defined_cells > 0:
-            negative_fraction = float(num_negative)/float(num_defined_cells)
-            above_one_fraction = float(num_above_one)/float(num_defined_cells)
+            negative_fraction = num_negative / num_defined_cells
+            above_one_fraction = num_above_one / num_defined_cells
             if negative_fraction > 0.1:
                 raise ValueError(
                     'Probability for facies {} in {} has {} negative values.'
                     ''.format(facies_name, parameter_name, num_negative)
-                    )
+                )
             if above_one_fraction > 0.1:
                 raise ValueError(
                     'Probability for facies {} in {} has {} values above 1.0'
                     ''.format(facies_name, parameter_name, num_above_one)
-                    )
+                )
         # Sum up probability over all facies per selected cell
         all_values[cell_index_defined] = probabilities_selected_cells
         sum_probabilities_selected_cells += probabilities_selected_cells
@@ -108,9 +108,9 @@ def check_and_normalise_probability(
         max_acceptable_prob_sum = 1.0 + tolerance_of_probability_normalisation
         for i in range(num_defined_cells):
             if not (min_acceptable_prob_sum <= sum_probabilities_selected_cells[i] <= max_acceptable_prob_sum):
-                    unacceptable_prob_normalisation += 1
+                unacceptable_prob_normalisation += 1
 
-        unacceptable_prob_normalisation_fraction = float(unacceptable_prob_normalisation)/float(num_defined_cells)
+        unacceptable_prob_normalisation_fraction = unacceptable_prob_normalisation / num_defined_cells
         if unacceptable_prob_normalisation_fraction > 0.1:
             largest_prob_sum = 0.0
             smallest_prob_sum = 1.0
@@ -123,12 +123,14 @@ def check_and_normalise_probability(
                 'Sum of input facies probabilities is either less than: {} or larger than: {} in: {} cells.\n'
                 'Input probabilities should be normalised and the sum close to 1.0 but found a minimum value of: {} and a maximum value of: {}\n'
                 'Check input probabilities!'
-                    ''.format(min_acceptable_prob_sum, max_acceptable_prob_sum, unacceptable_prob_normalisation, smallest_prob_sum, largest_prob_sum)
+                ''.format(
+                    min_acceptable_prob_sum, max_acceptable_prob_sum,
+                    unacceptable_prob_normalisation, smallest_prob_sum, largest_prob_sum
                 )
+            )
 
         # Normalize
         psum = sum_probabilities_selected_cells
-        p = np.zeros(num_defined_cells, np.float32)
 
         for f in range(len(facies_names_for_zone)):
             facies_name = facies_names_for_zone[f]
@@ -143,7 +145,6 @@ def check_and_normalise_probability(
                         num_cell_with_modified_probability += 1
                     p[i] = p[i] / psum[i]
 
-
             # The cells  belonging to the zone,region as defined by the input cell_index_defined array
             # is updated by normalised values
             all_values[cell_index_defined] = p
@@ -153,7 +154,6 @@ def check_and_normalise_probability(
 
 
 def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_probability_normalisation, eps, overwrite):
-
     # Read APS model
     print('- Read file: ' + model_file)
     aps_model = APSModel(model_file)
@@ -182,33 +182,31 @@ def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_
     probability_parameter_names = aps_model.getAllProbParam()
 
     # Probability values for each RMS parameter
-    probability_values_per_rms_param = {}
-
-    for parameter_name in probability_parameter_names:
-        parameter_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number)
-        probability_values_per_rms_param[parameter_name] = parameter_values
+    probability_values_per_rms_param = {
+        parameter_name: getContinuous3DParameterValues(grid_model, parameter_name, realization_number)
+        for parameter_name in probability_parameter_names
+    }
 
     # Loop over all pairs of (zone_number, region_number) that is specified and selected
-    # Check and normalize the probabilities for each (zone,region) model
+    # Check and normalize the probabilities for each (zone, region) model
     for key, zone_model in all_zone_models.items():
-        zone_number = key[0]
-        region_number = key[1]
+        zone_number, region_number = key
         if not aps_model.isSelected(zone_number, region_number):
             continue
 
-        use_constant_probability = zone_model.useConstProb()
-        if use_constant_probability:
-            # No probability cubes for this (zone,region)
+        if zone_model.useConstProb():
+            # No probability cubes for this (zone, region)
             continue
 
         # RMS probability parameter names for each facies
-        probability_parameter_per_facies = {}
         facies_names_for_zone = zone_model.getFaciesInZoneModel()
-        for facies_name in facies_names_for_zone:
-            probability_parameter_per_facies[facies_name] = zone_model.getProbParamName(facies_name)
+        probability_parameter_per_facies = {
+            facies_name: zone_model.getProbParamName(facies_name)
+            for facies_name in facies_names_for_zone
+        }
 
         # For current (zone,region) find the active cells
-        cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF)
+        cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
         if len(cell_index_defined) == 0:
             print(
                 'Warning: No active grid cells for (zone,region)=({},{})\n'
@@ -235,11 +233,10 @@ def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_
         if not overwrite:
             parameter_name = parameter_name + '_norm'
         zone_number_list = []
-        if not setContinuous3DParameterValues(grid_model, parameter_name, parameter_values, zone_number_list,
-                                              realization_number, isShared=True, debug_level=Debug.OFF):
+        if not setContinuous3DParameterValues(grid_model, parameter_name, parameter_values, zone_number_list, realization_number, isShared=True):
             raise IOError('Can not update parameter {}'.format(parameter_name))
         else:
-            if debug_level>= Debug.ON:
+            if debug_level >= Debug.ON:
                 print('--- Updated probability cube: {}'.format(parameter_name))
 
 
