@@ -10,21 +10,24 @@ class DiscreteItem {
   set id (value) { throw new Error('id cannot be set') }
 }
 
-class Facies extends DiscreteItem {
-  constructor ({ code, name, color, _id }) {
-    super({ code, name, _id })
-    this.color = color
-  }
-}
-
 class SelectableItem extends DiscreteItem {
   constructor ({ code, name, _id, selected }) {
     super({ code, name, _id })
-    this._selected = !!selected
+    this.selected = selected
   }
+}
 
-  get selected () { return this._selected }
-  set selected (selected) { this._selected = selected }
+class Facies extends SelectableItem {
+  constructor ({ code, name, color, selected, _id, probabilityCube = null, previewProbability = null }) {
+    super({ code, name, selected, _id })
+    this.color = color
+    // this.probability = {
+    //   cubeParameter: probabilityCube,
+    //   preview: previewProbability,
+    // }
+    this.probabilityCube = probabilityCube
+    this.previewProbability = previewProbability
+  }
 }
 
 class Region extends SelectableItem {

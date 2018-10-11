@@ -1,6 +1,7 @@
 <template>
   <v-container>
     <v-layout
+      child-flex
       row
       wrap
     >
@@ -126,14 +127,16 @@ export default {
     },
     variogramType: {
       get: function () { return this.variogram.type },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/variogramType', {grfId: this.grfId, value}) }
+      set: function (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { grfId: this.grfId, value }) }
     },
     reseedOnRefresh () { return this.field.settings.seed.autoRenew }
   },
 
   methods: {
     simulation () {
-      if (this.reseedOnRefresh) this.$store.dispatch('gaussianRandomFields/newSeed', {grfId: this.grfId})
+      if (this.reseedOnRefresh) {
+        this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
+      }
       return rms.simulateGaussianField(this.field.name, this.variogram, this.trend, this.field.settings)
     },
     updateSimulation () {
@@ -161,11 +164,19 @@ export default {
           y: this.field.settings.simulationBox.y,
           z: this.field.settings.simulationBox.z,
         },
-        seed: {value: this.field.settings.seed.value, autoRenew: this.field.settings.seed.autoRenew},
+        seed: {
+          value: this.field.settings.seed.value,
+          autoRenew: this.field.settings.seed.autoRenew
+        },
       }
       this.$refs.visualisationSettings.open(settings, {})
-        .then(({save, settings}) => {
-          if (save) this.$store.dispatch('gaussianRandomFields/changeSettings', {grfId: this.grfId, settings})
+        .then(({ save, settings }) => {
+          if (save) {
+            this.$store.dispatch('gaussianRandomFields/changeSettings', {
+              grfId: this.grfId,
+              settings
+            })
+          }
         })
     },
   }

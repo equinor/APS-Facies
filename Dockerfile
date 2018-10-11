@@ -1,17 +1,17 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.1.3" \
+LABEL version="3.2.2" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
 
 # Versions
-ENV RMS_VERSION=11.0.0-b9 \
+ENV RMS_VERSION=11.0.0 \
     PYTHON_VERSION=3.6 \
     TCL_VERSION=8.6 \
     INTEL_MKL_VERSION=2018.3.222 \
     INTEL_MKL_SEED=13005 \
-    NODE_VERSION=8.11.3 \
-    NRLIB_VERSION=1.1-r6 \
+    NODE_VERSION=8.11.4 \
+    NRLIB_VERSION=1.1-r7 \
     SQLITE_VERSION=3.23.1 \
     YARN_VERSION=1.6.0
 ENV APSW_VERSION=${SQLITE_VERSION}-r1 \
@@ -25,7 +25,7 @@ ENV NODE_ARCH='x64' \
     CA_FILE="/etc/ssl/certs/ca-bundle.crt"
 
 # Prefixes
-ENV RMS_PREFIX="/prog/roxar/site/RMS11_beta_latest/rms/versions/statoil_release" \
+ENV RMS_PREFIX="/prog/roxar/site/RMS${RMS_VERSION}/rms/versions/${RMS_VERSION}" \
     DEPENDENCIES_PREFIX="/dependencies" \
     INTEL_PREFIX="${SOURCE_DIR}/${INTEL_MKL}" \
     INTEL_MKL_PREFIX="/opt/intel" \
@@ -74,7 +74,9 @@ ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
     SSL_CERT_FILE="${CA_FILE}"
 
 # Add external resources
-ADD rms-${RMS_VERSION}.tar.xz /
+ADD .rms/rms-${RMS_VERSION}.tar.gz /
+ADD .rms/auxillary.tar.gz /
+ADD .rms/APS-workflows.rms11.tar.gz /
 
 # Misc. software
 RUN yum update -y \

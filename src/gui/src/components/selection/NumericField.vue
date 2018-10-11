@@ -16,7 +16,9 @@
           :step="100/steps"
         />
       </v-flex>
-      <v-flex>
+      <v-flex
+        v-if="canShowField"
+      >
         <v-text-field
           ref="input"
           :value="fieldValue"
@@ -34,12 +36,16 @@
         v-if="isFmuUpdatable"
         v-bind="binding"
       >
-        <v-checkbox
-          v-model="updatable"
-          hint="fmu"
-          persistent-hint
-          @change="e => setUpdatable(e)"
-        />
+        <v-tooltip bottom>
+          <span slot="activator">
+            <v-checkbox
+              :value="updatable"
+              persistent-hint
+              @change="e => setUpdatable(e)"
+            />
+          </span>
+          <span>Toggle whether "this field" should be updatable in FMU</span>
+        </v-tooltip>
       </v-flex>
     </v-layout>
   </div>
@@ -47,16 +53,26 @@
 
 <script>
 import Vue from 'vue'
+
 import VueTypes from 'vue-types'
+
+import math from 'mathjs'
+
 import { required as requiredField, between, numeric } from 'vuelidate/lib/validators'
+
 import { updatableType, nullableNumber } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
+
+math.config({
+  number: 'Fraction'
+})
 
 export default Vue.extend({
   props: {
     label: VueTypes.string.isRequired,
     valueType: VueTypes.string.def(''),
     slider: VueTypes.bool.def(false),
+    onlySlider: VueTypes.bool.def(false),
     value: VueTypes.oneOfType([nullableNumber, updatableType]),
     unit: VueTypes.string.def(''),
     optional: VueTypes.bool.def(false),
@@ -67,8 +83,14 @@ export default Vue.extend({
     strictlyGreater: VueTypes.bool.def(false),
     strictlySmaller: VueTypes.bool.def(false),
     useModulus: VueTypes.bool.def(false),
+    additionalRules: VueTypes.arrayOf(VueTypes.shape({
+      name: VueTypes.string.isRequired,
+      check: VueTypes.func.isRequired,
+      error: VueTypes.string.isRequired,
+    })).def([]),
     steps: VueTypes.number.def(10000),
     arrowStep: VueTypes.number.def(1),
+    enforceRanges: VueTypes.bool.def(false),
     ranges: VueTypes.oneOfType([VueTypes.shape({
       min: VueTypes.number.isRequired,
       max: VueTypes.number.isRequired,
@@ -83,14 +105,19 @@ export default Vue.extend({
   },
 
   validations () {
+    const fieldValue = {
+      required: this.optional ? true : requiredField,
+      between: between(this.min, this.max),
+      discrete: this.discrete ? numeric : true,
+      strictlyGreater: this.strictlyGreater ? value => value > this.min : true,
+      strictlySmaller: this.strictlySmaller ? value => value < this.max : true,
+      // TODO: Add option to add more validations
+    }
+    this.additionalRules.forEach(rule => {
+      fieldValue[`${rule.name}`] = value => rule.check(value)
+    })
     return {
-      fieldValue: {
-        required: this.optional ? true : requiredField,
-        between: between(this.min, this.max),
-        discrete: this.discrete ? numeric : true,
-        strictlyGreater: this.strictlyGreater ? value => value > this.min : true,
-        strictlySmaller: this.strictlySmaller ? value => value < this.max : true,
-      },
+      fieldValue,
     }
   },
 
@@ -115,6 +142,9 @@ export default Vue.extend({
     canShowSlider () {
       return this.slider && this.max < Infinity && this.min > -Infinity
     },
+    canShowField () {
+      return this.canShowSlider ? !this.onlySlider : true
+    },
     isFmuUpdatable () {
       return this.fmuUpdatable && typeof this.value.updatable !== 'undefined'
     },
@@ -126,6 +156,9 @@ export default Vue.extend({
       !this.$v.fieldValue.between && errors.push(`Must be between [${this.min}, ${this.max}]`)
       !this.$v.fieldValue.strictlyGreater && errors.push(`Must be strictly greater than ${this.min}`)
       !this.$v.fieldValue.strictlySmaller && errors.push(`Must be strictly smaller than ${this.max}`)
+      this.additionalRules.forEach(rule => {
+        !this.$v.fieldValue[`${rule.name}`] && errors.push(rule.error)
+      })
       return errors
     },
     binding () {
@@ -157,40 +190,47 @@ export default Vue.extend({
       this.$v.fieldValue.$touch()
       this.$emit('input', payload)
     },
-    updateValue (event) {
-      let value = typeof event === 'string' ? event : event.target.value
-      value = value.replace(',', '.')
-      if (value === '.') {
-        value = '0.'
+    updateValue (value) {
+      if (typeof value === 'string') {
+        value = value.replace(',', '.')
+        if (value === '.') {
+          value = '0.'
+        }
+      } else if (typeof value.target !== 'undefined') {
+        // An event has been passed
+        value = value.target.value
       }
+
       let numericValue = this.getValue(this.value)
       if (/^[+-]?\d+(\.\d*)?$/.test(value)) {
-        numericValue = Number(value)
-        if (this.modulus) {
-          numericValue = numericValue % this.max
-        } else if (numericValue < this.min) {
-          numericValue = this.min
-        } else if (numericValue > this.max) {
-          numericValue = this.max
-        }
+        numericValue = this.getValue(value)
       } else if (value === '') {
         value = null
       } else if (value === '-') {
         value = '-'
+      } else if (value === '+') {
+        value = ''
       } else {
-        value = this.value.value
-        // FIXME: Hack to make sure illegal values are not displayed in the text field
+        value = this.value ? this.value.value : this.value
+        // Hack to make sure illegal values are not displayed in the text field
         this.$refs.input.lazyValue = value
       }
-      this.fieldValue = value
+      if (!!value && value[value.toString().length - 1] === '.') {
+        this.fieldValue = value
+      } else {
+        this.fieldValue = numericValue
+      }
       this.emitChange(numericValue)
     },
-    getValue (val) {
-      return isEmpty(val)
-        ? null
-        : typeof val.value !== 'undefined'
-          ? val.value
-          : val
+    getValue (value) {
+      if (isEmpty(value)) return null
+      if (typeof value.value !== 'undefined') value = value.value
+      if (this.modulus) value = math.mod(value, this.max)
+      if (this.enforceRanges) {
+        if (value < this.min) value = this.min
+        if (value > this.max) value = this.max
+      }
+      return math.bignumber(value)
     },
     getUpdatable (val) {
       const defaultValue = false
@@ -201,12 +241,10 @@ export default Vue.extend({
           : defaultValue
     },
     increase () {
-      this.fieldValue = String(Number(this.fieldValue) + this.arrowStep)
-      this.emitChange(this.fieldValue)
+      this.updateValue(math.add(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)))
     },
     decrease () {
-      this.fieldValue = String(Number(this.fieldValue) - this.arrowStep)
-      this.emitChange(this.fieldValue)
+      this.updateValue(math.subtract(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)))
     },
   },
 })

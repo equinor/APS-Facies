@@ -9,22 +9,22 @@ export default {
   },
 
   actions: {
-    select: ({state, commit, dispatch, rootState}, gridModel) => {
+    select: ({ state, commit, dispatch, rootState }, gridModel) => {
       return new Promise((resolve, reject) => {
         if (state.available.includes(gridModel)) {
           commit('CURRENT', gridModel)
-          const parameters = ['zone', 'region', 'blockedWell', 'rmsTrend']
+          const parameters = ['zone', 'region', 'blockedWell', 'rmsTrend', 'probabilityCube']
           parameters.forEach(param => {
             dispatch(`parameters/${param}/fetch`, null, { root: true })
           })
-          dispatch('zones/current', {id: null}, { root: true })
+          dispatch('zones/current', { id: null }, { root: true })
           resolve(gridModel)
         } else {
           reject(new Error('Selected grid model must be valid.'))
         }
       })
     },
-    fetch: ({commit}) => {
+    fetch: ({ commit }) => {
       return rms.gridModels().then(result => {
         commit('AVAILABLE', result)
       })

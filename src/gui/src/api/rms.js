@@ -1,7 +1,7 @@
 /**
  * Mock of the rms.uipy object available in RMS 11
  */
-import {rms as mock} from './roxar'
+import { rms as mock } from './roxar'
 // eslint-disable-next-line no-undef
 const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 
@@ -15,8 +15,10 @@ export default {
   blockedWellLogParameters: (gridName, blockedWellName) => api.call('get_blocked_well_logs', gridName, blockedWellName),
   facies: (gridName, blockedWellName, blockedWellLogName) => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName),
   trendParameters: (gridName) => api.call('get_rms_trend_parameters', gridName),
+  probabilityCubeParameters: (gridName) => api.call('get_probability_cube_parameters', gridName),
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
   options: (name) => api.call('get_options', name),
   simulateGaussianField: (name, variogram, trend, settings) => api.call('simulate_gaussian_field', name, variogram, trend, settings),
+  averageProbabilityCubes: (gridName, probabilityCubeParameters, ZoneNumbers) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, ZoneNumbers),
   isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
 }
