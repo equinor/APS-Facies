@@ -12,12 +12,11 @@ if [ -z "${RMS}" ]; then
 RMS="/prog/roxar/site/RMS${RMS_VERSION}/rms/rms"
 fi
 
+# TODO: Make sure the workflow "Test_defineFaciesProbTrend" and "Test_APS_deterministic_interpretation" work as intended
 for workflow in "Example_APS_Coarse_unconditioned" \
                 "Example_APS_Coarse_conditioned" \
                 "Example_APS_Coarse_uncond_regions" \
                 "Example_APS_Fine_unconditioned" \
-                "Test_defineFaciesProbTrend" \
-                "Test_APS_deterministic_interpretation" \
                 "Test_Update_FMU_parameters" \
                 "Test_APS_uncertainty_workflow"
 do
