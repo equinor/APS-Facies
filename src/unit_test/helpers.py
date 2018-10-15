@@ -75,9 +75,12 @@ def apply_truncations(
 
 
 def compare(source, reference):
+    prefix = ''
     if not exists(reference):
-        reference = 'src/unit_test/' + reference
-    return cmp(reference, source)
+        prefix = 'src/unit_test/'
+        if not exists(prefix + reference):
+            prefix = prefix + 'integration/'
+    return cmp(prefix + reference, source)
 
 
 def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):

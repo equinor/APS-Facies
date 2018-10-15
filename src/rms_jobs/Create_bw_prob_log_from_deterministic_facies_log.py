@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     run(
         roxar, project,
-        grid_model_name='GridModelCoarse',
+        grid_model_name='GridModelFine',
         blocked_wells_set_name='BW',
         input_facies_log_name='Deterministic_facies',
         prefix_prob_logs='Prob',

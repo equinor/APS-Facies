@@ -1,8 +1,18 @@
+# -*- coding: utf-8 -*-
 from os.path import exists
 
 import numpy as np
 
 from src.utils.constants.simple import Debug
+from src.utils.roxar import running_in_batch_mode
+from src.utils.methods import get_workflow_name
+
+
+def write_status_file(status, always=False):
+    if running_in_batch_mode() or always:
+        file_name = 'statusfile_{workflow_name}.dat'.format(workflow_name=get_workflow_name())
+        with open(file_name, 'w') as f:
+            f.write('{status}\n'.format(status=int(status)))
 
 
 def writeFile(fileName, a, nx, ny, debug_level=Debug.OFF):

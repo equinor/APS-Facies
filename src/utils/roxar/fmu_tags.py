@@ -17,16 +17,15 @@ def get_list_of_aps_uncertainty_parameters(project, workflow_name):
     return param_list
 
 
-def read_selected_fmu_variables(input_selected_FMU_variable_file):
+def read_selected_fmu_variables(input_selected_fmu_variable_file):
     fmu_variables = []
-    with open(input_selected_FMU_variable_file, 'r') as file:
+    with open(input_selected_fmu_variable_file, 'r') as file:
         finished = False
         while not finished:
             line = file.readline()
             if line == '':
                 finished = True
             else:
-                print(line.strip())
                 words = line.split('_')
                 zone = int(words[1])
                 region = int(words[2])
@@ -37,21 +36,21 @@ def read_selected_fmu_variables(input_selected_FMU_variable_file):
                     trunc_name = words[4].strip()
 
                 keyword2 = words[5]
-                if keyword2 == 'RESIDUAL':
-                    var_name = words[6].strip()
-                elif keyword2 == 'TREND':
+                if keyword2 in ['RESIDUAL', 'TREND']:
                     var_name = words[6].strip()
                 elif keyword2 == 'POLYNUMBER':
                     poly_number = int(words[6])
 
                 if keyword2 == 'RESIDUAL':
-                    fmu_var = ['RESIDUAL', zone, region, gauss_name, var_name]
+                    fmu_var = ('RESIDUAL', zone, region, gauss_name, var_name)
                 elif keyword2 == 'TREND':
-                    fmu_var = ['TREND', zone, region, gauss_name, var_name]
+                    fmu_var = ('TREND', zone, region, gauss_name, var_name)
                 elif keyword == 'TRUNC' and keyword2 == 'POLYNUMBER':
-                    fmu_var = ['TRUNC', zone, region, trunc_name, poly_number]
+                    fmu_var = ('TRUNC', zone, region, trunc_name, poly_number)
                 elif keyword == 'TRUNC':
-                    fmu_var = ['TRUNC', zone, region, trunc_name, var_name]
+                    fmu_var = ('TRUNC', zone, region, trunc_name, var_name)
+                else:
+                    raise ValueError('Invalid FMU parameter')
                 fmu_variables.append(fmu_var)
     return fmu_variables
 
@@ -60,48 +59,42 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
     aps_model = APSModel(input_model_file)
     value = True
     all_zone_models = aps_model.sorted_zone_models
-    for key, zoneModel in all_zone_models.items():
+    for key, zone_model in all_zone_models.items():
         zone_number = key[0]
         region_number = key[1]
         if aps_model.isSelected(zone_number, region_number):
-            gauss_names_for_zone = zoneModel.used_gaussian_field_names
+            gauss_names_for_zone = zone_model.used_gaussian_field_names
             for i in range(len(gauss_names_for_zone)):
                 gauss_name = gauss_names_for_zone[i]
 
                 # - Set FMU tag
-                zoneModel.setMainRangeFmuUpdatable(gauss_name, value)
-                zoneModel.setPerpRangeFmuUpdatable(gauss_name, value)
-                zoneModel.setVertRangeFmuUpdatable(gauss_name, value)
-                zoneModel.setAzimuthAngleFmuUpdatable(gauss_name, value)
-                zoneModel.setDipAngleFmuUpdatable(gauss_name, value)
-                variogramType = zoneModel.getVariogramType(gauss_name)
-                if variogramType == VariogramType.GENERAL_EXPONENTIAL:
-                    zoneModel.setPowerFmuUpdatable(gauss_name, value)
+                zone_model.setMainRangeFmuUpdatable(gauss_name, value)
+                zone_model.setPerpRangeFmuUpdatable(gauss_name, value)
+                zone_model.setVertRangeFmuUpdatable(gauss_name, value)
+                zone_model.setAzimuthAngleFmuUpdatable(gauss_name, value)
+                zone_model.setDipAngleFmuUpdatable(gauss_name, value)
+                variogram_type = zone_model.getVariogramType(gauss_name)
+                if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
+                    zone_model.setPowerFmuUpdatable(gauss_name, value)
 
-                useTrend, trendModelObj, relStdDev, relStdDevFMU = zoneModel.getTrendModel(gauss_name)
+                useTrend, trendModelObj, relStdDev, relStdDevFMU = zone_model.getTrendModel(gauss_name)
                 if useTrend:
-                    zoneModel.setRelStdDevFmuUpdatable(gauss_name, value)
+                    zone_model.setRelStdDevFmuUpdatable(gauss_name, value)
                     trendModelObj.setAzimuthFmuUpdatable(value)
                     trendModelObj.setStackingAngleFmuUpdatable(value)
-                    if trendModelObj.type == TrendType.ELLIPTIC:
+                    _type = trendModelObj.type
+                    if _type in [TrendType.ELLIPTIC, TrendType.HYPERBOLIC, TrendType.ELLIPTIC_CONE]:
                         trendModelObj.setCurvatureFmuUpdatable(value)
                         trendModelObj.setOriginXFmuUpdatable(value)
                         trendModelObj.setOriginYFmuUpdatable(value)
-                        trendModelObj.setOriginZFmuUpdatable(value)
-                    elif trendModelObj.type == TrendType.HYPERBOLIC:
-                        trendModelObj.setCurvatureFmuUpdatable(value)
-                        trendModelObj.setOriginXFmuUpdatable(value)
-                        trendModelObj.setOriginYFmuUpdatable(value)
-                        trendModelObj.setOriginZFmuUpdatable(value)
-                        trendModelObj.setMigrationAngleFmuUpdatable(value)
-                    elif  trendModelObj.type == TrendType.ELLIPTIC_CONE:
-                        trendModelObj.setCurvatureFmuUpdatable(value)
-                        trendModelObj.setOriginXFmuUpdatable(value)
-                        trendModelObj.setOriginYFmuUpdatable(value)
-                        trendModelObj.setMigrationAngleFmuUpdatable(value)
-                        trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(value)
+                        if _type in [TrendType.ELLIPTIC, TrendType.HYPERBOLIC]:
+                            trendModelObj.setOriginZFmuUpdatable(value)
+                        if _type in [TrendType.HYPERBOLIC, TrendType.ELLIPTIC_CONE]:
+                            trendModelObj.setMigrationAngleFmuUpdatable(value)
+                        if _type == TrendType.ELLIPTIC_CONE:
+                            trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(value)
 
-            trunc_rule = zoneModel.truncation_rule
+            trunc_rule = zone_model.truncation_rule
             if trunc_rule._className == 'Trunc2D_Angle':
                 nPoly = trunc_rule.getNumberOfPolygonsInTruncationMap()
                 for polygon_number in range(nPoly):
@@ -116,10 +109,10 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
 
 def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_variables, tagged_variable_file=None):
     aps_model = APSModel(input_model_file)
-    value = True
-    for i in range(len(selected_variables)):
-        fmu_variable = selected_variables[i]
-        words = fmu_variable.split('_')
+    updatable = True
+    for words in selected_variables:
+        if isinstance(words, str):
+            words = words.split('_')
         zone_number = int(words[1])
         region_number = int(words[2])
 
@@ -148,76 +141,76 @@ def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_
             elif trunc_name == 'BAYFILL':
                 var_name = words[5]
 
-        zoneModel = aps_model.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
+        zone_model = aps_model.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
         if aps_model.isSelected(zone_number, region_number):
             if var_type1 == 'GF' and var_type2 == 'RESIDUAL':
                 if var_name == 'MAINRANGE':
-                    zoneModel.setMainRangeFmuUpdatable(gauss_name, value)
+                    zone_model.setMainRangeFmuUpdatable(gauss_name, updatable)
                 elif var_name == 'PERPRANGE':
-                    zoneModel.setPerpRangeFmuUpdatable(gauss_name, value)
+                    zone_model.setPerpRangeFmuUpdatable(gauss_name, updatable)
                 elif var_name == 'VERTRANGE':
-                    zoneModel.setVertRangeFmuUpdatable(gauss_name, value)
+                    zone_model.setVertRangeFmuUpdatable(gauss_name, updatable)
                 elif var_name == 'AZIMUTHANGLE':
-                    zoneModel.setAzimuthAngleFmuUpdatable(gauss_name, value)
+                    zone_model.setAzimuthAngleFmuUpdatable(gauss_name, updatable)
                 elif var_name == 'DIPANGLE':
-                    zoneModel.setDipAngleFmuUpdatable(gauss_name, value)
+                    zone_model.setDipAngleFmuUpdatable(gauss_name, updatable)
                 elif var_name == 'POWER':
-                    variogramType = zoneModel.getVariogramType(gauss_name)
-                    if variogramType == VariogramType.GENERAL_EXPONENTIAL:
-                        zoneModel.setPowerFmuUpdatable(gauss_name, value)
+                    variogram_type = zone_model.getVariogramType(gauss_name)
+                    if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
+                        zone_model.setPowerFmuUpdatable(gauss_name, updatable)
             elif var_type1 == 'GF' and var_type2 == 'TREND':
-                useTrend, trendModelObj, relStdDev, relStdDevFMU = zoneModel.getTrendModel(gauss_name)
+                useTrend, trendModelObj, relStdDev, relStdDevFMU = zone_model.getTrendModel(gauss_name)
                 if useTrend:
                     if var_name == 'AZIMUTH':
-                        trendModelObj.setAzimuthFmuUpdatable(value)
+                        trendModelObj.setAzimuthFmuUpdatable(updatable)
                     elif var_name == 'STACKANGLE':
-                        trendModelObj.setStackingAngleFmuUpdatable(value)
+                        trendModelObj.setStackingAngleFmuUpdatable(updatable)
 
                     if trendModelObj.type == TrendType.ELLIPTIC:
                         if var_name == 'CURVATURE':
-                            trendModelObj.setCurvatureFmuUpdatable(value)
+                            trendModelObj.setCurvatureFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_X':
-                            trendModelObj.setOriginXFmuUpdatable(value)
+                            trendModelObj.setOriginXFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_Y':
-                            trendModelObj.setOriginYFmuUpdatable(value)
+                            trendModelObj.setOriginYFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_Z_SIMBOX':
-                            trendModelObj.setOriginZFmuUpdatable(value)
+                            trendModelObj.setOriginZFmuUpdatable(updatable)
                     elif trendModelObj.type == TrendType.HYPERBOLIC:
                         if var_name == 'CURVATURE':
-                            trendModelObj.setCurvatureFmuUpdatable(value)
+                            trendModelObj.setCurvatureFmuUpdatable(updatable)
                         elif var_name == 'MIGRATIONANGLE':
-                            trendModelObj.setMigrationAngleFmuUpdatable(value)
+                            trendModelObj.setMigrationAngleFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_X':
-                            trendModelObj.setOriginXFmuUpdatable(value)
+                            trendModelObj.setOriginXFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_Y':
-                            trendModelObj.setOriginYFmuUpdatable(value)
+                            trendModelObj.setOriginYFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_Z_SIMBOX':
-                            trendModelObj.setOriginZFmuUpdatable(value)
-                    elif  trendModelObj.type == TrendType.ELLIPTIC_CONE:
+                            trendModelObj.setOriginZFmuUpdatable(updatable)
+                    elif trendModelObj.type == TrendType.ELLIPTIC_CONE:
                         if var_name == 'CURVATURE':
-                            trendModelObj.setCurvatureFmuUpdatable(value)
+                            trendModelObj.setCurvatureFmuUpdatable(updatable)
                         elif var_name == 'MIGRATIONANGLE':
-                            trendModelObj.setMigrationAngleFmuUpdatable(value)
+                            trendModelObj.setMigrationAngleFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_X':
-                            trendModelObj.setOriginXFmuUpdatable(value)
+                            trendModelObj.setOriginXFmuUpdatable(updatable)
                         elif var_name == 'ORIGIN_Y':
-                            trendModelObj.setOriginYFmuUpdatable(value)
+                            trendModelObj.setOriginYFmuUpdatable(updatable)
                         elif var_name == 'RELATIVESIZE':
-                            trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(value)
+                            trendModelObj.setRelativeSizeOfEllipseFmuUpdatable(updatable)
                     if var_name =='RELSTDDEV':
-                        zoneModel.setRelStdDevFmuUpdatable(gauss_name, value)
+                        zone_model.setRelStdDevFmuUpdatable(gauss_name, updatable)
 
             if var_type1 == 'TRUNC':
-                trunc_rule = zoneModel.truncation_rule
+                trunc_rule = zone_model.truncation_rule
                 if trunc_name == 'NONCUBIC':
                     # setAnglwFMUUpdatable take polygon_number counting from 0
-                    trunc_rule.setAngleFmuUpdatable(poly_number-1, value)
+                    trunc_rule.setAngleFmuUpdatable(poly_number-1, updatable)
                 elif trunc_name == 'BAYFILL':
                     if var_name == 'SF':
-                        trunc_rule.setSFParamFmuUpdatable(value)
-                    elif  var_name == 'YSF':
-                        trunc_rule.setYSFParamFmuUpdatable(value)
-                    elif  var_name == 'SBHD':
-                        trunc_rule.setSBHDParamFmuUpdatable(value)
+                        trunc_rule.setSFParamFmuUpdatable(updatable)
+                    elif var_name == 'YSF':
+                        trunc_rule.setYSFParamFmuUpdatable(updatable)
+                    elif var_name == 'SBHD':
+                        trunc_rule.setSBHDParamFmuUpdatable(updatable)
 
     aps_model.writeModel(output_model_file, attributesFileName=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)

@@ -165,7 +165,7 @@
           <ProbCube> 0.01 </ProbCube>
         </Facies>
         <Facies name="F3">
-          <ProbCube> 0.80 </ProbCube>
+          <ProbCube> 0.8 </ProbCube>
         </Facies>
         <Facies name="F1">
           <ProbCube> 0.19 </ProbCube>
@@ -574,13 +574,13 @@
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
         <Facies name="F1">
-          <ProbCube> 0.50 </ProbCube>
+          <ProbCube> 0.5 </ProbCube>
         </Facies>
         <Facies name="F2">
-          <ProbCube> 0.30 </ProbCube>
+          <ProbCube> 0.3 </ProbCube>
         </Facies>
         <Facies name="F3">
-          <ProbCube> 0.20 </ProbCube>
+          <ProbCube> 0.2 </ProbCube>
         </Facies>
       </FaciesProbForModel>
       <GaussField name="GRF6">
@@ -646,10 +646,10 @@
           <ProbCube> 0.3 </ProbCube>
         </Facies>
         <Facies name="F5">
-          <ProbCube> 0.10 </ProbCube>
+          <ProbCube> 0.1 </ProbCube>
         </Facies>
         <Facies name="F4">
-          <ProbCube> 0.10 </ProbCube>
+          <ProbCube> 0.1 </ProbCube>
         </Facies>
       </FaciesProbForModel>
       <GaussField name="GRF6">

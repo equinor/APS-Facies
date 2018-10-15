@@ -9,7 +9,7 @@ export default {
 
   modules: {},
   actions: {
-    fetch ({commit, rootGetters}) {
+    fetch ({ commit, rootGetters }) {
       // TODO: Use 'fetchParameterHelper' to automatically chose the parameter?
       return rms.trendParameters(rootGetters.gridModel)
         .then(params => {

@@ -29,7 +29,7 @@ export default {
         return this.$store.state.regions.use
       },
       set: function (value) {
-        this.$store.dispatch('regions/use', {use: value})
+        this.$store.dispatch('regions/use', { use: value })
       }
     },
   }

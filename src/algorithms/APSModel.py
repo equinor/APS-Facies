@@ -4,7 +4,7 @@ import collections
 import copy
 import xml.etree.ElementTree as ET
 
-from src.algorithms.APSGaussModel import CrossSection
+from src.algorithms.properties import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug
@@ -672,7 +672,6 @@ class APSModel:
     @staticmethod
     def __getParamFromRMSTable(project, workflow_name, uncertainty_variable_names, realisation_number, debug_level=Debug.OFF):
         """ Get values from RMS uncertainty table"""
-        import roxar
         wf = project.workflows[workflow_name]
         rms_table_name = wf.report_table_name
         parametersUncertainty = []
@@ -813,7 +812,6 @@ class APSModel:
     def getRMSWorkflowName(self):
         return copy.copy(self.__rmsWorkflowName)
 
-    # ----- Set functions -----
     def getAllProbParam(self):
         allProbList = []
         for key, zoneModel in self.__zoneModelTable.items():
@@ -823,6 +821,7 @@ class APSModel:
                     allProbList.append(pName)
         return allProbList
 
+    # ----- Set functions -----
     def setRmsProjectName(self, name):
         self.__rmsProjectName = copy.copy(name)
 

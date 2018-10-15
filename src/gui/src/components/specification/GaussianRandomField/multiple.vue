@@ -86,7 +86,7 @@ export default {
     deleteField (grfId) {
       this.$refs[`confirmation_${grfId}`][0].open('Are you sure?', `This will delete the Gaussian random field '${this.fields[`${grfId}`].name}'`, {})
         .then(confirmed => {
-          if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', {grfId})
+          if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { grfId })
         })
     },
   }

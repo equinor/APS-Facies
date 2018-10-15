@@ -26,8 +26,6 @@ from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.methods import get_model_file_name
 
 
-
-
 def transform_empiric(cell_index_defined, gauss_values, alpha_values):
     """
     For the defined cells, transform the input Gaussian fields by the

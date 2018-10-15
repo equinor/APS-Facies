@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import roxar
 import numpy as np
-from src.utils.constants.simple import  ProbabilityTolerances, Debug
+from src.utils.constants.simple import ProbabilityTolerances, Debug
 
 
 def getBlockedWells(project, grid_model_name, bw_name):
@@ -44,7 +44,7 @@ def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked
         return None, None
     if blocked_wells.is_empty(realization_number):
         print('Error: Specified blocked wells {} in grid model {} for realization {} is empty'
-              ''.format(blocked_wells_set_name, grid_model_name, str(realization_number+1)))
+              ''.format(blocked_wells_set_name, grid_model_name, realization_number + 1))
         return None, None
     # Get facies property
     facies_property = blocked_wells.properties[facies_log_name]
@@ -61,10 +61,10 @@ def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked
     return code_names, facies_log_values
 
 
-def createProbabilityLogs(project, grid_model_name, 
-                          bw_name='BW', 
-                          facies_log_name='Facies', 
-                          additional_unobserved_facies_list=None, 
+def createProbabilityLogs(project, grid_model_name,
+                          bw_name='BW',
+                          facies_log_name='Facies',
+                          additional_unobserved_facies_list=None,
                           output_facies_names=None,
                           conditional_prob_facies=None,
                           prefix_prob_logs='Prob_',
@@ -75,7 +75,7 @@ def createProbabilityLogs(project, grid_model_name,
         Probability logs for these uncobserved facies will only contain 0 as value since the facies is not observed.  """
 
     code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, facies_log_name, realization_number)
-    blocked_wells = getBlockedWells(project, grid_model_name,bw_name)
+    blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
     if blocked_wells is None:
         return
 
@@ -86,7 +86,6 @@ def createProbabilityLogs(project, grid_model_name,
             print('Create blocked well log for {}'.format(prob_log_name))
             prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
             prob_values = blocked_wells.generate_values(discrete=False, fill_value=-1.0)
-
 
             for i in range(len(facies_log_values)):
                 faciesCode = facies_log_values[i]
@@ -116,11 +115,11 @@ def createProbabilityLogs(project, grid_model_name,
                 key = (output_name, name)
                 prob = conditional_prob_facies[key]
                 sum_prob = sum_prob + prob
-            if abs(sum_prob -1.0) > ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION:
+            if abs(sum_prob - 1.0) > ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION:
                 raise ValueError('Sum of the conditional probabilities conditioned to {} is {} and not 1.0. Check specification.'.format(name, sum_prob))
 
         # Loop over all output facies names and create a probability log with probabilities depending on facies in input log. In this case
-        # the probabilties for the output logs does not necessarily have ot contain only 0 or 1. 
+        # the probabilties for the output logs does not necessarily have ot contain only 0 or 1.
         for output_name in output_facies_names:
             prob_log_name = prefix_prob_logs + '_' + str(output_name)
             if debug_level >= Debug.ON:
@@ -135,7 +134,7 @@ def createProbabilityLogs(project, grid_model_name,
                     faciesCode = facies_log_values[i]
                     if faciesCode == code:
                         # This grid cell in the blocked well is of matching facies as the facies for the probability log
-                        # Assign the specified probability for the output facies 
+                        # Assign the specified probability for the output facies
                         prob_values[i] = prob_value
             prob_log.set_values(prob_values)
 

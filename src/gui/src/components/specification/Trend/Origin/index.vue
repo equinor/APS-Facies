@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import {mapState} from 'vuex'
+import { mapState } from 'vuex'
 import VueTypes from 'vue-types'
 import OriginCoordinate from './Coordinate'
 
@@ -63,7 +63,7 @@ export default {
     isEllipticCone () { return this.trend.type === 'ELLIPTIC_CONE' },
     originType: {
       get: function () { return this.trend.origin.type },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/originType', {grfId: this.grfId, value}) }
+      set: function (value) { this.$store.dispatch('gaussianRandomFields/originType', { grfId: this.grfId, value }) }
     },
   },
 }

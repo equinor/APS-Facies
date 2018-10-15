@@ -4,6 +4,7 @@ from src.utils.methods import get_run_parameters
 from src.utils.roxar.fmu_tags import (
     read_selected_fmu_variables,  set_all_as_fmu_updatable,  set_selected_as_fmu_updatable,
 )
+from src.utils.io import write_status_file
 
 
 def run(roxar=None, project=None, **kwargs):
@@ -22,6 +23,14 @@ def run(roxar=None, project=None, **kwargs):
         print(fmu_variables)
         set_selected_as_fmu_updatable(model_file, output_model_file, fmu_variables, tagged_variable_file)
 
+    write_status_file(True, 'Test_Update_FMU_parameters')
+
 
 if __name__ == '__main__':
-    run()
+    run(
+        model_file='APS.xml',
+        fmu_variables_file='examples/FMU_selected_variables.dat',
+        output_model_file='APS_with_FMU_tags.xml',
+        tagged_variable_file='FMU_tagged_variables.dat',
+        tag_all_variables=True,
+    )

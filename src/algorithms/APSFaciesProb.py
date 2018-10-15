@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import copy
 from warnings import warn
 from xml.etree.ElementTree import Element
 
@@ -26,11 +25,23 @@ class FaciesProbability:
 
     @property
     def probability(self):
-        return self._probability
+        probability = self._probability
+        try:
+            return float(probability)
+        except ValueError:
+            return probability
 
     @probability.setter
     def probability(self, value):
         self._probability = value
+
+    def __getitem__(self, item):
+        if item == 0:
+            return self.name
+        elif item == 1:
+            return self.probability
+        else:
+            raise IndexError('list index out of range')
 
     @classmethod
     def from_definition(cls, definition):
@@ -82,9 +93,6 @@ class APSFaciesProb:
         self.__debug_level = Debug.OFF
         self.__mainFaciesTable = None
         self.__zoneNumber = 0
-
-        self.__FNAME = 0
-        self.__FPROB = 1
 
         if ET_Tree_zone is not None:
             self.__useConstProb = useConstProb
@@ -192,22 +200,21 @@ class APSFaciesProb:
         if self.__useConstProb:
             sumProb = 0.0
             for item in self.__faciesProbForZoneModel:
-                prob = float(item.probability)
+                prob = item.probability
                 sumProb += prob
             if abs(sumProb - 1.0) > 0.001:
                 warn('Specified constant probabilities sum up to: {} and not 1.0 in zone {}'.format(sumProb, zoneNumber))
                 warn('The specified probabilities will be normalized.')
-                for i in range(len(self.__faciesProbForZoneModel)):
-                    item = self.__faciesProbForZoneModel[i]
-                    prob = float(item[self.__FPROB])
+                for item in self.__faciesProbForZoneModel:
+                    prob = item.probability
                     normalized_prob = prob / sumProb
                     item.probability = str(normalized_prob)
 
     def getAllProbParamForZone(self):
-        ''' Return list of name of all specified RMS probability parameter names'''
+        """ Return list of name of all specified RMS probability parameter names"""
         allProbParamList = []
         for item in self.__faciesProbForZoneModel:
-            probParamName = item.name
+            probParamName = item.probability
             if not self.__useConstProb:
                 if probParamName not in allProbParamList:
                     allProbParamList.append(probParamName)
@@ -291,7 +298,6 @@ class APSFaciesProb:
         if indx != -999:
             # Remove data for this facies
             self.__faciesProbForZoneModel.pop(indx)
-        return
 
     def hasFacies(self, facies_name):
         ''' Check that facies with specified name exist'''

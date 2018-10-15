@@ -39,7 +39,7 @@ export default {
           l: 0, r: 0, t: 0, b: 0,
         },
         xaxis: axis,
-        yaxis: {...axis, scaleanchor: 'x'},
+        yaxis: { ...axis, scaleanchor: 'x' },
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
       },

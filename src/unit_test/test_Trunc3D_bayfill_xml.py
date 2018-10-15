@@ -33,7 +33,7 @@ def interpretXMLModelFileAndWrite(
     nGaussFields = int(trRule[0].get('nGFields'))
     print('Number of gauss fields required for truncation rule: ' + str(nGaussFields))
 
-    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
+    mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
 
     # Create truncation rule object from input data, not read from file
     # faciesInZone debug_level are global variables in test script
@@ -69,7 +69,7 @@ def createTrunc(
         gaussFieldsInZone, gaussFieldsForBGFacies,
         sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level
 ):
-    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
+    mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
 
     # Create an object and initialize it
     # Global variables in test script: faciesInZone, faciesInTruncRule, sf_value, sf_name, ysf, sbhd, useConstTruncParam
@@ -121,7 +121,7 @@ def initialize_write_read(
 def getClassName(truncRule):
     assert truncRule is not None
     name = truncRule.getClassName()
-    assert name == 'Trunc3D_Bayfill'
+    assert name == 'Trunc3D_bayfill'
 
 
 def truncMapsystemPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):

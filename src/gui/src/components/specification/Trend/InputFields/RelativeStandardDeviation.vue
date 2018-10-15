@@ -24,7 +24,7 @@ export default {
 
   computed: {
     ranges () {
-      return {min: 0, max: 1}
+      return { min: 0, max: 1 }
     }
   }
 }

@@ -58,7 +58,7 @@ export default {
 
   methods: {
     changeName () {
-      this.$store.dispatch('gaussianRandomFields/changeName', {grfId: this.grfId, name: this.fieldName})
+      this.$store.dispatch('gaussianRandomFields/changeName', { grfId: this.grfId, name: this.fieldName })
     },
     restoreName () {
       this.fieldName = this.name

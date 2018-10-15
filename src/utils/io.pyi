@@ -4,6 +4,8 @@ from src.utils.constants.simple import Debug
 from typing import List, Tuple, Union
 
 
+def write_status_file(status: bool, always: bool=False) -> None: ...
+
 def readFile(
     fileName: str,
     debug_level: Debug = Debug.OFF

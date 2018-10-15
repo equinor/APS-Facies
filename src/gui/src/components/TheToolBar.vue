@@ -75,7 +75,7 @@ export default {
         return ''
       },
       set: function (value) {
-        this.file = {name: value}
+        this.file = { name: value }
       }
     }
   },

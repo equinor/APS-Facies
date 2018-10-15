@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 
 from src.utils.ConvertBitMapToRMS import ConvertBitMapToRMS
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_run_parameters
+
 long_help = """-------------------------------------------------------------------------------------
 python3 script which can be run as a python job in RMS10
-Purpose: Read a rectangular area of a bitmap color file with 1byte colors (256 colors) and information
+Purpose: Read a rectangular piece of a bitmap color file with 1byte colors (256 colors) and information
          about coordinates for the selected rectangle of the bitmap image and other
          information to be able to convert the bitmap image into
          an irap map format file that can be imported into RMS.
@@ -17,7 +19,8 @@ Input:   Bitmap input file (1 byte) colors (256 colors at maximum)
          to be selected as well as which facies belongs to which colour number.
          Note that the selected rectangular area of the bitmap is specified with its corner point coordinates
          and pixel numbers.
-Output:  An irap map file containing the facies numbers for each pixel.
+Output:  An irap map file containing the colour/facies numbers for each pixel
+         or facies number for each pixel.
 
 Usage:
          1. Import the script into an empty python job in e.g.a an empty rms workflow.
@@ -68,11 +71,11 @@ Usage:
                        interval of pixels corresponding to the rectangle defined by the corner points.
                        Hence the user will have to identify the corner point pixels (Imin, Jmin), (Imax, Jmax)
                        and their corresponding geographic (UTM coordinates) (xmin, ymin) and (xmax ,ymax).
-      ColorCode     -  specify which facies code corresponds to which color.  
-                       The user will usually have to run bitmap2rms_color_code.py first to get maps with color codes. 
-                       From these maps identify areas for the various facies and which color code is used for the facies. 
-                       Use these color codes to specify the corresponding colors for each facies. 
-                       Missing code (usually 9999900.000) is specified in separate keyword.
+      ColorCode     -  specify which facies code corresponds to which color. The effect of this keyword is turned on/off by a
+                       command line value (0/1). The user will usually have to run without activating this keyword by using
+                       command line value 0 first to get a map with colour values. Find corresponding colour values and facies
+                       and then specify that using this keyword before running a second time. Missing code (usually 9999900.000) is
+                       specified in separate keyword.
       CropToPixelInterval - Is set to 1 if the output maps should only contain the pixels in the specified rectangle. If it is set to 0
                             the script will calculate the geographic coordinates of pixel (1,1) and (nx,ny) and write out uncropped file
                             which also will contain area outside the specified rectangle.
@@ -82,24 +85,22 @@ Usage:
 --------------------------------------------------------------------------------------"""
 
 
-def get_arguments() -> Namespace:
+def get_arguments():
     parser = ArgumentParser(description="Read a rectangular piece of a bitmap (256 colors) file")
     parser.add_argument('model_file', metavar='FILE', type=str, nargs='?', default='bitmap2rms_model.xml', help="The model file to read from (default: bitmap2rms_model.xml)")
-    parser.add_argument('facies_code', metavar='CODE', type=int, nargs='?', default=1, help="The model file to read from (default: bitmap2rms_model.xml)")
+    parser.add_argument('facies_code', metavar='CODE', type=int, nargs='?', default=0, help="The model file to read from (default: bitmap2rms_model.xml)")
     parser.add_argument('-d', '--debug-level', type=int, default=0, help="Sets the verbosity. 0-4, where 0 is least verbose (default: 0)")
+    parser.add_argument('-t', '--test', type=bool, default=False, help="Toggles whether the test script is to be run (default: False)")
     parser.add_argument('--long-help', type=bool, default=False, help="Prints an extended help message")
     return parser.parse_args()
 
 
 def run(roxar=None, project=None, **kwargs):
-    # Use command line arguments
-    args = get_arguments()
-    if args.long_help:
-        print(long_help)
-        sys.exit(0)
-    model_file = args.model_file
-    facies_code = args.facies_code
-    debug_level = Debug(args.debug_level)
+    params = get_run_parameters(**kwargs)
+    model_file = params['model_file']
+    facies_code = params['facies_code']
+    debug_level = params['debug_level']
+    run_test_script = params['run_test_script']
 
     if facies_code > 0 and debug_level >= Debug.ON:
         print('Calculate map with facies')
@@ -109,10 +110,26 @@ def run(roxar=None, project=None, **kwargs):
     bitmap_converter.convert()
     bitmap_converter.writeFile()
     if debug_level >= Debug.ON:
-        name = 'bitmap2rms_facies_code'
+        name = __file__.split('_')[0].split('/')[-1]
         print('Finished: ' + name)
+    if run_test_script:
+        bitmap_converter.testPlot()
+
+
+def run_cli():
+    args = get_arguments()
+    if args.long_help:
+        print(long_help)
+        sys.exit(0)
+
+    run(
+        model_file=args.model_file,
+        facies_code=args.facies_code,
+        run_test_script=args.test,
+        debug_level=Debug(args.debug_level)
+    )
 
 
 # -------------  Main ----------------------
 if __name__ == "__main__":
-    run()
+    run_cli()

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
+from warnings import warn
 
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingKeyword
@@ -85,6 +86,12 @@ def get_global_ipl_file(**kwargs):
 
 def get_debug_level(**kwargs):
     debug_level = _get_value(kwargs, legal_kwargs=['debugInfo', 'debug_level'], default_value=Debug.OFF)
+    if isinstance(debug_level, str):
+        try:
+            debug_level = int(debug_level)
+        except ValueError:
+            warn('Illegal debug level, {}. Using default of OFF'.format(debug_level))
+            debug_level = Debug.OFF
     if isinstance(debug_level, int):
         debug_levels = get_legal_values_of_enum(Debug)
         if debug_level < min(debug_levels):
@@ -143,7 +150,7 @@ def get_prefix(**kwargs):
 
 # TODO: Make more generic; dict with precise names?
 def get_grid_model_name(**kwargs):
-    return _get_value(kwargs, legal_kwargs=['grid_model', 'grid_model_name'], default_value='GridModel2')
+    return _get_value(kwargs, legal_kwargs=['grid_model', 'grid_model_name'], default_value='GridModelFine')
 
 
 def get_blocked_well_name(**kwargs):
@@ -188,6 +195,7 @@ def get_run_parameters(**kwargs):
         'additional_unobserved_facies_list': get_additional_unobserved_facies(**kwargs),
         'facies_code': get_facies_code(**kwargs),
         'run_test_script': get_run_test_script(**kwargs),
+        'workflow_name': get_workflow_name(),
         'debug_level': get_debug_level(**kwargs),
     }
 
@@ -208,3 +216,12 @@ def calc_average(cell_index_defined, values):
         _sum += values[index]
     average = _sum / float(num_cells)
     return average
+
+
+def get_workflow_name():
+    try:
+        import roxar.rms
+        name = roxar.rms.get_running_workflow_name()
+    except ImportError:
+        name = None
+    return name

@@ -170,7 +170,7 @@ kwargs = {{
 
     # Settings for `Create_bw_probability_logs_from_facies_log`
     # -------- Project/user specific assignment to be set by the user -----------
-    'grid_model_name': 'GridModelCoarse',
+    'grid_model_name': 'GridModelFine',
     'blocked_wells_set_name': 'BW',
     'input_facies_log_name': 'Deterministic_facies',
     'prefix_prob_logs': 'Prob',
@@ -238,7 +238,6 @@ def get_rms_mapping():
         'APS_update_gauss_rms': 'APS_update_gauss_rms.py',
         'APS_simulate_gauss_single_processing': 'APS_simulate_gauss_singleprocessing.py',
         'Get_grid_model_attributes': 'getGridModelAttributes.py',
-        'DefineFaciesProbTrend': 'defineFaciesProbTrend.py',
         'test_welldata_api': None,
         'test_gridmodel_parameters_api': None,
         'Example_discrete_parameter_info': None,
