@@ -554,7 +554,7 @@ class DefineTruncationRule:
 
         # Define default values for name of gauss fields, facies
         faciesInZone = fNameList
-        mainFaciesTable = APSMainFaciesTable(fTable=fTable)
+        mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
         gaussFieldsInZone = ['GRF01', 'GRF02']
         alphaFieldNameForBackGroundFacies = ['GRF01', 'GRF02']
         return mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies

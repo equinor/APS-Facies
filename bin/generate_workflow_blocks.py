@@ -10,10 +10,9 @@ This is called when running 'make init', and 'make generate-workflow-files'.
 The resulting stubs are given in the 'workflow' directory (which again is inside the root of the repo)
 
 Usage:
-    ./bin/generate_workflow_blocks.py [--read-only]
-    ./generate_workflow_blocks.py [--read-only] <path to project folder>
+    ./bin/generate_workflow_blocks.py [--read-only] [--copy-to-rms-project <path to rms project>]
+    ./generate_workflow_blocks.py <path to project folder> [--read-only] [--copy-to-rms-project <path to rms project>]
 """
-
 from pathlib import Path
 from shutil import copy
 from sys import argv
@@ -29,8 +28,16 @@ def run():
             create_workflow_block_file(file_name, root_path, relative_path)
     add_ipl_scripts(root_path)
 
-    if len(argv) > 1 and argv[1] == '--read-only':
-        set_file_attributes(root_path)
+    for i in range(len(argv)):
+        arg = argv[i]
+        if arg == '--read-only':
+            set_file_attributes(root_path)
+        elif arg == '--copy-to-rms-project':
+            project_location = Path(argv[i + 1]).absolute()
+            workflow_dir = get_workflow_dir(root_path)
+            for rms_name, workflow_name in get_rms_mapping().items():
+                if workflow_name is not None:
+                    _OS.copy(workflow_dir / workflow_name, project_location / 'pythoncomp' / rms_name)
 
 
 def get_workflow_block(file_name, root_path, relative_path):
@@ -50,28 +57,17 @@ import roxar
 
 from importlib.machinery import SourceFileLoader
 
+import os
 import sys
+
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.4.1"
+__version__ = "0.5.1"
 __status__ = "Draft"
 
-# Keywords to pass along to the various modules
-kwargs = {{
-    # Legal values: 0..4 (0 is off, while 4 is very verbose)
-    'debug_level': 0,
-    'use_prefix_as_fallback': True,
-    # Prefix for the location of model files (if absolute paths are not given)
-    'prefix': '{root_path}',
-    # APS model file
-    'model_file_name': '{root_path}/APS.xml',
-    'output_rms_data_file': '{root_path}/rms_project_data_for_APS_gui.xml',
-    'global_ipl_file': '{root_path}/test_global_include.ipl',
-}}
-
 # The path to the repository's root folder
-root_path = '{root_path}'
+root_path = os.environ.get('APS_ROOT', '{root_path}')
 
 # Path to where the file bellow is located within the repository
 relative_path = '{relative_path}'
@@ -79,15 +75,109 @@ relative_path = '{relative_path}'
 # Name of Python file to be executed (excluding .py)
 file_name = '{file_name}'
 
+model_root = os.environ.get('APS_RESOURCES', root_path)
+
 # Add path to searchable path
 sys.path.append(root_path)
 
 
 # Generating necessary paths
-absolute_path = root_path + '/' + relative_path + '/' + file_name + '.py'
+absolute_path = '{{}}/{{}}/{{}}.py'.format(root_path, relative_path, file_name)
 module_path = relative_path.replace('/', '.') + '.' + file_name
 
 module = SourceFileLoader(module_path, absolute_path).load_module()
+
+
+# Getting the location of the necessary files
+def _get_file(environ_name, default_name):
+    return os.environ.get(environ_name, prepend_absolute_path(default_name))
+
+
+def _get_value(environ_name, default_value):
+    return os.environ.get(environ_name, default_value)
+
+
+def get_aps_model_file():
+    # Location/name of APS.xml
+    return _get_file('APS_MODEL_FILE', 'APS.xml')
+
+
+def get_rms_data_file():
+    # Location/name of rms_project_data_for_APS_gui.xml
+    return _get_file('APS_RMS_DATA_FILE', 'rms_project_data_for_APS_gui.xml')
+
+
+def get_global_include_file():
+    # Location/name of test_global_include.ipl
+    return _get_file('APS_GLOBAL_INCLUDE_FILE', 'test_global_include.ipl')
+
+
+def get_fmu_variables_file():
+    return _get_file('APS_FMU_VARIABLES_FILE', 'examples/FMU_selected_variables.dat')
+
+
+def get_tagged_variables_file():
+    return _get_file('APS_FMU_TAGS_FILE', 'examples/FMU_tagged_variables.dat')
+
+
+def get_tag_all_variables():
+    return _get_value('APS_TAG_ALL_VARIABLES', False)
+
+
+def get_output_fmu_tagged_model_file():
+    return _get_file('APS_OUTPUT_FMU_MODEL_FILE', 'APS_with_FMU_tags.xml')
+
+
+def get_write_logfile():
+    return _get_value('APS_WRITE_LOG_FILE', True)
+
+
+def get_input_directory():
+    path = os.environ.get('APS_INPUT_DIRECTORY', 'tmp_gauss_sim')
+    if not path.startswith('/'):
+        path = model_root + '/' + path
+    return path
+
+
+def get_debug_level():
+    # How verbose it should be
+    return _get_value('APS_DEBUG_LEVEL', 0)
+
+
+def prepend_absolute_path(file):
+    return model_root + '/' + file
+
+
+# Keywords to pass along to the various modules
+kwargs = {{
+    # Legal values: 0..4 (0 is off, while 4 is very verbose)
+    'debug_level': get_debug_level(),
+    # Misc. flags
+    'use_prefix_as_fallback': True,
+    'write_log_file': get_write_logfile(),
+    # Prefix for the location of model files (if absolute paths are not given)
+    'prefix': root_path,
+    # APS model file
+    'model_file_name': get_aps_model_file(),
+    'output_rms_data_file': get_rms_data_file(),
+    'global_ipl_file': get_global_include_file(),
+    'output_model_file': get_output_fmu_tagged_model_file(),
+    # FMU parameters
+    'tagged_variables_file': get_tagged_variables_file(),
+    'tag_all_variables': get_tag_all_variables(),
+    'fmu_variables_file': get_fmu_variables_file(),
+    'input_directory': get_input_directory(),
+
+    # Settings for `Create_bw_probability_logs_from_facies_log`
+    # -------- Project/user specific assignment to be set by the user -----------
+    'grid_model_name': 'GridModelFine',
+    'blocked_wells_set_name': 'BW',
+    'input_facies_log_name': 'Deterministic_facies',
+    'prefix_prob_logs': 'Prob',
+    'assign_binary_probabilities': False,
+    'additional_unobserved_facies_list': [],
+    #  ------- End of user specific input --------------------------------------
+}}
 
 module.run(roxar, project, **kwargs)
 '''
@@ -96,10 +186,8 @@ module.run(roxar, project, **kwargs)
 
 
 def get_root_path():
-    if len(argv) == 1:
+    if len(argv) == 1 or argv[1] in ['--read-only',  '--copy-to-rms-project']:
         return Path('.').absolute()
-    elif len(argv[1]) == '--read-only':
-        return Path(argv[2])
     else:
         return Path(argv[1])
 
@@ -110,6 +198,7 @@ def get_workflows():
             'APS_main',
             'updateAPSModelFromFMU',
             'updateAPSModelFromUncertaintyTable',
+            'bitmap2rms_xml',
         ],
         'depricated': [
             'APS_make_gauss_IPL',
@@ -118,9 +207,14 @@ def get_workflows():
         'src/rms_jobs': [
             'APS_simulate_gauss_multiprocessing',
             'APS_simulate_gauss_singleprocessing',
+            'Create_bw_probability_logs_from_facies_log',
+            'Create_bw_prob_log_from_deterministic_facies_log',
             'defineFaciesProbMapDepTrend',
             'defineFaciesProbTrend',
             'APS_normalize_prob_cubes',
+        ],
+        'src/algorithms': [
+            'setupFMUtags',
         ],
         'src/utils': [
             'testPreview',
@@ -128,7 +222,39 @@ def get_workflows():
         'src/utils/roxar': [
             'APS_update_gauss_rms',
             'getGridModelAttributes',
+            'compare_files',
         ],
+    }
+
+
+def get_rms_mapping():
+    return {
+        'APS_main_trunc': 'APS_main.py',
+        'Test_APS': None,
+        'TestPreview': 'testPreview.py',
+        'UpdateAPSModelFileFromFMU': 'updateAPSModelFromFMU.py',
+        'DefineFaciesProbMapDepTrend': 'defineFaciesProbMapDepTrend.py',
+        'APS_simulate_gauss_multiprocessing': 'APS_simulate_gauss_multiprocessing.py',
+        'APS_update_gauss_rms': 'APS_update_gauss_rms.py',
+        'APS_simulate_gauss_single_processing': 'APS_simulate_gauss_singleprocessing.py',
+        'Get_grid_model_attributes': 'getGridModelAttributes.py',
+        'test_welldata_api': None,
+        'test_gridmodel_parameters_api': None,
+        'Example_discrete_parameter_info': None,
+        'Example_zone_and_region_parameter': None,
+        'UpdateAPSModelFromUncertaintyTable': 'updateAPSModelFromUncertaintyTable.py',
+        'Compare_files_with_uncertainty_parameters': 'compare_files.py',
+        'Create_bw_probability_logs_from_facies_log': 'Create_bw_probability_logs_from_facies_log.py',
+        'setupFMUtags': 'setupFMUtags.py',
+        'defineFaciesProbTrend': 'defineFaciesProbTrend.py',
+        'GetGridModelAttributes': 'getGridModelAttributes.py',
+        'defineFaciesProbMapDepTrend': 'defineFaciesProbMapDepTrend.py',
+        'Compare_files_updated_with_FMU_parameters': None,
+        'APS_normalize_prob_cubes': 'APS_normalize_prob_cubes.py',
+        'bitmap2rms_color_code': None,
+        'bitmap2rms_facies_code': None,
+        'bitmap2rms': 'bitmap2rms_xml.py',
+        'Create_bw_prob_log_from_deterministic_facies_log_fine_grid': 'Create_bw_prob_log_from_deterministic_facies_log.py',
     }
 
 

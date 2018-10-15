@@ -85,7 +85,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def __setEmpty(self):
 
         # Specific variables for class Trunc3D_bayfill
-        self._className = 'Trunc3D_Bayfill'
+        self._className = self.__class__.__name__
 
         self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
 
@@ -174,7 +174,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         # Initialize object from xml tree object trRuleXML
         # Reference to main facies table which is global for the whole model
-        self._className = 'Trunc3D_bayfill'
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Call Trunc3D_bayfill init')
 
@@ -270,7 +269,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 self._is_param_sf_fmuupdatable = isFMUUpdatable(bgmObj, kw)
             else:
                 self.__param_sf_name = copy.copy(text.strip())
-
 
         kw = 'YSF'
         YSFObj = bgmObj.find(kw)

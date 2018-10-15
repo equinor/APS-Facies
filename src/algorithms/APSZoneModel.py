@@ -238,7 +238,7 @@ class APSZoneModel:
                         )
                     )
                 else:
-                    faciesInZone = self.__faciesProbObject.getFaciesInZoneModel()
+                    faciesInZone = self.__faciesProbObject.facies_in_zone_model
                     gaussFieldsInZone = self.__gaussModelObject.used_gaussian_field_names
                     if truncRuleName == 'Trunc3D_Bayfill':
                         self.truncation_rule = Trunc3D_bayfill(
@@ -294,7 +294,7 @@ class APSZoneModel:
         return self.__useConstProb
 
     def getFaciesInZoneModel(self):
-        return self.__faciesProbObject.getFaciesInZoneModel()
+        return self.__faciesProbObject.facies_in_zone_model
 
     @property
     def used_gaussian_field_names(self):

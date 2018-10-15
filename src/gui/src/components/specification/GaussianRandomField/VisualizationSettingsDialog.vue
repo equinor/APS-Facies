@@ -171,7 +171,7 @@ export default {
         simulationBox: {
           x: null, y: null, z: null,
         },
-        seed: {value: null, autoRenew: true},
+        seed: { value: null, autoRenew: true },
       },
       options: {
         color: 'primary',
@@ -193,11 +193,11 @@ export default {
       })
     },
     save () {
-      this.resolve({save: true, settings: this.settings})
+      this.resolve({ save: true, settings: this.settings })
       this.dialog = false
     },
     cancel () {
-      this.resolve({save: false, settings: {}})
+      this.resolve({ save: false, settings: {} })
       this.dialog = false
     },
     newSeed () {

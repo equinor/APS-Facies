@@ -812,8 +812,9 @@ class APSGaussModel:
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Call init ' + self.__class_name + ' and read from xml file')
 
-            assert mainFaciesTable
-            assert simBoxThickness
+            assert mainFaciesTable is not None
+            assert simBoxThickness is not None
+            assert modelFileName is not None
 
             self.__main_facies_table = mainFaciesTable
             self.__sim_box_thickness = simBoxThickness

@@ -10,7 +10,7 @@ export const selectable = {
   },
 
   actions: {
-    fetch ({commit}, type) {
+    fetch ({ commit }, type) {
       return rms.options(type)
         .then(types => {
           commit('AVAILABLE', types)
@@ -36,7 +36,7 @@ export default {
   },
 
   actions: {
-    fetch ({dispatch}) {
+    fetch ({ dispatch }) {
       dispatch('variograms/fetch', 'variogram')
       dispatch('origin/fetch', 'origin')
       dispatch('stacking/fetch', 'stacking_direction')

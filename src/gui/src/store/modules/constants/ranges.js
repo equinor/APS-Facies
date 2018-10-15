@@ -11,7 +11,7 @@ export const ranged = {
   },
 
   actions: {
-    fetch ({commit}, type) {
+    fetch ({ commit }, type) {
       rms.constants(type, 'min,max')
         .then(res => {
           commit('MAXIMUM', res.max)
@@ -43,7 +43,7 @@ export default {
   },
 
   actions: {
-    fetch ({dispatch}) {
+    fetch ({ dispatch }) {
       dispatch('azimuth/fetch', 'azimuth')
       dispatch('dip/fetch', 'dip')
       dispatch('power/fetch', 'power')

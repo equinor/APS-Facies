@@ -8,7 +8,7 @@ const updatableValue = {
   value: nullableNumber,
   updatable: VueTypes.bool.def(false),
 }
-const updatableType = VueTypes.shape({...updatableValue})
+const updatableType = VueTypes.shape({ ...updatableValue })
 const updatableStacking = VueTypes.shape({
   ...updatableValue,
   direction: VueTypes.oneOfType([VueTypes.oneOf([-1, 1]), null]),

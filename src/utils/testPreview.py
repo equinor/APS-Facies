@@ -493,7 +493,10 @@ def get_argument_parser() -> ArgumentParser:
 
 
 def run(roxar=None, project=None, **kwargs):
-    model, rms_data_file_name, _, _, debug_level = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    model = params['model_file']
+    rms_data_file_name = params['rms_data_file']
+    debug_level = params['debug_level']
     [kwargs.pop(item, None) for item in ['model', 'rms_data_file_name', 'debug_level']]
     run_previewer(model=model, rms_data_file_name=rms_data_file_name, debug_level=debug_level, **kwargs)
 

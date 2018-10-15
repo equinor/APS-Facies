@@ -10,11 +10,11 @@ export default {
   },
 
   actions: {
-    select: ({commit, dispatch}, zoneParameter) => {
+    select: ({ commit, dispatch }, zoneParameter) => {
       return promiseSimpleCommit(commit, 'CURRENT', zoneParameter)
         .then(() => dispatch('zones/fetch', null, { root: true }))
     },
-    fetch: ({commit, dispatch, rootGetters}) => {
+    fetch: ({ commit, dispatch, rootGetters }) => {
       return fetchParameterHelper(commit, dispatch, rms.zoneParameters(rootGetters.gridModel))
     },
   },

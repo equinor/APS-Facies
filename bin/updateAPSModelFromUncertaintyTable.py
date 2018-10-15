@@ -5,6 +5,8 @@ from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.roxar.fmu_tags import get_list_of_aps_uncertainty_parameters, set_selected_as_fmu_updatable
 from src.utils.methods import get_run_parameters
+from src.utils.methods import get_workflow_name
+
 """
 Description:
     This script uses Roxar API to read RMS table with parameters. The parameter names are specified using the
@@ -40,8 +42,7 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
                output_aps_model_file - Name of updated APS model file
     """
     # Read model file to get workflow name
-    apsModel = APSModel(input_aps_model_file)
-    workflow_name = apsModel.getRMSWorkflowName()
+    workflow_name = get_workflow_name()
     if write_output_file_with_parameter_names:
         output_file_with_parameter_names = 'tmp_' + workflow_name + '.dat'
     else:
@@ -65,8 +66,10 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
             print(s)
         print('')
     # Tag all relevant parameters as FMU updatable and write out a new model file containing the tags
-    set_selected_as_fmu_updatable(input_aps_model_file, output_aps_model_file,
-                                  uncertainty_variable_names, output_file_with_parameter_names)
+    set_selected_as_fmu_updatable(
+        input_aps_model_file, output_aps_model_file,
+        uncertainty_variable_names, output_file_with_parameter_names
+    )
 
     # Read the values of the tagged variables from RMS table corresponding to the specified workflow
     # Use the tagged model file and update this file with new values and write it out again,
@@ -87,14 +90,20 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
 
 # -------  Main ----------------
 def run(roxar=None, project=None, **kwargs):
-    input_aps_model_file, _, _, _, debug_level = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    input_aps_model_file = params['model_file']
+    debug_level = params['debug_level']
+    workflow_name = params['workflow_name']
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
     write_output_file_with_parameter_names = False
     if debug_level >= Debug.ON:
-        print('Update model file {} from RMS uncertainty table {]'.format(input_aps_model_file, workflow_name))
+        print('Update model file {} from RMS uncertainty table {}'.format(input_aps_model_file, workflow_name))
         write_output_file_with_parameter_names = True
 
-    update_aps_model_from_uncertainty(project, input_aps_model_file,  output_aps_model_file, debug_level=debug_level)
+    update_aps_model_from_uncertainty(
+        project, input_aps_model_file,  output_aps_model_file,
+        write_output_file_with_parameter_names, debug_level=debug_level
+    )
 
 
 if __name__ == '__main__':

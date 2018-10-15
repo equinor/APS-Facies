@@ -84,8 +84,9 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
 
 def run(roxar=None, project=None, **kwargs):
     # TODO: Separate this part into a CLI program
-
-    model_file, output_rms_data_file, _, _, _ = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    model_file = params['model_file']
+    output_rms_data_file = params['input_directory']
 
     # Read APS model
     print('- Read file: ' + model_file)

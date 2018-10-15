@@ -1,12 +1,90 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-import sys
 from xml.etree.ElementTree import Element
 
 import copy
 
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import ReadingXmlError
+from src.utils.records import FaciesRecord
+
+
+class Facies:
+    __slots__ = '_name', '_code'
+
+    def __init__(self, name, code):
+        self._name = name
+        self._code = code
+
+    def __eq__(self, other):
+        return self.name == other.name or self.code == other.code
+
+    def __getitem__(self, item):
+        if item == 0:
+            return self.name
+        elif item == 1:
+            return self.code
+        else:
+            raise IndexError('list index out of range')
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def code(self):
+        return self._code
+
+    @classmethod
+    def from_definition(cls, definition):
+        definition = FaciesRecord._make(definition)
+        return cls(
+            name=definition.Name,
+            code=definition.Code,
+        )
+
+    def to_list(self):
+        return self.name, self.code
+
+
+class FaciesTable(list):
+    def __init__(self, facies=None):
+        super().__init__(facies or [])
+
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return super().__getitem__(item)
+        elif isinstance(item, str):
+            for facies in self:
+                if item == facies.name:
+                    return facies
+        raise IndexError('The facies with index/name "{}" does not exist'.format(item))
+
+    def __contains__(self, item):
+        for facies in self:
+            if item == facies:
+                return True
+        return False
+
+    @property
+    def names(self):
+        return [facies.name for facies in self]
+
+    def append(self, facies):
+        if facies in self:
+            raise ValueError('Facies names, and codes MUST be unique')
+        super().append(facies)
+
+    def pop(self, facies=None):
+        if isinstance(facies, int):
+            return super().pop(facies)
+        elif isinstance(facies, str):
+            for i in range(len(self)):
+                if self[i].name == facies:
+                    return super().pop(i)
+        elif isinstance(facies, Facies):
+            self.pop(facies.name)
+        raise IndexError('The given index/facies "{}" does not exist'.format(facies))
 
 
 class APSMainFaciesTable:
@@ -23,20 +101,20 @@ class APSMainFaciesTable:
        def getNFacies(self)
        def getClassName(self)
        def getFaciesTable(self)
-       def getFaciesName(self,fIndx)
-       def getFaciesCode(self,fIndx)
-       def getFaciesCodeForFaciesName(self,fName)
-       def getFaciesIndx(self,fName)
+       def getFaciesName(self, fIndx)
+       def getFaciesCode(self, fIndx)
+       def getFaciesCodeForFaciesName(self, fName)
+       def getFaciesIndx(self, fName)
 
        --- Set functions ---
-       def addFacies(self,faciesName, code)
-       def removeFacies(self,faciesName):
+       def add_facies(self, faciesName, code)
+       def remove_facies(self, faciesName):
 
        --- Check functions ---
-       def checkWithFaciesTable(self,fName)
+       def checkWithFaciesTable(self, fName)
 
        --- Write ---
-       def XMLAddElement(self,root)
+       def XMLAddElement(self, root)
                 - Add data to xml tree
 
      Private member functions:
@@ -44,23 +122,17 @@ class APSMainFaciesTable:
        def __checkUniqueFaciesNamesAndCodes(self)
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, fTable=None, debug_level=Debug.OFF):
+    def __init__(self, ET_Tree=None, modelFileName=None, facies_table=None, debug_level=Debug.OFF):
         self.__debug_level = debug_level
-        self.__className = self.__class__.__name__
-        self.__NAME = 0
-        self.__CODE = 1
-        self.__modelFileName = modelFileName
+        self.__class_name = self.__class__.__name__
+        self.__model_file_name = modelFileName
 
-        # Input fTable must be a dictionary
-        self.__faciesTable = []
-        if fTable is not None:
-            codeList = fTable.keys()
-            for c in codeList:
-                fName = fTable.get(c)
-                fCode = int(c)
-                self.__faciesTable.append([fName, fCode])
+        # Input facies_table must be a dictionary
+        self.__facies_table = FaciesTable()
+        if facies_table is not None:
+            for code in facies_table.keys():
+                self.__facies_table.append(Facies(name=facies_table.get(code), code=int(code)))
 
-        # assert ET_Tree is not None
         if ET_Tree is not None:
             # Search xml tree for model file to find the specified Main facies table
             self.__interpretXMLTree(ET_Tree)
@@ -74,136 +146,95 @@ class APSMainFaciesTable:
         kw = 'MainFaciesTable'
         obj = root.find(kw)
         if obj is None:
-            raise ReadingXmlError(model_file_name=self.__modelFileName, keyword=kw)
+            raise ReadingXmlError(model_file_name=self.__model_file_name, keyword=kw)
         else:
-            fTable = obj
-            for fItem in fTable.findall('Facies'):
-                fName = fItem.get('name')
-                text = fItem.find('Code').text
-                fCode = int(text.strip())
-                self.__faciesTable.append([fName, fCode])
-            if self.__faciesTable is None:
+            facies_table = obj
+            for facies in facies_table.findall('Facies'):
+                self.__facies_table.append(
+                    Facies(
+                        name=facies.get('name'),
+                        code=int(facies.find('Code').text)
+                    )
+                )
+            if not self.__facies_table:
                 raise ReadingXmlError(
                     keyword='Facies',
-                    model_file_name=self.__modelFileName,
+                    model_file_name=self.__model_file_name,
                     parent_keyword='MainFaciesTable'
                 )
         if not self.__checkUniqueFaciesNamesAndCodes():
-            sys.exit()
+            raise ValueError('The facies table has two or more facies with the same code and/or name.')
         return
 
     def __len__(self):
-        return len(self.__faciesTable)
+        return len(self.__facies_table)
 
     def getClassName(self):
-        return copy.copy(self.__className)
+        return copy.copy(self.__class_name)
 
     def getFaciesTable(self):
-        return copy.copy(self.__faciesTable)
+        return copy.copy(self.__facies_table)
 
-    def getFaciesName(self, fIndx):
-        return self.__faciesTable[fIndx][self.__NAME]
+    def getFaciesName(self, index):
+        return self.__facies_table[index].name
 
-    def getFaciesCode(self, fIndx):
-        return int(self.__faciesTable[fIndx][self.__CODE])
+    def getFaciesCode(self, index):
+        return int(self.__facies_table[index].code)
 
-    def getFaciesCodeForFaciesName(self, fName):
-        code = -999
-        for item in self.__faciesTable:
-            if item[self.__NAME] == fName:
-                code = item[self.__CODE]
-                break
-        return code
+    def getFaciesCodeForFaciesName(self, facies_name):
+        for facies in self.__facies_table:
+            if facies.name == facies_name:
+                return facies.code
+        return -1
 
-    def getFaciesIndx(self, fName):
-        found = 0
-        fIndx = -999
+    def getFaciesIndx(self, facies_name):
         for i in range(len(self)):
-            fItem = self.__faciesTable[i]
-            facName = fItem[self.__NAME]
-            if fName == facName:
-                fIndx = i
-                found = 1
-                break
-        if found == 0:
-            raise ValueError(
-                'Can not find facies with name {} in facies table'
-                ''.format(fName)
-            )
-        else:
-            return fIndx
+            facies = self.__facies_table[i]
+            name = facies.name
+            if facies_name == name:
+                return i
+        raise ValueError(
+            'Can not find facies with name {} in facies table'
+            ''.format(facies_name)
+        )
 
-    def addFacies(self, faciesName, code):
-        # Check that the faciesName and code is not already used
-        err = 0
-        for i in range(len(self.__faciesTable)):
-            item = self.__faciesTable[i]
-            fName = item[0]
-            fCode = item[1]
-            if faciesName == fName or code == fCode:
-                err = 1
-                break
-        if err == 1:
-            print('Error in ' + self.__className)
-            print('Error: Try to add new facies with a name or code that is already used.')
+    def add_facies(self, name, code):
+        self.__facies_table.append(Facies(name, code))
 
-        item = [faciesName, code]
-        self.__faciesTable.append(item)
-        return err
+    def remove_facies(self, facies_name):
+        self.__facies_table.pop(facies_name)
 
-    def removeFacies(self, faciesName):
-        for i in range(len(self.__faciesTable)):
-            item = self.__faciesTable[i]
-            fName = item[0]
-            fCode = int(item[1])
-            if faciesName == fName:
-                self.__faciesTable.pop(i)
-                break
+    def __contains__(self, item):
+        return item in self.__facies_table
 
-    def has_facies_int_facies_table(self, fName):
-        facies_names = [item[self.__NAME] for item in self.__faciesTable]
-        return fName in facies_names
+    def has_facies_int_facies_table(self, facies_name):
+        return facies_name in [facies.name for facies in self.__facies_table]
 
     def XMLAddElement(self, root):
-        tag = 'MainFaciesTable'
-        elem = Element(tag)
-        root.append(elem)
-        ftElement = elem
-        for i in range(len(self)):
-            fName = self.__faciesTable[i][0]
-            fCode = self.__faciesTable[i][1]
-            tag = 'Facies'
-            attribute = {'name': fName}
-            elem = Element(tag, attribute)
-            ftElement.append(elem)
-            fElement = elem
-            tag = 'Code'
-            elem = Element(tag)
-            elem.text = ' ' + str(fCode) + ' '
-            fElement.append(elem)
+        facies_table = Element('MainFaciesTable')
+        root.append(facies_table)
+        for facies in self.__facies_table:
+            facies_element = Element('Facies', {'name': facies.name})
+            facies_table.append(facies_element)
+            code = Element('Code')
+            code.text = ' ' + str(facies.code) + ' '
+            facies_element.append(code)
 
     def __checkUniqueFaciesNamesAndCodes(self):
-        found = 0
         for i in range(len(self)):
-            f1 = self.__faciesTable[i][self.__NAME]
+            f1 = self.__facies_table[i].name
             for j in range(i + 1, len(self)):
-                f2 = self.__faciesTable[j][self.__NAME]
+                f2 = self.__facies_table[j].name
                 if f1 == f2:
-                    found = 1
-                    print('Error: In ' + self.__className)
+                    print('Error: In ' + self.__class_name)
                     print('Error: Facies name: ' + f1 + ' is specified multiple times')
-                    break
+                    return False
         for i in range(len(self)):
-            c1 = self.__faciesTable[i][self.__CODE]
+            c1 = self.__facies_table[i].code
             for j in range(i + 1, len(self)):
-                c2 = self.__faciesTable[j][self.__CODE]
+                c2 = self.__facies_table[j].code
                 if c1 == c2:
-                    found = 1
-                    print('Error: In ' + self.__className)
+                    print('Error: In ' + self.__class_name)
                     print('Error: Facies code: ' + str(c1) + ' is specified multiple times')
-                    break
-        if found == 1:
-            return False
-        else:
-            return True
-            # -- End of function checkUniqueFaciesNamesAndCodes
+                    return False
+        return True

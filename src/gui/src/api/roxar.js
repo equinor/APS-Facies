@@ -11,7 +11,7 @@ function callPythonFunction (code) {
 
     // simple:
     axios.get(`${API_PROTOCOL}://${API_SERVER}:${API_PORT}/${code}`, {
-      headers: {'Content-Type': 'text/html; charset=utf-8'}
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
       .then(response => {
         resolve(response.data)

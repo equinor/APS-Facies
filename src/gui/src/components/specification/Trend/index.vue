@@ -142,15 +142,15 @@ export default {
     },
     trendType: {
       get: function () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend.type },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/trendType', {grfId: this.grfId, value}) }
+      set: function (value) { this.$store.dispatch('gaussianRandomFields/trendType', { grfId: this.grfId, value }) }
     },
     trendParameter: {
       get: function () { return this.trend.parameter },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', {grfId: this.grfId, value}) }
+      set: function (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', { grfId: this.grfId, value }) }
     },
     useTrend: {
       get: function () { return this.trend.use },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/useTrend', {grfId: this.grfId, value}) },
+      set: function (value) { this.$store.dispatch('gaussianRandomFields/useTrend', { grfId: this.grfId, value }) },
     },
   },
 

@@ -39,7 +39,7 @@ def defineCommonModelParam(
     print('Debug level: {}'.format(apsmodel.debug_level))
 
     # Define main facies table
-    main_facies_table = APSMainFaciesTable(fTable=fTable)
+    main_facies_table = APSMainFaciesTable(facies_table=fTable)
     apsmodel.setMainFaciesTable(main_facies_table)
 
 
@@ -354,7 +354,7 @@ def test_variogram_generation():
     zoneNumber = 1
     # Define main facies table
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
-    mainFaciesTable = APSMainFaciesTable(fTable=fTable)
+    mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
     mainRange = 1000
     perpRange = 100
     vertRange = 1.0

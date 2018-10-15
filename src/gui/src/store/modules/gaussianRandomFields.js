@@ -3,7 +3,7 @@ import uuidv4 from 'uuid/v4'
 import { newSeed } from '@/utils'
 
 const emptyUpdatableValue = () => {
-  return {value: null, updatable: false}
+  return { value: null, updatable: false }
 }
 
 const emptyVariogram = () => {
@@ -58,7 +58,7 @@ const defaultSettings = () => {
     simulationBox: {
       x: 100, y: 100, z: 1,
     },
-    seed: {value: 0, autoRenew: true},
+    seed: { value: 0, autoRenew: true },
   }
 }
 
@@ -78,7 +78,7 @@ const newGaussianFieldName = state => {
   return name(grfNumber)
 }
 
-const setValue = ({state, commit}, {commitName, grfId, type, legalTypes, variogramOrTrend, value}) => {
+const setValue = ({ state, commit }, { commitName, grfId, type, legalTypes, variogramOrTrend, value }) => {
   const checks = [
     [
       () => state.fields.hasOwnProperty(grfId),
@@ -96,7 +96,7 @@ const setValue = ({state, commit}, {commitName, grfId, type, legalTypes, variogr
   checks.forEach(([check, errorMessage]) => {
     if (!check()) throw new Error(errorMessage)
   })
-  commit(commitName, {grfId, type, variogramOrTrend, value})
+  commit(commitName, { grfId, type, variogramOrTrend, value })
 }
 
 export default {
@@ -111,145 +111,145 @@ export default {
   },
 
   actions: {
-    init ({state, dispatch}) {
+    init ({ state, dispatch }) {
       const minGaussianFields = 2
       const remaining = minGaussianFields - Object.keys(state.fields).length
       for (let i = 0; i < remaining; i++) {
         dispatch('addEmptyField')
       }
     },
-    addEmptyField ({dispatch, state}) {
+    addEmptyField ({ dispatch, state }) {
       const field = {
         name: newGaussianFieldName(state),
         variogram: emptyVariogram(),
         trend: emptyTrend(),
         settings: defaultSettings(),
       }
-      dispatch('addField', {field})
+      dispatch('addField', { field })
     },
-    addField ({commit, state}, {field}) {
+    addField ({ commit, state }, { field }) {
       // TODO: Checks field is valid / migrate to typescript
       const grfId = uuidv4()
-      commit('ADD', {grfId, field})
+      commit('ADD', { grfId, field })
       return new Promise((resolve, reject) => {
         resolve(grfId)
       })
     },
-    deleteField ({state, commit}, {grfId}) {
+    deleteField ({ state, commit }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {
-        commit('DELETE', {grfId})
+        commit('DELETE', { grfId })
       }
     },
-    changeName ({state, commit}, {grfId, name}) {
-      setValue({state, commit}, {grfId, value: name, commitName: 'CHANGE_NAME'})
+    changeName ({ state, commit }, { grfId, name }) {
+      setValue({ state, commit }, { grfId, value: name, commitName: 'CHANGE_NAME' })
     },
-    changeSettings ({state, commit}, {grfId, settings}) {
-      setValue({state, commit}, {grfId, value: settings, commitName: 'CHANGE_SETTINGS'})
+    changeSettings ({ state, commit }, { grfId, settings }) {
+      setValue({ state, commit }, { grfId, value: settings, commitName: 'CHANGE_SETTINGS' })
     },
-    newSeed ({state, commit}, {grfId}) {
+    newSeed ({ state, commit }, { grfId }) {
       const seed = {
         value: newSeed(),
         autoRenew: state.fields[`${grfId}`].settings.seed.autoRenew,
       }
-      setValue({state, commit}, {grfId, value: seed, commitName: 'CHANGE_SEED'})
+      setValue({ state, commit }, { grfId, value: seed, commitName: 'CHANGE_SEED' })
     },
-    seed ({state, commit}, {grfId, value}) {
-      setValue({state, commit}, {grfId, value, commitName: 'CHANGE_SEED'})
+    seed ({ state, commit }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, value, commitName: 'CHANGE_SEED' })
     },
     // TODO: check values are appropriate
     // Variogram
-    range ({state, commit}, {grfId, type, value}) {
-      setValue({state, commit}, {grfId, type, value, legalTypes: ['main', 'perpendicular', 'vertical'], commitName: 'CHANGE_RANGE'})
+    range ({ state, commit }, { grfId, type, value }) {
+      setValue({ state, commit }, { grfId, type, value, legalTypes: ['main', 'perpendicular', 'vertical'], commitName: 'CHANGE_RANGE' })
     },
-    angle ({commit, state}, {grfId, variogramOrTrend, type, value}) {
+    angle ({ commit, state }, { grfId, variogramOrTrend, type, value }) {
       const legalTypes = variogramOrTrend === 'variogram' ? ['azimuth', 'dip'] : ['azimuth', 'stacking', 'migration']
-      setValue({state, commit}, {grfId, type, variogramOrTrend, value, legalTypes, commitName: 'CHANGE_ANGLE'})
+      setValue({ state, commit }, { grfId, type, variogramOrTrend, value, legalTypes, commitName: 'CHANGE_ANGLE' })
     },
-    variogramType ({commit, state, rootState}, {grfId, value}) {
-      setValue({state, commit}, {grfId, value, type: value, legalTypes: rootState.constants.options.variograms.available, commitName: 'CHANGE_VARIOGRAM_TYPE'})
+    variogramType ({ commit, state, rootState }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, value, type: value, legalTypes: rootState.constants.options.variograms.available, commitName: 'CHANGE_VARIOGRAM_TYPE' })
     },
-    power ({commit, state}, {grfId, value}) {
-      setValue({state, commit}, {grfId, value, commitName: 'CHANGE_POWER'})
+    power ({ commit, state }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, value, commitName: 'CHANGE_POWER' })
     },
     // Trend
-    useTrend ({commit, state}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, commitName: 'USE_TREND'})
+    useTrend ({ commit, state }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'USE_TREND' })
     },
-    relativeStdDev ({commit, state}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_STANDARD_DEVIATION'})
+    relativeStdDev ({ commit, state }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_STANDARD_DEVIATION' })
     },
-    relativeSize ({commit, state}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_SIZE_OF_ELLIPSE'})
+    relativeSize ({ commit, state }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_SIZE_OF_ELLIPSE' })
     },
-    trendType ({commit, state, rootState}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE'})
+    trendType ({ commit, state, rootState }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
     },
-    stackingDirection ({commit, state}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_STACKING_DIRECTION'})
+    stackingDirection ({ commit, state }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_STACKING_DIRECTION' })
     },
-    curvature ({commit, state}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_CURVATURE'})
+    curvature ({ commit, state }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_CURVATURE' })
     },
-    originType ({commit, state, rootState}, {grfId, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.origin.available, commitName: 'CHANGE_ORIGIN_TYPE'})
+    originType ({ commit, state, rootState }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.origin.available, commitName: 'CHANGE_ORIGIN_TYPE' })
     },
-    origin ({commit, state}, {grfId, type, value}) {
-      setValue({state, commit}, {grfId, variogramOrTrend: 'trend', type, value, legalTypes: ['x', 'y', 'z'], commitName: 'CHANGE_ORIGIN_COORDINATE'})
+    origin ({ commit, state }, { grfId, type, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', type, value, legalTypes: ['x', 'y', 'z'], commitName: 'CHANGE_ORIGIN_COORDINATE' })
     },
   },
 
   mutations: {
-    ADD (state, {grfId, field}) {
+    ADD (state, { grfId, field }) {
       Vue.set(state.fields, grfId, field)
     },
-    DELETE (state, {grfId}) {
+    DELETE (state, { grfId }) {
       Vue.delete(state.fields, grfId)
     },
-    CHANGE_NAME (state, {grfId, value}) {
+    CHANGE_NAME (state, { grfId, value }) {
       state.fields[`${grfId}`].name = value
     },
-    CHANGE_SETTINGS (state, {grfId, value}) {
+    CHANGE_SETTINGS (state, { grfId, value }) {
       state.fields[`${grfId}`].settings = value
     },
-    CHANGE_SEED (state, {grfId, value}) {
+    CHANGE_SEED (state, { grfId, value }) {
       state.fields[`${grfId}`].settings.seed = value
     },
     // Variogram
-    CHANGE_RANGE (state, {grfId, type, value}) {
+    CHANGE_RANGE (state, { grfId, type, value }) {
       state.fields[`${grfId}`].variogram.range[`${type}`] = value
     },
-    CHANGE_ANGLE (state, {grfId, variogramOrTrend, type, value}) {
+    CHANGE_ANGLE (state, { grfId, variogramOrTrend, type, value }) {
       state.fields[`${grfId}`][`${variogramOrTrend}`].angle[`${type}`] = value
     },
-    CHANGE_VARIOGRAM_TYPE (state, {grfId, value}) {
+    CHANGE_VARIOGRAM_TYPE (state, { grfId, value }) {
       state.fields[`${grfId}`].variogram.type = value
     },
-    CHANGE_POWER (state, {grfId, value}) {
+    CHANGE_POWER (state, { grfId, value }) {
       state.fields[`${grfId}`].variogram.power = value
     },
     // Trend
-    USE_TREND (state, {grfId, value}) {
+    USE_TREND (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.use = value
     },
-    CHANGE_TREND_TYPE (state, {grfId, value}) {
+    CHANGE_TREND_TYPE (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.type = value
     },
-    CHANGE_RELATIVE_STANDARD_DEVIATION (state, {grfId, value}) {
+    CHANGE_RELATIVE_STANDARD_DEVIATION (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.relativeStdDev = value
     },
-    CHANGE_RELATIVE_SIZE_OF_ELLIPSE (state, {grfId, value}) {
+    CHANGE_RELATIVE_SIZE_OF_ELLIPSE (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.relativeSize = value
     },
-    CHANGE_STACKING_DIRECTION (state, {grfId, value}) {
+    CHANGE_STACKING_DIRECTION (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.stackingDirection = value
     },
-    CHANGE_CURVATURE (state, {grfId, value}) {
+    CHANGE_CURVATURE (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.curvature = value
     },
-    CHANGE_ORIGIN_COORDINATE (state, {grfId, type, value}) {
+    CHANGE_ORIGIN_COORDINATE (state, { grfId, type, value }) {
       state.fields[`${grfId}`].trend.origin[`${type}`] = value
     },
-    CHANGE_ORIGIN_TYPE (state, {grfId, value}) {
+    CHANGE_ORIGIN_TYPE (state, { grfId, value }) {
       state.fields[`${grfId}`].trend.origin.type = value
     },
   },

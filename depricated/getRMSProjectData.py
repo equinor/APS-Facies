@@ -465,7 +465,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             print('Debug output: Facies names:')
             print(facies_code_names)
 
-        facies_table = APSMainFaciesTable(fTable=facies_code_names)
+        facies_table = APSMainFaciesTable(facies_table=facies_code_names)
         facies_table.XMLAddElement(topElement)
     # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:

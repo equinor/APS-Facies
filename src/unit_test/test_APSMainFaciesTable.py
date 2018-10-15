@@ -5,20 +5,20 @@ from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 def test_mainFaciesTable():
     mainFaciesTable1 = APSMainFaciesTable()
     # Test example of facies table
-    mainFaciesTable1.addFacies('F1', 1)
-    mainFaciesTable1.addFacies('F2', 2)
-    mainFaciesTable1.addFacies('F8', 8)
-    mainFaciesTable1.addFacies('F3', 3)
-    mainFaciesTable1.addFacies('F7', 7)
-    mainFaciesTable1.addFacies('F4', 4)
-    mainFaciesTable1.addFacies('F5', 5)
-    mainFaciesTable1.addFacies('F6', 6)
+    mainFaciesTable1.add_facies('F1', 1)
+    mainFaciesTable1.add_facies('F2', 2)
+    mainFaciesTable1.add_facies('F8', 8)
+    mainFaciesTable1.add_facies('F3', 3)
+    mainFaciesTable1.add_facies('F7', 7)
+    mainFaciesTable1.add_facies('F4', 4)
+    mainFaciesTable1.add_facies('F5', 5)
+    mainFaciesTable1.add_facies('F6', 6)
 
-    mainFaciesTable1.removeFacies('F7')
-    mainFaciesTable1.removeFacies('F8')
+    mainFaciesTable1.remove_facies('F7')
+    mainFaciesTable1.remove_facies('F8')
 
     fTable = {1: 'F1', 2: 'F2', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6'}
-    mainFaciesTable2 = APSMainFaciesTable(fTable=fTable)
+    mainFaciesTable2 = APSMainFaciesTable(facies_table=fTable)
 
     nFacies1 = len(mainFaciesTable1)
     nFacies2 = len(mainFaciesTable2)

@@ -1146,8 +1146,10 @@ class Trunc2D_Angle(Trunc2D_Base):
                 poly = self.__faciesPolygons[i]
                 probFrac = self.__probFracPerPolygon[i][1]
                 assert indx == self.__probFracPerPolygon[i][0]
-                print('Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'.format(str(i), fAngleParamName,
-                                                                                             fName, probFrac))
+                print(
+                    'Polygon: {0} Angle param name: {1} Facies: {2} Prob frac: {3}'
+                    ''.format(i, fAngleParamName, fName, probFrac)
+                )
                 for j in range(len(poly)):
                     print(repr(poly[j]))
 

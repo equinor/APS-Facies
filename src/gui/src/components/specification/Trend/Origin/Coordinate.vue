@@ -31,7 +31,7 @@ export default {
   computed: {
     propertyType () { return 'origin' },
     isRelative () { return this.originType === 'RELATIVE' },
-    ranges () { return this.isRelative ? {min: 0, max: 1} : {min: -Infinity, max: Infinity} },
+    ranges () { return this.isRelative ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity } },
     shownLabel () { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() },
     arrowStep () { return this.isRelative ? 0.001 : 1 },
   },

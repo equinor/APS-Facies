@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 
 from src.utils.ConvertBitMapToRMS import ConvertBitMapToRMS
 from src.utils.constants.simple import Debug
+from src.utils.methods import get_run_parameters
 
 long_help = """-------------------------------------------------------------------------------------
 python3 script which can be run as a python job in RMS10
@@ -18,7 +19,7 @@ Input:   Bitmap input file (1 byte) colors (256 colors at maximum)
          to be selected as well as which facies belongs to which colour number.
          Note that the selected rectangular area of the bitmap is specified with its corner point coordinates
          and pixel numbers.
-Output:  An irap map file containing the colour numbers for each pixel
+Output:  An irap map file containing the colour/facies numbers for each pixel
          or facies number for each pixel.
 
 Usage:
@@ -53,11 +54,11 @@ Usage:
  <ColorCode facies="5"> 1 </ColorCode>
  <Files>
    <Input> CorelDraw_aboveFS36_model_input.bmp </Input>
-   <Output> out1.irap </Output>
+   <Output> out1_facies.irap </Output>
  </Files>
  <Files>
    <Input> CorelDraw_aboveFS38_model_input.bmp </Input>
-   <Output> out2.irap </Output>
+   <Output> out2_facies.irap </Output>
  </Files>
 </ConvertBitmapToRMS>
 
@@ -84,8 +85,8 @@ Usage:
 --------------------------------------------------------------------------------------"""
 
 
-def get_arguments() -> Namespace:
-    parser = ArgumentParser(description="Read a rectangular piece of a bitmap color file")
+def get_arguments():
+    parser = ArgumentParser(description="Read a rectangular piece of a bitmap (256 colors) file")
     parser.add_argument('model_file', metavar='FILE', type=str, nargs='?', default='bitmap2rms_model.xml', help="The model file to read from (default: bitmap2rms_model.xml)")
     parser.add_argument('facies_code', metavar='CODE', type=int, nargs='?', default=0, help="The model file to read from (default: bitmap2rms_model.xml)")
     parser.add_argument('-d', '--debug-level', type=int, default=0, help="Sets the verbosity. 0-4, where 0 is least verbose (default: 0)")
@@ -94,16 +95,13 @@ def get_arguments() -> Namespace:
     return parser.parse_args()
 
 
-def run():
-    args = get_arguments()
-    if args.long_help:
-        print(long_help)
-        sys.exit(0)
+def run(roxar=None, project=None, **kwargs):
+    params = get_run_parameters(**kwargs)
+    model_file = params['model_file']
+    facies_code = params['facies_code']
+    debug_level = params['debug_level']
+    run_test_script = params['run_test_script']
 
-    model_file = args.model_file
-    facies_code = args.facies_code
-    debug_level = Debug(args.debug_level)
-    run_test_script = args.test
     if facies_code > 0 and debug_level >= Debug.ON:
         print('Calculate map with facies')
     bitmap_converter = ConvertBitMapToRMS(model_file, facies_code)
@@ -118,6 +116,20 @@ def run():
         bitmap_converter.testPlot()
 
 
+def run_cli():
+    args = get_arguments()
+    if args.long_help:
+        print(long_help)
+        sys.exit(0)
+
+    run(
+        model_file=args.model_file,
+        facies_code=args.facies_code,
+        run_test_script=args.test,
+        debug_level=Debug(args.debug_level)
+    )
+
+
 # -------------  Main ----------------------
 if __name__ == "__main__":
-    run()
+    run_cli()

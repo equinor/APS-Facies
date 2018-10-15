@@ -32,7 +32,7 @@ export default {
     trend () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend },
     stackingDirection: {
       get: function () { return this.trend.stackingDirection },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/stackingDirection', {grfId: this.grfId, value}) }
+      set: function (value) { this.$store.dispatch('gaussianRandomFields/stackingDirection', { grfId: this.grfId, value }) }
     },
   },
 }

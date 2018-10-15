@@ -1,11 +1,11 @@
 #!/bin/env python
+# -*- coding: utf-8 -*-
 
 import xml.etree.ElementTree as ET
 import pytest
-from src.utils.constants.simple import Debug, OriginType, TrendType
+from src.utils.constants.simple import Debug
 from bin.updateAPSModelFromFMU import updateAPSModelFromFMU
-from src.algorithms.APSModel import APSModel
-from src.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_markers, get_apsmodel_with_all_fmu_markers, read_write_model
+from src.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_markers, get_apsmodel_with_all_fmu_markers
 
 
 @pytest.fixture(scope='module')

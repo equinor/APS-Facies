@@ -10,11 +10,11 @@ export default {
   },
 
   actions: {
-    select: ({commit, dispatch}, blockedWellLog) => {
+    select: ({ commit, dispatch }, blockedWellLog) => {
       return promiseSimpleCommit(commit, 'CURRENT', blockedWellLog)
         .then(() => { dispatch('facies/fetch', null, { root: true }) })
     },
-    fetch: ({commit, dispatch, rootGetters}) => {
+    fetch: ({ commit, dispatch, rootGetters }) => {
       return fetchParameterHelper(commit, dispatch, rms.blockedWellLogParameters(rootGetters.gridModel, rootGetters.blockedWellParameter))
     },
   },

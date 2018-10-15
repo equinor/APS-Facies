@@ -27,9 +27,8 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "@babel/polyfill": "^7.0.0-beta.51",
+    "@babel/polyfill": "^7.0.0",
     "@vue/cli-plugin-babel": "^3.0.1",
-    "@vue/cli-plugin-e2e-cypress": "^3.0.1",
     "@vue/cli-plugin-eslint": "^3.0.1",
     "@vue/cli-plugin-unit-jest": "^3.0.1",
     "@vue/cli-service": "^3.0.1",
@@ -38,6 +37,7 @@
     "axios": "^0.18.0",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "^23.0.1",
+    "babel-loader": "^8.0.4",
     "babel-plugin-transform-imports": "^1.4.1",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-vue-types": "^0.2.0",

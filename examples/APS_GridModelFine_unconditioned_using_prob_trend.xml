@@ -14,11 +14,11 @@
     </Optimization>
 
     <SelectedZonesAndRegions>
-        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions> 
-        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions> 
+        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions>
         <SelectedZoneWithRegions zone="3">0</SelectedZoneWithRegions>
-        <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions> 
-        <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>  
+        <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>
         <SelectedZoneWithRegions zone="6">0</SelectedZoneWithRegions>
     </SelectedZonesAndRegions>
 

@@ -4,9 +4,13 @@ import sys
 import numpy as np
 from warnings import warn
 
-import roxar
+from src.utils.exceptions.general import raise_error
+from src.utils.io import print_debug_information, print_error
+from src.utils.roxar.grid_model import get3DParameter, modifySelectedGridCells, update_code_names
 
 from src.utils.constants.simple import Debug
+
+import roxar
 
 
 # List of functions in this file
@@ -19,9 +23,6 @@ from src.utils.constants.simple import Debug
 # [activeCellValues,codeNames] = getDiscrete3DParameterValues(gridModel, parameterName, realNumber=0, debug_level 1)
 # isOK                         = setContinuous3DParameterValues(gridModel, parameterName, values, realNumber=0, isShared=True, debug_level=1)
 # isOK                         = setDiscrete3DParameterValues(gridModel, parameterName, values, codeNames, realNumber=0, isShared=True, debug_level=1)
-from src.utils.exceptions.general import raise_error
-from src.utils.io import print_debug_information, print_error
-from src.utils.roxar.grid_model import get3DParameter, modifySelectedGridCells, update_code_names
 
 
 def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList,

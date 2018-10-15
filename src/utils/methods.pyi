@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
-from typing import Dict, TypeVar, Optional, Set, List, Type, overload, Tuple, NewType
+from typing import Dict, TypeVar, Optional, Set, List, Type, overload, Tuple, NewType, NamedTuple
 from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
@@ -9,9 +9,39 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 ModelFile = NewType('ModelFile', str)
+OutputModelFile = NewType('OutputModelFile', str)
 GlobalIplFile = NewType('GlobalIplFile', str)
 RmsProjectDataFile = NewType('RmsProjectDataFile', str)
 TemporaryGaussianSimulation = NewType('TemporaryGaussianSimulation', str)
+FmuVariablesFile = NewType('FmuVariablesFile', str)
+TaggedVariableFile = NewType('TaggedVariableFile', str)
+GridModelName = NewType('GridModelName', str)
+BlockedWellSetName = NewType('BlockedWellSetName', str)
+FaciesLogName = NewType('FaciesLogName', str)
+WorkflowName = NewType('WorkflowName', str)
+
+
+class RunParameters(NamedTuple):
+    model_file: ModelFile
+    output_model_file: OutputModelFile
+    rms_data_file: RmsProjectDataFile
+    global_include_file: GlobalIplFile
+    tagged_variables_file: TaggedVariableFile
+    tag_all_variables: bool
+    fmu_variables_file: FmuVariablesFile
+    write_log_file: bool
+    input_directory: TemporaryGaussianSimulation
+    grid_model_name: GridModelName
+    blocked_wells_set_name: BlockedWellSetName
+    facies_log_name: FaciesLogName
+    prefix_prob_logs: str
+    additional_unobserved_facies_list: List[str]
+    facies_code: int
+    run_test_script: bool
+    debug_level: Debug
+
+    def __getitem__(self, item: str): ...
+
 
 def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]: ...
 
@@ -37,7 +67,7 @@ def get_colors(n: int, min_colors: int) -> List[str]: ...
 @overload
 def get_colors(n: int) -> List[str]: ...
 
-def get_run_parameters(**kwargs) -> Tuple[ModelFile, RmsProjectDataFile, GlobalIplFile, TemporaryGaussianSimulation, Debug]: ...
+def get_run_parameters(**kwargs) -> RunParameters: ...
 def get_model_file_name(**kwargs) -> ModelFile: ...
 def get_debug_level(**kwargs) -> Debug: ...
 def get_global_ipl_file(**kwargs) -> GlobalIplFile: ...
@@ -46,3 +76,4 @@ def _get_value(kwargs: Dict[str, T], legal_kwargs: List[str], default_value: T) 
 def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str) -> str: ...
 def get_prefix(**kwargs) -> str: ...
 def calc_average(cell_index_defined: List[int], values: List[float]) -> float: ...
+def get_workflow_name() -> WorkflowName: ...
