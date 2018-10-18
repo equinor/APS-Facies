@@ -472,3 +472,53 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
         dimensions[0], dimensions[1], dimensions[2], num_zones, zone_names, num_layers_per_zone, start_layer_per_zone,
         end_layer_per_zone
     )
+
+def createZoneParameter(grid_model,  realization_number):
+    ''' Description: Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
+                     If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
+                     If the zone parameter already exist and is non-empty, nothing is done to the zone parameter except returning it.
+                     Return zone parameter either it is newly created, updated or already existing.
+    '''
+    import roxar
+    grid3d = grid_model.get_grid(realization_number)
+    properties = grid_model.properties
+    found_zone_parameter = False
+    zone_parameter = None
+    for p in properties:
+        if p.name == 'Zone_test':
+            found_zone_parameter = True
+            zone_parameter = p
+            break
+    if found_zone_parameter:
+        print('Found existing zone parameter with name {}'.format(zone_parameter.name))
+        if zone_parameter.is_empty(realisation=realization_number):
+            print('Found existing zone which was empty')
+            # Fill the parameter with zone values
+            values = zone_parameter_values(grid3d)
+            zone_parameter.set_values(values, realisation=realization_number)
+    else:
+        print('Not found existing zone parameter with name {}'.format(zone_parameter.name))
+        # Create zone parameter connected to the grid model
+        zone_parameter = properties.create('Zone_test', property_type=roxar.GridPropertyType.discrete, data_type=np.uint8)
+        # Fill the parameter with zone values
+        values = zone_parameter_values(grid3d)
+        zone_parameter.set_values(values,realisation=realization_number)
+        zone_parameter.set_shared(False)
+    print('zone_parameter:')
+    print(zone_parameter)
+    return zone_parameter
+
+def zone_parameter_values(grid3d):
+    ''' Description: Return numpy array for the active grid cells with zone number in each grid cell. '''
+    indexer = grid3d.simbox_indexer
+    dim_i, dim_j, dim_k = indexer.dimensions
+    values = grid3d.generate_values(np.uint8)
+    for zone_index in indexer.zonation:
+        print('zone_index: {}'.format(zone_index))
+        layer_ranges = indexer.zonation[zone_index]
+        for lr in layer_ranges:
+            # Get all the cell numbers for the layer range
+            cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
+        values[cell_numbers] = zone_index+1  # Zone number values start from 1 while zone_index start from 0
+    return values
+

@@ -484,7 +484,7 @@ def test_updating_model1():
             powerFmuUpdatable = powerFmuUpdatableList[i]
             assertPropertyGetterSetter(gfName, powerFmuUpdatable, zone, 'PowerFmuUpdatable')
 
-    outfile2 = 'testOut2_updated.xml'
+    outfile2 = 'testOut1_updated.xml'
     attributes_file = 'fmu_attributes.txt'
     apsmodel.writeModel(outfile2, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated1.xml'

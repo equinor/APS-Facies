@@ -138,7 +138,7 @@ def writeIrapMap(fmap, xOrigo, yOrigo, xinc, yinc, angleInDegrees, outputFileNam
 
 
 class ConvertBitMapToRMS:
-    def __init__(self, model_file_name, define_facies_code=0, debug_level=Debug.OFF):
+    def __init__(self, model_file_name,  debug_level=Debug.OFF):
         self.__model_file_name = model_file_name
         self.__nx = 0
         self.__ny = 0
@@ -270,7 +270,15 @@ class ConvertBitMapToRMS:
             text = obj.text
             self.__crop = bool(text.strip())
 
-        if define_facies_code == 1:
+        kw = 'UseFaciesCode'
+        define_facies_code = False
+        obj = root.find(kw)
+        if obj is not None:
+            text = obj.text
+            if int(text) != 0:
+                define_facies_code = True
+
+        if define_facies_code:
             kw = 'MissingCode'
             obj = root.find(kw)
             if obj is None:

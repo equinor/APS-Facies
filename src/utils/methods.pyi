@@ -9,6 +9,7 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 ModelFile = NewType('ModelFile', str)
+ProbabilityLogSpecificationFile = NewType('ProbabilityLogSpecificationFile', str)
 OutputModelFile = NewType('OutputModelFile', str)
 GlobalIplFile = NewType('GlobalIplFile', str)
 RmsProjectDataFile = NewType('RmsProjectDataFile', str)
@@ -31,16 +32,18 @@ class RunParameters(NamedTuple):
     fmu_variables_file: FmuVariablesFile
     write_log_file: bool
     input_directory: TemporaryGaussianSimulation
-    grid_model_name: GridModelName
-    blocked_wells_set_name: BlockedWellSetName
-    facies_log_name: FaciesLogName
-    prefix_prob_logs: str
-    additional_unobserved_facies_list: List[str]
+    probability_log_specification_file: ProbabilityLogSpecificationFile
     facies_code: int
     run_test_script: bool
     debug_level: Debug
 
     def __getitem__(self, item: str): ...
+
+
+class SpecificationType(Enum):
+    PROBABILITY_LOG = 1
+    FACIES_LOG = 2
+    CONVERT_BITMAP = 3
 
 
 def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]: ...
@@ -68,7 +71,10 @@ def get_colors(n: int, min_colors: int) -> List[str]: ...
 def get_colors(n: int) -> List[str]: ...
 
 def get_run_parameters(**kwargs) -> RunParameters: ...
-def get_model_file_name(**kwargs) -> ModelFile: ...
+def get_model_file_name(
+        _default_name: str = 'APS.xml',
+        **kwargs
+) -> ModelFile: ...
 def get_debug_level(**kwargs) -> Debug: ...
 def get_global_ipl_file(**kwargs) -> GlobalIplFile: ...
 def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile: ...
@@ -77,3 +83,4 @@ def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name
 def get_prefix(**kwargs) -> str: ...
 def calc_average(cell_index_defined: List[int], values: List[float]) -> float: ...
 def get_workflow_name() -> WorkflowName: ...
+def get_specification_file(_type: SpecificationType, **kwargs) -> ProbabilityLogSpecificationFile: ...

@@ -26,7 +26,7 @@ class APSModel:
             rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True,
             mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
-            previewScale=1.0, debug_level=Debug.OFF):
+            previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF):
 
 
       def updateXMLModelFile(self, modelFileName, parameterFileName, debug_level=Debug.OFF)
@@ -54,6 +54,7 @@ class APSModel:
         preview_cross_section
         preview_cross_section_type
         preview_cross_section_relative_position
+        preview_resolution
 
       Get data from data structure:
 
@@ -130,6 +131,7 @@ class APSModel:
             preview_cross_section_type='IJ',
             preview_cross_section_relative_pos=0.5,
             preview_scale=1.0,
+            preview_resolution='Normal',
             debug_level=Debug.OFF
     ):
         """
@@ -167,6 +169,8 @@ class APSModel:
                                           and mean for IJ cross sections that the cross section correspond to
                                           an index = previewCrossSectionRelativePos * nz and similar fo IK and JK cross sections.
          previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
+         previewResolution - Define  whether the testPreview program should use higher resolution or not compared with
+                             default resolution taken from the grid model.
          debugLevel - Define amouth of output to the screen during runs
 
         """
@@ -196,6 +200,7 @@ class APSModel:
         self.__previewRegion = preview_region
         self.__preview_cross_section = CrossSection(preview_cross_section_type, preview_cross_section_relative_pos)
         self.__previewScale = preview_scale
+        self.__previewResolution = preview_resolution
         self.__debug_level = debug_level
 
         # Read model if it is defined
@@ -270,6 +275,15 @@ class APSModel:
                 raise MissingAttributeInKeyword(kw, 'scale')
             self.__previewScale = float(text.strip())
 
+            text = obj.get('resolution')
+            if text is None:
+                self.__previewResolution = "Normal"
+            else:
+                self.__previewResolution = text.strip()
+                if not (self.__previewResolution == "Normal" or self.__previewResolution == "High"):
+                    raise ValueError('Preview resolution must be specified to be either Normal orr High\n'
+                                     'Default value is Normal if resolution is not specified')
+                    
         placement = [
             ('RMSProjectName', '__rmsProjectName', False),
             ('RMSWorkflowName', '__rmsWorkflowName', False),
@@ -642,6 +656,9 @@ class APSModel:
             )
         else:
             self.__previewScale = scale
+    @property
+    def preview_resolution(self):
+        return self.__previewResolution
 
     @property
     def preview_cross_section(self):
@@ -929,7 +946,8 @@ class APSModel:
                 'regionNumber': str(self.__previewRegion),
                 'crossSectionType': str(self.preview_cross_section_type.name),
                 'crossSectionRelativePos': str(self.preview_cross_section_relative_position),
-                'scale': str(self.__previewScale)
+                'scale': str(self.__previewScale),
+                'resolution': str(self.__previewResolution)
             }
             elem = ET.Element(tag, attribute)
             root.append(elem)

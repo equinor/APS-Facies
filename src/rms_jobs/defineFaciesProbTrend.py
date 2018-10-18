@@ -120,14 +120,9 @@ from src.algorithms.defineFaciesProbTrend import DefineFaciesProb
 from src.utils.methods import get_prefix, get_debug_level, get_model_file_name
 
 
-def get_model_file(**kwargs):
-    if 'prefix' not in kwargs:
-        return get_model_file_name(_default_name='defineProbTrend.xml', **kwargs)
-    return get_prefix(**kwargs) + '/' + 'defineProbTrend.xml'
-
-
 def run(roxar=None, project=None, **kwargs):
-    model_file_name = get_model_file(**kwargs)
+    model_file_name = 'defineProbTrend.xml'
+    print('Input model file: {}'.format(model_file_name))
     debug_level = get_debug_level(**kwargs)
     define_facies_trend = DefineFaciesProb(model_file_name, project, debug_level=debug_level)
     define_facies_trend.calculate_facies_probability_parameter()
