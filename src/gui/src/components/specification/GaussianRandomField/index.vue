@@ -72,7 +72,7 @@ import rms from '@/api/rms'
 
 import { hasValidChildren, notEmpty } from '@/utils'
 
-import GaussianPlot from '@/components/GaussianPlot'
+import GaussianPlot from '@/components/plot/GaussianPlot'
 import TrendSpecification from '@/components/specification/Trend'
 import RangeSpecification from '@/components/specification/GaussianRandomField/Range'
 import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection'

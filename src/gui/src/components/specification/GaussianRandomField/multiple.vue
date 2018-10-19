@@ -70,11 +70,12 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import GaussianRandomField from '@/components/specification/GaussianRandomField'
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog'
 import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName'
 import IconButton from '@/components/selection/IconButton'
-
 
 export default {
   components: {
@@ -91,8 +92,10 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      fields: 'fields'
+    }),
     isOpen () { return this.expanded === 0 },
-    fields () { return this.$store.state.gaussianRandomFields.fields },
     ids () { return Object.keys(this.fields) },
   },
 

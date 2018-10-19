@@ -1,66 +1,7 @@
 import Vue from 'vue'
 import uuidv4 from 'uuid/v4'
-import { newSeed } from '@/utils'
-
-const emptyUpdatableValue = () => {
-  return { value: null, updatable: false }
-}
-
-const emptyVariogram = () => {
-  return {
-    type: null,
-    angle: {
-      azimuth: emptyUpdatableValue(),
-      dip: emptyUpdatableValue(),
-    },
-    range: {
-      main: emptyUpdatableValue(),
-      perpendicular: emptyUpdatableValue(),
-      vertical: emptyUpdatableValue(),
-    },
-    power: emptyUpdatableValue(),
-  }
-}
-
-const emptyTrend = () => {
-  return {
-    use: false,
-    type: null,
-    angle: {
-      azimuth: emptyUpdatableValue(),
-      stacking: emptyUpdatableValue(),
-      migration: emptyUpdatableValue(),
-    },
-    stackingDirection: null,
-    parameter: null,
-    curvature: emptyUpdatableValue(),
-    origin: {
-      x: emptyUpdatableValue(),
-      y: emptyUpdatableValue(),
-      z: emptyUpdatableValue(),
-      type: '',
-    },
-    relativeSize: emptyUpdatableValue(),
-    relativeStdDev: emptyUpdatableValue(),
-  }
-}
-
-const defaultSettings = () => {
-  return {
-    crossSection: {
-      type: 'IJ',
-      relativePosition: 0.5,
-    },
-    gridAzimuth: 0.0,
-    gridSize: {
-      x: 100, y: 100, z: 1,
-    },
-    simulationBox: {
-      x: 100, y: 100, z: 1,
-    },
-    seed: { value: 0, autoRenew: true },
-  }
-}
+import { isEmpty, newSeed, notEmpty } from '@/utils'
+import { GaussianRandomField } from '@/store/utils/domain'
 
 const inNames = (state, name) => {
   for (const grfId in state.fields) {
@@ -111,21 +52,35 @@ export default {
   },
 
   actions: {
-    init ({ state, dispatch }) {
+    init ({ state, dispatch, rootState }, { zoneId, regionId }) {
       const minGaussianFields = 2
-      const remaining = minGaussianFields - Object.keys(state.fields).length
+      const remaining = minGaussianFields - Object.values(state.fields)
+        .filter(field => field.parent.zone === zoneId).length
       for (let i = 0; i < remaining; i++) {
-        dispatch('addEmptyField')
+        dispatch('addEmptyField', { zoneId, regionId })
+      }
+      if (notEmpty(regionId)) {
+        const relevantFields = Object.keys(state.fields)
+          .filter(fieldId => {
+            const field = state.fields[`${fieldId}`]
+            return field.parent.zone === zoneId && isEmpty(field.parent.region)
+          })
+        relevantFields.forEach(fieldId => {
+          const field = JSON.parse(JSON.stringify(state.fields[`${fieldId}`]))
+          field.name = newGaussianFieldName(state)
+          field.parent.region = regionId
+          dispatch('addField', { field })
+        })
       }
     },
-    addEmptyField ({ dispatch, state }) {
-      const field = {
-        name: newGaussianFieldName(state),
-        variogram: emptyVariogram(),
-        trend: emptyTrend(),
-        settings: defaultSettings(),
-      }
-      dispatch('addField', { field })
+    addEmptyField ({ dispatch, state, rootGetters }, { zoneId, regionId }) {
+      dispatch('addField', {
+        field: new GaussianRandomField({
+          name: newGaussianFieldName(state),
+          zone: zoneId || rootGetters.zone,
+          region: regionId || rootGetters.region || '',
+        })
+      })
     },
     addField ({ commit, state }, { field }) {
       // TODO: Checks field is valid / migrate to typescript

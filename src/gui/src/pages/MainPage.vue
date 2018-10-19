@@ -3,7 +3,11 @@
     <v-layout wrap>
       <v-flex xs4><Selection/></v-flex>
       <v-flex xs4><Preview/></v-flex>
-      <v-flex xs4><Settings/></v-flex>
+      <v-flex xs4>
+        <Settings
+          v-if="zoneSelected"
+        />
+      </v-flex>
     </v-layout>
   </v-container>
 </template>
@@ -20,6 +24,12 @@ export default {
     Selection,
     Settings,
     Preview
+  },
+
+  computed: {
+    zoneSelected () {
+      return !!this.$store.getters.zone
+    }
   }
 }
 </script>
