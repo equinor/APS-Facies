@@ -1,5 +1,7 @@
 import Vue from 'vue'
 
+import cloneDeep from 'lodash/cloneDeep'
+
 import templates from '@/store/modules/truncationRules/templates'
 import { Bayfill } from '@/store/utils/domain/truncationRule'
 import { ADD_ITEM } from '@/store/mutations'
@@ -26,6 +28,27 @@ const processFields = (getters, fields) => {
 
 const processPolygons = (getters, polygons) => {
   return process(getters, polygons, 'facies', 'facies', 'facies')
+}
+
+const getPolygonByName = (rule, name) => {
+  return rule.polygons.find(polygon => polygon.name === name)
+}
+
+const setFacies = (polygons, src, dest) => {
+  polygons.find(polygon => polygon.name === dest.name).facies = src.facies
+}
+
+function swapFacies (rule, polygons) {
+  if (polygons.length !== 2) throw new Error('Only two polygons may be swapped')
+  const newPolygons = cloneDeep(rule.polygons)
+
+  const first = getPolygonByName(rule, polygons[0])
+  const other = getPolygonByName(rule, polygons[1])
+
+  setFacies(newPolygons, first, other)
+  setFacies(newPolygons, other, first)
+
+  return newPolygons
 }
 
 export default {
@@ -91,6 +114,9 @@ export default {
     updateFields ({ commit, rootGetters }, { channel, selected }) {
       commit('CHANGE_FIELDS', { ruleId: rootGetters.truncationRule.id, channel, fieldId: selected })
     },
+    swapFacies ({ commit }, { rule, polygons }) {
+      commit('SET_FACIES', { ruleId: rule.id, polygons: swapFacies(rule, polygons) })
+    },
     updateFacies ({ commit, dispatch, state, rootState }, { rule, polygon, faciesId }) {
       const polygonName = polygon.name || polygon
       commit('CHANGE_FACIES', { ruleId: rule.id || rule, polygonName, faciesId })
@@ -119,6 +145,9 @@ export default {
   mutations: {
     ADD: (state, { id, item }) => {
       ADD_ITEM(state.rules, { id, item })
+    },
+    SET_FACIES: (state, { ruleId, polygons }) => {
+      Vue.set(state.rules[`${ruleId}`], 'polygons', polygons)
     },
     CHANGE_TYPE: (state, { type }) => changePreset(state, 'type', type),
     CHANGE_TEMPLATE: (state, { template }) => changePreset(state, 'template', template),

@@ -1,4 +1,6 @@
 'use strict'
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
+
 // Vue configurations
 const isProduction = process.env.NODE_ENV === 'production'
 const canParallelize = require('os').cpus().length > 1
@@ -19,6 +21,29 @@ module.exports = {
         minimize: isProduction,
       },
     }
+  },
+
+  configureWebpack: {
+    plugins: [
+      new LodashModuleReplacementPlugin({
+        shorthands: false,
+        cloning: true,
+        currying: false,
+        caching: false,
+        collections: false,
+        exotics: false,
+        guards: false,
+        metadata: false, // (requires currying)
+        deburring: false,
+        unicode: false,
+        chaining: false,
+        memoizing: false,
+        coercions: false,
+        flattening: false,
+        paths: false,
+        placeholders: false, // (requires currying)
+      }),
+    ],
   },
 
   lintOnSave: true,
