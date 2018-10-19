@@ -27,6 +27,7 @@ export default {
     },
     setter (value) {
       this.$store.dispatch('gridModels/select', value)
+      this.$emit('changed', value)
     }
   },
 }
