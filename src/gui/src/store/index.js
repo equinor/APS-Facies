@@ -7,6 +7,7 @@ import facies from '@/store/modules/facies'
 import gaussianRandomFields from '@/store/modules/gaussianRandomFields'
 import parameters from '@/store/modules/parameters'
 import constants from '@/store/modules/constants'
+import options from '@/store/modules/options'
 import { mirrorZoneRegions } from '@/store/utils'
 
 Vue.use(Vuex)
@@ -29,6 +30,7 @@ export default new Vuex.Store({
     gaussianRandomFields,
     parameters,
     constants,
+    options,
   },
 
   actions: {

@@ -179,6 +179,16 @@ export default {
       showRegionNameNumber: '',
     }
   },
+
+  watch: {
+    dialog: function (value) {
+      if (value) {
+        this.showZoneNameNumber = this.$store.state.options.nameNumber.zone.show
+        this.showRegionNameNumber = this.$store.state.options.nameNumber.region.show
+      }
+    },
+  },
+
   methods: {
     chooseAPSModelFileLocation (e) {
       // eslint-disable-next-line no-undef
@@ -208,11 +218,14 @@ export default {
       this.dialog = false
     },
     ok (e) {
+      // TODO: Store stuff
       alert(`dialogAPSModelFileLocation:    ${this.apsModelFileLocation}
             dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
             dialogFMUParameterListLocation: ${this.fmuParameterListLocation}
             dialogShowZoneNameNumber:       ${this.showZoneNameNumber}
             dialogShowRegionNameNumber:     ${this.showRegionNameNumber}`)
+      this.$store.dispatch('options/nameNumber/zone/set', this.showZoneNameNumber)
+      this.$store.dispatch('options/nameNumber/region/set', this.showRegionNameNumber)
       this.dialog = false
     }
   },
