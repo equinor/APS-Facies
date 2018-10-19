@@ -5,10 +5,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import './style/main.styl'
-import './plugins/swatches'
-import './plugins/vuetify'
-import './plugins/axios'
-import './plugins/validation'
+import './plugins'
 
 Vue.config.productionTip = process.env.NODE_ENV !== 'production'
 

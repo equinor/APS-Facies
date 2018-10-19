@@ -16,11 +16,9 @@
 import Selection from '@/components/ElementSelection'
 import Settings from '@/components/ElementSettings'
 import Preview from '@/components/ElementPreview'
-import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple'
 
 export default {
   components: {
-    GaussianRandomFields,
     Selection,
     Settings,
     Preview

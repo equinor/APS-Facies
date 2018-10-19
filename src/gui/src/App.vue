@@ -16,8 +16,7 @@ export default {
 
   beforeMount () {
     // Fetch various parameters
-    this.$store.dispatch('gridModels/fetch')
-    this.$store.dispatch('constants/fetch')
+    return this.$store.dispatch('fetch')
   },
 }
 </script>

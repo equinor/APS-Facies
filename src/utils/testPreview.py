@@ -192,7 +192,6 @@ def run_previewer(
     if not 0.0 <= azimuthGridOrientation <= 360.0:
         azimuthGridOrientation = azimuthGridOrientation % 360.0
 
-
     nzFromGrid = rmsData.getNumberOfLayersInZone(preview_zone_number)
     nx = int(nxFromGrid)
     ny = int(nyFromGrid)
@@ -401,11 +400,13 @@ def get_dimensions(preview_cross_section_type, preview_size, simulation_box_size
     return grid_dimensions, increments
 
 
-def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, debug_level=Debug.OFF):
+def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, facies_colors=None, title='Truncation Map', debug_level=Debug.OFF):
     if num_facies is None:
         num_facies = truncation_rule.num_facies_in_zone
     if ax is None:
         fig, ax = plt.subplots()
+    if facies_colors is None:
+        facies_colors = get_colors(num_facies)
     facies_ordering = truncation_rule.getFaciesOrderIndexList()
 
     # Calculate polygons for truncation map for current facies probability
@@ -413,7 +414,6 @@ def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, deb
     facies_polygons = truncation_rule.truncMapPolygons()
     facies_index_per_polygon = truncation_rule.faciesIndxPerPolygon()
     # Truncation map is plotted
-    colors = get_colors(num_facies)
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print(
             'Number of facies:          {num_facies}\n'
@@ -423,9 +423,11 @@ def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, deb
         index = facies_index_per_polygon[i]
         facies_index = facies_ordering[index]
         poly = facies_polygons[i]
-        polygon = Polygon(poly, closed=True, facecolor=colors[facies_index])
+        polygon = Polygon(poly, closed=True, facecolor=facies_colors[facies_index])
         ax.add_patch(polygon)
-    ax.set_title('Truncation Map')
+    if title is not None:
+        ax.set_title(title)
+    ax.axes.set_axis_off()
     ax.set_aspect('equal', 'box')
     return fig, ax
 

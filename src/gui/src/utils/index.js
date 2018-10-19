@@ -35,6 +35,20 @@ const hasValidChildren = component => {
   return true
 }
 
+const hasCurrentParents = (item, getters) => {
+  return item.parent.zone === getters.zone.id && item.parent.region ? item.parent.region === getters.region.id : true
+}
+
+const hasEnoughFacies = (rule, getters) => {
+  let minFacies = 0
+  if (rule.type === 'bayfill') minFacies = 5
+  else throw new Error(`${rule.type} is not implemented`)
+  // TODO: Implement for Cubic and Non-Cubic
+
+  const numFacies = getters['facies/selected'].length
+  return numFacies >= minFacies
+}
+
 const isEmpty = property => (typeof property === 'undefined' || property === null || property === '')
 const notEmpty = property => !isEmpty(property)
 
@@ -42,12 +56,20 @@ const getRandomInt = max => Math.floor(Math.random() * max)
 
 const newSeed = () => getRandomInt(Math.pow(2, 64) - 1)
 
+const resolve = (path, obj = self, separator = '.') => {
+  const properties = Array.isArray(path) ? path : path.split(separator)
+  return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)
+}
+
 export {
   makeData,
   selectItems,
   hasValidChildren,
+  hasCurrentParents,
+  hasEnoughFacies,
   getRandomInt,
   newSeed,
+  resolve,
   isEmpty,
   notEmpty
 }

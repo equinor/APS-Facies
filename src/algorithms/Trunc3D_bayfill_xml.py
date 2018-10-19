@@ -331,8 +331,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
             print(repr(self._faciesCode))
 
     def initialize(
-            self, mainFaciesTable, faciesInZone, faciesInTruncRule, gaussFieldsInZone,
-            alphaFieldNameForBackGroundFacies, sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable, useConstTruncParam, debug_level=Debug.OFF
+            self, mainFaciesTable, faciesInZone, faciesInTruncRule,
+            gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
+            sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable,
+            useConstTruncParam, debug_level=Debug.OFF
     ):
         """
         Initialize the truncation object from input variables.
@@ -352,8 +354,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self._setModelledFacies(mainFaciesTable, faciesInZone)
 
         # Call base class method to associate gauss fields with alpha coordinates
-        self._setGaussFieldForBackgroundFaciesTruncationMap(gaussFieldsInZone,
-                                                            alphaFieldNameForBackGroundFacies, 3)
+        self._setGaussFieldForBackgroundFaciesTruncationMap(gaussFieldsInZone, alphaFieldNameForBackGroundFacies, 3)
         # Set facies in truncation rule
         self._faciesInTruncRule = copy.copy(faciesInTruncRule)
 
@@ -445,13 +446,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def truncMapPolygons(self):
         assert self._setTruncRuleIsCalled
         isDetermined = False
-        for indx in range(len(self._faciesInTruncRule)):
+        for indx in range(self.num_facies_in_truncation_rule):
             if self._faciesIsDetermined[indx] == 1:
                 isDetermined = True
                 break
         if isDetermined:
             self.__polygons = []
-            for indx in range(len(self._faciesInTruncRule)):
+            for indx in range(self.num_facies_in_truncation_rule):
                 if self._faciesIsDetermined[indx] == 1:
                     poly = self.__unitSquarePolygon()
                     self.__polygons.append(poly)

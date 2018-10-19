@@ -1,7 +1,8 @@
 import Vue from 'vue'
-import uuidv4 from 'uuid/v4'
 import { isEmpty, newSeed, notEmpty } from '@/utils'
 import { GaussianRandomField } from '@/store/utils/domain'
+import { ADD_ITEM } from '@/store/mutations'
+import { addItem } from '@/store/actions'
 
 const inNames = (state, name) => {
   for (const grfId in state.fields) {
@@ -52,8 +53,8 @@ export default {
   },
 
   actions: {
-    init ({ state, dispatch, rootState }, { zoneId, regionId }) {
-      const minGaussianFields = 2
+    init ({ state, dispatch, rootState, rootGetters }, { zoneId, regionId }) {
+      const minGaussianFields = rootGetters['constants/numberOf/gaussianRandomFields/minimum']
       const remaining = minGaussianFields - Object.values(state.fields)
         .filter(field => field.parent.zone === zoneId).length
       for (let i = 0; i < remaining; i++) {
@@ -78,17 +79,12 @@ export default {
         field: new GaussianRandomField({
           name: newGaussianFieldName(state),
           zone: zoneId || rootGetters.zone,
-          region: regionId || rootGetters.region || '',
+          region: regionId || rootGetters.region,
         })
       })
     },
     addField ({ commit, state }, { field }) {
-      // TODO: Checks field is valid / migrate to typescript
-      const grfId = uuidv4()
-      commit('ADD', { grfId, field })
-      return new Promise((resolve, reject) => {
-        resolve(grfId)
-      })
+      addItem({ commit }, { item: field })
     },
     deleteField ({ state, commit }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {
@@ -154,8 +150,8 @@ export default {
   },
 
   mutations: {
-    ADD (state, { grfId, field }) {
-      Vue.set(state.fields, grfId, field)
+    ADD (state, { id, item }) {
+      ADD_ITEM(state.fields, { id, item })
     },
     DELETE (state, { grfId }) {
       Vue.delete(state.fields, grfId)

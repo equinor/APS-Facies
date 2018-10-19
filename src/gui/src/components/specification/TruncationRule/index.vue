@@ -6,67 +6,43 @@
       <div slot="header">
         <h2>Truncation Rules</h2>
       </div>
+      <truncation-header/>
       <v-layout row>
-        <v-flex xs5>
-          <v-select
-            v-model="templateName"
-            :items="['Cubic', 'Non-cubic', 'Bayfill']"
-            label="Rule"
+        <v-flex xs12>
+          <component
+            :is="truncationRuleComponent"
           />
         </v-flex>
-        <v-flex xs5>
-          <v-combobox
-            v-model="truncationType"
-            :items="templates"
-            label="Template"
-          />
-        </v-flex>
-        <icon-button
-          icon="add_box"
-          @click="addTemplate"
-        />
-        <icon-button
-          icon="content_copy"
-          @click="copyTemplate"
-        />
-        <icon-button
-          icon="delete_forever"
-          @click="deleteTemplate"
-        />
       </v-layout>
     </v-expansion-panel-content>
   </v-expansion-panel>
 </template>
 
 <script>
-import IconButton from '@/components/selection/IconButton'
+import { mapState } from 'vuex'
+
+import BayfillSpecification from '@/components/specification/TruncationRule/Bayfill'
+import TruncationHeader from '@/components/specification/TruncationRule/header'
 
 export default {
   components: {
-    IconButton,
-  },
-
-  data () {
-    return {
-      templateName: '',
-      truncationType: '',
-    }
+    TruncationHeader,
   },
 
   computed: {
-    templates () {
-      return ['Simple', 'Advanced']
-    }
-  },
-
-  methods: {
-    addTemplate () {},
-    copyTemplate () {},
-    deleteTemplate () {},
+    ...mapState({
+      truncationRuleType: state => state.truncationRules.templates.types.available[state.truncationRules.preset.type]
+    }),
+    truncationRuleComponent () {
+      const mapping = {
+        'Cubic': null,
+        'Non-cubic': null,
+        'Bayfill': BayfillSpecification,
+      }
+      return this.truncationRuleType
+        ? mapping[this.truncationRuleType.name]
+        : null
+    },
   },
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -26,7 +26,7 @@
           :label="label"
           :suffix="unit"
           :disabled="disabled"
-          @input="e => updateValue(e)"
+          @input.capture="e => updateValue(e)"
           @blur="$v.fieldValue.$touch()"
           @keydown.up="increase"
           @keydown.down="decrease"
@@ -117,7 +117,13 @@ export default Vue.extend({
       fieldValue[`${rule.name}`] = value => rule.check(value)
     })
     return {
-      fieldValue,
+      fieldValue: {
+        required: this.optional ? true : requiredField,
+        between: between(this.min, this.max),
+        discrete: this.discrete ? numeric : true,
+        strictlyGreater: this.strictlyGreater ? value => value > this.min : true,
+        strictlySmaller: this.strictlySmaller ? value => value < this.max : true,
+      },
     }
   },
 
@@ -172,12 +178,19 @@ export default Vue.extend({
 
   watch: {
     value (value) {
-      this.fieldValue = this.getValue(value)
+      if (this.hasChanged(value)) {
+        this.fieldValue = this.getValue(value)
+      }
       this.updatable = this.getUpdatable(value)
     }
   },
 
   methods: {
+    hasChanged (value) {
+      // Helper method to deal with letting the '.' appear in the textfield
+      // Returns this.fieldValue != value, in the proper types
+      return math.unequal(math.bignumber(this.fieldValue), this.getValue(value))
+    },
     setUpdatable (event) {
       this.emitChange(event)
     },

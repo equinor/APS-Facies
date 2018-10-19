@@ -7,7 +7,7 @@
     label=""
     optional
     enforce-ranges
-    @input="propagate"
+    @input="e => propagate(e)"
   />
 </template>
 
@@ -25,10 +25,6 @@ export default {
   props: {
     value: VueTypes.oneOfType([nullableNumber, updatableType]).isRequired,
     fmuUpdatable: VueTypes.bool.def(false),
-  },
-
-  data () {
-    return {}
   },
 
   computed: {
