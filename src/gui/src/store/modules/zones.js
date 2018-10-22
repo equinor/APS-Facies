@@ -17,6 +17,7 @@ export default {
       const ids = selected.map(zone => zone.id)
       for (const id in state.available) {
         // TODO: Make sure all regions are also selected, of regions is in use (and this zone has regions)
+        // FIXME: Ensure that 'intermediate' is preserved
         const toggled = ids.indexOf(id) >= 0
         if (rootState.regions.use) {
           // When a zone is (un)toggled, all of its regions should be (un)toggled
@@ -40,11 +41,18 @@ export default {
       return rms.zones(rootGetters.gridModel, rootGetters.zoneParameter)
         .then(zones => {
           const data = makeData(zones, Zone)
-          if (rootGetters.regionParameter) {
-            for (let zoneId in data) {
+          Object.keys(data).forEach(zoneId => {
+            if (rootGetters.regionParameter) {
               dispatch('regions/fetch', zoneId, { root: true })
+                .then(regionIds => {
+                  regionIds.forEach(regionId => {
+                    dispatch('gaussianRandomFields/init', { zoneId, regionId }, { root: true })
+                  })
+                })
+            } else {
+              dispatch('gaussianRandomFields/init', { zoneId }, { root: true })
             }
-          }
+          })
           commit('AVAILABLE', data)
         })
     },
@@ -53,6 +61,8 @@ export default {
         // We are setting/updating the regions for `zone`
         if (isEmpty(zoneId)) zoneId = state.current
         commit('REGIONS', { zoneId, regions })
+        // TODO: Add new GRFs for each region if necessary
+        Object.keys(regions).forEach(regionId => dispatch('gaussianRandomFields/init', { zoneId, regionId }, { root: true }))
         // All regions selected
         if (Object.values(regions).every(region => region.selected)) commit('SELECTED', { id: zoneId, toggled: true })
         // Some region(s) selected

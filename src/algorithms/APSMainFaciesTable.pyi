@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from src.utils.constants.simple import Debug
-from typing import Dict, List, Optional, Union, Tuple, Iterator
+from typing import Dict, List, Optional, Union
 from xml.etree.ElementTree import Element, ElementTree
 
 from src.utils.records import FaciesRecord

@@ -5,9 +5,12 @@ import zones from '@/store/modules/zones'
 import regions from '@/store/modules/regions'
 import facies from '@/store/modules/facies'
 import gaussianRandomFields from '@/store/modules/gaussianRandomFields'
+import truncationRules from '@/store/modules/truncationRules'
 import parameters from '@/store/modules/parameters'
 import constants from '@/store/modules/constants'
+import options from '@/store/modules/options'
 import { mirrorZoneRegions } from '@/store/utils'
+import { hasCurrentParents, resolve } from '@/utils'
 
 Vue.use(Vuex)
 
@@ -27,11 +30,18 @@ export default new Vuex.Store({
     regions,
     facies,
     gaussianRandomFields,
+    truncationRules,
     parameters,
     constants,
+    options,
   },
 
   actions: {
+    fetch ({ dispatch }) {
+      dispatch('gridModels/fetch')
+      dispatch('constants/fetch')
+      dispatch('truncationRules/fetch')
+    },
   },
 
   mutations: {
@@ -51,6 +61,9 @@ export default new Vuex.Store({
     facies: (state) => {
       return state.facies.current
     },
+    truncationRule: (state, getters) => {
+      return state.truncationRules.rules ? Object.values(state.truncationRules.rules).find(rule => hasCurrentParents(rule, getters)) : null
+    },
     zoneParameter: (state) => {
       return state.parameters.zone.selected
     },
@@ -63,6 +76,18 @@ export default new Vuex.Store({
     blockedWellLogParameter: (state) => {
       return state.parameters.blockedWellLog.selected
     },
+    fields: (state) => {
+      const fields = state.gaussianRandomFields.fields
+      return Object.keys(fields)
+        .filter(fieldId => {
+          const field = fields[`${fieldId}`]
+          return field.parent.zone === state.zones.current && field.parent.region === state.regions.current
+        })
+        .reduce((obj, fieldId) => {
+          obj[`${fieldId}`] = fields[`${fieldId}`]
+          return obj
+        }, {})
+    },
     field: (state) => (id) => {
       return state.gaussianRandomFields.fields[`${id}`]
     },
@@ -72,6 +97,24 @@ export default new Vuex.Store({
     },
     regions: (state) => {
       return state.regions.available
+    },
+    faciesTable: (state) => {
+      return Object.values(state.facies.available).map(facies => { return { id: facies.id, name: facies.name, code: facies.code, color: facies.color } })
+    },
+    // Utility method for getting IDs
+    id: (state) => (type, name) => {
+      const mapping = {
+        'gaussianRandomField': 'gaussianRandomFields.fields',
+        'facies': 'facies.available',
+      }
+      const items = resolve(mapping[`${type}`], state)
+      if (items) {
+        const item = Object.values(items).find(item => item.name === name)
+        if (item) {
+          return item.id
+        }
+      }
+      return null
     },
   },
 })

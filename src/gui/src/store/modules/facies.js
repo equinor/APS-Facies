@@ -24,7 +24,7 @@ export default {
   state: {
     available: {},
     current: null,
-    constantProbability: false,
+    constantProbability: true,
   },
 
   modules: {},
@@ -70,6 +70,12 @@ export default {
       }
       dispatch('normalizeEmpty')
     },
+    updateProbability: ({ dispatch, state }, { facies, probability }) => {
+      if (!facies.id) {
+        facies = state.available[`${facies}`]
+      }
+      return updateFaciesProbability(dispatch, facies, probability)
+    },
     normalizeEmpty: ({ dispatch, getters }) => {
       const selectedFacies = getters.selected
       const probabilities = selectedFacies
@@ -92,6 +98,7 @@ export default {
       commit('CONSTANT_PROBABILITY', !state.constantProbability)
     },
     changed: ({ commit, state }, { facies }) => {
+      // TODO: Update proportion in truncation rule if applicable
       return promiseSimpleCommit(commit, 'UPDATE', { facies: new Facies({ _id: facies.id, ...facies }) }, () => facies.hasOwnProperty('id'))
     },
     fetch: ({ commit, rootGetters, rootState }) => {
@@ -99,7 +106,7 @@ export default {
         .then(facies => {
           // TODO: Add colors (properly)
           for (let i = 0; i < facies.length; i++) {
-            facies[i].color = rootState.constants.faciesColors.available[i]
+            facies[`${i}`].color = rootState.constants.faciesColors.available[`${i}`]
           }
           const data = makeData(facies, Facies)
           commit('AVAILABLE', { facies: data })
@@ -127,6 +134,9 @@ export default {
   },
 
   getters: {
+    byName: (state) => (name) => {
+      return Object.values(state.available).find(facies => facies.name === name)
+    },
     selected: (state) => {
       return Object.values(state.available).filter(facies => facies.selected)
     },

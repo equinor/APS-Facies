@@ -1348,7 +1348,6 @@ Background facies:
             key = tuple(keyList)
         return key
 
-
     @staticmethod
     def _makeRoundOfFaciesProb(faciesProb, resolution):
         '''Calculate round off of facies probabilities and adjusted

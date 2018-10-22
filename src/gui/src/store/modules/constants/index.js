@@ -1,6 +1,7 @@
 import ranges from './ranges'
 import options from './options'
 import faciesColors from './faciesColors'
+import numberOf from './numberOf'
 
 export default {
   namespaced: true,
@@ -11,6 +12,7 @@ export default {
     ranges,
     options,
     faciesColors,
+    numberOf,
   },
 
   actions: {
@@ -23,6 +25,9 @@ export default {
 
       // Get the standard colors for facies
       dispatch('faciesColors/fetch')
+
+      // Get minimum, and maximum number of fields for different truncation rules
+      dispatch('numberOf/fetch')
     }
   },
 

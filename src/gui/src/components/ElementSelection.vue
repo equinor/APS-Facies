@@ -3,31 +3,55 @@
     align-start
     justify-start
   >
-    <grid-model/>
-    <div v-if="currentGridModel">
-      <zone-parameter/>
-      <div v-if="zoneParameter">
-        <zone-region/>
-        <div
-          v-if="hasWellParameters"
-        >
-          <choose-blocked-well-parameter/>
-          <choose-blocked-well-log-parameter
-            v-if="hasBlockedWellParameter"
-          />
-          <div
-            v-if="hasBlockedWellLogParameter"
-          >
-            <facies-selection/>
+    <grid-model
+      @changed="onGridModelSelected"
+    />
+
+    <v-expansion-panel
+      v-if="currentGridModel"
+      v-model="panel"
+      expand
+    >
+      <v-expansion-panel-content>
+        <template slot="header">Zones and regions</template>
+        <v-card>
+          <div v-if="currentGridModel">
+            <zone-parameter/>
+            <div v-if="zoneParameter">
+              <zone-region/>
+            </div>
           </div>
-        </div>
-        <div
-          v-else
-        >
-          <facies-selection/>
-        </div>
-      </div>
-    </div>
+          <div v-else>Selection of zones and regions is not available until Grid Model is selected</div>
+        </v-card>
+      </v-expansion-panel-content>
+
+      <v-expansion-panel-content>
+        <template slot="header">Facies</template>
+        <v-card>
+          <div v-if="currentGridModel">
+            <div
+              v-if="hasWellParameters"
+            >
+              <choose-blocked-well-parameter/>
+              <choose-blocked-well-log-parameter
+                v-if="hasBlockedWellParameter"
+              />
+              <div
+                v-if="hasBlockedWellLogParameter"
+              >
+                <facies-selection/>
+              </div>
+            </div>
+            <div
+              v-else
+            >
+              <facies-selection/>
+            </div>
+          </div>
+          <div v-else>Selection of facies is not available until Grid Model is selected</div>
+        </v-card>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
   </v-container>
 </template>
 
@@ -51,7 +75,10 @@ export default {
 
   data () {
     return {
-      toggledZoneRegion: false
+      toggledZoneRegion: false,
+      panel: [false, false],
+      disabled: false,
+      readonly: false
     }
   },
 
@@ -73,6 +100,13 @@ export default {
     currentGridModel () {
       return this.$store.state.gridModels.current
     }
-  }
+  },
+
+  methods: {
+    onGridModelSelected: function (gridModel) {
+      this.panel = [true, true]
+    }
+
+  },
 }
 </script>

@@ -16,9 +16,7 @@ export default {
 
   beforeMount () {
     // Fetch various parameters
-    this.$store.dispatch('gridModels/fetch')
-    this.$store.dispatch('constants/fetch')
-    this.$store.dispatch('gaussianRandomFields/init')
+    return this.$store.dispatch('fetch')
   },
 }
 </script>

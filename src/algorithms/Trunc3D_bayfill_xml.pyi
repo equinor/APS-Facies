@@ -9,6 +9,7 @@ from xml.etree.ElementTree import Element
 
 
 class Trunc3D_bayfill(Trunc2D_Base):
+    _setTruncRuleIsCalled: bool
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,

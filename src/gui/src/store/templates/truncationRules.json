@@ -1,0 +1,93 @@
+{
+  "types": [
+    {
+      "name": "Bayfill",
+      "type": "bayfill"
+    },
+    {
+      "name": "Non-Cubic",
+      "type": "con-cubic"
+    },
+    {
+      "name": "Cubic",
+      "type": "cubic"
+    }
+  ],
+  "templates": [
+    {
+      "name": "Simple",
+      "type": "bayfill",
+      "minFields": 3,
+      "polygons": [
+        {
+          "name": "Floodplain",
+          "facies": "",
+          "proportion": 0.2
+        },
+        {
+          "name": "Subbay",
+          "facies": "",
+          "proportion": 0.2
+        },
+        {
+          "name": "Bayhead Delta",
+          "facies": "",
+          "proportion": 0.2
+        },
+        {
+          "name": "Wave influenced Bayfill",
+          "facies": "",
+          "proportion": 0.2
+        },
+        {
+          "name": "Lagoon",
+          "facies": "",
+          "proportion": 0.2
+        }
+      ],
+      "settings": [
+        {
+          "name": "SF",
+          "factor": {
+            "value": 0.5,
+            "updatable": false
+          }
+        },
+        {
+          "name": "YSF",
+          "factor": {
+            "value": 0.5,
+            "updatable": false
+          }
+        },
+        {
+          "name": "SBHD",
+          "factor": {
+            "value": 0.5,
+            "updatable": false
+          }
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": ""
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": ""
+          }
+        },
+        {
+          "channel": 3,
+          "field": {
+            "name": ""
+          }
+        }
+      ]
+    }
+  ]
+}

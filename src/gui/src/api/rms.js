@@ -14,6 +14,7 @@ export default {
   blockedWellParameters: (gridName) => api.call('get_blocked_well_set_names', gridName),
   blockedWellLogParameters: (gridName, blockedWellName) => api.call('get_blocked_well_logs', gridName, blockedWellName),
   facies: (gridName, blockedWellName, blockedWellLogName) => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName),
+  truncationPolygons: (specification) => api.call('get_truncation_map_polygons', specification),
   trendParameters: (gridName) => api.call('get_rms_trend_parameters', gridName),
   probabilityCubeParameters: (gridName) => api.call('get_probability_cube_parameters', gridName),
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),

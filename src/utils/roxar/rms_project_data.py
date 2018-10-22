@@ -12,6 +12,7 @@ from base64 import b64decode
 
 from src.utils.exceptions.xml import ApsXmlError
 from src.utils.roxar.grid_model import calcStatisticsFor3DParameter
+from src.utils.truncation_rules import make_truncation_rule
 
 
 def empty_if_none(func):
@@ -179,6 +180,24 @@ class RMSData:
         ).simulate()
         data = simulation.field_as_matrix(grid_index_order)
         return data.tolist()
+
+    @staticmethod
+    def get_truncation_map_polygons(specification):
+        truncation_rule = make_truncation_rule(specification)
+
+        # Calculate polygons for truncation map for current facies probability
+        # as specified when calling setTruncRule(faciesProb)
+        facies_polygons = truncation_rule.truncMapPolygons()
+        facies_index_per_polygon = truncation_rule.faciesIndxPerPolygon()
+        # NOTE: Names has the correct order (relative to facies_index_per_polygon)
+        names = truncation_rule.getFaciesInTruncRule()
+
+        return [
+            {
+                'name': names[facies_index_per_polygon[i]],
+                'polygon': facies_polygons[i]
+            } for i in range(len(facies_polygons))
+        ]
 
     @staticmethod
     def get_constant(_property, _type='min,max'):

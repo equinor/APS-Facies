@@ -41,7 +41,7 @@
       @click="saveSessionAs"
     />
 
-    <ProjectSettings/>
+    <project-settings/>
 
   </v-toolbar>
 </template>
@@ -51,7 +51,7 @@
 import FileSelect from '@/components/selection/ImportApsModel'
 import ProjectSettings from '@/components/dialogs/ProjectSettings'
 import BoldButton from '@/components/baseComponents/BoldButton'
-import { notEmpty } from './../utils/index'
+import { notEmpty } from '@/utils'
 
 export default {
   components: {
