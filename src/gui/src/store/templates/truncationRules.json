@@ -6,7 +6,7 @@
     },
     {
       "name": "Non-Cubic",
-      "type": "con-cubic"
+      "type": "non-cubic"
     },
     {
       "name": "Cubic",

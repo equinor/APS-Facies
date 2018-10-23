@@ -41,9 +41,21 @@ const hasCurrentParents = (item, getters) => {
 
 const hasEnoughFacies = (rule, getters) => {
   let minFacies = 0
-  if (rule.type === 'bayfill') minFacies = 5
-  else throw new Error(`${rule.type} is not implemented`)
-  // TODO: Implement for Cubic and Non-Cubic
+  switch (rule.type) {
+    case 'cubic':
+      // TODO: Implement
+      minFacies = Number.POSITIVE_INFINITY
+      break
+    case 'non-cubic':
+      // TODO: Implement
+      minFacies = Number.POSITIVE_INFINITY
+      break
+    case 'bayfill':
+      minFacies = 5
+      break
+    default:
+      throw new Error(`${rule.type} is not implemented`)
+  }
 
   const numFacies = getters['facies/selected'].length
   return numFacies >= minFacies
