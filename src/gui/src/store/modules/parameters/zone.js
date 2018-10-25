@@ -10,9 +10,20 @@ export default {
   },
 
   actions: {
-    select: ({ commit, dispatch }, zoneParameter) => {
-      return promiseSimpleCommit(commit, 'CURRENT', zoneParameter)
-        .then(() => dispatch('zones/fetch', null, { root: true }))
+    select: ({ state, commit, dispatch }, zoneParameter) => {
+      return new Promise((resolve, reject) => {
+        if (state.available.includes(zoneParameter)) {
+          return promiseSimpleCommit(commit, 'CURRENT', zoneParameter)
+            .then(() =>
+              dispatch('zones/fetch', null, { root: true })
+                .then(() => resolve(zoneParameter))
+            )
+        } else {
+          let errorMsg = `Selected zoneParam ( ${zoneParameter} ) is not present int the current project\n\n`
+          errorMsg += `Tip: zoneParamName in the APS model File must be one of { ${state.available.join()} } `
+          reject(new Error(errorMsg))
+        }
+      })
     },
     fetch: ({ commit, dispatch, rootGetters }) => {
       return fetchParameterHelper(commit, dispatch, rms.zoneParameters(rootGetters.gridModel))

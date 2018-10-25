@@ -27,25 +27,28 @@ export default {
     fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {
       if (state.use) {
         if (isEmpty(zoneId)) {
-          Object.keys(rootState.zones.available)
-            .forEach(id => {
+          const promises = Object.keys(rootState.zones.available)
+            .map(id => {
               const zone = rootState.zones.available[`${id}`]
-              return rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter)
-                .then(regions => {
-                  dispatch('zones/update', { zoneId: id, regions: makeData(regions, Region) }, { root: true })
-                })
+              return new Promise((resolve, reject) => {
+                rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter)
+                  .then(regions => {
+                    resolve(dispatch('zones/update', { zoneId: id, regions: makeData(regions, Region) }, { root: true }))
+                  })
+              })
             })
-          zoneId = rootState.zones.current
+          return Promise.all(promises)
         }
-        return Promise.resolve(
-          zoneId
-            ? rootState.zones.available[`${zoneId}`].regions
-            : []
-        )
       }
+      return Promise.resolve(
+        zoneId
+          ? rootState.zones.available[`${zoneId}`].regions
+          : []
+      )
     },
-    use: ({ commit, state, rootGetters }, { use }) => {
+    use: ({ commit, dispatch }, { use }) => {
       commit('USE', use)
+      return dispatch('fetch', null)
     },
   },
 

@@ -1,111 +1,97 @@
 <template>
   <v-toolbar>
 
-    <div>APS Model: </div>
+    <div>
+      APS Model:
+    </div>
 
     <v-text-field
-      id="file_name_input"
-      v-model="fileName"
-      single-line
+      maxlength="60"
+    />
+
+    <upload-button
+      :file-changed-callback="e => importModelFile(e)"
+      title="Import"
     />
 
     <bold-button
-      title="New"
-      @click="newModel"
+      title="Export"
+      disabled="true"
     />
 
-    <file-select v-model="file"/>
+    <v-spacer/>
+
+    <ProjectSettings/>
 
     <bold-button
-      title="Save Model"
-      @click="saveModel"
+      title="Run Settings"
+      diabled="true"
     />
-
-    <bold-button
-      title="Save Model As"
-      @click="saveModelAs"
-    />
-
-    <bold-button
-      title="Load Session"
-      @click="loadSession"
-    />
-
-    <bold-button
-      title="Save Session"
-      @click="saveSession"
-    />
-
-    <bold-button
-      title="Save Session As"
-      @click="saveSessionAs"
-    />
-
-    <project-settings/>
 
   </v-toolbar>
 </template>
 
 <script>
 
-import FileSelect from '@/components/selection/ImportApsModel'
+import { xml2json } from 'xml-js'
+import UploadButton from 'vuetify-upload-button'
+
 import ProjectSettings from '@/components/dialogs/ProjectSettings'
 import BoldButton from '@/components/baseComponents/BoldButton'
-import { notEmpty } from '@/utils'
+
+import rms from '@/api/rms'
+
+const parse = xmlString => {
+  const parser = new DOMParser()
+  const parsererrorNS = parser.parseFromString('INVALID', 'text/xml').getElementsByTagName('parsererror')[0].namespaceURI
+  const dom = parser.parseFromString(xmlString, 'text/xml')
+  return dom.getElementsByTagNameNS(parsererrorNS, 'parsererror').length > 0 ? '' : dom
+}
+
+const fileHandler = (store) => {
+  return (e) => {
+    const fileContent = e.target.result
+    let json = null
+    try {
+      json = xml2json(fileContent, { compact: true, ignoreComment: true })
+    } catch (err) {
+      console.log(err)
+      alert('The file you tried to open is not valid XML and cannot be used\n' +
+        'Fix the following error before opening again:\n\n' +
+        err.message)
+    }
+    if (json) {
+      const dom = parse(fileContent)
+      rms.isApsModelValid(btoa(new XMLSerializer().serializeToString(dom)))
+        .then(result => {
+          if (result.valid) {
+            store.dispatch('modelFileLoader/populateGUI', json)
+          } else {
+            alert('The file you tried to open is not a valid APS model file and cannot be used\n' +
+              'Fix the following error before opening again:\n\n' +
+              result.error)
+          }
+        })
+    }
+  }
+}
 
 export default {
   components: {
-    FileSelect,
     ProjectSettings,
     BoldButton,
+    UploadButton
   },
 
   data () {
-    return {
-      file: null
-    }
-  },
-
-  computed: {
-    fileName: {
-      get: function () {
-        if (notEmpty(this.file)) {
-          return this.file.name
-        }
-        return ''
-      },
-      set: function (value) {
-        this.file = { name: value }
-      }
-    }
+    return {}
   },
 
   methods: {
-    newModel () {
-      if (this.fileName === '') {
-        alert('Please enter a name for your model')
-      } else {
-        alert('new Model function is not implemented')
-      }
-    },
-    saveModel () {
-      if (this.fileName === '') {
-        alert('Please enter a name for your model')
-      } else {
-        alert('save model function is not implemented')
-      }
-    },
-    saveModelAs () {
-      alert('save model as function is not implemented')
-    },
-    loadSession () {
-      alert('load session function is not implemented')
-    },
-    saveSession () {
-      alert('save session function is not implemented')
-    },
-    saveSessionAs () {
-      alert('save session as function is not implemented')
+    importModelFile (file) {
+      const reader = new FileReader()
+      reader.onloadend = fileHandler(this.$store)
+      reader.readAsText(file)
     },
   },
 }

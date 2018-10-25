@@ -1,4 +1,4 @@
-import { promiseSimpleCommit, fetchParameterHelper } from '@/store/utils'
+import { fetchParameterHelper } from '@/store/utils'
 import rms from '@/api/rms'
 
 export default {
@@ -10,12 +10,23 @@ export default {
   },
 
   actions: {
-    select: ({ commit, dispatch }, regionParameter) => {
-      return promiseSimpleCommit(commit, 'CURRENT', regionParameter)
-        .then(() => {
+    select: ({ state, commit, dispatch }, regionParameter) => {
+      return new Promise((resolve, reject) => {
+        if (state.available.includes(regionParameter)) {
+          commit('CURRENT', regionParameter)
           dispatch('regions/use', { use: !!regionParameter }, { root: true })
-          dispatch('regions/fetch', null, { root: true })
-        })
+            .then(() => {
+              resolve(regionParameter)
+            })
+            .catch(error => {
+              reject(error)
+            })
+        } else {
+          let errorMsg = `Selected regionParam ( ${regionParameter} ) is not present int the current project\n\n`
+          errorMsg += `Tip: RegionParamName in the APS model File must be one of { ${state.available.join()} } `
+          reject(new Error(errorMsg))
+        }
+      })
     },
     fetch: ({ commit, dispatch, rootGetters }) => {
       commit('CURRENT', null)

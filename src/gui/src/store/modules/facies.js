@@ -101,16 +101,17 @@ export default {
       // TODO: Update proportion in truncation rule if applicable
       return promiseSimpleCommit(commit, 'UPDATE', { facies: new Facies({ _id: facies.id, ...facies }) }, () => facies.hasOwnProperty('id'))
     },
-    fetch: ({ commit, rootGetters, rootState }) => {
+    fetch: ({ dispatch, rootGetters }) => {
       return rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
-        .then(facies => {
-          // TODO: Add colors (properly)
-          for (let i = 0; i < facies.length; i++) {
-            facies[`${i}`].color = rootState.constants.faciesColors.available[`${i}`]
-          }
-          const data = makeData(facies, Facies)
-          commit('AVAILABLE', { facies: data })
-        })
+        .then(facies => dispatch('populate', { facies }))
+    },
+    populate: ({ commit, rootState }, { facies }) => {
+      // TODO: Add colors (properly)
+      for (let i = 0; i < facies.length; i++) {
+        facies[i].color = rootState.constants.faciesColors.available[i]
+      }
+      const data = makeData(facies, Facies)
+      commit('AVAILABLE', { facies: data })
     },
   },
 

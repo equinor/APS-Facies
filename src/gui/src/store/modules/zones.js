@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 import { promiseSimpleCommit } from '@/store/utils'
 import { Zone } from '@/store/utils/domain'
 import { SELECTED_ITEMS } from '@/store/mutations'
@@ -37,24 +39,28 @@ export default {
     current: ({ commit }, { id }) => {
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    fetch: ({ commit, dispatch, state, rootGetters }) => {
+    fetch: ({ dispatch, rootGetters }) => {
       return rms.zones(rootGetters.gridModel, rootGetters.zoneParameter)
-        .then(zones => {
-          const data = makeData(zones, Zone)
-          Object.keys(data).forEach(zoneId => {
-            if (rootGetters.regionParameter) {
-              dispatch('regions/fetch', zoneId, { root: true })
-                .then(regionIds => {
-                  regionIds.forEach(regionId => {
-                    dispatch('gaussianRandomFields/init', { zoneId, regionId }, { root: true })
-                  })
+        .then(zones => dispatch('populate', { zones }))
+    },
+    populate: ({ commit, dispatch, rootGetters }, { zones }) => {
+      return new Promise((resolve, reject) => {
+        const data = makeData(zones, Zone)
+        Object.keys(data).forEach(zoneId => {
+          if (rootGetters.regionParameter) {
+            dispatch('regions/fetch', zoneId, { root: true })
+              .then(regionIds => {
+                regionIds.forEach(regionId => {
+                  dispatch('gaussianRandomFields/init', { zoneId, regionId }, { root: true })
                 })
-            } else {
-              dispatch('gaussianRandomFields/init', { zoneId }, { root: true })
-            }
-          })
-          commit('AVAILABLE', data)
+              })
+          } else {
+            dispatch('gaussianRandomFields/init', { zoneId }, { root: true })
+          }
         })
+        commit('AVAILABLE', data)
+        resolve(data)
+      })
     },
     update ({ commit, dispatch, state }, { zones, zoneId, regions }) {
       if (isEmpty(zones) && notEmpty(regions)) {
@@ -77,7 +83,7 @@ export default {
 
   mutations: {
     AVAILABLE: (state, zones) => {
-      state.available = zones
+      Vue.set(state, 'available', zones)
     },
     SELECTED: SELECTED_ITEMS,
     CURRENT: (state, { id }) => {
