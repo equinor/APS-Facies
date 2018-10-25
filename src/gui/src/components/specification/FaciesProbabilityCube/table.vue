@@ -128,20 +128,10 @@ export default {
 
   methods: {
     changeProbabilityCube (facies, probabilityCube) {
-      this.$store.dispatch('facies/changed', {
-        facies: {
-          ...facies,
-          probabilityCube,
-        }
-      })
+      this.$store.dispatch('facies/changed', { id: facies.id, probabilityCube })
     },
     changeProbability (facies, prob) {
-      this.$store.dispatch('facies/changed', {
-        facies: {
-          ...facies,
-          previewProbability: prob,
-        }
-      })
+      this.$store.dispatch('facies/changed', { id: facies.id, previewProbability: prob })
     },
   },
 
