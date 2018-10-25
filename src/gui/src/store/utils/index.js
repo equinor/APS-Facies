@@ -45,6 +45,9 @@ const mirrorZoneRegions = store => {
       } else if (type === 'zones/SELECTED') {
         // Nothing to do.
         // Handled by zone's selected action
+      } else if (type === 'zones/REGION_SELECTED') {
+        // Nothing to do.
+        // Handled by regions's selected action
       } else {
         throw new Error(`Unsupported commit type, ${type}`)
       }

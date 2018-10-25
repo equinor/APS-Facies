@@ -55,7 +55,6 @@ def check_and_normalise_probability(
     :return: integer with number of grid cells for which the probabilities are re-calculated to be normalised.
     """
     num_defined_cells = len(cell_index_defined)
-    probabilities_selected_cells = np.zeros(num_defined_cells, np.float32)
     sum_probabilities_selected_cells = np.zeros(num_defined_cells, np.float32)
     num_cell_with_modified_probability = 0
 
@@ -132,7 +131,6 @@ def check_and_normalise_probability(
 
         # Normalize
         psum = sum_probabilities_selected_cells
-        p = np.zeros(num_defined_cells, np.float32)
 
         for f in range(len(facies_names_for_zone)):
             facies_name = facies_names_for_zone[f]

@@ -3,9 +3,7 @@
     align-start
     justify-start
   >
-    <grid-model
-      @changed="onGridModelSelected"
-    />
+    <grid-model/>
 
     <v-expansion-panel
       v-if="currentGridModel"
@@ -76,7 +74,6 @@ export default {
   data () {
     return {
       toggledZoneRegion: false,
-      panel: [false, false],
       disabled: false,
       readonly: false
     }
@@ -99,14 +96,13 @@ export default {
 
     currentGridModel () {
       return this.$store.state.gridModels.current
+    },
+    panel () {
+      return this.currentGridModel
+        ? [true, true]
+        : [false, false]
     }
-  },
+  }
 
-  methods: {
-    onGridModelSelected: function (gridModel) {
-      this.panel = [true, true]
-    }
-
-  },
 }
 </script>

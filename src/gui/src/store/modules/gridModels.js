@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 import rms from '@/api/rms'
 
 export default {
@@ -14,13 +16,25 @@ export default {
         if (state.available.includes(gridModel)) {
           commit('CURRENT', gridModel)
           const parameters = ['zone', 'region', 'blockedWell', 'rmsTrend', 'probabilityCube']
+          // when loading a file, we must ensure that all promises in this method are resolved before calling the
+          // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
+          // resolved.
+          const promises = []
           parameters.forEach(param => {
-            dispatch(`parameters/${param}/fetch`, null, { root: true })
+            promises.push(dispatch(`parameters/${param}/fetch`, null, { root: true }))
           })
-          dispatch('zones/current', { id: null }, { root: true })
-          resolve(gridModel)
+          promises.push(dispatch('zones/current', { id: null }, { root: true }))
+          Promise.all(promises)
+            .then(() => {
+              resolve(gridModel)
+            })
+            .catch(error => {
+              reject(error)
+            })
         } else {
-          reject(new Error('Selected grid model must be valid.'))
+          let errorMsg = `Selected grid model ( ${gridModel} ) is not present in the current project.\n\n `
+          errorMsg += `Tip: GridModelName in the APS model file must be one of { ${state.available.join()} } `
+          reject(new Error(errorMsg))
         }
       })
     },
@@ -33,7 +47,7 @@ export default {
 
   mutations: {
     CURRENT: (state, selectedGridModel) => {
-      state.current = selectedGridModel
+      Vue.set(state, 'current', selectedGridModel)
     },
     AVAILABLE: (state, gridModels) => {
       state.available = gridModels

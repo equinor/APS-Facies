@@ -814,7 +814,6 @@ class APSGaussModel:
 
             assert mainFaciesTable is not None
             assert simBoxThickness is not None
-            assert modelFileName is not None
 
             self.__main_facies_table = mainFaciesTable
             self.__sim_box_thickness = simBoxThickness

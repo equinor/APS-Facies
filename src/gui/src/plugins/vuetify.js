@@ -8,6 +8,7 @@ import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@mdi/font/css/materialdesignicons.min.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
+import Ripple from 'vuetify/es5/directives/ripple'
 
 Vue.use(Vuetify, {
   iconfont: 'mdi', // 'md' || 'mdi' || 'fa' || 'fa4'
@@ -15,4 +16,7 @@ Vue.use(Vuetify, {
     'copy': 'mdi-content-copy',
   },
   customProperties: true,
+  directives: {
+    Ripple
+  }
 })
