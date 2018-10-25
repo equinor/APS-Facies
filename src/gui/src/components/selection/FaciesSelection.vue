@@ -1,6 +1,6 @@
 <template>
   <div>
-    <facies-table/>
+    <facies-table :hide-alias="hideAlias"/>
     <div>
       <v-btn
         color="info"
@@ -22,6 +22,12 @@ import FaciesTable from '@/components/table/FaciesTable'
 export default {
   components: {
     FaciesTable,
+  },
+
+  data () {
+    return {
+      hideAlias: false
+    }
   },
 
   computed: {
