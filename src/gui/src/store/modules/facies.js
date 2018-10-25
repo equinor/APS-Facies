@@ -26,7 +26,7 @@ export default {
   actions: {
     select: ({ commit, state }, items) => {
       const facies = selectItems({ state, items, _class: Facies })
-      commit('AVAILABLE', { facies })
+      commit('AVAILABLE', facies)
       return Promise.resolve(Object.keys(facies))
     },
     current: ({ commit }, { id }) => {
