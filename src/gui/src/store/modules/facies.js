@@ -140,6 +140,9 @@ export default {
   },
 
   getters: {
+    byId: (state) => (id) => {
+      return state.available[`${id}`]
+    },
     byName: (state) => (name) => {
       return Object.values(state.available).find(facies => facies.name === name)
     },

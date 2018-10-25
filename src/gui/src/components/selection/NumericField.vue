@@ -53,10 +53,10 @@
 
 <script>
 import Vue from 'vue'
-
 import VueTypes from 'vue-types'
 
 import math from 'mathjs'
+import { isNumber } from 'lodash'
 
 import { required as requiredField, between, numeric } from 'vuelidate/lib/validators'
 
@@ -215,7 +215,7 @@ export default Vue.extend({
       }
 
       let numericValue = this.getValue(this.value)
-      if (/^[+-]?\d+(\.\d*)?$/.test(value)) {
+      if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value)) {
         numericValue = this.getValue(value)
       } else if (value === '') {
         value = null
@@ -236,7 +236,7 @@ export default Vue.extend({
       this.emitChange(numericValue)
     },
     getValue (value) {
-      if (isEmpty(value)) return null
+      if (isEmpty(value) && !isNumber(value)) return null
       if (typeof value.value !== 'undefined') value = value.value
       if (this.modulus) value = math.mod(value, this.max)
       if (this.enforceRanges) {

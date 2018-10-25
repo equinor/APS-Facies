@@ -82,7 +82,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 import { notEmpty } from '@/utils'
 import OriginSpecification from '@/components/specification/Trend/Origin'
 import {
@@ -106,7 +106,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    grfId: AppTypes.id.isRequired,
   },
 
   computed: {

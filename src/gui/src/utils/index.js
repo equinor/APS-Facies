@@ -1,3 +1,5 @@
+import _ from 'lodash'
+
 const makeData = (items, _class) => {
   const data = {}
   for (const item of items) {
@@ -7,12 +9,16 @@ const makeData = (items, _class) => {
   return data
 }
 
-const makeTruncationRuleSpecification = (rule, getters) => {
+const makeTruncationRuleSpecification = (rule, rootGetters) => {
   return {
-    type: 'bayfill',
-    globalFaciesTable: getters['facies/selected']
+    type: rule.type,
+    globalFaciesTable: rootGetters['facies/selected']
+      .filter(facies => facies.previewProbability && facies.previewProbability > 0)
       .map(facies => {
-        const polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
+        let polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
+        if (isEmpty(polygon) && rule.overlay) {
+          polygon = Object.values(rule.overlay).find(polygon => polygon.facies === facies.id)
+        }
         return {
           code: facies.code,
           name: facies.name,
@@ -21,14 +27,20 @@ const makeTruncationRuleSpecification = (rule, getters) => {
           inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
         }
       }),
-    gaussianRandomFields: Object.values(getters.fields)
+    gaussianRandomFields: Object.values(rootGetters.fields)
       .map(field => {
+        const alpha = rule.fields.find(item => item.field === field.id)
         return {
-          name: field.name, inZone: true, inRule: rule.fields.findIndex(item => item.field === field.id),
+          name: field.name,
+          inZone: true,
+          inRule: rule.fields.findIndex(item => item.field === field.id),
+          inBackground: alpha
+            ? !alpha.overlay
+            : true,
         }
       }),
-    values: Object.values(rule.settings),
-    constantParameters: !getters.faciesTable.some(facies => !!facies.probabilityCube),
+    values: rule.specification({ rootGetters }),
+    constantParameters: !rootGetters.faciesTable.some(facies => !!facies.probabilityCube),
   }
 }
 
@@ -99,27 +111,42 @@ const hasParents = (item, zone, region) => {
 
 const hasEnoughFacies = (rule, getters) => {
   let minFacies = 0
-  switch (rule.type) {
+  const type = getters['truncationRules/typeById'](rule.type) || rule.type
+  switch (type) {
     case 'cubic':
       // TODO: Implement
       minFacies = Number.POSITIVE_INFINITY
       break
     case 'non-cubic':
-      // TODO: Implement
-      minFacies = Number.POSITIVE_INFINITY
+      if (rule.polygons) {
+        const uniqueFacies = new Set(Object.values(rule.polygons).map(polygon => polygon.facies))
+        if (rule.overlay) {
+          const items = Object.values(rule.overlay.items || rule.overlay)
+          items.forEach(item => {
+            item.polygons
+              ? item.polygons.forEach(polygon => {
+                uniqueFacies.add(polygon.facies.name)
+              })
+              : uniqueFacies.add(item.facies)
+          })
+        }
+        minFacies = uniqueFacies.size
+      } else {
+        minFacies = 2
+      }
       break
     case 'bayfill':
       minFacies = 5
       break
     default:
-      throw new Error(`${rule.type} is not implemented`)
+      throw new Error(`${type} is not implemented`)
   }
 
   const numFacies = getters['facies/selected'].length
   return numFacies >= minFacies
 }
 
-const isEmpty = property => (typeof property === 'undefined' || property === null || property === '')
+const isEmpty = property => _.isEmpty(property)
 const notEmpty = property => !isEmpty(property)
 
 const getRandomInt = max => Math.floor(Math.random() * max)
@@ -132,7 +159,9 @@ const resolve = (path, obj = self, separator = '.') => {
 }
 
 const allSet = (items, prop) => {
-  return Object.values(items).every(item => !!item[`${prop}`])
+  return items
+    ? Object.values(items).every(item => !!item[`${prop}`])
+    : false
 }
 
 export {

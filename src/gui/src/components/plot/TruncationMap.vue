@@ -14,6 +14,7 @@ import rms from '@/api/rms'
 import StaticPlot from '@/components/plot/StaticPlot'
 
 import { makeTruncationRuleSpecification } from '@/utils'
+import { AppTypes } from '@/utils/typing'
 
 const svgPoint = (point, width = 1, height = 1) => {
   return `${point[0] * width},${point[1] * height}`
@@ -47,7 +48,7 @@ export default {
   },
 
   props: {
-    truncationRuleId: VueTypes.string.isRequired,
+    truncationRuleId: AppTypes.id.isRequired,
     expand: VueTypes.bool.def(false),
   },
 

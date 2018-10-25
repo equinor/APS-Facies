@@ -29,8 +29,8 @@ export default {
     ...mapState({
       options: state => {
         return {
-          zone: state.options.nameNumber.zone.show,
-          region: state.options.nameNumber.region.show,
+          zone: state.options.showNameOrNumber.zone.show,
+          region: state.options.showNameOrNumber.region.show,
         }
       }
     }),

@@ -1,7 +1,6 @@
 <template>
-  <realization-map
-    :data="data"
-    :color-scale="faciesColors"
+  <static-plot
+    :data-definition="dataDefinition"
     :expand="expand"
   />
 </template>
@@ -10,14 +9,17 @@
 import { mapGetters } from 'vuex'
 import VueTypes from 'vue-types'
 
-import RealizationMap from '@/components/plot/GaussianPlot'
-import IconButton from '@/components/selection/IconButton'
+import StaticPlot from '@/components/plot/StaticPlot'
+
+const filterOnCode = (data, code) => {
+  return data
+    .map(arr => arr.map(val => val === code ? 1 : null))
+}
 
 export default {
   name: 'FaciesRealization',
   components: {
-    IconButton,
-    RealizationMap,
+    StaticPlot,
   },
 
   props: {
@@ -26,38 +28,28 @@ export default {
 
   computed: {
     ...mapGetters({
+      faciesTable: 'faciesTable',
       rule: 'truncationRule',
-      fields: 'fields',
     }),
+    dataDefinition () {
+      return this.faciesTable
+        .filter(({ selected }) => !!selected)
+        .map(({ color, code }) => {
+          return {
+            z: filterOnCode(this.data, code),
+            zsmooth: 'best',
+            type: 'heatmap',
+            hoverinfo: 'none',
+            colorscale: [[0, color], [1, color]],
+            showscale: false,
+          }
+        })
+    },
     data () {
       return this.rule && this.rule._realization
         ? this.rule._realization
         : []
     },
-    fields () {
-      const fields = this.$store.getters.fields
-      return this.rule
-        ? this.rule.fields.map(({ field, channel }) => {
-          return {
-            channel,
-            field: field ? fields[`${field}`] : null
-          }
-        })
-        : null
-    },
-    faciesColors () {
-      return this.$store.getters.faciesTable
-        .map(facies => {
-          return {
-            value: facies.code,
-            color: facies.color,
-          }
-        })
-    }
   },
 }
 </script>
-
-<style scoped>
-
-</style>

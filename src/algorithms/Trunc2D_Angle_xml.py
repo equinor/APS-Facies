@@ -962,7 +962,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 indx = self.__faciesIndxPerPolygon[i]
                 fIndx = self._orderIndex[indx]
                 if self._faciesIsDetermined[fIndx] == 1:
-                    poly = self._setUnitSquarePolygon()
+                    poly = self.__setUnitSquarePolygon()
                     self.__faciesPolygons.append(poly)
                 else:
                     poly = self.__setZeroPolygon()

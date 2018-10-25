@@ -400,7 +400,7 @@ class Trunc2D_Base:
                 if indx < 0 or indx >= self._nBackGroundFacies:
                     raise ValueError(
                         'Wrong index {0} for background facies.'
-                        'Should be less than {1} and not negative'.format(str(indx), self._nBackGroundFacies)
+                        'Should be less than {1} and not negative'.format(indx, self._nBackGroundFacies)
                     )
 
                 # Check that background facies for this group is not specified multiple times
@@ -461,11 +461,6 @@ class Trunc2D_Base:
                 # print('faciesInTruncRule:')
                 # print(repr(self._faciesInTruncRule))
         for indx in range(self._nBackGroundFacies, self.num_facies_in_zone):
-            fName = self._faciesInTruncRule[indx]
-            # print(
-            #    'Sum prob fraction for {} is {}'
-            #    ''.format(fName, sumProbFrac[indx])
-            # )
             assert abs(sumProbFrac[indx] - 1.0) <= self._epsFaciesProb
 
     def __checkCenterTruncInterval(self):

@@ -11,14 +11,9 @@
       slot="headerCell"
       slot-scope="props"
     >
-      <v-tooltip bottom>
-        <span slot="activator">
-          {{ props.header.text }}
-        </span>
-        <span>
-          {{ props.header.help }}
-        </span>
-      </v-tooltip>
+      <optional-help-item
+        :value="props.header"
+      />
     </template>
     <template
       slot="items"
@@ -26,18 +21,9 @@
     >
       <tr>
         <td class="text-xs-left">
-          <v-tooltip
-            v-if="!!props.item.help"
-            bottom
-          >
-            <span slot="activator">
-              {{ props.item.name }}
-            </span>
-            <span>
-              {{ props.item.help }}
-            </span>
-          </v-tooltip>
-          <span v-else>{{ props.item.name }}</span>
+          <optional-help-item
+            :value="props.item"
+          />
         </td>
         <td class="text-xs-left">
           <!--TODO: Figure out why input happens twice-->
@@ -52,7 +38,7 @@
             v-if="!!props.item.factor"
             :value="props.item.factor"
             fmu-updatable
-            @input="value => updateFactor(props.item, value)"
+            @input="factor => updateFactor(props.item, factor)"
           />
           <slot v-else/>
         </td>
@@ -62,38 +48,48 @@
 </template>
 
 <script>
+import VueTypes from 'vue-types'
 import { mapGetters } from 'vuex'
 
 import FractionField from '@/components/selection/FractionField'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem'
+
+import { updateFacies } from '@/store/utils'
 import { notEmpty } from '@/utils'
+import { TruncationRule } from '@/store/utils/domain'
 
 export default {
   components: {
+    OptionalHelpItem,
     FractionField,
+  },
+
+  props: {
+    value: VueTypes.instanceOf(TruncationRule)
   },
 
   computed: {
     ...mapGetters({
       selectedFacies: 'facies/selected',
-      truncationRule: 'truncationRule',
     }),
     polygons () {
       // TODO: Include 'help' messages
-      return !this.truncationRule
+      return !this.value
         ? []
-        : Object.values(this.truncationRule.polygons).map(polygon => {
-          let factor = null
-          const setting = this.truncationRule.settings[polygon.id]
-          if (notEmpty(setting)) {
-            factor = setting.factor
-          }
-          const options = {
-            ...polygon,
-            hasFactor: !!factor,
-          }
-          if (factor) options['factor'] = factor
-          return options
-        })
+        : this.value.backgroundPolygons
+          .map(polygon => {
+            let factor = null
+            const setting = this.value.settings[polygon.id]
+            if (notEmpty(setting)) {
+              factor = setting.factor
+            }
+            const options = {
+              ...polygon,
+              hasFactor: !!factor,
+            }
+            if (factor) options['factor'] = factor
+            return options
+          })
     },
     faciesOptions () {
       return this.selectedFacies.map(facies => {
@@ -131,22 +127,11 @@ export default {
   },
 
   methods: {
-    updateFacies (polygon, faciesId) {
-      const existing = Object.values(this.truncationRule.polygons)
-        .find(polygon => polygon.facies === faciesId)
-      return existing
-        ? this.$store.dispatch('truncationRules/swapFacies', {
-          rule: this.truncationRule,
-          polygons: [polygon, existing]
-        })
-        : this.$store.dispatch('truncationRules/updateFacies', {
-          rule: this.truncationRule,
-          polygon,
-          faciesId
-        })
+    updateFacies (item, faciesId) {
+      updateFacies(this.$store.dispatch, this.value, item, faciesId)
     },
     updateFactor (item, value) {
-      return this.$store.dispatch('truncationRules/changeFactors', {
+      return this.$store.dispatch('truncationRules/changeSlantFactors', {
         polygon: item,
         value
       })

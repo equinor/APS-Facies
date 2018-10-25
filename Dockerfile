@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.2.2" \
+LABEL version="3.2.5" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -10,12 +10,10 @@ ENV RMS_VERSION=11.0.0 \
     TCL_VERSION=8.6 \
     INTEL_MKL_VERSION=2018.3.222 \
     INTEL_MKL_SEED=13005 \
-    NODE_VERSION=8.11.4 \
+    NODE_VERSION=8.12.0 \
     NRLIB_VERSION=1.1-r7 \
-    SQLITE_VERSION=3.23.1 \
-    YARN_VERSION=1.6.0
-ENV APSW_VERSION=${SQLITE_VERSION}-r1 \
-    TK_VERSION=${TCL_VERSION}
+    YARN_VERSION=1.9.4
+ENV TK_VERSION=${TCL_VERSION}
 
 # Auxillary (version) information
 ENV NODE_ARCH='x64' \
@@ -151,8 +149,6 @@ RUN yum update -y \
  && wget https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz \
     # NRlib
  && wget https://git.equinor.com/sdp/nrlib/repository/v${NRLIB_VERSION}/archive.tar.gz --output-document=${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz \
-    # APSW
- && wget https://github.com/rogerbinns/apsw/archive/${APSW_VERSION}.tar.gz --output-document=${SOURCE_DIR}/apsw-${APSW_VERSION}.tar.gz \
     ## Verify Downloads
     # Node JS
  && wget https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt.asc --output-document=${SOURCE_DIR}/NODE_SHASUMS256.txt.asc \
@@ -165,13 +161,11 @@ RUN yum update -y \
  && cd ${BUILD_DIR} \
  && mkdir -p \
     nrlib-${NRLIB_VERSION} \
-    apsw-${APSW_VERSION} \
     # Extract all downloaded archives
  && tar -xvf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
  && tar -xJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
  && tar -xzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
  && tar -xvf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
- && tar -xvf  ${SOURCE_DIR}/apsw-${APSW_VERSION}.tar.gz -C apsw-${APSW_VERSION} --strip-components=1 \
  # Remove downloaded archives
  && rm -f ${SOURCE_DIR}/*.txt* \
  && rm -f ${SOURCE_DIR}/*.tar.* \
@@ -222,14 +216,6 @@ RUN yum update -y \
     make build \
          tests \
  && mv nrlib.*.so $DEPENDENCIES_PREFIX \
-    # Install APSW to dependencies collection
-    # TODO: Add cython before apsw to get extension?
- && cd ${BUILD_DIR}/apsw-${APSW_VERSION} \
- && $PYTHON setup.py fetch --version $SQLITE_VERSION --all \
-                     build --enable-all-extensions \
-                     build_ext --force --inplace \
-                     test \
- && mv apsw.*.so $DEPENDENCIES_PREFIX \
     ##
     # Final clean-up
  && rm -rf $SOURCE_DIR \

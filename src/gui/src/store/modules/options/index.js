@@ -1,4 +1,5 @@
-import nameNumber from './nameNumber'
+import showNameOrNumber from './nameNumber'
+import automaticAlphaFieldSelection from './alphaChannels'
 
 export default {
   namespaced: true,
@@ -6,7 +7,8 @@ export default {
   state: {},
 
   modules: {
-    nameNumber,
+    showNameOrNumber,
+    automaticAlphaFieldSelection,
   },
 
   actions: {},

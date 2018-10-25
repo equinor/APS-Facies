@@ -21,27 +21,42 @@
       "polygons": [
         {
           "name": "Floodplain",
-          "facies": "",
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
           "proportion": 0.2
         },
         {
           "name": "Subbay",
-          "facies": "",
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
           "proportion": 0.2
         },
         {
           "name": "Bayhead Delta",
-          "facies": "",
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
           "proportion": 0.2
         },
         {
           "name": "Wave influenced Bayfill",
-          "facies": "",
+          "facies": {
+            "name": "F04",
+            "index": 3
+          },
           "proportion": 0.2
         },
         {
           "name": "Lagoon",
-          "facies": "",
+          "facies": {
+            "name": "F05",
+            "index": 4
+          },
           "proportion": 0.2
         }
       ],
@@ -75,19 +90,992 @@
         {
           "channel": 1,
           "field": {
-            "name": ""
+            "name": "GRF1",
+            "index": 0
           }
         },
         {
           "channel": 2,
           "field": {
-            "name": ""
+            "name": "GRF2",
+            "index": 1
           }
         },
         {
           "channel": 3,
           "field": {
-            "name": ""
+            "name": "GRF3",
+            "index": 2
+          }
+        }
+      ]
+    },
+    {
+      "name": "N01",
+      "type": "non-cubic",
+      "minFields": 2,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.5
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.5
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "N01_A01",
+      "type": "non-cubic",
+      "minFields": 3,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.5
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.5
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ],
+      "overlay": {
+        "use": true,
+        "items": [
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF03",
+                  "index": 2
+                },
+                "facies": {
+                  "name": "F03",
+                  "index": 2
+                },
+                "probability": 1.0,
+                "interval": 0.0
+              }
+            ],
+            "over": [
+              {
+                "name": "F01",
+                "index": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "N02",
+      "type": "non-cubic",
+      "minFields": 2,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.5
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.5
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "N02_A02",
+      "type": "non-cubic",
+      "minFields": 3,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.5
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.5
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ],
+      "overlay": {
+        "use": true,
+        "items": [
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF03",
+                  "index": 2
+                },
+                "facies": {
+                  "name": "F03",
+                  "index": 2
+                },
+                "probability": 1.0,
+                "interval": 0.0
+              }
+            ],
+            "over": [
+              {
+                "name": "F01",
+                "index": 0
+              },
+              {
+                "name": "F02",
+                "index": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "N02_A06",
+      "type": "non-cubic",
+      "minFields": 6,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.5
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.5
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ],
+      "overlay": {
+        "use": true,
+        "items": [
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF03",
+                  "index": 2
+                },
+                "facies": {
+                  "name": "F03",
+                  "index": 2
+                },
+                "probability": 0.8,
+                "interval": 0.0
+              },
+              {
+                "field": {
+                  "name": "GRF04",
+                  "index": 3
+                },
+                "facies": {
+                  "name": "F04",
+                  "index": 3
+                },
+                "probability": 0.5,
+                "interval": 0.0
+              }
+            ],
+            "over": [
+              {
+                "name": "F01",
+                "index": 0
+              }
+            ]
+          },
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF05",
+                  "index": 4
+                },
+                "facies": {
+                  "name": "F03",
+                  "index": 2
+                },
+                "probability": 0.2,
+                "interval": 0.5
+              },
+              {
+                "field": {
+                  "name": "GRF06",
+                  "index": 5
+                },
+                "facies": {
+                  "name": "F04",
+                  "index": 3
+                },
+                "probability": 0.5,
+                "interval": 0.5
+              }
+            ],
+            "over": [
+              {
+                "name": "F02",
+                "index": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "N03",
+      "type": "non-cubic",
+      "minFields": 2,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.3333333333333333
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.3333333333333333
+        },
+        {
+          "name": 3,
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.3333333333333333
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 30.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 3,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "N03_A07",
+      "type": "non-cubic",
+      "minFields": 3,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.3333333333333333
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.3333333333333333
+        },
+        {
+          "name": 3,
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.3333333333333333
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 30.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 3,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ],
+      "overlay": {
+        "use": true,
+        "items": [
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF03",
+                  "index": 2
+                },
+                "facies": {
+                  "name": "F04",
+                  "index": 3
+                },
+                "probability": 1.0,
+                "interval": 0.0
+              }
+            ],
+            "over": [
+              {
+                "name": "F01",
+                "index": 0
+              },
+              {
+                "name": "F02",
+                "index": 1
+              },
+              {
+                "name": "F03",
+                "index": 2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "N03_A08",
+      "type": "non-cubic",
+      "minFields": 4,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.3333333333333333
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.3333333333333333
+        },
+        {
+          "name": 3,
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.3333333333333333
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": 30.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 3,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ],
+      "overlay": {
+        "use": true,
+        "items": [
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF03",
+                  "index": 2
+                },
+                "facies": {
+                  "name": "F04",
+                  "index": 3
+                },
+                "probability": 1.0,
+                "interval": 0.0
+              }
+            ],
+            "over": [
+              {
+                "name": "F01",
+                "index": 0
+              },
+              {
+                "name": "F02",
+                "index": 1
+              }
+            ]
+          },
+          {
+            "polygons": [
+              {
+                "field": {
+                  "name": "GRF04",
+                  "index": 3
+                },
+                "facies": {
+                  "name": "F05",
+                  "index": 4
+                },
+                "probability": 1.0,
+                "interval": 0.0
+              }
+            ],
+            "over": [
+              {
+                "name": "F03",
+                "index": 2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "N04",
+      "type": "non-cubic",
+      "minFields": 2,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.25
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.25
+        },
+        {
+          "name": 3,
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.25
+        },
+        {
+          "name": 4,
+          "facies": {
+            "name": "F04",
+            "index": 3
+          },
+          "proportion": 0.25
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": -45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 3,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 4,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "N05",
+      "type": "non-cubic",
+      "minFields": 2,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": 3,
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": 4,
+          "facies": {
+            "name": "F04",
+            "index": 3
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": 5,
+          "facies": {
+            "name": "F05",
+            "index": 4
+          },
+          "proportion": 0.2
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": -45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 3,
+          "angle": 120.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 4,
+          "angle": -120.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 5,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "N06",
+      "type": "non-cubic",
+      "minFields": 2,
+      "polygons": [
+        {
+          "name": 1,
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.16666666666666666
+        },
+        {
+          "name": 2,
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.16666666666666666
+        },
+        {
+          "name": 3,
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.16666666666666666
+        },
+        {
+          "name": 4,
+          "facies": {
+            "name": "F04",
+            "index": 3
+          },
+          "proportion": 0.16666666666666666
+        },
+        {
+          "name": 5,
+          "facies": {
+            "name": "F05",
+            "index": 4
+          },
+          "proportion": 0.16666666666666666
+        },
+        {
+          "name": 6,
+          "facies": {
+            "name": "F06",
+            "index": 5
+          },
+          "proportion": 0.16666666666666666
+        }
+      ],
+      "settings": [
+        {
+          "polygon": 1,
+          "angle": 45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 2,
+          "angle": -45.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 3,
+          "angle": 120.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 4,
+          "angle": -120.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 5,
+          "angle": -180.0,
+          "fraction": 1.0,
+          "updatable": false
+        },
+        {
+          "polygon": 6,
+          "angle": 0.0,
+          "fraction": 1.0,
+          "updatable": false
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
           }
         }
       ]

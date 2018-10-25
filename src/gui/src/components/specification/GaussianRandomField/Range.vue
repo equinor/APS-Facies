@@ -26,8 +26,9 @@
     />
   </div>
 </template>
+
 <script>
-import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 import StorableNumericField from '@/components/specification/StorableNumericField'
 
 export default {
@@ -38,7 +39,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    grfId: AppTypes.id.isRequired,
   },
 
   computed: {

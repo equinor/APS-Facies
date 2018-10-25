@@ -36,7 +36,8 @@ export default {
       }
       return Promise.resolve(ids)
     },
-    current: ({ commit }, { id }) => {
+    current: ({ commit, dispatch }, { id }) => {
+      dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, rootGetters }) => {

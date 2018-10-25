@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 import StorableNumericField from '@/components/specification/StorableNumericField'
 
 // TODO: Ensure the unit of '%' is correct, and consistent e.g. 100% -> 1
@@ -19,7 +19,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    grfId: AppTypes.id.isRequired,
   },
 
 }

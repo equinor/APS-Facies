@@ -14,26 +14,27 @@
             row
             wrap
           >
-            <v-flex xs6>
+            <v-flex xs1/>
+            <v-flex>
               <h3>Truncation rule</h3>
               <truncation-map
                 :truncation-rule-id="ruleId"
               />
             </v-flex>
-            <v-flex xs6>
+            <v-flex xs1/>
+            <v-flex>
               <h3>Realization</h3>
               <facies-realization
               />
             </v-flex>
+            <v-flex xs1/>
             <v-flex xs12>
-              <h3>Gaussian Random Fields</h3>
+              <gaussian-plots
+                v-if="isGaussianFieldsSimulated"
+                :value="fields"
+              />
             </v-flex>
-            <gaussian-plots
-              v-if="isGaussianFieldsSimulated"
-              :value="fields"
-            />
             <v-flex xs12>
-              <h3>Cross plots</h3>
               <cross-plots
                 :value="fields"
               />

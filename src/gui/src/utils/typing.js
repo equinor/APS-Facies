@@ -1,4 +1,5 @@
 import VueTypes from 'vue-types'
+import { TruncationRule } from '@/store/utils/domain'
 
 const rawDataType = VueTypes.arrayOf(VueTypes.object).isRequired
 
@@ -14,10 +15,45 @@ const updatableStacking = VueTypes.shape({
   direction: VueTypes.oneOfType([VueTypes.oneOf([-1, 1]), null]),
 })
 
+const hex = '[0-9a-f]'
+const isUUID = value => {
+  const uuid = `${hex}{8}(-${hex}{4}){3}-${hex}{8}`
+
+  return RegExp(uuid).test(value)
+}
+const _isValidId = value => {
+  return typeof value === 'string' && (
+    value === '' || isUUID(value)
+  )
+}
+
+const _isValidIds = value => {
+  return Array.isArray(value) && (
+    value.length === 0 || value.every(val => _isValidId(val))
+  )
+}
+
+const _isValidColor = value => {
+  return RegExp(`#?${hex}{6}`).test(value) ||
+    VueTypes.oneOf(['primary', 'secondary', 'accent', 'error', 'info', 'success', 'warning']) || // Vuetify aliases
+    VueTypes.oneOf([]) || // Named colors
+    !value // Empty string
+}
+
+const AppTypes = {
+  id: VueTypes.custom(_isValidId).def(''),
+  ids: VueTypes.custom(_isValidIds).def(['']),
+  color: VueTypes.custom(_isValidColor),
+  name: VueTypes.string,
+  truncationRule: VueTypes.instanceOf(TruncationRule),
+}
+
 export {
+  isUUID,
   rawDataType,
   updatableType,
   updatableStacking,
   nullableString,
   nullableNumber,
+  AppTypes,
 }

@@ -12,14 +12,9 @@
       slot="headerCell"
       slot-scope="props"
     >
-      <v-tooltip bottom>
-        <span slot="activator">
-          {{ props.header.text }}
-        </span>
-        <span>
-          {{ props.header.text }}
-        </span>
-      </v-tooltip>
+      <optional-help-item
+        :value="props.header"
+      />
     </template>
     <template
       slot="items"
@@ -59,9 +54,11 @@ import VueTypes from 'vue-types'
 import { mapState } from 'vuex'
 
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 
 export default {
   components: {
+    OptionalHelpItem,
     HighlightCurrentItem,
   },
 

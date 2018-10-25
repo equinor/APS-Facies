@@ -8,6 +8,7 @@
 <script>
 import VueTypes from 'vue-types'
 import StaticPlot from '@/components/plot/StaticPlot'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   components: {
@@ -20,7 +21,7 @@ export default {
       VueTypes.string,
       VueTypes.arrayOf(VueTypes.shape({
         value: VueTypes.integer.isRequired,
-        color: VueTypes.string.isRequired,
+        color: AppTypes.color.isRequired,
       }))
     ]).def('Viridis'),
     expand: VueTypes.bool.def(false),

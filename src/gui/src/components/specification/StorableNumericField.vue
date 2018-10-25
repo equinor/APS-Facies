@@ -16,6 +16,7 @@
 <script>
 import VueTypes from 'vue-types'
 import NumericField from '@/components/selection/NumericField'
+import { AppTypes } from '@/utils/typing'
 
 const getValue = (field, property, subProperty) => {
   return field[`${property}`].hasOwnProperty(subProperty)
@@ -29,7 +30,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    grfId: AppTypes.id.isRequired,
     propertyType: VueTypes.string.isRequired,
     subPropertyType: VueTypes.string,
     label: VueTypes.string.def(''),

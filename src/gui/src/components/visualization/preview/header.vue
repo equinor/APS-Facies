@@ -33,7 +33,9 @@ export default {
 
   computed: {
     rule () { return this.$store.getters.truncationRule },
-    canSimulate () { return !!this.rule },
+    canSimulate () {
+      return this.rule && this.rule.ready
+    },
   },
 
   methods: {
