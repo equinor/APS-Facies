@@ -10,13 +10,7 @@ import { promiseSimpleCommit } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
 
-const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changed', {
-  facies: new Facies({
-    _id: facies.id,
-    ...facies,
-    previewProbability: probability,
-  })
-})
+const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changed', { id: facies.id, previewProbability: probability })
 
 export default {
   namespaced: true,
@@ -58,7 +52,7 @@ export default {
         const colors = rootState.constants.faciesColors.available
         color = colors[code % colors.length]
       }
-      dispatch('changed', { facies: new Facies({ code, name, color }) })
+      dispatch('changed', new Facies({ code, name, color }))
     },
     updateProbabilities: ({ dispatch, state }, { facies, probabilityCubes }) => {
       if (notEmpty(probabilityCubes) && isEmpty(facies)) {
@@ -97,33 +91,34 @@ export default {
     toggleConstantProbability: ({ commit, state }) => {
       commit('CONSTANT_PROBABILITY', !state.constantProbability)
     },
-    changed: ({ commit, state }, { facies }) => {
+    changed: ({ commit, state }, facies) => {
       // TODO: Update proportion in truncation rule if applicable
-      return promiseSimpleCommit(commit, 'UPDATE', { facies: new Facies({ _id: facies.id, ...facies }) }, () => facies.hasOwnProperty('id'))
+      const old = state.available[`${facies.id}`]
+      return promiseSimpleCommit(commit, 'UPDATE', new Facies({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
     },
     fetch: ({ dispatch, rootGetters }) => {
       return rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
-        .then(facies => dispatch('populate', { facies }))
+        .then(facies => dispatch('populate', facies))
     },
-    populate: ({ commit, rootState }, { facies }) => {
+    populate: ({ commit, rootState }, facies) => {
       // TODO: Add colors (properly)
       for (let i = 0; i < facies.length; i++) {
-        facies[i].color = rootState.constants.faciesColors.available[i]
+        facies[`${i}`].color = rootState.constants.faciesColors.available[`${i}`]
       }
       const data = makeData(facies, Facies)
-      commit('AVAILABLE', { facies: data })
+      commit('AVAILABLE', data)
     },
   },
 
   mutations: {
-    AVAILABLE: (state, { facies }) => {
+    AVAILABLE: (state, facies) => {
       Vue.set(state, 'available', facies)
     },
     CURRENT: (state, { id }) => {
       state.current = id
     },
     SELECTED: SELECTED_ITEMS,
-    UPDATE: (state, { facies }) => {
+    UPDATE: (state, facies) => {
       Vue.set(state.available, facies.id, facies)
     },
     REMOVE: (state, { id }) => {

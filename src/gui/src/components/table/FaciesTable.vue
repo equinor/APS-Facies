@@ -50,6 +50,26 @@
             />
           </v-edit-dialog>
         </td>
+        <td
+          v-if="!hideAlias"
+          class="text-xs-left"
+        >
+          <v-edit-dialog
+            lazy
+          >
+            <highlight-current-item
+              :item="props.item"
+              field="alias"
+            />
+            <v-text-field
+              slot="input"
+              v-model="props.item.alias"
+              label="Edit"
+              single-line
+              @keydown.enter="() => changeAlias(props.item)"
+            />
+          </v-edit-dialog>
+        </td>
         <td class="text-xs-left">
           <highlight-current-item
             :item="props.item"
@@ -81,6 +101,8 @@
 <script>
 import { mapState } from 'vuex'
 import Swatches from 'vue-swatches'
+import VueTypes from 'vue-types'
+
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 
 export default {
@@ -90,6 +112,7 @@ export default {
   },
 
   props: {
+    hideAlias: VueTypes.bool.def(false),
   },
 
   data () {
@@ -107,6 +130,14 @@ export default {
           sortable: false,
           value: 'name',
         },
+        ...(this.hideAlias ? [] : [
+          {
+            text: 'Alias',
+            align: 'left',
+            sortable: false,
+            value: 'alias'
+          },
+        ]),
         {
           text: 'Code',
           align: 'left',
@@ -130,10 +161,7 @@ export default {
           const facies = state.facies.available[`${id}`]
           return {
             id,
-            name: facies.name,
-            code: facies.code,
-            color: facies.color,
-            selected: facies.selected,
+            ...facies,
             current: id === state.facies.current,
           }
         }),
@@ -151,32 +179,19 @@ export default {
     changeColor (facies, color) {
       if (facies.color !== color) {
         // Only dispatch when the color *actually* changes
-        return this.$store.dispatch('facies/changed', {
-          facies: {
-            id: facies.id,
-            code: facies.code,
-            name: facies.name,
-            color,
-          }
-        })
+        return this.$store.dispatch('facies/changed', { id: facies.id, color })
       } else {
         return Promise.resolve(facies)
       }
     },
     current ({ id }) {
-      this.$store.dispatch('facies/current', { id })
+      return this.$store.dispatch('facies/current', { id })
     },
     changeName (value) {
-      const facies = {
-        id: value.id,
-        name: value.name,
-        code: value.code,
-        color: value.color,
-      }
-      if (facies.name === '') {
-        facies.name = `F${value.code}`
-      }
-      return this.$store.dispatch('facies/changed', { facies })
+      return this.$store.dispatch('facies/changed', { id: value.id, name: value.name || `F${value.code}` })
+    },
+    changeAlias (facies) {
+      return this.$store.dispatch('facies/changed', { id: facies.id, alias: facies.alias })
     },
   },
 
