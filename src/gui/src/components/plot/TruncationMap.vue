@@ -37,7 +37,7 @@ const plotify = (polygons, faciesTable) => {
 }
 
 const allSet = (items, prop) => {
-  return items.every(item => !!item[`${prop}`])
+  return Object.values(items).every(item => !!item[`${prop}`])
 }
 
 export default {
@@ -83,7 +83,7 @@ export default {
                 inRule: rule.fields.findIndex(item => item.field === field.id),
               }
             }),
-          values: rule.settings,
+          values: Object.values(rule.settings),
           constantParameters: !this.$store.getters.faciesTable.some(facies => !!facies.probabilityCube),
         }).then(polygons => plotify(polygons, this.$store.getters.faciesTable))
       },

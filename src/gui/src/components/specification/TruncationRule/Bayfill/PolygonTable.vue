@@ -65,6 +65,7 @@
 import { mapGetters } from 'vuex'
 
 import FractionField from '@/components/selection/FractionField'
+import { notEmpty } from '@/utils'
 
 export default {
   components: {
@@ -78,23 +79,17 @@ export default {
     }),
     polygons () {
       // TODO: Include 'help' messages
-      const mapping = {
-        'Floodplain': 'SF',
-        'Subbay': 'YSF',
-        'Bayhead Delta': 'SBHD',
-      }
       return !this.truncationRule
         ? []
-        : this.truncationRule.polygons.map(polygon => {
+        : Object.values(this.truncationRule.polygons).map(polygon => {
           let factor = null
-          const factorName = mapping[polygon.name]
-          if (factorName) {
-            factor = this.truncationRule.settings.find(item => item.name === factorName).factor
+          const setting = this.truncationRule.settings[polygon.id]
+          if (notEmpty(setting)) {
+            factor = setting.factor
           }
           const options = {
-            name: polygon.name,
+            ...polygon,
             hasFactor: !!factor,
-            facies: polygon.facies,
           }
           if (factor) options['factor'] = factor
           return options
@@ -136,14 +131,25 @@ export default {
   },
 
   methods: {
-    updateFacies ({ name }, faciesId) {
-      const existing = this.truncationRule.polygons.find(polygon => polygon.facies === faciesId && polygon.name !== name)
+    updateFacies (polygon, faciesId) {
+      const existing = Object.values(this.truncationRule.polygons)
+        .find(polygon => polygon.facies === faciesId)
       return existing
-        ? this.$store.dispatch('truncationRules/swapFacies', { rule: this.truncationRule, polygons: [name, existing.name] })
-        : this.$store.dispatch('truncationRules/updateFacies', { rule: this.truncationRule, polygon: name, faciesId })
+        ? this.$store.dispatch('truncationRules/swapFacies', {
+          rule: this.truncationRule,
+          polygons: [polygon, existing]
+        })
+        : this.$store.dispatch('truncationRules/updateFacies', {
+          rule: this.truncationRule,
+          polygon,
+          faciesId
+        })
     },
     updateFactor (item, value) {
-      return this.$store.dispatch('truncationRules/changeFactors', { polygon: item, value })
+      return this.$store.dispatch('truncationRules/changeFactors', {
+        polygon: item,
+        value
+      })
     },
   },
 }
