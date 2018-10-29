@@ -74,7 +74,7 @@ export default {
         })
       }
     },
-    addEmptyField ({ dispatch, state, rootGetters }, { zoneId, regionId }) {
+    addEmptyField ({ dispatch, state, rootGetters }, { zoneId, regionId } = {}) {
       dispatch('addField', {
         field: new GaussianRandomField({
           name: newGaussianFieldName(state),
