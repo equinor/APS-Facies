@@ -37,7 +37,7 @@ const plotify = (polygons, faciesTable) => {
 }
 
 const allSet = (items, prop) => {
-  return items.every(item => !!item[`${prop}`])
+  return Object.values(items).every(item => !!item[`${prop}`])
 }
 
 export default {
@@ -67,12 +67,13 @@ export default {
           type: 'bayfill',
           globalFaciesTable: this.$store.getters['facies/selected']
             .map(facies => {
+              const polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
               return {
                 code: facies.code,
                 name: facies.name,
                 probability: facies.previewProbability,
                 inZone: true,
-                inRule: rule.polygons.findIndex(polygon => polygon.facies === facies.id),
+                inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
               }
             }),
           gaussianRandomFields: Object.values(this.$store.getters.fields)
@@ -83,7 +84,7 @@ export default {
                 inRule: rule.fields.findIndex(item => item.field === field.id),
               }
             }),
-          values: rule.settings,
+          values: Object.values(rule.settings),
           constantParameters: !this.$store.getters.faciesTable.some(facies => !!facies.probabilityCube),
         }).then(polygons => plotify(polygons, this.$store.getters.faciesTable))
       },

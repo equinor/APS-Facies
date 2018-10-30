@@ -30,20 +30,20 @@ const processPolygons = (getters, polygons) => {
   return process(getters, polygons, 'facies', 'facies', 'facies')
 }
 
-const getPolygonByName = (rule, name) => {
-  return rule.polygons.find(polygon => polygon.name === name)
+const findPolygonInRule = (rule, polygon) => {
+  return rule.polygons[`${polygon.id}`]
 }
 
 const setFacies = (polygons, src, dest) => {
-  polygons.find(polygon => polygon.name === dest.name).facies = src.facies
+  polygons[`${dest.id}`].facies = src.facies
 }
 
 function swapFacies (rule, polygons) {
   if (polygons.length !== 2) throw new Error('Only two polygons may be swapped')
   const newPolygons = cloneDeep(rule.polygons)
 
-  const first = getPolygonByName(rule, polygons[0])
-  const other = getPolygonByName(rule, polygons[1])
+  const first = findPolygonInRule(rule, polygons[0])
+  const other = findPolygonInRule(rule, polygons[1])
 
   setFacies(newPolygons, first, other)
   setFacies(newPolygons, other, first)
@@ -99,14 +99,8 @@ export default {
     },
     changeFactors ({ commit, rootGetters }, { polygon, value }) {
       const current = rootGetters.truncationRule
-      const mapping = {
-        'Floodplain': 'SF',
-        'Subbay': 'YSF',
-        'Bayhead Delta': 'SBHD',
-      }
-      const index = current.settings.findIndex(item => item.name === mapping[`${polygon.name}`])
-      if (index >= 0) {
-        commit('CHANGE_FACTORS', { ruleId: current.id, index, value })
+      if (current.settings.hasOwnProperty(polygon.id)) {
+        commit('CHANGE_FACTORS', { ruleId: current.id, polygonId: polygon.id, value })
       } else {
         throw new Error(`The ${polygon.name} polygon was not found`)
       }
@@ -118,11 +112,11 @@ export default {
       commit('SET_FACIES', { ruleId: rule.id, polygons: swapFacies(rule, polygons) })
     },
     updateFacies ({ commit, dispatch, state, rootState }, { rule, polygon, faciesId }) {
-      const polygonName = polygon.name || polygon
-      commit('CHANGE_FACIES', { ruleId: rule.id || rule, polygonName, faciesId })
+      const polygonId = polygon.id || polygon
+      commit('CHANGE_FACIES', { ruleId: rule.id || rule, polygonId, faciesId })
 
       if (!rootState.facies.available[`${faciesId}`].previewProbability) {
-        const probability = rule.polygons.find(polygon => polygon.name === polygonName).proportion
+        const probability = rule.polygons[`${polygonId}`].proportion
         dispatch('facies/updateProbability', { facies: faciesId, probability }, { root: true })
       }
     },
@@ -151,14 +145,14 @@ export default {
     },
     CHANGE_TYPE: (state, { type }) => changePreset(state, 'type', type),
     CHANGE_TEMPLATE: (state, { template }) => changePreset(state, 'template', template),
-    CHANGE_FACIES: (state, { ruleId, polygonName, faciesId }) => {
-      state.rules[`${ruleId}`].polygons.find(polygon => polygon.name === polygonName).facies = faciesId
+    CHANGE_FACIES: (state, { ruleId, polygonId, faciesId }) => {
+      state.rules[`${ruleId}`].polygons[`${polygonId}`].facies = faciesId
     },
     CHANGE_FIELDS: (state, { ruleId, channel, fieldId }) => {
       state.rules[`${ruleId}`].fields.find(field => field.channel === channel).field = fieldId
     },
-    CHANGE_FACTORS: (state, { ruleId, index, value }) => {
-      Vue.set(state.rules[`${ruleId}`].settings[`${index}`], 'factor', value)
+    CHANGE_FACTORS: (state, { ruleId, polygonId, value }) => {
+      Vue.set(state.rules[`${ruleId}`].settings[`${polygonId}`], 'factor', value)
     }
   },
 
