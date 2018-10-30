@@ -67,12 +67,13 @@ export default {
           type: 'bayfill',
           globalFaciesTable: this.$store.getters['facies/selected']
             .map(facies => {
+              const polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
               return {
                 code: facies.code,
                 name: facies.name,
                 probability: facies.previewProbability,
                 inZone: true,
-                inRule: rule.polygons.findIndex(polygon => polygon.facies === facies.id),
+                inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
               }
             }),
           gaussianRandomFields: Object.values(this.$store.getters.fields)

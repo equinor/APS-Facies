@@ -15,7 +15,12 @@ const identify = items => {
 }
 
 const structurePolygons = (polygons) => {
-  return identify(polygons)
+  return identify(polygons.map((polygon, index) => {
+    return {
+      order: index,
+      ...polygon,
+    }
+  }))
 }
 
 const structureSettings = (settings, polygons) => {
