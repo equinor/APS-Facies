@@ -36,7 +36,13 @@ const hasValidChildren = component => {
 }
 
 const hasCurrentParents = (item, getters) => {
-  return item.parent.zone === getters.zone.id && item.parent.region ? item.parent.region === getters.region.id : true
+  return getters.zone
+    ? item.parent.zone === getters.zone.id && (
+      item.parent.region
+        ? item.parent.region === getters.region.id
+        : true
+    )
+    : false
 }
 
 const hasEnoughFacies = (rule, getters) => {

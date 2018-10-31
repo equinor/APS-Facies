@@ -78,12 +78,11 @@ export default new Vuex.Store({
     blockedWellLogParameter: (state) => {
       return state.parameters.blockedWellLog.selected
     },
-    fields: (state) => {
+    fields: (state, getters) => {
       const fields = state.gaussianRandomFields.fields
       return Object.keys(fields)
         .filter(fieldId => {
-          const field = fields[`${fieldId}`]
-          return field.parent.zone === state.zones.current && field.parent.region === state.regions.current
+          return hasCurrentParents(fields[`${fieldId}`], getters)
         })
         .reduce((obj, fieldId) => {
           obj[`${fieldId}`] = fields[`${fieldId}`]
