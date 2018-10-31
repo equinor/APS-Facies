@@ -1,6 +1,6 @@
 import { promiseSimpleCommit } from '@/store/utils'
 import { Region } from '@/store/utils/domain'
-import { makeData, selectItems, isEmpty } from '@/utils'
+import { makeData, selectItems, isEmpty, notEmpty } from '@/utils'
 import rms from '@/api/rms'
 import { SELECTED_ITEMS } from '@/store/mutations'
 
@@ -25,7 +25,7 @@ export default {
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {
-      if (state.use) {
+      if (state.use && notEmpty(rootGetters.regionParameter)) {
         if (isEmpty(zoneId)) {
           const promises = Object.keys(rootState.zones.available)
             .map(id => {
