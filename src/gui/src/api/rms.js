@@ -7,8 +7,7 @@ const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 
 export default {
   gridModels: () => api.call('get_grid_model_names'),
-  zoneParameters: (gridName) => api.call('get_zone_parameters', gridName),
-  zones: (gridName, zoneParameter) => api.call('get_zones', gridName, zoneParameter),
+  zones: (gridName) => api.call('get_zones', gridName),
   regionParameters: (gridName) => api.call('get_region_parameters', gridName),
   regions: (gridName, zoneName, regionParameter) => api.call('get_regions', gridName, zoneName, regionParameter),
   blockedWellParameters: (gridName) => api.call('get_blocked_well_set_names', gridName),
