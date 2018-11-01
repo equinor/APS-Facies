@@ -6,7 +6,7 @@ from types import ModuleType
 from src.algorithms.APSGaussModel import GaussianFieldName
 
 from roxar import Project
-from roxar.grid import GridModel, GridModels, Properties, Property, BlockedWell, BlockedWellsSet
+from roxar.grids import GridModel, GridModels, Properties, Property, BlockedWell, BlockedWellsSet, Grid3D
 from roxar.zones import Zone, Zones
 
 RoxarModule = ModuleType
@@ -62,6 +62,11 @@ class RMSData:
             self,
             name: str
     ) -> GridModel: ...
+    def get_grid(
+            self,
+            name:                        GridName,
+            realization:                 Optional[int]                   = None
+    ) -> Grid3D: ...
     def get_grid_model_names(
             self
     ) -> List[GridName]: ...

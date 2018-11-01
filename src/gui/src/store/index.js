@@ -66,9 +66,6 @@ export default new Vuex.Store({
     truncationRule: (state, getters) => {
       return state.truncationRules.rules ? Object.values(state.truncationRules.rules).find(rule => hasCurrentParents(rule, getters)) : null
     },
-    zoneParameter: (state) => {
-      return state.parameters.zone.selected
-    },
     regionParameter: (state) => {
       return state.parameters.region.selected
     },

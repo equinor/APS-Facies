@@ -14,10 +14,7 @@
         <template slot="header">Zones and regions</template>
         <v-card>
           <div v-if="currentGridModel">
-            <zone-parameter/>
-            <div v-if="zoneParameter">
-              <zone-region/>
-            </div>
+            <zone-region/>
           </div>
           <div v-else>Selection of zones and regions is not available until Grid Model is selected</div>
         </v-card>
@@ -56,7 +53,6 @@
 <script>
 import ZoneRegion from '@/components/selection/ZoneRegionSelection'
 import GridModel from '@/components/selection/dropdown/ChooseGridModel'
-import ZoneParameter from '@/components/selection/dropdown/ChooseZoneParameter'
 import FaciesSelection from '@/components/selection/FaciesSelection'
 import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter'
 import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter'
@@ -65,7 +61,6 @@ export default {
   components: {
     ZoneRegion,
     GridModel,
-    ZoneParameter,
     ChooseBlockedWellParameter,
     ChooseBlockedWellLogParameter,
     FaciesSelection
@@ -88,10 +83,6 @@ export default {
     },
     hasBlockedWellParameter () {
       return !!this.$store.getters.blockedWellParameter
-    },
-
-    zoneParameter () {
-      return this.$store.state.parameters.zone.selected
     },
 
     currentGridModel () {

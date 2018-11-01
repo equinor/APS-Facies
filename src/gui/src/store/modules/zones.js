@@ -40,7 +40,7 @@ export default {
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, rootGetters }) => {
-      return rms.zones(rootGetters.gridModel, rootGetters.zoneParameter)
+      return rms.zones(rootGetters.gridModel)
         .then(zones => dispatch('populate', { zones }))
     },
     populate: ({ commit, dispatch, rootGetters }, { zones }) => {

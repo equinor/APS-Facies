@@ -52,6 +52,11 @@ class RMSData:
         grid_models = self.get_grid_models()
         return grid_models[name]
 
+    def get_grid(self, name, realization=None):
+        if realization is None:
+            realization = self.project.current_realisation
+        return self.get_grid_model(name).get_grid(realization)
+
     def get_grid_model_names(self):
         return [grid_model.name for grid_model in self.get_grid_models()]
 
@@ -71,23 +76,20 @@ class RMSData:
         grid_model = self.get_grid_model(grid_model_name)
         return [parameter.name for parameter in grid_model.properties if check(parameter)]
 
-    def get_zones(self, grid_model_name, zone_parameter):
-        grid_model = self.get_grid_model(grid_model_name)
-        zones = self.get_code_names(grid_model.properties[zone_parameter])
-        return zones
+    def get_zones(self, grid_model_name):
+        grid = self.get_grid(grid_model_name)
+        return [
+            {
+                'code': key + 1,
+                'name': grid.zone_names[key]
+            } for key in grid.simbox_indexer.zonation
+        ]
 
     def get_regions(self, grid_model_name, zone_name, region_parameter):
         # TODO: Ensure that available regions depends on zone
         grid_model = self.get_grid_model(grid_model_name)
         regions = self.get_code_names(grid_model.properties[region_parameter])
         return regions
-
-    def is_zone_parameter(self, param):
-        return (
-                self.is_discrete(param)
-                and set(param.code_names.values()) <= set([zone.name for zone in self.project.zones])
-                and len(param.code_names) > 0
-        )
 
     def is_region_parameter(self, param):
         # TODO: Implement properly
