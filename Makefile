@@ -318,7 +318,7 @@ initialize-python-environment: install-pipenv
 	{ $(PIPENV) --venv || $(PIPENV) --python=$(PYTHON) --site-packages ; }
 
 install-pipenv:
-	type $(PIPENV) >/dev/null || { $(PIP) install $(USER_INSTALL_PIPENV) pipenv ; }
+	type pipenv >/dev/null || $(PIPENV) >/dev/null || { $(PIP) install $(USER_INSTALL_PIPENV) pipenv ; }
 
 requirements:
 	cd $(CODE_DIR) && \
