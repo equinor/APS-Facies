@@ -10,8 +10,9 @@
           :data="gaussianFieldData"
         />
       </v-flex>
+      <v-flex xs1/>
       <v-flex
-        xs6
+        xs5
       >
         Variogram selection
         <v-select
@@ -50,7 +51,8 @@
           :grf-id="grfId"
         />
       </v-flex>
-      <v-flex xs6>
+      <v-flex xs1/>
+      <v-flex xs5>
         Ranges
         <range-specification
           :grf-id="grfId"
@@ -70,7 +72,7 @@ import VueTypes from 'vue-types'
 
 import rms from '@/api/rms'
 
-import { hasValidChildren, notEmpty } from '@/utils'
+import { hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
 
 import GaussianPlot from '@/components/plot/GaussianPlot'
 import TrendSpecification from '@/components/specification/Trend'
@@ -156,6 +158,10 @@ export default {
       this.simulation()
         .then(() => {
           this.waitingForSimulation = false
+        })
+        .catch(reason => {
+          this.waitingForSimulation = false
+          invalidateChildren(this)
         })
     },
     openVisualizationSettings () {
