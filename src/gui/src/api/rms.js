@@ -18,7 +18,8 @@ export default {
   probabilityCubeParameters: (gridName) => api.call('get_probability_cube_parameters', gridName),
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
   options: (name) => api.call('get_options', name),
-  simulateGaussianField: (name, variogram, trend, settings) => api.call('simulate_gaussian_field', name, variogram, trend, settings),
+  simulateGaussianField: (field) => api.call('simulate_gaussian_field', field),
+  simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (gridName, probabilityCubeParameters, ZoneNumbers) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, ZoneNumbers),
   isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
 }

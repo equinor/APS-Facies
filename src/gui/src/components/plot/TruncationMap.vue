@@ -12,6 +12,8 @@ import rms from '@/api/rms'
 
 import StaticPlot from '@/components/plot/StaticPlot'
 
+import { makeTruncationRuleSpecification } from '@/utils'
+
 const svgPoint = (point, width = 1, height = 1) => {
   return `${point[0] * width},${point[1] * height}`
 }
@@ -63,30 +65,8 @@ export default {
     polygons: {
       get () {
         const rule = this.rule
-        return rms.truncationPolygons({
-          type: 'bayfill',
-          globalFaciesTable: this.$store.getters['facies/selected']
-            .map(facies => {
-              const polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
-              return {
-                code: facies.code,
-                name: facies.name,
-                probability: facies.previewProbability,
-                inZone: true,
-                inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
-              }
-            }),
-          gaussianRandomFields: Object.values(this.$store.getters.fields)
-            .map(field => {
-              return {
-                name: field.name,
-                inZone: true,
-                inRule: rule.fields.findIndex(item => item.field === field.id),
-              }
-            }),
-          values: Object.values(rule.settings),
-          constantParameters: !this.$store.getters.faciesTable.some(facies => !!facies.probabilityCube),
-        }).then(polygons => plotify(polygons, this.$store.getters.faciesTable))
+        return rms.truncationPolygons(makeTruncationRuleSpecification(rule, this.$store.getters))
+          .then(polygons => plotify(polygons, this.$store.getters.faciesTable))
       },
       shouldUpdate () {
         return !!this.rule &&

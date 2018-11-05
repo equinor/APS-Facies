@@ -97,7 +97,6 @@ export default {
 
   data () {
     return {
-      gaussianFieldData: [],
       waitingForSimulation: false,
     }
   },
@@ -106,6 +105,11 @@ export default {
     ...mapState({
       availableVariograms: state => state.constants.options.variograms.available,
     }),
+    gaussianFieldData () {
+      return this.field
+        ? this.field._data
+        : []
+    },
     isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },
     field () { return this.$store.state.gaussianRandomFields.fields[this.grfId] },
     variogram () { return this.field.variogram },
@@ -133,17 +137,24 @@ export default {
   },
 
   methods: {
-    simulation () {
+    async simulation () {
       if (this.reseedOnRefresh) {
-        this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
+        await this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
       }
-      return rms.simulateGaussianField(this.field.name, this.variogram, this.trend, this.field.settings)
+      return this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
+        grfId: this.grfId,
+        data: await rms.simulateGaussianField({
+          name: this.field.name,
+          variogram: this.variogram,
+          trend: this.trend,
+          settings: this.field.settings,
+        })
+      })
     },
     updateSimulation () {
       this.waitingForSimulation = true
       this.simulation()
-        .then(data => {
-          this.gaussianFieldData = data
+        .then(() => {
           this.waitingForSimulation = false
         })
     },

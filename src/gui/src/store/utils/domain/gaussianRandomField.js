@@ -79,5 +79,7 @@ export class GaussianRandomField extends ZoneRegionDependent {
     this.variogram = new Variogram({})
     this.trend = new Trend()
     this.settings = defaultSettings()
+    // TODO: Make sure the class knows that the data is actually from the CURRENT specification
+    this._data = []
   }
 }

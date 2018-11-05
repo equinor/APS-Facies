@@ -1,5 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import numpy as np
+
 from src.algorithms.APSGaussModel import (
     GaussianField, Variogram, Ranges, Angles, Trend, GaussianFieldSimulationSettings,
 )
@@ -13,6 +15,7 @@ from base64 import b64decode
 from src.utils.exceptions.xml import ApsXmlError
 from src.utils.roxar.grid_model import calcStatisticsFor3DParameter
 from src.utils.truncation_rules import make_truncation_rule
+from src.utils.testPreview import create_facies_map
 
 
 def empty_if_none(func):
@@ -150,37 +153,18 @@ class RMSData:
         return self.get_code_names(facies_property)
 
     @staticmethod
-    def simulate_gaussian_field(name, variogram, trend, settings=None):
-        if trend is None:
-            trend = {}
-        if settings is None:
-            settings = GaussianFieldSimulationSettings(
-                cross_section=CrossSection('IJ', 0.5),
-                grid_azimuth=0,
-                grid_size=(100, 100, 1),
-                simulation_box_size=(100, 100, 1),
-                seed=0,
-            )
-        else:
-            settings = GaussianFieldSimulationSettings.from_dict(**settings)
+    def simulate_gaussian_field(field):
         grid_index_order = 'C'
-        simulation = GaussianField(
-            name=name,
-            variogram=Variogram(
-                name=name,
-                type=variogram['type'],
-                ranges=Ranges(
-                    **variogram['range']
-                ),
-                angles=Angles(
-                    **variogram['angle']
-                ),
-                power=variogram['power'],
-            ),
-            trend=Trend.from_dict(name, **trend),
-            settings=settings,
-        ).simulate()
+        simulation = RMSData._simulate_gaussian_field(field)
         data = simulation.field_as_matrix(grid_index_order)
+        return data.tolist()
+
+    @staticmethod
+    def simulate_realization(fields, specification):
+        simulations = [RMSData._simulate_gaussian_field(field) for field in fields]
+        truncation_rule = make_truncation_rule(specification)
+        facies, facies_fraction = create_facies_map(simulations, truncation_rule)
+        data = np.reshape(facies, simulations[0].settings.dimensions, 'C')
         return data.tolist()
 
     @staticmethod
@@ -234,6 +218,42 @@ class RMSData:
             valid = False
             error = str(e)
         return {'valid': valid, 'error': error}
+
+    @staticmethod
+    def _simulate_gaussian_field(field):
+        if 'field' in field:
+            field = field['field']
+        name, variogram, trend, settings = field['name'], field['variogram'], field['trend'], field['settings']
+
+        if trend is None:
+            trend = {}
+        if settings is None:
+            settings = GaussianFieldSimulationSettings(
+                cross_section=CrossSection('IJ', 0.5),
+                grid_azimuth=0,
+                grid_size=(100, 100, 1),
+                simulation_box_size=(100, 100, 1),
+                seed=0,
+            )
+        else:
+            settings = GaussianFieldSimulationSettings.from_dict(**settings)
+        simulation = GaussianField(
+            name=name,
+            variogram=Variogram(
+                name=name,
+                type=variogram['type'],
+                ranges=Ranges(
+                    **variogram['range']
+                ),
+                angles=Angles(
+                    **variogram['angle']
+                ),
+                power=variogram['power'],
+            ),
+            trend=Trend.from_dict(name, **trend),
+            settings=settings,
+        ).simulate()
+        return simulation
 
 
 def list_all_wells(project):

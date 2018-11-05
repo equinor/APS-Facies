@@ -7,6 +7,31 @@ const makeData = (items, _class) => {
   return data
 }
 
+const makeTruncationRuleSpecification = (rule, getters) => {
+  return {
+    type: 'bayfill',
+    globalFaciesTable: getters['facies/selected']
+      .map(facies => {
+        const polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
+        return {
+          code: facies.code,
+          name: facies.name,
+          probability: facies.previewProbability,
+          inZone: true,
+          inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
+        }
+      }),
+    gaussianRandomFields: Object.values(getters.fields)
+      .map(field => {
+        return {
+          name: field.name, inZone: true, inRule: rule.fields.findIndex(item => item.field === field.id),
+        }
+      }),
+    values: Object.values(rule.settings),
+    constantParameters: !getters.faciesTable.some(facies => !!facies.probabilityCube),
+  }
+}
+
 function selectItems ({ items, state, _class }) {
   const ids = items.map(item => item.id)
   const obj = {}
@@ -19,6 +44,20 @@ function selectItems ({ items, state, _class }) {
     })
   }
   return obj
+}
+
+// TODO: reuse / generalize `hasValidChildren`
+const invalidateChildren = component => {
+  let children = component.$children.slice()
+  while (children.length > 0) {
+    const child = children.shift()
+    if (typeof child !== 'undefined' && child.dialog !== false) {
+      if (child.$v && child.$v.$invalid) {
+        child.$touch()
+      }
+      children = children.concat(child.$children.slice())
+    }
+  }
 }
 
 const hasValidChildren = component => {
@@ -81,8 +120,10 @@ const resolve = (path, obj = self, separator = '.') => {
 
 export {
   makeData,
+  makeTruncationRuleSpecification,
   selectItems,
   hasValidChildren,
+  invalidateChildren,
   hasCurrentParents,
   hasEnoughFacies,
   getRandomInt,

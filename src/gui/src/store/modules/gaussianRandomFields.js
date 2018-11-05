@@ -91,6 +91,9 @@ export default {
         commit('DELETE', { grfId })
       }
     },
+    updateSimulationData ({ commit, state }, { grfId, data }) {
+      setValue({ state, commit }, { grfId, value: data, commitName: 'CHANGE_SIMULATION' })
+    },
     changeName ({ state, commit }, { grfId, name }) {
       setValue({ state, commit }, { grfId, value: name, commitName: 'CHANGE_NAME' })
     },
@@ -164,6 +167,9 @@ export default {
     },
     CHANGE_SEED (state, { grfId, value }) {
       state.fields[`${grfId}`].settings.seed = value
+    },
+    CHANGE_SIMULATION (state, { grfId, value }) {
+      state.fields[`${grfId}`]._data = value
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }) {
