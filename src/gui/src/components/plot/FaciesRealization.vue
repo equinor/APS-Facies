@@ -4,12 +4,11 @@
       :data="data"
       :color-scale="faciesColors"
     />
-    <v-btn
+    <wait-btn
+      :waiting="waitingForSimulation"
+      title="Refresh"
       @click="refresh"
-    >
-      <span v-if="!waitingForSimulation">Refresh</span>
-      <span v-else><v-progress-circular indeterminate/></span>
-    </v-btn>
+    />
   </div>
 </template>
 
@@ -21,10 +20,12 @@ import api from '@/api/rms'
 import RealizationMap from '@/components/plot/GaussianPlot'
 
 import { makeTruncationRuleSpecification } from '@/utils'
+import WaitBtn from '@/components/baseComponents/WaitButton'
 
 export default {
   name: 'FaciesRealization',
   components: {
+    WaitBtn,
     RealizationMap: RealizationMap,
   },
 
