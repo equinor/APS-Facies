@@ -1,6 +1,6 @@
 <template>
   <v-btn
-    :disabled="disabled"
+    :disabled="waiting || disabled"
     :dark="dark"
     :color="color"
     @click="e => $emit('click', e)"
