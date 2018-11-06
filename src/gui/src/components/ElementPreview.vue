@@ -16,6 +16,9 @@
     <v-flex xs12>
       <h3>Gaussian Random Fields</h3>
     </v-flex>
+    <gaussian-plots
+      :value="fields"
+    />
     <v-flex xs12>
       <h3>Cross plots</h3>
     </v-flex>
@@ -25,14 +28,17 @@
 <script>
 import TruncationMap from '@/components/plot/TruncationMap'
 import FaciesRealization from '@/components/plot/FaciesRealization'
+import GaussianPlots from '@/components/plot/GaussianPlot/multiple'
 
 export default {
   components: {
+    GaussianPlots,
     FaciesRealization,
     TruncationMap,
   },
 
   computed: {
+    fields () { return Object.values(this.$store.getters.fields) },
     ruleId () {
       const rule = this.$store.getters.truncationRule
       return rule ? rule.id : ''

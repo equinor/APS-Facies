@@ -164,8 +164,18 @@ class RMSData:
         simulations = [RMSData._simulate_gaussian_field(field) for field in fields]
         truncation_rule = make_truncation_rule(specification)
         facies, facies_fraction = create_facies_map(simulations, truncation_rule)
-        data = np.reshape(facies, simulations[0].settings.dimensions, 'C')
-        return data.tolist()
+
+        grid_index_order = 'C'
+        data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order)
+        return {
+            'faciesMap': data.tolist(),
+            'fields': [
+                {
+                    'name': simulation.name,
+                    'data': simulation.field_as_matrix(grid_index_order).tolist(),
+                } for simulation in simulations
+            ]
+        }
 
     @staticmethod
     def get_truncation_map_polygons(specification):

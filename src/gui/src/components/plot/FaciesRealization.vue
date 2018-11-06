@@ -26,7 +26,7 @@ export default {
   name: 'FaciesRealization',
   components: {
     WaitBtn,
-    RealizationMap: RealizationMap,
+    RealizationMap,
   },
 
   data () {
@@ -66,7 +66,14 @@ export default {
   methods: {
     async refresh () {
       this.waitingForSimulation = true
-      this.data = await api.simulateRealization(this.fields, makeTruncationRuleSpecification(this.rule, this.$store.getters))
+      const data = await api.simulateRealization(this.fields, makeTruncationRuleSpecification(this.rule, this.$store.getters))
+      this.data = data.faciesMap
+      data.fields.forEach(field => {
+        this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
+          grfId: Object.values(this.$store.getters.fields).find(item => item.name === field.name).id,
+          data: field.data,
+        })
+      })
       this.waitingForSimulation = false
     }
   }
