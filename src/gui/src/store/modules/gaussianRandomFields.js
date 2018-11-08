@@ -169,7 +169,7 @@ export default {
       state.fields[`${grfId}`].settings.seed = value
     },
     CHANGE_SIMULATION (state, { grfId, value }) {
-      state.fields[`${grfId}`]._data = value
+      Vue.set(state.fields[`${grfId}`], '_data', value)
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }) {

@@ -17,6 +17,7 @@
       <h3>Gaussian Random Fields</h3>
     </v-flex>
     <gaussian-plots
+      v-if="isGaussianFieldsSimulated"
       :value="fields"
     />
     <v-flex xs12>
@@ -42,7 +43,10 @@ export default {
     ruleId () {
       const rule = this.$store.getters.truncationRule
       return rule ? rule.id : ''
-    }
+    },
+    isGaussianFieldsSimulated () {
+      return this.fields.every(field => field._data.length > 0 && field._data[0].length > 0)
+    },
   },
 }
 </script>

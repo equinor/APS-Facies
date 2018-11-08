@@ -139,6 +139,10 @@ export default {
     reseedOnRefresh () { return this.field.settings.seed.autoRenew }
   },
 
+  beforeMount () {
+    this.updateSimulation()
+  },
+
   methods: {
     async simulation () {
       if (this.reseedOnRefresh) {
