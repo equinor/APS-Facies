@@ -3,12 +3,14 @@
     :data="data"
     :layout="layout"
     :options="options"
+    auto-resize
   />
 </template>
 
 <script>
 import VueTypes from 'vue-types'
 import VuePlot from '@statnett/vue-plotly'
+
 import { notEmpty } from '@/utils'
 
 export default {
@@ -22,12 +24,7 @@ export default {
     height: VueTypes.integer.def(100),
     staticSize: VueTypes.bool.def(false),
     svg: VueTypes.bool.def(false),
-  },
-
-  data () {
-    return {
-      parent: null,
-    }
+    expand: VueTypes.bool.def(false),
   },
 
   computed: {
@@ -42,16 +39,6 @@ export default {
         }]
       }
     },
-    size () {
-      // Update plot size
-      const parent = this.parent ? this.parent : {
-        clientWidth: this.width,
-        clientHeight: this.height,
-      }
-      return this.staticSize
-        ? { width: this.width, height: this.height }
-        : { width: parent.clientWidth, height: parent.clientHeight }
-    },
     layout () {
       const scaleRatio = notEmpty(this.data) && this.data.length > 0
         ? this.data.length / this.data[0].length
@@ -65,9 +52,9 @@ export default {
       }
 
       const layout = {
-        ...this.size,
+        ...this.size(),
         showLegend: false,
-        autosize: false,
+        autosize: true,
         margin: {
           l: 0, r: 0, t: 0, b: 0,
         },
@@ -83,13 +70,28 @@ export default {
     },
     options () {
       return {
-        staticPlot: true
+        staticPlot: true,
+        responsive: true,
       }
     },
   },
 
-  beforeUpdate () {
-    this.parent = this.$el.parentElement
+  methods: {
+    size () {
+      const parent = this.$el
+        ? this.$el.parentElement
+        : {
+          clientWidth: this.width,
+          clientHeight: this.height,
+        }
+      const size = this.staticSize
+        ? { width: this.width, height: this.height }
+        : { width: parent.clientWidth || this.width, height: parent.clientHeight || this.height }
+      const val = Math[`${this.expand ? 'max' : 'min'}`](...Object.values(size))
+      size.width = val
+      size.height = val
+      return size
+    }
   },
 }
 </script>

@@ -11,7 +11,7 @@
       expand
     >
       <v-expansion-panel-content>
-        <template slot="header">Zones and regions</template>
+        <div slot="header">Zones and regions</div>
         <v-card>
           <div v-if="currentGridModel">
             <zone-region/>
@@ -21,7 +21,7 @@
       </v-expansion-panel-content>
 
       <v-expansion-panel-content>
-        <template slot="header">Facies</template>
+        <div slot="header">Facies</div>
         <v-card>
           <div v-if="currentGridModel">
             <div

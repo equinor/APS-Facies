@@ -1,6 +1,7 @@
 <template>
   <static-plot
     :data-definition="polygons"
+    :expand="expand"
     svg
   />
 </template>
@@ -47,6 +48,7 @@ export default {
 
   props: {
     truncationRuleId: VueTypes.string.isRequired,
+    expand: VueTypes.bool.def(false),
   },
 
   computed: {

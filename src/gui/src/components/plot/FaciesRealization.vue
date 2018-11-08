@@ -1,26 +1,16 @@
 <template>
-  <div>
-    <realization-map
-      :data="data"
-      :color-scale="faciesColors"
-    />
-    <icon-button
-      :disabled="!canSimulate"
-      :waiting="waitingForSimulation"
-      icon="refresh"
-      @click="refresh"
-    />
-  </div>
+  <realization-map
+    :data="data"
+    :color-scale="faciesColors"
+    :expand="expand"
+  />
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-
-import api from '@/api/rms'
+import VueTypes from 'vue-types'
 
 import RealizationMap from '@/components/plot/GaussianPlot'
-
-import { makeTruncationRuleSpecification } from '@/utils'
 import IconButton from '@/components/selection/IconButton'
 
 export default {
@@ -30,11 +20,8 @@ export default {
     RealizationMap,
   },
 
-  data () {
-    return {
-      waitingForSimulation: false,
-      data: [],
-    }
+  props: {
+    expand: VueTypes.bool.def(false),
   },
 
   computed: {
@@ -42,8 +29,10 @@ export default {
       rule: 'truncationRule',
       fields: 'fields',
     }),
-    canSimulate () {
-      return !!this.$store.getters.truncationRule
+    data () {
+      return this.rule && this.rule._realization
+        ? this.rule._realization
+        : []
     },
     fields () {
       const fields = this.$store.getters.fields
@@ -66,21 +55,6 @@ export default {
         })
     }
   },
-
-  methods: {
-    async refresh () {
-      this.waitingForSimulation = true
-      const data = await api.simulateRealization(this.fields, makeTruncationRuleSpecification(this.rule, this.$store.getters))
-      this.data = data.faciesMap
-      data.fields.forEach(field => {
-        this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
-          grfId: Object.values(this.$store.getters.fields).find(item => item.name === field.name).id,
-          data: field.data,
-        })
-      })
-      this.waitingForSimulation = false
-    }
-  }
 }
 </script>
 

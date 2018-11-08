@@ -1,6 +1,7 @@
 <template>
   <static-plot
     :data-definition="dataDefinition"
+    :expand="expand"
   />
 </template>
 
@@ -22,6 +23,7 @@ export default {
         color: VueTypes.string.isRequired,
       }))
     ]).def('Viridis'),
+    expand: VueTypes.bool.def(false),
   },
 
   computed: {
