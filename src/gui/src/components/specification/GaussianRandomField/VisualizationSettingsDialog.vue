@@ -64,12 +64,10 @@
                   v-if="settings.seed.autoRenew"
                   xs2
                 >
-                  <v-btn
-                    icon
+                  <icon-button
+                    icon="random"
                     @click="settings.seed.value = newSeed()"
-                  >
-                    <v-icon>refresh</v-icon>
-                  </v-btn>
+                  />
                 </v-flex>
               </v-layout>
             </v-layout>
@@ -147,9 +145,11 @@
 <script>
 import NumericField from '@/components/selection/NumericField'
 import { newSeed } from '@/utils'
+import IconButton from '@/components/selection/IconButton'
 
 export default {
   components: {
+    IconButton,
     NumericField,
   },
 

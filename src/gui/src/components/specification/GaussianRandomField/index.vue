@@ -24,17 +24,16 @@
           :items="[]"
           label="Truncation Rule Role"
         />
-        <wait-btn
+        <icon-button
           :disabled="!canSimulate"
           :waiting="waitingForSimulation"
-          title="Refresh"
+          icon="refresh"
           @click="updateSimulation"
         />
-        <v-btn
+        <icon-button
+          icon="settings"
           @click="openVisualizationSettings"
-        >
-          Settings
-        </v-btn>
+        />
         <visualization-settings-dialog
           ref="visualisationSettings"
         />
@@ -79,13 +78,13 @@ import RangeSpecification from '@/components/specification/GaussianRandomField/R
 import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection'
 import Power from '@/components/specification/GaussianRandomField/Power'
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
-import WaitBtn from '@/components/baseComponents/WaitButton'
+import IconButton from '@/components/selection/IconButton'
 
 export default {
   name: 'GaussianRandomField',
 
   components: {
-    WaitBtn,
+    IconButton,
     PowerSpecification: Power,
     AnisotropyDirection,
     RangeSpecification,

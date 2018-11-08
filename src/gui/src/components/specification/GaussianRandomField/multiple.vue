@@ -19,7 +19,7 @@
             xs2
           >
             <icon-button
-              icon="add_box"
+              icon="add"
               @click="addField"
             />
           </v-flex>
@@ -47,13 +47,10 @@
               <v-flex
                 xs1
               >
-                <v-btn
-                  flat
-                  icon
+                <icon-button
+                  icon="remove"
                   @click.stop="deleteField(grfId)"
-                >
-                  <v-icon>delete</v-icon>
-                </v-btn>
+                />
                 <confirmation-dialog :ref="`confirmation_${grfId}`"/>
               </v-flex>
             </v-layout>

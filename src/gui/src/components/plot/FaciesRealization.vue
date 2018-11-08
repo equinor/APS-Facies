@@ -4,9 +4,10 @@
       :data="data"
       :color-scale="faciesColors"
     />
-    <wait-btn
+    <icon-button
+      :disabled="!canSimulate"
       :waiting="waitingForSimulation"
-      title="Refresh"
+      icon="refresh"
       @click="refresh"
     />
   </div>
@@ -20,12 +21,12 @@ import api from '@/api/rms'
 import RealizationMap from '@/components/plot/GaussianPlot'
 
 import { makeTruncationRuleSpecification } from '@/utils'
-import WaitBtn from '@/components/baseComponents/WaitButton'
+import IconButton from '@/components/selection/IconButton'
 
 export default {
   name: 'FaciesRealization',
   components: {
-    WaitBtn,
+    IconButton,
     RealizationMap,
   },
 
@@ -41,6 +42,9 @@ export default {
       rule: 'truncationRule',
       fields: 'fields',
     }),
+    canSimulate () {
+      return !!this.$store.getters.truncationRule
+    },
     fields () {
       const fields = this.$store.getters.fields
       return this.rule
