@@ -1,4 +1,5 @@
 import { ZoneRegionDependent } from '@/store/utils/domain/bases'
+import { newSeed } from '@/utils'
 
 const updatableValue = (value = null, updatable = false) => {
   return { value, updatable }
@@ -17,7 +18,7 @@ const defaultSettings = () => {
     simulationBox: {
       x: 1000, y: 1000, z: 10,
     },
-    seed: 0,
+    seed: newSeed(),
   }
 }
 

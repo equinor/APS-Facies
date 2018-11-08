@@ -25,6 +25,10 @@ export default {
     staticSize: VueTypes.bool.def(false),
     svg: VueTypes.bool.def(false),
     expand: VueTypes.bool.def(false),
+    axisNames: VueTypes.shape({
+      x: VueTypes.oneOfType([VueTypes.string, null]).def(null),
+      y: VueTypes.oneOfType([VueTypes.string, null]).def(null),
+    }).def(() => { return { x: null, y: null } })
   },
 
   computed: {
@@ -44,11 +48,20 @@ export default {
         ? this.data.length / this.data[0].length
         : 1
 
-      const axis = {
+      const _axis = {
         ticks: '',
         visible: false,
+        zeroline: false,
+        showgrid: false,
+        showline: false,
         scaleratio: scaleRatio,
         autorange: true,
+      }
+      const xaxis = this.axisNames.x ? { ..._axis, visible: true, title: this.axisNames.x } : _axis
+      const yaxis = { ..._axis, scaleanchor: 'x' }
+      if (this.axisNames.y) {
+        yaxis.title = this.axisNames.y
+        yaxis.visible = true
       }
 
       const layout = {
@@ -58,8 +71,8 @@ export default {
         margin: {
           l: 0, r: 0, t: 0, b: 0,
         },
-        xaxis: axis,
-        yaxis: { ...axis, scaleanchor: 'x' },
+        xaxis,
+        yaxis,
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
       }

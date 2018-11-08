@@ -34,6 +34,9 @@
             />
             <v-flex xs12>
               <h3>Cross plots</h3>
+              <cross-plots
+                :value="fields"
+              />
             </v-flex>
           </v-layout>
         </v-card>
@@ -48,9 +51,11 @@ import FaciesRealization from '@/components/plot/FaciesRealization'
 import GaussianPlots from '@/components/plot/GaussianPlot/multiple'
 
 import PreviewHeader from '@/components/visualization/preview/header'
+import CrossPlots from '@/components/plot/CrossPlot/multiple'
 
 export default {
   components: {
+    CrossPlots,
     PreviewHeader,
     GaussianPlots,
     FaciesRealization,
@@ -66,7 +71,7 @@ export default {
 
   computed: {
     expanded: {
-      get () { return [!!this.isGaussianFieldsSimulated] },
+      get () { return this.isGaussianFieldsSimulated ? 0 : null },
       set (val) { this.panels = val }
     },
     fields () { return Object.values(this.$store.getters.fields) },

@@ -23,6 +23,14 @@ module.exports = {
     }
   },
 
+  chainWebpack: config => {
+    config.module
+      .rule('plot.ly')
+      .test(/\.js$/)
+      .use('IFY')
+      .loader('ify-loader')
+  },
+
   configureWebpack: {
     plugins: [
       new LodashModuleReplacementPlugin({
