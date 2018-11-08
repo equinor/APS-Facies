@@ -118,6 +118,10 @@ const resolve = (path, obj = self, separator = '.') => {
   return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)
 }
 
+const allSet = (items, prop) => {
+  return Object.values(items).every(item => !!item[`${prop}`])
+}
+
 export {
   makeData,
   makeTruncationRuleSpecification,
@@ -128,6 +132,7 @@ export {
   hasEnoughFacies,
   getRandomInt,
   newSeed,
+  allSet,
   resolve,
   isEmpty,
   notEmpty

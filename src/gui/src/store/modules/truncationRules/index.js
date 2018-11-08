@@ -6,7 +6,7 @@ import templates from '@/store/modules/truncationRules/templates'
 import { Bayfill } from '@/store/utils/domain/truncationRule'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
-import { notEmpty, hasCurrentParents, hasEnoughFacies, resolve } from '@/utils'
+import { notEmpty, hasCurrentParents, hasEnoughFacies, resolve, allSet } from '@/utils'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -157,6 +157,16 @@ export default {
   },
 
   getters: {
+    ready (state) {
+      return (id) => {
+        const rule = id
+          ? state.truncationRules.rules[`${id}`]
+          : null
+        return !!rule &&
+               allSet(rule.fields, 'field') &&
+               allSet(rule.polygons, 'facies')
+      }
+    },
     relevant (state, getters, rootState, rootGetters) {
       return Object.values(state.rules)
         .filter(rule => hasCurrentParents(rule, rootGetters) && hasEnoughFacies(rule, rootGetters))

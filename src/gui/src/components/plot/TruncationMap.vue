@@ -38,10 +38,6 @@ const plotify = (polygons, faciesTable) => {
     })
 }
 
-const allSet = (items, prop) => {
-  return Object.values(items).every(item => !!item[`${prop}`])
-}
-
 export default {
   name: 'TruncationMap',
 
@@ -69,9 +65,7 @@ export default {
           .then(polygons => plotify(polygons, this.$store.getters.faciesTable))
       },
       shouldUpdate () {
-        return !!this.rule &&
-          allSet(this.rule.fields, 'field') &&
-          allSet(this.rule.polygons, 'facies')
+        return this.$store.getters['truncationRules/ready'](this.truncationRuleId)
       },
       default () { return [] },
     },
