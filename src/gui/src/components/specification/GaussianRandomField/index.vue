@@ -26,9 +26,14 @@
         />
         <icon-button
           :disabled="!canSimulate"
+          icon="random"
+          @click="() => updateSimulation(true)"
+        />
+        <icon-button
+          :disabled="!canSimulate"
           :waiting="waitingForSimulation"
           icon="refresh"
-          @click="updateSimulation"
+          @click="() => updateSimulation(false)"
         />
         <icon-button
           icon="settings"
@@ -135,7 +140,6 @@ export default {
       get: function () { return this.variogram.type },
       set: function (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { grfId: this.grfId, value }) }
     },
-    reseedOnRefresh () { return this.field.settings.seed.autoRenew }
   },
 
   beforeMount () {
@@ -143,8 +147,8 @@ export default {
   },
 
   methods: {
-    async simulation () {
-      if (this.reseedOnRefresh) {
+    async simulation (renew = false) {
+      if (renew) {
         await this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
       }
       return this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
@@ -157,9 +161,9 @@ export default {
         })
       })
     },
-    updateSimulation () {
+    updateSimulation (renew = false) {
       this.waitingForSimulation = true
-      this.simulation()
+      this.simulation(renew)
         .then(() => {
           this.waitingForSimulation = false
         })
@@ -185,10 +189,7 @@ export default {
           y: this.field.settings.simulationBox.y,
           z: this.field.settings.simulationBox.z,
         },
-        seed: {
-          value: this.field.settings.seed.value,
-          autoRenew: this.field.settings.seed.autoRenew
-        },
+        seed: this.field.settings.seed,
       }
       this.$refs.visualisationSettings.open(settings, {})
         .then(({ save, settings }) => {

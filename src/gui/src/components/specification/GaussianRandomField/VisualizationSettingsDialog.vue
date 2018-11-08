@@ -49,24 +49,17 @@
               <v-layout row>
                 <v-flex>
                   <numeric-field
-                    v-model="settings.seed.value"
-                    :disabled="settings.seed.autoRenew"
+                    v-model="settings.seed"
                     :ranges="{min: 0, max: Math.pow(2, 64) - 1}"
                     label="Seed"
                   />
                 </v-flex>
-                <v-flex xs2>
-                  <v-checkbox
-                    v-model="settings.seed.autoRenew"
-                  />
-                </v-flex>
                 <v-flex
-                  v-if="settings.seed.autoRenew"
                   xs2
                 >
                   <icon-button
                     icon="random"
-                    @click="settings.seed.value = newSeed()"
+                    @click="settings.seed = newSeed()"
                   />
                 </v-flex>
               </v-layout>
@@ -171,7 +164,7 @@ export default {
         simulationBox: {
           x: null, y: null, z: null,
         },
-        seed: { value: null, autoRenew: true },
+        seed: null,
       },
       options: {
         color: 'primary',

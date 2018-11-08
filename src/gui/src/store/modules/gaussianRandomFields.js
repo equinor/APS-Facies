@@ -101,11 +101,7 @@ export default {
       setValue({ state, commit }, { grfId, value: settings, commitName: 'CHANGE_SETTINGS' })
     },
     newSeed ({ state, commit }, { grfId }) {
-      const seed = {
-        value: newSeed(),
-        autoRenew: state.fields[`${grfId}`].settings.seed.autoRenew,
-      }
-      setValue({ state, commit }, { grfId, value: seed, commitName: 'CHANGE_SEED' })
+      setValue({ state, commit }, { grfId, value: newSeed(), commitName: 'CHANGE_SEED' })
     },
     seed ({ state, commit }, { grfId, value }) {
       setValue({ state, commit }, { grfId, value, commitName: 'CHANGE_SEED' })

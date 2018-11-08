@@ -17,9 +17,7 @@ const defaultSettings = () => {
     simulationBox: {
       x: 1000, y: 1000, z: 10,
     },
-    seed: {
-      value: 0, autoRenew: true
-    },
+    seed: 0,
   }
 }
 
