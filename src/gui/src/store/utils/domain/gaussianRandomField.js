@@ -1,4 +1,5 @@
 import { ZoneRegionDependent } from '@/store/utils/domain/bases'
+import { newSeed } from '@/utils'
 
 const updatableValue = (value = null, updatable = false) => {
   return { value, updatable }
@@ -15,11 +16,9 @@ const defaultSettings = () => {
       x: 100, y: 100, z: 1,
     },
     simulationBox: {
-      x: 100, y: 100, z: 1,
+      x: 1000, y: 1000, z: 10,
     },
-    seed: {
-      value: 0, autoRenew: true
-    },
+    seed: newSeed(),
   }
 }
 
@@ -33,7 +32,7 @@ class Variogram {
     main = 1000,
     perpendicular = 1000,
     vertical = 10,
-    power = null,
+    power = 1.5,
   }) {
     this.type = 'SPHERICAL'
     this.angle = {
@@ -79,5 +78,7 @@ export class GaussianRandomField extends ZoneRegionDependent {
     this.variogram = new Variogram({})
     this.trend = new Trend()
     this.settings = defaultSettings()
+    // TODO: Make sure the class knows that the data is actually from the CURRENT specification
+    this._data = []
   }
 }

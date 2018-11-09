@@ -10,7 +10,8 @@
           label="Apply trend to field"
         />
       </v-flex>
-      <v-flex xs6>
+      <v-flex xs1/>
+      <v-flex xs5>
         <relative-standard-deviation
           v-if="useTrend"
           :grf-id="grfId"
@@ -48,7 +49,8 @@
               :grf-id="grfId"
             />
           </v-flex>
-          <v-flex xs6>
+          <v-flex xs1/>
+          <v-flex xs5>
             <v-select
               v-if="isRmsParameter"
               :items="availableRmsTrendParameters"

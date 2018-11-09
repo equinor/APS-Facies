@@ -49,27 +49,18 @@
               <v-layout row>
                 <v-flex>
                   <numeric-field
-                    v-model="settings.seed.value"
-                    :disabled="settings.seed.autoRenew"
+                    v-model="settings.seed"
                     :ranges="{min: 0, max: Math.pow(2, 64) - 1}"
                     label="Seed"
                   />
                 </v-flex>
-                <v-flex xs2>
-                  <v-checkbox
-                    v-model="settings.seed.autoRenew"
-                  />
-                </v-flex>
                 <v-flex
-                  v-if="settings.seed.autoRenew"
                   xs2
                 >
-                  <v-btn
-                    icon
-                    @click="settings.seed.value = newSeed()"
-                  >
-                    <v-icon>refresh</v-icon>
-                  </v-btn>
+                  <icon-button
+                    icon="random"
+                    @click="settings.seed = newSeed()"
+                  />
                 </v-flex>
               </v-layout>
             </v-layout>
@@ -147,9 +138,11 @@
 <script>
 import NumericField from '@/components/selection/NumericField'
 import { newSeed } from '@/utils'
+import IconButton from '@/components/selection/IconButton'
 
 export default {
   components: {
+    IconButton,
     NumericField,
   },
 
@@ -171,7 +164,7 @@ export default {
         simulationBox: {
           x: null, y: null, z: null,
         },
-        seed: { value: null, autoRenew: true },
+        seed: null,
       },
       options: {
         color: 'primary',

@@ -2,11 +2,14 @@ import Vue from 'vue'
 
 import cloneDeep from 'lodash/cloneDeep'
 
+import api from '@/api/rms'
+
 import templates from '@/store/modules/truncationRules/templates'
+
 import { Bayfill } from '@/store/utils/domain/truncationRule'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
-import { notEmpty, hasCurrentParents, hasEnoughFacies, resolve } from '@/utils'
+import { notEmpty, hasCurrentParents, hasEnoughFacies, resolve, allSet, makeTruncationRuleSpecification } from '@/utils'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -105,6 +108,19 @@ export default {
         throw new Error(`The ${polygon.name} polygon was not found`)
       }
     },
+    async updateRealization ({ commit, dispatch, rootGetters }, rule) {
+      const data = await api.simulateRealization(
+        Object.values(rootGetters.fields),
+        makeTruncationRuleSpecification(rule, rootGetters)
+      )
+      commit('UPDATE_REALIZATION', { rule, data: data.faciesMap })
+      data.fields.forEach(async field => {
+        await dispatch('gaussianRandomFields/updateSimulationData', {
+          grfId: Object.values(rootGetters.fields).find(item => item.name === field.name).id,
+          data: field.data,
+        }, { root: true })
+      })
+    },
     updateFields ({ commit, rootGetters }, { channel, selected }) {
       commit('CHANGE_FIELDS', { ruleId: rootGetters.truncationRule.id, channel, fieldId: selected })
     },
@@ -143,6 +159,9 @@ export default {
     SET_FACIES: (state, { ruleId, polygons }) => {
       Vue.set(state.rules[`${ruleId}`], 'polygons', polygons)
     },
+    UPDATE_REALIZATION: (state, { rule, data }) => {
+      Vue.set(state.rules[`${rule.id}`], '_realization', data)
+    },
     CHANGE_TYPE: (state, { type }) => changePreset(state, 'type', type),
     CHANGE_TEMPLATE: (state, { template }) => changePreset(state, 'template', template),
     CHANGE_FACIES: (state, { ruleId, polygonId, faciesId }) => {
@@ -157,6 +176,16 @@ export default {
   },
 
   getters: {
+    ready (state) {
+      return (id) => {
+        const rule = id
+          ? state.rules[`${id}`]
+          : null
+        return !!rule &&
+               allSet(rule.fields, 'field') &&
+               allSet(rule.polygons, 'facies')
+      }
+    },
     relevant (state, getters, rootState, rootGetters) {
       return Object.values(state.rules)
         .filter(rule => hasCurrentParents(rule, rootGetters) && hasEnoughFacies(rule, rootGetters))

@@ -109,7 +109,7 @@ class GaussianFieldSimulationSettings:
             grid_azimuth=kwargs['gridAzimuth'],
             grid_size=Point3D(**kwargs['gridSize']),
             simulation_box_size=Point3D(**kwargs['simulationBox']),
-            seed=kwargs['seed']['value'],
+            seed=kwargs['seed'],
         )
 
 

@@ -5,24 +5,35 @@
       align-center
       justify-center
       row
+      wrap
       fill-height
     >
-      <v-flex>
+      <v-flex
+        md11
+        lg3
+      >
         <origin-x
           :grf-id="grfId"
           :origin-type="originType"
           coordinate-axis="x"
         />
       </v-flex>
-      <v-flex>
+      <v-flex xs1/>
+      <v-flex
+        md11
+        lg3
+      >
         <origin-y
           :grf-id="grfId"
           :origin-type="originType"
           coordinate-axis="y"
         />
       </v-flex>
+      <v-flex xs1/>
       <v-flex
         v-if="!isEllipticCone"
+        md11
+        lg3
       >
         <origin-z
           :grf-id="grfId"

@@ -33,7 +33,7 @@ const structureSettings = (settings, polygons) => {
 }
 
 class TruncationRule extends ZoneRegionDependent {
-  constructor ({ polygons, fields, settings, _id, zone, region = null }) {
+  constructor ({ polygons, fields, settings, _realization, _id, zone, region = null }) {
     super({ _id, zone, region })
     polygons = structurePolygons(polygons)
     settings = structureSettings(settings, polygons)
@@ -42,12 +42,14 @@ class TruncationRule extends ZoneRegionDependent {
     this.polygons = polygons
     this.fields = fields
     this.settings = settings
+
+    this._realization = _realization
   }
 }
 
 class Bayfill extends TruncationRule {
-  constructor ({ polygons, fields, settings, _id, zone, region = null }) {
-    super({ polygons, fields, settings, _id, zone, region })
+  constructor ({ polygons, fields, settings, _realization, _id, zone, region = null }) {
+    super({ polygons, fields, settings, _realization, _id, zone, region })
     this.type = 'bayfill'
   }
 

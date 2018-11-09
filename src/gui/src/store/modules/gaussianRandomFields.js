@@ -91,6 +91,9 @@ export default {
         commit('DELETE', { grfId })
       }
     },
+    updateSimulationData ({ commit, state }, { grfId, data }) {
+      setValue({ state, commit }, { grfId, value: data, commitName: 'CHANGE_SIMULATION' })
+    },
     changeName ({ state, commit }, { grfId, name }) {
       setValue({ state, commit }, { grfId, value: name, commitName: 'CHANGE_NAME' })
     },
@@ -98,11 +101,7 @@ export default {
       setValue({ state, commit }, { grfId, value: settings, commitName: 'CHANGE_SETTINGS' })
     },
     newSeed ({ state, commit }, { grfId }) {
-      const seed = {
-        value: newSeed(),
-        autoRenew: state.fields[`${grfId}`].settings.seed.autoRenew,
-      }
-      setValue({ state, commit }, { grfId, value: seed, commitName: 'CHANGE_SEED' })
+      setValue({ state, commit }, { grfId, value: newSeed(), commitName: 'CHANGE_SEED' })
     },
     seed ({ state, commit }, { grfId, value }) {
       setValue({ state, commit }, { grfId, value, commitName: 'CHANGE_SEED' })
@@ -164,6 +163,9 @@ export default {
     },
     CHANGE_SEED (state, { grfId, value }) {
       state.fields[`${grfId}`].settings.seed = value
+    },
+    CHANGE_SIMULATION (state, { grfId, value }) {
+      Vue.set(state.fields[`${grfId}`], '_data', value)
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }) {

@@ -16,6 +16,7 @@ function callPythonFunction (code) {
       .then(response => {
         resolve(response.data)
       })
+      .catch(reason => reject(reason))
   })
 }
 

@@ -16,17 +16,17 @@
       />
     </v-flex>
     <icon-button
-      icon="add_box"
+      icon="add"
       disabled
       @click="addTemplate"
     />
     <icon-button
-      icon="content_copy"
+      icon="copy"
       disabled
       @click="copyTemplate"
     />
     <icon-button
-      icon="delete_forever"
+      icon="remove"
       disabled
       @click="deleteTemplate"
     />

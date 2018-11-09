@@ -10,8 +10,9 @@
           :data="gaussianFieldData"
         />
       </v-flex>
+      <v-flex xs1/>
       <v-flex
-        xs6
+        xs5
       >
         Variogram selection
         <v-select
@@ -23,18 +24,21 @@
           :items="[]"
           label="Truncation Rule Role"
         />
-        <v-btn
+        <icon-button
           :disabled="!canSimulate"
-          @click="updateSimulation"
-        >
-          <span v-if="!waitingForSimulation">Refresh</span>
-          <span v-else><v-progress-circular indeterminate/></span>
-        </v-btn>
-        <v-btn
+          icon="random"
+          @click="() => updateSimulation(true)"
+        />
+        <icon-button
+          :disabled="!canSimulate"
+          :waiting="waitingForSimulation"
+          icon="refresh"
+          @click="() => updateSimulation(false)"
+        />
+        <icon-button
+          icon="settings"
           @click="openVisualizationSettings"
-        >
-          Settings
-        </v-btn>
+        />
         <visualization-settings-dialog
           ref="visualisationSettings"
         />
@@ -50,7 +54,8 @@
           :grf-id="grfId"
         />
       </v-flex>
-      <v-flex xs6>
+      <v-flex xs1/>
+      <v-flex xs5>
         Ranges
         <range-specification
           :grf-id="grfId"
@@ -70,7 +75,7 @@ import VueTypes from 'vue-types'
 
 import rms from '@/api/rms'
 
-import { hasValidChildren, notEmpty } from '@/utils'
+import { hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
 
 import GaussianPlot from '@/components/plot/GaussianPlot'
 import TrendSpecification from '@/components/specification/Trend'
@@ -78,11 +83,13 @@ import RangeSpecification from '@/components/specification/GaussianRandomField/R
 import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection'
 import Power from '@/components/specification/GaussianRandomField/Power'
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
+import IconButton from '@/components/selection/IconButton'
 
 export default {
   name: 'GaussianRandomField',
 
   components: {
+    IconButton,
     PowerSpecification: Power,
     AnisotropyDirection,
     RangeSpecification,
@@ -97,7 +104,6 @@ export default {
 
   data () {
     return {
-      gaussianFieldData: [],
       waitingForSimulation: false,
     }
   },
@@ -106,6 +112,11 @@ export default {
     ...mapState({
       availableVariograms: state => state.constants.options.variograms.available,
     }),
+    gaussianFieldData () {
+      return this.field
+        ? this.field._data
+        : []
+    },
     isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },
     field () { return this.$store.state.gaussianRandomFields.fields[this.grfId] },
     variogram () { return this.field.variogram },
@@ -129,22 +140,36 @@ export default {
       get: function () { return this.variogram.type },
       set: function (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { grfId: this.grfId, value }) }
     },
-    reseedOnRefresh () { return this.field.settings.seed.autoRenew }
+  },
+
+  beforeMount () {
+    this.updateSimulation()
   },
 
   methods: {
-    simulation () {
-      if (this.reseedOnRefresh) {
-        this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
+    async simulation (renew = false) {
+      if (renew) {
+        await this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
       }
-      return rms.simulateGaussianField(this.field.name, this.variogram, this.trend, this.field.settings)
+      return this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
+        grfId: this.grfId,
+        data: await rms.simulateGaussianField({
+          name: this.field.name,
+          variogram: this.variogram,
+          trend: this.trend,
+          settings: this.field.settings,
+        })
+      })
     },
-    updateSimulation () {
+    updateSimulation (renew = false) {
       this.waitingForSimulation = true
-      this.simulation()
-        .then(data => {
-          this.gaussianFieldData = data
+      this.simulation(renew)
+        .then(() => {
           this.waitingForSimulation = false
+        })
+        .catch(reason => {
+          this.waitingForSimulation = false
+          invalidateChildren(this)
         })
     },
     openVisualizationSettings () {
@@ -164,10 +189,7 @@ export default {
           y: this.field.settings.simulationBox.y,
           z: this.field.settings.simulationBox.z,
         },
-        seed: {
-          value: this.field.settings.seed.value,
-          autoRenew: this.field.settings.seed.autoRenew
-        },
+        seed: this.field.settings.seed,
       }
       this.$refs.visualisationSettings.open(settings, {})
         .then(({ save, settings }) => {
