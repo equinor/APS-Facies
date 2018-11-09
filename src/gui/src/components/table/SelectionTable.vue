@@ -4,7 +4,7 @@
     :items="items"
     :no-data-text="noDataText"
     v-model="selected"
-    item-key="name"
+    item-key="id"
     class="elevation-1"
     hide-actions
   >
@@ -40,7 +40,7 @@
         >
           <highlight-current-item
             :item="props.item"
-            field="itemName"
+            field="name"
           />
         </td>
         <td
@@ -93,8 +93,7 @@ export default {
             const item = items[`${id}`]
             return {
               id,
-              name: id, // Hack to overcome vuetify's requirement of 'name' being defined, and unique
-              itemName: item.name,
+              name: item.name,
               code: item.code,
               selected: item.selected,
               current: id === state[`${this.itemType}s`].current,
@@ -114,7 +113,7 @@ export default {
         text: this.headerName,
         align: 'left',
         sortable: false,
-        value: 'itemName',
+        value: 'name',
       })
     }
     if (this.showCode) {
