@@ -63,13 +63,16 @@ import sys
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 __status__ = "Draft"
+
+# Toggle whether the source files should be read from the plugin, or the git repo
 
 # The path to the repository's root folder
 root_path = os.environ.get('APS_ROOT', '{root_path}')
+release_location = '/project/res/APSGUI/releases'
 
-# Path to where the file bellow is located within the repository
+# Path to where the file below is located within the repository
 relative_path = '{relative_path}'
 
 # Name of Python file to be executed (excluding .py)
