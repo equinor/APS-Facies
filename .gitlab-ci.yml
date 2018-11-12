@@ -132,14 +132,11 @@ build GUI:
 deploy release:
   stage: deploy
   script:
-    - ""
+    - '${MAKE} deploy-stable'
   only:
     - tags
   dependencies:
     - build GUI
-  artifacts:
-    paths:
-      - artifacts/
 
 deploy release candidate:
   stage: deploy
