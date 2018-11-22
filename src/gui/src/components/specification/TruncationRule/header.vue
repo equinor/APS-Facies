@@ -64,7 +64,7 @@ export default {
       get: function () {
         let type = this.preset.type
         if (!!type && isUUID(type)) {
-          type = this.$store.state.truncationRules.templates.types.available[type]
+          type = this.$store.state.truncationRules.templates.types.available[`${type}`]
         } else if (!!type && !isUUID(type)) {
           type = Object.values(this.$store.state.truncationRules.templates.types.available).find(item => item.type === type)
         }

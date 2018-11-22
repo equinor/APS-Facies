@@ -99,6 +99,46 @@ export default new Vuex.Store({
     faciesTable: (state) => {
       return Object.values(state.facies.available)
     },
+    // ...
+    simulationSettings: (state, getters) => (grfId) => {
+      const grid = state.parameters.grid
+      const fieldSettings = grfId
+        ? state.gaussianRandomFields.fields[`${grfId}`].settings()
+        : {}
+      const globalSettings = grid && !grid._waiting
+        ? {
+          gridAzimuth: grid.azimuth,
+          gridSize: {
+            // TODO: Get Z (thickness) based on the zone name
+            ...(
+              fieldSettings.gridModel && fieldSettings.gridModel.use
+                ? fieldSettings.gridModel.size
+                : grid.size
+            ),
+          },
+          simulationBox: {
+            // TODO: Get Z (thickness) based on the zone name
+            // TODO: Add quality
+            ...grid.simBox.size,
+            z: getters.zone
+              ? grid.simBox.size.z[getters.zone.code]
+              : 0,
+          },
+          simulationBoxOrigin: {
+            ...grid.simBox.origin,
+          },
+        }
+        : {
+          gridAzimuth: 0,
+          gridSize: { x: 100, y: 100, z: 1 },
+          simulationBox: { x: 1000, y: 1000, z: 10 },
+          simulationBoxOrigin: { x: 0, y: 0 },
+        }
+      return {
+        ...globalSettings,
+        ...fieldSettings,
+      }
+    },
     // Utility method for getting IDs
     id: (state) => (type, name) => {
       const mapping = {

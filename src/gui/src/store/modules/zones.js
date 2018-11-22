@@ -1,6 +1,5 @@
 import Vue from 'vue'
 
-import { promiseSimpleCommit } from '@/store/utils'
 import { Zone } from '@/store/utils/domain'
 import { SELECTED_ITEMS } from '@/store/mutations'
 import rms from '@/api/rms'
@@ -36,9 +35,13 @@ export default {
       }
       return Promise.resolve(ids)
     },
-    current: ({ commit, dispatch }, { id }) => {
+    current: ({ commit, dispatch, state }, { id }) => {
       dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
-      return promiseSimpleCommit(commit, 'CURRENT', { id })
+      commit('CURRENT', { id })
+
+      const zone = state.available[`${id}`]
+      dispatch('parameters/grid/thickness', zone.name, { root: true })
+      dispatch('parameters/grid/simBox/thickness', zone.name, { root: true })
     },
     fetch: ({ dispatch, rootGetters }) => {
       return rms.zones(rootGetters.gridModel)

@@ -163,10 +163,10 @@ export default {
       state.fields[`${grfId}`].name = value
     },
     CHANGE_SETTINGS (state, { grfId, value }) {
-      state.fields[`${grfId}`].settings = value
+      Vue.set(state.fields[`${grfId}`], '_settings', value)
     },
     CHANGE_SEED (state, { grfId, value }) {
-      state.fields[`${grfId}`].settings.seed = value
+      state.fields[`${grfId}`]._settings.seed = value
     },
     CHANGE_SIMULATION (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`], '_data', value)

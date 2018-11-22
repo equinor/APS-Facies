@@ -16,10 +16,11 @@ function makeCustomIcons () {
   const icons = {
     add: 'fas fa-plus-square',
     copy: 'fas fa-clone',
+    import: 'fas fa-file-import fa-flip-horizontal',
     remove: 'far fa-trash-alt',
     refresh: 'fas fa-sync-alt',
     random: 'fas fa-dice',
-    settings: 'fas fa-sliders-h',
+    settings: 'fas fa-cogs',
     down: 'fas fa-angle-down',
     up: 'fas fa-angle-up',
   }

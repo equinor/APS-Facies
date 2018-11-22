@@ -1,3 +1,5 @@
+import cloneDeep from 'lodash/cloneDeep'
+
 import { ZoneRegionDependent } from '@/store/utils/domain/bases'
 import { newSeed } from '@/utils'
 
@@ -11,12 +13,11 @@ const defaultSettings = () => {
       type: 'IJ',
       relativePosition: 0.5,
     },
-    gridAzimuth: 0.0,
-    gridSize: {
-      x: 100, y: 100, z: 1,
-    },
-    simulationBox: {
-      x: 1000, y: 1000, z: 10,
+    gridModel: {
+      use: false,
+      size: {
+        x: 100, y: 100, z: 1,
+      },
     },
     seed: newSeed(),
   }
@@ -107,17 +108,16 @@ class GaussianRandomField extends ZoneRegionDependent {
     this.name = name
     this.variogram = variogram || new Variogram({})
     this.trend = trend || new Trend({})
-    this.settings = settings || defaultSettings()
+    this._settings = settings || defaultSettings()
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
     this._data = []
   }
 
-  get specification () {
+  settings (store = null) {
+    const settings = store ? cloneDeep(store.getters.simulationSettings) : {}
     return {
-      name: this.name,
-      variogram: this.variogram,
-      trend: this.trend,
-      settings: this.settings,
+      ...settings,
+      ...this._settings,
     }
   }
 }

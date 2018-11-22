@@ -268,11 +268,11 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
 
 
 def modifySelectedGridCells(grid_model, zone_number_list, realization_number, old_values, new_values):
-    ''' Updates an input numpy array old_values with values from the input numpy array new_values for those indices
+    """ Updates an input numpy array old_values with values from the input numpy array new_values for those indices
         that corresponds to grid cells in the zones defined in the zone_number_list.
         If the list of zone numbers is empty, this means that ALL zones are updated,
         and has the same effect as if all zones are specified in the list.
-    '''
+    """
     grid = grid_model.get_grid(realization_number)
     indexer = grid.simbox_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
@@ -326,6 +326,118 @@ def update_code_names(old_code_names, new_code_names):
                     old_code_names[code] = u
 
 
+def get_zone_layer_numbering(grid):
+    indexer = grid.simbox_indexer
+    number_layers_per_zone = []
+    start_layers_per_zone = []
+    end_layers_per_zone = []
+    for key in indexer.zonation:
+        layer_ranges = indexer.zonation[key]
+        number_layers = 0
+        # sim box indexer should not have repeated layer numbering
+        assert(len(layer_ranges) == 1)
+        layer_range = layer_ranges[0]
+        start = layer_range[0]
+        end = layer_range[-1]
+        number_layers += (end + 1 - start)
+        number_layers_per_zone.append(number_layers)
+        start_layers_per_zone.append(start)
+        end_layers_per_zone.append(end)
+    return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
+
+
+def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_selected_cells=100):
+    ''' Estimate simulation box thickness for each zone.
+        This is done by assuming that it is sufficient to calculate difference
+        between top of some selected grid cell for top layer and bottom of
+        the corresponding grid cells at bottom layer.
+        The difference is calculated and average is calculated.
+        This is done for all zones in the grid adn a dictionary with values
+        for each zone number is returned. The input parameter max_number_of_selected_cells
+        define how many grid cells to be used in the average thickness calculation.
+    '''
+    thickness_per_zone = {}
+    # List of number of layers per zone
+    number_of_layers, start_layers, end_layers = get_zone_layer_numbering(grid)
+    number_of_zones = len(number_of_layers)
+    simbox_indexer = grid.simbox_indexer
+    grid_indexer = grid.grid_indexer
+    (nx, ny, nz) = simbox_indexer.dimensions
+
+    for i in range(number_of_zones):
+        start = start_layers[i]
+        end = end_layers[i]
+        # All cell numbers in the zone
+        zone_cell_numbers_top_layer = simbox_indexer.get_cell_numbers_in_range((0, 0, start), (nx, ny, start+1))
+        zone_cell_numbers_bottom_layer = simbox_indexer.get_cell_numbers_in_range((0, 0, end), (nx, ny, end+1))
+
+        # Pick max_number_of_selected_cells arbitrary grid cells among the defined grid cells (from the zone_cell_numbers)
+        n_cells_active_in_zone_top = len(zone_cell_numbers_top_layer)
+        n_cells_active_in_zone_bottom = len(zone_cell_numbers_bottom_layer)
+        if n_cells_active_in_zone_top < max_number_of_selected_cells:
+            step_top = 1
+        else:
+            step_top = int(n_cells_active_in_zone_top/max_number_of_selected_cells+1)+1
+
+        if n_cells_active_in_zone_bottom < max_number_of_selected_cells:
+            step_bottom = 1
+        else:
+            step_bottom = int(n_cells_active_in_zone_bottom/max_number_of_selected_cells+1)+1
+
+        sum_thickness_for_selected_cells = 0.0
+        n_cells_selected = 0
+        for j in range(0, n_cells_active_in_zone_top, step_top):
+            cell_number = zone_cell_numbers_top_layer[j]
+            ijk_index_top = grid_indexer.get_indices(cell_number)
+            ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], end)
+            if simbox_indexer.is_defined(ijk_index_bottom):
+                # Both the grid cell at top and bottom of the zone are defined.
+                # Get z coordinates and find thickness (approximately)
+                # print(ijk_index_top)
+                # print(ijk_index_bottom)
+                corner_top = grid.get_cell_corners_by_index(ijk_index_top)
+                corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
+                sum_thickness_in_cell = 0.0
+                for n in range(4):
+                    z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
+                    z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
+                    sum_thickness_in_cell += (z_bottom - z_top)
+                average_thickness_in_cell = sum_thickness_in_cell/4
+                sum_thickness_for_selected_cells +=  average_thickness_in_cell
+                n_cells_selected += 1
+
+        if n_cells_selected == 0:
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('\n'
+                      'When estimating simbox thickness:  Have to use also inactive cells since there are 0 pairs of cells\n'
+                      '                                   where both are active and one is at top zone layer\n'
+                      '                                   and one at bottom zone layer')
+            for j in range(0, n_cells_active_in_zone_top, step_top):
+                cell_number = zone_cell_numbers_top_layer[j]
+                ijk_index_top = simbox_indexer.get_indices(cell_number)
+                ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], end)
+
+                # Use bottom cell even though it is inactive
+                # Get z coordinates and find thickness (approximately)
+                corner_top = grid.get_cell_corners_by_index(ijk_index_top)
+                corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
+                sum_thickness_in_cell = 0.0
+                for n in range(4):
+                    z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
+                    z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
+                    sum_thickness_in_cell += (z_bottom - z_top)
+                average_thickness_in_cell = sum_thickness_in_cell/4
+                sum_thickness_for_selected_cells += average_thickness_in_cell
+                n_cells_selected += 1
+
+        assert n_cells_selected > 0
+        average_thickness_selected_cells = sum_thickness_for_selected_cells / n_cells_selected
+        thickness_per_zone[i + 1] = average_thickness_selected_cells
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('Zone number: {}   Estimated sim box thickness {}'.format(i+1, average_thickness_selected_cells))
+    return thickness_per_zone
+
+
 def getGridSimBoxSize(grid, debug_level=Debug.OFF):
     indexer = grid.grid_indexer
     (nx, ny, nz) = indexer.dimensions
@@ -334,17 +446,20 @@ def getGridSimBoxSize(grid, debug_level=Debug.OFF):
     cell_00 = grid.get_cell_corners_by_index((0, 0, 0))
     cell_10 = grid.get_cell_corners_by_index((nx - 1, 0, 0))
     cell_01 = grid.get_cell_corners_by_index((0, ny - 1, 0))
-    cell_11 = grid.get_cell_corners_by_index((nx - 1, ny - 1, 0))
+
     x2 = cell_01[2][0]
     x1 = cell_10[1][0]
     x0 = cell_00[0][0]
     y2 = cell_01[2][1]
     y1 = cell_10[1][1]
     y0 = cell_00[0][1]
+
     sim_box_x_length = np.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0))
     sim_box_y_length = np.sqrt((x2 - x0) * (x2 - x0) + (y2 - y0) * (y2 - y0))
+
     cos_theta = (y2 - y0) / sim_box_y_length
     sin_theta = (x2 - x0) / sim_box_y_length
+
     azimuth_angle = np.arctan(sin_theta / cos_theta)
     azimuth_angle *= 180.0 / np.pi
     if debug_level >= Debug.VERY_VERBOSE:
@@ -397,7 +512,7 @@ def getZoneLayerNumbering(grid_model, realization_number=0):
         number_layers_per_zone.append(number_layers)
         start_layers_per_zone.append(start)
         end_layers_per_zone.append(end)
-    return [number_layers_per_zone, start_layers_per_zone, end_layers_per_zone]
+    return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
 
 
 def getGridAttributes(grid, debug_level=Debug.OFF):
@@ -473,13 +588,16 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
         end_layer_per_zone
     )
 
+
 def createZoneParameter(grid_model,  realization_number):
-    ''' Description: Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
-                     If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
-                     If the zone parameter already exist and is non-empty, nothing is done to the zone parameter except returning it.
-                     Return zone parameter either it is newly created, updated or already existing.
-    '''
+    """ Description:
+     Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
+     If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
+     If the zone parameter already exist and is non-empty, nothing is done to the zone parameter except returning it.
+     Return zone parameter either it is newly created, updated or already existing.
+    """
     import roxar
+
     grid3d = grid_model.get_grid(realization_number)
     properties = grid_model.properties
     found_zone_parameter = False
@@ -502,14 +620,15 @@ def createZoneParameter(grid_model,  realization_number):
         zone_parameter = properties.create('Zone_test', property_type=roxar.GridPropertyType.discrete, data_type=np.uint8)
         # Fill the parameter with zone values
         values = zone_parameter_values(grid3d)
-        zone_parameter.set_values(values,realisation=realization_number)
+        zone_parameter.set_values(values, realisation=realization_number)
         zone_parameter.set_shared(False)
     print('zone_parameter:')
     print(zone_parameter)
     return zone_parameter
 
+
 def zone_parameter_values(grid3d):
-    ''' Description: Return numpy array for the active grid cells with zone number in each grid cell. '''
+    """ Description: Return numpy array for the active grid cells with zone number in each grid cell. """
     indexer = grid3d.simbox_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
     values = grid3d.generate_values(np.uint8)

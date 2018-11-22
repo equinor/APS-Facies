@@ -47,11 +47,11 @@ class GaussianFieldSimulationSettings:
 
     def __init__(self, cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, seed):
         assert isinstance(cross_section, CrossSection)
-        assert 0 <= grid_azimuth <= 360
         assert all([isinstance(coor, int) for coor in grid_size]) and len(grid_size) == 3
         assert all([isinstance(coor, (float, int)) for coor in simulation_box_size]) and len(simulation_box_size) == 3
         assert all([isinstance(coor, (float, int)) for coor in simulation_box_origin]) and len(simulation_box_origin) == 2
         assert isinstance(seed, int)
+        grid_azimuth %= 360
 
         self._cross_section = cross_section
         self._grid_azimuth = grid_azimuth
@@ -261,10 +261,11 @@ class GaussianField:
             simulation_box_origin=None,
             debug_level=Debug.OFF
     ):
+        args = (cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, )
         if self.settings is None:
-            settings = GaussianFieldSimulationSettings(cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origo)
+            settings = GaussianFieldSimulationSettings(*args)
         else:
-            settings = self.settings.merge(cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origo)
+            settings = self.settings.merge(*args)
 
         grid_dimensions, sizes, projection, = _get_projection_parameters(settings.cross_section.type, settings.grid_size, settings.simulation_box_size)
         # Find data for specified Gauss field name

@@ -87,6 +87,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import VueTypes from 'vue-types'
+import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
 
@@ -192,7 +193,7 @@ export default {
           name: this.value.name,
           variogram: this.variogram,
           trend: this.trend,
-          settings: this.value.settings,
+          settings: this.$store.getters.simulationSettings(this.grfId),
         })
       })
     },
@@ -208,31 +209,14 @@ export default {
         })
     },
     openVisualizationSettings () {
-      const settings = {
-        crossSection: {
-          type: this.value.settings.crossSection.type,
-          relativePosition: this.value.settings.crossSection.relativePosition,
-        },
-        gridAzimuth: this.value.settings.gridAzimuth,
-        gridSize: {
-          x: this.value.settings.gridSize.x,
-          y: this.value.settings.gridSize.y,
-          z: this.value.settings.gridSize.z,
-        },
-        simulationBox: {
-          x: this.value.settings.simulationBox.x,
-          y: this.value.settings.simulationBox.y,
-          z: this.value.settings.simulationBox.z,
-        },
-        seed: this.value.settings.seed,
-      }
+      const settings = cloneDeep(this.value._settings)
       this.$refs.visualisationSettings.open(settings, {})
         .then(({ save, settings }) => {
           if (save) {
             this.$store.dispatch('gaussianRandomFields/changeSettings', {
               grfId: this.grfId,
               settings
-            })
+            }).then(() => this.updateSimulation())
           }
         })
     },

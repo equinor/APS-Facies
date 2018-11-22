@@ -30,90 +30,71 @@
               sm6
               md6
             >
-              <numeric-field
+              <fraction-field
                 v-model="settings.crossSection.relativePosition"
-                :ranges="{min: 0, max: 1}"
                 label="Relative position"
               />
             </v-flex>
             <v-layout row>
-              <!--Grid azimuth angle-->
-              <v-flex xs6>
-                <numeric-field
-                  v-model="settings.gridAzimuth"
-                  :ranges="{min: 0, max: 360}"
-                  label="Grid azimuth"
-                />
-              </v-flex>
               <!--Seed-->
-              <v-layout row>
-                <v-flex>
-                  <numeric-field
-                    v-model="settings.seed"
-                    :ranges="{min: 0, max: Math.pow(2, 64) - 1}"
-                    label="Seed"
-                  />
-                </v-flex>
-                <v-flex
-                  xs2
-                >
-                  <icon-button
-                    icon="random"
-                    @click="settings.seed = newSeed()"
-                  />
-                </v-flex>
-              </v-layout>
-            </v-layout>
-            <!--Grid size-->
-            Grid size
-            <v-layout row>
-              <v-flex xs4>
+              <v-flex xs10>
                 <numeric-field
-                  v-model="settings.gridSize.x"
-                  label="X"
-                  discrete
+                  v-model="settings.seed"
+                  :ranges="{min: 0, max: Math.pow(2, 64) - 1}"
+                  label="Seed"
                 />
               </v-flex>
-              <v-flex xs4>
-                <numeric-field
-                  v-model="settings.gridSize.y"
-                  label="Y"
-                  discrete
-                />
-              </v-flex>
-              <v-flex xs4>
-                <numeric-field
-                  v-model="settings.gridSize.z"
-                  label="Z"
-                  discrete
+              <v-flex
+                xs2
+              >
+                <icon-button
+                  icon="random"
+                  @click="settings.seed = newSeed()"
                 />
               </v-flex>
             </v-layout>
-            <!--Simulation box size-->
-            Simulation box size
-            <v-layout row>
+            <v-flex xs6>
+              <v-checkbox
+                :value="!settings.gridModel.use"
+                label="Use model grid"
+                @change="val => settings.gridModel.use = !val"
+              />
+            </v-flex>
+            <v-flex xs6/>
+            <v-layout
+              v-if="settings.gridModel.use"
+              justify-space-around
+              row
+              wrap
+            >
               <v-flex xs4>
                 <numeric-field
-                  v-model="settings.simulationBox.x"
+                  v-model="settings.gridModel.size.x"
+                  discrete
+                  unit="cell"
                   label="X"
-                  discrete
-                  unit="m"
+                  hint="The size of the grid to be simulated"
+                  persistent-hint
                 />
               </v-flex>
               <v-flex xs4>
                 <numeric-field
-                  v-model="settings.simulationBox.y"
+                  v-model="settings.gridModel.size.y"
+                  discrete
+                  unit="cell"
                   label="Y"
-                  discrete
-                  unit="m"
+                  hint="The size of the grid to be simulated"
+                  persistent-hint
                 />
               </v-flex>
               <v-flex xs4>
                 <numeric-field
-                  v-model="settings.simulationBox.z"
-                  label="Z"
+                  v-model="settings.gridModel.size.z"
                   discrete
-                  unit="m"
+                  unit="cell"
+                  label="Z"
+                  hint="The size of the grid to be simulated"
+                  persistent-hint
                 />
               </v-flex>
             </v-layout>
@@ -137,12 +118,15 @@
 
 <script>
 import NumericField from '@/components/selection/NumericField'
-import { newSeed } from '@/utils'
+import FractionField from '@/components/selection/FractionField'
 import IconButton from '@/components/selection/IconButton'
+
+import { newSeed } from '@/utils'
 
 export default {
   components: {
     IconButton,
+    FractionField,
     NumericField,
   },
 
@@ -151,18 +135,16 @@ export default {
       dialog: false,
       resolve: null,
       reject: null,
-      grfId: null,
       settings: {
         crossSection: {
           type: null,
           relativePosition: null,
         },
-        gridAzimuth: null,
-        gridSize: {
-          x: null, y: null, z: null,
-        },
-        simulationBox: {
-          x: null, y: null, z: null,
+        gridModel: {
+          use: false,
+          size: {
+            x: 100, y: 100, z: 1,
+          },
         },
         seed: null,
       },
@@ -176,9 +158,7 @@ export default {
   methods: {
     open (settings, options) {
       this.dialog = true
-      // this.grfId = grfId
       this.settings = settings
-      // this.setSettings()
       this.options = Object.assign(this.options, options)
       return new Promise((resolve, reject) => {
         this.resolve = resolve
@@ -195,7 +175,7 @@ export default {
     },
     newSeed () {
       return newSeed()
-    }
+    },
   },
 }
 </script>
