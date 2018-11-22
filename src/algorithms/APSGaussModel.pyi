@@ -21,6 +21,7 @@ Number = Union[int, float]
 
 GridSize = Tuple[int, int, int]
 SimulationBoxSize = Tuple[float, float, float]
+SimulationBoxOrigin = Tuple[float, float]
 
 PropertyName = str
 XMLKeyword = str
@@ -34,6 +35,7 @@ class GaussianFieldSimulationSettings:
     grid_azimuth: float
     grid_size: GridSize
     simulation_box_size: SimulationBoxSize
+    simulation_box_origin: SimulationBoxOrigin
     seed: int
     dimensions: Tuple[int, int]
     def __init__(
@@ -42,6 +44,7 @@ class GaussianFieldSimulationSettings:
             grid_azimuth: float,
             grid_size: GridSize,
             simulation_box_size: SimulationBoxSize,
+            simulation_box_origin: SimulationBoxOrigin,
             seed: int,
     ): ...
     def merge(
@@ -50,6 +53,7 @@ class GaussianFieldSimulationSettings:
             grid_azimuth: Optional[float] = None,
             grid_size: Optional[GridSize] = None,
             simulation_box_size: Optional[SimulationBoxSize] = None,
+            simulation_box_origin: Optional[SimulationBoxOrigin] = None,
             seed: Optional[int] = None,
     ) -> GaussianFieldSimulationSettings: ...
     @classmethod
@@ -94,6 +98,7 @@ class GaussianField:
             grid_azimuth: Optional[float] = None,
             grid_size: Optional[GridSize] = None,
             simulation_box_size: Optional[SimulationBoxSize] = None,
+            simulation_box_origin: Optional[SimulationBoxOrigin] = None,
             debug_level: Debug = Debug.OFF
     ) -> ndarray: ...
     def simulate(
@@ -102,6 +107,7 @@ class GaussianField:
             grid_azimuth: Optional[float] = None,
             grid_size: Optional[GridSize] = None,
             simulation_box_size: Optional[SimulationBoxSize] = None,
+            simulation_box_origin: Optional[SimulationBoxOrigin] = None,
             debug_level: Debug = Debug.OFF
     ) -> GaussianFieldSimulation: ...
 
