@@ -87,13 +87,13 @@ export default {
     },
     SELECTED: SELECTED_ITEMS,
     CURRENT: (state, { id }) => {
-      state.current = id
+      Vue.set(state, 'current', id)
     },
     REGIONS: (state, { zoneId, regions }) => {
-      state.available[`${zoneId}`].regions = regions
+      Vue.set(state.available[`${zoneId}`], 'regions', regions)
     },
     REGION_SELECTED: (state, { zoneId, regionId, toggled }) => {
-      state.available[`${zoneId}`].regions[`${regionId}`].selected = toggled
+      Vue.set(state.available[`${zoneId}`].regions[`${regionId}`], 'selected', toggled)
     },
   },
 

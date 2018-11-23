@@ -1,20 +1,18 @@
 import Vue from 'vue'
-import { isEmpty, newSeed, notEmpty } from '@/utils'
+import uuidv4 from 'uuid/v4'
+
+import { hasParents, newSeed, notEmpty } from '@/utils'
 import { GaussianRandomField } from '@/store/utils/domain'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
+import { cloneDeep } from 'lodash'
 
-const inNames = (state, name) => {
-  for (const grfId in state.fields) {
-    if (state.fields[`${grfId}`].name === name) return true
-  }
-  return false
-}
-
-const newGaussianFieldName = state => {
+const newGaussianFieldName = (state, zone, region) => {
   const name = num => `GRF${num}`
-  let grfNumber = Object.keys(state.fields).length + 1
-  while (inNames(state, name(grfNumber))) {
+  const relevant = () => getRelevantFields(state, zone, region)
+
+  let grfNumber = relevant().length + 1
+  while (relevant().find((field) => field.name === name(grfNumber))) {
     grfNumber += 1
   }
   return name(grfNumber)
@@ -41,6 +39,13 @@ const setValue = ({ state, commit }, { commitName, grfId, type, legalTypes, vari
   commit(commitName, { grfId, type, variogramOrTrend, value })
 }
 
+const getRelevantFields = (state, zone, region) => {
+  const zoneId = zone.id || zone
+  const regionId = region ? (region.id || region) : undefined
+  return Object.values(state.fields)
+    .filter(field => hasParents(field, zoneId, regionId))
+}
+
 export default {
   namespaced: true,
 
@@ -55,29 +60,26 @@ export default {
   actions: {
     init ({ state, dispatch, rootState, rootGetters }, { zoneId, regionId }) {
       const minGaussianFields = rootGetters['constants/numberOf/gaussianRandomFields/minimum']
-      const remaining = minGaussianFields - Object.values(state.fields)
-        .filter(field => field.parent.zone === zoneId).length
-      for (let i = 0; i < remaining; i++) {
-        dispatch('addEmptyField', { zoneId, regionId })
-      }
-      if (notEmpty(regionId)) {
-        const relevantFields = Object.keys(state.fields)
-          .filter(fieldId => {
-            const field = state.fields[`${fieldId}`]
-            return field.parent.zone === zoneId && isEmpty(field.parent.region)
+      const remaining = minGaussianFields - getRelevantFields(state, zoneId, regionId).length
+      if (notEmpty(regionId) && remaining > 0) {
+        getRelevantFields(state, zoneId)
+          .forEach(field => {
+            field = cloneDeep(field)
+            field._id = uuidv4()
+            field.name = newGaussianFieldName(state, zoneId, regionId)
+            field.parent.region = regionId
+            dispatch('addField', { field })
           })
-        relevantFields.forEach(fieldId => {
-          const field = JSON.parse(JSON.stringify(state.fields[`${fieldId}`]))
-          field.name = newGaussianFieldName(state)
-          field.parent.region = regionId
-          dispatch('addField', { field })
-        })
+      } else {
+        for (let i = 0; i < remaining; i++) {
+          dispatch('addEmptyField', { zoneId, regionId })
+        }
       }
     },
     addEmptyField ({ dispatch, state, rootGetters }, { zoneId, regionId } = {}) {
       dispatch('addField', {
         field: new GaussianRandomField({
-          name: newGaussianFieldName(state),
+          name: newGaussianFieldName(state, zoneId || rootGetters.zone),
           zone: zoneId || rootGetters.zone,
           region: regionId || rootGetters.region,
         })

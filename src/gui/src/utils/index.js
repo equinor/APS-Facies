@@ -75,13 +75,26 @@ const hasValidChildren = component => {
 }
 
 const hasCurrentParents = (item, getters) => {
-  return getters.zone
-    ? item.parent.zone === getters.zone.id && (
-      item.parent.region
-        ? item.parent.region === getters.region.id
-        : true
-    )
+  return !!getters && getters.zone
+    ? hasParents(item, getters.zone, getters.region)
     : false
+}
+
+const hasParents = (item, zone, region) => {
+  const id = item => item.id || item
+
+  if (item.parent.zone === id(zone)) {
+    // The Zone ID is consistent
+    if (region) {
+      // We are dealing with a 'thing', that is SUPPOSED to have a region
+      return item.parent.region === id(region)
+    } else {
+      // The 'thing' should NOT have a region
+      return !item.parent.region
+    }
+  } else {
+    return false
+  }
 }
 
 const hasEnoughFacies = (rule, getters) => {
@@ -129,6 +142,7 @@ export {
   hasValidChildren,
   invalidateChildren,
   hasCurrentParents,
+  hasParents,
   hasEnoughFacies,
   getRandomInt,
   newSeed,

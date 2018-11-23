@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import { promiseSimpleCommit } from '@/store/utils'
 import { Region } from '@/store/utils/domain'
 import { makeData, selectItems, isEmpty, notEmpty } from '@/utils'
@@ -54,14 +55,14 @@ export default {
 
   mutations: {
     AVAILABLE: (state, { regions }) => {
-      state.available = regions
+      Vue.set(state, 'available', regions)
     },
     SELECTED: SELECTED_ITEMS,
     CURRENT: (state, { id }) => {
-      state.current = id
+      Vue.set(state, 'current', id)
     },
     USE: (state, value) => {
-      state.use = value
+      Vue.set(state, 'use', value)
     },
   },
 
