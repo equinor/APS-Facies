@@ -27,8 +27,8 @@
       </div>
       <v-expansion-panel>
         <v-expansion-panel-content
-          v-for="grfId in ids"
-          :key="grfId"
+          v-for="field in fields"
+          :key="field.id"
         >
           <div slot="header">
             <v-layout
@@ -40,8 +40,8 @@
             >
               <v-flex xs2>
                 <gaussian-field-name
-                  :ref="grfId"
-                  :grf-id="grfId"
+                  :value="field"
+                  :ref="field.id"
                 />
               </v-flex>
               <v-flex
@@ -49,15 +49,15 @@
               >
                 <icon-button
                   icon="remove"
-                  @click.stop="deleteField(grfId)"
+                  @click.stop="deleteField(field)"
                 />
-                <confirmation-dialog :ref="`confirmation_${grfId}`"/>
+                <confirmation-dialog :ref="`confirmation_${field.id}`"/>
               </v-flex>
             </v-layout>
           </div>
           <v-card>
             <gaussian-random-field
-              :grf-id="grfId"
+              :value="field"
             />
           </v-card>
         </v-expansion-panel-content>
@@ -100,10 +100,10 @@ export default {
     addField () {
       this.$store.dispatch('gaussianRandomFields/addEmptyField')
     },
-    deleteField (grfId) {
-      this.$refs[`confirmation_${grfId}`][0].open('Are you sure?', `This will delete the Gaussian random field '${this.fields[`${grfId}`].name}'`, {})
+    deleteField (field) {
+      this.$refs[`confirmation_${field.id}`][0].open('Are you sure?', `This will delete the Gaussian random field '${field.name}'`, {})
         .then(confirmed => {
-          if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { grfId })
+          if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { grfId: field.id })
         })
     },
   }

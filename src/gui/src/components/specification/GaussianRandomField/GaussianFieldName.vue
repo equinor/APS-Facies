@@ -12,12 +12,13 @@
 <script>
 import VueTypes from 'vue-types'
 import { required } from 'vuelidate/lib/validators'
+import { GaussianRandomField } from '@/store/utils/domain'
 
 // TODO: Add description of behavior
 // Alt; make behavior consistent with remaining application
 export default {
   props: {
-    grfId: VueTypes.string.isRequired,
+    value: VueTypes.instanceOf(GaussianRandomField).isRequired,
   },
 
   data () {
@@ -31,7 +32,7 @@ export default {
       required,
       isUnique (value) {
         for (const grfId in this.fields) {
-          if (this.fields[`${grfId}`].name === value && this.grfId !== grfId) {
+          if (this.name === value && this.grfId !== grfId) {
             return false
           }
         }
@@ -42,7 +43,7 @@ export default {
 
   computed: {
     fields () { return this.$store.state.gaussianRandomFields.fields },
-    name () { return this.fields[this.grfId].name },
+    name () { return this.value.name },
     errors () {
       const errors = []
       if (!this.$v.fieldName.$dirty) return errors
@@ -58,7 +59,7 @@ export default {
 
   methods: {
     changeName () {
-      this.$store.dispatch('gaussianRandomFields/changeName', { grfId: this.grfId, name: this.fieldName })
+      this.$store.dispatch('gaussianRandomFields/changeName', { grfId: this.value.id, name: this.fieldName })
     },
     restoreName () {
       this.fieldName = this.name

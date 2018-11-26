@@ -84,6 +84,7 @@ import AnisotropyDirection from '@/components/specification/GaussianRandomField/
 import Power from '@/components/specification/GaussianRandomField/Power'
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
 import IconButton from '@/components/selection/IconButton'
+import { GaussianRandomField } from '@/store/utils/domain'
 
 export default {
   name: 'GaussianRandomField',
@@ -99,7 +100,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    value: VueTypes.instanceOf(GaussianRandomField).isRequired,
   },
 
   data () {
@@ -113,15 +114,15 @@ export default {
       availableVariograms: state => state.constants.options.variograms.available,
     }),
     gaussianFieldData () {
-      return this.field
-        ? this.field._data
+      return this.value
+        ? this.value._data
         : []
     },
     isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },
-    field () { return this.$store.state.gaussianRandomFields.fields[this.grfId] },
-    variogram () { return this.field.variogram },
-    trend () { return this.field.trend },
-    fieldName () { return this.field.name },
+    grfId () { return this.value.id },
+    variogram () { return this.value.variogram },
+    trend () { return this.value.trend },
+    fieldName () { return this.value.name },
     canSimulate: {
       cache: false,
       get: function () {
@@ -154,10 +155,10 @@ export default {
       return this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
         grfId: this.grfId,
         data: await rms.simulateGaussianField({
-          name: this.field.name,
+          name: this.value.name,
           variogram: this.variogram,
           trend: this.trend,
-          settings: this.field.settings,
+          settings: this.value.settings,
         })
       })
     },
@@ -175,21 +176,21 @@ export default {
     openVisualizationSettings () {
       const settings = {
         crossSection: {
-          type: this.field.settings.crossSection.type,
-          relativePosition: this.field.settings.crossSection.relativePosition,
+          type: this.value.settings.crossSection.type,
+          relativePosition: this.value.settings.crossSection.relativePosition,
         },
-        gridAzimuth: this.field.settings.gridAzimuth,
+        gridAzimuth: this.value.settings.gridAzimuth,
         gridSize: {
-          x: this.field.settings.gridSize.x,
-          y: this.field.settings.gridSize.y,
-          z: this.field.settings.gridSize.z,
+          x: this.value.settings.gridSize.x,
+          y: this.value.settings.gridSize.y,
+          z: this.value.settings.gridSize.z,
         },
         simulationBox: {
-          x: this.field.settings.simulationBox.x,
-          y: this.field.settings.simulationBox.y,
-          z: this.field.settings.simulationBox.z,
+          x: this.value.settings.simulationBox.x,
+          y: this.value.settings.simulationBox.y,
+          z: this.value.settings.simulationBox.z,
         },
-        seed: this.field.settings.seed,
+        seed: this.value.settings.seed,
       }
       this.$refs.visualisationSettings.open(settings, {})
         .then(({ save, settings }) => {
