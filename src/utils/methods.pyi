@@ -41,9 +41,11 @@ class RunParameters(NamedTuple):
 
 
 class SpecificationType(Enum):
+    APS_MODEL = 0
     PROBABILITY_LOG = 1
     FACIES_LOG = 2
     CONVERT_BITMAP = 3
+    PROBABILITY_TREND = 4
 
 
 def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]: ...
