@@ -74,7 +74,8 @@ Usage:
                        and their corresponding geographic (UTM coordinates) (xmin, ymin) and (xmax ,ymax).
       UseFaciesCode -  Turn on (1) to use correspondence between color code and facies code to be able to write facies codes in output maps.
                        Turn off(0) use of facies code. This means output maps will contain color codes.
-      ColorCode     -  specify which facies code corresponds to which color. The effect of this keyword is turned on/off by the keyword UseFaciesCode.                                The user will usually have to run with UseFaciesCode turned off (0) to get output maps with colour values. 
+      ColorCode     -  specify which facies code corresponds to which color. The effect of this keyword is turned on/off by the keyword UseFaciesCode.
+                       The user will usually have to run with UseFaciesCode turned off (0) to get output maps with colour values.
                        The user will then find corresponding colour values and facies
                        and then specify that using this keyword before running a second time. Missing code (usually 9999900.000) is
                        specified in separate keyword.
@@ -90,7 +91,6 @@ Usage:
 def get_arguments():
     parser = ArgumentParser(description="Read a rectangular piece of a bitmap (256 colors) file")
     parser.add_argument('model_file', metavar='FILE', type=str, nargs='?', default='bitmap2rms_model.xml', help="The model file to read from (default: bitmap2rms_model.xml)")
-#    parser.add_argument('facies_code', metavar='CODE', type=bool, nargs='?', default=False, help="The model file to read from (default: bitmap2rms_model.xml)")
     parser.add_argument('-d', '--debug-level', type=int, default=0, help="Sets the verbosity. 0-4, where 0 is least verbose (default: 0)")
     parser.add_argument('-t', '--test', type=bool, default=False, help="Toggles whether the test script is to be run (default: False)")
     parser.add_argument('--long-help', type=bool, default=False, help="Prints an extended help message")
@@ -98,17 +98,11 @@ def get_arguments():
 
 
 def run(roxar=None, project=None, **kwargs):
-#    params = get_run_parameters(**kwargs)
-    model_file = get_specification_file(_type=SpecificationType.CONVERT_BITMAP, **kwargs)
+    params = get_run_parameters(**kwargs)
+    model_file = get_specification_file(**kwargs)
     print('Model file: {}'.format(model_file))
-#    facies_code = params['facies_code']
-#    debug_level = params['debug_level']
-    debug_level = Debug.OFF
-#    run_test_script = params['run_test_script']
+    debug_level = params['debug_level']
     run_test_script = False
-#    if facies_code > 0 and debug_level >= Debug.ON:
-#        print('Calculate map with facies')
-#    bitmap_converter = ConvertBitMapToRMS(model_file, facies_code)
     bitmap_converter = ConvertBitMapToRMS(model_file)
     if debug_level >= Debug.ON:
         bitmap_converter.printContents()
@@ -129,7 +123,6 @@ def run_cli():
 
     run(
         model_file=args.model_file,
-#        facies_code=args.facies_code,
         run_test_script=args.test,
         debug_level=Debug(args.debug_level)
     )

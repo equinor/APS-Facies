@@ -1,5 +1,5 @@
 image:
-  name: "git.equinor.com:4567/aps/gui/aps-gui:3.2.5"
+  name: "git.equinor.com:4567/aps/gui/aps-gui:3.2.7"
 
 variables:
   GIT_STRATEGY:           "fetch"
@@ -18,6 +18,7 @@ variables:
   DEPLOY_PATH:            "${DEPLOY_SERVER}:/project/res/APSGUI"
   SYSTEM_INSTALL_PIPENV:  "yes"
   RMS_VERSION:            "11.0.0"
+  GIT_LFS_SKIP_SMUDGE:    "1"
 
 stages:
   - init
@@ -105,7 +106,7 @@ integration testing (RMS 11):
   variables:
     WRITE_WORKFLOW_FILES_TO_PROJECT: "yes"
     RMS_PROJECT:                     "/testAPSWorkflow_new.rms${RMS_VERSION}"
-    APS_DEBUG_LEVEL:                 4
+    APS_DEBUG_LEVEL:                 "4"
   script:
     - 'eval $MAKE integration-tests'
   dependencies:

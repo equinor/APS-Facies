@@ -4,7 +4,7 @@ from enum import Enum
 from typing import List, Dict, Union, Callable, NamedTuple, NewType, Type, Optional
 from types import ModuleType
 
-from src.algorithms.APSGaussModel import GaussianFieldName, GaussianFieldSimulation, SimulationBoxOrigin, GridSize
+from src.algorithms.APSGaussModel import GaussianFieldName, SimulationBoxOrigin, GridSize, GaussianFieldSimulation
 
 from roxar import Project
 from roxar.grids import GridModel, GridModels, Properties, Property, BlockedWell, BlockedWellsSet, Grid3D
@@ -187,3 +187,4 @@ class RMSData:
     def is_aps_model_valid(encoded_xml): ...
     @staticmethod
     def _simulate_gaussian_field(field: Dict) -> GaussianFieldSimulation: ...
+

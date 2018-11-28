@@ -3,14 +3,14 @@ Parameter diff, inputFaciesParam, refFaciesParam
 String paramName, paramName_Reference, paramName_Difference, gridModelName
 GridModel gm
 Float minValue, maxValue, avgValue
-String reportStatusFile ="statusfile_Example_APS_gridmodelCoarse_uncond_regions.dat"
+String reportStatusFile ="statusfile_Example_APS_gridmodel1_unconditioned_multiProcess.dat"
 Include("/project/res/etc/IPL/iplib/STutilities1.iplib")
 File file
 // -----------------------------------------------------------------------
-gridModelName = "GridModelCoarse"
-paramName = "FaciesReal_unconditioned_merged"
-paramName_Reference = "FaciesReal_unconditioned_merged_reference"
-paramName_Difference = "FaciesReal_unconditioned_merged_difference"
+gridModelName = "GridModelFine"
+paramName = "FaciesReal_unconditioned"
+paramName_Reference = "FaciesReal_unconditioned_multiprocess_reference"
+paramName_Difference = "FaciesReal_unconditioned_multiprocess_difference"
 
 
 // ------------------------------------------------------------------------
@@ -40,4 +40,3 @@ ELSE
    WriteLine(file,"1")
    CloseFile(file)
 ENDIF
-

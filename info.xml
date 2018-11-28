@@ -1,6 +1,6 @@
 <plugin>
   <meta name="application-name" content="Adaptive Pluri-Gaussian Simulation GUI" />
-  <meta name="author" content="Statoil ASA" />
+  <meta name="author" content="Equinor ASA" />
   <meta name="description" content="..." />  <!-- TODO -->
   <meta name="roxapi-version" content="1.2" />
   <meta name="window-size" content="1920x1080" />
@@ -8,5 +8,4 @@
   <meta name="enable-mustache" content="False" />
   <meta name="uipy-timeout" content="10000" />
   <tree-location name="Grid models" />
-  <tree-location name="Wells" />  <!-- TODO -->
 </plugin>

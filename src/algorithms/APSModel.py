@@ -283,7 +283,7 @@ class APSModel:
                 if not (self.__previewResolution == "Normal" or self.__previewResolution == "High"):
                     raise ValueError('Preview resolution must be specified to be either Normal orr High\n'
                                      'Default value is Normal if resolution is not specified')
-                    
+
         placement = [
             ('RMSProjectName', '__rmsProjectName', False),
             ('RMSWorkflowName', '__rmsWorkflowName', False),
@@ -328,12 +328,18 @@ class APSModel:
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: RMSGridModel:                       %s', self.__rmsGridModelName)
-            print('Debug output: RMSZoneParamName:                   %s', self.__rmsZoneParamName)
-            print('Debug output: RMSFaciesParamName:                 %s', self.__rmsFaciesParamName)
-            print('Debug output: RMSRegionParamName:                 %s', self.__rmsRegionParamName)
-            print('Debug output: Name of RMS project read:           %s', self.__rmsProjectName)
-            print('Debug output: Name of RMS workflow read:          %s', self.__rmsWorkflowName)
+            print(
+                'Debug output: RMSGridModel:                       {}\n'
+                'Debug output: RMSZoneParamName:                   {}\n'
+                'Debug output: RMSFaciesParamName:                 {}\n'
+                'Debug output: RMSRegionParamName:                 {}\n'
+                'Debug output: Name of RMS project read:           {}\n'
+                'Debug output: Name of RMS workflow read:          {}'
+                ''.format(
+                    self.__rmsGridModelName, self.__rmsZoneParamName, self.__rmsFaciesParamName,
+                    self.__rmsRegionParamName, self.__rmsProjectName, self.__rmsWorkflowName
+                )
+            )
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
