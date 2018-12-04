@@ -1,3 +1,76 @@
+import { resolve } from '@/utils'
+import { Variogram, Trend, GaussianRandomField } from '@/store/utils/domain/gaussianRandomField'
+
+const ensureArray = (value) => {
+  if (Array.isArray(value)) {
+    return value
+  } else {
+    const returnValue = []
+    returnValue.push(value)
+    return returnValue
+  }
+}
+
+const getNodeValue = (container, prop) => {
+  let value = resolve(prop, container.APSModel)
+  if (value._text) {
+    value = value._text.trim()
+  }
+  return value
+}
+
+const getOriginType = (elem) => {
+  if (elem && elem._text) {
+    const value = elem._text.trim().replace(/'/g, '').toUpperCase()
+    return value
+  }
+  return null
+}
+
+const isFMUUpdatable = (elem) => {
+  if (elem && elem._attributes && elem._attributes.kw) {
+    return true
+  }
+  return false
+}
+
+const getNumericValue = (elem) => {
+  if (elem && elem._text) {
+    return Number(elem._text.trim())
+  }
+  return null
+}
+
+const getTextValue = (elem) => {
+  if (elem && elem._text) {
+    return elem._text.trim()
+  }
+  return null
+}
+
+const getBooleanValue = (elem) => {
+  if (elem && elem._text) {
+    return Boolean(Number(elem._text.trim()))
+  }
+  return null
+}
+
+const getStackingDirection = (elem) => {
+  if (elem && elem._text) {
+    if (elem._text.trim() === '1') {
+      return 'PROGRADING'
+    }
+    if (elem._text.trim() === '-1') {
+      return 'RETROGRADING'
+    }
+  }
+  return null
+}
+
+const handleError = (reason) => {
+  alert(reason)
+}
+
 export default {
   namespaced: true,
 
@@ -6,39 +79,128 @@ export default {
   modules: {},
 
   actions: {
-    populateGUI: ({ dispatch }, json) => {
+
+    /**
+     * This is the entry point for loading a model file
+     * @param dispatch
+     * @param json
+     * @param fileName
+     * @returns {Promise<void>}
+     */
+    populateGUI: async ({ dispatch }, { json, fileName }) => {
       const apsModelContainer = JSON.parse(json)
-      // TODO: Add a helpermethod to get text value of node when method resolve from other branch gets into develop, like
-      // import { resolve } from '@/utils'
-      // const helper = (container, prop) => {
-      //   let value = resolve(prop, container.APSModel)
-      //   if (value._text) {
-      //     value = value._text.trim()
-      //   }
-      //   return value
-      // }
-      // so that instead of
-      // dispatch('gridModels/select', apsModelContainer.APSModel.GridModelName._text.trim(), { root: true })
-      // we can use
-      // dispatch('gridModels/select', helper(apsModelContainer, 'GridModelName'), { root: true })
-      dispatch('gridModels/select', apsModelContainer.APSModel.GridModelName._text.trim(), { root: true })
-        .then(() => {
-          dispatch(`parameters/zone/select`, apsModelContainer.APSModel.ZoneParamName._text.trim(), { root: true })
-            .then(() => {
-              if (apsModelContainer.APSModel.RegionParamName) {
-                dispatch(`parameters/region/select`, apsModelContainer.APSModel.RegionParamName._text.trim(), { root: true })
-                  .then(() => {
-                    dispatch('selectZonesAndRegions', apsModelContainer.APSModel.ZoneModels.Zone)
-                  })
-              } else {
-                dispatch('selectZonesAndRegions', apsModelContainer.APSModel.ZoneModels.Zone)
-              }
+      let populateFailed = false
+
+      await dispatch('modelName/select', fileName, { root: true })
+
+      // TODO introduce function (repeating code. Codesmell?)
+      if (!populateFailed) {
+        await dispatch('gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
+          .catch(reason => {
+            populateFailed = true
+            handleError(reason)
+          })
+      }
+
+      if (!populateFailed) {
+        if (apsModelContainer.APSModel.RegionParamName) {
+          await dispatch(`parameters/region/select`, getNodeValue(apsModelContainer, 'RegionParamName'), { root: true })
+            .catch(reason => {
+              populateFailed = true
+              handleError(reason)
             })
-        })
-        .catch(reason => {
-          alert(reason)
-        })
+        }
+      }
+
+      if (!populateFailed) {
+        await dispatch('populateGlobalFaciesList', apsModelContainer.APSModel.MainFaciesTable)
+          .catch(reason => {
+            populateFailed = true
+            handleError(reason)
+          })
+      }
+
+      if (!populateFailed) {
+        await dispatch('populateGaussianRandomFields', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+          .catch(reason => {
+            populateFailed = true
+            handleError(reason)
+          })
+      }
+
+      if (!populateFailed) {
+        await dispatch('populateFaciesProbabilities', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+          .catch(reason => {
+            populateFailed = true
+            handleError(reason)
+          })
+      }
+
+      if (!populateFailed) {
+        await dispatch('populateTruncationRules', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+          .catch(reason => {
+            populateFailed = true
+            handleError(reason)
+          })
+      }
+
+      // Now we can select zones and regions on the left hand side of the gui.
+      if (!populateFailed) {
+        await dispatch('selectZonesAndRegions', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+          .catch(reason => {
+            populateFailed = true
+            handleError(reason)
+          })
+      }
     },
+
+    /**
+     * Takes the main facies table from a file and compares it to the facies log loaded from the project
+     * (based on selected blocked well). Facies both loaded from the project and present in the file are
+     * selected. Any facies not present in the project is added and then selected.
+     * This method returns a promise. In order to let it complete fully before moving on, call it with async - await
+     * @param dispatch
+     * @param rootState
+     * @param mainFaciesTableFromFile
+     * @returns {Promise<void>}
+     */
+    populateGlobalFaciesList: async ({ dispatch, rootState }, mainFaciesTableFromFile) => {
+      const faciesToBeSelected = []
+
+      // cannot use await inside anonymous callback function for forEach, therefore using for( x of y)
+      for (const faciesItemFromFile of mainFaciesTableFromFile.Facies) {
+        // facies information from the file.
+        const currentName = faciesItemFromFile._attributes.name.trim()
+        const currentCode = parseInt(faciesItemFromFile.Code._text.trim())
+        // console.log(`alias: ${currentName} code: ${currentCode}`)
+
+        // corresponding facies from project
+        const faciesForAliasAndCode = Object.keys(rootState.facies.available)
+          .map(e => rootState.facies.available[e])
+          .filter(e => e.alias === currentName && e.code === currentCode)
+        const FaciesFound = faciesForAliasAndCode.length > 0 ? faciesForAliasAndCode[0] : null
+
+        // logic for selecting / adding
+        if (FaciesFound) {
+          faciesToBeSelected.push(FaciesFound)
+        } else {
+          await dispatch('facies/new', { code: currentCode, name: currentName }, { root: true })
+          faciesToBeSelected.push(
+            ...Object.keys(rootState.facies.available)
+              .map(e => rootState.facies.available[e])
+              .filter(e => e.alias === currentName && e.code === currentCode)
+          )
+        }
+      }// end for
+      await dispatch('facies/select', faciesToBeSelected, { root: true })
+    },
+
+    /**
+     * This is the part that selects zones and regions combinations present in the file.
+     * @param dispatch
+     * @param rootState
+     * @param zoneModelsFromFile
+     */
     selectZonesAndRegions: ({ dispatch, rootState }, zoneModelsFromFile) => {
       // syntezing zones and region info: Zones and regions could be specified in weird ways. For instance we could
       // have zones regions defined in the input data as
@@ -61,14 +223,6 @@ export default {
           zoneRegionsMap.get(zoneNumber).push(parseInt(regionNumber, 10))
         }
       })
-
-      // testprinting what to select
-      // for (const item of zoneRegionsMap) {
-      //  console.log('zone ' + item[0])
-      //  item[1].forEach(region => {
-      //    console.log(' region ' + region)
-      //  })
-      // }
 
       // checking that all zones and regions from the file is present/loaded from the project and selecting them as we
       // go. After finding everything that should be selected, we call the actual methods that sets the selected status
@@ -132,7 +286,283 @@ export default {
         dispatch('regions/current', regionToSetAsCurrent, { root: true })
         dispatch('regions/select', regionsToSelect, { root: true })
       }
+    },
+
+    /**
+     * This adds and sets up the gaussian randomfields specified in the file.
+     * @param dispatch
+     * @param rootState
+     * @param zoneModelsFromFile
+     * @returns {Promise<void>}
+     */
+    populateGaussianRandomFields: async ({ dispatch, rootState }, zoneModelsFromFile) => {
+      zoneModelsFromFile.forEach(zoneModel => {
+        const zoneNumber = parseInt(zoneModel._attributes.number)
+        let regionNumber = parseInt(zoneModel._attributes.regionNumber)
+        if (isNaN(regionNumber)) regionNumber = null
+
+        // The corresponding zone and region number in the internal datastructures
+        const zoneId = Object.keys(rootState.zones.available)
+          .find(key => rootState.zones.available[key].code === zoneNumber)
+        const regionsForZone = rootState.zones.available[`${zoneId}`].regions
+        const regionId = Object.keys(regionsForZone)
+          .find(key => regionsForZone[key].code === regionNumber)
+
+        zoneModel.GaussField.forEach(gaussFieldFromFile => {
+          let trend = null
+
+          if (gaussFieldFromFile.Trend) {
+            let type = null
+            let trendContainer = null
+            if (gaussFieldFromFile.Trend.Linear3D) {
+              type = 'LINEAR'
+              trendContainer = gaussFieldFromFile.Trend.Linear3D
+            }
+            if (gaussFieldFromFile.Trend.Elliptic3D) {
+              type = 'ELLIPTIC'
+              trendContainer = gaussFieldFromFile.Trend.Elliptic3D
+            }
+            if (gaussFieldFromFile.Trend.EllipticCone3D) {
+              type = 'ELLIPTIC_CONE'
+              trendContainer = gaussFieldFromFile.Trend.EllipticCone3D
+            }
+            if (gaussFieldFromFile.Trend.Hyperbolic3D) {
+              type = 'HYPERBOLIC'
+              trendContainer = gaussFieldFromFile.Trend.Hyperbolic3D
+            }
+            if (gaussFieldFromFile.Trend.RMSParameter) {
+              type = 'RMS_PARAM'
+              trendContainer = gaussFieldFromFile.Trend.RMSParameter
+            }
+
+            trend = new Trend({
+              use: true,
+              type: type,
+              azimuth: getNumericValue(trendContainer.azimuth),
+              azimuthUpdatable: isFMUUpdatable(trendContainer.azimuth),
+              stackAngle: getNumericValue(trendContainer.stackAngle),
+              stackAngleUpdatable: isFMUUpdatable(trendContainer.stackAngle),
+              migrationAngle: getNumericValue(trendContainer.migrationAngle),
+              migrationAngleUpdatable: isFMUUpdatable(trendContainer.migrationAngle),
+              stackingDirection: getStackingDirection(trendContainer.directionStacking),
+              // TODO. Load parameters
+              parameter: null,
+              curvature: getNumericValue(trendContainer.curvature),
+              curvatureUpdatable: isFMUUpdatable(trendContainer.curvature),
+              originX: getNumericValue(trendContainer.origin_x),
+              originXUpdatable: isFMUUpdatable(trendContainer.origin_x),
+              originY: getNumericValue(trendContainer.origin_y),
+              originYUpdatable: isFMUUpdatable(trendContainer.origin_y),
+              originZ: getNumericValue(trendContainer.origin_z_simbox),
+              originZUpdatable: isFMUUpdatable(trendContainer.origin_z_simbox),
+              originType: getOriginType(trendContainer.origintype),
+              relativeSize: getNumericValue(trendContainer.relativeSize),
+              relativeSizeUpdateble: isFMUUpdatable(trendContainer.relativeSize),
+              relativeStdDev: getNumericValue(gaussFieldFromFile.RelStdDev),
+              relativeStdDevUpdatable: isFMUUpdatable(gaussFieldFromFile.RelStdDev)
+            })
+          }
+
+          const vario = new Variogram(
+            {
+              type: gaussFieldFromFile.Vario._attributes.name.trim(),
+              // Angles
+              azimuth: getNumericValue(gaussFieldFromFile.Vario.AzimuthAngle),
+              azimuthUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.AzimuthAngle),
+              dip: getNumericValue(gaussFieldFromFile.Vario.DipAngle),
+              dipUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.DipAngle),
+              // Ranges
+              main: getNumericValue(gaussFieldFromFile.Vario.MainRange),
+              mainUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.MainRange),
+              perpendicular: getNumericValue(gaussFieldFromFile.Vario.PerpRange),
+              perpendicularUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.PerpRange),
+              vertical: getNumericValue(gaussFieldFromFile.Vario.VertRange),
+              verticalUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.VertRange),
+              power: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
+                ? getNumericValue(gaussFieldFromFile.Vario.Power)
+                : null,
+              powerUpdatable: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL' &&
+                isFMUUpdatable(gaussFieldFromFile.Vario.Power)
+            }
+          )
+
+          dispatch('gaussianRandomFields/addField',
+            {
+              field: new GaussianRandomField({
+                name: gaussFieldFromFile._attributes.name,
+                variogram: vario,
+                trend: trend,
+                zone: zoneId,
+                region: regionId,
+              })
+            },
+            { root: true }
+          )
+        })
+      })
+    },
+
+    /**
+     * Sets the facies probability for facies in zone. If the file spesifies probcubes, the method sets the
+     * probablity to 1/number of fields in order to have the truncation rule visible after load
+     * Note:
+     * This will have to be updated in order to set correct selecton based on zone/region.
+     * as it is now it just updates the facies over and over again for each zone/region combo
+     *
+     * @param dispatch
+     * @param rootState
+     * @param zoneModelsFromFile
+     * @returns {Promise<void>}
+     */
+    populateFaciesProbabilities: async ({ dispatch, rootState }, zoneModelsFromFile) => {
+      // zoneModelsFromFile.forEach(zoneModel => {
+      for (const zoneModel of zoneModelsFromFile) {
+        const useConstantProb = getBooleanValue(zoneModel.UseConstProb)
+        await dispatch('facies/setConstantProbability', useConstantProb, { root: true })
+        // TODO: handle SimBoxThickness (must await implementation from Sindre on this?)
+        const probCubes = []
+        for (const faciesModel of zoneModel.FaciesProbForModel.Facies) {
+          const facies = Object.values(rootState.facies.available).find(obj => obj.name === faciesModel._attributes.name)
+          if (useConstantProb) {
+            dispatch('facies/updateProbability', {
+              facies,
+              probability: getNumericValue(faciesModel.ProbCube)
+            }, { root: true })
+          } else {
+            const probabilityCube = faciesModel.ProbCube._text.trim()
+            probCubes.push(probabilityCube)
+            await dispatch('facies/changed', { id: facies.id, probabilityCube }, { root: true })
+          }
+        }
+        // hack to set value of preview probability of probCubes to 1/nr of probcubes to have the preview of the truncation rule load immediately
+        // user can always push Average button and get the actual values from project.
+        if (!useConstantProb) {
+          dispatch('facies/updateProbabilities', {
+            probabilityCubes: probCubes.reduce((obj, name) => {
+              obj[name] = 1 / probCubes.length
+              return obj
+            }, {})
+          }, { root: true })
+        }
+      }
+    },
+
+    /**
+     * Sets up Truncation Rules and connects them to fields as specified in the modelfile.
+     * @param dispatch
+     * @param rootState
+     * @param rootGetters
+     * @param zoneModelsFromFile
+     * @returns {Promise<void>}
+     */
+    populateTruncationRules: async ({ dispatch, rootState, rootGetters }, zoneModelsFromFile) => {
+      for (const zoneModel of zoneModelsFromFile) {
+        const zoneNumber = parseInt(zoneModel._attributes.number)
+        let regionNumber = parseInt(zoneModel._attributes.regionNumber)
+        if (isNaN(regionNumber)) regionNumber = null
+
+        const zoneId = Object.keys(rootState.zones.available)
+          .find(key => rootState.zones.available[key].code === zoneNumber)
+        const regionsForZone = rootState.zones.available[`${zoneId}`].regions
+        const regionId = Object.keys(regionsForZone)
+          .find(key => regionsForZone[key].code === regionNumber)
+
+        if (zoneModel.TruncationRule) {
+          let truncationRuleContainer = zoneModel.TruncationRule
+          if (truncationRuleContainer.Trunc3D_Bayfill) {
+            const type = Object.keys(rootState.truncationRules.templates.types.available)
+              .find(key => rootState.truncationRules.templates.types.available[key].name === 'Bayfill')
+
+            const alphafields = getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.AlphaFields)
+            // TODO: Where does this fit in?
+            // const useConstantParam = getBooleanValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.UseConstTruncParam)
+
+            // TODO. Proportions must be read from file.
+            const polygons = [
+              {
+                'name': 'Floodplain',
+                'facies': getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.Floodplain),
+                'proportion': 0.3
+              },
+              {
+                'name': 'Subbay',
+                'facies': getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.Subbay),
+                'proportion': 0.3
+              },
+              {
+                'name': 'Bayhead Delta',
+                'facies': getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.BHD),
+                'proportion': 0.3
+              },
+              {
+                'name': 'Wave influenced Bayfill',
+                'facies': getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.WBF),
+                'proportion': 0.3
+              },
+              {
+                'name': 'Lagoon',
+                'facies': getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.Lagoon),
+                'proportion': 0.3
+              }
+            ]
+
+            const settings = [
+              {
+                'name': 'SF',
+                'polygon': 'Floodplain',
+                'factor': {
+                  'value': getNumericValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.SF),
+                  'updatable': isFMUUpdatable(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.SF)
+                }
+              },
+              {
+                'name': 'YSF',
+                'polygon': 'Subbay',
+                'factor': {
+                  'value': getNumericValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.YSF),
+                  'updatable': isFMUUpdatable(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.YSF)
+                }
+              },
+              {
+                'name': 'SBHD',
+                'polygon': 'Bayhead Delta',
+                'factor': {
+                  'value': getNumericValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.SBHD),
+                  'updatable': isFMUUpdatable(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.SBHD)
+                }
+              }
+            ]
+
+            const fields = [
+              {
+                'channel': 1,
+                'field': {
+                  'name': alphafields.split(' ')[0]
+                }
+              },
+              {
+                'channel': 2,
+                'field': {
+                  'name': alphafields.split(' ')[1]
+                }
+              },
+              {
+                'channel': 3,
+                'field': {
+                  'name': alphafields.split(' ')[2]
+                }
+              }
+            ]
+
+            // now we should have everything needed to add the truncationRule.
+            await dispatch('truncationRules/add', { type, polygons, fields, settings, parent: { zone: zoneId, region: regionId } }, { root: true })
+            // Changing presents must be done after the truncation rule is added (the command above must run to completion)
+            dispatch('truncationRules/changePreset', { 'type': 'Bayfill', 'template': 'Simple', parent: { zone: zoneId, region: regionId } }, { root: true })
+          }
+        }
+      }
     }
+
   },
 
   mutations: {},

@@ -27,58 +27,94 @@ class Variogram {
     type = 'SPHERICAL',
     // Angles
     azimuth = 0,
+    azimuthUpdatable = false,
     dip = 0,
+    dipUpdatable = false,
     // Ranges
     main = 1000,
+    mainUpdatable = false,
     perpendicular = 1000,
+    perpendicularUpdatable = false,
     vertical = 10,
     power = 1.5,
+    verticalUpdatable = false,
+    powerUpdatable = false
   }) {
     this.type = 'SPHERICAL'
     this.angle = {
-      azimuth: updatableValue(azimuth),
-      dip: updatableValue(dip),
+      azimuth: updatableValue(azimuth, !!azimuthUpdatable),
+      dip: updatableValue(dip, !!dipUpdatable),
     }
     this.range = {
-      main: updatableValue(main),
-      perpendicular: updatableValue(perpendicular),
-      vertical: updatableValue(vertical),
+      main: updatableValue(main, !!mainUpdatable),
+      perpendicular: updatableValue(perpendicular, !!perpendicularUpdatable),
+      vertical: updatableValue(vertical, !!verticalUpdatable),
     }
-    this.power = updatableValue(power)
+    this.power = updatableValue(power, !!powerUpdatable)
   }
 }
 
 class Trend {
-  constructor () {
-    this.use = false
-    this.type = null
+  constructor ({
+    use = false,
+    type = null,
+    azimuth = 0,
+    azimuthUpdatable = false,
+    stackAngle = 0,
+    stackAngleUpdatable = false,
+    migrationAngle = 0,
+    migrationAngleUpdatable = false,
+    stackingDirection = null,
+    parameter = null,
+    curvature = 0,
+    curvatureUpdatable = false,
+    originX = 0,
+    originXUpdatable = false,
+    originY = 0,
+    originYUpdatable = false,
+    originZ = 0,
+    originZUpdatable = false,
+    originType = 'ABSOLUTE',
+    relativeSize = 0,
+    relativeSizeUpdateble = false,
+    relativeStdDev = 0,
+    relativeStdDevUpdatable = false
+  }) {
+    this.use = use
+    this.type = type
     this.angle = {
-      azimuth: updatableValue(),
-      stacking: updatableValue(),
-      migration: updatableValue(),
+      azimuth: updatableValue(azimuth, !!azimuthUpdatable),
+      stacking: updatableValue(stackAngle, !!stackAngleUpdatable),
+      migration: updatableValue(migrationAngle, !!migrationAngleUpdatable)
     }
-    this.stackingDirection = null
-    this.parameter = null
-    this.curvature = updatableValue()
+    this.stackingDirection = stackingDirection
+    this.parameter = parameter
+    this.curvature = updatableValue(curvature, !!curvatureUpdatable)
     this.origin = {
-      x: updatableValue(),
-      y: updatableValue(),
-      z: updatableValue(),
-      type: '',
+      x: updatableValue(originX, !!originXUpdatable),
+      y: updatableValue(originY, !!originYUpdatable),
+      z: updatableValue(originZ, !!originZUpdatable),
+      type: originType
     }
-    this.relativeSize = updatableValue()
-    this.relativeStdDev = updatableValue()
+    this.relativeSize = updatableValue(relativeSize, !!relativeSizeUpdateble)
+    this.relativeStdDev = updatableValue(relativeStdDev, !!relativeStdDevUpdatable)
   }
 }
 
-export class GaussianRandomField extends ZoneRegionDependent {
-  constructor ({ name, _id, zone, region = null }) {
+class GaussianRandomField extends ZoneRegionDependent {
+  constructor ({ name, variogram = null, trend = null, settings = null, _id, zone, region = null }) {
     super({ _id, zone, region })
     this.name = name
-    this.variogram = new Variogram({})
-    this.trend = new Trend()
-    this.settings = defaultSettings()
+    this.variogram = variogram || new Variogram({})
+    this.trend = trend || new Trend({})
+    this.settings = settings || defaultSettings()
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
     this._data = []
   }
+}
+
+export {
+  Variogram,
+  Trend,
+  GaussianRandomField,
 }

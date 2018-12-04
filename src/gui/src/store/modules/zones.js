@@ -46,18 +46,6 @@ export default {
     populate: ({ commit, dispatch, rootGetters }, { zones }) => {
       return new Promise((resolve, reject) => {
         const data = makeData(zones, Zone)
-        Object.keys(data).forEach(zoneId => {
-          if (rootGetters.regionParameter) {
-            dispatch('regions/fetch', zoneId, { root: true })
-              .then(regionIds => {
-                regionIds.forEach(regionId => {
-                  dispatch('gaussianRandomFields/init', { zoneId, regionId }, { root: true })
-                })
-              })
-          } else {
-            dispatch('gaussianRandomFields/init', { zoneId }, { root: true })
-          }
-        })
         commit('AVAILABLE', data)
         resolve(data)
       })
@@ -68,7 +56,6 @@ export default {
         if (isEmpty(zoneId)) zoneId = state.current
         commit('REGIONS', { zoneId, regions })
         // TODO: Add new GRFs for each region if necessary
-        Object.keys(regions).forEach(regionId => dispatch('gaussianRandomFields/init', { zoneId, regionId }, { root: true }))
         // All regions selected
         if (Object.values(regions).every(region => region.selected)) commit('SELECTED', { id: zoneId, toggled: true })
         // Some region(s) selected
