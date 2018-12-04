@@ -12,6 +12,7 @@ import options from '@/store/modules/options'
 import { mirrorZoneRegions } from '@/store/utils'
 import { hasCurrentParents, resolve } from '@/utils'
 import modelFileLoader from '@/store/modules/modelFileLoader'
+import modelName from '@/store/modules/modelName'
 
 Vue.use(Vuex)
 
@@ -36,6 +37,7 @@ export default new Vuex.Store({
     constants,
     options,
     modelFileLoader,
+    modelName
   },
 
   actions: {

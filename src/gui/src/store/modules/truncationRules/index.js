@@ -9,7 +9,7 @@ import templates from '@/store/modules/truncationRules/templates'
 import { Bayfill } from '@/store/utils/domain/truncationRule'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
-import { notEmpty, hasCurrentParents, hasEnoughFacies, resolve, allSet, makeTruncationRuleSpecification } from '@/utils'
+import { notEmpty, hasCurrentParents, hasParents, hasEnoughFacies, resolve, allSet, makeTruncationRuleSpecification } from '@/utils'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -73,13 +73,14 @@ export default {
     fetch ({ dispatch }) {
       dispatch('templates/fetch')
     },
-    add ({ commit, state, rootGetters }, { type, polygons, fields, settings }) {
+    add ({ commit, state, rootGetters }, { type, polygons, fields, settings, parent }) {
+      parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
       type = state.templates.types.available[`${type}`].type
       let rule
       fields = processFields(rootGetters, fields)
       polygons = processPolygons(rootGetters, polygons)
       if (type === 'bayfill') {
-        rule = new Bayfill({ polygons, fields, settings, zone: rootGetters.zone, region: rootGetters.region })
+        rule = new Bayfill({ polygons, fields, settings, ...parent })
       } else if (type === 'non-cubic') {
         // TODO
       } else if (type === 'cubic') {
@@ -89,7 +90,7 @@ export default {
       }
       return addItem({ commit }, { item: rule })
     },
-    changePreset ({ commit, dispatch, state }, { type, template }) {
+    changePreset ({ commit, dispatch, state }, { type, template, parent }) {
       if (notEmpty(type)) {
         const types = state.templates.types.available
         const typeId = Object.keys(types).find(id => types[`${id}`].name === type)
@@ -97,7 +98,7 @@ export default {
       }
       if (notEmpty(template)) {
         commit('CHANGE_TEMPLATE', { template })
-        dispatch('changeRule')
+        dispatch('changeRule', parent)
       }
     },
     changeFactors ({ commit, rootGetters }, { polygon, value }) {
@@ -136,13 +137,20 @@ export default {
         dispatch('facies/updateProbability', { facies: faciesId, probability }, { root: true })
       }
     },
-    changeRule ({ commit, dispatch, state, rootGetters }) {
+    changeRule ({ commit, dispatch, state, rootState, rootGetters }, parent) {
       const rule = Object.values(state.templates.available).find(template => template.name === state.preset.template && template.type === state.preset.type)
-      const missing = rule.minFields - Object.values(rootGetters.fields).length
+      let missing = 0
+      if (parent) {
+        const existingFields = Object.values(rootState.gaussianRandomFields.fields)
+          .filter(field => hasParents(field, parent.zone, parent.region))
+        missing = rule.minFields - existingFields.length
+      } else {
+        missing = rule.minFields - Object.values(rootGetters.fields).length
+      }
       if (missing > 0) {
         for (let i = 0; i < missing; i++) dispatch('gaussianRandomFields/addEmptyField', {}, { root: true })
       }
-      dispatch('add', { ...rule, type: state.preset.type })
+      dispatch('add', { ...rule, type: state.preset.type, parent })
       rule.polygons.forEach(polygon => {
         if (polygon.facies && polygon.proportion >= 0) {
           const facies = rootGetters['facies/byName'](polygon.facies)

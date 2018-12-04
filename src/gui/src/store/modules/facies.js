@@ -39,20 +39,24 @@ export default {
         })
     },
     new: ({ dispatch, state, rootState }, { code, name, color }) => {
-      if (isEmpty(code) || code < 0) {
-        // TODO: Find the highest values in the Global Facies Table (from rms, as some may have been deleted)
-        code = 1 + Object.values(state.available)
-          .map(facies => facies.code)
-          .reduce((a, b) => Math.max(a, b), 0)
-      }
-      if (isEmpty(name)) {
-        name = `F${code}`
-      }
-      if (isEmpty(color)) {
-        const colors = rootState.constants.faciesColors.available
-        color = colors[code % colors.length]
-      }
-      dispatch('changed', new Facies({ code, name, color }))
+      return new Promise((resolve, reject) => {
+        if (isEmpty(code) || code < 0) {
+          // TODO: Find the highest values in the Global Facies Table (from rms, as some may have been deleted)
+          code = 1 + Object.values(state.available)
+            .map(facies => facies.code)
+            .reduce((a, b) => Math.max(a, b), 0)
+        }
+        if (isEmpty(name)) {
+          name = `F${code}`
+        }
+        if (isEmpty(color)) {
+          const colors = rootState.constants.faciesColors.available
+          color = colors[code % colors.length]
+        }
+        const facies = new Facies({ code, name, color })
+        dispatch('changed', facies)
+        resolve(facies)
+      })
     },
     updateProbabilities: ({ dispatch, state }, { facies, probabilityCubes }) => {
       if (notEmpty(probabilityCubes) && isEmpty(facies)) {
@@ -91,10 +95,16 @@ export default {
     toggleConstantProbability: ({ commit, state }) => {
       commit('CONSTANT_PROBABILITY', !state.constantProbability)
     },
+    setConstantProbability: ({ commit, state }, value) => {
+      if (typeof value === 'boolean') {
+        commit('CONSTANT_PROBABILITY', value)
+      }
+    },
     changed: ({ commit, state }, facies) => {
       // TODO: Update proportion in truncation rule if applicable
       const old = state.available[`${facies.id}`]
-      return promiseSimpleCommit(commit, 'UPDATE', new Facies({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
+      // need this to be be synchronous:
+      commit('UPDATE', new Facies({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
     },
     fetch: ({ dispatch, rootGetters }) => {
       return rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)

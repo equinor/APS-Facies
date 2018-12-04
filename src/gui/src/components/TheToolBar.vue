@@ -6,7 +6,7 @@
     </div>
 
     <v-text-field
-      maxlength="60"
+      v-model="modelName"
     />
 
     <upload-button
@@ -48,7 +48,7 @@ const parse = xmlString => {
   return dom.getElementsByTagNameNS(parsererrorNS, 'parsererror').length > 0 ? '' : dom
 }
 
-const fileHandler = (store) => {
+const fileHandler = (store, fileName) => {
   return (e) => {
     const fileContent = e.target.result
     let json = null
@@ -65,7 +65,7 @@ const fileHandler = (store) => {
       rms.isApsModelValid(btoa(new XMLSerializer().serializeToString(dom)))
         .then(result => {
           if (result.valid) {
-            store.dispatch('modelFileLoader/populateGUI', json)
+            store.dispatch('modelFileLoader/populateGUI', { json, fileName })
           } else {
             alert('The file you tried to open is not a valid APS model file and cannot be used\n' +
               'Fix the following error before opening again:\n\n' +
@@ -87,10 +87,17 @@ export default {
     return {}
   },
 
+  computed: {
+    modelName: {
+      get: function () { return this.$store.state.modelName.selected },
+      set: function (value) { this.$store.dispatch('modelName/select', value, { root: true }) }
+    },
+  },
+
   methods: {
     importModelFile (file) {
       const reader = new FileReader()
-      reader.onloadend = fileHandler(this.$store)
+      reader.onloadend = fileHandler(this.$store, file.name)
       reader.readAsText(file)
     },
   },

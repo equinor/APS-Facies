@@ -18,7 +18,7 @@ export default {
           const parameters = ['region', 'blockedWell', 'rmsTrend', 'probabilityCube']
           // when loading a file, we must ensure that all promises in this method are resolved before calling the
           // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
-          // resolved.
+          // resolved
           const promises = []
           parameters.forEach(param => {
             promises.push(dispatch(`parameters/${param}/fetch`, null, { root: true }))

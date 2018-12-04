@@ -1,4 +1,3 @@
-import { promiseSimpleCommit, fetchParameterHelper } from '@/store/utils'
 import rms from '@/api/rms'
 
 export default {
@@ -10,12 +9,22 @@ export default {
   },
 
   actions: {
-    select: ({ commit, dispatch }, blockedWellLog) => {
-      return promiseSimpleCommit(commit, 'CURRENT', blockedWellLog)
-        .then(() => { dispatch('facies/fetch', null, { root: true }) })
+    select: async ({ commit, dispatch }, blockedWellLog) => {
+      commit('CURRENT', blockedWellLog)
+      await dispatch('facies/fetch', null, { root: true })
     },
     fetch: ({ commit, dispatch, rootGetters }) => {
-      return fetchParameterHelper(commit, dispatch, rms.blockedWellLogParameters(rootGetters.gridModel, rootGetters.blockedWellParameter))
+      return new Promise((resolve, reject) => {
+        rms.blockedWellLogParameters(rootGetters.gridModel, rootGetters.blockedWellParameter)
+          .then((result) => {
+            commit('AVAILABLE', result)
+            if (result.length === 1) {
+              dispatch('select', result[0]).then(resolve)
+            } else if (result.length === 0) {
+              dispatch('select', null).then(resolve)
+            }
+          })
+      })
     },
   },
 
