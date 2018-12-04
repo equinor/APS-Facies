@@ -16,6 +16,9 @@ module.exports = {
     'plugin:vue-types/strongly-recommended',
     'plugin:security/recommended',
   ],
+  settings: {
+    'vue-types/namespace': ['VueTypes', 'AppTypes'],
+  },
   // required to lint *.vue files
   plugins: [
     'vue',

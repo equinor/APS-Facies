@@ -2,8 +2,10 @@
   <v-select
     v-model="selected"
     :items="fieldNames"
+    clearable
   >
     <template
+      v-if="!hideLabel"
       slot="label"
     >
       <span>α<sub>{{ channel }}</sub></span>
@@ -15,16 +17,18 @@
 import { mapGetters } from 'vuex'
 
 import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 
-// TODO: Implement check that gives a warning/error when the same GRF is used more than once
 export default {
   props: {
-    value: VueTypes.oneOfType([VueTypes.string, null]).isRequired,
+    value: VueTypes.oneOfType([AppTypes.id, null]).isRequired,
     channel: VueTypes.integer.isRequired,
+    hideLabel: VueTypes.bool.def(false),
   },
 
   computed: {
     ...mapGetters({
+      rule: 'truncationRule',
       fields: 'fields'
     }),
     selected: {
@@ -38,9 +42,17 @@ export default {
     fieldNames () {
       return Object.values(this.fields)
         .map(field => {
+          const disabled = this.rule
+            ? this.rule.fields
+              .findIndex(inRule => (
+                inRule.field === field.id &&
+                inRule.channel !== this.channel
+              )) >= 0
+            : false
           return {
             text: field.name,
             value: field.id,
+            disabled,
           }
         })
     }

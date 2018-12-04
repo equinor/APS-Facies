@@ -34,8 +34,9 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters } from 'vuex'
 import IconButton from '@/components/selection/IconButton'
+import { isUUID } from '@/utils/typing'
 
 export default {
   name: 'TruncationHeader',
@@ -49,12 +50,24 @@ export default {
       truncationRules: 'truncationRules/ruleTypes',
       templates: 'truncationRules/ruleNames'
     }),
-    ...mapState({
-      preset: state => state.truncationRules.preset
-    }),
+    preset () {
+      const rule = this.$store.getters.truncationRule
+      const { type, template } = this.$store.state.truncationRules.preset
+      return {
+        type: type || (rule ? rule.type : ''),
+        template: template || {
+          text: rule ? rule.name : '',
+        },
+      }
+    },
     type: {
       get: function () {
-        const type = this.$store.state.truncationRules.templates.types.available[this.preset.type]
+        let type = this.preset.type
+        if (!!type && isUUID(type)) {
+          type = this.$store.state.truncationRules.templates.types.available[type]
+        } else if (!!type && !isUUID(type)) {
+          type = Object.values(this.$store.state.truncationRules.templates.types.available).find(item => item.type === type)
+        }
         return type
           ? type.name
           : ''

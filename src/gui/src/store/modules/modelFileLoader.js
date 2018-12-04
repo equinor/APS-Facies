@@ -245,7 +245,7 @@ export default {
             }
             let regionsInZone = zoneRegionsItem[1]
             for (let i = 0; i < regionsInZone.length; i++) {
-              const regionIdFromFile = regionsInZone[i]
+              const regionIdFromFile = regionsInZone[`${i}`]
               let regionFound = false
               for (const regionId in zone.regions) {
                 const region = rootState.zones.available[`${id}`].regions[`${regionId}`]

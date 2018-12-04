@@ -447,7 +447,7 @@ def create_facies_map(gauss_fields, truncation_rule):
             alpha_coord[m] = alpha_realization[i]
         facies_code, facies_index = truncation_rule.defineFaciesByTruncRule(alpha_coord)
 
-        facies[i] = facies_index + 1  # Use fIndx+1 as values in the facies plot
+        facies[i] = facies_code
         if facies_index not in facies_fraction:
             facies_fraction[facies_index] = 0
         facies_fraction[facies_index] += 1

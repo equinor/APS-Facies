@@ -15,6 +15,7 @@
 import VueTypes from 'vue-types'
 import StorableNumericField from '@/components/specification/StorableNumericField'
 import { notEmpty } from '@/utils'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   components: {
@@ -22,7 +23,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    grfId: AppTypes.id.isRequired,
     originType: VueTypes.string.isRequired,
     coordinateAxis: VueTypes.string.isRequired,
     label: VueTypes.string.def(''),

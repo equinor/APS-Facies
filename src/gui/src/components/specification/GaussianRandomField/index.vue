@@ -21,9 +21,24 @@
           label="Variogram"
         />
         <v-select
-          :items="[]"
+          v-model="alphaChannel"
+          :items="alphaChannels"
+          no-data-text="No truncation rule has been selected"
           label="Truncation Rule Role"
-        />
+        >
+          <template
+            slot="item"
+            slot-scope="{ item }"
+          >
+            ɑ<sub>{{ item }}</sub>
+          </template>
+          <template
+            slot="selection"
+            slot-scope="{ item }"
+          >
+            ɑ<sub>{{ item }}</sub>
+          </template>
+        </v-select>
         <icon-button
           :disabled="!canSimulate"
           icon="random"
@@ -70,7 +85,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import VueTypes from 'vue-types'
 
 import rms from '@/api/rms'
@@ -110,12 +125,31 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      rule: 'truncationRule',
+    }),
     ...mapState({
       availableVariograms: state => state.constants.options.variograms.available,
     }),
     gaussianFieldData () {
       return this.value
         ? this.value._data
+        : []
+    },
+    alphaChannel: {
+      get: function () {
+        if (this.rule) {
+          const item = this.rule.fields.find(item => item.field === this.grfId)
+          return item ? item.channel : null
+        } else {
+          return null
+        }
+      },
+      set: function (channel) { this.$store.dispatch('truncationRules/updateFields', { channel, selected: this.grfId }) }
+    },
+    alphaChannels () {
+      return this.rule
+        ? this.rule.fields.map(item => item.channel)
         : []
     },
     isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },

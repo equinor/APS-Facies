@@ -535,6 +535,8 @@ src/unit_test/Created_truncation_maps_cubic.png
 src/unit_test/Created_truncation_maps_cubic_overlay.png
 src/unit_test/Overview_truncation_maps.png
 !src/unit_test/testData_models/*.xml
+!src/unit_test/testData_*/*.dat
+!src/unit_test/testData_updateAPSModel/APS*.xml
 src/unit_test/matplotlibrc
 src/unit_test/integration/matplotlibrc
 

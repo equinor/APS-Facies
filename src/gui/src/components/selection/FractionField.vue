@@ -4,6 +4,7 @@
     :arrow-step="0.01"
     :ranges="ranges"
     :fmu-updatable="fmuUpdatable"
+    :disabled="disabled"
     label=""
     optional
     enforce-ranges
@@ -25,6 +26,7 @@ export default {
   props: {
     value: VueTypes.oneOfType([nullableNumber, updatableType]).isRequired,
     fmuUpdatable: VueTypes.bool.def(false),
+    disabled: VueTypes.bool.def(false),
   },
 
   computed: {

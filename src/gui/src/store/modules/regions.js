@@ -22,7 +22,8 @@ export default {
       dispatch('zones/update', { regions }, { root: true })
       return Promise.resolve(Object.keys(regions))
     },
-    current: ({ commit }, { id }) => {
+    current: ({ commit, dispatch }, { id }) => {
+      dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {

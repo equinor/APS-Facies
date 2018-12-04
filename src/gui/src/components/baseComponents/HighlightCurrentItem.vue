@@ -6,13 +6,14 @@
 
 <script>
 import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   props: {
     item: VueTypes.shape({
       current: VueTypes.bool.isRequired,
     }).loose.isRequired,
-    field: VueTypes.string.isRequired,
+    field: AppTypes.name.isRequired,
   }
 }
 </script>

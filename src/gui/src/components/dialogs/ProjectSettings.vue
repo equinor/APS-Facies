@@ -141,6 +141,12 @@
                 />
               </v-radio-group>
             </v-flex>
+            <v-flex>
+              <v-checkbox
+                v-model="automaticAlphaFieldSelection"
+                label="Automatically assign fields to alpha channels"
+              />
+            </v-flex>
           </v-layout>
         </fieldset>
       </v-card-text>
@@ -177,14 +183,16 @@ export default {
       fmuParameterListLocation: '',
       showZoneNameNumber: '',
       showRegionNameNumber: '',
+      automaticAlphaFieldSelection: ''
     }
   },
 
   watch: {
     dialog: function (value) {
       if (value) {
-        this.showZoneNameNumber = this.$store.state.options.nameNumber.zone.show
-        this.showRegionNameNumber = this.$store.state.options.nameNumber.region.show
+        this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
+        this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
+        this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
       }
     },
   },
@@ -224,8 +232,9 @@ export default {
             dialogFMUParameterListLocation: ${this.fmuParameterListLocation}
             dialogShowZoneNameNumber:       ${this.showZoneNameNumber}
             dialogShowRegionNameNumber:     ${this.showRegionNameNumber}`)
-      this.$store.dispatch('options/nameNumber/zone/set', this.showZoneNameNumber)
-      this.$store.dispatch('options/nameNumber/region/set', this.showRegionNameNumber)
+      this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber)
+      this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber)
+      this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection)
       this.dialog = false
     }
   },

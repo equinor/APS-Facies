@@ -5,14 +5,15 @@
       :key="item.channel"
       :channel="item.channel"
       :value="item.selected"
-      @input="value => update(item, value)"
+      @input="val => update(item, val)"
     />
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import VueTypes from 'vue-types'
+
+import { TruncationRule } from '@/store/utils/domain'
 
 import AlphaSelection from './AlphaSelection'
 
@@ -31,17 +32,19 @@ export default {
   },
 
   props: {
-    minChannels: VueTypes.integer.def(2)
+    value: VueTypes.instanceOf(TruncationRule),
+    minChannels: VueTypes.integer.def(2),
   },
 
   computed: {
-    ...mapGetters({
-      rule: 'truncationRule',
-    }),
     alphas () {
-      return this.rule
-        ? this.rule.fields
-          .map(item => { return { channel: item.channel, selected: item.field || '' } })
+      return this.value
+        ? this.value.fields
+          .map(item => {
+            return {
+              channel: item.channel,
+              selected: item.field || '' }
+          })
         : defaultChannels(this.minChannels)
     },
   },
@@ -53,7 +56,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -1292,13 +1292,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         # ------ Lagoon ------------------
 
-        x1 = XL
-        x2 = XL
-        y1 = 1.0
         y2 = 0.0
         # Intersection between Floodplain line and Lagoon line
         if X2 >= XL:
-            x2 = XL  # TODO: Unused
             y2 = (YF2 - YF) * (XL - X1) / (X2 - X1) + YF
 
         if bhdsit == 1:
@@ -1351,12 +1347,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # BHD polygons should be inserted into the list before Lagoon which is at the end of the list so far
         # WBF
         if bhdsit < 4:
-            # TODO: Unused
-            x1 = Xm2
-            x2 = Xm
-            y1 = Ym
-            y2 = Ym2
-
             if bhdsit == 1:
                 if Xm2 > X4:
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,0.0),(Xm,0.0)],True) #BHD
@@ -1602,9 +1592,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
             # Intersection between y = YWIB and the line for boundary between Subbay and WFB
             x2 = x1 + (YWIB - y1) * (x2 - x1) / (y2 - y1)
-            x1 = X4
-            y1 = YWIB
-            y2 = YWIB
 
             if bhdsit == 4:
                 if X2 > XL:
@@ -1712,11 +1699,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
                         [X4, 1.0]
                     ])
                     polygons.insert(2, polyWBF)
-
-            x1 = X4
-            x2 = X4
-            y1 = 1.0
-            y2 = YWIB
 
         # Area BHD and WBF
         WBF_area = 0.0

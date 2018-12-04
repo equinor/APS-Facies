@@ -21,11 +21,12 @@
 
 <script>
 import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   props: {
     items: VueTypes.arrayOf(VueTypes.shape({
-      name: VueTypes.string,
+      name: AppTypes.name,
       selected: VueTypes.bool
     }).loose).isRequired,
 

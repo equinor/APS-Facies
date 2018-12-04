@@ -55,10 +55,57 @@ const mirrorZoneRegions = store => {
   })
 }
 
+const updateFacies = (dispatch, rule, polygon, faciesId, swap = true) => {
+  const existing = Object.values(rule.polygons)
+    .find(polygon => polygon.facies === faciesId)
+  return existing && swap
+    ? dispatch('truncationRules/swapFacies', {
+      rule,
+      polygons: [polygon, existing]
+    })
+    : dispatch('truncationRules/updateFacies', {
+      rule,
+      polygon,
+      faciesId
+    })
+}
+
+const makeOption = (def, legal) => {
+  if (!Array.isArray(legal)) {
+    throw new Error('The legal values MUST be a list')
+  } else if (legal.indexOf(def) === -1) {
+    throw new Error('The default value MUST be a legal value')
+  }
+  return {
+    namespaced: true,
+    state: () => {
+      return {
+        value: def,
+        legal: legal
+      }
+    },
+    actions: {
+      set: ({ commit, state }, value) => {
+        if (state.legal.indexOf(value) >= 0) {
+          commit('SET', value)
+        }
+      },
+    },
+    mutations: {
+      SET: (state, value) => {
+        state.value = value
+      },
+    },
+    getters: {},
+  }
+}
+
 export {
   promiseSimpleCommit,
   indexOfFacies,
   fetchParameterHelper,
   mirrorZoneRegions,
-  compareFacies
+  updateFacies,
+  compareFacies,
+  makeOption,
 }

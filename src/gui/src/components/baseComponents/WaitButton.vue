@@ -12,6 +12,7 @@
 
 <script>
 import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   name: 'WaitBtn',
@@ -21,7 +22,7 @@ export default {
     waiting: VueTypes.bool.def(false),
     disabled: VueTypes.bool.def(false),
     dark: VueTypes.bool.def(false),
-    color: VueTypes.string,
+    color: AppTypes.color,
   },
 }
 </script>

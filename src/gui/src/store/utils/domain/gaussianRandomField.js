@@ -111,6 +111,15 @@ class GaussianRandomField extends ZoneRegionDependent {
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
     this._data = []
   }
+
+  get specification () {
+    return {
+      name: this.name,
+      variogram: this.variogram,
+      trend: this.trend,
+      settings: this.settings,
+    }
+  }
 }
 
 export {

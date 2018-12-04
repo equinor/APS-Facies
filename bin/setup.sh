@@ -56,21 +56,6 @@ sudo make install
 
 cd ${SOURCE_DIR}
 
-# Download and install SQLite
-SQLITE3_VERSION=3200100
-wget https://sqlite.org/2017/sqlite-autoconf-${SQLITE3_VERSION}.tar.gz
-tar -xvf sqlite-autoconf-${SQLITE3_VERSION}.tar.gz
-rm -f sqlite-autoconf-${SQLITE3_VERSION}.tar.gz
-cd sqlite-autoconf-${SQLITE3_VERSION}
-./configure --enable-readline \
-            --enable-threadsafe \
-            --enable-dynamic-extensions \
-            --enable-fts5 \
-            --enable-json1 \
-            --enable-session
-make
-make install
-
 OPENSSL_LIBS='-L/opt/ssl/lib -lssl -lcrypto'
 
 # Installing Python

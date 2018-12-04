@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+
 import gridModels from '@/store/modules/gridModels'
 import zones from '@/store/modules/zones'
 import regions from '@/store/modules/regions'
@@ -9,10 +10,11 @@ import truncationRules from '@/store/modules/truncationRules'
 import parameters from '@/store/modules/parameters'
 import constants from '@/store/modules/constants'
 import options from '@/store/modules/options'
-import { mirrorZoneRegions } from '@/store/utils'
-import { hasCurrentParents, resolve } from '@/utils'
 import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelName from '@/store/modules/modelName'
+
+import { mirrorZoneRegions } from '@/store/utils'
+import { hasCurrentParents, resolve } from '@/utils'
 
 Vue.use(Vuex)
 
@@ -66,7 +68,9 @@ export default new Vuex.Store({
       return state.facies.current
     },
     truncationRule: (state, getters) => {
-      return state.truncationRules.rules ? Object.values(state.truncationRules.rules).find(rule => hasCurrentParents(rule, getters)) : null
+      // FIXME: This only works if there is one and ONLY one truncation rule in existence for a given zone/region
+      // use truncationRules.current in stead
+      return getters['truncationRules/current']
     },
     regionParameter: (state) => {
       return state.parameters.region.selected
@@ -93,7 +97,7 @@ export default new Vuex.Store({
       return state.regions.available
     },
     faciesTable: (state) => {
-      return Object.values(state.facies.available).map(facies => { return { id: facies.id, name: facies.name, code: facies.code, color: facies.color } })
+      return Object.values(state.facies.available)
     },
     // Utility method for getting IDs
     id: (state) => (type, name) => {
@@ -110,5 +114,13 @@ export default new Vuex.Store({
       }
       return null
     },
+    byId: (state) => (id) => {
+      const relevant = Object.values(state)
+        .map(thing => thing.available || thing.field)
+        .filter(items => !!items && items.hasOwnProperty(id))
+      return relevant.length > 0
+        ? relevant[0][`${id}`]
+        : null
+    }
   },
 })

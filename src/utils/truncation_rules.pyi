@@ -20,6 +20,7 @@ class TruncationSpecification:
 
     fields_in_zone:                  List[str]
     fields_in_rule:                  List[str]
+    fields_in_background:            List[List[List[str]]]
     values:                          Dict
     probabilities:                   List[float]
     use_constant_parameters:         bool

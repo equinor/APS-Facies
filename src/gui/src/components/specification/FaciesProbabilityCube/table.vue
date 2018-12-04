@@ -11,14 +11,9 @@
       slot="headerCell"
       slot-scope="props"
     >
-      <v-tooltip bottom>
-        <span slot="activator">
-          {{ props.header.text }}
-        </span>
-        <span>
-          {{ props.header.text }}
-        </span>
-      </v-tooltip>
+      <optional-help-item
+        :value="props.header"
+      />
     </template>
     <template
       slot="items"
@@ -61,9 +56,11 @@
 import { mapState } from 'vuex'
 
 import FractionField from '@/components/selection/FractionField'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 
 export default {
   components: {
+    OptionalHelpItem,
     FractionField,
   },
 

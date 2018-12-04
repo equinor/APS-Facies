@@ -13,7 +13,7 @@
 
 <script>
 import { mapState } from 'vuex'
-import VueTypes from 'vue-types'
+import { AppTypes } from '@/utils/typing'
 import StackingAngle from './StackingAngle'
 
 export default {
@@ -22,7 +22,7 @@ export default {
   },
 
   props: {
-    grfId: VueTypes.string.isRequired,
+    grfId: AppTypes.id.isRequired,
   },
 
   computed: {
