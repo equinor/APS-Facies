@@ -6,12 +6,15 @@
       <div slot="header">
         <h2>Truncation Rules</h2>
       </div>
-      <truncation-header/>
+      <truncation-header />
       <v-layout
         v-if="rule"
         row
       >
-        <v-flex xs12>
+        <v-flex
+          v-if="notBayfill"
+          xs12
+        >
           <v-popover
             :disabled="canUseOverlay"
             trigger="hover"
@@ -23,7 +26,10 @@
               label="Include Overlay Facies"
             />
             <span
-              slot="popover">{{ useOverlayTooltip }}</span>
+              slot="popover"
+            >
+              {{ useOverlayTooltip }}
+            </span>
           </v-popover>
         </v-flex>
       </v-layout>
@@ -54,6 +60,7 @@ import NonCubicSpecification from '@/components/specification/TruncationRule/Non
 import TruncationHeader from '@/components/specification/TruncationRule/header'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay'
 import { isUUID } from '@/utils/typing'
+import { Bayfill } from '@/store/utils/domain'
 
 export default {
   components: {
@@ -105,15 +112,24 @@ export default {
       )].length
       return numFacies > numFaciesInBackground
     },
+    notBayfill () {
+      return !(this.rule instanceof Bayfill)
+    },
+    overlayErrors () {
+      return [
+        { check: this.notBayfill, errorMessage: 'Bayfill cannot have user defined overlay facies' },
+        { check: this.hasEnoughFacies, errorMessage: 'There are not enough facies has been selected for this truncation rule' },
+        { check: this.hasEnoughFields, errorMessage: 'There are not enough gaussian random fields to use with overlay' },
+      ]
+    },
     canUseOverlay () {
-      return this.hasEnoughFacies && this.hasEnoughFields
+      return this.overlayErrors.every(({ check }) => !!check)
     },
     useOverlayTooltip () {
-      return this.hasEnoughFacies
-        ? this.hasEnoughFields
-          ? null
-          : 'There are not enough gaussian random fields to use with overlay'
-        : 'There are not enough facies has been selected for this truncation rule'
+      for (const { check, errorMessage } of this.overlayErrors) {
+        if (!check) return errorMessage
+      }
+      return null
     },
   },
 }

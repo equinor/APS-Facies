@@ -1,3 +1,5 @@
+import { Facies, GlobalFacies } from '@/store/utils/domain'
+
 const promiseSimpleCommit = (commit, commitment, data, check = true, error = '') => {
   return new Promise((resolve, reject) => {
     if (check) {
@@ -39,7 +41,11 @@ const mirrorZoneRegions = store => {
       !!state.zones.current
     ) {
       if (type === 'zones/REGIONS') {
-        store.commit('regions/AVAILABLE', { regions: payload.regions })
+        if (payload.zoneId === state.zones.current) {
+          store.commit('regions/AVAILABLE', { regions: payload.regions })
+        } else {
+          // Nothing to be done
+        }
       } else if (type === 'zones/CURRENT') {
         store.commit('regions/AVAILABLE', { regions: state.zones.available[`${payload.id}`].regions })
       } else if (type === 'zones/SELECTED') {
@@ -68,6 +74,14 @@ const updateFacies = (dispatch, rule, polygon, faciesId, swap = true) => {
       polygon,
       faciesId
     })
+}
+
+const changeFacies = ({ state, commit }, facies) => {
+// TODO: Update proportion in truncation rule if applicable
+  const old = state.available[`${facies.id}`]
+  // need this to be be synchronous:
+  const _class = state.global ? Facies : GlobalFacies
+  commit('UPDATE', new _class({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
 }
 
 const makeOption = (def, legal) => {
@@ -106,6 +120,7 @@ export {
   fetchParameterHelper,
   mirrorZoneRegions,
   updateFacies,
+  changeFacies,
   compareFacies,
   makeOption,
 }

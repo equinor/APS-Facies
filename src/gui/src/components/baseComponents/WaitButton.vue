@@ -5,8 +5,12 @@
     :color="color"
     @click="e => $emit('click', e)"
   >
-    <span v-if="!waiting">{{ title }}</span>
-    <span v-else><v-progress-circular indeterminate/></span>
+    <span v-if="!waiting">
+      {{ title }}
+    </span>
+    <span v-else>
+      <v-progress-circular indeterminate />
+    </span>
   </v-btn>
 </template>
 

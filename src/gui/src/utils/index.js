@@ -1,7 +1,12 @@
 import _ from 'lodash'
+import uuidv5 from 'uuid/v5'
+import { getId } from '@/utils/typing'
 
 const makeData = (items, _class) => {
   const data = {}
+  if (_class.toLocaleString().indexOf('"CodeName"') >= 0 || _class.toLocaleString().indexOf('"Named"') >= 0) {
+    items = items.filter(({ name }) => !!name)
+  }
   for (const item of items) {
     const instance = new _class(item)
     data[instance.id] = instance
@@ -9,20 +14,30 @@ const makeData = (items, _class) => {
   return data
 }
 
+const defaultSimulationSettings = () => {
+  return {
+    gridAzimuth: 0,
+    gridSize: { x: 100, y: 100, z: 1 },
+    simulationBox: { x: 1000, y: 1000, z: 10 },
+    simulationBoxOrigin: { x: 0, y: 0 },
+  }
+}
+
 const makeTruncationRuleSpecification = (rule, rootGetters) => {
   return {
     type: rule.type,
     globalFaciesTable: rootGetters['facies/selected']
       .filter(facies => facies.previewProbability && facies.previewProbability > 0)
-      .map(facies => {
-        let polygon = Object.values(rule.polygons).find(polygon => polygon.facies === facies.id)
+      .map(({ facies, previewProbability, id }) => {
+        let polygon = Object.values(rule.polygons).find(polygon => polygon.facies === id)
         if (isEmpty(polygon) && rule.overlay) {
-          polygon = Object.values(rule.overlay).find(polygon => polygon.facies === facies.id)
+          polygon = Object.values(rule.overlay).find(polygon => polygon.facies === id)
         }
+        const globalFacies = rootGetters.faciesTable.find(({ id }) => id === facies)
         return {
-          code: facies.code,
-          name: facies.name,
-          probability: facies.previewProbability,
+          code: globalFacies.code,
+          name: globalFacies.name,
+          probability: previewProbability,
           inZone: true,
           inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
         }
@@ -93,13 +108,11 @@ const hasCurrentParents = (item, getters) => {
 }
 
 const hasParents = (item, zone, region) => {
-  const id = item => item.id || item
-
-  if (item.parent.zone === id(zone)) {
+  if (item.parent.zone === getId(zone)) {
     // The Zone ID is consistent
     if (region) {
       // We are dealing with a 'thing', that is SUPPOSED to have a region
-      return item.parent.region === id(region)
+      return item.parent.region === getId(region)
     } else {
       // The 'thing' should NOT have a region
       return !item.parent.region
@@ -107,6 +120,10 @@ const hasParents = (item, zone, region) => {
   } else {
     return false
   }
+}
+
+const parentId = ({ zone, region }) => {
+  return uuidv5(getId(region), getId(zone))
 }
 
 const hasEnoughFacies = (rule, getters) => {
@@ -165,6 +182,7 @@ const allSet = (items, prop) => {
 }
 
 export {
+  defaultSimulationSettings,
   makeData,
   makeTruncationRuleSpecification,
   selectItems,
@@ -172,11 +190,12 @@ export {
   invalidateChildren,
   hasCurrentParents,
   hasParents,
+  parentId,
   hasEnoughFacies,
   getRandomInt,
   newSeed,
   allSet,
   resolve,
   isEmpty,
-  notEmpty
+  notEmpty,
 }

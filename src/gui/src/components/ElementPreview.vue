@@ -7,27 +7,28 @@
       v-model="expanded"
     >
       <v-expansion-panel-content>
-        <div slot="header">Preview</div>
-        <preview-header/>
+        <div slot="header">
+          Preview
+        </div>
+        <preview-header />
         <v-card>
           <v-layout
             row
             wrap
           >
-            <v-flex xs1/>
+            <v-flex xs1 />
             <v-flex>
               <h3>Truncation rule</h3>
               <truncation-map
                 :truncation-rule-id="ruleId"
               />
             </v-flex>
-            <v-flex xs1/>
+            <v-flex xs1 />
             <v-flex>
               <h3>Realization</h3>
-              <facies-realization
-              />
+              <facies-realization />
             </v-flex>
-            <v-flex xs1/>
+            <v-flex xs1 />
             <v-flex xs12>
               <gaussian-plots
                 v-if="isGaussianFieldsSimulated"
@@ -79,7 +80,7 @@ export default {
     rule () { return this.$store.getters.truncationRule },
     ruleId () { return this.rule ? this.rule.id : '' },
     isGaussianFieldsSimulated () {
-      return this.fields.every(field => field._data.length > 0 && field._data[0].length > 0)
+      return this.fields.every(field => field.simulated)
     },
   },
 }

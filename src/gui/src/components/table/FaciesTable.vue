@@ -1,8 +1,8 @@
 <template>
   <v-data-table
+    v-model="selected"
     :headers="headers"
     :items="facies"
-    v-model="selected"
     item-key="name"
     class="elevation-1"
     hide-actions
@@ -21,12 +21,21 @@
     >
       <tr @click="() => current(props.item)">
         <td>
-          <v-checkbox
-            v-model="props.selected"
-            :indeterminate="props.item.selected === 'intermediate'"
-            primary
-            hide-details
-          />
+          <v-popover
+            :disabled="canSelect"
+            trigger="hover"
+          >
+            <v-checkbox
+              v-model="props.selected"
+              :indeterminate="props.item.selected === 'intermediate'"
+              :disabled="!canSelect"
+              primary
+              hide-details
+            />
+            <span slot="popover">
+              {{ selectFaciesError }}
+            </span>
+          </v-popover>
         </td>
         <td class="text-xs-left">
           <v-edit-dialog
@@ -94,12 +103,13 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Swatches from 'vue-swatches'
 import VueTypes from 'vue-types'
 
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
+import { hasCurrentParents } from '@/utils'
 
 export default {
   components: {
@@ -152,23 +162,43 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      'canSelect': 'canSpecifyModelSettings',
+    }),
     ...mapState({
-      facies: state => Object.keys(state.facies.available)
-        .map(id => {
-          const facies = state.facies.available[`${id}`]
+      facies: state => Object.values(state.facies.global.available)
+        .map(facies => {
           return {
-            id,
+            id: facies.id,
             ...facies,
-            current: id === state.facies.current,
+            current: facies.id === state.facies.global.current,
           }
         }),
+      parent: state => { return { zone: state.zones.current, region: state.regions.current } },
     }),
     selected: {
-      get: function () { return Object.values(this.facies).filter(item => item.selected) },
-      set: function (value) { this.$store.dispatch('facies/select', value) },
+      get: function () {
+        const state = this.$store.state
+        const getters = this.$store.getters
+        return Object.values(state.facies.global.available)
+          .filter(facies => Object.values(state.facies.available)
+            .filter(facies => hasCurrentParents(facies, getters))
+            .findIndex(localFacies => localFacies.facies === facies.id) >= 0)
+      },
+      set: function (value) {
+        this.$store.dispatch('facies/select', { items: value, parent: this.parent })
+      },
     },
     availableColors () {
       return this.$store.state.constants.faciesColors.available
+    },
+    selectFaciesError () {
+      const item = this.$store.state.regions.use && !this.parent.region
+        ? 'Region'
+        : 'Zone'
+      return !this.canSelect
+        ? `A ${item} must be selected, before including a facies in the model`
+        : ''
     },
   },
 
@@ -176,19 +206,19 @@ export default {
     changeColor (facies, color) {
       if (facies.color !== color) {
         // Only dispatch when the color *actually* changes
-        return this.$store.dispatch('facies/changed', { id: facies.id, color })
+        return this.$store.dispatch('facies/global/changed', { id: facies.id, color })
       } else {
         return Promise.resolve(facies)
       }
     },
     current ({ id }) {
-      return this.$store.dispatch('facies/current', { id })
+      return this.$store.dispatch('facies/global/current', { id })
     },
     changeName (value) {
-      return this.$store.dispatch('facies/changed', { id: value.id, name: value.name || `F${value.code}` })
+      return this.$store.dispatch('facies/global/changed', { id: value.id, name: value.name || `F${value.code}` })
     },
     changeAlias (facies) {
-      return this.$store.dispatch('facies/changed', { id: facies.id, alias: facies.alias })
+      return this.$store.dispatch('facies/global/changed', { id: facies.id, alias: facies.alias })
     },
   },
 

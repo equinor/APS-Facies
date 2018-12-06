@@ -40,8 +40,8 @@
             >
               <v-flex xs2>
                 <gaussian-field-name
-                  :value="field"
                   :ref="field.id"
+                  :value="field"
                 />
               </v-flex>
               <v-flex
@@ -51,7 +51,7 @@
                   icon="remove"
                   @click.stop="deleteField(field)"
                 />
-                <confirmation-dialog :ref="`confirmation_${field.id}`"/>
+                <confirmation-dialog :ref="`confirmation_${field.id}`" />
               </v-flex>
             </v-layout>
           </div>

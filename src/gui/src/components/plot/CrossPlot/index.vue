@@ -29,14 +29,16 @@ export default {
     field () { return this._getField(this.value[0]) },
     other () { return this._getField(this.value[1]) },
     dataDefinition () {
-      return [{
-        type: 'scattergl',
-        mode: 'markers',
-        marker: { size: 1 },
-        // TODO: Use Array.prototype.flat when possible
-        x: flatten(this.field._data),
-        y: flatten(this.other._data),
-      }]
+      return this.field.simulated && this.other.simulated
+        ? [{
+          type: 'scattergl',
+          mode: 'markers',
+          marker: { size: 1 },
+          // TODO: Use Array.prototype.flat when possible
+          x: flatten(this.field._data),
+          y: flatten(this.other._data),
+        }]
+        : []
     },
   },
 
@@ -49,7 +51,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-
-</style>

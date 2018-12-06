@@ -1,6 +1,6 @@
 <template>
   <selection-table
-    header-name="Regions"
+    header-name="Region"
     item-type="region"
     no-data-text="A Zone must be selected, before its regions may be shown"
     show-name

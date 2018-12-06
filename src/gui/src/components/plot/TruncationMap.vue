@@ -65,7 +65,7 @@ export default {
       get () {
         const rule = this.rule
         return rms.truncationPolygons(makeTruncationRuleSpecification(rule, this.$store.getters))
-          .then(polygons => plotify(polygons, this.$store.getters.faciesTable))
+          .then(polygons => plotify(polygons, this.$store.getters['facies/global/selected']))
       },
       shouldUpdate () {
         return this.$store.getters['truncationRules/ready'](this.truncationRuleId)

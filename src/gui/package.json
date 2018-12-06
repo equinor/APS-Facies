@@ -1,16 +1,16 @@
 {
   "name": "aps-gui",
   "version": "0.5.0",
+  "private": true,
   "description": "The GUI component of the APS workflow",
   "author": "Sindre Nistad <snis@equinor.com>",
-  "private": true,
   "scripts": {
-    "serve:gui": "vue-cli-service serve --host=localhost",
-    "serve:api": "make -C ../.. run-rms.uipy-mock",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e"
+    "serve:api": "make -C ../.. run-rms.uipy-mock",
+    "serve:gui": "vue-cli-service serve --host=localhost",
+    "test:e2e": "vue-cli-service test:e2e",
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
@@ -35,6 +35,7 @@
   "devDependencies": {
     "@babel/core": "^7.1.2",
     "@types/mathjs": "^4.4.3",
+    "@types/vuelidate": "^0.7.2",
     "@vue/cli-plugin-babel": "^3.0.1",
     "@vue/cli-plugin-eslint": "^3.0.1",
     "@vue/cli-plugin-unit-jest": "^3.0.1",
@@ -42,12 +43,15 @@
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/test-utils": "^1.0.0-beta.20",
     "axios": "^0.18.0",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^23.0.1",
     "babel-loader": "^8.0.4",
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-transform-imports": "^1.4.1",
+    "eslint": "^5.8.0",
     "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-vue-types": "^0.2.0",
+    "eslint-plugin-vue": "^5.0.0-0",
+    "eslint-plugin-vue-types": "^1.0.0",
     "file-loader": "^2.0.0",
     "ify-loader": "^1.1.0",
     "jest-webpack-resolver": "^0.3.0",
@@ -65,30 +69,6 @@
     "vue-types": "^1.3.2",
     "vuetify-loader": "^1.0.5",
     "webpack": "^4.12.1"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/reccomended",
-      "@vue/standard"
-    ],
-    "rules": {
-      "vue/attribute-hyphenation": [
-        "error",
-        "always"
-      ],
-      "vue/attributes-order": "error",
-      "vue/html-quotes": [
-        "error",
-        "double"
-      ]
-    },
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
   },
   "postcss": {
     "plugins": {
@@ -136,12 +116,10 @@
   },
   "lint-staged": {
     "*.js": [
-      "vue-cli-service lint",
-      "git add"
+      "vue-cli-service lint"
     ],
     "*.vue": [
-      "vue-cli-service lint",
-      "git add"
+      "vue-cli-service lint"
     ]
   }
 }

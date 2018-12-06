@@ -6,8 +6,7 @@
 
 <script>
 import OverlayFaciesTable from './table'
-import VueTypes from 'vue-types'
-import { TruncationRule } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   components: {
@@ -15,7 +14,7 @@ export default {
   },
 
   props: {
-    value: VueTypes.instanceOf(TruncationRule).isRequired,
+    value: AppTypes.truncationRule.isRequired,
   },
 }
 </script>

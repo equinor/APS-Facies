@@ -5,15 +5,12 @@
     multiple
     @input.capture="facies => updateBackgroundFacies(facies)"
   />
-
 </template>
 
 <script>
 import VueTypes from 'vue-types'
 
 import FaciesSpecificationBase from './base'
-
-import { TruncationRule } from '@/store/utils/domain'
 
 import { AppTypes } from '@/utils/typing'
 
@@ -25,7 +22,7 @@ export default {
   },
 
   props: {
-    rule: VueTypes.instanceOf(TruncationRule).isRequired,
+    rule: AppTypes.truncationRule.isRequired,
     value: VueTypes.shape({
       group: AppTypes.ids.isRequired,
     }).loose.isRequired,

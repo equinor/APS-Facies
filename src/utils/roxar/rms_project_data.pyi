@@ -17,6 +17,7 @@ class CodeName(NamedTuple):
     name: str
 
 
+ProjectName = NewType('ProjectName', str)
 TrendName = NewType('TrendName', str)
 VariogramName = NewType('VariogramName', str)
 GridName = NewType('GridName', str)
@@ -57,6 +58,9 @@ class RMSData:
             self,
             _property
     ) -> bool: ...
+    def get_project_name(
+            self
+    ) -> ProjectName: ...
     def get_grid_models(
             self
     ) -> GridModels: ...

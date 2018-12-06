@@ -1,6 +1,6 @@
 import { Region } from '@/store/utils/domain/region'
 import { GaussianRandomField } from '@/store/utils/domain/gaussianRandomField'
-import { Facies } from '@/store/utils/domain/facies'
+import { Facies, GlobalFacies } from '@/store/utils/domain/facies'
 import { Zone } from '@/store/utils/domain/zone'
 import {
   TruncationRule,
@@ -11,6 +11,7 @@ import {
 export {
   Region,
   Zone,
+  GlobalFacies,
   Facies,
   GaussianRandomField,
   TruncationRule,

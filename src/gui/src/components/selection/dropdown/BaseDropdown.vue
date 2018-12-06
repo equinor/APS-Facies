@@ -1,7 +1,7 @@
 <template>
   <v-select
-    :items="items"
     v-model="selected"
+    :items="items"
     :label="label"
     :disabled="disabled"
   />

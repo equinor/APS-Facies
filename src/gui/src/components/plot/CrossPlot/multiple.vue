@@ -45,7 +45,7 @@
 <script>
 import VueTypes from 'vue-types'
 
-import { GaussianRandomField } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 import CrossPlot from './index'
 
@@ -55,7 +55,7 @@ export default {
   },
 
   props: {
-    value: VueTypes.arrayOf(VueTypes.instanceOf(GaussianRandomField)).isRequired,
+    value: VueTypes.arrayOf(AppTypes.gaussianRandomField).isRequired,
   },
 
   data () {

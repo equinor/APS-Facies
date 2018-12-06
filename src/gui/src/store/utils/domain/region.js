@@ -1,7 +1,7 @@
-import { SelectableItem } from '@/store/utils/domain/bases'
+import { Selectable, CodeName, BaseItem } from '@/store/utils/domain/bases'
 
-export class Region extends SelectableItem {
-  constructor ({ code, name, _id, selected }) {
-    super({ code, name, _id, selected })
+export class Region extends Selectable(CodeName(BaseItem)) {
+  constructor ({ ...rest }) {
+    super(rest)
   }
 }

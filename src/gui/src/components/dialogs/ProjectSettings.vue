@@ -15,7 +15,7 @@
       <v-card-title
         class="headline"
       >
-        Project Settings
+        {{ title }}
       </v-card-title>
       <v-card-text>
         <fieldset>
@@ -195,7 +195,7 @@
                   persistent-hint
                 />
               </v-flex>
-              <v-spacer/>
+              <v-spacer />
               <v-flex xs4>
                 <numeric-field
                   :value="simulationSettings.simulationBox.x"
@@ -265,7 +265,7 @@
         </fieldset>
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <bold-button
           title="Cancel"
           @click="cancel"
@@ -280,6 +280,7 @@
 </template>
 
 <script>
+import rms from '@/api/rms'
 
 import BoldButton from '@/components/baseComponents/BoldButton'
 import NumericField from '@/components/selection/NumericField'
@@ -299,8 +300,15 @@ export default {
       fmuParameterListLocation: '',
       showZoneNameNumber: '',
       showRegionNameNumber: '',
-      automaticAlphaFieldSelection: ''
+      automaticAlphaFieldSelection: '',
     }
+  },
+
+  asyncComputed: {
+    async title () {
+      const name = await rms.projectName()
+      return name ? `Project settings for ${name}` : 'Project settings'
+    },
   },
 
   computed: {

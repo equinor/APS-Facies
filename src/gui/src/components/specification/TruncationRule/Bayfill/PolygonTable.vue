@@ -27,10 +27,9 @@
         </td>
         <td class="text-xs-left">
           <!--TODO: Figure out why input happens twice-->
-          <v-select
-            :items="faciesOptions"
-            :value="props.item.facies"
-            @input.capture="facies => updateFacies(props.item, facies)"
+          <facies-specification
+            :value="props.item"
+            :rule="value"
           />
         </td>
         <td>
@@ -40,7 +39,7 @@
             fmu-updatable
             @input="factor => updateFactor(props.item, factor)"
           />
-          <slot v-else/>
+          <slot v-else />
         </td>
       </tr>
     </template>
@@ -48,24 +47,25 @@
 </template>
 
 <script>
-import VueTypes from 'vue-types'
 import { mapGetters } from 'vuex'
 
 import FractionField from '@/components/selection/FractionField'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
+import FaciesSpecification from '@/components/specification/Facies'
 
 import { updateFacies } from '@/store/utils'
 import { notEmpty } from '@/utils'
-import { TruncationRule } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   components: {
     OptionalHelpItem,
     FractionField,
+    FaciesSpecification,
   },
 
   props: {
-    value: VueTypes.instanceOf(TruncationRule)
+    value: AppTypes.truncationRule,
   },
 
   computed: {

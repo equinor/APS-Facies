@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep'
 
-import { ZoneRegionDependent } from '@/store/utils/domain/bases'
+import { ZoneRegionDependent, Named, BaseItem } from '@/store/utils/domain/bases'
 import { newSeed } from '@/utils'
 
 const updatableValue = (value = null, updatable = false) => {
@@ -77,7 +77,7 @@ class Trend {
     originZUpdatable = false,
     originType = 'ABSOLUTE',
     relativeSize = 0,
-    relativeSizeUpdateble = false,
+    relativeSizeUpdatable = false,
     relativeStdDev = 0,
     relativeStdDevUpdatable = false
   }) {
@@ -97,27 +97,35 @@ class Trend {
       z: updatableValue(originZ, !!originZUpdatable),
       type: originType
     }
-    this.relativeSize = updatableValue(relativeSize, !!relativeSizeUpdateble)
+    this.relativeSize = updatableValue(relativeSize, !!relativeSizeUpdatable)
     this.relativeStdDev = updatableValue(relativeStdDev, !!relativeStdDevUpdatable)
   }
 }
 
-class GaussianRandomField extends ZoneRegionDependent {
-  constructor ({ name, variogram = null, trend = null, settings = null, _id, zone, region = null }) {
-    super({ _id, zone, region })
-    this.name = name
+class GaussianRandomField extends ZoneRegionDependent(Named(BaseItem)) {
+  constructor ({ variogram = null, trend = null, settings = null, ...rest }) {
+    super(rest)
     this.variogram = variogram || new Variogram({})
     this.trend = trend || new Trend({})
-    this._settings = settings || defaultSettings()
+    this.settings = settings || defaultSettings()
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
+    //   E.g. use a hash of the specification (variogram, trend, and settings)
     this._data = []
   }
 
-  settings (store = null) {
-    const settings = store ? cloneDeep(store.getters.simulationSettings) : {}
+  get simulated () {
+    return this._data.length > 0 && this._data[0].length > 0
+  }
+
+  specification ({ rootGetters } = {}) {
     return {
-      ...settings,
-      ...this._settings,
+      name: this.name,
+      variogram: this.variogram,
+      trend: this.trend,
+      settings: {
+        ...rootGetters ? cloneDeep(rootGetters.simulationSettings()) : {},
+        ...this.settings
+      },
     }
   }
 }

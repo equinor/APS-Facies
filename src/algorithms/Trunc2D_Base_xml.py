@@ -1357,9 +1357,6 @@ Background facies:
             p = faciesProb[i]
             pNew = int(resolution * p + 0.5) / resolution
             sumProb += pNew
-            # if minProb > pNew:
-            #    minProb = pNew
-            #    indxMin = i
             if maxProb < pNew:
                 maxProb = pNew
                 indxMax = i

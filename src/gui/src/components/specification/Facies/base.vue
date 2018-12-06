@@ -5,7 +5,6 @@
     :multiple="multiple"
     @input.capture="facies => $emit('input', facies)"
   />
-
 </template>
 
 <script>
@@ -28,10 +27,11 @@ export default {
       selectedFacies: 'facies/selected',
     }),
     faciesOptions () {
+      const getters = this.$store.getters
       return this.selectedFacies
         .map(facies => {
           return {
-            text: facies.name,
+            text: getters['facies/nameById'](facies.id),
             value: facies.id,
             disabled: this.multiple
               ? this.rule.overlayPolygons.map(polygon => polygon.facies).indexOf(facies.id) >= 0

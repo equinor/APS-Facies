@@ -1,7 +1,7 @@
 <template>
   <v-layout column>
-    <zone-selection/>
-    <choose-region-parameter/>
+    <zone-selection />
+    <choose-region-parameter />
     <region-selection
       v-show="canShowRegions"
     />

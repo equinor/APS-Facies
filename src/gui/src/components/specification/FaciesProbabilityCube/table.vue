@@ -57,6 +57,7 @@ import { mapState } from 'vuex'
 
 import FractionField from '@/components/selection/FractionField'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
+import { hasCurrentParents } from '@/utils'
 
 export default {
   components: {
@@ -66,19 +67,6 @@ export default {
 
   computed: {
     ...mapState({
-      items: state => {
-        const items = state.facies.available
-        return Object.keys(items)
-          .map(id => {
-            const item = items[`${id}`]
-            return {
-              id,
-              ...item,
-              selected: item.selected,
-            }
-          })
-          .filter(item => item.selected)
-      },
       probabilityCubes: state => [{ text: '', disabled: false }]
         .concat(state.parameters.probabilityCube.available
           .map(parameter => {
@@ -89,8 +77,24 @@ export default {
             }
           })
         ),
-      useProbabilityCubes: state => !state.facies.constantProbability,
     }),
+    useProbabilityCubes () {
+      return !this.$store.getters['facies/constantProbability']
+    },
+    items () {
+      const state = this.$store.state
+      const getters = this.$store.getters
+      const items = state.facies.available
+      return Object.values(items)
+        .filter(item => hasCurrentParents(item, getters))
+        .map(item => {
+          return {
+            id: item.id,
+            name: state.facies.global.available[`${item.facies}`].name,
+            ...item,
+          }
+        })
+    },
     noDataText () {
       return 'No Facies selected'
     },

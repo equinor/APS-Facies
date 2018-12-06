@@ -18,7 +18,7 @@
           coordinate-axis="x"
         />
       </v-flex>
-      <v-flex xs1/>
+      <v-flex xs1 />
       <v-flex
         md11
         lg3
@@ -29,7 +29,7 @@
           coordinate-axis="y"
         />
       </v-flex>
-      <v-flex xs1/>
+      <v-flex xs1 />
       <v-flex
         v-if="!isEllipticCone"
         md11
@@ -43,8 +43,8 @@
       </v-flex>
     </v-layout>
     <v-select
-      :items="availableOriginTypes"
       v-model="originType"
+      :items="availableOriginTypes"
       label="Origin type"
     />
   </div>

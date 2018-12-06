@@ -4,8 +4,8 @@
       :grf-id="grfId"
     />
     <v-select
-      :items="availableStackingDirection"
       v-model="stackingDirection"
+      :items="availableStackingDirection"
       label="Stacking direction"
     />
   </div>
