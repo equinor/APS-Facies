@@ -1,0 +1,45 @@
+<?xml version="1.0" ?>
+<!-- This model specification is used in the script createProbabilityLogs.py -->
+
+<ProbLogs>
+  <GridModelName>GridModelFine</GridModelName>      
+  <BlockedWells> BW  </BlockedWells>
+  <FaciesLogName> Deterministic_facies </FaciesLogName>
+  <ZoneLogName>   Zone  </ZoneLogName>
+  <OutputPrefix> Prob </OutputPrefix>
+  <ModellingFaciesPerZone>
+    <Zone number="1">  F1 F2 F3 F4 F5 </Zone>
+    <Zone number="2">  F1 F2 F3 F4 F5 </Zone>
+    <Zone number="3">  F1 F2 F3 F4 F5 </Zone>
+    <Zone number="4">  F1 F2 F3 F4 F5 </Zone>
+    <Zone number="5">  F1 F2 F3 F4 F5 </Zone>
+    <Zone number="6">  F1 F2 F3 F4 F5 </Zone>
+  </ModellingFaciesPerZone>
+  <UseConditionalProbabilities> 1 </UseConditionalProbabilities>
+  <CondProbMatrix>
+    <Line>  F1  A  1.0 </Line>
+    <Line>  F2  A  0.0 </Line>
+    <Line>  F3  A  0.0 </Line>
+    <Line>  F4  A  0.0 </Line>
+    <Line>  F5  A  0.0 </Line>
+    
+    <Line>  F1  B  0.0 </Line>
+    <Line>  F2  B  1.0 </Line>
+    <Line>  F3  B  0.0 </Line>
+    <Line>  F4  B  0.0 </Line>
+    <Line>  F5  B  0.0 </Line>
+    
+    <Line>  F1  C  0.0 </Line>
+    <Line>  F2  C  0.0 </Line>
+    <Line>  F3  C  1.0 </Line>
+    <Line>  F4  C  0.0 </Line>
+    <Line>  F5  C  0.0 </Line>
+
+    <Line>  F1  D  0.0 </Line>
+    <Line>  F2  D  0.0 </Line>
+    <Line>  F3  D  0.0 </Line>
+    <Line>  F4  D  0.5 </Line>
+    <Line>  F5  D  0.5 </Line>
+
+  </CondProbMatrix>
+</ProbLogs>

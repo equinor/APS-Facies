@@ -111,8 +111,8 @@ def get_output_model_file(**kwargs):
     return _get_file_name(kwargs, legal_kwargs=['output_model_file'], default_name='APS_with_FMU_tags.xml')
 
 
-def get_tagged_variables_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['tagged_variable_file'], default_name='examples/FMU_tagged_variables.dat')
+def get_output_tagged_variables_file(**kwargs):
+    return _get_file_name(kwargs, legal_kwargs=['output_tagged_variables_file'], default_name='output_list_of_FMU_tagged_variables.dat')
 
 
 def get_tag_all_variables(**kwargs):
@@ -148,27 +148,31 @@ def get_prefix(**kwargs):
     return base_path
 
 
+class SpecificationType(Enum):
+    APS_MODEL = 0
+    PROBABILITY_LOG = 1
+    FACIES_LOG = 2
+    CONVERT_BITMAP = 3
+    PROBABILITY_TREND = 4
+
+
+def get_specification_file(_type=SpecificationType.APS_MODEL, **kwargs):
+    mapping = {
+        SpecificationType.APS_MODEL: 'APS.xml',
+        SpecificationType.PROBABILITY_LOG: 'Create_prob_logs.xml',
+        SpecificationType.FACIES_LOG: 'Create_redefined_blocked_facies_log.xml',
+        SpecificationType.CONVERT_BITMAP: 'bitmap2rms_model.xml',
+        SpecificationType.PROBABILITY_TREND: 'defineProbTrend.xml',
+    }
+    if _type in mapping:
+        file = get_model_file_name(default_name=mapping[_type], **kwargs)
+        if not file:
+            file = mapping[_type]
+        return str(file)
+    return None
+
+
 # TODO: Make more generic; dict with precise names?
-def get_grid_model_name(**kwargs):
-    return _get_value(kwargs, legal_kwargs=['grid_model', 'grid_model_name'], default_value='GridModelFine')
-
-
-def get_blocked_well_name(**kwargs):
-    return _get_value(kwargs, legal_kwargs=['blocked_well', 'blocked_well_name'], default_value='BW')
-
-
-def get_facies_log_name(**kwargs):
-    return _get_value(kwargs, legal_kwargs=['facies_log', 'facies_log_name'], default_value='Facies')
-
-
-def get_probability_log_prefix(**kwargs):
-    return _get_value(kwargs, legal_kwargs=['probability_log_prefix', 'prefix_prob_log'], default_value='Prob')
-
-
-def get_additional_unobserved_facies(**kwargs):
-    return _get_value(kwargs, legal_kwargs=['additional_unobserved_facies'], default_value=['F6'])
-
-
 def get_facies_code(**kwargs):
     return _get_value(kwargs, legal_kwargs=['facies_code'], default_value=0)
 
@@ -179,20 +183,16 @@ def get_run_test_script(**kwargs):
 
 def get_run_parameters(**kwargs):
     return {
-        'model_file': get_model_file_name(**kwargs),
+        'model_file': get_specification_file(**kwargs),
         'output_model_file': get_output_model_file(**kwargs),
         'rms_data_file': get_rms_project_data_file(**kwargs),
         'global_include_file': get_global_ipl_file(**kwargs),
-        'tagged_variables_file': get_tagged_variables_file(**kwargs),
+        'output_tagged_variables_file': get_output_tagged_variables_file(**kwargs),
         'tag_all_variables': get_tag_all_variables(**kwargs),
         'fmu_variables_file': get_fmu_variables_file(**kwargs),
         'write_log_file': get_write_log_file(**kwargs),
         'input_directory': get_prefix(**kwargs) + '/tmp_gauss_sim',
-        'grid_model_name': get_grid_model_name(**kwargs),
-        'blocked_wells_set_name': get_blocked_well_name(**kwargs),
-        'facies_log_name': get_facies_log_name(**kwargs),
-        'prefix_prob_logs': get_probability_log_prefix(**kwargs),
-        'additional_unobserved_facies_list': get_additional_unobserved_facies(**kwargs),
+        'probability_log_specification_file': get_specification_file(**kwargs),
         'facies_code': get_facies_code(**kwargs),
         'run_test_script': get_run_test_script(**kwargs),
         'workflow_name': get_workflow_name(),

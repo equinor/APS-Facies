@@ -4,14 +4,14 @@ String paramName, paramName_Reference, paramName_Difference, gridModelName
 GridModel gm
 Float minValue, maxValue, avgValue
 File file
-String reportStatusFile ="statusfile_Example_APS_gridmodelCoarse_unconditioned.dat"
+String reportStatusFile ="statusfile_Example_APS_Coarse_conditioned.dat"
 Include("/project/res/etc/IPL/iplib/STutilities1.iplib")
 
 // -----------------------------------------------------------------------
 gridModelName = "GridModelCoarse"
-paramName = "FaciesReal_unconditioned"
-paramName_Reference = "FaciesReal_unconditioned_reference"
-paramName_Difference = "FaciesReal_unconditioned_difference"
+paramName = "FaciesReal_conditioned"
+paramName_Reference = "FaciesReal_conditioned_reference"
+paramName_Difference = "FaciesReal_conditioned_difference"
 
 
 // ------------------------------------------------------------------------
@@ -25,6 +25,7 @@ diff = CreateContinuousParameter(gm)
 diff = refFaciesParam - inputFaciesParam
 
 GetMinMaxAvg(diff, minValue, maxValue, avgValue)
+
 
 IF minValue <> 0 or maxValue <> 0 THEN
    Print("Difference test for ", paramName, " : Failed")
@@ -40,5 +41,4 @@ ELSE
    WriteLine(file,"1")
    CloseFile(file)
 ENDIF
- 
 

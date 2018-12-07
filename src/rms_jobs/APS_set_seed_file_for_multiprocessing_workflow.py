@@ -8,7 +8,8 @@ from src.utils.methods import get_run_parameters
 from src.utils.constants.simple import Debug
 
 def run(roxar=None, project=None, **kwargs):
-    model_file, _, _,_, _ = get_run_parameters(**kwargs)
+    params = get_run_parameters(**kwargs)
+    model_file = params['model_file']
     real_number = project.current_realisation
     apsModel = APSModel(model_file)
     debug_level = apsModel.debug_level

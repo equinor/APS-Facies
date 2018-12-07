@@ -18,6 +18,8 @@ export default {
   probabilityCubeParameters: (gridName) => api.call('get_probability_cube_parameters', gridName),
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
   options: (name) => api.call('get_options', name),
+  gridSize: (name) => api.call('get_grid_size', name),
+  simulationBoxOrigin: (name) => api.call('get_simulation_box_size', name),
   simulateGaussianField: (field) => api.call('simulate_gaussian_field', field),
   simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (gridName, probabilityCubeParameters, ZoneNumbers) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, ZoneNumbers),

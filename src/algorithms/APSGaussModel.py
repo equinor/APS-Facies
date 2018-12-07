@@ -33,21 +33,31 @@ class Point3D(tuple):
         return super().__new__(cls, point)
 
 
+class Point2D(tuple):
+    def __new__(cls, **kwargs):
+        point = (kwargs['x'], kwargs['y'])
+        return super().__new__(cls, point)
+
+
 class GaussianFieldSimulationSettings:
-    __slots__ = '_cross_section', '_grid_azimuth', '_grid_size', '_simulation_box_size', '_seed'
+    __slots__ = (
+        '_cross_section', '_grid_azimuth', '_grid_size', '_simulation_box_size', '_simulation_box_origin', '_seed'
+    )
     # TODO: Fill in remaining data
 
-    def __init__(self, cross_section, grid_azimuth, grid_size, simulation_box_size, seed):
+    def __init__(self, cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, seed):
         assert isinstance(cross_section, CrossSection)
-        assert 0 <= grid_azimuth <= 360
         assert all([isinstance(coor, int) for coor in grid_size]) and len(grid_size) == 3
         assert all([isinstance(coor, (float, int)) for coor in simulation_box_size]) and len(simulation_box_size) == 3
+        assert all([isinstance(coor, (float, int)) for coor in simulation_box_origin]) and len(simulation_box_origin) == 2
         assert isinstance(seed, int)
+        grid_azimuth %= 360
 
         self._cross_section = cross_section
         self._grid_azimuth = grid_azimuth
         self._grid_size = grid_size
         self._simulation_box_size = simulation_box_size
+        self._simulation_box_origin = simulation_box_origin
         self._seed = seed
 
     @property
@@ -67,6 +77,10 @@ class GaussianFieldSimulationSettings:
         return self._simulation_box_size
 
     @property
+    def simulation_box_origin(self):
+        return self._simulation_box_origin
+
+    @property
     def seed(self):
         return self._seed
 
@@ -83,7 +97,15 @@ class GaussianFieldSimulationSettings:
         except KeyError:
             raise NotImplementedError
 
-    def merge(self, cross_section=None, grid_azimuth=None, grid_size=None, simulation_box_size=None, seed=None):
+    def merge(
+            self,
+            cross_section=None,
+            grid_azimuth=None,
+            grid_size=None,
+            simulation_box_size=None,
+            simulation_box_origin=None,
+            seed=None
+    ):
         if cross_section is None:
             cross_section = self.cross_section
         if grid_azimuth is None:
@@ -92,6 +114,8 @@ class GaussianFieldSimulationSettings:
             grid_size = self.grid_size
         if simulation_box_size is None:
             simulation_box_size = self.simulation_box_size
+        if simulation_box_origin is None:
+            simulation_box_origin = self.simulation_box_origin
         if seed is None:
             seed = self.seed
         return GaussianFieldSimulationSettings(
@@ -99,6 +123,7 @@ class GaussianFieldSimulationSettings:
             grid_azimuth=grid_azimuth,
             grid_size=grid_size,
             simulation_box_size=simulation_box_size,
+            simulation_box_origin=simulation_box_origin,
             seed=seed,
         )
 
@@ -109,6 +134,7 @@ class GaussianFieldSimulationSettings:
             grid_azimuth=kwargs['gridAzimuth'],
             grid_size=Point3D(**kwargs['gridSize']),
             simulation_box_size=Point3D(**kwargs['simulationBox']),
+            simulation_box_origin=Point2D(**kwargs['simulationBoxOrigin']),
             seed=kwargs['seed'],
         )
 
@@ -226,11 +252,20 @@ class GaussianField:
                 except AttributeError:
                     raise AttributeError("The Gaussian Field ('{}') has no attribute {}".format(self.name, item))
 
-    def _simulate(self, cross_section=None, grid_azimuth=None, grid_size=None, simulation_box_size=None, debug_level=Debug.OFF):
+    def _simulate(
+            self,
+            cross_section=None,
+            grid_azimuth=None,
+            grid_size=None,
+            simulation_box_size=None,
+            simulation_box_origin=None,
+            debug_level=Debug.OFF
+    ):
+        args = (cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, )
         if self.settings is None:
-            settings = GaussianFieldSimulationSettings(cross_section, grid_azimuth, grid_size, simulation_box_size)
+            settings = GaussianFieldSimulationSettings(*args)
         else:
-            settings = self.settings.merge(cross_section, grid_azimuth, grid_size, simulation_box_size)
+            settings = self.settings.merge(*args)
 
         grid_dimensions, sizes, projection, = _get_projection_parameters(settings.cross_section.type, settings.grid_size, settings.simulation_box_size)
         # Find data for specified Gauss field name
@@ -280,7 +315,7 @@ class GaussianField:
             if debug_level >= Debug.VERBOSE:
                 print('    - Use Trend: {}'.format(trend_model.type.name))
             min_max_difference, average_trend, trend_field = trend_model.createTrendFor2DProjection(
-                settings.simulation_box_size, settings.grid_azimuth, settings.grid_size, settings.cross_section
+                settings.simulation_box_size, settings.grid_azimuth, settings.grid_size, settings.cross_section, settings.simulation_box_origin
             )
             gauss_field_with_trend = _add_trend(
                 residual_field, trend_field, relative_std_dev, min_max_difference, average_trend, debug_level
@@ -290,9 +325,17 @@ class GaussianField:
         trans_field = _transform_empiric_distribution_to_uniform(gauss_field_with_trend, debug_level)
         return trans_field
 
-    def simulate(self, cross_section=None, grid_azimuth=None, grid_size=None, simulation_box_size=None, debug_level=Debug.OFF):
+    def simulate(
+            self,
+            cross_section=None,
+            grid_azimuth=None,
+            grid_size=None,
+            simulation_box_size=None,
+            simulation_box_origin=None,
+            debug_level=Debug.OFF
+    ):
         if self.settings is None:
-            self.settings = GaussianFieldSimulationSettings(cross_section, grid_azimuth, grid_size, simulation_box_size, self.seed)
+            self.settings = GaussianFieldSimulationSettings(cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, self.seed)
         else:
             self.settings = self.settings.merge(cross_section, grid_azimuth)
         return GaussianFieldSimulation(
@@ -1353,7 +1396,7 @@ class APSGaussModel:
         xml_element.append(elem)
 
     def simGaussFieldWithTrendAndTransform(
-            self, simulation_box_size, grid_size, grid_azimuth, cross_section
+            self, simulation_box_size, grid_size, grid_azimuth, cross_section, simulation_box_origin
     ):
         """ This function is used to create 2D simulation of horizontal or vertical cross sections. The gauss simulation is 2D
             and the correlation ellipsoid for the 3D variogram is projected into the specified cross section in 2D.
@@ -1366,7 +1409,7 @@ class APSGaussModel:
         gauss_field_items = []
         for grf in self._gaussian_models.values():
             gauss_field_items.append(
-                grf.simulate(cross_section, grid_azimuth, grid_size, simulation_box_size, self.debug_level),
+                grf.simulate(cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, self.debug_level),
             )
         return gauss_field_items
 

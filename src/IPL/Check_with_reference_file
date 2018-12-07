@@ -1,0 +1,19 @@
+// IPL: Compare output file from UpdateAPSModelFromUncertainty with reference file
+String output_uncertainty_parameter_file
+String reference_uncertainty_parameter_file
+String command
+
+
+
+// --------------------------------------------------------------------------------
+reference_uncertainty_parameter_file = "examples/reference_uncertainty_parameter_list.dat"
+output_uncertainty_parameter_file = "tmp_Test_APS_uncertainty_workflow.dat"
+// --------------------------------------------------------------------------------
+
+command = "rm -f diff.tmp"
+ShellCommand(command)
+
+command = "diff " + reference_uncertainty_parameter_file + " " + output_uncertainty_parameter_file + "> diff.tmp"
+ShellCommand(command)
+
+

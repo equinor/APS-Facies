@@ -1,0 +1,42 @@
+// IPL: Check that difference parameters are equal to 0
+Parameter diff, inputFaciesParam, refFaciesParam
+String paramName, paramName_Reference, paramName_Difference, gridModelName
+GridModel gm
+Float minValue, maxValue, avgValue
+String reportStatusFile ="statusfile_Example_APS_Fine_unconditioned.dat"
+Include("/project/res/etc/IPL/iplib/STutilities1.iplib")
+File file
+// -----------------------------------------------------------------------
+gridModelName = "GridModelFine"
+paramName = "FaciesReal_unconditioned"
+paramName_Reference = "FaciesReal_unconditioned_reference"
+paramName_Difference = "FaciesReal_unconditioned_difference"
+
+
+// ------------------------------------------------------------------------
+GetGridModel(gridModelName, gm)
+SetCurrentRealisation(1) // Must run for realisation number 1
+Print('"Check realisation number 1")
+inputFaciesParam = CreateDiscreteParameter(gm)
+inputFaciesParam = STgetParameter(gm,paramName)
+refFaciesParam = STgetParameter(gm,paramName_Reference)
+diff = CreateContinuousParameter(gm)
+diff = refFaciesParam - inputFaciesParam
+
+GetMinMaxAvg(diff, minValue, maxValue, avgValue)
+
+
+IF minValue <> 0 or maxValue <> 0 THEN
+   Print("Difference test for ", paramName, " : Failed")
+   Print("Min difference: ",minValue)
+   Print("Max difference: ",maxValue)
+   STsetParameter(gm, paramName_Difference, diff)
+   OpenFile(file,reportStatusFile,"WRITE")
+   WriteLine(file,"0")
+   CloseFile(file)
+ELSE
+   Print("Difference test for ", paramName, " : Ok")
+   OpenFile(file,reportStatusFile,"WRITE")
+   WriteLine(file,"1")
+   CloseFile(file)
+ENDIF

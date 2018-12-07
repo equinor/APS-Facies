@@ -4,13 +4,13 @@
 from warnings import warn
 
 from src.algorithms.APSModel import APSModel
-from src.utils.methods import get_model_file_name
+from src.utils.methods import get_specification_file
 
 
 def run(roxar=None, project=None, **kwargs):
     warn("deprecated", DeprecationWarning)
     print('Run: APS_make_gauss_IPL')
-    model_file_name = get_model_file_name(**kwargs)
+    model_file_name = get_specification_file(**kwargs)
 
     print('- Read file: ' + model_file_name)
     aps_model = APSModel(model_file_name)

@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<!-- This model specification is used in the script createRedefinedBlockedFaciesLog.py -->
+
+<MergeFaciesLog>
+  <GridModelName>GridModelFine</GridModelName>      
+  <BlockedWells> BW  </BlockedWells>
+  <OriginalFaciesLogName> Deterministic_facies </OriginalFaciesLogName>
+  <NewFaciesLogName> Facies_combined </NewFaciesLogName>
+  <NewFaciesCodes>  
+    <Facies code="1"> New_F01   </Facies>
+    <Facies code="2"> New_F02   </Facies>  
+    <Facies code="3"> New_F03   </Facies>
+  </NewFaciesCodes>  
+  
+  <FromOldToNewFacies>
+    <Line> A New_F01   </Line>
+    <Line> B New_F01   </Line>
+    <Line> C New_F02   </Line>
+    <Line> D New_F03   </Line>
+
+  </FromOldToNewFacies>
+</MergeFaciesLog>

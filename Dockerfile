@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.2.5" \
+LABEL version="3.2.7" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -208,14 +208,18 @@ RUN yum update -y \
     #                 #
     ###################
     # Install pipenv
-    # FIXME: pipenv 11 does not play nice with docker containers
  && $PIP install --user pipenv \
+    # FIXME: Backup distutils/__init__.py, as the compilation of nrlib changes it for some reason
+  && cp "/prog/roxar/site/RMS${RMS_VERSION}/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" /distutils.py.bak \
     # Install NRlib to dependencies collection
  && cd ${BUILD_DIR}/nrlib-${NRLIB_VERSION} \
  && MKLROOT=/opt/intel/mkl \
+    USE_SITE_PACKAGES=yes \
     make build \
          tests \
  && mv nrlib.*.so $DEPENDENCIES_PREFIX \
+ # FIXME: Restore distutils from backup
+ && cp -f /distutils.py.bak "/prog/roxar/site/RMS${RMS_VERSION}/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" \
     ##
     # Final clean-up
  && rm -rf $SOURCE_DIR \

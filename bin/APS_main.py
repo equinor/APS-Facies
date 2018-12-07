@@ -20,10 +20,9 @@ from src.utils.roxar.grid_model import (
     find_defined_cells,
 )
 
-from src.utils.methods import calc_average
+from src.utils.methods import calc_average, get_specification_file
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
-from src.utils.methods import get_model_file_name
 
 
 def transform_empiric(cell_index_defined, gauss_values, alpha_values):
@@ -248,7 +247,7 @@ def run(
     realization_number = project.current_realisation
     print('Run: APS_trunc  on realisation ' + str(realization_number + 1))
 
-    model_file_name = get_model_file_name(**kwargs)
+    model_file_name = get_specification_file(**kwargs)
 
     print('- Read file: ' + model_file_name)
     aps_model = APSModel(model_file_name)

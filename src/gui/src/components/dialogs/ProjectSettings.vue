@@ -149,6 +149,120 @@
             </v-flex>
           </v-layout>
         </fieldset>
+        <fieldset
+          v-if="!!$store.getters.gridModel"
+        >
+          <legend>Grid model</legend>
+          <v-container
+            v-if="!$store.getters['simulationSettings/waiting']"
+            grid-list-md
+            text-xs-center
+          >
+            <v-layout
+              justify-space-around
+              align-space-around
+              row
+              fill
+              wrap
+            >
+              <v-flex xs4>
+                <numeric-field
+                  v-model="gridSize.x"
+                  discrete
+                  unit="cell"
+                  label="X"
+                  hint="The size of the grid"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  v-model="gridSize.y"
+                  discrete
+                  unit="cell"
+                  label="Y"
+                  hint="The size of the grid"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  v-model="gridSize.z"
+                  discrete
+                  unit="cell"
+                  label="Z"
+                  hint="The size of the grid"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-spacer/>
+              <v-flex xs4>
+                <numeric-field
+                  :value="simulationSettings.simulationBox.x"
+                  label="X"
+                  unit="m"
+                  hint="The size of the simulation box"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  :value="simulationSettings.simulationBox.y"
+                  label="Y"
+                  unit="m"
+                  hint="The size of the simulation box"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  :value="simulationSettings.simulationBox.z"
+                  label="Z"
+                  unit="m"
+                  hint="The size of the simulation box"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  :value="simulationSettings.gridAzimuth"
+                  :ranges="{min: 0, max: 360}"
+                  label="Grid azimuth"
+                  unit="°"
+                  hint="The angle between the grid, and UTM"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  :value="simulationSettings.simulationBoxOrigin.x"
+                  label="X"
+                  unit="m"
+                  hint="Origin of simulation box"
+                  persistent-hint
+                />
+              </v-flex>
+              <v-flex xs4>
+                <numeric-field
+                  :value="simulationSettings.simulationBoxOrigin.y"
+                  label="Y"
+                  unit="m"
+                  hint="Origin of simulation box"
+                  persistent-hint
+                />
+              </v-flex>
+            </v-layout>
+          </v-container>
+          <v-layout
+            v-else
+            justify-center
+          >
+            <v-icon
+              x-large
+              v-text="$vuetify.icons.refreshSpinner"
+            />
+          </v-layout>
+        </fieldset>
       </v-card-text>
       <v-card-actions>
         <v-spacer/>
@@ -168,10 +282,12 @@
 <script>
 
 import BoldButton from '@/components/baseComponents/BoldButton'
+import NumericField from '@/components/selection/NumericField'
 
 export default {
 
   components: {
+    NumericField,
     BoldButton
   },
 
@@ -184,6 +300,15 @@ export default {
       showZoneNameNumber: '',
       showRegionNameNumber: '',
       automaticAlphaFieldSelection: ''
+    }
+  },
+
+  computed: {
+    simulationSettings () {
+      return this.$store.getters.simulationSettings()
+    },
+    gridSize () {
+      return this.simulationSettings.gridSize
     }
   },
 

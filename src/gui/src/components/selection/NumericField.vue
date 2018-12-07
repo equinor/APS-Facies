@@ -24,8 +24,10 @@
           :value="fieldValue"
           :error-messages="errors"
           :label="label"
-          :suffix="unit"
+          :suffix="_unit"
           :disabled="disabled"
+          :hint="hint"
+          :persistent-hint="persistentHint"
           @input.capture="e => updateValue(e)"
           @blur="$v.fieldValue.$touch()"
           @keydown.up="increase"
@@ -75,6 +77,8 @@ export default Vue.extend({
     onlySlider: VueTypes.bool.def(false),
     value: VueTypes.oneOfType([nullableNumber, updatableType]),
     unit: VueTypes.string.def(''),
+    hint: VueTypes.string.def(''),
+    persistentHint: VueTypes.bool.def(false),
     optional: VueTypes.bool.def(false),
     discrete: VueTypes.bool.def(false),
     disabled: VueTypes.bool.def(false),
@@ -138,6 +142,19 @@ export default Vue.extend({
         : this.valueType !== '' && this.$store.state.constants.ranges.hasOwnProperty(this.valueType)
           ? this.$store.state.constants.ranges[this.valueType]
           : { max: Infinity, min: this.allowNegative ? -Infinity : 0 }
+    },
+    _unit () {
+      if (this.discrete) {
+        const irregular = {
+        }
+        return this.value === 1
+          ? this.unit
+          : irregular.hasOwnProperty(this.unit)
+            ? irregular[this.unit]
+            : `${this.unit}s`
+      } else {
+        return this.unit
+      }
     },
     max () {
       return this.constants.max

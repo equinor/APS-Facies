@@ -75,7 +75,8 @@ class Trend3D:
         These parameters will be defined in sub classes
         """
         # Depositional direction
-        self.azimuth = FmuProperty(azimuth_angle, azimuth_angle_fmu_updatable)
+        azimuth_angle_update = azimuth_angle % 360.0
+        self.azimuth = FmuProperty(azimuth_angle_update, azimuth_angle_fmu_updatable)
         # Angle between facies
         self.stacking_angle = FmuProperty(stacking_angle, stacking_angle_fmu_updatable)
         # Direction of stacking (prograding/retrograding)
@@ -90,7 +91,7 @@ class Trend3D:
                 'Debug output: Stacking angle: {}\n'
                 'Debug output:Stacking type:   {}\n'
                 ''.format(self.azimuth.value, self.stacking_angle.value, self.stacking_direction.value)
-        )
+            )
 
         # Position of a reference point for the trend function.
         # This is in global coordinates for (x, y) and relative to simulation box for the zone for z coordinate.
@@ -361,10 +362,7 @@ class Trend3D:
             for indx in range(num_defined_cells):
                 x = cell_center_points[indx, 0]
                 y = cell_center_points[indx, 1]
-                z = cell_center_points[indx, 2]
 
-                i = cell_indices[indx, 0]
-                j = cell_indices[indx, 1]
                 k = cell_indices[indx, 2]
 
                 trend_value = self._trendValueCalculation(parameters_for_trend_calc, x, y, k, zinc)
@@ -382,7 +380,7 @@ class Trend3D:
 
     def createTrendFor2DProjection(
             self, sim_box_size, azimuth_sim_box,
-            preview_size, cross_section
+            preview_size, cross_section, sim_box_origin
     ):
         if self.type in [TrendType.RMS_PARAM, TrendType.NONE]:
             raise NotImplementedError('Preview of Trend of type RMS_PARAM or NONE is not implemented')
@@ -390,12 +388,13 @@ class Trend3D:
         nx_preview, ny_preview, nz_preview = preview_size
         projection_type = cross_section.type
         cross_section_relative_pos = cross_section.relative_position
+        sim_box_x_origin, sim_box_y_origin = sim_box_origin
 
         # Define relative azimuth relative to y axis in simulation box coordinates
         self._relative_azimuth = self.azimuth.value - azimuth_sim_box
 
         # Define self._x_center, self._y_center for the trend
-        self._setTrendCenter(0.0, 0.0, azimuth_sim_box, sim_box_x_size, sim_box_y_size, sim_box_z_size)
+        self._setTrendCenter(sim_box_x_origin, sim_box_y_origin, azimuth_sim_box, sim_box_x_size, sim_box_y_size, sim_box_z_size)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Trend type: {}'.format(self.type.name))
@@ -406,11 +405,16 @@ class Trend3D:
                     'Debug output:  Direction:          {}\n'
                     'Debug output:  x_center (sim box): {}\n'
                     'Debug output:  y_center (sim box): {}\n'
-                    'Debug output:  z_center (sim box): {}'
+                    'Debug output:  z_center (sim box): {}\n'
+                    'Debug output:  Projection type:    {}\n'
+                    'Debug output:  nx_preview:         {}\n'
+                    'Debug output:  ny_preview:         {}\n'
+                    'Debug output:  nz_preview:         {}'
                     ''.format(
                         self.azimuth.value, self.stacking_angle.value, self.stacking_direction.value,
                         self._x_center_in_sim_box_coordinates, self._y_center_in_sim_box_coordinates,
-                        self._z_center_in_sim_box_coordinates
+                        self._z_center_in_sim_box_coordinates,
+                        projection_type, nx_preview, ny_preview, nz_preview
                     )
                   )
             self._writeTrendSpecificParam()
@@ -421,10 +425,11 @@ class Trend3D:
         xinc = sim_box_x_size / nx_preview
         yinc = sim_box_y_size / ny_preview
         zinc = sim_box_z_size / nz_preview
-
         # Note: Save trend values for the 2D fields in 1D numpy vector in 'C' sequence
         if projection_type == CrossSectionType.IJ:
-            k = cross_section_relative_pos * (nz_preview - 1)
+            ndim1 = nx_preview
+            ndim2 = ny_preview
+            k = int(cross_section_relative_pos * (nz_preview - 1))
             values = np.zeros(nx_preview * ny_preview, np.float64)
             # values(i,j) as 1D vector
             for j in range(ny_preview):
@@ -434,7 +439,9 @@ class Trend3D:
                     values[indx] = trendValue
 
         elif projection_type == CrossSectionType.IK:
-            j = cross_section_relative_pos * (ny_preview - 1)
+            ndim1 = nx_preview
+            ndim2 = nz_preview
+            j = int(cross_section_relative_pos * (ny_preview - 1))
             values = np.zeros(nx_preview * nz_preview, np.float64)
             # values(i,k) as 1D vector
             for k in range(nz_preview):
@@ -444,7 +451,9 @@ class Trend3D:
                     values[indx] = trendValue
 
         elif projection_type == CrossSectionType.JK:
-            i = cross_section_relative_pos * (nx_preview - 1)
+            ndim1 = ny_preview
+            ndim2 = nz_preview
+            i = int(cross_section_relative_pos * (nx_preview - 1))
             values = np.zeros(ny_preview * nz_preview, np.float64)
             # values(j,k) as 1D vector
             for k in range(nz_preview):
@@ -455,28 +464,49 @@ class Trend3D:
         else:
             raise ValueError("Invalid projection type. Must be one of 'IJ', 'IK', 'JK'")
 
-        min_value_in_cross_section = values.min()
-        max_value_in_cross_section = values.max()
-        average_trend = values.mean()
-        minmax_difference = max_value_in_cross_section - min_value_in_cross_section
+        # Estimate an approximate min and max trend value from the zone by evaluating the trend in a small subset of points
+        # Calculate trends for every n'th grid cell location in all three directions
+        # Note it is important that this is done over the whole 3D simbox volume and not over only the specified cross section
+        # so that the actual standard deviation is comparable with the 3D simulation
+        nxstep = int(nx_preview/5)
+        nystep = int(ny_preview/5)
+        nzstep = int(nz_preview/5)
+        max_value = -999999999
+        min_value = 99999999
+        nvalues = 0
+        sum_values = 0.0
+        for k in range(0, nz_preview, nzstep):
+            for j in range(0, ny_preview, nystep):
+                for i in range(0, nx_preview, nxstep):
+                    trend_value = self._trendValueCalculationSimBox(parameters_for_trend_calc, i, j, k, xinc, yinc, zinc)
+                    if max_value < trend_value:
+                        max_value = trend_value
+                    if min_value > trend_value:
+                        min_value = trend_value
+                    sum_values = sum_values + trendValue
+                    nvalues = nvalues + 1
+
+        average_trend = sum_values/nvalues
+
+        minmax_difference = max_value - min_value
         if abs(average_trend) > 0.00001:
             if abs(minmax_difference/average_trend) < 0.0001:
-                values_rescaled = np.ones(nx_preview * ny_preview, float)
+                values_rescaled = np.ones(ndim1 * ndim2, float)
                 average_trend = 1.0
             else:
-                values_rescaled = (values - min_value_in_cross_section)/minmax_difference
+                values_rescaled = (values - min_value)/minmax_difference
         else:
             if abs(minmax_difference) < 0.00001:
-                values_rescaled = np.ones(nx_preview * ny_preview, float)
+                values_rescaled = np.ones(ndim1 * ndim2, float)
                 average_trend = 1.0
             else:
-                values_rescaled = (values - min_value_in_cross_section)/minmax_difference
-        min_value = values_rescaled.min()
-        max_value = values_rescaled.max()
-        minmax_difference = max_value - min_value
+                values_rescaled = (values - min_value)/minmax_difference
+        min_value_rescaled = values_rescaled.min()
+        max_value_rescaled = values_rescaled.max()
+        minmax_difference = max_value_rescaled - min_value_rescaled
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Min value of trend for 2D cross section within simBox before rescaling: ' + str(min_value_in_cross_section))
-            print('Debug output: Max value of trend for 2D cross section within simBox before rescaling: ' + str(max_value_in_cross_section))
+            print('Debug output: Approximate estimate of min value of trend within simBox before rescaling: ' + str(min_value))
+            print('Debug output: Approximate estimate of max value of trend within simBox before rescaling: ' + str(max_value))
             print('Debug output: Difference between max and min value within simBox after rescaling: ' + str(minmax_difference))
 
         return minmax_difference, average_trend, values_rescaled
@@ -571,6 +601,11 @@ class Trend3D_linear(Trend3D):
             x_component = math.sin(alpha) * math.sin(theta)
             y_component = math.sin(alpha) * math.cos(theta)
             z_component = math.cos(alpha)
+        if self.stacking_direction == Direction.RETROGRADING:
+            # Change sign of normal vector (The gradient)
+            x_component = - x_component
+            y_component = - y_component
+            z_component = - z_component
 
         parameter_for_trend_calculation = (x_component, y_component, z_component)
         return parameter_for_trend_calculation
@@ -579,7 +614,7 @@ class Trend3D_linear(Trend3D):
         print('')
 
     def _trendValueCalculation(self, parameters_for_trend_calc, x, y, k, zinc):
-        # Calculate trend value for point(x,y,z) relative to origo defined by (xCenter, yCenter,zCenter)
+        # Calculate trend value for point(x,y,z) relative to origin defined by (xCenter, yCenter,zCenter)
         # Here only a shift in the global x,y coordinates are done. The z coordinate is relative to simulation box.
         zRel = (k - self._start_layer + 0.5) * zinc - self._z_center
         xRel = x - self._x_center
@@ -589,7 +624,7 @@ class Trend3D_linear(Trend3D):
 
     def _trendValueCalculationSimBox(self, parameters_for_trend_calc, i, j, k, xinc, yinc, zinc):
         # Calculate trend value for point(x,y,z) in simulation box coordinates.
-        # The origo corresponds to the corner of cell (0,0,startLayer)
+        # The origin corresponds to the corner of cell (0,0,startLayer)
         zRel = (k - self._start_layer + 0.5) * zinc
         xRel = (i + 0.5) * xinc
         yRel = (j + 0.5) * yinc
@@ -753,8 +788,6 @@ class Trend3D_conic(Trend3D):
     @classmethod
     def from_xml(cls, trend_rule_xml, model_file_name=None, debug_level=Debug.OFF, get_migration_angle=True, get_origin_z=True):
         base_trend = super().from_xml(trend_rule_xml, model_file_name, debug_level)
-
-        common_parameters = dict(modelFile=model_file_name, required=True)
 
         # Additional input parameters comes here (for other Trend3D-types)
         curvature, is_curvature_fmu_updatable = get_fmu_value_from_xml(trend_rule_xml, 'curvature', modelFile=model_file_name, required=True)
@@ -1044,8 +1077,8 @@ class Trend3D_hyperbolic(Trend3D_conic):
         y1 = y - self._y_center
 
         # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
-        trendValue = self._hyperbolicTrendFunction(parameters_for_trend_calc, x1, y1, z1)
-        return trendValue
+        trend = self._hyperbolicTrendFunction(parameters_for_trend_calc, x1, y1, z1)
+        return trend
 
     def _trendValueCalculationSimBox(self, parameters_for_trend_calc, i, j, k, xinc, yinc, zinc):
         # Hyperbolic
@@ -1056,8 +1089,8 @@ class Trend3D_hyperbolic(Trend3D_conic):
         y = (j + 0.5) * yinc - self._y_center_in_sim_box_coordinates
 
         # Calculate trend value for point(x,y,z) relative to reference point (xCenterInSimBox, yCenterInSimBox, zCenterInSimBox)
-        trendValue = self._hyperbolicTrendFunction(parameters_for_trend_calc, x, y, z)
-        return trendValue
+        trend = self._hyperbolicTrendFunction(parameters_for_trend_calc, x, y, z)
+        return trend
 
     def _hyperbolicTrendFunction(self, parameters_for_trend_calc, x, y, z):
         # Hyperbolic
@@ -1353,8 +1386,6 @@ class Trend3D_elliptic_cone(Trend3D_conic):
     def type(self):
         return TrendType.ELLIPTIC_CONE
 
-    relative_size_of_ellipse = make_lower_bounded_property('relative_size_of_ellipse')
-
     def setRelativeSizeOfEllipseFmuUpdatable(self, value):
         self._isRelativeSizeFMUUpdatable = value
 
@@ -1383,8 +1414,8 @@ class Trend3D_elliptic_cone(Trend3D_conic):
         y = (j + 0.5) * yinc - self._y_center_in_sim_box_coordinates
 
         # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
-        trendValue = self._ellipticConeTrendFunction(parameters_for_trend_calc, x, y, z, zinc)
-        return trendValue
+        trend_value = self._ellipticConeTrendFunction(parameters_for_trend_calc, x, y, z, zinc)
+        return trend_value
 
     def _ellipticConeTrendFunction(self, parameters_for_trend_calc, x, y, z, zinc):
         # Elliptic cone
@@ -1392,7 +1423,6 @@ class Trend3D_elliptic_cone(Trend3D_conic):
 
         z_top = 0.0
         z_thickness = (self._end_layer - self._start_layer + 1) * zinc
-        z_base = z_top + z_thickness
 
         a_base = a
         a_top = a * self.relative_size_of_ellipse.value
@@ -1418,12 +1448,13 @@ class Trend3D_elliptic_cone(Trend3D_conic):
         x_rotated_by_theta = x_rel * cos_theta - y_rel * sin_theta
         y_rotated_by_theta = x_rel * sin_theta + y_rel * cos_theta
 
-        value = np.sqrt(np.square(x_rotated_by_theta / a) + np.square(y_rotated_by_theta / b))
-        return value
+        return np.sqrt(np.square(x_rotated_by_theta / a) + np.square(y_rotated_by_theta / b))
 
     def _calculateTrendModelParam(self, use_relative_azimuth=False):
         # Calculate the 3D trend values for Elliptic cone
         assert abs(self.migration_angle) < 90.0
+        if abs(self.stacking_angle) <= 0.001:
+            self.stacking_angle = 0.001
         assert abs(self.stacking_angle) > 0.0
 
         if use_relative_azimuth:

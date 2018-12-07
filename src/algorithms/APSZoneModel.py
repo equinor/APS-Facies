@@ -667,8 +667,8 @@ class APSZoneModel:
         self.truncation_rule.XMLAddElement(zoneElement, self.zone_number, self.region_number, fmu_attributes)
 
     def simGaussFieldWithTrendAndTransform(
-            self, simulation_box_size, grid_size, gridAzimuthAngle, crossSection):
+            self, simulation_box_size, grid_size, gridAzimuthAngle, crossSection, simulation_box_origin):
         """ Simulate 2D gauss field using specified trend"""
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
-            simulation_box_size, grid_size, gridAzimuthAngle, crossSection
+            simulation_box_size, grid_size, gridAzimuthAngle, crossSection, simulation_box_origin
         )

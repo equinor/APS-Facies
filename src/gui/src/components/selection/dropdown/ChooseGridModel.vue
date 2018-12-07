@@ -25,8 +25,8 @@ export default {
     getter () {
       return this.$store.state.gridModels.current
     },
-    setter (value) {
-      this.$store.dispatch('gridModels/select', value)
+    async setter (value) {
+      await this.$store.dispatch('gridModels/select', value)
     }
   },
 }

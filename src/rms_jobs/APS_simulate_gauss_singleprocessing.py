@@ -9,7 +9,7 @@ import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
-from src.utils.methods import get_model_file_name
+from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValuesInZoneRegion
 from src.utils.roxar.grid_model import getGridAttributes
 
@@ -179,7 +179,7 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
 
 
 def run(roxar=None, project=None, **kwargs):
-    model_file = get_model_file_name(**kwargs)
+    model_file = get_specification_file(**kwargs)
     real_number = project.current_realisation
     is_shared = False
     run_simulations(project, modelFile=model_file, realNumber=real_number, isShared=is_shared)

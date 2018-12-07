@@ -36,6 +36,7 @@ export default {
     icon: VueTypes.string.isRequired,
     waiting: VueTypes.bool.def(false),
     disabled: VueTypes.bool.def(false),
+    loadingSpinner: VueTypes.bool.def(false),
     color: VueTypes.oneOfType([VueTypes.string, undefined]).def(undefined),
     dark: VueTypes.bool.def(false),
     large: VueTypes.bool.def(false),
@@ -50,7 +51,11 @@ export default {
 
   computed: {
     fullIconName () {
-      return `$vuetify.icons.${this.icon}${this.waiting ? 'Spinner' : ''}`
+      if (this.loadingSpinner && this.waiting) {
+        return '$vuetify.icons.refreshSpinner'
+      } else {
+        return `$vuetify.icons.${this.icon}${this.waiting ? 'Spinner' : ''}`
+      }
     }
   },
 }

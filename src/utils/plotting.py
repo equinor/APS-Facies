@@ -7,9 +7,10 @@ from src.utils.constants.simple import CrossSectionType
 
 
 def plot_gaussian_field(simulation, lengths=None, grid_dimensions=None, ax=None,
-                        plot_ticks=True, rotate_plot=False, azimuth_grid_orientation=None, grid_index_order='C'):
+                        plot_ticks=True, rotate_plot=False, azimuth_grid_orientation=None, grid_index_order='C', vertical_scale=1.0):
     if ax is None:
         ax = plt.subplot(1, 1, 1)
+
     if simulation is None:
         # Used for compatibility with 'testPreviewer'
         assert grid_dimensions is not None
@@ -17,23 +18,24 @@ def plot_gaussian_field(simulation, lengths=None, grid_dimensions=None, ax=None,
         alpha_realization = np.zeros(grid_dimensions[0] * grid_dimensions[1], np.float32)
         gauss_name = 'Not used'
         cross_section_type = CrossSectionType.IJ
+        kwargs = _get_grid_kwargs(cross_section_type)
     else:
         gauss_name = simulation.name
         alpha_realization = simulation.field
         cross_section_type = simulation.cross_section.type
-        grid_dimensions = simulation.grid_size[:2]
+        grid_dimensions = get_grid_dimensions(cross_section_type, simulation)
+        kwargs = _get_grid_kwargs(cross_section_type)
+
         lengths = simulation.simulation_box_size
 
     # Reshape to a 2D matrix where first index is row, second index is column
-    assert grid_index_order in ['F', 'C']
-    alpha_map = np.reshape(alpha_realization, grid_dimensions[::-1], grid_index_order)
+    alpha_map = resize_data_to_grid(alpha_realization, grid_dimensions, grid_index_order)
 
     if rotate_plot:
         assert azimuth_grid_orientation is not None
         alpha_map = scipy.ndimage.interpolation.rotate(alpha_map, azimuth_grid_orientation)
 
-    kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'lower'}
-    extent, size = get_plot_sizing(cross_section_type, lengths)
+    extent, size = get_plot_sizing(cross_section_type, lengths, vertical_scale)
     im = ax.imshow(alpha_map, extent=extent, **kwargs)
     plt.axis(size)
     ax.set_title(gauss_name)
@@ -41,6 +43,42 @@ def plot_gaussian_field(simulation, lengths=None, grid_dimensions=None, ax=None,
     if not plot_ticks:
         _hide_plot_ticks(ax)
     return im
+
+
+def resize_data_to_grid(alpha_realization, grid_dimensions, grid_index_order):
+    assert grid_index_order in ['F', 'C']
+    alpha_map = np.reshape(alpha_realization, grid_dimensions[::-1], grid_index_order)
+    return alpha_map
+
+
+def _get_grid_kwargs(cross_section_type):
+    if cross_section_type == CrossSectionType.IJ:
+        # IJ
+        kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'lower'}
+    elif cross_section_type == CrossSectionType.IK:
+        # IK
+        kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'upper'}
+    elif cross_section_type == CrossSectionType.JK:
+        # JK
+        kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'upper'}
+    else:
+        raise ValueError('The cross section type, {}, does not exist'.format(cross_section_type))
+    return kwargs
+
+
+def get_grid_dimensions(cross_section_type, simulation):
+    if cross_section_type == CrossSectionType.IJ:
+        # IJ
+        grid_dimensions = (simulation.grid_size[0], simulation.grid_size[1])
+    elif cross_section_type == CrossSectionType.IK:
+        # IK
+        grid_dimensions = (simulation.grid_size[0], simulation.grid_size[2])
+    elif cross_section_type == CrossSectionType.JK:
+        # JK
+        grid_dimensions = (simulation.grid_size[1], simulation.grid_size[2])
+    else:
+        raise ValueError('The cross section type, {}, does not exist'.format(cross_section_type))
+    return grid_dimensions
 
 
 def cross_plot(ax, gaussian_field, other):
@@ -55,14 +93,14 @@ def cross_plot(ax, gaussian_field, other):
 
 
 def plot_facies(ax, fmap, nFacies, cmap, previewCrossSectionType,
-                lengths, plot_ticks=True, rotate_plot=False, azimuth_grid_orientation=None):
+                lengths, plot_ticks=False, rotate_plot=False, azimuth_grid_orientation=None, vertical_scale=1.0):
     facies_map = fmap
     if rotate_plot:
         assert azimuth_grid_orientation is not None
         facies_map = scipy.ndimage.interpolation.rotate(fmap, azimuth_grid_orientation)
 
     kwargs = {'interpolation': 'none', 'aspect': 'equal', 'cmap': cmap, 'clim': (1, nFacies), 'origin': 'lower'}
-    extent, size = get_plot_sizing(previewCrossSectionType, lengths)
+    extent, size = get_plot_sizing_facies(previewCrossSectionType, lengths, vertical_scale)
     facies_plot = ax.imshow(facies_map, extent=extent, **kwargs)
     plt.axis(size)
     ax.set_title('Facies')
@@ -76,17 +114,57 @@ def _hide_plot_ticks(ax):
     plt.setp(ax.get_yticklabels(), visible=False)
 
 
-def get_plot_sizing(cross_section_type, lengths):
+def get_plot_sizing(cross_section_type, lengths, vertical_scale=1.0):
     x_length, y_length, z_length = lengths
+    z_length_expanded = z_length * vertical_scale
     if cross_section_type == CrossSectionType.IJ:
         extent = (0.0, x_length, 0.0, y_length)
         size = [0.0, x_length, 0.0, y_length]
     elif cross_section_type == CrossSectionType.IK:
-        extent = (0.0, x_length, 0.0, z_length)
-        size = [0.0, x_length, z_length, 0.0]
+        extent = (0.0, x_length, z_length_expanded, 0.0)
+        size = [0.0, x_length, z_length_expanded, 0.0]
     elif cross_section_type == CrossSectionType.JK:
-        extent = (0.0, y_length, 0.0, z_length)
-        size = [0.0, y_length, z_length, 0.0]
+        extent = (0.0, y_length, z_length_expanded, 0.0)
+        size = [0.0, y_length, z_length_expanded, 0.0]
     else:
         raise ValueError('Invalid cross section type ({})'.format(cross_section_type))
     return extent, size
+
+
+def get_plot_sizing_facies(cross_section_type, lengths, vertical_scale=1.0):
+    x_length, y_length, z_length = lengths
+    z_length_expanded = z_length * vertical_scale
+    if cross_section_type == CrossSectionType.IJ:
+        extent = (0.0, x_length, 0.0, y_length)
+        size = [0.0, x_length, 0.0, y_length]
+    elif cross_section_type == CrossSectionType.IK:
+        extent = (0.0, x_length, 0.0, z_length_expanded)
+        size = [0.0, x_length, z_length_expanded, 0.0]
+    elif cross_section_type == CrossSectionType.JK:
+        extent = (0.0, y_length, 0.0, z_length_expanded)
+        size = [0.0, y_length, z_length_expanded, 0.0]
+    else:
+        raise ValueError('Invalid cross section type ({})'.format(cross_section_type))
+    return extent, size
+
+
+def create_facies_map(gauss_fields, truncation_rule, use_code=False):
+    grid_sizes = set([gf.field.size for gf in gauss_fields])
+    assert len(grid_sizes) == 1
+    num_grid_cells = grid_sizes.pop()
+    facies = np.zeros(num_grid_cells, int)
+    facies_fraction = {}
+    # Find one realization to get the grid size
+    alpha_coord = np.zeros(len(gauss_fields), np.float32)
+    for i in range(num_grid_cells):
+        for m in range(len(gauss_fields)):
+            item = gauss_fields[m]
+            alpha_realization = item.field
+            alpha_coord[m] = alpha_realization[i]
+        facies_code, facies_index = truncation_rule.defineFaciesByTruncRule(alpha_coord)
+
+        facies[i] = facies_code if use_code else facies_index + 1
+        if facies_index not in facies_fraction:
+            facies_fraction[facies_index] = 0
+        facies_fraction[facies_index] += 1
+    return facies, facies_fraction

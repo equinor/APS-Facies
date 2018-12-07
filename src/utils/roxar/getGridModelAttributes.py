@@ -86,7 +86,7 @@ def run(roxar=None, project=None, **kwargs):
     # TODO: Separate this part into a CLI program
     params = get_run_parameters(**kwargs)
     model_file = params['model_file']
-    output_rms_data_file = params['input_directory']
+    output_rms_data_file = params['rms_data_file']
 
     # Read APS model
     print('- Read file: ' + model_file)

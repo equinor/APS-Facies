@@ -143,8 +143,6 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
     nx = dimensions[0]
     ny = dimensions[1]
     nz = dimensions[2]
-    zoneName = grid3D.zone_names[zoneNumber]
-    zone_cell_numbers = []
     start_layer = nz
     end_layer = 0
     for layer_range in layer_ranges:
@@ -154,8 +152,8 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
             if end_layer < layer:
                 end_layer = layer
     end_layer = end_layer+1
-    start = (0,0,start_layer)
-    end = (nx,ny,end_layer)
+    start = (0, 0, start_layer)
+    end = (nx, ny, end_layer)
     zone_cell_numbers = indexer.get_cell_numbers_in_range(start,end)
 
     nLayers = end_layer-start_layer
@@ -166,18 +164,18 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
                       'Grid model nx: {}  Input array nx: {}\n'
                       'Grid model ny: {}  Input array ny: {}\n'
                       'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-                      ''.format(str(nx), str(inputArrayShape[0]), str(ny), str(inputArrayShape[1]), str(zoneNumber), str(nLayers), str(inputArrayShape[2]))
+                      ''.format(nx, inputArrayShape[0], ny, inputArrayShape[1], zoneNumber, nLayers, inputArrayShape[2])
                       )
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
-    i_indices = defined_cell_indices[:,0]
-    j_indices = defined_cell_indices[:,1]
-    k_indices = defined_cell_indices[:,2]
+    i_indices = defined_cell_indices[:, 0]
+    j_indices = defined_cell_indices[:, 1]
+    k_indices = defined_cell_indices[:, 2]
 
     # Loop over all parameter names
     for paramIndx in range(len(parameterNameList)):
-        paramName =  parameterNameList[paramIndx]
+        paramName = parameterNameList[paramIndx]
         inputValuesForZone = inputValuesForZoneList[paramIndx]
         found = False
         propertyParam = None
@@ -219,8 +217,8 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
         # These layers must correspond to layer from start_layer untill but not including end_layer
         # in the full 3D grid
 
-        for k in range(start_layer,end_layer):
-            new_3D_array[:,:,k] = inputValuesForZone[:,:,k - start_layer]
+        for k in range(start_layer, end_layer):
+            new_3D_array[:, :, k] = inputValuesForZone[:, :, k - start_layer]
 
         # Since the cell numbers and the indices all are based on the same range,
         # it is possible to use numpy vectorization to copy

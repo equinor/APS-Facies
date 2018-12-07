@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+import numpy as np
 from enum import Enum
 from typing import List, Dict, Union, Callable, NamedTuple, NewType, Type, Optional
 from types import ModuleType
 
-from src.algorithms.APSGaussModel import GaussianFieldName, GaussianFieldSimulation
+from src.algorithms.APSGaussModel import GaussianFieldName, SimulationBoxOrigin, GridSize, GaussianFieldSimulation
 
 from roxar import Project
 from roxar.grids import GridModel, GridModels, Properties, Property, BlockedWell, BlockedWellsSet, Grid3D
@@ -86,6 +87,14 @@ class RMSData:
             self,
             grid_model_name:             GridName
     ) -> List[ProbabilityCubeParameter]: ...
+    def get_simulation_box_size(
+            self,
+            grid_model_name:             GridName
+    ) -> SimulationBoxOrigin: ...
+    def get_grid_size(
+            self,
+            grid_model_name:             GridName
+    ) -> GridSize: ...
     def get_zones(
             self,
             grid_model_name:             GridName,
@@ -177,4 +186,5 @@ class RMSData:
     @staticmethod
     def is_aps_model_valid(encoded_xml): ...
     @staticmethod
-    def _simulate_gaussian_field(field) -> GaussianFieldSimulation: ...
+    def _simulate_gaussian_field(field: Dict) -> GaussianFieldSimulation: ...
+

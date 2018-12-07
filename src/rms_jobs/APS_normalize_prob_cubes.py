@@ -4,7 +4,7 @@ import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
-from src.utils.methods import get_model_file_name
+from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
 from src.utils.roxar.grid_model import (
     getContinuous3DParameterValues, getDiscrete3DParameterValues,
@@ -249,7 +249,7 @@ def run(
 ):
     real_number = project.current_realisation
     print('Run: APS_normalize_prob_cubes  on realisation ' + str(real_number + 1))
-    model_file = get_model_file_name(**kwargs)
+    model_file = get_specification_file(**kwargs)
     check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_probability_normalisation, eps, overwrite)
     print('Finished APS_normalize_prob_cubes')
 

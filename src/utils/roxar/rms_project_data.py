@@ -1,21 +1,34 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-
-from src.algorithms.APSGaussModel import (
-    GaussianField, Variogram, Ranges, Angles, Trend, GaussianFieldSimulationSettings,
-)
-from src.algorithms.properties import CrossSection
-from src.utils.constants.simple import VariogramType, MinimumValues, MaximumValues, TrendType, Direction, OriginType
-
-from src.algorithms.APSModel import APSModel
-
 from base64 import b64decode
 
+from src.algorithms.APSGaussModel import (
+    GaussianField,
+    Variogram,
+    Ranges,
+    Angles,
+    Trend,
+    GaussianFieldSimulationSettings,
+)
+from src.algorithms.APSModel import APSModel
+from src.algorithms.properties import CrossSection
+from src.utils.constants.simple import (
+    VariogramType,
+    MinimumValues,
+    MaximumValues,
+    TrendType,
+    Direction,
+    OriginType,
+)
 from src.utils.exceptions.xml import ApsXmlError
-from src.utils.roxar.grid_model import calcStatisticsFor3DParameter
+from src.utils.roxar.grid_model import (
+    calcStatisticsFor3DParameter,
+    getGridSimBoxSize,
+    get_simulation_box_thickness,
+)
+from src.utils.plotting import create_facies_map
 from src.utils.truncation_rules import make_truncation_rule
-from src.utils.testPreview import create_facies_map
 
 
 def empty_if_none(func):
@@ -74,6 +87,27 @@ class RMSData:
 
     def get_probability_cube_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_probability_cube)
+
+    def get_simulation_box_size(self, grid_model_name):
+        grid = self.get_grid(grid_model_name)
+        sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid)
+        return {
+            'size': {
+                'x': sim_box_x_length,
+                'y': sim_box_y_length,
+                'z': get_simulation_box_thickness(grid),
+            },
+            'rotation': azimuth_angle,
+            'origin': {
+                'x': x0,
+                'y': y0,
+            },
+        }
+
+    def get_grid_size(self, grid_model_name):
+        # TODO: Add option to get zone thickness
+        grid = self.get_grid(grid_model_name)
+        return grid.grid_indexer.dimensions
 
     def _get_parameter_names(self, grid_model_name, check):
         grid_model = self.get_grid_model(grid_model_name)
@@ -154,7 +188,7 @@ class RMSData:
 
     @staticmethod
     def simulate_gaussian_field(field):
-        grid_index_order = 'C'
+        grid_index_order = 'F'
         simulation = RMSData._simulate_gaussian_field(field)
         data = simulation.field_as_matrix(grid_index_order)
         return data.tolist()
@@ -163,7 +197,7 @@ class RMSData:
     def simulate_realization(fields, specification):
         simulations = [RMSData._simulate_gaussian_field(field) for field in fields]
         truncation_rule = make_truncation_rule(specification)
-        facies, facies_fraction = create_facies_map(simulations, truncation_rule)
+        facies, facies_fraction = create_facies_map(simulations, truncation_rule, use_code=True)
 
         grid_index_order = 'C'
         data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order)

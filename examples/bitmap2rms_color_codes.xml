@@ -15,7 +15,7 @@
   <CropToPixelInterval> 1 </CropToPixelInterval> 
   <MissingCode> 9999900.000 </MissingCode> 
   <!-- <MissingCode> -1 </MissingCode> -->
-  <UseFaciesCode> 1 </UseFaciesCode>
+  <UseFaciesCode> 0 </UseFaciesCode>
   <ColorCode facies="1"> 232 </ColorCode>
   <ColorCode facies="2"> 113 </ColorCode>
   <ColorCode facies="3"> 79 </ColorCode>
