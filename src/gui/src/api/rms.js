@@ -11,6 +11,7 @@ export default {
   regionParameters: (gridName) => api.call('get_region_parameters', gridName),
   regions: (gridName, zoneName, regionParameter) => api.call('get_regions', gridName, zoneName, regionParameter),
   blockedWellParameters: (gridName) => api.call('get_blocked_well_set_names', gridName),
+  realizationParameters: (gridName) => api.call('get_realization_parameters', gridName),
   blockedWellLogParameters: (gridName, blockedWellName) => api.call('get_blocked_well_logs', gridName, blockedWellName),
   facies: (gridName, blockedWellName, blockedWellLogName) => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName),
   truncationPolygons: (specification) => api.call('get_truncation_map_polygons', specification),

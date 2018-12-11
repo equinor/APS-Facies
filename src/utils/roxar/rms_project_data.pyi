@@ -27,6 +27,7 @@ ZoneParameter = NewType('ZoneParameter', str)
 RegionParameter = NewType('RegionParameter', str)
 TrendParameter = NewType('TrendParameter', str)
 ProbabilityCubeParameter = NewType('ProbabilityCubeParameter', str)
+RealizationParameter = NewType('RealizationParameter', str)
 
 
 ZoneNumber = NewType('ZoneNumber', int)
@@ -71,6 +72,10 @@ class RMSData:
     def get_grid_model_names(
             self
     ) -> List[GridName]: ...
+    def get_realization_parameters(
+            self,
+            grid_model_name:            GridName
+    ) -> List[RealizationParameter]: ...
     def get_zone_parameters(
             self,
             grid_model_name:             GridName
@@ -149,7 +154,7 @@ class RMSData:
     ) -> Dict[ProbabilityCubeParameter, Average]: ...
     def get_blocked_well_set_names(
             self,
-            grid_model_name:             str
+            grid_model_name:             GridName
     ) -> List[str]: ...
     def get_facies_table_from_blocked_well_log(
             self,
@@ -165,7 +170,12 @@ class RMSData:
     @staticmethod
     def get_options(
             _type:                       str
-    ) -> Union[List[VariogramName], List[TrendName], List[DirectionName], List[OriginTypeName]]: ...
+    ) -> Union[
+        List[VariogramName],
+        List[TrendName],
+        List[DirectionName],
+        List[OriginTypeName]
+    ]: ...
     @staticmethod
     def get_code_names(
             _property:                   Property

@@ -23,6 +23,7 @@ function makeCustomIcons () {
     settings: 'fas fa-cogs',
     down: 'fas fa-angle-down',
     up: 'fas fa-angle-up',
+    search: 'fas fa-search',
   }
   Object.keys(icons).forEach(key => {
     if (notEmpty(icons[`${key}`])) {

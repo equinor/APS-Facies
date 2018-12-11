@@ -4,6 +4,7 @@ import blockedWellLog from '@/store/modules/parameters/blockedWellLog'
 import rmsTrend from '@/store/modules/parameters/rmsTrend'
 import probabilityCube from '@/store/modules/parameters/probabilityCube'
 import grid from '@/store/modules/parameters/grid'
+import realization from '@/store/modules/parameters/realization'
 
 export default {
   namespaced: true,
@@ -15,6 +16,7 @@ export default {
     rmsTrend,
     probabilityCube,
     grid,
+    realization,
   },
   actions: {},
   mutations: {},
