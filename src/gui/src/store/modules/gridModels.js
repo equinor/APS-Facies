@@ -2,6 +2,15 @@ import Vue from 'vue'
 
 import rms from '@/api/rms'
 
+const parametersDependentOnGrid = [
+  'region',
+  'blockedWell',
+  'rmsTrend',
+  'probabilityCube',
+  'grid',
+  'realization',
+]
+
 export default {
   namespaced: true,
 
@@ -15,12 +24,11 @@ export default {
       return new Promise((resolve, reject) => {
         if (state.available.includes(gridModel)) {
           commit('CURRENT', gridModel)
-          const parameters = ['region', 'blockedWell', 'rmsTrend', 'probabilityCube', 'grid']
           // when loading a file, we must ensure that all promises in this method are resolved before calling the
           // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
           // resolved
           const promises = []
-          parameters.forEach(param => {
+          parametersDependentOnGrid.forEach(param => {
             promises.push(dispatch(`parameters/${param}/fetch`, null, { root: true }))
           })
           promises.push(dispatch('zones/fetch', null, { root: true }))
