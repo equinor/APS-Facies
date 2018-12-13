@@ -430,6 +430,7 @@ integration-tests: clean-integration init-workflow link-example-files
 	cd $(INTEGRATION_TESTS) && \
 	RMS_PROJECT="$(RMS_PROJECT)" \
 	APS_RESOURCES="$(INTEGRATION_TESTS)" \
+	APS_ROOT="$(CODE_DIR)" \
 	./test_workflows_in_rms11.sh
 
 clean-integration: clean-workflow-blocks clean-example-link clean-matplotlibrc
