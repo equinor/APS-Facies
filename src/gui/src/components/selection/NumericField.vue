@@ -66,7 +66,7 @@ import { updatableType, nullableNumber } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 
 math.config({
-  number: 'Fraction'
+  number: 'BigNumber'
 })
 
 export default Vue.extend({
@@ -221,21 +221,26 @@ export default Vue.extend({
       this.$emit('input', payload)
     },
     updateValue (value) {
-      if (typeof value === 'string') {
-        value = value.replace(',', '.')
-        if (value === '.') {
-          value = '0.'
-        }
-      } else if (typeof value.target !== 'undefined') {
+      if (typeof value.target !== 'undefined') {
         // An event has been passed
         value = value.target.value
       }
+      if (typeof value === 'string') {
+        value = value.replace(',', '.')
+        value = value.replace(/[^\d.+-]*/g, '')
+        if (/^[+-]?.*$/.test(value)) value = value[0] + value.slice(1).replace(/[+-]/g, '')
+        if (value.length >= 1) {
+          if (value[0] === '+') value = value.slice(1)
+          if (value[0] === '.') value = '0' + value
+        }
+      }
 
-      let numericValue = this.getValue(this.value)
+      let numericValue = this.getValue(value)
       if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value)) {
         numericValue = this.getValue(value)
       } else if (value === '') {
         value = null
+        numericValue = null
       } else if (value === '-') {
         value = '-'
       } else if (value === '+') {
@@ -245,8 +250,10 @@ export default Vue.extend({
         // Hack to make sure illegal values are not displayed in the text field
         this.$refs.input.lazyValue = value
       }
-      if (!!value && value[value.toString().length - 1] === '.') {
+      if (/^[+-]?0\.0*$/.test(value)) {
         this.fieldValue = value
+      } else if (/^[+-]?\d+\.\d+0+$/.test(value)) {
+        this.fieldValue = numericValue.toFixed(value.split('.')[1].length)
       } else {
         this.fieldValue = numericValue
       }
