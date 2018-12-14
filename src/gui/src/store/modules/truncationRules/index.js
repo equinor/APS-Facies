@@ -17,6 +17,7 @@ import {
   resolve,
   allSet,
   makeTruncationRuleSpecification,
+  hasParents,
 } from '@/utils'
 
 const changePreset = (state, thing, item) => {
@@ -42,8 +43,8 @@ const processOverlay = (getters, overlay) => {
       items[`${id}`] = {
         id,
         group: over.map(facies => findFaciesByIndex(getters, facies).id), // TODO: Process properly
-        field: findFieldByIndex(getters, field).id,
-        facies: findFaciesByIndex(getters, facies).id,
+        field: findField(getters, field).id,
+        facies: findFacies(getters, facies).id,
         fraction: probability,
         center: interval,
         order: index,
@@ -57,22 +58,50 @@ const sortAlphabetically = arr => {
   return Object.values(arr).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 }
 
+const findItem = ({ findByIndex, findByName, findDefaultName = (arg) => null }) => (getters, item) => {
+  let result = null
+  if (item.index >= 0) {
+    result = findByIndex(getters, item)
+  } else if (item.name || typeof item === 'string') {
+    result = findByName(getters, item)
+  }
+  return result || findDefaultName({ getters, item })
+}
+
+const findField = (getters, field, parent = {}) => {
+  return findItem({
+    findByIndex: findFieldByIndex,
+    findByName: (_getters, _field) => _getters.fields.find(({ name }) => name === _field.name),
+    findDefaultName: ({ item: field }) => getters.allFields
+      .filter(field => hasParents(field, parent.zone, parent.region))
+      .find(({ name }) => field.name === name)
+  })(getters, field)
+}
+
 const findFieldByIndex = (getters, field) => {
   const relevantFields = sortAlphabetically(getters.fields)
   return relevantFields[`${field.index}`]
 }
 
+const findFacies = (getters, facies) => {
+  return findItem({
+    findByIndex: findFaciesByIndex,
+    findByName: (_getters, _facies) => _getters['facies/selected'].find(item => item.facies === _getters.faciesTable.find(({ name }) => _facies === name).id)
+  })(getters, facies)
+}
+
 const findFaciesByIndex = (getters, facies) => {
-  const relevantFacies = sortAlphabetically(getters.faciesTable).filter(facies => !!facies.selected)
+  const relevantFacies = sortAlphabetically(getters['facies/selected'])
   return relevantFacies[`${facies.index}`]
 }
 
-const processFields = (getters, state, fields) => {
+const processFields = (getters, state, fields, parent = {}) => {
   if (state.options.automaticAlphaFieldSelection.value) {
     return fields.map(item => {
+      const field = findField(getters, item.field, parent)
       return {
         channel: item.channel,
-        field: findFieldByIndex(getters, item.field).id
+        field: field ? field.id : null
       }
     })
   } else {
@@ -84,13 +113,20 @@ const processPolygons = (getters, polygons) => {
   const autoFill = true
   if (autoFill) {
     polygons = polygons.map(polygon => {
+      const name = getters['facies/nameById'](findFacies(getters, polygon.facies))
       return {
         ...polygon,
-        facies: findFaciesByIndex(getters, polygon.facies).name,
+        facies: name || null,
       }
     })
   }
   return process(getters, polygons, 'facies', 'facies', 'facies')
+    .map(polygon => {
+      return {
+        ...polygon,
+        facies: getters['facies/selected'].find(facies => facies.facies === getters['facies/byId'](polygon.facies).id).id,
+      }
+    })
 }
 
 const findPolygonInRule = (rule, polygon) => {
@@ -155,12 +191,11 @@ export default {
       }
       const rule = new mapping[`${type}`]({
         polygons: processPolygons(rootGetters, polygons),
-        fields: processFields(rootGetters, rootState, fields),
+        fields: processFields(rootGetters, rootState, fields, parent),
         overlay: processOverlay(rootGetters, overlay),
         settings,
         name,
-        zone: rootGetters.zone,
-        region: rootGetters.region
+        ...parent,
       })
       const addProportions = (proportions, polygons) => {
         if (isEmpty(polygons)) return proportions
@@ -296,7 +331,7 @@ export default {
       await dispatch('facies/normalize', null, { root: true })
       const data = await api.simulateRealization(
         Object.values(rootGetters.fields)
-          .map(field => field.specification),
+          .map(field => field.specification({ rootGetters })),
         makeTruncationRuleSpecification(rule, rootGetters)
       )
       commit('UPDATE_REALIZATION', { rule, data: data.faciesMap })

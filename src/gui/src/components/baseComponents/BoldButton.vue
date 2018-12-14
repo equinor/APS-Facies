@@ -3,7 +3,8 @@
     :title="title"
     color="primary"
     dark
-    @click="e => $emit('click', e)"/>
+    @click="e => $emit('click', e)"
+  />
 </template>
 
 <script>

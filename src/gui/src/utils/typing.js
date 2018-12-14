@@ -1,5 +1,5 @@
 import VueTypes from 'vue-types'
-import { TruncationRule } from '@/store/utils/domain'
+import { GaussianRandomField, TruncationRule } from '@/store/utils/domain'
 
 const rawDataType = VueTypes.arrayOf(VueTypes.object).isRequired
 
@@ -21,6 +21,13 @@ const isUUID = value => {
 
   return RegExp(uuid).test(value)
 }
+
+const getId = item => {
+  if (isUUID(item)) return item
+  if (item && isUUID(item.id)) return item.id
+  return ''
+}
+
 const _isValidId = value => {
   return typeof value === 'string' && (
     value === '' || isUUID(value)
@@ -46,10 +53,12 @@ const AppTypes = {
   color: VueTypes.custom(_isValidColor),
   name: VueTypes.string,
   truncationRule: VueTypes.instanceOf(TruncationRule),
+  gaussianRandomField: VueTypes.instanceOf(GaussianRandomField),
 }
 
 export {
   isUUID,
+  getId,
   rawDataType,
   updatableType,
   updatableStacking,

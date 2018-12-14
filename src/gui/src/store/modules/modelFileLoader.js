@@ -28,10 +28,7 @@ const getOriginType = (elem) => {
 }
 
 const isFMUUpdatable = (elem) => {
-  if (elem && elem._attributes && elem._attributes.kw) {
-    return true
-  }
-  return false
+  return !!(elem && elem._attributes && elem._attributes.kw)
 }
 
 const getNumericValue = (elem) => {
@@ -175,8 +172,8 @@ export default {
         // console.log(`alias: ${currentName} code: ${currentCode}`)
 
         // corresponding facies from project
-        const faciesForAliasAndCode = Object.keys(rootState.facies.available)
-          .map(e => rootState.facies.available[e])
+        const faciesForAliasAndCode = Object.keys(rootState.facies.global.available)
+          .map(e => rootState.facies.available[`${e}`])
           .filter(e => e.alias === currentName && e.code === currentCode)
         const FaciesFound = faciesForAliasAndCode.length > 0 ? faciesForAliasAndCode[0] : null
 
@@ -184,10 +181,10 @@ export default {
         if (FaciesFound) {
           faciesToBeSelected.push(FaciesFound)
         } else {
-          await dispatch('facies/new', { code: currentCode, name: currentName }, { root: true })
+          await dispatch('facies/global/new', { code: currentCode, name: currentName }, { root: true })
           faciesToBeSelected.push(
-            ...Object.keys(rootState.facies.available)
-              .map(e => rootState.facies.available[e])
+            ...Object.keys(rootState.facies.global.available)
+              .map(e => rootState.facies.global.available[`${e}`])
               .filter(e => e.alias === currentName && e.code === currentCode)
           )
         }
@@ -422,7 +419,7 @@ export default {
         // TODO: handle SimBoxThickness (must await implementation from Sindre on this?)
         const probCubes = []
         for (const faciesModel of zoneModel.FaciesProbForModel.Facies) {
-          const facies = Object.values(rootState.facies.available).find(obj => obj.name === faciesModel._attributes.name)
+          const facies = Object.values(rootState.facies.global.available).find(obj => obj.name === faciesModel._attributes.name)
           if (useConstantProb) {
             dispatch('facies/updateProbability', {
               facies,
@@ -439,7 +436,7 @@ export default {
         if (!useConstantProb) {
           dispatch('facies/updateProbabilities', {
             probabilityCubes: probCubes.reduce((obj, name) => {
-              obj[name] = 1 / probCubes.length
+              obj[`${name}`] = 1 / probCubes.length
               return obj
             }, {})
           }, { root: true })

@@ -1,7 +1,7 @@
 <template>
   <v-app id="app">
-    <tool-bar/>
-    <router-view/>
+    <tool-bar />
+    <router-view />
   </v-app>
 </template>
 

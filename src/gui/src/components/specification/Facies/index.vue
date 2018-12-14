@@ -1,6 +1,7 @@
 <template>
   <facies-specification-base
     :value="value.facies"
+    :rule="rule"
     @input.capture="facies => updateFacies(facies)"
   />
 </template>
@@ -11,7 +12,6 @@ import VueTypes from 'vue-types'
 import FaciesSpecificationBase from './base'
 
 import { updateFacies } from '@/store/utils'
-import { TruncationRule } from '@/store/utils/domain'
 import { AppTypes } from '@/utils/typing'
 
 export default {
@@ -22,7 +22,7 @@ export default {
   },
 
   props: {
-    rule: VueTypes.instanceOf(TruncationRule).isRequired,
+    rule: AppTypes.truncationRule.isRequired,
     value: VueTypes.shape({
       facies: AppTypes.id.isRequired,
     }).loose.isRequired,

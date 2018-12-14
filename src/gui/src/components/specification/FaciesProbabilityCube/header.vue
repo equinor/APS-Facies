@@ -17,8 +17,7 @@
         <span>Toggles whether constant probabilities, or probability cubes should be used</span>
       </v-tooltip>
     </v-flex>
-    <v-flex
-    >
+    <v-flex>
       <v-tooltip
         v-show="useProbabilityCubes"
         bottom
@@ -27,7 +26,9 @@
           slot="activator"
           :disabled="!canCalculateAverages"
           @click.stop="average"
-        >Average</v-btn>
+        >
+          Average
+        </v-btn>
         <span>Calculate average probability (for previewer)</span>
       </v-tooltip>
       <v-tooltip
@@ -38,7 +39,9 @@
           slot="activator"
           :disabled="!shouldNormalize"
           @click.stop="normalize"
-        >Normalize</v-btn>
+        >
+          Normalize
+        </v-btn>
         <span>Normalize the probabilities</span>
       </v-tooltip>
     </v-flex>
@@ -49,7 +52,7 @@
 import { mapState } from 'vuex'
 
 import rms from '@/api/rms'
-import { notEmpty } from '@/utils'
+import { hasCurrentParents, notEmpty } from '@/utils'
 
 export default {
   data () {
@@ -60,7 +63,6 @@ export default {
 
   computed: {
     ...mapState({
-      selectedFacies: state => Object.values(state.facies.available).filter(facies => facies.selected),
       probabilityCubeParameters: state => Object.values(state.facies.available)
         .map(facies => facies.probabilityCube)
         .filter(param => notEmpty(param)),
@@ -68,8 +70,13 @@ export default {
         .filter(zone => !!zone.selected)
         .map(zone => zone.code)
     }),
+    selectedFacies () {
+      const state = this.$store.state
+      const getters = this.$store.getters
+      return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
+    },
     useProbabilityCubes: {
-      get () { return !this.$store.state.facies.constantProbability },
+      get () { return !this.$store.getters['facies/constantProbability'] },
       set (value) { this.$store.dispatch('facies/toggleConstantProbability') },
     },
     canCalculateAverages () { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 },

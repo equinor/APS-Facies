@@ -1,7 +1,7 @@
 import uuidv4 from 'uuid/v4'
 import { cloneDeep } from 'lodash'
 
-import { ZoneRegionDependent } from '@/store/utils/domain/bases'
+import { ZoneRegionDependent, Named, BaseItem } from '@/store/utils/domain/bases'
 
 const identify = items => {
   const obj = {}
@@ -38,13 +38,12 @@ const structureSettings = (settings, polygons) => {
   return structured
 }
 
-class TruncationRule extends ZoneRegionDependent {
-  constructor ({ polygons, fields, settings, name = '', _realization, _id, zone, region = null }) {
-    super({ _id, zone, region })
+class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
+  constructor ({ polygons, fields, settings, _realization, ...rest }) {
+    super(rest)
     polygons = structurePolygons(polygons)
     settings = structureSettings(settings, polygons)
 
-    this.name = name
     this.type = null
     this.polygons = polygons
     this._fields = fields
@@ -108,8 +107,8 @@ const combinePolygons = (polygons, overlay) => {
 }
 
 class OverlayedTruncationRule extends TruncationRule {
-  constructor ({ polygons, fields, settings, overlay, name = '', _realization, _id, zone, region = null }) {
-    super({ polygons: combinePolygons(polygons, overlay), fields, settings, name, _realization, _id, zone, region })
+  constructor ({ polygons, overlay, ...rest }) {
+    super({ polygons: combinePolygons(polygons, overlay), ...rest })
     this._useOverlay = overlay ? overlay.use : false
   }
 
@@ -155,9 +154,6 @@ class OverlayedTruncationRule extends TruncationRule {
   }
 
   specification ({ rootGetters }) {
-    const getFaciesName = (id) => {
-      return rootGetters['facies/byId'](id).name
-    }
     const getFieldName = (id) => {
       return rootGetters.fields.find(field => field.id === id).name
     }
@@ -165,8 +161,8 @@ class OverlayedTruncationRule extends TruncationRule {
       overlay: this.overlayPolygons.length > 0
         ? this.overlayPolygons.map(polygon => {
           return {
-            over: polygon.group.map(faciesId => getFaciesName(faciesId)),
-            facies: getFaciesName(polygon.facies),
+            over: polygon.group.map(faciesId => rootGetters['facies/nameById'](faciesId)),
+            facies: rootGetters['facies/nameById'](polygon.facies),
             field: getFieldName(polygon.field),
             center: polygon.center,
             fraction: polygon.fraction,
@@ -179,8 +175,8 @@ class OverlayedTruncationRule extends TruncationRule {
 }
 
 class Bayfill extends TruncationRule {
-  constructor ({ polygons, fields, settings, _realization, name = '', _id, zone, region = null }) {
-    super({ polygons, fields, settings, _realization, name, _id, zone, region })
+  constructor ({ ...rest }) {
+    super(rest)
     this.type = 'bayfill'
   }
 
@@ -190,12 +186,15 @@ class Bayfill extends TruncationRule {
     return {}
   }
 
-  specification (context) { return Object.values(this.settings) }
+  specification (context) {
+    return Object.values(this.settings)
+      .filter(setting => !!setting.factor)
+  }
 }
 
 class NonCubic extends OverlayedTruncationRule {
-  constructor ({ polygons, fields, settings, overlay, name = '', _id, zone, region = null }) {
-    super({ polygons, fields, settings, overlay, name, _id, zone, region })
+  constructor ({ ...rest }) {
+    super(rest)
     this.type = 'non-cubic'
   }
 
@@ -205,10 +204,10 @@ class NonCubic extends OverlayedTruncationRule {
       polygons: this.backgroundPolygons
         .map(polygon => {
           const settings = this.settings[`${polygon.id}`]
-          const facies = rootGetters['facies/byId'](polygon.facies)
+          const name = rootGetters['facies/nameById'](polygon.facies)
           return {
             order: polygon.order,
-            facies: facies.name,
+            facies: name,
             angle: settings.angle,
             fraction: settings.fraction,
             updatable: settings.updatable,

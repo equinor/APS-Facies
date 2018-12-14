@@ -61,6 +61,9 @@ class RMSData:
     def is_continuous(self, _property):
         return _property.type == self.roxar.GridPropertyType.continuous
 
+    def get_project_name(self):
+        return self.project.name
+
     def get_grid_models(self):
         return self.project.grid_models
 
@@ -190,19 +193,17 @@ class RMSData:
         return self.get_code_names(facies_property)
 
     @staticmethod
-    def simulate_gaussian_field(field):
-        grid_index_order = 'F'
+    def simulate_gaussian_field(field, grid_index_order='F'):
         simulation = RMSData._simulate_gaussian_field(field)
         data = simulation.field_as_matrix(grid_index_order)
         return data.tolist()
 
     @staticmethod
-    def simulate_realization(fields, specification):
+    def simulate_realization(fields, specification, grid_index_order='F'):
         simulations = [RMSData._simulate_gaussian_field(field) for field in fields]
         truncation_rule = make_truncation_rule(specification)
         facies, facies_fraction = create_facies_map(simulations, truncation_rule, use_code=True)
 
-        grid_index_order = 'C'
         data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order)
         return {
             'faciesMap': data.tolist(),

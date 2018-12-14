@@ -6,6 +6,7 @@ import { rms as mock } from './roxar'
 const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 
 export default {
+  projectName: () => api.call('get_project_name'),
   gridModels: () => api.call('get_grid_model_names'),
   zones: (gridName) => api.call('get_zones', gridName),
   regionParameters: (gridName) => api.call('get_region_parameters', gridName),

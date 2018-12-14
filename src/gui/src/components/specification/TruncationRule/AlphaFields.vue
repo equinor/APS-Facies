@@ -13,7 +13,7 @@
 <script>
 import VueTypes from 'vue-types'
 
-import { TruncationRule } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 import AlphaSelection from './AlphaSelection'
 
@@ -32,7 +32,7 @@ export default {
   },
 
   props: {
-    value: VueTypes.instanceOf(TruncationRule),
+    value: AppTypes.truncationRule,
     minChannels: VueTypes.integer.def(2),
   },
 

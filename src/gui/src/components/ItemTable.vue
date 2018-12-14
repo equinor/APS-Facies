@@ -1,9 +1,9 @@
 <template>
   <v-container>
     <v-data-table
+      v-model="selectedItems"
       :headers="headers"
       :items="items"
-      v-model="selectedItems"
       :item-key="itemKey"
       :class="tableClass"
       hide-actions
@@ -13,7 +13,9 @@
         slot="items"
         slot-scope="props"
       >
-        <td class="text-xs-left">{{ props.item.name }}</td>
+        <td class="text-xs-left">
+          {{ props.item.name }}
+        </td>
       </template>
     </v-data-table>
   </v-container>

@@ -7,7 +7,9 @@
   >
     <v-card>
       <v-card-title>
-        <span class="headline">Visualization settings</span>
+        <span class="headline">
+          Visualization settings
+        </span>
       </v-card-title>
       <v-card-text>
         <v-container grid-list-md>
@@ -55,12 +57,12 @@
             </v-layout>
             <v-flex xs6>
               <v-checkbox
-                :value="!settings.gridModel.use"
+                :value="settings.gridModel.use"
                 label="Use model grid"
-                @change="val => settings.gridModel.use = !val"
+                @change="val => settings.gridModel.use = val"
               />
             </v-flex>
-            <v-flex xs6/>
+            <v-flex xs6 />
             <v-layout
               v-if="settings.gridModel.use"
               justify-space-around
@@ -102,15 +104,21 @@
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-spacer/>
+        <v-spacer />
         <v-btn
           color="blue darken-1"
           flat
-          @click="cancel">Close</v-btn>
+          @click="cancel"
+        >
+          Close
+        </v-btn>
         <v-btn
           color="blue darken-1"
           flat
-          @click="save">Save</v-btn>
+          @click="save"
+        >
+          Save
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

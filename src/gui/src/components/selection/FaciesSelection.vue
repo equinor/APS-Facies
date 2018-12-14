@@ -1,16 +1,20 @@
 <template>
   <div>
-    <facies-table :hide-alias="hideAlias"/>
+    <facies-table :hide-alias="hideAlias" />
     <div>
       <v-btn
         color="info"
         @click="add"
-      >Add Facies</v-btn>
+      >
+        Add Facies
+      </v-btn>
       <v-btn
         :disabled="!hasSelected"
         color="warning"
         @click="remove"
-      >Remove Facies</v-btn>
+      >
+        Remove Facies
+      </v-btn>
     </div>
   </div>
 </template>
@@ -32,18 +36,16 @@ export default {
 
   computed: {
     ...mapState({
-      available: state => state.facies.available,
-      colors: state => state.constants.faciesColors.available,
       hasSelected: state => !!state.facies.current,
     }),
   },
 
   methods: {
     add () {
-      return this.$store.dispatch('facies/new', {})
+      return this.$store.dispatch('facies/global/new', {})
     },
     remove () {
-      return this.$store.dispatch('facies/removeSelectedFacies')
+      return this.$store.dispatch('facies/global/removeSelectedFacies')
     },
   }
 }

@@ -4,8 +4,8 @@
     <facies-probability-cube
       v-if="hasFacies"
     />
-    <truncation-rule/>
-    <gaussian-random-fields/>
+    <truncation-rule />
+    <gaussian-random-fields />
   </div>
 </template>
 

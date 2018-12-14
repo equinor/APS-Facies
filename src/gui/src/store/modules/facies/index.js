@@ -2,61 +2,69 @@ import Vue from 'vue'
 
 import math from 'mathjs'
 
-import rms from '@/api/rms'
+import { cloneDeep, merge, isEqual } from 'lodash'
 
 import { Facies } from '@/store/utils/domain'
-import { makeData, selectItems, isEmpty, notEmpty } from '@/utils'
-import { promiseSimpleCommit } from '@/store/utils'
+import { isEmpty, notEmpty, hasCurrentParents, parentId } from '@/utils'
+import { promiseSimpleCommit, changeFacies } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
+import global from './global'
+import { isUUID } from '@/utils/typing'
 
 const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changed', { id: facies.id, previewProbability: probability })
+
+const _removeCurrent = items => {
+  return Object.values(items)
+    .filter(item => !hasCurrentParents(item))
+    .reduce((obj, item) => {
+      obj[`${item.id}`] = item
+      return obj
+    }, {})
+}
+
+const updateSelected = (globalFacies, localFacies, selected, parent) => {
+  return merge(
+    _removeCurrent(cloneDeep(localFacies)),
+    selected
+      .map(item => {
+        const existing = Object.values(localFacies).find(({ facies }) => facies === item.id)
+        if (existing && isEqual(existing.parent, parent)) {
+          return existing
+        } else {
+          return new Facies({ facies: item.id, ...parent })
+        }
+      })
+      .reduce((obj, facies) => {
+        obj[`${facies.id}`] = facies
+        return obj
+      }, {})
+  )
+}
 
 export default {
   namespaced: true,
 
   state: {
     available: {},
-    current: null,
-    constantProbability: true,
+    constantProbability: {},
   },
 
-  modules: {},
+  modules: {
+    global,
+  },
 
   actions: {
-    select: ({ commit, state }, items) => {
-      const facies = selectItems({ state, items, _class: Facies })
+    select: ({ commit, state }, { items, parent }) => {
+      const facies = updateSelected(state.global.available, state.available, items, parent)
       commit('AVAILABLE', facies)
       return Promise.resolve(Object.keys(facies))
-    },
-    current: ({ commit }, { id }) => {
-      return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     removeSelectedFacies: ({ commit, dispatch, state }) => {
       return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
         .then(() => {
           dispatch('current', { id: null })
         })
-    },
-    new: ({ dispatch, state, rootState }, { code, name, color }) => {
-      return new Promise((resolve, reject) => {
-        if (isEmpty(code) || code < 0) {
-          // TODO: Find the highest values in the Global Facies Table (from rms, as some may have been deleted)
-          code = 1 + Object.values(state.available)
-            .map(facies => facies.code)
-            .reduce((a, b) => Math.max(a, b), 0)
-        }
-        if (isEmpty(name)) {
-          name = `F${code}`
-        }
-        if (isEmpty(color)) {
-          const colors = rootState.constants.faciesColors.available
-          color = colors[code % colors.length]
-        }
-        const facies = new Facies({ code, name, color })
-        dispatch('changed', facies)
-        resolve(facies)
-      })
     },
     updateProbabilities: ({ dispatch, state }, { facies, probabilityCubes }) => {
       if (notEmpty(probabilityCubes) && isEmpty(facies)) {
@@ -68,9 +76,9 @@ export default {
       }
       dispatch('normalizeEmpty')
     },
-    updateProbability: ({ dispatch, state }, { facies, probability }) => {
+    updateProbability: ({ dispatch, state, getters }, { facies, probability }) => {
       if (!facies.id) {
-        facies = state.available[`${facies}`]
+        facies = state.available[`${facies}`] || getters.selected.find(item => item.facies === facies)
       }
       return updateFaciesProbability(dispatch, facies, probability)
     },
@@ -82,50 +90,35 @@ export default {
       selectedFacies
         .map(facies => facies.previewProbability === 0 || facies.previewProbability === null ? updateFaciesProbability(dispatch, facies, emptyProbability) : null)
     },
-    normalize: ({ dispatch, getters }) => {
+    normalize: ({ dispatch, state, getters }) => {
       const selected = getters.selected
       const cumulativeProbability = selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
-      selected.map(facies => {
+      selected.forEach(facies => {
         const probability = cumulativeProbability === 0
           ? math.divide(1, selected.length)
           : math.divide(facies.previewProbability, cumulativeProbability)
         updateFaciesProbability(dispatch, facies, probability)
       })
     },
-    toggleConstantProbability: ({ commit, state }) => {
-      commit('CONSTANT_PROBABILITY', !state.constantProbability)
+    toggleConstantProbability: ({ commit, state, getters, rootGetters }) => {
+      const _id = parentId({ zone: rootGetters.zone, region: rootGetters.region })
+      const usage = !getters.constantProbability
+      commit('CONSTANT_PROBABILITY', { parentId: _id, toggled: usage })
     },
     setConstantProbability: ({ commit, state }, value) => {
       if (typeof value === 'boolean') {
         commit('CONSTANT_PROBABILITY', value)
       }
     },
-    changed: ({ commit, state }, facies) => {
-      // TODO: Update proportion in truncation rule if applicable
-      const old = state.available[`${facies.id}`]
-      // need this to be be synchronous:
-      commit('UPDATE', new Facies({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
-    },
-    fetch: ({ dispatch, rootGetters }) => {
-      return rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
-        .then(facies => dispatch('populate', facies))
-    },
-    populate: ({ commit, rootState }, facies) => {
-      // TODO: Add colors (properly)
-      for (let i = 0; i < facies.length; i++) {
-        facies[`${i}`].color = rootState.constants.faciesColors.available[`${i}`]
-      }
-      const data = makeData(facies, Facies)
-      commit('AVAILABLE', data)
+    changed: (context, facies) => changeFacies(context, facies),
+    fetch: ({ dispatch }) => {
+      dispatch('global/fetch')
     },
   },
 
   mutations: {
     AVAILABLE: (state, facies) => {
       Vue.set(state, 'available', facies)
-    },
-    CURRENT: (state, { id }) => {
-      state.current = id
     },
     SELECTED: SELECTED_ITEMS,
     UPDATE: (state, facies) => {
@@ -134,20 +127,32 @@ export default {
     REMOVE: (state, { id }) => {
       Vue.delete(state.available, id)
     },
-    CONSTANT_PROBABILITY: (state, toggled) => {
-      state.constantProbability = toggled
+    CONSTANT_PROBABILITY: (state, { parentId, toggled }) => {
+      Vue.set(state.constantProbability, parentId, toggled)
     },
   },
 
   getters: {
+    nameById: (state, getters) => (id) => {
+      id = isUUID(id) ? id : id.id
+      const facies = getters.byId(id)
+      return facies.name || getters.byId(facies.facies).name
+    },
     byId: (state) => (id) => {
-      return state.available[`${id}`]
+      return state.available[`${id}`] || state.global.available[`${id}`]
     },
     byName: (state) => (name) => {
       return Object.values(state.available).find(facies => facies.name === name)
     },
-    selected: (state) => {
-      return Object.values(state.available).filter(facies => facies.selected)
+    constantProbability: (state, getters, rootState, rootGetters) => {
+      const parent = { zone: rootGetters.zone, region: rootGetters.region }
+      const constantProbability = () => state.constantProbability[`${parentId(parent)}`]
+      return !parent.zone || typeof constantProbability() === 'undefined'
+        ? true
+        : constantProbability()
+    },
+    selected: (state, getters, rootState, rootGetters) => {
+      return Object.values(state.available).filter(facies => hasCurrentParents(facies, rootGetters))
     },
     cumulative: (state, getters) => {
       return getters.selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)

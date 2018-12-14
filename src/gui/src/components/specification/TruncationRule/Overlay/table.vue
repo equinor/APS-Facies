@@ -65,20 +65,15 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import VueTypes from 'vue-types'
-
 import FractionField from '@/components/selection/FractionField'
-import NumericField from '@/components/selection/NumericField'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import IconButton from '@/components/selection/IconButton'
 import PolygonOrder from '@/components/specification/TruncationRule/order'
 import FaciesSpecification from '@/components/specification/Facies'
 import BackgroundFaciesSpecification from '@/components/specification/Facies/background'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection'
 
 import { updateFacies } from '@/store/utils'
-import { TruncationRule } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   components: {
@@ -86,20 +81,15 @@ export default {
     BackgroundFaciesSpecification,
     FaciesSpecification,
     PolygonOrder,
-    IconButton,
     OptionalHelpItem,
     FractionField,
-    NumericField,
   },
 
   props: {
-    value: VueTypes.instanceOf(TruncationRule).isRequired,
+    value: AppTypes.truncationRule.isRequired,
   },
 
   computed: {
-    ...mapGetters({
-      selectedFacies: 'facies/selected',
-    }),
     polygons () {
       // TODO: Include 'help' messages
       return this.value

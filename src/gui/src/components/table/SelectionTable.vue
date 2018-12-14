@@ -1,9 +1,9 @@
 <template>
   <v-data-table
+    v-model="selected"
     :headers="headers"
     :items="items"
     :no-data-text="noDataText"
-    v-model="selected"
     item-key="id"
     class="elevation-1"
     hide-actions
@@ -51,7 +51,6 @@
 
 <script>
 import VueTypes from 'vue-types'
-import { mapState } from 'vuex'
 
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
@@ -70,56 +69,53 @@ export default {
     showCode: VueTypes.bool.def(false),
   },
 
-  data () {
-    return {
-      headers: [{
-        text: 'Use',
-        align: 'left',
-        sortable: false,
-        value: 'selected',
-      }],
-    }
-  },
-
   computed: {
-    ...mapState({
-      items: function (state) {
-        const items = state[`${this.itemType}s`].available
-        return Object.keys(items)
-          .map(id => {
-            const item = items[`${id}`]
-            return {
-              id,
-              name: item.name,
-              code: item.code,
-              selected: item.selected,
-              current: id === state[`${this.itemType}s`].current,
-            }
-          })
-      }
-    }),
+    headers () {
+      return [
+        {
+          text: 'Use',
+          align: 'left',
+          sortable: false,
+          value: 'selected',
+        },
+        ...(this.showName
+          ? [{
+            text: this.headerName,
+            align: 'left',
+            sortable: false,
+            value: 'name',
+          }]
+          : []
+        ),
+        ...(this.showCode
+          ? [{
+            text: 'Code',
+            align: 'left',
+            sortable: false,
+            value: 'code',
+          }]
+          : []
+        ),
+      ]
+    },
+    items () {
+      const state = this.$store.state[`${this.itemType}s`]
+      const items = state.available
+      return Object.keys(items)
+        .map(id => {
+          const item = items[`${id}`]
+          return {
+            id,
+            name: item.name,
+            code: item.code,
+            selected: item.selected,
+            current: id === state.current,
+          }
+        })
+    },
     selected: {
       get: function () { return Object.values(this.items).filter(item => item.selected) },
       set: function (value) { this.$store.dispatch(`${this.itemType}s/select`, value) },
-    }
-  },
-
-  mounted () {
-    if (this.showName) {
-      this.headers.push({
-        text: this.headerName,
-        align: 'left',
-        sortable: false,
-        value: 'name',
-      })
-    }
-    if (this.showCode) {
-      this.headers.push({
-        text: 'Code',
-        align: 'left',
-        sortable: false,
-        value: 'code',
-      })
     }
   },
 

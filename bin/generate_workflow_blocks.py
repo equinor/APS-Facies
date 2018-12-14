@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 #  -*- coding: utf-8 -*-
 """
 A script to create the stubs of Python scripts that will be used in a RMS workflow.
@@ -37,7 +37,7 @@ def run():
             add_ipl_scripts(root_path, project_location)
             for rms_name, workflow_name in get_rms_mapping().items():
                 if workflow_name is not None:
-                    _OS.copy(workflow_dir / workflow_name, project_location / 'pythoncomp' / rms_name)
+                    _OS.copy(workflow_dir / rms_name, project_location / 'pythoncomp' / rms_name)
 
 
 def get_workflow_block(file_name, root_path, relative_path):
@@ -287,6 +287,10 @@ def get_rms_mapping():
     }
 
 
+def get_file_mapping():
+    return {file: rms_name for rms_name, file in get_rms_mapping().items() if file}
+
+
 def get_workflow_dir(root_path):
     workflow_dir = root_path / 'workflow'
     if not _OS.exists(workflow_dir):
@@ -299,7 +303,7 @@ def create_workflow_block_file(file_name, root_path, relative_path):
     script_path = root_path / relative_path / script_name
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
     workflow_dir = get_workflow_dir(root_path)
-    workflow_path = str(workflow_dir / script_name)
+    workflow_path = str(workflow_dir / get_file_mapping()[script_name])
     workflow_block = get_workflow_block(file_name, root_path, relative_path)
     with open(workflow_path, 'w') as f:
         f.write(workflow_block)

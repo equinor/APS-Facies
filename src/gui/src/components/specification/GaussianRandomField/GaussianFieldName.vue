@@ -10,15 +10,14 @@
   />
 </template>
 <script>
-import VueTypes from 'vue-types'
 import { required } from 'vuelidate/lib/validators'
-import { GaussianRandomField } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 // TODO: Add description of behavior
 // Alt; make behavior consistent with remaining application
 export default {
   props: {
-    value: VueTypes.instanceOf(GaussianRandomField).isRequired,
+    value: AppTypes.gaussianRandomField.isRequired,
   },
 
   data () {

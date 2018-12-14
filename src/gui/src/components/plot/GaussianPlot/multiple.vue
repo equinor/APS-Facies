@@ -38,7 +38,7 @@
 import VueTypes from 'vue-types'
 
 import GaussianPlot from './index'
-import { GaussianRandomField } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   name: 'MultipleGaussianPlots',
@@ -48,7 +48,7 @@ export default {
   },
 
   props: {
-    value: VueTypes.arrayOf(VueTypes.instanceOf(GaussianRandomField)).isRequired,
+    value: VueTypes.arrayOf(AppTypes.gaussianRandomField).isRequired,
   }
 }
 </script>

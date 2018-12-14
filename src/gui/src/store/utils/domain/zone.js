@@ -1,8 +1,8 @@
-import { SelectableItem } from '@/store/utils/domain/bases'
+import { Selectable, CodeName, BaseItem } from '@/store/utils/domain/bases'
 
-export class Zone extends SelectableItem {
-  constructor ({ code, name, selected }) {
-    super({ code, name, selected })
+export class Zone extends Selectable(CodeName(BaseItem)) {
+  constructor ({ ...rest }) {
+    super(rest)
     this.regions = {}
   }
 }

@@ -64,14 +64,11 @@
 </template>
 
 <script>
-import VueTypes from 'vue-types'
-
-import { TruncationRule } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 import FractionField from '@/components/selection/FractionField'
 import NumericField from '@/components/selection/NumericField'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import IconButton from '@/components/selection/IconButton'
 import PolygonOrder from '@/components/specification/TruncationRule/order'
 import FaciesSpecification from '@/components/specification/Facies'
 
@@ -81,14 +78,13 @@ export default {
   components: {
     FaciesSpecification,
     PolygonOrder,
-    IconButton,
     OptionalHelpItem,
     FractionField,
     NumericField,
   },
 
   props: {
-    value: VueTypes.instanceOf(TruncationRule),
+    value: AppTypes.truncationRule,
   },
 
   computed: {
@@ -174,7 +170,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-
-</style>

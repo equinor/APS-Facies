@@ -14,7 +14,7 @@ import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelName from '@/store/modules/modelName'
 
 import { mirrorZoneRegions } from '@/store/utils'
-import { hasCurrentParents, resolve } from '@/utils'
+import { defaultSimulationSettings, hasCurrentParents, resolve } from '@/utils'
 
 Vue.use(Vuex)
 
@@ -54,6 +54,10 @@ export default new Vuex.Store({
   },
 
   getters: {
+    // Various checks used throughout the app
+    canSpecifyModelSettings: (state, getters) => {
+      return !!getters.zone && (state.regions.use ? !!getters.region : true)
+    },
     // These are the 'current' of the various modules
     gridModel: (state) => {
       return state.gridModels.current
@@ -69,7 +73,7 @@ export default new Vuex.Store({
     },
     truncationRule: (state, getters) => {
       // FIXME: This only works if there is one and ONLY one truncation rule in existence for a given zone/region
-      // use truncationRules.current in stead
+      //   use truncationRules.current in stead
       return getters['truncationRules/current']
     },
     regionParameter: (state) => {
@@ -81,8 +85,10 @@ export default new Vuex.Store({
     blockedWellLogParameter: (state) => {
       return state.parameters.blockedWellLog.selected
     },
+    allFields: (state) => {
+      return Object.values(state.gaussianRandomFields.fields)
+    },
     fields: (state, getters) => {
-      // const fields = state.gaussianRandomFields.fields
       return Object.values(state.gaussianRandomFields.fields)
         .filter(field => hasCurrentParents(field, getters))
     },
@@ -97,13 +103,13 @@ export default new Vuex.Store({
       return state.regions.available
     },
     faciesTable: (state) => {
-      return Object.values(state.facies.available)
+      return Object.values(state.facies.global.available)
     },
     // ...
     simulationSettings: (state, getters) => (grfId) => {
       const grid = state.parameters.grid
       const fieldSettings = grfId
-        ? state.gaussianRandomFields.fields[`${grfId}`].settings()
+        ? state.gaussianRandomFields.fields[`${grfId}`].settings
         : {}
       const globalSettings = grid && !grid._waiting
         ? {
@@ -128,12 +134,7 @@ export default new Vuex.Store({
             ...grid.simBox.origin,
           },
         }
-        : {
-          gridAzimuth: 0,
-          gridSize: { x: 100, y: 100, z: 1 },
-          simulationBox: { x: 1000, y: 1000, z: 10 },
-          simulationBoxOrigin: { x: 0, y: 0 },
-        }
+        : defaultSimulationSettings()
       return {
         ...globalSettings,
         ...fieldSettings,
@@ -143,7 +144,7 @@ export default new Vuex.Store({
     id: (state) => (type, name) => {
       const mapping = {
         'gaussianRandomField': 'gaussianRandomFields.fields',
-        'facies': 'facies.available',
+        'facies': 'facies.global.available',
       }
       const items = resolve(mapping[`${type}`], state)
       if (items) {

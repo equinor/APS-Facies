@@ -11,7 +11,9 @@
         {{ help }}
       </span>
     </v-tooltip>
-    <span v-else>{{ text }}</span>
+    <span v-else>
+      {{ text }}
+    </span>
   </div>
 </template>
 

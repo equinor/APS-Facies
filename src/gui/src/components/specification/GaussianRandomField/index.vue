@@ -10,14 +10,14 @@
           :data="gaussianFieldData"
         />
       </v-flex>
-      <v-flex xs1/>
+      <v-flex xs1 />
       <v-flex
         xs5
       >
-        Variogram selection
+        <span>Variogram selection</span>
         <v-select
-          :items="availableVariograms"
           v-model="variogramType"
+          :items="availableVariograms"
           label="Variogram"
         />
         <v-select
@@ -60,7 +60,7 @@
       </v-flex>
       <!--New line-->
       <v-flex xs6>
-        Anisotropy direction
+        <span>Anisotropy direction</span>
         <anisotropy-direction
           :grf-id="grfId"
         />
@@ -69,7 +69,7 @@
           :grf-id="grfId"
         />
       </v-flex>
-      <v-flex xs1/>
+      <v-flex xs1 />
       <v-flex xs5>
         Ranges
         <range-specification
@@ -86,7 +86,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-import VueTypes from 'vue-types'
 import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
@@ -100,7 +99,7 @@ import AnisotropyDirection from '@/components/specification/GaussianRandomField/
 import Power from '@/components/specification/GaussianRandomField/Power'
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
 import IconButton from '@/components/selection/IconButton'
-import { GaussianRandomField } from '@/store/utils/domain'
+import { AppTypes } from '@/utils/typing'
 
 export default {
   name: 'GaussianRandomField',
@@ -116,7 +115,7 @@ export default {
   },
 
   props: {
-    value: VueTypes.instanceOf(GaussianRandomField).isRequired,
+    value: AppTypes.gaussianRandomField.isRequired,
   },
 
   data () {
@@ -209,7 +208,7 @@ export default {
         })
     },
     openVisualizationSettings () {
-      const settings = cloneDeep(this.value._settings)
+      const settings = cloneDeep(this.value.settings())
       this.$refs.visualisationSettings.open(settings, {})
         .then(({ save, settings }) => {
           if (save) {

@@ -1,11 +1,15 @@
 <template>
   <v-container fluid>
     <v-layout wrap>
-      <v-flex xs4><Selection/></v-flex>
-      <v-flex xs4><Preview v-if="hasSimulations"/></v-flex>
       <v-flex xs4>
-        <Settings
-          v-if="zoneSelected"
+        <selection />
+      </v-flex>
+      <v-flex xs4>
+        <preview v-if="hasSimulations" />
+      </v-flex>
+      <v-flex xs4>
+        <settings
+          v-if="canSpecifyModelSettings"
         />
       </v-flex>
     </v-layout>
@@ -13,6 +17,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import Selection from '@/components/ElementSelection'
 import Settings from '@/components/ElementSettings'
 import Preview from '@/components/ElementPreview'
@@ -25,14 +31,14 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      'canSpecifyModelSettings': 'canSpecifyModelSettings',
+    }),
     fields () {
       return Object.values(this.$store.getters.fields)
     },
-    zoneSelected () {
-      return !!this.$store.getters.zone
-    },
     hasSimulations () {
-      return this.fields.length > 0 && this.fields.every(field => field._data.length > 0 && field._data[0].length > 0)
+      return this.fields.length > 0
     },
   }
 }

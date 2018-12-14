@@ -1,6 +1,5 @@
 <template>
   <v-toolbar>
-
     <div>
       APS Model:
     </div>
@@ -19,15 +18,14 @@
       disabled="true"
     />
 
-    <v-spacer/>
+    <v-spacer />
 
-    <ProjectSettings/>
+    <project-settings />
 
     <bold-button
       title="Run Settings"
       diabled="true"
     />
-
   </v-toolbar>
 </template>
 
@@ -55,7 +53,6 @@ const fileHandler = (store, fileName) => {
     try {
       json = xml2json(fileContent, { compact: true, ignoreComment: true })
     } catch (err) {
-      console.log(err)
       alert('The file you tried to open is not valid XML and cannot be used\n' +
         'Fix the following error before opening again:\n\n' +
         err.message)
@@ -103,7 +100,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-
-</style>

@@ -28,12 +28,11 @@ export default {
 
   computed: {
     ...mapGetters({
-      faciesTable: 'faciesTable',
+      faciesTable: 'facies/global/selected',
       rule: 'truncationRule',
     }),
     dataDefinition () {
       return this.faciesTable
-        .filter(({ selected }) => !!selected)
         .map(({ color, code }) => {
           return {
             z: filterOnCode(this.data, code),

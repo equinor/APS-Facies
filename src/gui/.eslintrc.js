@@ -31,9 +31,18 @@ module.exports = {
     'arrow-parens': 0,
     // allow async-await
     'generator-star-spacing': 0,
-    // allow debugger during development
     'comma-dangle': ['error', 'only-multiline'],
+    // allow debugger during development
     'no-console': verbosity,
     'no-debugger': verbosity,
-  }
+    'vue/attribute-hyphenation': ['error', 'always'],
+    'vue/attributes-order': 'error',
+    'vue/html-quotes': ['error', 'double'],
+    'vue/component-name-in-template-casing': ['error', 'kebab-case', {
+      'ignores': []
+    }],
+  },
+  parserOptions: {
+    parser: 'babel-eslint',
+  },
 }

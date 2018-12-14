@@ -14,8 +14,8 @@
             fill-height
             wrap
           >
-            <probability-cube-header/>
-            <facies-probability-cube-table/>
+            <probability-cube-header />
+            <facies-probability-cube-table />
           </v-layout>
         </v-container>
       </v-card>
