@@ -342,6 +342,17 @@ export default {
         }, { root: true })
       })
     },
+    deleteField ({ commit, dispatch, state }, { grfId }) {
+      return Promise.all(
+        Object.values(state.rules)
+          .filter(rule => !!rule.fields.some(({ field }) => field === grfId))
+          .map(rule => dispatch('updateFields', {
+            rule,
+            channel: rule.fields.find(({ field }) => field === grfId).channel,
+            selected: null
+          }))
+      )
+    },
     updateFields ({ commit, rootGetters }, { rule, channel, selected }) {
       rule = rule || rootGetters.truncationRule
       const existing = rule.fields.find(item => item.channel === channel)

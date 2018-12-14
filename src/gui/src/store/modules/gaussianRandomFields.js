@@ -90,8 +90,9 @@ export default {
     addField ({ commit, state }, { field }) {
       addItem({ commit }, { item: field })
     },
-    deleteField ({ state, commit }, { grfId }) {
+    async deleteField ({ state, commit, dispatch, rootState }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {
+        await dispatch('truncationRules/deleteField', { grfId }, { root: true })
         commit('DELETE', { grfId })
       }
     },
