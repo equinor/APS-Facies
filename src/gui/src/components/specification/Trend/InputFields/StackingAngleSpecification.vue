@@ -3,9 +3,10 @@
     <stacking-angle
       :grf-id="grfId"
     />
-    <v-select
+    <item-selection
       v-model="stackingDirection"
       :items="availableStackingDirection"
+      :constraints="{ required: true }"
       label="Stacking direction"
     />
   </div>
@@ -15,9 +16,11 @@
 import { mapState } from 'vuex'
 import { AppTypes } from '@/utils/typing'
 import StackingAngle from './StackingAngle'
+import ItemSelection from '@/components/selection/dropdown/ItemSelection'
 
 export default {
   components: {
+    ItemSelection,
     StackingAngle,
   },
 

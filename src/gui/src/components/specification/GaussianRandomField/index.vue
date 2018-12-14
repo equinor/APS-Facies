@@ -15,9 +15,10 @@
         xs5
       >
         <span>Variogram selection</span>
-        <v-select
+        <item-selection
           v-model="variogramType"
           :items="availableVariograms"
+          :constraints="{ required: true }"
           label="Variogram"
         />
         <v-select
@@ -86,12 +87,14 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex'
+import VueTypes from 'vue-types'
 import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
 
 import { hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
 
+import ItemSelection from '@/components/selection/dropdown/ItemSelection'
 import GaussianPlot from '@/components/plot/GaussianPlot'
 import TrendSpecification from '@/components/specification/Trend'
 import RangeSpecification from '@/components/specification/GaussianRandomField/Range'
@@ -105,6 +108,7 @@ export default {
   name: 'GaussianRandomField',
 
   components: {
+    ItemSelection,
     IconButton,
     PowerSpecification: Power,
     AnisotropyDirection,
