@@ -208,7 +208,7 @@ export default {
         })
     },
     openVisualizationSettings () {
-      const settings = cloneDeep(this.value.settings())
+      const settings = cloneDeep(this.value.settings)
       this.$refs.visualisationSettings.open(settings, {})
         .then(({ save, settings }) => {
           if (save) {
