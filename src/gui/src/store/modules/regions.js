@@ -51,6 +51,7 @@ export default {
     },
     use: ({ commit, dispatch }, { use }) => {
       commit('USE', use)
+      commit('CURRENT', { id: null })
       return dispatch('fetch', null)
     },
   },
