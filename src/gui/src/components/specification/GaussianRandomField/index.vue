@@ -160,17 +160,18 @@ export default {
     trend () { return this.value.trend },
     fieldName () { return this.value.name },
     canSimulate: {
-      cache: false,
+      cache: true,
       get: function () {
         return (
           notEmpty(this.variogramType) &&
+          (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true) &&
           this.isValid &&
           !this.waitingForSimulation
         )
       },
     },
     isValid: {
-      cache: false,
+      cache: true,
       get: function () { return hasValidChildren(this) }
     },
     variogramType: {
