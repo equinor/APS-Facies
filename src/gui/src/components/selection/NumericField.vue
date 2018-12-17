@@ -209,7 +209,7 @@ export default Vue.extend({
       return math.unequal(math.bignumber(this.fieldValue), this.getValue(value))
     },
     setUpdatable (event) {
-      this.emitChange(event)
+      this.emitChange(!!event)
     },
     emitChange (value) {
       const payload = this.value === null || typeof this.value.value === 'undefined'
