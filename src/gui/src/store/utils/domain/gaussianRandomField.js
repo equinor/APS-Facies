@@ -58,14 +58,14 @@ class Variogram {
 class Trend {
   constructor ({
     use = false,
-    type = null,
+    type = 'LINEAR',
     azimuth = 0,
     azimuthUpdatable = false,
     stackAngle = 0,
     stackAngleUpdatable = false,
     migrationAngle = 0,
     migrationAngleUpdatable = false,
-    stackingDirection = null,
+    stackingDirection = 'PROGRADING',
     parameter = null,
     curvature = 0,
     curvatureUpdatable = false,

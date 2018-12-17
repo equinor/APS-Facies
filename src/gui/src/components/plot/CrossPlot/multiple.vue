@@ -86,6 +86,15 @@ export default {
     },
   },
 
+  watch: {
+    available (value) {
+      if (this.selected.some(selectedItem => value.indexOf(availableItem => availableItem.value === selectedItem.value) === -1)) {
+        // That is, if there is some selected value that is no longer available
+        this.selected = this.available.filter(availableItem => this.selected.some(selectedItem => selectedItem.value === availableItem.value))
+      }
+    }
+  },
+
   beforeMount () {
     if (this.selected.length === 0 && this.value.length >= 2) {
       this.value.slice(0, 2).forEach(field => this.selected.push(field.id))

@@ -1,6 +1,7 @@
 import uuidv4 from 'uuid/v4'
 import { cloneDeep } from 'lodash'
 
+import { allSet } from '@/utils'
 import { ZoneRegionDependent, Named, BaseItem } from '@/store/utils/domain/bases'
 
 const identify = items => {
@@ -61,7 +62,8 @@ class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
     // * I en gruppe;
     //    * En eller flere polygoner
     // * Et GRF kan brukes FLERE ganger i forskjellige grupper
-    return this.fields.every(({ field }) => !!field)
+    return allSet(this.fields, 'field') &&
+           allSet(this.polygons, 'facies')
   }
 
   isBackgroundField (field) {

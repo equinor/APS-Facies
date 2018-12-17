@@ -27,12 +27,12 @@ const updateSelected = (globalFacies, localFacies, selected, parent) => {
   return merge(
     _removeCurrent(cloneDeep(localFacies)),
     selected
-      .map(item => {
-        const existing = Object.values(localFacies).find(({ facies }) => facies === item.id)
-        if (existing && isEqual(existing.parent, parent)) {
+      .map(global => {
+        const existing = Object.values(localFacies).find((local) => local.facies === global.id && isEqual(local.parent, parent))
+        if (existing) {
           return existing
         } else {
-          return new Facies({ facies: item.id, ...parent })
+          return new Facies({ facies: global.id, ...parent })
         }
       })
       .reduce((obj, facies) => {

@@ -80,7 +80,7 @@ const invalidateChildren = component => {
     const child = children.shift()
     if (typeof child !== 'undefined' && child.dialog !== false) {
       if (child.$v && child.$v.$invalid) {
-        child.$touch()
+        child.$v.$touch()
       }
       children = children.concat(child.$children.slice())
     }

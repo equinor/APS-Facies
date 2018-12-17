@@ -90,8 +90,9 @@ export default {
     addField ({ commit, state }, { field }) {
       addItem({ commit }, { item: field })
     },
-    deleteField ({ state, commit }, { grfId }) {
+    async deleteField ({ state, commit, dispatch, rootState }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {
+        await dispatch('truncationRules/deleteField', { grfId }, { root: true })
         commit('DELETE', { grfId })
       }
     },
@@ -160,54 +161,54 @@ export default {
       Vue.delete(state.fields, grfId)
     },
     CHANGE_NAME (state, { grfId, value }) {
-      state.fields[`${grfId}`].name = value
+      Vue.set(state.fields[`${grfId}`], 'name', value)
     },
     CHANGE_SETTINGS (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`], '_settings', value)
     },
     CHANGE_SEED (state, { grfId, value }) {
-      state.fields[`${grfId}`]._settings.seed = value
+      Vue.set(state.fields[`${grfId}`]._settings, 'seed', value)
     },
     CHANGE_SIMULATION (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`], '_data', value)
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }) {
-      state.fields[`${grfId}`].variogram.range[`${type}`] = value
+      Vue.set(state.fields[`${grfId}`].variogram.range, type, value)
     },
     CHANGE_ANGLE (state, { grfId, variogramOrTrend, type, value }) {
-      state.fields[`${grfId}`][`${variogramOrTrend}`].angle[`${type}`] = value
+      Vue.set(state.fields[`${grfId}`][`${variogramOrTrend}`].angle, type, value)
     },
     CHANGE_VARIOGRAM_TYPE (state, { grfId, value }) {
-      state.fields[`${grfId}`].variogram.type = value
+      Vue.set(state.fields[`${grfId}`].variogram, 'type', value)
     },
     CHANGE_POWER (state, { grfId, value }) {
-      state.fields[`${grfId}`].variogram.power = value
+      Vue.set(state.fields[`${grfId}`].variogram, 'power', value)
     },
     // Trend
     USE_TREND (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.use = value
+      Vue.set(state.fields[`${grfId}`].trend, 'use', value)
     },
     CHANGE_TREND_TYPE (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.type = value
+      Vue.set(state.fields[`${grfId}`].trend, 'type', value)
     },
     CHANGE_RELATIVE_STANDARD_DEVIATION (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.relativeStdDev = value
+      Vue.set(state.fields[`${grfId}`].trend, 'relativeStdDev', value)
     },
     CHANGE_RELATIVE_SIZE_OF_ELLIPSE (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.relativeSize = value
+      Vue.set(state.fields[`${grfId}`].trend, 'relativeSize', value)
     },
     CHANGE_STACKING_DIRECTION (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.stackingDirection = value
+      Vue.set(state.fields[`${grfId}`].trend, 'stackingDirection', value)
     },
     CHANGE_CURVATURE (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.curvature = value
+      Vue.set(state.fields[`${grfId}`].trend, 'curvature', value)
     },
     CHANGE_ORIGIN_COORDINATE (state, { grfId, type, value }) {
-      state.fields[`${grfId}`].trend.origin[`${type}`] = value
+      Vue.set(state.fields[`${grfId}`].trend.origin, type, value)
     },
     CHANGE_ORIGIN_TYPE (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.origin.type = value
+      Vue.set(state.fields[`${grfId}`].trend.origin, 'type', value)
     },
   },
 

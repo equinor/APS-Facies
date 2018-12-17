@@ -29,9 +29,10 @@
           fill-height
         >
           <v-flex xs6>
-            <v-select
+            <item-selection
               v-model="trendType"
               :items="availableTrends"
+              :constraints="{ required: true }"
               label="Trend type"
             />
             <div
@@ -83,7 +84,10 @@
 <script>
 import { mapState } from 'vuex'
 import { AppTypes } from '@/utils/typing'
+
 import { notEmpty } from '@/utils'
+
+import ItemSelection from '@/components/selection/dropdown/ItemSelection'
 import OriginSpecification from '@/components/specification/Trend/Origin'
 import {
   StackingAngleSpecification,
@@ -96,6 +100,7 @@ import {
 
 export default {
   components: {
+    ItemSelection,
     StackingAngleSpecification,
     OriginSpecification,
     RelativeStandardDeviation,

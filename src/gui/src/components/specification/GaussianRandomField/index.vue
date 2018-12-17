@@ -8,16 +8,16 @@
       <v-flex xs6>
         <gaussian-plot
           :data="gaussianFieldData"
+          expand
         />
       </v-flex>
       <v-flex xs1 />
-      <v-flex
-        xs5
-      >
+      <v-flex xs5>
         <span>Variogram selection</span>
-        <v-select
+        <item-selection
           v-model="variogramType"
           :items="availableVariograms"
+          :constraints="{ required: true }"
           label="Variogram"
         />
         <v-select
@@ -92,6 +92,7 @@ import rms from '@/api/rms'
 
 import { hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
 
+import ItemSelection from '@/components/selection/dropdown/ItemSelection'
 import GaussianPlot from '@/components/plot/GaussianPlot'
 import TrendSpecification from '@/components/specification/Trend'
 import RangeSpecification from '@/components/specification/GaussianRandomField/Range'
@@ -105,6 +106,7 @@ export default {
   name: 'GaussianRandomField',
 
   components: {
+    ItemSelection,
     IconButton,
     PowerSpecification: Power,
     AnisotropyDirection,
@@ -158,17 +160,18 @@ export default {
     trend () { return this.value.trend },
     fieldName () { return this.value.name },
     canSimulate: {
-      cache: false,
+      cache: true,
       get: function () {
         return (
           notEmpty(this.variogramType) &&
+          (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true) &&
           this.isValid &&
           !this.waitingForSimulation
         )
       },
     },
     isValid: {
-      cache: false,
+      cache: true,
       get: function () { return hasValidChildren(this) }
     },
     variogramType: {

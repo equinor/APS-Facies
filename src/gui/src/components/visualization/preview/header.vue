@@ -41,7 +41,11 @@ export default {
   methods: {
     async refresh () {
       this.waitingForSimulation = true
-      await this.$store.dispatch('truncationRules/updateRealization', this.rule)
+      try {
+        await this.$store.dispatch('truncationRules/updateRealization', this.rule)
+      } catch (e) {
+        alert(e)
+      }
       this.waitingForSimulation = false
     }
   }
