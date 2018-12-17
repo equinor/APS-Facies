@@ -15,7 +15,6 @@ import {
   hasCurrentParents,
   hasEnoughFacies,
   resolve,
-  allSet,
   makeTruncationRuleSpecification,
   hasParents,
 } from '@/utils'
@@ -513,9 +512,7 @@ export default {
         const rule = id
           ? state.rules[`${id}`]
           : null
-        return !!rule &&
-               allSet(rule.fields, 'field') &&
-               allSet(rule.polygons, 'facies')
+        return !!rule && rule.ready
       }
     },
     relevant (state, getters, rootState, rootGetters) {
