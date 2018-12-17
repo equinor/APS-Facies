@@ -2,6 +2,8 @@
   <static-plot
     :data-definition="dataDefinition"
     :expand="expand"
+    :width="size.width"
+    :height="size.height"
   />
 </template>
 
@@ -25,6 +27,10 @@ export default {
       }))
     ]).def('Viridis'),
     expand: VueTypes.bool.def(false),
+    size: VueTypes.shape({
+      width: VueTypes.integer.isRequired,
+      height: VueTypes.integer.isRequired,
+    }).def(() => { return { width: 100, height: 100 } }).loose
   },
 
   computed: {

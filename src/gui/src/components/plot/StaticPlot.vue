@@ -100,9 +100,9 @@ export default {
       const size = this.staticSize
         ? { width: this.width, height: this.height }
         : { width: parent.clientWidth || this.width, height: parent.clientHeight || this.height }
-      const val = Math[`${this.expand ? 'max' : 'min'}`](...Object.values(size))
-      size.width = val
-      size.height = val
+      const val = Math.min(...Object.values(size))
+      size.width = this.expand ? val : this.width
+      size.height = this.expand ? val : this.height
       return size
     }
   },

@@ -8,12 +8,11 @@
       <v-flex xs6>
         <gaussian-plot
           :data="gaussianFieldData"
+          expand
         />
       </v-flex>
       <v-flex xs1 />
-      <v-flex
-        xs5
-      >
+      <v-flex xs5>
         <span>Variogram selection</span>
         <item-selection
           v-model="variogramType"
@@ -87,7 +86,6 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex'
-import VueTypes from 'vue-types'
 import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
