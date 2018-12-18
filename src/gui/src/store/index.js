@@ -105,6 +105,14 @@ export default new Vuex.Store({
     faciesTable: (state) => {
       return Object.values(state.facies.global.available)
     },
+    // User options
+    options: (state) => {
+      return Object.keys(state.options)
+        .reduce((obj, key) => {
+          obj[key] = state.options[key].value
+          return obj
+        }, {})
+    },
     // ...
     simulationSettings: (state, getters) => (grfId) => {
       const grid = state.parameters.grid

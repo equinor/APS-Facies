@@ -228,7 +228,7 @@ export default Vue.extend({
       if (typeof value === 'string') {
         value = value.replace(',', '.')
         value = value.replace(/[^\d.+-]*/g, '')
-        if (/^[+-]?.*$/.test(value)) value = value[0] + value.slice(1).replace(/[+-]/g, '')
+        if (/^[+-].*$/.test(value)) value = value[0] + value.slice(1).replace(/[+-]/g, '')
         if (value.length >= 1) {
           if (value[0] === '+') value = value.slice(1)
           if (value[0] === '.') value = '0' + value

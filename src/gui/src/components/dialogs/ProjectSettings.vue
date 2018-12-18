@@ -141,12 +141,20 @@
                 />
               </v-radio-group>
             </v-flex>
-            <v-flex>
-              <v-checkbox
-                v-model="automaticAlphaFieldSelection"
-                label="Automatically assign fields to alpha channels"
-              />
-            </v-flex>
+            <v-layout column>
+              <v-flex>
+                <v-checkbox
+                  v-model="automaticAlphaFieldSelection"
+                  label="Automatically assign fields to alpha channels"
+                />
+              </v-flex>
+              <v-flex>
+                <v-checkbox
+                  v-model="filterZeroProbability"
+                  label="Ignore Facies with 0 probability"
+                />
+              </v-flex>
+            </v-layout>
           </v-layout>
         </fieldset>
         <fieldset
@@ -301,6 +309,7 @@ export default {
       showZoneNameNumber: '',
       showRegionNameNumber: '',
       automaticAlphaFieldSelection: '',
+      filterZeroProbability: false,
     }
   },
 
@@ -326,6 +335,7 @@ export default {
         this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
         this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
         this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
+        this.filterZeroProbability = this.$store.state.options.filterZeroProbability.value
       }
     },
   },
@@ -368,6 +378,7 @@ export default {
       this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber)
       this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber)
       this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection)
+      this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection)
       this.dialog = false
     }
   },

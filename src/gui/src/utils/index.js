@@ -27,7 +27,7 @@ const makeTruncationRuleSpecification = (rule, rootGetters) => {
   return {
     type: rule.type,
     globalFaciesTable: rootGetters['facies/selected']
-      .filter(facies => facies.previewProbability && facies.previewProbability > 0)
+      .filter(facies => rootGetters.options.filterZeroProbability ? facies.previewProbability && facies.previewProbability > 0 : true)
       .map(({ facies, previewProbability, id }) => {
         let polygon = Object.values(rule.polygons).find(polygon => polygon.facies === id)
         if (isEmpty(polygon) && rule.overlay) {
