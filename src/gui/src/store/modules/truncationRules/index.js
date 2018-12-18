@@ -157,6 +157,22 @@ const setProperty = (state, rule, property, values) => {
   Vue.set(state.rules[`${rule.id}`], property, values)
 }
 
+const processSettings = (type, settings) => {
+  return settings.map(setting => {
+    if (type === 'non-cubic') {
+      setting = {
+        ...setting,
+        angle: {
+          value: setting.angle,
+          updatable: setting.updatable,
+        }
+      }
+      delete setting.updatable
+    }
+    return setting
+  })
+}
+
 export default {
   namespaced: true,
 
@@ -192,7 +208,7 @@ export default {
         polygons: processPolygons(rootGetters, polygons),
         fields: processFields(rootGetters, rootState, fields, parent),
         overlay: processOverlay(rootGetters, overlay),
-        settings,
+        settings: processSettings(type, settings),
         name,
         ...parent,
       })
@@ -488,7 +504,7 @@ export default {
       setProperty(state, rule, 'polygons', polygons)
     },
     CHANGE_ANGLES: (state, { rule, polygon, value }) => {
-      state.rules[`${rule.id}`].settings[`${polygon.id}`].angle = value
+      Vue.set(state.rules[`${rule.id}`].settings[`${polygon.id}`], 'angle', value)
     },
     CHANGE_FIELDS: (state, { ruleId, channel, fieldId }) => {
       state.rules[`${ruleId}`].fieldByChannel(channel).field = fieldId

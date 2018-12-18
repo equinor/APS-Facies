@@ -89,7 +89,7 @@ class TruncationSpecification:
         elif self.type == TruncationType.NON_CUBIC:
             return {
                 'truncStructure': [
-                    [polygon['facies'], polygon['angle'], polygon['fraction'], polygon['updatable']]
+                    [polygon['facies'], polygon['angle']['value'], polygon['fraction'], polygon['angle']['updatable']]
                     for polygon in self._polygons()
                 ],
                 'overlayGroups': [

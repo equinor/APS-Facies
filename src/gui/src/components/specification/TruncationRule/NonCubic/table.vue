@@ -30,6 +30,7 @@
           <numeric-field
             :value="props.item.angle"
             :ranges="{min: -180.0, max: 180.0}"
+            fmu-updatable
             enforce-ranges
             allow-negative
             use-modulus
