@@ -157,20 +157,22 @@ const setProperty = (state, rule, property, values) => {
   Vue.set(state.rules[`${rule.id}`], property, values)
 }
 
-const processSettings = (type, settings) => {
-  return settings.map(setting => {
-    if (type === 'non-cubic') {
-      setting = {
-        ...setting,
-        angle: {
-          value: setting.angle,
-          updatable: setting.updatable,
-        }
+const processSetting = (type, setting) => {
+  if (type === 'non-cubic') {
+    setting = {
+      ...setting,
+      angle: {
+        value: setting.angle,
+        updatable: setting.updatable,
       }
-      delete setting.updatable
     }
-    return setting
-  })
+    delete setting.updatable
+  }
+  return setting
+}
+
+const processSettings = (type, settings) => {
+  return settings.map(setting => processSetting(type, setting))
 }
 
 export default {
@@ -297,7 +299,7 @@ export default {
       })
       polygons[polygon.id] = polygon
       commit('CHANGE_POLYGONS', { rule, polygons })
-      commit('ADD_SETTING', { rule, polygon, setting })
+      commit('ADD_SETTING', { rule, polygon, setting: processSetting(rule.type, setting) })
     },
     removePolygon ({ commit }, { rule, polygon }) {
       commit('REMOVE_POLYGON', { rule, polygon })
