@@ -332,6 +332,7 @@ export default {
   watch: {
     dialog: function (value) {
       if (value) {
+        this.apsModelFileLocation = this.$store.state.parameters.path.project
         this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
         this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
         this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
@@ -370,11 +371,11 @@ export default {
     },
     ok (e) {
       // TODO: Store stuff
-      alert(`dialogAPSModelFileLocation:    ${this.apsModelFileLocation}
-            dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
+      alert(`dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
             dialogFMUParameterListLocation: ${this.fmuParameterListLocation}
             dialogShowZoneNameNumber:       ${this.showZoneNameNumber}
             dialogShowRegionNameNumber:     ${this.showRegionNameNumber}`)
+      this.$store.dispatch('parameters/path/select', this.apsModelFileLocation)
       this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber)
       this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber)
       this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection)

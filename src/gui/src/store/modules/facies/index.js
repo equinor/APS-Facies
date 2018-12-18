@@ -102,7 +102,7 @@ export default {
     },
     toggleConstantProbability: ({ commit, state, getters, rootGetters }) => {
       const _id = parentId({ zone: rootGetters.zone, region: rootGetters.region })
-      const usage = !getters.constantProbability
+      const usage = !getters.constantProbability()
       commit('CONSTANT_PROBABILITY', { parentId: _id, toggled: usage })
     },
     setConstantProbability: ({ commit, state }, value) => {
@@ -144,8 +144,8 @@ export default {
     byName: (state) => (name) => {
       return Object.values(state.available).find(facies => facies.name === name)
     },
-    constantProbability: (state, getters, rootState, rootGetters) => {
-      const parent = { zone: rootGetters.zone, region: rootGetters.region }
+    constantProbability: (state, getters, rootState, rootGetters) => parent => {
+      parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
       const constantProbability = () => state.constantProbability[`${parentId(parent)}`]
       return !parent.zone || typeof constantProbability() === 'undefined'
         ? true

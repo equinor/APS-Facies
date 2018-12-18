@@ -11,7 +11,9 @@ import parameters from '@/store/modules/parameters'
 import constants from '@/store/modules/constants'
 import options from '@/store/modules/options'
 import modelFileLoader from '@/store/modules/modelFileLoader'
+import modelFileExporter from '@/store/modules/modelFileExporter'
 import modelName from '@/store/modules/modelName'
+import workflowName from '@/store/modules/workflowName'
 
 import { mirrorZoneRegions } from '@/store/utils'
 import { defaultSimulationSettings, hasCurrentParents, resolve } from '@/utils'
@@ -39,7 +41,9 @@ export default new Vuex.Store({
     constants,
     options,
     modelFileLoader,
-    modelName
+    modelFileExporter,
+    modelName,
+    workflowName
   },
 
   actions: {
@@ -47,6 +51,7 @@ export default new Vuex.Store({
       dispatch('gridModels/fetch')
       dispatch('constants/fetch')
       dispatch('truncationRules/fetch')
+      dispatch('parameters/path/fetch')
     },
   },
 

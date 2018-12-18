@@ -79,7 +79,7 @@ export default {
         ),
     }),
     useProbabilityCubes () {
-      return !this.$store.getters['facies/constantProbability']
+      return !this.$store.getters['facies/constantProbability']()
     },
     items () {
       const state = this.$store.state

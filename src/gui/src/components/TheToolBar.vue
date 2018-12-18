@@ -15,7 +15,7 @@
 
     <bold-button
       title="Export"
-      disabled="true"
+      @click="exportModelFile"
     />
 
     <v-spacer />
@@ -97,6 +97,20 @@ export default {
       reader.onloadend = fileHandler(this.$store, file.name)
       reader.readAsText(file)
     },
+    async exportModelFile () {
+      // TOFO: Show dialog to let user select where to export the modelfile to.
+      // for now just triggering the functionality to create a modelfile
+      const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
+      const result = await rms.isApsModelValid(btoa(exportedXMLString))
+      if (result.valid) {
+        // const path = await rms.chooseDir('save', )
+        rms.save(this.$store.state.parameters.path.project, btoa(exportedXMLString))
+      } else {
+        alert('The file you tried to open is not a valid APS model file and cannot be used\n' +
+          'Fix the following error before opening again:\n\n' +
+          result.error)
+      }
+    }
   },
 }
 </script>

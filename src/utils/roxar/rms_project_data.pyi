@@ -18,6 +18,8 @@ class CodeName(NamedTuple):
 
 
 ProjectName = NewType('ProjectName', str)
+ProjectPath= NewType('ProjectPath', str)
+XML = NewType('XML', str)
 TrendName = NewType('TrendName', str)
 VariogramName = NewType('VariogramName', str)
 GridName = NewType('GridName', str)
@@ -61,6 +63,9 @@ class RMSData:
     def get_project_name(
             self
     ) -> ProjectName: ...
+    def get_project_dir(
+            self
+    ) -> ProjectPath: ...
     def get_grid_models(
             self
     ) -> GridModels: ...
@@ -166,6 +171,11 @@ class RMSData:
             bw_name:                     str,
             facies_log_name:             str
     ) -> Dict[str, int]: ...
+    @staticmethod
+    def save_model(
+            path: str,
+            content: XML,
+    ) -> bool: ...
     @staticmethod
     def get_constant(
             _property:                   str,

@@ -10,7 +10,10 @@ from src.utils.constants.simple import OriginType
 
 
 def prettify(elem, indent="  ", new_line="\n"):
-    rough_string = ET.tostring(elem, 'utf-8')
+    if isinstance(elem, str):
+        rough_string = elem
+    else:
+        rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent=indent, newl=new_line)
 

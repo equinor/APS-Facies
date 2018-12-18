@@ -92,6 +92,17 @@ export default {
 
       // TODO introduce function (repeating code. Codesmell?)
       if (!populateFailed) {
+        const optionalRMSWorkFlowName = getNodeValue(apsModelContainer, 'RMSWorkflowName')
+        if (optionalRMSWorkFlowName) {
+          await dispatch('workflowName/select', optionalRMSWorkFlowName, { root: true })
+            .catch(reason => {
+              populateFailed = true
+              handleError(reason)
+            })
+        }
+      }
+
+      if (!populateFailed) {
         await dispatch('gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
           .catch(reason => {
             populateFailed = true
@@ -101,7 +112,27 @@ export default {
 
       if (!populateFailed) {
         if (apsModelContainer.APSModel.RegionParamName) {
+          await dispatch(`parameters/zone/select`, getNodeValue(apsModelContainer, 'ZoneParamName'), { root: true })
+            .catch(reason => {
+              populateFailed = true
+              handleError(reason)
+            })
+        }
+      }
+
+      if (!populateFailed) {
+        if (apsModelContainer.APSModel.RegionParamName) {
           await dispatch(`parameters/region/select`, getNodeValue(apsModelContainer, 'RegionParamName'), { root: true })
+            .catch(reason => {
+              populateFailed = true
+              handleError(reason)
+            })
+        }
+      }
+
+      if (!populateFailed) {
+        if (apsModelContainer.APSModel.ResultFaciesParamName) {
+          await dispatch(`parameters/resultFacies/select`, getNodeValue(apsModelContainer, 'ResultFaciesParamName'), { root: true })
             .catch(reason => {
               populateFailed = true
               handleError(reason)
