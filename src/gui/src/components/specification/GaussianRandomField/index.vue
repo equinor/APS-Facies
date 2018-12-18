@@ -189,7 +189,7 @@ export default {
       if (renew) {
         await this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
       }
-      return this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
+      await this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
         grfId: this.grfId,
         data: await rms.simulateGaussianField({
           name: this.value.name,
