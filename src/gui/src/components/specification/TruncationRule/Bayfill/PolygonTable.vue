@@ -132,6 +132,7 @@ export default {
     },
     updateFactor (item, value) {
       return this.$store.dispatch('truncationRules/changeSlantFactors', {
+        rule: this.value,
         polygon: item,
         value
       })
