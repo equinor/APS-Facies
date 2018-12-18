@@ -7,6 +7,7 @@ const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 
 export default {
   projectName: () => api.call('get_project_name'),
+  projectDirectory: () => api.call('get_project_dir'),
   gridModels: () => api.call('get_grid_model_names'),
   zones: (gridName) => api.call('get_zones', gridName),
   regionParameters: (gridName) => api.call('get_region_parameters', gridName),
@@ -26,4 +27,7 @@ export default {
   simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (gridName, probabilityCubeParameters, ZoneNumbers) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, ZoneNumbers),
   isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
+  save: (content, path) => api.call('save_model', content, path),
+  // eslint-disable-next-line no-undef
+  chooseDir: (mode, suggestion = '') => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve, reject) => resolve(null)),
 }

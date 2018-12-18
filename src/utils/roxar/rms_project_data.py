@@ -1,5 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from pathlib import Path
+
 import numpy as np
 from base64 import b64decode
 
@@ -29,6 +31,7 @@ from src.utils.roxar.grid_model import (
 )
 from src.utils.plotting import create_facies_map
 from src.utils.truncation_rules import make_truncation_rule
+from src.utils.xmlUtils import prettify
 
 
 def empty_if_none(func):
@@ -63,6 +66,9 @@ class RMSData:
 
     def get_project_name(self):
         return self.project.name
+
+    def get_project_dir(self):
+        return str(Path(self.project.filename).parent)
 
     def get_grid_models(self):
         return self.project.grid_models
@@ -193,6 +199,12 @@ class RMSData:
         return self.get_code_names(facies_property)
 
     @staticmethod
+    def save_model(path, content):
+        with open(Path(path) / 'APS.xml', 'w') as f:
+            f.write(prettify(b64decode(content).decode()))
+        return True
+
+    @staticmethod
     def simulate_gaussian_field(field, grid_index_order='F'):
         simulation = RMSData._simulate_gaussian_field(field)
         data = simulation.field_as_matrix(grid_index_order)
@@ -258,7 +270,7 @@ class RMSData:
         valid = True
         error = ''
         try:
-            APSModel.from_string(b64decode(encoded_xml))
+            APSModel.from_string(b64decode(encoded_xml).decode())
         except (ValueError, ApsXmlError) as e:
             valid = False
             error = str(e)

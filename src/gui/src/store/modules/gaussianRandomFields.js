@@ -139,6 +139,9 @@ export default {
     trendType ({ commit, state, rootState }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
     },
+    trendParameter ({ commit, state, rootState }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_PARAM' })
+    },
     stackingDirection ({ commit, state }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_STACKING_DIRECTION' })
     },
@@ -210,6 +213,9 @@ export default {
     CHANGE_ORIGIN_TYPE (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`].trend.origin, 'type', value)
     },
+    CHANGE_RMS_TREND_PARAM (state, { grfId, value }) {
+      state.fields[`${grfId}`].trend.rmsTrendParam = value
+    }
   },
 
   getters: {

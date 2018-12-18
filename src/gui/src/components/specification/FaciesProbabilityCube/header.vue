@@ -76,7 +76,7 @@ export default {
       return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
     },
     useProbabilityCubes: {
-      get () { return !this.$store.getters['facies/constantProbability'] },
+      get () { return !this.$store.getters['facies/constantProbability']() },
       set (value) { this.$store.dispatch('facies/toggleConstantProbability') },
     },
     canCalculateAverages () { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 },
