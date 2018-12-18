@@ -16,7 +16,8 @@ const identify = items => {
   return obj
 }
 
-const structurePolygons = (polygons) => {
+const structurePolygons = (polygons, _isParsed = false) => {
+  if (_isParsed) return polygons
   return identify(polygons.map((polygon, index) => {
     return {
       order: index,
@@ -25,7 +26,8 @@ const structurePolygons = (polygons) => {
   }))
 }
 
-const structureSettings = (settings, polygons) => {
+const structureSettings = (settings, polygons, _isParsed = false) => {
+  if (_isParsed) return settings
   const structured = {}
   Object.values(polygons)
     .forEach(polygon => {
@@ -40,14 +42,14 @@ const structureSettings = (settings, polygons) => {
 }
 
 class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
-  constructor ({ polygons, fields, settings, _realization, ...rest }) {
+  constructor ({ polygons, fields, _fields, settings, _realization, ...rest }) {
     super(rest)
-    polygons = structurePolygons(polygons)
-    settings = structureSettings(settings, polygons)
+    polygons = structurePolygons(polygons, rest._isParsed)
+    settings = structureSettings(settings, polygons, rest._isParsed)
 
     this.type = null
     this.polygons = polygons
-    this._fields = fields
+    this._fields = fields || _fields
     this.settings = settings
 
     this._realization = _realization
@@ -95,23 +97,29 @@ class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
   }
 }
 
-const combinePolygons = (polygons, overlay) => {
+const combinePolygons = (polygons, overlay, _isParsed = false) => {
   const combination = []
   const add = (item, overlay = false) => {
     combination.push({ ...item, overlay })
   }
-  if (overlay && overlay.items) overlay = overlay.items
-  Object.values(polygons).forEach(polygon => add(polygon, false))
-  if (overlay) {
-    Object.values(overlay).forEach(polygon => add(polygon, true))
+  if (_isParsed) {
+    return polygons
+  } else {
+    if (overlay && overlay.items) overlay = overlay.items
+    Object.values(polygons).forEach(polygon => add(polygon, false))
+    if (overlay) {
+      Object.values(overlay).forEach(polygon => add(polygon, true))
+    }
+    return combination
   }
-  return combination
 }
 
 class OverlayedTruncationRule extends TruncationRule {
-  constructor ({ polygons, overlay, ...rest }) {
-    super({ polygons: combinePolygons(polygons, overlay), ...rest })
-    this._useOverlay = overlay ? overlay.use : false
+  constructor ({ polygons, overlay, _useOverlay, ...rest }) {
+    super({ polygons: combinePolygons(polygons, overlay, rest._isParsed), ...rest })
+    this._useOverlay = typeof _useOverlay === 'undefined'
+      ? (overlay ? overlay.use : false)
+      : _useOverlay
   }
 
   fieldByChannel (channel) {

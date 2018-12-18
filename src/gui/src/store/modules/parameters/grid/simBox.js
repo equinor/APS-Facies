@@ -11,12 +11,14 @@ export default {
     },
   },
   actions: {
-    async fetch ({ commit, rootGetters }) {
+    async fetch ({ dispatch, rootGetters }) {
       const simBox = await api.simulationBoxOrigin(rootGetters.gridModel)
-      // TODO: Simbox Z and gird Z is zone dependent
-      commit('SIZE', simBox.size)
-      commit('ORIGIN', simBox.origin)
+      await dispatch('populate', simBox)
       return simBox.rotation
+    },
+    populate ({ commit }, { size, origin }) {
+      commit('SIZE', size)
+      commit('ORIGIN', origin)
     },
     thickness ({ commit }, zoneName) {},
   },

@@ -14,7 +14,7 @@ export default {
   },
 
   actions: {
-    select: ({ commit, dispatch, state, rootState }, selected) => {
+    select: async ({ commit, dispatch, state, rootState }, selected) => {
       const ids = selected.map(zone => zone.id)
       for (const id in state.available) {
         // TODO: Make sure all regions are also selected, of regions is in use (and this zone has regions)
@@ -24,16 +24,16 @@ export default {
           // When a zone is (un)toggled, all of its regions should be (un)toggled
           const zone = state.available[`${id}`]
           Object.keys(state.available[`${zone.id}`].regions)
-            .forEach(regionId => {
+            .forEach(async regionId => {
               commit('REGION_SELECTED', { zoneId: id, regionId, toggled })
               if (!toggled && regionId === rootState.regions.current) {
-                dispatch('regions/current', { id: null }, { root: true })
+                await dispatch('regions/current', { id: null }, { root: true })
               }
             })
         }
         commit('SELECTED', { id, toggled })
       }
-      return Promise.resolve(ids)
+      return ids
     },
     current: async ({ commit, dispatch, state }, { id }) => {
       await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
@@ -47,12 +47,12 @@ export default {
       return rms.zones(rootGetters.gridModel)
         .then(zones => dispatch('populate', { zones }))
     },
-    populate: ({ commit, dispatch, rootGetters }, { zones }) => {
-      return new Promise((resolve, reject) => {
-        const data = makeData(zones, Zone)
-        commit('AVAILABLE', data)
-        resolve(data)
-      })
+    populate: async ({ commit, dispatch, rootGetters }, { zones }) => {
+      const data = makeData(zones, Zone)
+      commit('AVAILABLE', data)
+      const selected = Object.values(data).filter(({ selected }) => !!selected)
+      await dispatch('select', selected)
+      return data
     },
     update ({ commit, dispatch, state }, { zones, zoneId, regions }) {
       if (isEmpty(zones) && notEmpty(regions)) {

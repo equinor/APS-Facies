@@ -6,6 +6,19 @@ import { GaussianRandomField } from '@/store/utils/domain'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
 import { cloneDeep } from 'lodash'
+import { Trend, Variogram } from '@/store/utils/domain/gaussianRandomField'
+
+const makeFieldData = (fields) => {
+  return fields.reduce((data, field) => {
+    const instance = new GaussianRandomField({
+      variogram: new Variogram(field.variogram || {}),
+      trend: new Trend(field.trend || {}),
+      ...field,
+    })
+    data[instance.id] = instance
+    return data
+  }, {})
+}
 
 const newGaussianFieldName = (state, zone, region) => {
   const name = num => `GRF${num}`
@@ -76,6 +89,9 @@ export default {
         }
       }
     },
+    populate ({ dispatch }, fields) {
+      return Promise.all(Object.values(makeFieldData(fields)).map(field => dispatch('addField', { field })))
+    },
     addEmptyField ({ dispatch, state, rootGetters }, { zoneId, regionId } = {}) {
       zoneId = zoneId || rootGetters.zone
       regionId = regionId || rootGetters.region
@@ -88,7 +104,7 @@ export default {
       })
     },
     addField ({ commit, state }, { field }) {
-      addItem({ commit }, { item: field })
+      return addItem({ commit }, { item: field })
     },
     async deleteField ({ state, commit, dispatch, rootState }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {

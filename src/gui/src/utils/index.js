@@ -60,7 +60,7 @@ const makeTruncationRuleSpecification = (rule, rootGetters) => {
 }
 
 function selectItems ({ items, state, _class }) {
-  const ids = items.map(item => item.id)
+  const ids = items.map(item => item.id || item._id)
   const obj = {}
   for (const id in state.available) {
     const item = state.available[`${id}`]
@@ -123,7 +123,11 @@ const hasParents = (item, zone, region) => {
 }
 
 const parentId = ({ zone, region }) => {
-  return uuidv5(getId(region), getId(zone))
+  if (region) {
+    return uuidv5(getId(region), getId(zone))
+  } else {
+    return getId(zone)
+  }
 }
 
 const hasEnoughFacies = (rule, getters) => {
@@ -181,6 +185,10 @@ const allSet = (items, prop) => {
     : false
 }
 
+const sortAlphabetically = arr => {
+  return Object.values(arr).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
+}
+
 export {
   defaultSimulationSettings,
   makeData,
@@ -198,4 +206,5 @@ export {
   resolve,
   isEmpty,
   notEmpty,
+  sortAlphabetically,
 }

@@ -13,18 +13,14 @@ export default {
       commit('CURRENT', blockedWell)
       await dispatch('parameters/blockedWellLog/fetch', null, { root: true })
     },
-    fetch: ({ commit, dispatch, rootGetters }) => {
-      return new Promise((resolve, reject) => {
-        rms.blockedWellParameters(rootGetters.gridModel)
-          .then((result) => {
-            commit('AVAILABLE', result)
-            if (result.length === 1) {
-              dispatch('select', result[0]).then(resolve)
-            } else if (result.length === 0) {
-              dispatch('select', null).then(resolve)
-            }
-          })
-      })
+    fetch: async ({ commit, dispatch, rootGetters }) => {
+      const result = await rms.blockedWellParameters(rootGetters.gridModel)
+      commit('AVAILABLE', result)
+      if (result.length === 1) {
+        await dispatch('select', result[0])
+      } else if (result.length === 0) {
+        await dispatch('select', null)
+      }
     },
   },
 

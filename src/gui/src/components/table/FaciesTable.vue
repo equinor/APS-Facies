@@ -3,6 +3,7 @@
     v-model="selected"
     :headers="headers"
     :items="facies"
+    must-sort
     item-key="name"
     class="elevation-1"
     hide-actions
@@ -148,7 +149,7 @@ export default {
         {
           text: 'Code',
           align: 'left',
-          sortable: false,
+          sortable: true,
           value: 'code',
         },
         {

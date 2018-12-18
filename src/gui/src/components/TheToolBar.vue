@@ -87,8 +87,8 @@ export default {
 
   computed: {
     modelName: {
-      get: function () { return this.$store.state.modelName.selected },
-      set: function (value) { this.$store.dispatch('modelName/select', value, { root: true }) }
+      get: function () { return this.$store.state.parameters.names.model.selected },
+      set: function (value) { this.$store.dispatch('parameters/names/model/select', value, { root: true }) }
     },
   },
 
@@ -99,8 +99,8 @@ export default {
       reader.readAsText(file)
     },
     async exportModelFile () {
-      // TOFO: Show dialog to let user select where to export the modelfile to.
-      // for now just triggering the functionality to create a modelfile
+      // TODO: Show dialog to let user select where to export the modelfile to.
+      //       for now just triggering the functionality to create a modelfile
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
       const result = await rms.isApsModelValid(btoa(exportedXMLString))
       if (result.valid) {

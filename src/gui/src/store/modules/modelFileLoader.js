@@ -88,13 +88,13 @@ export default {
       const apsModelContainer = JSON.parse(json)
       let populateFailed = false
 
-      await dispatch('modelName/select', fileName, { root: true })
+      await dispatch('parameters/names/model/select', fileName, { root: true })
 
-      // TODO introduce function (repeating code. Codesmell?)
+      // TODO introduce function (repeating code. Code smell?)
       if (!populateFailed) {
         const optionalRMSWorkFlowName = getNodeValue(apsModelContainer, 'RMSWorkflowName')
         if (optionalRMSWorkFlowName) {
-          await dispatch('workflowName/select', optionalRMSWorkFlowName, { root: true })
+          await dispatch('parameters/names/workflow/select', optionalRMSWorkFlowName, { root: true })
             .catch(reason => {
               populateFailed = true
               handleError(reason)
@@ -103,7 +103,7 @@ export default {
       }
 
       if (!populateFailed) {
-        await dispatch('gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
+        await dispatch('parameters/gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
           .catch(reason => {
             populateFailed = true
             handleError(reason)
@@ -200,7 +200,6 @@ export default {
         // facies information from the file.
         const currentName = faciesItemFromFile._attributes.name.trim()
         const currentCode = parseInt(faciesItemFromFile.Code._text.trim())
-        // console.log(`alias: ${currentName} code: ${currentCode}`)
 
         // corresponding facies from project
         const faciesForAliasAndCode = Object.keys(rootState.facies.global.available)

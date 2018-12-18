@@ -7,6 +7,7 @@ import probabilityCube from '@/store/modules/parameters/probabilityCube'
 import grid from '@/store/modules/parameters/grid'
 import realization from '@/store/modules/parameters/realization'
 import path from '@/store/modules/parameters/path'
+import names from '@/store/modules/parameters/names'
 
 export default {
   namespaced: true,
@@ -21,6 +22,7 @@ export default {
     grid,
     realization,
     path,
+    names,
   },
   actions: {},
   mutations: {},

@@ -4,6 +4,7 @@
     :headers="headers"
     :items="items"
     :no-data-text="noDataText"
+    must-sort
     item-key="id"
     class="elevation-1"
     hide-actions
@@ -91,7 +92,7 @@ export default {
           ? [{
             text: 'Code',
             align: 'left',
-            sortable: false,
+            sortable: true,
             value: 'code',
           }]
           : []
