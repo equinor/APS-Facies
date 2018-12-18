@@ -5,7 +5,7 @@ import math from 'mathjs'
 import { cloneDeep, merge, isEqual } from 'lodash'
 
 import { Facies } from '@/store/utils/domain'
-import { isEmpty, notEmpty, hasCurrentParents, parentId } from '@/utils'
+import { isEmpty, notEmpty, hasCurrentParents, hasParents, parentId } from '@/utils'
 import { promiseSimpleCommit, changeFacies } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
@@ -14,9 +14,9 @@ import { isUUID } from '@/utils/typing'
 
 const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changed', { id: facies.id, previewProbability: probability })
 
-const _removeCurrent = items => {
+const _removeCurrent = (items, parent) => {
   return Object.values(items)
-    .filter(item => !hasCurrentParents(item))
+    .filter(item => !hasParents(item, parent.zone, parent.region))
     .reduce((obj, item) => {
       obj[`${item.id}`] = item
       return obj
@@ -25,7 +25,7 @@ const _removeCurrent = items => {
 
 const updateSelected = (globalFacies, localFacies, selected, parent) => {
   return merge(
-    _removeCurrent(cloneDeep(localFacies)),
+    _removeCurrent(cloneDeep(localFacies), parent),
     selected
       .map(global => {
         const existing = Object.values(localFacies).find((local) => local.facies === global.id && isEqual(local.parent, parent))
