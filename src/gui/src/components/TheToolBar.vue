@@ -10,6 +10,7 @@
 
     <upload-button
       :file-changed-callback="e => importModelFile(e)"
+      disabled
       title="Import"
     />
 
