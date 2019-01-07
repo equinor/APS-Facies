@@ -10,13 +10,14 @@ import { Bayfill, NonCubic } from '@/store/utils/domain/truncationRule'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
 import {
-  notEmpty,
-  isEmpty,
   hasCurrentParents,
   hasEnoughFacies,
-  resolve,
-  makeTruncationRuleSpecification,
   hasParents,
+  isEmpty,
+  makeTruncationRuleSpecification,
+  notEmpty,
+  resolve,
+  sortAlphabetically,
 } from '@/utils'
 
 const changePreset = (state, thing, item) => {
@@ -51,10 +52,6 @@ const processOverlay = (getters, overlay) => {
     })
   })
   return { ...overlay, items }
-}
-
-const sortAlphabetically = arr => {
-  return Object.values(arr).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 }
 
 const findItem = ({ findByIndex, findByName, findDefaultName = (arg) => null }) => (getters, item) => {
@@ -175,6 +172,19 @@ const processSettings = (type, settings) => {
   return settings.map(setting => processSetting(type, setting))
 }
 
+const typeMapping = {
+  'bayfill': Bayfill,
+  'non-cubic': NonCubic,
+  'cubic': null, // TODO
+}
+
+const makeRule = ({ type, ...rest }, _isParsed = false) => {
+  if (!typeMapping.hasOwnProperty(type)) {
+    throw new Error(`The truncation rule of type ${type} is not implemented`)
+  }
+  return new typeMapping[`${type}`]({ type, _isParsed, ...rest })
+}
+
 export default {
   namespaced: true,
 
@@ -198,15 +208,8 @@ export default {
       parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
       type = state.templates.types.available[`${type}`].type
       const autoFill = true
-      const mapping = {
-        'bayfill': Bayfill,
-        'non-cubic': NonCubic,
-        'cubic': null, // TODO
-      }
-      if (!mapping.hasOwnProperty(type)) {
-        throw new Error(`The truncation rule of type ${type} is not implemented`)
-      }
-      const rule = new mapping[`${type}`]({
+      const rule = makeRule({
+        type,
         polygons: processPolygons(rootGetters, polygons),
         fields: processFields(rootGetters, rootState, fields, parent),
         overlay: processOverlay(rootGetters, overlay),
@@ -246,6 +249,14 @@ export default {
       } else {
         throw new Error(`The rule with ID ${ruleId} does not exist. Cannot be removed`)
       }
+    },
+    async populate ({ commit, dispatch }, { rules, templates, preset }) {
+      if (preset.type) commit('CHANGE_TYPE', preset)
+      if (preset.template) commit('CHANGE_TEMPLATE', preset)
+      await dispatch('templates/populate', templates)
+      return Promise.all(Object.values(rules).map(rule => {
+        return addItem({ commit }, { id: rule._id, item: makeRule({ ...rule, _isParsed: true }) })
+      }))
     },
     addPolygon ({ commit, dispatch, store }, { rule, order = null, overlay = false }) {
       if (!order || order < 0) {

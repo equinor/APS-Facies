@@ -5,7 +5,14 @@ import math from 'mathjs'
 import { cloneDeep, merge, isEqual } from 'lodash'
 
 import { Facies } from '@/store/utils/domain'
-import { isEmpty, notEmpty, hasCurrentParents, hasParents, parentId } from '@/utils'
+import {
+  isEmpty,
+  notEmpty,
+  hasCurrentParents,
+  hasParents,
+  parentId,
+  makeData,
+} from '@/utils'
 import { promiseSimpleCommit, changeFacies } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
@@ -60,6 +67,10 @@ export default {
       commit('AVAILABLE', facies)
       return Promise.resolve(Object.keys(facies))
     },
+    populate: ({ commit }, facies) => {
+      facies = makeData(facies, Facies)
+      commit('AVAILABLE', facies)
+    },
     removeSelectedFacies: ({ commit, dispatch, state }) => {
       return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
         .then(() => {
@@ -100,6 +111,11 @@ export default {
         updateFaciesProbability(dispatch, facies, probability)
       })
     },
+    populateConstantProbability: ({ commit }, data) => {
+      Object.keys(data).forEach(parentId => {
+        commit('CONSTANT_PROBABILITY', { parentId, toggled: data[`${parentId}`] })
+      })
+    },
     toggleConstantProbability: ({ commit, state, getters, rootGetters }) => {
       const _id = parentId({ zone: rootGetters.zone, region: rootGetters.region })
       const usage = !getters.constantProbability()
@@ -111,8 +127,8 @@ export default {
       }
     },
     changed: (context, facies) => changeFacies(context, facies),
-    fetch: ({ dispatch }) => {
-      dispatch('global/fetch')
+    fetch: async ({ dispatch }) => {
+      await dispatch('global/fetch')
     },
   },
 

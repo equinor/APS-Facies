@@ -90,7 +90,7 @@ export default {
         .map(item => {
           return {
             id: item.id,
-            name: state.facies.global.available[`${item.facies}`].name,
+            name: getters['facies/nameById'](item.facies),
             ...item,
           }
         })

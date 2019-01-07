@@ -22,9 +22,9 @@ export default {
               reject(error)
             })
         } else {
-          let errorMsg = `Selected regionParam ( ${regionParameter} ) is not present int the current project\n\n`
-          errorMsg += `Tip: RegionParamName in the APS model File must be one of { ${state.available.join()} } `
-          reject(new Error(errorMsg))
+          reject(new Error(`Selected regionParam ( ${regionParameter} ) is not present int the current project
+
+Tip: RegionParamName in the APS model File must be one of { ${state.available.join()} }`))
         }
       })
     },

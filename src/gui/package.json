@@ -8,7 +8,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "serve:api": "make -C ../.. run-rms.uipy-mock",
-    "serve:gui": "vue-cli-service serve --host=localhost",
+    "serve:gui": "vue-cli-service serve --host=localhost --inspect",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
   },
@@ -52,7 +52,7 @@
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-vue": "^5.0.0-0",
     "eslint-plugin-vue-types": "^1.0.0",
-    "file-loader": "^2.0.0",
+    "file-loader": "^3.0.1",
     "ify-loader": "^1.1.0",
     "jest-webpack-resolver": "^0.3.0",
     "lint-staged": "^8.0.3",

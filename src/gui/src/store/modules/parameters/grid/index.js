@@ -19,9 +19,11 @@ export default {
       commit('_WAITING', true)
       const [x, y, z] = await api.gridSize(rootGetters.gridModel)
       const azimuth = await dispatch('simBox/fetch')
+      await dispatch('populate', { azimuth, size: { x, y, z } })
       commit('_WAITING', false)
-
-      commit('SIZE', { x, y, z })
+    },
+    populate ({ commit }, { azimuth, size }) {
+      commit('SIZE', size)
       commit('AZIMUTH', azimuth)
     },
     thickness ({ commit }, zoneName) {},

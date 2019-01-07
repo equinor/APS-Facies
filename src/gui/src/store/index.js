@@ -12,11 +12,15 @@ import constants from '@/store/modules/constants'
 import options from '@/store/modules/options'
 import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelFileExporter from '@/store/modules/modelFileExporter'
-import modelName from '@/store/modules/modelName'
-import workflowName from '@/store/modules/workflowName'
 
 import { mirrorZoneRegions } from '@/store/utils'
-import { defaultSimulationSettings, hasCurrentParents, resolve } from '@/utils'
+import {
+  defaultSimulationSettings,
+  hasCurrentParents,
+  notEmpty,
+  resolve,
+  sortAlphabetically,
+} from '@/utils'
 
 Vue.use(Vuex)
 
@@ -42,17 +46,61 @@ export default new Vuex.Store({
     options,
     modelFileLoader,
     modelFileExporter,
-    modelName,
-    workflowName
   },
 
   actions: {
     fetch ({ dispatch }) {
-      dispatch('gridModels/fetch')
-      dispatch('constants/fetch')
-      dispatch('truncationRules/fetch')
-      dispatch('parameters/path/fetch')
+      return Promise.all([
+        dispatch('gridModels/fetch'),
+        dispatch('constants/fetch'),
+        dispatch('truncationRules/fetch'),
+        dispatch('parameters/path/fetch'),
+      ])
     },
+    async populate ({ dispatch, state }, data) {
+      await dispatch('fetch')
+
+      // Grid model
+      await dispatch('gridModels/select', data.gridModels.current)
+
+      // Parameters
+      for (const parameter of Object.keys(data.parameters)) {
+        const selected = data.parameters[`${parameter}`].selected
+        if (selected) {
+          await dispatch(`parameters/${parameter}/select`, selected)
+        } else if (parameter === 'grid') {
+          await dispatch('parameters/grid/populate', data.parameters.grid)
+          await dispatch('parameters/grid/simBox/populate', data.parameters.grid.simBox)
+        } else if (parameter === 'path') {
+          // Set the user settings of where to store various information
+          await dispatch('parameters/path/select', data.parameters.path.project)
+        } else {
+          // Ignored
+        }
+      }
+
+      // Zones
+      await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
+      await dispatch('zones/current', { id: data.zones.current })
+
+      // Regions
+      if (notEmpty(data.regions.available)) {
+        await dispatch('regions/use', data.regions)
+        await dispatch('regions/populate', data.regions.available)
+        await dispatch('regions/current', { id: data.regions.current })
+      }
+
+      // Facies
+      await dispatch('facies/global/populate', Object.values(data.facies.global.available))
+      await dispatch('facies/populate', Object.values(data.facies.available))
+      await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
+
+      // Gaussian Random Fields
+      await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.fields))
+
+      // Truncation rules
+      await dispatch('truncationRules/populate', data.truncationRules)
+    }
   },
 
   mutations: {
@@ -94,8 +142,10 @@ export default new Vuex.Store({
       return Object.values(state.gaussianRandomFields.fields)
     },
     fields: (state, getters) => {
-      return Object.values(state.gaussianRandomFields.fields)
-        .filter(field => hasCurrentParents(field, getters))
+      return sortAlphabetically(
+        Object.values(state.gaussianRandomFields.fields)
+          .filter(field => hasCurrentParents(field, getters))
+      )
     },
     field: (state) => (id) => {
       return state.gaussianRandomFields.fields[`${id}`]
@@ -114,7 +164,7 @@ export default new Vuex.Store({
     options: (state) => {
       return Object.keys(state.options)
         .reduce((obj, key) => {
-          obj[key] = state.options[key].value
+          obj[`${key}`] = state.options[`${key}`].value
           return obj
         }, {})
     },

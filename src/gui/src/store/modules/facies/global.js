@@ -15,16 +15,20 @@ export default {
   modules: {},
 
   actions: {
-    fetch: ({ dispatch, rootGetters }) => {
-      return rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
-        .then(facies => dispatch('populate', facies))
+    fetch: async ({ dispatch, rootGetters }) => {
+      const facies = await rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
+      await dispatch('populate', facies)
     },
     populate: ({ commit, rootState }, facies) => {
       // TODO: Add colors (properly)
-      for (let i = 0; i < facies.length; i++) {
-        const colors = rootState.constants.faciesColors.available
-        facies[`${i}`].color = colors[`${i % colors.length}`]
-      }
+      const colors = rootState.constants.faciesColors.available
+      const minFaciesCode = facies.map(({ code }) => code).reduce((min, curr) => min < curr ? min : curr, Number.POSITIVE_INFINITY)
+      facies.forEach(facies => {
+        if (!facies.color) {
+          const colorIndex = (facies.code - minFaciesCode) % colors.length
+          facies.color = colors[`${colorIndex}`]
+        }
+      })
       const data = makeData(facies, GlobalFacies)
       commit('AVAILABLE', data)
     },

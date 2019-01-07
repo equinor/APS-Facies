@@ -17,13 +17,13 @@ export default {
   modules: {},
 
   actions: {
-    select: ({ commit, dispatch, state }, items) => {
+    select: async ({ commit, dispatch, state }, items) => {
       const regions = selectItems({ state, items, _class: Region })
-      dispatch('zones/update', { regions }, { root: true })
-      return Promise.resolve(Object.keys(regions))
+      await dispatch('zones/update', { regions }, { root: true })
+      return Object.keys(regions)
     },
-    current: ({ commit, dispatch }, { id }) => {
-      dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
+    current: async ({ commit, dispatch }, { id }) => {
+      await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {
@@ -53,6 +53,10 @@ export default {
       commit('USE', use)
       commit('CURRENT', { id: null })
       return dispatch('fetch', null)
+    },
+    populate: async ({ commit, dispatch }, regions) => {
+      commit('AVAILABLE', { regions })
+      await dispatch('select', Object.values(regions).filter(({ selected }) => !!selected))
     },
   },
 

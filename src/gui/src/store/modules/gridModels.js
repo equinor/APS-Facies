@@ -20,31 +20,22 @@ export default {
   },
 
   actions: {
-    select: ({ state, commit, dispatch, rootState }, gridModel) => {
-      return new Promise((resolve, reject) => {
-        if (state.available.includes(gridModel)) {
-          commit('CURRENT', gridModel)
-          // when loading a file, we must ensure that all promises in this method are resolved before calling the
-          // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
-          // resolved
-          const promises = []
-          parametersDependentOnGrid.forEach(param => {
-            promises.push(dispatch(`parameters/${param}/fetch`, null, { root: true }))
-          })
-          promises.push(dispatch('zones/fetch', null, { root: true }))
-          Promise.all(promises)
-            .then(() => {
-              resolve(gridModel)
-            })
-            .catch(error => {
-              reject(error)
-            })
-        } else {
-          let errorMsg = `Selected grid model ( ${gridModel} ) is not present in the current project.\n\n `
-          errorMsg += `Tip: GridModelName in the APS model file must be one of { ${state.available.join()} } `
-          reject(new Error(errorMsg))
+    select: async ({ state, commit, dispatch, rootState }, gridModel) => {
+      if (state.available.includes(gridModel)) {
+        commit('CURRENT', gridModel)
+        // when loading a file, we must ensure that all promises in this method are resolved before calling the
+        // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
+        // resolved
+        for (const param of parametersDependentOnGrid) {
+          await dispatch(`parameters/${param}/fetch`, null, { root: true })
         }
-      })
+        await dispatch('zones/fetch', null, { root: true })
+        return gridModel
+      } else {
+        throw new Error(`Selected grid model ( ${gridModel} ) is not present in the current project.
+
+Tip: GridModelName in the APS model file must be one of { ${state.available.join()} }`)
+      }
     },
     fetch: ({ commit }) => {
       return rms.gridModels().then(result => {

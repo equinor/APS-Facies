@@ -11,7 +11,7 @@ class APSExportError extends Error {
 }
 
 const addRMSProjectName = (rootState, doc, parentElement) => {
-  const value = rootState.modelName.selected
+  const value = rootState.parameters.names.model.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSProjectName', value))
   } else {
@@ -20,14 +20,13 @@ const addRMSProjectName = (rootState, doc, parentElement) => {
 }
 
 const addRMSWorkFlowName = (rootState, doc, parentElement) => {
-  const value = rootState.workflowName.selected
+  const value = rootState.parameters.names.workflow.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSWorkFlowName', value))
   }
 }
 
 const addGridModelName = (rootState, doc, parentElement) => {
-  console.log('Adding element GridModelName')
   const value = rootState.gridModels.current
   if (value) {
     parentElement.appendChild(createElement(doc, 'GridModelName', value))
@@ -59,7 +58,6 @@ const addZoneParamName = (rootState, doc, parentElement) => {
 }
 
 const addRegionParamName = (rootState, doc, parentElement) => {
-  console.log('Adding element RegionParamName')
   const value = rootState.parameters.region.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RegionParamName', value))
@@ -76,7 +74,6 @@ const addResultFaciesParamName = (rootState, doc, parentElement) => {
 }
 
 const addPrintInfo = (rootState, doc, parentElement) => {
-  console.log('Adding element PrintInfo. Setting hardcoded value to 0')
   const value = 'DummyValue: What goes here?'
   if (value) {
     // setting to 0:
@@ -138,9 +135,7 @@ const addZoneModels = ({ rootState, rootGetters }, doc, parentElement) => {
 
 const addZoneModel = ({ rootState, rootGetters }, doc, parent, zoneModelsElement) => {
   if (parent.region) {
-    console.log(`Adding zone ${parent.zone.code} region ${parent.region.code}`)
   } else {
-    console.log(`Adding zone ${parent.zone.code}`)
   }
   const zoneRegionAttributes = []
   zoneRegionAttributes.push({ name: 'number', value: parent.zone.code })
@@ -182,7 +177,6 @@ const addGaussianRandomFields = (rootState, doc, parent, zoneElement) => {
 }
 
 const addGaussianRandomField = (doc, field, parent, zoneElement) => {
-  console.log('Adding gaussian Random Field')
   const fieldElement = createElement(doc, 'GaussField', null, [{ name: 'name', value: field.name }])
   zoneElement.append(fieldElement)
   // generating a base string to be used in kw attributes for this field.
@@ -353,11 +347,9 @@ const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => 
     let valueSource
 
     if (useConstantProb) {
-      console.log('use constant Prob')
       value = facies.previewProbability
       valueSource = 'probability'
     } else {
-      console.log('use cubes')
       value = facies.probabilityCube
       valueSource = 'probability cube'
     }
@@ -435,7 +427,6 @@ const addTruncationRuleBayFill = ({ rootState, rootGetters }, doc, parent, trunc
 }
 
 const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem) => {
-  console.log('adding truncRule of type non-cubic')
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
   const trunc2DAngleElement = createElement(doc, 'Trunc2D_Angle', null,
     [{ name: 'nGFields', value: numberOfFields }])
@@ -566,13 +557,9 @@ export default {
         addZoneModels({ rootState, rootGetters }, doc, rootElem)
         const serializer = new XMLSerializer()
         const xmlString = serializer.serializeToString(doc)
-        console.log(xmlString)
         return xmlString
       } catch (error) {
         if (error instanceof APSExportError) {
-          console.log(error.name)
-          console.log(error.message)
-          console.log(error.stack)
           alert(error.name + '\n' + error.message)
         }
       }

@@ -9,12 +9,10 @@ export default {
 
   modules: {},
   actions: {
-    fetch ({ commit, rootGetters }) {
+    async fetch ({ commit, rootGetters }) {
       // TODO: Use 'fetchParameterHelper' to automatically chose the parameter?
-      return rms.trendParameters(rootGetters.gridModel)
-        .then(params => {
-          commit('AVAILABLE', params)
-        })
+      const params = await rms.trendParameters(rootGetters.gridModel)
+      commit('AVAILABLE', params)
     },
   },
 
