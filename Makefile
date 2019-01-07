@@ -223,7 +223,7 @@ gather-python-scripts: copy-python-files __init__.py
 __init__.py:
 	touch $(PLUGIN_DIR)/__init__.py
 
-compile-python-files: ensure-relative-import-statements-in-plugin move-python-files-to-static
+compile-python-files: ensure-relative-import-statements-in-plugin move-python-files-to-static remove-extraneous-files
 
 increase-build-number:
 	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
@@ -238,6 +238,12 @@ move-python-files-to-static:
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
+
+remove-extraneous-files: remove-node_modules-stubs
+
+remove-node_modules-stubs:
+	rm -rf $(PLUGIN_DIR)/pydist/aps/gui/node_modules
+	rmdir $(PLUGIN_DIR)/pydist/aps/gui
 
 clean-build: clean-plugin clean-links clean-build-dir
 
