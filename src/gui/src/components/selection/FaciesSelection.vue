@@ -36,7 +36,7 @@ export default {
 
   computed: {
     ...mapState({
-      hasSelected: state => !!state.facies.current,
+      hasSelected: state => !!state.facies.global.current,
     }),
   },
 
