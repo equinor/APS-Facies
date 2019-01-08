@@ -6,7 +6,8 @@
   >
     <v-btn
       slot="activator"
-      color="primary"
+      outline
+      color="info"
       dark
     >
       Project Settings

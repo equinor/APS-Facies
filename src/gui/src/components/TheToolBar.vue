@@ -8,14 +8,31 @@
       v-model="modelName"
     />
 
+    <!--
+      NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly
+      This is *exactly* the same as what's done in the source code for the upload button
+    -->
     <upload-button
       :file-changed-callback="e => importModelFile(e)"
       disabled
-      title="Import"
-    />
+      color=""
+      icon
+    >
+      <template slot="icon">
+        <!--
+          NOTE: If the color is not given, the button will look gray, even when it is not disabled.
+          Must be set to 'black' in order to look clickable
+        -->
+        <v-icon
+          color="gray"
+        >
+          {{ $vuetify.icons.import }}
+        </v-icon>
+      </template>
+    </upload-button>
 
-    <bold-button
-      title="Export"
+    <icon-button
+      icon="export"
       @click="exportModelFile"
     />
 
@@ -23,10 +40,13 @@
 
     <project-settings />
 
-    <bold-button
-      title="Run Settings"
-      diabled="true"
-    />
+    <v-btn
+      disabled
+      outline
+      color="info"
+    >
+      Run Settings
+    </v-btn>
   </v-toolbar>
 </template>
 
@@ -36,9 +56,9 @@ import { xml2json } from 'xml-js'
 import UploadButton from 'vuetify-upload-button'
 
 import ProjectSettings from '@/components/dialogs/ProjectSettings'
-import BoldButton from '@/components/baseComponents/BoldButton'
 
 import rms from '@/api/rms'
+import IconButton from '@/components/selection/IconButton'
 
 const parse = xmlString => {
   const parser = new DOMParser()
@@ -77,7 +97,7 @@ const fileHandler = (store, fileName) => {
 export default {
   components: {
     ProjectSettings,
-    BoldButton,
+    IconButton,
     UploadButton
   },
 

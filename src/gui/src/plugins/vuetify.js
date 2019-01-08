@@ -17,6 +17,7 @@ function makeCustomIcons () {
     add: 'fas fa-plus-square',
     copy: 'fas fa-clone',
     import: 'fas fa-file-import fa-flip-horizontal',
+    export: 'fas fa-file-export',
     remove: 'far fa-trash-alt',
     refresh: 'fas fa-sync-alt',
     random: 'fas fa-dice',

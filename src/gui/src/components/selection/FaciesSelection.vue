@@ -3,14 +3,16 @@
     <facies-table :hide-alias="hideAlias" />
     <div>
       <v-btn
+        outline
         color="info"
         @click="add"
       >
         Add Facies
       </v-btn>
       <v-btn
+        outline
         :disabled="!hasSelected"
-        color="warning"
+        color="error"
         @click="remove"
       >
         Remove Facies
