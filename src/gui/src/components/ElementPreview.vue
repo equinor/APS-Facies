@@ -20,7 +20,7 @@
             <v-flex>
               <h3>Truncation rule</h3>
               <truncation-map
-                :truncation-rule-id="ruleId"
+                :value="rule"
               />
             </v-flex>
             <v-flex xs1 />
@@ -78,7 +78,6 @@ export default {
     },
     fields () { return Object.values(this.$store.getters.fields) },
     rule () { return this.$store.getters.truncationRule },
-    ruleId () { return this.rule ? this.rule.id : '' },
     isGaussianFieldsSimulated () {
       return this.fields.every(field => field.simulated)
     },
