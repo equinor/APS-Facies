@@ -3,6 +3,7 @@
 import filecmp
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
+import numpy as np
 
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
@@ -457,10 +458,11 @@ def run(
     nGaussFields = truncRule.getNGaussFieldsInModel()
     getClassName(truncRule)
     getFaciesInTruncRule(truncRule=truncRule, truncRule2=truncRule2, faciesInTruncRule=faciesInTruncRule)
+    facies_prob_numpy = np.asarray(faciesProb)
     truncMapPolygons(
         truncRule=truncRule,
         truncRule2=truncRule2,
-        faciesProb=faciesProb,
+        faciesProb=facies_prob_numpy,
         outPolyFile1=OUT_POLY_FILE1,
         outPolyFile2=OUT_POLY_FILE2
     )

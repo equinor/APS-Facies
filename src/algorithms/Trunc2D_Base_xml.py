@@ -194,18 +194,7 @@ class Trunc2D_Base:
         # A 2D list with background facies indices for a given overlay facies group
         self._backgroundFaciesInGroup = []
 
-        # Variables used to check optimization of algorithm
-        self._nCalc = 0
-        self._nLookup = 0
-        self._useMemoization = True
 
-        # Define disctionary to be used in memoization for optimalization
-        # In this dictionary use key equal to faciesProb and save faciespolygon
-        self._memo = {}
-
-        # To make a lookup key from facies probability, round off input facies probability
-        # to nearest value which is written like  n/resolution where n is an integer from 0 to resolution
-        self._keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  debug_level=Debug.OFF, modelFileName=None, nGaussFieldsInBackGroundModel=2):
@@ -1112,7 +1101,6 @@ Background facies:
                 )
 
             sumTotProb += sumProb[groupIndx]
-
         # Calculate truncation intervals for each overlay facies
         # or overlay faciespolygon since the overlay facies can be defined in multiple polygons
         # in N dimensional unit cube in alpha space.
@@ -1324,43 +1312,37 @@ Background facies:
                 bgElement.text = ' ' + fName + ' '
                 groupElement.append(bgElement)
 
-    def getNCalcTruncMap(self):
-        return self._nCalc
-
-    def getNLookupTruncMap(self):
-        return self._nLookup
-
-    def getKeyResolution(self):
-        return self._keyResolution
 
     @staticmethod
     def _makeKey(faciesProb, keyResolution):
-        keyList = []
-        key = None
-        for p in faciesProb:
-            # Round off the input values to nearest value of (0,0.01,0.02,..1.0)
-            keyList.append(int(keyResolution * p + 0.5) / keyResolution)
-            key = tuple(keyList)
+        '''  Round off the input values faciesProb to nearest value defined by i/keyResolution for i=0,1,2,.., keyResolution'''
+
+        # Numpy vector operations below are equivalent 
+        # to the code:
+        #        keyList = []
+        #        key = None
+        #        for p in faciesProb:
+        #            keyList.append(int(keyResolution * p + 0.5) / keyResolution)
+        dValue = 1.0/keyResolution
+        pNewInt = faciesProb  * keyResolution + 0.5
+        faciesProbNew = pNewInt.astype(int)
+        faciesProbNew = faciesProbNew * dValue
+        key = tuple(faciesProbNew)
         return key
 
     @staticmethod
     def _makeRoundOfFaciesProb(faciesProb, resolution):
         '''Calculate round off of facies probabilities and adjusted
            so that the round off values also are close to normalised '''
-        faciesProbNew = []
-        sumProb = 0.0
         if resolution <= 0:
             raise ValueError('Must have resolution (integer number) larger than 1, typical 100)')
         dValue = 1.0/resolution
-        maxProb = 0.0
-        for i in range(len(faciesProb)):
-            p = faciesProb[i]
-            pNew = int(resolution * p + 0.5) / resolution
-            sumProb += pNew
-            if maxProb < pNew:
-                maxProb = pNew
-                indxMax = i
-            faciesProbNew.append(pNew)
+        pNew = (faciesProb  * resolution + 0.5)
+        pNewInt = pNew.astype(int)
+        faciesProbNew = pNewInt * dValue
+        sumProb = faciesProbNew.sum()
+        maxProb = faciesProbNew.max()
+        indxMax = faciesProbNew.argmax()
         if sumProb > (0.9999 + dValue):
             faciesProbNew[indxMax] -= dValue
             sumProb -= dValue

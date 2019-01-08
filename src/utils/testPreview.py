@@ -4,6 +4,7 @@
 from argparse import ArgumentParser, Namespace
 
 import matplotlib
+import collections
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
@@ -254,13 +255,14 @@ def run_previewer(
 
     useConstProb = zoneModel.useConstProb()
 
-    if not useConstProb and debug_level >= Debug.SOMEWHAT_VERBOSE:
-        print('Error: Preview plots require constant facies probabilities')
+    if not useConstProb:
+        print('Warning: Preview plots require constant facies probabilities')
         print('       Use arbitrary constant values')
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('\n ---------  Zone number : ' + str(zoneNumber) + ' -----------------')
-    faciesProb = []
-    for fName in faciesNames:
+    faciesProb = np.zeros(len(faciesNames), np.float32)
+    for i in range(len(faciesNames)):
+        fName = faciesNames[i]
         pName = zoneModel.getProbParamName(fName)
         if useConstProb:
             v = float(pName)
@@ -274,7 +276,7 @@ def run_previewer(
             w = float(p) / 1000.0
             if debug_level >= Debug.SOMEWHAT_VERBOSE:
                 print('Zone: ' + str(zoneNumber) + ' Facies: ' + fName + ' Prob: ' + str(w))
-        faciesProb.append(v)
+        faciesProb[i] = v
 
     # Calculate truncation map for given facies probabilities
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
@@ -306,11 +308,15 @@ def run_previewer(
                 file_name = gaussian_field.name + '_' + preview_cross_section.type.name + '.dat'
                 writeFileRTF(file_name, gaussian_field.field, grid2D_dimensions, increments, x0, y0, debug_level=debug_level)
         writeFileRTF('facies2D.dat', facies, grid2D_dimensions, increments, x0, y0)
+        
 
     if debug_level >= Debug.VERY_VERBOSE:
+        facies_fraction_sorted = collections.OrderedDict(sorted(facies_fraction.items()))
         print('\nFacies name:   Simulated fractions:    Specified fractions:')
-        for i in range(nFacies):
-            f = facies_fraction[i]
+        print(facies_fraction_sorted)
+#        for i in range(nFacies):
+        for i, f in facies_fraction_sorted.items():
+#            f = facies_fraction[i]
             fraction = float(f) / float(len(facies))
             print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i], fraction, faciesProb[i]))
         print('')

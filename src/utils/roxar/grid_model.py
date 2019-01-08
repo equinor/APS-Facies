@@ -27,42 +27,47 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
                                is used in the grid parameter vectors zoneValues, regionValues and all other parameter
                                 vectors containing cell values for the selected and active (physical) cells for the grid.
     """
-    cell_index_defined = []
     num_cells_total = len(zone_values)
-    if region_number > 0 and len(zone_values) != len(region_values):
+
+
+    if region_number > 0 and num_cells_total != len(region_values):
         raise ValueError(
             'Zone number: {}  Region number: {}.\n'
             'Number of grid cells with this zone number: {}\n'
             'Number of grid cells with this region number: {}'
-            ''.format(zone_number, region_number, len(zone_values), len(region_values))
+            ''.format(zone_number, region_number, num_cells_total, len(region_values))
         )
 
     if region_number > 0:
         # Use both zone number and region number to define selected cells
-        for i in range(num_cells_total):
-            if zone_values[i] == zone_number and region_values[i] == region_number:
-                cell_index_defined.append(i)
+        # The numpy vector operation below is equivalent to the
+        # following code:
+        #        for i in range(num_cells_total):
+        #            if zone_values[i] == zone_number and region_values[i] == region_number:
+        #                cell_index_defined_list.append(i)
+        index_array = np.arange(num_cells_total, dtype=np.uint64)
+        cell_index_defined = index_array[(zone_values == zone_number) & (region_values == region_number)]
         if debug_level >= Debug.VERY_VERBOSE:
             print(
                 'Debug output: In find_defined_cells: Number of active cells for current '
                 '(zone_number, region_number)=({},{}): {}'
                 ''.format(zone_number, region_number, len(cell_index_defined))
             )
-
     else:
         # Only zone number is used to define selected cells
-        for i in range(num_cells_total):
-            if zone_values[i] == zone_number:
-
-                cell_index_defined.append(i)
+        # The numpy vector operation below is equivalent to the
+        # following code:
+        #        for i in range(num_cells_total):
+        #            if zone_values[i] == zone_number:
+        #                cell_index_defined_list.append(i)
+        index_array = np.arange(num_cells_total, dtype=np.uint64)
+        cell_index_defined = index_array[zone_values == zone_number]
         if debug_level >= Debug.VERY_VERBOSE:
             print(
                 'Debug output: In find_defined_cells: Number of active cells for current zone_number={} is: {}'
                 ''.format(zone_number, len(cell_index_defined))
             )
-
     return cell_index_defined
-
 
 def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, realization_number=0, debug_level=Debug.OFF):
     """
@@ -209,11 +214,17 @@ def getCellValuesFilteredOnDiscreteParam(code, value_array):
         int num_defined_cells is the number of cells found that match the value in the input variable code.
         list cell_index_defined is a list of the cell indices where the valueArray value is equal to code.
     """
-    cell_index_defined = []
+    # Numpy vector operations below are equivalent to
+    # the code:
+    #    cell_index_defined = []
+    #    num_cells_total = len(value_array)
+    #    for i in range(num_cells_total):
+    #        if value_array[i] == code:
+    #            cell_index_defined.append(i)
+
     num_cells_total = len(value_array)
-    for i in range(num_cells_total):
-        if value_array[i] == code:
-            cell_index_defined.append(i)
+    index_array = np.arange(num_cells_total, dtype=np.int32)
+    cell_index_defined = index_array[value_array == code]
     num_defined_cells = len(cell_index_defined)
 
     return num_defined_cells, cell_index_defined

@@ -9,6 +9,7 @@ Output:
       Facies realisation updated for specified zones.
       Updated 3D parameter for transformed gaussian fields.
 """
+from src.utils.cProfile_script import do_cprofile
 import numpy as np
 
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
@@ -23,7 +24,7 @@ from src.utils.roxar.grid_model import (
 from src.utils.methods import calc_average, get_specification_file
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
-
+from src.utils.checks import check_probability_values,  check_probability_normalisation
 
 def transform_empiric(cell_index_defined, gauss_values, alpha_values):
     """
@@ -54,19 +55,24 @@ def transform_empiric(cell_index_defined, gauss_values, alpha_values):
              the list cell_index_defined are modified compared with the values
              the vector had as input.
     """
-    y1_defined = []
-    num_defined_cells = len(cell_index_defined)
-    for i in range(num_defined_cells):
-        index = cell_index_defined[i]
-        y1_defined.append(gauss_values[index])
 
+    num_defined_cells = len(cell_index_defined)
+    increment = 1.0/num_defined_cells
+    # Numpy vector operation to select subset of values corresponding to the defined grid cells
+    y1_defined = gauss_values[cell_index_defined]
+
+    # The numpy array operations below are equivalent to 
+    # the code:
+    #    sort_index = np.argsort(y1_defined)
+    #    for i in range(num_defined_cells):
+    #        index = sort_index[i]
+    #        alpha_values[cell_index_defined[index]] = float(i) / float(num_defined_cells)
+
+    range_array = np.arange(num_defined_cells)
     sort_index = np.argsort(y1_defined)
-    for i in range(num_defined_cells):
-        index = sort_index[i]
-        # Assign the probability p= i/N to the cell corresponding to y1_defined cell
-        # with number i in sorting from smallest to highest value.
-        # Use cell_index_defined to assign it to the correct cell.
-        alpha_values[cell_index_defined[index]] = float(i) / float(num_defined_cells)
+    sorted_cell_index_defined = cell_index_defined[sort_index]
+    alpha_values[sorted_cell_index_defined] = range_array * increment
+
 
     return alpha_values
 
@@ -146,68 +152,36 @@ def check_and_normalise_probability(
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Facies: ' + facies_name)
 
-            num_negative = 0
-            num_above_one = 0
-            for i in range(num_defined_cells):
-                index = cell_index_defined[i]
-                v = values[index]
-                if v < 0.0:
-                    num_negative += 1
-                elif v > 1.0:
-                    num_above_one += 1
-                probability_defined[f][i] = v
-            if num_negative > 0:
-                raise ValueError(
-                    'Probability for facies ' + facies_name + ' has ' + str(num_negative) + ' negative values'
-                )
-            if num_above_one > 0:
-                raise ValueError(
-                    'Probability for facies ' + facies_name + ' has ' + str(num_above_one) + ' values above 1.0'
-                )
+            defined_values = values[cell_index_defined]
+            # Check that probabilities are in interval [0,1]. If not set to 0 if negative and 1 if larger than 1.
+            # Error message if too large fraction of input values are outside interval [0,1] also when using tolerance.
+            probability_defined[f] =  check_probability_values(defined_values, tolerance_of_probability_normalisation,
+                                                               facies_name)
 
         # Sum up probability over all facies per defined cell
         p = probability_defined[0]
         psum = np.copy(p)
-        ones = np.ones(num_defined_cells, np.float32)
         for f in range(1, num_facies):
             # sum of np arrays (cell by cell sum)
             psum += probability_defined[f]
 
-        if not np.allclose(psum, ones, eps):
+        normalise_is_necessary = check_probability_normalisation(psum, eps, tolerance_of_probability_normalisation)
+        if  normalise_is_necessary:
             if debug_level >= Debug.VERBOSE:
                 text = '--- Normalise probability cubes.'
                 print(text)
 
-            unacceptable_prob_normalisation = 0
-            min_acceptable_prob_sum = 1.0 - tolerance_of_probability_normalisation
-            max_acceptable_prob_sum = 1.0 + tolerance_of_probability_normalisation
-            largest_prob_sum = 0.0
-            smallest_prob_sum = 1.0
-            for i in range(num_defined_cells):
-                if smallest_prob_sum > psum[i]:
-                    smallest_prob_sum = psum[i]
-                if largest_prob_sum < psum[i]:
-                    largest_prob_sum = psum[i]
-
-                if not (min_acceptable_prob_sum <= psum[i] <= max_acceptable_prob_sum):
-                    unacceptable_prob_normalisation += 1
-
-            if unacceptable_prob_normalisation > 0:
-                raise ValueError(
-                    'Sum of input facies probabilities is either less than: {} or larger than: {} in: {} cells.\n'
-                    'Input probabilities should be normalised and the sum close to 1.0 but found a minimum value of: {} and a maximum value of: {}\n'
-                    'Check input probabilities!'
-                    ''.format(min_acceptable_prob_sum, max_acceptable_prob_sum, unacceptable_prob_normalisation, smallest_prob_sum, largest_prob_sum)
-                )
             for f in range(num_facies):
-                p = probability_defined[f]  # Points to array of probabilities
-                for i in range(num_defined_cells):
-                    if np.abs(psum[i] - 1.0) > eps:
-                        # Have to normalize
-                        if f == 0:
-                            num_cell_with_modified_probability += 1
-                        p[i] = p[i] / psum[i]
-                        # print('i,p,psum:' + str(i) + ' ' + str(p[i]) + ' ' + str(psum[i]))
+                p = probability_defined[f]
+                if f == 0:
+                    # Numpy operation to make an array with 0 or 1 where 1 is set if condition is satisfied
+                    # Number of cells with 1 are number of cells with modified probabilities
+                    check_value = (psum > (1.0 + eps)) | (psum < (1.0 - eps))
+                    num_cell_with_modified_probability = check_value.sum()
+
+                # Normalisation
+                p = p / psum
+                probability_defined[f] = p
 
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
@@ -236,7 +210,7 @@ def check_and_normalise_probability(
 
     return probability_defined, num_cell_with_modified_probability
 
-
+# @do_cprofile
 def run(
         roxar=None, project=None,
         eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
@@ -737,7 +711,6 @@ def run(
 
         print('')
     print('Finished APS_main.py')
-
 
 # --------------- Start main script ------------------------------------------
 if __name__ == '__main__':

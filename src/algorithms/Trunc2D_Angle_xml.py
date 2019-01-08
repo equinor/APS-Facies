@@ -289,7 +289,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 )
 
     def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-                   truncStructure, overlayGroups=None, useConstTruncParam=True, keyResolution=209, debug_level=Debug.OFF):
+                   truncStructure, overlayGroups=None, useConstTruncParam=True, keyResolution=100, debug_level=Debug.OFF):
         """
         Initialize the truncation object from input variables.
                   debug_level - an integer number from 0 to 3 defining how much to be printed to screen during runs.
@@ -323,7 +323,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Initialize base class variables
         super()._setEmpty()
-        self._keyResolution = keyResolution
+#        self._keyResolution = keyResolution
 
         # Initialize this class variables
         self.__setEmpty()
@@ -407,7 +407,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         Description: Function related to this truncation rule.
                      Create a polygon for the unit square
         """
-        poly = [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
+        poly = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0], [0.0, 0.0]]
         return poly
 
     @staticmethod
@@ -767,16 +767,6 @@ class Trunc2D_Angle(Trunc2D_Base):
                     print('Warning message: Calculating truncation map for Non-cubic is not converged with tolerance {}'.format(tolerance))
                     print('                 Calculated area of one polygon: {}.  Specified probability for the polygon: {}.'
                           ''.format(area, faciesProb))
-                    print(repr(outputPolyA))
-                    print(repr(outputPolyB))
-                    print('')
-            elif self._debug_level >= Debug.ON:
-                if np.abs(area - faciesProb) > tolerance2:
-                    print('Warning message: Calculating truncation map for Non-cubic is not converged with tolerance {}'.format(tolerance2))
-                    print('                 Calculated area of one polygon: {}.  Specified probability for the polygon: {}.'
-                          ''.format(area, faciesProb))
-                    print(repr(outputPolyA))
-                    print(repr(outputPolyB))
                     print('')
 
         return outputPolyA, outputPolyB, closestPolygon
@@ -792,7 +782,12 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Check if facies probability is close to 1.0. In this case do not calculate truncation map.
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
-        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self._keyResolution)
+        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__keyResolution)
+        sumProb =   faciesProbRoundOff.sum()
+        if np.abs(sumProb -1.0) > 0.00001:
+            print('faciesProbRoundOff {}'.format(faciesProbRoundOff))
+            print('sum: {}'.format(sumProb))
+            
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
         area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)

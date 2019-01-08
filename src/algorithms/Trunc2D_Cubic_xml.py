@@ -471,8 +471,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Check if facies probability is close to 1.0. In this case do not calculate truncation map.
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
-        faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__roundOffResolution)
-        if self._isFaciesProbEqualOne(faciesProbRoundOff):
+        if self._isFaciesProbEqualOne(faciesProb):
             return
 
         area = self._modifyBackgroundFaciesArea(faciesProb)
