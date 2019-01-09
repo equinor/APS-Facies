@@ -1,24 +1,22 @@
 <template>
-  <div>
-    <facies-table :hide-alias="hideAlias" />
-    <div>
+  <v-flex>
+    <v-flex>
       <v-btn
-        outline
-        color="info"
+        icon
         @click="add"
       >
-        Add Facies
+        <v-icon>{{ $vuetify.icons.add }}</v-icon>
       </v-btn>
       <v-btn
-        outline
+        icon
         :disabled="!hasSelected"
-        color="error"
         @click="remove"
       >
-        Remove Facies
+        <v-icon>{{ $vuetify.icons.remove }}</v-icon>
       </v-btn>
-    </div>
-  </div>
+    </v-flex>
+    <facies-table :hide-alias="hideAlias" />
+  </v-flex>
 </template>
 
 <script>
