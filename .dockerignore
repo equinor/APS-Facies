@@ -7,3 +7,5 @@ packer_cache/
 documentation/
 .rms/prog/
 .rms/project/
+aps_gui/
+aps_gui*.plugin
