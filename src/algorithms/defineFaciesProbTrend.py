@@ -41,7 +41,7 @@ class DefineFaciesProb(BaseDefineFacies):
             else:
                 raise MissingKeyword(kw, self._model_file_name)
         return self.__probability_matrix
-    # @do_cprofile
+
     def calculate_facies_probability_parameter(self, debug_level=Debug.OFF):
         # Get grid model and grid model parameter
         self.debug_level = Debug.ON

@@ -323,7 +323,6 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         # Initialize base class variables
         super()._setEmpty()
-#        self._keyResolution = keyResolution
 
         # Initialize this class variables
         self.__setEmpty()

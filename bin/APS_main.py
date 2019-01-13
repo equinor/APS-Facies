@@ -9,7 +9,6 @@ Output:
       Facies realisation updated for specified zones.
       Updated 3D parameter for transformed gaussian fields.
 """
-from src.utils.cProfile_script import do_cprofile
 import numpy as np
 
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
@@ -159,8 +158,8 @@ def check_and_normalise_probability(
                                                                facies_name)
 
         # Sum up probability over all facies per defined cell
-        p = probability_defined[0]
-        psum = np.copy(p)
+        prob_vector = probability_defined[0]
+        psum = np.copy(prob_vector)
         for f in range(1, num_facies):
             # sum of np arrays (cell by cell sum)
             psum += probability_defined[f]
@@ -168,11 +167,10 @@ def check_and_normalise_probability(
         normalise_is_necessary = check_probability_normalisation(psum, eps, tolerance_of_probability_normalisation)
         if  normalise_is_necessary:
             if debug_level >= Debug.VERBOSE:
-                text = '--- Normalise probability cubes.'
-                print(text)
+                print('--- Normalise probability cubes.')
 
             for f in range(num_facies):
-                p = probability_defined[f]
+                prob_vector = probability_defined[f]
                 if f == 0:
                     # Numpy operation to make an array with 0 or 1 where 1 is set if condition is satisfied
                     # Number of cells with 1 are number of cells with modified probabilities
@@ -180,8 +178,8 @@ def check_and_normalise_probability(
                     num_cell_with_modified_probability = check_value.sum()
 
                 # Normalisation
-                p = p / psum
-                probability_defined[f] = p
+                prob_vector = prob_vector / psum
+                probability_defined[f] = prob_vector
 
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
@@ -210,7 +208,7 @@ def check_and_normalise_probability(
 
     return probability_defined, num_cell_with_modified_probability
 
-# @do_cprofile
+
 def run(
         roxar=None, project=None,
         eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
@@ -257,7 +255,7 @@ def run(
     if isParameterDefinedWithValuesInRMS(grid_model, result_param_name, realization_number):
         if debug_level >= Debug.VERBOSE:
             print('--- Get RMS facies parameter which will be updated: {} from RMS project: {}'.format(result_param_name, rms_project_name))
-        [facies_real, code_names_for_input] = getDiscrete3DParameterValues(grid_model, result_param_name, realization_number, debug_level)
+        facies_real, code_names_for_input = getDiscrete3DParameterValues(grid_model, result_param_name, realization_number, debug_level)
     else:
         if debug_level >= Debug.VERBOSE:
             print('--- Facies parameter: {}  for the result will be created in the RMS project: {}'.format(result_param_name, rms_project_name))

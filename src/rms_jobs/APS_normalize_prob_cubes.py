@@ -1,6 +1,5 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from src.utils.cProfile_script import do_cprofile
 import numpy as np
 
 from src.algorithms.APSModel import APSModel
@@ -195,7 +194,7 @@ def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_
             if debug_level >= Debug.ON:
                 print('--- Updated probability cube: {}'.format(parameter_name))
 
-# do_cprofile
+
 def run(
         roxar=None, project=None,
         eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
