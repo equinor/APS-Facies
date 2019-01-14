@@ -1,8 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from src.utils.cProfile_script import do_cprofile
 import copy
-
 import numpy as np
 
 from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
