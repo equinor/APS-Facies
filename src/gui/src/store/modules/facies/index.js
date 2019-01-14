@@ -13,7 +13,7 @@ import {
   parentId,
   makeData,
 } from '@/utils'
-import { promiseSimpleCommit, changeFacies } from '@/store/utils'
+import { changeFacies } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
 import global from './global'
@@ -70,12 +70,6 @@ export default {
     populate: ({ commit }, facies) => {
       facies = makeData(facies, Facies)
       commit('AVAILABLE', facies)
-    },
-    removeSelectedFacies: ({ commit, dispatch, state }) => {
-      return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
-        .then(() => {
-          dispatch('current', { id: null })
-        })
     },
     updateProbabilities: ({ dispatch, state }, { facies, probabilityCubes }) => {
       if (notEmpty(probabilityCubes) && isEmpty(facies)) {
@@ -139,9 +133,6 @@ export default {
     SELECTED: SELECTED_ITEMS,
     UPDATE: (state, facies) => {
       Vue.set(state.available, facies.id, facies)
-    },
-    REMOVE: (state, { id }) => {
-      Vue.delete(state.available, id)
     },
     CONSTANT_PROBABILITY: (state, { parentId, toggled }) => {
       Vue.set(state.constantProbability, parentId, toggled)

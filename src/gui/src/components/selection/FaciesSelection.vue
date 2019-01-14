@@ -1,22 +1,22 @@
 <template>
-  <div>
-    <facies-table :hide-alias="hideAlias" />
-    <div>
+  <v-flex>
+    <v-flex>
       <v-btn
-        color="info"
+        icon
         @click="add"
       >
-        Add Facies
+        <v-icon>{{ $vuetify.icons.add }}</v-icon>
       </v-btn>
       <v-btn
+        icon
         :disabled="!hasSelected"
-        color="warning"
         @click="remove"
       >
-        Remove Facies
+        <v-icon>{{ $vuetify.icons.remove }}</v-icon>
       </v-btn>
-    </div>
-  </div>
+    </v-flex>
+    <facies-table :hide-alias="hideAlias" />
+  </v-flex>
 </template>
 
 <script>
@@ -36,7 +36,7 @@ export default {
 
   computed: {
     ...mapState({
-      hasSelected: state => !!state.facies.current,
+      hasSelected: state => !!state.facies.global.current,
     }),
   },
 

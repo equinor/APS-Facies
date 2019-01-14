@@ -48,27 +48,20 @@ export default {
   },
 
   props: {
-    truncationRuleId: AppTypes.id.isRequired,
+    value: AppTypes.truncationRule.isRequired,
     expand: VueTypes.bool.def(false),
-  },
-
-  computed: {
-    rule () {
-      return this.truncationRuleId
-        ? this.$store.state.truncationRules.rules[this.truncationRuleId]
-        : null
-    }
   },
 
   asyncComputed: {
     polygons: {
-      get () {
-        const rule = this.rule
-        return rms.truncationPolygons(makeTruncationRuleSpecification(rule, this.$store.getters))
-          .then(polygons => plotify(polygons, this.$store.getters['facies/global/selected']))
+      async get () {
+        return plotify(
+          await rms.truncationPolygons(makeTruncationRuleSpecification(this.value, this.$store.getters)),
+          this.$store.getters['facies/global/selected']
+        )
       },
       shouldUpdate () {
-        return this.$store.getters['truncationRules/ready'](this.truncationRuleId)
+        return this.$store.getters['truncationRules/ready'](this.value.id)
       },
       default () { return [] },
     },

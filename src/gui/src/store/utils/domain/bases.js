@@ -1,4 +1,5 @@
 import uuidv4 from 'uuid/v4'
+import { isInteger } from 'lodash'
 import { isEmpty } from '@/utils'
 import { getId } from '@/utils/typing'
 
@@ -27,7 +28,7 @@ const CodeName = superclass => class extends Discrete(Named(superclass)) {
 const Discrete = superclass => class extends superclass {
   constructor ({ code, ...rest }) {
     super(rest)
-    if (!code) throw new Error('Missing \'code\'')
+    if (!(isInteger(code) && code >= 0)) throw new Error('Missing \'code\'')
     this.code = code
   }
 }

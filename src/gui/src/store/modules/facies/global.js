@@ -56,6 +56,12 @@ export default {
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     changed: (context, facies) => changeFacies(context, facies),
+    removeSelectedFacies: ({ commit, dispatch, state }) => {
+      return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
+        .then(() => {
+          dispatch('current', { id: null })
+        })
+    },
   },
 
   mutations: {
@@ -67,6 +73,9 @@ export default {
     },
     UPDATE: (state, facies) => {
       Vue.set(state.available, facies.id, facies)
+    },
+    REMOVE: (state, { id }) => {
+      Vue.delete(state.available, id)
     },
   },
 
