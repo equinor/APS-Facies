@@ -10,6 +10,7 @@ from src.utils.roxar.grid_model import (
     getContinuous3DParameterValues, getDiscrete3DParameterValues,
     find_defined_cells,
 )
+from src.utils.checks import  check_probability_values, check_probability_normalisation
 
 
 def check_and_normalise_probability(
@@ -58,7 +59,7 @@ def check_and_normalise_probability(
     sum_probabilities_selected_cells = np.zeros(num_defined_cells, np.float32)
     num_cell_with_modified_probability = 0
 
-    # Check that probability values are in interval [0,1]
+     # Check that probability values are in interval [0,1]
     for facies_name in facies_names_for_zone:
         parameter_name = probability_parameter_per_facies[facies_name]
 
@@ -67,68 +68,22 @@ def check_and_normalise_probability(
 
         # The cells  belonging to the zone,region as defined by the input cell_index_defined array
         probabilities_selected_cells = all_values[cell_index_defined]
-        num_negative = 0
-        num_above_one = 0
-        for i in range(num_defined_cells):
-            v = probabilities_selected_cells[i]
-            if v < -tolerance_of_probability_normalisation:
-                num_negative += 1
-                probabilities_selected_cells[i] = 0.0
-            elif v < 0.0:
-                probabilities_selected_cells[i] = 0.0
-            elif v > 1.0 + tolerance_of_probability_normalisation:
-                num_above_one += 1
-                probabilities_selected_cells[i] = 1.0
-            elif v > 1.0:
-                probabilities_selected_cells[i] = 1.0
-        if num_defined_cells > 0:
-            negative_fraction = num_negative / num_defined_cells
-            above_one_fraction = num_above_one / num_defined_cells
-            if negative_fraction > 0.1:
-                raise ValueError(
-                    'Probability for facies {} in {} has {} negative values.'
-                    ''.format(facies_name, parameter_name, num_negative)
-                )
-            if above_one_fraction > 0.1:
-                raise ValueError(
-                    'Probability for facies {} in {} has {} values above 1.0'
-                    ''.format(facies_name, parameter_name, num_above_one)
-                )
+
+        # Check probability values, ensure that they are in interval [0,1]. If outside this interval,
+        # they are set to 0 if negative or 1 if above 1, but error message if too large fraction of grid cells have
+        # value outside the tolerance specified.
+        probabilities_selected_cells =  check_probability_values(probabilities_selected_cells,
+                                                                 tolerance_of_probability_normalisation, 
+                                                                 facies_name, parameter_name)
+
         # Sum up probability over all facies per selected cell
         all_values[cell_index_defined] = probabilities_selected_cells
         sum_probabilities_selected_cells += probabilities_selected_cells
         probability_values_per_rms_param[parameter_name] = all_values
+
     # Check normalisation and report error if input probabilities are too far from 1.0
-
-    ones = np.ones(num_defined_cells, np.float32)
-
-    if not np.allclose(sum_probabilities_selected_cells, ones, eps):
-        unacceptable_prob_normalisation = 0
-        min_acceptable_prob_sum = 1.0 - tolerance_of_probability_normalisation
-        max_acceptable_prob_sum = 1.0 + tolerance_of_probability_normalisation
-        for i in range(num_defined_cells):
-            if not (min_acceptable_prob_sum <= sum_probabilities_selected_cells[i] <= max_acceptable_prob_sum):
-                unacceptable_prob_normalisation += 1
-
-        unacceptable_prob_normalisation_fraction = unacceptable_prob_normalisation / num_defined_cells
-        if unacceptable_prob_normalisation_fraction > 0.1:
-            largest_prob_sum = 0.0
-            smallest_prob_sum = 1.0
-            for i in range(num_defined_cells):
-                if smallest_prob_sum > sum_probabilities_selected_cells[i]:
-                    smallest_prob_sum = sum_probabilities_selected_cells[i]
-                if largest_prob_sum < sum_probabilities_selected_cells[i]:
-                    largest_prob_sum = sum_probabilities_selected_cells[i]
-            raise ValueError(
-                'Sum of input facies probabilities is either less than: {} or larger than: {} in: {} cells.\n'
-                'Input probabilities should be normalised and the sum close to 1.0 but found a minimum value of: {} and a maximum value of: {}\n'
-                'Check input probabilities!'
-                ''.format(
-                    min_acceptable_prob_sum, max_acceptable_prob_sum,
-                    unacceptable_prob_normalisation, smallest_prob_sum, largest_prob_sum
-                )
-            )
-
+    normalise_is_necessary = check_probability_normalisation(sum_probabilities_selected_cells, eps, tolerance_of_probability_normalisation)
+    if  normalise_is_necessary:
         # Normalize
         psum = sum_probabilities_selected_cells
 
@@ -137,13 +92,13 @@ def check_and_normalise_probability(
             parameter_name = probability_parameter_per_facies[facies_name]
             all_values = probability_values_per_rms_param[parameter_name]
             p = all_values[cell_index_defined]
+            if f == 0:
+                check_value = (psum > (1.0 + eps)) | (psum < (1.0 - eps))
+                num_cell_with_modified_probability = check_value.sum()
 
-            for i in range(num_defined_cells):
-                if np.abs(psum[i] - 1.0) > eps:
-                    # Have to normalize
-                    if f == 0:
-                        num_cell_with_modified_probability += 1
-                    p[i] = p[i] / psum[i]
+            # Normalize
+            p = p/psum
+
 
             # The cells  belonging to the zone,region as defined by the input cell_index_defined array
             # is updated by normalised values

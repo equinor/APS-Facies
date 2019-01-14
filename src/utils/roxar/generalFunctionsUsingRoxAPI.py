@@ -474,9 +474,7 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cel
         # Assign values to the defined cells as specified in cellIndexDefined index vector
         # Using vector operations for numpy vector:
         if nDefinedCells > 0:
-            for i in range(nDefinedCells):
-                indx = cellIndexDefined[i]
-                currentValues[indx] = float(inputValues[indx])
+            currentValues[cellIndexDefined] = inputValues[cellIndexDefined]
         else:
             currentValues = inputValues
 

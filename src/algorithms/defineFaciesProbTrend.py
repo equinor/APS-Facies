@@ -1,8 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-
 import copy
-
 import numpy as np
 
 from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
@@ -122,29 +120,39 @@ class DefineFaciesProb(BaseDefineFacies):
             probability_values = np.zeros(len(zone_values), np.float32)
             for zone_number in self.selected_zone_numbers:
                 # Filter out cells with selected zone numbers
-                [num_defined_cells, cell_index] = getCellValuesFilteredOnDiscreteParam(zone_number + 1, zone_values)
+                num_defined_cells, cell_index = getCellValuesFilteredOnDiscreteParam(zone_number + 1, zone_values)
                 if use_const_prob_trend == 0:
-                    for i in range(num_defined_cells):
-                        index = cell_index[i]
-                        code = facies_real_values[index]
-                        p_index = prob_index[code]
-                        probability_values[index] = probabilities[f, p_index]
+                    # Calculate probability values for each cell that belongs to the zone
+                    # The code using numpy below is equivalent to the following:
+                    #                    for i in range(num_defined_cells):
+                    #                        index = cell_index[i]
+                    #                        code = facies_real_values[index]
+                    #                        p_index = prob_index[code]
+                    #                        probability_values[index] = probabilities[f, p_index]
+
+                    code_array = facies_real_values[cell_index]
+                    p_index_array  = prob_index[code_array]
+                    probability_values[cell_index] = probabilities[f, p_index_array]
                 else:
-                    sum_facies_prob = 0
-                    for i in range(num_defined_cells):
-                        index = cell_index[i]
-                        code = facies_real_values[index]
-                        p_index = prob_index[code]
-                        weight = probabilities[f, p_index]
-                        sum_facies_prob = sum_facies_prob + weight
-                    prob_average = sum_facies_prob/num_defined_cells
+                    # Calculate probability values for each cell that belongs to the zone and then
+                    # take the average of these values and use the average.
+                    # The code using numpy below is equivalent to the following:
+                    #                    for i in range(num_defined_cells):
+                    #                        index = cell_index[i]
+                    #                        code = facies_real_values[index]
+                    #                        p_index = prob_index[code]
+                    #                        weight = probabilities[f, p_index]
+                    #                        sum_facies_prob = sum_facies_prob + weight
+                    #                    prob_average = sum_facies_prob/num_defined_cells
+
+                    code_array = facies_real_values[cell_index]
+                    p_index_array  = prob_index[code_array]
+                    weigth_array = probabilities[f, p_index_array]
+                    prob_average = weigth_array.sum()/num_defined_cells
                     if self.debug_level >= Debug.ON:
                         print('Average probability (volume fraction) for facies {} zone {}  is: {}'
                               ''.format(facies_name, zone_number+1, prob_average))
-
-                    for i in range(num_defined_cells):
-                        index = cell_index[i]
-                        probability_values[index] = prob_average
+                    probability_values[cell_index] = prob_average
 
             # Calculate cumulative prob of all previously processed facies including current
             sum_probability_values += probability_values
