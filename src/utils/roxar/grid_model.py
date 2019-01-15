@@ -1,8 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-
-from src.utils.constants.simple import Debug
+import copy
+from src.utils.constants.simple import Debug, GridModelConstants
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
 
@@ -600,7 +600,7 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
     )
 
 
-def createZoneParameter(grid_model,  realization_number):
+def createZoneParameter(grid_model,  realization_number=0, set_shared=False, debug_level=Debug.OFF):
     """ Description:
      Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
      If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
@@ -609,46 +609,60 @@ def createZoneParameter(grid_model,  realization_number):
     """
     import roxar
 
+    name = GridModelConstants.ZONE_NAME
     grid3d = grid_model.get_grid(realization_number)
     properties = grid_model.properties
     found_zone_parameter = False
     zone_parameter = None
+    code_names = {}
     for p in properties:
-        if p.name == 'Zone_test':
+        if p.name == name:
             found_zone_parameter = True
             zone_parameter = p
             break
     if found_zone_parameter:
-        print('Found existing zone parameter with name {}'.format(zone_parameter.name))
+        if debug_level >= Debug.VERBOSE:
+            print('Found existing zone parameter with name {}'.format(zone_parameter.name))
+
         if zone_parameter.is_empty(realisation=realization_number):
-            print('Found existing zone which was empty')
+            if debug_level >= Debug.VERBOSE:
+                print('  The zone parameter was empty')
             # Fill the parameter with zone values
-            values = zone_parameter_values(grid3d)
+            values, code_names = zone_parameter_values(grid3d)
+            zone_parameter.code_names = code_names.copy()
             zone_parameter.set_values(values, realisation=realization_number)
+
+        else:
+            code_names = zone_parameter.code_names.copy()
     else:
-        print('Not found existing zone parameter with name {}'.format(zone_parameter.name))
+
+        if debug_level >= Debug.VERBOSE:
+            print('Create zone parameter with name {} as non-shared'.format(name))
         # Create zone parameter connected to the grid model
-        zone_parameter = properties.create('Zone_test', property_type=roxar.GridPropertyType.discrete, data_type=np.uint8)
+        zone_parameter = properties.create(name, property_type=roxar.GridPropertyType.discrete, data_type=np.uint16)
         # Fill the parameter with zone values
-        values = zone_parameter_values(grid3d)
+        values, code_names = zone_parameter_values(grid3d, debug_level)
+        zone_parameter.set_shared(set_shared)
         zone_parameter.set_values(values, realisation=realization_number)
-        zone_parameter.set_shared(False)
-    print('zone_parameter:')
-    print(zone_parameter)
+        zone_parameter.code_names = code_names.copy()
     return zone_parameter
 
 
-def zone_parameter_values(grid3d):
+def zone_parameter_values(grid3d, debug_level=Debug.OFF):
     """ Description: Return numpy array for the active grid cells with zone number in each grid cell. """
-    indexer = grid3d.simbox_indexer
+    code_names = {}
+    indexer = grid3d.grid_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
-    values = grid3d.generate_values(np.uint8)
+    values = grid3d.generate_values(data_type=np.uint16)
     for zone_index in indexer.zonation:
-        print('zone_index: {}'.format(zone_index))
+        zone_name = grid3d.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
+        code_names[zone_index+1] = zone_name
         for lr in layer_ranges:
             # Get all the cell numbers for the layer range
+            if debug_level >= Debug.VERBOSE:
+                print('Zone number: {} Zone name: {}  Layer range: {} - {}'.format(zone_index+1, code_names[zone_index+1], lr.start+1, lr.stop))
             cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
-        values[cell_numbers] = zone_index+1  # Zone number values start from 1 while zone_index start from 0
-    return values
+            values[cell_numbers] = zone_index+1  # Zone number values start from 1 while zone_index start from 0
+    return values, code_names
 

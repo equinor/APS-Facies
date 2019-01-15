@@ -200,7 +200,7 @@ def createProbabilityLogs(
                 else:
                     facies_code_in_log = facies_log_values[i]
 
-                if zone_number > 0 and facies_code_in_log > 0:
+                if zone_number > 0 and facies_code_in_log >= 0:
                     # Check that the grid cell has facies that belongs to the zone
                     if is_modelling_facies[zone_number, facies_code_in_log]:
                         # Check that the grid cell also has facies belonging to the current probability log that is to be updated
@@ -270,7 +270,7 @@ def createProbabilityLogs(
                 else:
                     facies_code_in_log = facies_log_values[i]
 
-                if zone_number_in_log > 0 and facies_code_in_log > 0:
+                if zone_number_in_log > 0 and facies_code_in_log >= 0:
                     if is_modelling_facies[zone_number_in_log, facies_code_in_log]:
                         update_prob_log = True
 
