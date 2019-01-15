@@ -9,7 +9,6 @@ from src.algorithms.defineFacies import BaseDefineFacies
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingKeyword
 
-
 class DefineFaciesProb(BaseDefineFacies):
     def __init__(self, model_file_name, project, debug_level=Debug.OFF):
         super().__init__(model_file_name, project, 'FaciesProbTrend', debug_level)
@@ -112,10 +111,6 @@ class DefineFaciesProb(BaseDefineFacies):
             if self.debug_level >= Debug.ON:
                 print('Parameter: ' + parameter_name)
 
-            parameter_name_cum = self.probability_parameter_name_prefix + '_cum_' + facies_name
-            if self.debug_level >= Debug.ON:
-                print('Parameter for cum prob: ' + parameter_name_cum)
-
             # Create new array with 0 probabilities for this facies
             probability_values = np.zeros(len(zone_values), np.float32)
             for zone_number in self.selected_zone_numbers:
@@ -148,14 +143,12 @@ class DefineFaciesProb(BaseDefineFacies):
                     code_array = facies_real_values[cell_index]
                     p_index_array  = prob_index[code_array]
                     weigth_array = probabilities[f, p_index_array]
-                    prob_average = weigth_array.sum()/num_defined_cells
+                    prob_average = weigth_array.average()
                     if self.debug_level >= Debug.ON:
                         print('Average probability (volume fraction) for facies {} zone {}  is: {}'
                               ''.format(facies_name, zone_number+1, prob_average))
                     probability_values[cell_index] = prob_average
 
-            # Calculate cumulative prob of all previously processed facies including current
-            sum_probability_values += probability_values
 
             # Write the calculated probabilities for the selected zones to 3D parameter
             # If the 3D parameter exist in advance, only the specified zones will be altered
@@ -167,13 +160,6 @@ class DefineFaciesProb(BaseDefineFacies):
             if not success:
                 raise ValueError('Error: Grid model is empty or can not be updated.')
 
-            # Write cumulative prob
-            success = setContinuous3DParameterValues(
-                grid_model, parameter_name_cum, sum_probability_values,
-                self.selected_zone_numbers, real_number, debug_level=self.debug_level
-            )
-            if not success:
-                raise ValueError('Error: Grid model is empty or can not be updated.')
 
     @staticmethod
     def calculate_probability_indices(code_names_facies, facies_names_in_real, facies_real_values):

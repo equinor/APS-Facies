@@ -9,21 +9,16 @@
     <Preview zoneNumber="6" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
     </Preview>
     <Optimization>
-        <UseMemoization>0</UseMemoization>
+        <UseMemoization>1</UseMemoization>
         <MemoizationResolution>109</MemoizationResolution>
     </Optimization>
 
     <SelectedZonesAndRegions>
-<!--        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions>
-       <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions>
-
+        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions>
         <SelectedZoneWithRegions zone="3">0</SelectedZoneWithRegions>
-
         <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions>
-
-
         <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>
--->
         <SelectedZoneWithRegions zone="6">0</SelectedZoneWithRegions>
     </SelectedZonesAndRegions>
 
