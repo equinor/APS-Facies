@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import numpy as np
 from enum import Enum
 from warnings import warn
 
@@ -204,18 +205,13 @@ def calc_average(cell_index_defined, values):
     """
     Calculates average of the values array.
     Input:
+           numpy arrays for:
            cell_index_defined - Array of cell indices to cells to be averaged.
-
+           values - Array of values (all cell values from a RMS property)
     Output:
             average  - average value
     """
-    _sum = 0.0
-    num_cells = len(cell_index_defined)
-    for i in range(num_cells):
-        index = cell_index_defined[i]
-        _sum += values[index]
-    average = _sum / float(num_cells)
-    return average
+    return np.average(values[cell_index_defined])
 
 
 def get_workflow_name():
