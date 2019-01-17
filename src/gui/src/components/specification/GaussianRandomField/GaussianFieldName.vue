@@ -2,6 +2,7 @@
   <v-text-field
     v-model="fieldName"
     :error-messages="errors"
+    :hint="showTip"
     @click.stop
     @keydown.esc="restoreName"
     @keydown.enter="changeName"
@@ -14,7 +15,7 @@ import { required } from 'vuelidate/lib/validators'
 import { AppTypes } from '@/utils/typing'
 
 // TODO: Add description of behavior
-// Alt; make behavior consistent with remaining application
+//       Alt; make behavior consistent with remaining application
 export default {
   props: {
     value: AppTypes.gaussianRandomField.isRequired,
@@ -30,14 +31,10 @@ export default {
     fieldName: {
       required,
       isUnique (value) {
-        for (const grfId in this.fields) {
-          if (this.name === value && this.grfId !== grfId) {
-            return false
-          }
-        }
-        return true
+        const current = { name: this.name, id: this.value.id }
+        return !Object.values(this.fields).some(({ name, id }) => name === value && id !== current.id)
       },
-    }
+    },
   },
 
   computed: {
@@ -49,6 +46,13 @@ export default {
       !this.$v.fieldName.required && errors.push('Is required')
       !this.$v.fieldName.isUnique && errors.push('Must be unique')
       return errors
+    },
+    showTip () {
+      if (this.name !== this.fieldName) {
+        return 'Press enter to save'
+      } else {
+        return ''
+      }
     },
   },
 
