@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import numpy as np
 from enum import Enum
 
 from src.algorithms.properties import FmuProperty
@@ -194,5 +195,5 @@ def make_truncation_rule(specification):
     )
 
     # TODO: Read probabilities
-    trunc.setTruncRule(specification.probabilities)
+    trunc.setTruncRule(np.array(specification.probabilities))
     return trunc
