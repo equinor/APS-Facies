@@ -250,7 +250,7 @@ export default Vue.extend({
         // Hack to make sure illegal values are not displayed in the text field
         this.$refs.input.lazyValue = value
       }
-      if (/^[+-]?0\.0*$/.test(value)) {
+      if (/^[+-]?\d+\.0*$/.test(value)) {
         this.fieldValue = value
       } else if (/^[+-]?\d+\.\d+0+$/.test(value)) {
         this.fieldValue = numericValue.toFixed(value.split('.')[1].length)
