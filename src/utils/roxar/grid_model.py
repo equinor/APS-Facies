@@ -5,6 +5,7 @@ import copy
 from src.utils.constants.simple import Debug, GridModelConstants
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
+from src.utils.methods import calc_average
 
 from roxar import GridPropertyType
 
@@ -69,6 +70,34 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
             )
     return cell_index_defined
 
+def average_of_property_inside_zone_region(
+    grid_model,
+    parameter_names,
+    zone_values,
+    zone_number,
+    region_values=None,
+    region_number=0,
+    realization_number=0,
+    debug_level=Debug.OFF
+    ):
+    ''' Calculates average of the input properties in the list parameter_names for the specified realisation number.
+        Note that realisation number 0 is the first realisation. 
+        The average is over the grid cells in the grid model that corresponds to the specified zone number and region number. 
+        Note that zone_values are zone number in each grid cell (of active cells) and zone number starts at 1. Region number value 
+        can be any positive integer value and possible values are case dependent.
+        If region_values is not specified , the average is over the cells corresponding to the specified zone number. 
+        Returns a dictionary with parameter name as key and average as value.
+    '''
+    cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
+    return {
+        name :  calc_average(
+            cell_index_defined, 
+            values=getContinuous3DParameterValues(grid_model, name, realization_number, debug_level)
+        )  for name in parameter_names
+    }
+
+
+
 def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, realization_number=0, debug_level=Debug.OFF):
     """
     Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
@@ -90,11 +119,11 @@ def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, r
         float maximum is the maximum value
         float average is the average value
     """
-    values = getSelectedGridCells(grid_model, parameter_name, zone_number_list, realization_number, debug_level)
-
+    values = get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number, debug_level)
     maximum = np.max(values)
     minimum = np.min(values)
     average = np.average(values)
+
     if debug_level >= Debug.VERY_VERBOSE:
         function_name = calcStatisticsFor3DParameter.__name__
         if len(zone_number_list) > 0:
@@ -172,7 +201,7 @@ def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realizati
     if len(zone_number_list) > 0:
         # Get values for the specified zones
         grid = grid_model.get_grid(realization_number)
-        indexer = grid.simbox_indexer
+        indexer = grid.grid_indexer
         dim_i, dim_j, dim_k = indexer.dimensions
         num_cells_selected = 0
         values = []
@@ -189,6 +218,42 @@ def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realizati
                         values.append(all_values[cIndx])
         values = np.asarray(values)
         return values
+    else:
+        return all_values
+
+def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number, debug_level=Debug.OFF):
+    """
+    Input:
+           grid_model     - Grid model object
+           parameterName - Name of 3D parameter to get.
+
+           zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
+                            included in the list, then grid cells in all zones are updated.
+           realization_number    - Realisation number counted from 0 for the parameter to get.
+    Output:
+           Numpy vector with parameter values for the active cells belonging to the specified zones. Note that the output
+           is in general not of the same length as a vector with all active cells.
+    """
+    all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number, debug_level)
+    if len(zone_number_list) > 0:
+        grid3d = grid_model.get_grid(realization_number)        
+        # Get all zone values
+        zone_values, _ = zone_parameter_values(grid3d, debug_level)
+
+        # Get values for the specified zones
+        index_array = np.arange(len(zone_values), dtype=np.uint64)
+        first = True
+        for i in range(len(zone_number_list)):
+            zone_number = zone_number_list[i] + 1 # Input zone numbering start at 0, but zone  values start at 1
+            cell_index_one_zone = index_array[(zone_values == zone_number)]
+            if first:
+                cell_index_defined = cell_index_one_zone
+                first = False
+            else:
+                cell_index_defined = np.concatenate((cell_index_defined, cell_index_one_zone))
+
+        values_selected = all_values[cell_index_defined]
+        return values_selected
     else:
         return all_values
 
@@ -600,7 +665,7 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
     )
 
 
-def createZoneParameter(grid_model,  realization_number=0, set_shared=False, debug_level=Debug.OFF):
+def create_zone_parameter(grid_model,  realization_number=0, set_shared=False, debug_level=Debug.OFF):
     """ Description:
      Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
      If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.

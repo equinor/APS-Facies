@@ -4,7 +4,7 @@ import roxar
 import numpy as np
 import collections
 from src.utils.constants.simple import  ProbabilityTolerances, Debug
-from src.utils.roxar.grid_model import  createZoneParameter, getDiscrete3DParameterValues
+from src.utils.roxar.grid_model import  create_zone_parameter, getDiscrete3DParameterValues
 
 
 def get_facies_code(code_names, facies_name):
@@ -378,7 +378,7 @@ def get_facies_in_zone_from_blocked_wells(project, grid_model_name, bw_name, fac
     cell_numbers =  cell_numbers_for_blocked_wells(project, grid_model_name, bw_name)
     # Check if zone parameter exist. If not create it
     grid_model = project.grid_models[grid_model_name]
-    zone_parameter = createZoneParameter(grid_model, realization_number)
+    zone_parameter = create_zone_parameter(grid_model, realization_number)
     zone_values = zone_parameter.get_values(realization_number)
     zone_values_in_bw = np.zeros(len(cell_numbers), np.uint8)
     zone_values_in_bw = zone_values[cell_numbers]
