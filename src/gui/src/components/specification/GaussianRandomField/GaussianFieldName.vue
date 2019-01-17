@@ -2,10 +2,7 @@
   <v-text-field
     v-model="fieldName"
     :error-messages="errors"
-    :hint="showTip"
     @click.stop
-    @keydown.esc="restoreName"
-    @keydown.enter="changeName"
     @input="$v.fieldName.$touch()"
     @blur="$v.fieldName.$touch()"
   />
@@ -14,8 +11,6 @@
 import { required } from 'vuelidate/lib/validators'
 import { AppTypes } from '@/utils/typing'
 
-// TODO: Add description of behavior
-//       Alt; make behavior consistent with remaining application
 export default {
   props: {
     value: AppTypes.gaussianRandomField.isRequired,
@@ -31,8 +26,8 @@ export default {
     fieldName: {
       required,
       isUnique (value) {
-        const current = { name: this.name, id: this.value.id }
-        return !Object.values(this.fields).some(({ name, id }) => name === value && id !== current.id)
+        const current = this.value.id
+        return !Object.values(this.fields).some(({ name, id }) => name === value && id !== current)
       },
     },
   },
@@ -47,26 +42,18 @@ export default {
       !this.$v.fieldName.isUnique && errors.push('Must be unique')
       return errors
     },
-    showTip () {
-      if (this.name !== this.fieldName) {
-        return 'Press enter to save'
-      } else {
-        return ''
+  },
+
+  watch: {
+    fieldName (value) {
+      if (!this.$v.fieldName.$invalid) {
+        this.$store.dispatch('gaussianRandomFields/changeName', { grfId: this.value.id, name: value })
       }
-    },
+    }
   },
 
   mounted () {
     this.fieldName = this.name
-  },
-
-  methods: {
-    changeName () {
-      this.$store.dispatch('gaussianRandomFields/changeName', { grfId: this.value.id, name: this.fieldName })
-    },
-    restoreName () {
-      this.fieldName = this.name
-    },
   },
 }
 </script>
