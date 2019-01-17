@@ -10,7 +10,7 @@
             child-flex
             align-center
             justify-start
-            row
+            column
             fill-height
             wrap
           >
