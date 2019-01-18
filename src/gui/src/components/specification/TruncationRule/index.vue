@@ -116,7 +116,7 @@ export default {
     overlayErrors () {
       return [
         { check: this.notBayfill, errorMessage: 'Bayfill cannot have user defined overlay facies' },
-        { check: this.hasEnoughFacies, errorMessage: 'There are not enough facies has been selected for this truncation rule' },
+        { check: this.hasEnoughFacies, errorMessage: 'Too few facies has been selected for this truncation rule' },
         { check: this.hasEnoughFields, errorMessage: 'There are not enough gaussian random fields to use with overlay' },
       ]
     },
