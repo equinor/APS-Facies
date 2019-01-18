@@ -224,12 +224,12 @@ export default {
         })
         return proportions
       }
-      if (autoFill) {
+      if (autoFill && rootGetters['facies/unset']) {
         const normalize = (items) => {
           const sum = items.reduce((sum, { probability }) => sum + probability, 0)
           return items.map(payload => { return { ...payload, probability: payload.probability / sum } })
         }
-        let proportions = []
+        const proportions = []
         addProportions(proportions, rule.polygons)
         normalize(proportions).forEach((payload) => {
           dispatch('facies/updateProbability', payload, { root: true })
@@ -394,7 +394,7 @@ export default {
         }
       }
       commit('CHANGE_FIELDS', { ruleId: rule.id, channel, fieldId: selected })
-      if (previous) {
+      if (previous && previous.channel.field) {
         commit('CHANGE_FIELDS', { ruleId: rule.id, channel: previous.channel, fieldId: previous.field })
       }
     },
