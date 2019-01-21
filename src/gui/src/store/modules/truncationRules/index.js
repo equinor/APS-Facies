@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import cloneDeep from 'lodash/cloneDeep'
+import { cloneDeep, isNumber } from 'lodash'
 import uuidv4 from 'uuid/v4'
 
 import api from '@/api/rms'
@@ -259,7 +259,7 @@ export default {
       }))
     },
     addPolygon ({ commit, dispatch, store }, { rule, order = null, overlay = false }) {
-      if (!order || order < 0) {
+      if (!isNumber(order) || order < 0) {
         const polygons = Object.values(rule.polygons)
           .filter(polygon => polygon.overlay === overlay)
         order = polygons.length === 0
@@ -304,7 +304,7 @@ export default {
       }
       const polygons = cloneDeep(rule.polygons)
       Object.values(polygons).forEach(polygon => {
-        if (polygon.order >= order) {
+        if (polygon.order >= order && polygon.overlay === overlay) {
           polygon.order += 1
         }
       })

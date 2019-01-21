@@ -2,6 +2,7 @@
   <facies-specification-base
     :value="value.facies"
     :rule="rule"
+    :disable="disable"
     @input.capture="facies => updateFacies(facies)"
   />
 </template>
@@ -26,6 +27,7 @@ export default {
     value: VueTypes.shape({
       facies: AppTypes.id.isRequired,
     }).loose.isRequired,
+    disable: VueTypes.func.def(() => false),
   },
 
   computed: {

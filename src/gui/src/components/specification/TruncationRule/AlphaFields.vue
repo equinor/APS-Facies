@@ -14,6 +14,7 @@
 import VueTypes from 'vue-types'
 
 import { AppTypes } from '@/utils/typing'
+import { sortByProperty } from '@/utils'
 
 import AlphaSelection from './AlphaSelection'
 
@@ -39,7 +40,7 @@ export default {
   computed: {
     alphas () {
       return this.value
-        ? this.value.fields
+        ? sortByProperty('channel')(this.value.fields)
           .map(item => {
             return {
               channel: item.channel,

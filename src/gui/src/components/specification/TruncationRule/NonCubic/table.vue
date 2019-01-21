@@ -2,7 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="polygons"
-    :custom-sort="order"
+    :custom-sort="ordering"
     item-key="name"
     class="elevation-1"
     hide-actions
@@ -73,7 +73,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import PolygonOrder from '@/components/specification/TruncationRule/order'
 import FaciesSpecification from '@/components/specification/Facies'
 
-import { notEmpty } from '@/utils'
+import { notEmpty, sortByOrder } from '@/utils'
 
 export default {
   components: {
@@ -155,9 +155,7 @@ export default {
   },
 
   methods: {
-    order (items, index, isDescending) {
-      return items.slice().sort((polygon, other) => polygon.order - other.order)
-    },
+    ordering (...args) { return sortByOrder(...args) },
     updateFactor (item, value) {
       return this.$store.dispatch('truncationRules/changeProportionFactors', { rule: this.value, polygon: item, value })
     },

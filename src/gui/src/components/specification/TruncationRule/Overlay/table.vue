@@ -2,6 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="polygons"
+    :custom-sort="ordering"
     item-key="id"
     class="elevation-1"
     hide-actions
@@ -39,6 +40,7 @@
           <facies-specification
             :value="props.item"
             :rule="value"
+            :disable="facies => backgroundFacies(facies)"
             @input="val => updateFacies(props.item, val)"
           />
         </td>
@@ -73,6 +75,7 @@ import BackgroundFaciesSpecification from '@/components/specification/Facies/bac
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection'
 
 import { updateFacies } from '@/store/utils'
+import { sortByOrder } from '@/utils'
 import { AppTypes } from '@/utils/typing'
 
 export default {
@@ -156,6 +159,11 @@ export default {
   },
 
   methods: {
+    backgroundFacies (facies) {
+      const backgroundFacies = [...new Set(this.value.backgroundPolygons.map(({ facies }) => facies))]
+      return backgroundFacies.indexOf(facies.id) >= 0
+    },
+    ordering (...args) { return sortByOrder(...args) },
     updateField (item, fieldId) {
       this.$store.dispatch('truncationRules/updateFields', { rule: this.value, channel: this.channel(item), selected: fieldId })
     },
@@ -169,7 +177,7 @@ export default {
       this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.value, polygon: item, value: val })
     },
     channel (order) {
-      order = order.order || order
+      order = order.hasOwnProperty('order') ? order.order : order
       // +1 due to order being 0-indexed, but `channel` is expected to be 1-indexed
       return order + 1 + this.value.fields.filter(({ overlay }) => !overlay).length
     },
