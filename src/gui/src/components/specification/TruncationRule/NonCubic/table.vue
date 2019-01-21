@@ -127,7 +127,7 @@ export default {
         },
         ...(this.hasMultipleFaciesSpecified ? [
           {
-            text: 'Proportion Factor',
+            text: 'Probability Fraction',
             align: 'left',
             sortable: false,
             value: 'fraction',
