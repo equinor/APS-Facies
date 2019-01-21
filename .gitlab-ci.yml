@@ -15,7 +15,6 @@ variables:
   SHELL:                  "/bin/bash"
   PIPENV_VENV_IN_PROJECT: "1"
   DEPLOY_SERVER:          "tr-linrgsn001.tr.statoil.no"
-  DEPLOY_PATH:            "${DEPLOY_SERVER}:/project/res/APSGUI"
   SYSTEM_INSTALL_PIPENV:  "yes"
   RMS_VERSION:            "11.0.0"
   GIT_LFS_SKIP_SMUDGE:    "1"
@@ -123,10 +122,10 @@ integration testing (RMS 11):
 build GUI:
   stage: build gui
   script:
-    - 'eval mkdir -p plugin'
     - 'eval $MAKE build-gui'
+    - 'mv $CODE_DIR/build $CODE_DIR/plugin'
   artifacts:
-    expire_in: 1 week
+    expire_in: 1 month
     paths:
       - plugin/
 
