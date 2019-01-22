@@ -1046,8 +1046,12 @@ Background facies:
     def _modifyBackgroundFaciesArea(self, faciesProb):
         """
         Description: Calculate area in trunc map which has corrected for overlay facies.
+                     It also calculates truncation intervals for overlay facies for alpha3, alpha4, .., alphaN.
                      This function will also set a minimum probability for robustness of truncation algorithms.
         """
+        if self._nGroups == 0:
+            return faciesProb
+
         # The array faciesProb contain probability for all facies, a subset are background facies
         # NOTE: Only the entries in area corresponding to the background facies will be set
         # Set initially -1 into the list area.
@@ -1333,11 +1337,16 @@ Background facies:
     @staticmethod
     def _makeRoundOfFaciesProb(faciesProb, resolution):
         '''Calculate round off of facies probabilities and adjusted
-           so that the round off values also are close to normalised'''
+           so that the round off values also are close to normalised
+           Resolution is set to 100 if input is not positive. The case that memoization is turned off
+           corresponds to input resolution = 0 and in this case 100 is always used.
+        '''
         if resolution <= 0:
-            raise ValueError('Must have resolution (integer number) larger than 1, typical 100)')
-        dValue = 1.0 / resolution
-        pNew = (faciesProb * resolution + 0.5)
+            # The value used when memoization is not used
+            resolution = 100
+
+        dValue = 1.0/resolution
+        pNew = (faciesProb  * resolution + 0.5)
         pNewInt = pNew.astype(int)
         faciesProbNew = pNewInt * dValue
         sumProb = faciesProbNew.sum()

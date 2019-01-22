@@ -12,6 +12,12 @@ from src.utils.numeric import isNumber
 from src.utils.roxar.grid_model import getContinuous3DParameterValues
 from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand, isFMUUpdatable, createFMUvariableNameForNonCubicTruncation
 
+class MemoizationItem:
+    __slots__ = 'polygons', 'low_threshold_values', 'high_threshold_values'
+    def __init__(self, polygons, low_threshold_values, high_threshold_values):
+        self.polygons = polygons
+        self.low_threshold_values = low_threshold_values
+        self.high_threshold_values = high_threshold_values
 
 class Trunc2D_Angle(Trunc2D_Base):
     """
@@ -792,22 +798,37 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
-        area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
         if self.__useMemoization:
             key = self._makeKey(faciesProb, self.__keyResolution)
 
             if key not in self.__memo:
                 self.__nCalc += 1
+                # Not only the area of the polygons in alpha1, alpha2 plane is calculated here, 
+                # but also the truncation intervals for
+                # all the other alpha fields used for overlay facies.
+                # They are saved in self._lowAlphaInGroup and self._highAlphaInGroup.
+                area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
 
                 # Call methods specific for this truncation rule with corrected area due to overprint facies
                 # Calculate polygons the truncation map is divided into
                 polygons = self.__calculateFaciesPolygons(cellIndx, area)
-                self.__memo[key] = polygons
+                memo_object = MemoizationItem(
+                    polygons, 
+                    copy.deepcopy(self._lowAlphaInGroup), 
+                    copy.deepcopy(self._highAlphaInGroup)
+                )
+                self.__memo[key] = memo_object
                 self.__faciesPolygons = polygons
             else:
                 self.__nLookup += 1
-                self.__faciesPolygons = self.__memo[key]
+                memo_object = self.__memo[key]
+                self.__faciesPolygons = memo_object.polygons
+                self._lowAlphaInGroup = memo_object.low_threshold_values
+                self._highAlphaInGroup = memo_object.high_threshold_values
         else:
+            # Not only the area of the polygons in alpha1, alpha2 plane is calculated here, but also the truncation intervals for
+            # all the other alpha fields used for overlay facies.
+            area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
             # Call methods specific for this truncation rule with corrected area due to overprint facies
             # Calculate polygons the truncation map is divided into
             polygons = self.__calculateFaciesPolygons(cellIndx, area)
