@@ -1315,16 +1315,16 @@ Background facies:
 
     @staticmethod
     def _makeKey(faciesProb, keyResolution):
-        '''  Round off the input values faciesProb to nearest value defined by i/keyResolution for i=0,1,2,.., keyResolution'''
+        '''Round off the input values faciesProb to nearest value defined by i/keyResolution for i=0,1,2,.., keyResolution'''
 
-        # Numpy vector operations below are equivalent 
+        # Numpy vector operations below are equivalent
         # to the code:
         #        keyList = []
         #        key = None
         #        for p in faciesProb:
         #            keyList.append(int(keyResolution * p + 0.5) / keyResolution)
-        dValue = 1.0/keyResolution
-        pNewInt = faciesProb  * keyResolution + 0.5
+        dValue = 1.0 / keyResolution
+        pNewInt = faciesProb * keyResolution + 0.5
         faciesProbNew = pNewInt.astype(int)
         faciesProbNew = faciesProbNew * dValue
         key = tuple(faciesProbNew)
@@ -1333,11 +1333,11 @@ Background facies:
     @staticmethod
     def _makeRoundOfFaciesProb(faciesProb, resolution):
         '''Calculate round off of facies probabilities and adjusted
-           so that the round off values also are close to normalised '''
+           so that the round off values also are close to normalised'''
         if resolution <= 0:
             raise ValueError('Must have resolution (integer number) larger than 1, typical 100)')
-        dValue = 1.0/resolution
-        pNew = (faciesProb  * resolution + 0.5)
+        dValue = 1.0 / resolution
+        pNew = (faciesProb * resolution + 0.5)
         pNewInt = pNew.astype(int)
         faciesProbNew = pNewInt * dValue
         sumProb = faciesProbNew.sum()

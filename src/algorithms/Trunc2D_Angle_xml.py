@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
@@ -763,10 +764,12 @@ class Trunc2D_Angle(Trunc2D_Base):
         if not converged:
             if self._debug_level >= Debug.VERY_VERBOSE:
                 if np.abs(area - faciesProb) > tolerance:
-                    print('Warning message: Calculating truncation map for Non-cubic is not converged with tolerance {}'.format(tolerance))
-                    print('                 Calculated area of one polygon: {}.  Specified probability for the polygon: {}.'
-                          ''.format(area, faciesProb))
-                    print('')
+                    warn(
+                        'Calculating truncation map for Non-cubic is not converged with tolerance {}'
+                        'Calculated area of one polygon: {}. Specified probability for the polygon: {}.'
+                        ''
+                        ''.format(tolerance, area, faciesProb)
+                    )
 
         return outputPolyA, outputPolyB, closestPolygon
 
@@ -782,11 +785,11 @@ class Trunc2D_Angle(Trunc2D_Base):
         # Take care of overprint facies to get correct probability (volume in truncation cube)
         self._setTruncRuleIsCalled = True
         faciesProbRoundOff = self._makeRoundOfFaciesProb(faciesProb, self.__keyResolution)
-        sumProb =   faciesProbRoundOff.sum()
-        if np.abs(sumProb -1.0) > 0.00001:
+        sumProb = faciesProbRoundOff.sum()
+        if np.abs(sumProb - 1.0) > 0.00001:
             print('faciesProbRoundOff {}'.format(faciesProbRoundOff))
             print('sum: {}'.format(sumProb))
-            
+
         if self._isFaciesProbEqualOne(faciesProbRoundOff):
             return
         area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)

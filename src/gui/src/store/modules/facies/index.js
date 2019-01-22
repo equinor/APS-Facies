@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import math from 'mathjs'
 
-import { cloneDeep, merge, isEqual } from 'lodash'
+import { cloneDeep, merge, isEqual, isNumber } from 'lodash'
 
 import { Facies } from '@/store/utils/domain'
 import {
@@ -163,6 +163,9 @@ export default {
     },
     cumulative: (state, getters) => {
       return getters.selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
+    },
+    unset: (state, getters) => {
+      return getters.selected.every(facies => !isNumber(facies.previewProbability))
     }
   },
 }

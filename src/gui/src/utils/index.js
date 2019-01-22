@@ -189,7 +189,23 @@ const sortAlphabetically = arr => {
   return Object.values(arr).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 }
 
+const sortByProperty = (prop) => (items) => {
+  items.forEach(item => {
+    if (!item.hasOwnProperty(prop)) {
+      throw new Error(`The item (${item}) does not have the required property on which to sort (${prop})`)
+    }
+  })
+  return items.slice().sort((polygon, other) => polygon[`${prop}`] - other[`${prop}`])
+}
+
+const sortByOrder = (items, index, isDescending) => {
+  // Used in Vuetify's tables
+  return sortByProperty('order')(items)
+}
+
 export {
+  sortByProperty,
+  sortByOrder,
   defaultSimulationSettings,
   makeData,
   makeTruncationRuleSpecification,

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import cloneDeep from 'lodash/cloneDeep'
+import { cloneDeep, isNumber } from 'lodash'
 import uuidv4 from 'uuid/v4'
 
 import api from '@/api/rms'
@@ -224,12 +224,12 @@ export default {
         })
         return proportions
       }
-      if (autoFill) {
+      if (autoFill && rootGetters['facies/unset']) {
         const normalize = (items) => {
           const sum = items.reduce((sum, { probability }) => sum + probability, 0)
           return items.map(payload => { return { ...payload, probability: payload.probability / sum } })
         }
-        let proportions = []
+        const proportions = []
         addProportions(proportions, rule.polygons)
         normalize(proportions).forEach((payload) => {
           dispatch('facies/updateProbability', payload, { root: true })
@@ -259,7 +259,7 @@ export default {
       }))
     },
     addPolygon ({ commit, dispatch, store }, { rule, order = null, overlay = false }) {
-      if (!order || order < 0) {
+      if (!isNumber(order) || order < 0) {
         const polygons = Object.values(rule.polygons)
           .filter(polygon => polygon.overlay === overlay)
         order = polygons.length === 0
@@ -304,7 +304,7 @@ export default {
       }
       const polygons = cloneDeep(rule.polygons)
       Object.values(polygons).forEach(polygon => {
-        if (polygon.order >= order) {
+        if (polygon.order >= order && polygon.overlay === overlay) {
           polygon.order += 1
         }
       })
@@ -394,7 +394,7 @@ export default {
         }
       }
       commit('CHANGE_FIELDS', { ruleId: rule.id, channel, fieldId: selected })
-      if (previous) {
+      if (previous && previous.channel.field) {
         commit('CHANGE_FIELDS', { ruleId: rule.id, channel: previous.channel, fieldId: previous.field })
       }
     },

@@ -103,10 +103,8 @@ export default {
       return numFieldsAvailable >= numNecessaryFields
     },
     hasEnoughFacies () {
-      const numFacies = this.$store.getters.faciesTable
-        .filter(facies => !!facies.selected)
-        .length
-      const numFaciesInBackground = [ ...new Set(Object.values(this.$store.getters.truncationRule.polygons)
+      const numFacies = Object.values(this.$store.state.facies.available).length
+      const numFaciesInBackground = [ ...new Set(this.rule.backgroundPolygons
         .map(polygon => polygon.facies)
         .filter(name => !!name)
       )].length
@@ -118,12 +116,12 @@ export default {
     overlayErrors () {
       return [
         { check: this.notBayfill, errorMessage: 'Bayfill cannot have user defined overlay facies' },
-        { check: this.hasEnoughFacies, errorMessage: 'There are not enough facies has been selected for this truncation rule' },
+        { check: this.hasEnoughFacies, errorMessage: 'Too few facies has been selected for this truncation rule' },
         { check: this.hasEnoughFields, errorMessage: 'There are not enough gaussian random fields to use with overlay' },
       ]
     },
     canUseOverlay () {
-      return this.overlayErrors.every(({ check }) => !!check)
+      return this.overlayErrors.every(({ check }) => !!check) || this.rule.useOverlay
     },
     useOverlayTooltip () {
       for (const { check, errorMessage } of this.overlayErrors) {

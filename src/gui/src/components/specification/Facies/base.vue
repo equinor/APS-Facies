@@ -20,6 +20,7 @@ export default {
     value: VueTypes.oneOfType([AppTypes.id, AppTypes.ids]).isRequired,
     multiple: VueTypes.bool.def(false),
     rule: AppTypes.truncationRule,
+    disable: VueTypes.func.def(() => false),
   },
 
   computed: {
@@ -35,7 +36,7 @@ export default {
             value: facies.id,
             disabled: this.multiple
               ? this.rule.overlayPolygons.map(polygon => polygon.facies).indexOf(facies.id) >= 0
-              : false,
+              : this.disable(facies),
           }
         })
     },

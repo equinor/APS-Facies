@@ -143,8 +143,10 @@ class OverlayedTruncationRule extends TruncationRule {
   get useOverlay () { return this._useOverlay }
 
   get overlayPolygons () {
-    return Object.values(this.polygons)
-      .filter(({ overlay }) => !!overlay)
+    return this.useOverlay
+      ? Object.values(this.polygons)
+        .filter(({ overlay }) => !!overlay)
+      : []
   }
 
   get fields () {

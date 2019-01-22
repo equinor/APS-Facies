@@ -2,6 +2,7 @@
   <storable-numeric-field
     :grf-id="grfId"
     :property-type="propertyType"
+    :arrow-step="0.01"
     value-type="power"
     label="Power"
     unit=""
