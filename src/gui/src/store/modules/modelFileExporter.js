@@ -526,31 +526,31 @@ export default {
 
   actions: {
     createModelFileFromStore: ({ rootState, rootGetters }) => {
-      const doc = document.implementation.createDocument('', '', null)
-
-      const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
-      doc.appendChild(rootElem)
-
-      try {
-        addRMSProjectName(rootState, doc, rootElem)
-        addRMSWorkFlowName(rootState, doc, rootElem)
-        addGridModelName(rootState, doc, rootElem)
-        addZoneParamName(rootState, doc, rootElem)
-        addRegionParamName(rootState, doc, rootElem)
-        addResultFaciesParamName(rootState, doc, rootElem)
-        addPrintInfo(rootState, doc, rootElem)
-        addSeedFile(rootState, doc, rootElem)
-        addWriteSeeds(rootState, doc, rootElem)
-        addMainFaciesTable(rootState, doc, rootElem)
-        addZoneModels({ rootState, rootGetters }, doc, rootElem)
-        const serializer = new XMLSerializer()
-        const xmlString = serializer.serializeToString(doc)
-        return xmlString
-      } catch (error) {
-        if (error instanceof APSExportError) {
-          alert(error.name + '\n' + error.message)
+      return new Promise((resolve, reject) => {
+        const doc = document.implementation.createDocument('', '', null)
+        const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
+        doc.appendChild(rootElem)
+        try {
+          addRMSProjectName(rootState, doc, rootElem)
+          addRMSWorkFlowName(rootState, doc, rootElem)
+          addGridModelName(rootState, doc, rootElem)
+          addZoneParamName(rootState, doc, rootElem)
+          addRegionParamName(rootState, doc, rootElem)
+          addResultFaciesParamName(rootState, doc, rootElem)
+          addPrintInfo(rootState, doc, rootElem)
+          addSeedFile(rootState, doc, rootElem)
+          addWriteSeeds(rootState, doc, rootElem)
+          addMainFaciesTable(rootState, doc, rootElem)
+          addZoneModels({ rootState, rootGetters }, doc, rootElem)
+          const serializer = new XMLSerializer()
+          const xmlString = serializer.serializeToString(doc)
+          resolve(xmlString)
+        } catch (error) {
+          if (error instanceof APSExportError) {
+            reject(error)
+          }
         }
-      }
+      })
     }
   }
 }
