@@ -1090,8 +1090,9 @@ class DefineTruncationRule:
         faciesNames = truncObj.getFaciesInTruncRule()
         faciesProb = []
         nFacies = len(faciesNames)
+        faciesProb = np.zeros(nFacies, dtype=np.float32)
         for i in range(nFacies):
-            faciesProb.append(1.0 / float(nFacies))
+            faciesProb[i] = (1.0 / float(nFacies))
         truncObj.setTruncRule(faciesProb)
         faciesPolygons = truncObj.truncMapPolygons()
         faciesIndxPerPolygon = truncObj.faciesIndxPerPolygon()
@@ -1141,8 +1142,9 @@ class DefineTruncationRule:
         faciesNames = truncObj.getFaciesInTruncRule()
         faciesProb = []
         nFacies = len(faciesNames)
+        faciesProb = np.zeros(nFacies, dtype=np.float32)
         for i in range(nFacies):
-            faciesProb.append(1.0 / float(nFacies))
+            faciesProb[i] = (1.0 / float(nFacies))
         truncObj.setTruncRule(faciesProb)
         faciesPolygons = truncObj.truncMapPolygons()
         faciesIndxPerPolygon = truncObj.faciesIndxPerPolygon()
@@ -1441,6 +1443,9 @@ def run_example():
     rulesFromFile.readFile("truncation_settings.dat")
     rulesFromFile.createAllCubicPlots()
 
+    rules2 = DefineTruncationRule(truncRuleDir)
+    rules2.readFile('truncation_settings.dat')
+    rules2.createAllNonCubicXMLTemplatesWithOverlayFacies()
 
 if __name__ == '__main__':
     run_example()
