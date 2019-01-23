@@ -26,10 +26,8 @@ export default {
         // when loading a file, we must ensure that all promises in this method are resolved before calling the
         // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
         // resolved
-        for (const param of parametersDependentOnGrid) {
-          await dispatch(`parameters/${param}/fetch`, null, { root: true })
-        }
         await dispatch('zones/fetch', null, { root: true })
+        await Promise.all(parametersDependentOnGrid.map(param => dispatch(`parameters/${param}/fetch`, null, { root: true })))
         return gridModel
       } else {
         throw new Error(`Selected grid model ( ${gridModel} ) is not present in the current project.
