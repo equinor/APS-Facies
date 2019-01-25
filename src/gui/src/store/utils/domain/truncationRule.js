@@ -173,8 +173,8 @@ class OverlayedTruncationRule extends TruncationRule {
       overlay: this.overlayPolygons.length > 0
         ? this.overlayPolygons.map(polygon => {
           return {
-            over: polygon.group.map(faciesId => rootGetters['facies/nameById'](faciesId)),
-            facies: rootGetters['facies/nameById'](polygon.facies),
+            over: polygon.group.map(faciesId => rootGetters['facies/name'](faciesId)),
+            facies: rootGetters['facies/name'](polygon.facies),
             field: getFieldName(polygon.field),
             center: polygon.center,
             fraction: polygon.fraction,
@@ -216,7 +216,7 @@ class NonCubic extends OverlayedTruncationRule {
       polygons: this.backgroundPolygons
         .map(polygon => {
           const settings = this.settings[`${polygon.id}`]
-          const name = rootGetters['facies/nameById'](polygon.facies)
+          const name = rootGetters['facies/name'](polygon.facies)
           return {
             order: polygon.order,
             facies: name,

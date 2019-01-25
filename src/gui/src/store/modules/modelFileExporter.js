@@ -338,7 +338,7 @@ const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => 
 
   selectedFacies.forEach(facies => {
     // get the facies name from the referenced global facies
-    const globalFacies = rootGetters['facies/nameById'](facies.id)
+    const globalFacies = rootGetters['facies/name'](facies)
     const probFaciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: globalFacies }])
     probModelElem.append(probFaciesElem)
 
@@ -444,7 +444,7 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
     // settings
     const settingForPolygon = Object.values(truncRule.settings).find(setting => setting.hasOwnProperty('polygon') && setting.polygon === polygon.name)
     // facies Element
-    const faciesName = rootGetters['facies/nameById'](polygon.facies)
+    const faciesName = rootGetters['facies/name'](polygon.facies)
     const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
     backGroundModelElem.append(faciesElem)
     // angle element
@@ -480,11 +480,11 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
       polygon.fraction,
       [{
         name: 'name',
-        value: rootGetters['facies/nameById'](polygon.facies)
+        value: rootGetters['facies/name'](polygon.facies)
       }]
     ))
 
-    polygon.group.map(id => rootGetters['facies/nameById'](id))
+    polygon.group.map(id => rootGetters['facies/name'](id))
       .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
   })
 }

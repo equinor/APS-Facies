@@ -110,7 +110,7 @@ const processPolygons = (getters, polygons) => {
   const autoFill = true
   if (autoFill) {
     polygons = polygons.map(polygon => {
-      const name = getters['facies/nameById'](findFacies(getters, polygon.facies))
+      const name = getters['facies/name'](findFacies(getters, polygon.facies))
       return {
         ...polygon,
         facies: name || null,

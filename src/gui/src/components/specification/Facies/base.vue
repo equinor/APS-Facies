@@ -32,7 +32,7 @@ export default {
       return this.selectedFacies
         .map(facies => {
           return {
-            text: getters['facies/nameById'](facies.id),
+            text: getters['facies/name'](facies),
             value: facies.id,
             disabled: this.multiple
               ? this.rule.overlayPolygons.map(polygon => polygon.facies).indexOf(facies.id) >= 0

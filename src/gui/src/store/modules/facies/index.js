@@ -140,7 +140,7 @@ export default {
   },
 
   getters: {
-    nameById: (state, getters) => (id) => {
+    name: (state, getters) => (id) => {
       id = isUUID(id) ? id : id.id
       const facies = getters.byId(id)
       return facies.name || getters.byId(facies.facies).name
