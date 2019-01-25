@@ -13,6 +13,7 @@
         <preview-header />
         <v-card>
           <v-layout
+            v-if="!!rule"
             row
             wrap
           >
@@ -35,6 +36,8 @@
                 :value="fields"
               />
             </v-flex>
+          </v-layout>
+          <v-layout>
             <v-flex xs12>
               <cross-plots
                 :value="fields"

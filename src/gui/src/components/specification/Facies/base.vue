@@ -2,7 +2,6 @@
   <v-select
     :items="faciesOptions"
     :value="value"
-    :multiple="multiple"
     @input.capture="facies => $emit('input', facies)"
   />
 </template>
@@ -18,7 +17,6 @@ export default {
 
   props: {
     value: VueTypes.oneOfType([AppTypes.id, AppTypes.ids]).isRequired,
-    multiple: VueTypes.bool.def(false),
     rule: AppTypes.truncationRule,
     disable: VueTypes.func.def(() => false),
   },
@@ -34,9 +32,7 @@ export default {
           return {
             text: getters['facies/name'](facies),
             value: facies.id,
-            disabled: this.multiple
-              ? this.rule.overlayPolygons.map(polygon => polygon.facies).indexOf(facies.id) >= 0
-              : this.disable(facies),
+            disabled: this.disable(facies),
           }
         })
     },

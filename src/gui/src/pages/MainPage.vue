@@ -31,9 +31,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters({
-      'canSpecifyModelSettings': 'canSpecifyModelSettings',
-    }),
+    ...mapGetters([
+      'canSpecifyModelSettings',
+    ]),
     fields () {
       return Object.values(this.$store.getters.fields)
     },

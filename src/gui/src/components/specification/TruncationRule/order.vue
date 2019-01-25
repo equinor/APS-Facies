@@ -24,7 +24,9 @@ export default {
   props: {
     value: VueTypes.shape({
       order: VueTypes.integer.isRequired,
+      overlay: VueTypes.bool,
     }).loose.isRequired,
+    overlay: VueTypes.bool,
   },
 
   computed: {
@@ -33,6 +35,7 @@ export default {
     }),
     max () {
       return Object.values(this.rule.polygons)
+        .filter(polygon => polygon.overlay === this.overlay)
         .map(polygon => polygon.order)
         .reduce((max, order) => order > max ? order : max, 0)
     },
@@ -55,7 +58,7 @@ export default {
 
   methods: {
     addPolygon () {
-      return this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, order: this.value.order, overlay: this.value.overlay })
+      return this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, ...this.value })
     },
     deletePolygon () {
       return this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })

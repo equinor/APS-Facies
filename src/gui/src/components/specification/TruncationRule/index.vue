@@ -44,7 +44,6 @@
           v-if="useOverlay"
           xs12
         >
-          <h5>Overlay Facies</h5>
           <overlay-facies
             :value="rule"
           />

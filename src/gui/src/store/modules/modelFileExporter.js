@@ -134,9 +134,6 @@ const addZoneModels = ({ rootState, rootGetters }, doc, parentElement) => {
 }
 
 const addZoneModel = ({ rootState, rootGetters }, doc, parent, zoneModelsElement) => {
-  if (parent.region) {
-  } else {
-  }
   const zoneRegionAttributes = []
   zoneRegionAttributes.push({ name: 'number', value: parent.zone.code })
   if (parent.region) {
@@ -413,17 +410,10 @@ const addTruncationRuleBayFill = ({ rootState, rootGetters }, doc, parent, trunc
   // slant factors
   const baseKw = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_BAYFILL`
 
-  const SF = Object.values(truncRule.settings).find(settings => settings.name === 'SF')
-  BackGroundModelElem.append(createElement(doc, 'SF', SF.factor.value,
-    SF.factor.updatable ? [{ name: 'kw', value: baseKw + '_SF' }] : null))
-
-  const YSF = Object.values(truncRule.settings).find(settings => settings.name === 'YSF')
-  BackGroundModelElem.append(createElement(doc, 'YSF', YSF.factor.value,
-    YSF.factor.updatable ? [{ name: 'kw', value: baseKw + '_YSF' }] : null))
-
-  const SBHD = Object.values(truncRule.settings).find(settings => settings.name === 'SBHD')
-  BackGroundModelElem.append(createElement(doc, 'SBHD', SBHD.factor.value,
-    SBHD.factor.updatable ? [{ name: 'kw', value: baseKw + '_SBHD' }] : null))
+  truncRule.specification({}).forEach(setting => {
+    BackGroundModelElem.append(createElement(doc, setting.name, setting.factor.value,
+      setting.factor.updatable ? [{ name: 'kw', value: baseKw + `_${setting.name}` }] : null))
+  })
 }
 
 const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem) => {
@@ -441,17 +431,15 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
   // The background polygons
   const backGroundPolygons = Object.values(truncRule.polygons).filter(polygon => polygon.overlay === false)
   backGroundPolygons.forEach(polygon => {
-    // settings
-    const settingForPolygon = Object.values(truncRule.settings).find(setting => setting.hasOwnProperty('polygon') && setting.polygon === polygon.name)
     // facies Element
     const faciesName = rootGetters['facies/name'](polygon.facies)
     const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
     backGroundModelElem.append(faciesElem)
     // angle element
     const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${polygon.name}_ANGLE`
-    faciesElem.append(createElement(doc, 'Angle', settingForPolygon.angle.value, settingForPolygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
+    faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
     // ProbFrac element
-    faciesElem.append(createElement(doc, 'ProbFrac', settingForPolygon.fraction))
+    faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
   })
 
   const overLayModelElem = createElement(doc, 'OverLayModel')
@@ -507,8 +495,8 @@ const getAlphaNames = ({ rootState }, truncRule) => {
 const findFaciesNameForNamedPolygon = ({ rootState }, truncRule, polygonName) => {
   const polygonInRule = Object.values(truncRule.polygons).find(polygon => polygon.name === polygonName)
   const faciesInZone = Object.values(rootState.facies.available).find(facies => facies.id === polygonInRule.facies)
-  const globaFacies = Object.values(rootState.facies.global.available).find(e => e.id === faciesInZone.facies)
-  return globaFacies.name
+  const globalFacies = Object.values(rootState.facies.global.available).find(e => e.id === faciesInZone.facies)
+  return globalFacies.name
 }
 
 /**

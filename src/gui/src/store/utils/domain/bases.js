@@ -1,6 +1,6 @@
 import uuidv4 from 'uuid/v4'
 import { isInteger } from 'lodash'
-import { isEmpty } from '@/utils'
+import { hasParents, isEmpty } from '@/utils'
 import { getId } from '@/utils/typing'
 
 class BaseItem {
@@ -53,6 +53,10 @@ const ZoneRegionDependent = superclass => class extends superclass {
         ? null
         : typeof region === 'string' ? region : region.id,
     }
+  }
+
+  isChildOf ({ zone, region = null }) {
+    return hasParents(this, zone, region)
   }
 }
 

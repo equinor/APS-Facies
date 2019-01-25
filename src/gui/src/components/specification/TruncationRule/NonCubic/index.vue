@@ -34,13 +34,5 @@ export default {
   props: {
     value: VueTypes.instanceOf(NonCubic),
   },
-
-  data () {
-    return {
-    }
-  },
-
-  computed: {
-  },
 }
 </script>

@@ -4,7 +4,7 @@
     :items="polygons"
     :custom-sort="ordering"
     item-key="id"
-    class="elevation-1"
+    class="elevation-0"
     hide-actions
     @input.stop
   >
@@ -23,15 +23,11 @@
     >
       <tr>
         <td>
-          <background-facies-specification
-            :value="props.item"
-            :rule="value"
-          />
-        </td>
-        <td>
           <alpha-selection
             :value="props.item.field"
             :channel="channel(props.item.order)"
+            :rule="rule"
+            :group="props.item.group"
             hide-label
             @input="field => updateField(props.item, field)"
           />
@@ -39,14 +35,15 @@
         <td>
           <facies-specification
             :value="props.item"
-            :rule="value"
+            :rule="rule"
             :disable="facies => backgroundFacies(facies)"
             @input="val => updateFacies(props.item, val)"
           />
         </td>
-        <td>
+        <td v-if="needFraction">
           <fraction-field
             :value="props.item.fraction"
+            :disabled="!multipleFaciesSpecified(props.item)"
             @input="val => updateFraction(props.item, val)"
           />
         </td>
@@ -59,6 +56,7 @@
         <td>
           <polygon-order
             :value="props.item"
+            overlay
           />
         </td>
       </tr>
@@ -71,17 +69,16 @@ import FractionField from '@/components/selection/FractionField'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import PolygonOrder from '@/components/specification/TruncationRule/order'
 import FaciesSpecification from '@/components/specification/Facies'
-import BackgroundFaciesSpecification from '@/components/specification/Facies/background'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection'
 
 import { updateFacies } from '@/store/utils'
-import { sortByOrder } from '@/utils'
+import { hasFaciesSpecifiedForMultiplePolygons, sortByOrder } from '@/utils'
 import { AppTypes } from '@/utils/typing'
+import VueTypes from 'vue-types'
 
 export default {
   components: {
     AlphaSelection,
-    BackgroundFaciesSpecification,
     FaciesSpecification,
     PolygonOrder,
     OptionalHelpItem,
@@ -89,15 +86,14 @@ export default {
   },
 
   props: {
-    value: AppTypes.truncationRule.isRequired,
+    value: VueTypes.arrayOf(VueTypes.any).isRequired,
+    rule: AppTypes.truncationRule.isRequired,
   },
 
   computed: {
     polygons () {
       // TODO: Include 'help' messages
       return this.value
-        ? this.value.overlayPolygons
-        : []
     },
     fieldOptions () {
       return Object.values(this.$store.getters.fields)
@@ -109,16 +105,11 @@ export default {
           }
         })
     },
+    needFraction () {
+      return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons)
+    },
     headers () {
       return [
-        {
-          text: 'Background',
-          align: 'left',
-          sortable: false,
-          value: 'group',
-          class: 'text-wrap-newline',
-          help: 'Which facies this overlay polygon should cover',
-        },
         {
           text: 'GRF',
           align: 'left',
@@ -133,19 +124,24 @@ export default {
           value: 'facies',
           help: '',
         },
+        ...(this.needFraction
+          ? [{
+            text: 'Probability Fraction',
+            align: 'left',
+            sortable: false,
+            value: 'fraction',
+            help: '',
+          }]
+          : []),
         {
-          text: 'Probability Fraction',
-          align: 'left',
-          sortable: false,
-          value: 'fraction',
-          help: '',
-        },
-        {
-          text: 'Truncation Interval Center Point',
+          text: 'Center',
           align: 'left',
           sortable: false,
           value: 'center',
-          help: '',
+          help: 'Truncation Interval Center Point',
+          /* or: The overlay facies will look more continuous if the value of the center point of
+                 the truncation interval is 0 or 1 and look more fragmented if a value between 0 and 1,
+                 typically 0.5 is chosen. */
         },
         {
           text: 'Order',
@@ -160,26 +156,29 @@ export default {
 
   methods: {
     backgroundFacies (facies) {
-      const backgroundFacies = [...new Set(this.value.backgroundPolygons.map(({ facies }) => facies))]
+      const backgroundFacies = [...new Set(this.rule.backgroundPolygons.map(({ facies }) => facies))]
       return backgroundFacies.indexOf(facies.id) >= 0
     },
     ordering (...args) { return sortByOrder(...args) },
     updateField (item, fieldId) {
-      this.$store.dispatch('truncationRules/updateFields', { rule: this.value, channel: this.channel(item), selected: fieldId })
+      this.$store.dispatch('truncationRules/updateFields', { rule: this.rule, channel: this.channel(item), selected: fieldId })
     },
     updateFacies (item, faciesId) {
-      updateFacies(this.$store.dispatch, this.value, item, faciesId, false)
+      updateFacies(this.$store.dispatch, this.rule, item, faciesId, false)
     },
     updateFraction (item, val) {
-      this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.value, polygon: item, value: val })
+      this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon: item, value: val })
     },
     updateCenter (item, val) {
-      this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.value, polygon: item, value: val })
+      this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon: item, value: val })
     },
     channel (order) {
       order = order.hasOwnProperty('order') ? order.order : order
       // +1 due to order being 0-indexed, but `channel` is expected to be 1-indexed
-      return order + 1 + this.value.fields.filter(({ overlay }) => !overlay).length
+      return order + 1 + this.rule.fields.filter(({ overlay }) => !overlay).length
+    },
+    multipleFaciesSpecified ({ facies }) {
+      return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons, facies)
     },
   },
 }

@@ -17,6 +17,7 @@ import { changeFacies } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
 import global from './global'
+import groups from './groups'
 import { isUUID } from '@/utils/typing'
 
 const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changed', { id: facies.id, previewProbability: probability })
@@ -59,6 +60,7 @@ export default {
 
   modules: {
     global,
+    groups,
   },
 
   actions: {
@@ -143,10 +145,19 @@ export default {
     name: (state, getters) => (id) => {
       id = isUUID(id) ? id : id.id
       const facies = getters.byId(id)
+      if (facies instanceof Array) {
+        return facies.map(id => getters.name(id))
+      }
       return facies.name || getters.byId(facies.facies).name
     },
-    byId: (state) => (id) => {
-      return state.available[`${id}`] || state.global.available[`${id}`]
+    byId: (state, getters) => (id) => {
+      const facies = state.available[`${id}`] || state.global.available[`${id}`]
+      if (!facies) {
+        const group = state.groups.available[`${id}`]
+        return group && group.facies.map(getters.byId)
+      } else {
+        return facies
+      }
     },
     byName: (state) => (name) => {
       return Object.values(state.available).find(facies => facies.name === name)
