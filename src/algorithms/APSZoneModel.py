@@ -5,7 +5,7 @@ from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
-
+from collections import OrderedDict
 from src.algorithms.APSFaciesProb import APSFaciesProb
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
@@ -473,13 +473,9 @@ class APSZoneModel:
     def updateGaussFieldTrendParam(self, gfName, trendModelObj, relStdDev):
         self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendModelObj, relStdDev)
 
-    def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined):
+    def applyTruncations(self, probDefined, alpha_fields, faciesReal, nDefinedCells, cellIndexDefined):
         ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
             The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
-        # GFAlphaList has items =[name,valueArray]
-        # Use NAME and VAL as index names
-        NAME = 0
-        VAL = 1
 
         debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
@@ -492,7 +488,7 @@ class APSZoneModel:
             )
 
         useConstTruncParam = self.truncation_rule.useConstTruncModelParam()
-        nGaussFields = len(GFAlphaList)
+        nGaussFields = len(alpha_fields)
         faciesProb = np.zeros(nFacies, np.float32)
         volFrac = np.zeros(nFacies, np.float32)
         if debug_level >= Debug.VERBOSE:
@@ -511,10 +507,7 @@ class APSZoneModel:
                 print(repr(faciesProb))
 
             alphaList = []
-            for gaussFieldIndx in range(nGaussFields):
-                item = GFAlphaList[gaussFieldIndx]
-                gfName = item[NAME]
-                alphaDataArray = item[VAL]
+            for gfName, alphaDataArray in alpha_fields.items():
                 alphaList.append(alphaDataArray)
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
@@ -543,7 +536,12 @@ class APSZoneModel:
                 alphaCoord = []
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
-                    alphaCoord.append(alphaDataArray[cellIndx])
+                    if alphaDataArray is not None:
+                        alphaValue = alphaDataArray[cellIndx]
+                    else:
+                        # This value is not used, but the lenght of alphaCoord must be equal to nGaussFields
+                        alphaValue = -1.0
+                    alphaCoord.append(alphaValue)
 
                 # Calculate facies realization by applying truncation rules
                 fCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alphaCoord)
@@ -559,13 +557,11 @@ class APSZoneModel:
                 print(text)
 
             alphaList = []
-            for gaussFieldIndx in range(nGaussFields):
-                item = GFAlphaList[gaussFieldIndx]
-                gfName = item[NAME]
-                alphaDataArray = item[VAL]
+            for gfName, alphaDataArray in alpha_fields.items():
+                alphaList.append(alphaDataArray)
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
-                alphaList.append(alphaDataArray)
+
 
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE:
@@ -607,7 +603,12 @@ class APSZoneModel:
                 # The sequence is defined by the sequence they are specified in the model file.
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
-                    alphaCoord.append(alphaDataArray[cellIndx])
+                    if alphaDataArray is not None:
+                        alphaValue = alphaDataArray[cellIndx]
+                    else:
+                        # This value is not used, but the lenght of alphaCoord must be equal to nGaussFields
+                        alphaValue = -1.0
+                    alphaCoord.append(alphaValue)
                 # Calculate facies realization by applying truncation rules
                 fCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alphaCoord)
                 faciesReal[cellIndx] = fCode

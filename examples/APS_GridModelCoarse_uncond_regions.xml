@@ -26,7 +26,7 @@
   <ZoneParamName> Zone </ZoneParamName>
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal_unconditioned_merged </ResultFaciesParamName>
-  <PrintInfo> 2 </PrintInfo>
+  <PrintInfo> 3 </PrintInfo>
   <SeedFile> seed.dat </SeedFile>
   <WriteSeeds> yes </WriteSeeds>
   <MainFaciesTable>
