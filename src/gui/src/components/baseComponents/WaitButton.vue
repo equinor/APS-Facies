@@ -2,9 +2,13 @@
   <v-btn
     :disabled="waiting || disabled"
     :dark="dark"
+    :flat="flat"
     :color="color"
     @click="e => $emit('click', e)"
   >
+    <slot
+      v-if="!title"
+    />
     <span v-if="!waiting">
       {{ title }}
     </span>
@@ -22,11 +26,12 @@ export default {
   name: 'WaitBtn',
 
   props: {
-    title: VueTypes.string.isRequired,
+    title: VueTypes.string,
     waiting: VueTypes.bool.def(false),
     disabled: VueTypes.bool.def(false),
+    flat: VueTypes.bool.def(false),
     dark: VueTypes.bool.def(false),
-    color: AppTypes.color,
+    color: AppTypes.color.def('primary'),
   },
 }
 </script>
