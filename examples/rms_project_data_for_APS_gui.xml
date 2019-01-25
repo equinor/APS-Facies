@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <RMS_grid_model_data>
-  <GridModel name="GridModel2">
+  <GridModel name="GridModelCoarse">
     <ZoneName end="45" nLayers="46" number="1" start="0"> top_model_top_upper_Neslen </ZoneName>
     <ZoneName end="136" nLayers="91" number="2" start="46"> top_upper_Neslen_top_lower_Neslen </ZoneName>
     <ZoneName end="211" nLayers="75" number="3" start="137"> top_lower_Neslen_top_Buck_Tounge </ZoneName>
