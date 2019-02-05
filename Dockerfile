@@ -1,11 +1,11 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.2.8" \
+LABEL version="3.3.0" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
 
 # Versions
-ENV RMS_VERSION=11.0.0 \
+ENV RMS_VERSION=11.0.1 \
     PYTHON_VERSION=3.6 \
     TCL_VERSION=8.6 \
     INTEL_MKL_VERSION=2018.3.222 \
@@ -23,7 +23,7 @@ ENV NODE_ARCH='x64' \
     CA_FILE="/etc/ssl/certs/ca-bundle.crt"
 
 # Prefixes
-ENV RMS_PREFIX="/prog/roxar/site/RMS${RMS_VERSION}/rms/versions/${RMS_VERSION}" \
+ENV RMS_PREFIX="/prog/roxar/rms/versions/${RMS_VERSION}" \
     DEPENDENCIES_PREFIX="/dependencies" \
     INTEL_PREFIX="${SOURCE_DIR}/${INTEL_MKL}" \
     INTEL_MKL_PREFIX="/opt/intel" \
@@ -37,10 +37,14 @@ ENV PYTHON_LIB_PREFIX=$RMS_LIB_PREFIX/python$PYTHON_VERSION \
     MKL_ROOT="${INTEL_MKL_PREFIX}/mkl" \
     INTEL_CONFIGURATION="${INTEL_PREFIX}/config.txt"
 
+# RMS License
+ENV LM_LICENSE_FILE="/prog/roxar/licensing/geomaticLM.lic"
+
 # Paths for executables, and libraries
 
 ENV PATH="\
 /root/.local/bin:\
+/global/distbin:\
 ${NODE_PREFIX}/bin:\
 ${ROXAR_RMS_ROOT}/bin:\
 ${RMS_BIN_PREFIX}:\
@@ -63,6 +67,7 @@ ENV LIBRARY_PATH="${LD_LIBRARY_PATH}" \
 
 # Variables for programs
 ENV PYTHON="$RMS_BIN_PREFIX/python" \
+    RMS="rms -v ${RMS_VERSION}"\
     NODE="$NODE_PREFIX/bin/node" \
     NPM="$NODE_PREFIX/bin/npm" \
     NPX="$NODE_PREFIX/bin/npx" \
@@ -72,8 +77,7 @@ ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
     SSL_CERT_FILE="${CA_FILE}"
 
 # Add external resources
-ADD .rms/rms-${RMS_VERSION}.tar.gz /
-ADD .rms/auxillary.tar.gz /
+ADD .rms/bundle.rms-${RMS_VERSION}.tar.gz /
 ADD .rms/APS-workflows.rms11.tar.gz /
 
 # Misc. software
@@ -108,6 +112,7 @@ RUN yum update -y \
     libXt \
     libXtst \
     libXScrnSaver \
+    glibc.i686 \
     fontconfig \
     alsa-lib \
     libgomp \
@@ -210,7 +215,7 @@ RUN yum update -y \
     # Install pipenv
  && $PIP install --user pipenv \
     # FIXME: Backup distutils/__init__.py, as the compilation of nrlib changes it for some reason
-  && cp "/prog/roxar/site/RMS${RMS_VERSION}/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" /distutils.py.bak \
+  && cp "/prog/roxar/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" /distutils.py.bak \
     # Install NRlib to dependencies collection
  && cd ${BUILD_DIR}/nrlib-${NRLIB_VERSION} \
  && MKLROOT=/opt/intel/mkl \
@@ -219,7 +224,7 @@ RUN yum update -y \
          tests \
  && mv nrlib.*.so $DEPENDENCIES_PREFIX \
  # FIXME: Restore distutils from backup
- && cp -f /distutils.py.bak "/prog/roxar/site/RMS${RMS_VERSION}/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" \
+ && cp -f /distutils.py.bak "/prog/roxar/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" \
     ##
     # Final clean-up
  && rm -rf $SOURCE_DIR \

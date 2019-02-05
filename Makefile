@@ -492,9 +492,7 @@ get-rms-repo:
 rms-bundle: get-rms-repo
 	cd $(RMS_DIR) && \
 	CODE_DIR=$(RMS_DIR) \
-	make -f $(RMS_DIR)/Makefile rms-bundle \
-	                            auxillary-bundle \
-	                            project-bundle
+	make -f $(RMS_DIR)/Makefile bundle
 
 
 print-%  : ; @echo $($*)
