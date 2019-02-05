@@ -186,6 +186,17 @@ const makeRule = ({ type, ...rest }, _isParsed = false) => {
   return new typeMapping[`${type}`]({ type, _isParsed, ...rest })
 }
 
+function compareTemplate (rootGetters, a, b) {
+  const _minFacies = item => minFacies(item, rootGetters)
+  if (_minFacies(a) > _minFacies(b)) {
+    return +1
+  } else if (_minFacies(a) < _minFacies(b)) {
+    return -1
+  } else {
+    return a.name.localeCompare(b.name)
+  }
+}
+
 export default {
   namespaced: true,
 
@@ -567,10 +578,9 @@ export default {
         })
     },
     ruleNames (state, getters, rootState, rootGetters) {
-      const _minFacies = item => minFacies(item, rootGetters)
       return Object.values(state.templates.available)
         .filter(template => template.type === state.preset.type)
-        .sort((a, b) => _minFacies(a) > _minFacies(b) ? +1 : _minFacies(a) < _minFacies(b) ? -1 : 0)
+        .sort((a, b) => compareTemplate(rootGetters, a, b))
         .map(template => {
           return {
             text: template.name,
