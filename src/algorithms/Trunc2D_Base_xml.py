@@ -7,7 +7,7 @@ import numpy as np
 
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import getFloatCommand, getKeyword
-
+from src.algorithms.Memoization import  RoundOffConstant
 """
 -----------------------------------------------------------------------
 class Trunc2D_Base
@@ -194,10 +194,23 @@ class Trunc2D_Base:
         # A 2D list with background facies indices for a given overlay facies group
         self._backgroundFaciesInGroup = []
 
+        # Truncation map polygons calculated by sub classes. The polygons subdivide the unit square into non-overlapping areas.
+        # They are used in the algorithm that look up which facies that is associated with a point in the truncation map/cube.
+        # They are also used for the purpose to plot/visualize the truncation map.
+        self._faciesPolygons = []
 
+        # Counter for how many lookup of facies in truncation maps had to be modified by slightly shifting the alpha coordinates.
+        # This happens if the alpha coordinate for the lookup point is located exactly on the boundary between two polygons and the algorithm
+        # is not able to define in which polygon the point is located.
+        self._nCountShiftBoundary = 0
+
+        # The keyresolution is a resolution of how to round off facies probability. 
+        # The facies probability rounded off is used as key to classify which grid cells have the same facies probability 
+        # and can be treated simultaneously when looking up facies in the truncation cubes.
+        self._keyResolution = 100
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 debug_level=Debug.OFF, modelFileName=None, nGaussFieldsInBackGroundModel=2):
+                 debug_level=Debug.OFF, modelFileName=None, nGaussFieldsInBackGroundModel=2, keyResolution=100):
         """
         Base class constructor.
         """
@@ -206,6 +219,7 @@ class Trunc2D_Base:
         self._setEmpty()
         self._className = self.__class__.__name__
         self._debug_level = debug_level
+        self._keyResolution = keyResolution
         self._nGaussFieldsInBackGroundModel = nGaussFieldsInBackGroundModel
 
         if trRuleXML is not None:
@@ -256,7 +270,7 @@ class Trunc2D_Base:
         # Reference to facies in zone model using this truncation rule
         if faciesInZone is not None:
             self._faciesInZone = copy.copy(faciesInZone)
-            self._faciesIsDetermined = np.zeros(self.num_facies_in_zone, int)
+            self._faciesIsDetermined = np.zeros(self.num_facies_in_zone, dtype=int)
         else:
             raise ValueError(
                 'Error in ' + self._className + '\n'
@@ -322,11 +336,8 @@ class Trunc2D_Base:
             groupItem = overlayGroups[groupIndx]
             alphaList = groupItem[ALPHA_LIST_INDX]
             nAlpha = len(alphaList)
-            # print(repr(alphaList))
             for j in range(nAlpha):
                 alphaItem = alphaList[j]
-                # print('alphaItem:')
-                # print(repr(alphaItem))
                 alphaFieldName = alphaItem[ALPHA_INDX]
                 overlayFaciesName = alphaItem[OVERLAY_INDX]
                 probFrac = alphaItem[PROBFRAC_INDX]
@@ -334,29 +345,19 @@ class Trunc2D_Base:
 
                 alphaIndx = self.__addAlpha(alphaFieldName, createErrorIfExist=False)
                 alphaFieldIndxListThisGroup.append(alphaIndx)
-                # print('alphaFieldName: ' + alphaFieldName + ' alphaIndx: ' + str(alphaIndx))
 
                 nFaciesInTruncRule, indx, fIndx, isNew = self._addFaciesToTruncRule(overlayFaciesName)
                 if isNew:
                     self._orderIndex.append(fIndx)
 
                 overlayFaciesIndxListThisGroup.append(indx)
-                # print('overlayFaciesName: ' + overlayFaciesName + ' indx for facies in truncation rule: ' + str(indx))
-
                 probFracListThisGroup.append(probFrac)
-                # print('probFrac: ' + str(probFrac))
-
                 centerTruncIntervalThisGroup.append(centerInterval)
-                # print('centerOfInterval: ' + str(centerInterval))
 
             bgFaciesListForGroup = groupItem[BACKGROUND_LIST_INDX]
             for bgFaciesName in bgFaciesListForGroup:
                 indx = self.getFaciesInTruncRuleIndex(bgFaciesName)
                 backGroundFaciesIndxListThisGroup.append(indx)
-            # print('background facies:')
-            # print(repr(bgFaciesListForGroup))
-            # print('background facies indx:')
-            # print(repr(backGroundFaciesIndxListThisGroup))
 
             self._alphaInGroup.append(alphaFieldIndxListThisGroup)
             self._overlayFaciesIndxInGroup.append(overlayFaciesIndxListThisGroup)
@@ -999,13 +1000,6 @@ Background facies:
             return self._faciesInZone.index(facies_name)
         except IndexError:
             return -1
-        # indx = -1
-        # for i in range(self.num_facies_in_zone):
-        #     fN = self._faciesInZone[i]
-        #     if fN == facies_name:
-        #         indx = i
-        #         break
-        # return indx
 
     def getNGaussFieldsInModel(self):
         # Number of gauss fields used in the truncation rule (dimension of alpha space)
@@ -1243,7 +1237,11 @@ Background facies:
         """
 
         # Lookup which overlay group the background facies faciesInTruncRule[indx] belongs to if any.
-        groupIndx = self._groupIndxForBackGroundFaciesIndx[indx]
+        if len(self._groupIndxForBackGroundFaciesIndx) == 0:
+            groupIndx = -1
+        else:
+            groupIndx = self._groupIndxForBackGroundFaciesIndx[indx]
+
         if groupIndx >= 0:
             # The background facies is defined by the input variable 'indx' and the facies name is faciesInTruncRule[
             # indx]. This background facies belongs to the group with index groupIndx. The overlay facies in this
@@ -1267,6 +1265,78 @@ Background facies:
         fIndx = self._orderIndex[indx]
         faciesCode = self._faciesCode[fIndx]
         return faciesCode, fIndx
+
+    def _truncateOverlayFacies_vectorized(self,bg_index_in_trunc_rule, alpha_coord_vectors):
+        """
+        Is used to truncate and find overlay facies. This function will be used in truncation calculations
+        in derived classes when overlay facies is defined.
+        The algorithm for overlay facies follows these rules:
+            1. The background facies defined by the first two alpha dimensions (alpha1, alpha2) is grouped
+               into one or more groups where each group has no background facies in common with other groups.
+               There can be background facies that does not belong to any group. These are therefore never overlayed
+               by any other facies.
+            2. Within each group, there can be one or more overlay facies. Each overlay facies is defined by
+               truncation of its own gaussian field (a dimension in the alpha space). Hence each overlay facies can
+               have its own geometry since it is only one overlay facies defined per gaussian field.
+               This can be extended later such that several overlay facies is defined by several threshold values
+               for the same gaussian field.
+               NOTE: There is a requirement that no two alpha variables (gauss fields) are equal within a group.
+               However it is allowed to use the same alpha variable (gauss field) in different groups since
+               different groups are independent of each other.
+            3. The interval of the alpha parameter (the gaussian field) for an overlay facies is determined by
+               an interval center and a width of the interval. In this way, the truncation interval does not have to be
+               at one or the other end of the interval between 0 and 1 for the alpha coordinate corresponding
+               to the gaussian field-
+            4. The order of the Alpha fields define the truncation rule for overlay facies.
+               The overlay facies specified first is independent of the other overlay facies in a given location.
+               The second one depends on the first one, the third on both the first and second and so on.
+            5. It is possible to define the same facies name for several different alpha fields. This means that the
+               probability for the overlay facies is split into fractions associated with each alpha fields. This makes
+               it possible to use multiple geometries (due to multiple alpha fields) for the same overlay facies.
+               Note that each specification of overlay facies define a multidimensional polygon in the multidimensional
+               truncation cube. This means that the same overlay facies is defined by multiple polygons similar to the
+               functionality that is defined for truncation rule of background facies defined by (alpha1, alpha2).
+            6. An ovelay facies can be specified in multiple groups, but with probability split into fractions
+               such that the sum is 1.0 over all occurrences of the overlay facies in the multidimensional truncation cube.
+        """
+        order_index = np.asarray(self._orderIndex)
+        facies_codes = np.asarray(self._faciesCode)
+        index_vector = bg_index_in_trunc_rule
+        num_index_values = index_vector.max() + 1
+        group_index_for_bg_facies_index = np.asarray(self._groupIndxForBackGroundFaciesIndx)
+        groupIndx_vector = group_index_for_bg_facies_index[index_vector]
+        for m in range(num_index_values):
+            # Lookup which overlay group the background facies faciesInTruncRule[indx] belongs to if any.
+
+            groupIndx = self._groupIndxForBackGroundFaciesIndx[m]
+            if groupIndx >= 0:
+                index_selected = (index_vector == m)
+                num_selected = index_selected.sum()
+                # The background facies is defined by the input variable 'indx' and the facies name is
+                # faciesInTruncRule[indx]. This background facies belongs to the group with index groupIndx.
+                # The overlay facies in this group may overprint the background facies.
+                # The sequence of overlay facies is determined by the sequence
+                #  of alpha fields. So the sequence of alpha fields defined by the alphaInGroup and the corresponding
+                # sequence of facies define the internal priority of which overlay facies is truncated or not by the
+                # other overlay facies in this group. Note that overlay facies from different groups are independent of
+                # each other. This code can be extended to have multiple overlay facies defined by the same alpha field,
+                # by calculating threshold values for the alpha value for each facies, but so far only one overlay facies
+                # is defined for each alpha field.
+                set_overlay_facies_index = np.zeros(len(index_vector), dtype=int)
+                nAlpha = len(self._alphaInGroup[groupIndx])
+                for i in range(nAlpha):
+                    alphaIndx = self._alphaInGroup[groupIndx][i]
+                    alphaValue = alpha_coord_vectors[:,alphaIndx]
+
+                    # Check if value is within the interval which define the overlay facies.
+                    # Note that the loop over all alpha fields define the sequence in which the overlay facies is defined
+                    inside_truncation_interval = (index_selected & (alphaValue >  self._lowAlphaInGroup[groupIndx][i]) & (alphaValue <= self._highAlphaInGroup[groupIndx][i]) )
+                    set_overlay_facies_index = ((set_overlay_facies_index == False) &  inside_truncation_interval)
+                    index_vector[set_overlay_facies_index] = self._overlayFaciesIndxInGroup[groupIndx][i]
+
+        fIndx_vector = order_index[index_vector]
+        faciesCode_vector = facies_codes[fIndx_vector]
+        return faciesCode_vector, fIndx_vector
 
     def _XMLAddElement(self, parent):
         """
@@ -1318,32 +1388,23 @@ Background facies:
 
 
     @staticmethod
-    def _makeKey(faciesProb, keyResolution):
-        '''Round off the input values faciesProb to nearest value defined by i/keyResolution for i=0,1,2,.., keyResolution'''
-
-        # Numpy vector operations below are equivalent
-        # to the code:
-        #        keyList = []
-        #        key = None
-        #        for p in faciesProb:
-        #            keyList.append(int(keyResolution * p + 0.5) / keyResolution)
-        dValue = 1.0 / keyResolution
-        pNewInt = faciesProb * keyResolution + 0.5
-        faciesProbNew = pNewInt.astype(int)
-        faciesProbNew = faciesProbNew * dValue
-        key = tuple(faciesProbNew)
+    def _makeKey(faciesProbRoundOff):
+        '''Use roundoff of facies probability as key in dictionary. Make a tuple from the facies probability array. '''
+        key = tuple(faciesProbRoundOff)
         return key
 
-    @staticmethod
-    def _makeRoundOfFaciesProb(faciesProb, resolution):
+    def _makeRoundOffFaciesProb(self, faciesProb):
         '''Calculate round off of facies probabilities and adjusted
            so that the round off values also are close to normalised
            Resolution is set to 100 if input is not positive. The case that memoization is turned off
            corresponds to input resolution = 0 and in this case 100 is always used.
         '''
-        if resolution <= 0:
-            # The value used when memoization is not used
+        if self._keyResolution <= 0:
+            # A value of 0 or negative indicates that memoization is turned off. 
+            # Anyway the probabilities will be rounded off to nearest 1/100.
             resolution = 100
+        else:
+            resolution = self._keyResolution
 
         dValue = 1.0/resolution
         pNew = (faciesProb  * resolution + 0.5)
@@ -1352,22 +1413,20 @@ Background facies:
         sumProb = faciesProbNew.sum()
         maxProb = faciesProbNew.max()
         indxMax = faciesProbNew.argmax()
-        if sumProb > (0.9999 + dValue):
+        if sumProb > (RoundOffConstant.low + dValue):
             faciesProbNew[indxMax] -= dValue
             sumProb -= dValue
-            if sumProb > (0.9999 + dValue):
+            if sumProb > (RoundOffConstant.low + dValue):
                 faciesProbNew[indxMax] -= dValue
                 sumProb -= dValue
-        elif sumProb < (1.0001 - dValue):
+        elif sumProb < (RoundOffConstant.high - dValue):
             faciesProbNew[indxMax] += dValue
             sumProb += dValue
-            if sumProb < (1.0001 - dValue):
+            if sumProb < (RoundOffConstant.high - dValue):
                 faciesProbNew[indxMax] += dValue
                 sumProb += dValue
         return faciesProbNew
 
-    def defineFaciesByTruncRule(self, alphaCoord):
-        raise NotImplementedError
 
     def getGaussFieldsInTruncationRule(self):
         # Return list of the gauss field names actually used in the truncation rule
@@ -1412,9 +1471,243 @@ Background facies:
                     # from the point pt
                     num_intersections_found += 1
 
-        if (num_intersections_found // 2) * 2 != num_intersections_found:
+        if num_intersections_found % 2 != 0:
             # Point pt is inside the closed polygon
             return True
         else:
             # Point pt is outside the closed polygon
             return False
+
+
+    @staticmethod
+    def _isInsidePolygon_vectorized(polygon, x_coordinates, y_coordinates, poly_number):
+        """ Take as input a polygon and x and y vectors of the coordinates to many points
+            and return a vector with True/False whether the points are inside or outside the polygon.
+        """
+        # Calculate intersection between a straight line through the input point pt and the closed polygon
+        # in one direction from the point. If the number of intersections are odd number (1,3,5,..),
+        # the point is inside, if the number of intersections are even (0,2,4,..) the point is outside.
+        n = len(polygon)
+        p = polygon[0]
+        x1 = p[0]
+        y1 = p[1]
+        num_intersections_found = np.zeros(len(x_coordinates), dtype=int)
+        polygon_numbers = np.ones(len(x_coordinates), dtype=int) * (-1)
+        for i in range(1, n):
+            x0 = x1
+            y0 = y1
+            p = polygon[i]
+            x1 = p[0]
+            y1 = p[1]
+            vyp = y1 - y0
+            vxp = x1 - x0
+            if vyp != 0.0:
+                s = (y_coordinates - y0) / vyp
+                x = s * vxp + x0
+                t = x - x_coordinates
+                intersections = ((s >= 0.0) & (s <= 1.0) & (t > 0))
+                # intersection between the line y = pt[1] and the polygon line
+                # between the points polygon[i-1] and polygon[i] in one direction
+                # from the point pt
+                num_intersections_found[intersections] += 1
+
+        # Value of check is 0 if number of intersections is even which means outside polygon
+        # and the value is  not equal to 0 if number of intersections is uneven which means inside polygon
+        check = num_intersections_found % 2
+        polygon_numbers[check != 0] = poly_number
+        return  polygon_numbers
+
+    def getOrderIndex(self):
+        return self._orderIndex
+
+    def defineFaciesByTruncRule(self, alphaCoord):
+        """
+        Description: Apply the truncation rule to find facies.
+        """
+        x = alphaCoord[self._alphaIndxList[0]]
+        y = alphaCoord[self._alphaIndxList[1]]
+        # Check if the facies is deterministic (100% probability)
+        for fIndx in range(len(self._faciesInZone)):
+            if self._faciesIsDetermined[fIndx] == 1:
+                faciesCode = self._faciesCode[fIndx]
+                return faciesCode, fIndx
+
+        # Input is facies polygons for truncation rules and two values between 0 and 1
+        # Check in which polygon the point is located and thereby the facies
+        inside = False
+        faciesCode = -999
+        fIndx = -999
+        for i in range(self.num_polygons):
+            polygon = self._faciesPolygons[i]
+            inside = self._isInsidePolygon(polygon, x, y)
+            if not inside:
+                continue
+            else:
+                if self._className == 'Trunc3D_bayfill':
+                    indx = self.facies_index_in_truncation_rule_for_polygon(i)
+                    z = alphaCoord[self._alphaIndxList[2]]
+                    useZ = self.getUseZ()
+                    z_truncation_value = self.getZTruncationValue()
+                    if useZ:
+                        if indx == 3:
+                            if z < z_truncation_value:
+                                indx = 2
+                    # For bayfill rule this function only calculates facies code and fIndx given indx
+                    faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
+                    break
+
+                else:
+                    indx = self.facies_index_in_truncation_rule_for_polygon(i)
+                    # Check truncations for overlay facies (call function from base class)
+                    faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
+                    break
+
+        if not inside:
+            # Problem to identify which polygon in truncation map the point is within.
+            # Try once more but now by minor shift of the input point.
+
+            # Count the number of times in total for all cells this problem appears.
+            self._nCountShiftBoundary += 1
+
+            # Shift the point slightly and check again
+            xNew = x + RoundOffConstant.shift_tolerance
+            if xNew >= 1.0:
+                xNew = x - RoundOffConstant.shift_tolerance
+            yNew = y + RoundOffConstant.shift_tolerance
+            if yNew >= 1.0:
+                yNew = y - RoundOffConstant.shift_tolerance
+
+            for i in range(self.num_polygons):
+                polygon = self._faciesPolygons[i]
+                inside = self._isInsidePolygon(polygon, xNew, yNew)
+                if not inside:
+                    continue
+                else:
+                    if self._className == 'Trunc3D_bayfill':
+                        indx = self.facies_index_in_truncation_rule_for_polygon(i)
+                        z = alphaCoord[self._alphaIndxList[2]]
+                        useZ = self.getUseZ()
+                        z_truncation_value = self.getZTruncationValue()
+                        if useZ:
+                            if indx == 3:
+                                if z < z_truncation_value:
+                                    indx = 2
+                        # For bayfill rule this function only calculates facies code and fIndx given indx
+                        faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
+                        break
+                    else:
+                        indx = self.facies_index_in_truncation_rule_for_polygon(i)
+                        # Check truncations for overlay facies (call function from base class)
+                        faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
+                        break
+
+            if not inside:
+                print('Not inside any polygons, x,y: {} {}'.format(x,y))
+                for i in range(self.num_polygons):
+                    polygon = self._faciesPolygons[i]
+                    print('poly number {}'.format(i))
+                    for j in range(len(polygon)):
+                        print('point ({}, {})'.format(polygon[j][0], polygon[j][1]))
+
+            assert inside is True
+
+        return faciesCode, fIndx
+
+    def defineFaciesByTruncRule_vectorized(self, alpha_coord_vectors):
+        """
+        Description: Apply the truncation rule to find facies.
+        """
+        # Check if the facies is deterministic (100% probability)
+        for fIndx in range(len(self._faciesInZone)):
+            if self._faciesIsDetermined[fIndx] == 1:
+                facies_code = self._faciesCode[fIndx]
+                fIndx_vector = np.ones(len(alpha_coord_vectors[:,self._alphaIndxList[0]]), dtype=int) * fIndx
+                faciesCode_vector = np.ones(len(alpha_coord_vectors[:,self._alphaIndxList[0]]), dtype=int) * facies_code
+                return faciesCode_vector, fIndx_vector
+
+        x_coordinates = alpha_coord_vectors[:,self._alphaIndxList[0]]
+        y_coordinates = alpha_coord_vectors[:,self._alphaIndxList[1]]
+        polygon_number_all_vector = np.ones(len(x_coordinates), dtype=int) * (-1)
+        # Input is facies polygons for truncation rules and coordinates in alpha space for
+        # for a set of points saved in vectors of length equal to the set of points.
+        # Check in which polygon the points are located and thereby the facies
+        faciesCode_vector  = np.ones(len(x_coordinates), dtype=int) * (-1)
+        for poly_number in range(self.num_polygons):
+            polygon = self._faciesPolygons[poly_number]
+            selected = (polygon_number_all_vector == -1)
+            x_coordinates_selected = x_coordinates[selected]
+            y_coordinates_selected = y_coordinates[selected]
+
+            # Assign polygon number to those points that are inside the current polygon
+            # All other points in the selection will still be unassigned and have value -1.
+            polygon_number_selected = self._isInsidePolygon_vectorized(polygon,
+                                                                       x_coordinates_selected,
+                                                                       y_coordinates_selected, poly_number)
+
+            # The array with all points are updated for the selected points that are not previously assigned
+            polygon_number_all_vector[selected] = polygon_number_selected
+
+        if polygon_number_all_vector.min() == -1:
+            selected = (polygon_number_all_vector == -1)
+            # There are still some points which is not assigned to any polygon for numerical reasons
+            # Shift slightly the points which is not assigned to any polygon and re-calculate
+            for poly_number in range(self.num_polygons):
+                polygon = self._faciesPolygons[poly_number]
+                selected = (polygon_number_all_vector == -1)
+                # Shift the point slightly and check again
+                if polygon_number_all_vector.min() == -1:
+                    x_coordinates_selected = x_coordinates[selected] + RoundOffConstant.shift_tolerance
+                    x_coordinates_selected[x_coordinates_selected >= 1.0] = x_coordinates_selected[x_coordinates_selected >= 1.0] - 2.0*RoundOffConstant.shift_tolerance
+                    y_coordinates_selected = y_coordinates[selected] + RoundOffConstant.shift_tolerance
+                    y_coordinates_selected[y_coordinates_selected >= 1.0] = y_coordinates_selected[y_coordinates_selected >= 1.0] - 2.0*RoundOffConstant.shift_tolerance
+                    polygon_number_selected = self._isInsidePolygon_vectorized(polygon,
+                                                                               x_coordinates_selected,
+                                                                               y_coordinates_selected, poly_number)
+                    polygon_number_all_vector[selected] = polygon_number_selected
+
+            selected = (polygon_number_all_vector == -1)
+            num_points_not_in_polygons = len(polygon_number_all_vector[selected])
+            if num_points_not_in_polygons > 0:
+                raise ValueError('Internal error: Number of points with alpha coordinates outside unit square is: {}'.format(num_points_not_in_polygons))
+
+        # Get background facies index and background facies for each point
+        assert polygon_number_all_vector.min() >= 0
+        bg_index_in_trunc_rule = self.get_background_index_in_truncaction_rule()
+
+        # This vector contains for each point the index in the list of facies in truncation rule table self._faciesInTruncRule
+        # It means that self._faciesInTruncRule[index] is the name of the facies used in the truncation rule. 
+        bg_index_vector = bg_index_in_trunc_rule[polygon_number_all_vector]
+        if self._className == 'Trunc3D_bayfill':
+            # Special case for handling of the alpha3 coordinate to determine facies
+            z_coordinates = alpha_coord_vectors[:,self._alphaIndxList[2]]
+            useZ = self.getUseZ()
+            z_truncation_value = self.getZTruncationValue()
+            if useZ:
+                selected = (bg_index_vector == 3) & (z_coordinates <  z_truncation_value)
+                bg_index_vector[selected] = 2
+            order_index = np.asarray(self._orderIndex)
+            facies_codes = np.asarray(self._faciesCode)
+            fIndx_vector = order_index[bg_index_vector]
+            faciesCode_vector = facies_codes[fIndx_vector]
+            return faciesCode_vector, fIndx_vector
+        else:
+            # The overlay facies is determined for the other truncation algorithms
+            if self._nGroups == 0:
+                # No overlay facies
+                order_index = np.asarray(self._orderIndex)
+                facies_codes = np.asarray(self._faciesCode)
+                fIndx_vector = order_index[bg_index_vector]
+                faciesCode_vector = facies_codes[fIndx_vector]
+                return faciesCode_vector, fIndx_vector
+            else:
+                # Calculate facies for the case that overlay facies is possible
+                faciesCode_vector, fIndx_vector = self._truncateOverlayFacies_vectorized(bg_index_vector, alpha_coord_vectors)
+                return faciesCode_vector, fIndx_vector
+
+    def facies_index_in_truncation_rule_for_polygon(self, polygon_number):
+        # Is only implemented in sub classes
+        raise NotImplementedError
+
+    def get_background_index_in_truncaction_rule(self):
+        # Is only implemented in sub classed
+        raise NotImplementedError

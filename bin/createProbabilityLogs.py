@@ -108,7 +108,7 @@ from src.utils.constants.simple import Debug
 
 
 def run(roxar=None, project=None, **kwargs):
-    model_file_name = get_specification_file(**kwargs)
+    model_file_name = get_specification_file(_type=SpecificationType.PROBABILITY_LOG, **kwargs)
     debug_level = get_debug_level(**kwargs)
     _file = read_model_file(model_file_name)
     assign_binary_probabilities = not _file.use_conditioned_probabilities

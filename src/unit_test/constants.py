@@ -16,6 +16,7 @@ OUTPUT_MODEL_FILE_NAME2 = 'test_Trunc_output2.xml'
 OUT_POLY_FILE1 = 'test_Trunc_polygons1.dat'
 OUT_POLY_FILE2 = 'test_Trunc_polygons2.dat'
 FACIES_OUTPUT_FILE = 'facies2D.dat'
+FACIES_OUTPUT_FILE_VECTORIZED = 'facies2D_vectorized.dat'
 USE_CONST_TRUNC_PARAM = 1
 KEYRESOLUTION = 100
 ANGLE_GAUSS_FIELD_FILES = [

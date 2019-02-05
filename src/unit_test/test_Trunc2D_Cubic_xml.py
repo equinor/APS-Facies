@@ -10,10 +10,10 @@ from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.unit_test.constants import (
     CUBIC_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, OUTPUT_MODEL_FILE_NAME1,
-    OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, KEYRESOLUTION
+    OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, KEYRESOLUTION, FACIES_OUTPUT_FILE_VECTORIZED
 )
 from src.unit_test.helpers import (
-    apply_truncations, getFaciesInTruncRule, get_cubic_facies_reference_file_path,
+    apply_truncations,  apply_truncations_vectorized, getFaciesInTruncRule, get_cubic_facies_reference_file_path,
     truncMapPolygons,
 )
 from src.utils.constants.simple import Debug
@@ -232,7 +232,7 @@ def getClassName(truncRule):
                 ['F2'],  # background list
             ]
         ],
-        'faciesProb': [0.4, 0.1, 0.3, 0.2],
+        'faciesProb': [0.38, 0.11, 0.31, 0.2],
     }), (10, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2'},
         'faciesInZone': ['F2', 'F1', 'F4', 'F3'],
@@ -502,6 +502,13 @@ def run(
         faciesOutputFile=FACIES_OUTPUT_FILE
     )
 
+    apply_truncations_vectorized(
+        truncRule=truncRule,
+        faciesReferenceFile=faciesReferenceFile,
+        nGaussFields=nGaussFields,
+        gaussFieldFiles=CUBIC_GAUSS_FIELD_FILES,
+        faciesOutputFile=FACIES_OUTPUT_FILE_VECTORIZED
+    )
 
 if __name__ == '__main__':
     pytest.main([__file__])

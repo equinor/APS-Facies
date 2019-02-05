@@ -8,9 +8,12 @@ from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.unit_test.constants import (
     BAYFILL_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, NO_VERBOSE_DEBUG,
-    OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2,
+    OUTPUT_MODEL_FILE_NAME1, OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, FACIES_OUTPUT_FILE_VECTORIZED
 )
-from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, writePolygons
+from src.unit_test.helpers import (
+    apply_truncations,  apply_truncations_vectorized, 
+    getFaciesInTruncRule, truncMapPolygons, writePolygons,
+)
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import prettify
 
@@ -314,6 +317,15 @@ def run(
         nGaussFields=nGaussFields,
         gaussFieldFiles=BAYFILL_GAUSS_FIELD_FILES,
         faciesOutputFile=FACIES_OUTPUT_FILE,
+        debug_level=NO_VERBOSE_DEBUG
+    )
+
+    apply_truncations_vectorized(
+        truncRule=truncRule,
+        faciesReferenceFile=faciesReferenceFile,
+        nGaussFields=nGaussFields,
+        gaussFieldFiles=BAYFILL_GAUSS_FIELD_FILES,
+        faciesOutputFile=FACIES_OUTPUT_FILE_VECTORIZED,
         debug_level=NO_VERBOSE_DEBUG
     )
 

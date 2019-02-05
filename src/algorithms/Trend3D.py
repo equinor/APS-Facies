@@ -25,7 +25,6 @@ from src.algorithms.properties import (
     make_ranged_property,
 )
 from src.utils.constants.simple import Debug, OriginType, TrendType, CrossSectionType, Direction, TrendParameter
-from src.utils.roxar.grid_model import getGridSimBoxSize, getContinuous3DParameterValues
 from src.utils.xmlUtils import (
     getIntCommand, getTextCommand,
     createFMUvariableNameForTrend, fmu_xml_element,
@@ -277,6 +276,7 @@ class Trend3D:
         """
         Description: Create trend values for 3D grid zone using Roxar API.
         """
+        from src.utils.roxar.grid_model import getGridSimBoxSize
         # Check if specified grid model exists and is not empty
         if grid_model.is_empty():
             raise ValueError('Error: Specified grid model: ' + grid_model.name + ' is empty.')
@@ -348,6 +348,7 @@ class Trend3D:
             # corresponding to all active cells in the grid
 
         if isinstance(self, Trend3D_rms_param):
+            from src.utils.roxar.grid_model import getContinuous3DParameterValues
             print(self.type)
             # Values for all active cells
             values_in_active_cells = getContinuous3DParameterValues(
@@ -430,7 +431,7 @@ class Trend3D:
             ndim1 = nx_preview
             ndim2 = ny_preview
             k = int(cross_section_relative_pos * (nz_preview - 1))
-            values = np.zeros(nx_preview * ny_preview, np.float64)
+            values = np.zeros(nx_preview * ny_preview, np.float32)
             # values(i,j) as 1D vector
             for j in range(ny_preview):
                 for i in range(nx_preview):
@@ -442,7 +443,7 @@ class Trend3D:
             ndim1 = nx_preview
             ndim2 = nz_preview
             j = int(cross_section_relative_pos * (ny_preview - 1))
-            values = np.zeros(nx_preview * nz_preview, np.float64)
+            values = np.zeros(nx_preview * nz_preview, np.float32)
             # values(i,k) as 1D vector
             for k in range(nz_preview):
                 for i in range(nx_preview):
@@ -454,7 +455,7 @@ class Trend3D:
             ndim1 = ny_preview
             ndim2 = nz_preview
             i = int(cross_section_relative_pos * (nx_preview - 1))
-            values = np.zeros(ny_preview * nz_preview, np.float64)
+            values = np.zeros(ny_preview * nz_preview, np.float32)
             # values(j,k) as 1D vector
             for k in range(nz_preview):
                 for j in range(ny_preview):

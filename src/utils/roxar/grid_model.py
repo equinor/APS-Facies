@@ -420,8 +420,7 @@ def get_zone_layer_numbering(grid):
         end_layers_per_zone.append(end)
     return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
 
-
-def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_selected_cells=100):
+def get_simulation_box_thickness_old(grid, debug_level=Debug.OFF, max_number_of_selected_cells=100):
     ''' Estimate simulation box thickness for each zone.
         This is done by assuming that it is sufficient to calculate difference
         between top of some selected grid cell for top layer and bottom of
@@ -430,6 +429,7 @@ def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_sele
         This is done for all zones in the grid adn a dictionary with values
         for each zone number is returned. The input parameter max_number_of_selected_cells
         define how many grid cells to be used in the average thickness calculation.
+        NOTE: This function does not work for grids with reverse faults, only normal faults.
     '''
     thickness_per_zone = {}
     # List of number of layers per zone
@@ -478,6 +478,8 @@ def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_sele
                     z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
                     sum_thickness_in_cell += (z_bottom - z_top)
                 average_thickness_in_cell = sum_thickness_in_cell/4
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('IJK_index top: {}   IJK_index bottom: {}   Average cell thickness; {}'.format(ijk_index_top, ijk_index_bottom, average_thickness_in_cell))
                 sum_thickness_for_selected_cells +=  average_thickness_in_cell
                 n_cells_selected += 1
 
@@ -510,6 +512,101 @@ def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_sele
         thickness_per_zone[i + 1] = average_thickness_selected_cells
         if debug_level >= Debug.VERY_VERBOSE:
             print('Zone number: {}   Estimated sim box thickness {}'.format(i+1, average_thickness_selected_cells))
+    return thickness_per_zone
+
+
+def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_selected_cells=1000):
+    ''' Estimate simulation box thickness for each zone.
+        This is done by assuming that it is sufficient to calculate difference
+        between top of some selected grid cell for top layer and bottom of
+        the corresponding grid cells at bottom layer.
+        The difference is calculated and average is calculated.
+        This is done for all zones in the grid adn a dictionary with values
+        for each zone number is returned. The input parameter max_number_of_selected_cells
+        define how many grid cells to be used in the average thickness calculation.
+        This function works for grids with both normal and reverse faults.
+    '''
+    thickness_per_zone = {}
+    code_names = {}
+    indexer = grid.grid_indexer
+    dim_i, dim_j, dim_k = indexer.dimensions
+    for zone_index in indexer.zonation:
+        zone_name = grid.zone_names[zone_index]
+        layer_ranges = indexer.zonation[zone_index]
+        code_names[zone_index+1] = zone_name
+        for lr in layer_ranges:
+            # Get all the cell numbers for the layer range
+            if debug_level >= Debug.VERBOSE:
+                print('Zone number: {} Zone name: {}  Layer range: {} - {}'.format(zone_index+1, code_names[zone_index+1], lr.start+1, lr.stop))
+            zone_cell_numbers_top_layer = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.start+1))
+            zone_cell_numbers_bottom_layer = indexer.get_cell_numbers_in_range((0, 0, lr.stop-1), (dim_i, dim_j, lr.stop))
+
+            # Pick max_number_of_selected_cells arbitrary grid cells among the defined grid cells (from the zone_cell_numbers)
+            n_cells_active_in_zone_top = len(zone_cell_numbers_top_layer)
+            n_cells_active_in_zone_bottom = len(zone_cell_numbers_bottom_layer)
+            if n_cells_active_in_zone_top < max_number_of_selected_cells:
+                step_top = 1
+            else:
+                step_top = int(n_cells_active_in_zone_top/max_number_of_selected_cells+1)+1
+
+            if n_cells_active_in_zone_bottom < max_number_of_selected_cells:
+                step_bottom = 1
+            else:
+                step_bottom = int(n_cells_active_in_zone_bottom/max_number_of_selected_cells+1)+1
+
+            sum_thickness_for_selected_cells = 0.0
+            n_cells_selected = 0
+            for j in range(0, n_cells_active_in_zone_top, step_top):
+                cell_number = zone_cell_numbers_top_layer[j]
+                ijk_index_top = indexer.get_indices(cell_number)
+                ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], lr.stop)
+                if indexer.is_defined(ijk_index_bottom):
+                    # Both the grid cell at top and bottom of the zone are defined.
+                    # Get z coordinates and find thickness (approximately)
+#                    print(ijk_index_top)
+#                    print(ijk_index_bottom)
+                    corner_top = grid.get_cell_corners_by_index(ijk_index_top)
+                    corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
+                    sum_thickness_in_cell = 0.0
+                    for n in range(4):
+                        z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
+                        z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
+                        sum_thickness_in_cell += (z_bottom - z_top)
+                    average_thickness_in_cell = sum_thickness_in_cell/4
+#                    if debug_level >= Debug.VERY_VERBOSE:
+#                        print('IJK_index top: {}   IJK_index bottom: {}   Average cell thickness; {}'.format(ijk_index_top, ijk_index_bottom, average_thickness_in_cell))
+                    sum_thickness_for_selected_cells +=  average_thickness_in_cell
+                    n_cells_selected += 1
+
+            if n_cells_selected == 0:
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print('\n'
+                          'When estimating simbox thickness:  Have to use also inactive cells since there are 0 pairs of cells\n'
+                          '                                   where both are active and one is at top zone layer\n'
+                          '                                   and one at bottom zone layer')
+                for j in range(0, n_cells_active_in_zone_top, step_top):
+                    cell_number = zone_cell_numbers_top_layer[j]
+                    ijk_index_top = indexer.get_indices(cell_number)
+                    ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], lr.stop-1)
+
+                    # Use bottom cell even though it is inactive
+                    # Get z coordinates and find thickness (approximately)
+                    corner_top = grid.get_cell_corners_by_index(ijk_index_top)
+                    corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
+                    sum_thickness_in_cell = 0.0
+                    for n in range(4):
+                        z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
+                        z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
+                        sum_thickness_in_cell += (z_bottom - z_top)
+                    average_thickness_in_cell = sum_thickness_in_cell/4
+                    sum_thickness_for_selected_cells += average_thickness_in_cell
+                    n_cells_selected += 1
+
+            assert n_cells_selected > 0
+            average_thickness_selected_cells = sum_thickness_for_selected_cells / n_cells_selected
+            thickness_per_zone[zone_index + 1] = average_thickness_selected_cells
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('Zone number: {}   Estimated sim box thickness {}'.format(zone_index+1, average_thickness_selected_cells))
     return thickness_per_zone
 
 

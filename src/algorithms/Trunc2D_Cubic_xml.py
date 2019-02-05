@@ -8,7 +8,7 @@ import numpy as np
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import getKeyword
-
+from src.algorithms.Memoization import RoundOffConstant
 """
 -----------------------------------------------------------------------
 class Trunc2D_Cubic
@@ -113,10 +113,10 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # List of facies index ( index in faciesInZone) for each polygon
         self.__fIndxPerPolygon = []
 
-        self.__roundOffResolution = 209
+        self.__nCountShiftBoundary = 0
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
+                 keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
         """
         This constructor can either create a new object by reading the information
         from an XML tree or it can create an empty data structure for such an object.
@@ -166,7 +166,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # If the trRule is not none, the base class data structure is initialized.
         nGaussFieldsInBackGroundModel = 2
         super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                         debug_level, modelFileName, nGaussFieldsInBackGroundModel)
+                         debug_level, modelFileName, nGaussFieldsInBackGroundModel, keyResolution)
         self.__setEmpty()
 
         if trRuleXML is not None:
@@ -474,11 +474,20 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if self._isFaciesProbEqualOne(faciesProb):
             return
 
-        area = self._modifyBackgroundFaciesArea(faciesProb)
+        faciesProbRoundOff = self._makeRoundOffFaciesProb(faciesProb)
+        sumProb = faciesProbRoundOff.sum()
+        if np.abs(sumProb - 1.0) > 0.00001:
+            print('Warning: Check facies probability normalization: {}'.format(faciesProbRoundOff))
+            print('         Normalization: {}'.format(sumProb))
 
-        # Call methods specific for this truncation rule with corrected area due to overprint facies
+        if self._isFaciesProbEqualOne(faciesProbRoundOff):
+            return
+
+        area = self._modifyBackgroundFaciesArea(faciesProbRoundOff)
         self.__calcProbForEachNode(area)
         self.__calcThresholdValues()
+        self._faciesPolygons = self.truncMapPolygons()
+        self.num_polygons = len(self._faciesPolygons)
 
         if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             self.__writeDataForTruncRule()
@@ -685,7 +694,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                             itemL3[YMAX] = ymaxL3
                                             # end if use level 3
 
-    def defineFaciesByTruncRule(self, alphaCoord):
+    def defineFaciesByTruncRule_original(self, alphaCoord):
         # Check if the facies is deterministic (100% probability)
         for fIndx in range(len(self._faciesInZone)):
             if self._faciesIsDetermined[fIndx] == 1:
@@ -698,6 +707,22 @@ class Trunc2D_Cubic(Trunc2D_Base):
         else:
             faciesCode, fIndx = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
         return faciesCode, fIndx
+
+
+
+    def facies_index_in_truncation_rule_for_polygon(self, polygon_index):
+        indx = self.__fIndxPerPolygon[polygon_index]
+        if indx < 0:
+            print('indx: {} polygon number: {}'.format(indx, polygon_index))
+            assert indx >= 0
+        return indx
+
+    def get_background_index_in_truncaction_rule(self):
+        bg_index_in_trunc_rule = np.asarray(self.__fIndxPerPolygon)
+        return bg_index_in_trunc_rule
+
+    def getNCountShiftAlpha(self):
+        return self.__nCountShiftBoundary
 
     def __calcFaciesLevel1V(self, nodeListL1, alphaCoord):
         faciesCode = -1
@@ -1058,14 +1083,21 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Create list of polygons and corresponding list of facies
         self.__getPolygonAndFaciesList()
         polygons = copy.deepcopy(self.__polygons)
-        return polygons
+
+        # Make closed polygons
+        for poly in polygons:
+            pt = poly[0]
+            poly.append(pt)
+
+        
+        return np.asarray(polygons,dtype=np.float64)
 
     def faciesIndxPerPolygon(self):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
 
     def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-                   truncStructureList, overlayGroups=None, debug_level=Debug.OFF):
+                   truncStructureList, overlayGroups=None, keyResolution=100, debug_level=Debug.OFF):
         """
         TODO: Update documentation
 
@@ -1088,6 +1120,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         # Initialize base class variables
         super()._setEmpty()
+        self._keyResolution = keyResolution
 
         # Initialize this class variables
         self.__setEmpty()

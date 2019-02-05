@@ -4,9 +4,11 @@
 from argparse import ArgumentParser, Namespace
 
 import matplotlib
+matplotlib.use('Tkagg')
+from matplotlib import pyplot as plt
+
 import collections
 import numpy as np
-from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 
 from src.algorithms.APSModel import APSModel
@@ -15,7 +17,7 @@ from src.utils.exceptions.xml import UndefinedZoneError
 from src.utils.io import writeFileRTF
 from src.utils.methods import get_colors, get_run_parameters
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from src.utils.plotting import plot_gaussian_field, cross_plot, plot_facies, create_facies_map
+from src.utils.plotting import plot_gaussian_field, cross_plot, plot_facies, create_facies_map, create_facies_map_vectorized
 
 
 def high_resolution_2D_grids(
@@ -136,6 +138,7 @@ def run_previewer(
         rotate_plot=False,
         no_simulation=False,
         write_simulated_fields_to_file=False,
+        plot_to_file=False,
         debug_level=Debug.OFF,
         **kwargs
 ) -> None:
@@ -153,6 +156,7 @@ def run_previewer(
     if debug_level >= Debug.VERBOSE:
         print('matplotlib version: ' + matplotlib.__version__)
         print('Run: testPreview')
+        print('Backend: {}'.format(matplotlib.get_backend()))
         if isinstance(model, str):
             print('- Read file: ' + model)
     if isinstance(model, str):
@@ -297,6 +301,7 @@ def run_previewer(
     grid2D_dimensions, increments = get_dimensions(
         preview_cross_section.type, preview_grid_size, original_simulation_box_size
     )
+#    facies, facies_fraction = create_facies_map_vectorized(gauss_field_items, truncObject)
     facies, facies_fraction = create_facies_map(gauss_field_items, truncObject)
 
     if write_simulated_fields_to_file:
@@ -313,15 +318,13 @@ def run_previewer(
     if debug_level >= Debug.VERY_VERBOSE:
         facies_fraction_sorted = collections.OrderedDict(sorted(facies_fraction.items()))
         print('\nFacies name:   Simulated fractions:    Specified fractions:')
-        print(facies_fraction_sorted)
-#        for i in range(nFacies):
         for i, f in facies_fraction_sorted.items():
-#            f = facies_fraction[i]
             fraction = float(f) / float(len(facies))
             print('{0:10}  {1:.3f}   {2:.3f}'.format(faciesNames[i], fraction, faciesProb[i]))
         print('')
 
     # Plot the result
+
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('Make plots')
     fig = plt.figure(figsize=[20.0, 10.0])
@@ -352,7 +355,6 @@ def run_previewer(
                         original_simulation_box_size,
                         plot_ticks=True,
                         vertical_scale=preview_scale)
-#    imFac = plot_facies(axFacies, fmap, nFacies, cm, preview_cross_section.type, lengths, plot_ticks=False, vertical_scale=preview_scale)
 
     # Plot crossplot between GRF1 and GRF2,3,4,5
     cross_plots = [
@@ -401,9 +403,14 @@ def run_previewer(
         text = faciesNames[i] + ':  ' + str(faciesProb[i])
         fig.text(0.02, 0.40 - 0.03 * i, text, ha='left')
 
-    plt.show()
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
-        print('Finished testPreview')
+    if plot_to_file:
+        file_name = 'plot.pdf'
+        fig.savefig(file_name)
+        print('Finished creating plot: {}'.format(file_name))
+        plt.close(fig)
+    else:
+        plt.show()
+    print('Finished testPreview')
 
 
 def get_dimensions(preview_cross_section_type, preview_grid_size, simulation_box_size):
@@ -502,7 +509,8 @@ def run(roxar=None, project=None, **kwargs):
     debug_level = params['debug_level']
     [kwargs.pop(item, None) for item in ['model', 'rms_data_file_name', 'debug_level']]
     debug_level=Debug.VERY_VERBOSE
-    run_previewer(model=model, rms_data_file_name=rms_data_file_name, debug_level=debug_level, **kwargs)
+    plot_to_file = False
+    run_previewer(model=model, rms_data_file_name=rms_data_file_name, plot_to_file=plot_to_file, debug_level=debug_level, **kwargs)
 
 
 def get_arguments() -> Namespace:

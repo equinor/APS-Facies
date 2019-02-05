@@ -14,7 +14,7 @@ from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword, getTextCommand, getBoolCommand
-
+from src.algorithms.Memoization import MemoizationItem, RoundOffConstant
 
 class APSZoneModel:
     """
@@ -74,7 +74,8 @@ class APSZoneModel:
        def setTruncRule(self,truncRuleObj)
 
      ---  Calculate function ---
-       def applyTruncations(self,probDefined,GFAlphaList,faciesReal,nDefinedCells,cellIndexDefined)
+       def applyTruncations(self,probDefined,alpha_fields,faciesReal,nDefinedCells,cellIndexDefined)
+       def applyTruncations_vectorized(self, probDefined, alpha_fields, faciesReal, nDefinedCells, cellIndexDefined)
        def simGaussFieldWithTrendAndTransform(
             self, (simBoxXsize, simBoxYsize, simBoxZsize),
             (gridNX, gridNY, gridNZ), gridAzimuthAngle, crossSectionType, crossSectionIndx)
@@ -154,7 +155,7 @@ class APSZoneModel:
 
             nIntervalForProbabilityInMemoizationKey = getIntCommand(
                 obj, 'MemoizationResolution', 'Optimization',
-                minValue=100, maxValue=10000, defaultValue=100, modelFile=modelFileName, required=False
+                minValue=50, maxValue=1000, defaultValue=100, modelFile=modelFileName, required=False
             )
             if useMemoization == 1:
                 self.__keyResolution = nIntervalForProbabilityInMemoizationKey
@@ -255,6 +256,7 @@ class APSZoneModel:
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.truncation_rule = Trunc2D_Cubic(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
+                            self.__keyResolution,
                             self.debug_level, modelFileName, self.zone_number
                         )
                     else:
@@ -289,6 +291,10 @@ class APSZoneModel:
     @property
     def region_number(self):
         return self.__regionNumber
+
+    @property
+    def key_resolution(self):
+        return self.__keyResolution
 
     def useConstProb(self) -> bool:
         return self.__useConstProb
@@ -489,8 +495,8 @@ class APSZoneModel:
 
         useConstTruncParam = self.truncation_rule.useConstTruncModelParam()
         nGaussFields = len(alpha_fields)
-        faciesProb = np.zeros(nFacies, np.float32)
-        volFrac = np.zeros(nFacies, np.float32)
+        faciesProb = np.zeros(nFacies, dtype=np.float32)
+        volFrac = np.zeros(nFacies, dtype=np.float32)
         if debug_level >= Debug.VERBOSE:
             print('--- Truncation rule: ' + classNameTrunc)
 
@@ -566,19 +572,10 @@ class APSZoneModel:
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
-                        truncRuleName = self.truncation_rule.getClassName()
-                        if truncRuleName == 'Trunc2D_Angle':
-                            nCalc = self.truncation_rule.getNCalcTruncMap()
-                            nLookup = self.truncation_rule.getNLookupTruncMap()
-                            print('--- Calculate facies for cell number: {}    New truncation cubes: {}    Re-used truncation cubes: {}'
-                                  ''.format(str(i), str(nCalc), str(nLookup))
-                                  )
+                        if i == 0:
+                            print('--- Calculate facies')
                         else:
-                            if i == 0:
-                                print('--- Calculate facies')
-                            else:
-                                print('--- Calculate facies for cell number: {}'.format(str(i)))
-
+                            print('--- Calculate facies for cell number: {}'.format(str(i)))
                 elif debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         if i == 0:
@@ -616,19 +613,213 @@ class APSZoneModel:
 
         if self.__debug_level >= Debug.VERBOSE:
             truncRuleName = self.truncation_rule.getClassName()
-            if truncRuleName == 'Trunc2D_Angle':
-                nCalc = self.truncation_rule.getNCalcTruncMap()
-                nLookup = self.truncation_rule.getNLookupTruncMap()
-                print(
-                    '--- In truncation rule {} the truncation cube is recalculated {} number of times\n'
-                    '    due to varying facies probabilities and previous calculated truncation cubes are re-used {} of times.\n'
-                    ''.format(truncRuleName, nCalc, nLookup)
-                )
-
+            if truncRuleName != 'Trunc3D_bayfill':
                 nCount = self.truncation_rule.getNCountShiftAlpha()
                 print('--- In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
                       '    are done {} number of times for numerical reasons.'
                       ''.format(truncRuleName, str(nCount)))
+
+        for f in range(nFacies):
+            volFrac[f] = volFrac[f] / float(nDefinedCells)
+        return faciesReal, volFrac
+
+    def applyTruncations_vectorized(self, probDefined, alpha_fields, faciesReal, nDefinedCells, cellIndexDefined):
+        ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
+            The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
+
+        debug_level = self.__debug_level
+        order_index = self.truncation_rule.getOrderIndex()
+        faciesNames = self.getFaciesInZoneModel()
+        nFacies = len(faciesNames)
+        if len(probDefined) != nFacies:
+            raise ValueError(
+                'Error: In class: {}. Mismatch in input to applyTruncations '
+                ''.format(self.__className)
+            )
+
+        useConstTruncParam = self.truncation_rule.useConstTruncModelParam()
+        if not useConstTruncParam:
+            raise IOError('Cannot use optimization if the truncation parameters  (angles) are not constant in non-cubic rule')
+
+        nGaussFields = len(alpha_fields)
+
+        volFrac = np.zeros(nFacies, dtype=np.float32)
+
+        if debug_level >= Debug.VERBOSE:
+            print('--- Truncation rule: ' + self.truncation_rule.getClassName())
+            for gfName, alphaDataArray in alpha_fields.items():
+                print('--- Use gauss fields: ' + gfName)
+
+        if self.__useConstProb:
+            # Constant probability
+            if debug_level >= Debug.VERBOSE:
+                print('--- Using spatially constant probabilities for facies.')
+
+            faciesProb = np.zeros(nFacies, dtype=np.float32)
+            for f in range(nFacies):
+                faciesProb[f] = probDefined[f]
+
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: faciesProb:')
+                print(repr(faciesProb))
+
+            # Calculate truncation rules
+            # The truncation map/cube is constant and does not vary from cell to cell
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output:  Calculate truncation map/cube')
+            self.truncation_rule.setTruncRule(faciesProb)
+
+            # Alpha vectors for the selected cells for current zone or (zone,region) combination
+            alpha_coord_vectors = np.zeros((nDefinedCells, nGaussFields), dtype=np.float64)
+            gaussFieldIndx = 0
+            for gfName, alphaDataArray in alpha_fields.items():
+                if alphaDataArray is None:
+                    # This gauss field is not used for this zone, but numpy vector operations require that the vector exists
+                    alpha_coord_vectors[:,gaussFieldIndx] = -1
+                else:
+                    alpha_coord_vectors[:,gaussFieldIndx] = alphaDataArray[cellIndexDefined]
+                gaussFieldIndx += 1
+
+            fCode_vector, fIndx_vector = self.truncation_rule.defineFaciesByTruncRule_vectorized(alpha_coord_vectors)
+
+            # Facies codes for the selected cells are updated om faciesReal
+            faciesReal[cellIndexDefined] = fCode_vector
+
+            # Volume fraction of the different facies
+            sumfIndx = 0
+            for i in range(nFacies):
+                fIndx = order_index[i]
+                # Number of grid cells having the specified facies
+                volFrac[fIndx] = len(fIndx_vector[fIndx_vector == fIndx])
+
+        else:
+            # Varying probability from cell to cell and / or
+            # varying truncation parameter from cell to cell
+            if debug_level >= Debug.VERBOSE:
+                print('--- Using spatially varying probabilities for facies.')
+            faciesProb = np.zeros((nDefinedCells,nFacies), dtype=np.float32)
+
+            for f in range(nFacies):
+                faciesProb[:, f] = probDefined[f]
+
+            # Alpha vectors for the selected cells for current zone or (zone,region) combination
+            alpha_coord_vectors = np.zeros((nDefinedCells, nGaussFields), dtype=np.float32)
+            gaussFieldIndx = 0
+            for gfName, alphaDataArray in alpha_fields.items():
+                if alphaDataArray is None:
+                    # This gauss field is not used for this zone, but numpy vector operations require that the vector exists
+                    alpha_coord_vectors[:,gaussFieldIndx] = -1
+                else:
+                    alpha_coord_vectors[:,gaussFieldIndx] = alphaDataArray[cellIndexDefined]
+                gaussFieldIndx += 1
+
+            # Calculate how many different truncation maps are necessary and add a set of grid cell indices to each item
+            memo, num_maps = self.findDistinctTruncationCubes(faciesProb, nDefinedCells, nFacies)
+
+            # Check if optimization using vectorization is to be used
+            if num_maps < 0.2 * nDefinedCells:
+                # Use vectorization and look up facies for all cells having the same truncation cube at once
+                if debug_level >= Debug.VERBOSE:
+                    print('--- Using vectorization optimization')
+                count_single_cell_truncation_cubes = 0
+                count_unique_truncation_cubes = 0
+                nCells = 0
+                for key, item in memo.items():
+                    # Calculate truncation map
+                    faciesProb = np.array(key)
+                    self.truncation_rule.setTruncRule(faciesProb)
+                    count_unique_truncation_cubes += 1
+                    # Lookup facies
+                    cell_indices_trunc_rule = item.get_cell_indices()
+                    if len(cell_indices_trunc_rule) > 1:
+                        # More than one cell having the same truncation cube
+                        alpha_coord_selected = alpha_coord_vectors[cell_indices_trunc_rule,:]
+                        faciesCode_vector, fIndx_vector = self.truncation_rule.defineFaciesByTruncRule_vectorized(alpha_coord_selected)
+
+                        # Facies codes for the selected cells are updated om faciesReal
+                        faciesReal[cellIndexDefined[cell_indices_trunc_rule]] = faciesCode_vector
+
+                        nCells += len(cell_indices_trunc_rule)
+                        # Volume fraction of the different facies
+                        sumfIndx = 0
+                        for i in range(nFacies):
+                            fIndx = order_index[i]
+                            # Number of grid cells having the specified facies
+                            volFrac[fIndx] += len(fIndx_vector[fIndx_vector == fIndx])
+                    else:
+                        # The truncation cube is for one cell only.
+                        count_single_cell_truncation_cubes += 1
+                        nCells += 1
+                        index = cell_indices_trunc_rule[0]
+                        alpha_coord = alpha_coord_vectors[index,:]
+                        faciesCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alpha_coord)
+                        faciesReal[cellIndexDefined[index]] = faciesCode
+                        volFrac[fIndx] += 1
+
+                    if debug_level >= Debug.VERY_VERBOSE:
+                        if np.mod(nCells, 50000) == 0:
+                            if nCells == 0:
+                                print('--- Calculate facies')
+                            else:
+                                print('--- Calculate facies for cell number: {}'.format(nCells))
+                    elif debug_level == Debug.VERBOSE:
+                        if np.mod(nCells, 500000) == 0:
+                            if nCells == 0:
+                                print('--- Calculate facies')
+                            else:
+                                print('--- Calculate facies for cell number: {}'.format(nCells))
+
+                if debug_level >= Debug.VERBOSE:
+                    print('--- Number of cells where the truncation map is not shared with other cells is {} out of a total of {} cells.'
+                          ''.format(count_single_cell_truncation_cubes, nDefinedCells)
+                          )
+                    print('--- Number of different truncation cubes is {} out of a total of {} cells.'
+                          ''.format(count_unique_truncation_cubes, nDefinedCells)
+                          )
+            else:
+                # Don't use vectorization and look up facies for all cells one by one.
+                if debug_level >= Debug.VERBOSE:
+                    print('--- No vectorization optimization')
+                count_single_cell_truncation_cubes = 0
+                count_unique_truncation_cubes = 0
+                nCells = 0
+                for key, item in memo.items():
+                    # Calculate truncation map
+                    faciesProb = np.array(key)
+                    self.truncation_rule.setTruncRule(faciesProb)
+                    count_unique_truncation_cubes += 1
+                    # Lookup facies
+                    cell_indices_trunc_rule = item.get_cell_indices()
+                    for i in range(len(cell_indices_trunc_rule)):
+                        nCells += 1
+                        index = cell_indices_trunc_rule[i]
+                        alpha_coord = alpha_coord_vectors[index,:]
+                        faciesCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alpha_coord)
+                        faciesReal[cellIndexDefined[index]] = faciesCode
+                        volFrac[fIndx] += 1
+
+                        if debug_level >= Debug.VERY_VERBOSE:
+                            if np.mod(nCells, 50000) == 0:
+                                if nCells == 0:
+                                    print('--- Calculate facies')
+                                else:
+                                    print('--- Calculate facies for cell number: {}'.format(nCells))
+                        elif debug_level == Debug.VERBOSE:
+                            if np.mod(nCells, 500000) == 0:
+                                if nCells == 0:
+                                    print('--- Calculate facies')
+                                else:
+                                    print('--- Calculate facies for cell number: {}'.format(nCells))
+
+                assert nCells == nDefinedCells
+
+            if debug_level >= Debug.VERY_VERBOSE:
+                truncRuleName = self.truncation_rule.getClassName()
+                if  truncRuleName == 'Trunc2D_Angle':
+                    nCount = self.truncation_rule.getNCountShiftAlpha()
+                    print('Debug output: In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
+                          '    are done {} number of times for numerical reasons.'
+                          ''.format(truncRuleName, nCount))
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -673,3 +864,57 @@ class APSZoneModel:
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
             simulation_box_size, grid_size, gridAzimuthAngle, crossSection, simulation_box_origin
         )
+
+    def findDistinctTruncationCubes(self, probabilities, num_cells, num_facies):
+        # probabilities_for_selected_grid_cells[cell, facies]
+        resolution = self.__keyResolution
+        if self.__keyResolution <= 0:
+            # The value used when memoization is not used
+            resolution = 100
+
+        dValue = 1.0/resolution
+        # num_defined_cells = len(cell_index_defined)
+        # for i in range(num_defined_cells):
+        #    for j in range(num_facies):
+        #        facieProbNew[i,j] = int(probabilities[i,j] * resolution + 0.5) * dValue
+
+        # Round off to nearest number that is a multiple of 1/resolution.
+        pNew = probabilities * resolution + 0.5
+        pNewInt = pNew.astype(int)
+        probabilities = pNewInt * dValue
+
+        # Check if the normalization is more or less than 1
+        # If so, modify the probability with largest value up/down by an amount equal to 1/resolution
+        # Repeat this two times if necessary
+        sumProb = np.sum(probabilities, axis=1)
+        indxMax = np.argmax(probabilities, axis=1)
+        check_modify = (sumProb > (RoundOffConstant.low + dValue))
+        probabilities[check_modify, indxMax[check_modify]] -= dValue
+        sumProb[check_modify] -= dValue
+        check_modify = (sumProb > (RoundOffConstant.low + dValue))
+        probabilities[check_modify, indxMax[check_modify]] -= dValue
+        sumProb[check_modify] -= dValue
+
+        check_modify = ((RoundOffConstant.high - dValue) > sumProb)
+        probabilities[check_modify, indxMax[check_modify]] += dValue
+        sumProb[check_modify] += dValue
+        check_modify = ((RoundOffConstant.high - dValue) > sumProb)
+        probabilities[check_modify, indxMax[check_modify]] += dValue
+
+        # Create dictionary to keep data for all distinct truncation maps/cubes for Trunc2D_Angle type rules
+        # The round-off probabilities are used as key.
+        # For each unique round-off probability or key, initialize an empty datastructure to keep truncation map/cube and
+        # a data set with all grid cell indices for grid cells having the same round-off probabilities.
+        # All these grid cells will then share the same truncation map/cube.
+        memo = {}
+        for i in range(num_cells):
+            key = (tuple(probabilities[i, :]))
+            if key not in memo:
+                # Create new item to keep truncation map/cube
+                memo[key]= MemoizationItem(cell_index=i)
+            else:
+                # Existing item. Add the cell_index to this item.
+                memo[key].add_cell_index(i)
+
+        num_maps = len(memo)
+        return memo, num_maps
