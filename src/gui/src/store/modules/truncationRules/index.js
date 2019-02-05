@@ -11,6 +11,7 @@ import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
 import {
   hasCurrentParents,
+  minFacies,
   hasEnoughFacies,
   hasParents,
   isEmpty,
@@ -566,8 +567,10 @@ export default {
         })
     },
     ruleNames (state, getters, rootState, rootGetters) {
+      const _minFacies = item => minFacies(item, rootGetters)
       return Object.values(state.templates.available)
         .filter(template => template.type === state.preset.type)
+        .sort((a, b) => _minFacies(a) > _minFacies(b) ? +1 : _minFacies(a) < _minFacies(b) ? -1 : 0)
         .map(template => {
           return {
             text: template.name,

@@ -130,7 +130,13 @@ const parentId = ({ zone, region }) => {
   }
 }
 
-const hasEnoughFacies = (rule, getters) => {
+const faciesName = obj => {
+  if (obj.hasOwnProperty('facies')) obj = obj.facies
+  if (obj.hasOwnProperty('name')) obj = obj.name
+  return obj
+}
+
+const minFacies = (rule, getters) => {
   let minFacies = 0
   const type = getters['truncationRules/typeById'](rule.type) || rule.type
   switch (type) {
@@ -140,7 +146,7 @@ const hasEnoughFacies = (rule, getters) => {
       break
     case 'non-cubic':
       if (rule.polygons) {
-        const uniqueFacies = new Set(Object.values(rule.polygons).map(polygon => polygon.facies))
+        const uniqueFacies = new Set(Object.values(rule.polygons).map(polygon => faciesName(polygon)))
         if (rule.overlay) {
           const items = Object.values(rule.overlay.items || rule.overlay)
           items.forEach(item => {
@@ -162,9 +168,12 @@ const hasEnoughFacies = (rule, getters) => {
     default:
       throw new Error(`${type} is not implemented`)
   }
+  return minFacies
+}
 
+const hasEnoughFacies = (rule, getters) => {
   const numFacies = getters['facies/selected'].length
-  return numFacies >= minFacies
+  return numFacies >= minFacies(rule, getters)
 }
 
 const isEmpty = property => _.isEmpty(property)
@@ -215,6 +224,7 @@ export {
   hasCurrentParents,
   hasParents,
   parentId,
+  minFacies,
   hasEnoughFacies,
   getRandomInt,
   newSeed,
