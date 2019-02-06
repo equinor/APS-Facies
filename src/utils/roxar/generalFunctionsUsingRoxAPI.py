@@ -299,15 +299,15 @@ def setContinuous3DParameterValuesInZoneRegion(
                       'Grid model nx: {}  Input array nx: {}\n'
                       'Grid model ny: {}  Input array ny: {}\n'
                       'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-                      ''.format(str(nx), str(inputArrayShape[0]), str(ny), str(inputArrayShape[1]),
-                                str(zoneNumber), str(nLayers), str(inputArrayShape[2]))
+                      ''.format(nx, inputArrayShape[0], ny, inputArrayShape[1],
+                                zoneNumber, nLayers, inputArrayShape[2])
                       )
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
-    i_indices = defined_cell_indices[:,0]
-    j_indices = defined_cell_indices[:,1]
-    k_indices = defined_cell_indices[:,2]
+    i_indices = defined_cell_indices[:, 0]
+    j_indices = defined_cell_indices[:, 1]
+    k_indices = defined_cell_indices[:, 2]
 
     # Get region parameter values
     regionParamValues = None

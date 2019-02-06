@@ -15,142 +15,146 @@ from src.utils.roxar.generalFunctionsUsingRoxAPI import (
 from src.utils.roxar.grid_model import getGridAttributes
 
 
-def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
+def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=False):
     """
     Description: Run gauss simulations for the APS model i sequence
 
     """
 
     # Read APS model
-    print('- Read file: ' + modelFile)
-    apsModel = APSModel(modelFile)
-    debug_level = apsModel.debug_level
-    # When running in single processing mode, there will not be created new start seeds in the RMS multi realization workflow loop
-    # because the start random seed is created once per process, and the process is the same for all realizations in the loop.
+    print('- Read file: ' + model_file)
+    aps_model = APSModel(model_file)
+    debug_level = aps_model.debug_level
+    # When running in single processing mode, there will not be created new start seeds in the RMS multi realization
+    # workflow loop because the start random seed is created once per process,
+    # and the process is the same for all realizations in the loop.
     # Hence always read the start seed in single processing mode.
     # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file
     # before calling the current script.
 
     # Get grid dimensions
-    gridModelName = apsModel.getGridModelName()
-    gridModel = project.grid_models[gridModelName]
-    grid = gridModel.get_grid()
-    [_, _, _, _, _, _, simBoxXLength, simBoxYLength, azimuthAngleGrid, _, _, nx, ny, nz,
-     nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = getGridAttributes(grid, Debug.OFF)
+    grid_model = project.grid_models[aps_model.getGridModelName()]
+    grid = grid_model.get_grid()
+    [
+        _, _, _, _, _, _, sim_box_x_length, sim_box_y_length, azimuth_angle_grid,
+        _, _, nx, ny, _, _, _, num_layers_per_zone, start_layer_per_zone, end_layer_per_zone
+    ] = getGridAttributes(grid, Debug.OFF)
 
     # Calculate grid cell size
-    dx = simBoxXLength/nx
-    dy = simBoxYLength/ny
-
-    # Get region parameter name
-    regionParamName = apsModel.getRegionParamName()
+    dx = sim_box_x_length / nx
+    dy = sim_box_y_length / ny
 
     # Set start seed
-    startSeed = get_project_realization_seed(project)
-    nrlib.seed(startSeed)
+    start_seed = get_project_realization_seed(project)
+    nrlib.seed(start_seed)
 
     # Loop over all zones and simulate gauss fields
-    allZoneModels = apsModel.sorted_zone_models
-    for key, zoneModel in allZoneModels.items():
-        zoneNumber = key[0]
-        regionNumber = key[1]
-        if not apsModel.isSelected(zoneNumber, regionNumber):
+    all_zone_models = aps_model.sorted_zone_models
+    for key, zone_model in all_zone_models.items():
+        zone_number, region_number = key
+        if not aps_model.isSelected(zone_number, region_number):
             continue
-        gaussFieldNames = zoneModel.getGaussFieldsInTruncationRule()
-        simBoxThickness = zoneModel.getSimBoxThickness()
+        gauss_field_names = zone_model.getGaussFieldsInTruncationRule()
+        sim_box_thickness = zone_model.getSimBoxThickness()
 
         # Zone index is counted from 0 while zone number from 1
-        start = startLayerPerZone[zoneNumber-1]
-        end   = endLayerPerZone[zoneNumber-1]
-        nLayers = nLayersPerZone[zoneNumber-1]
+        start = start_layer_per_zone[zone_number - 1]
+        end = end_layer_per_zone[zone_number - 1]
+        num_layers = num_layers_per_zone[zone_number - 1]
 
         # Calculate grid cell size in z direction
-        nz = nLayers
-        dz =  simBoxThickness/nz
+        nz = num_layers
+        dz = sim_box_thickness / nz
 
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('-- Zone: {}'.format(zoneNumber))
+            print('-- Zone: {}'.format(zone_number))
         if debug_level >= Debug.VERBOSE:
-            print('--   Grid layers: {}     Start layer: {}     End layer: {}'
-                  ''.format(nLayers, start + 1, end + 1))
+            print('--   Grid layers: {}     Start layer: {}     End layer: {}'.format(num_layers, start + 1, end + 1))
 
-        gaussResultListForZone = []
-        for i in range(len(gaussFieldNames)):
-            gaussFieldName = gaussFieldNames[i]
-            azimuth = zoneModel.getAzimuthAngle(gaussFieldName)
-            dip     = zoneModel.getDipAngle(gaussFieldName)
-            power = zoneModel.getPower(gaussFieldName)
-            variogramType = zoneModel.getVariogramType(gaussFieldName)
-            vName = variogramType.name
-            mainRange = zoneModel.getMainRange(gaussFieldName)
-            perpRange = zoneModel.getPerpRange(gaussFieldName)
-            vertRange = zoneModel.getVertRange(gaussFieldName)
+        gauss_result_list_for_zone = []
+        for i in range(len(gauss_field_names)):
+            gauss_field_name = gauss_field_names[i]
+            azimuth = zone_model.getAzimuthAngle(gauss_field_name)
+            dip = zone_model.getDipAngle(gauss_field_name)
+            power = zone_model.getPower(gauss_field_name)
+            variogram_type = zone_model.getVariogramType(gauss_field_name)
+            v_name = variogram_type.name
+            main_range = zone_model.getMainRange(gauss_field_name)
+            perpendicular_range = zone_model.getPerpRange(gauss_field_name)
+            vertical_range = zone_model.getVertRange(gauss_field_name)
 
-            azimuthValueSimBox = azimuth - azimuthAngleGrid
+            azimuth_value_sim_box = azimuth - azimuth_angle_grid
 
             if debug_level >= Debug.VERBOSE:
-                print('---  Simulate: {}  for zone: {}  for region: {}'
-                      ''.format(gaussFieldName, zoneNumber, regionNumber))
+                print(
+                    '---  Simulate: {}  for zone: {}  for region: {}'
+                    ''.format(gauss_field_name, zone_number, region_number)
+                )
             if debug_level >= Debug.VERY_VERBOSE:
-                print('     Zone,region             : ({},{})'.format(zoneNumber, regionNumber))
-                print('     Gauss field name        : {}'.format(gaussFieldName))
-                print('     Variogram type          : {}'.format(vName))
-                print('     Main range              : {}'.format(mainRange))
-                print('     Perpendicular range     : {}'.format(perpRange))
-                print('     Vertical range          : {}'.format(vertRange))
-                print('     Azimuth angle in sim box: {}'.format(azimuthValueSimBox))
-                print('     Dip angle               : {}'.format(dip))
-                print('     NX                      : {}'.format(nx))
-                print('     NY                      : {}'.format(ny))
-                print('     NZ for this zone        : {}'.format(nz))
-                print('     DX                      : {}'.format(dx))
-                print('     DY                      : {}'.format(dy))
-                print('     DZ for this zone        : {}'.format(dz))
+                print(
+                    '     Zone,region             : ({},{})\n'
+                    '     Gauss field name        : {}\n'
+                    '     Variogram type          : {}\n'
+                    '     Main range              : {}\n'
+                    '     Perpendicular range     : {}\n'
+                    '     Vertical range          : {}\n'
+                    '     Azimuth angle in sim box: {}\n'
+                    '     Dip angle               : {}\n'
+                    '     NX                      : {}\n'
+                    '     NY                      : {}\n'
+                    '     NZ for this zone        : {}\n'
+                    '     DX                      : {}\n'
+                    '     DY                      : {}\n'
+                    '     DZ for this zone        : {}'
+                    ''.format(
+                        zone_number, region_number, gauss_field_name, v_name,
+                        main_range, perpendicular_range, vertical_range, azimuth_value_sim_box,
+                        dip, nx, ny, nz, dx, dy, dz)
+                )
 
             # Define variogram
-            variogramName = vName.lower()
+            variogram_name = v_name.lower()
             # Note: Since RMS is a left-handed coordinate system and NrLib treat the coordinate system as right-handed
             # we have to transform the azimuth angle to 90-azimuth to get it correct in RMS
-            azimuthInNRLIB = 90.0 - azimuthValueSimBox
-            if variogramName == 'general_exponential':
-                simVariogram = nrlib.variogram(
-                    variogramName, mainRange, perpRange, vertRange, azimuthInNRLIB, dip, power
+            azimuth_in_nrlib = 90.0 - azimuth_value_sim_box
+            if variogram_name == 'general_exponential':
+                sim_variogram = nrlib.variogram(
+                    variogram_name, main_range, perpendicular_range, vertical_range, azimuth_in_nrlib, dip, power
                 )
             else:
-                simVariogram = nrlib.variogram(
-                    variogramName, mainRange, perpRange, vertRange, azimuthInNRLIB, dip
+                sim_variogram = nrlib.variogram(
+                    variogram_name, main_range, perpendicular_range, vertical_range, azimuth_in_nrlib, dip
                 )
 
             if debug_level >= Debug.VERY_VERBOSE:
-                [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
+                [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
                 print('Debug output: Grid dimensions with padding for simulation:')
                 print('     nx: {}   nx with padding: {}'.format(nx, nx_padding))
                 print('     ny: {}   ny with padding: {}'.format(ny, ny_padding))
                 print('     nz: {}   nz with padding: {}'.format(nz, nz_padding))
 
             # Simulate gauss field. Return numpy 1D vector in F order
-            gaussVector = nrlib.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
-            gaussResult = np.reshape(gaussVector, (nx, ny, nz), order='F')
-            gaussResultListForZone.append(gaussResult)
+            gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
+            gauss_result = np.reshape(gauss_vector, (nx, ny, nz), order='F')
+            gauss_result_list_for_zone.append(gauss_result)
             if debug_level >= Debug.VERBOSE:
                 print('--- Finished running simulation of {} for zone,region: ({},{})'
-                      ''.format(gaussFieldName, zoneNumber, regionNumber))
+                      ''.format(gauss_field_name, zone_number, region_number))
                 print('')
 
         # End loop over gauss fields for one zone
         setContinuous3DParameterValuesInZoneRegion(
-            gridModel, gaussFieldNames, gaussResultListForZone, zoneNumber-1,
-            regionNumber=regionNumber, regionParamName=regionParamName,
-            realNumber=realNumber, isShared=isShared, debug_level=debug_level
+            grid_model, gauss_field_names, gauss_result_list_for_zone, zone_number - 1,
+            regionNumber=region_number, regionParamName=aps_model.getRegionParamName(),
+            realNumber=realisation, isShared=is_shared, debug_level=debug_level
         )
     # End loop over all active zones in the model
 
-    seedFileLog = 'seedLogFile.dat'
-    startSeed = nrlib.seed()
-    with open(seedFileLog, 'a') as file:
+    seed_file_log = 'seedLogFile.dat'
+    start_seed = nrlib.seed()
+    with open(seed_file_log, 'a') as file:
         file.write(
-            'RealNumber: {}  StartSeed for this realization: {}\n'.format(
-                str(realNumber + 1), str(startSeed))
+            'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, start_seed)
         )
     print('')
 
@@ -159,10 +163,11 @@ def run(roxar=None, project=None, **kwargs):
     model_file = get_specification_file(**kwargs)
     real_number = project.current_realisation
     is_shared = False
-    run_simulations(project, modelFile=model_file, realNumber=real_number, isShared=is_shared)
+    run_simulations(project, model_file=model_file, realisation=real_number, is_shared=is_shared)
     print('Finished simulation of gaussian fields for APS')
 
 
 if __name__ == '__main__':
     import roxar
+
     run(roxar, project)
