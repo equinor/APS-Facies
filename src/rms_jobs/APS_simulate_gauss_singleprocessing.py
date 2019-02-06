@@ -2,25 +2,17 @@
 # -*- coding: utf-8 -*-
 # This script use both nrlib and ROXAR API functions and run simulations sequentially and not in parallel
 
-from pathlib import Path
-
 import nrlib
 import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.methods import get_specification_file
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValuesInZoneRegion
+from src.utils.roxar.generalFunctionsUsingRoxAPI import (
+    setContinuous3DParameterValuesInZoneRegion,
+    get_project_realization_seed,
+)
 from src.utils.roxar.grid_model import getGridAttributes
-
-
-def getProjectRealizationSeed(seedFile):
-    try:
-        with open(seedFile, 'r') as file:
-            seed = int(file.read())
-    except:
-        raise IOError('Can not open and read seed file: {}'.format(seedFile))
-    return seed
 
 
 def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
@@ -33,13 +25,11 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     print('- Read file: ' + modelFile)
     apsModel = APSModel(modelFile)
     debug_level = apsModel.debug_level
-    seedFile = apsModel.seed_file_name
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization workflow loop
     # because the start random seed is created once per process, and the process is the same for all realizations in the loop.
     # Hence always read the start seed in single processing mode.
     # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file
     # before calling the current script.
-    writeSeedFile = False
 
     # Get grid dimensions
     gridModelName = apsModel.getGridModelName()
@@ -55,17 +45,9 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
     # Get region parameter name
     regionParamName = apsModel.getRegionParamName()
 
-    # Set start seed if it is defined
-    if not writeSeedFile:
-        sfile = Path(seedFile)
-        if sfile.is_file():
-            startSeed = getProjectRealizationSeed(seedFile)
-            nrlib.seed(startSeed)
-        else:
-            raise IOError(
-                'Seed file: {} is not defined.\n'
-                'This is required when the model has specified to read the seed from file.'.format(seedFile)
-            )
+    # Set start seed
+    startSeed = get_project_realization_seed(project)
+    nrlib.seed(startSeed)
 
     # Loop over all zones and simulate gauss fields
     allZoneModels = apsModel.sorted_zone_models
@@ -162,11 +144,6 @@ def run_simulations(project, modelFile='APS.xml', realNumber=0, isShared=False):
             realNumber=realNumber, isShared=isShared, debug_level=debug_level
         )
     # End loop over all active zones in the model
-
-    if writeSeedFile:
-        with open(seedFile, 'w') as file:
-            startSeed = nrlib.seed()
-            file.write(str(startSeed))
 
     seedFileLog = 'seedLogFile.dat'
     startSeed = nrlib.seed()

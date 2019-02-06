@@ -25,6 +25,10 @@ import roxar
 # isOK                         = setDiscrete3DParameterValues(gridModel, parameterName, values, codeNames, realNumber=0, isShared=True, debug_level=1)
 
 
+def get_project_realization_seed(project):
+    return project.seed + project.current_realisation + 1
+
+
 def setContinuous3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList,
                                    realNumber=0, isShared=True, debug_level=Debug.OFF):
     """Set 3D parameter with values for specified grid model.
