@@ -200,7 +200,7 @@ class RMSData:
 
     @staticmethod
     def save_model(path, content):
-        with open(Path(path) / 'APS.xml', 'w') as f:
+        with open(Path(path), 'w') as f:
             f.write(prettify(b64decode(content).decode()))
         return True
 

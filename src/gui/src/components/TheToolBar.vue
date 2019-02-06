@@ -36,6 +36,10 @@
       @click="exportModelFile"
     />
 
+    <export-dialog
+      ref="exportDialog"
+    />
+
     <v-spacer />
 
     <project-settings />
@@ -54,7 +58,7 @@
 
 import { xml2json } from 'xml-js'
 import UploadButton from 'vuetify-upload-button'
-
+import ExportDialog from '@/components/dialogs/ExportDialog'
 import ProjectSettings from '@/components/dialogs/ProjectSettings'
 
 import rms from '@/api/rms'
@@ -96,6 +100,7 @@ const fileHandler = (store, fileName) => {
 
 export default {
   components: {
+    ExportDialog,
     ProjectSettings,
     IconButton,
     UploadButton
@@ -119,8 +124,6 @@ export default {
       reader.readAsText(file)
     },
     exportModelFile: async function () {
-      // TODO: Show dialog to let user select where to export the modelfile to.
-      //       for now just triggering the functionality to create a modelfile
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
         .catch(error => {
           alert(error.message)
@@ -128,8 +131,13 @@ export default {
       if (exportedXMLString) {
         const result = await rms.isApsModelValid(btoa(exportedXMLString))
         if (result.valid) {
-          // const path = await rms.chooseDir('save', )
-          rms.save(this.$store.state.parameters.path.project, btoa(exportedXMLString))
+          const defaultPath = this.$store.state.parameters.path.project + '/myApsExport.xml'
+          this.$refs.exportDialog.open(defaultPath, {})
+            .then((result) => {
+              if (result.save) {
+                rms.save(result.path, btoa(exportedXMLString))
+              }
+            })
         } else {
           alert('The model you have defined is not valid and cannot be exported\n' +
             'Fix the following error before exporting again:\n\n' +

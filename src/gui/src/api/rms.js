@@ -27,7 +27,9 @@ export default {
   simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (gridName, probabilityCubeParameters, ZoneNumbers) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, ZoneNumbers),
   isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
-  save: (content, path) => api.call('save_model', content, path),
+  save: (path, content) => api.call('save_model', path, content),
   // eslint-disable-next-line no-undef
   chooseDir: (mode, suggestion = '') => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve, reject) => resolve(null)),
+  // eslint-disable-next-line no-undef
+  chooseFile: (mode, filter, suggestion = '') => typeof rms !== 'undefined' ? rms.chooseFile(mode, filter, suggestion) : new Promise((resolve, reject) => resolve(null)),
 }
