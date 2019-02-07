@@ -6,11 +6,17 @@ from copy import deepcopy
 from typing import List
 
 
-def find_polygon_reference(polygons, item):
+def find_polygon_references(polygons, item):
+    references = []
     for polygon in polygons:
         if polygon['facies'] == item[0]:
-            return polygon['name']
-    return -1
+            references.append(polygon['name'])
+    if len(references) == 0:
+        return -1
+    elif len(references) == 1:
+        return references.pop()
+    else:
+        return tuple(references)
 
 
 def make_empty_fields(num):
@@ -184,11 +190,19 @@ class Parser:
                 except IndexError:
                     updatable = False
                 settings.append({
-                    'polygon': find_polygon_reference(polygons, item),
+                    'polygon': find_polygon_references(polygons, item),
                     'angle': item[1],
                     'fraction': item[2],
                     'updatable': updatable,
                 })
+            counter = {}
+            for setting in settings:
+                polygon = setting['polygon']
+                if isinstance(polygon, tuple):
+                    if polygon not in counter:
+                        counter[polygon] = 0
+                    setting['polygon'] = polygon[counter[polygon]]
+                    counter[polygon] += 1
             return settings
 
         @staticmethod

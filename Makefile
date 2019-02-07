@@ -254,8 +254,8 @@ links: clean-links create-workflow-dir
 	ln -sf $(CODE_DIR)/src/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
 	ln -sf $(CODE_DIR)/src/rms_jobs/bitmap2rms.py $(BIN_DIR)/bitmap2rms_xml.py
 	# Matplotlibrc (Force use of Agg in tests)
-	ln -sf $(CODE_DIR)/.matplotlibrc $(TEST_FOLDER)/matplotlibrc
-	ln -sf $(CODE_DIR)/.matplotlibrc $(INTEGRATION_TESTS)/matplotlibrc
+	ln -sf $(CODE_DIR)/matplotlibrc $(TEST_FOLDER)/matplotlibrc
+	ln -sf $(CODE_DIR)/matplotlibrc $(INTEGRATION_TESTS)/matplotlibrc
 
 create-workflow-dir:
 	$(MKDIR) $(CODE_DIR)/workflow

@@ -45,7 +45,6 @@ def addCommandCubic(rules):
             nLevel3[i].append(k)
 
     truncStructureCubic = rules.initNewTruncationRuleSettingsCubic(direction)
-    polygon_list = []
     for i in range(nLevel1):
         for j in range(nLevel2[i]):
             for k in range(nLevel3[i][j]):
@@ -78,7 +77,6 @@ def addCommandNonCubic(rules):
     nPolygons = getInteger(text,minVal=2)
 
     truncStructureNonCubic = rules.initNewTruncationRuleSettingsNonCubic()
-    polygon_list = []
     for i in range(nPolygons):
         fName = input('Facies name for polygon number {}: '. format(i + 1))
 
@@ -108,7 +106,6 @@ def addCommandNonCubic(rules):
             except:
                 ok = False
 
-        poly = [fName, angle, probFrac]
         rules.addPolygonToTruncationRuleSettingsNonCubic(truncStructureNonCubic, fName, angle, probFrac)
 
     rules.addTruncationRuleSettingsNonCubic(name, truncStructureNonCubic)
@@ -117,11 +114,11 @@ def addCommandNonCubic(rules):
 def addCommandOverlay(rules):
     name = input('Give a name for the new Overlay truncation setting: ')
     text = 'Number of overlay groups'
-    nGroups = getInteger(text,minVal=1)
+    nGroups = getInteger(text, minVal=1)
     group_list = []
     for groupIndx in range(nGroups):
         text = 'Number of polygons for group {}: '.format(str(groupIndx+1))
-        nPoly = getInteger(text,minVal=1)
+        nPoly = getInteger(text, minVal=1)
         alphaList = []
         bgFaciesList = []
         for i in range(nPoly):
@@ -131,9 +128,10 @@ def addCommandOverlay(rules):
             probFrac = float(text)
             text       = input('Center point of interval for {} and polygon {}..: '.format(groupIndx + 1, i + 1))
             centerPoint = float(text)
-            alphaList = rules.addPolygonToAlphaList(alphaName, faciesName, probFrac=probFrac, centerPoint=centerPoint, alphaList=alphaList)
+            alphaList = rules.addPolygonToAlphaList(
+                alphaName, faciesName, probFrac=probFrac, centerPoint=centerPoint, alphaList=alphaList
+            )
         text = ' Number of background facies for group {}'.format(groupIndx + 1)
-        nBackgroundFacies = getInteger(text, minVal=1)
         bgFacies = input('Background facies for group {} : '.format(groupIndx + 1))
         bgFaciesList.append(bgFacies)
         group_list = rules.addOverlayGroupSettings(alphaList, bgFaciesList, overlayGroups=group_list)

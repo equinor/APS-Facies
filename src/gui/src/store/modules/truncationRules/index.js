@@ -11,6 +11,7 @@ import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
 import {
   hasCurrentParents,
+  minFacies,
   hasEnoughFacies,
   hasParents,
   isEmpty,
@@ -183,6 +184,17 @@ const makeRule = ({ type, ...rest }, _isParsed = false) => {
     throw new Error(`The truncation rule of type ${type} is not implemented`)
   }
   return new typeMapping[`${type}`]({ type, _isParsed, ...rest })
+}
+
+function compareTemplate (rootGetters, a, b) {
+  const _minFacies = item => minFacies(item, rootGetters)
+  if (_minFacies(a) > _minFacies(b)) {
+    return +1
+  } else if (_minFacies(a) < _minFacies(b)) {
+    return -1
+  } else {
+    return a.name.localeCompare(b.name)
+  }
 }
 
 export default {
@@ -568,6 +580,7 @@ export default {
     ruleNames (state, getters, rootState, rootGetters) {
       return Object.values(state.templates.available)
         .filter(template => template.type === state.preset.type)
+        .sort((a, b) => compareTemplate(rootGetters, a, b))
         .map(template => {
           return {
             text: template.name,
