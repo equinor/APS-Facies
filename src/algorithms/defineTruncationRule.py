@@ -407,7 +407,7 @@ class DefineTruncationRule:
                     centerPoint = float(words[m][:wlen - 3])
                 else:
                     centerPoint = float(words[m][:wlen - 2])
-                m = m + 1
+                m += 1
 
                 alphaItem = [alphaFieldName, fName, probFrac, centerPoint]
                 alphaList.append(alphaItem)
@@ -417,7 +417,6 @@ class DefineTruncationRule:
                 if k == 0:
                     bgFaciesName = copy.copy(words[m][2:5])
                 else:
-                    wlen = len(words[m])
                     bgFaciesName = copy.copy(words[m][1:4])
                 m = m + 1
                 bgFaciesList.append(bgFaciesName)
@@ -469,8 +468,6 @@ class DefineTruncationRule:
             STRUCT_CUBIC_INDX = CubicAndOverlayIndices.STRUCT_CUBIC_INDX
             OVERLAYGROUP_INDX = CubicAndOverlayIndices.OVERLAYGROUP_INDX
 
-            nameBG = itemCubicOverlay[NAME_BG_INDX]
-            nameOL = itemCubicOverlay[NAME_OL_INDX]
             truncStructureList = itemCubicOverlay[STRUCT_CUBIC_INDX]
             overlayGroups = itemCubicOverlay[OVERLAYGROUP_INDX]
 
@@ -506,8 +503,6 @@ class DefineTruncationRule:
             STRUCT_NONCUBIC_INDX = NonCubicAndOverlayIndices.STRUCT_NONCUBIC_INDX
             OVERLAYGROUP_INDX = NonCubicAndOverlayIndices.OVERLAYGROUP_INDX
 
-            nameBG = itemNonCubicOverlay[NAME_BG_INDX]
-            nameOL = itemNonCubicOverlay[NAME_OL_INDX]
             truncStructureList = itemNonCubicOverlay[STRUCT_NONCUBIC_INDX]
             overlayGroups = itemNonCubicOverlay[OVERLAYGROUP_INDX]
 
@@ -593,7 +588,6 @@ class DefineTruncationRule:
             for n in range(len(overlayGroups)):
                 groupItem = overlayGroups[n]
                 alphaList = groupItem[ALPHA_LIST_INDX]
-                backgroundListForGroup = groupItem[BACKGROUND_LIST_INDX]
                 for i in range(len(alphaList)):
                     alphaItem = alphaList[i]
                     alphaName = alphaItem[ALPHA_NAME_INDX]
@@ -721,7 +715,8 @@ class DefineTruncationRule:
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         if not self.__checkConsistencyBetweenBackGroundCubicAndOverlay(truncStructBG, overlayGroups):
             raise ValueError(
-                'Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
+                'Specified background facies truncation setting {} '
+                'and overlay facies setting {} are not consistent with each other'
                 ''.format(nameBG, nameOL)
             )
 
@@ -752,7 +747,8 @@ class DefineTruncationRule:
         # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
         if not self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(truncStructBG, overlayGroups):
             raise ValueError(
-                'Specified background facies truncation setting {} and overlay facies setting {} are not consistent with each other'
+                'Specified background facies truncation setting {} '
+                'and overlay facies setting {} are not consistent with each other'
                 ''.format(nameBG, nameOL)
             )
 
@@ -1140,7 +1136,6 @@ class DefineTruncationRule:
         ''' Create truncation map plot using same probability for each facies'''
         truncObj = self.getTruncationRuleObject(name)
         faciesNames = truncObj.getFaciesInTruncRule()
-        faciesProb = []
         nFacies = len(faciesNames)
         faciesProb = np.zeros(nFacies, dtype=np.float32)
         for i in range(nFacies):
@@ -1154,28 +1149,19 @@ class DefineTruncationRule:
         plt.axis('off')
         axTrunc = plt.subplot(Nrow, Ncol, indx)
         colors = get_colors(nFacies)
-        cmap_name = 'Colormap'
 
         # Create the colormap
-        cm = matplotlib.colors.ListedColormap(colors, name=cmap_name, N=nFacies)
-        bounds = np.linspace(0.5, 0.5 + nFacies, nFacies + 1)
-        ticks = bounds
-        labels = faciesNames
-        colorNumberPerPolygon = []
-        patches = []
         if self.debug_level >= Debug.SOMEWHAT_VERBOSE:
             print('Debug output: Number of facies:          ' + str(nFacies))
             print('Debug output: Number of facies polygons: ' + str(len(faciesPolygons)))
-        maxfIndx = 0
-        colorForFacies = []
         for i in range(len(faciesPolygons)):
             indx = faciesIndxPerPolygon[i]
             fIndx = faciesOrdering[indx]
             poly = faciesPolygons[i]
             polygon = Polygon(poly, closed=True, facecolor=colors[fIndx])
             axTrunc.add_patch(polygon)
-            fName = faciesNames[fIndx]
         axTrunc.set_title(name)
+        return axTrunc
 
     def createAllCubicPlots(self):
         ''' Make truncation map plots for all specified settings for Cubic truncation rule in dictionarly'''
@@ -1393,7 +1379,6 @@ def run_example():
         print('List of settings for Cubic with background facies: {}'
               ''.format(nBackgroundFacies))
 
-        nOverlayFacies = 0
         settingsList = rules.getListOfSettings('Cubic', nBackgroundFacies)
         for i in range(len(settingsList)):
             item = settingsList[i]
@@ -1415,7 +1400,6 @@ def run_example():
         print('List of settings for NonCubic with background facies: {}'
               ''.format(nBackgroundFacies))
 
-        nOverlayFacies = 0
         settingsList = rules.getListOfSettings('NonCubic', nBackgroundFacies)
         for i in range(len(settingsList)):
             item = settingsList[i]
@@ -1446,6 +1430,7 @@ def run_example():
     rules2 = DefineTruncationRule(truncRuleDir)
     rules2.readFile('truncation_settings.dat')
     rules2.createAllNonCubicXMLTemplatesWithOverlayFacies()
+
 
 if __name__ == '__main__':
     run_example()
