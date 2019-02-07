@@ -5,7 +5,7 @@ src/gui/node_modules/
 output-virtualbox-iso/
 packer_cache/
 documentation/
-.rms/prog/
-.rms/project/
+.rms/.local-root/
 aps_gui/
 aps_gui*.plugin
+examples/mock-data/
