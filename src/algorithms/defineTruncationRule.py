@@ -1081,46 +1081,9 @@ class DefineTruncationRule:
         return overlay_setting_list
 
     def makeTruncationMapPlot(self, name, writePngFile=True):
-        ''' Create truncation map plot using same probability for each facies'''
-        truncObj = self.getTruncationRuleObject(name)
-        faciesNames = truncObj.getFaciesInTruncRule()
-        faciesProb = []
-        nFacies = len(faciesNames)
-        faciesProb = np.zeros(nFacies, dtype=np.float32)
-        for i in range(nFacies):
-            faciesProb[i] = (1.0 / float(nFacies))
-        truncObj.setTruncRule(faciesProb)
-        faciesPolygons = truncObj.truncMapPolygons()
-        faciesIndxPerPolygon = truncObj.faciesIndxPerPolygon()
-        faciesOrdering = truncObj.getFaciesOrderIndexList()
-
         # Truncation map is plotted
         fig = plt.figure(figsize=[2.0, 2.0], frameon=False)
-        plt.axis('off')
-        axTrunc = plt.subplot(1, 1, 1)
-        colors = get_colors(nFacies)
-        cmap_name = 'Colormap'
-
-        # Create the colormap
-        cm = matplotlib.colors.ListedColormap(colors, name=cmap_name, N=nFacies)
-        bounds = np.linspace(0.5, 0.5 + nFacies, nFacies + 1)
-        ticks = bounds
-        labels = faciesNames
-        colorNumberPerPolygon = []
-        patches = []
-        if self.debug_level >= Debug.VERBOSE:
-            print('Debug output: Number of facies:          ' + str(nFacies))
-            print('Debug output:Number of facies polygons: ' + str(len(faciesPolygons)))
-        maxfIndx = 0
-        colorForFacies = []
-        for i in range(len(faciesPolygons)):
-            indx = faciesIndxPerPolygon[i]
-            fIndx = faciesOrdering[indx]
-            poly = faciesPolygons[i]
-            polygon = Polygon(poly, closed=True, facecolor=colors[fIndx])
-            axTrunc.add_patch(polygon)
-            fName = faciesNames[fIndx]
-        axTrunc.set_title(name)
+        axTrunc = self.__makeTruncationMapSubPlot(name, fig, 1, 1, 1)
         axTrunc.set_aspect('equal', 'box')
         if writePngFile:
             plotFileName = name + '.png'
