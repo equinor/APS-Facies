@@ -27,7 +27,7 @@
     <GridModelName>GridModelFine</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
     <ResultFaciesParamName>FaciesReal_unconditioned</ResultFaciesParamName>
-    <PrintInfo>3</PrintInfo>
+    <PrintInfo>1</PrintInfo>
     <SeedFile>seed.dat</SeedFile>
     <WriteSeeds>no</WriteSeeds>
     <MainFaciesTable>
@@ -85,6 +85,29 @@
                 </Facies>
             </FaciesProbForModel>
 
+
+            <GaussField name="GF7">
+                <Vario name="GAUSSIAN">
+                    <MainRange>12340.0</MainRange>
+                    <PerpRange>987.0</PerpRange>
+                    <VertRange>5.0</VertRange>
+                    <AzimuthAngle>270.0</AzimuthAngle>
+                    <DipAngle>0.0</DipAngle>
+                </Vario>
+                <SeedForPreview>75151556</SeedForPreview>
+            </GaussField>
+
+            <GaussField name="GF2">
+                <Vario name="GAUSSIAN">
+                    <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE">1000.0</MainRange>
+                    <PerpRange>1000.0</PerpRange>
+                    <VertRange>5.0</VertRange>
+                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">305.0</AzimuthAngle>
+                    <DipAngle>0.0</DipAngle>
+                </Vario>
+                <SeedForPreview>75151556</SeedForPreview>
+            </GaussField>
+
             <GaussField name="GF1">
                 <Vario name="GAUSSIAN">
                     <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAINRANGE">1500.0</MainRange>
@@ -109,12 +132,14 @@
                 <SeedForPreview>276787</SeedForPreview>
             </GaussField>
 
-            <GaussField name="GF2">
+
+
+            <GaussField name="GF5">
                 <Vario name="GAUSSIAN">
-                    <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE">1000.0</MainRange>
-                    <PerpRange>1000.0</PerpRange>
+                    <MainRange>91234.0</MainRange>
+                    <PerpRange>987.0</PerpRange>
                     <VertRange>5.0</VertRange>
-                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">305.0</AzimuthAngle>
+                    <AzimuthAngle>180.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
                 <SeedForPreview>75151556</SeedForPreview>

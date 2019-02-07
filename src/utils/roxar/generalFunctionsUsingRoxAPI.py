@@ -407,6 +407,8 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cel
     :param debug_level: Specify how much info is to be printed to screen. (0 - almost nothing output to screen, 3 - much output to screen)
 
     """
+    if inputValues is None:
+        return
 
     functionName = updateContinuous3DParameterValues.__name__
     nDefinedCells = len(cellIndexDefined)
