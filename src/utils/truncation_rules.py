@@ -93,12 +93,8 @@ class TruncationSpecification:
                     [polygon['facies'], polygon['angle']['value'], polygon['fraction'], polygon['angle']['updatable']]
                     for polygon in self._polygons()
                 ],
-                'overlayGroups': [
-                    [
-                        [[polygon['field'], polygon['facies'], polygon['fraction'], polygon['center']]],
-                        polygon['over']
-                    ] for polygon in self._polygons(_type='overlay')
-                ],
+            # FIXME: Ensure that the content of a group is given in a SINGLE array
+            'overlayGroups': self._get_overlay(),
                 'keyResolution': 209,
             }
         else:
@@ -124,6 +120,23 @@ class TruncationSpecification:
             probabilities=probabilities,
             use_constant_parameters=specification['constantParameters'],
         )
+
+    def _get_overlay(self):
+        overlay = {}
+        for polygon in self._polygons(_type='overlay'):
+            over = self._get_overlay_facies(polygon)
+            if over not in overlay:
+                overlay[over] = []
+            overlay[over].append([polygon['field'], polygon['facies'], polygon['fraction'], polygon['center']])
+        for over in overlay:
+            overlay[over] = [overlay[over], list(over)]
+        return list(overlay.values())
+
+    @staticmethod
+    def _get_overlay_facies(polygon):
+        over = polygon['over']
+        over.sort()
+        return tuple(over)
 
     @staticmethod
     def _get_facies_table(specification):
