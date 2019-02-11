@@ -122,10 +122,13 @@ class APSMainFaciesTable:
        def __checkUniqueFaciesNamesAndCodes(self)
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, facies_table=None, debug_level=Debug.OFF):
+    def __init__(self, ET_Tree=None, modelFileName=None, facies_table=None, blocked_well=None, blocked_well_log=None, debug_level=Debug.OFF):
         self.__debug_level = debug_level
         self.__class_name = self.__class__.__name__
         self.__model_file_name = modelFileName
+
+        self.__blocked_well = blocked_well
+        self.__blocked_well_log = blocked_well_log
 
         # Input facies_table must be a dictionary
         self.__facies_table = FaciesTable()
@@ -148,6 +151,16 @@ class APSMainFaciesTable:
         if obj is None:
             raise ReadingXmlError(model_file_name=self.__model_file_name, keyword=kw)
         else:
+            attr_blockedWell = obj.get('blockedWell')
+            if attr_blockedWell is None:
+                raise ReadingXmlError(model_file_name=self.__model_file_name, keyword=kw)
+            else:
+                self.__blocked_well = attr_blockedWell
+            attr_blockedWellLog = obj.get('blockedWellLog')
+            if attr_blockedWellLog is None:
+                raise ReadingXmlError(model_file_name=self.__model_file_name, keyword=kw)
+            else:
+                self.__blocked_well_log = attr_blockedWellLog
             facies_table = obj
             for facies in facies_table.findall('Facies'):
                 self.__facies_table.append(
@@ -212,6 +225,7 @@ class APSMainFaciesTable:
 
     def XMLAddElement(self, root):
         facies_table = Element('MainFaciesTable')
+        facies_table.attrib = {"blockedWell": self.__blocked_well, "blockedWellLog": self.__blocked_well_log}
         root.append(facies_table)
         for facies in self.__facies_table:
             facies_element = Element('Facies', {'name': facies.name})

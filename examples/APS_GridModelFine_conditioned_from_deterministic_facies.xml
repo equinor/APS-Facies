@@ -14,11 +14,11 @@
     </Optimization>
 
     <SelectedZonesAndRegions>
-        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions> 
-        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions> 
+        <SelectedZoneWithRegions zone="1">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="2">0</SelectedZoneWithRegions>
         <SelectedZoneWithRegions zone="3">0</SelectedZoneWithRegions>
-        <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions> 
-        <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>  
+        <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions>
+        <SelectedZoneWithRegions zone="5">0</SelectedZoneWithRegions>
         <SelectedZoneWithRegions zone="6">0</SelectedZoneWithRegions>
     </SelectedZonesAndRegions>
 
@@ -30,7 +30,7 @@
     <PrintInfo>2</PrintInfo>
     <SeedFile>seed.dat</SeedFile>
     <WriteSeeds>yes</WriteSeeds>
-    <MainFaciesTable>
+    <MainFaciesTable blockedWell="BW" blockedWellLog="facies">
         <Facies name="F1">
             <Code>1</Code>
         </Facies>

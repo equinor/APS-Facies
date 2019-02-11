@@ -21,7 +21,7 @@ import pytest
 
 def defineCommonModelParam(
         apsmodel, rmsProject, rmsWorkflow,  gridModelName,
-        zoneParamName, regionParamName, faciesRealParamNameResult, seedFileName, fTable, debug_level=VERY_VERBOSE_DEBUG
+        zoneParamName, regionParamName, faciesRealParamNameResult, seedFileName, fTable, fTable_blockedWell, fTable_blockedWellLog, debug_level=VERY_VERBOSE_DEBUG
 ):
     # The input data are global variables
 
@@ -39,7 +39,7 @@ def defineCommonModelParam(
     print('Debug level: {}'.format(apsmodel.debug_level))
 
     # Define main facies table
-    main_facies_table = APSMainFaciesTable(facies_table=fTable)
+    main_facies_table = APSMainFaciesTable(facies_table=fTable, blocked_well=fTable_blockedWell, blocked_well_log=fTable_blockedWellLog)
     apsmodel.setMainFaciesTable(main_facies_table)
 
 
@@ -742,7 +742,7 @@ def get_case_1_zone_1():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.VERY_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -762,7 +762,7 @@ def get_case_1_zone_2():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Two zones
     print('Zone: 1')
@@ -788,7 +788,7 @@ def get_case_2_zone_1():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
     )
 
     # Only one zone
@@ -809,7 +809,7 @@ def get_case_2_zone_2():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Two zones
     print('Zone: 1')
@@ -835,7 +835,7 @@ def get_case_3_zone_1():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -855,7 +855,7 @@ def get_case_4_zone_1():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.SOMEWHAT_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -874,7 +874,7 @@ def get_apsmodel_with_no_fmu_markers():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.VERY_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -894,7 +894,7 @@ def get_apsmodel_with_all_fmu_markers():
         apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
         gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, debug_level=Debug.VERY_VERBOSE
+        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.VERY_VERBOSE
     )
     # Only one zone
     print('Zone: 1')
@@ -921,6 +921,8 @@ def create_apsmodel_with_and_without_regions_and_regionparam(include_region_numb
         faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
         seedFileName=SEED_FILE_NAME,
         fTable=fTable,
+        fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
         debug_level=Debug.VERY_VERBOSE
     )
     if add_region_param_name:
