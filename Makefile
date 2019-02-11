@@ -413,6 +413,7 @@ unit-tests: clean-tests run-tests clean-tests
 
 run-tests: links
 	cd $(TEST_FOLDER) && \
+	PYTHONPATH=$(PYTHONPATH) \
 	$(PY.TEST) --basetemp=$(TEST_FOLDER)
 
 clean-tests: clean-integration
