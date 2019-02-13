@@ -44,6 +44,8 @@ import VueTypes from 'vue-types'
 import GaussianPlot from './index'
 import { AppTypes } from '@/utils/typing'
 
+import { DEFAULT_SIZE } from '@/config'
+
 export default {
   name: 'MultipleGaussianPlots',
 
@@ -68,10 +70,7 @@ export default {
                 height: el.clientHeight,
               }
             } else {
-              return {
-                width: 100,
-                height: 100,
-              }
+              return DEFAULT_SIZE
             }
           })
           .reduce((max, curr) => {

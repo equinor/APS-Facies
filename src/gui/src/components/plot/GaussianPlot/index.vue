@@ -12,6 +12,8 @@ import VueTypes from 'vue-types'
 import StaticPlot from '@/components/plot/StaticPlot'
 import { AppTypes } from '@/utils/typing'
 
+import { DEFAULT_SIZE, DEFAULT_COLOR_SCALE } from '@/config'
+
 export default {
   components: {
     StaticPlot,
@@ -25,12 +27,12 @@ export default {
         value: VueTypes.integer.isRequired,
         color: AppTypes.color.isRequired,
       }))
-    ]).def('Viridis'),
+    ]).def(DEFAULT_COLOR_SCALE),
     expand: VueTypes.bool.def(false),
     size: VueTypes.shape({
       width: VueTypes.integer.isRequired,
       height: VueTypes.integer.isRequired,
-    }).def(() => { return { width: 100, height: 100 } }).loose
+    }).def(() => DEFAULT_SIZE).loose
   },
 
   computed: {
