@@ -235,7 +235,7 @@
               <v-flex xs4>
                 <numeric-field
                   :value="simulationSettings.gridAzimuth"
-                  :ranges="{min: 0, max: 360}"
+                  :ranges="{min: -360, max: 360}"
                   label="Grid azimuth"
                   unit="°"
                   hint="The angle between the grid, and UTM"
