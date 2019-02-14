@@ -2,6 +2,58 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.7.0
+
+The GUI should now be ready for first use.
+
+The big change for this release, is the way overlay facies are specified in the GUI.
+The user may now specify a complete non-cubic truncation rule with an arbitrary number of (overlay) polygons.
+
+### Features
+* The included templates for truncation rules have been updated
+  * New naming convention for generic rules
+  * Added concrete examples for Mariner
+    * Implemented some Cubic rules as Non-Cubic
+  * The templates are sorted by number of necessary Facies (and secondarily in alphabetical order)
+* Added save dialog to let user define where to export file to
+
+### Restructure
+* The need for `seed.dat` has been removed from APS modeling (single processing)
+* `matplotlibrc` should now be read appropriately
+  * **Note**: This may cause the test previewer to fail on some systems 
+* The mock now uses HDF5 instead of a `tar.gz` archive
+  * Various edge cases, and issues with the mock has been resolved
+* The custom buttons are now easier to use
+* The way facies are gotten in the GUI has been simplified
+* Changed the way overlay facies is specified
+  * This allows some of the more complex constraints on specifying truncation rules to easily enforced, and to lift some of the mental burden from the user
+* Introduced a global config file for constants in the GUI
+  * The default size of plots
+  * The default color scheme
+* Added the attributes `blockedWell`, and `blockedWellLog` to element MainFaciesTable in the model file
+
+
+### Fixes
+* Will now handle cases where number of specified gauss fields in a zone is larger than number of gauss fields used in truncation rule for the zone.
+* Ensure that the user can specify more than one polygon per background facies group
+* Validation of exported APS model is done **only** when the creation of the file is successful
+  * A single error message is presented to the user
+* If user selects an invalid path and saving fails, the user is alerted (in the GUI)
+* The existantce of empty overlay, or overlay being disabled no longer causes the export to fail
+
+### Miscellaneous
+* Some more cleaning of code
+* Unused code has been removed
+* Added various Quality of Life improvements to the codebase
+* Dependencies are kept up to date
+* Allows the grid azimuth to be negative
+
+## 0.6.0
+
+### Fixes
+* The RMS license server has been changed
+  * Upgraded RMS (11.0.0 -> 11.0.1)
+
 ## 0.5.0
 The user may now see how the gaussian fields, and truncation rule will look in the previewer.
 
