@@ -14,7 +14,7 @@
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
   <PrintInfo> 2 </PrintInfo>
-  <MainFaciesTable>
+  <MainFaciesTable blockedWell="BW" blockedWellLog="facies">
     <Facies name="F1">
       <Code> 1 </Code>
     </Facies>
