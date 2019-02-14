@@ -135,7 +135,12 @@ export default {
           this.$refs.exportDialog.open(defaultPath, {})
             .then((result) => {
               if (result.save) {
-                rms.save(result.path, btoa(exportedXMLString))
+                const resultPromise = rms.save(result.path, btoa(exportedXMLString))
+                resultPromise.then((success) => {
+                  if (!success) {
+                    alert('Noe gikk galt med lagring. Valgte du en sti som ikke finnes?')
+                  }
+                })
               }
             })
         } else {
