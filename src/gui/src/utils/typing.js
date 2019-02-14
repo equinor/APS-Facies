@@ -1,5 +1,6 @@
 import VueTypes from 'vue-types'
 import { GaussianRandomField, TruncationRule } from '@/store/utils/domain'
+import { FaciesGroup } from '@/store/utils/domain/facies'
 
 const rawDataType = VueTypes.arrayOf(VueTypes.object).isRequired
 
@@ -54,6 +55,7 @@ const AppTypes = {
   name: VueTypes.string,
   truncationRule: VueTypes.instanceOf(TruncationRule),
   gaussianRandomField: VueTypes.instanceOf(GaussianRandomField),
+  faciesGroup: VueTypes.instanceOf(FaciesGroup),
 }
 
 export {

@@ -5,6 +5,8 @@
       :key="item.channel"
       :channel="item.channel"
       :value="item.selected"
+      :rule="value"
+      group=""
       @input="val => update(item, val)"
     />
   </div>
@@ -40,7 +42,7 @@ export default {
   computed: {
     alphas () {
       return this.value
-        ? sortByProperty('channel')(this.value.fields)
+        ? sortByProperty('channel')(this.value.backgroundFields)
           .map(item => {
             return {
               channel: item.channel,

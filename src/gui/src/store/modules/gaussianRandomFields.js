@@ -85,21 +85,21 @@ export default {
           })
       } else {
         for (let i = 0; i < remaining; i++) {
-          dispatch('addEmptyField', { zoneId, regionId })
+          dispatch('addEmptyField', { zone: zoneId, region: regionId })
         }
       }
     },
     populate ({ dispatch }, fields) {
       return Promise.all(Object.values(makeFieldData(fields)).map(field => dispatch('addField', { field })))
     },
-    addEmptyField ({ dispatch, state, rootGetters }, { zoneId, regionId } = {}) {
-      zoneId = zoneId || rootGetters.zone
-      regionId = regionId || rootGetters.region
-      dispatch('addField', {
+    addEmptyField ({ dispatch, state, rootGetters }, { zone, region } = {}) {
+      zone = zone || rootGetters.zone
+      region = region || rootGetters.region
+      return dispatch('addField', {
         field: new GaussianRandomField({
-          name: newGaussianFieldName(state, zoneId, regionId),
-          zone: zoneId,
-          region: regionId,
+          name: newGaussianFieldName(state, zone, region),
+          zone,
+          region,
         })
       })
     },

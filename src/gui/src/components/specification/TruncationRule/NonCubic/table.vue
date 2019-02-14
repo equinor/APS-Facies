@@ -22,11 +22,6 @@
     >
       <tr>
         <td class="text-xs-left">
-          <optional-help-item
-            :value="props.item.name"
-          />
-        </td>
-        <td class="text-xs-left">
           <numeric-field
             :value="props.item.angle"
             :ranges="{min: -180.0, max: 180.0}"
@@ -73,7 +68,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import PolygonOrder from '@/components/specification/TruncationRule/order'
 import FaciesSpecification from '@/components/specification/Facies'
 
-import { notEmpty, sortByOrder } from '@/utils'
+import { hasFaciesSpecifiedForMultiplePolygons, sortByOrder } from '@/utils'
 
 export default {
   components: {
@@ -94,23 +89,9 @@ export default {
       return !this.value
         ? []
         : this.value.backgroundPolygons
-          .map(polygon => {
-            const settings = this.value.settings[polygon.id]
-            return {
-              ...polygon,
-              ...settings,
-            }
-          })
     },
     headers () {
       return [
-        {
-          text: 'Polygon',
-          align: 'left',
-          sortable: false,
-          value: 'name',
-          help: '',
-        },
         {
           text: 'Angle',
           align: 'left',
@@ -144,14 +125,8 @@ export default {
       ]
     },
     hasMultipleFaciesSpecified () {
-      return this.value
-        ? Object.values(this.value.polygons)
-          .some(polygon => (
-            notEmpty(polygon.facies) &&
-            this.multipleFaciesSpecified(polygon)
-          ))
-        : false
-    }
+      return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
+    },
   },
 
   methods: {
@@ -162,9 +137,8 @@ export default {
     updateAngle (item, value) {
       return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
     },
-    multipleFaciesSpecified (item) {
-      return Object.values(this.value.polygons)
-        .filter(polygon => polygon.facies === item.facies).length > 1
+    multipleFaciesSpecified ({ facies }) {
+      return hasFaciesSpecifiedForMultiplePolygons(this.value.polygons, facies)
     },
   },
 }

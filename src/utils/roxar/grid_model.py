@@ -81,17 +81,17 @@ def average_of_property_inside_zone_region(
     debug_level=Debug.OFF
     ):
     ''' Calculates average of the input properties in the list parameter_names for the specified realisation number.
-        Note that realisation number 0 is the first realisation. 
-        The average is over the grid cells in the grid model that corresponds to the specified zone number and region number. 
-        Note that zone_values are zone number in each grid cell (of active cells) and zone number starts at 1. Region number value 
+        Note that realisation number 0 is the first realisation.
+        The average is over the grid cells in the grid model that corresponds to the specified zone number and region number.
+        Note that zone_values are zone number in each grid cell (of active cells) and zone number starts at 1. Region number value
         can be any positive integer value and possible values are case dependent.
-        If region_values is not specified , the average is over the cells corresponding to the specified zone number. 
+        If region_values is not specified , the average is over the cells corresponding to the specified zone number.
         Returns a dictionary with parameter name as key and average as value.
     '''
     cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
     return {
         name :  calc_average(
-            cell_index_defined, 
+            cell_index_defined,
             values=getContinuous3DParameterValues(grid_model, name, realization_number, debug_level)
         )  for name in parameter_names
     }
@@ -153,14 +153,13 @@ def get3DParameter(grid_model, parameter_name):
         raise ValueError("Expected non-empty grid model, but was empty. (Grid Model: '{}')".format(grid_model.name))
 
     # Check if specified parameter name exists.
-    found = any([param.name == parameter_name for param in grid_model.properties])
-    if not found:
+    try:
+        return grid_model.properties[parameter_name]
+    except KeyError:
         raise ValueError(
             "The parameter '{}' was expected in grid model '{}', but does not exist."
             "".format(parameter_name, grid_model.name)
         )
-
-    return grid_model.properties[parameter_name]
 
 
 def getContinuous3DParameterValues(grid_model, parameter_name, realization_number=0, debug_level=Debug.OFF):
@@ -236,7 +235,7 @@ def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realiz
     """
     all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number, debug_level)
     if len(zone_number_list) > 0:
-        grid3d = grid_model.get_grid(realization_number)        
+        grid3d = grid_model.get_grid(realization_number)
         # Get all zone values
         zone_values, _ = zone_parameter_values(grid3d, debug_level)
 

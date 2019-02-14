@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { isNumber } from 'lodash'
 import { mapGetters } from 'vuex'
 
 import FractionField from '@/components/selection/FractionField'
@@ -54,7 +55,6 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import FaciesSpecification from '@/components/specification/Facies'
 
 import { updateFacies } from '@/store/utils'
-import { notEmpty } from '@/utils'
 import { AppTypes } from '@/utils/typing'
 
 export default {
@@ -78,11 +78,7 @@ export default {
         ? []
         : this.value.backgroundPolygons
           .map(polygon => {
-            let factor = null
-            const setting = this.value.settings[polygon.id]
-            if (notEmpty(setting)) {
-              factor = setting.factor
-            }
+            const factor = isNumber(polygon.factor) ? polygon.factor : null
             const options = {
               ...polygon,
               hasFactor: !!factor,

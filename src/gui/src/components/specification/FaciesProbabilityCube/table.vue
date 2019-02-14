@@ -90,7 +90,7 @@ export default {
         .map(item => {
           return {
             id: item.id,
-            name: getters['facies/nameById'](item.facies),
+            name: getters['facies/name'](item.facies),
             ...item,
           }
         })

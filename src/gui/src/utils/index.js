@@ -59,6 +59,20 @@ const makeTruncationRuleSpecification = (rule, rootGetters) => {
   }
 }
 
+const hasFaciesSpecifiedForMultiplePolygons = (polygons, facies = null) => {
+  if (polygons instanceof Object) polygons = Object.values(polygons)
+  if (!polygons || polygons.length === 0) return false
+  const faciesCount = polygons
+    .filter(polygon => facies ? polygon.facies === facies : true)
+    .reduce((counts, { facies }) => {
+      counts.hasOwnProperty(facies)
+        ? counts[`${facies}`] += 1
+        : counts[`${facies}`] = 1
+      return counts
+    }, {})
+  return Object.values(faciesCount).some(count => count > 1)
+}
+
 function selectItems ({ items, state, _class }) {
   const ids = items.map(item => item.id || item._id)
   const obj = {}
@@ -136,6 +150,13 @@ const faciesName = obj => {
   return obj
 }
 
+const availableForBackgroundFacies = (getters, rule, facies) => {
+  return !(
+    getters['facies/groups/used'](facies) ||
+    rule.overlayPolygons.map(({ facies }) => facies).indexOf(getId(facies)) >= 0
+  )
+}
+
 const minFacies = (rule, getters) => {
   let minFacies = 0
   const type = getters['truncationRules/typeById'](rule.type) || rule.type
@@ -199,6 +220,7 @@ const sortAlphabetically = arr => {
 }
 
 const sortByProperty = (prop) => (items) => {
+  if (items instanceof Object) items = Object.values(items)
   items.forEach(item => {
     if (!item.hasOwnProperty(prop)) {
       throw new Error(`The item (${item}) does not have the required property on which to sort (${prop})`)
@@ -218,6 +240,8 @@ export {
   defaultSimulationSettings,
   makeData,
   makeTruncationRuleSpecification,
+  hasFaciesSpecifiedForMultiplePolygons,
+  availableForBackgroundFacies,
   selectItems,
   hasValidChildren,
   invalidateChildren,

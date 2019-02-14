@@ -11,7 +11,7 @@ export default {
   actions: {
     select: async ({ commit, dispatch }, blockedWellLog) => {
       commit('CURRENT', blockedWellLog)
-      await dispatch('facies/fetch', null, { root: true })
+      await dispatch('facies/global/fetch', null, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }) => {
       const result = await rms.blockedWellLogParameters(rootGetters.gridModel, rootGetters.blockedWellParameter)

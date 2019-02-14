@@ -4,9 +4,11 @@ const verbosity = process.env.NODE_ENV === 'production' ? 'error' : 'off'
 
 module.exports = {
   root: true,
+
   env: {
     node: true
   },
+
   extends: [
     // https://github.com/vuejs/eslint-plugin-vue#priority-a-essential-error-prevention
     // consider switching to `plugin:vue/strongly-recommended` or `plugin:vue/recommended` for stricter rules.
@@ -15,16 +17,20 @@ module.exports = {
     '@vue/standard',
     'plugin:vue-types/strongly-recommended',
     'plugin:security/recommended',
+    'plugin:vue/essential',
   ],
+
   settings: {
     'vue-types/namespace': ['VueTypes', 'AppTypes'],
   },
+
   // required to lint *.vue files
   plugins: [
     'vue',
     'security',
     // 'html'
   ],
+
   // add your custom rules here
   rules: {
     // allow paren-less arrow functions
@@ -39,9 +45,10 @@ module.exports = {
     'vue/attributes-order': 'error',
     'vue/html-quotes': ['error', 'double'],
     'vue/component-name-in-template-casing': ['error', 'kebab-case', {
-      'ignores': []
+      ignores: []
     }],
   },
+
   parserOptions: {
     parser: 'babel-eslint',
   },

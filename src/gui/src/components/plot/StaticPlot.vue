@@ -13,6 +13,8 @@ import VuePlot from '@statnett/vue-plotly'
 
 import { notEmpty } from '@/utils'
 
+import { DEFAULT_SIZE } from '@/config'
+
 export default {
   components: {
     VuePlot,
@@ -20,8 +22,8 @@ export default {
 
   props: {
     dataDefinition: VueTypes.arrayOf(Object).isRequired,
-    width: VueTypes.integer.def(100),
-    height: VueTypes.integer.def(100),
+    width: VueTypes.integer.def(DEFAULT_SIZE.width),
+    height: VueTypes.integer.def(DEFAULT_SIZE.height),
     staticSize: VueTypes.bool.def(false),
     svg: VueTypes.bool.def(false),
     expand: VueTypes.bool.def(false),
