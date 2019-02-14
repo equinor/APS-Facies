@@ -36,6 +36,10 @@
       @click="exportModelFile"
     />
 
+    <export-dialog
+      ref="exportDialog"
+    />
+
     <v-spacer />
 
     <project-settings />
@@ -54,7 +58,7 @@
 
 import { xml2json } from 'xml-js'
 import UploadButton from 'vuetify-upload-button'
-
+import ExportDialog from '@/components/dialogs/ExportDialog'
 import ProjectSettings from '@/components/dialogs/ProjectSettings'
 
 import rms from '@/api/rms'
@@ -96,6 +100,7 @@ const fileHandler = (store, fileName) => {
 
 export default {
   components: {
+    ExportDialog,
     ProjectSettings,
     IconButton,
     UploadButton
@@ -118,18 +123,31 @@ export default {
       reader.onloadend = fileHandler(this.$store, file.name)
       reader.readAsText(file)
     },
-    async exportModelFile () {
-      // TODO: Show dialog to let user select where to export the modelfile to.
-      //       for now just triggering the functionality to create a modelfile
+    exportModelFile: async function () {
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
-      const result = await rms.isApsModelValid(btoa(exportedXMLString))
-      if (result.valid) {
-        // const path = await rms.chooseDir('save', )
-        rms.save(this.$store.state.parameters.path.project, btoa(exportedXMLString))
-      } else {
-        alert('The file you tried to open is not a valid APS model file and cannot be used\n' +
-          'Fix the following error before opening again:\n\n' +
-          result.error)
+        .catch(error => {
+          alert(error.message)
+        })
+      if (exportedXMLString) {
+        const result = await rms.isApsModelValid(btoa(exportedXMLString))
+        if (result.valid) {
+          const defaultPath = this.$store.state.parameters.path.project + '/myApsExport.xml'
+          this.$refs.exportDialog.open(defaultPath, {})
+            .then((result) => {
+              if (result.save) {
+                const resultPromise = rms.save(result.path, btoa(exportedXMLString))
+                resultPromise.then((success) => {
+                  if (!success) {
+                    alert('Noe gikk galt med lagring. Valgte du en sti som ikke finnes?')
+                  }
+                })
+              }
+            })
+        } else {
+          alert('The model you have defined is not valid and cannot be exported\n' +
+            'Fix the following error before exporting again:\n\n' +
+            result.error)
+        }
       }
     }
   },

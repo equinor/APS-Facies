@@ -442,39 +442,41 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
     faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
   })
 
-  const overLayModelElem = createElement(doc, 'OverLayModel')
-  trunc2DAngleElement.append(overLayModelElem)
+  const overLayFacies = truncRule.overlayPolygons
+  if (overLayFacies.length > 0 && truncRule.useOverlay) {
+    const overLayModelElem = createElement(doc, 'OverLayModel')
+    trunc2DAngleElement.append(overLayModelElem)
 
-  const overLayFacies = Object.values(truncRule.polygons).filter(polygon => !!polygon.overlay)
-  overLayFacies.forEach(polygon => {
-    const groupElement = createElement(doc, 'Group')
-    overLayModelElem.append(groupElement)
+    overLayFacies.forEach(polygon => {
+      const groupElement = createElement(doc, 'Group')
+      overLayModelElem.append(groupElement)
 
-    const alphaFieldElement = createElement(
-      doc,
-      'AlphaField',
-      null,
-      [{
-        name: 'name',
-        value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
-      }])
-    groupElement.append(alphaFieldElement)
+      const alphaFieldElement = createElement(
+        doc,
+        'AlphaField',
+        null,
+        [{
+          name: 'name',
+          value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
+        }])
+      groupElement.append(alphaFieldElement)
 
-    alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
+      alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
 
-    alphaFieldElement.append(createElement(
-      doc,
-      'ProbFrac',
-      polygon.fraction,
-      [{
-        name: 'name',
-        value: rootGetters['facies/name'](polygon.facies)
-      }]
-    ))
+      alphaFieldElement.append(createElement(
+        doc,
+        'ProbFrac',
+        polygon.fraction,
+        [{
+          name: 'name',
+          value: rootGetters['facies/name'](polygon.facies)
+        }]
+      ))
 
-    polygon.group.map(id => rootGetters['facies/name'](id))
-      .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
-  })
+      polygon.group.map(id => rootGetters['facies/name'](id))
+        .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
+    })
+  }
 }
 
 const getNumberOfFieldsForTruncRule = ({ rootState }, parent) => {
@@ -526,31 +528,31 @@ export default {
 
   actions: {
     createModelFileFromStore: ({ rootState, rootGetters }) => {
-      const doc = document.implementation.createDocument('', '', null)
-
-      const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
-      doc.appendChild(rootElem)
-
-      try {
-        addRMSProjectName(rootState, doc, rootElem)
-        addRMSWorkFlowName(rootState, doc, rootElem)
-        addGridModelName(rootState, doc, rootElem)
-        addZoneParamName(rootState, doc, rootElem)
-        addRegionParamName(rootState, doc, rootElem)
-        addResultFaciesParamName(rootState, doc, rootElem)
-        addPrintInfo(rootState, doc, rootElem)
-        addSeedFile(rootState, doc, rootElem)
-        addWriteSeeds(rootState, doc, rootElem)
-        addMainFaciesTable(rootState, doc, rootElem)
-        addZoneModels({ rootState, rootGetters }, doc, rootElem)
-        const serializer = new XMLSerializer()
-        const xmlString = serializer.serializeToString(doc)
-        return xmlString
-      } catch (error) {
-        if (error instanceof APSExportError) {
-          alert(error.name + '\n' + error.message)
+      return new Promise((resolve, reject) => {
+        const doc = document.implementation.createDocument('', '', null)
+        const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
+        doc.appendChild(rootElem)
+        try {
+          addRMSProjectName(rootState, doc, rootElem)
+          addRMSWorkFlowName(rootState, doc, rootElem)
+          addGridModelName(rootState, doc, rootElem)
+          addZoneParamName(rootState, doc, rootElem)
+          addRegionParamName(rootState, doc, rootElem)
+          addResultFaciesParamName(rootState, doc, rootElem)
+          addPrintInfo(rootState, doc, rootElem)
+          addSeedFile(rootState, doc, rootElem)
+          addWriteSeeds(rootState, doc, rootElem)
+          addMainFaciesTable(rootState, doc, rootElem)
+          addZoneModels({ rootState, rootGetters }, doc, rootElem)
+          const serializer = new XMLSerializer()
+          const xmlString = serializer.serializeToString(doc)
+          resolve(xmlString)
+        } catch (error) {
+          if (error instanceof APSExportError) {
+            reject(error)
+          }
         }
-      }
+      })
     }
   }
 }

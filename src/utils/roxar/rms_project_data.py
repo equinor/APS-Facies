@@ -200,9 +200,12 @@ class RMSData:
 
     @staticmethod
     def save_model(path, content):
-        with open(Path(path) / 'APS.xml', 'w') as f:
-            f.write(prettify(b64decode(content).decode()))
-        return True
+        try:
+            with open(Path(path), 'w') as f:
+                f.write(prettify(b64decode(content).decode()))
+            return True
+        except FileNotFoundError:
+            return False
 
     @staticmethod
     def simulate_gaussian_field(field, grid_index_order='F'):
