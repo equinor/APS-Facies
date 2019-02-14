@@ -442,39 +442,41 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
     faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
   })
 
-  const overLayModelElem = createElement(doc, 'OverLayModel')
-  trunc2DAngleElement.append(overLayModelElem)
+  const overLayFacies = truncRule.overlayPolygons
+  if (overLayFacies.length > 0 && truncRule.useOverlay) {
+    const overLayModelElem = createElement(doc, 'OverLayModel')
+    trunc2DAngleElement.append(overLayModelElem)
 
-  const overLayFacies = Object.values(truncRule.polygons).filter(polygon => !!polygon.overlay)
-  overLayFacies.forEach(polygon => {
-    const groupElement = createElement(doc, 'Group')
-    overLayModelElem.append(groupElement)
+    overLayFacies.forEach(polygon => {
+      const groupElement = createElement(doc, 'Group')
+      overLayModelElem.append(groupElement)
 
-    const alphaFieldElement = createElement(
-      doc,
-      'AlphaField',
-      null,
-      [{
-        name: 'name',
-        value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
-      }])
-    groupElement.append(alphaFieldElement)
+      const alphaFieldElement = createElement(
+        doc,
+        'AlphaField',
+        null,
+        [{
+          name: 'name',
+          value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
+        }])
+      groupElement.append(alphaFieldElement)
 
-    alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
+      alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
 
-    alphaFieldElement.append(createElement(
-      doc,
-      'ProbFrac',
-      polygon.fraction,
-      [{
-        name: 'name',
-        value: rootGetters['facies/name'](polygon.facies)
-      }]
-    ))
+      alphaFieldElement.append(createElement(
+        doc,
+        'ProbFrac',
+        polygon.fraction,
+        [{
+          name: 'name',
+          value: rootGetters['facies/name'](polygon.facies)
+        }]
+      ))
 
-    polygon.group.map(id => rootGetters['facies/name'](id))
-      .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
-  })
+      polygon.group.map(id => rootGetters['facies/name'](id))
+        .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
+    })
+  }
 }
 
 const getNumberOfFieldsForTruncRule = ({ rootState }, parent) => {
