@@ -29,6 +29,11 @@ module.exports = {
       .test(/\.js$/)
       .use('IFY')
       .loader('ify-loader')
+
+    config.module
+      .rule('Webpack 4 fix')
+      .test(/\.mjs$/)
+      .type('javascript/auto')
   },
 
   configureWebpack: {
