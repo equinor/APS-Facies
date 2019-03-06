@@ -19,7 +19,7 @@ export default {
       const facies = await rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
       await dispatch('populate', facies)
     },
-    populate: ({ commit, rootState }, facies) => {
+    populate: ({ commit, state, rootState }, facies) => {
       // TODO: Add colors (properly)
       const colors = rootState.constants.faciesColors.available
       const minFaciesCode = facies.map(({ code }) => code).reduce((min, curr) => min < curr ? min : curr, Number.POSITIVE_INFINITY)
@@ -29,7 +29,7 @@ export default {
           facies.color = colors[`${colorIndex}`]
         }
       })
-      const data = makeData(facies, GlobalFacies)
+      const data = makeData(facies, GlobalFacies, state.available)
       commit('AVAILABLE', data)
     },
     new: ({ dispatch, state, rootState }, { code, name, color }) => {
