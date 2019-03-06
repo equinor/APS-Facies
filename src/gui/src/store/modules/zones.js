@@ -47,8 +47,8 @@ export default {
       return rms.zones(rootGetters.gridModel)
         .then(zones => dispatch('populate', { zones }))
     },
-    populate: async ({ commit, dispatch, rootGetters }, { zones }) => {
-      const data = makeData(zones, Zone)
+    populate: async ({ commit, dispatch, state, rootGetters }, { zones }) => {
+      const data = makeData(zones, Zone, state.available)
       commit('AVAILABLE', data)
       const selected = Object.values(data).filter(({ selected }) => !!selected)
       await dispatch('select', selected)

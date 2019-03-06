@@ -36,7 +36,7 @@ export default {
                 rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter)
                   .then(regions => {
                     regions = regions.map(region => { return { ...region, selected: !!zone.selected } })
-                    resolve(dispatch('zones/update', { zoneId: id, regions: makeData(regions, Region) }, { root: true }))
+                    resolve(dispatch('zones/update', { zoneId: id, regions: makeData(regions, Region, zone.regions) }, { root: true }))
                   })
               })
             })

@@ -26,7 +26,7 @@
         <td
           v-if="useProbabilityCubes"
         >
-          <v-select
+          <v-autocomplete
             :value="props.item.probabilityCube"
             :items="probabilityCubes"
             clearable

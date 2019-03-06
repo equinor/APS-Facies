@@ -2,13 +2,17 @@ import _ from 'lodash'
 import uuidv5 from 'uuid/v5'
 import { getId } from '@/utils/typing'
 
-const makeData = (items, _class) => {
+const makeData = (items, _class, originals = null) => {
+  originals = originals ? Object.values(originals) : []
   const data = {}
   if (_class.toLocaleString().indexOf('"CodeName"') >= 0 || _class.toLocaleString().indexOf('"Named"') >= 0) {
     items = items.filter(({ name }) => !!name)
   }
   for (const item of items) {
-    const instance = new _class(item)
+    const instance = originals
+      .find(original => Object.keys(item)
+        .every(key => original[`${key}`] === item[`${key}`])
+      ) || new _class(item)
     data[instance.id] = instance
   }
   return data

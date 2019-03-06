@@ -69,8 +69,8 @@ export default {
       commit('AVAILABLE', facies)
       return Promise.resolve(Object.keys(facies))
     },
-    populate: ({ commit }, facies) => {
-      facies = makeData(facies, Facies)
+    populate: ({ commit, state }, facies) => {
+      facies = makeData(facies, Facies, state.available)
       commit('AVAILABLE', facies)
     },
     updateProbabilities: ({ dispatch, state }, { facies, probabilityCubes }) => {
