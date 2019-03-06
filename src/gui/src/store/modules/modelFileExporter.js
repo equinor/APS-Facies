@@ -97,7 +97,10 @@ const addWriteSeeds = (rootState, doc, parentElement) => {
 }
 
 const addMainFaciesTable = (rootState, doc, parentElement) => {
-  const mainFaciesElement = createElement(doc, 'MainFaciesTable')
+  // getting blockedWell and blockedWellLog
+  const bwParam = rootState.parameters.blockedWell
+  const bwlogParam = rootState.parameters.blockedWellLog
+  const mainFaciesElement = createElement(doc, 'MainFaciesTable', null, [{ name: 'blockedWell', value: bwParam.selected }, { name: 'blockedWellLog', value: bwlogParam.selected }])
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
   const allFacies = Object.values(rootState.facies.global.available)
@@ -447,7 +450,7 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
     const overLayModelElem = createElement(doc, 'OverLayModel')
     trunc2DAngleElement.append(overLayModelElem)
 
-    overLayFacies.forEach(polygon => {
+    overLayFacies.forEach(overlayGroup => {
       const groupElement = createElement(doc, 'Group')
       overLayModelElem.append(groupElement)
 
@@ -457,23 +460,23 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
         null,
         [{
           name: 'name',
-          value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
+          value: rootState.gaussianRandomFields.fields[`${overlayGroup.field}`].name
         }])
       groupElement.append(alphaFieldElement)
 
-      alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
+      alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', overlayGroup.center))
 
       alphaFieldElement.append(createElement(
         doc,
         'ProbFrac',
-        polygon.fraction,
+        overlayGroup.fraction,
         [{
           name: 'name',
-          value: rootGetters['facies/name'](polygon.facies)
+          value: rootGetters['facies/name'](overlayGroup.facies)
         }]
       ))
 
-      polygon.group.map(id => rootGetters['facies/name'](id))
+      rootState.facies.groups.available[overlayGroup.group].facies.map(id => rootGetters['facies/name'](id))
         .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
     })
   }
