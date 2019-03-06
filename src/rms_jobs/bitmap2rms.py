@@ -99,7 +99,7 @@ def get_arguments():
 
 def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
-    model_file = get_specification_file(**kwargs)
+    model_file = get_specification_file(_type=SpecificationType.CONVERT_BITMAP, **kwargs)
     print('Model file: {}'.format(model_file))
     debug_level = params['debug_level']
     run_test_script = False

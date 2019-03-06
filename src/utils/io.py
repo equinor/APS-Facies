@@ -15,7 +15,8 @@ def write_status_file(status, always=False):
             f.write('{status}\n'.format(status=int(status)))
 
 
-def writeFile(fileName, a, nx, ny, debug_level=Debug.OFF):
+def writeFile(fileName, a, nx, ny, debug_level=Debug.SOMEWHAT_VERBOSE):
+    print('Write file: {}'.format(fileName))
     with open(fileName, 'w') as file:
         # Choose an arbitrary heading
         outstring = '''-996  {ny}  50.000000     50.000000

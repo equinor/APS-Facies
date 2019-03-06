@@ -64,7 +64,7 @@
         <!--  Zone 1 -->
         <Zone number="1">
             <UseConstProb>1</UseConstProb>
-            <SimBoxThickness>235.0</SimBoxThickness>
+            <SimBoxThickness>240.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
                     <ProbCube>0.4</ProbCube>
@@ -150,7 +150,7 @@
         <!--  Zone 2 -->
         <Zone number="2">
             <UseConstProb>1</UseConstProb>
-            <SimBoxThickness>442.0</SimBoxThickness>
+            <SimBoxThickness>410.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
                     <ProbCube>0.4</ProbCube>
@@ -273,7 +273,7 @@
         <!--  Zone 3 -->
         <Zone number="3">
             <UseConstProb>1</UseConstProb>
-            <SimBoxThickness>106.0</SimBoxThickness>
+            <SimBoxThickness>120.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
                     <ProbCube>0.3</ProbCube>
@@ -356,7 +356,7 @@
         <!--  Zone 4 -->
         <Zone number="4">
             <UseConstProb>1</UseConstProb>
-            <SimBoxThickness>334.0</SimBoxThickness>
+            <SimBoxThickness>290.0</SimBoxThickness>
             <FaciesProbForModel>
                 <Facies name="F1">
                     <ProbCube>0.3</ProbCube>

@@ -6,7 +6,7 @@
 <!-- Facies realization parameter: FaciesReal_case1  -->
 
 <APSModel version="1.0">
-    <Preview zoneNumber="4" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
+    <Preview zoneNumber="1" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
     </Preview>
     <Optimization>
         <UseMemoization>1</UseMemoization>
@@ -25,7 +25,7 @@
     <GridModelName>GridModelCoarse</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
     <ResultFaciesParamName>FaciesReal_unconditioned</ResultFaciesParamName>
-    <PrintInfo>3</PrintInfo>
+    <PrintInfo>2</PrintInfo>
     <SeedFile>seed.dat</SeedFile>
     <WriteSeeds>yes</WriteSeeds>
     <MainFaciesTable blockedWell="BW" blockedWellLog="facies">

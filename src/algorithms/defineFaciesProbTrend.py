@@ -143,7 +143,7 @@ class DefineFaciesProb(BaseDefineFacies):
                     code_array = facies_real_values[cell_index]
                     p_index_array  = prob_index[code_array]
                     weigth_array = probabilities[f, p_index_array]
-                    prob_average = weigth_array.average()
+                    prob_average = np.average(weigth_array)
                     if self.debug_level >= Debug.ON:
                         print('Average probability (volume fraction) for facies {} zone {}  is: {}'
                               ''.format(facies_name, zone_number+1, prob_average))

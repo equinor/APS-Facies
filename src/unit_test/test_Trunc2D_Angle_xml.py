@@ -8,10 +8,10 @@ import numpy as np
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.unit_test.constants import (
-    ANGLE_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, OUTPUT_MODEL_FILE_NAME1,
+    ANGLE_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, FACIES_OUTPUT_FILE_VECTORIZED, OUTPUT_MODEL_FILE_NAME1,
     OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, USE_CONST_TRUNC_PARAM, KEYRESOLUTION
 )
-from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons
+from src.unit_test.helpers import apply_truncations, getFaciesInTruncRule, truncMapPolygons, apply_truncations_vectorized
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import prettify
 
@@ -472,6 +472,14 @@ def run(
         nGaussFields=nGaussFields,
         gaussFieldFiles=ANGLE_GAUSS_FIELD_FILES,
         faciesOutputFile=FACIES_OUTPUT_FILE
+    )
+
+    apply_truncations_vectorized(
+        truncRule=truncRule,
+        faciesReferenceFile=faciesReferenceFile,
+        nGaussFields=nGaussFields,
+        gaussFieldFiles=ANGLE_GAUSS_FIELD_FILES,
+        faciesOutputFile=FACIES_OUTPUT_FILE_VECTORIZED
     )
 
 

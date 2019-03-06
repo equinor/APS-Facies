@@ -10,7 +10,7 @@
     </Preview>
     <Optimization>
         <UseMemoization>1</UseMemoization>
-        <MemoizationResolution>109</MemoizationResolution>
+        <MemoizationResolution>100</MemoizationResolution>
     </Optimization>
 
     <SelectedZonesAndRegions>
@@ -391,6 +391,7 @@
                         <Group>
                             <AlphaField name="GF3">
                                 <TruncIntervalCenter>0.0</TruncIntervalCenter>
+<!--                                <TruncIntervalCenter>0.5</TruncIntervalCenter> -->
                                 <ProbFrac name="F3">1.0</ProbFrac>
                             </AlphaField>
                             <BackGround>F2</BackGround>

@@ -1101,8 +1101,10 @@ class DefineTruncationRule:
         faciesNames = truncObj.getFaciesInTruncRule()
         nFacies = len(faciesNames)
         faciesProb = np.zeros(nFacies, dtype=np.float32)
+        f = -1.0
         for i in range(nFacies):
-            faciesProb[i] = (1.0 / float(nFacies))
+            f = -f
+            faciesProb[i] = (1.0 / float(nFacies)) + 0.001*f
         truncObj.setTruncRule(faciesProb)
         faciesPolygons = truncObj.truncMapPolygons()
         faciesIndxPerPolygon = truncObj.faciesIndxPerPolygon()

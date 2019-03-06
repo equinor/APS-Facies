@@ -9,6 +9,7 @@ Output:
       Facies realisation updated for specified zones.
       Updated 3D parameter for transformed gaussian fields.
 """
+# from src.utils.check_performance import do_cprofile
 import numpy as np
 from collections import OrderedDict
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
@@ -24,6 +25,7 @@ from src.utils.methods import calc_average, get_specification_file
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.checks import check_probability_values,  check_probability_normalisation
+
 
 def transform_empiric(cell_index_defined, gauss_values, alpha_values):
     """
@@ -473,6 +475,7 @@ def update_RMS_parameter(grid_model,
         else:
             print('--- Create or update parameter: {} for zone number: {}'.format(rms_variable_name, zone_number))
 
+# @do_cprofile
 def run(
         roxar=None, project=None,
         eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
@@ -748,9 +751,19 @@ def run(
         # Apply truncations and calculate or update facies realization
         if debug_level >= Debug.VERBOSE:
             print('--- Truncate transformed Gaussian fields.')
-        facies_real, volume_fraction = zone_model.applyTruncations(
-            probability_defined, gf_alpha_for_current_zone, facies_real, len(cell_index_defined), cell_index_defined
-        )
+
+        if zone_model.key_resolution > 0:
+            # Use optimization
+            if debug_level >= Debug.VERBOSE:
+                print('--- Use optimization (Memoization and vectorization)')
+            facies_real, volume_fraction = zone_model.applyTruncations_vectorized(
+                probability_defined, gf_alpha_for_current_zone, facies_real, len(cell_index_defined), cell_index_defined
+            )
+        else:
+            # Do not use optimization
+            facies_real, volume_fraction = zone_model.applyTruncations(
+                probability_defined, gf_alpha_for_current_zone, facies_real, len(cell_index_defined), cell_index_defined
+            )
 
         if debug_level >= Debug.ON:
             print('')

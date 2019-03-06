@@ -121,7 +121,7 @@ from src.utils.methods import SpecificationType, get_debug_level, get_specificat
 
 
 def run(roxar=None, project=None, **kwargs):
-    model_file_name = get_specification_file(**kwargs)
+    model_file_name = get_specification_file(_type=SpecificationType.PROBABILITY_TREND, **kwargs)
     print('Input model file: {}'.format(model_file_name))
     debug_level = get_debug_level(**kwargs)
     define_facies_trend = DefineFaciesProb(model_file_name, project, debug_level=debug_level)

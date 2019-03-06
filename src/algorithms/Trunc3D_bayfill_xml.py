@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 import copy
 import math
-
+import numpy as np
 from warnings import warn
 from xml.etree.ElementTree import Element
 
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
-from src.utils.roxar.grid_model import getContinuous3DParameterValues
 from src.utils.xmlUtils import getKeyword, isFMUUpdatable, createFMUvariableNameForBayfillTruncation
 
 
@@ -45,6 +44,8 @@ Description: This truncation rule was the first truncation rule developed in thi
    def getFaciesOrderIndexList(self)
    def getFaciesInTruncRule(self)
    def getNGaussFieldsInModel(self)
+   def getUseZ(self)
+   def getZTruncationValue(self)
 
   --- Set functions ---
    def setParamSF(self, paramName)
@@ -87,7 +88,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # Specific variables for class Trunc3D_bayfill
         self._className = self.__class__.__name__
 
-        self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
+#        self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
+        self.__fIndxPerPolygon = np.arange(5, dtype=np.int32)
 
         # Internal data structure
         self.__param_sf = []
@@ -103,7 +105,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__Zm = 0
 
         # Tolerance used for probabilities
-        self.__eps = self._epsFaciesProb
+        self.__eps = 0.5*self._epsFaciesProb
 
         # Define if truncation parameters are constant for all grid cells or
         # vary from cell to cell.
@@ -440,6 +442,12 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def getNGaussFieldsInModel(self):
         return 3
 
+    def getUseZ(self):
+        return self.__useZ
+
+    def getZTruncationValue(self):
+        return self.__Zm
+
     def useConstTruncModelParam(self):
         return self.__useConstTruncModelParam
 
@@ -465,6 +473,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def getTruncationParam(self, gridModel, realNumber):
         # Read truncation parameters
+        from src.utils.roxar.grid_model import getContinuous3DParameterValues
         paramName = self.__param_sf_name
         if self._debug_level >= Debug.VERBOSE:
             print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self._className)
@@ -697,7 +706,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             sf = 0.0001
 
         # Tolerance when comparing two float values
-        eps = 0.0001
+        eps = self.__eps
         YWIB = 1.0
         Ym = 0.0
         Ym2 = 0.0
@@ -732,8 +741,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if sumProb == 0.0:
             raise ValueError('Error: All input probabilities are <= 0.0')
 
-        if not (1.0 + eps) >= sumProb >= (1.0 - eps):
-            print(' Warning: Sum of input probabilities is not equal to 1.0')
+        if not (1.0 + 2.0*eps) >= sumProb >= (1.0 - 2.0*eps):
+            print(' Warning: In truncation rule type: bayfill.\n'
+                  '          Sum of input probabilities is {} and not within 1.0 +/- {}'
+                  ''.format(sumProb, 2.0*eps)
+                  )
             print('          Adjust all probabilities by normalizing the probabilities.')
 
         # Very small adjustments if abs(sumProb) < eps
@@ -1752,8 +1764,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__polygons = polygons
         self.__useZ = useZ
         self.__Zm = Zm
+        # Set base class facies polygons
+        self._faciesPolygons = copy.copy(self.__polygons)
+        self.num_polygons = len(self._faciesPolygons)
 
-    def defineFaciesByTruncRule(self, alphaCoord):
+    def defineFaciesByTruncRule_old(self, alphaCoord):
         """defineFaciesByTruncRule: Calculate facies by applying the truncation rule.
 
            Input:
@@ -1804,6 +1819,18 @@ class Trunc3D_bayfill(Trunc2D_Base):
         faciesCode = self._faciesCode[fIndx]
 
         return faciesCode, fIndx
+
+
+    def facies_index_in_truncation_rule_for_polygon(self, polygon_index):
+        indx = self.__fIndxPerPolygon[polygon_index]
+        if indx < 0:
+            print('indx: {} polygon number: {}'.format(indx, polygon_index))
+            assert indx >= 0
+        return indx
+
+    def get_background_index_in_truncaction_rule(self):
+        bg_index_in_trunc_rule = self.__fIndxPerPolygon
+        return bg_index_in_trunc_rule
 
     def setParamSFConst(self, value):
         if not (0 <= value <= 1):

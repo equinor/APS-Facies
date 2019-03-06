@@ -739,7 +739,8 @@
                         </Group>
                         <Group>
                             <AlphaField name="GF4">
-                                <TruncIntervalCenter>0.5</TruncIntervalCenter>
+<!--                                <TruncIntervalCenter>0.5</TruncIntervalCenter>  -->
+                                <TruncIntervalCenter>0.51</TruncIntervalCenter>
                                 <ProbFrac name="F6">1.0</ProbFrac>
                             </AlphaField>
                             <BackGround>F1</BackGround>
