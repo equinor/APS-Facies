@@ -40,6 +40,7 @@ export default {
 
   methods: {
     async refresh () {
+      await this.$store.dispatch('facies/normalize')
       this.waitingForSimulation = true
       try {
         await this.$store.dispatch('truncationRules/updateRealization', this.rule)
