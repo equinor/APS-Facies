@@ -21,16 +21,18 @@ const compareFacies = (facies, other, beStrict = false) => {
 
 const indexOfFacies = (state, facies) => { return state.available.findIndex(item => compareFacies(item, facies)) }
 
-const fetchParameterHelper = (commit, dispatch, promise) => {
-  return promise
-    .then(result => {
-      commit('AVAILABLE', result)
-      if (result.length === 1) {
-        dispatch('select', result[0])
-      } else if (result.length === 0) {
-        dispatch('select', null)
-      }
-    })
+const fetchParameterHelper = async ({ commit, dispatch }, promise) => {
+  const result = await promise
+  commit('AVAILABLE', result)
+  await selectOnlyParameter({ dispatch }, result)
+}
+
+const selectOnlyParameter = async ({ dispatch }, result) => {
+  if (result.length === 1) {
+    await dispatch('select', result[0])
+  } else if (result.length === 0) {
+    await dispatch('select', null)
+  }
 }
 
 const mirrorZoneRegions = store => {
@@ -123,4 +125,5 @@ export {
   changeFacies,
   compareFacies,
   makeOption,
+  selectOnlyParameter,
 }

@@ -30,7 +30,7 @@ Tip: RegionParamName in the APS model File must be one of { ${state.available.jo
     },
     fetch: ({ commit, dispatch, rootGetters }) => {
       commit('CURRENT', null)
-      return fetchParameterHelper(commit, dispatch, rms.regionParameters(rootGetters.gridModel))
+      return fetchParameterHelper({ commit, dispatch }, rms.regionParameters(rootGetters.gridModel))
     },
   },
 
