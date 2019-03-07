@@ -5,6 +5,7 @@ import rms from '@/api/rms'
 const parametersDependentOnGrid = [
   'region',
   'blockedWell',
+  'blockedWellLog',
   'rmsTrend',
   'probabilityCube',
   'grid',
