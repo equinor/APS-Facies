@@ -93,6 +93,7 @@ export default new Vuex.Store({
       // Facies
       await dispatch('facies/global/populate', Object.values(data.facies.global.available))
       await dispatch('facies/populate', Object.values(data.facies.available))
+      await dispatch('facies/groups/populate', Object.values(data.facies.groups.available))
       await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
 
       // Gaussian Random Fields

@@ -238,6 +238,14 @@ const sortByOrder = (items, index, isDescending) => {
   return sortByProperty('order')(items)
 }
 
+const toIdentifiedObject = items => {
+  items = Object.values(items)
+  return items.reduce((obj, item) => {
+    obj[getId(item)] = item
+    return obj
+  }, {})
+}
+
 export {
   sortByProperty,
   sortByOrder,
@@ -261,4 +269,5 @@ export {
   isEmpty,
   notEmpty,
   sortAlphabetically,
+  toIdentifiedObject,
 }
