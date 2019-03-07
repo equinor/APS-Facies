@@ -26,6 +26,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    _loaded: false,
   },
 
   strict: process.env.NODE_ENV !== 'production',
@@ -49,13 +50,16 @@ export default new Vuex.Store({
   },
 
   actions: {
-    fetch ({ dispatch }) {
-      return Promise.all([
-        dispatch('gridModels/fetch'),
-        dispatch('constants/fetch'),
-        dispatch('truncationRules/fetch'),
-        dispatch('parameters/path/fetch'),
-      ])
+    async fetch ({ dispatch, commit, state }) {
+      if (!state._loaded) {
+        await Promise.all([
+          dispatch('gridModels/fetch'),
+          dispatch('constants/fetch'),
+          dispatch('truncationRules/fetch'),
+          dispatch('parameters/path/fetch'),
+        ])
+        commit('FINISHED')
+      }
     },
     async populate ({ dispatch, state }, data) {
       await dispatch('fetch')
@@ -101,10 +105,13 @@ export default new Vuex.Store({
 
       // Truncation rules
       await dispatch('truncationRules/populate', data.truncationRules)
-    }
+    },
   },
 
   mutations: {
+    FINISHED: state => {
+      state._loaded = true
+    },
   },
 
   getters: {
@@ -191,7 +198,9 @@ export default new Vuex.Store({
             // TODO: Add quality
             ...grid.simBox.size,
             z: getters.zone
-              ? grid.simBox.size.z[getters.zone.code]
+              ? grid.simBox.size.z instanceof Object
+                ? grid.simBox.size.z[getters.zone.code]
+                : grid.simBox.size.z // Assuming it is a number
               : 0,
           },
           simulationBoxOrigin: {
