@@ -62,7 +62,7 @@ const mirrorZoneRegions = store => {
 }
 
 const updateFacies = (dispatch, rule, polygon, faciesId, swap = true) => {
-  const existing = Object.values(rule.polygons)
+  const existing = rule.polygons
     .find(polygon => polygon.facies === faciesId)
   return existing && swap
     ? dispatch('truncationRules/swapFacies', {

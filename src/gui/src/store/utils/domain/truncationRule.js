@@ -26,12 +26,12 @@ const structurePolygons = (polygons, _isParsed = false) => {
 }
 
 class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
-  constructor ({ polygons, fields, _fields, _realization, ...rest }) {
+  constructor ({ polygons, _polygons, fields, _fields, _realization, ...rest }) {
     super(rest)
     polygons = structurePolygons(polygons, rest._isParsed)
 
     this.type = null
-    this.polygons = polygons
+    this._polygons = polygons || _polygons
     this._fields = fields || _fields
 
     this._realization = _realization
@@ -60,6 +60,12 @@ class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
     return this._fields.find(item => item.channel === channel)
   }
 
+  get polygons () {
+    // TODO: Consider using sortByProperty
+    return Object.values(this._polygons)
+      .sort((a, b) => a.order - b.order)
+  }
+
   get fields () { return this._fields.map(item => { return { ...item, overlay: false } }) }
 
   get backgroundFields () {
@@ -73,7 +79,7 @@ class TruncationRule extends ZoneRegionDependent(Named(BaseItem)) {
   get useOverlay () { return false }
 
   get backgroundPolygons () {
-    return Object.values(this.polygons)
+    return this.polygons
       .filter(({ overlay }) => !overlay)
   }
 }
@@ -125,7 +131,7 @@ class OverlayedTruncationRule extends TruncationRule {
 
   get overlayPolygons () {
     return this.useOverlay
-      ? Object.values(this.polygons)
+      ? this.polygons
         .filter(({ overlay }) => !!overlay)
       : []
   }
@@ -185,7 +191,7 @@ class Bayfill extends TruncationRule {
       'Subbay': 'YSF',
       'Bayhead Delta': 'SBHD',
     }
-    return Object.values(this.polygons)
+    return this.polygons
       .filter(polygon => !!polygon.factor)
       .map(polygon => { return { ...polygon, name: _mapping[polygon.name] } })
   }

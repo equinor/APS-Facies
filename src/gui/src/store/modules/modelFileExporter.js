@@ -432,7 +432,7 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
   backGroundModelElem.append(createElement(doc, 'AlphaFields', alphaNames))
   backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
   // The background polygons
-  const backGroundPolygons = Object.values(truncRule.polygons).filter(polygon => polygon.overlay === false)
+  const backGroundPolygons = truncRule.polygons.filter(polygon => !polygon.overlay)
   backGroundPolygons.forEach(polygon => {
     // facies Element
     const faciesName = rootGetters['facies/name'](polygon.facies)
@@ -498,7 +498,7 @@ const getAlphaNames = ({ rootState }, truncRule) => {
 }
 
 const findFaciesNameForNamedPolygon = ({ rootState }, truncRule, polygonName) => {
-  const polygonInRule = Object.values(truncRule.polygons).find(polygon => polygon.name === polygonName)
+  const polygonInRule = truncRule.polygons.find(polygon => polygon.name === polygonName)
   const faciesInZone = Object.values(rootState.facies.available).find(facies => facies.id === polygonInRule.facies)
   const globalFacies = Object.values(rootState.facies.global.available).find(e => e.id === faciesInZone.facies)
   return globalFacies.name
