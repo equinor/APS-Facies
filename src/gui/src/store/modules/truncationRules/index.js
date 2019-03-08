@@ -141,7 +141,7 @@ const processPolygons = (getters, { polygons, type, settings }) => {
 }
 
 const findPolygonInRule = (rule, polygon) => {
-  return rule.polygons[`${polygon.id}`]
+  return rule._polygons[`${polygon.id}`]
 }
 
 const setFacies = (polygons, src, dest) => {
@@ -150,7 +150,7 @@ const setFacies = (polygons, src, dest) => {
 
 function swapFacies (rule, polygons) {
   if (polygons.length !== 2) throw new Error('Only two polygons may be swapped')
-  const newPolygons = cloneDeep(rule.polygons)
+  const newPolygons = cloneDeep(rule._polygons)
 
   const first = findPolygonInRule(rule, polygons[0])
   const other = findPolygonInRule(rule, polygons[1])
@@ -162,7 +162,7 @@ function swapFacies (rule, polygons) {
 }
 
 const setPolygonValue = (state, rule, polygon, property, value) => {
-  Vue.set(state.rules[`${rule.id}`].polygons[`${polygon.id}`], property, value)
+  Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], property, value)
 }
 
 const setProperty = (state, rule, property, values) => {
@@ -300,7 +300,7 @@ export default {
     async addPolygon ({ commit, dispatch, rootState }, { rule, group = '', order = null, overlay = false }) {
       if (group) group = getId(group)
       if (!isNumber(order) || order < 0) {
-        const polygons = Object.values(rule.polygons)
+        const polygons = rule.polygons
         // TODO: Filter on group as well
           .filter(polygon => polygon.overlay === overlay)
         order = polygons.length === 0
@@ -317,7 +317,7 @@ export default {
         fraction: 1,
         proportion: 1, // TODO: ...
         order,
-        name: 1 + Object.values(rule.polygons)
+        name: 1 + rule.polygons
           .map(polygon => polygon.name)
           .reduce((max, curr) => curr > max ? curr : max, 0),
       }
@@ -347,7 +347,7 @@ export default {
       } else if (rule.type === 'cubic') {
         throw new Error('Cubic is not implemented')
       }
-      const polygons = cloneDeep(rule.polygons)
+      const polygons = cloneDeep(rule._polygons)
       Object.values(polygons).forEach(polygon => {
         if (polygon.order >= order && polygon.overlay === overlay) {
           polygon.order += 1
@@ -461,7 +461,7 @@ export default {
       commit('CHANGE_FACIES', { ruleId: rule.id || rule, polygonId, faciesId })
 
       if (!rootState.facies.available[`${faciesId}`].previewProbability) {
-        const probability = rule.polygons[`${polygonId}`].proportion
+        const probability = rule._polygons[`${polygonId}`].proportion
         await dispatch('facies/updateProbability', { facies: faciesId, probability }, { root: true })
       }
       await dispatch('normalizeProportionFactors', { rule })
@@ -482,13 +482,13 @@ export default {
     },
     toggleOverlay ({ commit, dispatch }, { rule, value }) {
       commit('CHANGE_OVERLAY_USAGE', { rule, value })
-      if (Object.values(rule.polygons).filter(({ overlay }) => !!overlay).length === 0) {
+      if (rule.polygons.filter(({ overlay }) => !!overlay).length === 0) {
         dispatch('addPolygon', { rule, overlay: true })
       }
     },
     async normalizeProportionFactors ({ dispatch, rootGetters }, { rule }) {
       const proportional = false /* TODO: should be moved to the state as an option for the user */
-      const facies = Object.values(rule.polygons)
+      const facies = rule.polygons
         .reduce((obj, polygon) => {
           const id = polygon.facies
           if (id) {
@@ -514,7 +514,7 @@ export default {
 
       // Ensure that facies that has only been assigned to a single polygon have a 'Proportion Factor' of 1
       await Promise.all(rootGetters['facies/selected']
-        .map(facies => Object.values(rule.polygons).filter(polygon => polygon.facies === facies.id))
+        .map(facies => rule.polygons.filter(polygon => polygon.facies === facies.id))
         .filter(items => items.length === 1)
         .map(items => items[0])
         .map(polygon => dispatch('changeProportionFactors', { rule, polygon, value: 1 })))
@@ -552,10 +552,10 @@ export default {
       Vue.delete(state.rules, ruleId)
     },
     REMOVE_POLYGON: (state, { rule, polygon }) => {
-      Vue.delete(state.rules[`${rule.id}`].polygons, polygon.id)
+      Vue.delete(state.rules[`${rule.id}`]._polygons, polygon.id)
     },
     SET_FACIES: (state, { ruleId, polygons }) => {
-      Vue.set(state.rules[`${ruleId}`], 'polygons', polygons)
+      Vue.set(state.rules[`${ruleId}`], '_polygons', polygons)
     },
     UPDATE_REALIZATION: (state, { rule, data }) => {
       Vue.set(state.rules[`${rule.id}`], '_realization', data)
@@ -564,24 +564,24 @@ export default {
       state.rules[`${rule.id}`]._useOverlay = value
     },
     UPDATE_OVERLAY_CENTER: (state, { rule, polygon, value }) => {
-      state.rules[rule.id].polygons[polygon.id].center = value
+      state.rules[rule.id]._polygons[polygon.id].center = value
     },
     UPDATE_OVERLAY_FRACTION: (state, { rule, polygon, value }) => {
-      state.rules[rule.id].polygons[polygon.id].fraction = value
+      state.rules[rule.id]._polygons[polygon.id].fraction = value
     },
     UPDATE_BACKGROUND_GROUP: (state, { rule, polygon, value }) => {
-      state.rules[rule.id].polygons[polygon.id].group = value
+      state.rules[rule.id]._polygons[polygon.id].group = value
     },
     CHANGE_TYPE: (state, { type }) => changePreset(state, 'type', type),
     CHANGE_TEMPLATE: (state, { template }) => changePreset(state, 'template', template.text),
     CHANGE_FACIES: (state, { ruleId, polygonId, faciesId }) => {
-      state.rules[`${ruleId}`].polygons[`${polygonId}`].facies = faciesId
+      state.rules[`${ruleId}`]._polygons[`${polygonId}`].facies = faciesId
     },
     CHANGE_POLYGONS: (state, { rule, polygons }) => {
-      setProperty(state, rule, 'polygons', polygons)
+      setProperty(state, rule, '_polygons', polygons)
     },
     CHANGE_ANGLES: (state, { rule, polygon, value }) => {
-      Vue.set(state.rules[`${rule.id}`].polygons[`${polygon.id}`], 'angle', value)
+      Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'angle', value)
     },
     CHANGE_FIELDS: (state, { ruleId, channel, fieldId }) => {
       state.rules[`${ruleId}`].fieldByChannel(channel).field = fieldId

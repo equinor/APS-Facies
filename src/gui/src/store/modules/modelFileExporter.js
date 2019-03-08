@@ -97,7 +97,10 @@ const addWriteSeeds = (rootState, doc, parentElement) => {
 }
 
 const addMainFaciesTable = (rootState, doc, parentElement) => {
-  const mainFaciesElement = createElement(doc, 'MainFaciesTable')
+  // getting blockedWell and blockedWellLog
+  const bwParam = rootState.parameters.blockedWell
+  const bwlogParam = rootState.parameters.blockedWellLog
+  const mainFaciesElement = createElement(doc, 'MainFaciesTable', null, [{ name: 'blockedWell', value: bwParam.selected }, { name: 'blockedWellLog', value: bwlogParam.selected }])
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
   const allFacies = Object.values(rootState.facies.global.available)
@@ -429,7 +432,7 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
   backGroundModelElem.append(createElement(doc, 'AlphaFields', alphaNames))
   backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
   // The background polygons
-  const backGroundPolygons = Object.values(truncRule.polygons).filter(polygon => polygon.overlay === false)
+  const backGroundPolygons = truncRule.polygons.filter(polygon => !polygon.overlay)
   backGroundPolygons.forEach(polygon => {
     // facies Element
     const faciesName = rootGetters['facies/name'](polygon.facies)
@@ -442,38 +445,44 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
     faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
   })
 
-  const overLayFacies = truncRule.overlayPolygons
-  if (overLayFacies.length > 0 && truncRule.useOverlay) {
+  const overlayGroups = truncRule.overlayPolygons
+    .reduce((obj, polygon) => {
+      if (!obj.hasOwnProperty(polygon.group)) obj[polygon.group] = []
+      obj[polygon.group].push(polygon)
+      return obj
+    }, {})
+  if (Object.values(overlayGroups).length > 0 && truncRule.useOverlay) {
     const overLayModelElem = createElement(doc, 'OverLayModel')
     trunc2DAngleElement.append(overLayModelElem)
 
-    overLayFacies.forEach(polygon => {
+    Object.keys(overlayGroups).forEach(overlayGroup => {
       const groupElement = createElement(doc, 'Group')
       overLayModelElem.append(groupElement)
 
-      const alphaFieldElement = createElement(
-        doc,
-        'AlphaField',
-        null,
-        [{
-          name: 'name',
-          value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
-        }])
-      groupElement.append(alphaFieldElement)
+      overlayGroups[`${overlayGroup}`].forEach(polygon => {
+        const alphaFieldElement = createElement(
+          doc,
+          'AlphaField',
+          null,
+          [{
+            name: 'name',
+            value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
+          }])
+        groupElement.append(alphaFieldElement)
 
-      alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
+        alphaFieldElement.append(createElement(doc, 'TruncIntervalCenter', polygon.center))
 
-      alphaFieldElement.append(createElement(
-        doc,
-        'ProbFrac',
-        polygon.fraction,
-        [{
-          name: 'name',
-          value: rootGetters['facies/name'](polygon.facies)
-        }]
-      ))
-
-      polygon.group.map(id => rootGetters['facies/name'](id))
+        alphaFieldElement.append(createElement(
+          doc,
+          'ProbFrac',
+          polygon.fraction,
+          [{
+            name: 'name',
+            value: rootGetters['facies/name'](polygon.facies)
+          }]
+        ))
+      })
+      rootState.facies.groups.available[`${overlayGroup}`].facies.map(id => rootGetters['facies/name'](id))
         .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
     })
   }
@@ -495,7 +504,7 @@ const getAlphaNames = ({ rootState }, truncRule) => {
 }
 
 const findFaciesNameForNamedPolygon = ({ rootState }, truncRule, polygonName) => {
-  const polygonInRule = Object.values(truncRule.polygons).find(polygon => polygon.name === polygonName)
+  const polygonInRule = truncRule.polygons.find(polygon => polygon.name === polygonName)
   const faciesInZone = Object.values(rootState.facies.available).find(facies => facies.id === polygonInRule.facies)
   const globalFacies = Object.values(rootState.facies.global.available).find(e => e.id === faciesInZone.facies)
   return globalFacies.name

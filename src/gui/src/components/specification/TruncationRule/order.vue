@@ -34,7 +34,7 @@ export default {
       rule: 'truncationRule',
     }),
     max () {
-      return Object.values(this.rule.polygons)
+      return this.rule.polygons
         .filter(polygon => polygon.overlay === this.overlay)
         .map(polygon => polygon.order)
         .reduce((max, order) => order > max ? order : max, 0)

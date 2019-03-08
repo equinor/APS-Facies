@@ -33,7 +33,7 @@ const makeTruncationRuleSpecification = (rule, rootGetters) => {
     globalFaciesTable: rootGetters['facies/selected']
       .filter(facies => rootGetters.options.filterZeroProbability ? facies.previewProbability && facies.previewProbability > 0 : true)
       .map(({ facies, previewProbability, id }) => {
-        let polygon = Object.values(rule.polygons).find(polygon => polygon.facies === id)
+        let polygon = rule.polygons.find(polygon => polygon.facies === id)
         if (isEmpty(polygon) && rule.overlay) {
           polygon = Object.values(rule.overlay).find(polygon => polygon.facies === id)
         }
@@ -171,7 +171,7 @@ const minFacies = (rule, getters) => {
       break
     case 'non-cubic':
       if (rule.polygons) {
-        const uniqueFacies = new Set(Object.values(rule.polygons).map(polygon => faciesName(polygon)))
+        const uniqueFacies = new Set(rule.polygons.map(polygon => faciesName(polygon)))
         if (rule.overlay) {
           const items = Object.values(rule.overlay.items || rule.overlay)
           items.forEach(item => {
