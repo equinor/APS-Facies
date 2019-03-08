@@ -170,7 +170,9 @@ export default {
         : constantProbability()
     },
     selected: (state, getters, rootState, rootGetters) => {
-      return Object.values(state.available).filter(facies => hasCurrentParents(facies, rootGetters))
+      return Object.values(state.available)
+        .filter(facies => hasCurrentParents(facies, rootGetters))
+        .sort((a, b) => getters.byId(a.facies).code - getters.byId(b.facies).code)
     },
     cumulative: (state, getters) => {
       return getters.selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
