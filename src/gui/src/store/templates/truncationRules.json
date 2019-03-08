@@ -36,7 +36,7 @@
           "proportion": 0.2
         },
         {
-          "name": "Bayhead Delta",
+          "name": "Wave influenced Bayfill",
           "facies": {
             "name": "F03",
             "index": 2
@@ -44,7 +44,7 @@
           "proportion": 0.2
         },
         {
-          "name": "Wave influenced Bayfill",
+          "name": "Bayhead Delta",
           "facies": {
             "name": "F04",
             "index": 3
