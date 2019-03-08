@@ -27,6 +27,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     _loaded: false,
+    _loading: false,
   },
 
   strict: process.env.NODE_ENV !== 'production',
@@ -61,7 +62,8 @@ export default new Vuex.Store({
         commit('FINISHED')
       }
     },
-    async populate ({ dispatch, state }, data) {
+    async populate ({ dispatch, commit, state }, data) {
+      commit('LOADING', true)
       await dispatch('fetch')
 
       // Grid model
@@ -105,6 +107,7 @@ export default new Vuex.Store({
 
       // Truncation rules
       await dispatch('truncationRules/populate', data.truncationRules)
+      commit('LOADING', false)
     },
   },
 
@@ -112,6 +115,9 @@ export default new Vuex.Store({
     FINISHED: state => {
       state._loaded = true
     },
+    LOADING: (state, loading) => {
+      state._loading = loading
+    }
   },
 
   getters: {
