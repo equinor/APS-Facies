@@ -17,8 +17,14 @@ export default {
   },
 
   actions: {
-    fetch ({ dispatch }) {
-      return Promise.all(templates.types.map(rule => dispatch('add', rule)))
+    fetch ({ dispatch, state }) {
+      const promises = []
+      templates.types.forEach(rule => {
+        if (Object.values(state.available).indexOf(({ name, type }) => rule.name === name && rule.type === type) < 0) {
+          promises.push(dispatch('add', rule))
+        }
+      })
+      return Promise.all(promises)
     },
     populate ({ commit, dispatch }, types) {
       if (isEqual(templates.types, types)) {

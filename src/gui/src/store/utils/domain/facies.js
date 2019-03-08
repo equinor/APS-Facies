@@ -26,8 +26,9 @@ class Facies extends ZoneRegionDependent(BaseItem) {
 }
 
 class FaciesGroup extends ZoneRegionDependent(BaseItem) {
-  constructor ({ facies, ...rest }) {
+  constructor ({ facies, _facies, ...rest }) {
     super(rest)
+    facies = facies || _facies
     facies.forEach(facies => {
       checkFaciesId(facies)
     })

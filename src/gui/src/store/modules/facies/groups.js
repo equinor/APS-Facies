@@ -5,6 +5,7 @@ import { AVAILABLE } from '@/store/mutations'
 
 import { FaciesGroup } from '@/store/utils/domain/facies'
 import { getId } from '@/utils/typing'
+import { toIdentifiedObject } from '@/utils'
 
 export default {
   namespaced: true,
@@ -16,6 +17,15 @@ export default {
   modules: {},
 
   actions: {
+    populate ({ commit, rootGetters }, groups) {
+      groups = groups.map(group => new FaciesGroup(group))
+      groups.forEach(group => {
+        if (group.facies.some(facies => !rootGetters['facies/byId'](facies))) {
+          throw new Error(`The group reference a facies that does not exist`)
+        }
+      })
+      commit('AVAILABLE', toIdentifiedObject(groups))
+    },
     async get ({ getters, dispatch }, { facies, parent }) {
       let group = getters.byFacies(facies, parent)
       if (!group) {

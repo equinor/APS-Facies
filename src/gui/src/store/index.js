@@ -26,6 +26,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    _loaded: false,
+    _loading: false,
   },
 
   strict: process.env.NODE_ENV !== 'production',
@@ -49,15 +51,19 @@ export default new Vuex.Store({
   },
 
   actions: {
-    fetch ({ dispatch }) {
-      return Promise.all([
-        dispatch('gridModels/fetch'),
-        dispatch('constants/fetch'),
-        dispatch('truncationRules/fetch'),
-        dispatch('parameters/path/fetch'),
-      ])
+    async fetch ({ dispatch, commit, state }) {
+      if (!state._loaded) {
+        await Promise.all([
+          dispatch('gridModels/fetch'),
+          dispatch('constants/fetch'),
+          dispatch('truncationRules/fetch'),
+          dispatch('parameters/path/fetch'),
+        ])
+        commit('FINISHED')
+      }
     },
-    async populate ({ dispatch, state }, data) {
+    async populate ({ dispatch, commit, state }, data) {
+      commit('LOADING', true)
       await dispatch('fetch')
 
       // Grid model
@@ -93,6 +99,7 @@ export default new Vuex.Store({
       // Facies
       await dispatch('facies/global/populate', Object.values(data.facies.global.available))
       await dispatch('facies/populate', Object.values(data.facies.available))
+      await dispatch('facies/groups/populate', Object.values(data.facies.groups.available))
       await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
 
       // Gaussian Random Fields
@@ -100,10 +107,17 @@ export default new Vuex.Store({
 
       // Truncation rules
       await dispatch('truncationRules/populate', data.truncationRules)
-    }
+      commit('LOADING', false)
+    },
   },
 
   mutations: {
+    FINISHED: state => {
+      state._loaded = true
+    },
+    LOADING: (state, loading) => {
+      state._loading = loading
+    }
   },
 
   getters: {
@@ -190,7 +204,9 @@ export default new Vuex.Store({
             // TODO: Add quality
             ...grid.simBox.size,
             z: getters.zone
-              ? grid.simBox.size.z[getters.zone.code]
+              ? grid.simBox.size.z instanceof Object
+                ? grid.simBox.size.z[getters.zone.code]
+                : grid.simBox.size.z // Assuming it is a number
               : 0,
           },
           simulationBoxOrigin: {

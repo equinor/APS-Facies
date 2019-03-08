@@ -1,6 +1,28 @@
 <template>
   <v-container fluid>
-    <v-layout wrap>
+    <v-layout
+      v-if="loading"
+      column
+      align-center
+      justify-center
+      fill-height
+    >
+      <v-flex />
+      <v-flex>
+        <v-progress-circular
+          :size="70"
+          indeterminate
+        />
+      </v-flex>
+      <v-flex>
+        <span>Loading job. Please wait.</span>
+      </v-flex>
+      <v-flex />
+    </v-layout>
+    <v-layout
+      v-else
+      wrap
+    >
       <v-flex xs4>
         <selection />
       </v-flex>
@@ -34,6 +56,9 @@ export default {
     ...mapGetters([
       'canSpecifyModelSettings',
     ]),
+    loading () {
+      return this.$store.state._loading
+    },
     fields () {
       return Object.values(this.$store.getters.fields)
     },

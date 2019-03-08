@@ -1,4 +1,5 @@
 import rms from '@/api/rms'
+import { fetchParameterHelper } from '@/store/utils'
 
 export default {
   namespaced: true,
@@ -14,13 +15,7 @@ export default {
       await dispatch('parameters/blockedWellLog/fetch', null, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }) => {
-      const result = await rms.blockedWellParameters(rootGetters.gridModel)
-      commit('AVAILABLE', result)
-      if (result.length === 1) {
-        await dispatch('select', result[0])
-      } else if (result.length === 0) {
-        await dispatch('select', null)
-      }
+      await fetchParameterHelper({ commit, dispatch }, rms.blockedWellParameters(rootGetters.gridModel))
     },
   },
 
