@@ -38,6 +38,7 @@
           <facies-specification
             :value="props.item"
             :rule="value"
+            :disable="isUsedInOverlay"
           />
         </td>
         <td
@@ -130,6 +131,11 @@ export default {
   },
 
   methods: {
+    isUsedInOverlay (facies) {
+      return this.value.overlayPolygons
+        .map(({ facies }) => facies)
+        .includes(facies.id)
+    },
     ordering (...args) { return sortByOrder(...args) },
     updateFactor (item, value) {
       return this.$store.dispatch('truncationRules/changeProportionFactors', { rule: this.value, polygon: item, value })
