@@ -259,7 +259,7 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
   trendElement.append(trendTypeElement)
 
   // adding the parameters specific to each trend type
-  if (trendType === 'RMS_PARAM') {
+  if (trendType === 'RMSParameter') {
     const trendParamName = createElement(doc, 'TrendParamName', rmsTrendParam, null)
     trendTypeElement.append(trendParamName)
   } else {
