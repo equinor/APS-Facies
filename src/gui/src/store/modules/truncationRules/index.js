@@ -359,6 +359,22 @@ export default {
     async removePolygon ({ commit, dispatch, rootState }, { rule, polygon }) {
       commit('REMOVE_POLYGON', { rule, polygon })
 
+      // Remove from facies group (if it is no longer a background facies)
+      if (!rule.backgroundPolygons.map(({ facies }) => facies).includes(polygon.facies)) {
+        const group = Object.values(rootState.facies.groups.available).find(group => group.facies.includes(polygon.facies))
+        const facies = group.facies.filter(facies => facies !== polygon.facies)
+        if (facies.length > 0) {
+          await dispatch('facies/groups/update', { group, facies }, { root: true })
+        } else {
+          rule.overlayPolygons
+            .filter(polygon => polygon.group === getId(group))
+            .forEach(polygon => {
+              commit('REMOVE_POLYGON', { rule, polygon })
+            })
+          await dispatch('facies/groups/remove', group, { root: true })
+        }
+      }
+
       // Remove lingering Facies Group (if overlay)
       if (polygon.overlay) {
         const group = rootState.facies.groups.available[`${polygon.group}`]
@@ -480,11 +496,8 @@ export default {
     updateOverlayFraction ({ commit }, { rule, polygon, value }) {
       commit('UPDATE_OVERLAY_FRACTION', { rule, polygon, value })
     },
-    toggleOverlay ({ commit, dispatch }, { rule, value }) {
+    toggleOverlay ({ commit }, { rule, value }) {
       commit('CHANGE_OVERLAY_USAGE', { rule, value })
-      if (rule.polygons.filter(({ overlay }) => !!overlay).length === 0) {
-        dispatch('addPolygon', { rule, overlay: true })
-      }
     },
     async normalizeProportionFactors ({ dispatch, rootGetters }, { rule }) {
       const proportional = false /* TODO: should be moved to the state as an option for the user */

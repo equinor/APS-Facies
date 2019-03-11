@@ -155,10 +155,8 @@ const faciesName = obj => {
 }
 
 const availableForBackgroundFacies = (getters, rule, facies) => {
-  return !(
-    getters['facies/groups/used'](facies) ||
-    rule.overlayPolygons.map(({ facies }) => facies).indexOf(getId(facies)) >= 0
-  )
+  return !getters['facies/groups/used'](facies) &&
+    rule.backgroundPolygons.map(({ facies }) => facies).includes(getId(facies))
 }
 
 const minFacies = (rule, getters) => {
