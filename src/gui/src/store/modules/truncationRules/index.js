@@ -480,11 +480,8 @@ export default {
     updateOverlayFraction ({ commit }, { rule, polygon, value }) {
       commit('UPDATE_OVERLAY_FRACTION', { rule, polygon, value })
     },
-    toggleOverlay ({ commit, dispatch }, { rule, value }) {
+    toggleOverlay ({ commit }, { rule, value }) {
       commit('CHANGE_OVERLAY_USAGE', { rule, value })
-      if (rule.polygons.filter(({ overlay }) => !!overlay).length === 0) {
-        dispatch('addPolygon', { rule, overlay: true })
-      }
     },
     async normalizeProportionFactors ({ dispatch, rootGetters }, { rule }) {
       const proportional = false /* TODO: should be moved to the state as an option for the user */
