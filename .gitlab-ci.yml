@@ -6,7 +6,7 @@ variables:
   HTTP_PROXY:             "http://www-proxy.statoil.no:80"
   HTTPS_PROXY:            "http://www-proxy.statoil.no:80"
   FTP_PROXY:              "http://www-proxy.statoil.no:80"
-  NO_PROXY:               "git.statoil.no"
+  NO_PROXY:               "git.equinor.com"
   CODE_DIR:               "${CI_PROJECT_DIR}"
   ARTIFACTS:              "${CODE_DIR}/artifacts"
   MAKE:                   "make --makefile=${CODE_DIR}/Makefile"
