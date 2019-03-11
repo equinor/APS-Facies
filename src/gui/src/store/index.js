@@ -64,50 +64,53 @@ export default new Vuex.Store({
     },
     async populate ({ dispatch, commit, state }, data) {
       commit('LOADING', true)
-      await dispatch('fetch')
+      try {
+        await dispatch('fetch')
 
-      // Grid model
-      await dispatch('gridModels/select', data.gridModels.current)
+        // Grid model
+        await dispatch('gridModels/select', data.gridModels.current)
 
-      // Parameters
-      for (const parameter of Object.keys(data.parameters)) {
-        const selected = data.parameters[`${parameter}`].selected
-        if (selected) {
-          await dispatch(`parameters/${parameter}/select`, selected)
-        } else if (parameter === 'grid') {
-          await dispatch('parameters/grid/populate', data.parameters.grid)
-          await dispatch('parameters/grid/simBox/populate', data.parameters.grid.simBox)
-        } else if (parameter === 'path') {
-          // Set the user settings of where to store various information
-          await dispatch('parameters/path/select', data.parameters.path.project)
-        } else {
-          // Ignored
+        // Parameters
+        for (const parameter of Object.keys(data.parameters)) {
+          const selected = data.parameters[`${parameter}`].selected
+          if (selected) {
+            await dispatch(`parameters/${parameter}/select`, selected)
+          } else if (parameter === 'grid') {
+            await dispatch('parameters/grid/populate', data.parameters.grid)
+            await dispatch('parameters/grid/simBox/populate', data.parameters.grid.simBox)
+          } else if (parameter === 'path') {
+            // Set the user settings of where to store various information
+            await dispatch('parameters/path/select', data.parameters.path.project)
+          } else {
+            // Ignored
+          }
         }
+
+        // Zones
+        await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
+        await dispatch('zones/current', { id: data.zones.current })
+
+        // Regions
+        if (notEmpty(data.regions.available)) {
+          await dispatch('regions/use', data.regions)
+          await dispatch('regions/populate', data.regions.available)
+          await dispatch('regions/current', { id: data.regions.current })
+        }
+
+        // Facies
+        await dispatch('facies/global/populate', Object.values(data.facies.global.available))
+        await dispatch('facies/populate', Object.values(data.facies.available))
+        await dispatch('facies/groups/populate', Object.values(data.facies.groups.available))
+        await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
+
+        // Gaussian Random Fields
+        await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.fields))
+
+        // Truncation rules
+        await dispatch('truncationRules/populate', data.truncationRules)
+      } finally {
+        commit('LOADING', false)
       }
-
-      // Zones
-      await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
-      await dispatch('zones/current', { id: data.zones.current })
-
-      // Regions
-      if (notEmpty(data.regions.available)) {
-        await dispatch('regions/use', data.regions)
-        await dispatch('regions/populate', data.regions.available)
-        await dispatch('regions/current', { id: data.regions.current })
-      }
-
-      // Facies
-      await dispatch('facies/global/populate', Object.values(data.facies.global.available))
-      await dispatch('facies/populate', Object.values(data.facies.available))
-      await dispatch('facies/groups/populate', Object.values(data.facies.groups.available))
-      await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
-
-      // Gaussian Random Fields
-      await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.fields))
-
-      // Truncation rules
-      await dispatch('truncationRules/populate', data.truncationRules)
-      commit('LOADING', false)
     },
   },
 

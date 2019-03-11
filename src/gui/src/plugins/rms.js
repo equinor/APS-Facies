@@ -10,6 +10,8 @@ if (typeof rms !== 'undefined') {
     // NOTE: an 'empty' data object from RMS, looks like this:
     // { _treeorigin: "", _version: "1.2" }
     // TODO: Handle different versions, (and merge?)
-    store.dispatch('populate', data)
+    if (Object.keys(data).length > 2) {
+      store.dispatch('populate', data)
+    }
   })
 }
