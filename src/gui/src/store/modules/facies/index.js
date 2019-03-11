@@ -6,7 +6,6 @@ import { cloneDeep, merge, isEqual, isNumber } from 'lodash'
 
 import { Facies } from '@/store/utils/domain'
 import {
-  isEmpty,
   notEmpty,
   hasCurrentParents,
   hasParents,
@@ -73,15 +72,15 @@ export default {
       facies = makeData(facies, Facies, state.available)
       commit('AVAILABLE', facies)
     },
-    updateProbabilities: ({ dispatch, state }, { facies, probabilityCubes }) => {
-      if (notEmpty(probabilityCubes) && isEmpty(facies)) {
-        Object.keys(probabilityCubes)
+    updateProbabilities: async ({ dispatch, state }, { probabilityCubes }) => {
+      if (notEmpty(probabilityCubes)) {
+        await Promise.all(Object.keys(probabilityCubes)
           .map(parameter => {
             const facies = Object.values(state.available).find(facies => facies.probabilityCube === parameter)
             return updateFaciesProbability(dispatch, facies, probabilityCubes[`${parameter}`])
-          })
+          }))
       }
-      dispatch('normalizeEmpty')
+      await dispatch('normalizeEmpty')
     },
     updateProbability: ({ dispatch, state, getters }, { facies, probability }) => {
       if (!facies.id) {
@@ -94,18 +93,21 @@ export default {
       const probabilities = selectedFacies
         .map(facies => facies.previewProbability ? facies.previewProbability : 0)
       const emptyProbability = (1 - probabilities.reduce((sum, prob) => sum + prob, 0)) / probabilities.filter(prob => prob === 0).length
-      selectedFacies
-        .map(facies => facies.previewProbability === 0 || facies.previewProbability === null ? updateFaciesProbability(dispatch, facies, emptyProbability) : null)
+      return Promise.all(selectedFacies
+        .map(facies => facies.previewProbability === 0 || facies.previewProbability === null
+          ? updateFaciesProbability(dispatch, facies, emptyProbability)
+          : new Promise((resolve) => resolve()))
+      )
     },
     normalize: ({ dispatch, state, getters }) => {
       const selected = getters.selected
       const cumulativeProbability = selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
-      selected.forEach(facies => {
+      return Promise.all(selected.map(facies => {
         const probability = cumulativeProbability === 0
           ? math.divide(1, selected.length)
           : math.divide(facies.previewProbability, cumulativeProbability)
-        updateFaciesProbability(dispatch, facies, probability)
-      })
+        return updateFaciesProbability(dispatch, facies, probability)
+      }))
     },
     populateConstantProbability: ({ commit }, data) => {
       Object.keys(data).forEach(parentId => {

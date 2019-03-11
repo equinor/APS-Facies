@@ -86,17 +86,28 @@ export default {
 
   methods: {
     validate () {},
-    average () {
+    async average () {
       this.calculatingAverages = true
-      rms.averageProbabilityCubes(this.$store.getters.gridModel, this.probabilityCubeParameters, this.zoneCodes)
-        .then(probabilityCubes => {
-          // Result in the form of { probCubeName_1: average, ...}
-          this.$store.dispatch('facies/updateProbabilities', { probabilityCubes })
-            .then(() => { this.calculatingAverages = false })
-        })
+      const gridModel = this.$store.getters.gridModel
+      const zoneNumber = this.$store.getters.zone.code
+      let regionParameter = null
+      let regionNumber = null
+      if (this.$store.getters.useRegions) {
+        regionParameter = this.$store.getters.regionParameter
+        const region = this.$store.state.getters.region
+        if (region) regionNumber = region.code
+      }
+      try {
+        const probabilityCubes = await rms.averageProbabilityCubes(gridModel, this.probabilityCubeParameters, zoneNumber, regionParameter, regionNumber)
+        // Result in the form of { probCubeName_1: average, ...}
+        await this.$store.dispatch('facies/updateProbabilities', { probabilityCubes })
+        await this.normalize()
+      } finally {
+        this.calculatingAverages = false
+      }
     },
     normalize () {
-      this.$store.dispatch('facies/normalize')
+      return this.$store.dispatch('facies/normalize')
     }
   },
 }

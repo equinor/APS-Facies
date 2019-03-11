@@ -28,7 +28,7 @@ from src.utils.roxar.grid_model import (
     calcStatisticsFor3DParameter,
     getGridSimBoxSize,
     get_simulation_box_thickness,
-)
+    average_of_property_inside_zone_region, getDiscrete3DParameterValues, create_zone_parameter)
 from src.utils.plotting import create_facies_map
 from src.utils.truncation_rules import make_truncation_rule
 from src.utils.xmlUtils import prettify
@@ -167,18 +167,30 @@ class RMSData:
         block_wells = self._get_blocked_well_set(grid_model_name)
         return block_wells[blocked_well_name]
 
-    def calculate_average_of_probability_cube(self, grid_model_name, probability_cube_parameters, zones=None):
-        if zones is None:
-            zones = []
-        averages = {}
-        for probability_cube in probability_cube_parameters:
-            _, _, average = calcStatisticsFor3DParameter(
-                grid_model=self.project.grid_models[grid_model_name],
-                parameter_name=probability_cube,
-                zone_number_list=zones
-            )
-            averages[probability_cube] = float(average)
-        return averages
+    def calculate_average_of_probability_cube(
+            self, grid_model_name, probability_cube_parameters,
+            zone_number,
+            region_parameter=None, region_number=None
+    ):
+
+        # Get parameters from RMS
+        realisation_number = self.project.current_realisation
+        grid_model = self.project.grid_models[grid_model_name]
+        # get zone_values and region_values
+        zone_values = create_zone_parameter(grid_model, realisation_number).get_values(realisation_number)
+        if region_parameter:
+            region_values, _ = getDiscrete3DParameterValues(grid_model, region_parameter, realisation_number)
+        else:
+            region_values = None
+
+        averages = average_of_property_inside_zone_region(
+            grid_model, probability_cube_parameters,
+            zone_values, zone_number,
+            region_values, region_number,
+            realisation_number
+        )
+        # numpy float to regular float
+        return {parameter: float(probability) for parameter, probability in averages.items()}
 
     @empty_if_none
     def get_blocked_well_logs(self, grid_model_name, blocked_well_name):

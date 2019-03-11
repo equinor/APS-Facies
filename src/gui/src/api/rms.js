@@ -25,7 +25,7 @@ export default {
   simulationBoxOrigin: (name) => api.call('get_simulation_box_size', name),
   simulateGaussianField: (field) => api.call('simulate_gaussian_field', field),
   simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
-  averageProbabilityCubes: (gridName, probabilityCubeParameters, ZoneNumbers) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, ZoneNumbers),
+  averageProbabilityCubes: (gridName, probabilityCubeParameters, zoneNumber, regionParameter = null, regionNumber = null) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, zoneNumber, regionParameter, regionNumber),
   isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
   save: (path, content) => api.call('save_model', path, content),
   // eslint-disable-next-line no-undef

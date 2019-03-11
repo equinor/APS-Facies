@@ -36,6 +36,8 @@ RealizationParameter = NewType('RealizationParameter', str)
 ZoneNumber = NewType('ZoneNumber', int)
 ZoneName = NewType('ZoneName', str)
 
+RegionNumber = NewType('RegionNumber', int)
+
 Average = NewType('Average', float)
 
 
@@ -159,7 +161,9 @@ class RMSData:
             self,
             grid_model_name:             GridName,
             probability_cube_parameters: List[ProbabilityCubeParameter],
-            zones:                       Optional[List[ZoneNumber]]      = None
+            zone_number:                 ZoneNumber,
+            region_parameter:            Optional[RegionParameter]       = None,
+            region_number:               Optional[RegionNumber]          = None,
     ) -> Dict[ProbabilityCubeParameter, Average]: ...
     def get_blocked_well_set_names(
             self,

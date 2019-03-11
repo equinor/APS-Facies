@@ -29,15 +29,15 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
     """
     num_cells_total = len(zone_values)
 
-    if region_number > 0 and num_cells_total != len(region_values):
-        raise ValueError(
-            'Zone number: {}  Region number: {}.\n'
-            'Number of grid cells with this zone number: {}\n'
-            'Number of grid cells with this region number: {}'
-            ''.format(zone_number, region_number, num_cells_total, len(region_values))
-        )
+    if region_number is not None and region_number > 0:
+        if num_cells_total != len(region_values):
+            raise ValueError(
+                'Zone number: {}  Region number: {}.\n'
+                'Number of grid cells with this zone number: {}\n'
+                'Number of grid cells with this region number: {}'
+                ''.format(zone_number, region_number, num_cells_total, len(region_values))
+            )
 
-    if region_number > 0:
         # Use both zone number and region number to define selected cells
         # The numpy vector operation below is equivalent to the
         # following code:
@@ -78,7 +78,7 @@ def average_of_property_inside_zone_region(
     region_number=0,
     realization_number=0,
     debug_level=Debug.OFF
-    ):
+):
     ''' Calculates average of the input properties in the list parameter_names for the specified realisation number.
         Note that realisation number 0 is the first realisation.
         The average is over the grid cells in the grid model that corresponds to the specified zone number and region number.
@@ -89,7 +89,7 @@ def average_of_property_inside_zone_region(
     '''
     cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
     return {
-        name :  calc_average(
+        name: calc_average(
             cell_index_defined,
             values=getContinuous3DParameterValues(grid_model, name, realization_number, debug_level)
         ) for name in parameter_names
