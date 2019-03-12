@@ -15,6 +15,7 @@ export default {
       await dispatch('parameters/blockedWellLog/fetch', null, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }) => {
+      commit('CURRENT', null)
       await fetchParameterHelper({ commit, dispatch }, rms.blockedWellParameters(rootGetters.gridModel))
     },
   },
