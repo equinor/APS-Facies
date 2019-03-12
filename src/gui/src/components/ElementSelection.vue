@@ -97,7 +97,6 @@ export default {
     hasBlockedWellParameter () {
       return !!this.$store.getters.blockedWellParameter
     },
-
     currentGridModel () {
       return this.$store.state.gridModels.current
     },

@@ -50,6 +50,8 @@ const mirrorZoneRegions = store => {
         }
       } else if (type === 'zones/CURRENT') {
         store.commit('regions/AVAILABLE', { regions: state.zones.available[`${payload.id}`].regions })
+      } else if (type === 'zones/AVAILABLE') {
+        // Something to be done?
       } else if (type === 'zones/SELECTED') {
         // Nothing to do.
         // Handled by zone's selected action
