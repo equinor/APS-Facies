@@ -22,13 +22,15 @@
         v-show="useProbabilityCubes"
         bottom
       >
-        <v-btn
+        <wait-btn
           slot="activator"
           :disabled="!canCalculateAverages"
+          :waiting="calculatingAverages"
+          color=""
           @click.stop="average"
         >
           Average
-        </v-btn>
+        </wait-btn>
         <span>Calculate average probability (for previewer)</span>
       </v-tooltip>
       <v-tooltip
@@ -53,8 +55,12 @@ import { mapState } from 'vuex'
 
 import rms from '@/api/rms'
 import { hasCurrentParents, notEmpty } from '@/utils'
+import WaitBtn from '@/components/baseComponents/WaitButton'
 
 export default {
+  components: {
+    WaitBtn
+  },
   data () {
     return {
       calculatingAverages: false,
