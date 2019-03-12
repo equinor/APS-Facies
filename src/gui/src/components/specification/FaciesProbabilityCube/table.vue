@@ -73,7 +73,9 @@ export default {
             return {
               text: parameter,
               disabled: Object.values(state.facies.available)
-                .map(facies => facies.probabilityCube).indexOf(parameter) >= 0
+                .map(facies => facies.probabilityCube)
+                .filter(facies => hasCurrentParents(facies))
+                .includes(parameter)
             }
           })
         ),
