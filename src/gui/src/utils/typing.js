@@ -51,7 +51,7 @@ const _isValidColor = value => {
 const AppTypes = {
   id: VueTypes.custom(_isValidId).def(''),
   ids: VueTypes.custom(_isValidIds).def(['']),
-  color: VueTypes.custom(_isValidColor),
+  color: VueTypes.custom(_isValidColor).def(''),
   name: VueTypes.string,
   truncationRule: VueTypes.instanceOf(TruncationRule),
   gaussianRandomField: VueTypes.instanceOf(GaussianRandomField),

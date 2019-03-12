@@ -7,7 +7,7 @@
     @click="e => $emit('click', e)"
   >
     <slot
-      v-if="!title"
+      v-if="!title && !waiting"
     />
     <span v-if="!waiting">
       {{ title }}
@@ -31,7 +31,7 @@ export default {
     disabled: VueTypes.bool.def(false),
     flat: VueTypes.bool.def(false),
     dark: VueTypes.bool.def(false),
-    color: AppTypes.color.def('primary'),
+    color: AppTypes.color.def(''),
   },
 }
 </script>
