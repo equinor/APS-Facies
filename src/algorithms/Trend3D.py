@@ -469,9 +469,9 @@ class Trend3D:
         # Calculate trends for every n'th grid cell location in all three directions
         # Note it is important that this is done over the whole 3D simbox volume and not over only the specified cross section
         # so that the actual standard deviation is comparable with the 3D simulation
-        nxstep = int(nx_preview/5)
-        nystep = int(ny_preview/5)
-        nzstep = int(nz_preview/5)
+        nxstep = max(int(nx_preview/5), 1)
+        nystep = max(int(ny_preview/5), 1)
+        nzstep = max(int(nz_preview/5), 1)
         max_value = -999999999
         min_value = 99999999
         nvalues = 0
