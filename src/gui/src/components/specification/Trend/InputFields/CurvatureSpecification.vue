@@ -5,6 +5,7 @@
     value-type="curvature"
     label="Curvature of ellipse"
     strictly-greater
+    :ranges="{ min: minCurvature, max: Number.POSITIVE_INFINITY }"
     trend
   />
 </template>
@@ -20,6 +21,15 @@ export default {
 
   props: {
     grfId: AppTypes.id.isRequired,
+  },
+
+  computed: {
+    minCurvature () {
+      const field = this.$store.state.gaussianRandomFields.fields[`${this.grfId}`]
+      return field && field.trend && field.trend.type === 'HYPERBOLIC'
+        ? 1
+        : 0
+    }
   },
 
 }

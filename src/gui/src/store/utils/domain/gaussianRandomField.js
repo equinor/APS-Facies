@@ -90,6 +90,7 @@ class Trend {
     }
     this.stackingDirection = stackingDirection
     this.parameter = parameter
+    if (this.type === 'HYPERBOLIC' && curvature <= 1) curvature = 1.01
     this.curvature = updatableValue(curvature, !!curvatureUpdatable)
     this.origin = {
       x: updatableValue(originX, !!originXUpdatable),
