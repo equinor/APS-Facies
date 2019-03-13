@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import { DEFAULT_POINT_SIZE } from '@/config'
 import StaticPlot from '@/components/plot/StaticPlot'
 import VueTypes from 'vue-types'
 import { GaussianRandomField } from '@/store/utils/domain/index'
@@ -33,7 +34,7 @@ export default {
         ? [{
           type: 'scattergl',
           mode: 'markers',
-          marker: { size: 1 },
+          marker: { size: DEFAULT_POINT_SIZE },
           // TODO: Use Array.prototype.flat when possible
           x: flatten(this.field._data),
           y: flatten(this.other._data),
