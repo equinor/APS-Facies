@@ -1068,8 +1068,9 @@ class APSGaussModel:
     def used_gaussian_field_names(self):
         # Require that this function always return the values in the same order since the ordering
         # is used to define list indices
-        sorted_dictionary = OrderedDict(sorted(self._gaussian_models.items()))
-        return [name for name in sorted_dictionary]
+        # The sequence here should be the same as the sequence in alphaIndxList in the truncation base class Trunc2D_Base
+        ordered_dictionary = OrderedDict(self._gaussian_models.items())
+        return [name for name in ordered_dictionary]
 
     def findGaussFieldParameterItem(self, gaussFieldName):
         try:
