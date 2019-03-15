@@ -137,6 +137,9 @@ export default {
               if (result.save) {
                 const resultPromise = rms.save(result.path, btoa(exportedXMLString))
                 resultPromise.then((success) => {
+                  if (success) {
+                    alert('modellfil lagret til ' + result.path)
+                  }
                   if (!success) {
                     alert('Noe gikk galt med lagring. Valgte du en sti som ikke finnes?')
                   }
