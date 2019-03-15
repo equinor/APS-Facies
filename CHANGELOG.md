@@ -2,6 +2,55 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.8.0
+
+This release mostly targets fixes, and polishes so that the GUI is usable to end users.
+That is, there where some breaking bugs that are now fixed.
+
+These bugs concerns opening the GUI, Overlay Facies, Background Facies, and Export of the model file.
+
+
+### Features
+* Exporting a model works as expected
+  * When exporting, the user is presented with a dialog to choose where to model is stored
+* When a previous job is loaded from RMS, a spinner is displayed for the duration of the loading time
+* When calculating the average of probability cubes, the `AVERAGE` button is disabled, and spinning
+* The default sizes of plots are increased
+
+### Restructure
+* The default values for trends are updated to be more usable
+* `matplotlibrc` is automatically generated, with a different backend depending an platform and usage 
+* The `<MainFaciesTable>` tag in the model file has gotten two new attributes
+  * `blockedWellSet`
+  * `blockedWellLog`
+* Introduced `BackgroundGroup` to better enforce overlay constraints
+
+### Fixes
+* Facies are now _always_[^1] presented in the same order (by `code`)
+* Calculating probability cubes now work correctly when regions are selected
+* A probability cube may be used in multiple zones / regions
+  * but not twice in the same zone / region
+* Resolved an issue that caused to GUI to not open properly
+* Fixed numerous issues regarding Overlay
+* When selecting `RMS_PARAMETER` as a trend, the export failed
+* Bayfill polygons where in the wrong order
+* When fetching `blockedWells` and `blockedWellsLog`, the current parameter is unset
+* Fixed some _minor_ user interface glitches
+* Truncation rule types where fetched multiple times in stead of once
+* When an RMS job was loaded, some of the information was not restored
+* Plots in the GUI are now consistent with plots from `testPreviewer`
+* Curvature _must_ be greater than `1` for `HYPERBOLIC` trends
+* The order of Gaussian Random Fields has been made consistent
+* The probabilities in the exported model file is now consistent with what is shown in the GUI 
+
+
+### Miscellaneous
+* _Minor_ code improvements
+  * Duplicate, or similar code are now written once
+* Dependencies have been updated
+* Updated proxy / firewall settings
+
+
 ## 0.7.0
 
 The GUI should now be ready for first use.
@@ -39,7 +88,7 @@ The user may now specify a complete non-cubic truncation rule with an arbitrary 
 * Validation of exported APS model is done **only** when the creation of the file is successful
   * A single error message is presented to the user
 * If user selects an invalid path and saving fails, the user is alerted (in the GUI)
-* The existantce of empty overlay, or overlay being disabled no longer causes the export to fail
+* The existence of empty overlay, or overlay being disabled no longer causes the export to fail
 
 ### Miscellaneous
 * Some more cleaning of code
@@ -225,4 +274,7 @@ The user may now see how the gaussian fields, and truncation rule will look in t
 
 ## 0.1.0
 
+---
+
+[^1]: Except when toggling the order in the Global Facies Table
 
