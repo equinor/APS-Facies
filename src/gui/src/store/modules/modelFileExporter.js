@@ -325,8 +325,10 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
 const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => {
   const probModelElem = createElement(doc, 'FaciesProbForModel')
   zoneElement.append(probModelElem)
-  const selectedFacies = rootGetters['facies/selected']
-  if (selectedFacies.length === 0) {
+
+  const relevantFacies = Object.values(rootState.facies.available).filter(
+    facies => hasParents(facies, parent.zone, parent.region))
+  if (relevantFacies.length === 0) {
     let message = ''
     if (parent.region) {
       message = `Zone ${parent.zone.code} / region ${parent.region.code}`
@@ -336,10 +338,10 @@ const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => 
     throw new APSExportError(message + ' has no selected facies')
   }
 
-  selectedFacies.forEach(facies => {
+  relevantFacies.forEach(facies => {
     // get the facies name from the referenced global facies
-    const globalFacies = rootGetters['facies/name'](facies)
-    const probFaciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: globalFacies }])
+    const faciesName = rootGetters['facies/name'](facies)
+    const probFaciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
     probModelElem.append(probFaciesElem)
 
     const useConstantProb = rootGetters['facies/constantProbability'](parent)
@@ -354,7 +356,7 @@ const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => 
       valueSource = 'probability cube'
     }
     if (!value) {
-      let errMessage = `No ${valueSource} given for facies ${globalFacies} in Zone ${parent.zone.code}`
+      let errMessage = `No ${valueSource} given for facies ${faciesName} in Zone ${parent.zone.code}`
       if (parent.region) {
         errMessage = errMessage + ` Region ${parent.region.code}`
       }
