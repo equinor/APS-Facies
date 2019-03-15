@@ -1,7 +1,8 @@
 {
   "DEFAULT_SIZE": {
-    "width": 100,
-    "height": 100
+    "width": 200,
+    "height": 200
   },
+  "DEFAULT_POINT_SIZE": 1.2,
   "DEFAULT_COLOR_SCALE": "Viridis"
 }

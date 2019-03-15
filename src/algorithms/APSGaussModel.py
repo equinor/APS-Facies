@@ -176,7 +176,7 @@ class GaussianFieldSimulation:
         return self._settings.simulation_box_size
 
     def field_as_matrix(self, grid_index_order='F'):
-        return np.reshape(self.field, self.settings.dimensions, grid_index_order)
+        return np.reshape(self.field, self.settings.dimensions, grid_index_order).transpose()
 
 
 class GaussianField:

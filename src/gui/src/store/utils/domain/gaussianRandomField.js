@@ -36,7 +36,7 @@ class Variogram {
     mainUpdatable = false,
     perpendicular = 1000,
     perpendicularUpdatable = false,
-    vertical = 10,
+    vertical = 5,
     power = 1.5,
     verticalUpdatable = false,
     powerUpdatable = false
@@ -61,24 +61,24 @@ class Trend {
     type = 'LINEAR',
     azimuth = 0,
     azimuthUpdatable = false,
-    stackAngle = 0,
+    stackAngle = 2.0,
     stackAngleUpdatable = false,
     migrationAngle = 0,
     migrationAngleUpdatable = false,
     stackingDirection = 'PROGRADING',
     parameter = null,
-    curvature = 0,
+    curvature = 1,
     curvatureUpdatable = false,
-    originX = 0,
+    originX = 0.5,
     originXUpdatable = false,
-    originY = 0,
+    originY = 0.5,
     originYUpdatable = false,
-    originZ = 0,
+    originZ = 0.5,
     originZUpdatable = false,
-    originType = 'ABSOLUTE',
+    originType = 'RELATIVE',
     relativeSize = 0,
     relativeSizeUpdatable = false,
-    relativeStdDev = 0,
+    relativeStdDev = 0.001,
     relativeStdDevUpdatable = false
   }) {
     this.use = use
@@ -90,6 +90,7 @@ class Trend {
     }
     this.stackingDirection = stackingDirection
     this.parameter = parameter
+    if (this.type === 'HYPERBOLIC' && curvature <= 1) curvature = 1.01
     this.curvature = updatableValue(curvature, !!curvatureUpdatable)
     this.origin = {
       x: updatableValue(originX, !!originXUpdatable),

@@ -231,7 +231,7 @@ class RMSData:
         truncation_rule = make_truncation_rule(specification)
         facies, facies_fraction = create_facies_map(simulations, truncation_rule, use_code=True)
 
-        data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order)
+        data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order).transpose()
         return {
             'faciesMap': data.tolist(),
             'fields': [

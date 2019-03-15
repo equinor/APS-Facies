@@ -152,8 +152,12 @@ export default {
     relativeSize ({ commit, state }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_SIZE_OF_ELLIPSE' })
     },
-    trendType ({ commit, state, rootState }, { grfId, value }) {
+    trendType ({ commit, dispatch, state, rootState }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
+      const field = state.fields[`${grfId}`]
+      if (field.trend.type === 'HYPERBOLIC' && field.trend.curvature.value <= 1) {
+        dispatch('curvature', { grfId, value: 1.01 })
+      }
     },
     trendParameter ({ commit, state, rootState }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_PARAM' })
