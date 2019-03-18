@@ -105,7 +105,7 @@ class TruncationSpecification:
 
     @property
     def probabilities(self):
-        return [self._probabilities[facies.name] for facies in self.facies_in_rule]
+        return [self._probabilities[facies.name] for facies in self.facies_in_zone]
 
     @classmethod
     def from_dict(cls, specification):

@@ -1,5 +1,5 @@
 import { resolve } from '@/utils'
-import { Variogram, Trend, GaussianRandomField } from '@/store/utils/domain/gaussianRandomField'
+import { Variogram, Trend, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 
 const ensureArray = (value) => {
   if (Array.isArray(value)) {

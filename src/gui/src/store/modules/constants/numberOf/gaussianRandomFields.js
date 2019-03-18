@@ -1,4 +1,4 @@
-import { Bayfill } from '@/store/utils/domain/truncationRule'
+import { Bayfill } from '@/utils/domain/truncationRule'
 
 const defaultMinimum = 2
 const numberBayfill = 3

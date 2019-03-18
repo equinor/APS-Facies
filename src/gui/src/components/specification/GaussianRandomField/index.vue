@@ -151,7 +151,7 @@ export default {
     },
     alphaChannels () {
       return this.rule
-        ? this.rule.fields.map(item => item.channel)
+        ? this.rule.fields.map((_, index) => index + 1)
         : []
     },
     isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },

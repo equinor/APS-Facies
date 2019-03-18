@@ -10,7 +10,7 @@ export default {
   },
 
   actions: {
-    select: ({ commit, dispatch }, parameter) => {
+    select: ({ commit }, parameter) => {
       commit('CURRENT', parameter)
     },
     fetch: async ({ commit, rootGetters }) => {

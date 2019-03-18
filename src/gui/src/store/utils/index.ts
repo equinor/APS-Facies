@@ -1,5 +1,10 @@
-import { Facies, GlobalFacies } from '@/store/utils/domain'
+import { Facies, GlobalFacies } from '@/utils/domain'
+import Polygon from '@/utils/domain/polygon/base'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+import { ID } from '@/utils/domain/types'
+import { getId } from '@/utils/helpers'
 
+// @ts-ignore
 const promiseSimpleCommit = (commit, commitment, data, check = true, error = '') => {
   return new Promise((resolve, reject) => {
     if (check) {
@@ -11,7 +16,8 @@ const promiseSimpleCommit = (commit, commitment, data, check = true, error = '')
   })
 }
 
-const compareFacies = (facies, other, beStrict = false) => {
+// @ts-ignore
+function compareFacies (facies, other, beStrict = false): boolean {
   let equal = facies.name === other.name && facies.code === other.code
   if (beStrict) {
     equal = equal && facies.color === other.color
@@ -19,14 +25,10 @@ const compareFacies = (facies, other, beStrict = false) => {
   return equal
 }
 
-const indexOfFacies = (state, facies) => { return state.available.findIndex(item => compareFacies(item, facies)) }
+// @ts-ignore
+function indexOfFacies (state, facies): number { return state.available.findIndex(item => compareFacies(item, facies)) }
 
-const fetchParameterHelper = async ({ commit, dispatch }, promise) => {
-  const result = await promise
-  commit('AVAILABLE', result)
-  await selectOnlyParameter({ dispatch }, result)
-}
-
+// @ts-ignore
 const selectOnlyParameter = async ({ dispatch }, result) => {
   if (result.length === 1) {
     await dispatch('select', result[0])
@@ -35,7 +37,16 @@ const selectOnlyParameter = async ({ dispatch }, result) => {
   }
 }
 
+// @ts-ignore
+const fetchParameterHelper = async ({ commit, dispatch }, promise) => {
+  const result = await promise
+  commit('AVAILABLE', result)
+  await selectOnlyParameter({ dispatch }, result)
+}
+
+// @ts-ignore
 const mirrorZoneRegions = store => {
+  // @ts-ignore
   store.subscribe(({ type, payload }, state) => {
     if (
       type.startsWith('zones') &&
@@ -65,9 +76,10 @@ const mirrorZoneRegions = store => {
   })
 }
 
-const updateFacies = (dispatch, rule, polygon, faciesId, swap = true) => {
+// @ts-ignore
+function updateFacies (dispatch, rule: TruncationRule<Polygon>, polygon: Polygon, facies: Facies | ID, swap: boolean = true): Promise {
   const existing = rule.polygons
-    .find(polygon => polygon.facies === faciesId)
+    .find((polygon): boolean => getId(polygon.facies) === getId(facies))
   return existing && swap
     ? dispatch('truncationRules/swapFacies', {
       rule,
@@ -76,11 +88,12 @@ const updateFacies = (dispatch, rule, polygon, faciesId, swap = true) => {
     : dispatch('truncationRules/updateFacies', {
       rule,
       polygon,
-      faciesId
+      facies,
     })
 }
 
-const changeFacies = ({ state, commit }, facies) => {
+// @ts-ignore
+function changeFacies ({ state, commit }, facies): void {
 // TODO: Update proportion in truncation rule if applicable
   const old = state.available[`${facies.id}`]
   // need this to be be synchronous:
@@ -88,7 +101,13 @@ const changeFacies = ({ state, commit }, facies) => {
   commit('UPDATE', new _class({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
 }
 
-const makeOption = (def, legal) => {
+interface OptionState<T> {
+  value: T
+  legal: T[]
+}
+
+// @ts-ignore
+function makeOption<T> (def: T, legal: T[]) {
   if (!Array.isArray(legal)) {
     throw new Error('The legal values MUST be a list')
   } else if (legal.indexOf(def) === -1) {
@@ -96,21 +115,23 @@ const makeOption = (def, legal) => {
   }
   return {
     namespaced: true,
-    state: () => {
+    state: (): OptionState<T> => {
       return {
         value: def,
         legal: legal
       }
     },
     actions: {
-      set: ({ commit, state }, value) => {
-        if (state.legal.indexOf(value) >= 0) {
+      // @ts-ignore
+      set: ({ commit, state }, value): void => {
+        if (state.legal.includes(value)) {
           commit('SET', value)
         }
       },
     },
     mutations: {
-      SET: (state, value) => {
+      // @ts-ignore
+      SET: (state, value): void => {
         state.value = value
       },
     },

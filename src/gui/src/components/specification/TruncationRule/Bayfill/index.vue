@@ -4,7 +4,7 @@
     <v-layout row>
       <alpha-fields
         :value="value"
-        :min-channels="3"
+        :min-fields="3"
       />
     </v-layout>
     <h4>Truncation rule specification</h4>
@@ -28,7 +28,7 @@ import VueTypes from 'vue-types'
 import AlphaFields from '@/components/specification/TruncationRule/AlphaFields'
 import PolygonTable from '@/components/specification/TruncationRule/Bayfill/PolygonTable'
 
-import { Bayfill } from '@/store/utils/domain'
+import { Bayfill } from '@/utils/domain'
 
 export default {
   name: 'BayfillSpecification',

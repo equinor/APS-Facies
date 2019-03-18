@@ -36,7 +36,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import IconButton from '@/components/selection/IconButton'
-import { isUUID } from '@/utils/typing'
+import { isUUID } from '@/utils/helpers'
 
 export default {
   name: 'TruncationHeader',

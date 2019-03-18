@@ -26,9 +26,9 @@ export default {
       })
       return Promise.all(promises)
     },
-    populate ({ commit, dispatch }, types) {
+    populate ({ commit }, types) {
       if (isEqual(templates.types, types)) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           commit('AVAILABLE', types)
           resolve(Object.keys(types))
         })

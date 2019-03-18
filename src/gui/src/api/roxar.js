@@ -21,7 +21,7 @@ function callPythonFunction (code) {
 }
 
 // utilities
-// eslint-disable-next-line camelcase
+// eslint-disable-next-line camelcase, @typescript-eslint/camelcase
 let uipy_handler = {
   get (target, propKey) {
     return function (...args) {

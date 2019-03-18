@@ -14,6 +14,7 @@ export default {
     showNameOrNumber,
     automaticAlphaFieldSelection,
     filterZeroProbability,
+    automaticFill: makeOption(true, [true, false])
   },
 
   actions: {},

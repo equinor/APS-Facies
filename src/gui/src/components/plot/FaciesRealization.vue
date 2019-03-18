@@ -45,8 +45,8 @@ export default {
         })
     },
     data () {
-      return this.rule && this.rule._realization
-        ? this.rule._realization
+      return this.rule && this.rule.realization
+        ? this.rule.realization
         : []
     },
   },

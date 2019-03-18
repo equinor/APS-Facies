@@ -131,7 +131,7 @@ export default {
 
   methods: {
     goToHelp () {
-      rms.open_wiki_help()
+      rms.openWikiHelp()
     },
     importModelFile (file) {
       const reader = new FileReader()

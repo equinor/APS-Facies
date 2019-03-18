@@ -62,7 +62,7 @@ export default new Vuex.Store({
         commit('FINISHED')
       }
     },
-    async populate ({ dispatch, commit, state }, data) {
+    async populate ({ dispatch, commit }, data) {
       commit('LOADING', true)
       try {
         await dispatch('fetch')

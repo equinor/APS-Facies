@@ -10,62 +10,62 @@
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import { mapGetters } from 'vuex'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import PolygonOrder from '@/components/specification/PolygonOrder'
+import BasePolygonOrder from '@/components/specification/PolygonOrder'
 
-export default {
+@Component({
   components: {
-    PolygonOrder,
+    BasePolygonOrder,
   },
+})
+export default class PolygonOrder extends Vue {
+  @Prop({ required: true })
+  readonly value!: { /* TODO: Define the correct type */
+    order: number
+    overlay?: boolean
+    [_: string]: any
+  }
+  @Prop({ default: false })
+  readonly overlay: boolean
 
-  props: {
-    value: VueTypes.shape({
-      order: VueTypes.integer.isRequired,
-      overlay: VueTypes.bool,
-    }).loose.isRequired,
-    overlay: VueTypes.bool,
-  },
+  get rule () { return this.$store.getters['truncationRule'] }
+  get max () {
+    return this.rule.polygons
+      .filter(polygon => polygon.overlay === this.overlay)
+      .map(polygon => polygon.order)
+      .reduce((max, order) => order > max ? order : max, 0)
+  }
+  get min () {
+    return 0
+  }
+  get canIncrease () {
+    return this.value.order < this.max
+  }
+  get canDecrease () {
+    return this.value.order > this.min
+  }
+  get canRemove (): boolean {
+    return true
+  }
+  get canAdd (): boolean {
+    return true
+  }
 
-  computed: {
-    ...mapGetters({
-      rule: 'truncationRule',
-    }),
-    max () {
-      return this.rule.polygons
-        .filter(polygon => polygon.overlay === this.overlay)
-        .map(polygon => polygon.order)
-        .reduce((max, order) => order > max ? order : max, 0)
-    },
-    min () {
-      return 0
-    },
-    canIncrease () {
-      return this.value.order < this.max
-    },
-    canDecrease () {
-      return this.value.order > this.min
-    },
-    canRemove () {
-      return true
-    },
-    canAdd () {
-      return true
-    },
-  },
-
-  methods: {
-    addPolygon () {
-      return this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, ...this.value })
-    },
-    deletePolygon () {
-      return this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })
-    },
-    changeOrder (direction) {
-      return this.$store.dispatch('truncationRules/changeOrder', { rule: this.rule, polygon: this.value, direction })
-    },
-  },
+  addPolygon () {
+    return this.$store.dispatch('truncationRules/addPolygon', {
+      rule: this.rule,
+      order: this.value.order + 1,
+      overlay: this.value.overlay,
+      group: this.value.overlay ? this.value.group : null,
+    })
+  }
+  deletePolygon () {
+    return this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })
+  }
+  changeOrder (direction: number) {
+    return this.$store.dispatch('truncationRules/changeOrder', { rule: this.rule, polygon: this.value, direction })
+  }
 }
 </script>

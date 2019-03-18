@@ -64,7 +64,7 @@
         {
           "name": "SF",
           "polygon": "Floodplain",
-          "factor": {
+          "slantFactor": {
             "value": 0.5,
             "updatable": false
           }
@@ -72,7 +72,7 @@
         {
           "name": "YSF",
           "polygon": "Subbay",
-          "factor": {
+          "slantFactor": {
             "value": 0.5,
             "updatable": false
           }
@@ -80,7 +80,7 @@
         {
           "name": "SBHD",
           "polygon": "Bayhead Delta",
-          "factor": {
+          "slantFactor": {
             "value": 0.5,
             "updatable": false
           }

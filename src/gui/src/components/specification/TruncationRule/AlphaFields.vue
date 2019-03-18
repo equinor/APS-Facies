@@ -40,19 +40,20 @@ export default {
 
   props: {
     value: AppTypes.truncationRule,
-    minChannels: VueTypes.integer.def(2),
+    minFields: VueTypes.integer.def(2),
   },
 
   computed: {
     alphas () {
       return this.value
-        ? sortByProperty('channel')(this.value.backgroundFields)
-          .map(item => {
+        ? this.value.backgroundFields
+          .map((field, index) => {
             return {
-              channel: item.channel,
-              selected: item.field || '' }
+              channel: index + 1,
+              selected: field
+            }
           })
-        : defaultChannels(this.minChannels)
+        : defaultChannels(this.minFields)
     },
   },
 

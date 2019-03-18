@@ -423,10 +423,15 @@ clean-example-link:
 
 unit-tests: clean-tests run-tests clean-tests
 
-run-tests: links
+run-tests: links python-unit-tests javascript-unit-tests
+
+python-unit-tests:
 	cd $(TEST_FOLDER) && \
 	PYTHONPATH=$(PYTHONPATH) \
 	$(PY.TEST) --basetemp=$(TEST_FOLDER)
+
+javascript-unit-tests:
+	$(YARN) test:unit
 
 clean-tests: clean-integration
 	cd $(TEST_FOLDER) && \

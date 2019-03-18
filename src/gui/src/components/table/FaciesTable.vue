@@ -115,8 +115,7 @@ import VueTypes from 'vue-types'
 
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import { hasCurrentParents } from '@/utils'
-import { getId } from '@/utils/typing'
+import { hasCurrentParents, getId } from '@/utils'
 
 export default {
   components: {
@@ -190,7 +189,7 @@ export default {
         return Object.values(state.facies.global.available)
           .filter(facies => Object.values(state.facies.available)
             .filter(facies => hasCurrentParents(facies, getters))
-            .findIndex(localFacies => localFacies.facies === facies.id) >= 0)
+            .findIndex(localFacies => localFacies.facies.id === facies.id) >= 0)
       },
       set: function (value) {
         this.$store.dispatch('facies/select', { items: value, parent: this.parent })
@@ -227,11 +226,11 @@ export default {
     current ({ id }) {
       return this.$store.dispatch('facies/global/current', { id })
     },
-    changeName (value) {
-      return this.$store.dispatch('facies/global/changed', { id: value.id, name: value.name || `F${value.code}` })
+    changeName (facies) {
+      return this.$store.dispatch('facies/global/changeName', { id: facies.id, name: facies.name || `F${facies.code}` })
     },
     changeAlias (facies) {
-      return this.$store.dispatch('facies/global/changed', { id: facies.id, alias: facies.alias })
+      return this.$store.dispatch('facies/global/changeAlias', { id: facies.id, alias: facies.alias })
     },
   },
 }

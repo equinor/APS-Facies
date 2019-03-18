@@ -9,7 +9,6 @@ import './plugins'
 Vue.config.productionTip = process.env.NODE_ENV !== 'production'
 
 /* eslint-disable no-new */
-/* tslint:disable no-unused-expression */
 new Vue({
   store,
   render: h => h(App)

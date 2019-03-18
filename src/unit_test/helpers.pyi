@@ -23,6 +23,15 @@ def apply_truncations(
 ) -> None: ...
 
 
+def apply_truncations_vectorized(
+    truncRule:              TruncationRule,
+    faciesReferenceFile:    str,
+    nGaussFields:           int,
+    gaussFieldFiles:        List[str],
+    faciesOutputFile:       str,
+    debug_level:            Debug = Debug.OFF
+) -> None: ...
+
 def compare(source: str, reference: str) -> bool: ...
 def compare_image(source: Union[str, Image], reference: Union[str, Image]) -> bool: ...
 

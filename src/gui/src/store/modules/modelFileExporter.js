@@ -1,4 +1,6 @@
 import { hasParents } from '@/utils'
+import {isReturnStatement} from "@babel/types";
+import APSError from "@/utils/domain/errors/base";
 
 class APSExportError extends Error {
   constructor (message) {
@@ -242,7 +244,7 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
   }
 
   // fields in store that might be used depending on trendType
-  const rmsTrendParam = field.trend.rmsTrendParam
+  const rmsTrendParam = field.trend.parameter
   const azimuth = field.trend.angle.azimuth
   const stackingDirection = field.trend.stackingDirection
   const stackAngle = field.trend.angle.stacking
@@ -386,7 +388,7 @@ const addTruncationRule = ({ rootState, rootGetters }, doc, parent, zoneElement)
   }
 }
 
-const addTruncationRuleBayFill = ({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem) => {
+const addTruncationRuleBayFill = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
   const bayFillElem = createElement(doc, 'Trunc3D_Bayfill', null,
     [{ name: 'nGFields', value: numberOfFields }])
@@ -395,33 +397,33 @@ const addTruncationRuleBayFill = ({ rootState, rootGetters }, doc, parent, trunc
   const BackGroundModelElem = createElement(doc, 'BackGroundModel')
   bayFillElem.append(BackGroundModelElem)
 
-  const alphaNames = getAlphaNames({ rootState }, truncRule)
+  const alphaNames = getAlphaNames(truncRule)
   BackGroundModelElem.append(createElement(doc, 'AlphaFields', alphaNames))
 
   BackGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
 
   // polygons
   BackGroundModelElem.append(createElement(doc, 'Floodplain',
-    findFaciesNameForNamedPolygon({ rootState }, truncRule, 'Floodplain')))
+    findFaciesNameForNamedPolygon(truncRule, 'Floodplain')))
   BackGroundModelElem.append(createElement(doc, 'Subbay',
-    findFaciesNameForNamedPolygon({ rootState }, truncRule, 'Subbay')))
+    findFaciesNameForNamedPolygon(truncRule, 'Subbay')))
   BackGroundModelElem.append(createElement(doc, 'WBF',
-    findFaciesNameForNamedPolygon({ rootState }, truncRule, 'Wave influenced Bayfill')))
+    findFaciesNameForNamedPolygon(truncRule, 'Wave influenced Bayfill')))
   BackGroundModelElem.append(createElement(doc, 'BHD',
-    findFaciesNameForNamedPolygon({ rootState }, truncRule, 'Bayhead Delta')))
+    findFaciesNameForNamedPolygon(truncRule, 'Bayhead Delta')))
   BackGroundModelElem.append(createElement(doc, 'Lagoon',
-    findFaciesNameForNamedPolygon({ rootState }, truncRule, 'Lagoon')))
+    findFaciesNameForNamedPolygon(truncRule, 'Lagoon')))
 
   // slant factors
   const baseKw = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_BAYFILL`
 
-  truncRule.specification({}).forEach(setting => {
+  truncRule.specification.forEach(setting => {
     BackGroundModelElem.append(createElement(doc, setting.name, setting.factor.value,
       setting.factor.updatable ? [{ name: 'kw', value: baseKw + `_${setting.name}` }] : null))
   })
 }
 
-const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem) => {
+const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
   const trunc2DAngleElement = createElement(doc, 'Trunc2D_Angle', null,
     [{ name: 'nGFields', value: numberOfFields }])
@@ -430,18 +432,17 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
   const backGroundModelElem = createElement(doc, 'BackGroundModel')
   trunc2DAngleElement.append(backGroundModelElem)
 
-  const alphaNames = getAlphaNames({ rootState }, truncRule)
+  const alphaNames = getAlphaNames(truncRule)
   backGroundModelElem.append(createElement(doc, 'AlphaFields', alphaNames))
   backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
   // The background polygons
-  const backGroundPolygons = truncRule.polygons.filter(polygon => !polygon.overlay)
-  backGroundPolygons.forEach(polygon => {
+  truncRule.backgroundPolygons.forEach(polygon => {
     // facies Element
-    const faciesName = rootGetters['facies/name'](polygon.facies)
+    const faciesName = polygon.facies.name
     const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
     backGroundModelElem.append(faciesElem)
     // angle element
-    const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${polygon.name}_ANGLE`
+    const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
     faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
     // ProbFrac element
     faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
@@ -449,8 +450,9 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
 
   const overlayGroups = truncRule.overlayPolygons
     .reduce((obj, polygon) => {
-      if (!obj.hasOwnProperty(polygon.group)) obj[polygon.group] = []
-      obj[polygon.group].push(polygon)
+      const groupId = polygon.group.id
+      if (!obj.hasOwnProperty(groupId)) obj[`${groupId}`] = []
+      obj[`${groupId}`].push(polygon)
       return obj
     }, {})
   if (Object.values(overlayGroups).length > 0 && truncRule.useOverlay) {
@@ -468,7 +470,7 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
           null,
           [{
             name: 'name',
-            value: rootState.gaussianRandomFields.fields[`${polygon.field}`].name
+            value: polygon.field.name
           }])
         groupElement.append(alphaFieldElement)
 
@@ -480,12 +482,15 @@ const addTruncationRuleNonCubic = ({ rootState, rootGetters }, doc, parent, trun
           polygon.fraction,
           [{
             name: 'name',
-            value: rootGetters['facies/name'](polygon.facies)
+            value: polygon.facies.name
           }]
         ))
       })
-      rootState.facies.groups.available[`${overlayGroup}`].facies.map(id => rootGetters['facies/name'](id))
-        .forEach(faciesName => groupElement.append(createElement(doc, 'BackGround', faciesName)))
+      const group = rootState.facies.groups.available[`${overlayGroup}`]
+      group.facies
+        .forEach(({ name }) => groupElement.append(
+          createElement(doc, 'BackGround', name)
+        ))
     })
   }
 }
@@ -496,20 +501,14 @@ const getNumberOfFieldsForTruncRule = ({ rootState }, parent) => {
   return relevantFields ? relevantFields.length : 0
 }
 
-const getAlphaNames = ({ rootState }, truncRule) => {
-  const alphaFields = truncRule.fields
-    .filter(({ overlay }) => !overlay)
-    .map(e => Object.values(rootState.gaussianRandomFields.fields)
-      .find(availableField => availableField.id === e.field))
-  const alphaNames = alphaFields.map(field => field.name).join(' ')
-  return alphaNames
+const getAlphaNames = (truncRule) => {
+  const alphaFields = truncRule.backgroundFields
+  return alphaFields.map(field => field.name).join(' ')
 }
 
-const findFaciesNameForNamedPolygon = ({ rootState }, truncRule, polygonName) => {
+const findFaciesNameForNamedPolygon = (truncRule, polygonName) => {
   const polygonInRule = truncRule.polygons.find(polygon => polygon.name === polygonName)
-  const faciesInZone = Object.values(rootState.facies.available).find(facies => facies.id === polygonInRule.facies)
-  const globalFacies = Object.values(rootState.facies.global.available).find(e => e.id === faciesInZone.facies)
-  return globalFacies.name
+  return polygonInRule.facies.facies.name
 }
 
 /**
@@ -559,9 +558,7 @@ export default {
           const xmlString = serializer.serializeToString(doc)
           resolve(xmlString)
         } catch (error) {
-          if (error instanceof APSExportError) {
-            reject(error)
-          }
+          reject(error)
         }
       })
     }

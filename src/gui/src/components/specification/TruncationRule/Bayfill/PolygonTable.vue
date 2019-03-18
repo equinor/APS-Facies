@@ -34,8 +34,8 @@
         </td>
         <td>
           <fraction-field
-            v-if="!!props.item.factor"
-            :value="props.item.factor"
+            v-if="!!props.item.slantFactor"
+            :value="props.item.slantFactor"
             fmu-updatable
             @input="factor => updateFactor(props.item, factor)"
           />

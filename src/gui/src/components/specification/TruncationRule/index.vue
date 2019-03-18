@@ -58,8 +58,8 @@ import BayfillSpecification from '@/components/specification/TruncationRule/Bayf
 import NonCubicSpecification from '@/components/specification/TruncationRule/NonCubic'
 import TruncationHeader from '@/components/specification/TruncationRule/header'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay'
-import { isUUID } from '@/utils/typing'
-import { Bayfill } from '@/store/utils/domain'
+import { isUUID } from '@/utils/helpers'
+import { Bayfill } from '@/utils/domain'
 
 export default {
   components: {

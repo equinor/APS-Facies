@@ -25,9 +25,8 @@
         <td>
           <alpha-selection
             :value="props.item.field"
-            :channel="channel(props.item.order)"
             :rule="rule"
-            :group="props.item.group"
+            :group="props.item.group.id"
             hide-label
             @input="field => updateField(props.item, field)"
           />
@@ -64,7 +63,14 @@
   </v-data-table>
 </template>
 
-<script>
+<script lang="ts">
+import { Facies, GaussianRandomField } from '@/utils/domain'
+import OverlayPolygon from '@/utils/domain/polygon/overlay'
+import { ID } from '@/utils/domain/types'
+import { Vue, Component, Prop } from 'vue-property-decorator'
+
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+
 import FractionField from '@/components/selection/FractionField'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import PolygonOrder from '@/components/specification/TruncationRule/order'
@@ -73,10 +79,16 @@ import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelec
 
 import { updateFacies } from '@/store/utils'
 import { hasFaciesSpecifiedForMultiplePolygons, sortByOrder } from '@/utils'
-import { AppTypes } from '@/utils/typing'
-import VueTypes from 'vue-types'
+import Polygon from '@/utils/domain/polygon/base'
 
-export default {
+interface Ordered {
+  order: number
+  [_: string]: any
+}
+
+type Order = number | Ordered
+
+@Component({
   components: {
     AlphaSelection,
     FaciesSpecification,
@@ -84,103 +96,99 @@ export default {
     OptionalHelpItem,
     FractionField,
   },
+})
+export default class OverlayTable extends Vue {
+  @Prop({ required: true })
+  value: OverlayPolygon[]
+  @Prop({ required: true })
+  rule: OverlayTruncationRule<Polygon>
 
-  props: {
-    value: VueTypes.arrayOf(VueTypes.any).isRequired,
-    rule: AppTypes.truncationRule.isRequired,
-  },
-
-  computed: {
-    polygons () {
-      // TODO: Include 'help' messages
-      return this.value
-    },
-    fieldOptions () {
-      return Object.values(this.$store.getters.fields)
-        .map(field => {
-          return {
-            value: field.id,
-            text: field.name,
-            disabled: false,
-          }
-        })
-    },
-    needFraction () {
-      return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons)
-    },
-    headers () {
-      return [
-        {
-          text: 'GRF',
-          align: 'left',
-          sortable: false,
-          value: 'field',
-          help: 'Gaussian Random Field',
-        },
-        {
-          text: 'Overlay Facies',
-          align: 'left',
-          sortable: false,
-          value: 'facies',
-          help: '',
-        },
-        ...(this.needFraction
-          ? [{
-            text: 'Probability Fraction',
-            align: 'left',
-            sortable: false,
-            value: 'fraction',
-            help: '',
-          }]
-          : []),
-        {
-          text: 'Center',
-          align: 'left',
-          sortable: false,
-          value: 'center',
-          help: 'Truncation Interval Center Point',
-          /* or: The overlay facies will look more continuous if the value of the center point of
-                 the truncation interval is 0 or 1 and look more fragmented if a value between 0 and 1,
-                 typically 0.5 is chosen. */
-        },
-        {
-          text: 'Order',
-          align: 'left',
-          sortable: false,
-          value: 'order',
-          help: '',
+  get polygons () {
+    // TODO: Include 'help' messages
+    return this.value
+  }
+  get fieldOptions () {
+    return (Object.values(this.$store.getters.fields) as GaussianRandomField[]) // TODO: Type annotate store
+      .map(field => {
+        return {
+          value: field.id,
+          text: field.name,
+          disabled: false,
         }
-      ]
-    },
-  },
+      })
+  }
+  get needFraction () {
+    return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons)
+  }
+  get headers () {
+    return [
+      {
+        text: 'GRF',
+        align: 'left',
+        sortable: false,
+        value: 'field',
+        help: 'Gaussian Random Field',
+      },
+      {
+        text: 'Overlay Facies',
+        align: 'left',
+        sortable: false,
+        value: 'facies',
+        help: '',
+      },
+      ...(this.needFraction
+        ? [{
+          text: 'Probability Fraction',
+          align: 'left',
+          sortable: false,
+          value: 'fraction',
+          help: '',
+        }]
+        : []),
+      {
+        text: 'Center',
+        align: 'left',
+        sortable: false,
+        value: 'center',
+        help: 'Truncation Interval Center Point',
+        /* or: The overlay facies will look more continuous if the value of the center point of
+               the truncation interval is 0 or 1 and look more fragmented if a value between 0 and 1,
+               typically 0.5 is chosen. */
+      },
+      {
+        text: 'Order',
+        align: 'left',
+        sortable: false,
+        value: 'order',
+        help: '',
+      }
+    ]
+  }
 
-  methods: {
-    backgroundFacies (facies) {
-      const backgroundFacies = [...new Set(this.rule.backgroundPolygons.map(({ facies }) => facies))]
-      return backgroundFacies.indexOf(facies.id) >= 0
-    },
-    ordering (...args) { return sortByOrder(...args) },
-    updateField (item, fieldId) {
-      this.$store.dispatch('truncationRules/updateFields', { rule: this.rule, channel: this.channel(item), selected: fieldId })
-    },
-    updateFacies (item, faciesId) {
-      updateFacies(this.$store.dispatch, this.rule, item, faciesId, false)
-    },
-    updateFraction (item, val) {
-      this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon: item, value: val })
-    },
-    updateCenter (item, val) {
-      this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon: item, value: val })
-    },
-    channel (order) {
-      order = order.hasOwnProperty('order') ? order.order : order
-      // +1 due to order being 0-indexed, but `channel` is expected to be 1-indexed
-      return order + 1 + this.rule.fields.filter(({ overlay }) => !overlay).length
-    },
-    multipleFaciesSpecified ({ facies }) {
-      return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons, facies)
-    },
-  },
+  backgroundFacies (facies: Facies) {
+    return this.rule.isUsedInBackground(facies)
+  }
+  ordering (...args: OverlayPolygon[]) { return sortByOrder(...args) }
+  updateField (item: OverlayPolygon, fieldId: ID) {
+    this.$store.dispatch('truncationRules/updateFields', { rule: this.rule, channel: this.channel(item), selected: fieldId })
+  }
+  updateFacies (item: OverlayPolygon, faciesId: ID) {
+    updateFacies(this.$store.dispatch, this.rule, item, faciesId, false)
+  }
+  updateFraction (item: OverlayPolygon, val: number) {
+    this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon: item, value: val })
+  }
+  updateCenter (item: OverlayPolygon, val: number) {
+    this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon: item, value: val })
+  }
+  // channel (order: Order) {
+  //   order = order.hasOwnProperty('order') ? (order as Ordered).order : order
+  //   // +1 due to order being 0-indexed, but `channel` is expected to be 1-indexed
+  //   return (order as number) + 1 + this.rule.fields.filter(({ overlay }) => !overlay).length
+  // }
+  multipleFaciesSpecified ({ facies }: Facies) {
+    return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons, facies)
+  }
 }
 </script>
 

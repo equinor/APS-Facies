@@ -2,11 +2,10 @@ import Vue from 'vue'
 import uuidv4 from 'uuid/v4'
 
 import { hasParents, newSeed, notEmpty } from '@/utils'
-import { GaussianRandomField } from '@/store/utils/domain'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
 import { cloneDeep } from 'lodash'
-import { Trend, Variogram } from '@/store/utils/domain/gaussianRandomField'
+import { Trend, Variogram, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 
 const makeFieldData = (fields) => {
   return fields.reduce((data, field) => {
@@ -71,7 +70,7 @@ export default {
   },
 
   actions: {
-    init ({ state, dispatch, rootState, rootGetters }, { zoneId, regionId }) {
+    init ({ state, dispatch, rootGetters }, { zoneId, regionId }) {
       const minGaussianFields = rootGetters['constants/numberOf/gaussianRandomFields/minimum']
       const remaining = minGaussianFields - getRelevantFields(state, zoneId, regionId).length
       if (notEmpty(regionId) && remaining > 0) {
@@ -103,10 +102,10 @@ export default {
         })
       })
     },
-    addField ({ commit, state }, { field }) {
+    addField ({ commit }, { field }) {
       return addItem({ commit }, { item: field })
     },
-    async deleteField ({ state, commit, dispatch, rootState }, { grfId }) {
+    async deleteField ({ state, commit, dispatch }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {
         await dispatch('truncationRules/deleteField', { grfId }, { root: true })
         commit('DELETE', { grfId })
@@ -126,6 +125,9 @@ export default {
     },
     seed ({ state, commit }, { grfId, value }) {
       setValue({ state, commit }, { grfId, value, commitName: 'CHANGE_SEED' })
+    },
+    overlay ({ state, commit }, { grfId, value }) {
+      setValue({ state, commit }, { grfId, value, commitName: 'CHANGE_OVERLAY' })
     },
     // TODO: check values are appropriate
     // Variogram
@@ -159,7 +161,7 @@ export default {
         dispatch('curvature', { grfId, value: 1.01 })
       }
     },
-    trendParameter ({ commit, state, rootState }, { grfId, value }) {
+    trendParameter ({ commit, state }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_PARAM' })
     },
     stackingDirection ({ commit, state }, { grfId, value }) {
@@ -187,13 +189,16 @@ export default {
       Vue.set(state.fields[`${grfId}`], 'name', value)
     },
     CHANGE_SETTINGS (state, { grfId, value }) {
-      Vue.set(state.fields[`${grfId}`], '_settings', value)
+      Vue.set(state.fields[`${grfId}`], 'settings', value)
     },
     CHANGE_SEED (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`].settings, 'seed', value)
     },
     CHANGE_SIMULATION (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`], '_data', value)
+    },
+    CHANGE_OVERLAY (state, { grfId, value }) {
+      Vue.set(state.fields[`${grfId}`], 'overlay', value)
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }) {
@@ -234,10 +239,13 @@ export default {
       Vue.set(state.fields[`${grfId}`].trend.origin, 'type', value)
     },
     CHANGE_RMS_TREND_PARAM (state, { grfId, value }) {
-      state.fields[`${grfId}`].trend.rmsTrendParam = value
+      state.fields[`${grfId}`].trend.parameter = value
     }
   },
 
   getters: {
+    byId: (state) => id => {
+      return state.fields[`${id}`]
+    },
   },
 }
