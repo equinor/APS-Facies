@@ -10,7 +10,6 @@ from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import getKeyword, isFMUUpdatable, createFMUvariableNameForBayfillTruncation
 
-
 """
 ------------ Truncation map for Bayfill ----------------------------------
  Developed by: Kari Skjerve and Tone-Berit Ornskar
@@ -88,7 +87,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # Specific variables for class Trunc3D_bayfill
         self._className = self.__class__.__name__
 
-#        self.__fIndxPerPolygon = [0, 1, 2, 3, 4]
         self.__fIndxPerPolygon = np.arange(5, dtype=np.int32)
 
         # Internal data structure
@@ -105,7 +103,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__Zm = 0
 
         # Tolerance used for probabilities
-        self.__eps = 0.5*self._epsFaciesProb
+        self.__eps = 0.5 * self._epsFaciesProb
 
         # Define if truncation parameters are constant for all grid cells or
         # vary from cell to cell.
@@ -333,10 +331,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
             print(repr(self._faciesCode))
 
     def initialize(
-            self, mainFaciesTable, faciesInZone, faciesInTruncRule,
-            gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-            sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable,
-            useConstTruncParam, debug_level=Debug.OFF
+        self, mainFaciesTable, faciesInZone, faciesInTruncRule,
+        gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
+        sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable,
+        useConstTruncParam, debug_level=Debug.OFF
     ):
         """
         Initialize the truncation object from input variables.
@@ -622,7 +620,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             raise ValueError('SF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
 
     def setSFParamFmuUpdatable(self, value):
-         self._is_param_sf_fmuupdatable = value
+        self._is_param_sf_fmuupdatable = value
 
     def setYSFParam(self, ysfValue):
         if 0 <= ysfValue <= 1.0:
@@ -631,7 +629,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             raise ValueError('YSF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
 
     def setYSFParamFmuUpdatable(self, value):
-         self._is_param_ysf_fmuupdatable = value
+        self._is_param_ysf_fmuupdatable = value
 
     def setSBHDParam(self, sbhdValue):
         if 0 <= sbhdValue <= 1.0:
@@ -640,7 +638,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             raise ValueError('SBHD parameter for Bayfill truncation rule must be between 0.0 and 1.0')
 
     def setSBHDParamFmuUpdatable(self, value):
-         self._is_param_sbhd_fmuupdatable = value
+        self._is_param_sbhd_fmuupdatable = value
 
     def setTruncRule(self, faciesProb, cellIndx=0):
         """setTruncRule: Calculate internal parameters and polygons that define the truncation rule.
@@ -741,10 +739,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if sumProb == 0.0:
             raise ValueError('Error: All input probabilities are <= 0.0')
 
-        if not (1.0 + 2.0*eps) >= sumProb >= (1.0 - 2.0*eps):
+        if not (1.0 + 2.0 * eps) >= sumProb >= (1.0 - 2.0 * eps):
             print(' Warning: In truncation rule type: bayfill.\n'
                   '          Sum of input probabilities is {} and not within 1.0 +/- {}'
-                  ''.format(sumProb, 2.0*eps)
+                  ''.format(sumProb, 2.0 * eps)
                   )
             print('          Adjust all probabilities by normalizing the probabilities.')
 
@@ -893,6 +891,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             c = sf + 0.00001
 
         if P4 == 0:
+            # No BHD in shared polygon shared by WBF
             Xm = X4
             Xm2 = X4
             Ym = 0.0
@@ -903,7 +902,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             Xm2 = XL
             Ym = 1.0
             Ym2 = 1.0
-            Amax = 0
+            Amax = XL - X4
         elif bhdsit == 1:
             Amax = XL - X4
             AmP4sqrt = math.sqrt(P4 * Amax)
@@ -1038,8 +1037,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     Xm2 = X4
                     caseA = 2
                 # A2<AmP4sqrt<=A3
-                elif AmP4sqrt <= (0.5 / c) * (XL - X4) * (XL - X4) - 0.5 * (X2 - X4) * YS + (XL - X4) * (
-                            1.0 - (XL - X4) / c):
+                elif AmP4sqrt <= (
+                    (0.5 / c) * (XL - X4) * (XL - X4)
+                    - 0.5 * (X2 - X4) * YS + (XL - X4) * (1.0 - (XL - X4) / c)
+                ):
                     Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 *
                            (XL - X4) * (XL - X4) / c) / (XL - X4)
                     Ym = Ym2 + (XL - X4) / c
@@ -1182,124 +1183,172 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         if fssit == 1:
             # polygon = Polygon([(0.0,0.0),(1.0,0.0),(X2,YF2),(X1,YF),(0.0,YF)],True) #FP
-            polyFP.extend([
-                [0.0, 0.0],
-                [1.0, 0.0],
-                [X2, YF2],
-                [X1, YF],
-                [0.0, YF],
-                [0.0, 0.0]
-            ])
+            if P1 > 0.0:
+                polyFP.extend([
+                    [0.0, 0.0],
+                    [1.0, 0.0],
+                    [X2, YF2],
+                    [X1, YF],
+                    [0.0, YF],
+                    [0.0, 0.0]
+                ])
+            else:
+                polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X3,YF),(X1,YF)],True) #SB
-            polySB.extend([
-                [X4, YS],
-                [X3, YF],
-                [X1, YF],
-                [X4, YS]
-            ])
+            if P2 > 0.0:
+                polySB.extend([
+                    [X4, YS],
+                    [X3, YF],
+                    [X1, YF],
+                    [X4, YS]
+                ])
+            else:
+                polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polySB)
 
         elif fssit == 2:
             # polygon = Polygon([(0.0,0.0),(X2,YS),(X1,YF),(0.0,YF)],True) #FP
-            polyFP.extend([
-                [0.0, 0.0],
-                [X2, YS],
-                [X1, YF],
-                [0.0, YF],
-                [0.0, 0.0]
-            ])
+            if P1 > 0:
+                polyFP.extend([
+                    [0.0, 0.0],
+                    [X2, YS],
+                    [X1, YF],
+                    [0.0, YF],
+                    [0.0, 0.0]
+                ])
+            else:
+                polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X3,YF),(X1,YF),(X2,YS)],True) #SB
-            polySB.extend([
-                [X4, YS],
-                [X3, YF],
-                [X1, YF],
-                [X2, YS],
-                [X4, YS]
-            ])
+            if P2 > 0:
+                polySB.extend([
+                    [X4, YS],
+                    [X3, YF],
+                    [X1, YF],
+                    [X2, YS],
+                    [X4, YS]
+                ])
+            else:
+                polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polySB)
 
         elif fssit == 3:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF),(0.0,YF)],True) #FP
-            polyFP.extend([
-                [0.0, 0.0],
-                [X2, YF2],
-                [X1, YF],
-                [0.0, YF],
-                [0.0, 0.0]
-            ])
+            if P1 > 0:
+                polyFP.extend([
+                    [0.0, 0.0],
+                    [X2, YF2],
+                    [X1, YF],
+                    [0.0, YF],
+                    [0.0, 0.0]
+                ])
+            else:
+                polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X3,YF),(X1,YF)],True) #SB
-            polySB.extend([
-                [X4, YS],
-                [X3, YF],
-                [X1, YF],
-                [X4, YS]
-            ])
+            if P2 > 0:
+                polySB.extend([
+                    [X4, YS],
+                    [X3, YF],
+                    [X1, YF],
+                    [X4, YS]
+                ])
+            else:
+                polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polySB)
 
         elif fssit == 4:
             # polygon = Polygon([(0.0,0.0),(X2,YS),(X1,YF)],True) #FP
-            polyFP.extend([
-                [0.0, 0.0],
-                [X2, YS],
-                [X1, YF],
-                [0.0, 0.0]
-            ])
+            if P1 > 0:
+                polyFP.extend([
+                    [0.0, 0.0],
+                    [X2, YS],
+                    [X1, YF],
+                    [0.0, 0.0]
+                ])
+            else:
+                polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X3,1.0),(X1,1.0),(X1,YF),(X2,YS)],True) #SB
-            polySB.extend([
-                [X4, YS],
-                [X3, 1.0],
-                [X1, 1.0],
-                [X1, YF],
-                [X2, YS],
-                [X4, YS]
-            ])
+            if P2 > 0:
+                polySB.extend([
+                    [X4, YS],
+                    [X3, 1.0],
+                    [X1, 1.0],
+                    [X1, YF],
+                    [X2, YS],
+                    [X4, YS]
+                ])
+            else:
+                polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polySB)
 
         elif fssit == 5:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF)],True) #FP
-            polyFP.extend([
-                [0.0, 0.0],
-                [X2, YF2],
-                [X1, YF],
-                [0.0, 0.0],
+            if P1 > 0:
+                polyFP.extend([
+                    [0.0, 0.0],
+                    [X2, YF2],
+                    [X1, YF],
+                    [0.0, 0.0],
                 ])
+            else:
+                polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X3,1.0),(X1,1.0),(X1,YF)],True) #SB
-            polySB.extend([
-                [X4, YS],
-                [X3, 1.0],
-                [X1, 1.0],
-                [X1, YF],
-                [X4, YS]
-            ])
+            if P2 > 0:
+                polySB.extend([
+                    [X4, YS],
+                    [X3, 1.0],
+                    [X1, 1.0],
+                    [X1, YF],
+                    [X4, YS]
+                ])
+            else:
+                polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polySB)
 
         else:
             # polygon = Polygon([(0.0,0.0),(X2,YF2),(X1,YF)],True) #FP
-            polyFP.extend([
-                [0.0, 0.0],
-                [X2, YF2],
-                [X1, YF],
-                [0.0, 0.0]
-            ])
+            if P1 > 0:
+                polyFP.extend([
+                    [0.0, 0.0],
+                    [X2, YF2],
+                    [X1, YF],
+                    [0.0, 0.0]
+                ])
+            else:
+                polyFP.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyFP)
 
             # polygon = Polygon([(X4,YS),(X1,YS2),(X1,YF)],True) #SB
-            polySB.extend([
-                [X4, YS],
-                [X1, YS2],
-                [X1, YF],
-                [X4, YS]
-            ])
+            if P2 > 0:
+                polySB.extend([
+                    [X4, YS],
+                    [X1, YS2],
+                    [X1, YF],
+                    [X4, YS]
+                ])
+            else:
+                polySB.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polySB)
 
         # ------ Lagoon ------------------
@@ -1311,37 +1360,49 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         if bhdsit == 1:
             # polygon = Polygon([(1.0,0.0),(1.0,1.0),(XL,1.0),(XL,0.0)],True) #LG
-            polyLG.extend([
-                [1.0, 0.0],
-                [1.0, 1.0],
-                [XL, 1.0],
-                [XL, 0.0],
-                [1.0, 0.0]
-            ])
+            if P5 > 0:
+                polyLG.extend([
+                    [1.0, 0.0],
+                    [1.0, 1.0],
+                    [XL, 1.0],
+                    [XL, 0.0],
+                    [1.0, 0.0]
+                ])
+            else:
+                polyLG.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
             polygons.append(polyLG)
 
         else:
             if X2 > XL:
                 # polygon = Polygon([(X2,YF2),(1.0,0.0),(1.0,1.0),(XL,1.0),(XL,y2)],True) #LG
-                polyLG.extend([
-                    [X2, YF2],
-                    [1.0, 0.0],
-                    [1.0, 1.0],
-                    [XL, 1.0],
-                    [XL, y2],
-                    [X2, YF2]
-                ])
+                if P5 > 0:
+                    polyLG.extend([
+                        [X2, YF2],
+                        [1.0, 0.0],
+                        [1.0, 1.0],
+                        [XL, 1.0],
+                        [XL, y2],
+                        [X2, YF2]
+                    ])
+                else:
+                    polyLG.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                 polygons.append(polyLG)
 
             else:
                 # polygon = Polygon([(XL,0.0),(1.0,0.0),(1.0,1.0),(XL,1.0)],True) #LG
-                polyLG.extend([
-                    [XL, 0.0],
-                    [1.0, 0.0],
-                    [1.0, 1.0],
-                    [XL, 1.0],
-                    [XL, 0.0]
-                ])
+                if P5 > 0:
+                    polyLG.extend([
+                        [XL, 0.0],
+                        [1.0, 0.0],
+                        [1.0, 1.0],
+                        [XL, 1.0],
+                        [XL, 0.0]
+                    ])
+                else:
+                    polyLG.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                 polygons.append(polyLG)
 
         # Area Lagoon
@@ -1362,237 +1423,317 @@ class Trunc3D_bayfill(Trunc2D_Base):
             if bhdsit == 1:
                 if Xm2 > X4:
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,0.0),(Xm,0.0)],True) #BHD
-                    polyBHD.extend([
-                        [Xm, Ym2],
-                        [Xm2, Ym],
-                        [X4, 1.0],
-                        [X4, 0.0],
-                        [Xm, 0.0],
-                        [Xm, Ym2]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [Xm, Ym2],
+                            [Xm2, Ym],
+                            [X4, 1.0],
+                            [X4, 0.0],
+                            [Xm, 0.0],
+                            [Xm, Ym2]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(XL,1.0),(XL,Ym2)],True) #WBF
-                    polyWBF.extend([
-                        [Xm, Ym2],
-                        [Xm2, Ym],
-                        [XL, 1.0],
-                        [XL, Ym2],
-                        [Xm, Ym2]
-                    ])
+                    if P3 > 0:
+                        polyWBF.extend([
+                            [Xm, Ym2],
+                            [Xm2, Ym],
+                            [XL, 1.0],
+                            [XL, Ym2],
+                            [Xm, Ym2]
+                        ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyWBF)
 
                 else:
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(Xm2,0.0),(Xm,0.0)],True) #BHD
-                    polyBHD.extend([
-                        [Xm, Ym2],
-                        [Xm2, Ym],
-                        [Xm2, 0.0],
-                        [Xm, 0.0],
-                        [Xm, Ym2]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [Xm, Ym2],
+                            [Xm2, Ym],
+                            [Xm2, 0.0],
+                            [Xm, 0.0],
+                            [Xm, Ym2]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(Xm2,1.0),(XL,1.0),(XL,YL)],True) #WBF
-                    polyWBF.extend([
-                        [Xm, Ym2],
-                        [Xm2, Ym],
-                        [Xm2, 1.0],
-                        [XL, 1.0],
-                        [XL, YL],
-                        [Xm, Ym2]
-                    ])
+                    if P3 > 0:
+                        polyWBF.extend([
+                            [Xm, Ym2],
+                            [Xm2, Ym],
+                            [Xm2, 1.0],
+                            [XL, 1.0],
+                            [XL, YL],
+                            [Xm, Ym2]
+                        ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyWBF)
 
             elif bhdsit == 2:
                 if Xm2 > X4:
                     if Ym < YS:
                         # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X2,0.0),(XL,0.0)],True) #BHD
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X2, 0.0],
-                            [XL, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        if P4 > 0:
+                            polyBHD.extend([
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X2, 0.0],
+                                [XL, 0.0],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyBHD)
 
                         # polygon =
                         # Polygon([(Xm,Ym2),(Xm2,Ym),(X4,YS),(X3,YS2),(X3,1.0),(X4,1.0),(XL,1.0),(XL,0.0)],True)
                         # #WBF
-                        polyWBF.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, YS],
-                            [X3, YS2],
-                            [X3, 1.0],
-                            [X4, 1.0],
-                            [XL, 1.0],
-                            [XL, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        if P3 > 0:
+                            polyWBF.extend([
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, YS],
+                                [X3, YS2],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                                [XL, 1.0],
+                                [XL, 0.0],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyWBF)
 
                     elif Ym == 1.0:
                         # polygon =
                         # Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,YS),(X2,YF2),(XL,0.0)],True)
                         # #BHD
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, 1.0],
-                            [X4, YS],
-                            [X2, YF2],
-                            [XL, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        if P4 > 0:
+                            polyBHD.extend([
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, 1.0],
+                                [X4, YS],
+                                [X2, YF2],
+                                [XL, 0.0],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyBHD)
 
                         # polygon =
                         # Polygon([(X4,1.0),(X3,1.0),(X3,YS2),(X4,YS),(X4,1.0),(Xm2,1.0),(XL,1.0),(XL,0.0),(Xm,Ym2),(Xm2,Ym)],False)
                         # #WBF
-                        polyWBF.extend([
-                            [X4, 1.0],
-                            [X3, 1.0],
-                            [X3, YS2],
-                            [X4, YS],
-                            [X4, 1.0],
-                            [Xm2, 1.0],
-                            [XL, 1.0],
-                            [XL, 0.0],
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, 1.0]
-                        ])
+                        if P3 > 0:
+                            polyWBF.extend([
+                                [X4, 1.0],
+                                [X3, 1.0],
+                                [X3, YS2],
+                                [X4, YS],
+                                [X4, 1.0],
+                                [Xm2, 1.0],
+                                [XL, 1.0],
+                                [XL, 0.0],
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, 1.0]
+                            ])
+                        else:
+                            polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyWBF)
                 else:
                     if Ym == 0.0 and Ym2 == 0.0:
                         # polygon = Polygon([(Xm,Ym2),(X4,Ym)],True) #BHD
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [X4, Ym],
-                            [Xm, Ym2]
-                        ])
+                        if P4 > 0:
+                            polyBHD.extend([
+                                [Xm, Ym2],
+                                [X4, Ym],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyBHD)
 
                         # polygon =
                         # Polygon([(X4,YS),(X3,YS2),(X3,1.0),(X4,1.0),(XL,1.0),(XL,0.0),(X2,0.0)],True)
                         # #WBF
-                        polyWBF.extend([
-                            [X4, YS],
-                            [X3, YS2],
-                            [X3, 1.0],
-                            [X4, 1.0],
-                            [XL, 1.0],
-                            [XL, 0.0],
-                            [X2, 0.0],
-                            [X4, YS]
-                        ])
+                        if P3 > 0:
+                            polyWBF.extend([
+                                [X4, YS],
+                                [X3, YS2],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                                [XL, 1.0],
+                                [XL, 0.0],
+                                [X2, 0.0],
+                                [X4, YS]
+                            ])
+                        else:
+                            polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
                         polygons.insert(2, polyWBF)
 
                     else:
                         # polygon = Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(X2,0.0),(Xm,0.0)],True) #BHD
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [X4, Ym],
-                            [X4, YS],
-                            [X2, 0.0],
-                            [Xm, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        if P4 > 0:
+                            polyBHD.extend([
+                                [Xm, Ym2],
+                                [X4, Ym],
+                                [X4, YS],
+                                [X2, 0.0],
+                                [Xm, 0.0],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyBHD)
 
                         # polygon =
                         # Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(X3,YS2),(X3,1.0),(X4,1.0),(XL,1.0),(XL,0.0)],True)
                         # #WBF
-                        polyWBF.extend([
-                            [Xm, Ym2],
-                            [X4, Ym],
-                            [X4, YS],
-                            [X3, YS2],
-                            [X3, 1.0],
-                            [X4, 1.0],
-                            [XL, 1.0],
-                            [XL, 0.0],
-                            [Xm, Ym2]
-                        ])
+                        if P3 > 0:
+                            polyWBF.extend([
+                                [Xm, Ym2],
+                                [X4, Ym],
+                                [X4, YS],
+                                [X3, YS2],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                                [XL, 1.0],
+                                [XL, 0.0],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyWBF)
 
             elif bhdsit == 3:
                 if Xm2 > X4:
                     if Ym < YS:
                         # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(XL,YL)],True) #BHD
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [XL, YL],
-                            [Xm, Ym2]
-                        ])
+                        if P4 > 0:
+                            polyBHD.extend([
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [XL, YL],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyBHD)
 
                         # polygon =
                         # Polygon([(Xm,Ym2),(Xm2,Ym),(X4,YS),(X3,1.0),(X4,1.0),(XL,1.0),(XL,Ym2)],True)
                         # #WBF
-                        polyWBF.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, YS],
-                            [X3, 1.0],
-                            [X4, 1.0],
-                            [XL, 1.0],
-                            [XL, Ym2],
-                            [Xm, Ym2]
-                        ])
+                        if P3 > 0:
+                            polyWBF.extend([
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, YS],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                                [XL, 1.0],
+                                [XL, Ym2],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyWBF)
 
                     elif Ym == 1.0:
                         # polygon = Polygon([(Xm,Ym2),(Xm2,Ym),(X4,1.0),(X4,YS),(XL,YL)],True) #BHD
-                        polyBHD.extend([
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, 1.0],
-                            [X4, YS],
-                            [XL, YL],
-                            [Xm, Ym2]
-                        ])
+                        if P4 > 0:
+                            polyBHD.extend([
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, 1.0],
+                                [X4, YS],
+                                [XL, YL],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyBHD)
 
                         # polygon =
                         # Polygon([(X4,1.0),(X3,1.0),(X4,YS),(X4,1.0),(Xm2,1.0),(XL,1.0),(Xm,Ym2),(Xm2,Ym)],False)
                         # #WBF
-                        polyWBF.extend([
-                            [X4, 1.0],
-                            [X3, 1.0],
-                            [X4, YS],
-                            [X4, 1.0],
-                            [Xm2, 1.0],
-                            [XL, 1.0],
-                            [Xm, Ym2],
-                            [Xm2, Ym],
-                            [X4, 1.0]
-                        ])
+                        if P3 > 0:
+                            polyWBF.extend([
+                                [X4, 1.0],
+                                [X3, 1.0],
+                                [X4, YS],
+                                [X4, 1.0],
+                                [Xm2, 1.0],
+                                [XL, 1.0],
+                                [Xm, Ym2],
+                                [Xm2, Ym],
+                                [X4, 1.0]
+                            ])
+                        else:
+                            polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                         polygons.insert(2, polyWBF)
                 else:
                     # polygon = Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(XL,YL)],True) #BHD
-                    polyBHD.extend([
-                        [Xm, Ym2],
-                        [X4, Ym],
-                        [X4, YS],
-                        [XL, YL],
-                        [Xm, Ym2]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [Xm, Ym2],
+                            [X4, Ym],
+                            [X4, YS],
+                            [XL, YL],
+                            [Xm, Ym2]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(Xm,Ym2),(X4,Ym),(X4,YS),(X3,1.0),(X4,1.0),(XL,1.0)],True) #WBF
-                    polyWBF.extend([
-                        [Xm, Ym2],
-                        [X4, Ym],
-                        [X4, YS],
-                        [X3, 1.0],
-                        [X4, 1.0],
-                        [XL, 1.0],
-                        [Xm, Ym2]
-                    ])
+                    if P3 > 0:
+                        if P4 > 0:
+                            polyWBF.extend([
+                                [Xm, Ym2],
+                                [X4, Ym],
+                                [X4, YS],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                                [XL, 1.0],
+                                [Xm, Ym2]
+                            ])
+                        else:
+                            polyWBF.extend([
+                                [XL, YL],
+                                [X4, YS],
+                                [X3, 1.0],
+                                [X4, 1.0],
+                                [XL, 1.0],
+                                [XL, YL]
+                            ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
                     polygons.insert(2, polyWBF)
 
         else:
@@ -1610,51 +1751,67 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # polygon =
                     # Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X4,YS),(XL,YL),(XL,1.0)],True)
                     # #BHD
-                    polyBHD.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [x2, YWIB],
-                        [X4, YS],
-                        [XL, YL],
-                        [XL, 1.0],
-                        [X4, 1.0]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [x2, YWIB],
+                            [X4, YS],
+                            [XL, YL],
+                            [XL, 1.0],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X3,YS2)],True) #WBF
-                    polyWBF.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [x2, YWIB],
-                        [X3, YS2],
-                        [X4, 1.0]
-                    ])
+                    if P3 > 0:
+                        polyWBF.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [x2, YWIB],
+                            [X3, YS2],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyWBF)
 
                 else:
                     # polygon =
                     # Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X4,YS),(X2,YF2),(XL,0.0),(XL,1.0)],True)
                     # #BHD
-                    polyBHD.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [x2, YWIB],
-                        [X4, YS],
-                        [X2, YF2],
-                        [XL, 0.0],
-                        [XL, 1.0],
-                        [X4, 1.0]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [x2, YWIB],
+                            [X4, YS],
+                            [X2, YF2],
+                            [XL, 0.0],
+                            [XL, 1.0],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X3,YS2)],True) #WBF
-                    polyWBF.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [x2, YWIB],
-                        [X3, YS2],
-                        [X4, 1.0]
-                    ])
+                    if P3 > 0:
+                        polyWBF.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [x2, YWIB],
+                            [X3, YS2],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyWBF)
 
             if bhdsit == 5 or bhdsit == 6:
@@ -1662,54 +1819,70 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     # polygon =
                     # Polygon([(X4,1.0),(X4,YWIB),(0.0,YWIB),(0.0,YS2),(X4,YS),(X2,YF2),(XL,YL),(XL,1.0)],True)
                     # #BHD
-                    polyBHD.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [0.0, YWIB],
-                        [0.0, YS2],
-                        [X4, YS],
-                        [X2, YF2],
-                        [XL, YL],
-                        [XL, 1.0],
-                        [X4, 1.0]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [0.0, YWIB],
+                            [0.0, YS2],
+                            [X4, YS],
+                            [X2, YF2],
+                            [XL, YL],
+                            [XL, 1.0],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(0.0,YWIB),(0.0,1.0)],True) #WBF
-                    polyWBF.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [0.0, YWIB],
-                        [0.0, 1.0],
-                        [X4, 1.0]
-                    ])
+                    if P3 > 0:
+                        polyWBF.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [0.0, YWIB],
+                            [0.0, 1.0],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyWBF)
 
                 else:
                     # polygon =
                     # Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X4,YS),(X2,YF2),(XL,YL),(XL,1.0)],True)
                     # #BHD
-                    polyBHD.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [x2, YWIB],
-                        [X4, YS],
-                        [X2, YF2],
-                        [XL, YL],
-                        [XL, 1.0],
-                        [X4, 1.0]
-                    ])
+                    if P4 > 0:
+                        polyBHD.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [x2, YWIB],
+                            [X4, YS],
+                            [X2, YF2],
+                            [XL, YL],
+                            [XL, 1.0],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyBHD.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyBHD)
 
                     # polygon = Polygon([(X4,1.0),(X4,YWIB),(x2,YWIB),(X3,YS2),(X3,1.0)],True) #WBF
-                    polyWBF.extend([
-                        [X4, 1.0],
-                        [X4, YWIB],
-                        [x2, YWIB],
-                        [X3, YS2],
-                        [X3, 1.0],
-                        [X4, 1.0]
-                    ])
+                    if P3 > 0:
+                        polyWBF.extend([
+                            [X4, 1.0],
+                            [X4, YWIB],
+                            [x2, YWIB],
+                            [X3, YS2],
+                            [X3, 1.0],
+                            [X4, 1.0]
+                        ])
+                    else:
+                        polyWBF.extend([[0, 0], [0, 0], [0, 0], [0, 0]])
+
                     polygons.insert(2, polyWBF)
 
         # Area BHD and WBF
@@ -1819,7 +1992,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
         faciesCode = self._faciesCode[fIndx]
 
         return faciesCode, fIndx
-
 
     def facies_index_in_truncation_rule_for_polygon(self, polygon_index):
         indx = self.__fIndxPerPolygon[polygon_index]
