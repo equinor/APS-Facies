@@ -6,7 +6,7 @@
 <!-- Facies realization parameter: FaciesReal_case1  -->
 
 <APSModel version="1.0">
-    <Preview zoneNumber="1" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
+    <Preview zoneNumber="2" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
     </Preview>
     <Optimization>
         <UseMemoization>1</UseMemoization>
