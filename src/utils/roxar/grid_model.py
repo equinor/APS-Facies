@@ -750,7 +750,7 @@ def getGridAttributes(grid, debug_level=Debug.OFF):
     )
 
 
-def create_zone_parameter(grid_model,  realization_number=0, set_shared=False, debug_level=Debug.OFF):
+def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realization_number=0, set_shared=False, debug_level=Debug.OFF):
     """ Description:
      Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
      If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
@@ -759,7 +759,6 @@ def create_zone_parameter(grid_model,  realization_number=0, set_shared=False, d
     """
     import roxar
 
-    name = GridModelConstants.ZONE_NAME
     grid3d = grid_model.get_grid(realization_number)
     properties = grid_model.properties
     found_zone_parameter = False
@@ -775,7 +774,7 @@ def create_zone_parameter(grid_model,  realization_number=0, set_shared=False, d
 
         if zone_parameter.is_empty(realisation=realization_number):
             if debug_level >= Debug.VERBOSE:
-                print('  The zone parameter was empty')
+                print('  The zone parameter was empty. Assign values to zone parameter with name: {}'.format(zone_parameter.name))
             # Fill the parameter with zone values
             values, code_names = zone_parameter_values(grid3d)
             zone_parameter.code_names = code_names.copy()

@@ -18,7 +18,7 @@ from src.utils.roxar.generalFunctionsUsingRoxAPI import (
 from src.utils.roxar.grid_model import (
     get3DParameter, getContinuous3DParameterValues,
     isParameterDefinedWithValuesInRMS, getDiscrete3DParameterValues,
-    find_defined_cells,
+    find_defined_cells, create_zone_parameter,
 )
 
 from src.utils.methods import calc_average, get_specification_file
@@ -506,7 +506,8 @@ def run(
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
         print('--- Get RMS zone parameter: ' + zone_param_name + ' from RMS project ' + rms_project_name)
-    zone_values, _ = getDiscrete3DParameterValues(grid_model, zone_param_name, realization_number, debug_level)
+    zone_param = create_zone_parameter(grid_model,  name=zone_param_name, realization_number=realization_number, set_shared=False, debug_level=debug_level)
+    zone_values = zone_param.get_values(realization_number)
 
     region_values = None
     if use_regions:
