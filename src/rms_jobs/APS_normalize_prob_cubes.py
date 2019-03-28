@@ -8,7 +8,7 @@ from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
 from src.utils.roxar.grid_model import (
     getContinuous3DParameterValues, getDiscrete3DParameterValues,
-    find_defined_cells,
+    find_defined_cells, create_zone_parameter,
 )
 from src.utils.checks import  check_probability_values, check_probability_normalisation
 
@@ -123,7 +123,8 @@ def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_
 
     # Read zone parameter from RMS
     assert zone_param_name is not None
-    zone_values, _ = getDiscrete3DParameterValues(grid_model, zone_param_name, realization_number)
+    zone_param = create_zone_parameter(grid_model,  name=zone_param_name, realization_number=realization_number, set_shared=False, debug_level=debug_level)
+    zone_values = zone_param.get_values(realization_number)
 
     # Read region parameter from RMS
     region_values = None
