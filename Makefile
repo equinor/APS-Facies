@@ -437,6 +437,17 @@ clean-tests: clean-integration
 	       fmu_attributes.txt \
 	       libdraw2D.so
 
+find-circular-dependencies:
+	cd $(WEB_DIR) && \
+	npx strip-json-comments-cli --no-whitespace $(WEB_DIR)/tsconfig.json > /tmp/tsconfig.json && \
+	npx madge --circular \
+	          --warning \
+	          --ts-config /tmp/tsconfig.json \
+	          --webpack-config $(WEB_DIR)/node_modules/@vue/cli-service/webpack.config.js \
+	          --extensions js,ts \
+	          $(WEB_DIR)/src
+
+
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams: uml-main-program
 
