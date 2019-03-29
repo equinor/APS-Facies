@@ -44,12 +44,14 @@ export default {
 
   actions: {
     fetch ({ dispatch }) {
-      dispatch('azimuth/fetch', 'azimuth')
-      dispatch('dip/fetch', 'dip')
-      dispatch('power/fetch', 'power')
-      dispatch('depositionalAzimuth/fetch', 'depositional_direction')
-      dispatch('stacking/fetch', 'stacking_angle')
-      dispatch('migration/fetch', 'migration_angle')
+      return Promise.all([
+        dispatch('azimuth/fetch', 'azimuth'),
+        dispatch('dip/fetch', 'dip'),
+        dispatch('power/fetch', 'power'),
+        dispatch('depositionalAzimuth/fetch', 'depositional_direction'),
+        dispatch('stacking/fetch', 'stacking_angle'),
+        dispatch('migration/fetch', 'migration_angle'),
+      ])
     }
   },
 }

@@ -18,16 +18,18 @@ export default {
   actions: {
     fetch ({ dispatch }) {
       // Ranged values (min/max)
-      dispatch('ranges/fetch')
+      return Promise.all([
+        dispatch('ranges/fetch'),
 
-      // Get available options
-      dispatch('options/fetch')
+        // Get available options
+        dispatch('options/fetch'),
 
-      // Get the standard colors for facies
-      dispatch('faciesColors/fetch')
+        // Get the standard colors for facies
+        dispatch('faciesColors/fetch'),
 
-      // Get minimum, and maximum number of fields for different truncation rules
-      dispatch('numberOf/fetch')
+        // Get minimum, and maximum number of fields for different truncation rules
+        dispatch('numberOf/fetch'),
+      ])
     }
   },
 
