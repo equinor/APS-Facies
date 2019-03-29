@@ -122,26 +122,26 @@ export default {
     trend () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend },
     hasLinearProperties () {
       return (
-        notEmpty(this.trendType) &&
-        this.notOneOf(['RMS_PARAM', 'NONE'])
+        notEmpty(this.trendType)
+        && this.notOneOf(['RMS_PARAM', 'NONE'])
       )
     },
     hasEllipticProperties () {
       return (
-        this.hasLinearProperties &&
-        this.notOneOf(['LINEAR'])
+        this.hasLinearProperties
+        && this.notOneOf(['LINEAR'])
       )
     },
     hasHyperbolicProperties () {
       return (
-        this.hasEllipticProperties &&
-        this.notOneOf(['ELLIPTIC'])
+        this.hasEllipticProperties
+        && this.notOneOf(['ELLIPTIC'])
       )
     },
     hasEllipticConeProperties () {
       return (
-        this.hasHyperbolicProperties &&
-        this.notOneOf(['HYPERBOLIC'])
+        this.hasHyperbolicProperties
+        && this.notOneOf(['HYPERBOLIC'])
       )
     },
     isRmsParameter () {

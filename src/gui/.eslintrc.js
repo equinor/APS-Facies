@@ -41,6 +41,7 @@ module.exports = {
 
   // add your custom rules here
   rules: {
+    'operator-linebreak': ['error', 'before'],
     '@typescript-eslint/indent': ['error', 2],
     // allow paren-less arrow functions
     'arrow-parens': 0,

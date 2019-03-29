@@ -25,8 +25,8 @@ export default {
   computed: {
     canShowRegions () {
       return (
-        this.$store.state.regions.use &&
-        notEmpty(this.$store.getters.regionParameter)
+        this.$store.state.regions.use
+        && notEmpty(this.$store.getters.regionParameter)
       )
     },
   },

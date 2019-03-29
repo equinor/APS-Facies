@@ -90,9 +90,9 @@ const fileHandler = (store, fileName) => {
     try {
       json = xml2json(fileContent, { compact: true, ignoreComment: true })
     } catch (err) {
-      alert('The file you tried to open is not valid XML and cannot be used\n' +
-        'Fix the following error before opening again:\n\n' +
-        err.message)
+      alert('The file you tried to open is not valid XML and cannot be used\n'
+        + 'Fix the following error before opening again:\n\n'
+        + err.message)
     }
     if (json) {
       const dom = parse(fileContent)
@@ -101,9 +101,9 @@ const fileHandler = (store, fileName) => {
           if (result.valid) {
             store.dispatch('modelFileLoader/populateGUI', { json, fileName })
           } else {
-            alert('The file you tried to open is not a valid APS model file and cannot be used\n' +
-              'Fix the following error before opening again:\n\n' +
-              result.error)
+            alert('The file you tried to open is not a valid APS model file and cannot be used\n'
+              + 'Fix the following error before opening again:\n\n'
+              + result.error)
           }
         })
     }
@@ -162,9 +162,9 @@ export default {
               }
             })
         } else {
-          alert('The model you have defined is not valid and cannot be exported\n' +
-            'Fix the following error before exporting again:\n\n' +
-            result.error)
+          alert('The model you have defined is not valid and cannot be exported\n'
+            + 'Fix the following error before exporting again:\n\n'
+            + result.error)
         }
       }
     }

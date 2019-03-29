@@ -16,23 +16,21 @@ const updatableValue = {
 const updatableType = VueTypes.shape({ ...updatableValue })
 
 function _isValidId (value: any): boolean {
-  return typeof value === 'string' && (
-    value === '' || isUUID(value)
-  )
+  return typeof value === 'string'
+    && (value === '' || isUUID(value))
 }
 
 function _isValidIds (value: any): boolean {
-  return Array.isArray(value) && (
-    value.length === 0 || value.every(val => _isValidId(val))
-  )
+  return Array.isArray(value)
+    && (value.length === 0 || value.every(val => _isValidId(val)))
 }
 
 function _isValidColor (value: any): boolean {
   return (
-    RegExp(`#?${hex}{6}`).test(value) ||
-    VueTypes.oneOf(['primary', 'secondary', 'accent', 'error', 'info', 'success', 'warning']) || // Vuetify aliases
-    VueTypes.oneOf([]) || // Named colors
-    !value // Empty string
+    RegExp(`#?${hex}{6}`).test(value)
+    || VueTypes.oneOf(['primary', 'secondary', 'accent', 'error', 'info', 'success', 'warning']) // Vuetify aliases
+    || VueTypes.oneOf([]) // Named colors
+    || !value // Empty string
   ) as boolean
 }
 

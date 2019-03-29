@@ -163,10 +163,10 @@ export default {
       cache: true,
       get: function () {
         return (
-          notEmpty(this.variogramType) &&
-          (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true) &&
-          this.isValid &&
-          !this.waitingForSimulation
+          notEmpty(this.variogramType)
+          && (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true)
+          && this.isValid
+          && !this.waitingForSimulation
         )
       },
     },

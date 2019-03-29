@@ -90,8 +90,8 @@ export default class BackgroundFacies extends Vue {
       overlay = Object.keys(groups).map(groupId => { return { group: groupId, polygons: groups[`${groupId}`] } })
     }
     if (
-      hasAvailableBackgroundFacies(this.$store, this.value) &&
-      allBackgroundPolygonsHasSomeFacies(this.value)
+      hasAvailableBackgroundFacies(this.$store, this.value)
+      && allBackgroundPolygonsHasSomeFacies(this.value)
     ) {
       overlay.push({ group: '', polygons: [] })
     }

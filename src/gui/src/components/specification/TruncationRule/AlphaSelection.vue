@@ -66,9 +66,9 @@ export default class AlphaSelection extends Vue {
               /* This field  MAY be used in overlay */
               disabled = (
                 /* A Gaussian Field CANNOT be used twice in the same group */
-                this.rule.isUsedInDifferentOverlayPolygon(this.group, field) ||
+                this.rule.isUsedInDifferentOverlayPolygon(this.group, field)
                 /* A Gaussian Field used in overlay, CANNOT be used in the background, and vice versa */
-                this.rule.isUsedInBackground(field)
+                || this.rule.isUsedInBackground(field)
               )
             }
           } else {

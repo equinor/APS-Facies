@@ -408,8 +408,8 @@ export default {
               power: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
                 ? getNumericValue(gaussFieldFromFile.Vario.Power)
                 : null,
-              powerUpdatable: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL' &&
-                isFMUUpdatable(gaussFieldFromFile.Vario.Power)
+              powerUpdatable: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
+                && isFMUUpdatable(gaussFieldFromFile.Vario.Power)
             }
           )
 

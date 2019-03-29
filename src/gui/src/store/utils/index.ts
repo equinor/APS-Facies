@@ -49,9 +49,9 @@ const mirrorZoneRegions = store => {
   // @ts-ignore
   store.subscribe(({ type, payload }, state) => {
     if (
-      type.startsWith('zones') &&
-      state.regions.use &&
-      !!state.zones.current
+      type.startsWith('zones')
+      && state.regions.use
+      && !!state.zones.current
     ) {
       if (type === 'zones/REGIONS') {
         if (payload.zoneId === state.zones.current) {
