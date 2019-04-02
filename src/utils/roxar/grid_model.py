@@ -508,7 +508,7 @@ def get_simulation_box_thickness_old(grid, debug_level=Debug.OFF, max_number_of_
     return thickness_per_zone
 
 
-def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_selected_cells=1000):
+def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_number_of_selected_cells=1000):
     ''' Estimate simulation box thickness for each zone.
         This is done by assuming that it is sufficient to calculate difference
         between top of some selected grid cell for top layer and bottom of
@@ -523,7 +523,11 @@ def get_simulation_box_thickness(grid, debug_level=Debug.OFF, max_number_of_sele
     code_names = {}
     indexer = grid.grid_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
-    for zone_index in indexer.zonation:
+    if zone is not None:
+        zone_indices = [zone]
+    else:
+        zone_indices = indexer.zonation
+    for zone_index in zone_indices:
         zone_name = grid.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
         code_names[zone_index+1] = zone_name

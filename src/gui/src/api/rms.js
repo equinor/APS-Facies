@@ -22,7 +22,7 @@ export default {
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
   options: (name) => api.call('get_options', name),
   gridSize: (name) => api.call('get_grid_size', name),
-  simulationBoxOrigin: (name) => api.call('get_simulation_box_size', name),
+  simulationBoxOrigin: (name, rough = false) => api.call('get_simulation_box_size', name, rough),
   simulateGaussianField: (field) => api.call('simulate_gaussian_field', field),
   simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (gridName, probabilityCubeParameters, zoneNumber, regionParameter = null, regionNumber = null) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, zoneNumber, regionParameter, regionNumber),

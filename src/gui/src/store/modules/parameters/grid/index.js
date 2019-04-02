@@ -15,10 +15,10 @@ export default {
     simBox,
   },
   actions: {
-    async fetch ({ commit, dispatch, rootGetters }) {
+    async fetch ({ commit, dispatch, rootGetters }, rough = true) {
       commit('_WAITING', true)
       const [x, y, z] = await api.gridSize(rootGetters.gridModel)
-      const azimuth = await dispatch('simBox/fetch')
+      const azimuth = await dispatch('simBox/fetch', rough)
       await dispatch('populate', { azimuth, size: { x, y, z } })
       commit('_WAITING', false)
     },
