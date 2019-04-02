@@ -8,7 +8,7 @@ export default {
   actions: {
     async fetch ({ dispatch }) {
       const path = await rms.projectDirectory()
-      dispatch('select', path)
+      await dispatch('select', path)
     },
     select ({ commit }, path) {
       commit('PROJECT', path)

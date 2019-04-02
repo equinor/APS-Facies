@@ -43,9 +43,11 @@ export default {
 
   actions: {
     fetch ({ dispatch }) {
-      dispatch('cubic/fetch')
-      dispatch('nonCubic/fetch')
-      dispatch('bayfill/fetch')
+      return Promise.all([
+        dispatch('cubic/fetch'),
+        dispatch('nonCubic/fetch'),
+        dispatch('bayfill/fetch'),
+      ])
     },
   },
 

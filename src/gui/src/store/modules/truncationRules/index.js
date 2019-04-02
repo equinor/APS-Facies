@@ -91,8 +91,8 @@ export default {
   },
 
   actions: {
-    fetch ({ dispatch }) {
-      dispatch('templates/fetch')
+    async fetch ({ dispatch }) {
+      await dispatch('templates/fetch')
     },
     async add ({ commit }, rule) {
       return addItem({ commit }, { item: rule })
@@ -199,7 +199,7 @@ export default {
       commit('CHANGE_TYPE', { type: null })
       commit('CHANGE_TEMPLATE', { template: { text: null } })
     },
-    changePreset ({ commit, dispatch, state, rootGetters }, { type, template }) {
+    async changePreset ({ commit, dispatch, state, rootGetters }, { type, template }) {
       const current = rootGetters.truncationRule
       if (current && type !== state.preset.type && template !== state.preset.template) {
         commit('REMOVE', current.id)
@@ -212,7 +212,7 @@ export default {
       }
       if (notEmpty(template)) {
         commit('CHANGE_TEMPLATE', { template })
-        dispatch('addRuleFromTemplate')
+        await dispatch('addRuleFromTemplate')
       }
     },
     changeOrder ({ commit }, { rule, polygon, direction }) {

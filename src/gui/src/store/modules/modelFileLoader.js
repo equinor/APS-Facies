@@ -228,7 +228,7 @@ export default {
      * @param rootState
      * @param zoneModelsFromFile
      */
-    selectZonesAndRegions: ({ dispatch, rootState }, zoneModelsFromFile) => {
+    selectZonesAndRegions: async ({ dispatch, rootState }, zoneModelsFromFile) => {
       // syntezing zones and region info: Zones and regions could be specified in weird ways. For instance we could
       // have zones regions defined in the input data as
       //  zone 1, region 2
@@ -307,11 +307,11 @@ export default {
         }
       }
       // if we get here, the data is ok, we have identified what to select and can make the selection
-      dispatch('zones/current', zoneToSetAsCurrent, { root: true })
-      dispatch('zones/select', zonesToSelect, { root: true })
+      await dispatch('zones/current', zoneToSetAsCurrent, { root: true })
+      await dispatch('zones/select', zonesToSelect, { root: true })
       if (regionToSetAsCurrent) {
-        dispatch('regions/current', regionToSetAsCurrent, { root: true })
-        dispatch('regions/select', regionsToSelect, { root: true })
+        await dispatch('regions/current', regionToSetAsCurrent, { root: true })
+        await dispatch('regions/select', regionsToSelect, { root: true })
       }
     },
 
