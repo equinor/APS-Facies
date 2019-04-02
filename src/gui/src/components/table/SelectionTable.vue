@@ -66,8 +66,14 @@ export default {
   },
 
   props: {
-    headerName: VueTypes.string.isRequired,
-    itemType: VueTypes.string.isRequired,
+    headerName: {
+      required: true,
+      type: String,
+    },
+    itemType: {
+      required: true,
+      type: String,
+    },
     noDataText: VueTypes.string.def('$vuetify.noDataText'),
     showName: VueTypes.bool.def(false),
     showCode: VueTypes.bool.def(false),

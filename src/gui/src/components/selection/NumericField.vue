@@ -70,7 +70,10 @@ math.config({
 
 export default Vue.extend({
   props: {
-    label: VueTypes.string.isRequired,
+    label: {
+      required: true,
+      type: String,
+    },
     valueType: VueTypes.string.def(''),
     slider: VueTypes.bool.def(false),
     onlySlider: VueTypes.bool.def(false),
