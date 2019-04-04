@@ -335,7 +335,7 @@ export default {
         const regionId = Object.keys(regionsForZone)
           .find(key => regionsForZone[key].code === regionNumber)
 
-        zoneModel.GaussField.forEach(gaussFieldFromFile => {
+        zoneModel.GaussField.forEach(async gaussFieldFromFile => {
           let trend = null
 
           if (gaussFieldFromFile.Trend) {
@@ -419,6 +419,7 @@ export default {
                 name: gaussFieldFromFile._attributes.name,
                 variogram: vario,
                 trend: trend,
+                crossSection: await dispatch('crossSections/fetch', { zone: zoneId, region: regionId }),
                 zone: zoneId,
                 region: regionId,
               })

@@ -25,6 +25,9 @@
           </v-flex>
         </v-layout>
       </div>
+      <cross-section
+        :value="fields"
+      />
       <v-expansion-panel>
         <v-expansion-panel-content
           v-for="field in fields"
@@ -73,9 +76,11 @@ import GaussianRandomField from '@/components/specification/GaussianRandomField'
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog'
 import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName'
 import IconButton from '@/components/selection/IconButton'
+import CrossSection from '@/components/specification/GaussianRandomField/CrossSection'
 
 export default {
   components: {
+    CrossSection,
     IconButton,
     GaussianFieldName,
     ConfirmationDialog,

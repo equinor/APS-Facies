@@ -37,6 +37,7 @@ export default {
     },
     current: async ({ commit, dispatch, state }, { id }) => {
       await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
+      await dispatch('gaussianRandomFields/crossSections/fetch', { zone: id }, { root: true })
       commit('CURRENT', { id })
 
       const zone = state.available[`${id}`]

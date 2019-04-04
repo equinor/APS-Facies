@@ -7,11 +7,15 @@ import { addItem } from '@/store/actions'
 import { cloneDeep } from 'lodash'
 import { Trend, Variogram, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 
+import crossSections from '@/store/modules/gaussianRandomFields/crossSections'
+import rms from '@/api/rms'
+
 const makeFieldData = (fields) => {
   return fields.reduce((data, field) => {
     const instance = new GaussianRandomField({
       variogram: new Variogram(field.variogram || {}),
       trend: new Trend(field.trend || {}),
+      // TODO: settings
       ...field,
     })
     data[instance.id] = instance
@@ -63,40 +67,46 @@ export default {
 
   state: {
     fields: {
-    }
+    },
   },
 
   modules: {
+    crossSections,
   },
 
   actions: {
-    init ({ state, dispatch, rootGetters }, { zoneId, regionId }) {
+    async init ({ state, dispatch, rootGetters }, { zoneId, regionId }) {
+      /* TODO: Deprecate? */
       const minGaussianFields = rootGetters['constants/numberOf/gaussianRandomFields/minimum']
       const remaining = minGaussianFields - getRelevantFields(state, zoneId, regionId).length
       if (notEmpty(regionId) && remaining > 0) {
-        getRelevantFields(state, zoneId)
-          .forEach(field => {
+        await Promise.all(getRelevantFields(state, zoneId)
+          .map(async field => {
             field = cloneDeep(field)
             field._id = uuidv4()
             field.name = newGaussianFieldName(state, zoneId, regionId)
+            field.settings.crossSection = await dispatch('crossSection/fetch')
             field.parent.region = regionId
-            dispatch('addField', { field })
+            return dispatch('addField', { field })
           })
+        )
       } else {
-        for (let i = 0; i < remaining; i++) {
-          dispatch('addEmptyField', { zone: zoneId, region: regionId })
-        }
+        await Promise.all(
+          [...new Array(remaining)]
+            .map(() => dispatch('addEmptyField', { zone: zoneId, region: regionId }))
+        )
       }
     },
     populate ({ dispatch }, fields) {
       return Promise.all(Object.values(makeFieldData(fields)).map(field => dispatch('addField', { field })))
     },
-    addEmptyField ({ dispatch, state, rootGetters }, { zone, region } = {}) {
+    async addEmptyField ({ dispatch, state, rootGetters }, { zone, region } = {}) {
       zone = zone || rootGetters.zone
       region = region || rootGetters.region
       return dispatch('addField', {
         field: new GaussianRandomField({
           name: newGaussianFieldName(state, zone, region),
+          crossSection: await dispatch('crossSections/fetch', { zone, region }),
           zone,
           region,
         })
@@ -109,6 +119,23 @@ export default {
       if (state.fields.hasOwnProperty(grfId)) {
         await dispatch('truncationRules/deleteField', { grfId }, { root: true })
         commit('DELETE', { grfId })
+      }
+    },
+    async updateSimulation ({ state, commit, dispatch, rootGetters }, { grfId }) {
+      const field = state.fields[`${grfId}`]
+      commit('CHANGE_WAITING', { grfId, value: true })
+      try {
+        await dispatch('updateSimulationData', {
+          grfId: grfId,
+          data: await rms.simulateGaussianField({
+            name: field.name,
+            variogram: field.variogram,
+            trend: field.trend,
+            settings: rootGetters.simulationSettings(grfId),
+          })
+        })
+      } finally {
+        commit('CHANGE_WAITING', { grfId, value: false })
       }
     },
     updateSimulationData ({ commit, state }, { grfId, data }) {
@@ -179,6 +206,7 @@ export default {
   },
 
   mutations: {
+    // Gaussian Random Field
     ADD (state, { id, item }) {
       ADD_ITEM(state.fields, { id, item })
     },
@@ -199,6 +227,9 @@ export default {
     },
     CHANGE_OVERLAY (state, { grfId, value }) {
       Vue.set(state.fields[`${grfId}`], 'overlay', value)
+    },
+    CHANGE_WAITING (state, { grfId, value }) {
+      Vue.set(state.fields[`${grfId}`], 'waiting', value)
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }) {

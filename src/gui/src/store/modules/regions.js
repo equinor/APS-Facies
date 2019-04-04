@@ -24,6 +24,7 @@ export default {
     },
     current: async ({ commit, dispatch }, { id }) => {
       await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
+      await dispatch('gaussianRandomFields/crossSections/fetch', { region: id }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {

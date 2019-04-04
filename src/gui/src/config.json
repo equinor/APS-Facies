@@ -4,5 +4,9 @@
     "height": 200
   },
   "DEFAULT_POINT_SIZE": 1.2,
-  "DEFAULT_COLOR_SCALE": "Viridis"
+  "DEFAULT_COLOR_SCALE": "Viridis",
+  "DEFAULT_CROSS_SECTION": {
+    "type": "IJ",
+    "position": 0.5
+  }
 }
