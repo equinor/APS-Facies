@@ -1,10 +1,8 @@
 import Vue from 'vue'
-import uuidv4 from 'uuid/v4'
 
-import { hasParents, newSeed, notEmpty } from '@/utils'
+import { hasParents, newSeed } from '@/utils'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
-import { cloneDeep } from 'lodash'
 import { Trend, Variogram, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 
 import crossSections from '@/store/modules/gaussianRandomFields/crossSections'
@@ -15,7 +13,6 @@ const makeFieldData = (fields) => {
     const instance = new GaussianRandomField({
       variogram: new Variogram(field.variogram || {}),
       trend: new Trend(field.trend || {}),
-      // TODO: settings
       ...field,
     })
     data[instance.id] = instance
@@ -75,28 +72,6 @@ export default {
   },
 
   actions: {
-    async init ({ state, dispatch, rootGetters }, { zoneId, regionId }) {
-      /* TODO: Deprecate? */
-      const minGaussianFields = rootGetters['constants/numberOf/gaussianRandomFields/minimum']
-      const remaining = minGaussianFields - getRelevantFields(state, zoneId, regionId).length
-      if (notEmpty(regionId) && remaining > 0) {
-        await Promise.all(getRelevantFields(state, zoneId)
-          .map(async field => {
-            field = cloneDeep(field)
-            field._id = uuidv4()
-            field.name = newGaussianFieldName(state, zoneId, regionId)
-            field.settings.crossSection = await dispatch('crossSection/fetch')
-            field.parent.region = regionId
-            return dispatch('addField', { field })
-          })
-        )
-      } else {
-        await Promise.all(
-          [...new Array(remaining)]
-            .map(() => dispatch('addEmptyField', { zone: zoneId, region: regionId }))
-        )
-      }
-    },
     populate ({ dispatch }, fields) {
       return Promise.all(Object.values(makeFieldData(fields)).map(field => dispatch('addField', { field })))
     },
