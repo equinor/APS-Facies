@@ -129,9 +129,26 @@ export default {
     hideAlias: VueTypes.bool.def(false),
   },
 
-  data () {
-    return {
-      headers: [
+  computed: {
+    ...mapGetters({
+      'canSelect': 'canSpecifyModelSettings',
+    }),
+    facies () {
+      return Object.values(this.$store.state.facies.global.available)
+        .map(facies => {
+          return {
+            id: facies.id,
+            ...facies,
+            selected: this.selected.map(getId).includes(facies.id),
+            current: facies.id === this.$store.state.facies.global.current,
+          }
+        })
+    },
+    ...mapState({
+      parent: state => { return { zone: state.zones.current, region: state.regions.current } },
+    }),
+    headers () {
+      return [
         {
           text: 'Use',
           align: 'left',
@@ -163,29 +180,9 @@ export default {
           align: 'left',
           sortable: false,
           value: 'color',
-        }
-      ],
-    }
-  },
-
-  computed: {
-    ...mapGetters({
-      'canSelect': 'canSpecifyModelSettings',
-    }),
-    facies () {
-      return Object.values(this.$store.state.facies.global.available)
-        .map(facies => {
-          return {
-            id: facies.id,
-            ...facies,
-            selected: this.selected.map(getId).includes(facies.id),
-            current: facies.id === this.$store.state.facies.global.current,
-          }
-        })
+        },
+      ]
     },
-    ...mapState({
-      parent: state => { return { zone: state.zones.current, region: state.regions.current } },
-    }),
     selected: {
       get: function () {
         const state = this.$store.state
@@ -211,7 +208,6 @@ export default {
         : ''
     },
     selectedStyle () {
-      console.log('!!!')
       return {
         background: this.$vuetify.theme.info,
         color: 'white',
