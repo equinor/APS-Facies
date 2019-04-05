@@ -20,7 +20,10 @@
       slot="items"
       slot-scope="props"
     >
-      <tr @click="() => current(props.item)">
+      <tr
+        :style="props.item.selected ? selectedStyle : ''"
+        @click="() => current(props.item)"
+      >
         <td>
           <v-popover
             :disabled="canSelect"
@@ -43,6 +46,7 @@
             lazy
           >
             <highlight-current-item
+              :style="props.item.selected ? selectedStyle : ''"
               :item="props.item"
               field="name"
             />
@@ -63,6 +67,7 @@
             lazy
           >
             <highlight-current-item
+              :style="props.item.selected ? selectedStyle : ''"
               :item="props.item"
               field="alias"
             />
@@ -111,6 +116,7 @@ import VueTypes from 'vue-types'
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import { hasCurrentParents } from '@/utils'
+import { getId } from '@/utils/typing'
 
 export default {
   components: {
@@ -166,15 +172,18 @@ export default {
     ...mapGetters({
       'canSelect': 'canSpecifyModelSettings',
     }),
-    ...mapState({
-      facies: state => Object.values(state.facies.global.available)
+    facies () {
+      return Object.values(this.$store.state.facies.global.available)
         .map(facies => {
           return {
             id: facies.id,
             ...facies,
-            current: facies.id === state.facies.global.current,
+            selected: this.selected.map(getId).includes(facies.id),
+            current: facies.id === this.$store.state.facies.global.current,
           }
-        }),
+        })
+    },
+    ...mapState({
       parent: state => { return { zone: state.zones.current, region: state.regions.current } },
     }),
     selected: {
@@ -201,6 +210,13 @@ export default {
         ? `A ${item} must be selected, before including a facies in the model`
         : ''
     },
+    selectedStyle () {
+      console.log('!!!')
+      return {
+        background: this.$vuetify.theme.info,
+        color: 'white',
+      }
+    },
   },
 
   methods: {
@@ -222,6 +238,5 @@ export default {
       return this.$store.dispatch('facies/global/changed', { id: facies.id, alias: facies.alias })
     },
   },
-
 }
 </script>

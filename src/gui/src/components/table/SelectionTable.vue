@@ -21,7 +21,10 @@
       slot="items"
       slot-scope="props"
     >
-      <tr @click="() => current(props.item.id)">
+      <tr
+        :style="props.item.selected ? selectedStyle : ''"
+        @click="() => current(props.item.id)"
+      >
         <td>
           <v-checkbox
             v-model="props.selected"
@@ -117,6 +120,12 @@ export default {
     selected: {
       get: function () { return Object.values(this.items).filter(item => item.selected) },
       set: function (value) { this.$store.dispatch(`${this.itemType}s/select`, value) },
+    },
+    selectedStyle () {
+      return {
+        background: this.$vuetify.theme.info,
+        color: 'white'
+      }
     }
   },
 
