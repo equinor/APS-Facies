@@ -22,6 +22,7 @@ export default {
 
   props: {
     dataDefinition: VueTypes.arrayOf(Object).isRequired,
+    annotations: VueTypes.arrayOf(Object).def([]),
     width: VueTypes.integer.def(DEFAULT_SIZE.width),
     height: VueTypes.integer.def(DEFAULT_SIZE.height),
     staticSize: VueTypes.bool.def(false),
@@ -80,6 +81,9 @@ export default {
       }
       if (this.svg) {
         layout.shapes = this.dataDefinition
+      }
+      if (this.annotations) {
+        layout.annotations = this.annotations
       }
       return layout
     },
