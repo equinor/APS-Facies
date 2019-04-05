@@ -16,7 +16,7 @@
       ma-0
     >
       <v-flex
-        v-for="field in value"
+        v-for="(field, index) in value"
         :key="field.id"
         :ref="`v-flex:${field.id}`"
         column
@@ -31,6 +31,7 @@
             ma-0
             :data="field._data"
             :size="size"
+            :show-scale="index === (value.length - 1)"
           />
         </v-layout>
       </v-flex>
