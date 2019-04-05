@@ -1,5 +1,6 @@
 <template>
   <choose-parameter
+    :hide-if-disabled="false"
     parameter-type="blockedWellLog"
     label="Blocked well log parameter"
   />
