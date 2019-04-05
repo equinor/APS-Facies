@@ -21,7 +21,7 @@
       slot-scope="props"
     >
       <tr
-        :style="props.item.selected ? selectedStyle : ''"
+        :style="props.item.current ? selectedStyle : ''"
         @click="() => current(props.item)"
       >
         <td>
@@ -46,7 +46,7 @@
             lazy
           >
             <highlight-current-item
-              :style="props.item.selected ? selectedStyle : ''"
+              :style="props.item.current ? selectedStyle : ''"
               :item="props.item"
               field="name"
             />
@@ -67,7 +67,7 @@
             lazy
           >
             <highlight-current-item
-              :style="props.item.selected ? selectedStyle : ''"
+              :style="props.item.current ? selectedStyle : ''"
               :item="props.item"
               field="alias"
             />
