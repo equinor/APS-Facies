@@ -51,6 +51,11 @@
     >
       Run Settings
     </v-btn>
+    <icon-button
+      icon="help"
+      color="info"
+      @click="() => goToHelp()"
+    />
   </v-toolbar>
 </template>
 
@@ -118,6 +123,9 @@ export default {
   },
 
   methods: {
+    goToHelp () {
+      rms.open_wiki_help()
+    },
     importModelFile (file) {
       const reader = new FileReader()
       reader.onloadend = fileHandler(this.$store, file.name)

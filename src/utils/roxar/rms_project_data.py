@@ -25,7 +25,6 @@ from src.utils.constants.simple import (
 )
 from src.utils.exceptions.xml import ApsXmlError
 from src.utils.roxar.grid_model import (
-    calcStatisticsFor3DParameter,
     getGridSimBoxSize,
     get_simulation_box_thickness,
     average_of_property_inside_zone_region, getDiscrete3DParameterValues, create_zone_parameter)
@@ -329,6 +328,11 @@ class RMSData:
             settings=settings,
         ).simulate()
         return simulation
+
+    @staticmethod
+    def open_wiki_help():
+        import webbrowser
+        webbrowser.open('https://wiki.equinor.com/wiki/index.php/Res:APS_Adaptive_Plurigaussian_Simulation')
 
 
 def list_all_wells(project):
