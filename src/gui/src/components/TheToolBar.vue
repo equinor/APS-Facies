@@ -51,11 +51,18 @@
     >
       Run Settings
     </v-btn>
-    <icon-button
-      icon="help"
-      color="info"
-      @click="() => goToHelp()"
-    />
+    <v-popover
+      trigger="hover"
+    >
+      <icon-button
+        icon="help"
+        color="info"
+        @click="() => goToHelp()"
+      />
+      <span slot="popover">
+        Documentation of the APS methodology and user guide for this plug-in.
+      </span>
+    </v-popover>
   </v-toolbar>
 </template>
 
