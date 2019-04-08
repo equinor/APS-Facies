@@ -51,6 +51,18 @@
     >
       Run Settings
     </v-btn>
+    <v-popover
+      trigger="hover"
+    >
+      <icon-button
+        icon="help"
+        color="info"
+        @click="() => goToHelp()"
+      />
+      <span slot="popover">
+        Documentation of the APS methodology and user guide for this plug-in.
+      </span>
+    </v-popover>
   </v-toolbar>
 </template>
 
@@ -118,6 +130,9 @@ export default {
   },
 
   methods: {
+    goToHelp () {
+      rms.open_wiki_help()
+    },
     importModelFile (file) {
       const reader = new FileReader()
       reader.onloadend = fileHandler(this.$store, file.name)
