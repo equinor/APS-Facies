@@ -831,7 +831,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 5
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1252,7 +1252,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1274,7 +1274,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 5
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1382,7 +1382,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1394,7 +1394,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 5
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1611,7 +1611,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1633,7 +1633,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 5
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1878,7 +1878,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -1900,7 +1900,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 5
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2173,7 +2173,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2195,7 +2195,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 5
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2474,7 +2474,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2496,7 +2496,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2590,7 +2590,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2779,7 +2779,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2801,7 +2801,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -2909,7 +2909,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -3310,7 +3310,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -3332,7 +3332,7 @@
                 },
                 "facies": {
                   "name": "F14",
-                  "index": 3
+                  "index": 4
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -3454,7 +3454,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 1.0,
                 "interval": 0.0
@@ -4087,7 +4087,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 0.5,
                 "interval": 0.0
@@ -4099,7 +4099,7 @@
                 },
                 "facies": {
                   "name": "F13",
-                  "index": 2
+                  "index": 3
                 },
                 "probability": 0.5,
                 "interval": 0.0
