@@ -1,15 +1,19 @@
 <template>
-  <div>
-    <alpha-selection
+  <v-layout>
+    <v-flex
       v-for="item in alphas"
       :key="item.channel"
-      :channel="item.channel"
-      :value="item.selected"
-      :rule="value"
-      group=""
-      @input="val => update(item, val)"
-    />
-  </div>
+      pa-1
+    >
+      <alpha-selection
+        :channel="item.channel"
+        :value="item.selected"
+        :rule="value"
+        group=""
+        @input="val => update(item, val)"
+      />
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>

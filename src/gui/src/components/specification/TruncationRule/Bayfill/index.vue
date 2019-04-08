@@ -1,21 +1,25 @@
 <template>
-  <v-layout>
-    <v-flex xs10>
-      <v-layout column>
-        <v-flex>
-          <polygon-table
-            :value="value"
-          />
-        </v-flex>
-      </v-layout>
-    </v-flex>
-    <v-flex xs2>
+  <v-container column>
+    <h4>Alpha selection</h4>
+    <v-layout row>
       <alpha-fields
         :value="value"
         :min-channels="3"
       />
-    </v-flex>
-  </v-layout>
+    </v-layout>
+    <h4>Truncation rule specification</h4>
+    <v-layout>
+      <v-flex>
+        <v-layout>
+          <v-flex>
+            <polygon-table
+              :value="value"
+            />
+          </v-flex>
+        </v-layout>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
