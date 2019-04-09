@@ -14,7 +14,6 @@
     -->
     <upload-button
       :file-changed-callback="e => importModelFile(e)"
-      disabled
       color=""
       icon
     >
@@ -24,7 +23,7 @@
           Must be set to 'black' in order to look clickable
         -->
         <v-icon
-          color="gray"
+          color="black"
         >
           {{ $vuetify.icons.import }}
         </v-icon>
