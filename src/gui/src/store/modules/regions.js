@@ -22,9 +22,11 @@ export default {
       await dispatch('zones/update', { regions }, { root: true })
       return Object.keys(regions)
     },
-    current: async ({ commit, dispatch }, { id }) => {
+    current: async ({ commit, dispatch, rootState }, { id }) => {
+      const zone = Object.values(rootState.zones.available)
+        .find(zone => Object.values(zone.regions).map(region => region.id).includes(id))
       await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
-      await dispatch('gaussianRandomFields/crossSections/fetch', { region: id }, { root: true })
+      await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region: id }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
     fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {

@@ -8,9 +8,11 @@ import {
 } from '@/utils/domain/truncationRule/index'
 import Zone from '@/utils/domain/zone'
 import Polygon from '@/utils/domain/polygon/base'
+import BayfillPolygon from '@/utils/domain/polygon/bayfill'
 
 export {
   Polygon,
+  BayfillPolygon,
   Region,
   Zone,
   GlobalFacies,
