@@ -16,6 +16,7 @@
     "@babel/polyfill": "^7.0.0",
     "@fortawesome/fontawesome-free": "^5.5.0",
     "@statnett/vue-plotly": "^0.2.0",
+    "hex-rgb": "^4.0.0",
     "lodash": "^4.17.11",
     "mathjs": "^5.2.0",
     "plotly.js-dist": "^1.39.2",

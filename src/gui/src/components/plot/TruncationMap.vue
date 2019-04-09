@@ -9,6 +9,8 @@
 
 <script>
 import VueTypes from 'vue-types'
+import hexRgb from 'hex-rgb'
+import colors from 'vuetify/es5/util/colors'
 
 import rms from '@/api/rms'
 
@@ -45,6 +47,32 @@ function centerOfPolygon (polygon) {
   }
 }
 
+function luminance ({ red, green, blue }) {
+  /* Borrowed from https://stackoverflow.com/questions/9733288/how-to-programmatically-calculate-the-contrast-ratio-between-two-colors
+  * */
+  const [x, y, z] = [red, green, blue].map(v => {
+    v /= 255
+    return v <= 0.03928
+      ? v / 12.92
+      : Math.pow((v + 0.055) / 1.055, 2.4)
+  })
+  return 0.2126 * x + 0.7152 * y + 0.0722 * z
+}
+
+function contrast (color, other) {
+  return (
+    (luminance(hexRgb(color)) + 0.05)
+    / (luminance(hexRgb(other)) + 0.05)
+  )
+}
+
+function getTextColor (backgroundColor) {
+  const textColor = colors.grey.darken3
+  return contrast(backgroundColor, textColor) <= 4.5
+    ? colors.grey.lighten4
+    : textColor
+}
+
 const plotify = (polygons, faciesTable) => {
   return polygons.reduce((obj, { name, polygon }) => {
     const facies = faciesTable.find(facies => facies.name === name)
@@ -69,6 +97,9 @@ const plotify = (polygons, faciesTable) => {
       xref: 'x',
       yref: 'y',
       text: facies.alias,
+      font: {
+        color: getTextColor(color)
+      },
       showarrow: false,
     })
 
