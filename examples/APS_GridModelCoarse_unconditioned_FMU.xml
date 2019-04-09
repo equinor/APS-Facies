@@ -22,7 +22,7 @@
   <PrintInfo>3</PrintInfo>
   <SeedFile>seed.dat</SeedFile>
   <WriteSeeds>yes</WriteSeeds>
-  <MainFaciesTable blockedWell="BW" blockedWellLog="facies”">
+  <MainFaciesTable blockedWell="BW" blockedWellLog="Facies">
     <Facies name="F1">
       <Code>1</Code>
     </Facies>
