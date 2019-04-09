@@ -59,6 +59,9 @@ export default {
         showline: false,
         scaleratio: scaleRatio,
         autorange: true,
+        titlefont: {
+          family: 'Roboto'
+        },
       }
       const xaxis = this.axisNames.x ? { ..._axis, visible: true, title: this.axisNames.x } : _axis
       const yaxis = { ..._axis, scaleanchor: 'x' }
