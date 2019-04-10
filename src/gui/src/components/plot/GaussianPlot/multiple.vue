@@ -16,7 +16,7 @@
       ma-0
     >
       <v-flex
-        v-for="field in value"
+        v-for="(field, index) in value"
         :key="field.id"
         :ref="`v-flex:${field.id}`"
         column
@@ -31,6 +31,7 @@
             ma-0
             :data="field._data"
             :size="size"
+            :show-scale="index === (value.length - 1)"
           />
         </v-layout>
       </v-flex>
@@ -57,11 +58,16 @@ export default {
     value: VueTypes.arrayOf(AppTypes.gaussianRandomField).isRequired,
   },
 
-  computed: {
-    size: {
-      cache: false,
-      get () {
-        return this.value
+  data () {
+    return {
+      size: DEFAULT_SIZE,
+    }
+  },
+
+  watch: {
+    content () {
+      this.$nextTick(() => {
+        this.size = this.value
           .map(field => {
             if (Object.values(this.$refs).length > 0) {
               const el = this.$refs[`v-flex:${field.id}`][0].firstChild
@@ -80,8 +86,8 @@ export default {
               height: Math.floor(Math.max(max.height, curr.height) * (1 - air)),
             }
           })
-      },
-    },
-  },
+      })
+    }
+  }
 }
 </script>

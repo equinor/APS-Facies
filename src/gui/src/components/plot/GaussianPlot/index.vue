@@ -21,6 +21,7 @@ export default {
 
   props: {
     data: VueTypes.arrayOf(VueTypes.arrayOf(VueTypes.number)).isRequired,
+    showScale: VueTypes.bool.def(false),
     colorScale: VueTypes.oneOfType([
       VueTypes.string,
       VueTypes.arrayOf(VueTypes.shape({
@@ -43,7 +44,7 @@ export default {
         type: 'heatmap',
         hoverinfo: 'none',
         colorscale: this.colorMapping,
-        showscale: false,
+        showscale: this.showScale,
       }]
     },
     colorMapping () {

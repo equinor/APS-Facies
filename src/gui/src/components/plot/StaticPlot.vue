@@ -22,6 +22,7 @@ export default {
 
   props: {
     dataDefinition: VueTypes.arrayOf(Object).isRequired,
+    annotations: VueTypes.arrayOf(Object).def([]),
     width: VueTypes.integer.def(DEFAULT_SIZE.width),
     height: VueTypes.integer.def(DEFAULT_SIZE.height),
     staticSize: VueTypes.bool.def(false),
@@ -58,6 +59,9 @@ export default {
         showline: false,
         scaleratio: scaleRatio,
         autorange: true,
+        titlefont: {
+          family: 'Roboto'
+        },
       }
       const xaxis = this.axisNames.x ? { ..._axis, visible: true, title: this.axisNames.x } : _axis
       const yaxis = { ..._axis, scaleanchor: 'x' }
@@ -80,6 +84,9 @@ export default {
       }
       if (this.svg) {
         layout.shapes = this.dataDefinition
+      }
+      if (this.annotations) {
+        layout.annotations = this.annotations
       }
       return layout
     },
