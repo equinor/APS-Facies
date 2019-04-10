@@ -233,45 +233,48 @@ export default {
      * @param fileName
      * @returns {Promise<void>}
      */
-    populateGUI: async ({ dispatch }, { json, fileName }) => {
+    populateGUI: async ({ dispatch, commit }, { json, fileName }) => {
       const apsModelContainer = JSON.parse(json)
 
       await dispatch('parameters/names/model/select', fileName, { root: true })
 
       // TODO introduce function (repeating code. Code smell?)
       const optionalRMSWorkFlowName = getNodeValue(apsModelContainer, 'RMSWorkflowName')
-      // try {
-      if (optionalRMSWorkFlowName) {
-        await dispatch('parameters/names/workflow/select', optionalRMSWorkFlowName, { root: true })
+      commit('LOADING', { loading: true, message: `Loading the model file, "${fileName}"` }, { root: true })
+      try {
+        if (optionalRMSWorkFlowName) {
+          await dispatch('parameters/names/workflow/select', optionalRMSWorkFlowName, { root: true })
+        }
+
+        await dispatch('gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
+
+        if (apsModelContainer.APSModel.RegionParamName) {
+          await dispatch(`parameters/zone/select`, getNodeValue(apsModelContainer, 'ZoneParamName'), { root: true })
+        }
+
+        if (apsModelContainer.APSModel.RegionParamName) {
+          await dispatch(`parameters/region/select`, getNodeValue(apsModelContainer, 'RegionParamName'), { root: true })
+        }
+
+        if (apsModelContainer.APSModel.ResultFaciesParamName) {
+          await dispatch('parameters/realization/select', getNodeValue(apsModelContainer, 'ResultFaciesParamName'), { root: true })
+        }
+
+        await dispatch('populateGlobalFaciesList', apsModelContainer.APSModel.MainFaciesTable)
+
+        await dispatch('populateGaussianRandomFields', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+
+        await dispatch('populateFaciesProbabilities', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+
+        await dispatch('populateTruncationRules', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+
+        // Now we can select zones and regions on the left hand side of the gui.
+        await dispatch('selectZonesAndRegions', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
+      } catch (reason) {
+        handleError(reason)
+      } finally {
+        commit('LOADING', { loading: false }, { root: true })
       }
-
-      await dispatch('gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
-
-      if (apsModelContainer.APSModel.RegionParamName) {
-        await dispatch(`parameters/zone/select`, getNodeValue(apsModelContainer, 'ZoneParamName'), { root: true })
-      }
-
-      if (apsModelContainer.APSModel.RegionParamName) {
-        await dispatch(`parameters/region/select`, getNodeValue(apsModelContainer, 'RegionParamName'), { root: true })
-      }
-
-      if (apsModelContainer.APSModel.ResultFaciesParamName) {
-        await dispatch('parameters/realization/select', getNodeValue(apsModelContainer, 'ResultFaciesParamName'), { root: true })
-      }
-
-      await dispatch('populateGlobalFaciesList', apsModelContainer.APSModel.MainFaciesTable)
-
-      await dispatch('populateGaussianRandomFields', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-
-      await dispatch('populateFaciesProbabilities', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-
-      await dispatch('populateTruncationRules', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-
-      // Now we can select zones and regions on the left hand side of the gui.
-      await dispatch('selectZonesAndRegions', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-      // } catch (reason) {
-      //   handleError(reason)
-      // }
     },
 
     /**
@@ -603,7 +606,6 @@ export default {
           // Changing presents must be done after the truncation rule is added (the command above must run to completion)
           commit('truncationRules/CHANGE_TYPE', { type }, { root: true })
           commit('truncationRules/CHANGE_TEMPLATE', { template: { text: 'Imported' } }, { root: true })
-          // await dispatch('truncationRules/changePreset', { type, template: 'Imported', parent }, { root: true })
         }
       }
     }
