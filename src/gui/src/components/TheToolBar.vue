@@ -98,6 +98,7 @@ const fileHandler = (store, fileName) => {
       rms.isApsModelValid(btoa(new XMLSerializer().serializeToString(dom)))
         .then(result => {
           if (result.valid) {
+            // TODO: Empty state
             store.dispatch('modelFileLoader/populateGUI', { json, fileName })
           } else {
             alert('The file you tried to open is not a valid APS model file and cannot be used\n'

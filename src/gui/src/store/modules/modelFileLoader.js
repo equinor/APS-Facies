@@ -1,6 +1,12 @@
 import { resolve } from '@/utils'
 import { Variogram, Trend, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
-import { Bayfill, BayfillPolygon } from '@/utils/domain'
+import {
+  Bayfill,
+  BayfillPolygon,
+  NonCubic,
+  NonCubicPolygon,
+  OverlayPolygon,
+} from '@/utils/domain'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 const ensureArray = (value) => {
@@ -83,34 +89,55 @@ function getParent ({ rootState }, zoneModel) {
   }
 }
 
-function getFacies ({ rootState }, parent, truncationRuleContainer, item) {
-  const mappig = {
-    'Bayhead Delta': 'BHD',
-    'Wave influenced Bayfill': 'WBF',
-  }
-  if (item in mappig) item = mappig[item]
-  const name = getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel[item])
+function getFacies ({ rootState }, name, parent) {
   return Object.values(rootState.facies.available)
     .filter(facies => facies.isChildOf(parent))
     .find(facies => facies.name === name)
 }
 
-function getSlantFactor (truncationRuleContainer, item) {
+function getBackgroundFacies ({ rootState }, container, parent) {
+  const over = ensureArray(container.BackGround)
+
+  return over.map(el => getFacies({ rootState }, getTextValue(el), parent))
+}
+
+function getFaciesFromBayfill ({ rootState }, container, item, parent) {
+  const mappig = {
+    'Bayhead Delta': 'BHD',
+    'Wave influenced Bayfill': 'WBF',
+  }
+  if (item in mappig) item = mappig[`${item}`]
+  const name = getTextValue(container.BackGroundModel[item])
+  return getFacies({ rootState }, name, parent)
+}
+
+function getSlantFactor (container, item) {
   const mapping = {
     'Floodplain': 'SF',
     'Subbay': 'YSF',
     'Bayhead Delta': 'SBHD',
   }
-  const element = truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel
+  const element = container.BackGroundModel
   return item in mapping
     ? new FmuUpdatableValue({
-      value: getNumericValue(element[mapping[item]]),
-      updatable: isFMUUpdatable(element[mapping[item]])
+      value: getNumericValue(element[mapping[`${item}`]]),
+      updatable: isFMUUpdatable(element[mapping[`${item}`]])
     })
     : null
 }
 
-function makeBayfillTruncationRule (truncationRuleContainer, rootState, parent) {
+function getAlphaField ({ rootState }, name, parent) {
+  return Object.values(rootState.gaussianRandomFields.fields)
+    .filter(field => field.isChildOf(parent))
+    .find(field => field.name === name)
+}
+
+function getAlphaFields ({ rootState }, container, parent) {
+  const alphafields = getTextValue(container.BackGroundModel.AlphaFields)
+  return alphafields.split(' ').map(name => getAlphaField({ rootState }, name, parent))
+}
+
+function makeBayfillTruncationRule ({ rootState }, container, parent) {
   const names = [
     'Floodplain',
     'Subbay',
@@ -118,29 +145,76 @@ function makeBayfillTruncationRule (truncationRuleContainer, rootState, parent) 
     'Bayhead Delta',
     'Lagoon',
   ]
-  const polygons = names.map((name, index) => {
+  const polygons = names.map((name, order) => {
     return new BayfillPolygon({
       name,
-      facies: getFacies({ rootState }, parent, truncationRuleContainer, name),
-      slantFactor: getSlantFactor(truncationRuleContainer, name),
-      order: index,
+      facies: getFaciesFromBayfill({ rootState }, container, name, parent),
+      slantFactor: getSlantFactor(container, name),
+      order,
     })
   })
 
-  const alphafields = getTextValue(truncationRuleContainer.Trunc3D_Bayfill.BackGroundModel.AlphaFields)
-  const fields = alphafields.split(' ').map(name => {
-    return Object.values(rootState.gaussianRandomFields.fields)
-      .filter(field => field.isChildOf(parent))
-      .find(field => field.name === name)
-  })
+  const backgroundFields = getAlphaFields({ rootState }, container, parent)
 
-  const rule = new Bayfill({
+  return new Bayfill({
     name: '',
     polygons,
-    backgroundFields: fields,
+    backgroundFields,
     parent,
   })
-  return rule
+}
+
+function getOverlayPolygon ({ rootState }, backgroundFacies, container, order, parent) {
+  return new OverlayPolygon({
+    group: backgroundFacies,
+    center: getNumericValue(container.TruncIntervalCenter),
+    field: getAlphaField({ rootState }, container._attributes.name, parent),
+    fraction: getNumericValue(container.ProbFrac),
+    facies: getFacies({ rootState }, container.ProbFrac._attributes.name, parent),
+    order,
+  })
+}
+
+async function getOverlayPolygons ({ rootState, dispatch }, group, parent) {
+  const backgroundFacies = await dispatch('facies/groups/get', {
+    facies: getBackgroundFacies({ rootState }, group, parent),
+    parent,
+  }, { root: true })
+  const _getOverlayPolygon = (el, order = 0) => getOverlayPolygon({ rootState }, backgroundFacies, el, order, parent)
+  const polygons = ensureArray(group.AlphaField)
+  return polygons.map((polygon, index) => _getOverlayPolygon(polygon, index))
+}
+
+async function makeNonCubicTruncationRule ({ rootState, dispatch }, container, parent) {
+  const backgroundFields = getAlphaFields({ rootState }, container, parent)
+  const backgroundPolygons = container.BackGroundModel.Facies.map(element => {
+    return new NonCubicPolygon({
+      angle: getNumericValue(element.Angle),
+      fraction: getNumericValue(element.ProbFrac),
+      facies: getFacies({ rootState }, element._attributes.name, parent)
+    })
+  })
+
+  let overlayPolygons = []
+  if (container.OverLayModel) {
+    const groups = ensureArray(container.OverLayModel.Group)
+    for (const group of groups) {
+      const polygons = await getOverlayPolygons({ dispatch, rootState }, group, parent)
+      overlayPolygons.push(...polygons)
+    }
+  }
+  const polygons = [...backgroundPolygons, ...overlayPolygons]
+  polygons.forEach((polygon, index) => {
+    polygon.order = index
+  })
+
+  return new NonCubic({
+    name: '',
+    backgroundFields,
+    polygons,
+    _useOverlay: overlayPolygons.length > 0,
+    parent,
+  })
 }
 
 export default {
@@ -489,7 +563,7 @@ export default {
      * @param zoneModelsFromFile
      * @returns {Promise<void>}
      */
-    populateTruncationRules: async ({ dispatch, rootState }, zoneModelsFromFile) => {
+    populateTruncationRules: async ({ dispatch, commit, rootState }, zoneModelsFromFile) => {
       for (const zoneModel of zoneModelsFromFile) {
         const zoneNumber = parseInt(zoneModel._attributes.number)
         let regionNumber = parseInt(zoneModel._attributes.regionNumber)
@@ -499,7 +573,7 @@ export default {
           .find(zone => zone.code === zoneNumber)
         const regionsForZone = rootState.zones.available[`${zone.id}`].regions
         const region = Object.values(regionsForZone)
-          .find(region => region.code === regionNumber)
+          .find(region => region.code === regionNumber) || null
 
         const parent = {
           zone,
@@ -508,13 +582,27 @@ export default {
         if (zoneModel.TruncationRule) {
           let truncationRuleContainer = zoneModel.TruncationRule
           let type = ''
+          let rule = null
           if (truncationRuleContainer.Trunc3D_Bayfill) {
             type = 'Bayfill'
-            const rule = makeBayfillTruncationRule(truncationRuleContainer, rootState, parent)
+            rule = makeBayfillTruncationRule({ rootState }, truncationRuleContainer.Trunc3D_Bayfill, parent)
+          } else if (truncationRuleContainer.Trunc2D_Angle) {
+            type = 'Non-Cubic'
+            rule = await makeNonCubicTruncationRule({ dispatch, rootState }, truncationRuleContainer.Trunc2D_Angle, parent)
+          } else {
+            /* Cubic is not implemented */
+            type = 'Cubic'
+          }
+          if (rule) {
             // now we should have everything needed to add the truncationRule.
             await dispatch('truncationRules/add', rule, { root: true })
           }
+
+          type = Object.values(rootState.truncationRules.templates.types.available)
+            .find(item => item.name === type)
           // Changing presents must be done after the truncation rule is added (the command above must run to completion)
+          commit('truncationRules/CHANGE_TYPE', { type }, { root: true })
+          commit('truncationRules/CHANGE_TEMPLATE', { template: { text: 'Imported' } }, { root: true })
           // await dispatch('truncationRules/changePreset', { type, template: 'Imported', parent }, { root: true })
         }
       }
