@@ -15,7 +15,7 @@
     >
       <v-expansion-panel-content>
         <div slot="header">
-          Zones and regions
+          <h2>Zones and regions</h2>
         </div>
         <v-card>
           <div v-if="currentGridModel">
@@ -29,7 +29,7 @@
 
       <v-expansion-panel-content>
         <div slot="header">
-          Facies
+          <h2>Facies</h2>
         </div>
         <v-card>
           <div v-if="currentGridModel">

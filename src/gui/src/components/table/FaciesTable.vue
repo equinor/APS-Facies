@@ -20,7 +20,10 @@
       slot="items"
       slot-scope="props"
     >
-      <tr @click="() => current(props.item)">
+      <tr
+        :style="props.item.current ? selectedStyle : ''"
+        @click="() => current(props.item)"
+      >
         <td>
           <v-popover
             :disabled="canSelect"
@@ -43,6 +46,7 @@
             lazy
           >
             <highlight-current-item
+              :style="props.item.current ? selectedStyle : ''"
               :item="props.item"
               field="name"
             />
@@ -63,6 +67,7 @@
             lazy
           >
             <highlight-current-item
+              :style="props.item.current ? selectedStyle : ''"
               :item="props.item"
               field="alias"
             />
@@ -111,6 +116,7 @@ import VueTypes from 'vue-types'
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
 import { hasCurrentParents } from '@/utils'
+import { getId } from '@/utils/typing'
 
 export default {
   components: {
@@ -123,9 +129,26 @@ export default {
     hideAlias: VueTypes.bool.def(false),
   },
 
-  data () {
-    return {
-      headers: [
+  computed: {
+    ...mapGetters({
+      'canSelect': 'canSpecifyModelSettings',
+    }),
+    facies () {
+      return Object.values(this.$store.state.facies.global.available)
+        .map(facies => {
+          return {
+            id: facies.id,
+            ...facies,
+            selected: this.selected.map(getId).includes(facies.id),
+            current: facies.id === this.$store.state.facies.global.current,
+          }
+        })
+    },
+    ...mapState({
+      parent: state => { return { zone: state.zones.current, region: state.regions.current } },
+    }),
+    headers () {
+      return [
         {
           text: 'Use',
           align: 'left',
@@ -157,26 +180,9 @@ export default {
           align: 'left',
           sortable: false,
           value: 'color',
-        }
-      ],
-    }
-  },
-
-  computed: {
-    ...mapGetters({
-      'canSelect': 'canSpecifyModelSettings',
-    }),
-    ...mapState({
-      facies: state => Object.values(state.facies.global.available)
-        .map(facies => {
-          return {
-            id: facies.id,
-            ...facies,
-            current: facies.id === state.facies.global.current,
-          }
-        }),
-      parent: state => { return { zone: state.zones.current, region: state.regions.current } },
-    }),
+        },
+      ]
+    },
     selected: {
       get: function () {
         const state = this.$store.state
@@ -201,6 +207,12 @@ export default {
         ? `A ${item} must be selected, before including a facies in the model`
         : ''
     },
+    selectedStyle () {
+      return {
+        background: this.$vuetify.theme.info,
+        color: 'white',
+      }
+    },
   },
 
   methods: {
@@ -222,6 +234,5 @@ export default {
       return this.$store.dispatch('facies/global/changed', { id: facies.id, alias: facies.alias })
     },
   },
-
 }
 </script>
