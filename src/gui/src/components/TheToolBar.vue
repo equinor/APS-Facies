@@ -47,7 +47,7 @@
     <v-btn
       disabled
       outline
-      color="info"
+      color="primary"
     >
       Run Settings
     </v-btn>
@@ -56,7 +56,7 @@
     >
       <icon-button
         icon="help"
-        color="info"
+        color="primary"
         @click="() => goToHelp()"
       />
       <span slot="popover">

@@ -209,7 +209,7 @@ export default {
     },
     selectedStyle () {
       return {
-        background: this.$vuetify.theme.info,
+        background: this.$vuetify.theme.primary,
         color: 'white',
       }
     },
