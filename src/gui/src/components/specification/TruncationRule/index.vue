@@ -36,8 +36,14 @@
       <v-flex xs12>
         <component
           :is="truncationRuleComponent"
+          v-if="truncationRuleComponent"
           :value="rule"
         />
+        <span
+          v-else
+        >
+          Cubic truncation rules have not been implemented, yet
+        </span>
       </v-flex>
       <v-layout row>
         <v-flex
