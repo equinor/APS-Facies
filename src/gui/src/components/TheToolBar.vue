@@ -146,17 +146,17 @@ export default {
       if (exportedXMLString) {
         const result = await rms.isApsModelValid(btoa(exportedXMLString))
         if (result.valid) {
-          const defaultPath = this.$store.state.parameters.path.project + '/myApsExport.xml'
+          const defaultPath = `${this.$store.state.parameters.path.project}/myApsExport.xml`
           this.$refs.exportDialog.open(defaultPath, {})
             .then((result) => {
               if (result.save) {
                 const resultPromise = rms.save(result.path, btoa(exportedXMLString))
                 resultPromise.then((success) => {
                   if (success) {
-                    alert('modellfil lagret til ' + result.path)
+                    alert(`model file was saved to ${result.path}`)
                   }
                   if (!success) {
-                    alert('Noe gikk galt med lagring. Valgte du en sti som ikke finnes?')
+                    alert('Saving failed. Did you choose a path that does not exist?')
                   }
                 })
               }

@@ -1,6 +1,4 @@
 import { hasParents } from '@/utils'
-import {isReturnStatement} from "@babel/types";
-import APSError from "@/utils/domain/errors/base";
 
 class APSExportError extends Error {
   constructor (message) {
@@ -17,7 +15,7 @@ const addRMSProjectName = (rootState, doc, parentElement) => {
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSProjectName', value))
   } else {
-    throw new APSExportError('Feltet APS Model er ikke utfylt')
+    throw new APSExportError('The field "APS Model" is not filled')
   }
 }
 
@@ -33,7 +31,7 @@ const addGridModelName = (rootState, doc, parentElement) => {
   if (value) {
     parentElement.appendChild(createElement(doc, 'GridModelName', value))
   } else {
-    throw new APSExportError('GridModel er ikke valgt')
+    throw new APSExportError('No grid model is selected')
   }
 }
 
@@ -55,7 +53,7 @@ const addZoneParamName = (rootState, doc, parentElement) => {
   if (value) {
     parentElement.appendChild(createElement(doc, 'ZoneParamName', value))
   } else {
-    throw new APSExportError('ZoneParamName er ikke valgt')
+    throw new APSExportError('No Zone parameter is selected')
   }
 }
 
@@ -71,7 +69,7 @@ const addResultFaciesParamName = (rootState, doc, parentElement) => {
   if (value) {
     parentElement.appendChild(createElement(doc, 'ResultFaciesParamName', value))
   } else {
-    throw new APSExportError('ResultFaciesParamName er ikke valgt')
+    throw new APSExportError('No result facies parameter is given')
   }
 }
 
