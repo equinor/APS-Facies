@@ -24,6 +24,10 @@ export default class NonCubic extends OverlayTruncationRule<Polygon> {
     super(props)
   }
 
+  public get type (): string {
+    return 'non-cubic'
+  }
+
   public get specification (): NonCubicSpecification {
     return {
       ...super.specification,

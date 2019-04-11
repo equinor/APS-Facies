@@ -40,9 +40,7 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
     ]
   }
 
-  public get type (): string {
-    return this.constructor.name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-  }
+  abstract get type (): string
 
   public get ready (): boolean {
     return this._constraints.every((constraint): boolean => constraint())

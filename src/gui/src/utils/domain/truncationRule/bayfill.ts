@@ -54,4 +54,8 @@ export default class Bayfill extends TruncationRule<BayfillPolygon> {
         }
       })
   }
+
+  public get type (): string {
+    return 'bayfill'
+  }
 }
