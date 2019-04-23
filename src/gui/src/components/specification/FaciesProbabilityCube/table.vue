@@ -52,91 +52,96 @@
   </v-data-table>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-import FractionField from '@/components/selection/FractionField'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem'
+import FractionField from '@/components/selection/FractionField.vue'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+
+import Facies from '@/utils/domain/facies/local'
+import { RootGetters } from '@/utils/helpers/store/typing'
+
 import { hasCurrentParents } from '@/utils'
 
-export default {
+@Component({
   components: {
     OptionalHelpItem,
     FractionField,
   },
+})
+export default class FaciesProbabilityCubeTable extends Vue {
+  get facies (): Facies[] {
+    return (Object.values(this.$store.state.facies.available) as Facies[])
+      .filter(facies => hasCurrentParents(facies, this.$store.getters))
+  }
 
-  computed: {
-    ...mapState({
-      probabilityCubes: state => [{ text: '', disabled: false }]
-        .concat(state.parameters.probabilityCube.available
-          .map(parameter => {
-            return {
-              text: parameter,
-              disabled: Object.values(state.facies.available)
-                .map(facies => facies.probabilityCube)
-                .filter(facies => hasCurrentParents(facies))
-                .includes(parameter)
-            }
-          })
-        ),
-    }),
-    useProbabilityCubes () {
-      return !this.$store.getters['facies/constantProbability']()
-    },
-    items () {
-      const state = this.$store.state
-      const getters = this.$store.getters
-      const items = state.facies.available
-      return Object.values(items)
-        .filter(item => hasCurrentParents(item, getters))
-        .map(item => {
+  get probabilityCubes () {
+    return [{ text: '', disabled: false }]
+      .concat(this.$store.state.parameters.probabilityCube.available
+        .map((parameter: string) => {
           return {
-            id: item.id,
-            name: getters['facies/name'](item.facies),
-            ...item,
+            text: parameter,
+            disabled: this.facies
+              .map(facies => facies.probabilityCube)
+              .includes(parameter)
           }
         })
-    },
-    noDataText () {
-      return 'No Facies selected'
-    },
-    headers () {
-      const headers = [
-        {
-          text: 'Facies',
-          align: 'left',
-          sortable: false,
-          value: 'name',
-        },
-        {
-          text: 'Probability Cube',
-          align: 'left',
-          sortable: false,
-          value: 'probabilityCube',
-        },
-        {
-          text: this.useProbabilityCubes ? 'Preview Probability' : 'Probability',
-          align: 'left',
-          sortable: false,
-          value: 'previewProbability',
-        },
-      ]
-      return headers
-        .filter(item => this.useProbabilityCubes
-          ? true
-          : item.value !== 'probabilityCube'
-        )
-    },
-  },
+      )
+  }
 
-  methods: {
-    changeProbabilityCube (facies, probabilityCube) {
-      this.$store.dispatch('facies/changed', { id: facies.id, probabilityCube })
-    },
-    changeProbability (facies, prob) {
-      this.$store.dispatch('facies/changed', { id: facies.id, previewProbability: prob })
-    },
-  },
+  get useProbabilityCubes () {
+    return !(this.$store.getters as RootGetters)['facies/constantProbability']()
+  }
 
+  get items () {
+    return this.facies
+      .map(item => {
+        return {
+          id: item.id,
+          name: item.name,
+          ...item,
+        }
+      })
+  }
+
+  get noDataText () {
+    return 'No Facies selected'
+  }
+
+  get headers () {
+    const headers = [
+      {
+        text: 'Facies',
+        align: 'left',
+        sortable: false,
+        value: 'name',
+      },
+      {
+        text: 'Probability Cube',
+        align: 'left',
+        sortable: false,
+        value: 'probabilityCube',
+      },
+      {
+        text: this.useProbabilityCubes ? 'Preview Probability' : 'Probability',
+        align: 'left',
+        sortable: false,
+        value: 'previewProbability',
+      },
+    ]
+    return headers
+      .filter(item => this.useProbabilityCubes
+        ? true
+        : item.value !== 'probabilityCube'
+      )
+  }
+
+  changeProbabilityCube (facies: Facies, probabilityCube: string) {
+    this.$store.dispatch('facies/changeProbabilityCube', { facies, probabilityCube })
+  }
+
+  changeProbability (facies: Facies, prob: number) {
+    this.$store.dispatch('facies/changePreviewProbability', { facies, previewProbability: prob })
+  }
 }
 </script>

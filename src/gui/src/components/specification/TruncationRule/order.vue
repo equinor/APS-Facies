@@ -1,5 +1,5 @@
 <template>
-  <polygon-order
+  <base-polygon-order
     :can-increase="canIncrease"
     :can-decrease="canDecrease"
     :can-remove="canRemove"
@@ -13,7 +13,12 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import BasePolygonOrder from '@/components/specification/PolygonOrder'
+import {
+  Polygon,
+  TruncationRule,
+} from '@/utils/domain'
+
+import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
 
 @Component({
   components: {
@@ -30,14 +35,14 @@ export default class PolygonOrder extends Vue {
   @Prop({ default: false })
   readonly overlay: boolean
 
-  get rule () { return this.$store.getters['truncationRule'] }
+  get rule (): TruncationRule<Polygon> { return this.$store.getters['truncationRule'] }
   get max () {
     return this.rule.polygons
       .filter(polygon => polygon.overlay === this.overlay)
       .map(polygon => polygon.order)
       .reduce((max, order) => order > max ? order : max, 0)
   }
-  get min () {
+  get min (): number {
     return 0
   }
   get canIncrease () {

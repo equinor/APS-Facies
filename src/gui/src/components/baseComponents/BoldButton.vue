@@ -7,19 +7,18 @@
   />
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import VueTypes from 'vue-types'
-import WaitBtn from '@/components/baseComponents/WaitButton'
+import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
-export default {
+@Component({
   components: {
-    WaitBtn
-  },
-
-  props: {
-    title: VueTypes.string.required
-  },
+    WaitBtn,
+  }
+})
+export default class BoldButton extends Vue {
+  @Prop({ required: true })
+  readonly title!: string
 }
-
 </script>

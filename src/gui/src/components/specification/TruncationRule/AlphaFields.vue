@@ -20,7 +20,6 @@
 import VueTypes from 'vue-types'
 
 import { AppTypes } from '@/utils/typing'
-import { sortByProperty } from '@/utils'
 
 import AlphaSelection from './AlphaSelection'
 
@@ -58,8 +57,13 @@ export default {
   },
 
   methods: {
-    update (item, value) {
-      return this.$store.dispatch('truncationRules/updateFields', { channel: item.channel, selected: value })
+    update ({ channel }, fieldId) {
+      const field = this.$store.state.gaussianRandomFields.fields[`${fieldId}`]
+      return this.$store.dispatch('truncationRules/updateBackgroundField', {
+        index: channel - 1,
+        rule: this.value,
+        field: field || null
+      })
     }
   },
 }

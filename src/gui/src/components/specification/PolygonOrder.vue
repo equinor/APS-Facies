@@ -40,17 +40,21 @@
   </v-layout>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
-  name: 'PolygonOrder',
+@Component
+export default class BasePolygonOrder extends Vue {
+  @Prop({ default: true })
+  readonly canIncrease: boolean
 
-  props: {
-    canIncrease: VueTypes.bool.def(true),
-    canDecrease: VueTypes.bool.def(true),
-    canRemove: VueTypes.bool.def(true),
-    canAdd: VueTypes.bool.def(true),
-  },
+  @Prop({ default: true })
+  readonly canDecrease: boolean
+
+  @Prop({ default: true })
+  readonly canRemove: boolean
+
+  @Prop({ default: true })
+  readonly canAdd: boolean
 }
 </script>

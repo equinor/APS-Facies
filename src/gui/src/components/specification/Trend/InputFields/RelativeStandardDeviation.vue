@@ -9,23 +9,22 @@
   />
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+import { ID } from '@/utils/domain/types'
 
-export default {
+@Component({
   components: {
     StorableNumericField,
   },
+})
+export default class RelativeStandardDeviation extends Vue {
+  @Prop({ required: true })
+  readonly grfId!: ID
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
-  computed: {
-    ranges () {
-      return { min: 0, max: 1 }
-    }
+  get ranges () {
+    return { min: 0, max: 1 }
   }
 }
 </script>

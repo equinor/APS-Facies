@@ -38,7 +38,7 @@
           <facies-specification
             :value="props.item"
             :rule="value"
-            :disable="isUsedInOverlay"
+            :disable="facies => value.isUsedInOverlay(facies)"
           />
         </td>
         <td
@@ -60,18 +60,23 @@
   </v-data-table>
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import FractionField from '@/components/selection/FractionField'
-import NumericField from '@/components/selection/NumericField'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import PolygonOrder from '@/components/specification/TruncationRule/order'
-import FaciesSpecification from '@/components/specification/Facies'
+import FractionField from '@/components/selection/FractionField.vue'
+import NumericField from '@/components/selection/NumericField.vue'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
+import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import { hasFaciesSpecifiedForMultiplePolygons, sortByOrder } from '@/utils'
+import NonCubic from '@/utils/domain/truncationRule/nonCubic'
+import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
+import Facies from '@/utils/domain/facies/local'
 
-export default {
+import { sortByOrder } from '@/utils'
+import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+
+@Component({
   components: {
     FaciesSpecification,
     PolygonOrder,
@@ -79,73 +84,69 @@ export default {
     FractionField,
     NumericField,
   },
+})
+export default class NonCubicTable extends Vue {
+  @Prop({ required: true })
+  readonly value!: NonCubic
 
-  props: {
-    value: AppTypes.truncationRule,
-  },
+  get polygons () {
+    // TODO: Include 'help' messages
+    return !this.value
+      ? []
+      : this.value.backgroundPolygons
+  }
 
-  computed: {
-    polygons () {
-      // TODO: Include 'help' messages
-      return !this.value
-        ? []
-        : this.value.backgroundPolygons
-    },
-    headers () {
-      return [
+  get headers () {
+    return [
+      {
+        text: 'Angle',
+        align: 'left',
+        sortable: false,
+        value: 'angle',
+        help: '',
+      },
+      {
+        text: 'Facies',
+        align: 'left',
+        sortable: false,
+        value: 'facies',
+        help: '',
+      },
+      ...(this.hasMultipleFaciesSpecified ? [
         {
-          text: 'Angle',
+          text: 'Probability Fraction',
           align: 'left',
           sortable: false,
-          value: 'angle',
-          help: '',
+          value: 'fraction',
+          help: 'The fraction of the facies probability assigned to the individual polygon',
         },
-        {
-          text: 'Facies',
-          align: 'left',
-          sortable: false,
-          value: 'facies',
-          help: '',
-        },
-        ...(this.hasMultipleFaciesSpecified ? [
-          {
-            text: 'Probability Fraction',
-            align: 'left',
-            sortable: false,
-            value: 'fraction',
-            help: 'The fraction of the facies probability assigned to the individual polygon',
-          },
-        ] : []),
-        {
-          text: 'Order',
-          align: 'left',
-          sortable: false,
-          value: 'order',
-          help: '',
-        }
-      ]
-    },
-    hasMultipleFaciesSpecified () {
-      return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
-    },
-  },
+      ] : []),
+      {
+        text: 'Order',
+        align: 'left',
+        sortable: false,
+        value: 'order',
+        help: '',
+      }
+    ]
+  }
 
-  methods: {
-    isUsedInOverlay (facies) {
-      return this.value.overlayPolygons
-        .map(({ facies }) => facies)
-        .includes(facies.id)
-    },
-    ordering (...args) { return sortByOrder(...args) },
-    updateFactor (item, value) {
-      return this.$store.dispatch('truncationRules/changeProportionFactors', { rule: this.value, polygon: item, value })
-    },
-    updateAngle (item, value) {
-      return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
-    },
-    multipleFaciesSpecified ({ facies }) {
-      return hasFaciesSpecifiedForMultiplePolygons(this.value.polygons, facies)
-    },
-  },
+  get hasMultipleFaciesSpecified () {
+    return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
+  }
+
+  ordering (items: NonCubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
+
+  updateFactor (item: NonCubicPolygon, value: number) {
+    return this.$store.dispatch('truncationRules/changeProportionFactors', { rule: this.value, polygon: item, value })
+  }
+
+  updateAngle (item: NonCubicPolygon, value: number) {
+    return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
+  }
+
+  multipleFaciesSpecified ({ facies }: { facies: Facies }) {
+    return hasFaciesSpecifiedForMultiplePolygons(this.value.polygons, facies)
+  }
 }
 </script>

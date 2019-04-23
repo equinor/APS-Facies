@@ -9,36 +9,35 @@
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import BaseDropdown from '@/components/selection/dropdown/BaseDropdown'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
+
+@Component({
   components: {
     BaseDropdown
   },
+})
+export default class ChooseParameter<T = any> extends Vue {
+  @Prop({ required: true })
+  readonly label!: string
 
-  props: {
-    label: VueTypes.string.isRequired,
-    parameterType: VueTypes.string.isRequired,
-    hideIfDisabled: VueTypes.bool.def(true),
-    disabled: VueTypes.bool.def(false)
-  },
+  @Prop({ required: true })
+  readonly parameterType!: string
 
-  computed: {
-    available () { return this.$store.state.parameters[this.parameterType].available },
-    selected () { return this.$store.state.parameters[this.parameterType].selected },
-    isDisabled () { return (this.available ? this.available.length <= 1 : false) || this.disabled },
-    isShown () { return !(this.hideIfDisabled && this.isDisabled) },
-  },
+  @Prop({ default: true })
+  readonly hideIfDisabled!: boolean
 
-  methods: {
-    getter () {
-      return this.selected
-    },
-    setter (value) {
-      this.$store.dispatch(`parameters/${this.parameterType}/select`, value)
-    }
-  },
+  @Prop({ default: false })
+  readonly disabled!: boolean
+
+  get available (): T[] { return this.$store.state.parameters[this.parameterType].available }
+  get selected (): T { return this.$store.state.parameters[this.parameterType].selected }
+  get isDisabled (): boolean { return (this.available ? this.available.length <= 1 : false) || this.disabled }
+  get isShown (): boolean { return !(this.hideIfDisabled && this.isDisabled) }
+
+  getter () { return this.selected }
+  setter (value: T) { this.$store.dispatch(`parameters/${this.parameterType}/select`, value) }
 }
 </script>

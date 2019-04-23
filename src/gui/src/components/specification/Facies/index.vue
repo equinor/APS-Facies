@@ -1,41 +1,42 @@
 <template>
   <facies-specification-base
     :value="value.facies"
-    :rule="rule"
     :disable="disable"
     @input.capture="facies => updateFacies(facies)"
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import FaciesSpecificationBase from './base'
+import { RootGetters } from '@/utils/helpers/store/typing'
+import { ID } from '@/utils/domain/types'
+import Facies from '@/utils/domain/facies/local'
+import Polygon from '@/utils/domain/polygon/base'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+
+import FaciesSpecificationBase from './base.vue'
 
 import { updateFacies } from '@/store/utils'
-import { AppTypes } from '@/utils/typing'
 
-export default {
-  name: 'FaciesSpecification',
-
+@Component({
   components: {
     FaciesSpecificationBase,
-  },
+  }
+})
+export default class FaciesSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value: Polygon
 
-  props: {
-    rule: AppTypes.truncationRule.isRequired,
-    value: VueTypes.shape({
-      facies: AppTypes.id.isRequired,
-    }).loose.isRequired,
-    disable: VueTypes.func.def(() => false),
-  },
+  @Prop({ required: true })
+  readonly rule: TruncationRule<Polygon>
 
-  computed: {
-  },
-  methods: {
-    updateFacies (faciesId) {
-      updateFacies(this.$store.dispatch, this.rule, this.value, faciesId, false)
-    },
-  },
+  @Prop({ default: false })
+  readonly disable: ((facies: Facies) => boolean) | boolean
+
+  async updateFacies (faciesId: ID) {
+    const facies = (this.$store.getters as RootGetters)['facies/byId'](faciesId)
+    await updateFacies(this.$store.dispatch, this.rule, this.value, facies, false)
+  }
 }
 </script>

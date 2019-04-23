@@ -64,29 +64,23 @@
 </template>
 
 <script lang="ts">
-import { Facies, GaussianRandomField } from '@/utils/domain'
-import OverlayPolygon from '@/utils/domain/polygon/overlay'
-import { ID } from '@/utils/domain/types'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
-
-import FractionField from '@/components/selection/FractionField'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import PolygonOrder from '@/components/specification/TruncationRule/order'
-import FaciesSpecification from '@/components/specification/Facies'
-import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection'
-
-import { updateFacies } from '@/store/utils'
-import { hasFaciesSpecifiedForMultiplePolygons, sortByOrder } from '@/utils'
+import FractionField from '@/components/selection/FractionField.vue'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
+import FaciesSpecification from '@/components/specification/Facies/index.vue'
+import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection.vue'
 import Polygon from '@/utils/domain/polygon/base'
 
-interface Ordered {
-  order: number
-  [_: string]: any
-}
-
-type Order = number | Ordered
+import { Facies } from '@/utils/domain'
+import OverlayPolygon from '@/utils/domain/polygon/overlay'
+import { ID } from '@/utils/domain/types'
+import { RootGetters } from '@/utils/helpers/store/typing'
+import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+import { updateFacies } from '@/store/utils'
+import { sortByOrder } from '@/utils'
 
 @Component({
   components: {
@@ -99,16 +93,17 @@ type Order = number | Ordered
 })
 export default class OverlayTable extends Vue {
   @Prop({ required: true })
-  value: OverlayPolygon[]
+  readonly value!: OverlayPolygon[]
+
   @Prop({ required: true })
-  rule: OverlayTruncationRule<Polygon>
+  readonly rule!: OverlayTruncationRule<Polygon>
 
   get polygons () {
     // TODO: Include 'help' messages
     return this.value
   }
   get fieldOptions () {
-    return (Object.values(this.$store.getters.fields) as GaussianRandomField[]) // TODO: Type annotate store
+    return Object.values((this.$store.getters as RootGetters).fields)
       .map(field => {
         return {
           value: field.id,
@@ -168,24 +163,20 @@ export default class OverlayTable extends Vue {
   backgroundFacies (facies: Facies) {
     return this.rule.isUsedInBackground(facies)
   }
-  ordering (...args: OverlayPolygon[]) { return sortByOrder(...args) }
-  updateField (item: OverlayPolygon, fieldId: ID) {
-    this.$store.dispatch('truncationRules/updateFields', { rule: this.rule, channel: this.channel(item), selected: fieldId })
+  ordering (items: OverlayPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
+  async updateField (polygon: OverlayPolygon, fieldId: ID) {
+    const field = this.$store.state.gaussianRandomFields.fields[`${fieldId}`]
+    await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
   }
-  updateFacies (item: OverlayPolygon, faciesId: ID) {
-    updateFacies(this.$store.dispatch, this.rule, item, faciesId, false)
+  updateFacies (polygon: OverlayPolygon, faciesId: ID) {
+    updateFacies(this.$store.dispatch, this.rule, polygon, faciesId, false)
   }
-  updateFraction (item: OverlayPolygon, val: number) {
-    this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon: item, value: val })
+  async updateFraction (polygon: OverlayPolygon, val: number) {
+    await this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon, value: val })
   }
-  updateCenter (item: OverlayPolygon, val: number) {
-    this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon: item, value: val })
+  async updateCenter (polygon: OverlayPolygon, val: number) {
+    await this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon, value: val })
   }
-  // channel (order: Order) {
-  //   order = order.hasOwnProperty('order') ? (order as Ordered).order : order
-  //   // +1 due to order being 0-indexed, but `channel` is expected to be 1-indexed
-  //   return (order as number) + 1 + this.rule.fields.filter(({ overlay }) => !overlay).length
-  // }
   multipleFaciesSpecified ({ facies }: Facies) {
     return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons, facies)
   }

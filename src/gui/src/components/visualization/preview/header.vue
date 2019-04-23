@@ -15,40 +15,31 @@
   </v-layout>
 </template>
 
-<script>
-import IconButton from '@/components/selection/IconButton'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
-  name: 'PreviewHeader',
+import IconButton from '@/components/selection/IconButton.vue'
 
+@Component({
   components: {
     IconButton
   },
+})
+export default class PreviewHeader extends Vue {
+  waitingForSimulation: boolean = false
 
-  data () {
-    return {
-      waitingForSimulation: false,
+  get rule () { return this.$store.getters.truncationRule }
+  get canSimulate () { return this.rule && this.rule.ready }
+
+  async refresh () {
+    await this.$store.dispatch('facies/normalize')
+    this.waitingForSimulation = true
+    try {
+      await this.$store.dispatch('truncationRules/updateRealization', this.rule)
+    } catch (e) {
+      alert(e)
     }
-  },
-
-  computed: {
-    rule () { return this.$store.getters.truncationRule },
-    canSimulate () {
-      return this.rule && this.rule.ready
-    },
-  },
-
-  methods: {
-    async refresh () {
-      await this.$store.dispatch('facies/normalize')
-      this.waitingForSimulation = true
-      try {
-        await this.$store.dispatch('truncationRules/updateRealization', this.rule)
-      } catch (e) {
-        alert(e)
-      }
-      this.waitingForSimulation = false
-    }
+    this.waitingForSimulation = false
   }
 }
 </script>

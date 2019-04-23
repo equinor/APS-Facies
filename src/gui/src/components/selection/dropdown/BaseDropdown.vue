@@ -7,27 +7,27 @@
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
-  props: {
-    label: VueTypes.string.isRequired,
-    items: VueTypes.arrayOf(VueTypes.string).isRequired,
-    modelGetter: VueTypes.func.isRequired,
-    modelSetter: VueTypes.func.isRequired,
-    disabled: VueTypes.bool.def(false),
-  },
+@Component
+export default class BaseDropdown<T = any> extends Vue {
+  @Prop({ required: true })
+  readonly label!: string
 
-  computed: {
-    selected: {
-      get () {
-        return this.modelGetter()
-      },
-      set (value) {
-        this.modelSetter(value)
-      }
-    }
-  }
+  @Prop({ required: true })
+  readonly items!: string[]
+
+  @Prop({ required: true })
+  readonly modelGetter!: () => T
+
+  @Prop({ required: true })
+  readonly modelSetter!: (value: T) => void
+
+  @Prop({ default: false })
+  readonly disabled!: boolean
+
+  get selected () { return this.modelGetter() }
+  set selected (value) { this.modelSetter(value) }
 }
 </script>
