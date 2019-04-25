@@ -71,7 +71,7 @@ export default {
       return addItem({ commit }, { item: template })
     },
     async createRule ({ dispatch, state, rootGetters, rootState }, { name, type, parent = null }) {
-      const autoFill = rootState.options.automaticFill.value
+      const autoFill = rootState.options.automaticFaciesFill.value
 
       parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
 

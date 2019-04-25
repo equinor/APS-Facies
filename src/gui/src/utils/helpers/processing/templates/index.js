@@ -165,7 +165,7 @@ export function processOverlay (getters, overlay, parent) {
   return { ...overlay, items }
 }
 export function processPolygons ({ rootGetters, rootState }, { polygons, type, settings }) {
-  const autoFill = rootState.options.automaticFill.value
+  const autoFill = rootState.options.automaticFaciesFill.value
   polygons = processSettings(polygons, type, settings)
   if (autoFill) {
     polygons = polygons.map(polygon => {

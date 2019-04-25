@@ -151,6 +151,12 @@
               </v-flex>
               <v-flex>
                 <v-checkbox
+                  v-model="automaticFaciesFill"
+                  label="Automatically assign facies to templates"
+                />
+              </v-flex>
+              <v-flex>
+                <v-checkbox
                   v-model="filterZeroProbability"
                   label="Ignore Facies with 0 probability"
                 />
@@ -310,6 +316,7 @@ export default {
       showZoneNameNumber: '',
       showRegionNameNumber: '',
       automaticAlphaFieldSelection: '',
+      automaticFaciesFill: '',
       filterZeroProbability: false,
     }
   },
@@ -337,6 +344,7 @@ export default {
         this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
         this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
         this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
+        this.automaticFaciesFill = this.$store.state.options.automaticFaciesFill.value
         this.filterZeroProbability = this.$store.state.options.filterZeroProbability.value
       }
     },
@@ -370,17 +378,17 @@ export default {
     cancel (e) {
       this.dialog = false
     },
-    ok (e) {
-      // TODO: Store stuff
+    async ok (e) {
       alert(`dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
-            dialogFMUParameterListLocation: ${this.fmuParameterListLocation}
-            dialogShowZoneNameNumber:       ${this.showZoneNameNumber}
-            dialogShowRegionNameNumber:     ${this.showRegionNameNumber}`)
-      this.$store.dispatch('parameters/path/select', this.apsModelFileLocation)
-      this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber)
-      this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber)
-      this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection)
-      this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection)
+            dialogFMUParameterListLocation: ${this.fmuParameterListLocation}`)
+      await Promise.all([
+        this.$store.dispatch('parameters/path/select', this.apsModelFileLocation),
+        this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
+        this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
+        this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
+        this.$store.dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
+        this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection),
+      ])
       this.dialog = false
     }
   },
