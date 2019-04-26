@@ -24,7 +24,7 @@ import {
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     _loaded: false,
     _loading: {
@@ -118,6 +118,9 @@ export default new Vuex.Store({
   },
 
   mutations: {
+    RESET: (state, initial) => {
+      Object.assign(state, initial)
+    },
     FINISHED: state => {
       state._loaded = true
     },
@@ -251,3 +254,11 @@ export default new Vuex.Store({
     }
   },
 })
+
+const initialState = JSON.parse(JSON.stringify(store.state))
+
+export default store
+
+export function resetState () {
+  store.commit('RESET', initialState)
+}

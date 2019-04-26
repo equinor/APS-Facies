@@ -74,6 +74,7 @@ import ProjectSettings from '@/components/dialogs/ProjectSettings'
 
 import rms from '@/api/rms'
 import IconButton from '@/components/selection/IconButton'
+import { resetState } from '@/store'
 
 const parse = xmlString => {
   const parser = new DOMParser()
@@ -95,11 +96,14 @@ const fileHandler = (store, fileName) => {
     }
     if (json) {
       const dom = parse(fileContent)
-      rms.isApsModelValid(btoa(new XMLSerializer().serializeToString(dom)))
+      rms.isApsModelValid(btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(dom)))))
         .then(result => {
           if (result.valid) {
-            // TODO: Empty state
-            store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+            resetState()
+            store.dispatch('fetch')
+              .then(() => {
+                store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+              })
           } else {
             alert('The file you tried to open is not a valid APS model file and cannot be used\n'
               + 'Fix the following error before opening again:\n\n'
