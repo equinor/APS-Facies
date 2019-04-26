@@ -24,11 +24,28 @@ module.exports = {
   },
 
   chainWebpack: config => {
+    // Clear the existing entry point, added by the TypeScript plugin
+    config
+      .entry('app')
+      .clear()
+    // Add the regular entry point, until such a time when it has been rewritten to typeScript
+    config
+      .entry('app')
+      .add('./src/main.js')
+
     config.module
       .rule('plot.ly')
       .test(/\.js$/)
       .use('IFY')
       .loader('ify-loader')
+
+    config.module
+      .rule('ts')
+      .use('ts-loader')
+      .tap(options => {
+        options.appendTsSuffixTo = [/\.vue$/]
+        return options
+      })
   },
 
   configureWebpack: {

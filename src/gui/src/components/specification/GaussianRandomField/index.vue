@@ -151,7 +151,7 @@ export default {
     },
     alphaChannels () {
       return this.rule
-        ? this.rule.fields.map(item => item.channel)
+        ? this.rule.fields.map((_, index) => index + 1)
         : []
     },
     isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },
@@ -163,10 +163,10 @@ export default {
       cache: true,
       get: function () {
         return (
-          notEmpty(this.variogramType) &&
-          (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true) &&
-          this.isValid &&
-          !this.waitingForSimulation
+          notEmpty(this.variogramType)
+          && (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true)
+          && this.isValid
+          && !this.waitingForSimulation
         )
       },
     },
@@ -199,28 +199,25 @@ export default {
         })
       })
     },
-    updateSimulation (renew = false) {
+    async updateSimulation (renew = false) {
       this.waitingForSimulation = true
-      this.simulation(renew)
-        .then(() => {
-          this.waitingForSimulation = false
-        })
-        .catch(reason => {
-          this.waitingForSimulation = false
-          invalidateChildren(this)
-        })
+      try {
+        await this.simulation(renew)
+      } catch (reason) {
+        invalidateChildren(this)
+      } finally {
+        this.waitingForSimulation = false
+      }
     },
-    openVisualizationSettings () {
-      const settings = cloneDeep(this.value.settings)
-      this.$refs.visualisationSettings.open(settings, {})
-        .then(({ save, settings }) => {
-          if (save) {
-            this.$store.dispatch('gaussianRandomFields/changeSettings', {
-              grfId: this.grfId,
-              settings
-            }).then(() => this.updateSimulation())
-          }
+    async openVisualizationSettings () {
+      const { save, settings } = await this.$refs.visualisationSettings.open(cloneDeep(this.value.settings), {})
+      if (save) {
+        await this.$store.dispatch('gaussianRandomFields/changeSettings', {
+          grfId: this.grfId,
+          settings
         })
+        await this.updateSimulation()
+      }
     },
   }
 }

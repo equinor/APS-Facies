@@ -56,12 +56,20 @@ class RMSData:
     ): ...
     def is_discrete(
             self,
-            _property
+            _property:                   Property,
+            can_be_empty:                bool                            = False,
     ) -> bool: ...
     def is_continuous(
             self,
-            _property
+            _property:                   Property,
+            can_be_empty:                bool                            = False,
     ) -> bool: ...
+    def is_property_type(
+            self,
+            _property:                   Property,
+            type:                        Roxar.GridPropertyType,
+            can_be_empty:                bool                            = False,
+     ) -> bool:...
     def get_project_name(
             self
     ) -> ProjectName: ...

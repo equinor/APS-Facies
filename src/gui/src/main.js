@@ -2,7 +2,6 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
 import store from './store'
 import './style/main.styl'
 import './plugins'
@@ -10,9 +9,7 @@ import './plugins'
 Vue.config.productionTip = process.env.NODE_ENV !== 'production'
 
 /* eslint-disable no-new */
-/* tslint:disable no-unused-expression */
 new Vue({
-  router,
   store,
   render: h => h(App)
 }).$mount('#app')

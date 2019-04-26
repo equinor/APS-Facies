@@ -27,7 +27,9 @@
             <v-flex xs1 />
             <v-flex>
               <h3>Realization</h3>
-              <facies-realization />
+              <facies-realization
+                :value="rule"
+              />
             </v-flex>
             <v-flex xs1 />
             <v-flex xs12>

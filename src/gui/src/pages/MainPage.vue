@@ -15,7 +15,7 @@
         />
       </v-flex>
       <v-flex>
-        <span>Loading job. Please wait.</span>
+        <span>{{ loadingMessage }}</span>
       </v-flex>
       <v-flex />
     </v-layout>
@@ -57,7 +57,10 @@ export default {
       'canSpecifyModelSettings',
     ]),
     loading () {
-      return this.$store.state._loading
+      return this.$store.state._loading.value
+    },
+    loadingMessage () {
+      return this.$store.state._loading.message
     },
     fields () {
       return Object.values(this.$store.getters.fields)

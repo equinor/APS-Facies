@@ -1,143 +1,30 @@
 import Vue from 'vue'
 import { cloneDeep, isNumber } from 'lodash'
-import uuidv4 from 'uuid/v4'
 
 import api from '@/api/rms'
 
 import templates from '@/store/modules/truncationRules/templates'
 
-import { Bayfill, NonCubic } from '@/store/utils/domain/truncationRule'
 import { ADD_ITEM } from '@/store/mutations'
 import { addItem } from '@/store/actions'
 import {
   hasCurrentParents,
   minFacies,
   hasEnoughFacies,
-  hasParents,
   isEmpty,
   makeTruncationRuleSpecification,
   notEmpty,
-  resolve,
-  sortAlphabetically,
 } from '@/utils'
-import { getId } from '@/utils/typing'
+import { getId } from '@/utils/helpers'
+import { makeRule } from '@/utils/helpers/processing/templates'
+import OverlayPolygon from '@/utils/domain/polygon/overlay'
+import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
+import APSTypeError from '@/utils/domain/errors/type'
+import APSError from '@/utils/domain/errors/base'
+import { makePolygonsFromSpecification } from '@/utils/helpers/processing/templates/typed'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
-}
-
-const process = (getters, items, target, type, path) => {
-  return items.map(item => {
-    const updated = {
-      ...item,
-    }
-    updated[`${target}`] = getters.id(type, resolve(path, item))
-    return updated
-  })
-}
-
-const getFaciesGroup = (getters, dispatch, over, parent) => dispatch(
-  'facies/groups/get', {
-    facies: over.map(facies => findFaciesByIndex(getters, facies).id),
-    parent
-  }, { root: true }
-)
-
-const findOverlayGroup = (getters, over, parent) => {
-  const facies = over.map(facies => findFaciesByIndex(getters, facies).id)
-  return getters['facies/groups/byFacies'](facies, parent)
-}
-
-const processOverlay = (getters, overlay, parent) => {
-  if (!overlay) return null
-  const items = {}
-  overlay.items.forEach(({ over, polygons }, index) => {
-    polygons.forEach(({ field, facies, probability, interval }) => {
-      const id = uuidv4()
-      items[`${id}`] = {
-        id,
-        group: findOverlayGroup(getters, over, parent).id,
-        field: findField(getters, field).id,
-        facies: findFacies(getters, facies).id,
-        fraction: probability,
-        center: interval,
-        order: index,
-      }
-    })
-  })
-  return { ...overlay, items }
-}
-
-const findItem = ({ findByIndex, findByName, findDefaultName = (arg) => null }) => (getters, item) => {
-  let result = null
-  if (item.index >= 0) {
-    result = findByIndex(getters, item)
-  } else if (item.name || typeof item === 'string') {
-    result = findByName(getters, item)
-  }
-  return result || findDefaultName({ getters, item })
-}
-
-const findField = (getters, field, parent = {}) => {
-  return findItem({
-    findByIndex: findFieldByIndex,
-    findByName: (_getters, _field) => _getters.fields.find(({ name }) => name === _field.name),
-    findDefaultName: ({ item: field }) => getters.allFields
-      .filter(field => hasParents(field, parent.zone, parent.region)) // TODO: Use field.isChildOf()
-      .find(({ name }) => field.name === name)
-  })(getters, field)
-}
-
-const findFieldByIndex = (getters, field) => {
-  const relevantFields = sortAlphabetically(getters.fields)
-  return relevantFields[`${field.index}`]
-}
-
-const findFacies = (getters, facies) => {
-  return findItem({
-    findByIndex: findFaciesByIndex,
-    findByName: (_getters, _facies) => _getters['facies/selected'].find(item => item.facies === _getters.faciesTable.find(({ name }) => _facies === name).id)
-  })(getters, facies)
-}
-
-const findFaciesByIndex = (getters, facies) => {
-  const relevantFacies = sortAlphabetically(getters['facies/selected'])
-  return relevantFacies[`${facies.index}`]
-}
-
-const processFields = (getters, state, fields, parent = {}) => {
-  if (state.options.automaticAlphaFieldSelection.value) {
-    return fields.map(item => {
-      const field = findField(getters, item.field, parent)
-      return {
-        channel: item.channel,
-        field: field ? field.id : null
-      }
-    })
-  } else {
-    return process(getters, fields, 'field', 'gaussianRandomField', 'field.name')
-  }
-}
-
-const processPolygons = (getters, { polygons, type, settings }) => {
-  const autoFill = true
-  polygons = processSettings(polygons, type, settings)
-  if (autoFill) {
-    polygons = polygons.map(polygon => {
-      const name = getters['facies/name'](findFacies(getters, polygon.facies))
-      return {
-        ...polygon,
-        facies: name || null,
-      }
-    })
-  }
-  return process(getters, polygons, 'facies', 'facies', 'facies')
-    .map(polygon => {
-      return {
-        ...polygon,
-        facies: getters['facies/selected'].find(facies => facies.facies === getters['facies/byId'](polygon.facies).id).id,
-      }
-    })
 }
 
 const findPolygonInRule = (rule, polygon) => {
@@ -169,46 +56,6 @@ const setProperty = (state, rule, property, values) => {
   Vue.set(state.rules[`${rule.id}`], property, values)
 }
 
-const processSetting = (type, setting) => {
-  if (type === 'non-cubic') {
-    setting = {
-      ...setting,
-      angle: {
-        value: setting.angle,
-        updatable: setting.updatable,
-      }
-    }
-    delete setting.updatable
-    delete setting.polygon
-  }
-  return setting
-}
-
-const processSettings = (polygons, type, settings) => polygons.map(polygon => {
-  const setting = settings.find(setting => setting.polygon === polygon.name)
-  if (setting) {
-    return {
-      ...processSetting(type, setting),
-      ...polygon,
-    }
-  } else {
-    return polygon
-  }
-})
-
-const typeMapping = {
-  'bayfill': Bayfill,
-  'non-cubic': NonCubic,
-  'cubic': null, // TODO
-}
-
-const makeRule = ({ type, ...rest }, _isParsed = false) => {
-  if (!typeMapping.hasOwnProperty(type)) {
-    throw new Error(`The truncation rule of type ${type} is not implemented`)
-  }
-  return new typeMapping[`${type}`]({ type, _isParsed, ...rest })
-}
-
 function compareTemplate (rootGetters, a, b) {
   const _minFacies = item => minFacies(item, rootGetters)
   if (_minFacies(a) > _minFacies(b)) {
@@ -218,6 +65,14 @@ function compareTemplate (rootGetters, a, b) {
   } else {
     return a.name.localeCompare(b.name)
   }
+}
+
+function increaseOrderByRelativeTo ({ commit }, rule, polygon, amount = 1) {
+  rule.polygons.forEach(_polygon => {
+    if (_polygon.order >= polygon.order && _polygon.overlay === polygon.overlay) {
+      commit('CHANGE_ORDER', { rule, polygon: _polygon, order: _polygon.order + amount })
+    }
+  })
 }
 
 export default {
@@ -236,44 +91,10 @@ export default {
   },
 
   actions: {
-    fetch ({ dispatch }) {
-      dispatch('templates/fetch')
+    async fetch ({ dispatch }) {
+      await dispatch('templates/fetch')
     },
-    async add ({ commit, dispatch, state, rootGetters, rootState }, { type, name, polygons, overlay, fields, settings, parent }) {
-      parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
-      type = state.templates.types.available[`${type}`].type
-      const autoFill = true
-      if (autoFill && overlay) {
-        await Promise.all(overlay.items.map(item => getFaciesGroup(rootGetters, dispatch, item.over, parent)))
-      }
-      const rule = makeRule({
-        type,
-        polygons: processPolygons(rootGetters, { polygons, type, settings }),
-        fields: processFields(rootGetters, rootState, fields, parent),
-        overlay: processOverlay(rootGetters, overlay, parent),
-        name,
-        ...parent,
-      })
-      const addProportions = (proportions, polygons) => {
-        if (isEmpty(polygons)) return proportions
-        Object.values(polygons).forEach(({ facies, proportion }) => {
-          proportions.push({ facies, probability: proportion || 1 })
-        })
-        return proportions
-      }
-      if (autoFill) {
-        if (rootGetters['facies/unset']) {
-          const normalize = (items) => {
-            const sum = items.reduce((sum, { probability }) => sum + probability, 0)
-            return items.map(payload => { return { ...payload, probability: payload.probability / sum } })
-          }
-          const proportions = []
-          addProportions(proportions, rule.polygons)
-          await Promise.all(normalize(proportions)
-            .map(payload => dispatch('facies/updateProbability', payload, { root: true }))
-          )
-        }
-      }
+    async add ({ commit }, rule) {
       return addItem({ commit }, { item: rule })
     },
     remove ({ commit, state, rootGetters }, ruleId) {
@@ -289,16 +110,26 @@ export default {
         throw new Error(`The rule with ID ${ruleId} does not exist. Cannot be removed`)
       }
     },
-    async populate ({ commit, dispatch }, { rules, templates, preset }) {
+    async populate ({ commit, dispatch, rootGetters }, { rules, templates, preset }) {
       if (preset.type) commit('CHANGE_TYPE', preset)
       if (preset.template) commit('CHANGE_TEMPLATE', preset)
       await dispatch('templates/populate', templates)
-      return Promise.all(Object.values(rules).map(rule => {
-        return addItem({ commit }, { id: rule._id, item: makeRule({ ...rule, _isParsed: true }) })
-      }))
+      Object.values(rules).forEach(rule => {
+        rule.backgroundFields = rule.backgroundFields.map(({ id }) => rootGetters['gaussianRandomFields/byId'](id))
+        rule.polygons.forEach(polygon => {
+          polygon.facies = rootGetters['facies/byId'](polygon.facies.id)
+          if (polygon.overlay) {
+            polygon.field = rootGetters['gaussianRandomFields/byId'](polygon.field.id)
+            polygon.group = rootGetters['facies/groups/byId'](polygon.group.id)
+          }
+        })
+        rule.polygons = makePolygonsFromSpecification(rule.polygons)
+        commit('ADD', { id: rule.id, item: makeRule(rule) })
+      })
     },
     async addPolygon ({ commit, dispatch, rootState }, { rule, group = '', order = null, overlay = false }) {
-      if (group) group = getId(group)
+      if (rule.type === 'bayfill') throw new Error('Bayfill must have exactly 5 polygons. Cannot add more.')
+
       if (!isNumber(order) || order < 0) {
         const polygons = rule.polygons
         // TODO: Filter on group as well
@@ -309,65 +140,43 @@ export default {
             .map(polygon => polygon.order)
             .reduce((max, curr) => curr > max ? curr : max, 0)
       }
-      // TODO: Make polygon into a proper class
-      const polygon = {
-        id: uuidv4(),
-        overlay,
-        facies: '',
-        fraction: 1,
-        proportion: 1, // TODO: ...
-        order,
-        name: 1 + rule.polygons
-          .map(polygon => polygon.name)
-          .reduce((max, curr) => curr > max ? curr : max, 0),
-      }
+      let polygon = null
       if (overlay) {
-        let field = ''
+        let field = null
         if (
           (
             rule.overlayPolygons
-              .filter(polygon => polygon.group === group).length + 1
+              .filter(polygon => getId(polygon.group) === getId(group)).length + 1
           ) > (Object.values(rootState.gaussianRandomFields.fields).length - rule.backgroundFields.length)
         ) {
           field = await dispatch('gaussianRandomFields/addEmptyField', { ...rule.parent }, { root: true })
         }
-        polygon.center = 0
-        polygon.field = field
-        polygon.group = group
-      }
-      if (rule.type === 'bayfill') {
-        throw new Error('Bayfill must have exactly 5 polygons. Cannot add more.')
+        polygon = new OverlayPolygon({ group, field, order })
       } else if (rule.type === 'non-cubic') {
-        if (!overlay) {
-          polygon.angle = {
-            value: 0,
-            updatable: false,
-          }
-        }
+        polygon = new NonCubicPolygon({ order })
       } else if (rule.type === 'cubic') {
         throw new Error('Cubic is not implemented')
+      } else {
+        throw new APSTypeError('Invalid type')
       }
-      const polygons = cloneDeep(rule._polygons)
-      Object.values(polygons).forEach(polygon => {
-        if (polygon.order >= order && polygon.overlay === overlay) {
-          polygon.order += 1
-        }
-      })
-      polygons[polygon.id] = polygon
-      commit('CHANGE_POLYGONS', { rule, polygons })
+      increaseOrderByRelativeTo({ commit }, rule, polygon)
+      commit('ADD_POLYGON', { rule, polygon })
     },
     async removePolygon ({ commit, dispatch, rootState }, { rule, polygon }) {
+      // TODO: Decrease orders
       commit('REMOVE_POLYGON', { rule, polygon })
+      // Decrease the order of polygons
+      increaseOrderByRelativeTo({ commit }, rule, polygon, -1)
 
       // Remove from facies group (if it is no longer a background facies)
-      if (!rule.backgroundPolygons.map(({ facies }) => facies).includes(polygon.facies)) {
-        const group = Object.values(rootState.facies.groups.available).find(group => group.facies.includes(polygon.facies))
+      if (!rule.backgroundPolygons.map(({ facies }) => facies.id).includes(polygon.facies.id)) {
+        const group = Object.values(rootState.facies.groups.available).find(group => group.has(polygon.facies))
         const facies = group.facies.filter(facies => facies !== polygon.facies)
         if (facies.length > 0) {
           await dispatch('facies/groups/update', { group, facies }, { root: true })
         } else {
           rule.overlayPolygons
-            .filter(polygon => polygon.group === getId(group))
+            .filter(polygon => getId(polygon.group) === getId(group))
             .forEach(polygon => {
               commit('REMOVE_POLYGON', { rule, polygon })
             })
@@ -377,17 +186,20 @@ export default {
 
       // Remove lingering Facies Group (if overlay)
       if (polygon.overlay) {
-        const group = rootState.facies.groups.available[`${polygon.group}`]
-        if (rule.overlayPolygons.filter(polygon => polygon.group === group.id).length === 0) {
+        const group = rootState.facies.groups.available[`${polygon.group.id}`]
+        if (rule.overlayPolygons.filter(polygon => polygon.group.id === group.id).length === 0) {
           await dispatch('facies/groups/remove', group, { root: true })
         }
       }
+
+      // Normalize probabilities again
+      await dispatch('normalizeProportionFactors', { rule })
     },
     resetTemplate ({ commit }) {
       commit('CHANGE_TYPE', { type: null })
       commit('CHANGE_TEMPLATE', { template: { text: null } })
     },
-    changePreset ({ commit, dispatch, state, rootGetters }, { type, template }) {
+    async changePreset ({ commit, dispatch, state, rootGetters }, { type, template }) {
       const current = rootGetters.truncationRule
       if (current && type !== state.preset.type && template !== state.preset.template) {
         commit('REMOVE', current.id)
@@ -400,15 +212,13 @@ export default {
       }
       if (notEmpty(template)) {
         commit('CHANGE_TEMPLATE', { template })
-        dispatch('addRuleFromTemplate')
+        await dispatch('addRuleFromTemplate')
       }
     },
-    changeOrder ({ commit, getters }, { polygon, direction }) {
-      const newOrder = polygon.order + direction
-      const newPolygons = cloneDeep(getters.current.polygons)
-      Object.values(newPolygons).find(polygon => polygon.order === newOrder).order = polygon.order
-      newPolygons[`${polygon.id}`].order = newOrder
-      commit('CHANGE_POLYGONS', { rule: getters.current, polygons: newPolygons })
+    changeOrder ({ commit }, { rule, polygon, direction }) {
+      const other = rule.polygons.find(_polygon => _polygon.order === polygon.order + direction)
+      commit('CHANGE_ORDER', { rule, polygon: other, order: polygon.order })
+      commit('CHANGE_ORDER', { rule, polygon, order: polygon.order + direction })
     },
     changeAngles ({ commit }, { rule, polygon, value }) {
       commit('CHANGE_ANGLES', { rule, polygon, value })
@@ -434,51 +244,48 @@ export default {
         }, { root: true })
       })
     },
-    deleteField ({ commit, dispatch, state }, { grfId }) {
+    deleteField ({ dispatch, state, rootGetters }, { grfId }) {
+      const field = rootGetters.field(grfId)
       return Promise.all(
         Object.values(state.rules)
-          .filter(rule => !!rule.fields.some(({ field }) => field === grfId))
-          .map(rule => dispatch('updateFields', {
-            rule,
-            channel: rule.fields.find(({ field }) => field === grfId).channel,
-            selected: null
-          }))
+          .filter(rule => !!rule.fields.some(({ field }) => getId(field) === grfId))
+          .map(rule => rule.isUsedInBackground(field)
+            ? dispatch('updateBackgroundField', {
+              rule,
+              index: rule.backgroundFields.indexOf(field),
+              field: null,
+            })
+            : Promise.all(
+              rule.overlayPolygons
+                .filter(polygon => getId(polygon.field) === grfId)
+                .map(polygon => dispatch('updateOverlayField', {
+                  rule,
+                  polygon,
+                  field: null,
+                }))
+            )
+          )
       )
     },
-    updateFields ({ commit, rootGetters }, { rule, channel, selected = '' }) {
-      // TODO: Use POLYGONS instead of channels
-      rule = rule || rootGetters.truncationRule
-      const existing = rule.fields.find(item => item.channel === channel)
-      let previous = null
-      if (existing && existing.field !== selected) {
-        previous = rule.fields.find(item => item.field === selected)
-        if (previous && isNumber(previous.channel)) {
-          previous.field = existing.field
-        } else if (previous) {
-          previous = {
-            channel: previous,
-            field: existing.field,
-            overlay: (previous > 3 && rule instanceof Bayfill) || (previous > 2 && !(rule instanceof Bayfill)),
-          }
-        } else {
-          previous = null
-        }
+    updateBackgroundField ({ commit }, { rule, index, field }) {
+      if (index < 0 || index >= rule.backgroundFields.length) {
+        throw new APSError(`The index (${index}) is outside the range of the background fields in the truncation rule with ID ${rule.id}`)
       }
-      commit('CHANGE_FIELDS', { ruleId: rule.id, channel, fieldId: selected })
-      if (previous && !previous.overlay && previous.channel.field) {
-        commit('CHANGE_FIELDS', { ruleId: rule.id, channel: previous.channel, fieldId: previous.field })
-      }
+      commit('CHANGE_BACKGROUND_FIELD', { rule, index, field })
+    },
+    updateOverlayField ({ commit }, { rule, polygon, field }) {
+      commit('CHANGE_OVERLAY_FIELD', { rule, polygon, field })
     },
     swapFacies ({ commit }, { rule, polygons }) {
       commit('SET_FACIES', { ruleId: rule.id, polygons: swapFacies(rule, polygons) })
     },
-    async updateFacies ({ commit, dispatch, state, rootState }, { rule, polygon, faciesId }) {
-      const polygonId = polygon.id || polygon
-      commit('CHANGE_FACIES', { ruleId: rule.id || rule, polygonId, faciesId })
+    async updateFacies ({ commit, dispatch, rootState }, { rule, polygon, facies }) {
+      if (facies instanceof String) facies = rootState.facies.available[`${facies}`]
+      commit('CHANGE_FACIES', { rule, polygon, facies })
 
-      if (!rootState.facies.available[`${faciesId}`].previewProbability) {
-        const probability = rule._polygons[`${polygonId}`].proportion
-        await dispatch('facies/updateProbability', { facies: faciesId, probability }, { root: true })
+      if (!rootState.facies.available[`${facies.id}`].previewProbability) {
+        const probability = rule._polygons[`${polygon.id}`].proportion
+        await dispatch('facies/updateProbability', { facies, probability }, { root: true })
       }
       await dispatch('normalizeProportionFactors', { rule })
     },
@@ -503,7 +310,7 @@ export default {
       const proportional = false /* TODO: should be moved to the state as an option for the user */
       const facies = rule.polygons
         .reduce((obj, polygon) => {
-          const id = polygon.facies
+          const id = polygon.facies.id
           if (id) {
             if (!obj.hasOwnProperty(id)) obj[`${id}`] = []
             obj[`${id}`].push(polygon)
@@ -521,7 +328,7 @@ export default {
                 ? polygon.fraction / sum
                 : 1 / polygons.length,
             })))
-            : new Promise((resolve, reject) => resolve(null))
+            : new Promise((resolve) => resolve(null))
         })
       )
 
@@ -532,28 +339,8 @@ export default {
         .map(items => items[0])
         .map(polygon => dispatch('changeProportionFactors', { rule, polygon, value: 1 })))
     },
-    // TODO: refactor, so that this method signalizes it should ONLY be called
-    //       when the user changes the template. NOT when changing the template (e.g. switching between zones/regions)
-    //       addRuleFromTemplate ?
-    async addRuleFromTemplate ({ commit, dispatch, state, rootGetters }) {
-      const rule = Object.values(state.templates.available).find(template => template.name === state.preset.template && template.type === state.preset.type)
-      const missing = rule.minFields - Object.values(rootGetters.fields).length
-      if (missing > 0) {
-        for (let i = 0; i < missing; i++) dispatch('gaussianRandomFields/addEmptyField', {}, { root: true })
-      }
-      // TODO: Add overlay groups
-      await dispatch('add', { ...rule, type: state.preset.type })
-      await Promise.all(rule.polygons.map(polygon => {
-        if (polygon.facies && polygon.proportion >= 0) {
-          const facies = rootGetters['facies/byName'](polygon.facies)
-          if (facies) {
-            dispatch('facies/updateProbability', { facies, probability: polygon.proportion }, { root: true })
-          } else {
-            // TODO: Handle appropriately
-            // throw new Error(`The facies ${polygon.facies} does not exist`)
-          }
-        }
-      }))
+    async addRuleFromTemplate ({ dispatch, state }) {
+      await dispatch('templates/createRule', { name: state.preset.template, type: state.preset.type })
     }
   },
 
@@ -563,6 +350,9 @@ export default {
     },
     REMOVE: (state, ruleId) => {
       Vue.delete(state.rules, ruleId)
+    },
+    ADD_POLYGON: (state, { rule, polygon }) => {
+      Vue.set(state.rules[`${rule.id}`]._polygons, polygon.id, polygon)
     },
     REMOVE_POLYGON: (state, { rule, polygon }) => {
       Vue.delete(state.rules[`${rule.id}`]._polygons, polygon.id)
@@ -587,23 +377,29 @@ export default {
     },
     CHANGE_TYPE: (state, { type }) => changePreset(state, 'type', type),
     CHANGE_TEMPLATE: (state, { template }) => changePreset(state, 'template', template.text),
-    CHANGE_FACIES: (state, { ruleId, polygonId, faciesId }) => {
-      state.rules[`${ruleId}`]._polygons[`${polygonId}`].facies = faciesId
+    CHANGE_FACIES: (state, { rule, polygon, facies }) => {
+      Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'facies', facies)
     },
     CHANGE_POLYGONS: (state, { rule, polygons }) => {
       setProperty(state, rule, '_polygons', polygons)
     },
+    CHANGE_ORDER: (state, { rule, polygon, order }) => {
+      state.rules[`${rule.id}`]._polygons[`${polygon.id}`].order = order
+    },
     CHANGE_ANGLES: (state, { rule, polygon, value }) => {
       Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'angle', value)
     },
-    CHANGE_FIELDS: (state, { ruleId, channel, fieldId }) => {
-      state.rules[`${ruleId}`].fieldByChannel(channel).field = fieldId
+    CHANGE_BACKGROUND_FIELD: (state, { rule, index, field }) => {
+      state.rules[`${rule.id}`]._backgroundFields.splice(index, 1, field)
+    },
+    CHANGE_OVERLAY_FIELD: (state, { rule, polygon, field }) => {
+      Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'field', field)
     },
     CHANGE_PROPORTION_FACTOR: (state, { rule, polygon, value }) => {
       setPolygonValue(state, rule, polygon, 'fraction', value)
     },
     CHANGE_FACTORS: (state, { rule, polygon, value }) => {
-      setPolygonValue(state, rule, polygon, 'factor', value)
+      setPolygonValue(state, rule, polygon, 'slantFactor', value)
     }
   },
 

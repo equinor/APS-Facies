@@ -1,10 +1,9 @@
 import Vue from 'vue'
-import { cloneDeep } from 'lodash'
 
 import { AVAILABLE } from '@/store/mutations'
 
-import { FaciesGroup } from '@/store/utils/domain/facies'
-import { getId } from '@/utils/typing'
+import { FaciesGroup } from '@/utils/domain/facies'
+import { getId } from '@/utils/helpers'
 import { toIdentifiedObject } from '@/utils'
 
 export default {
@@ -33,22 +32,19 @@ export default {
       }
       return group
     },
-    add ({ commit, state, getters }, { facies, zone, region = null }) {
+    add ({ commit, getters }, { facies, zone, region = null }) {
       // TODO: Deal with missing parents
       // TODO: ensure that none of the given facies are used
+      if (!Array.isArray(facies)) facies = [facies]
       if (facies.some(facies => getters.used(facies))) {
         throw new Error(`The facies, ${facies}, has already been specified`)
       }
       const group = new FaciesGroup({ facies, zone, region })
-      const groups = cloneDeep(state.available)
-      groups[getId(group)] = group
-      commit('AVAILABLE', groups)
+      commit('ADD', group)
       return group
     },
-    remove ({ commit, state }, group) {
-      const groups = cloneDeep(state.available)
-      delete groups[getId(group)]
-      commit('AVAILABLE', groups)
+    remove ({ commit }, group) {
+      commit('DELETE', group)
     },
     update ({ commit }, { group, facies }) {
       commit('UPDATE', { group, facies })
@@ -56,13 +52,22 @@ export default {
   },
 
   mutations: {
+    ADD: (state, group) => {
+      Vue.set(state.available, group.id, group)
+    },
+    DELETE: (state, group) => {
+      Vue.delete(state.available, group.id)
+    },
     AVAILABLE,
     UPDATE: (state, { group, facies }) => {
-      Vue.set(state.available[`${group.id}`], '_facies', facies)
+      Vue.set(state.available[`${group.id}`], 'facies', facies)
     },
   },
 
   getters: {
+    byId: (state) => id => {
+      return state.available[`${id}`]
+    },
     byFacies: (state) => (facies, parent) => {
       return Object.values(state.available).find(group => group.isChildOf(parent) && group.contains(facies))
     },

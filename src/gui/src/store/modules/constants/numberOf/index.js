@@ -10,8 +10,8 @@ export default {
   },
 
   actions: {
-    fetch ({ dispatch }) {
-      dispatch('gaussianRandomFields/fetch')
+    async fetch ({ dispatch }) {
+      await dispatch('gaussianRandomFields/fetch')
     }
   },
 

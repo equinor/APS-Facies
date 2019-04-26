@@ -18,20 +18,28 @@
   </v-btn>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Color } from '@/utils/domain/facies/helpers/colors'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
-  name: 'WaitBtn',
+@Component
+export default class WaitButton extends Vue {
+  @Prop({ default: '' })
+  readonly title!: string
 
-  props: {
-    title: VueTypes.string,
-    waiting: VueTypes.bool.def(false),
-    disabled: VueTypes.bool.def(false),
-    flat: VueTypes.bool.def(false),
-    dark: VueTypes.bool.def(false),
-    color: AppTypes.color.def(''),
-  },
+  @Prop({ default: false })
+  readonly waiting: boolean
+
+  @Prop({ default: false })
+  readonly disabled: boolean
+
+  @Prop({ default: false })
+  readonly flat: boolean
+
+  @Prop({ default: false })
+  readonly dark: boolean
+
+  @Prop({ default: '' })
+  readonly color: Color
 }
 </script>

@@ -80,9 +80,18 @@ class Parser:
                     content[item['type']] = {}
                 content[item['type']][item['name']] = item
         rules = cls._make_rules(content)
+        rules = cls._copy_rules(rules)
         rules = cls._add_indices(rules)
         rules = cls._add_minimum_fields(rules)
         return rules
+
+    @staticmethod
+    def _copy_rules(rules):
+        """ Helper method to ensure NO dicts are duplecated by Python, to "optimize" memory usage """
+        _rules = []
+        for rule in rules:
+            _rules.append(deepcopy(rule))
+        return _rules
 
     @staticmethod
     def _parse(line: str):

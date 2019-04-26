@@ -31,10 +31,13 @@ export default {
 
   props: {
     grfId: AppTypes.id.isRequired,
-    propertyType: VueTypes.string.isRequired,
-    subPropertyType: VueTypes.string,
+    propertyType: {
+      required: true,
+      type: String,
+    },
+    subPropertyType: VueTypes.string.def(''),
     label: VueTypes.string.def(''),
-    valueType: VueTypes.string,
+    valueType: VueTypes.string.def(''),
     unit: VueTypes.string.def(''),
     strictlyGreater: VueTypes.bool.def(false),
     allowNegative: VueTypes.bool.def(false),

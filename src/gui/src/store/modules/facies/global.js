@@ -1,8 +1,8 @@
 import rms from '@/api/rms'
 import { isEmpty, makeData } from '@/utils'
-import { GlobalFacies } from '@/store/utils/domain'
+import { GlobalFacies } from '@/utils/domain'
 import Vue from 'vue'
-import { promiseSimpleCommit, changeFacies } from '@/store/utils'
+import { promiseSimpleCommit } from '@/store/utils'
 
 export default {
   namespaced: true,
@@ -32,35 +32,38 @@ export default {
       const data = makeData(facies, GlobalFacies, state.available)
       commit('AVAILABLE', data)
     },
-    new: ({ dispatch, state, rootState }, { code, name, color }) => {
-      return new Promise((resolve, reject) => {
-        if (isEmpty(code) || code < 0) {
-          // TODO: Find the highest values in the Global Facies Table (from rms, as some may have been deleted)
-          code = 1 + Object.values(state.available)
-            .map(facies => facies.code)
-            .reduce((a, b) => Math.max(a, b), 0)
-        }
-        if (isEmpty(name)) {
-          name = `F${code}`
-        }
-        if (isEmpty(color)) {
-          const colors = rootState.constants.faciesColors.available
-          color = colors[code % colors.length]
-        }
-        const facies = new GlobalFacies({ code, name, color })
-        dispatch('changed', facies)
-        resolve(facies)
-      })
+    new: ({ commit, state, rootState }, { code, name, color }) => {
+      if (isEmpty(code) || code < 0) {
+        // TODO: Find the highest values in the Global Facies Table (from rms, as some may have been deleted)
+        code = 1 + Object.values(state.available)
+          .map(facies => facies.code)
+          .reduce((a, b) => Math.max(a, b), 0)
+      }
+      if (isEmpty(name)) {
+        name = `F${code}`
+      }
+      if (isEmpty(color)) {
+        const colors = rootState.constants.faciesColors.available
+        color = colors[code % colors.length]
+      }
+      const facies = new GlobalFacies({ code, name, color })
+      commit('ADD', facies)
+      return facies
     },
     current: ({ commit }, { id }) => {
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    changed: (context, facies) => changeFacies(context, facies),
     removeSelectedFacies: ({ commit, dispatch, state }) => {
       return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
         .then(() => {
           dispatch('current', { id: null })
         })
+    },
+    changeName: ({ commit }, { id, name }) => {
+      commit('CHANGE', { id, name: 'name', value: name })
+    },
+    changeAlias: ({ commit }, { id, alias }) => {
+      commit('CHANGE', { id, name: 'alias', value: alias })
     },
   },
 
@@ -71,11 +74,17 @@ export default {
     CURRENT: (state, { id }) => {
       state.current = id
     },
+    ADD: (state, facies) => {
+      Vue.set(state.available, facies.id, facies)
+    },
     UPDATE: (state, facies) => {
       Vue.set(state.available, facies.id, facies)
     },
     REMOVE: (state, { id }) => {
       Vue.delete(state.available, id)
+    },
+    CHANGE: (state, { id, name, value }) => {
+      Vue.set(state.available[`${id}`], name, value)
     },
   },
 
@@ -83,7 +92,7 @@ export default {
     selected: (state, getters, rootState, rootGetters) => {
       return rootGetters['facies/selected']
         .sort((a, b) => a.code - b.code)
-        .map(({ facies }) => state.available[`${facies}`])
+        .map(({ facies }) => state.available[`${facies.id}`])
     }
   },
 }

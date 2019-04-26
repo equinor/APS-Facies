@@ -5,6 +5,6 @@ export const addItem = ({ commit }, { item }) => {
   const id = item.id || uuidv4()
   commit('ADD', { id, item })
   return new Promise((resolve, reject) => {
-    resolve(id)
+    resolve(item)
   })
 }

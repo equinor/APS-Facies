@@ -22,11 +22,11 @@ export default {
   constants: (constantName, constantType) => api.call('get_constant', constantName, constantType),
   options: (name) => api.call('get_options', name),
   gridSize: (name) => api.call('get_grid_size', name),
-  simulationBoxOrigin: (name) => api.call('get_simulation_box_size', name),
+  simulationBoxOrigin: (name, rough = false) => api.call('get_simulation_box_size', name, rough),
   simulateGaussianField: (field) => api.call('simulate_gaussian_field', field),
   simulateRealization: (fields, truncationRule) => api.call('simulate_realization', fields, truncationRule),
   averageProbabilityCubes: (gridName, probabilityCubeParameters, zoneNumber, regionParameter = null, regionNumber = null) => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, zoneNumber, regionParameter, regionNumber),
-  open_wiki_help: () => api.call('open_wiki_help'),
+  openWikiHelp: () => api.call('open_wiki_help'),
   isApsModelValid: (fileContent) => api.call('is_aps_model_valid', fileContent),
   save: (path, content) => api.call('save_model', path, content),
   // eslint-disable-next-line no-undef

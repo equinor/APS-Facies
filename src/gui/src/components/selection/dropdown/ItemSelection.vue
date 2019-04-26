@@ -9,38 +9,46 @@
   />
 </template>
 
-<script>
-import Vue from 'vue'
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { required } from 'vuelidate/lib/validators'
 
-export default Vue.extend({
-  name: 'ItemSelection',
+/* TODO: Remove // @ts-ignore when vuelidate OFFICIALLY  supports TypeScript */
 
-  props: {
-    value: VueTypes.any.isRequired,
-    items: VueTypes.arrayOf(VueTypes.any).isRequired,
-    label: VueTypes.string,
-    constraints: VueTypes.shape({
-      required: VueTypes.bool,
-    }).loose
-  },
-
+@Component({
+// @ts-ignore
   validations () {
     return {
       value: {
+        // @ts-ignore
         required: this.constraints.required ? required : true,
       },
     }
   },
-
-  computed: {
-    errors () {
-      const errors = []
-      if (!this.$v.value.$dirty) return errors
-      !this.$v.value.required && errors.push('Is required')
-      return errors
-    },
-  },
 })
+export default class ItemSelection<T = any> extends Vue {
+  @Prop({ required: true })
+  value: T
+
+  @Prop({ required: true })
+  items: T[]
+
+  @Prop({ default: '' })
+  label: string
+
+  @Prop()
+  constraints: {
+    required: boolean
+    [_: string]: any
+  }
+
+  get errors (): string[] {
+    const errors: string[] = []
+    // @ts-ignore
+    if (!this.$v.value.$dirty) return errors
+    // @ts-ignore
+    !this.$v.value.required && errors.push('Is required')
+    return errors
+  }
+}
 </script>

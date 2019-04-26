@@ -24,10 +24,13 @@ import {
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
     _loaded: false,
-    _loading: false,
+    _loading: {
+      value: false,
+      message: '',
+    },
   },
 
   strict: process.env.NODE_ENV !== 'production',
@@ -62,8 +65,8 @@ export default new Vuex.Store({
         commit('FINISHED')
       }
     },
-    async populate ({ dispatch, commit, state }, data) {
-      commit('LOADING', true)
+    async populate ({ dispatch, commit }, data) {
+      commit('LOADING', { loading: true, message: 'Loading job. Please wait.' })
       try {
         await dispatch('fetch')
 
@@ -109,17 +112,21 @@ export default new Vuex.Store({
         // Truncation rules
         await dispatch('truncationRules/populate', data.truncationRules)
       } finally {
-        commit('LOADING', false)
+        commit('LOADING', { loading: false })
       }
     },
   },
 
   mutations: {
+    RESET: (state, initial) => {
+      Object.assign(state, initial)
+    },
     FINISHED: state => {
       state._loaded = true
     },
-    LOADING: (state, loading) => {
-      state._loading = loading
+    LOADING: (state, { loading, message = '' }) => {
+      state._loading.value = loading
+      state._loading.message = message
     }
   },
 
@@ -247,3 +254,11 @@ export default new Vuex.Store({
     }
   },
 })
+
+const initialState = JSON.parse(JSON.stringify(store.state))
+
+export default store
+
+export function resetState () {
+  store.commit('RESET', initialState)
+}

@@ -19,34 +19,26 @@
   </v-flex>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import FaciesTable from '@/components/table/FaciesTable'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import FaciesTable from '@/components/table/FaciesTable.vue'
 
-export default {
+@Component({
   components: {
     FaciesTable,
   },
+})
+export default class FaciesSelection extends Vue {
+  hideAlias: boolean = false
 
-  data () {
-    return {
-      hideAlias: false
-    }
-  },
+  get hasSelected () { return !!this.$store.state.facies.global.current }
 
-  computed: {
-    ...mapState({
-      hasSelected: state => !!state.facies.global.current,
-    }),
-  },
+  add () {
+    return this.$store.dispatch('facies/global/new', {})
+  }
 
-  methods: {
-    add () {
-      return this.$store.dispatch('facies/global/new', {})
-    },
-    remove () {
-      return this.$store.dispatch('facies/global/removeSelectedFacies')
-    },
+  remove () {
+    return this.$store.dispatch('facies/global/removeSelectedFacies')
   }
 }
 </script>

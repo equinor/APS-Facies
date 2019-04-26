@@ -13,7 +13,7 @@ def _get_environ(variable_name, default,  divider=':'):
 
 def _get_client_url():
     protocols = _get_environ('VUE_APP_APS_PROTOCOL', 'http:https')
-    servers = _get_environ('VUE_APP_APS_SERVER', 'localhost')
+    servers = _get_environ('VUE_APP_APS_SERVER', 'localhost:127.0.0.1')
     ports = _get_environ('VUE_APP_APS_GUI_PORT', '8080')
     return [
         '{protocol}://{server}:{port}'.format(protocol=protocol, server=server, port=port)

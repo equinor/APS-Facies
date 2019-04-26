@@ -4,7 +4,7 @@ import math from 'mathjs'
 
 import { cloneDeep, merge, isEqual, isNumber } from 'lodash'
 
-import { Facies } from '@/store/utils/domain'
+import Facies from '@/utils/domain/facies/local'
 import {
   notEmpty,
   hasCurrentParents,
@@ -12,14 +12,13 @@ import {
   parentId,
   makeData,
 } from '@/utils'
-import { changeFacies } from '@/store/utils'
 
 import { SELECTED_ITEMS } from '@/store/mutations'
 import global from './global'
 import groups from './groups'
-import { isUUID } from '@/utils/typing'
+import { getId, isUUID } from '@/utils/helpers'
 
-const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changed', { id: facies.id, previewProbability: probability })
+const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changePreviewProbability', { facies, previewProbability: probability })
 
 const _removeCurrent = (items, parent) => {
   return Object.values(items)
@@ -39,7 +38,7 @@ const updateSelected = (globalFacies, localFacies, selected, parent) => {
         if (existing) {
           return existing
         } else {
-          return new Facies({ facies: global.id, ...parent })
+          return new Facies({ facies: globalFacies[global.id], ...parent })
         }
       })
       .reduce((obj, facies) => {
@@ -63,6 +62,16 @@ export default {
   },
 
   actions: {
+    add: ({ commit }, { facies, parent, probabilityCube = null, previewProbability = null }) => {
+      const localFacies = new Facies({
+        facies,
+        probabilityCube,
+        previewProbability,
+        parent,
+      })
+      commit('ADD', { facies: localFacies })
+      return localFacies
+    },
     select: ({ commit, state }, { items, parent }) => {
       const facies = updateSelected(state.global.available, state.available, items, parent)
       commit('AVAILABLE', facies)
@@ -74,11 +83,11 @@ export default {
     },
     updateProbabilities: async ({ dispatch, state }, { probabilityCubes }) => {
       if (notEmpty(probabilityCubes)) {
-        await Promise.all(Object.keys(probabilityCubes)
-          .map(parameter => {
-            const facies = Object.values(state.available).find(facies => facies.probabilityCube === parameter)
-            return updateFaciesProbability(dispatch, facies, probabilityCubes[`${parameter}`])
-          }))
+        for (const parameter in probabilityCubes) {
+          const facies = Object.values(state.available)
+            .filter(facies => facies.probabilityCube === parameter)
+          await Promise.all(facies.map(facies => updateFaciesProbability(dispatch, facies, probabilityCubes[`${parameter}`])))
+        }
       }
       await dispatch('normalizeEmpty')
     },
@@ -99,7 +108,7 @@ export default {
           : new Promise((resolve) => resolve()))
       )
     },
-    normalize: ({ dispatch, state, getters }) => {
+    normalize: ({ dispatch, getters }) => {
       const selected = getters.selected
       const cumulativeProbability = selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
       return Promise.all(selected.map(facies => {
@@ -114,23 +123,31 @@ export default {
         commit('CONSTANT_PROBABILITY', { parentId, toggled: data[`${parentId}`] })
       })
     },
-    toggleConstantProbability: ({ commit, state, getters, rootGetters }) => {
+    toggleConstantProbability: ({ commit, getters, rootGetters }) => {
       const _id = parentId({ zone: rootGetters.zone, region: rootGetters.region })
       const usage = !getters.constantProbability()
       commit('CONSTANT_PROBABILITY', { parentId: _id, toggled: usage })
     },
-    setConstantProbability: ({ commit, state }, value) => {
+    setConstantProbability: ({ commit }, { parentId, toggled }) => {
       if (typeof value === 'boolean') {
-        commit('CONSTANT_PROBABILITY', value)
+        commit('CONSTANT_PROBABILITY', { parentId, toggled })
       }
     },
-    changed: (context, facies) => changeFacies(context, facies),
+    changeProbabilityCube: ({ commit }, { facies, probabilityCube }) => {
+      commit('CHANGE_PROBABILITY_CUBE', { facies, probabilityCube })
+    },
+    changePreviewProbability: ({ commit }, { facies, previewProbability }) => {
+      commit('CHANGE_PREVIEW_PROBABILITY', { facies, previewProbability })
+    },
     fetch: async ({ dispatch }) => {
       await dispatch('global/fetch')
     },
   },
 
   mutations: {
+    ADD: (state, { facies }) => {
+      Vue.set(state.available, facies.id, facies)
+    },
     AVAILABLE: (state, facies) => {
       Vue.set(state, 'available', facies)
     },
@@ -140,6 +157,12 @@ export default {
     },
     CONSTANT_PROBABILITY: (state, { parentId, toggled }) => {
       Vue.set(state.constantProbability, parentId, toggled)
+    },
+    CHANGE_PROBABILITY_CUBE: (state, { facies, probabilityCube }) => {
+      state.available[`${facies.id}`].probabilityCube = probabilityCube
+    },
+    CHANGE_PREVIEW_PROBABILITY: (state, { facies, previewProbability }) => {
+      state.available[`${facies.id}`].previewProbability = previewProbability
     },
   },
 
@@ -153,9 +176,10 @@ export default {
       return facies.name || getters.byId(facies.facies).name
     },
     byId: (state, getters) => (id) => {
+      id = getId(id)
       const facies = state.available[`${id}`] || state.global.available[`${id}`]
       if (!facies) {
-        const group = state.groups.available[`${id}`]
+        const group = getters['groups/byId'](id)
         return group && group.facies.map(getters.byId)
       } else {
         return facies
@@ -174,7 +198,7 @@ export default {
     selected: (state, getters, rootState, rootGetters) => {
       return Object.values(state.available)
         .filter(facies => hasCurrentParents(facies, rootGetters))
-        .sort((a, b) => getters.byId(a.facies).code - getters.byId(b.facies).code)
+        .sort((a, b) => a.facies.code - b.facies.code)
     },
     cumulative: (state, getters) => {
       return getters.selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)

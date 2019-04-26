@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import { Zone } from '@/store/utils/domain'
+import { Zone } from '@/utils/domain'
 import { SELECTED_ITEMS } from '@/store/mutations'
 import rms from '@/api/rms'
 import { makeData, isEmpty, notEmpty } from '@/utils'
@@ -37,6 +37,7 @@ export default {
     },
     current: async ({ commit, dispatch, state }, { id }) => {
       await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
+      await dispatch('gaussianRandomFields/crossSections/fetch', { zone: id }, { root: true })
       commit('CURRENT', { id })
 
       const zone = state.available[`${id}`]
@@ -47,14 +48,14 @@ export default {
       return rms.zones(rootGetters.gridModel)
         .then(zones => dispatch('populate', { zones }))
     },
-    populate: async ({ commit, dispatch, state, rootGetters }, { zones }) => {
+    populate: async ({ commit, dispatch, state }, { zones }) => {
       const data = makeData(zones, Zone, state.available)
       commit('AVAILABLE', data)
       const selected = Object.values(data).filter(({ selected }) => !!selected)
       await dispatch('select', selected)
       return data
     },
-    update ({ commit, dispatch, state }, { zones, zoneId, regions }) {
+    update ({ commit, state }, { zones, zoneId, regions }) {
       if (isEmpty(zones) && notEmpty(regions)) {
         // We are setting/updating the regions for `zone`
         if (isEmpty(zoneId)) zoneId = state.current

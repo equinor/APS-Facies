@@ -1,16 +1,18 @@
 <template>
   <v-app id="app">
     <tool-bar />
-    <router-view />
+    <main-page />
   </v-app>
 </template>
 
 <script>
 import ToolBar from '@/components/TheToolBar'
+import MainPage from '@/pages/MainPage'
 
 export default {
   name: 'App',
   components: {
+    MainPage,
     ToolBar
   },
 

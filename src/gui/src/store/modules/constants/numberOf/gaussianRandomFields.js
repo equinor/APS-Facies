@@ -1,4 +1,4 @@
-import { Bayfill } from '@/store/utils/domain/truncationRule'
+import { Bayfill } from '@/utils/domain/truncationRule'
 
 const defaultMinimum = 2
 const numberBayfill = 3
@@ -43,9 +43,11 @@ export default {
 
   actions: {
     fetch ({ dispatch }) {
-      dispatch('cubic/fetch')
-      dispatch('nonCubic/fetch')
-      dispatch('bayfill/fetch')
+      return Promise.all([
+        dispatch('cubic/fetch'),
+        dispatch('nonCubic/fetch'),
+        dispatch('bayfill/fetch'),
+      ])
     },
   },
 

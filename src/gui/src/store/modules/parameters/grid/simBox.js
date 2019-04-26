@@ -11,8 +11,8 @@ export default {
     },
   },
   actions: {
-    async fetch ({ dispatch, rootGetters }) {
-      const simBox = await api.simulationBoxOrigin(rootGetters.gridModel)
+    async fetch ({ dispatch, rootGetters }, rough = false) {
+      const simBox = await api.simulationBoxOrigin(rootGetters.gridModel, rough)
       await dispatch('populate', simBox)
       return simBox.rotation
     },

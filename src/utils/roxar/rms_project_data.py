@@ -57,11 +57,20 @@ class RMSData:
         self.roxar = roxar
         self.project = project
 
-    def is_discrete(self, _property):
-        return _property.type == self.roxar.GridPropertyType.discrete
+    def is_discrete(self, _property, can_be_empty=False):
+        return self.is_property_type(_property, self.roxar.GridPropertyType.discrete, can_be_empty)
 
-    def is_continuous(self, _property):
-        return _property.type == self.roxar.GridPropertyType.continuous
+    def is_continuous(self, _property, can_be_empty=False):
+        return self.is_property_type(_property, self.roxar.GridPropertyType.continuous, can_be_empty)
+
+    def is_property_type(self, _property, type, can_be_empty=False):
+        return (
+            _property.type == type
+            and (
+                can_be_empty
+                or not _property.is_empty(self.project.current_realisation)
+            )
+        )
 
     def get_project_name(self):
         return self.project.name
@@ -99,14 +108,26 @@ class RMSData:
     def get_probability_cube_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_probability_cube)
 
-    def get_simulation_box_size(self, grid_model_name):
+    def get_simulation_box_size(self, grid_model_name, rough=False):
         grid = self.get_grid(grid_model_name)
         sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid)
+        kwargs = {}
+        zone_indices = list(grid.grid_indexer.zonation.keys())
+
+        if rough:
+            kwargs['zone'] = zone_indices[0]
+            kwargs['max_number_of_selected_cells'] = 10
+
+        sim_box_z_length = get_simulation_box_thickness(grid, **kwargs)
+
+        if rough:
+            _, sim_box_z_length = sim_box_z_length.popitem()
+            sim_box_z_length = {zone_index + 1: sim_box_z_length for zone_index in zone_indices}
         return {
             'size': {
                 'x': sim_box_x_length,
                 'y': sim_box_y_length,
-                'z': get_simulation_box_thickness(grid),
+                'z': sim_box_z_length,
             },
             'rotation': azimuth_angle,
             'origin': {

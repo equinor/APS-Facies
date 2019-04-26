@@ -22,7 +22,7 @@
       <tr>
         <td class="text-xs-left">
           <optional-help-item
-            :value="props.item"
+            :value="props.item.name"
           />
         </td>
         <td class="text-xs-left">
@@ -34,8 +34,8 @@
         </td>
         <td>
           <fraction-field
-            v-if="!!props.item.factor"
-            :value="props.item.factor"
+            v-if="!!props.item.slantFactor"
+            :value="props.item.slantFactor"
             fmu-updatable
             @input="factor => updateFactor(props.item, factor)"
           />
@@ -46,93 +46,76 @@
   </v-data-table>
 </template>
 
-<script>
-import { isNumber } from 'lodash'
-import { mapGetters } from 'vuex'
+<script lang="ts">
+import { RootGetters } from '@/utils/helpers/store/typing'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import FractionField from '@/components/selection/FractionField'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import FaciesSpecification from '@/components/specification/Facies'
+import FractionField from '@/components/selection/FractionField.vue'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+import FaciesSpecification from '@/components/specification/Facies/index.vue'
 
-import { updateFacies } from '@/store/utils'
-import { AppTypes } from '@/utils/typing'
+import { Bayfill, BayfillPolygon } from '@/utils/domain'
 
-export default {
+@Component({
   components: {
     OptionalHelpItem,
     FractionField,
     FaciesSpecification,
   },
+})
+export default class BayfillPolygonTable extends Vue {
+  @Prop({ required: true })
+  readonly value!: Bayfill
 
-  props: {
-    value: AppTypes.truncationRule,
-  },
+  get selectedFacies () { return (this.$store.getters as RootGetters)['facies/selected'] }
 
-  computed: {
-    ...mapGetters({
-      selectedFacies: 'facies/selected',
-    }),
-    polygons () {
-      // TODO: Include 'help' messages
-      return !this.value
-        ? []
-        : this.value.backgroundPolygons
-          .map(polygon => {
-            const factor = isNumber(polygon.factor) ? polygon.factor : null
-            const options = {
-              ...polygon,
-              hasFactor: !!factor,
-            }
-            if (factor) options['factor'] = factor
-            return options
-          })
-    },
-    faciesOptions () {
-      return this.selectedFacies.map(facies => {
-        return {
-          text: facies.name,
-          value: facies.id,
-        }
-      })
-    },
-    headers () {
-      return [
-        {
-          text: 'Polygon',
-          align: 'left',
-          sortable: false,
-          value: 'name',
-          help: '',
-        },
-        {
-          text: 'Facies',
-          align: 'left',
-          sortable: false,
-          value: 'facies',
-          help: '',
-        },
-        {
-          text: 'Slant Factor',
-          align: 'left',
-          sortable: false,
-          value: 'factor',
-          help: '',
-        }
-      ]
-    }
-  },
+  get polygons () {
+    return !this.value
+      ? []
+      : this.value.backgroundPolygons
+  }
 
-  methods: {
-    updateFacies (item, faciesId) {
-      updateFacies(this.$store.dispatch, this.value, item, faciesId)
-    },
-    updateFactor (item, value) {
-      return this.$store.dispatch('truncationRules/changeSlantFactors', {
-        rule: this.value,
-        polygon: item,
-        value
-      })
-    },
-  },
+  get faciesOptions () {
+    return this.selectedFacies.map(facies => {
+      return {
+        text: facies.name,
+        value: facies.id,
+      }
+    })
+  }
+
+  get headers () {
+    return [
+      {
+        text: 'Polygon',
+        align: 'left',
+        sortable: false,
+        value: 'name',
+        help: '',
+      },
+      {
+        text: 'Facies',
+        align: 'left',
+        sortable: false,
+        value: 'facies',
+        help: '',
+      },
+      {
+        text: 'Slant Factor',
+        align: 'left',
+        sortable: false,
+        value: 'factor',
+        help: '',
+      }
+    ]
+  }
+
+  async updateFactor (item: BayfillPolygon, value: number) {
+    return this.$store.dispatch('truncationRules/changeSlantFactors', {
+      rule: this.value,
+      polygon: item,
+      value
+    })
+  }
 }
 </script>

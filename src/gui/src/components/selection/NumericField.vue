@@ -41,9 +41,8 @@
         <v-tooltip bottom>
           <span slot="activator">
             <v-checkbox
-              :value="updatable"
+              v-model="updatable"
               persistent-hint
-              @change="e => setUpdatable(e)"
             />
           </span>
           <span>Toggle whether "this field" should be updatable in FMU</span>
@@ -71,7 +70,10 @@ math.config({
 
 export default Vue.extend({
   props: {
-    label: VueTypes.string.isRequired,
+    label: {
+      required: true,
+      type: String,
+    },
     valueType: VueTypes.string.def(''),
     slider: VueTypes.bool.def(false),
     onlySlider: VueTypes.bool.def(false),
@@ -104,7 +106,6 @@ export default Vue.extend({
   data () {
     return {
       fieldValue: this.getValue(this.value),
-      updatable: this.getUpdatable(this.value),
     }
   },
 
@@ -132,6 +133,10 @@ export default Vue.extend({
   },
 
   computed: {
+    updatable: {
+      get: function () { return this.getUpdatable(this.value) },
+      set: function (value) { this.setUpdatable(value) },
+    },
     sliderValue: {
       get () { return (this.fieldValue - this.min) * this.steps / (this.max - this.min) },
       set (val) { this.fieldValue = val / this.steps * (this.max - this.min) + this.min },
@@ -198,7 +203,6 @@ export default Vue.extend({
       if (this.hasChanged(value)) {
         this.fieldValue = this.getValue(value)
       }
-      this.updatable = this.getUpdatable(value)
     }
   },
 

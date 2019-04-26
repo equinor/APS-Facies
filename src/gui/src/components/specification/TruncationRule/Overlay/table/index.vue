@@ -42,71 +42,80 @@
   </v-data-table>
 </template>
 
-<script>
-import BackgroundFaciesSpecification from '@/components/specification/Facies/background'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import PolygonTable from './table'
+<script lang="ts">
+import Facies from '@/utils/domain/facies/local'
+import { ID } from '@/utils/domain/types'
+import { Store } from '@/utils/helpers/store/typing'
+import { availableForBackgroundFacies } from '@/utils/queries'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { AppTypes } from '@/utils/typing'
-import { availableForBackgroundFacies } from '@/utils'
+import OverlayPolygon from '@/utils/domain/polygon/overlay'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
-export default {
-  name: 'BackgroundFacies',
+import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
+import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+import PolygonTable from './table.vue'
 
+function hasAvailableBackgroundFacies (store: Store, rule: OverlayTruncationRule<OverlayPolygon>): boolean {
+  return Object.values(store.state.facies.available)
+    .some(facies => availableForBackgroundFacies(store.getters, rule, facies))
+}
+
+function allBackgroundPolygonsHasSomeFacies (rule: OverlayTruncationRule<OverlayPolygon>): boolean {
+  return rule.overlayPolygons
+    .every(({ group }) => group ? group.facies.length > 0 : true)
+}
+
+@Component({
   components: {
     OptionalHelpItem,
     BackgroundFaciesSpecification,
     PolygonTable,
   },
+})
+export default class BackgroundFacies extends Vue {
+  @Prop({ required: true })
+  readonly value!: OverlayTruncationRule<OverlayPolygon>
 
-  props: {
-    value: AppTypes.truncationRule.isRequired,
-  },
-
-  computed: {
-    groups () {
-      // TODO: Include 'help' messages
-      let overlay = []
-      if (this.value) {
-        const groups = {}
-        const polygons = this.value.overlayPolygons
-        polygons.forEach(polygon => {
-          if (!groups.hasOwnProperty(polygon.group)) groups[polygon.group] = []
-          groups[polygon.group].push(polygon)
-        })
-        overlay = Object.keys(groups).map(groupId => { return { group: groupId, polygons: groups[`${groupId}`] } })
-      }
-      if (
-        Object.values(this.$store.state.facies.available)
-          .some(facies => availableForBackgroundFacies(this.$store.getters, this.value, facies)) &&
-        this.value.overlayPolygons
-          .map(({ group }) => this.$store.state.facies.groups.available[`${group}`])
-          .every(group => group ? group.facies.length > 0 : true)
-      ) {
-        overlay.push({ group: '', polygons: [] })
-      }
-      return overlay
-    },
-    headers () {
-      return [
-        {
-          text: 'Background',
-          align: 'left',
-          sortable: false,
-          value: 'group',
-          class: 'text-wrap-newline',
-          help: 'Which facies this overlay polygon should cover',
-        },
-        {
-          text: 'Polygons',
-          align: 'left',
-          sortable: false,
-          value: 'polygon',
-          help: 'Specification of the polygons',
-        },
-      ]
+  get groups () {
+    // TODO: Include 'help' messages
+    let overlay: { group: ID, polygons: Facies[] }[] = []
+    if (this.value) {
+      const groups = {}
+      const polygons = this.value.overlayPolygons
+      polygons.forEach(polygon => {
+        if (!groups.hasOwnProperty(polygon.group.id)) groups[polygon.group.id] = []
+        groups[polygon.group.id].push(polygon)
+      })
+      overlay = Object.keys(groups).map(groupId => { return { group: groupId, polygons: groups[`${groupId}`] } })
     }
-  },
+    if (
+      hasAvailableBackgroundFacies(this.$store, this.value)
+      && allBackgroundPolygonsHasSomeFacies(this.value)
+    ) {
+      overlay.push({ group: '', polygons: [] })
+    }
+    return overlay
+  }
 
+  get headers () {
+    return [
+      {
+        text: 'Background',
+        align: 'left',
+        sortable: false,
+        value: 'group',
+        class: 'text-wrap-newline',
+        help: 'Which facies this overlay polygon should cover',
+      },
+      {
+        text: 'Polygons',
+        align: 'left',
+        sortable: false,
+        value: 'polygon',
+        help: 'Specification of the polygons',
+      },
+    ]
+  }
 }
 </script>

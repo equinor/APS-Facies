@@ -15,13 +15,20 @@ module.exports = {
     'plugin:vue/recommended',
     // https://github.com/standard/standard/blob/master/docs/RULES-en.md
     '@vue/standard',
-    'plugin:vue-types/strongly-recommended',
     'plugin:security/recommended',
-    'plugin:vue/essential',
+    'plugin:vue/recommended',
+    'plugin:vue-types/strongly-recommended',
+    '@vue/typescript',
+    'plugin:@typescript-eslint/recommended',
   ],
 
   settings: {
     'vue-types/namespace': ['VueTypes', 'AppTypes'],
+    'import/resolver': {
+      node: {
+        extensions: ['.js', '.ts'],
+      }
+    },
   },
 
   // required to lint *.vue files
@@ -29,10 +36,13 @@ module.exports = {
     'vue',
     'security',
     // 'html'
+    '@typescript-eslint',
   ],
 
   // add your custom rules here
   rules: {
+    'operator-linebreak': ['error', 'before'],
+    '@typescript-eslint/indent': ['error', 2],
     // allow paren-less arrow functions
     'arrow-parens': 0,
     // allow async-await
@@ -48,8 +58,39 @@ module.exports = {
       ignores: []
     }],
   },
-
+  overrides: [
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+    {
+      files: ['*.ts', '*.vue'],
+      rules: {
+        'no-useless-constructor': 1 /* warning */,
+        '@typescript-eslint/member-delimiter-style': ['error', {
+          multiline: {
+            delimiter: 'none'
+          },
+          singleline: {
+            delimiter: 'comma'
+          },
+        }],
+      },
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+      }
+    },
+  ],
+  parser: 'vue-eslint-parser',
   parserOptions: {
-    parser: 'babel-eslint',
+    parser: '@typescript-eslint/parser',
+    ecmaVersion: 2017,
+    sourceType: 'module',
+    ecmaFeatures: { // See https://github.com/babel/babel-eslint/issues/662
+      legacyDecorators: true,
+    },
   },
 }

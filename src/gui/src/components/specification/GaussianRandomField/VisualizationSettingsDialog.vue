@@ -14,29 +14,6 @@
       <v-card-text>
         <v-container grid-list-md>
           <v-layout wrap>
-            <!--Cross section-->
-            <v-flex
-              xs12
-              sm6
-              md6
-            >
-              <v-select
-                v-model="settings.crossSection.type"
-                :items="['IJ', 'IK', 'JK']"
-                label="Cross section type"
-                required
-              />
-            </v-flex>
-            <v-flex
-              xs12
-              sm6
-              md6
-            >
-              <fraction-field
-                v-model="settings.crossSection.relativePosition"
-                label="Relative position"
-              />
-            </v-flex>
             <v-layout row>
               <!--Seed-->
               <v-flex xs10>
@@ -126,7 +103,6 @@
 
 <script>
 import NumericField from '@/components/selection/NumericField'
-import FractionField from '@/components/selection/FractionField'
 import IconButton from '@/components/selection/IconButton'
 
 import { newSeed } from '@/utils'
@@ -134,7 +110,6 @@ import { newSeed } from '@/utils'
 export default {
   components: {
     IconButton,
-    FractionField,
     NumericField,
   },
 

@@ -28,7 +28,7 @@ import VueTypes from 'vue-types'
 import AlphaFields from '@/components/specification/TruncationRule/AlphaFields'
 import PolygonTable from './table'
 
-import { NonCubic } from '@/store/utils/domain'
+import { NonCubic } from '@/utils/domain'
 
 export default {
   name: 'NonCubicTruncationRule',

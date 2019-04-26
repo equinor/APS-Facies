@@ -33,7 +33,10 @@ import VueTypes from 'vue-types'
 
 export default {
   props: {
-    icon: VueTypes.string.isRequired,
+    icon: {
+      required: true,
+      type: String,
+    },
     waiting: VueTypes.bool.def(false),
     disabled: VueTypes.bool.def(false),
     loadingSpinner: VueTypes.bool.def(false),

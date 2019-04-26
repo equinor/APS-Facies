@@ -37,10 +37,12 @@ export default {
 
   actions: {
     fetch ({ dispatch }) {
-      dispatch('variograms/fetch', 'variogram')
-      dispatch('origin/fetch', 'origin')
-      dispatch('stacking/fetch', 'stacking_direction')
-      dispatch('trends/fetch', 'trend')
+      return Promise.all([
+        dispatch('variograms/fetch', 'variogram'),
+        dispatch('origin/fetch', 'origin'),
+        dispatch('stacking/fetch', 'stacking_direction'),
+        dispatch('trends/fetch', 'trend'),
+      ])
     }
   },
 }

@@ -4,7 +4,7 @@
     <v-layout row>
       <alpha-fields
         :value="value"
-        :min-channels="3"
+        :min-fields="3"
       />
     </v-layout>
     <h4>Truncation rule specification</h4>
@@ -22,27 +22,23 @@
   </v-container>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import AlphaFields from '@/components/specification/TruncationRule/AlphaFields'
-import PolygonTable from '@/components/specification/TruncationRule/Bayfill/PolygonTable'
+import AlphaFields from '@/components/specification/TruncationRule/AlphaFields.vue'
+import PolygonTable from '@/components/specification/TruncationRule/Bayfill/PolygonTable.vue'
 
-import { Bayfill } from '@/store/utils/domain'
+import { Bayfill } from '@/utils/domain'
 
-export default {
-  name: 'BayfillSpecification',
-
+@Component({
   components: {
     AlphaFields,
     PolygonTable,
   },
 
-  props: {
-    value: VueTypes.instanceOf(Bayfill),
-  },
-
-  computed: {
-  },
+})
+export default class BayfillSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value!: Bayfill
 }
 </script>

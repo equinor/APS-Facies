@@ -423,10 +423,15 @@ clean-example-link:
 
 unit-tests: clean-tests run-tests clean-tests
 
-run-tests: links
+run-tests: links python-unit-tests javascript-unit-tests
+
+python-unit-tests:
 	cd $(TEST_FOLDER) && \
 	PYTHONPATH=$(PYTHONPATH) \
 	$(PY.TEST) --basetemp=$(TEST_FOLDER)
+
+javascript-unit-tests:
+	$(YARN) test:unit
 
 clean-tests: clean-integration
 	cd $(TEST_FOLDER) && \
@@ -436,6 +441,17 @@ clean-tests: clean-integration
 	       *.png \
 	       fmu_attributes.txt \
 	       libdraw2D.so
+
+find-circular-dependencies:
+	cd $(WEB_DIR) && \
+	npx strip-json-comments-cli --no-whitespace $(WEB_DIR)/tsconfig.json > /tmp/tsconfig.json && \
+	npx madge --circular \
+	          --warning \
+	          --ts-config /tmp/tsconfig.json \
+	          --webpack-config $(WEB_DIR)/node_modules/@vue/cli-service/webpack.config.js \
+	          --extensions js,ts \
+	          $(WEB_DIR)/src
+
 
 # TODO: Add diagrams for Previewer, and other files / classes of interest
 uml-diagrams: uml-main-program

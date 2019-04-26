@@ -9,7 +9,7 @@
 import { DEFAULT_POINT_SIZE } from '@/config'
 import StaticPlot from '@/components/plot/StaticPlot'
 import VueTypes from 'vue-types'
-import { GaussianRandomField } from '@/store/utils/domain/index'
+import { GaussianRandomField } from '@/utils/domain/index'
 import { AppTypes } from '@/utils/typing'
 
 const flatten = (arr) => {

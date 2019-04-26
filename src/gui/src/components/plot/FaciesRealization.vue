@@ -5,50 +5,51 @@
   />
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import StaticPlot from '@/components/plot/StaticPlot'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+import Polygon from '@/utils/domain/polygon/base'
+import { RootGetters } from '@/utils/helpers/store/typing'
 
-const filterOnCode = (data, code) => {
+import StaticPlot from '@/components/plot/StaticPlot.vue'
+
+function filterOnCode (data: number[][] | null, code: number) {
+  if (!data) return []
   return data
     .map(arr => arr.map(val => val === code ? 1 : null))
 }
 
-export default {
-  name: 'FaciesRealization',
+@Component({
   components: {
     StaticPlot,
   },
+})
+export default class FaciesRealization extends Vue {
+  @Prop({ required: true })
+  readonly value!: TruncationRule<Polygon>
 
-  props: {
-    expand: VueTypes.bool.def(false),
-  },
+  @Prop({ default: false, type: Boolean })
+  readonly expand!: boolean
 
-  computed: {
-    ...mapGetters({
-      faciesTable: 'facies/global/selected',
-      rule: 'truncationRule',
-    }),
-    dataDefinition () {
-      return this.faciesTable
-        .map(({ color, code }) => {
-          return {
-            z: filterOnCode(this.data, code),
-            zsmooth: 'best',
-            type: 'heatmap',
-            hoverinfo: 'none',
-            colorscale: [[0, color], [1, color]],
-            showscale: false,
-          }
-        })
-    },
-    data () {
-      return this.rule && this.rule._realization
-        ? this.rule._realization
-        : []
-    },
-  },
+  get faciesTable () { return (this.$store.getters as RootGetters)['facies/global/selected'] }
+  get dataDefinition () {
+    return this.faciesTable
+      .map(({ color, code }) => {
+        return {
+          z: filterOnCode(this.data, code),
+          zsmooth: 'best',
+          type: 'heatmap',
+          hoverinfo: 'none',
+          colorscale: [[0, color], [1, color]],
+          showscale: false,
+        }
+      })
+  }
+  get data (): number[][] | null {
+    return this.value && this.value.realization
+      ? this.value.realization
+      : null
+  }
 }
 </script>

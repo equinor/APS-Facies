@@ -28,8 +28,10 @@ export default {
         // next method in the loading chain. The loading chain depends on the fetch statements in this methods being
         // resolved
         await dispatch('zones/fetch', null, { root: true })
-        await Promise.all(parametersDependentOnGrid.map(param => dispatch(`parameters/${param}/fetch`, null, { root: true })))
-        return gridModel
+        await Promise.all(parametersDependentOnGrid.map(param => dispatch(`parameters/${param}/fetch`, undefined, { root: true })))
+        // This takes quite a bit more time, and is not worth waiting for, as the rough estimates earlier are good enough for now
+        // Hence no `await`
+        dispatch('parameters/grid/simBox/fetch', false, { root: true })
       } else {
         throw new Error(`Selected grid model ( ${gridModel} ) is not present in the current project.
 

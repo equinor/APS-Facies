@@ -79,7 +79,9 @@ export default {
         },
         xaxis,
         yaxis,
+        /* eslint-disable-next-line @typescript-eslint/camelcase */
         paper_bgcolor: 'rgba(0,0,0,0)',
+        /* eslint-disable-next-line @typescript-eslint/camelcase */
         plot_bgcolor: 'rgba(0,0,0,0)',
       }
       if (this.svg) {

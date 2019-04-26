@@ -14,7 +14,6 @@
     -->
     <upload-button
       :file-changed-callback="e => importModelFile(e)"
-      disabled
       color=""
       icon
     >
@@ -24,7 +23,7 @@
           Must be set to 'black' in order to look clickable
         -->
         <v-icon
-          color="gray"
+          color="black"
         >
           {{ $vuetify.icons.import }}
         </v-icon>
@@ -75,6 +74,7 @@ import ProjectSettings from '@/components/dialogs/ProjectSettings'
 
 import rms from '@/api/rms'
 import IconButton from '@/components/selection/IconButton'
+import { resetState } from '@/store'
 
 const parse = xmlString => {
   const parser = new DOMParser()
@@ -90,20 +90,24 @@ const fileHandler = (store, fileName) => {
     try {
       json = xml2json(fileContent, { compact: true, ignoreComment: true })
     } catch (err) {
-      alert('The file you tried to open is not valid XML and cannot be used\n' +
-        'Fix the following error before opening again:\n\n' +
-        err.message)
+      alert('The file you tried to open is not valid XML and cannot be used\n'
+        + 'Fix the following error before opening again:\n\n'
+        + err.message)
     }
     if (json) {
       const dom = parse(fileContent)
-      rms.isApsModelValid(btoa(new XMLSerializer().serializeToString(dom)))
+      rms.isApsModelValid(btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(dom)))))
         .then(result => {
           if (result.valid) {
-            store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+            resetState()
+            store.dispatch('fetch')
+              .then(() => {
+                store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+              })
           } else {
-            alert('The file you tried to open is not a valid APS model file and cannot be used\n' +
-              'Fix the following error before opening again:\n\n' +
-              result.error)
+            alert('The file you tried to open is not a valid APS model file and cannot be used\n'
+              + 'Fix the following error before opening again:\n\n'
+              + result.error)
           }
         })
     }
@@ -131,7 +135,7 @@ export default {
 
   methods: {
     goToHelp () {
-      rms.open_wiki_help()
+      rms.openWikiHelp()
     },
     importModelFile (file) {
       const reader = new FileReader()
@@ -146,25 +150,25 @@ export default {
       if (exportedXMLString) {
         const result = await rms.isApsModelValid(btoa(exportedXMLString))
         if (result.valid) {
-          const defaultPath = this.$store.state.parameters.path.project + '/myApsExport.xml'
+          const defaultPath = `${this.$store.state.parameters.path.project}/myApsExport.xml`
           this.$refs.exportDialog.open(defaultPath, {})
             .then((result) => {
               if (result.save) {
                 const resultPromise = rms.save(result.path, btoa(exportedXMLString))
                 resultPromise.then((success) => {
                   if (success) {
-                    alert('modellfil lagret til ' + result.path)
+                    alert(`model file was saved to ${result.path}`)
                   }
                   if (!success) {
-                    alert('Noe gikk galt med lagring. Valgte du en sti som ikke finnes?')
+                    alert('Saving failed. Did you choose a path that does not exist?')
                   }
                 })
               }
             })
         } else {
-          alert('The model you have defined is not valid and cannot be exported\n' +
-            'Fix the following error before exporting again:\n\n' +
-            result.error)
+          alert('The model you have defined is not valid and cannot be exported\n'
+            + 'Fix the following error before exporting again:\n\n'
+            + result.error)
         }
       }
     }

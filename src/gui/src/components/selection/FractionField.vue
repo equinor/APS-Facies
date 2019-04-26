@@ -5,47 +5,44 @@
     :ranges="ranges"
     :fmu-updatable="fmuUpdatable"
     :disabled="disabled"
-    label=""
+    :label="label"
     optional
     enforce-ranges
     @input="e => propagate(e)"
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
-import { nullableNumber, updatableType } from '@/utils/typing'
-import NumericField from '@/components/selection/NumericField'
+import { Optional } from '@/utils/typing'
+import NumericField from '@/components/selection/NumericField.vue'
 
-export default {
+@Component({
   components: {
     NumericField,
   },
+})
+export default class FractionField extends Vue {
+  @Prop({ required: true })
+  readonly value!: Optional<number> | FmuUpdatable
+  @Prop({ required: false, default: false, type: Boolean })
+  readonly fmuUpdatable!: boolean
+  @Prop({ required: false, default: false, type: Boolean })
+  readonly disabled!: boolean
+  @Prop({ required: false, default: '' })
+  readonly label!: string
 
-  props: {
-    value: VueTypes.oneOfType([nullableNumber, updatableType]).isRequired,
-    fmuUpdatable: VueTypes.bool.def(false),
-    disabled: VueTypes.bool.def(false),
-  },
-
-  computed: {
-    ranges () {
-      return {
-        min: 0,
-        max: 1,
-      }
+  get ranges () {
+    return {
+      min: 0,
+      max: 1,
     }
-  },
+  }
 
-  methods: {
-    propagate (value) {
-      this.$emit('input', value)
-    },
-  },
+  propagate (value: any) {
+    this.$emit('input', value)
+  }
 }
 </script>
-
-<style scoped>
-
-</style>

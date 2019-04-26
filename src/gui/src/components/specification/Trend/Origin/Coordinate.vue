@@ -24,8 +24,14 @@ export default {
 
   props: {
     grfId: AppTypes.id.isRequired,
-    originType: VueTypes.string.isRequired,
-    coordinateAxis: VueTypes.string.isRequired,
+    originType: {
+      required: true,
+      type: String,
+    },
+    coordinateAxis: {
+      required: true,
+      type: String,
+    },
     label: VueTypes.string.def(''),
   },
 

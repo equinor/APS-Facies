@@ -20,7 +20,6 @@
 import VueTypes from 'vue-types'
 
 import { AppTypes } from '@/utils/typing'
-import { sortByProperty } from '@/utils'
 
 import AlphaSelection from './AlphaSelection'
 
@@ -40,25 +39,31 @@ export default {
 
   props: {
     value: AppTypes.truncationRule,
-    minChannels: VueTypes.integer.def(2),
+    minFields: VueTypes.integer.def(2),
   },
 
   computed: {
     alphas () {
       return this.value
-        ? sortByProperty('channel')(this.value.backgroundFields)
-          .map(item => {
+        ? this.value.backgroundFields
+          .map((field, index) => {
             return {
-              channel: item.channel,
-              selected: item.field || '' }
+              channel: index + 1,
+              selected: field
+            }
           })
-        : defaultChannels(this.minChannels)
+        : defaultChannels(this.minFields)
     },
   },
 
   methods: {
-    update (item, value) {
-      return this.$store.dispatch('truncationRules/updateFields', { channel: item.channel, selected: value })
+    update ({ channel }, fieldId) {
+      const field = this.$store.state.gaussianRandomFields.fields[`${fieldId}`]
+      return this.$store.dispatch('truncationRules/updateBackgroundField', {
+        index: channel - 1,
+        rule: this.value,
+        field: field || null
+      })
     }
   },
 }

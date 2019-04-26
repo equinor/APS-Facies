@@ -74,8 +74,9 @@ def apply_truncations(
     elif debug_level >= Debug.ON:
         print('Files are equal: OK')
 
+
 def apply_truncations_vectorized(
-        truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, debug_level=Debug.SOMEWHAT_VERBOSE
+        truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, debug_level=Debug.OFF
 ):
     assert truncRule is not None
     assert faciesReferenceFile != ''
