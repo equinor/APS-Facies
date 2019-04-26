@@ -57,11 +57,20 @@ class RMSData:
         self.roxar = roxar
         self.project = project
 
-    def is_discrete(self, _property):
-        return _property.type == self.roxar.GridPropertyType.discrete
+    def is_discrete(self, _property, can_be_empty=False):
+        return self.is_property_type(_property, self.roxar.GridPropertyType.discrete, can_be_empty)
 
-    def is_continuous(self, _property):
-        return _property.type == self.roxar.GridPropertyType.continuous
+    def is_continuous(self, _property, can_be_empty=False):
+        return self.is_property_type(_property, self.roxar.GridPropertyType.continuous, can_be_empty)
+
+    def is_property_type(self, _property, type, can_be_empty=False):
+        return (
+            _property.type == type
+            and (
+                can_be_empty
+                or not _property.is_empty(self.project.current_realisation)
+            )
+        )
 
     def get_project_name(self):
         return self.project.name
