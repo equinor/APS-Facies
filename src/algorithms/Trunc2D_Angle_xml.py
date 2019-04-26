@@ -787,9 +787,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         polygons = self.__calculateFaciesPolygons(cellIndx, area)
         self._faciesPolygons = polygons
 
-
-
-
     def __calculateFaciesPolygons(self, cellIndx, area):
         """
         Description:  Calculate polygons in truncation map for given facies fraction (area)
@@ -809,15 +806,13 @@ class Trunc2D_Angle(Trunc2D_Base):
             vyN = self.__vyNormal[i]
             x0N = self.__x0Normal[i]
             y0N = self.__y0Normal[i]
-            item = self.__probFracPerPolygon[i]
+            indx, probFrac = self.__probFracPerPolygon[i]
 
-            indx = item[0]
-            probFrac = item[1]
             fIndx = self._orderIndex[indx]
             fProb = area[fIndx] * probFrac
             # If area = 0 for a facies, define a 0 area polygon as the one that is split off the input polygon
             if abs(area[fIndx]) < self._epsFaciesProb:
-                outPolyA = [[0.0, 0.0], [1.0,0.0], [1.0, 0.000001], [0.0, 0.000001], [0.0,0.0]]
+                outPolyA = [[0.0, 0.0], [1.0, 0.0], [1.0, 0.000001], [0.0, 0.000001], [0.0, 0.0]]
                 faciesPolygons.append(outPolyA)
                 if i == nPolygons - 2:
                     faciesPolygons.append(polygon)

@@ -2,6 +2,8 @@
 from enum import Enum
 from typing import Union, List, Dict, Any
 
+from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
+from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.algorithms.APSFaciesProb import FaciesName
 from src.algorithms.APSMainFaciesTable import Facies
 
@@ -57,4 +59,4 @@ class TruncationSpecification:
 
 def make_truncation_rule(
         specification:               Union[TruncationSpecification, Dict]
-): ...
+) -> Union[Trunc2D_Angle, Trunc3D_bayfill]: ...

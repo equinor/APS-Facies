@@ -27,6 +27,9 @@ class Facies:
         else:
             raise IndexError('list index out of range')
 
+    def __repr__(self):
+        return 'Facies({name}, {code})'.format(name=self.name, code=self.code)
+
     @property
     def name(self):
         return self._name
