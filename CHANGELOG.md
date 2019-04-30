@@ -2,6 +2,70 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.9.0
+
+The majority of changes here, is related to the migration from JavaScript to TypeScript.
+The domain model has been rewritten entirely in TypeScript, while many Vue components has been migrated to TypeScript.
+There has also been a number of user interface / experience improvements.
+
+### Features
+* Import of model files is enabled for Bayfill and non-cubic truncation rules
+* Added labels of facies alias to the truncation map
+  * Automatic contrast adjustment
+* Show color scale of Gaussian Random Fields
+
+* The currently selected element is highlighting
+  * Zone / Region
+  * Facies
+
+* Added button for the Equinor wiki page on APS
+  * Added a helper text on the help icon when hovering
+
+* The blocked well parameters are _always_ shown, even when they can only have one possible value
+  * blocked well log parameter
+  * blocked well parameter
+* Added a spinner when loading a model file, or a previous job from RMS
+* Added option to toggle facies filling
+
+### Fixes
+* FMU Checkboxes are checked when the value is updatable
+  * This caused then not to be selected, when a model file was loaded
+* Ensure the 'Roboto' font is rendered in plots
+* Fixed a bug in bayfill rule which appeared in polygon calculations when BHD probability was 0
+* Ensure that if Zone parameter does not exit in the RMS grid_model, it will be created when needed in `APS_normalize_prob_cubes.py` and in `APS_main.py`
+* For the test project, blocked wells log has been renamed
+* Ensure that dicts in templates are not reused when initially same
+* Ensure that the state is emptied before importing model file
+* Ensure properties from RMS are non-empty in current realisation
+
+### Restructure
+* Introduced TypeScript
+  * Migrated domain to TypeScript
+  * Migrated components to TypeScript
+* Restructured import for new state (Bayfill)
+* Moved 3D cut to be depend on zone/region instead of on GRF
+* Moved alpha specification above truncation rule specification
+* Size change is moved to watched property; more robust
+* Return Promises.all, instead of simply dispatching actions
+* Made operand be first on newline; more readable
+* Replaced `Promises` with `async`/`await`
+* Translated error messages to English
+
+### Miscellaneous
+* Removed `vue-router`, as it is not used in a meaningful way
+* Updated dependencies
+* Added target for detection of circular imports
+* Added the integration test `Test_defineFaciesProbTrend`
+* Added the Karoo Fan3 dataset, as mock data
+* Increased font sizes
+* Minor code cleanup
+* Code coverage in tests
+* Added a small explanation that Cubic truncation rules are not shown
+
+### Performance
+* Loads an initial rougher estimate of simbox thickness, and then loading more accurate estimates in the background
+
+
 ## 0.8.0
 
 This release mostly targets fixes, and polishes so that the GUI is usable to end users.
