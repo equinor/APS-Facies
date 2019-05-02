@@ -2,6 +2,11 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.9.1
+
+### Fixes
+* Fixed a regression error that caused the facies realizations to not render
+
 ## 0.9.0
 
 The majority of changes here, is related to the migration from JavaScript to TypeScript.

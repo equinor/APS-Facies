@@ -361,7 +361,7 @@ export default {
       Vue.set(state.rules[`${ruleId}`], '_polygons', polygons)
     },
     UPDATE_REALIZATION: (state, { rule, data }) => {
-      Vue.set(state.rules[`${rule.id}`], '_realization', data)
+      Vue.set(state.rules[`${rule.id}`], 'realization', data)
     },
     CHANGE_OVERLAY_USAGE: (state, { rule, value }) => {
       state.rules[`${rule.id}`]._useOverlay = value

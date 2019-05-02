@@ -23,9 +23,10 @@ export interface Specification {
 export default abstract class TruncationRule<T extends Polygon> extends ZoneRegionDependent implements Named {
   public readonly name: string
 
+  public realization: number[][] | null
+
   protected _polygons: Identified<T>
   protected _backgroundFields: GaussianRandomField[]
-  protected _realization: number[][] | null
   protected _constraints: (() => boolean)[]
 
   protected constructor ({ name, polygons, backgroundFields, realization, ...rest }: TruncationRuleConfiguration<T>) {
@@ -33,7 +34,7 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
     this.name = name
     this._polygons = identify(polygons)
     this._backgroundFields = backgroundFields
-    this._realization = realization || null
+    this.realization = realization || null
 
     this._constraints = [
       (): boolean => allSet(this.polygons, 'facies')
@@ -60,8 +61,6 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
   public get backgroundPolygons (): T[] {
     return this.polygons
   }
-
-  public get realization (): number[][] | null { return this._realization }
 
   public get polygons (): T[] {
     return Object.values(this._polygons)

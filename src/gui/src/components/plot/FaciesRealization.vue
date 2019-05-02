@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import Polygon from '@/utils/domain/polygon/base'
@@ -26,6 +26,8 @@ function filterOnCode (data: number[][] | null, code: number) {
   },
 })
 export default class FaciesRealization extends Vue {
+  data: number[][] | null = null
+
   @Prop({ required: true })
   readonly value!: TruncationRule<Polygon>
 
@@ -46,10 +48,9 @@ export default class FaciesRealization extends Vue {
         }
       })
   }
-  get data (): number[][] | null {
-    return this.value && this.value.realization
-      ? this.value.realization
-      : null
+  @Watch('value.realization')
+  onRealizationChanged (value: number[][] | null): void {
+    this.data = value
   }
 }
 </script>
