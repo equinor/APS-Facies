@@ -6,9 +6,9 @@
     -->
     <upload-button
       ref="uploadButton"
-      :file-changed-callback="e => importModelFile(e)"
       color=""
       icon
+      @file-update="importModelFile"
     >
       <template slot="icon">
         <!--
