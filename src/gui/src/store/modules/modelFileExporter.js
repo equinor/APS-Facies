@@ -189,8 +189,7 @@ const addGaussianRandomField = (doc, field, parent, zoneElement) => {
     fieldElement.append(createElement(doc, 'RelStdDev',
       field.trend.relativeStdDev.value, field.trend.relativeStdDev.updatable ? [{ name: 'kw', value: baseKw + '_RELSTDDEV' }] : null))
   }
-  // TODO / Future: Consider if the value here should be the same as the last used seed in the gui.
-  fieldElement.append(createElement(doc, 'SeedForPreview', '0'))
+  fieldElement.append(createElement(doc, 'SeedForPreview', field.settings.seed))
 }
 
 const addVario = (doc, variogram, baseKw, fieldElement) => {
