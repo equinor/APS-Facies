@@ -61,6 +61,7 @@ const store = new Vuex.Store({
           dispatch('constants/fetch'),
           dispatch('truncationRules/fetch'),
           dispatch('parameters/path/fetch'),
+          dispatch('parameters/names/project/fetch'),
         ])
         commit('FINISHED')
       }

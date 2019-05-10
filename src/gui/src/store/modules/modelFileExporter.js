@@ -11,7 +11,7 @@ class APSExportError extends Error {
 }
 
 const addRMSProjectName = (rootState, doc, parentElement) => {
-  const value = rootState.parameters.names.model.selected
+  const value = rootState.parameters.names.project.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSProjectName', value))
   } else {

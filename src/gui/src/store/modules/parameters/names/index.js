@@ -1,5 +1,6 @@
 import model from './model'
 import workflow from './workflow'
+import project from './project'
 
 export default {
   namespaced: true,
@@ -7,6 +8,7 @@ export default {
   modules: {
     model,
     workflow,
+    project,
   },
   actions: {},
   mutations: {},

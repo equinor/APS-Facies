@@ -1,6 +1,7 @@
 import { Commit, Dispatch } from 'vuex'
 
 import { GridModelsState } from '@/store/modules/gridModels/types'
+import ProjectNameState from '@/store/modules/parameters/names/project/typing'
 import { Polygon, TruncationRule } from '@/utils/domain'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
 import { Parent } from '@/utils/domain/bases/interfaces'
@@ -52,6 +53,9 @@ interface RootState {
   }
 
   parameters: {
+    names: {
+      project: ProjectNameState
+    }
     probabilityCube: {
       available: string[]
     }
