@@ -1,13 +1,5 @@
 <template>
   <v-toolbar>
-    <div>
-      APS Model:
-    </div>
-
-    <v-text-field
-      v-model="modelName"
-    />
-
     <!--
       NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly
       This is *exactly* the same as what's done in the source code for the upload button
@@ -121,13 +113,6 @@ export default {
     ProjectSettings,
     IconButton,
     UploadButton
-  },
-
-  computed: {
-    modelName: {
-      get: function () { return this.$store.state.parameters.names.model.selected },
-      set: function (value) { this.$store.dispatch('parameters/names/model/select', value, { root: true }) }
-    },
   },
 
   methods: {
