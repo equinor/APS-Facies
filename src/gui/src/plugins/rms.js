@@ -1,9 +1,19 @@
 /* eslint-disable no-undef */
 import store from '@/store'
 
+import { createModel } from '@/utils/helpers/processing/export'
+
 if (typeof rms !== 'undefined') {
   rms.onPluginSave(() => {
-    return store.state
+    let model = null
+    try {
+      model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
+    } catch {
+    }
+    return {
+      ...store.state,
+      model,
+    }
   })
 
   rms.onPluginLoaded(data => {

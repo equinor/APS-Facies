@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+import os
+from base64 import b64decode
 from os.path import exists
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import numpy as np
 
@@ -102,3 +106,33 @@ def print_debug_information(function_name, text):
 
 def print_error(function_name, text):
     print('Error in {function_name}: {text}'.format(function_name=function_name, text=text))
+
+
+class TemporaryFile:
+    def __init__(self, file):
+        self._file = file
+
+    def __repr__(self):
+        return f'TemporaryFile(name="{str(self)}")'
+
+    def __str__(self):
+        return self._file.name
+
+    def __enter__(self):
+        return str(Path(self._file.name).absolute())
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.unlink(str(self._file.name))
+
+
+def create_temporary_model_file(model):
+    file = NamedTemporaryFile(
+        suffix='.xml',
+        delete=False,
+    )
+    try:
+        file.write(b64decode(model))
+        file.seek(0)
+    finally:
+        file.close()
+    return TemporaryFile(file)

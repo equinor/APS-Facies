@@ -207,6 +207,10 @@ class APSModel:
         if model_file_name is not None:
             self.__interpretXMLModelFile(model_file_name, debug_level=debug_level)
 
+    @property
+    def use_constant_probability(self):
+        return all([model.useConstProb() for model in self.__zoneModelTable.values()])
+
     def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
         root = ET.parse(modelFileName).getroot()
         self.__interpretTree(root, debug_level, modelFileName)
