@@ -280,6 +280,7 @@
         </fieldset>
       </v-card-text>
       <v-card-actions>
+        Version: {{ version }}
         <v-spacer />
         <bold-button
           title="Cancel"
@@ -334,6 +335,9 @@ export default {
     },
     gridSize () {
       return this.simulationSettings.gridSize
+    },
+    version () {
+      return process.env.VUE_APP_APS_VERSION || ''
     }
   },
 

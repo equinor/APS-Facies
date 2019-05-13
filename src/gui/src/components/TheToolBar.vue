@@ -55,6 +55,11 @@
         Documentation of the APS methodology and user guide for this plug-in.
       </span>
     </v-popover>
+    <span
+      v-if="betaBuild"
+    >
+      {{ `${versionInformation}` }}
+    </span>
   </v-toolbar>
 </template>
 
@@ -113,6 +118,18 @@ export default {
     ProjectSettings,
     IconButton,
     UploadButton
+  },
+
+  computed: {
+    betaBuild () { return process.env.VUE_APP_BUILD_MODE !== 'stable' },
+    versionNumber () { return process.env.VUE_APP_APS_VERSION },
+    buildNumber () { return process.env.VUE_APP_BUILD_NUMBER },
+    commitHash () { return process.env.VUE_APP_HASH },
+    versionInformation () {
+      return this.versionNumber && this.buildNumber && this.commitHash
+        ? `${this.versionNumber}.${this.buildNumber}-${this.commitHash} (beta)`
+        : 'live'
+    },
   },
 
   methods: {
