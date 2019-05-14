@@ -199,11 +199,14 @@ build-gui: clean-build increase-build-number build-front-end compile-files-for-p
 
 compile-files-for-plugin: gather-python-scripts auxillary-files compile-python-files
 
-gather-python-scripts: copy-python-files
+gather-python-scripts: copy-python-files __init__.py
 	cp $(UI.PY) $(PLUGIN_DIR)
 	cp $(MAIN.PY) $(PLUGIN_DIR)
 	rm -rf $(PLUGIN_DIR)/src/unit_test \
 	       $(PLUGIN_DIR)/src/api
+
+__init__.py:
+	touch $(PLUGIN_DIR)/__init__.py
 
 compile-python-files: ensure-relative-import-statements-in-plugin move-python-files-to-static
 
