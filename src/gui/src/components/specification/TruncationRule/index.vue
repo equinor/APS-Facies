@@ -39,11 +39,6 @@
           v-if="truncationRuleComponent"
           :value="rule"
         />
-        <span
-          v-else
-        >
-          Cubic truncation rules have not been implemented, yet
-        </span>
       </v-flex>
       <v-layout row>
         <v-flex
@@ -62,6 +57,7 @@
 <script>
 import BayfillSpecification from '@/components/specification/TruncationRule/Bayfill'
 import NonCubicSpecification from '@/components/specification/TruncationRule/NonCubic'
+import CubicSpecification from '@/components/specification/TruncationRule/Cubic'
 import TruncationHeader from '@/components/specification/TruncationRule/header'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay'
 import { isUUID } from '@/utils/helpers'
@@ -87,7 +83,7 @@ export default {
     },
     truncationRuleComponent () {
       const mapping = {
-        'Cubic': null,
+        'Cubic': CubicSpecification,
         'Non-Cubic': NonCubicSpecification,
         'Bayfill': BayfillSpecification,
       }

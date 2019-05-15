@@ -5,6 +5,7 @@ import {
   Bayfill,
   NonCubic,
   Cubic,
+  Direction,
 } from '@/utils/domain/truncationRule/index'
 import Zone from '@/utils/domain/zone'
 import Polygon from '@/utils/domain/polygon/base'
@@ -16,6 +17,7 @@ import OverlayPolygon from '@/utils/domain/polygon/overlay'
 type TruncationRule = Bayfill | NonCubic | Cubic
 
 export {
+  Direction,
   Polygon,
   BayfillPolygon,
   CubicPolygon,

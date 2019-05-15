@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
@@ -492,6 +493,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
             self.__writeDataForTruncRule()
 
     def __calcProbForEachNode(self, faciesProb):
+        if len(faciesProb) == 0:
+            warn('The facies probabilities are empty')
+            return
         TYPE = self.__node_index['type']
         NLIST = self.__node_index['list of nodes']
         PROB = self.__node_index['probability']

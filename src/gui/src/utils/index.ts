@@ -1,5 +1,8 @@
 import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
-import { Polygon, TruncationRule } from '@/utils/domain'
+import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
+import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
+import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
+import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
 import { ID, Identified } from '@/utils/domain/types'
 import {
   getId,
@@ -57,6 +60,57 @@ function defaultSimulationSettings (): SimulationSettings {
     gridSize: { x: 100, y: 100, z: 1 },
     simulationBox: { x: 1000, y: 1000, z: 10 },
     simulationBoxOrigin: { x: 0, y: 0 },
+  }
+}
+
+function simplify (specification: BayfillSpecification | NonCubicSpecification | CubicSpecification, rule: TruncationRule, includeOverlay: boolean = true) {
+  if (specification instanceof Array) {
+    return specification
+      .map((spec, index) => {
+        spec.facies = rule.polygons[`${index}`].id
+        return spec
+      })
+  } else {
+    // @ts-ignore
+    specification.polygons = specification.polygons
+      .filter((polygon: Polygon): boolean => polygon instanceof OverlayPolygon ? includeOverlay : true)
+      .map((polygon: any) => {
+        polygon.facies = polygon.id
+        polygon.fraction = 1
+        return polygon
+      })
+    if (!includeOverlay) {
+      specification.overlay = null
+    }
+    return specification
+  }
+}
+
+function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
+  return {
+    type: rule.type,
+    globalFaciesTable: (rule.backgroundPolygons as Polygon[])
+      .map((polygon, index) => {
+        return {
+          code: index,
+          name: polygon.id,
+          probability: 1 / rule.backgroundPolygons.length,
+          inZone: true,
+          inRule: true,
+        }
+      }),
+    gaussianRandomFields: ['GRF1', 'GRF2', 'GRF3']
+      .map(field => {
+        const included = !(field === 'GRF3' && rule.type !== 'bayfill')
+        return {
+          name: field,
+          inZone: true,
+          inRule: included,
+          inBackground: included,
+        }
+      }),
+    values: simplify(rule.specification, rule, false),
+    constantParameters: true,
   }
 }
 
@@ -157,10 +211,10 @@ function faciesName (obj: any) {
 function minFacies (rule: any, getters: RootGetters): number {
   let minFacies = 0
   const type = getters['truncationRules/typeById'](rule.type) || rule.type
-  if (type === 'cubic') {
-    // TODO: Implement
-    minFacies = Number.POSITIVE_INFINITY
-  } else if ([type, rule.type].includes('non-cubic')) {
+  if (
+    [type, rule.type].includes('non-cubic')
+    || [type, rule.type].includes('cubic')
+  ) {
     if (rule.polygons) {
       // @ts-ignore
       const uniqueFacies = new Set(rule.polygons.map((polygon): string => faciesName(polygon)))
@@ -236,6 +290,7 @@ export {
   sortByOrder,
   defaultSimulationSettings,
   makeData,
+  makeSimplifiedTruncationRuleSpecification,
   makeTruncationRuleSpecification,
   selectItems,
   hasValidChildren,

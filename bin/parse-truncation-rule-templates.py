@@ -47,6 +47,7 @@ def make_overlay_polygon(elem):
 def _get_overlays(rule, content):
     _mapping = {
         'non-cubic': 'NonCubicAndOverlay',
+        'cubic': 'CubicAndOverlay',
     }
     extension = [rule]
     try:
@@ -169,10 +170,50 @@ class Parser:
             return content
 
     class Cubic:
-        @staticmethod
-        def parse(line):
+        min_fields = 2
+
+        @classmethod
+        def parse(cls, line):
             # TODO: Implement
-            return None
+            content = re.match(r"(?P<type>\w+) +(?P<name>\w+) +(?P<num_polygons>\d+) +(?P<rule>\[.*\])", line).groupdict()
+            polygons = cls.polygons(content)
+            return {
+                'name': content['name'],
+                'type': 'cubic',
+                'minFields': cls.min_fields,
+                'polygons': polygons,
+                'settings': cls.settings(content, polygons),
+                'fields': make_empty_fields(cls.min_fields)
+            }
+
+        @staticmethod
+        def polygons(content):
+            items = get_array(content, 'rule')[1:]
+            polygons = []
+            for i, item in enumerate(items):
+                polygons.append({
+                    'name': i + 1,
+                    'facies': item[0],
+                    'proportion': 1 / len(items)
+                })
+            return polygons
+
+        @staticmethod
+        def settings(content, polygons):
+            cubic_specification = get_array(content, 'rule')
+
+            settings = [
+                {
+                    'direction': cubic_specification[0]
+                }
+            ]
+            for polygon in cubic_specification[1:]:
+                settings.append({
+                    'polygon': find_polygon_references(polygons, polygon),
+                    'fraction': polygon[1],
+                    'level': tuple(polygon[2:])
+                })
+            return settings
 
     class NonCubic:
         min_fields = 2

@@ -269,6 +269,8 @@ class RMSData:
         # Calculate polygons for truncation map for current facies probability
         # as specified when calling setTruncRule(faciesProb)
         facies_polygons = truncation_rule.truncMapPolygons()
+        if isinstance(facies_polygons, np.ndarray):
+            facies_polygons = facies_polygons.tolist()
         facies_index_per_polygon = truncation_rule.faciesIndxPerPolygon()
         # NOTE: Names has the correct order (relative to facies_index_per_polygon)
         names = truncation_rule.getFaciesInTruncRule()

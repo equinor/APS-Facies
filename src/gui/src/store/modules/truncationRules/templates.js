@@ -2,6 +2,7 @@ import Vue from 'vue'
 import { cloneDeep } from 'lodash'
 
 import templates from '@/store/templates/truncationRules'
+import simpleTemplates from '@/store/templates/simpleTruncationRules'
 import types from '@/store/modules/truncationRules/types'
 import { addItem } from '@/store/actions'
 import { ADD_ITEM } from '@/store/mutations'
@@ -17,6 +18,8 @@ import {
   structurePolygons,
 } from '@/utils/helpers/processing/templates'
 import { isEmpty } from '@/utils'
+import { Orientation } from '@/utils/domain/truncationRule/cubic'
+import { CubicPolygon, OverlayPolygon } from '@/utils/domain'
 import APSError from '@/utils/domain/errors/base'
 
 const missingTemplates = (_templates, state) => {
@@ -41,6 +44,58 @@ const normalize = (items) => {
   return items.map(payload => { return { ...payload, probability: payload.probability / sum } })
 }
 
+function organizeCubicPolygons (polygons, levels) {
+  const allPolygons = []
+  if (polygons.length === 0) return polygons
+  const root = new CubicPolygon({ order: -1 })
+  for (let i = 0; i < levels.length; i++) {
+    const polygon = polygons[`${i}`]
+    if (polygon instanceof OverlayPolygon) {
+      allPolygons.push(polygon)
+    } else {
+      const levelSpecification = levels[`${i}`]
+      let current = root
+      for (let j = 0; j < levelSpecification.length; j++) {
+        const level = levelSpecification[`${j}`]
+        if (level <= 0) continue
+        let polygon = current.children.find(polygon => polygon.order === level)
+        if (!polygon) {
+          if (j + 1 < levelSpecification.length && levelSpecification[`${j + 1}`] > 0) {
+            polygon = new CubicPolygon({ parent: current, order: level })
+          } else {
+            polygon = polygons[`${i}`]
+            polygon.order = level
+            current.add(polygon)
+          }
+        }
+        current = polygon
+      }
+    }
+  }
+  const queue = [root]
+  while (queue.length > 0) {
+    const current = queue.shift()
+    allPolygons.push(current)
+    current.children.forEach(polygon => {
+      queue.push(polygon)
+    })
+  }
+  return allPolygons
+}
+
+function getDirection (settings) {
+  const mapping = {
+    'H': Orientation.HORIZONTAL,
+    'V': Orientation.VERTICAL,
+  }
+  let direction = settings[0].direction
+  if (typeof direction !== 'string') return null
+  direction = mapping[direction.toUpperCase()]
+  return !Object.is(direction, undefined)
+    ? direction
+    : null
+}
+
 export default {
   namespaced: true,
 
@@ -57,6 +112,7 @@ export default {
       return Promise.all([
         dispatch('types/fetch'),
         ...templates.templates.map(template => dispatch('add', template)),
+        ...simpleTemplates.templates.map(template => dispatch('add', template))
       ])
     },
     async populate ({ commit, dispatch, state }, { available, types }) {
@@ -87,16 +143,22 @@ export default {
       if (autoFill && template.overlay) {
         await Promise.all(template.overlay.items.map(item => getFaciesGroup({ rootGetters, dispatch }, item.over, parent)))
       }
-      let polygons = processPolygons({ rootGetters, rootState }, { type, polygons: template.polygons, settings: template.settings })
-      const backgroundFields = processFields(rootGetters, rootState, template.fields, template.parent)
+      const backgroundFields = processFields(rootGetters, rootState, template.fields, template.level)
       const overlay = processOverlay(rootGetters, template.overlay, parent)
+      let polygons = processPolygons({ rootGetters, rootState }, { type, polygons: template.polygons, settings: template.settings })
       polygons = combinePolygons(polygons, overlay)
       polygons = structurePolygons(polygons)
+      const levels = polygons.map(({ level }) => level)
       polygons = makePolygonsFromSpecification(polygons)
+      if (type === 'cubic') {
+        polygons = organizeCubicPolygons(polygons, levels)
+      }
 
       const uniqueFacies = [...polygons
         .reduce((facies, polygon) => {
-          facies.add(polygon.facies)
+          if (polygon.facies) {
+            facies.add(polygon.facies)
+          }
           return facies
         }, new Set())]
       await Promise.all(uniqueFacies.map(async facies => {
@@ -106,9 +168,16 @@ export default {
           throw new APSError(`The facies ${facies} does not exist`)
         }
       }))
+      if (uniqueFacies.length === 0) {
+        // This is a simple template, without any facies specification
+        // However, at least two facies HAS to be selected in order to create a truncation rule
+        await dispatch('facies/normalize', undefined, { root: true })
+      }
+      const direction = getDirection(template.settings)
 
       const rule = makeRule({
         type,
+        direction,
         polygons,
         backgroundFields,
         overlay,

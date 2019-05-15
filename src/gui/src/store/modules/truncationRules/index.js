@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { cloneDeep, isNumber } from 'lodash'
+import { cloneDeep, isNumber, sample } from 'lodash'
 
 import api from '@/api/rms'
 
@@ -21,7 +21,8 @@ import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import APSTypeError from '@/utils/domain/errors/type'
 import APSError from '@/utils/domain/errors/base'
-import { makePolygonsFromSpecification } from '@/utils/helpers/processinga/templates/typed'
+import { makePolygonsFromSpecification, normalizeOrder } from '@/utils/helpers/processing/templates/typed'
+import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -70,7 +71,12 @@ function compareTemplate (rootGetters, a, b) {
 
 function increaseOrderByRelativeTo ({ commit }, rule, polygon, amount = 1) {
   rule.polygons.forEach(_polygon => {
-    if (_polygon.order >= polygon.order && _polygon.overlay === polygon.overlay) {
+    if (
+      !(_polygon instanceof CubicPolygon)
+      && _polygon.order >= polygon.order
+      && _polygon.overlay === polygon.overlay
+      && _polygon.atLevel === polygon.atLevel
+    ) {
       commit('CHANGE_ORDER', { rule, polygon: _polygon, order: _polygon.order + amount })
     }
   })
@@ -128,7 +134,7 @@ export default {
         commit('ADD', { id: rule.id, item: makeRule(rule) })
       })
     },
-    async addPolygon ({ commit, dispatch, rootState }, { rule, group = '', order = null, overlay = false }) {
+    async addPolygon ({ commit, dispatch, rootState }, { rule, group = '', order = null, overlay = false, parent = null, atLevel = 0 }) {
       if (rule.type === 'bayfill') throw new Error('Bayfill must have exactly 5 polygons. Cannot add more.')
 
       if (!isNumber(order) || order < 0) {
@@ -158,15 +164,24 @@ export default {
       } else if (rule.type === 'non-cubic') {
         polygon = new NonCubicPolygon({ order })
       } else if (rule.type === 'cubic') {
-        throw new Error('Cubic is not implemented')
+        polygon = new CubicPolygon({ order })
+        if (parent) {
+          commit('ADD_CHILD_POLYGON', { parent, child: polygon })
+        }
       } else {
         throw new APSTypeError('Invalid type')
       }
       increaseOrderByRelativeTo({ commit }, rule, polygon)
       commit('ADD_POLYGON', { rule, polygon })
+      if (rule instanceof Cubic) {
+        normalizeOrder(rule, (polygon, order) => { commit('CHANGE_ORDER', { rule, polygon, order }) })
+      }
     },
     async removePolygon ({ commit, dispatch, rootState }, { rule, polygon }) {
       commit('REMOVE_POLYGON', { rule, polygon })
+      if (polygon.parent) {
+        commit('REMOVE_CHILD', { child: polygon })
+      }
       // Decrease the order of polygons
       increaseOrderByRelativeTo({ commit }, rule, polygon, -1)
 
@@ -219,9 +234,31 @@ export default {
         await dispatch('addRuleFromTemplate')
       }
     },
+    async split ({ dispatch }, { rule, polygon, value }) {
+      if (!(rule instanceof Cubic)) throw new APSTypeError('Only Cubic truncation rules may use \'split\'')
+
+      await Promise.all([...Array(value)]
+        .map((_, index) => dispatch('addPolygon', { rule, parent: polygon, order: index + 1 }))
+      )
+    },
+    async merge ({ dispatch }, { rule, polygons }) {
+      if (!(rule instanceof Cubic)) throw new APSTypeError('Only Cubic truncation rules may use \'merge\'')
+
+      const parent = sample(polygons.map(({ parent }) => parent))
+      if (polygons.every(polygon => getId(polygon.parent) === getId(parent))) {
+        await Promise.all(polygons.map(polygon => dispatch('removePolygon', { rule, polygon })))
+        if (parent.children.length !== 0) {
+          await dispatch('addPolygon', { rule, parent, atLevel: parent.atLevel + 1 })
+        }
+      } else {
+        throw new APSTypeError('Polygons need to have the same parent in order to be merged')
+      }
+    },
     changeOrder ({ commit }, { rule, polygon, direction }) {
       const other = rule.polygons.find(_polygon => _polygon.order === polygon.order + direction)
-      commit('CHANGE_ORDER', { rule, polygon: other, order: polygon.order })
+      if (!(other instanceof CubicPolygon)) {
+        commit('CHANGE_ORDER', { rule, polygon: other, order: polygon.order })
+      }
       commit('CHANGE_ORDER', { rule, polygon, order: polygon.order + direction })
     },
     changeAngles ({ commit }, { rule, polygon, value }) {
@@ -232,6 +269,9 @@ export default {
     },
     changeSlantFactors ({ commit }, { rule, polygon, value }) {
       commit('CHANGE_FACTORS', { rule, polygon, value })
+    },
+    changeDirection ({ commit }, { rule, value }) {
+      commit('CHANGE_DIRECTION', { rule, value: new Direction(value) })
     },
     async updateRealization ({ commit, dispatch, rootGetters }, rule) {
       await dispatch('facies/normalize', undefined, { root: true })
@@ -361,6 +401,9 @@ export default {
     REMOVE_POLYGON: (state, { rule, polygon }) => {
       Vue.delete(state.rules[`${rule.id}`]._polygons, polygon.id)
     },
+    REMOVE_CHILD: (state, { child }) => {
+      Vue.delete(child.parent.children, child.parent.children.findIndex(polygon => getId(polygon) === getId(child)))
+    },
     SET_FACIES: (state, { ruleId, polygons }) => {
       Vue.set(state.rules[`${ruleId}`], '_polygons', polygons)
     },
@@ -404,6 +447,13 @@ export default {
     },
     CHANGE_FACTORS: (state, { rule, polygon, value }) => {
       setPolygonValue(state, rule, polygon, 'slantFactor', value)
+    },
+    CHANGE_DIRECTION: (state, { rule, value }) => {
+      Vue.set(state.rules[`${rule.id}`], 'direction', value)
+    },
+    ADD_CHILD_POLYGON: (state, { parent, child }) => {
+      parent.children.push(child)
+      Vue.set(child, 'parent', parent)
     }
   },
 

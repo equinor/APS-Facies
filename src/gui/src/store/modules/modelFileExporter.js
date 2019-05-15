@@ -384,6 +384,9 @@ const addTruncationRule = ({ rootState }, doc, parent, zoneElement) => {
   if (truncRule.type === 'non-cubic') {
     addTruncationRuleNonCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
   }
+  if (truncRule.type === 'cubic') {
+    addTruncationRuleCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+  }
 }
 
 const addTruncationRuleBayFill = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
@@ -421,30 +424,19 @@ const addTruncationRuleBayFill = ({ rootState }, doc, parent, truncRule, truncRu
   })
 }
 
-const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+const addTruncationRuleOverlay = ({ rootState }, doc, parent, truncRule, truncRuleElem, elementName, backgroundPolygonsHandler) => {
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
-  const trunc2DAngleElement = createElement(doc, 'Trunc2D_Angle', null,
+  const truncElement = createElement(doc, elementName, null,
     [{ name: 'nGFields', value: numberOfFields }])
-  truncRuleElem.append(trunc2DAngleElement)
+  truncRuleElem.append(truncElement)
 
   const backGroundModelElem = createElement(doc, 'BackGroundModel')
-  trunc2DAngleElement.append(backGroundModelElem)
+  truncElement.append(backGroundModelElem)
 
   const alphaNames = getAlphaNames(truncRule)
   backGroundModelElem.append(createElement(doc, 'AlphaFields', alphaNames))
-  backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
   // The background polygons
-  truncRule.backgroundPolygons.forEach(polygon => {
-    // facies Element
-    const faciesName = polygon.facies.name
-    const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
-    backGroundModelElem.append(faciesElem)
-    // angle element
-    const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
-    faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
-    // ProbFrac element
-    faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
-  })
+  backgroundPolygonsHandler(backGroundModelElem)
 
   const overlayGroups = truncRule.overlayPolygons
     .reduce((obj, polygon) => {
@@ -455,7 +447,7 @@ const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncR
     }, {})
   if (Object.values(overlayGroups).length > 0 && truncRule.useOverlay) {
     const overLayModelElem = createElement(doc, 'OverLayModel')
-    trunc2DAngleElement.append(overLayModelElem)
+    truncElement.append(overLayModelElem)
 
     Object.keys(overlayGroups).forEach(overlayGroup => {
       const groupElement = createElement(doc, 'Group')
@@ -491,6 +483,57 @@ const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncR
         ))
     })
   }
+}
+
+const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+  function handleBackgroundPolygons (backGroundModelElem) {
+    backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
+    truncRule.backgroundPolygons.forEach(polygon => {
+      // facies Element
+      const faciesName = polygon.facies.name
+      const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
+      backGroundModelElem.append(faciesElem)
+      // angle element
+      const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
+      faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
+      // ProbFrac element
+      faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
+    })
+  }
+  addTruncationRuleOverlay({ rootState }, doc, parent, truncRule, truncRuleElem, 'Trunc2D_Angle', handleBackgroundPolygons)
+}
+
+const addTruncationRuleCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+  function handleBackgroundPolygons (backGroundModelElem) {
+    function addFraction (element, polygon) {
+      element.append(createElement(doc, 'ProbFrac', polygon.fraction, [{ name: 'name', value: polygon.facies.name }]))
+    }
+    function addPolygon (element, polygon) {
+      if (polygon.facies) {
+        addFraction(element, polygon)
+      } else {
+        const attributes = !polygon.parent
+          ? [{ name: 'direction', value: truncRule.direction.specification }]
+          : null
+        const child = createElement(doc, `L${polygon.atLevel + 1}`, null, attributes)
+        element.append(child)
+        polygon.children.forEach(polygon => {
+          addPolygon(child, polygon)
+        })
+      }
+    }
+
+    addPolygon(backGroundModelElem, truncRule.root)
+  }
+  addTruncationRuleOverlay(
+    { rootState },
+    doc,
+    parent,
+    truncRule,
+    truncRuleElem,
+    'Trunc2D_Cubic',
+    handleBackgroundPolygons,
+  )
 }
 
 const getNumberOfFieldsForTruncRule = ({ rootState }, parent) => {

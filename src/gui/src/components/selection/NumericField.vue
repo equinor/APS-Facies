@@ -150,6 +150,7 @@ export default Vue.extend({
     },
     _unit () {
       if (this.discrete) {
+        if (!this.unit) return ''
         const irregular = {
         }
         return this.value === 1

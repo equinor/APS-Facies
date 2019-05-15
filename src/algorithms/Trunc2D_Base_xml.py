@@ -1,5 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from warnings import warn
 from xml.etree.ElementTree import Element
 
 import copy
@@ -1398,6 +1399,9 @@ Background facies:
            Resolution is set to 100 if input is not positive. The case that memoization is turned off
            corresponds to input resolution = 0 and in this case 100 is always used.
         """
+        if len(facies_prob) == 0:
+            warn('The facies probabilities are empty')
+            return facies_prob
         if self._keyResolution <= 0:
             # A value of 0 or negative indicates that memoization is turned off.
             # Anyway the probabilities will be rounded off to nearest 1/100.

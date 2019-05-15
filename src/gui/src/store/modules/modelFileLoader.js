@@ -5,6 +5,8 @@ import {
   BayfillPolygon,
   NonCubic,
   NonCubicPolygon,
+  Cubic,
+  CubicPolygon,
   OverlayPolygon,
 } from '@/utils/domain'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
@@ -175,46 +177,106 @@ function getOverlayPolygon ({ rootState }, backgroundFacies, container, order, p
   })
 }
 
-async function getOverlayPolygons ({ rootState, dispatch }, group, parent) {
+async function getOverlayPolygons ({ rootState, dispatch }, group, parent, offset = 0) {
   const backgroundFacies = await dispatch('facies/groups/get', {
     facies: getBackgroundFacies({ rootState }, group, parent),
     parent,
   }, { root: true })
-  const _getOverlayPolygon = (el, order = 0) => getOverlayPolygon({ rootState }, backgroundFacies, el, order, parent)
+  const _getOverlayPolygon = (el, index = 0) => getOverlayPolygon({ rootState }, backgroundFacies, el, offset + index + 1, parent)
   const polygons = ensureArray(group.AlphaField)
-  return polygons.map((polygon, index) => _getOverlayPolygon(polygon, index))
+  return polygons.map(_getOverlayPolygon)
 }
 
-async function makeNonCubicTruncationRule ({ rootState, dispatch }, container, parent) {
-  const backgroundFields = getAlphaFields({ rootState }, container, parent)
-  const backgroundPolygons = container.BackGroundModel.Facies.map(element => {
-    return new NonCubicPolygon({
-      angle: getNumericValue(element.Angle),
-      fraction: getNumericValue(element.ProbFrac),
-      facies: getFacies({ rootState }, element._attributes.name, parent)
-    })
-  })
-
-  let overlayPolygons = []
+async function makeOverlayPolygons ({ dispatch, rootState }, container, parent, offset = 0) {
+  const overlayPolygons = []
   if (container.OverLayModel) {
     const groups = ensureArray(container.OverLayModel.Group)
     for (const group of groups) {
-      const polygons = await getOverlayPolygons({ dispatch, rootState }, group, parent)
+      const polygons = await getOverlayPolygons({ dispatch, rootState }, group, parent, overlayPolygons.length + offset)
       overlayPolygons.push(...polygons)
     }
   }
-  const polygons = [...backgroundPolygons, ...overlayPolygons]
-  polygons.forEach((polygon, index) => {
-    polygon.order = index
-  })
+  return overlayPolygons
+}
 
-  return new NonCubic({
-    name: '',
+async function makeOverlayTruncationRule ({ rootState, dispatch }, container, parent, makeBackgroundPolygons, _class, extra = {}) {
+  const backgroundFields = getAlphaFields({ rootState }, container, parent)
+  const backgroundPolygons = makeBackgroundPolygons(container.BackGroundModel)
+
+  const overlayPolygons = await makeOverlayPolygons({ dispatch, rootState }, container, parent, backgroundPolygons.length)
+  const polygons = [...backgroundPolygons, ...overlayPolygons]
+
+  return new _class({
+    name: 'Imported',
     backgroundFields,
     polygons,
     _useOverlay: overlayPolygons.length > 0,
     parent,
+    ...extra,
   })
+}
+
+async function makeNonCubicTruncationRule ({ rootState, dispatch }, container, parent) {
+  function makeNonCubicBackgroundFacies (container) {
+    return container.Facies.map((element, index) => new NonCubicPolygon({
+      angle: getNumericValue(element.Angle),
+      fraction: getNumericValue(element.ProbFrac),
+      facies: getFacies({ rootState }, element._attributes.name, parent),
+      order: index + 1,
+    }))
+  }
+  /* eslint-disable-next-line no-return-await */
+  return await makeOverlayTruncationRule(
+    { rootState, dispatch },
+    container,
+    parent,
+    makeNonCubicBackgroundFacies,
+    NonCubic,
+  )
+}
+
+async function makeCubicTruncationRule ({ rootState, dispatch }, container, parent) {
+  function getChildren (container, root, level) {
+    const polygons = []
+    let order = 1
+    if (!container) return polygons
+    else if (Array.isArray(container)) {
+      container.forEach(element => {
+        polygons.push(...getChildren(element, new CubicPolygon({ parent: root, order }), level + 1))
+        order += 1
+      })
+    } else if (container.ProbFrac) {
+      container.ProbFrac.forEach(element => {
+        polygons.push(new CubicPolygon({
+          parent: root,
+          fraction: getNumericValue(element),
+          facies: getFacies({ rootState }, element._attributes.name, parent),
+          order,
+        }))
+        order += 1
+      })
+    }
+    if (root) {
+      polygons.push(root)
+    }
+    container = container[`L${level}`]
+    if (container) {
+      root = new CubicPolygon({ parent: root, order })
+    }
+    return polygons.concat(getChildren(container, root, level + 1))
+  }
+
+  /* eslint-disable-next-line no-return-await */
+  return await makeOverlayTruncationRule(
+    { rootState, dispatch },
+    container,
+    parent,
+    container => getChildren(container, null, 1),
+    Cubic,
+    {
+      direction: container.BackGroundModel.L1._attributes.direction,
+    }
+  )
 }
 
 export default {
@@ -233,7 +295,7 @@ export default {
      * @param fileName
      * @returns {Promise<void>}
      */
-    populateGUI: async ({ dispatch }, { json, fileName }) => {
+    populateGUI: async ({ dispatch, commit }, { json, fileName }) => {
       const apsModelContainer = JSON.parse(json)
 
       await dispatch('parameters/names/model/select', fileName, { root: true })
@@ -593,7 +655,7 @@ export default {
             type = 'Non-Cubic'
             rule = await makeNonCubicTruncationRule({ dispatch, rootState }, truncationRuleContainer.Trunc2D_Angle, parent)
           } else {
-            /* Cubic is not implemented */
+            rule = await makeCubicTruncationRule({ dispatch, rootState }, truncationRuleContainer.Trunc2D_Cubic, parent)
             type = 'Cubic'
           }
           if (rule) {

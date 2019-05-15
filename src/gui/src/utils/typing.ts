@@ -1,6 +1,6 @@
 import VueTypes from 'vue-types'
 
-import { Bayfill, GaussianRandomField, NonCubic } from '@/utils/domain'
+import { Bayfill, Cubic, CubicPolygon, GaussianRandomField, NonCubic } from '@/utils/domain'
 import { hex, isUUID } from '@/utils/helpers'
 
 type Optional<T> = T | null
@@ -34,6 +34,9 @@ function _isValidColor (value: any): boolean {
 
 const AppTypes = {
   color: VueTypes.custom(_isValidColor).def(''),
+  polygon: {
+    cubic: VueTypes.instanceOf(CubicPolygon),
+  },
   gaussianRandomField: VueTypes.instanceOf(GaussianRandomField),
   id: VueTypes.custom(_isValidId).def(''),
   ids: VueTypes.custom(_isValidIds).def(['']),
@@ -41,6 +44,7 @@ const AppTypes = {
   truncationRule: VueTypes.oneOfType([
     VueTypes.instanceOf(Bayfill),
     VueTypes.instanceOf(NonCubic),
+    VueTypes.instanceOf(Cubic),
   ]),
 }
 

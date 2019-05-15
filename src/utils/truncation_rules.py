@@ -2,6 +2,7 @@
 import numpy as np
 from enum import Enum
 
+from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.properties import FmuProperty
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable, Facies
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
@@ -96,6 +97,15 @@ class TruncationSpecification:
                 'overlayGroups': self._get_overlay(),
                 'keyResolution': 209,
             }
+        elif self.type == TruncationType.CUBIC:
+            return {
+                'truncStructureList': [self._values['direction']] + [
+                        [polygon['facies'], polygon['fraction']] + polygon['level']
+                        for polygon in self._polygons()
+                    ],
+                'overlayGroups': self._get_overlay(),
+                'keyResolution': 209,
+            }
         else:
             raise ValueError("Invalid truncation type ({type})".format(type=self.type))
 
@@ -186,9 +196,18 @@ def make_truncation_rule(specification):
     facies_table = APSMainFaciesTable(
         facies_table={facies.code: facies.name for facies in specification.global_facies_table}
     )
+    kwargs = {
+        'faciesInZone': [facies.name for facies in specification.facies_in_zone],
+        'alphaFieldNameForBackGroundFacies': [field for field in specification.fields_in_background],
+        'gaussFieldsInZone': [field for field in specification.fields_in_zone],
+        'useConstTruncParam': specification.use_constant_parameters,
+        'debug_level': Debug.OFF,
+    }
+    kwargs.update(specification.values)
 
     if specification.type == TruncationType.CUBIC:
-        raise NotImplementedError()
+        trunc = Trunc2D_Cubic()
+        del kwargs['useConstTruncParam']
     elif specification.type == TruncationType.NON_CUBIC:
         trunc = Trunc2D_Angle()
     elif specification.type == TruncationType.BAYFILL:
@@ -198,12 +217,7 @@ def make_truncation_rule(specification):
 
     trunc.initialize(
         facies_table,
-        faciesInZone=[facies.name for facies in specification.facies_in_zone],
-        gaussFieldsInZone=[field for field in specification.fields_in_zone],
-        alphaFieldNameForBackGroundFacies=[field for field in specification.fields_in_background],
-        useConstTruncParam=specification.use_constant_parameters,
-        debug_level=Debug.OFF,
-        **specification.values
+        **kwargs
     )
 
     trunc.setTruncRule(np.array(specification.probabilities))
