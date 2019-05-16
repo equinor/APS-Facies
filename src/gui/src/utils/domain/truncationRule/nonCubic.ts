@@ -7,6 +7,7 @@ import OverlayTruncationRule, {
   OverlaySpecification,
   OverlayTruncationRuleArgs
 } from '@/utils/domain/truncationRule/overlay'
+import { getFaciesName } from '@/utils/queries'
 
 type Polygon = NonCubicPolygon | OverlayPolygon
 
@@ -35,25 +36,13 @@ export default class NonCubic extends OverlayTruncationRule<Polygon> {
         .map((polygon): NonCubicPolygonSpecification => {
           return {
             angle: polygon.angle,
-            facies: polygon.facies ? polygon.facies.name : '',
+            facies: getFaciesName(polygon),
             fraction: polygon.fraction,
             order: polygon.order,
             updatable: polygon.angle.updatable,
           }
         }),
     }
-  }
-
-  public get backgroundFields (): GaussianRandomField[] {
-    return this._backgroundFields
-  }
-
-  public get backgroundPolygons (): NonCubicPolygon[] {
-    const polygons: NonCubicPolygon[] = []
-    this.polygons.forEach((polygon): void => {
-      if (!(polygon instanceof OverlayPolygon)) polygons.push(polygon)
-    })
-    return polygons
   }
 
   public get fields (): GaussianRandomField[] {

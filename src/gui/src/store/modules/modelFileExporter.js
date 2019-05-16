@@ -154,13 +154,13 @@ const addZoneModel = ({ rootState, rootGetters }, doc, parent, zoneModelsElement
 
   addGaussianRandomFields(rootState, doc, parent, zoneElement)
 
-  addTruncationRule({ rootState, rootGetters }, doc, parent, zoneElement)
+  addTruncationRule({ rootState }, doc, parent, zoneElement)
 }
 
 const addGaussianRandomFields = (rootState, doc, parent, zoneElement) => {
-  const relevantFields = Object.values(rootState.gaussianRandomFields.fields).filter(
-    field => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null)
-  )
+  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
+    .filter(field => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
   if (relevantFields.length < 2) {
     let message = ''
     if (parent.region) {
@@ -263,11 +263,11 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
     const trendParamName = createElement(doc, 'TrendParamName', rmsTrendParam, null)
     trendTypeElement.append(trendParamName)
   } else {
-    // azimuth, directionStacking and stackAngle common to all trends execpt rms parameter
+    // azimuth, directionStacking and stackAngle common to all trends except rms parameter
 
     // azimuth
     trendTypeElement.append(createElement(doc, 'azimuth',
-      azimuth.value, azimuth.updatable ? [{ name: 'kw', value: baseKw + '_AZIMUTH' }] : null))
+      azimuth.value, azimuth.updatable ? [{ name: 'kw', value: baseKw + '_TREND_AZIMUTH' }] : null))
 
     // directionStacking
     if (!stackingDirection) {
@@ -281,18 +281,18 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
 
     // stackAngle
     trendTypeElement.append(createElement(doc, 'stackAngle', stackAngle.value,
-      stackAngle.updatable ? [{ name: 'kw', value: baseKw + '_STACKANGLE' }] : null))
+      stackAngle.updatable ? [{ name: 'kw', value: baseKw + '_TREND_STACKANGLE' }] : null))
 
     if (trendType === 'EllipticCone3D' || trendType === 'Hyperbolic3D') {
       // migrationAngle is specific to EllipticCone3D and Hyperbolic3D
       trendTypeElement.append(createElement(doc, 'migrationAngle', migrationAngle.value,
-        migrationAngle.updatable ? [{ name: 'kw', value: baseKw + '_MIGRATIONANGLE' }] : null))
+        migrationAngle.updatable ? [{ name: 'kw', value: baseKw + '_TREND_MIGRATIONANGLE' }] : null))
     }
 
     if (trendType !== 'Linear3D') {
       // curvature is a child of everything not Linear3D (and RMSParameter of course)
       trendTypeElement.append(createElement(doc, 'curvature', curvature.value,
-        curvature.updatable ? [{ name: 'kw', value: baseKw + '_CURVATURE' }] : null))
+        curvature.updatable ? [{ name: 'kw', value: baseKw + '_TREND_CURVATURE' }] : null))
     }
 
     if (trendType === 'EllipticCone3D') {
@@ -306,15 +306,15 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
 
       // origin_x,
       trendTypeElement.append(createElement(doc, 'origin_x', originX.value,
-        originX.updatable ? [{ name: 'kw', value: baseKw + '_ORIGIN_X' }] : null))
+        originX.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_X' }] : null))
 
       // origin_y,
       trendTypeElement.append(createElement(doc, 'origin_y', originY.value,
-        originY.updatable ? [{ name: 'kw', value: baseKw + '_ORIGIN_Y' }] : null))
+        originY.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_Y' }] : null))
 
       // origin_z_simbox
       trendTypeElement.append(createElement(doc, 'origin_z_simbox', originZ.value,
-        originZ.updatable ? [{ name: 'kw', value: baseKw + '_ORIGIN_Z_SIMBOX' }] : null))
+        originZ.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_Z_SIMBOX' }] : null))
 
       // origintype
       trendTypeElement.append(createElement(doc, 'origintype', originType))
@@ -366,7 +366,7 @@ const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => 
   })
 }
 
-const addTruncationRule = ({ rootState, rootGetters }, doc, parent, zoneElement) => {
+const addTruncationRule = ({ rootState }, doc, parent, zoneElement) => {
   const truncRuleElem = createElement(doc, 'TruncationRule')
   zoneElement.append(truncRuleElem)
 
@@ -379,10 +379,10 @@ const addTruncationRule = ({ rootState, rootGetters }, doc, parent, zoneElement)
     throw new APSExportError(errMessage)
   }
   if (truncRule.type === 'bayfill') {
-    addTruncationRuleBayFill({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleBayFill({ rootState }, doc, parent, truncRule, truncRuleElem)
   }
   if (truncRule.type === 'non-cubic') {
-    addTruncationRuleNonCubic({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleNonCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
   }
 }
 

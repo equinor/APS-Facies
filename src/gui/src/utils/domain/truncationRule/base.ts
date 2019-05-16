@@ -37,7 +37,7 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
     this.realization = realization || null
 
     this._constraints = [
-      (): boolean => allSet(this.polygons, 'facies')
+      (): boolean => allSet(this.polygons, 'facies'),
     ]
   }
 

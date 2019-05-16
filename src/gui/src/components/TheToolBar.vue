@@ -13,6 +13,7 @@
       This is *exactly* the same as what's done in the source code for the upload button
     -->
     <upload-button
+      ref="uploadButton"
       :file-changed-callback="e => importModelFile(e)"
       color=""
       icon
@@ -122,10 +123,6 @@ export default {
     UploadButton
   },
 
-  data () {
-    return {}
-  },
-
   computed: {
     modelName: {
       get: function () { return this.$store.state.parameters.names.model.selected },
@@ -141,6 +138,7 @@ export default {
       const reader = new FileReader()
       reader.onloadend = fileHandler(this.$store, file.name)
       reader.readAsText(file)
+      this.$refs.uploadButton.clear()
     },
     exportModelFile: async function () {
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})

@@ -234,9 +234,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         kw1 = 'L1'
         L1Obj = getKeyword(bgmObj, kw1, 'BackGroundModel', modelFile=modelFileName, required=True)
-        text = L1Obj.get('direction')
-        directionL1 = text.strip()
-        if directionL1 != 'H' and directionL1 != 'V':
+        directionL1 = L1Obj.get('direction').strip()
+        if directionL1 not in ['H', 'V']:
             raise ValueError(
                 'Error when reading model file: {}\n'
                 'Error: Read truncation rule: {}\n'
@@ -500,8 +499,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
         PFRAC = self.__node_index['probability fraction']
         nodeListL1 = self.__truncStructure[NLIST]
         cumProbL1 = 0.0
-        for i in range(len(nodeListL1)):
-            itemL1 = nodeListL1[i]
+
+        for itemL1 in nodeListL1:
             if itemL1[TYPE] == 'F':
                 indx = itemL1[INDX]
                 fIndx = self._orderIndex[indx]
@@ -512,8 +511,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             else:
                 nodeListL2 = itemL1[NLIST]
                 cumProbL2 = 0
-                for j in range(len(nodeListL2)):
-                    itemL2 = nodeListL2[j]
+                for itemL2 in nodeListL2:
                     if itemL2[TYPE] == 'F':
                         indx = itemL2[INDX]
                         fIndx = self._orderIndex[indx]
@@ -525,8 +523,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         nodeListL3 = itemL2[NLIST]
                         cumProbL3 = 0
 
-                        for k in range(len(nodeListL3)):
-                            itemL3 = nodeListL3[k]
+                        for itemL3 in nodeListL3:
                             indx = itemL3[INDX]
                             fIndx = self._orderIndex[indx]
                             probFrac = itemL3[PFRAC]
@@ -540,12 +537,12 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 itemL1[PROB] = cumProbL2  # prob
                 cumProbL1 += cumProbL2
 
-                # Check that total sum of probabilities is =  1.0
+        # Check that total sum of probabilities is =  1.0
         if abs(cumProbL1 - 1.0) > 0.001:
             raise ValueError(
                 'Error in {0}\n'
                 'Error: Internal program error. Sum of probabilities is not 1.0\n'
-                'Error: cumProbL1 = {1}'.format(self._className, str(cumProbL1))
+                'Error: cumProbL1 = {1}'.format(self._className, cumProbL1)
             )
 
     def __calcThresholdValues(self):
@@ -1089,7 +1086,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
             pt = poly[0]
             poly.append(pt)
 
-        
         return np.asarray(polygons,dtype=np.float64)
 
     def faciesIndxPerPolygon(self):
@@ -1181,7 +1177,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         directionL2 = 'V'
         directionL3 = 'H'
         directionL1 = truncStructureList[0]
-        if directionL1 != 'V' and directionL1 != 'H':
+        if directionL1 not in ['V', 'H']:
             raise ValueError("The direction of L1 must be either 'H' or 'V'. It is {}".format(directionL1))
 
         if directionL1 == 'V':

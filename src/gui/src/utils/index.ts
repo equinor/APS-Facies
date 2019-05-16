@@ -91,34 +91,29 @@ function selectItems ({ items, state, _class }) {
   return obj
 }
 
-// TODO: reuse / generalize `hasValidChildren`
-// @ts-ignore
-function invalidateChildren (component): void {
+function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEarly: boolean = false): void {
   let children = component.$children.slice()
   while (children.length > 0) {
     const child = children.shift()
+    // @ts-ignore
     if (typeof child !== 'undefined' && child.dialog !== false) {
       if (child.$v && child.$v.$invalid) {
-        child.$v.$touch()
+        onFound(child)
+        if (breakEarly) break
       }
       children = children.concat(child.$children.slice())
     }
   }
 }
 
-// @ts-ignore
-function hasValidChildren (component): boolean {
-  let children = component.$children.slice()
-  while (children.length > 0) {
-    const child = children.shift()
-    if (typeof child !== 'undefined' && child.dialog !== false) {
-      if (child.$v && child.$v.$invalid) {
-        return false
-      }
-      children = children.concat(child.$children.slice())
-    }
-  }
-  return true
+function invalidateChildren (component: Vue): void {
+  goTroughChildren(component, (child): void => child.$v.$touch())
+}
+
+function hasValidChildren (component: Vue): boolean {
+  let valid = true
+  goTroughChildren(component, (): void => { valid = false }, true)
+  return valid
 }
 
 // @ts-ignore

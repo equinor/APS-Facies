@@ -17,6 +17,7 @@ import {
   structurePolygons,
 } from '@/utils/helpers/processing/templates'
 import { isEmpty } from '@/utils'
+import APSError from '@/utils/domain/errors/base'
 
 const missingTemplates = (_templates, state) => {
   const name = template => {
@@ -102,8 +103,7 @@ export default {
         if (facies) {
           await dispatch('facies/updateProbability', { facies, probability: 1 / uniqueFacies.length }, { root: true })
         } else {
-          // TODO: Handle appropriately
-          // throw new Error(`The facies ${polygon.facies} does not exist`)
+          throw new APSError(`The facies ${facies} does not exist`)
         }
       }))
 

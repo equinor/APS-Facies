@@ -21,7 +21,7 @@ import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import APSTypeError from '@/utils/domain/errors/type'
 import APSError from '@/utils/domain/errors/base'
-import { makePolygonsFromSpecification } from '@/utils/helpers/processing/templates/typed'
+import { makePolygonsFromSpecification } from '@/utils/helpers/processinga/templates/typed'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -36,6 +36,7 @@ const setFacies = (polygons, src, dest) => {
 }
 
 function swapFacies (rule, polygons) {
+  // FIXME: Should be done without 'cloneDeep', as it "objectifies" the polygons
   if (polygons.length !== 2) throw new Error('Only two polygons may be swapped')
   const newPolygons = cloneDeep(rule._polygons)
 
@@ -117,7 +118,7 @@ export default {
       Object.values(rules).forEach(rule => {
         rule.backgroundFields = rule.backgroundFields.map(({ id }) => rootGetters['gaussianRandomFields/byId'](id))
         rule.polygons.forEach(polygon => {
-          polygon.facies = rootGetters['facies/byId'](polygon.facies.id)
+          polygon.facies = rootGetters['facies/byId'](getId(polygon.facies))
           if (polygon.overlay) {
             polygon.field = rootGetters['gaussianRandomFields/byId'](polygon.field.id)
             polygon.group = rootGetters['facies/groups/byId'](polygon.group.id)
@@ -132,8 +133,10 @@ export default {
 
       if (!isNumber(order) || order < 0) {
         const polygons = rule.polygons
-        // TODO: Filter on group as well
-          .filter(polygon => polygon.overlay === overlay)
+          .filter(polygon => (
+            polygon.overlay === overlay
+            && polygon.atLevel === atLevel
+          ))
         order = polygons.length === 0
           ? 0
           : 1 + polygons
@@ -163,24 +166,25 @@ export default {
       commit('ADD_POLYGON', { rule, polygon })
     },
     async removePolygon ({ commit, dispatch, rootState }, { rule, polygon }) {
-      // TODO: Decrease orders
       commit('REMOVE_POLYGON', { rule, polygon })
       // Decrease the order of polygons
       increaseOrderByRelativeTo({ commit }, rule, polygon, -1)
 
       // Remove from facies group (if it is no longer a background facies)
-      if (!rule.backgroundPolygons.map(({ facies }) => facies.id).includes(polygon.facies.id)) {
+      if (!rule.backgroundPolygons.map(({ facies }) => getId(facies)).includes(getId(polygon.facies))) {
         const group = Object.values(rootState.facies.groups.available).find(group => group.has(polygon.facies))
-        const facies = group.facies.filter(facies => facies !== polygon.facies)
-        if (facies.length > 0) {
-          await dispatch('facies/groups/update', { group, facies }, { root: true })
-        } else {
-          rule.overlayPolygons
-            .filter(polygon => getId(polygon.group) === getId(group))
-            .forEach(polygon => {
-              commit('REMOVE_POLYGON', { rule, polygon })
-            })
-          await dispatch('facies/groups/remove', group, { root: true })
+        if (group) {
+          const facies = group.facies.filter(facies => facies !== polygon.facies)
+          if (facies.length > 0) {
+            await dispatch('facies/groups/update', { group, facies }, { root: true })
+          } else {
+            rule.overlayPolygons
+              .filter(polygon => getId(polygon.group) === getId(group))
+              .forEach(polygon => {
+                commit('REMOVE_POLYGON', { rule, polygon })
+              })
+            await dispatch('facies/groups/remove', group, { root: true })
+          }
         }
       }
 
@@ -230,19 +234,19 @@ export default {
       commit('CHANGE_FACTORS', { rule, polygon, value })
     },
     async updateRealization ({ commit, dispatch, rootGetters }, rule) {
-      await dispatch('facies/normalize', null, { root: true })
-      const data = await api.simulateRealization(
+      await dispatch('facies/normalize', undefined, { root: true })
+      const { fields, faciesMap: data } = await api.simulateRealization(
         Object.values(rootGetters.fields)
           .map(field => field.specification({ rootGetters })),
         makeTruncationRuleSpecification(rule, rootGetters)
       )
-      commit('UPDATE_REALIZATION', { rule, data: data.faciesMap })
-      data.fields.forEach(async field => {
-        await dispatch('gaussianRandomFields/updateSimulationData', {
+      commit('UPDATE_REALIZATION', { rule, data })
+      await Promise.all(fields.map(field => {
+        return dispatch('gaussianRandomFields/updateSimulationData', {
           grfId: Object.values(rootGetters.fields).find(item => item.name === field.name).id,
           data: field.data,
         }, { root: true })
-      })
+      }))
     },
     deleteField ({ dispatch, state, rootGetters }, { grfId }) {
       const field = rootGetters.field(grfId)
@@ -310,7 +314,7 @@ export default {
       const proportional = false /* TODO: should be moved to the state as an option for the user */
       const facies = rule.polygons
         .reduce((obj, polygon) => {
-          const id = polygon.facies.id
+          const id = getId(polygon.facies)
           if (id) {
             if (!obj.hasOwnProperty(id)) obj[`${id}`] = []
             obj[`${id}`].push(polygon)

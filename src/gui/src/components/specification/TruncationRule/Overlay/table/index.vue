@@ -22,7 +22,7 @@
     >
       <tr>
         <td>
-          <background-facies-specification
+          <background-group-facies-specification
             :value="props.item"
             :rule="value"
           />
@@ -46,19 +46,18 @@
 import Facies from '@/utils/domain/facies/local'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/utils/helpers/store/typing'
-import { availableForBackgroundFacies } from '@/utils/queries'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
-import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
+import BackgroundGroupFaciesSpecification from '@/components/specification/Facies/backgroundGroup.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonTable from './table.vue'
 
 function hasAvailableBackgroundFacies (store: Store, rule: OverlayTruncationRule<OverlayPolygon>): boolean {
   return Object.values(store.state.facies.available)
-    .some(facies => availableForBackgroundFacies(store.getters, rule, facies))
+    .some(facies => store.getters['facies/availableForBackgroundFacies'](rule, facies))
 }
 
 function allBackgroundPolygonsHasSomeFacies (rule: OverlayTruncationRule<OverlayPolygon>): boolean {
@@ -69,7 +68,7 @@ function allBackgroundPolygonsHasSomeFacies (rule: OverlayTruncationRule<Overlay
 @Component({
   components: {
     OptionalHelpItem,
-    BackgroundFaciesSpecification,
+    BackgroundGroupFaciesSpecification,
     PolygonTable,
   },
 })
@@ -78,7 +77,6 @@ export default class BackgroundFacies extends Vue {
   readonly value!: OverlayTruncationRule<OverlayPolygon>
 
   get groups () {
-    // TODO: Include 'help' messages
     let overlay: { group: ID, polygons: Facies[] }[] = []
     if (this.value) {
       const groups = {}

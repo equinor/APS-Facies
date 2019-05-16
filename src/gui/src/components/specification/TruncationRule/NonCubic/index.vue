@@ -1,45 +1,27 @@
 <template>
-  <v-container column>
-    <h4>Alpha selection</h4>
-    <v-layout row>
-      <alpha-fields
-        :value="value"
-        :min-channels="2"
-      />
-    </v-layout>
-    <h4>Truncation rule specification</h4>
-    <v-layout>
-      <v-flex>
-        <v-layout>
-          <v-flex>
-            <polygon-table
-              :value="value"
-            />
-          </v-flex>
-        </v-layout>
-      </v-flex>
-    </v-layout>
-  </v-container>
+  <truncation-rule-specification
+    :value="value"
+    :table="table"
+  />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import AlphaFields from '@/components/specification/TruncationRule/AlphaFields'
-import PolygonTable from './table'
+import TruncationRuleSpecification from '../main.vue'
+import PolygonTable from './table.vue'
 
 import { NonCubic } from '@/utils/domain'
 
-export default {
-  name: 'NonCubicTruncationRule',
-
+@Component({
   components: {
-    AlphaFields,
-    PolygonTable,
+    TruncationRuleSpecification,
   },
+})
+export default class NonCubicTruncationRule extends Vue {
+  @Prop({ required: true })
+  readonly value!: NonCubic
 
-  props: {
-    value: VueTypes.instanceOf(NonCubic),
-  },
+  get table () { return PolygonTable }
 }
 </script>

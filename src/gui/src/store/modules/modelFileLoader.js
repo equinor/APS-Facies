@@ -145,19 +145,19 @@ function makeBayfillTruncationRule ({ rootState }, container, parent) {
     'Bayhead Delta',
     'Lagoon',
   ]
-  const polygons = names.map((name, order) => {
+  const polygons = names.map((name, index) => {
     return new BayfillPolygon({
       name,
       facies: getFaciesFromBayfill({ rootState }, container, name, parent),
       slantFactor: getSlantFactor(container, name),
-      order,
+      order: index + 1,
     })
   })
 
   const backgroundFields = getAlphaFields({ rootState }, container, parent)
 
   return new Bayfill({
-    name: '',
+    name: 'Imported',
     polygons,
     backgroundFields,
     parent,
@@ -233,7 +233,7 @@ export default {
      * @param fileName
      * @returns {Promise<void>}
      */
-    populateGUI: async ({ dispatch, commit }, { json, fileName }) => {
+    populateGUI: async ({ dispatch }, { json, fileName }) => {
       const apsModelContainer = JSON.parse(json)
 
       await dispatch('parameters/names/model/select', fileName, { root: true })
@@ -413,7 +413,7 @@ export default {
         let regionNumber = parseInt(zoneModel._attributes.regionNumber)
         if (isNaN(regionNumber)) regionNumber = null
 
-        // The corresponding zone and region number in the internal datastructures
+        // The corresponding zone and region number in the internal data structures
         const zone = Object.values(rootState.zones.available)
           .find(zone => zone.code === zoneNumber)
         const regionsForZone = zone.regions

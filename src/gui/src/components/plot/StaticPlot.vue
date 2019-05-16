@@ -4,6 +4,7 @@
     :layout="layout"
     :options="options"
     auto-resize
+    @click.native="e => $emit('click', e)"
   />
 </template>
 

@@ -204,8 +204,8 @@ class Trunc2D_Base:
         # is not able to define in which polygon the point is located.
         self._nCountShiftBoundary = 0
 
-        # The keyresolution is a resolution of how to round off facies probability. 
-        # The facies probability rounded off is used as key to classify which grid cells have the same facies probability 
+        # The key resolution is a resolution of how to round off facies probability.
+        # The facies probability rounded off is used as key to classify which grid cells have the same facies probability
         # and can be treated simultaneously when looking up facies in the truncation cubes.
         self._keyResolution = 100
 
@@ -1386,47 +1386,42 @@ Background facies:
                 bgElement.text = ' ' + fName + ' '
                 groupElement.append(bgElement)
 
-
     @staticmethod
     def _makeKey(faciesProbRoundOff):
-        '''Use roundoff of facies probability as key in dictionary. Make a tuple from the facies probability array. '''
+        '''Use round off of facies probability as key in dictionary. Make a tuple from the facies probability array. '''
         key = tuple(faciesProbRoundOff)
         return key
 
-    def _makeRoundOffFaciesProb(self, faciesProb):
-        '''Calculate round off of facies probabilities and adjusted
+    def _makeRoundOffFaciesProb(self, facies_prob):
+        """Calculate round off of facies probabilities and adjusted
            so that the round off values also are close to normalised
            Resolution is set to 100 if input is not positive. The case that memoization is turned off
            corresponds to input resolution = 0 and in this case 100 is always used.
-        '''
+        """
         if self._keyResolution <= 0:
-            # A value of 0 or negative indicates that memoization is turned off. 
+            # A value of 0 or negative indicates that memoization is turned off.
             # Anyway the probabilities will be rounded off to nearest 1/100.
             resolution = 100
         else:
             resolution = self._keyResolution
 
-        dValue = 1.0/resolution
-        pNew = (faciesProb  * resolution + 0.5)
-        pNewInt = pNew.astype(int)
-        faciesProbNew = pNewInt * dValue
-        sumProb = faciesProbNew.sum()
-        maxProb = faciesProbNew.max()
-        indxMax = faciesProbNew.argmax()
-        if sumProb > (RoundOffConstant.low + dValue):
-            faciesProbNew[indxMax] -= dValue
-            sumProb -= dValue
-            if sumProb > (RoundOffConstant.low + dValue):
-                faciesProbNew[indxMax] -= dValue
-                sumProb -= dValue
-        elif sumProb < (RoundOffConstant.high - dValue):
-            faciesProbNew[indxMax] += dValue
-            sumProb += dValue
-            if sumProb < (RoundOffConstant.high - dValue):
-                faciesProbNew[indxMax] += dValue
-                sumProb += dValue
-        return faciesProbNew
-
+        delta = 1.0 / resolution
+        facies_prob = (facies_prob * resolution + 0.5).astype(int) * delta
+        sum_prob = facies_prob.sum()
+        index_max = facies_prob.argmax()
+        if sum_prob > (RoundOffConstant.low + delta):
+            facies_prob[index_max] -= delta
+            sum_prob -= delta
+            if sum_prob > (RoundOffConstant.low + delta):
+                facies_prob[index_max] -= delta
+                sum_prob -= delta
+        elif sum_prob < (RoundOffConstant.high - delta):
+            facies_prob[index_max] += delta
+            sum_prob += delta
+            if sum_prob < (RoundOffConstant.high - delta):
+                facies_prob[index_max] += delta
+                sum_prob += delta
+        return facies_prob
 
     def getGaussFieldsInTruncationRule(self):
         # Return list of the gauss field names actually used in the truncation rule
@@ -1478,7 +1473,6 @@ Background facies:
             # Point pt is outside the closed polygon
             return False
 
-
     @staticmethod
     def _isInsidePolygon_vectorized(polygon, x_coordinates, y_coordinates, poly_number):
         """ Take as input a polygon and x and y vectors of the coordinates to many points
@@ -1515,7 +1509,7 @@ Background facies:
         # and the value is  not equal to 0 if number of intersections is uneven which means inside polygon
         check = num_intersections_found % 2
         polygon_numbers[check != 0] = poly_number
-        return  polygon_numbers
+        return polygon_numbers
 
     def getOrderIndex(self):
         return self._orderIndex
@@ -1675,7 +1669,7 @@ Background facies:
         bg_index_in_trunc_rule = self.get_background_index_in_truncaction_rule()
 
         # This vector contains for each point the index in the list of facies in truncation rule table self._faciesInTruncRule
-        # It means that self._faciesInTruncRule[index] is the name of the facies used in the truncation rule. 
+        # It means that self._faciesInTruncRule[index] is the name of the facies used in the truncation rule.
         bg_index_vector = bg_index_in_trunc_rule[polygon_number_all_vector]
         if self._className == 'Trunc3D_bayfill':
             # Special case for handling of the alpha3 coordinate to determine facies

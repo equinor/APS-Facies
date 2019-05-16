@@ -56,4 +56,5 @@ export {
   Optional,
   updatableType,
   nullableNumber,
-  AppTypes}
+  AppTypes,
+}

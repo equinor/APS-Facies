@@ -1,4 +1,4 @@
-import { Facies, GlobalFacies } from '@/utils/domain'
+import { Facies } from '@/utils/domain'
 import Polygon from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
@@ -15,18 +15,6 @@ const promiseSimpleCommit = (commit, commitment, data, check = true, error = '')
     }
   })
 }
-
-// @ts-ignore
-function compareFacies (facies, other, beStrict = false): boolean {
-  let equal = facies.name === other.name && facies.code === other.code
-  if (beStrict) {
-    equal = equal && facies.color === other.color
-  }
-  return equal
-}
-
-// @ts-ignore
-function indexOfFacies (state, facies): number { return state.available.findIndex(item => compareFacies(item, facies)) }
 
 // @ts-ignore
 const selectOnlyParameter = async ({ dispatch }, result) => {
@@ -92,15 +80,6 @@ function updateFacies (dispatch, rule: TruncationRule<Polygon>, polygon: Polygon
     })
 }
 
-// @ts-ignore
-function changeFacies ({ state, commit }, facies): void {
-// TODO: Update proportion in truncation rule if applicable
-  const old = state.available[`${facies.id}`]
-  // need this to be be synchronous:
-  const _class = state.global ? Facies : GlobalFacies
-  commit('UPDATE', new _class({ _id: facies.id, ...old, ...facies }), () => facies.hasOwnProperty('id'))
-}
-
 interface OptionState<T> {
   value: T
   legal: T[]
@@ -141,12 +120,9 @@ function makeOption<T> (def: T, legal: T[]) {
 
 export {
   promiseSimpleCommit,
-  indexOfFacies,
   fetchParameterHelper,
   mirrorZoneRegions,
   updateFacies,
-  changeFacies,
-  compareFacies,
   makeOption,
   selectOnlyParameter,
 }

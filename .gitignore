@@ -557,3 +557,6 @@ src/unit_test/integration/examples
 
 # Data stores
 monkeytype.sqlite3
+
+# Word temporary files
+doc/~$*.docx

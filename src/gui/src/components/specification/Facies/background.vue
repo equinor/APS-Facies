@@ -1,66 +1,34 @@
 <template>
-  <v-select
-    :value="selected"
-    :items="facies"
-    multiple
-    @input="e => update(e)"
+  <facies-specification
+    :value="value"
+    :rule="rule"
+    :disable="facies => overlayFacies(facies)"
   />
 </template>
 
 <script lang="ts">
+import FaciesSpecification from '@/components/specification/Facies/index.vue'
+
+import { Bayfill, Facies, Polygon, TruncationRule } from '@/utils/domain'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { Facies } from '@/utils/domain'
-import { RootGetters } from '@/utils/helpers/store/typing'
-import FaciesGroup from '@/utils/domain/facies/group'
-import Polygon from '@/utils/domain/polygon/base'
-import { ID } from '@/utils/domain/types'
-import OverlayPolygon from '@/utils/domain/polygon/overlay'
-import TruncationRule from '@/utils/domain/truncationRule/base'
-
-import { availableForBackgroundFacies } from '@/utils/queries'
-
-function isFaciesSelected (group: FaciesGroup | undefined, facies: Facies): boolean {
-  return group
-    ? group.has(facies)
-    : false
-}
-
-@Component
+@Component({
+  components: {
+    FaciesSpecification,
+  }
+})
 export default class BackgroundFaciesSpecification extends Vue {
   @Prop({ required: true })
-  readonly value!: { group: ID, polygons: OverlayPolygon[]}
+  readonly value!: Polygon
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<Polygon>
+  readonly rule!: TruncationRule
 
-  get group (): FaciesGroup | undefined { return this.$store.state.facies.groups.available[`${this.value.group}`] }
-
-  get selected () {
-    return this.group
-      ? this.group.facies.map(({ id }) => id)
-      : []
-  }
-
-  get facies () {
-    return (Object.values(this.$store.state.facies.available) as Facies[])
-      .map(facies => {
-        return {
-          value: facies.id,
-          text: facies.name,
-          disabled: !isFaciesSelected(this.group, facies) /* I.e. the user should be allowed to DESELECT an already selected facies */
-            && (!availableForBackgroundFacies(this.$store.getters, this.rule, facies)),
-        }
-      })
-  }
-
-  async update (ids: ID[]) {
-    const facies = ids.map(id => (this.$store.getters as RootGetters)['facies/byId'](id))
-    if (!this.group) {
-      const group = await this.$store.dispatch('facies/groups/add', { facies, ...this.rule.parent })
-      await this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, group, overlay: true })
+  overlayFacies (facies: Facies): boolean {
+    if (this.rule instanceof Bayfill) {
+      return false
     } else {
-      await this.$store.dispatch('facies/groups/update', { group: this.group, facies })
+      return this.rule.isUsedInOverlay(facies)
     }
   }
 }

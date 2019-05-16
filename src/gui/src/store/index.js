@@ -255,10 +255,10 @@ const store = new Vuex.Store({
   },
 })
 
-const initialState = JSON.parse(JSON.stringify(store.state))
+const initialState = JSON.stringify(store.state)
 
 export default store
 
 export function resetState () {
-  store.commit('RESET', initialState)
+  store.commit('RESET', JSON.parse(initialState))
 }

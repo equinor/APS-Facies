@@ -1,4 +1,3 @@
-import { allSet } from '@/utils'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import APSTypeError from '@/utils/domain/errors/type'
 import FaciesGroup from '@/utils/domain/facies/group'
@@ -7,7 +6,7 @@ import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayPolygon, { CENTER } from '@/utils/domain/polygon/overlay'
 import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
-import { getId } from '@/utils/helpers'
+import { getId, allSet } from '@/utils/helpers'
 
 export type OverlayTruncationRuleArgs<T extends Polygon> = TruncationRuleConfiguration<T> & {
   overlay?: {

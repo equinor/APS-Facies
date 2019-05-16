@@ -104,7 +104,6 @@ class Trunc2D_Angle(Trunc2D_Base):
         # vary from cell to cell.
         self.__useConstTruncModelParam = True
 
-
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
         """
@@ -292,7 +291,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                                to the facies polygon line in the truncation map.
         :param overlayGroups: List of overlay facies with associated alphaFields and probability fractions.
         :param useConstTruncParam: Is a boolean variable and must be True if the angles specified are specified as
-                                   constants (not spatially dependent, not varlying from grid cell to grid cell in the
+                                   constants (not spatially dependent, not varying from grid cell to grid cell in the
                                    modelling grid). If it is set to 1, the angle numbers specified in truncStructure
                                    must be replaced by name of RMS parameters containing the angles.
                                    In this case it is possible to specify spatial trends for these parameters.

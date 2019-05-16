@@ -93,8 +93,7 @@ class TruncationSpecification:
                     [polygon['facies'], polygon['angle']['value'], polygon['fraction'], polygon['angle']['updatable']]
                     for polygon in self._polygons()
                 ],
-            # FIXME: Ensure that the content of a group is given in a SINGLE array
-            'overlayGroups': self._get_overlay(),
+                'overlayGroups': self._get_overlay(),
                 'keyResolution': 209,
             }
         else:
@@ -207,6 +206,5 @@ def make_truncation_rule(specification):
         **specification.values
     )
 
-    # TODO: Read probabilities
     trunc.setTruncRule(np.array(specification.probabilities))
     return trunc

@@ -87,7 +87,7 @@ class Parser:
 
     @staticmethod
     def _copy_rules(rules):
-        """ Helper method to ensure NO dicts are duplecated by Python, to "optimize" memory usage """
+        """ Helper method to ensure NO dicts are duplicated by Python, to "optimize" memory usage """
         _rules = []
         for rule in rules:
             _rules.append(deepcopy(rule))

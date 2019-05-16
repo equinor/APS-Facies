@@ -38,8 +38,9 @@ export default class PreviewHeader extends Vue {
       await this.$store.dispatch('truncationRules/updateRealization', this.rule)
     } catch (e) {
       alert(e)
+    } finally {
+      this.waitingForSimulation = false
     }
-    this.waitingForSimulation = false
   }
 }
 </script>

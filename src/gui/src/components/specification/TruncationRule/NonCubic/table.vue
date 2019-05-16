@@ -35,10 +35,9 @@
           />
         </td>
         <td class="text-xs-left">
-          <facies-specification
+          <background-facies-specification
             :value="props.item"
             :rule="value"
-            :disable="facies => value.isUsedInOverlay(facies)"
           />
         </td>
         <td
@@ -67,7 +66,7 @@ import FractionField from '@/components/selection/FractionField.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
-import FaciesSpecification from '@/components/specification/Facies/index.vue'
+import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
 
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
@@ -78,7 +77,7 @@ import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 
 @Component({
   components: {
-    FaciesSpecification,
+    BackgroundFaciesSpecification,
     PolygonOrder,
     OptionalHelpItem,
     FractionField,

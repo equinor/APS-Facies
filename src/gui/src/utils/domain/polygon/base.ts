@@ -19,6 +19,7 @@ export default abstract class Polygon extends BaseItem {
   public order: ORDER
   public fraction: PROBABILITY
   public facies: Facies | null
+
   protected constructor ({ id, order, facies = null, fraction = 1.0 }: PolygonArgs) {
     super({ id })
     this.order = order
