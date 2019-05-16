@@ -1,5 +1,5 @@
 import { Facies } from '@/utils/domain'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
@@ -61,7 +61,7 @@ function mirrorZoneRegions (store: Store<RootState>): void {
   })
 }
 
-function updateFacies (dispatch: Dispatch, rule: TruncationRule<Polygon>, polygon: Polygon, facies: Facies | ID, swap: boolean = true): Promise<void> {
+function updateFacies (dispatch: Dispatch, rule: TruncationRule<Polygon, PolygonSerialization>, polygon: Polygon, facies: Facies | ID, swap: boolean = true): Promise<void> {
   const existing = rule.polygons
     .find((polygon): boolean => getId(polygon.facies) === getId(facies))
   return existing && swap

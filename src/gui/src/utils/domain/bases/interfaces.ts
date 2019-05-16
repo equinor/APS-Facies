@@ -5,7 +5,7 @@ export interface Identifiable {
 }
 
 export interface Selectable {
-  selected: boolean
+  selected: boolean | 'intermediate'
 }
 
 export interface Named {
@@ -20,8 +20,8 @@ export interface Discrete extends Named, Coded {
 }
 
 export interface Parent {
-  readonly zone: string
-  readonly region: string | null
+  readonly zone: ID
+  readonly region: ID | null
 }
 
 export interface Dependent {

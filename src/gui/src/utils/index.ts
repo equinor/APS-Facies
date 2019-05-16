@@ -30,8 +30,8 @@ function makeData<T extends Identifiable, Y extends Identifiable> (
   const data = {}
   for (const item of items) {
     const instance = originals
-      .find(original => Object.keys(item)
-        .every(key => original[`${key}`] === item[`${key}`])
+      .find((original): boolean => Object.keys(item)
+        .every((key): boolean => original[`${key}`] === item[`${key}`])
       ) || new _class(item)
     data[instance.id] = instance
   }
@@ -47,7 +47,7 @@ interface Coordinate3D extends Coordinate2D {
   z: number
 }
 
-interface SimulationSettings {
+export interface SimulationSettings {
   gridAzimuth: number
   gridSize: Coordinate3D
   simulationBox: Coordinate3D
@@ -74,7 +74,8 @@ function simplify (specification: BayfillSpecification | NonCubicSpecification |
     // @ts-ignore
     specification.polygons = specification.polygons
       .filter((polygon: Polygon): boolean => polygon instanceof OverlayPolygon ? includeOverlay : true)
-      .map((polygon: any) => {
+      .map((polygon: Polygon): Polygon => {
+        // @ts-ignore
         polygon.facies = polygon.id
         polygon.fraction = 1
         return polygon
@@ -220,11 +221,11 @@ function minFacies (rule: any, getters: RootGetters): number {
       const uniqueFacies = new Set(rule.polygons.map((polygon): string => faciesName(polygon)))
       if (rule.overlay) {
         const items = Object.values(rule.overlay.items || rule.overlay)
-        items.forEach(item => {
+        items.forEach((item): void => {
           // @ts-ignore
           item.polygons
           // @ts-ignore
-            ? item.polygons.forEach(polygon => {
+            ? item.polygons.forEach((polygon): void => {
               uniqueFacies.add(polygon.facies.name)
             })
           // @ts-ignore

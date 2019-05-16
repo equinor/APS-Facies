@@ -1,10 +1,11 @@
+import ParametersState from '@/store/modules/parameters/typing'
+import { SimulationSettings } from '@/utils'
+import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
 import { GridModelsState } from '@/store/modules/gridModels/types'
-import ProjectNameState from '@/store/modules/parameters/names/project/typing'
-import { Polygon, TruncationRule } from '@/utils/domain'
+import { Polygon, TruncationRule, Parent } from '@/utils/domain'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
-import { Parent } from '@/utils/domain/bases/interfaces'
 import GlobalFacies from '@/utils/domain/facies/global'
 import FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
@@ -52,13 +53,10 @@ interface RootState {
     }
   }
 
-  parameters: {
-    names: {
-      project: ProjectNameState
-    }
-    probabilityCube: {
-      available: string[]
-    }
+  parameters: ParametersState
+
+  truncationRules: {
+    rules: Identified<TruncationRule>
   }
 
   zones: {
@@ -78,7 +76,7 @@ interface RootGetters {
   'facies/byId': (faciesId: ID) => Facies | null
   'facies/selected': Facies[]
   'facies/constantProbability': (parent?: Parent) => boolean
-  'facies/availableForBackgroundFacies': (rule: TruncationRuleBase<Polygon>, facies: Facies) => boolean
+  'facies/availableForBackgroundFacies': (rule: TruncationRuleBase<Polygon, PolygonSerialization>, facies: Facies) => boolean
 
   'facies/global/selected': GlobalFacies[]
 
@@ -96,6 +94,8 @@ interface RootGetters {
   }
   'region': Region
   'zone': Zone
+
+  simulationSettings: (grfId?: ID) => SimulationSettings
 }
 
 export {

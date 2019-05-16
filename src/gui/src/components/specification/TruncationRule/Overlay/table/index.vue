@@ -81,7 +81,7 @@ export default class BackgroundFacies<T extends Polygon> extends Vue {
     if (this.value) {
       const groups = {}
       const polygons = this.value.overlayPolygons
-      polygons.forEach(polygon => {
+      polygons.forEach((polygon): void => {
         if (!groups.hasOwnProperty(polygon.group.id)) groups[polygon.group.id] = []
         groups[polygon.group.id].push(polygon)
       })

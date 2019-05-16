@@ -1,7 +1,23 @@
+import { RootGetters, RootState } from '@/store/typing'
 import { hasParents } from '@/utils'
+import TruncationRuleBase from '@/utils/domain/truncationRule/base'
+import {
+  Bayfill,
+  Cubic,
+  CubicPolygon,
+  GaussianRandomField,
+  NonCubic,
+  OverlayPolygon,
+  Parent,
+  Polygon,
+} from '@/utils/domain'
+import Variogram from '@/utils/domain/gaussianRandomField/variogram'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import { Identified } from '@/utils/domain/types'
+import { getFaciesName } from '@/utils/queries'
 
 class APSExportError extends Error {
-  constructor (message) {
+  public constructor (message: string) {
     super(message)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, APSExportError)
@@ -10,7 +26,37 @@ class APSExportError extends Error {
   }
 }
 
-const addRMSProjectName = (rootState, doc, parentElement) => {
+interface Context {
+  rootState: RootState
+  rootGetters: RootGetters
+}
+
+type Value = string | number
+
+/**
+ * Generic method to create an xml element from input. This method does not handle connecting the element to
+ * any parent, nor does it add any child elements.
+ * @param doc A document instance created using document.implementation.createDocument
+ * @param elemName name of the element (tag) to be created
+ * @param elemValue null | the value between start and end-tags (not child elements)
+ * @param attributes: null | an array of objects in the form  {name: '<name>', value: '<value>'}
+ * @returns {HTMLElement | any | ActiveX.IXMLDOMElement}
+ */
+// @ts-ignore
+function createElement (doc: Document, elemName: string, elemValue?: Value | null, attributes?: null | { name: string, value: Value }[]): HTMLElement {
+  const elem = doc.createElement(elemName)
+  if (attributes) {
+    attributes.forEach((attribute): void => {
+      elem.setAttribute(attribute.name, String(attribute.value))
+    })
+  }
+  if (elemValue || elemValue === 0) {
+    elem.append(document.createTextNode(String(elemValue)))
+  }
+  return elem
+}
+
+function addRMSProjectName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.parameters.names.project.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSProjectName', value))
@@ -19,14 +65,14 @@ const addRMSProjectName = (rootState, doc, parentElement) => {
   }
 }
 
-const addRMSWorkFlowName = (rootState, doc, parentElement) => {
+function addRMSWorkFlowName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.parameters.names.workflow.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSWorkFlowName', value))
   }
 }
 
-const addGridModelName = (rootState, doc, parentElement) => {
+function addGridModelName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.gridModels.current
   if (value) {
     parentElement.appendChild(createElement(doc, 'GridModelName', value))
@@ -35,7 +81,7 @@ const addGridModelName = (rootState, doc, parentElement) => {
   }
 }
 
-const addZoneParamName = (rootState, doc, parentElement) => {
+function addZoneParamName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   /**
    * zoneParamName : Kommentar fra Oddvar:
    * GUI henter info direkte fra gridet. Workflow leser soneparameteren, men jeg har en funksjon som oppretter
@@ -57,14 +103,13 @@ const addZoneParamName = (rootState, doc, parentElement) => {
   }
 }
 
-const addRegionParamName = (rootState, doc, parentElement) => {
-  const value = rootState.parameters.region.selected
-  if (value) {
-    parentElement.appendChild(createElement(doc, 'RegionParamName', value))
+function addRegionParamName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+  if (rootState.regions.use) {
+    parentElement.appendChild(createElement(doc, 'RegionParamName', rootState.parameters.region.selected))
   }
 }
 
-const addResultFaciesParamName = (rootState, doc, parentElement) => {
+function addResultFaciesParamName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.parameters.realization.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'ResultFaciesParamName', value))
@@ -73,7 +118,7 @@ const addResultFaciesParamName = (rootState, doc, parentElement) => {
   }
 }
 
-const addPrintInfo = (rootState, doc, parentElement) => {
+function addPrintInfo (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here?'
   if (value) {
     // setting to 0:
@@ -81,7 +126,7 @@ const addPrintInfo = (rootState, doc, parentElement) => {
   }
 }
 
-const addSeedFile = (rootState, doc, parentElement) => {
+function addSeedFile (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here??? Seed.dat is said to be default value?'
   if (value) {
     // hard coded to seed.dat
@@ -89,14 +134,14 @@ const addSeedFile = (rootState, doc, parentElement) => {
   }
 }
 
-const addWriteSeeds = (rootState, doc, parentElement) => {
+function addWriteSeeds (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = 'No'
   if (value) {
     parentElement.appendChild(createElement(doc, 'WriteSeeds', value))
   }
 }
 
-const addMainFaciesTable = (rootState, doc, parentElement) => {
+function addMainFaciesTable (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   // getting blockedWell and blockedWellLog
   const bwParam = rootState.parameters.blockedWell
   const bwlogParam = rootState.parameters.blockedWellLog
@@ -104,7 +149,7 @@ const addMainFaciesTable = (rootState, doc, parentElement) => {
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
   const allFacies = Object.values(rootState.facies.global.available)
-  allFacies.forEach(facies => {
+  allFacies.forEach((facies): void => {
     const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: facies.name }])
     mainFaciesElement.append(faciesElem)
     const codeElem = createElement(doc, 'Code', facies.code)
@@ -112,87 +157,51 @@ const addMainFaciesTable = (rootState, doc, parentElement) => {
   })
 }
 
-const addZoneModels = ({ rootState, rootGetters }, doc, parentElement) => {
-  const zoneModelsElem = createElement(doc, 'ZoneModels', null, null)
-  parentElement.appendChild(zoneModelsElem)
-  const selectedZones = Object.values(rootState.zones.available)
-    .filter(zone => zone.selected === true || zone.selected === 'intermediate')
-    .sort((z1, z2) => z1.code - z2.code)
-  if (selectedZones.length === 0) {
-    throw new APSExportError('No zones/regions selected')
-  }
-  selectedZones.forEach(zone => {
-    const useRegions = rootState.regions.use && !!rootState.parameters.region.selected
-    if (!useRegions) {
-      addZoneModel({ rootState, rootGetters }, doc, { zone: zone, region: null }, zoneModelsElem)
-    } else {
-      const selectedRegions = Object.values(zone.regions)
-        .filter(region => !!region.selected)
-        .sort((r1, r2) => r1.code - r2.code)
-      selectedRegions.forEach(region => {
-        addZoneModel({ rootState, rootGetters }, doc, { zone: zone, region: region }, zoneModelsElem)
-      })
-    }
-  })
-}
+function addFaciesProb ({ rootState, rootGetters }: Context, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
+  const probModelElem = createElement(doc, 'FaciesProbForModel')
+  zoneElement.append(probModelElem)
 
-const addZoneModel = ({ rootState, rootGetters }, doc, parent, zoneModelsElement) => {
-  const zoneRegionAttributes = []
-  zoneRegionAttributes.push({ name: 'number', value: parent.zone.code })
-  if (parent.region) {
-    zoneRegionAttributes.push({ name: 'regionNumber', value: parent.region.code })
-  }
-  const zoneElement = createElement(doc, 'Zone', null, zoneRegionAttributes)
-  zoneModelsElement.append(zoneElement)
-
-  const useConstantProbability = rootGetters['facies/constantProbability'](parent) ? 1 : 0
-  zoneElement.append(createElement(doc, 'UseConstProb', useConstantProbability))
-
-  zoneElement.append(createElement(doc, 'SimBoxThickness', rootGetters.simulationSettings().simulationBox.z))
-
-  addFaciesProb({ rootState, rootGetters }, doc, parent, zoneElement)
-
-  addGaussianRandomFields(rootState, doc, parent, zoneElement)
-
-  addTruncationRule({ rootState }, doc, parent, zoneElement)
-}
-
-const addGaussianRandomFields = (rootState, doc, parent, zoneElement) => {
-  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
-    .filter(field => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
-  if (relevantFields.length < 2) {
+  const relevantFacies = Object.values(rootState.facies.available)
+    .filter((facies): boolean => hasParents(facies, parent.zone, parent.region))
+  if (relevantFacies.length === 0) {
     let message = ''
     if (parent.region) {
       message = `Zone ${parent.zone.code} / region ${parent.region.code}`
     } else {
       message = `Zone ${parent.zone.code}`
     }
-    throw new APSExportError(message + ' has less than 2 Gaussian Random Fields')
-  } else {
-    relevantFields.forEach(field => {
-      addGaussianRandomField(doc, field, parent, zoneElement)
-    })
+    throw new APSExportError(message + ' has no selected facies')
   }
+
+  relevantFacies.forEach((facies): void => {
+    // get the facies name from the referenced global facies
+    const faciesName = rootGetters['facies/name'](facies)
+    const probFaciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
+    probModelElem.append(probFaciesElem)
+
+    const useConstantProb = rootGetters['facies/constantProbability'](parent)
+    let value
+    let valueSource
+
+    if (useConstantProb) {
+      value = facies.previewProbability
+      valueSource = 'probability'
+    } else {
+      value = facies.probabilityCube
+      valueSource = 'probability cube'
+    }
+    if (!value) {
+      let errMessage = `No ${valueSource} given for facies ${faciesName} in Zone ${parent.zone.code}`
+      if (parent.region) {
+        errMessage = errMessage + ` Region ${parent.region.code}`
+      }
+      throw new APSExportError(errMessage)
+    }
+    probFaciesElem.append(createElement(doc, 'ProbCube', value))
+  })
 }
 
-const addGaussianRandomField = (doc, field, parent, zoneElement) => {
-  const fieldElement = createElement(doc, 'GaussField', null, [{ name: 'name', value: field.name }])
-  zoneElement.append(fieldElement)
-  // generating a base string to be used in kw attributes for this field.
-  const regionCode = parent.region ? parent.region.code : 0
-  const baseKw = `APS_${parent.zone.code}_${regionCode}_GF_${field.name}`
-  // attach vario, trend, relative standard deviation and seed to field:
-  addVario(doc, field.variogram, baseKw, fieldElement)
-  if (field.trend.use && field.trend.type !== 'NONE') {
-    addTrend(doc, field, parent, baseKw, fieldElement)
-    fieldElement.append(createElement(doc, 'RelStdDev',
-      field.trend.relativeStdDev.value, field.trend.relativeStdDev.updatable ? [{ name: 'kw', value: baseKw + '_RELSTDDEV' }] : null))
-  }
-  fieldElement.append(createElement(doc, 'SeedForPreview', field.settings.seed))
-}
-
-const addVario = (doc, variogram, baseKw, fieldElement) => {
+function addVario (doc: Document, variogram: Variogram, baseKw: string, fieldElement: HTMLElement): void {
   const varioElement = createElement(doc, 'Vario', null, [{ name: 'name', value: variogram.type }])
 
   varioElement.append(createElement(doc, 'MainRange',
@@ -224,7 +233,7 @@ const addVario = (doc, variogram, baseKw, fieldElement) => {
   fieldElement.append(varioElement)
 }
 
-const addTrend = (doc, field, parent, baseKw, fieldElement) => {
+function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, baseKw: string, fieldElement: HTMLElement): void {
   const trendElement = createElement(doc, 'Trend', null, null)
   fieldElement.append(trendElement)
 
@@ -321,74 +330,62 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
   }
 }
 
-const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => {
-  const probModelElem = createElement(doc, 'FaciesProbForModel')
-  zoneElement.append(probModelElem)
+function addGaussianRandomField (doc: Document, field: GaussianRandomField, parent: Parent, zoneElement: HTMLElement): void {
+  const fieldElement = createElement(doc, 'GaussField', null, [{ name: 'name', value: field.name }])
+  zoneElement.append(fieldElement)
+  // generating a base string to be used in kw attributes for this field.
+  const regionCode = parent.region ? parent.region.code : 0
+  const baseKw = `APS_${parent.zone.code}_${regionCode}_GF_${field.name}`
+  // attach vario, trend, relative standard deviation and seed to field:
+  addVario(doc, field.variogram, baseKw, fieldElement)
+  if (field.trend.use && field.trend.type !== 'NONE') {
+    addTrend(doc, field, parent, baseKw, fieldElement)
+    fieldElement.append(createElement(doc, 'RelStdDev',
+      field.trend.relativeStdDev.value, field.trend.relativeStdDev.updatable ? [{ name: 'kw', value: baseKw + '_RELSTDDEV' }] : null))
+  }
+  fieldElement.append(createElement(doc, 'SeedForPreview', field.settings.seed))
+}
 
-  const relevantFacies = Object.values(rootState.facies.available).filter(
-    facies => hasParents(facies, parent.zone, parent.region))
-  if (relevantFacies.length === 0) {
+function addGaussianRandomFields (rootState: RootState, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
+  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
+    .filter((field): boolean => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
+    .sort((a, b): number => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  if (relevantFields.length < 2) {
     let message = ''
     if (parent.region) {
       message = `Zone ${parent.zone.code} / region ${parent.region.code}`
     } else {
       message = `Zone ${parent.zone.code}`
     }
-    throw new APSExportError(message + ' has no selected facies')
-  }
-
-  relevantFacies.forEach(facies => {
-    // get the facies name from the referenced global facies
-    const faciesName = rootGetters['facies/name'](facies)
-    const probFaciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
-    probModelElem.append(probFaciesElem)
-
-    const useConstantProb = rootGetters['facies/constantProbability'](parent)
-    let value
-    let valueSource
-
-    if (useConstantProb) {
-      value = facies.previewProbability
-      valueSource = 'probability'
-    } else {
-      value = facies.probabilityCube
-      valueSource = 'probability cube'
-    }
-    if (!value) {
-      let errMessage = `No ${valueSource} given for facies ${faciesName} in Zone ${parent.zone.code}`
-      if (parent.region) {
-        errMessage = errMessage + ` Region ${parent.region.code}`
-      }
-      throw new APSExportError(errMessage)
-    }
-    probFaciesElem.append(createElement(doc, 'ProbCube', value))
-  })
-}
-
-const addTruncationRule = ({ rootState }, doc, parent, zoneElement) => {
-  const truncRuleElem = createElement(doc, 'TruncationRule')
-  zoneElement.append(truncRuleElem)
-
-  const truncRule = Object.values(rootState.truncationRules.rules).find(rule => hasParents(rule, parent.zone, parent.region))
-  if (!truncRule) {
-    let errMessage = `No truncation rule specified for zone ${parent.zone.code}`
-    if (parent.region) {
-      errMessage = errMessage + ` , region ${parent.region.code}`
-    }
-    throw new APSExportError(errMessage)
-  }
-  if (truncRule.type === 'bayfill') {
-    addTruncationRuleBayFill({ rootState }, doc, parent, truncRule, truncRuleElem)
-  }
-  if (truncRule.type === 'non-cubic') {
-    addTruncationRuleNonCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
-  }
-  if (truncRule.type === 'cubic') {
-    addTruncationRuleCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+    throw new APSExportError(message + ' has less than 2 Gaussian Random Fields')
+  } else {
+    relevantFields.forEach((field): void => {
+      addGaussianRandomField(doc, field, parent, zoneElement)
+    })
   }
 }
 
-const addTruncationRuleBayFill = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+function getNumberOfFieldsForTruncRule ({ rootState }: { rootState: RootState }, parent: Parent): number {
+  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
+    .filter((field): boolean => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
+  return relevantFields ? relevantFields.length : 0
+}
+
+// @ts-ignore
+function findFaciesNameForNamedPolygon (truncRule: Bayfill, polygonName: string): string {
+  const polygonInRule = truncRule.polygons.find((polygon): boolean => polygon.name === polygonName)
+  return polygonInRule && polygonInRule.facies
+    ? polygonInRule.facies.name
+    : ''
+}
+
+// @ts-ignore
+function getAlphaNames<P extends Polygon> (truncRule: TruncationRuleBase<P>): string {
+  const alphaFields = truncRule.backgroundFields
+  return alphaFields.map((field): string => field.name).join(' ')
+}
+
+function addTruncationRuleBayFill ({ rootState }: { rootState: RootState }, doc: Document, parent: Parent, truncRule: Bayfill, truncRuleElem: HTMLElement): void {
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
   const bayFillElem = createElement(doc, 'Trunc3D_Bayfill', null,
     [{ name: 'nGFields', value: numberOfFields }])
@@ -417,13 +414,21 @@ const addTruncationRuleBayFill = ({ rootState }, doc, parent, truncRule, truncRu
   // slant factors
   const baseKw = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_BAYFILL`
 
-  truncRule.specification.forEach(setting => {
+  truncRule.specification.forEach((setting): void => {
     BackGroundModelElem.append(createElement(doc, setting.name, setting.factor.value,
       setting.factor.updatable ? [{ name: 'kw', value: baseKw + `_${setting.name}` }] : null))
   })
 }
 
-const addTruncationRuleOverlay = ({ rootState }, doc, parent, truncRule, truncRuleElem, elementName, backgroundPolygonsHandler) => {
+function addTruncationRuleOverlay<P extends Polygon, T extends OverlayTruncationRule<P>> (
+  { rootState }: { rootState: RootState },
+  doc: Document,
+  parent: Parent,
+  truncRule: T,
+  truncRuleElem: HTMLElement,
+  elementName: string,
+  backgroundPolygonsHandler: (backGroundModelElem: HTMLElement) => void
+): void {
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
   const truncElement = createElement(doc, elementName, null,
     [{ name: 'nGFields', value: numberOfFields }])
@@ -437,8 +442,8 @@ const addTruncationRuleOverlay = ({ rootState }, doc, parent, truncRule, truncRu
   // The background polygons
   backgroundPolygonsHandler(backGroundModelElem)
 
-  const overlayGroups = truncRule.overlayPolygons
-    .reduce((obj, polygon) => {
+  const overlayGroups: Identified<OverlayPolygon[]> = truncRule.overlayPolygons
+    .reduce((obj, polygon): Identified<OverlayPolygon[]> => {
       const groupId = polygon.group.id
       if (!obj.hasOwnProperty(groupId)) obj[`${groupId}`] = []
       obj[`${groupId}`].push(polygon)
@@ -448,18 +453,18 @@ const addTruncationRuleOverlay = ({ rootState }, doc, parent, truncRule, truncRu
     const overLayModelElem = createElement(doc, 'OverLayModel')
     truncElement.append(overLayModelElem)
 
-    Object.keys(overlayGroups).forEach(overlayGroup => {
+    Object.keys(overlayGroups).forEach((overlayGroup): void => {
       const groupElement = createElement(doc, 'Group')
       overLayModelElem.append(groupElement)
 
-      overlayGroups[`${overlayGroup}`].forEach(polygon => {
+      overlayGroups[`${overlayGroup}`].forEach((polygon): void => {
         const alphaFieldElement = createElement(
           doc,
           'AlphaField',
           null,
           [{
             name: 'name',
-            value: polygon.field.name
+            value: polygon.field ? polygon.field.name : ''
           }])
         groupElement.append(alphaFieldElement)
 
@@ -471,43 +476,25 @@ const addTruncationRuleOverlay = ({ rootState }, doc, parent, truncRule, truncRu
           polygon.fraction,
           [{
             name: 'name',
-            value: polygon.facies.name
+            value: getFaciesName(polygon),
           }]
         ))
       })
       const group = rootState.facies.groups.available[`${overlayGroup}`]
       group.facies
-        .forEach(({ name }) => groupElement.append(
+        .forEach(({ name }): void => groupElement.append(
           createElement(doc, 'BackGround', name)
         ))
     })
   }
 }
 
-const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
-  function handleBackgroundPolygons (backGroundModelElem) {
-    backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
-    truncRule.backgroundPolygons.forEach(polygon => {
-      // facies Element
-      const faciesName = polygon.facies.name
-      const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
-      backGroundModelElem.append(faciesElem)
-      // angle element
-      const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
-      faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
-      // ProbFrac element
-      faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
-    })
-  }
-  addTruncationRuleOverlay({ rootState }, doc, parent, truncRule, truncRuleElem, 'Trunc2D_Angle', handleBackgroundPolygons)
-}
-
-const addTruncationRuleCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
-  function handleBackgroundPolygons (backGroundModelElem) {
-    function addFraction (element, polygon) {
-      element.append(createElement(doc, 'ProbFrac', polygon.fraction, [{ name: 'name', value: polygon.facies.name }]))
+function addTruncationRuleCubic ({ rootState }: { rootState: RootState }, doc: Document, parent: Parent, truncRule: Cubic, truncRuleElem: HTMLElement): void {
+  function handleBackgroundPolygons (backGroundModelElem: HTMLElement): void {
+    function addFraction (element: HTMLElement, polygon: CubicPolygon): void {
+      element.append(createElement(doc, 'ProbFrac', polygon.fraction, [{ name: 'name', value: getFaciesName(polygon) }]))
     }
-    function addPolygon (element, polygon) {
+    function addPolygon (element: HTMLElement, polygon: CubicPolygon): void {
       if (polygon.facies) {
         addFraction(element, polygon)
       } else {
@@ -516,13 +503,15 @@ const addTruncationRuleCubic = ({ rootState }, doc, parent, truncRule, truncRule
           : null
         const child = createElement(doc, `L${polygon.atLevel + 1}`, null, attributes)
         element.append(child)
-        polygon.children.forEach(polygon => {
+        polygon.children.forEach((polygon): void => {
           addPolygon(child, polygon)
         })
       }
     }
 
-    addPolygon(backGroundModelElem, truncRule.root)
+    if (truncRule.root) {
+      addPolygon(backGroundModelElem, truncRule.root)
+    }
   }
   addTruncationRuleOverlay(
     { rootState },
@@ -535,45 +524,94 @@ const addTruncationRuleCubic = ({ rootState }, doc, parent, truncRule, truncRule
   )
 }
 
-const getNumberOfFieldsForTruncRule = ({ rootState }, parent) => {
-  const relevantFields = Object.values(rootState.gaussianRandomFields.fields).filter(
-    field => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
-  return relevantFields ? relevantFields.length : 0
-}
-
-const getAlphaNames = (truncRule) => {
-  const alphaFields = truncRule.backgroundFields
-  return alphaFields.map(field => field.name).join(' ')
-}
-
-const findFaciesNameForNamedPolygon = (truncRule, polygonName) => {
-  const polygonInRule = truncRule.polygons.find(polygon => polygon.name === polygonName)
-  return polygonInRule.facies.facies.name
-}
-
-/**
- * Generic method to create an xml element from input. This method does not handle connecting the element to
- * any parent, nor does it add any child elements.
- * @param doc A document instance created using document.implementation.createDocument
- * @param elemName name of the element (tag) to be created
- * @param elemValue null | the value between start and end-tags (not child elements)
- * @param attributes: null | an array of objects in the form  {name: '<name>', value: '<value>'}
- * @returns {HTMLElement | any | ActiveX.IXMLDOMElement}
- */
-const createElement = (doc, elemName, elemValue, attributes) => {
-  const elem = doc.createElement(elemName)
-  if (attributes) {
-    attributes.forEach(attribute => {
-      elem.setAttribute(attribute.name, attribute.value)
+function addTruncationRuleNonCubic ({ rootState }: { rootState: RootState }, doc: Document, parent: Parent, truncRule: NonCubic, truncRuleElem: HTMLElement): void {
+  function handleBackgroundPolygons (backGroundModelElem: HTMLElement): void {
+    backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
+    truncRule.backgroundPolygons.forEach((polygon): void => {
+      // facies Element
+      const faciesName = getFaciesName(polygon)
+      const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
+      backGroundModelElem.append(faciesElem)
+      // angle element
+      const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
+      faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
+      // ProbFrac element
+      faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
     })
   }
-  if (elemValue || elemValue === 0) {
-    elem.append(document.createTextNode(elemValue))
-  }
-  return elem
+  addTruncationRuleOverlay({ rootState }, doc, parent, truncRule, truncRuleElem, 'Trunc2D_Angle', handleBackgroundPolygons)
 }
 
-function addContent ({ rootState, rootGetters }, doc, rootElem) {
+function addTruncationRule ({ rootState }: { rootState: RootState}, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
+  const truncRuleElem = createElement(doc, 'TruncationRule')
+  zoneElement.append(truncRuleElem)
+
+  const truncRule = Object.values(rootState.truncationRules.rules).find((rule): boolean => hasParents(rule, parent.zone, parent.region))
+  if (!truncRule) {
+    let errMessage = `No truncation rule specified for zone ${parent.zone.code}`
+    if (parent.region) {
+      errMessage = errMessage + ` , region ${parent.region.code}`
+    }
+    throw new APSExportError(errMessage)
+  }
+  if (truncRule instanceof Bayfill) {
+    addTruncationRuleBayFill({ rootState }, doc, parent, truncRule, truncRuleElem)
+  }
+  if (truncRule instanceof NonCubic) {
+    addTruncationRuleNonCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+  }
+  if (truncRule instanceof Cubic) {
+    addTruncationRuleCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+  }
+}
+
+function addZoneModel ({ rootState, rootGetters }: Context, doc: Document, parent: Parent, zoneModelsElement: HTMLElement): void {
+  const zoneRegionAttributes = []
+  zoneRegionAttributes.push({ name: 'number', value: parent.zone.code })
+  if (parent.region) {
+    zoneRegionAttributes.push({ name: 'regionNumber', value: parent.region.code })
+  }
+  const zoneElement = createElement(doc, 'Zone', null, zoneRegionAttributes)
+  zoneModelsElement.append(zoneElement)
+
+  const useConstantProbability = rootGetters['facies/constantProbability'](parent) ? 1 : 0
+  zoneElement.append(createElement(doc, 'UseConstProb', useConstantProbability))
+
+  zoneElement.append(createElement(doc, 'SimBoxThickness', rootGetters.simulationSettings().simulationBox.z))
+
+  addFaciesProb({ rootState, rootGetters }, doc, parent, zoneElement)
+
+  addGaussianRandomFields(rootState, doc, parent, zoneElement)
+
+  addTruncationRule({ rootState }, doc, parent, zoneElement)
+}
+
+function addZoneModels ({ rootState, rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
+  const zoneModelsElem = createElement(doc, 'ZoneModels', null, null)
+  parentElement.appendChild(zoneModelsElem)
+  const selectedZones = Object.values(rootState.zones.available)
+    .filter((zone): boolean => zone.selected === true || zone.selected === 'intermediate')
+    .sort((z1, z2): number => z1.code - z2.code)
+  if (selectedZones.length === 0) {
+    throw new APSExportError('No zones/regions selected')
+  }
+  selectedZones.forEach((zone): void => {
+    const useRegions = rootState.regions.use && !!rootState.parameters.region.selected
+    if (!useRegions) {
+      addZoneModel({ rootState, rootGetters }, doc, { zone: zone, region: null }, zoneModelsElem)
+    } else {
+      const selectedRegions = Object.values(zone.regions)
+        .filter((region): boolean => !!region.selected)
+        .sort((r1, r2): number => r1.code - r2.code)
+      selectedRegions.forEach((region): void => {
+        addZoneModel({ rootState, rootGetters }, doc, { zone: zone, region: region }, zoneModelsElem)
+      })
+    }
+  })
+}
+
+// @ts-ignore
+function addContent ({ rootState, rootGetters }: Context, doc: Document, rootElem: HTMLElement): void {
   addRMSProjectName(rootState, doc, rootElem)
   addRMSWorkFlowName(rootState, doc, rootElem)
   addGridModelName(rootState, doc, rootElem)
@@ -587,7 +625,8 @@ function addContent ({ rootState, rootGetters }, doc, rootElem) {
   addZoneModels({ rootState, rootGetters }, doc, rootElem)
 }
 
-export function createModel ({ rootState, rootGetters }) {
+// @ts-ignore
+export function createModel ({ rootState, rootGetters }: Context): string {
   const doc = document.implementation.createDocument('', '', null)
   const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
   doc.appendChild(rootElem)
