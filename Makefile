@@ -69,6 +69,7 @@ endif
 APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | sed -e "s/v//g")
 APS_FULL_VERSION := $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH := $(shell git rev-parse --short HEAD)
+LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
 
 PLUGIN_NAME := aps_gui
 PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
@@ -246,8 +247,14 @@ build-front-end: $(PACKAGE.JSON) build-dir
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
 
-auxillary-files:
+auxillary-files: VERSION COMMIT
 	cp $(INFO.XML) $(PLUGIN_DIR)
+
+VERSION:
+	echo $(APS_FULL_VERSION) > $(PLUGIN_DIR)/VERSION
+
+COMMIT:
+	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
 
 init: initialize-python-environment dependencies init-workflow package.json
 
