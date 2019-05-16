@@ -502,6 +502,8 @@ def _map_js_to_py(add_empty=False, **kwargs):
         elif key == 'curvature':
             _add_parameter('curvature', value, res, add_empty)
         elif key == 'origin':
+            if value['type'] is None:
+                continue
             _type = getattr(OriginType, value['type'], None)
             x, x_updatable = _get_value(value['x'])
             y, y_updatable = _get_value(value['y'])
@@ -563,6 +565,8 @@ class Variogram:
 
     @type.setter
     def type(self, value):
+        if isinstance(value, str):
+            value = value.upper()
         if not isVariogramTypeOK(value):
             raise ValueError('The given variogram is not valid ({})'.format(value))
         elif (

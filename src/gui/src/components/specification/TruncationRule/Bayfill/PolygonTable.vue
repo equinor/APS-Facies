@@ -47,7 +47,6 @@
 </template>
 
 <script lang="ts">
-import { RootGetters } from '@/utils/helpers/store/typing'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import FractionField from '@/components/selection/FractionField.vue'
@@ -67,21 +66,10 @@ export default class BayfillPolygonTable extends Vue {
   @Prop({ required: true })
   readonly value!: Bayfill
 
-  get selectedFacies () { return (this.$store.getters as RootGetters)['facies/selected'] }
-
   get polygons () {
     return !this.value
       ? []
       : this.value.backgroundPolygons
-  }
-
-  get faciesOptions () {
-    return this.selectedFacies.map(facies => {
-      return {
-        text: facies.name,
-        value: facies.id,
-      }
-    })
   }
 
   get headers () {

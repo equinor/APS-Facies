@@ -16,17 +16,23 @@
   </v-layout>
 </template>
 
-<script>
-import OverlayFaciesTable from './table'
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import OverlayFaciesTable from './table/index.vue'
+
+import {
+  Polygon,
+} from '@/utils/domain'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+
+@Component({
   components: {
     OverlayFaciesTable,
   },
-
-  props: {
-    value: AppTypes.truncationRule.isRequired,
-  },
+})
+export default class OverlaySpecification<T extends Polygon> extends Vue {
+  @Prop({ required: true })
+  readonly value!: OverlayTruncationRule<T>
 }
 </script>

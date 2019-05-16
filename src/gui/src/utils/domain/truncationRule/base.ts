@@ -37,7 +37,8 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
     this.realization = realization || null
 
     this._constraints = [
-      (): boolean => allSet(this.polygons, 'facies')
+      (): boolean => allSet(this.polygons, 'facies'),
+      (): boolean => this.polygons.length > 0,
     ]
   }
 
@@ -64,7 +65,7 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
 
   public get polygons (): T[] {
     return Object.values(this._polygons)
-      .sort((a, b): number => a.order - b.order)
+      .sort((a, b): number => a.atLevel === b.atLevel ? a.order - b.order : b.atLevel - a.atLevel)
   }
 
   public isUsedInDifferentAlpha (field: GaussianRandomField | ID, channel: number): boolean {

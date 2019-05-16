@@ -66,7 +66,7 @@ export default {
 
   getters: {
     byId: (state) => id => {
-      return state.available[`${id}`]
+      return state.available[`${getId(id)}`]
     },
     byFacies: (state) => (facies, parent) => {
       return Object.values(state.available).find(group => group.isChildOf(parent) && group.contains(facies))

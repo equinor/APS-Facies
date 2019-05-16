@@ -21,6 +21,7 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import Polygon from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
+import { Store } from '@/store/typing'
 
 @Component
 export default class AlphaSelection extends Vue {
@@ -36,7 +37,7 @@ export default class AlphaSelection extends Vue {
   @Prop({ default: '' })
   readonly group: ID
 
-  get _fields (): GaussianRandomField[] { return this.$store.getters['fields'] }
+  get _fields () { return (this.$store as Store).getters['fields'] }
 
   get id (): ID | '' { return this.value ? this.value.id : '' }
 

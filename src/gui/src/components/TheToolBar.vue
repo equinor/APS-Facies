@@ -1,21 +1,14 @@
 <template>
   <v-toolbar>
-    <div>
-      APS Model:
-    </div>
-
-    <v-text-field
-      v-model="modelName"
-    />
-
     <!--
       NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly
       This is *exactly* the same as what's done in the source code for the upload button
     -->
     <upload-button
-      :file-changed-callback="e => importModelFile(e)"
+      ref="uploadButton"
       color=""
       icon
+      @file-update="importModelFile"
     >
       <template slot="icon">
         <!--
@@ -122,17 +115,6 @@ export default {
     UploadButton
   },
 
-  data () {
-    return {}
-  },
-
-  computed: {
-    modelName: {
-      get: function () { return this.$store.state.parameters.names.model.selected },
-      set: function (value) { this.$store.dispatch('parameters/names/model/select', value, { root: true }) }
-    },
-  },
-
   methods: {
     goToHelp () {
       rms.openWikiHelp()
@@ -141,6 +123,7 @@ export default {
       const reader = new FileReader()
       reader.onloadend = fileHandler(this.$store, file.name)
       reader.readAsText(file)
+      this.$refs.uploadButton.clear()
     },
     exportModelFile: async function () {
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})

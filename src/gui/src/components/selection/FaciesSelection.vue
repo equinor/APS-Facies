@@ -23,6 +23,8 @@
 import { Component, Vue } from 'vue-property-decorator'
 import FaciesTable from '@/components/table/FaciesTable.vue'
 
+import { Store } from '@/store/typing'
+
 @Component({
   components: {
     FaciesTable,
@@ -31,7 +33,7 @@ import FaciesTable from '@/components/table/FaciesTable.vue'
 export default class FaciesSelection extends Vue {
   hideAlias: boolean = false
 
-  get hasSelected () { return !!this.$store.state.facies.global.current }
+  get hasSelected () { return !!(this.$store as Store).state.facies.global.current }
 
   add () {
     return this.$store.dispatch('facies/global/new', {})

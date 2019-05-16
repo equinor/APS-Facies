@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import math from 'mathjs'
 
-import { cloneDeep, merge, isEqual, isNumber } from 'lodash'
+import { isNumber } from 'lodash'
 
 import Facies from '@/utils/domain/facies/local'
 import {
@@ -19,34 +19,6 @@ import groups from './groups'
 import { getId, isUUID } from '@/utils/helpers'
 
 const updateFaciesProbability = (dispatch, facies, probability) => dispatch('changePreviewProbability', { facies, previewProbability: probability })
-
-const _removeCurrent = (items, parent) => {
-  return Object.values(items)
-    .filter(item => !hasParents(item, parent.zone, parent.region))
-    .reduce((obj, item) => {
-      obj[`${item.id}`] = item
-      return obj
-    }, {})
-}
-
-const updateSelected = (globalFacies, localFacies, selected, parent) => {
-  return merge(
-    _removeCurrent(cloneDeep(localFacies), parent),
-    selected
-      .map(global => {
-        const existing = Object.values(localFacies).find((local) => local.facies === global.id && isEqual(local.parent, parent))
-        if (existing) {
-          return existing
-        } else {
-          return new Facies({ facies: globalFacies[global.id], ...parent })
-        }
-      })
-      .reduce((obj, facies) => {
-        obj[`${facies.id}`] = facies
-        return obj
-      }, {})
-  )
-}
 
 export default {
   namespaced: true,
@@ -72,10 +44,26 @@ export default {
       commit('ADD', { facies: localFacies })
       return localFacies
     },
-    select: ({ commit, state }, { items, parent }) => {
-      const facies = updateSelected(state.global.available, state.available, items, parent)
-      commit('AVAILABLE', facies)
-      return Promise.resolve(Object.keys(facies))
+    select: async ({ commit, dispatch, state }, { items, parent }) => {
+      const getRelevantFacies = () => Object.values(state.available)
+        .filter(facies => hasParents(facies, parent.zone, parent.region))
+
+      let removed = false
+      const relevantFacies = getRelevantFacies()
+      items.forEach(global => {
+        if (!relevantFacies.map(({ facies }) => getId(facies)).includes(getId(global))) {
+          commit('ADD', { facies: new Facies({ facies: state.global.available[`${getId(global)}`], ...parent }) })
+        }
+      })
+      relevantFacies.forEach(facies => {
+        if (!items.map(getId).includes(getId(facies.facies))) {
+          commit('REMOVE', { facies })
+          removed = true
+        }
+      })
+      if (removed) {
+        await dispatch('normalize', { selected: getRelevantFacies() })
+      }
     },
     populate: ({ commit, state }, facies) => {
       facies = makeData(facies, Facies, state.available)
@@ -103,16 +91,16 @@ export default {
         .map(facies => facies.previewProbability ? facies.previewProbability : 0)
       const emptyProbability = (1 - probabilities.reduce((sum, prob) => sum + prob, 0)) / probabilities.filter(prob => prob === 0).length
       return Promise.all(selectedFacies
-        .map(facies => facies.previewProbability === 0 || facies.previewProbability === null
+        .map(facies => !facies.previewProbability
           ? updateFaciesProbability(dispatch, facies, emptyProbability)
           : new Promise((resolve) => resolve()))
       )
     },
-    normalize: ({ dispatch, getters }) => {
-      const selected = getters.selected
+    normalize: ({ dispatch, getters }, { selected = null } = {}) => {
+      selected = selected || getters.selected
       const cumulativeProbability = selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
       return Promise.all(selected.map(facies => {
-        const probability = cumulativeProbability === 0
+        const probability = !cumulativeProbability
           ? math.divide(1, selected.length)
           : math.divide(facies.previewProbability, cumulativeProbability)
         return updateFaciesProbability(dispatch, facies, probability)
@@ -148,6 +136,9 @@ export default {
     ADD: (state, { facies }) => {
       Vue.set(state.available, facies.id, facies)
     },
+    REMOVE: (state, { facies }) => {
+      Vue.delete(state.available, facies.id)
+    },
     AVAILABLE: (state, facies) => {
       Vue.set(state, 'available', facies)
     },
@@ -182,7 +173,7 @@ export default {
         const group = getters['groups/byId'](id)
         return group && group.facies.map(getters.byId)
       } else {
-        return facies
+        return facies || null
       }
     },
     byName: (state) => (name) => {
@@ -205,6 +196,10 @@ export default {
     },
     unset: (state, getters) => {
       return getters.selected.every(facies => !isNumber(facies.previewProbability))
+    },
+    availableForBackgroundFacies: (state, getters) => (rule, facies) => {
+      return !getters['groups/used'](facies)
+        && rule.backgroundPolygons.map(({ facies }) => getId(facies)).includes(getId(facies))
     }
   },
 }

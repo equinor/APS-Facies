@@ -5,16 +5,18 @@ import Polygon, { PolygonArgs } from './base'
 
 export type CENTER = number
 
+export interface OverlayPolygonArgs extends PolygonArgs {
+  group: FaciesGroup
+  center?: number
+  field?: GaussianRandomField | null
+}
+
 export default class OverlayPolygon extends Polygon {
   public center: CENTER
   public field: GaussianRandomField | null
   public readonly group: FaciesGroup
 
-  public constructor ({ group, center = 0, field = null, ...rest }: PolygonArgs & {
-    group: FaciesGroup
-    center: number
-    field: GaussianRandomField | null
-  }) {
+  public constructor ({ group, center = 0, field = null, ...rest }: OverlayPolygonArgs) {
     super(rest)
     if (!group) throw new APSError('No group was given')
     this.group = group

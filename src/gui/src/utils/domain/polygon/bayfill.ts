@@ -1,14 +1,20 @@
 import FmuUpdatableValue, { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
+import APSTypeError from '@/utils/domain/errors/type'
 import Polygon, { PolygonArgs } from '@/utils/domain/polygon/base'
 
-const enum SlantFactorFacies {
+enum SlantFactorFacies {
   Floodplain = 'Floodplain',
   Subbay = 'Subbay',
-  BayheadDelta = 'Wave influenced Bayfill',
+  BayheadDelta = 'Bayhead Delta',
+}
+
+export interface BayfillPolygonArgs extends PolygonArgs {
+  name: BayfillFacies | string
+  slantFactor: FmuUpdatable | number | null
 }
 
 const enum NonSlantFactorFacies {
-  WaveInfluencedBayfill = 'Bayhead Delta',
+  WaveInfluencedBayfill = 'Wave influenced Bayfill',
   Lagoon = 'Lagoon',
 }
 type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
@@ -16,12 +22,16 @@ type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
 export default class BayfillPolygon extends Polygon {
   public name: BayfillFacies | string
   public slantFactor: FmuUpdatable | null
-  public constructor ({ name, slantFactor = null, ...rest }: PolygonArgs & {
-    name: BayfillFacies | string
-    slantFactor: FmuUpdatable | number | null
-  }) {
+
+  public constructor ({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
-    this.slantFactor = slantFactor ? new FmuUpdatableValue(slantFactor) : null // TODO: Check type / name
+    if (Object.values(SlantFactorFacies).includes(name)) {
+      if (slantFactor) {
+        this.slantFactor = new FmuUpdatableValue(slantFactor)
+      } else {
+        throw new APSTypeError(`The Bayfill polygon, ${name} MUST have a slant factor`)
+      }
+    }
   }
 }

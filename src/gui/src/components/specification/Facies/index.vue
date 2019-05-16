@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { Store } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import Facies from '@/utils/domain/facies/local'
 import Polygon from '@/utils/domain/polygon/base'
@@ -35,8 +35,10 @@ export default class FaciesSpecification extends Vue {
   readonly disable: ((facies: Facies) => boolean) | boolean
 
   async updateFacies (faciesId: ID) {
-    const facies = (this.$store.getters as RootGetters)['facies/byId'](faciesId)
-    await updateFacies(this.$store.dispatch, this.rule, this.value, facies, false)
+    const facies = (this.$store as Store).getters['facies/byId'](faciesId)
+    if (facies) {
+      await updateFacies(this.$store.dispatch, this.rule, this.value, facies, false)
+    }
   }
 }
 </script>

@@ -10,6 +10,7 @@ export interface PolygonArgs {
 }
 
 export interface PolygonSpecification {
+  id?: ID
   facies: string
   fraction: PROBABILITY
   order: number
@@ -19,6 +20,7 @@ export default abstract class Polygon extends BaseItem {
   public order: ORDER
   public fraction: PROBABILITY
   public facies: Facies | null
+
   protected constructor ({ id, order, facies = null, fraction = 1.0 }: PolygonArgs) {
     super({ id })
     this.order = order
@@ -27,6 +29,8 @@ export default abstract class Polygon extends BaseItem {
   }
 
   public get overlay (): boolean { return false }
+
+  public get atLevel (): number { return 0 }
 }
 
 export type Polygons = Identified<Polygon>

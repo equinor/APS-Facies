@@ -11,7 +11,7 @@ class APSExportError extends Error {
 }
 
 const addRMSProjectName = (rootState, doc, parentElement) => {
-  const value = rootState.parameters.names.model.selected
+  const value = rootState.parameters.names.project.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSProjectName', value))
   } else {
@@ -154,13 +154,13 @@ const addZoneModel = ({ rootState, rootGetters }, doc, parent, zoneModelsElement
 
   addGaussianRandomFields(rootState, doc, parent, zoneElement)
 
-  addTruncationRule({ rootState, rootGetters }, doc, parent, zoneElement)
+  addTruncationRule({ rootState }, doc, parent, zoneElement)
 }
 
 const addGaussianRandomFields = (rootState, doc, parent, zoneElement) => {
-  const relevantFields = Object.values(rootState.gaussianRandomFields.fields).filter(
-    field => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null)
-  )
+  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
+    .filter(field => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
   if (relevantFields.length < 2) {
     let message = ''
     if (parent.region) {
@@ -189,8 +189,7 @@ const addGaussianRandomField = (doc, field, parent, zoneElement) => {
     fieldElement.append(createElement(doc, 'RelStdDev',
       field.trend.relativeStdDev.value, field.trend.relativeStdDev.updatable ? [{ name: 'kw', value: baseKw + '_RELSTDDEV' }] : null))
   }
-  // TODO / Future: Consider if the value here should be the same as the last used seed in the gui.
-  fieldElement.append(createElement(doc, 'SeedForPreview', '0'))
+  fieldElement.append(createElement(doc, 'SeedForPreview', field.settings.seed))
 }
 
 const addVario = (doc, variogram, baseKw, fieldElement) => {
@@ -263,11 +262,11 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
     const trendParamName = createElement(doc, 'TrendParamName', rmsTrendParam, null)
     trendTypeElement.append(trendParamName)
   } else {
-    // azimuth, directionStacking and stackAngle common to all trends execpt rms parameter
+    // azimuth, directionStacking and stackAngle common to all trends except rms parameter
 
     // azimuth
     trendTypeElement.append(createElement(doc, 'azimuth',
-      azimuth.value, azimuth.updatable ? [{ name: 'kw', value: baseKw + '_AZIMUTH' }] : null))
+      azimuth.value, azimuth.updatable ? [{ name: 'kw', value: baseKw + '_TREND_AZIMUTH' }] : null))
 
     // directionStacking
     if (!stackingDirection) {
@@ -281,18 +280,18 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
 
     // stackAngle
     trendTypeElement.append(createElement(doc, 'stackAngle', stackAngle.value,
-      stackAngle.updatable ? [{ name: 'kw', value: baseKw + '_STACKANGLE' }] : null))
+      stackAngle.updatable ? [{ name: 'kw', value: baseKw + '_TREND_STACKANGLE' }] : null))
 
     if (trendType === 'EllipticCone3D' || trendType === 'Hyperbolic3D') {
       // migrationAngle is specific to EllipticCone3D and Hyperbolic3D
       trendTypeElement.append(createElement(doc, 'migrationAngle', migrationAngle.value,
-        migrationAngle.updatable ? [{ name: 'kw', value: baseKw + '_MIGRATIONANGLE' }] : null))
+        migrationAngle.updatable ? [{ name: 'kw', value: baseKw + '_TREND_MIGRATIONANGLE' }] : null))
     }
 
     if (trendType !== 'Linear3D') {
       // curvature is a child of everything not Linear3D (and RMSParameter of course)
       trendTypeElement.append(createElement(doc, 'curvature', curvature.value,
-        curvature.updatable ? [{ name: 'kw', value: baseKw + '_CURVATURE' }] : null))
+        curvature.updatable ? [{ name: 'kw', value: baseKw + '_TREND_CURVATURE' }] : null))
     }
 
     if (trendType === 'EllipticCone3D') {
@@ -306,15 +305,15 @@ const addTrend = (doc, field, parent, baseKw, fieldElement) => {
 
       // origin_x,
       trendTypeElement.append(createElement(doc, 'origin_x', originX.value,
-        originX.updatable ? [{ name: 'kw', value: baseKw + '_ORIGIN_X' }] : null))
+        originX.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_X' }] : null))
 
       // origin_y,
       trendTypeElement.append(createElement(doc, 'origin_y', originY.value,
-        originY.updatable ? [{ name: 'kw', value: baseKw + '_ORIGIN_Y' }] : null))
+        originY.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_Y' }] : null))
 
       // origin_z_simbox
       trendTypeElement.append(createElement(doc, 'origin_z_simbox', originZ.value,
-        originZ.updatable ? [{ name: 'kw', value: baseKw + '_ORIGIN_Z_SIMBOX' }] : null))
+        originZ.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_Z_SIMBOX' }] : null))
 
       // origintype
       trendTypeElement.append(createElement(doc, 'origintype', originType))
@@ -366,7 +365,7 @@ const addFaciesProb = ({ rootState, rootGetters }, doc, parent, zoneElement) => 
   })
 }
 
-const addTruncationRule = ({ rootState, rootGetters }, doc, parent, zoneElement) => {
+const addTruncationRule = ({ rootState }, doc, parent, zoneElement) => {
   const truncRuleElem = createElement(doc, 'TruncationRule')
   zoneElement.append(truncRuleElem)
 
@@ -379,10 +378,13 @@ const addTruncationRule = ({ rootState, rootGetters }, doc, parent, zoneElement)
     throw new APSExportError(errMessage)
   }
   if (truncRule.type === 'bayfill') {
-    addTruncationRuleBayFill({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleBayFill({ rootState }, doc, parent, truncRule, truncRuleElem)
   }
   if (truncRule.type === 'non-cubic') {
-    addTruncationRuleNonCubic({ rootState, rootGetters }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleNonCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+  }
+  if (truncRule.type === 'cubic') {
+    addTruncationRuleCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
   }
 }
 
@@ -421,30 +423,19 @@ const addTruncationRuleBayFill = ({ rootState }, doc, parent, truncRule, truncRu
   })
 }
 
-const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+const addTruncationRuleOverlay = ({ rootState }, doc, parent, truncRule, truncRuleElem, elementName, backgroundPolygonsHandler) => {
   const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
-  const trunc2DAngleElement = createElement(doc, 'Trunc2D_Angle', null,
+  const truncElement = createElement(doc, elementName, null,
     [{ name: 'nGFields', value: numberOfFields }])
-  truncRuleElem.append(trunc2DAngleElement)
+  truncRuleElem.append(truncElement)
 
   const backGroundModelElem = createElement(doc, 'BackGroundModel')
-  trunc2DAngleElement.append(backGroundModelElem)
+  truncElement.append(backGroundModelElem)
 
   const alphaNames = getAlphaNames(truncRule)
   backGroundModelElem.append(createElement(doc, 'AlphaFields', alphaNames))
-  backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
   // The background polygons
-  truncRule.backgroundPolygons.forEach(polygon => {
-    // facies Element
-    const faciesName = polygon.facies.name
-    const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
-    backGroundModelElem.append(faciesElem)
-    // angle element
-    const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
-    faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
-    // ProbFrac element
-    faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
-  })
+  backgroundPolygonsHandler(backGroundModelElem)
 
   const overlayGroups = truncRule.overlayPolygons
     .reduce((obj, polygon) => {
@@ -455,7 +446,7 @@ const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncR
     }, {})
   if (Object.values(overlayGroups).length > 0 && truncRule.useOverlay) {
     const overLayModelElem = createElement(doc, 'OverLayModel')
-    trunc2DAngleElement.append(overLayModelElem)
+    truncElement.append(overLayModelElem)
 
     Object.keys(overlayGroups).forEach(overlayGroup => {
       const groupElement = createElement(doc, 'Group')
@@ -491,6 +482,57 @@ const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncR
         ))
     })
   }
+}
+
+const addTruncationRuleNonCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+  function handleBackgroundPolygons (backGroundModelElem) {
+    backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
+    truncRule.backgroundPolygons.forEach(polygon => {
+      // facies Element
+      const faciesName = polygon.facies.name
+      const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
+      backGroundModelElem.append(faciesElem)
+      // angle element
+      const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
+      faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
+      // ProbFrac element
+      faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
+    })
+  }
+  addTruncationRuleOverlay({ rootState }, doc, parent, truncRule, truncRuleElem, 'Trunc2D_Angle', handleBackgroundPolygons)
+}
+
+const addTruncationRuleCubic = ({ rootState }, doc, parent, truncRule, truncRuleElem) => {
+  function handleBackgroundPolygons (backGroundModelElem) {
+    function addFraction (element, polygon) {
+      element.append(createElement(doc, 'ProbFrac', polygon.fraction, [{ name: 'name', value: polygon.facies.name }]))
+    }
+    function addPolygon (element, polygon) {
+      if (polygon.facies) {
+        addFraction(element, polygon)
+      } else {
+        const attributes = !polygon.parent
+          ? [{ name: 'direction', value: truncRule.direction.specification }]
+          : null
+        const child = createElement(doc, `L${polygon.atLevel + 1}`, null, attributes)
+        element.append(child)
+        polygon.children.forEach(polygon => {
+          addPolygon(child, polygon)
+        })
+      }
+    }
+
+    addPolygon(backGroundModelElem, truncRule.root)
+  }
+  addTruncationRuleOverlay(
+    { rootState },
+    doc,
+    parent,
+    truncRule,
+    truncRuleElem,
+    'Trunc2D_Cubic',
+    handleBackgroundPolygons,
+  )
 }
 
 const getNumberOfFieldsForTruncRule = ({ rootState }, parent) => {

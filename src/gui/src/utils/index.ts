@@ -1,6 +1,8 @@
 import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
-import Polygon from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
+import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
+import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
+import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
 import { ID, Identified } from '@/utils/domain/types'
 import {
   getId,
@@ -11,13 +13,18 @@ import {
   allSet,
 } from '@/utils/helpers'
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { RootGetters } from '@/store/typing'
 
 import uuidv5 from 'uuid/v5'
+import { Vue } from 'vue/types/vue'
 
 interface Newable<T> { new (...args: any[]): T }
 
-function makeData<T extends Identifiable, Y extends Identifiable> (items: T[], _class: Newable<Y>, originals: T[] | null = null): Identified<Y> {
+function makeData<T extends Identifiable, Y extends Identifiable> (
+  items: T[],
+  _class: Newable<Y>,
+  originals: T[] | null = null
+): Identified<Y> {
   if (items.length === 0) return {}
   originals = originals ? Object.values(originals) : []
   const data = {}
@@ -31,7 +38,23 @@ function makeData<T extends Identifiable, Y extends Identifiable> (items: T[], _
   return data
 }
 
-function defaultSimulationSettings () {
+interface Coordinate2D {
+  x: number
+  y: number
+}
+
+interface Coordinate3D extends Coordinate2D {
+  z: number
+}
+
+interface SimulationSettings {
+  gridAzimuth: number
+  gridSize: Coordinate3D
+  simulationBox: Coordinate3D
+  simulationBoxOrigin: Coordinate2D
+}
+
+function defaultSimulationSettings (): SimulationSettings {
   return {
     gridAzimuth: 0,
     gridSize: { x: 100, y: 100, z: 1 },
@@ -40,13 +63,64 @@ function defaultSimulationSettings () {
   }
 }
 
-function makeTruncationRuleSpecification (rule: TruncationRule<Polygon>, rootGetters: RootGetters) {
+function simplify (specification: BayfillSpecification | NonCubicSpecification | CubicSpecification, rule: TruncationRule, includeOverlay: boolean = true) {
+  if (specification instanceof Array) {
+    return specification
+      .map((spec, index) => {
+        spec.facies = rule.polygons[`${index}`].id
+        return spec
+      })
+  } else {
+    // @ts-ignore
+    specification.polygons = specification.polygons
+      .filter((polygon: Polygon): boolean => polygon instanceof OverlayPolygon ? includeOverlay : true)
+      .map((polygon: any) => {
+        polygon.facies = polygon.id
+        polygon.fraction = 1
+        return polygon
+      })
+    if (!includeOverlay) {
+      specification.overlay = null
+    }
+    return specification
+  }
+}
+
+function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
+  return {
+    type: rule.type,
+    globalFaciesTable: (rule.backgroundPolygons as Polygon[])
+      .map((polygon, index) => {
+        return {
+          code: index,
+          name: polygon.id,
+          probability: 1 / rule.backgroundPolygons.length,
+          inZone: true,
+          inRule: true,
+        }
+      }),
+    gaussianRandomFields: ['GRF1', 'GRF2', 'GRF3']
+      .map(field => {
+        const included = !(field === 'GRF3' && rule.type !== 'bayfill')
+        return {
+          name: field,
+          inZone: true,
+          inRule: included,
+          inBackground: included,
+        }
+      }),
+    values: simplify(rule.specification, rule, false),
+    constantParameters: true,
+  }
+}
+
+function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters) {
   return {
     type: rule.type,
     globalFaciesTable: rootGetters['facies/selected']
       .filter((facies): boolean => rootGetters.options.filterZeroProbability ? !!facies.previewProbability && facies.previewProbability > 0 : true)
       .map(({ facies: globalFacies, previewProbability, id }) => {
-        let polygon = rule.polygons.find((polygon): boolean => getId(polygon.facies) === id)
+        let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
         // @ts-ignore
         if (isEmpty(polygon) && rule.overlay) {
           // @ts-ignore
@@ -75,9 +149,7 @@ function makeTruncationRuleSpecification (rule: TruncationRule<Polygon>, rootGet
   }
 }
 
-// @ts-ignore
-function selectItems ({ items, state, _class }) {
-  // @ts-ignore
+function selectItems ({ items, state, _class }: { items: any[], state: { available: Identified<any>, [_: string]: any }, _class: Newable<any> }) {
   const ids = items.map(item => item.id || item._id)
   const obj = {}
   for (const id in state.available) {
@@ -91,38 +163,32 @@ function selectItems ({ items, state, _class }) {
   return obj
 }
 
-// TODO: reuse / generalize `hasValidChildren`
-// @ts-ignore
-function invalidateChildren (component): void {
+function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEarly: boolean = false): void {
   let children = component.$children.slice()
   while (children.length > 0) {
     const child = children.shift()
+    // @ts-ignore
     if (typeof child !== 'undefined' && child.dialog !== false) {
       if (child.$v && child.$v.$invalid) {
-        child.$v.$touch()
+        onFound(child)
+        if (breakEarly) break
       }
       children = children.concat(child.$children.slice())
     }
   }
 }
 
-// @ts-ignore
-function hasValidChildren (component): boolean {
-  let children = component.$children.slice()
-  while (children.length > 0) {
-    const child = children.shift()
-    if (typeof child !== 'undefined' && child.dialog !== false) {
-      if (child.$v && child.$v.$invalid) {
-        return false
-      }
-      children = children.concat(child.$children.slice())
-    }
-  }
-  return true
+function invalidateChildren (component: Vue): void {
+  goTroughChildren(component, (child): void => child.$v.$touch())
 }
 
-// @ts-ignore
-function hasCurrentParents (item: any, getters): boolean {
+function hasValidChildren (component: Vue): boolean {
+  let valid = true
+  goTroughChildren(component, (): void => { valid = false }, true)
+  return valid
+}
+
+function hasCurrentParents (item: any, getters: RootGetters): boolean {
   return !!getters && getters.zone
     ? hasParents(item, getters.zone, getters.region)
     : false
@@ -145,13 +211,13 @@ function faciesName (obj: any) {
 function minFacies (rule: any, getters: RootGetters): number {
   let minFacies = 0
   const type = getters['truncationRules/typeById'](rule.type) || rule.type
-  if (type === 'cubic') {
-    // TODO: Implement
-    minFacies = Number.POSITIVE_INFINITY
-  } else if ([type, rule.type].includes('non-cubic')) {
+  if (
+    [type, rule.type].includes('non-cubic')
+    || [type, rule.type].includes('cubic')
+  ) {
     if (rule.polygons) {
       // @ts-ignore
-      const uniqueFacies = new Set(rule.polygons.map(polygon => faciesName(polygon)))
+      const uniqueFacies = new Set(rule.polygons.map((polygon): string => faciesName(polygon)))
       if (rule.overlay) {
         const items = Object.values(rule.overlay.items || rule.overlay)
         items.forEach(item => {
@@ -177,8 +243,7 @@ function minFacies (rule: any, getters: RootGetters): number {
   return minFacies
 }
 
-// @ts-ignore
-function hasEnoughFacies (rule, getters: RootGetters): boolean {
+function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
   const numFacies = getters['facies/selected'].length
   return numFacies >= minFacies(rule, getters)
 }
@@ -225,6 +290,7 @@ export {
   sortByOrder,
   defaultSimulationSettings,
   makeData,
+  makeSimplifiedTruncationRuleSpecification,
   makeTruncationRuleSpecification,
   selectItems,
   hasValidChildren,

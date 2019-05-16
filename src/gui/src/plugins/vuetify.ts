@@ -9,10 +9,16 @@ import colors from 'vuetify/es5/util/colors'
 // Icons
 import '@fortawesome/fontawesome-free/css/all.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
+// @ts-ignore
 import Ripple from 'vuetify/es5/directives/ripple'
 import { notEmpty } from '@/utils'
 
-function makeCustomIcons () {
+type Icon = string
+interface Icons {
+  [name: string]: Icon
+}
+
+function makeCustomIcons (): Icons {
   const icons = {
     add: 'fas fa-plus-square',
     copy: 'fas fa-clone',
@@ -27,7 +33,7 @@ function makeCustomIcons () {
     search: 'fas fa-search',
     help: 'fas fa-question-circle',
   }
-  Object.keys(icons).forEach(key => {
+  Object.keys(icons).forEach((key: string): void => {
     if (notEmpty(icons[`${key}`])) {
       icons[`${key}Spinner`] = icons[`${key}`] + ' fa-spin'
     }
@@ -35,8 +41,8 @@ function makeCustomIcons () {
   return icons
 }
 
-function makeVuetifyIcons () {
-  const icons = {
+function makeVuetifyIcons (): Icons {
+  const icons: Icons = {
     'complete': '',
     'cancel': '',
     'close': '',
@@ -60,12 +66,12 @@ function makeVuetifyIcons () {
     'radioOff': '',
     'edit': '',
   }
-  Object.keys(icons).forEach(key => {
+  Object.keys(icons).forEach((key: Icon): void => {
     if (icons[`${key}`] === '') delete icons[`${key}`]
   })
   return icons
 }
-export const icons = {
+export const icons: Icons = {
   ...makeVuetifyIcons(),
   ...makeCustomIcons(),
 }

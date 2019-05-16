@@ -1,7 +1,10 @@
 import { hasParents, resolve, sortAlphabetically, sortByProperty } from '@/utils'
 import uuidv4 from 'uuid/v4'
-import Bayfill from '@/utils/domain/truncationRule/bayfill'
-import NonCubic from '@/utils/domain/truncationRule/nonCubic'
+import {
+  Bayfill,
+  NonCubic,
+  Cubic,
+} from '@/utils/domain'
 import { makePolygonsFromSpecification } from './typed'
 
 const processSetting = (type, setting) => {
@@ -76,6 +79,7 @@ const findItem = ({ findByIndex, findByName, findDefaultName = (arg) => null }) 
 const typeMapping = {
   'bayfill': Bayfill,
   'non-cubic': NonCubic,
+  'cubic': Cubic,
 }
 
 export function makeRule ({ type, ...rest }) {
@@ -111,12 +115,24 @@ export function combinePolygons (polygons, overlay, _isParsed = false) {
   }
 }
 
-export function structurePolygons (polygons, _isParsed = false) {
-  if (_isParsed) return polygons
+export function structurePolygons (polygons,) {
   return polygons.map((polygon, index) => {
-    return {
-      ...polygon,
-      order: index,
+    if (polygon.level) {
+      /* I.E. Dealing with cubic polygons */
+      return {
+        ...polygon,
+        order: polygon.level.reduce((order, level, index) => {
+          if (level > 0) {
+            order += (level - 1 /* 1-indexed */) * (index + 1 /* 0-indexed */)
+          }
+          return order
+        }, 0)
+      }
+    } else {
+      return {
+        ...polygon,
+        order: index,
+      }
     }
   })
 }

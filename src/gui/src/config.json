@@ -8,5 +8,6 @@
   "DEFAULT_CROSS_SECTION": {
     "type": "IJ",
     "position": 0.5
-  }
+  },
+  "DEFAULT_CUBIC_LEVELS": 3
 }

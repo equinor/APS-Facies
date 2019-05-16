@@ -11,6 +11,8 @@
 import { Component, Vue } from 'vue-property-decorator'
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
 
+import { Store } from '@/store/typing'
+
 type GridModel = string
 
 @Component({
@@ -19,12 +21,12 @@ type GridModel = string
   }
 })
 export default class ChooseGridModel extends Vue {
-  get available (): GridModel[] {
-    return this.$store.state.gridModels.available
+  get available () {
+    return (this.$store as Store).state.gridModels.available
   }
 
-  getter (): GridModel {
-    return this.$store.state.gridModels.current
+  getter () {
+    return (this.$store as Store).state.gridModels.current
   }
   async setter (value: GridModel) {
     await this.$store.dispatch('gridModels/select', value)

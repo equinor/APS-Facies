@@ -1,0 +1,126 @@
+{
+  "templates": [
+    {
+      "name": "Simple",
+      "type": "bayfill",
+      "minFields": 3,
+      "polygons": [
+        {
+          "name": "Floodplain",
+          "facies": {
+            "name": "F01",
+            "index": 0
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": "Subbay",
+          "facies": {
+            "name": "F02",
+            "index": 1
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": "Wave influenced Bayfill",
+          "facies": {
+            "name": "F03",
+            "index": 2
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": "Bayhead Delta",
+          "facies": {
+            "name": "F04",
+            "index": 3
+          },
+          "proportion": 0.2
+        },
+        {
+          "name": "Lagoon",
+          "facies": {
+            "name": "F05",
+            "index": 4
+          },
+          "proportion": 0.2
+        }
+      ],
+      "settings": [
+        {
+          "name": "SF",
+          "polygon": "Floodplain",
+          "slantFactor": {
+            "value": 0.5,
+            "updatable": false
+          }
+        },
+        {
+          "name": "YSF",
+          "polygon": "Subbay",
+          "slantFactor": {
+            "value": 0.5,
+            "updatable": false
+          }
+        },
+        {
+          "name": "SBHD",
+          "polygon": "Bayhead Delta",
+          "slantFactor": {
+            "value": 0.5,
+            "updatable": false
+          }
+        }
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF1",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF2",
+            "index": 1
+          }
+        },
+        {
+          "channel": 3,
+          "field": {
+            "name": "GRF3",
+            "index": 2
+          }
+        }
+      ]
+    },
+    {
+      "name": "Simple",
+      "type": "cubic",
+      "minFields": 2,
+      "polygons": [
+      ],
+      "settings": [
+        "V"
+      ],
+      "fields": [
+        {
+          "channel": 1,
+          "field": {
+            "name": "GRF01",
+            "index": 0
+          }
+        },
+        {
+          "channel": 2,
+          "field": {
+            "name": "GRF02",
+            "index": 1
+          }
+        }
+      ]
+    }
+  ]
+}

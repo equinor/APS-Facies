@@ -29,7 +29,7 @@ export default {
       await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region: id }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    fetch: ({ dispatch, commit, rootState, rootGetters, state }, zoneId) => {
+    fetch: ({ dispatch, rootState, rootGetters, state }, zoneId) => {
       if (state.use && notEmpty(rootGetters.regionParameter)) {
         if (isEmpty(zoneId)) {
           const promises = Object.keys(rootState.zones.available)

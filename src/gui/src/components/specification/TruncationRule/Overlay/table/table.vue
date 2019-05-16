@@ -32,11 +32,9 @@
           />
         </td>
         <td>
-          <facies-specification
+          <overlay-facies-specification
             :value="props.item"
             :rule="rule"
-            :disable="facies => backgroundFacies(facies)"
-            @input="val => updateFacies(props.item, val)"
           />
         </td>
         <td v-if="needFraction">
@@ -70,22 +68,21 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import FractionField from '@/components/selection/FractionField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
-import FaciesSpecification from '@/components/specification/Facies/index.vue'
+import OverlayFaciesSpecification from '@/components/specification/Facies/overlay.vue'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection.vue'
 import Polygon from '@/utils/domain/polygon/base'
 
 import { Facies } from '@/utils/domain'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import { ID } from '@/utils/domain/types'
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { Store } from '@/store/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
-import { updateFacies } from '@/store/utils'
 import { sortByOrder } from '@/utils'
 
 @Component({
   components: {
     AlphaSelection,
-    FaciesSpecification,
+    OverlayFaciesSpecification,
     PolygonOrder,
     OptionalHelpItem,
     FractionField,
@@ -103,7 +100,7 @@ export default class OverlayTable extends Vue {
     return this.value
   }
   get fieldOptions () {
-    return Object.values((this.$store.getters as RootGetters).fields)
+    return Object.values((this.$store as Store).getters.fields)
       .map(field => {
         return {
           value: field.id,
@@ -160,16 +157,10 @@ export default class OverlayTable extends Vue {
     ]
   }
 
-  backgroundFacies (facies: Facies) {
-    return this.rule.isUsedInBackground(facies)
-  }
   ordering (items: OverlayPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
   async updateField (polygon: OverlayPolygon, fieldId: ID) {
-    const field = this.$store.state.gaussianRandomFields.fields[`${fieldId}`]
+    const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
     await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
-  }
-  updateFacies (polygon: OverlayPolygon, faciesId: ID) {
-    updateFacies(this.$store.dispatch, this.rule, polygon, faciesId, false)
   }
   async updateFraction (polygon: OverlayPolygon, val: number) {
     await this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon, value: val })

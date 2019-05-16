@@ -8,9 +8,8 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import TruncationRule from '@/utils/domain/truncationRule/base'
-import Polygon from '@/utils/domain/polygon/base'
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { TruncationRule } from '@/utils/domain'
+import { Store } from '@/store/typing'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
@@ -29,12 +28,12 @@ export default class FaciesRealization extends Vue {
   data: number[][] | null = null
 
   @Prop({ required: true })
-  readonly value!: TruncationRule<Polygon>
+  readonly value!: TruncationRule
 
   @Prop({ default: false, type: Boolean })
   readonly expand!: boolean
 
-  get faciesTable () { return (this.$store.getters as RootGetters)['facies/global/selected'] }
+  get faciesTable () { return (this.$store as Store).getters['facies/global/selected'] }
   get dataDefinition () {
     return this.faciesTable
       .map(({ color, code }) => {

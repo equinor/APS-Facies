@@ -35,10 +35,9 @@
           />
         </td>
         <td class="text-xs-left">
-          <facies-specification
+          <background-facies-specification
             :value="props.item"
             :rule="value"
-            :disable="facies => value.isUsedInOverlay(facies)"
           />
         </td>
         <td
@@ -67,7 +66,7 @@ import FractionField from '@/components/selection/FractionField.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
-import FaciesSpecification from '@/components/specification/Facies/index.vue'
+import BackgroundFaciesSpecification from '@/components/specification/Facies/background.vue'
 
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
@@ -75,10 +74,11 @@ import Facies from '@/utils/domain/facies/local'
 
 import { sortByOrder } from '@/utils'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+import { updateFactor } from '@/store/actions'
 
 @Component({
   components: {
-    FaciesSpecification,
+    BackgroundFaciesSpecification,
     PolygonOrder,
     OptionalHelpItem,
     FractionField,
@@ -138,7 +138,7 @@ export default class NonCubicTable extends Vue {
   ordering (items: NonCubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
 
   updateFactor (item: NonCubicPolygon, value: number) {
-    return this.$store.dispatch('truncationRules/changeProportionFactors', { rule: this.value, polygon: item, value })
+    return updateFactor(this.$store, this.value, item, value)
   }
 
   updateAngle (item: NonCubicPolygon, value: number) {

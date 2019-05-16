@@ -1,4 +1,3 @@
-import { allSet } from '@/utils'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import APSTypeError from '@/utils/domain/errors/type'
 import FaciesGroup from '@/utils/domain/facies/group'
@@ -7,7 +6,7 @@ import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayPolygon, { CENTER } from '@/utils/domain/polygon/overlay'
 import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
-import { getId } from '@/utils/helpers'
+import { getId, allSet } from '@/utils/helpers'
 
 export type OverlayTruncationRuleArgs<T extends Polygon> = TruncationRuleConfiguration<T> & {
   overlay?: {
@@ -26,7 +25,7 @@ export interface OverlaySpecification {
   overlay: OverlayPolygonSpecification[] | null
 }
 
-export default abstract class OverlayTruncationRule<T extends Polygon> extends TruncationRule<T> {
+export default abstract class OverlayTruncationRule<T extends Polygon> extends TruncationRule<T | OverlayPolygon> {
   protected _useOverlay: boolean
 
   protected constructor ({ overlay, _useOverlay, ...rest }: OverlayTruncationRuleArgs<T>) {
@@ -50,6 +49,27 @@ export default abstract class OverlayTruncationRule<T extends Polygon> extends T
       if (polygon instanceof OverlayPolygon) polygons.push(polygon)
     })
     return polygons
+  }
+
+  public get backgroundPolygons (): T[] {
+    const polygons: T[] = []
+    this.polygons.forEach((polygon): void => {
+      if (!(polygon instanceof OverlayPolygon)) polygons.push(polygon)
+    })
+    return polygons
+  }
+
+  public get fields (): GaussianRandomField[] {
+    const backgroundFields = this.backgroundFields
+    const overlayFields: GaussianRandomField[] = []
+    this.overlayPolygons
+      .sort((a, b): number => a.order - b.order)
+      .forEach(({ field }): void => {
+        if (field && !overlayFields.includes(field)) {
+          overlayFields.push(field)
+        }
+      })
+    return [...backgroundFields, ...overlayFields]
   }
 
   public get specification (): OverlaySpecification {

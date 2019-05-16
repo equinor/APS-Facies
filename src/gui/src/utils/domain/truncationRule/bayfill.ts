@@ -3,12 +3,15 @@ import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import BayfillPolygon from '@/utils/domain/polygon/bayfill'
 import TruncationRule, { Specification, TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
+import { getFaciesName } from '@/utils/queries'
 
 interface BayfillPolygonSpecification extends Specification {
   name: string
   polygon: string
   factor: FmuUpdatable
 }
+
+export type BayfillSpecification = BayfillPolygonSpecification[]
 
 export default class Bayfill extends TruncationRule<BayfillPolygon> {
   public constructor (props: TruncationRuleConfiguration<BayfillPolygon>) {
@@ -35,7 +38,7 @@ export default class Bayfill extends TruncationRule<BayfillPolygon> {
     return this.fields
   }
 
-  public get specification (): BayfillPolygonSpecification[] {
+  public get specification (): BayfillSpecification {
     const _mapping: {[_: string]: string} = {
       'Bayhead Delta': 'SBHD',
       'Floodplain': 'SF',
@@ -45,7 +48,7 @@ export default class Bayfill extends TruncationRule<BayfillPolygon> {
       .filter((polygon): boolean => !!polygon.slantFactor)
       .map((polygon): BayfillPolygonSpecification => {
         return {
-          facies: polygon.facies ? polygon.facies.name : '',
+          facies: getFaciesName(polygon),
           factor: (polygon.slantFactor as FmuUpdatable),
           fraction: polygon.fraction,
           name: _mapping[polygon.name],
