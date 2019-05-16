@@ -29,4 +29,5 @@ export default class Facies extends ZoneRegionDependent {
   }
 
   public get name (): string { return this.facies.name }
+  public get alias (): string { return this.facies.alias }
 }

@@ -35,7 +35,7 @@ export default class FaciesSpecificationBase extends Vue {
     return this.selectedFacies
       .map(facies => {
         return {
-          text: facies.name,
+          text: facies.alias,
           value: facies.id,
           disabled: this.disable instanceof Function ? this.disable(facies) : this.disable,
         }
