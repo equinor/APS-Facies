@@ -6,19 +6,22 @@ type Probability = number
 // TODO: Make ProbabilityCube into its own class
 type ProbabilityCube = string
 
+export type FaciesArgs = DependentConfiguration & {
+  facies: GlobalFacies
+  probabilityCube?: ProbabilityCube | null
+  previewProbability?: Probability | null
+}
+
 export default class Facies extends ZoneRegionDependent {
   public readonly facies: GlobalFacies
   public probabilityCube: ProbabilityCube | null
   public previewProbability: Probability | null
+
   public constructor ({
     facies,
     probabilityCube = null,
     previewProbability = null,
-    ...rest }: DependentConfiguration & {
-    facies: GlobalFacies
-    probabilityCube?: ProbabilityCube | null
-    previewProbability?: Probability | null
-  }) {
+    ...rest }: FaciesArgs) {
     super(rest)
     this.facies = facies
     this.probabilityCube = probabilityCube

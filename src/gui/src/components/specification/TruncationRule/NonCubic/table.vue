@@ -74,6 +74,7 @@ import Facies from '@/utils/domain/facies/local'
 
 import { sortByOrder } from '@/utils'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+import { updateFactor } from '@/store/actions'
 
 @Component({
   components: {
@@ -137,7 +138,7 @@ export default class NonCubicTable extends Vue {
   ordering (items: NonCubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
 
   updateFactor (item: NonCubicPolygon, value: number) {
-    return this.$store.dispatch('truncationRules/changeProportionFactors', { rule: this.value, polygon: item, value })
+    return updateFactor(this.$store, this.value, item, value)
   }
 
   updateAngle (item: NonCubicPolygon, value: number) {

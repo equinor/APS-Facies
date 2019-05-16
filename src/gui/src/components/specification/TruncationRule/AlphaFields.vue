@@ -16,14 +16,16 @@
   </v-layout>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { AppTypes } from '@/utils/typing'
+import { ID } from '@/utils/domain/types'
+import { TruncationRule } from '@/utils/domain'
+import { Store } from '@/store/typing'
 
-import AlphaSelection from './AlphaSelection'
+import AlphaSelection from './AlphaSelection.vue'
 
-const defaultChannels = (num) => {
+function defaultChannels (num: number): { channel: number, selected: ID | '' }[] {
   const items = []
   for (let i = 1; i <= num; i++) {
     // NOTE: The alpha channels are (supposed to be) 1-indexed
@@ -32,39 +34,37 @@ const defaultChannels = (num) => {
   return items
 }
 
-export default {
+@Component({
   components: {
     AlphaSelection,
   },
+})
+export default class AlphaFields extends Vue {
+  @Prop({ required: true })
+  readonly value!: TruncationRule
 
-  props: {
-    value: AppTypes.truncationRule,
-    minFields: VueTypes.integer.def(2),
-  },
+  @Prop({ default: 2 })
+  readonly minFields!: number
 
-  computed: {
-    alphas () {
-      return this.value
-        ? this.value.backgroundFields
-          .map((field, index) => {
-            return {
-              channel: index + 1,
-              selected: field
-            }
-          })
-        : defaultChannels(this.minFields)
-    },
-  },
+  get alphas () {
+    return this.value
+      ? this.value.backgroundFields
+        .map((field, index) => {
+          return {
+            channel: index + 1,
+            selected: field
+          }
+        })
+      : defaultChannels(this.minFields)
+  }
 
-  methods: {
-    update ({ channel }, fieldId) {
-      const field = this.$store.state.gaussianRandomFields.fields[`${fieldId}`]
-      return this.$store.dispatch('truncationRules/updateBackgroundField', {
-        index: channel - 1,
-        rule: this.value,
-        field: field || null
-      })
-    }
-  },
+  update ({ channel }: { channel: number }, fieldId: ID) {
+    const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+    return this.$store.dispatch('truncationRules/updateBackgroundField', {
+      index: channel - 1,
+      rule: this.value,
+      field: field || null
+    })
+  }
 }
 </script>

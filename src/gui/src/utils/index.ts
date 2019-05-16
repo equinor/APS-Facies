@@ -1,6 +1,5 @@
 import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
-import Polygon from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
+import { Polygon, TruncationRule } from '@/utils/domain'
 import { ID, Identified } from '@/utils/domain/types'
 import {
   getId,
@@ -11,13 +10,18 @@ import {
   allSet,
 } from '@/utils/helpers'
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { RootGetters } from '@/store/typing'
 
 import uuidv5 from 'uuid/v5'
+import { Vue } from 'vue/types/vue'
 
 interface Newable<T> { new (...args: any[]): T }
 
-function makeData<T extends Identifiable, Y extends Identifiable> (items: T[], _class: Newable<Y>, originals: T[] | null = null): Identified<Y> {
+function makeData<T extends Identifiable, Y extends Identifiable> (
+  items: T[],
+  _class: Newable<Y>,
+  originals: T[] | null = null
+): Identified<Y> {
   if (items.length === 0) return {}
   originals = originals ? Object.values(originals) : []
   const data = {}
@@ -31,7 +35,23 @@ function makeData<T extends Identifiable, Y extends Identifiable> (items: T[], _
   return data
 }
 
-function defaultSimulationSettings () {
+interface Coordinate2D {
+  x: number
+  y: number
+}
+
+interface Coordinate3D extends Coordinate2D {
+  z: number
+}
+
+interface SimulationSettings {
+  gridAzimuth: number
+  gridSize: Coordinate3D
+  simulationBox: Coordinate3D
+  simulationBoxOrigin: Coordinate2D
+}
+
+function defaultSimulationSettings (): SimulationSettings {
   return {
     gridAzimuth: 0,
     gridSize: { x: 100, y: 100, z: 1 },
@@ -40,13 +60,13 @@ function defaultSimulationSettings () {
   }
 }
 
-function makeTruncationRuleSpecification (rule: TruncationRule<Polygon>, rootGetters: RootGetters) {
+function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters) {
   return {
     type: rule.type,
     globalFaciesTable: rootGetters['facies/selected']
       .filter((facies): boolean => rootGetters.options.filterZeroProbability ? !!facies.previewProbability && facies.previewProbability > 0 : true)
       .map(({ facies: globalFacies, previewProbability, id }) => {
-        let polygon = rule.polygons.find((polygon): boolean => getId(polygon.facies) === id)
+        let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
         // @ts-ignore
         if (isEmpty(polygon) && rule.overlay) {
           // @ts-ignore
@@ -75,9 +95,7 @@ function makeTruncationRuleSpecification (rule: TruncationRule<Polygon>, rootGet
   }
 }
 
-// @ts-ignore
-function selectItems ({ items, state, _class }) {
-  // @ts-ignore
+function selectItems ({ items, state, _class }: { items: any[], state: { available: Identified<any>, [_: string]: any }, _class: Newable<any> }) {
   const ids = items.map(item => item.id || item._id)
   const obj = {}
   for (const id in state.available) {
@@ -116,8 +134,7 @@ function hasValidChildren (component: Vue): boolean {
   return valid
 }
 
-// @ts-ignore
-function hasCurrentParents (item: any, getters): boolean {
+function hasCurrentParents (item: any, getters: RootGetters): boolean {
   return !!getters && getters.zone
     ? hasParents(item, getters.zone, getters.region)
     : false
@@ -146,7 +163,7 @@ function minFacies (rule: any, getters: RootGetters): number {
   } else if ([type, rule.type].includes('non-cubic')) {
     if (rule.polygons) {
       // @ts-ignore
-      const uniqueFacies = new Set(rule.polygons.map(polygon => faciesName(polygon)))
+      const uniqueFacies = new Set(rule.polygons.map((polygon): string => faciesName(polygon)))
       if (rule.overlay) {
         const items = Object.values(rule.overlay.items || rule.overlay)
         items.forEach(item => {
@@ -172,8 +189,7 @@ function minFacies (rule: any, getters: RootGetters): number {
   return minFacies
 }
 
-// @ts-ignore
-function hasEnoughFacies (rule, getters: RootGetters): boolean {
+function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
   const numFacies = getters['facies/selected'].length
   return numFacies >= minFacies(rule, getters)
 }

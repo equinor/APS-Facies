@@ -7,19 +7,10 @@ const filterZeroProbability = makeOption(false, [true, false])
 
 export default {
   namespaced: true,
-
-  state: {},
-
   modules: {
     showNameOrNumber,
     automaticAlphaFieldSelection,
     filterZeroProbability,
     automaticFaciesFill: makeOption(true, [true, false])
   },
-
-  actions: {},
-
-  mutations: {},
-
-  getters: {},
 }

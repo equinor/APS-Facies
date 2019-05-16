@@ -10,7 +10,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { getId } from '@/utils/helpers'
 
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { Store } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import Facies from '@/utils/domain/facies/local'
 
@@ -23,7 +23,7 @@ export default class FaciesSpecificationBase extends Vue {
   readonly disable: ((facies: Facies) => boolean) | boolean
 
   get selectedFacies () {
-    return (this.$store.getters as RootGetters)['facies/selected']
+    return (this.$store as Store).getters['facies/selected']
   }
 
   get selected (): ID | ID[] {

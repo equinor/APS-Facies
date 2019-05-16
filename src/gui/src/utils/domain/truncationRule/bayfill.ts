@@ -11,6 +11,8 @@ interface BayfillPolygonSpecification extends Specification {
   factor: FmuUpdatable
 }
 
+export type BayfillSpecification = BayfillPolygonSpecification[]
+
 export default class Bayfill extends TruncationRule<BayfillPolygon> {
   public constructor (props: TruncationRuleConfiguration<BayfillPolygon>) {
     super(props)
@@ -36,7 +38,7 @@ export default class Bayfill extends TruncationRule<BayfillPolygon> {
     return this.fields
   }
 
-  public get specification (): BayfillPolygonSpecification[] {
+  public get specification (): BayfillSpecification {
     const _mapping: {[_: string]: string} = {
       'Bayhead Delta': 'SBHD',
       'Floodplain': 'SF',

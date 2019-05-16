@@ -20,6 +20,8 @@ import { Component, Vue } from 'vue-property-decorator'
 
 import IconButton from '@/components/selection/IconButton.vue'
 
+import { Store } from '@/store/typing'
+
 @Component({
   components: {
     IconButton
@@ -28,7 +30,7 @@ import IconButton from '@/components/selection/IconButton.vue'
 export default class PreviewHeader extends Vue {
   waitingForSimulation: boolean = false
 
-  get rule () { return this.$store.getters.truncationRule }
+  get rule () { return (this.$store as Store).getters.truncationRule }
   get canSimulate () { return this.rule && this.rule.ready }
 
   async refresh () {

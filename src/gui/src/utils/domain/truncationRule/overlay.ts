@@ -25,7 +25,7 @@ export interface OverlaySpecification {
   overlay: OverlayPolygonSpecification[] | null
 }
 
-export default abstract class OverlayTruncationRule<T extends Polygon> extends TruncationRule<T> {
+export default abstract class OverlayTruncationRule<T extends Polygon> extends TruncationRule<T | OverlayPolygon> {
   protected _useOverlay: boolean
 
   protected constructor ({ overlay, _useOverlay, ...rest }: OverlayTruncationRuleArgs<T>) {
@@ -49,6 +49,27 @@ export default abstract class OverlayTruncationRule<T extends Polygon> extends T
       if (polygon instanceof OverlayPolygon) polygons.push(polygon)
     })
     return polygons
+  }
+
+  public get backgroundPolygons (): T[] {
+    const polygons: T[] = []
+    this.polygons.forEach((polygon): void => {
+      if (!(polygon instanceof OverlayPolygon)) polygons.push(polygon)
+    })
+    return polygons
+  }
+
+  public get fields (): GaussianRandomField[] {
+    const backgroundFields = this.backgroundFields
+    const overlayFields: GaussianRandomField[] = []
+    this.overlayPolygons
+      .sort((a, b): number => a.order - b.order)
+      .forEach(({ field }): void => {
+        if (field && !overlayFields.includes(field)) {
+          overlayFields.push(field)
+        }
+      })
+    return [...backgroundFields, ...overlayFields]
   }
 
   public get specification (): OverlaySpecification {

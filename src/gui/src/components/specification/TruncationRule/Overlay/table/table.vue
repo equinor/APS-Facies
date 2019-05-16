@@ -75,7 +75,7 @@ import Polygon from '@/utils/domain/polygon/base'
 import { Facies } from '@/utils/domain'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import { ID } from '@/utils/domain/types'
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { Store } from '@/store/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { sortByOrder } from '@/utils'
 
@@ -100,7 +100,7 @@ export default class OverlayTable extends Vue {
     return this.value
   }
   get fieldOptions () {
-    return Object.values((this.$store.getters as RootGetters).fields)
+    return Object.values((this.$store as Store).getters.fields)
       .map(field => {
         return {
           value: field.id,
@@ -159,7 +159,7 @@ export default class OverlayTable extends Vue {
 
   ordering (items: OverlayPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
   async updateField (polygon: OverlayPolygon, fieldId: ID) {
-    const field = this.$store.state.gaussianRandomFields.fields[`${fieldId}`]
+    const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
     await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
   }
   async updateFraction (polygon: OverlayPolygon, val: number) {

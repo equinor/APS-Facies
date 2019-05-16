@@ -34,7 +34,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { debounce } from 'lodash'
 
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { Store } from '@/store/typing'
 
 import FractionField from '@/components/selection/FractionField.vue'
 
@@ -56,7 +56,7 @@ import FractionField from '@/components/selection/FractionField.vue'
   }
 })
 export default class CrossSection extends Vue {
-  get crossSection () { return (this.$store.getters as RootGetters)['gaussianRandomFields/crossSections/current'] }
+  get crossSection () { return (this.$store as Store).getters['gaussianRandomFields/crossSections/current'] }
 
   public get type (): string { return this.crossSection.type }
   public set type (value: string) { this.$store.dispatch('gaussianRandomFields/crossSections/changeType', { id: this.crossSection.id, type: value }) }

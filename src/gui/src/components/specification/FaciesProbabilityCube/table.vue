@@ -59,7 +59,7 @@ import FractionField from '@/components/selection/FractionField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 
 import Facies from '@/utils/domain/facies/local'
-import { RootGetters } from '@/utils/helpers/store/typing'
+import { Store } from '@/store/typing'
 
 import { hasCurrentParents } from '@/utils'
 
@@ -77,7 +77,7 @@ export default class FaciesProbabilityCubeTable extends Vue {
 
   get probabilityCubes () {
     return [{ text: '', disabled: false }]
-      .concat(this.$store.state.parameters.probabilityCube.available
+      .concat((this.$store as Store).state.parameters.probabilityCube.available
         .map((parameter: string) => {
           return {
             text: parameter,
@@ -90,7 +90,7 @@ export default class FaciesProbabilityCubeTable extends Vue {
   }
 
   get useProbabilityCubes () {
-    return !(this.$store.getters as RootGetters)['facies/constantProbability']()
+    return !(this.$store as Store).getters['facies/constantProbability']()
   }
 
   get items () {

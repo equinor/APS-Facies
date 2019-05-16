@@ -4,17 +4,21 @@ import Region from '@/utils/domain/region'
 import {
   Bayfill,
   NonCubic,
-  TruncationRule,
+  Cubic,
 } from '@/utils/domain/truncationRule/index'
 import Zone from '@/utils/domain/zone'
 import Polygon from '@/utils/domain/polygon/base'
 import BayfillPolygon from '@/utils/domain/polygon/bayfill'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
+import CubicPolygon from '@/utils/domain/polygon/cubic'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
+
+type TruncationRule = Bayfill | NonCubic | Cubic
 
 export {
   Polygon,
   BayfillPolygon,
+  CubicPolygon,
   NonCubicPolygon,
   OverlayPolygon,
   Region,
@@ -25,4 +29,5 @@ export {
   TruncationRule,
   Bayfill,
   NonCubic,
+  Cubic,
 }

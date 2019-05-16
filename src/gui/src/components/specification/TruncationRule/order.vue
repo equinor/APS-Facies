@@ -11,11 +11,12 @@
 </template>
 
 <script lang="ts">
+import { Store } from '@/store/typing'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import {
+  OverlayPolygon,
   Polygon,
-  TruncationRule,
 } from '@/utils/domain'
 
 import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
@@ -25,19 +26,16 @@ import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
     BasePolygonOrder,
   },
 })
-export default class PolygonOrder extends Vue {
+export default class PolygonOrder<T extends Polygon> extends Vue {
   @Prop({ required: true })
-  readonly value!: { /* TODO: Define the correct type */
-    order: number
-    overlay?: boolean
-    [_: string]: any
-  }
+  readonly value!: T
+
   @Prop({ default: false })
   readonly overlay: boolean
 
-  get rule (): TruncationRule<Polygon> { return this.$store.getters['truncationRule'] }
+  get rule () { return (this.$store as Store).getters['truncationRule'] }
   get max () {
-    return this.rule.polygons
+    return (this.rule.polygons as Polygon[])
       .filter(polygon => polygon.overlay === this.overlay)
       .map(polygon => polygon.order)
       .reduce((max, order) => order > max ? order : max, 0)
@@ -63,7 +61,7 @@ export default class PolygonOrder extends Vue {
       rule: this.rule,
       order: this.value.order + 1,
       overlay: this.value.overlay,
-      group: this.value.overlay ? this.value.group : null,
+      group: this.value instanceof OverlayPolygon ? this.value.group : null,
     })
   }
   deletePolygon () {

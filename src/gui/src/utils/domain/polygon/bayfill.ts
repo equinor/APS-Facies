@@ -8,6 +8,11 @@ enum SlantFactorFacies {
   BayheadDelta = 'Bayhead Delta',
 }
 
+export interface BayfillPolygonArgs extends PolygonArgs {
+  name: BayfillFacies | string
+  slantFactor: FmuUpdatable | number | null
+}
+
 const enum NonSlantFactorFacies {
   WaveInfluencedBayfill = 'Wave influenced Bayfill',
   Lagoon = 'Lagoon',
@@ -17,10 +22,8 @@ type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
 export default class BayfillPolygon extends Polygon {
   public name: BayfillFacies | string
   public slantFactor: FmuUpdatable | null
-  public constructor ({ name, slantFactor = null, ...rest }: PolygonArgs & {
-    name: BayfillFacies | string
-    slantFactor: FmuUpdatable | number | null
-  }) {
+
+  public constructor ({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
     if (Object.values(SlantFactorFacies).includes(name)) {

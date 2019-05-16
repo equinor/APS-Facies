@@ -173,7 +173,7 @@ export default {
         const group = getters['groups/byId'](id)
         return group && group.facies.map(getters.byId)
       } else {
-        return facies
+        return facies || null
       }
     },
     byName: (state) => (name) => {
