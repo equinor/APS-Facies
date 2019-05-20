@@ -3,12 +3,18 @@ export enum Orientation {
   'HORIZONTAL',
 }
 
+export type OrientationString = 'V' | 'H'
+
 export default class Direction {
   public readonly orientation: Orientation
 
-  public constructor (direction: Orientation | Direction) {
+  public constructor (direction: Orientation | Direction | OrientationString) {
     if (direction instanceof Direction) {
       direction = direction.orientation
+    } else if (direction === 'V') {
+      direction = Orientation.VERTICAL
+    } else if (direction === 'H') {
+      direction = Orientation.HORIZONTAL
     }
     this.orientation = direction
   }
@@ -19,11 +25,11 @@ export default class Direction {
       : 'Horizontal'
   }
 
-  public get specification (): 'V' | 'H' {
+  public get specification (): OrientationString {
     return this.orientation === Orientation.VERTICAL ? 'V' : 'H'
   }
 
-  public toString (): 'V' | 'H' {
+  public toString (): OrientationString {
     return this.specification
   }
 

@@ -1,7 +1,7 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
 import { PolygonSpecification } from '@/utils/domain/polygon/base'
 import CubicPolygon, { Level } from '@/utils/domain/polygon/cubic'
-import Direction, { Orientation } from '@/utils/domain/truncationRule/cubic/direction'
+import Direction, { Orientation, OrientationString } from '@/utils/domain/truncationRule/cubic/direction'
 import OverlayTruncationRule, {
   OverlaySpecification,
   OverlayTruncationRuleArgs
@@ -10,7 +10,7 @@ import { getFaciesName } from '@/utils/queries'
 import { sample } from 'lodash'
 
 type CubicTruncationRuleArgs = OverlayTruncationRuleArgs<CubicPolygon> & {
-  direction: Direction | Orientation
+  direction: Direction | Orientation | OrientationString
 }
 
 interface CubicPolygonSpecification extends PolygonSpecification {
@@ -77,6 +77,7 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon> {
   public toJSON () {
     return {
       ...super.toJSON(),
+      direction: this.direction.toString(),
       polygons: Object.values(this._polygons),
     }
   }
