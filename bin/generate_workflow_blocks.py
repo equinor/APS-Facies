@@ -226,7 +226,6 @@ def get_root_path():
 def get_workflows():
     return {
         'bin': [
-            'APS_main',
             'updateAPSModelFromFMU',
             'updateAPSModelFromUncertaintyTable',
             'createProbabilityLogs',
@@ -235,6 +234,7 @@ def get_workflows():
         'depricated': [
         ],
         'src/rms_jobs': [
+            'APS_main',
             'APS_simulate_gauss_multiprocessing',
             'APS_simulate_gauss_singleprocessing',
             'defineFaciesProbMapDepTrend',
