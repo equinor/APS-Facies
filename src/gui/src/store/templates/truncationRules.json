@@ -2,15 +2,18 @@
   "types": [
     {
       "name": "Bayfill",
-      "type": "bayfill"
+      "type": "bayfill",
+      "order": 1
     },
     {
       "name": "Non-Cubic",
-      "type": "non-cubic"
+      "type": "non-cubic",
+      "order": 2
     },
     {
       "name": "Cubic",
-      "type": "cubic"
+      "type": "cubic",
+      "order": 3
     }
   ],
   "templates": [

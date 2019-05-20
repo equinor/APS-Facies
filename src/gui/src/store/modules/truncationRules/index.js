@@ -485,10 +485,12 @@ export default {
     },
     ruleTypes (state, getters, rootState, rootGetters) {
       return Object.values(state.templates.types.available)
+        .sort((a, b) => a.order - b.order)
         .map(rule => {
           return {
             text: rule.name,
-            disabled: !hasEnoughFacies(rule, rootGetters)
+            disabled: !hasEnoughFacies(rule, rootGetters),
+            order: rule.order,
           }
         })
     },

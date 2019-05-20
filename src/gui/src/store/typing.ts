@@ -86,6 +86,7 @@ interface RootGetters {
 
   'truncationRule': TruncationRule
   'truncationRules/typeById': (id: ID) => string | null
+  'truncationRules/ruleTypes': { text: string, disabled: boolean, order: number }[]
 
   'gaussianRandomFields/crossSections/current': CrossSection
 
