@@ -152,12 +152,12 @@ export default {
         if (result.valid) {
           const defaultPath = `${this.$store.state.parameters.path.project}/myApsExport.xml`
           this.$refs.exportDialog.open(defaultPath, {})
-            .then((result) => {
-              if (result.save) {
-                const resultPromise = rms.save(result.path, btoa(exportedXMLString))
+            .then(({ save, path }) => {
+              if (save) {
+                const resultPromise = rms.save(path, btoa(exportedXMLString))
                 resultPromise.then((success) => {
                   if (success) {
-                    alert(`model file was saved to ${result.path}`)
+                    alert(`model file was saved to ${path}`)
                   }
                   if (!success) {
                     alert('Saving failed. Did you choose a path that does not exist?')

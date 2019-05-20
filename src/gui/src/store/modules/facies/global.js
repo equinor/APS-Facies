@@ -91,7 +91,6 @@ export default {
   getters: {
     selected: (state, getters, rootState, rootGetters) => {
       return rootGetters['facies/selected']
-        .sort((a, b) => a.code - b.code)
         .map(({ facies }) => state.available[`${facies.id}`])
     }
   },

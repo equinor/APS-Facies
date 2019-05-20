@@ -15,6 +15,9 @@ class FaciesProbability:
         self._name = name
         self._probability = probability
 
+    def __repr__(self):
+        return '{}("{}", {})'.format(self.__class__.__name__, self.name, self.probability)
+
     @property
     def name(self):
         return self._name

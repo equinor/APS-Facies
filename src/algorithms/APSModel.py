@@ -143,21 +143,21 @@ class APSModel:
          rmsWorkflowName - Name of RMS workflow for APS model (Now Optional)
          rmsGridModelName - Name of grid model in RMS project.
          rmsZoneParameterName - Zone parameter for the grid model in the RMS project.
-         rmsRegionParameterName - Region parameter for the grid model in the RMS project (Optional if there are no sones
+         rmsRegionParameterName - Region parameter for the grid model in the RMS project (Optional if there are no zones
              with regions.
          rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
          seedFileName - Name of seed file to be used. Used by scripts for simulation of gaussian fields.
          writeSeeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read.
-                      Used by scripts simulationg gaussian fields.
+                      Used by scripts simulating gaussian fields.
          mainFaciesTable - Object containing the global facies table with facies names an associated
                            facies code common for the RMS project. All facies to be modelled must be defined
                            in the mainFaciesTable.
-         zoneModelTable - Disctionary with key = (zoneNumber, regionNumber) containing zoneModels as values.
-                          Each zoneModel will be associated with the grid cells in the gridmodel that belongs to
+         zoneModelTable - Dictionary with key = (zoneNumber, regionNumber) containing zoneModels as values.
+                          Each zoneModel will be associated with the grid cells in the grid model that belongs to
                           a specified zoneNumber and regionNumber. If regionNumber is not used (is equal to 0),
                           the facies realization will be calculated for the grid cells belonging to the specified zone number.
                           The maximum possible zoneModels will be the sum over all defined (zoneNumber,regionNumber) pairs
-                          that exist in the gridmodel. It is possible (but not very useful) that an APS model is defined for
+                          that exist in the grid model. It is possible (but not very useful) that an APS model is defined for
                           only one (zoneNumber,regionNumber) pair and there does not exist any grid cells satisfying
                           this criteria.
          previewZone, previewRegion, previewCrossSectionType, previewCrossSectionRelativePos:
@@ -171,7 +171,7 @@ class APSModel:
          previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
          previewResolution - Define  whether the testPreview program should use higher resolution or not compared with
                              default resolution taken from the grid model.
-         debugLevel - Define amouth of output to the screen during runs
+         debugLevel - Define amount of output to the screen during runs
 
         """
         # Local variables

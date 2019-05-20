@@ -24,7 +24,9 @@ import APSError from '@/utils/domain/errors/base'
 
 const missingTemplates = (_templates, state) => {
   const name = template => {
-    const type = isUUID(template.type) ? state.types.available[template.type].type : template.type
+    const type = isUUID(template.type)
+      ? state.types.available[template.type].type
+      : template.type
     return `${type}::${template.name}`
   }
   const names = Object.values(_templates).map(template => name(template))

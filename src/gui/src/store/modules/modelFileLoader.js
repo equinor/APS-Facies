@@ -22,7 +22,8 @@ const ensureArray = (value) => {
 }
 
 const getNodeValue = (container, prop) => {
-  let value = resolve(prop, container.APSModel)
+  let value = resolve(prop, container)
+  if (typeof value === 'undefined') return null
   if (value._text) {
     value = value._text.trim()
   }
@@ -30,11 +31,9 @@ const getNodeValue = (container, prop) => {
 }
 
 const getOriginType = (elem) => {
-  if (elem && elem._text) {
-    const value = elem._text.trim().replace(/'/g, '').toUpperCase()
-    return value
-  }
-  return null
+  return elem && elem._text
+    ? elem._text.trim().replace(/'/g, '').toUpperCase()
+    : null
 }
 
 const isFMUUpdatable = (elem) => {
@@ -303,42 +302,40 @@ export default {
      * @returns {Promise<void>}
      */
     populateGUI: async ({ dispatch, commit }, { json, fileName }) => {
-      const apsModelContainer = JSON.parse(json)
+      const apsModelContainer = JSON.parse(json).APSModel
 
       await dispatch('parameters/names/model/select', fileName, { root: true })
 
-      // TODO introduce function (repeating code. Code smell?)
-      const optionalRMSWorkFlowName = getNodeValue(apsModelContainer, 'RMSWorkflowName')
       commit('LOADING', { loading: true, message: `Loading the model file, "${fileName}"` }, { root: true })
+
+      const actions = [
+        { action: 'parameters/names/workflow/select', property: 'RMSWorkflowName', check: true },
+        { action: 'gridModels/select', property: 'GridModelName', check: false },
+        { action: 'parameters/zone/select', property: 'ZoneParamName', check: true },
+        { action: 'parameters/region/select', property: 'RegionParamName', check: true },
+        { action: 'parameters/realization/select', property: 'ResultFaciesParamName', check: true },
+      ]
       try {
-        if (optionalRMSWorkFlowName) {
-          await dispatch('parameters/names/workflow/select', optionalRMSWorkFlowName, { root: true })
+        for (const { action, property, check } of actions) {
+          if (check ? apsModelContainer[`${property}`] : true) {
+            await dispatch(action, getNodeValue(apsModelContainer, property), { root: true })
+          }
         }
 
-        await dispatch('gridModels/select', getNodeValue(apsModelContainer, 'GridModelName'), { root: true })
+        const apsModels = ensureArray(apsModelContainer.ZoneModels.Zone)
 
-        if (apsModelContainer.APSModel.RegionParamName) {
-          await dispatch(`parameters/zone/select`, getNodeValue(apsModelContainer, 'ZoneParamName'), { root: true })
+        await dispatch('populateGlobalFaciesList', apsModelContainer.MainFaciesTable)
+
+        const localActions = [
+          'populateGaussianRandomFields',
+          'populateFaciesProbabilities',
+          'populateTruncationRules',
+          // Now we can select zones and regions on the left hand side of the gui.
+          'selectZonesAndRegions',
+        ]
+        for (const action of localActions) {
+          await dispatch(action, apsModels)
         }
-
-        if (apsModelContainer.APSModel.RegionParamName) {
-          await dispatch(`parameters/region/select`, getNodeValue(apsModelContainer, 'RegionParamName'), { root: true })
-        }
-
-        if (apsModelContainer.APSModel.ResultFaciesParamName) {
-          await dispatch('parameters/realization/select', getNodeValue(apsModelContainer, 'ResultFaciesParamName'), { root: true })
-        }
-
-        await dispatch('populateGlobalFaciesList', apsModelContainer.APSModel.MainFaciesTable)
-
-        await dispatch('populateGaussianRandomFields', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-
-        await dispatch('populateFaciesProbabilities', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-
-        await dispatch('populateTruncationRules', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
-
-        // Now we can select zones and regions on the left hand side of the gui.
-        await dispatch('selectZonesAndRegions', ensureArray(apsModelContainer.APSModel.ZoneModels.Zone))
       } catch (reason) {
         handleError(reason)
       } finally {
@@ -383,7 +380,7 @@ export default {
      * @param zoneModelsFromFile
      */
     selectZonesAndRegions: async ({ dispatch, rootState }, zoneModelsFromFile) => {
-      // syntezing zones and region info: Zones and regions could be specified in weird ways. For instance we could
+      // synthesizing zones and region info: Zones and regions could be specified in weird ways. For instance we could
       // have zones regions defined in the input data as
       //  zone 1, region 2
       //  zone 2, region 3
@@ -470,7 +467,7 @@ export default {
     },
 
     /**
-     * This adds and sets up the gaussian randomfields specified in the file.
+     * This adds and sets up the gaussian random fields specified in the file.
      * @param dispatch
      * @param rootState
      * @param zoneModelsFromFile
@@ -591,7 +588,6 @@ export default {
      * @returns {Promise<void>}
      */
     populateFaciesProbabilities: async ({ dispatch, rootState }, zoneModelsFromFile) => {
-      // zoneModelsFromFile.forEach(zoneModel => {
       for (const zoneModel of zoneModelsFromFile) {
         const useConstantProb = getBooleanValue(zoneModel.UseConstProb)
         const parent = getParent({ rootState }, zoneModel)

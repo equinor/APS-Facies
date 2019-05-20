@@ -6,7 +6,8 @@ import { addItem } from '@/store/actions'
 const isEqual = (values, others) => {
   values = Object.values(values)
   others = Object.values(others)
-  return values.length === others.length && values.every(value => others.indexOf(({ name, type }) => value.name === name && type === value.type))
+  return values.length === others.length
+    && values.every(value => others.indexOf(({ name, type }) => value.name === name && type === value.type))
 }
 
 export default {

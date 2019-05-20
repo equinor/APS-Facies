@@ -1,5 +1,6 @@
 import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
 import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
+import { APSError } from '@/utils/domain/errors'
 import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
 import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
 import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
@@ -11,6 +12,7 @@ import {
   isEmpty,
   notEmpty,
   allSet,
+  isUUID,
 } from '@/utils/helpers'
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 import { RootGetters } from '@/store/typing'
@@ -211,7 +213,10 @@ function faciesName (obj: any) {
 
 function minFacies (rule: any, getters: RootGetters): number {
   let minFacies = 0
-  const type = getters['truncationRules/typeById'](rule.type) || rule.type
+  const type = isUUID(rule.type)
+    ? getters['truncationRules/typeById'](rule.type)
+    : rule.type
+  if (!type) throw new APSError(`There exists no types with the ID ${rule.type}`)
   if (
     [type, rule.type].includes('non-cubic')
     || [type, rule.type].includes('cubic')

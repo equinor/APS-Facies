@@ -65,10 +65,10 @@ function addRMSProjectName (rootState: RootState, doc: Document, parentElement: 
   }
 }
 
-function addRMSWorkFlowName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addRMSWorkflowName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.parameters.names.workflow.selected
   if (value) {
-    parentElement.appendChild(createElement(doc, 'RMSWorkFlowName', value))
+    parentElement.appendChild(createElement(doc, 'RMSWorkflowName', value))
   }
 }
 
@@ -304,7 +304,7 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
     }
 
     if (trendType === 'EllipticCone3D') {
-      // relativeSize is spesific to EllipticCone3D
+      // relativeSize is specific to EllipticCone3D
       trendTypeElement.append(createElement(doc, 'curvature', relativeSize.value,
         relativeSize.updatable ? [{ name: 'kw', value: baseKw + 'RELATIVE_SIZE' }] : null))
     }
@@ -613,7 +613,7 @@ function addZoneModels ({ rootState, rootGetters }: Context, doc: Document, pare
 // @ts-ignore
 function addContent ({ rootState, rootGetters }: Context, doc: Document, rootElem: HTMLElement): void {
   addRMSProjectName(rootState, doc, rootElem)
-  addRMSWorkFlowName(rootState, doc, rootElem)
+  addRMSWorkflowName(rootState, doc, rootElem)
   addGridModelName(rootState, doc, rootElem)
   addZoneParamName(rootState, doc, rootElem)
   addRegionParamName(rootState, doc, rootElem)

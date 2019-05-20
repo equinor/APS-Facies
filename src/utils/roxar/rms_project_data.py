@@ -27,7 +27,10 @@ from src.utils.exceptions.xml import ApsXmlError
 from src.utils.roxar.grid_model import (
     getGridSimBoxSize,
     get_simulation_box_thickness,
-    average_of_property_inside_zone_region, getDiscrete3DParameterValues, create_zone_parameter)
+    average_of_property_inside_zone_region,
+    getDiscrete3DParameterValues,
+    create_zone_parameter,
+)
 from src.utils.plotting import create_facies_map
 from src.utils.truncation_rules import make_truncation_rule
 from src.utils.xmlUtils import prettify

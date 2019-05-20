@@ -41,8 +41,11 @@ RegionNumber = NewType('RegionNumber', int)
 Average = NewType('Average', float)
 
 
-def empty_if_none(func: Callable) -> Callable: ...
-def _option_mapping() -> Dict[str, Type[Enum]]: ...
+def empty_if_none(
+        func:                           Callable
+) -> Callable: ...
+def _option_mapping(
+) -> Dict[str, Type[Enum]]: ...
 
 
 class RMSData:
@@ -81,7 +84,7 @@ class RMSData:
     ) -> GridModels: ...
     def get_grid_model(
             self,
-            name: str
+            name:                        str
     ) -> GridModel: ...
     def get_grid(
             self,
@@ -185,8 +188,8 @@ class RMSData:
     ) -> Dict[str, int]: ...
     @staticmethod
     def save_model(
-            path: str,
-            content: XML,
+            path:                        str,
+            content:                     XML,
     ) -> bool: ...
     @staticmethod
     def get_constant(
@@ -207,7 +210,10 @@ class RMSData:
             _property:                   Property
     ) -> List[CodeName]: ...
     @staticmethod
-    def simulate_realization(fields: List[Dict], specification): ...
+    def simulate_realization(
+            fields:                      List[Dict],
+            specification,
+    ): ...
     @staticmethod
     def get_truncation_map_polygons(
             specification
@@ -220,9 +226,13 @@ class RMSData:
             settings:                    Optional[Dict]
     ) -> List[List[float]]: ...
     @staticmethod
-    def is_aps_model_valid(encoded_xml): ...
+    def is_aps_model_valid(
+            encoded_xml:                 str,
+    ) -> Dict[str, Union[bool, str]]: ...
     @staticmethod
-    def _simulate_gaussian_field(field: Dict) -> GaussianFieldSimulation: ...
+    def _simulate_gaussian_field(
+            field:                       Dict
+    ) -> GaussianFieldSimulation: ...
     @staticmethod
     def open_wiki_help() -> None: ...
 

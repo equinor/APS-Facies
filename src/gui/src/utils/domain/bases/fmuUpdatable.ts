@@ -8,6 +8,7 @@ export interface FmuUpdatable {
 export default class FmuUpdatableValue implements FmuUpdatable {
   public value: number
   public updatable: boolean
+
   public constructor (
     value: number | FmuUpdatable,
     updatable: boolean = false,

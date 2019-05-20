@@ -55,7 +55,7 @@ class FaciesTable(list):
         super().__init__(facies or [])
 
     def __getitem__(self, item):
-        if isinstance(item, int):
+        if isinstance(item, int) or isinstance(item, slice):
             return super().__getitem__(item)
         elif isinstance(item, str):
             for facies in self:

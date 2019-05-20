@@ -56,7 +56,7 @@ def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked
         return None, None
     if blocked_wells.is_empty(realization_number):
         print('Error: Specified blocked wells {} in grid model {} for realization {} is empty'
-              ''.format(blocked_wells_set_name, grid_model_name, str(realization_number+1)))
+              ''.format(blocked_wells_set_name, grid_model_name, realization_number + 1))
         return None, None
     # Get facies property
     facies_property = blocked_wells.properties[facies_log_name]
@@ -372,8 +372,8 @@ def cell_numbers_for_blocked_wells(project, grid_model_name, bw_name):
     for i in range(len(blocked_wells_cell_numbers)):
         cell_number = blocked_wells_cell_numbers[i]
     return  blocked_wells_cell_numbers
-    
-def get_facies_in_zone_from_blocked_wells(project, grid_model_name, bw_name, facies_log_name, zone_number, 
+
+def get_facies_in_zone_from_blocked_wells(project, grid_model_name, bw_name, facies_log_name, zone_number,
                                           region_param_name=None, region_number= 0, realization_number=0):
     cell_numbers =  cell_numbers_for_blocked_wells(project, grid_model_name, bw_name)
     # Check if zone parameter exist. If not create it

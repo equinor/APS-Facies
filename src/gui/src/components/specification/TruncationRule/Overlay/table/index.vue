@@ -43,11 +43,11 @@
 </template>
 
 <script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
 import Facies from '@/utils/domain/facies/local'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-
 import { Polygon } from '@/utils/domain'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 

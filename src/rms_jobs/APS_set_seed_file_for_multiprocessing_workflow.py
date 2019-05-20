@@ -7,6 +7,7 @@ from src.algorithms.APSModel import APSModel
 from src.utils.methods import get_run_parameters
 from src.utils.constants.simple import Debug
 
+
 def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     model_file = params['model_file']
@@ -17,10 +18,9 @@ def run(roxar=None, project=None, **kwargs):
     writeSeedFile = apsModel.writeSeeds
 
     # Set seed file to point to seed file for this realisation
-    seedFileNameNew = 'seed_list_' + str(real_number+1) + '.dat'
+    seedFileNameNew = 'seed_list_' + str(real_number + 1) + '.dat'
     command = 'ln -sf ' + seedFileNameNew + ' ' + seedFileName
     os.system(command)
-
 
     if writeSeedFile:
         if debug_level >= Debug.ON:

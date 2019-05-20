@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from numpy import float64, ndarray
 
-from src.algorithms.APSGaussModel import GaussianFieldName
+from src.algorithms.APSGaussModel import GaussianFieldName, SimulationBoxOrigin
 from src.algorithms.properties import CrossSection, FmuProperty
 from src.utils.constants.simple import Debug, OriginType, TrendType, Direction, TrendParameter
 from typing import List, Optional, Union, Tuple, Dict, Any
@@ -111,6 +111,7 @@ class Trend3D:
         azimuth_sim_box: float,
         preview_size,
         cross_section: CrossSection,
+        sim_box_origin: SimulationBoxOrigin,
     ) -> Tuple[float64, float64, ndarray]: ...
     def getStackingDirection(self) -> int: ...
     def XMLAddElement(

@@ -228,7 +228,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         INDX = self.__node_index['index']
         PFRAC = self.__node_index['probability fraction']
 
-        truncStructure = []
         nPoly = 0
         # Keyword BackGroundModel
         bgmObj = getKeyword(trRuleXML, 'BackGroundModel', 'TruncationRule', modelFileName, required=True)
@@ -260,15 +259,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # print(childL1.tag,childL1.attrib)
             if childL1.tag == kw2:
                 text = childL1.get('name')
-                fName = text.strip()
+                facies_name = text.strip()
                 text = childL1.text
                 probFrac = float(text.strip())
-                if fName not in self._faciesInZone:
+                if facies_name not in self._faciesInZone:
                     raise ValueError(
                         'Error when reading model file: {0}\n'
                         'Error: Read truncation rule: {1}\n'
                         'Error: Specified facies name in truncation rule: {2} is not defined for this zone.'
-                        ''.format(modelFileName, self._className, fName)
+                        ''.format(modelFileName, self._className, facies_name)
                     )
                 if probFrac < 0.0 or probFrac > 1.0:
                     raise ValueError(
@@ -278,7 +277,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         ''.format(modelFileName, self._className)
                     )
 
-                nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
+                nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(facies_name)
                 nPoly += 1
 
                 poly = []
@@ -306,14 +305,14 @@ class Trunc2D_Cubic(Trunc2D_Base):
                     # print(childL2.tag,childL2.attrib)
                     if childL2.tag == kw2:
                         text = childL2.get('name')
-                        fName = text.strip()
+                        facies_name = text.strip()
                         text = childL2.text
                         probFrac = float(text.strip())
-                        if fName not in self._faciesInZone:
+                        if facies_name not in self._faciesInZone:
                             raise ValueError(
                                 'Error when reading model file: ' + modelFileName + '\n'
                                 'Error: Read truncation rule: ' + self._className + '\n'
-                                'Error: Specified facies name in truncation rule: ' + fName +
+                                'Error: Specified facies name in truncation rule: ' + facies_name +
                                 ' is not defined for this zone.'
                             )
                         elif probFrac < 0.0 or probFrac > 1.0:
@@ -323,7 +322,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                 'Error: Specified probability fraction in truncation rule is outside [0,1]'
                             )
 
-                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
+                        nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(facies_name)
                         nPoly += 1
 
                         poly = []
@@ -347,14 +346,14 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             # print(childL3.tag,childL3.attrib)
                             if childL3.tag == kw2:
                                 text = childL3.get('name')
-                                fName = text.strip()
+                                facies_name = text.strip()
                                 text = childL3.text
                                 probFrac = float(text.strip())
-                                if not (fName in self._faciesInZone):
+                                if not (facies_name in self._faciesInZone):
                                     raise ValueError(
                                         'Error when reading model file: ' + modelFileName + '\n'
                                         'Error: Read truncation rule: ' + self._className + '\n'
-                                        'Error: Specified facies name in truncation rule: ' + fName +
+                                        'Error: Specified facies name in truncation rule: ' + facies_name +
                                         ' is not defined for this zone.'
                                     )
                                 if not (0.0 <= probFrac <= 1.0):
@@ -364,7 +363,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                         'Error: Specified probability fraction in truncation rule is outside [0,1]'
                                     )
 
-                                nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
+                                nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(facies_name)
                                 nPoly += 1
 
                                 poly = []
@@ -384,39 +383,36 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # Note that overlay facies is not a part of this calculations.
         sumProbFrac = np.zeros(self._nBackGroundFacies, np.float32)
         nodeListL1 = truncStructure[NLIST]
-        for i in range(len(nodeListL1)):
-            item = nodeListL1[i]
+        for item in nodeListL1:
             if item[TYPE] == 'F':
                 indx = item[INDX]
                 probFrac = item[PFRAC]
                 sumProbFrac[indx] += probFrac
             else:
                 nodeListL2 = item[NLIST]
-                for j in range(len(nodeListL2)):
-                    item = nodeListL2[j]
+                for item in nodeListL2:
                     if item[TYPE] == 'F':
                         indx = item[INDX]
                         probFrac = item[PFRAC]
                         sumProbFrac[indx] += probFrac
                     else:
                         nodeListL3 = item[NLIST]
-                        for k in range(len(nodeListL3)):
-                            item = nodeListL3[k]
+                        for item in nodeListL3:
                             indx = item[INDX]
                             probFrac = item[PFRAC]
                             sumProbFrac[indx] += probFrac
 
         # Check the sum over background facies for probfrac
         for i in range(self.num_facies_in_truncation_rule):
-            fName = self._faciesInTruncRule[i]
+            facies_name = self._faciesInTruncRule[i]
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Sum prob frac for facies {0} is: {1}'.format(fName, str(sumProbFrac[i])))
+                print('Debug output: Sum prob frac for facies {0} is: {1}'.format(facies_name, sumProbFrac[i]))
 
             if abs(sumProbFrac[i] - 1.0) > 0.001:
                 raise ValueError(
                     'Error in {0}\n'
                     'Error: Sum of probability fractions over all polygons for facies {1} is not 1.0\n'
-                    'Error: The sum is: {2}'.format(self._className, fName, str(sumProbFrac[i]))
+                    'Error: The sum is: {2}'.format(self._className, facies_name, sumProbFrac[i])
                 )
         self.__truncStructure = truncStructure
         if self._debug_level >= Debug.VERY_VERBOSE:
@@ -567,8 +563,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # directionL1 = 'H'
             yminL1 = 0.0
             ymaxL1 = 0.0
-            for i in range(len(nodeListL1)):
-                itemL1 = nodeListL1[i]
+            for itemL1 in nodeListL1:
                 p = itemL1[PROB]
                 yminL1 = ymaxL1
                 ymaxL1 = yminL1 + p
@@ -580,8 +575,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
             # directionL1 = 'V'
             xminL1 = 0.0
             xmaxL1 = 0.0
-            for i in range(len(nodeListL1)):
-                itemL1 = nodeListL1[i]
+            for itemL1 in nodeListL1:
                 p = itemL1[PROB]
                 xminL1 = xmaxL1
                 xmaxL1 = xminL1 + p
@@ -594,8 +588,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if self.__useLevel2 == 1:
             if directionL1 == 'H':
                 # directionL2 = 'V'
-                for i in range(len(nodeListL1)):
-                    itemL1 = nodeListL1[i]
+                for itemL1 in nodeListL1:
                     if itemL1[TYPE] == 'N':
                         probL1 = itemL1[PROB]
                         if probL1 > eps:
@@ -614,8 +607,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
             else:
                 # directionL2 = 'H'
-                for i in range(len(nodeListL1)):
-                    itemL1 = nodeListL1[i]
+                for itemL1 in nodeListL1:
                     if itemL1[TYPE] == 'N':
                         probL1 = itemL1[PROB]
                         if probL1 > eps:
@@ -637,8 +629,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if self.__useLevel3 == 1:
             if directionL1 == 'V':
                 # directionL3 = 'V'
-                for i in range(len(nodeListL1)):
-                    itemL1 = nodeListL1[i]
+                for itemL1 in nodeListL1:
                     if itemL1[TYPE] == 'N':
                         probL1 = itemL1[PROB]
                         if probL1 > eps:
@@ -655,8 +646,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                         xmaxL3 = xminL2
                                         yminL2 = itemL2[YMIN]
                                         ymaxL2 = itemL2[YMAX]
-                                        for k in range(len(nodeListL3)):
-                                            itemL3 = nodeListL3[k]
+                                        for itemL3 in nodeListL3:
                                             p = itemL3[PROB] / probL2
                                             xminL3 = xmaxL3
                                             xmaxL3 = xminL3 + p * xLength
@@ -666,8 +656,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                             itemL3[YMAX] = ymaxL2
             else:
                 # directionL3 = 'H'
-                for i in range(len(nodeListL1)):
-                    itemL1 = nodeListL1[i]
+                for itemL1 in nodeListL1:
                     if itemL1[TYPE] == 'N':
                         probL1 = itemL1[PROB]
                         if probL1 > eps:
@@ -708,8 +697,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         else:
             faciesCode, fIndx = self.__calcFaciesLevel1V(nodeListL1, alphaCoord)
         return faciesCode, fIndx
-
-
 
     def facies_index_in_truncation_rule_for_polygon(self, polygon_index):
         indx = self.__fIndxPerPolygon[polygon_index]
@@ -857,8 +844,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         faciesCode = -1
         fIndx = -1
         x = alphaCoord[self._alphaIndxList[0]]
-        for k in range(len(nodeListL3)):
-            itemL3 = nodeListL3[k]
+        for itemL3 in nodeListL3:
             typeNode = itemL3[self.__node_index['type']]
             if typeNode != 'F':
                 raise ValueError(
@@ -1177,9 +1163,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
         INDXL3 = 4
 
         # First item contain only 'H' or 'V'
-        directionL1 = 'H'
-        directionL2 = 'V'
-        directionL3 = 'H'
         directionL1 = truncStructureList[0]
         if directionL1 not in ['V', 'H']:
             raise ValueError("The direction of L1 must be either 'H' or 'V'. It is {}".format(directionL1))
@@ -1187,6 +1170,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if directionL1 == 'V':
             directionL2 = 'H'
             directionL3 = 'V'
+        else:
+            directionL2 = 'V'
+            directionL3 = 'H'
 
         nodeList = None
         poly = None
@@ -1274,7 +1260,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         nodeListLevel3 = []
                         nodeData = ['N', directionL3, nodeListLevel3, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
-                        parentNodeDefinedL2 = 1
 
                         # Create L3 facies node
                         nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
@@ -1306,7 +1291,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         nodeListLevel3 = []
                         nodeData = ['N', directionL3, nodeListLevel3, 0.0, poly, 0.0, 0.0, 0.0, 0.0]
                         nodeListLevel2.append(nodeData)
-                        parentNodeDefinedL2 = 1
 
                         # Create L3 facies node
                         nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
@@ -1394,7 +1378,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 nodeElementL2.text = ' ' + str(probFrac) + ' '
                 nodeElementL1.append(nodeElementL2)
             else:
-                directionL2 = itemL1[DIR]
                 tag = 'L2'
                 nodeElementL2 = Element(tag)
                 nodeElementL1.append(nodeElementL2)
@@ -1412,7 +1395,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
                         nodeElementL3.text = ' ' + str(probFrac) + ' '
                         nodeElementL2.append(nodeElementL3)
                     else:
-                        directionL3 = itemL2[DIR]
                         tag = 'L3'
                         nodeElementL3 = Element(tag)
                         nodeElementL2.append(nodeElementL3)
@@ -1427,5 +1409,4 @@ class Trunc2D_Cubic(Trunc2D_Base):
                             nodeElementL3Below = Element(tag, attribute)
                             nodeElementL3Below.text = ' ' + str(probFrac) + ' '
                             nodeElementL3.append(nodeElementL3Below)
-
         super()._XMLAddElement(trRuleTypeElement)
