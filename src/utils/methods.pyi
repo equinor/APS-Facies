@@ -20,6 +20,7 @@ GridModelName = NewType('GridModelName', str)
 BlockedWellSetName = NewType('BlockedWellSetName', str)
 FaciesLogName = NewType('FaciesLogName', str)
 WorkflowName = NewType('WorkflowName', str)
+SeedLogFile = NamedTuple('SeedLogFile', str)
 
 
 class RunParameters(NamedTuple):
@@ -31,6 +32,7 @@ class RunParameters(NamedTuple):
     tag_all_variables: bool
     fmu_variables_file: FmuVariablesFile
     write_log_file: bool
+    seed_log_file: SeedLogFile
     input_directory: TemporaryGaussianSimulation
     probability_log_specification_file: ProbabilityLogSpecificationFile
     facies_code: int
@@ -77,6 +79,7 @@ def get_model_file_name(
         _default_name: str = 'APS.xml',
         **kwargs
 ) -> ModelFile: ...
+def get_seed_log_file(**kwargs) -> SeedLogFile: ...
 def get_debug_level(**kwargs) -> Debug: ...
 def get_global_ipl_file(**kwargs) -> GlobalIplFile: ...
 def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile: ...
