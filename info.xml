@@ -8,4 +8,5 @@
   <meta name="enable-mustache" content="False" />
   <meta name="uipy-timeout" content="10000" />
   <tree-location name="Grid models" />
+  <tree-location name="Grid models/*" />
 </plugin>
