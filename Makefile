@@ -67,10 +67,12 @@ GET_RMS_RESOURCES := get-rms get-rms-project
 endif
 
 APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | sed -e "s/v//g")
+APS_FULL_VERSION := $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH := $(shell git rev-parse --short HEAD)
+LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
 
 PLUGIN_NAME := aps_gui
-PLUGIN_BIN = $(PLUGIN_NAME).$(APS_VERSION).$(BUILD_NUMBER).plugin
+PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
 PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
 WEB_DIR := $(SOURCE_DIR)/gui
 LIB_PREFIX := $(CODE_DIR)/libraries
@@ -192,6 +194,9 @@ NO_COLOR = \033[0m
 # Build / clean / run
 build: clean-all init
 
+build-stable-gui:
+	make build-gui VUE_APP_BUILD_MODE=stable
+
 build-gui: clean-build increase-build-number build-front-end compile-files-for-plugin
 	cd $(BUILD_DIR) && \
 	$(ZIP) $(PLUGIN_BIN) $(PLUGIN_NAME)
@@ -233,14 +238,23 @@ clean-plugin:
 	rm -rf $(PLUGIN_DIR) $(PLUGIN_DIR).plugin
 
 build-front-end: $(PACKAGE.JSON) build-dir
+	VUE_APP_APS_VERSION="$(APS_VERSION)" \
+	VUE_APP_BUILD_NUMBER="$(BUILD_NUMBER)" \
+	VUE_APP_HASH="$(LATEST_COMMIT_HASH)" \
 	$(YARN) build && \
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
 
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
 
-auxillary-files:
+auxillary-files: VERSION COMMIT
 	cp $(INFO.XML) $(PLUGIN_DIR)
+
+VERSION:
+	echo $(APS_FULL_VERSION) > $(PLUGIN_DIR)/VERSION
+
+COMMIT:
+	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
 
 init: initialize-python-environment dependencies init-workflow package.json
 
