@@ -495,7 +495,7 @@ function addTruncationRuleCubic ({ rootState }: { rootState: RootState }, doc: D
       element.append(createElement(doc, 'ProbFrac', polygon.fraction, [{ name: 'name', value: getFaciesName(polygon) }]))
     }
     function addPolygon (element: HTMLElement, polygon: CubicPolygon): void {
-      if (polygon.facies) {
+      if (polygon.children.length === 0) {
         addFraction(element, polygon)
       } else {
         const attributes = !polygon.parent
