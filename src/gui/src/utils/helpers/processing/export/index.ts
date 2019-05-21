@@ -57,12 +57,8 @@ function createElement (doc: Document, elemName: string, elemValue?: Value | nul
 }
 
 function addRMSProjectName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
-  const value = rootState.parameters.names.project.selected
-  if (value) {
-    parentElement.appendChild(createElement(doc, 'RMSProjectName', value))
-  } else {
-    throw new APSExportError('The field "APS Model" is not filled')
-  }
+  const name = rootState.parameters.names.project.selected || '[ UNKNOWN ]'
+  parentElement.appendChild(createElement(doc, 'RMSProjectName', name))
 }
 
 function addRMSWorkflowName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
