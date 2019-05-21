@@ -30,12 +30,18 @@ export default {
     expand: VueTypes.bool.def(false),
   },
 
+  computed: {
+    selectedFacies () {
+      return this.$store.getters['facies/global/selected']
+    },
+  },
+
   asyncComputed: {
     data: {
       async get () {
         return plotify(
           await rms.truncationPolygons(makeTruncationRuleSpecification(this.value, this.$store.getters)),
-          this.$store.getters['facies/global/selected']
+          this.selectedFacies
         )
       },
       shouldUpdate () {
@@ -48,6 +54,16 @@ export default {
         }
       },
     },
+  },
+
+  watch: {
+    selectedFacies: {
+      deep: true,
+      handler () {
+        // To detect changes in alias
+        this.$asyncComputed.data.update()
+      }
+    }
   },
 
   methods: {
