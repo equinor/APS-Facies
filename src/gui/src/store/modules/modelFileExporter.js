@@ -58,9 +58,8 @@ const addZoneParamName = (rootState, doc, parentElement) => {
 }
 
 const addRegionParamName = (rootState, doc, parentElement) => {
-  const value = rootState.parameters.region.selected
-  if (value) {
-    parentElement.appendChild(createElement(doc, 'RegionParamName', value))
+  if (rootState.regions.use) {
+    parentElement.appendChild(createElement(doc, 'RegionParamName', rootState.parameters.region.selected))
   }
 }
 
