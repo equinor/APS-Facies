@@ -137,10 +137,12 @@ export default {
       rms.openWikiHelp()
     },
     importModelFile (file) {
-      const reader = new FileReader()
-      reader.onloadend = fileHandler(this.$store, file.name)
-      reader.readAsText(file)
-      this.$refs.uploadButton.clear()
+      if (file) {
+        const reader = new FileReader()
+        reader.onloadend = fileHandler(this.$store, file.name)
+        reader.readAsText(file)
+        this.$refs.uploadButton.clear()
+      }
     },
     exportModelFile: async function () {
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
