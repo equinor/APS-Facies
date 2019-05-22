@@ -122,12 +122,12 @@ export default {
       if (preset.template) commit('CHANGE_TEMPLATE', preset)
       await dispatch('templates/populate', templates)
       Object.values(rules).forEach(rule => {
-        rule.backgroundFields = rule.backgroundFields.map(({ id }) => rootGetters['gaussianRandomFields/byId'](id))
+        rule.backgroundFields = rule.backgroundFields.map(field => rootGetters['gaussianRandomFields/byId'](field))
         rule.polygons.forEach(polygon => {
-          polygon.facies = rootGetters['facies/byId'](getId(polygon.facies))
+          polygon.facies = rootGetters['facies/byId'](polygon.facies)
           if (polygon.overlay) {
-            polygon.field = rootGetters['gaussianRandomFields/byId'](polygon.field.id)
-            polygon.group = rootGetters['facies/groups/byId'](polygon.group.id)
+            polygon.field = rootGetters['gaussianRandomFields/byId'](polygon.field)
+            polygon.group = rootGetters['facies/groups/byId'](polygon.group)
           }
         })
         rule.polygons = makePolygonsFromSpecification(rule.polygons)

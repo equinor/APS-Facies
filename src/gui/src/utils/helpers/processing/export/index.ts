@@ -1,5 +1,6 @@
 import { RootGetters, RootState } from '@/store/typing'
 import { hasParents } from '@/utils'
+import { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
 import {
   Bayfill,
@@ -367,7 +368,6 @@ function getNumberOfFieldsForTruncRule ({ rootState }: { rootState: RootState },
   return relevantFields ? relevantFields.length : 0
 }
 
-// @ts-ignore
 function findFaciesNameForNamedPolygon (truncRule: Bayfill, polygonName: string): string {
   const polygonInRule = truncRule.polygons.find((polygon): boolean => polygon.name === polygonName)
   return polygonInRule && polygonInRule.facies
@@ -375,8 +375,7 @@ function findFaciesNameForNamedPolygon (truncRule: Bayfill, polygonName: string)
     : ''
 }
 
-// @ts-ignore
-function getAlphaNames<P extends Polygon> (truncRule: TruncationRuleBase<P>): string {
+function getAlphaNames<P extends Polygon, S extends PolygonSerialization> (truncRule: TruncationRuleBase<P, S>): string {
   const alphaFields = truncRule.backgroundFields
   return alphaFields.map((field): string => field.name).join(' ')
 }
@@ -416,7 +415,12 @@ function addTruncationRuleBayFill ({ rootState }: { rootState: RootState }, doc:
   })
 }
 
-function addTruncationRuleOverlay<P extends Polygon, T extends OverlayTruncationRule<P>> (
+function addTruncationRuleOverlay<
+  P extends Polygon,
+  S extends PolygonSerialization,
+  Sp extends PolygonSpecification,
+  T extends OverlayTruncationRule<P, S, Sp>
+> (
   { rootState }: { rootState: RootState },
   doc: Document,
   parent: Parent,

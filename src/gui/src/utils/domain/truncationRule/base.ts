@@ -1,13 +1,22 @@
 import { Named } from '@/utils/domain/bases'
 import ZoneRegionDependent, {
   DependentConfiguration,
+  DependentSerialization,
 } from '@/utils/domain/bases/zoneRegionDependent'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
-import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID, Identified } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
+
+export interface TruncationRuleSerialization<S extends PolygonSerialization> extends DependentSerialization {
+  name: string
+  type: string
+  polygons: S[]
+  backgroundFields: ID[]
+  realization: number[][] | null
+}
 
 export type TruncationRuleConfiguration<T extends Polygon> = DependentConfiguration & {
   name: string
@@ -16,7 +25,7 @@ export type TruncationRuleConfiguration<T extends Polygon> = DependentConfigurat
   realization?: number[][]
 }
 
-export default abstract class TruncationRule<T extends Polygon> extends ZoneRegionDependent implements Named {
+export default abstract class TruncationRule<T extends Polygon, S extends PolygonSerialization> extends ZoneRegionDependent implements Named {
   public readonly name: string
 
   public realization: number[][] | null
@@ -83,6 +92,18 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
       throw new APSTypeError(`${item} is not valid`)
     }
   }
+
+  protected toJSON (): TruncationRuleSerialization<S> {
+    return {
+      ...super.toJSON(),
+      type: this.type,
+      name: this.name,
+      parent: this.parent,
+      polygons: Object.values(this._polygons).map((polygon): S => (polygon.toJSON() as S)),
+      backgroundFields: this.backgroundFields.map((field): ID => field.id),
+      realization: this.realization,
+    }
+  }
 }
 
-export type TruncationRules<T extends Polygon> = Identified<TruncationRule<T>>
+export type TruncationRules<T extends Polygon, S extends PolygonSerialization> = Identified<TruncationRule<T, S>>

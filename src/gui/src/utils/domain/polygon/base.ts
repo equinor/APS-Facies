@@ -17,6 +17,13 @@ export interface PolygonSpecification extends BasePolygonSpec<string> {
   fraction: PROBABILITY
 }
 
+export interface PolygonSerialization extends BasePolygonSpec<ID | null> {
+  id: ID
+  facies: ID | null
+  fraction: PROBABILITY
+  overlay: boolean
+}
+
 export default abstract class Polygon extends BaseItem {
   public order: ORDER
   public fraction: PROBABILITY
@@ -39,6 +46,17 @@ export default abstract class Polygon extends BaseItem {
       fraction: this.fraction,
       order: this.order,
     }
+  }
+
+  public toJSON (): PolygonSerialization {
+    return {
+      id: this.id,
+      facies: this.facies ? this.facies.id : null,
+      fraction: this.fraction,
+      order: this.order,
+      overlay: this.overlay,
+    }
+  }
 }
 
 export type Polygons = Identified<Polygon>

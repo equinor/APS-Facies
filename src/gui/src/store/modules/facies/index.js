@@ -65,7 +65,10 @@ export default {
         await dispatch('normalize', { selected: getRelevantFacies() })
       }
     },
-    populate: ({ commit, state }, facies) => {
+    populate: ({ commit, state, getters }, facies) => {
+      facies.forEach(facies => {
+        facies.facies = getters['byId'](getId(facies.facies))
+      })
       facies = makeData(facies, Facies, state.available)
       commit('AVAILABLE', facies)
     },

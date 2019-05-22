@@ -2,8 +2,13 @@ import CodeError from '@/utils/domain/bases/discrete/codeError'
 import { APSTypeError } from '@/utils/domain/errors'
 import { CODE, ID } from '@/utils/domain/types'
 import { isInteger } from 'lodash'
-import BaseItem from '../baseItem'
+import BaseItem, { BaseItemSerialization } from '../baseItem'
 import { Discrete as IDiscrete } from '../interfaces'
+
+export interface DiscreteSerialization extends BaseItemSerialization {
+  name: string
+  code: number
+}
 
 export default class Discrete extends BaseItem implements IDiscrete {
   public readonly name: string
@@ -15,5 +20,13 @@ export default class Discrete extends BaseItem implements IDiscrete {
     if (!isInteger(code)) throw new APSTypeError(`A discrete item MUST have an integer as code. Was ${code}`)
     if (code < 0) throw new CodeError(code)
     this.code = code
+  }
+
+  protected toJSON (): DiscreteSerialization {
+    return {
+      ...super.toJSON(),
+      name: this.name,
+      code: this.code,
+    }
   }
 }

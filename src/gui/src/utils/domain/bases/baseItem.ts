@@ -4,6 +4,10 @@ import { ID } from '@/utils/domain/types'
 import { isUUID } from '@/utils/helpers'
 import { Identifiable } from './interfaces'
 
+export interface BaseItemSerialization {
+  id: ID
+}
+
 export interface BaseItemConfiguration {
   id?: ID
 }
@@ -16,7 +20,12 @@ export default class BaseItem implements Identifiable {
     this.id = id
   }
 
-  public toJSON () {
+  protected toJSON (): BaseItemSerialization {
+    return {
+      id: this.id
+    }
+  }
+  protected objectify (): { [_: string]: any } {
     // Include all (computed) properties, while dumping state to JSON
     // This makes reconstruction / population _much_ easier
     // Adapted from https://stackoverflow.com/a/50785428, and https://stackoverflow.com/a/8024294

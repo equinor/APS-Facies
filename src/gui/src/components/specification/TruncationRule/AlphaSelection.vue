@@ -19,17 +19,17 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { GaussianRandomField } from '@/utils/domain'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import TruncationRule from '@/utils/domain/truncationRule/base'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
 
 @Component
-export default class AlphaSelection<P extends Polygon> extends Vue {
+export default class AlphaSelection<P extends Polygon, S extends PolygonSerialization> extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField | null
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<P>
+  readonly rule!: TruncationRule<P, S>
 
   @Prop({ default: 0 })
   readonly channel: number

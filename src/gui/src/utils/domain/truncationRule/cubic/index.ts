@@ -1,7 +1,8 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
-import CubicPolygon, { CubicPolygonSpecification } from '@/utils/domain/polygon/cubic'
+import CubicPolygon, { CubicPolygonSerialization, CubicPolygonSpecification } from '@/utils/domain/polygon/cubic'
 import Direction, { Orientation, OrientationString } from '@/utils/domain/truncationRule/cubic/direction'
 import OverlayTruncationRule, {
+  OverlaySerialization,
   OverlaySpecification,
   OverlayTruncationRuleArgs
 } from '@/utils/domain/truncationRule/overlay'
@@ -15,7 +16,11 @@ export interface CubicSpecification extends OverlaySpecification<CubicPolygonSpe
   direction: OrientationString
 }
 
-export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPolygonSpecification> {
+export interface CubicSerialization extends OverlaySerialization<CubicPolygonSerialization> {
+  direction: OrientationString
+}
+
+export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPolygonSerialization, CubicPolygonSpecification> {
   public direction: Direction
 
   public constructor ({ direction, ...rest }: CubicTruncationRuleArgs) {
@@ -58,11 +63,10 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
     }
   }
 
-  public toJSON () {
+  public toJSON (): CubicSerialization {
     return {
       ...super.toJSON(),
       direction: this.direction.toString(),
-      polygons: Object.values(this._polygons),
     }
   }
 }

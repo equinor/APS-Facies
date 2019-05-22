@@ -2,10 +2,11 @@ import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import APSTypeError from '@/utils/domain/errors/type'
 import FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
-import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
-import OverlayPolygon, { CENTER } from '@/utils/domain/polygon/overlay'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import OverlayPolygon, { CENTER, OverlayPolygonSerialization } from '@/utils/domain/polygon/overlay'
 import TruncationRule, {
   TruncationRuleConfiguration,
+  TruncationRuleSerialization,
 } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { getId, allSet } from '@/utils/helpers'
@@ -28,11 +29,17 @@ export interface OverlaySpecification<P extends PolygonSpecification> {
   polygons: P[]
 }
 
+export interface OverlaySerialization<P extends PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
+  _useOverlay: boolean
+}
+
 export default abstract class OverlayTruncationRule<
   T extends Polygon,
+  S extends PolygonSerialization,
   P extends PolygonSpecification,
 > extends TruncationRule<
-  T | OverlayPolygon
+  T | OverlayPolygon,
+  S | OverlayPolygonSerialization
   > {
   protected _useOverlay: boolean
 
@@ -118,6 +125,13 @@ export default abstract class OverlayTruncationRule<
       return false
     } else {
       throw new APSTypeError('The given item is of incompatible type')
+    }
+  }
+
+  protected toJSON (): OverlaySerialization<S> {
+    return {
+      ...super.toJSON(),
+      _useOverlay: this.useOverlay,
     }
   }
 }

@@ -17,6 +17,9 @@ export default {
 
   actions: {
     populate ({ commit, rootGetters }, groups) {
+      groups.forEach(group => {
+        group.facies = group.facies.map(facies => rootGetters['facies/byId'](getId(facies)))
+      })
       groups = groups.map(group => new FaciesGroup(group))
       groups.forEach(group => {
         if (group.facies.some(facies => !rootGetters['facies/byId'](facies))) {

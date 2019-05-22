@@ -1,7 +1,7 @@
 import FmuUpdatableValue, { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import APSError from '@/utils/domain/errors/base'
 import APSTypeError from '@/utils/domain/errors/type'
-import Polygon, { PolygonArgs, PolygonSpecification } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
 enum SlantFactorFacies {
   Floodplain = 'Floodplain',
@@ -24,6 +24,11 @@ export interface BayfillPolygonSpecification extends PolygonSpecification {
   name: string
   polygon: string
   factor: FmuUpdatable
+}
+
+export interface BayfillPolygonSerialization extends PolygonSerialization {
+  name: BayfillFacies | string
+  slantFactor?: FmuUpdatable
 }
 
 export default class BayfillPolygon extends Polygon {
@@ -54,6 +59,14 @@ export default class BayfillPolygon extends Polygon {
       name: _mapping[this.name],
       polygon: this.name,
       factor: this.slantFactor,
+    }
+  }
+
+  public toJSON (): BayfillPolygonSerialization {
+    return {
+      ...super.toJSON(),
+      name: this.name,
+      ...(this.slantFactor ? { slantFactor: this.slantFactor } : {})
     }
   }
 }

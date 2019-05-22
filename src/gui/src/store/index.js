@@ -97,7 +97,7 @@ const store = new Vuex.Store({
         // Regions
         if (notEmpty(data.regions.available)) {
           await dispatch('regions/use', data.regions)
-          await dispatch('regions/populate', data.regions.available)
+          await dispatch('regions/populate', Object.values(data.regions.available))
           await dispatch('regions/current', { id: data.regions.current })
         }
 
@@ -108,6 +108,7 @@ const store = new Vuex.Store({
         await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
 
         // Gaussian Random Fields
+        await dispatch('gaussianRandomFields/crossSections/populate', Object.values(data.gaussianRandomFields.crossSections.available))
         await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.fields))
 
         // Truncation rules

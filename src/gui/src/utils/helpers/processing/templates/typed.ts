@@ -8,6 +8,24 @@ import Cubic from '@/utils/domain/truncationRule/cubic'
 
 type Polygon = BayfillPolygon | NonCubicPolygon | CubicPolygon | OverlayPolygon
 
+function addChildren (polygon: CubicPolygon, parsedPolygons: Polygon[]): void {
+  polygon.children = polygon.children.map((child): CubicPolygon => {
+    const found = parsedPolygons.find((polygon): boolean => polygon.id === getId(child))
+    if (!found || !(found instanceof CubicPolygon)) {
+      throw new APSTypeError(`The child reference of ${found ? found.id : found}, is not a Cubic Polygon`)
+    }
+    return found
+  })
+}
+
+function addParent (polygon: CubicPolygon, parsedPolygons: Polygon[]): void {
+  const parent = parsedPolygons.find((item): boolean => item.id === getId(polygon.parent))
+  if (!(parent instanceof CubicPolygon)) {
+    throw new APSTypeError(`The parent reference of ${polygon.id}, is not a Cubic Polygon`)
+  }
+  polygon.parent = (parent as CubicPolygon)
+}
+
 export function makePolygonsFromSpecification (polygons: any[]): Polygon[] {
   const parsedPolygons = polygons.map((polygon): Polygon => {
     if (
@@ -51,16 +69,11 @@ export function makePolygonsFromSpecification (polygons: any[]): Polygon[] {
   return parsedPolygons
     .map((polygon): Polygon => {
       if (polygon instanceof CubicPolygon) {
-        if (polygon.parent === null) {
+        if (polygon.parent !== null) {
           // This is the root
-          return polygon
-        } else {
-          const parent = parsedPolygons.find((item): boolean => item.id === getId(polygon.parent))
-          if (!(parent instanceof CubicPolygon)) {
-            throw new APSTypeError(`The parent reference of ${polygon.id}, is not a Cubic Polygon`)
-          }
-          polygon.parent = (parent as CubicPolygon)
+          addParent(polygon, parsedPolygons)
         }
+        addChildren(polygon, parsedPolygons)
       }
       return polygon
     })

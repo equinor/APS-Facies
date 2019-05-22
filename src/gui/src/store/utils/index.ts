@@ -61,9 +61,9 @@ function mirrorZoneRegions (store: Store<RootState>): void {
   })
 }
 
-function updateFacies<P extends Polygon> (
+function updateFacies<P extends Polygon, S extends PolygonSerialization> (
   dispatch: Dispatch,
-  rule: TruncationRule<P>,
+  rule: TruncationRule<P, S>,
   polygon: Polygon,
   facies: Facies | ID,
   swap: boolean = true

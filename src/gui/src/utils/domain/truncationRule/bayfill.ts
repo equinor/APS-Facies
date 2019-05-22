@@ -1,5 +1,6 @@
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import BayfillPolygon, {
+  BayfillPolygonSerialization,
   BayfillPolygonSpecification
 } from '@/utils/domain/polygon/bayfill'
 import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
@@ -7,7 +8,7 @@ import { ID } from '@/utils/domain/types'
 
 export type BayfillSpecification = BayfillPolygonSpecification[]
 
-export default class Bayfill extends TruncationRule<BayfillPolygon> {
+export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolygonSerialization> {
   public constructor (props: TruncationRuleConfiguration<BayfillPolygon>) {
     super(props)
 

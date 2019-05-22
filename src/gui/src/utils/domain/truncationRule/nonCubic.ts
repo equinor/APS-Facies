@@ -1,4 +1,5 @@
 import NonCubicPolygon, {
+  NonCubicPolygonSerialization,
   NonCubicPolygonSpecification,
 } from '@/utils/domain/polygon/nonCubic'
 import OverlayTruncationRule, {
@@ -8,7 +9,7 @@ import OverlayTruncationRule, {
 
 export type NonCubicSpecification = OverlaySpecification<NonCubicPolygonSpecification>
 
-export default class NonCubic extends OverlayTruncationRule<NonCubicPolygon, NonCubicPolygonSpecification> {
+export default class NonCubic extends OverlayTruncationRule<NonCubicPolygon, NonCubicPolygonSerialization, NonCubicPolygonSpecification> {
   public constructor (props: OverlayTruncationRuleArgs<NonCubicPolygon>) {
     super(props)
   }

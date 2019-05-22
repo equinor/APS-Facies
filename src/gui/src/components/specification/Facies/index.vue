@@ -12,7 +12,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { Store } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import Facies from '@/utils/domain/facies/local'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import FaciesSpecificationBase from './base.vue'
@@ -24,12 +24,12 @@ import { updateFacies } from '@/store/utils'
     FaciesSpecificationBase,
   }
 })
-export default class FaciesSpecification<P extends Polygon> extends Vue {
+export default class FaciesSpecification<P extends Polygon, S extends PolygonSerialization> extends Vue {
   @Prop({ required: true })
   readonly value: Polygon
 
   @Prop({ required: true })
-  readonly rule: TruncationRule<P>
+  readonly rule: TruncationRule<P, S>
 
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean

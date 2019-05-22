@@ -1,14 +1,22 @@
-import ZoneRegionDependent, { DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
+import ZoneRegionDependent, {
+  DependentConfiguration,
+  DependentSerialization
+} from '@/utils/domain/bases/zoneRegionDependent'
 import Facies from '@/utils/domain/facies/local'
 import { ID } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 import { checkFaciesId } from './helpers'
 
+export interface FaciesGroupSerialization extends DependentSerialization {
+  facies: ID[]
+}
+
 export default class FaciesGroup extends ZoneRegionDependent {
   public facies: Facies[]
+
   public constructor ({ facies, ...rest }: DependentConfiguration & { facies: Facies[]}) {
     super(rest)
-    facies.forEach(facies => {
+    facies.forEach((facies): void => {
       checkFaciesId(facies)
     })
     this.facies = facies
@@ -23,5 +31,12 @@ export default class FaciesGroup extends ZoneRegionDependent {
   public contains (facies: Facies[]): boolean {
     const collection: Set<ID> = new Set(facies.map(getId))
     return this.facies.filter(x => !collection.has(x.id)).length === 0
+  }
+
+  public toJSON (): FaciesGroupSerialization {
+    return {
+      ...super.toJSON(),
+      facies: this.facies.map(({ id }): ID => id)
+    }
   }
 }

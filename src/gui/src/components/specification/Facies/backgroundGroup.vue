@@ -13,7 +13,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Facies } from '@/utils/domain'
 import { RootGetters } from '@/store/typing'
 import FaciesGroup from '@/utils/domain/facies/group'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import TruncationRule from '@/utils/domain/truncationRule/base'
@@ -25,12 +25,12 @@ function isFaciesSelected (group: FaciesGroup | undefined, facies: Facies): bool
 }
 
 @Component
-export default class BackgroundGroupFaciesSpecification<P extends Polygon> extends Vue {
+export default class BackgroundGroupFaciesSpecification<P extends Polygon, S extends PolygonSerialization> extends Vue {
   @Prop({ required: true })
   readonly value!: { group: ID, polygons: OverlayPolygon[]}
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<P>
+  readonly rule!: TruncationRule<P, S>
 
   get group (): FaciesGroup | undefined { return this.$store.state.facies.groups.available[`${this.value.group}`] }
 
