@@ -1,10 +1,12 @@
 import { Named } from '@/utils/domain/bases'
-import ZoneRegionDependent, { DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
+import ZoneRegionDependent, {
+  DependentConfiguration,
+} from '@/utils/domain/bases/zoneRegionDependent'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
-import Polygon from '@/utils/domain/polygon/base'
-import { FRACTION, ID, Identified } from '@/utils/domain/types'
+import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
+import { ID, Identified } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 
 export type TruncationRuleConfiguration<T extends Polygon> = DependentConfiguration & {
@@ -12,12 +14,6 @@ export type TruncationRuleConfiguration<T extends Polygon> = DependentConfigurat
   polygons: Identified<T> | T[]
   backgroundFields: GaussianRandomField[]
   realization?: number[][]
-}
-
-export interface Specification {
-  facies: string
-  fraction: FRACTION
-  order: number
 }
 
 export default abstract class TruncationRule<T extends Polygon> extends ZoneRegionDependent implements Named {
@@ -47,7 +43,7 @@ export default abstract class TruncationRule<T extends Polygon> extends ZoneRegi
   public get ready (): boolean {
     return this._constraints.every((constraint): boolean => constraint())
   }
-  public abstract get specification (): Specification[] | object
+  public abstract get specification (): PolygonSpecification[] | object
 
   public get backgroundFields (): GaussianRandomField[] {
     return Object.values(this._backgroundFields)

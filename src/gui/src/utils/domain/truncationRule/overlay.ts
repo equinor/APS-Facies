@@ -4,7 +4,9 @@ import FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
 import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayPolygon, { CENTER } from '@/utils/domain/polygon/overlay'
-import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
+import TruncationRule, {
+  TruncationRuleConfiguration,
+} from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { getId, allSet } from '@/utils/helpers'
 
@@ -21,11 +23,17 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
   over: string[]
 }
 
-export interface OverlaySpecification {
+export interface OverlaySpecification<P extends PolygonSpecification> {
   overlay: OverlayPolygonSpecification[] | null
+  polygons: P[]
 }
 
-export default abstract class OverlayTruncationRule<T extends Polygon> extends TruncationRule<T | OverlayPolygon> {
+export default abstract class OverlayTruncationRule<
+  T extends Polygon,
+  P extends PolygonSpecification,
+> extends TruncationRule<
+  T | OverlayPolygon
+  > {
   protected _useOverlay: boolean
 
   protected constructor ({ overlay, _useOverlay, ...rest }: OverlayTruncationRuleArgs<T>) {
@@ -72,20 +80,13 @@ export default abstract class OverlayTruncationRule<T extends Polygon> extends T
     return [...backgroundFields, ...overlayFields]
   }
 
-  public get specification (): OverlaySpecification {
+  public get specification (): OverlaySpecification<P> {
     return {
       overlay: this.overlayPolygons.length > 0
-        ? this.overlayPolygons.map((polygon): OverlayPolygonSpecification => {
-          return {
-            center: polygon.center,
-            facies: polygon.facies ? polygon.facies.name : '',
-            field: polygon.field ? polygon.field.name : '',
-            fraction: polygon.fraction,
-            order: polygon.order,
-            over: polygon.group.facies.map((facies): string => facies.name),
-          }
-        })
+        ? this.overlayPolygons.map((polygon): OverlayPolygonSpecification => polygon.specification)
         : null,
+      polygons: this.backgroundPolygons
+        .map((polygon): P => (polygon.specification as P)),
     }
   }
 

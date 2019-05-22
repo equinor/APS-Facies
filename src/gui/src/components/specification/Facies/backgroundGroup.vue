@@ -25,12 +25,12 @@ function isFaciesSelected (group: FaciesGroup | undefined, facies: Facies): bool
 }
 
 @Component
-export default class BackgroundGroupFaciesSpecification extends Vue {
+export default class BackgroundGroupFaciesSpecification<P extends Polygon> extends Vue {
   @Prop({ required: true })
   readonly value!: { group: ID, polygons: OverlayPolygon[]}
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<Polygon>
+  readonly rule!: TruncationRule<P>
 
   get group (): FaciesGroup | undefined { return this.$store.state.facies.groups.available[`${this.value.group}`] }
 

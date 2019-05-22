@@ -24,12 +24,12 @@ import { updateFacies } from '@/store/utils'
     FaciesSpecificationBase,
   }
 })
-export default class FaciesSpecification extends Vue {
+export default class FaciesSpecification<P extends Polygon> extends Vue {
   @Prop({ required: true })
   readonly value: Polygon
 
   @Prop({ required: true })
-  readonly rule: TruncationRule<Polygon>
+  readonly rule: TruncationRule<P>
 
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean

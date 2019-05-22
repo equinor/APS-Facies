@@ -1,15 +1,9 @@
-import { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
-import BayfillPolygon from '@/utils/domain/polygon/bayfill'
-import TruncationRule, { Specification, TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
+import BayfillPolygon, {
+  BayfillPolygonSpecification
+} from '@/utils/domain/polygon/bayfill'
+import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
-import { getFaciesName } from '@/utils/queries'
-
-interface BayfillPolygonSpecification extends Specification {
-  name: string
-  polygon: string
-  factor: FmuUpdatable
-}
 
 export type BayfillSpecification = BayfillPolygonSpecification[]
 
@@ -39,23 +33,9 @@ export default class Bayfill extends TruncationRule<BayfillPolygon> {
   }
 
   public get specification (): BayfillSpecification {
-    const _mapping: {[_: string]: string} = {
-      'Bayhead Delta': 'SBHD',
-      'Floodplain': 'SF',
-      'Subbay': 'YSF',
-    }
     return this.polygons
       .filter((polygon): boolean => !!polygon.slantFactor)
-      .map((polygon): BayfillPolygonSpecification => {
-        return {
-          facies: getFaciesName(polygon),
-          factor: (polygon.slantFactor as FmuUpdatable),
-          fraction: polygon.fraction,
-          name: _mapping[polygon.name],
-          order: polygon.order,
-          polygon: polygon.name,
-        }
-      })
+      .map((polygon): BayfillPolygonSpecification => polygon.specification)
   }
 
   public get type (): string {

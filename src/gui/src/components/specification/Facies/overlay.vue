@@ -19,12 +19,12 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
     FaciesSpecification,
   }
 })
-export default class OverlayFaciesSpecification<T extends Polygon> extends Vue {
+export default class OverlayFaciesSpecification<T extends Polygon, P extends PolygonSpecification> extends Vue {
   @Prop({ required: true })
   readonly value!: OverlayPolygon
 
   @Prop({ required: true })
-  readonly rule!: OverlayTruncationRule<T>
+  readonly rule!: OverlayTruncationRule<T, P>
 
   backgroundFacies (facies: Facies) {
     return this.rule.isUsedInBackground(facies)

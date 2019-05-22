@@ -24,12 +24,12 @@ import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
 
 @Component
-export default class AlphaSelection extends Vue {
+export default class AlphaSelection<P extends Polygon> extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField | null
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<Polygon>
+  readonly rule!: TruncationRule<P>
 
   @Prop({ default: 0 })
   readonly channel: number

@@ -46,6 +46,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import Facies from '@/utils/domain/facies/local'
+import { PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
 import { Polygon } from '@/utils/domain'
@@ -55,12 +56,12 @@ import BackgroundGroupFaciesSpecification from '@/components/specification/Facie
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonTable from './table.vue'
 
-function hasAvailableBackgroundFacies<T extends Polygon> (store: Store, rule: OverlayTruncationRule<T>): boolean {
+function hasAvailableBackgroundFacies<T extends Polygon, P extends PolygonSpecification> (store: Store, rule: OverlayTruncationRule<T, P>): boolean {
   return Object.values(store.state.facies.available)
     .some(facies => store.getters['facies/availableForBackgroundFacies'](rule, facies))
 }
 
-function allBackgroundPolygonsHasSomeFacies<T extends Polygon> (rule: OverlayTruncationRule<T>): boolean {
+function allBackgroundPolygonsHasSomeFacies<T extends Polygon, P extends PolygonSpecification> (rule: OverlayTruncationRule<T, P>): boolean {
   return rule.overlayPolygons
     .every(({ group }) => group ? group.facies.length > 0 : true)
 }
@@ -72,9 +73,9 @@ function allBackgroundPolygonsHasSomeFacies<T extends Polygon> (rule: OverlayTru
     PolygonTable,
   },
 })
-export default class BackgroundFacies<T extends Polygon> extends Vue {
+export default class BackgroundFacies<T extends Polygon, P extends PolygonSpecification> extends Vue {
   @Prop({ required: true })
-  readonly value!: OverlayTruncationRule<T>
+  readonly value!: OverlayTruncationRule<T, P>
 
   get groups () {
     let overlay: { group: ID, polygons: Facies[] }[] = []

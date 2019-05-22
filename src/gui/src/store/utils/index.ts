@@ -61,7 +61,13 @@ function mirrorZoneRegions (store: Store<RootState>): void {
   })
 }
 
-function updateFacies (dispatch: Dispatch, rule: TruncationRule<Polygon, PolygonSerialization>, polygon: Polygon, facies: Facies | ID, swap: boolean = true): Promise<void> {
+function updateFacies<P extends Polygon> (
+  dispatch: Dispatch,
+  rule: TruncationRule<P>,
+  polygon: Polygon,
+  facies: Facies | ID,
+  swap: boolean = true
+): Promise<void> {
   const existing = rule.polygons
     .find((polygon): boolean => getId(polygon.facies) === getId(facies))
   return existing && swap

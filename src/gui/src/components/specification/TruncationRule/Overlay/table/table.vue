@@ -70,7 +70,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
 import OverlayFaciesSpecification from '@/components/specification/Facies/overlay.vue'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection.vue'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSpecification } from '@/utils/domain/polygon/base'
 
 import { Facies } from '@/utils/domain'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
@@ -88,12 +88,12 @@ import { sortByOrder } from '@/utils'
     FractionField,
   },
 })
-export default class OverlayTable extends Vue {
+export default class OverlayTable<T extends Polygon, P extends PolygonSpecification> extends Vue {
   @Prop({ required: true })
   readonly value!: OverlayPolygon[]
 
   @Prop({ required: true })
-  readonly rule!: OverlayTruncationRule<Polygon>
+  readonly rule!: OverlayTruncationRule<T, P>
 
   get polygons () {
     // TODO: Include 'help' messages

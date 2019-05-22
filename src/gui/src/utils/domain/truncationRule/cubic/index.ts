@@ -1,28 +1,21 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
-import { PolygonSpecification } from '@/utils/domain/polygon/base'
-import CubicPolygon, { Level } from '@/utils/domain/polygon/cubic'
+import CubicPolygon, { CubicPolygonSpecification } from '@/utils/domain/polygon/cubic'
 import Direction, { Orientation, OrientationString } from '@/utils/domain/truncationRule/cubic/direction'
 import OverlayTruncationRule, {
   OverlaySpecification,
   OverlayTruncationRuleArgs
 } from '@/utils/domain/truncationRule/overlay'
-import { getFaciesName } from '@/utils/queries'
 import { sample } from 'lodash'
 
 type CubicTruncationRuleArgs = OverlayTruncationRuleArgs<CubicPolygon> & {
   direction: Direction | Orientation | OrientationString
 }
 
-interface CubicPolygonSpecification extends PolygonSpecification {
-  level: Level
+export interface CubicSpecification extends OverlaySpecification<CubicPolygonSpecification> {
+  direction: OrientationString
 }
 
-export interface CubicSpecification extends OverlaySpecification {
-  direction: string
-  polygons: CubicPolygonSpecification[]
-}
-
-export default class Cubic extends OverlayTruncationRule<CubicPolygon> {
+export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPolygonSpecification> {
   public direction: Direction
 
   public constructor ({ direction, ...rest }: CubicTruncationRuleArgs) {
@@ -62,15 +55,6 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon> {
     return {
       ...super.specification,
       direction: this.direction.specification,
-      polygons: this.backgroundPolygons.map((polygon, index): CubicPolygonSpecification => {
-        return {
-          id: polygon.id,
-          facies: getFaciesName(polygon),
-          fraction: polygon.fraction,
-          level: polygon.level,
-          order: index,
-        }
-      })
     }
   }
 

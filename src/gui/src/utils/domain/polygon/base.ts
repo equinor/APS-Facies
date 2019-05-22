@@ -1,19 +1,20 @@
 import BaseItem from '@/utils/domain/bases/baseItem'
 import Facies from '@/utils/domain/facies/local'
 import { ID, Identified, ORDER, PROBABILITY } from '@/utils/domain/types'
+import { getFaciesName } from '@/utils/queries'
 
-export interface PolygonArgs {
+interface BasePolygonSpec<F> {
   id?: ID
-  order: ORDER
+  facies?: F
   fraction?: PROBABILITY
-  facies?: Facies | null
+  order: ORDER
 }
 
-export interface PolygonSpecification {
-  id?: ID
+export type PolygonArgs = BasePolygonSpec<Facies | null>
+
+export interface PolygonSpecification extends BasePolygonSpec<string> {
   facies: string
   fraction: PROBABILITY
-  order: number
 }
 
 export default abstract class Polygon extends BaseItem {
@@ -31,6 +32,13 @@ export default abstract class Polygon extends BaseItem {
   public get overlay (): boolean { return false }
 
   public get atLevel (): number { return 0 }
+
+  public get specification (): PolygonSpecification {
+    return {
+      facies: getFaciesName(this),
+      fraction: this.fraction,
+      order: this.order,
+    }
 }
 
 export type Polygons = Identified<Polygon>

@@ -1,12 +1,15 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
-import { ID } from '@/utils/domain/types'
-import Polygon, { PolygonArgs } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonArgs, PolygonSpecification } from '@/utils/domain/polygon/base'
 
 export type Level = number[]
 
 interface CubicPolygonArgs extends PolygonArgs {
   parent?: CubicPolygon | null
   children?: CubicPolygon[]
+}
+
+export interface CubicPolygonSpecification extends PolygonSpecification {
+  level: Level
 }
 
 export default class CubicPolygon extends Polygon {
@@ -50,6 +53,13 @@ export default class CubicPolygon extends Polygon {
   public add (child: CubicPolygon): void {
     child.parent = this
     this.children.push(child)
+  }
+
+  public get specification (): CubicPolygonSpecification {
+    return {
+      ...super.specification,
+      level: this.level,
+    }
   }
 
   public toJSON () {
