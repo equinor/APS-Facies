@@ -67,7 +67,7 @@ GET_RMS_RESOURCES := get-rms get-rms-project
 endif
 
 APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | sed -e "s/v//g")
-APS_FULL_VERSION := $(APS_VERSION).$(BUILD_NUMBER)
+APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH := $(shell git rev-parse --short HEAD)
 LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
 
