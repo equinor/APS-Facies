@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import rms from '@/api/rms'
 
+import { DEFAULT_FACIES_REALIZATION_PARAMETER_NAME } from '@/config'
+
 export default {
   namespaced: true,
 
@@ -14,7 +16,7 @@ export default {
       commit('CURRENT', parameter)
     },
     fetch: async ({ commit, rootGetters }) => {
-      commit('CURRENT', null)
+      commit('CURRENT', DEFAULT_FACIES_REALIZATION_PARAMETER_NAME)
       const discreteParameters = await rms.realizationParameters(rootGetters.gridModel)
       commit('AVAILABLE', discreteParameters)
       return discreteParameters
