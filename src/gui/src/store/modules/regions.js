@@ -1,15 +1,13 @@
 import Vue from 'vue'
 import { promiseSimpleCommit } from '@/store/utils'
 import { Region } from '@/utils/domain'
-import { makeData, selectItems, isEmpty, notEmpty } from '@/utils'
+import { makeData, isEmpty, notEmpty } from '@/utils'
 import rms from '@/api/rms'
-import { SELECTED_ITEMS } from '@/store/mutations'
 
 export default {
   namespaced: true,
 
   state: {
-    available: {},
     current: null,
     use: false,
   },
@@ -17,10 +15,13 @@ export default {
   modules: {},
 
   actions: {
-    select: async ({ dispatch, state }, items) => {
-      const regions = selectItems({ state, items, _class: Region })
+    select: async ({ dispatch, commit }, regions) => {
+      regions.forEach(({ zone }) => {
+        zone.regions.forEach(region => {
+          commit('TOGGLE', { region, toggled: regions.map(({ id }) => id).includes(region.id) })
+        })
+      })
       await dispatch('zones/update', { regions }, { root: true })
-      return Object.keys(regions)
     },
     current: async ({ commit, dispatch, rootState }, { id }) => {
       const zone = Object.values(rootState.zones.available)
@@ -29,21 +30,22 @@ export default {
       await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region: id }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    fetch: ({ dispatch, rootState, rootGetters, state }, zoneId) => {
+    fetch: async ({ commit, rootState, rootGetters, state }, zoneId) => {
       if (state.use && notEmpty(rootGetters.regionParameter)) {
         if (isEmpty(zoneId)) {
-          const promises = Object.keys(rootState.zones.available)
-            .map(id => {
-              const zone = rootState.zones.available[`${id}`]
-              return new Promise((resolve, reject) => {
-                rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter)
-                  .then(regions => {
-                    regions = regions.map(region => { return { ...region, selected: !!zone.selected } })
-                    resolve(dispatch('zones/update', { zoneId: id, regions: makeData(regions, Region, zone.regions) }, { root: true }))
-                  })
+          for (const zone of Object.values(rootState.zones.available)) {
+            (await rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter))
+              .forEach(region => {
+                // TODO: Don't add if one exists with the same code / name
+                commit('ADD', new Region({
+                  ...region,
+                  selected: !!zone.selected,
+                  zone,
+                }))
               })
-            })
-          return Promise.all(promises)
+          }
+        } else {
+          // TODO
         }
       }
       return Promise.resolve(
@@ -52,22 +54,30 @@ export default {
           : []
       )
     },
-    use: ({ commit, dispatch }, { use }) => {
+    use: async ({ commit, dispatch }, { use, fetch = true }) => {
       commit('USE', use)
       commit('CURRENT', { id: null })
-      return dispatch('fetch', null)
+      if (fetch) {
+        await dispatch('fetch', null)
+      }
     },
-    populate: async ({ commit, dispatch }, regions) => {
+    populate: async ({ commit, dispatch, state }, regions) => {
+      regions = makeData(regions, Region, state.available)
       commit('AVAILABLE', { regions })
-      await dispatch('select', Object.values(regions).filter(({ selected }) => !!selected))
+      await dispatch('select', { regions: Object.values(regions).filter(({ selected }) => !!selected) })
     },
   },
 
   mutations: {
+    ADD: (state, region) => {
+      Vue.set(region.zone._regions, region.id, region)
+    },
+    TOGGLE: (state, { region, toggled }) => {
+      Vue.set(region.zone._regions[`${region.id}`], 'selected', toggled)
+    },
     AVAILABLE: (state, { regions }) => {
       Vue.set(state, 'available', regions)
     },
-    SELECTED: SELECTED_ITEMS,
     CURRENT: (state, { id }) => {
       Vue.set(state, 'current', id)
     },

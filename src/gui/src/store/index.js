@@ -13,11 +13,9 @@ import options from '@/store/modules/options'
 import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelFileExporter from '@/store/modules/modelFileExporter'
 
-import { mirrorZoneRegions } from '@/store/utils'
 import {
   defaultSimulationSettings,
   hasCurrentParents,
-  notEmpty,
   resolve,
   sortAlphabetically,
 } from '@/utils'
@@ -34,10 +32,6 @@ const store = new Vuex.Store({
   },
 
   strict: process.env.NODE_ENV !== 'production',
-
-  plugins: [
-    mirrorZoneRegions,
-  ],
 
   modules: {
     gridModels,
@@ -95,11 +89,8 @@ const store = new Vuex.Store({
         await dispatch('zones/current', { id: data.zones.current })
 
         // Regions
-        if (notEmpty(data.regions.available)) {
-          await dispatch('regions/use', data.regions)
-          await dispatch('regions/populate', Object.values(data.regions.available))
-          await dispatch('regions/current', { id: data.regions.current })
-        }
+        await dispatch('regions/use', { use: data.regions.use, fetch: false })
+        await dispatch('regions/current', { id: data.regions.current })
 
         // Facies
         await dispatch('facies/global/populate', Object.values(data.facies.global.available))
@@ -144,8 +135,8 @@ const store = new Vuex.Store({
     zone: (state) => {
       return state.zones.current ? state.zones.available[`${state.zones.current}`] : null
     },
-    region: (state) => {
-      return state.regions.use ? state.regions.available[`${state.regions.current}`] : null
+    region: (state, getters) => {
+      return state.regions.use && getters.zone ? getters.zone._regions[`${state.regions.current}`] : null
     },
     facies: (state) => {
       return state.facies.current
@@ -178,10 +169,10 @@ const store = new Vuex.Store({
     },
     // These are the 'available' for various modules / properties
     zones: (state) => {
-      return state.zones.available
+      return Object.values(state.zones.available)
     },
-    regions: (state) => {
-      return state.regions.available
+    regions: (state, getters) => {
+      return getters.zone ? getters.zone.regions : []
     },
     faciesTable: (state) => {
       return Object.values(state.facies.global.available)

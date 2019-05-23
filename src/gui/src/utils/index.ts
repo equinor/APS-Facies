@@ -152,20 +152,6 @@ function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: Roo
   }
 }
 
-function selectItems ({ items, state, _class }: { items: any[], state: { available: Identified<any>, [_: string]: any }, _class: Newable<any> }) {
-  const ids = items.map(item => item.id || item._id)
-  const obj = {}
-  for (const id in state.available) {
-    const item = state.available[`${id}`]
-    obj[`${id}`] = new _class({
-      _id: id,
-      ...item,
-      selected: ids.indexOf(id) >= 0,
-    })
-  }
-  return obj
-}
-
 function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEarly: boolean = false): void {
   let children = component.$children.slice()
   while (children.length > 0) {
@@ -298,7 +284,6 @@ export {
   makeData,
   makeSimplifiedTruncationRuleSpecification,
   makeTruncationRuleSpecification,
-  selectItems,
   hasValidChildren,
   invalidateChildren,
   hasCurrentParents,

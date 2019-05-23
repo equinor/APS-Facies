@@ -4,7 +4,7 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 import { RootState } from '@/store/typing'
-import { Commit, Dispatch, Module, Store } from 'vuex'
+import { Commit, Dispatch, Module } from 'vuex'
 
 function promiseSimpleCommit (commit: Commit, commitment: string, data: any, check: boolean = true, error: string = ''): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -29,36 +29,6 @@ async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dis
   const result = await promise
   commit('AVAILABLE', result)
   await selectOnlyParameter({ dispatch }, result)
-}
-
-function mirrorZoneRegions (store: Store<RootState>): void {
-  store.subscribe(({ type, payload }, state): void => {
-    if (
-      type.startsWith('zones')
-      && state.regions.use
-      && !!state.zones.current
-    ) {
-      if (type === 'zones/REGIONS') {
-        if (payload.zoneId === state.zones.current) {
-          store.commit('regions/AVAILABLE', { regions: payload.regions })
-        } else {
-          // Nothing to be done
-        }
-      } else if (type === 'zones/CURRENT') {
-        store.commit('regions/AVAILABLE', { regions: state.zones.available[`${payload.id}`].regions })
-      } else if (type === 'zones/AVAILABLE') {
-        // Something to be done?
-      } else if (type === 'zones/SELECTED') {
-        // Nothing to do.
-        // Handled by zone's selected action
-      } else if (type === 'zones/REGION_SELECTED') {
-        // Nothing to do.
-        // Handled by regions's selected action
-      } else {
-        throw new Error(`Unsupported commit type, ${type}`)
-      }
-    }
-  })
 }
 
 function updateFacies<P extends Polygon, S extends PolygonSerialization> (
@@ -120,7 +90,6 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
 export {
   promiseSimpleCommit,
   fetchParameterHelper,
-  mirrorZoneRegions,
   updateFacies,
   makeOption,
   selectOnlyParameter,
