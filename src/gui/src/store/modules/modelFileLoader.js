@@ -236,6 +236,14 @@ async function makeNonCubicTruncationRule ({ rootState, dispatch }, container, p
 }
 
 async function makeCubicTruncationRule ({ rootState, dispatch }, container, parent) {
+  function getPolygon (element, order, root, parent) {
+    return new CubicPolygon({
+      parent: root,
+      fraction: getNumericValue(element),
+      facies: getFacies({ rootState }, element._attributes.name, parent),
+      order,
+    })
+  }
   function getChildren (container, root, level) {
     const polygons = []
     let order = 1
@@ -246,15 +254,14 @@ async function makeCubicTruncationRule ({ rootState, dispatch }, container, pare
         order += 1
       })
     } else if (container.ProbFrac) {
-      container.ProbFrac.forEach(element => {
-        polygons.push(new CubicPolygon({
-          parent: root,
-          fraction: getNumericValue(element),
-          facies: getFacies({ rootState }, element._attributes.name, parent),
-          order,
-        }))
-        order += 1
-      })
+      if (Array.isArray(container.ProbFrac)) {
+        container.ProbFrac.forEach(element => {
+          polygons.push(getPolygon(element, order, root, parent))
+          order += 1
+        })
+      } else {
+        polygons.push(getPolygon(container.ProbFrac, order, root, parent))
+      }
     }
     if (root) {
       polygons.push(root)
