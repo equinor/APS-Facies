@@ -152,7 +152,7 @@ export default {
       if (exportedXMLString) {
         const result = await rms.isApsModelValid(btoa(exportedXMLString))
         if (result.valid) {
-          const defaultPath = `${this.$store.state.parameters.path.project}/myApsExport.xml`
+          const defaultPath = `${this.$store.state.parameters.path.project.selected}/myApsExport.xml`
           this.$refs.exportDialog.open(defaultPath, {})
             .then(({ save, path }) => {
               if (save) {

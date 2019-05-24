@@ -15,6 +15,7 @@ import modelFileExporter from '@/store/modules/modelFileExporter'
 
 import {
   defaultSimulationSettings,
+  getParameters,
   hasCurrentParents,
   resolve,
   sortAlphabetically,
@@ -69,16 +70,13 @@ const store = new Vuex.Store({
         await dispatch('gridModels/select', data.gridModels.current)
 
         // Parameters
-        for (const parameter of Object.keys(data.parameters)) {
-          const selected = data.parameters[`${parameter}`].selected
+        for (const parameter of getParameters(data.parameters)) {
+          const { selected } = resolve(parameter, data.parameters)
           if (selected) {
-            await dispatch(`parameters/${parameter}/select`, selected)
+            await dispatch(`parameters/${parameter.replace('.', '/')}/select`, selected)
           } else if (parameter === 'grid') {
             await dispatch('parameters/grid/populate', data.parameters.grid)
             await dispatch('parameters/grid/simBox/populate', data.parameters.grid.simBox)
-          } else if (parameter === 'path') {
-            // Set the user settings of where to store various information
-            await dispatch('parameters/path/select', data.parameters.path.project)
           } else {
             // Ignored
           }

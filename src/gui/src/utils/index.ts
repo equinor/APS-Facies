@@ -1,3 +1,5 @@
+import flatten from 'flat'
+
 import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
 import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
 import { APSError } from '@/utils/domain/errors'
@@ -276,6 +278,20 @@ function toIdentifiedObject<T> (items: T[]): Identified<T> {
   }, {})
 }
 
+function getParameters (collection: object, delimiter: string = '.'): string[] {
+  const parameters = new Set(Object.keys(collection))
+  const selectable = Object.keys(flatten(collection, { delimiter }))
+    .filter((param): boolean => param.endsWith('selected'))
+    .map((param): string => param.slice(0, -'/selected'.length))
+  selectable.forEach((param): void => {
+    parameters.delete(param.split(delimiter)[0])
+  })
+  return [
+    ...parameters,
+    ...selectable,
+  ]
+}
+
 export {
   getId,
   sortByProperty,
@@ -299,4 +315,5 @@ export {
   notEmpty,
   sortAlphabetically,
   toIdentifiedObject,
+  getParameters,
 }
