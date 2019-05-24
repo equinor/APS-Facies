@@ -73,7 +73,7 @@ class RMSData:
         )
 
     def get_project_name(self):
-        return self.project.name
+        return Path(self.project.filename).name
 
     def get_project_dir(self):
         return str(Path(self.project.filename).parent)
