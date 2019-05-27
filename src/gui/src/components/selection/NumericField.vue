@@ -64,6 +64,8 @@ import { required as requiredField, between, numeric } from 'vuelidate/lib/valid
 import { updatableType, nullableNumber } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
+
 math.config({
   number: 'BigNumber'
 })
@@ -223,7 +225,7 @@ export default Vue.extend({
           ? { value: Number(this.fieldValue), updatable: value }
           : { value: Number(value), updatable: this.updatable }
       this.$v.fieldValue.$touch()
-      this.$emit('input', payload)
+      this.$emit('input', new FmuUpdatableValue(payload))
     },
     updateValue (value) {
       if (typeof value.target !== 'undefined') {
