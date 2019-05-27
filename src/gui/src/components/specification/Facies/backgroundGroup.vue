@@ -45,7 +45,7 @@ export default class BackgroundGroupFaciesSpecification<P extends Polygon, S ext
       .map(facies => {
         return {
           value: facies.id,
-          text: facies.name,
+          text: facies.alias,
           disabled: !isFaciesSelected(this.group, facies) /* I.e. the user should be allowed to DESELECT an already selected facies */
             && (!this.$store.getters['facies/availableForBackgroundFacies'](this.rule, facies)),
         }
