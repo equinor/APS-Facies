@@ -7,6 +7,7 @@ import { Trend, Variogram, GaussianRandomField } from '@/utils/domain/gaussianRa
 
 import crossSections from '@/store/modules/gaussianRandomFields/crossSections'
 import rms from '@/api/rms'
+import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 const makeFieldData = (fields) => {
   return fields.reduce((data, field) => {
@@ -159,8 +160,11 @@ export default {
     async trendType ({ commit, dispatch, state, rootState }, { grfId, value }) {
       setValue({ state, commit }, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
       const field = state.fields[`${grfId}`]
-      if (field.trend.type === 'HYPERBOLIC' && field.trend.curvature.value <= 1) {
-        await dispatch('curvature', { grfId, value: 1.01 })
+      if (field.trend.type === 'HYPERBOLIC') {
+        const curvature = field.trend.curvature
+        if (curvature.value <= 1) {
+          await dispatch('curvature', { grfId, value: new FmuUpdatableValue(1.01, curvature.updatable) })
+        }
       }
     },
     trendParameter ({ commit, state }, { grfId, value }) {
