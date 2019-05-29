@@ -14,21 +14,9 @@ export default {
   },
 
   actions: {
-    select: async ({ commit, dispatch, state, rootState }, selected) => {
+    select: async ({ commit, state }, selected) => {
       for (const zone of Object.values(state.available)) {
-        // TODO: Make sure all regions are also selected, of regions is in use (and this zone has regions)
-        // FIXME: Ensure that 'intermediate' is preserved
         const toggled = includes(selected, zone)
-        if (rootState.regions.use) {
-          // When a zone is (un)toggled, all of its regions should be (un)toggled
-          Object.values(state.available[`${zone.id}`].regions)
-            .forEach(async region => {
-              commit('REGION_SELECTED', { region, toggled })
-              if (!toggled && region.id === rootState.regions.current) {
-                await dispatch('regions/current', { id: null }, { root: true })
-              }
-            })
-        }
         commit('SELECTED', { zone, toggled })
       }
     },
@@ -55,24 +43,6 @@ export default {
       commit('AVAILABLE', identify(zones))
       return zones
     },
-    update ({ commit }, { regions }) {
-      const zones = regions.reduce((zones, region) => {
-        if (!(zones.map(zone => zone.id).includes(region.zone.id))) {
-          zones.push(region.zone)
-        }
-        return zones
-      }, [])
-      zones.forEach(zone => {
-        // We are setting/updating the regions for `zone`
-        // TODO: Add new GRFs for each region if necessary
-        // All regions selected
-        if (Object.values(zone.regions).every(region => region.selected)) commit('SELECTED', { zone, toggled: true })
-        // Some region(s) selected
-        else if (Object.values(zone.regions).some(region => region.selected)) commit('SELECTED', { zone, toggled: 'intermediate' })
-        // No regions selected
-        else commit('SELECTED', { zone, toggled: false })
-      })
-    },
   },
 
   mutations: {
@@ -84,15 +54,6 @@ export default {
     },
     CURRENT: (state, { id }) => {
       Vue.set(state, 'current', id)
-    },
-    ADD_REGION: (state, { region }) => {
-      Vue.set(state.available[`${region.zone.id}`]._regions, region.id, region)
-    },
-    REGIONS: (state, { zone, regions }) => {
-      Vue.set(state.available[`${zone.id}`], '_regions', regions)
-    },
-    REGION_SELECTED: (state, { region, toggled }) => {
-      Vue.set(state.available[`${region.zone.id}`]._regions[`${region.id}`], 'selected', toggled)
     },
   },
 

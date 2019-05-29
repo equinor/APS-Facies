@@ -1,6 +1,10 @@
 import { ID, Identified } from '@/utils/domain/types'
 import { identify } from '@/utils/helpers'
-import SelectableItem, { SelectableItemConfiguration, SelectableSerialization } from './bases/selectableItem'
+import SelectableItem, {
+  SelectableItemConfiguration,
+  SelectableSerialization,
+  SelectedType,
+} from './bases/selectableItem'
 
 type Regions = Identified<Region>
 
@@ -47,6 +51,32 @@ export default class Zone extends SelectableItem {
   public get regions (): Region[] {
     return Object.values(this._regions)
   }
+
+  public get selected (): SelectedType {
+    if (this.hasRegions) {
+      if (this.regions.every(({ selected }): boolean => !!selected)) {
+        return true
+      } else if (this.regions.some(({ selected }): boolean => !!selected)) {
+        return 'intermediate'
+      } else {
+        return false
+      }
+    } else {
+      return this._selected
+    }
+  }
+
+  public set selected (toggled) {
+    if (this.hasRegions) {
+      this.regions.forEach((region): void => {
+        region.selected = toggled
+      })
+    } else {
+      this._selected = toggled
+    }
+  }
+
+  public get hasRegions (): boolean { return this._regions && this.regions.length > 0 }
 
   public toJSON (): ZoneSerialization {
     return {

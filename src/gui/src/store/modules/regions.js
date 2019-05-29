@@ -4,6 +4,20 @@ import { Region } from '@/utils/domain'
 import { makeData, isEmpty, notEmpty, includes } from '@/utils'
 import rms from '@/api/rms'
 
+async function fetchRegions ({ rootGetters, commit }, zone) {
+  (await rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter))
+    .forEach(region => {
+      const exists = zone.regions.find(({ code, name }) => region.code === code && region.name === name)
+      if (!exists) {
+        commit('ADD', new Region({
+          ...region,
+          selected: !!zone.selected,
+          zone,
+        }))
+      }
+    })
+}
+
 export default {
   namespaced: true,
 
@@ -15,13 +29,22 @@ export default {
   modules: {},
 
   actions: {
-    select: async ({ dispatch, commit }, regions) => {
-      regions.forEach(({ zone }) => {
+    select: async ({ commit, rootGetters }, regions) => {
+      const affectedZones = regions.reduce((unique, region) => {
+        if (!(includes(unique, region.zone))) {
+          unique.push(region.zone)
+        }
+        return unique
+      }, [])
+      for (const zone of affectedZones) {
         zone.regions.forEach(region => {
           commit('TOGGLE', { region, toggled: includes(regions, region) })
         })
-      })
-      await dispatch('zones/update', { regions }, { root: true })
+      }
+      if (regions.length === 0) {
+        // All regions of, presumably, the current zone has been deselected
+        commit('zones/SELECTED', { toggled: false, zone: rootGetters.zone }, { root: true })
+      }
     },
     current: async ({ commit, dispatch, rootState }, { id }) => {
       const zone = Object.values(rootState.zones.available)
@@ -30,29 +53,17 @@ export default {
       await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region: id }, { root: true })
       return promiseSimpleCommit(commit, 'CURRENT', { id })
     },
-    fetch: async ({ commit, rootState, rootGetters, state }, zoneId) => {
+    fetch: async ({ commit, rootState, rootGetters, state }, zone) => {
+      // TODO: Add new GRFs for each region if necessary
       if (state.use && notEmpty(rootGetters.regionParameter)) {
-        if (isEmpty(zoneId)) {
+        if (isEmpty(zone)) {
           for (const zone of Object.values(rootState.zones.available)) {
-            (await rms.regions(rootGetters.gridModel, zone.name, rootGetters.regionParameter))
-              .forEach(region => {
-                // TODO: Don't add if one exists with the same code / name
-                commit('ADD', new Region({
-                  ...region,
-                  selected: !!zone.selected,
-                  zone,
-                }))
-              })
+            await fetchRegions({ commit, rootGetters }, zone)
           }
         } else {
-          // TODO
+          await fetchRegions({ commit, rootGetters }, zone)
         }
       }
-      return Promise.resolve(
-        zoneId
-          ? rootState.zones.available[`${zoneId}`].regions
-          : []
-      )
     },
     use: async ({ commit, dispatch }, { use, fetch = true }) => {
       commit('USE', use)
