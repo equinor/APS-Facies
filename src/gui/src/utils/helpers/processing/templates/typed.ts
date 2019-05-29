@@ -80,17 +80,19 @@ export function makePolygonsFromSpecification (polygons: any[]): Polygon[] {
 }
 
 export function normalizeOrder (rule: Cubic, cb: (polygon: OverlayPolygon | CubicPolygon, order: number) => void): void {
-  [...Array(rule.levels + 1)].forEach((_, level): void => {
-    // @ts-ignore TS2445
-    const polygons = (Object.values(rule._polygons) as (OverlayPolygon | CubicPolygon)[])
-      .filter((polygon): boolean => polygon.atLevel === level)
+  const polygons = rule.root ? [...rule.root.children] : []
+  while (polygons.length > 0) {
+    const polygon = polygons.shift()
+    if (!polygon) continue
+    const children = polygon.children
+      .concat() /* Copy the array, because `sort` sorts in-place */
       .sort((a, b): number => a.order - b.order)
-    polygons
-      .forEach((polygon, index): void => {
-        const order = index + 1
-        if (polygon.order !== order) {
-          cb(polygon, order)
-        }
-      })
-  })
+    children.forEach((child, index): void => {
+      polygons.push(child)
+      const order = index + 1
+      if (child.order !== order) {
+        cb(child, order)
+      }
+    })
+  }
 }
