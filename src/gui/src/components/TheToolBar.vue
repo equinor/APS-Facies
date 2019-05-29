@@ -137,10 +137,12 @@ export default {
       rms.openWikiHelp()
     },
     importModelFile (file) {
-      const reader = new FileReader()
-      reader.onloadend = fileHandler(this.$store, file.name)
-      reader.readAsText(file)
-      this.$refs.uploadButton.clear()
+      if (file) {
+        const reader = new FileReader()
+        reader.onloadend = fileHandler(this.$store, file.name)
+        reader.readAsText(file)
+        this.$refs.uploadButton.clear()
+      }
     },
     exportModelFile: async function () {
       const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
@@ -150,14 +152,14 @@ export default {
       if (exportedXMLString) {
         const result = await rms.isApsModelValid(btoa(exportedXMLString))
         if (result.valid) {
-          const defaultPath = `${this.$store.state.parameters.path.project}/myApsExport.xml`
+          const defaultPath = `${this.$store.state.parameters.path.project.selected}/myApsExport.xml`
           this.$refs.exportDialog.open(defaultPath, {})
-            .then((result) => {
-              if (result.save) {
-                const resultPromise = rms.save(result.path, btoa(exportedXMLString))
+            .then(({ save, path }) => {
+              if (save) {
+                const resultPromise = rms.save(path, btoa(exportedXMLString))
                 resultPromise.then((success) => {
                   if (success) {
-                    alert(`model file was saved to ${result.path}`)
+                    alert(`model file was saved to ${path}`)
                   }
                   if (!success) {
                     alert('Saving failed. Did you choose a path that does not exist?')

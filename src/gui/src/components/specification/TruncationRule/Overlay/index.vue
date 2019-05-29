@@ -21,9 +21,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import OverlayFaciesTable from './table/index.vue'
 
-import {
-  Polygon,
-} from '@/utils/domain'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 @Component({
@@ -31,8 +29,8 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
     OverlayFaciesTable,
   },
 })
-export default class OverlaySpecification<T extends Polygon> extends Vue {
+export default class OverlaySpecification<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> extends Vue {
   @Prop({ required: true })
-  readonly value!: OverlayTruncationRule<T>
+  readonly value!: OverlayTruncationRule<T, S, P>
 }
 </script>

@@ -12,8 +12,11 @@ export default {
   },
 
   actions: {
-    fetch: async ({ commit }: ActionContext<ProjectNameState, RootState>): Promise<void> => {
-      commit('CURRENT', await rms.projectName())
+    fetch: async ({ dispatch }: ActionContext<ProjectNameState, RootState>): Promise<void> => {
+      await dispatch('select', await rms.projectName())
+    },
+    select: ({ commit }: ActionContext<ProjectNameState, RootState>, name: string): void => {
+      commit('CURRENT', name)
     },
   },
 

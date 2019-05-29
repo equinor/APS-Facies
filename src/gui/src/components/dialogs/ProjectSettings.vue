@@ -344,7 +344,7 @@ export default {
   watch: {
     dialog: function (value) {
       if (value) {
-        this.apsModelFileLocation = this.$store.state.parameters.path.project
+        this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
         this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
         this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
         this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value

@@ -2,8 +2,9 @@
   <v-data-table
     v-model="selected"
     :headers="headers"
+    :loading="loading"
     :items="items"
-    :no-data-text="noDataText"
+    :no-data-text="_noDataText"
     must-sort
     item-key="id"
     class="elevation-1"
@@ -80,6 +81,14 @@ export default {
   },
 
   computed: {
+    _noDataText () {
+      return this.loading
+        ? `Loading ${this.itemType}s`
+        : this.noDataText
+    },
+    loading () {
+      return this.$store.state[`${this.itemType}s`]._loading
+    },
     headers () {
       return [
         {
@@ -109,23 +118,24 @@ export default {
       ]
     },
     items () {
-      const state = this.$store.state[`${this.itemType}s`]
-      const items = state.available
-      return Object.keys(items)
-        .map(id => {
-          const item = items[`${id}`]
+      const current = this.$store.state[`${this.itemType}s`].current
+      return this.$store.getters[`${this.itemType}s`]
+        .map(item => {
           return {
-            id,
+            id: item.id,
             name: item.name,
             code: item.code,
             selected: item.selected,
-            current: id === state.current,
+            current: item.id === current,
           }
         })
     },
     selected: {
-      get: function () { return Object.values(this.items).filter(item => item.selected) },
-      set: function (value) { this.$store.dispatch(`${this.itemType}s/select`, value) },
+      get: function () { return this.items.filter(item => item.selected) },
+      set: function (values) {
+        values = this.$store.getters[`${this.itemType}s`].filter(item => values.map(({ id }) => id).includes(item.id))
+        this.$store.dispatch(`${this.itemType}s/select`, values)
+      },
     },
     selectedStyle () {
       return {

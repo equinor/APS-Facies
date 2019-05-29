@@ -124,6 +124,10 @@ def get_write_log_file(**kwargs):
     return _get_value(kwargs, legal_kwargs=['write_log_file'], default_value=True)
 
 
+def get_seed_log_file(**kwargs):
+    return _get_file_name(kwargs, legal_kwargs=['seed_log_file'], default_name='seedLogFile.dat')
+
+
 def _get_file_name(kwargs, legal_kwargs, default_name):
     use_prefix_as_fallback = kwargs.get('use_prefix_as_fallback', False)
     file_name = _get_value(kwargs, legal_kwargs, default_name)
@@ -192,6 +196,7 @@ def get_run_parameters(**kwargs):
         'tag_all_variables': get_tag_all_variables(**kwargs),
         'fmu_variables_file': get_fmu_variables_file(**kwargs),
         'write_log_file': get_write_log_file(**kwargs),
+        'seed_log_file': get_seed_log_file(**kwargs),
         'input_directory': get_prefix(**kwargs) + '/tmp_gauss_sim',
         'probability_log_specification_file': get_specification_file(**kwargs),
         'facies_code': get_facies_code(**kwargs),

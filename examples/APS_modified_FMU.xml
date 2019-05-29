@@ -10,7 +10,6 @@
   <RMSWorkflowName> Test_APS_uncertainty_workflow </RMSWorkflowName>
   <GridModelName> GridModelCoarse </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
-  <RegionParamName>  </RegionParamName>
   <ResultFaciesParamName> FaciesReal_unconditioned_sim </ResultFaciesParamName>
   <PrintInfo> 0 </PrintInfo>
   <SeedFile> seed.dat </SeedFile>

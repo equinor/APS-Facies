@@ -4,7 +4,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import { newSeed } from '@/utils/helpers'
 import { Named, Parent } from '@/utils/domain/bases/interfaces'
 import ZoneRegionDependent, { DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
-import { Identified } from '@/utils/domain/types'
+import { ID, Identified } from '@/utils/domain/types'
 
 import Trend from '@/utils/domain/gaussianRandomField/trend'
 import Variogram from '@/utils/domain/gaussianRandomField/variogram'
@@ -93,6 +93,13 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
         ...rootGetters ? cloneDeep(rootGetters.simulationSettings()) : {},
         ...this.settings,
       },
+    }
+  }
+
+  public toJSON (): {id: ID, parent: { zone: ID, region: ID | null, [_: string]: any }} {
+    return {
+      ...super.toJSON(),
+      ...this.objectify()
     }
   }
 }

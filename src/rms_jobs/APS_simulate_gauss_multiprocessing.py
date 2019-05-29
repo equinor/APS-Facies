@@ -76,10 +76,10 @@ def simulateGauss(
         'SPHERICAL': 'spherical',
         'GAUSSIAN': 'gaussian',
         'GENERAL_EXPONENTIAL': 'general_exponential',
-        'MATERN32':'matern32',
-        'MATERN52':'matern52',
-        'MATERN72':'matern72',
-        'CONSTANT':'constant'
+        'MATERN32': 'matern32',
+        'MATERN52': 'matern52',
+        'MATERN72': 'matern72',
+        'CONSTANT': 'constant'
         }
 
     if not writeSeedFile and seedFileName is not None:
@@ -99,13 +99,13 @@ def simulateGauss(
                             # Found the correct line for the seed
                             startSeed = int(words[i+3])
                             if debug_level >= Debug.VERY_VERBOSE:
-                                print('  Read seed: {} from seed file: {}'.format(str(startSeed), seedFileName))
+                                print('  Read seed: {} from seed file: {}'.format(startSeed, seedFileName))
                             break
                 if startSeed == -1:
                     raise IOError(
                         'The seed file: {} does not contain seed value for '
                         'gauss field name: {}   zone number: {}    and region number: {}'.format(
-                            seedFileName, str(gaussFieldName), str(zoneNumber), str(regionNumber)
+                            seedFileName, gaussFieldName, zoneNumber, regionNumber
                         )
                     )
         except:
@@ -129,10 +129,10 @@ def simulateGauss(
     [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
     if logFileName is not None:
         file.write('    Simulation grid size with padding due to correlation lengths for gauss field {} for zone,region: ({},{})\n'
-                   ''.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
-        file.write('      nx with padding: {}\n'.format(str(nx_padding)))
-        file.write('      ny with padding: {}\n'.format(str(ny_padding)))
-        file.write('      nz with padding: {}\n'.format(str(nz_padding)))
+                   ''.format(gaussFieldName, zoneNumber, regionNumber))
+        file.write('      nx with padding: {}\n'.format(nx_padding))
+        file.write('      ny with padding: {}\n'.format(ny_padding))
+        file.write('      nz with padding: {}\n'.format(nz_padding))
     gaussVector = nrlib.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
 
     # Get the start seed

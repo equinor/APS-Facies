@@ -1,5 +1,6 @@
 import uuidv4 from 'uuid/v4'
 import { ID, Identified } from '@/utils/domain/types'
+import { Identifiable } from '@/utils/domain/bases/interfaces'
 import {
   allSet,
   newSeed,
@@ -31,7 +32,7 @@ type HasIdentity<T> = T & {
 }
 
 function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<MaybeIdentified<T>>): Identified<HasIdentity<T>> {
-  return Object.values(items).reduce((obj, item) => {
+  return Object.values(items).reduce((obj, item): Identified<HasIdentity<T>> => {
     const _id = item.id || uuidv4()
     if (!('id' in item) || item.id !== _id) {
       item.id = _id
@@ -40,6 +41,10 @@ function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<Ma
     return obj
   /* eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion */
   }, ({} as Identified<HasIdentity<T>>))
+}
+
+function includes<T extends Identifiable> (items: T[], item: T): boolean {
+  return items.map(getId).includes(item.id)
 }
 
 export {
@@ -52,4 +57,5 @@ export {
   getRandomInt,
   isEmpty,
   notEmpty,
+  includes,
 }

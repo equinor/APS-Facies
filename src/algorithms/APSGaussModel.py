@@ -315,7 +315,8 @@ class GaussianField:
             if debug_level >= Debug.VERBOSE:
                 print('    - Use Trend: {}'.format(trend_model.type.name))
             min_max_difference, average_trend, trend_field = trend_model.createTrendFor2DProjection(
-                settings.simulation_box_size, settings.grid_azimuth, settings.grid_size, settings.cross_section, settings.simulation_box_origin
+                settings.simulation_box_size, settings.grid_azimuth, settings.grid_size,
+                settings.cross_section, settings.simulation_box_origin
             )
             gauss_field_with_trend = _add_trend(
                 residual_field, trend_field, relative_std_dev, min_max_difference, average_trend, debug_level

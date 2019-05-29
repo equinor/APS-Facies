@@ -1,5 +1,8 @@
+import flatten from 'flat'
+
 import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
 import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
+import { APSError } from '@/utils/domain/errors'
 import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
 import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
 import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
@@ -11,6 +14,8 @@ import {
   isEmpty,
   notEmpty,
   allSet,
+  isUUID,
+  includes,
 } from '@/utils/helpers'
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 import { RootGetters } from '@/store/typing'
@@ -30,8 +35,8 @@ function makeData<T extends Identifiable, Y extends Identifiable> (
   const data = {}
   for (const item of items) {
     const instance = originals
-      .find(original => Object.keys(item)
-        .every(key => original[`${key}`] === item[`${key}`])
+      .find((original): boolean => Object.keys(item)
+        .every((key): boolean => original[`${key}`] === item[`${key}`])
       ) || new _class(item)
     data[instance.id] = instance
   }
@@ -47,7 +52,7 @@ interface Coordinate3D extends Coordinate2D {
   z: number
 }
 
-interface SimulationSettings {
+export interface SimulationSettings {
   gridAzimuth: number
   gridSize: Coordinate3D
   simulationBox: Coordinate3D
@@ -74,7 +79,8 @@ function simplify (specification: BayfillSpecification | NonCubicSpecification |
     // @ts-ignore
     specification.polygons = specification.polygons
       .filter((polygon: Polygon): boolean => polygon instanceof OverlayPolygon ? includeOverlay : true)
-      .map((polygon: any) => {
+      .map((polygon: Polygon): Polygon => {
+        // @ts-ignore
         polygon.facies = polygon.id
         polygon.fraction = 1
         return polygon
@@ -149,20 +155,6 @@ function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: Roo
   }
 }
 
-function selectItems ({ items, state, _class }: { items: any[], state: { available: Identified<any>, [_: string]: any }, _class: Newable<any> }) {
-  const ids = items.map(item => item.id || item._id)
-  const obj = {}
-  for (const id in state.available) {
-    const item = state.available[`${id}`]
-    obj[`${id}`] = new _class({
-      _id: id,
-      ...item,
-      selected: ids.indexOf(id) >= 0,
-    })
-  }
-  return obj
-}
-
 function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEarly: boolean = false): void {
   let children = component.$children.slice()
   while (children.length > 0) {
@@ -210,7 +202,10 @@ function faciesName (obj: any) {
 
 function minFacies (rule: any, getters: RootGetters): number {
   let minFacies = 0
-  const type = getters['truncationRules/typeById'](rule.type) || rule.type
+  const type = isUUID(rule.type)
+    ? getters['truncationRules/typeById'](rule.type)
+    : rule.type
+  if (!type) throw new APSError(`There exists no types with the ID ${rule.type}`)
   if (
     [type, rule.type].includes('non-cubic')
     || [type, rule.type].includes('cubic')
@@ -220,11 +215,11 @@ function minFacies (rule: any, getters: RootGetters): number {
       const uniqueFacies = new Set(rule.polygons.map((polygon): string => faciesName(polygon)))
       if (rule.overlay) {
         const items = Object.values(rule.overlay.items || rule.overlay)
-        items.forEach(item => {
+        items.forEach((item): void => {
           // @ts-ignore
           item.polygons
           // @ts-ignore
-            ? item.polygons.forEach(polygon => {
+            ? item.polygons.forEach((polygon): void => {
               uniqueFacies.add(polygon.facies.name)
             })
           // @ts-ignore
@@ -284,6 +279,20 @@ function toIdentifiedObject<T> (items: T[]): Identified<T> {
   }, {})
 }
 
+function getParameters (collection: object, delimiter: string = '.'): string[] {
+  const parameters = new Set(Object.keys(collection))
+  const selectable = Object.keys(flatten(collection, { delimiter }))
+    .filter((param): boolean => param.endsWith('selected'))
+    .map((param): string => param.slice(0, -'/selected'.length))
+  selectable.forEach((param): void => {
+    parameters.delete(param.split(delimiter)[0])
+  })
+  return [
+    ...parameters,
+    ...selectable,
+  ]
+}
+
 export {
   getId,
   sortByProperty,
@@ -292,7 +301,6 @@ export {
   makeData,
   makeSimplifiedTruncationRuleSpecification,
   makeTruncationRuleSpecification,
-  selectItems,
   hasValidChildren,
   invalidateChildren,
   hasCurrentParents,
@@ -308,4 +316,6 @@ export {
   notEmpty,
   sortAlphabetically,
   toIdentifiedObject,
+  getParameters,
+  includes,
 }

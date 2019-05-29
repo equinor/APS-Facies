@@ -174,7 +174,7 @@ def getContinuous3DParameterValues(grid_model, parameter_name, realization_numbe
     function_name = getContinuous3DParameterValues.__name__
     param = get3DParameter(grid_model, parameter_name)
     if param.is_empty(realization_number):
-        text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number)
+        text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number + 1)
         raise_error(function_name, text)
 
     active_cell_values = param.get_values(realization_number)

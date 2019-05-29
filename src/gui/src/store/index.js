@@ -13,11 +13,10 @@ import options from '@/store/modules/options'
 import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelFileExporter from '@/store/modules/modelFileExporter'
 
-import { mirrorZoneRegions } from '@/store/utils'
 import {
   defaultSimulationSettings,
+  getParameters,
   hasCurrentParents,
-  notEmpty,
   resolve,
   sortAlphabetically,
 } from '@/utils'
@@ -34,10 +33,6 @@ const store = new Vuex.Store({
   },
 
   strict: process.env.NODE_ENV !== 'production',
-
-  plugins: [
-    mirrorZoneRegions,
-  ],
 
   modules: {
     gridModels,
@@ -61,6 +56,7 @@ const store = new Vuex.Store({
           dispatch('constants/fetch'),
           dispatch('truncationRules/fetch'),
           dispatch('parameters/path/fetch'),
+          dispatch('parameters/names/workflow/fetch'),
           dispatch('parameters/names/project/fetch'),
         ])
         commit('FINISHED')
@@ -75,16 +71,13 @@ const store = new Vuex.Store({
         await dispatch('gridModels/select', data.gridModels.current)
 
         // Parameters
-        for (const parameter of Object.keys(data.parameters)) {
-          const selected = data.parameters[`${parameter}`].selected
+        for (const parameter of getParameters(data.parameters)) {
+          const { selected } = resolve(parameter, data.parameters)
           if (selected) {
-            await dispatch(`parameters/${parameter}/select`, selected)
+            await dispatch(`parameters/${parameter.replace('.', '/')}/select`, selected)
           } else if (parameter === 'grid') {
             await dispatch('parameters/grid/populate', data.parameters.grid)
             await dispatch('parameters/grid/simBox/populate', data.parameters.grid.simBox)
-          } else if (parameter === 'path') {
-            // Set the user settings of where to store various information
-            await dispatch('parameters/path/select', data.parameters.path.project)
           } else {
             // Ignored
           }
@@ -95,11 +88,8 @@ const store = new Vuex.Store({
         await dispatch('zones/current', { id: data.zones.current })
 
         // Regions
-        if (notEmpty(data.regions.available)) {
-          await dispatch('regions/use', data.regions)
-          await dispatch('regions/populate', data.regions.available)
-          await dispatch('regions/current', { id: data.regions.current })
-        }
+        await dispatch('regions/use', { use: data.regions.use, fetch: false })
+        await dispatch('regions/current', { id: data.regions.current })
 
         // Facies
         await dispatch('facies/global/populate', Object.values(data.facies.global.available))
@@ -108,6 +98,7 @@ const store = new Vuex.Store({
         await dispatch('facies/populateConstantProbability', data.facies.constantProbability)
 
         // Gaussian Random Fields
+        await dispatch('gaussianRandomFields/crossSections/populate', Object.values(data.gaussianRandomFields.crossSections.available))
         await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.fields))
 
         // Truncation rules
@@ -143,8 +134,8 @@ const store = new Vuex.Store({
     zone: (state) => {
       return state.zones.current ? state.zones.available[`${state.zones.current}`] : null
     },
-    region: (state) => {
-      return state.regions.use ? state.regions.available[`${state.regions.current}`] : null
+    region: (state, getters) => {
+      return state.regions.use && getters.zone ? getters.zone._regions[`${state.regions.current}`] : null
     },
     facies: (state) => {
       return state.facies.current
@@ -177,10 +168,10 @@ const store = new Vuex.Store({
     },
     // These are the 'available' for various modules / properties
     zones: (state) => {
-      return state.zones.available
+      return Object.values(state.zones.available)
     },
-    regions: (state) => {
-      return state.regions.available
+    regions: (state, getters) => {
+      return getters.zone ? getters.zone.regions : []
     },
     faciesTable: (state) => {
       return Object.values(state.facies.global.available)

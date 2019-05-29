@@ -3,7 +3,7 @@ import { isEmpty, getId } from '@/utils/helpers'
 import Region from '@/utils/domain/region'
 import { ID } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
-import BaseItem, { BaseItemConfiguration } from './baseItem'
+import BaseItem, { BaseItemConfiguration, BaseItemSerialization } from './baseItem'
 import { Dependent, Parent } from './interfaces'
 
 interface ParentConfiguration extends BaseItemConfiguration {
@@ -19,6 +19,13 @@ interface ZoneRegionConfiguration extends BaseItemConfiguration {
 }
 
 export type DependentConfiguration = ParentConfiguration | ZoneRegionConfiguration
+
+export interface DependentSerialization extends BaseItemSerialization {
+  parent: {
+    zone: ID
+    region: ID | null
+  }
+}
 
 // @ts-ignore
 export function hasParents (item: any, zone, region): boolean {
@@ -38,6 +45,7 @@ export function hasParents (item: any, zone, region): boolean {
 
 export default abstract class ZoneRegionDependent extends BaseItem implements Dependent {
   public readonly parent: Parent
+
   protected constructor ({
     id,
     zone,
@@ -66,6 +74,13 @@ export default abstract class ZoneRegionDependent extends BaseItem implements De
       return uuidv5(getId(this.parent.region), getId(this.parent.zone))
     } else {
       return getId(this.parent.zone)
+    }
+  }
+
+  protected toJSON (): DependentSerialization {
+    return {
+      ...super.toJSON(),
+      parent: this.parent,
     }
   }
 }

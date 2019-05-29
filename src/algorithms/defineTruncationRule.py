@@ -9,10 +9,8 @@ from sys import argv
 import copy
 import collections
 import numpy as np
-import matplotlib
 
 from matplotlib import pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.patches import Polygon
 
 from src.utils.constants.simple import Debug

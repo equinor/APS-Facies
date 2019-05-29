@@ -10,7 +10,7 @@ from src.utils.roxar.grid_model import (
     getContinuous3DParameterValues, getDiscrete3DParameterValues,
     find_defined_cells, create_zone_parameter,
 )
-from src.utils.checks import  check_probability_values, check_probability_normalisation
+from src.utils.checks import check_probability_values, check_probability_normalisation
 
 
 def check_and_normalise_probability(
@@ -59,7 +59,7 @@ def check_and_normalise_probability(
     sum_probabilities_selected_cells = np.zeros(num_defined_cells, np.float32)
     num_cell_with_modified_probability = 0
 
-     # Check that probability values are in interval [0,1]
+    # Check that probability values are in interval [0,1]
     for facies_name in facies_names_for_zone:
         parameter_name = probability_parameter_per_facies[facies_name]
 
@@ -72,9 +72,10 @@ def check_and_normalise_probability(
         # Check probability values, ensure that they are in interval [0,1]. If outside this interval,
         # they are set to 0 if negative or 1 if above 1, but error message if too large fraction of grid cells have
         # value outside the tolerance specified.
-        probabilities_selected_cells =  check_probability_values(probabilities_selected_cells,
-                                                                 tolerance_of_probability_normalisation, 
-                                                                 facies_name, parameter_name)
+        probabilities_selected_cells = check_probability_values(
+            probabilities_selected_cells, tolerance_of_probability_normalisation,
+            facies_name, parameter_name
+        )
 
         # Sum up probability over all facies per selected cell
         all_values[cell_index_defined] = probabilities_selected_cells
@@ -82,8 +83,10 @@ def check_and_normalise_probability(
         probability_values_per_rms_param[parameter_name] = all_values
 
     # Check normalisation and report error if input probabilities are too far from 1.0
-    normalise_is_necessary = check_probability_normalisation(sum_probabilities_selected_cells, eps, tolerance_of_probability_normalisation)
-    if  normalise_is_necessary:
+    normalise_is_necessary = check_probability_normalisation(
+        sum_probabilities_selected_cells, eps, tolerance_of_probability_normalisation
+    )
+    if normalise_is_necessary:
         # Normalize
         psum = sum_probabilities_selected_cells
 
@@ -97,8 +100,7 @@ def check_and_normalise_probability(
                 num_cell_with_modified_probability = check_value.sum()
 
             # Normalize
-            p = p/psum
-
+            p = p / psum
 
             # The cells  belonging to the zone,region as defined by the input cell_index_defined array
             # is updated by normalised values
@@ -123,7 +125,7 @@ def check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_
 
     # Read zone parameter from RMS
     assert zone_param_name is not None
-    zone_param = create_zone_parameter(grid_model,  name=zone_param_name, realization_number=realization_number, set_shared=False, debug_level=debug_level)
+    zone_param = create_zone_parameter(grid_model, name=zone_param_name, realization_number=realization_number, set_shared=False, debug_level=debug_level)
     zone_values = zone_param.get_values(realization_number)
 
     # Read region parameter from RMS

@@ -5,7 +5,7 @@ from src.algorithms.properties import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug, CrossSectionType
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple, Dict
 from xml.etree.ElementTree import Element, ElementTree
 
 from roxar import Project
@@ -14,6 +14,7 @@ from roxar import Project
 class APSModel:
     __aps_model_version: str
     __class_name: str
+    __zoneModelTable: Dict[Tuple[int, int], APSZoneModel]
     def __init__(
             self,
             model_file_name: Optional[str] = None,
@@ -43,6 +44,7 @@ class APSModel:
     __preview_cross_section: CrossSection
     preview_cross_section: CrossSection
     sorted_zone_models: OrderedDict
+    use_constant_probability: bool
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(cls, xml_content: str) -> APSModel: ...

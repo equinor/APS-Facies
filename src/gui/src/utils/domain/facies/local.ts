@@ -1,5 +1,9 @@
-import ZoneRegionDependent, { DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
+import ZoneRegionDependent, {
+  DependentConfiguration,
+  DependentSerialization
+} from '@/utils/domain/bases/zoneRegionDependent'
 import GlobalFacies from '@/utils/domain/facies/global'
+import { ID } from '@/utils/domain/types'
 
 type Probability = number
 
@@ -10,6 +14,12 @@ export type FaciesArgs = DependentConfiguration & {
   facies: GlobalFacies
   probabilityCube?: ProbabilityCube | null
   previewProbability?: Probability | null
+}
+
+export interface FaciesSerialization extends DependentSerialization {
+  facies: ID
+  probabilityCube: ProbabilityCube | null
+  previewProbability: Probability | null
 }
 
 export default class Facies extends ZoneRegionDependent {
@@ -30,4 +40,13 @@ export default class Facies extends ZoneRegionDependent {
 
   public get name (): string { return this.facies.name }
   public get alias (): string { return this.facies.alias }
+
+  public toJSON (): FaciesSerialization {
+    return {
+      ...super.toJSON(),
+      facies: this.facies.id,
+      probabilityCube: this.probabilityCube,
+      previewProbability: this.previewProbability,
+    }
+  }
 }

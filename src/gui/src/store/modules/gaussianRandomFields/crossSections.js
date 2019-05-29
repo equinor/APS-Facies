@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
 import { DEFAULT_CROSS_SECTION } from '@/config'
+import { getId } from '@/utils'
 
 async function updateAffectedFields ({ state, rootGetters, dispatch }, id) {
   const crossSection = state.available[`${id}`]
@@ -70,6 +71,9 @@ export default {
     current (state, getters, rootState, rootGetters) {
       return Object.values(state.available)
         .find(crossSection => crossSection.isChildOf({ zone: rootGetters.zone, region: rootGetters.region }))
+    },
+    byId: (state) => (id) => {
+      return state.available[`${getId(id)}`]
     }
   },
 }

@@ -61,7 +61,7 @@ def run(roxar=None, project=None, **kwargs):
 
     realization_number = project.current_realisation
     if debug_level >= Debug.VERBOSE:
-        print('Realization number: {}'.format(realization_number))
+        print('Realization number: {}'.format(realization_number + 1))
 
     createCombinedFaciesLogForBlockedWells(
         project,

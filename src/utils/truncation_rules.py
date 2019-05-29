@@ -101,7 +101,7 @@ class TruncationSpecification:
             return {
                 'truncStructureList': [self._values['direction']] + [
                         [polygon['facies'], polygon['fraction']] + polygon['level']
-                        for polygon in self._polygons()
+                        for polygon in self._polygons(sort=False)
                     ],
                 'overlayGroups': self._get_overlay(),
                 'keyResolution': 209,
@@ -109,8 +109,11 @@ class TruncationSpecification:
         else:
             raise ValueError("Invalid truncation type ({type})".format(type=self.type))
 
-    def _polygons(self, _type='polygons'):
-        return sorted(self._values[_type] or [], key=lambda polygon: polygon['order'])
+    def _polygons(self, _type='polygons', sort=True):
+        if sort:
+            return sorted(self._values[_type] or [], key=lambda polygon: polygon['order'])
+        else:
+            return self._values[_type]
 
     @property
     def probabilities(self):

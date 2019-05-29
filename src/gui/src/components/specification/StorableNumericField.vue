@@ -62,7 +62,7 @@ export default {
 
   methods: {
     dispatchChange (value) {
-      this.$store.dispatch('gaussianRandomFields/' + this.propertyType, { grfId: this.grfId, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
+      this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { grfId: this.grfId, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
     },
     getValue () {
       return getValue(this.field, this.propertyType, this.subPropertyType)

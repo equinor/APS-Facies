@@ -16,8 +16,14 @@ import OverlayPolygon from '@/utils/domain/polygon/overlay'
 
 type TruncationRule = Bayfill | NonCubic | Cubic
 
+interface Parent {
+  zone: Zone
+  region: Region | null
+}
+
 export {
   Direction,
+  Parent,
   Polygon,
   BayfillPolygon,
   CubicPolygon,

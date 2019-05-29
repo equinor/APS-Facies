@@ -1,4 +1,8 @@
-import SelectableItem from './bases/selectableItem'
+import { Region, RegionConfiguration, RegionSerialization } from '@/utils/domain/zone'
 
-export default class Region extends SelectableItem {
+export default Region
+
+export {
+  RegionConfiguration,
+  RegionSerialization,
 }

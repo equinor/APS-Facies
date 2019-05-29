@@ -1,9 +1,9 @@
 import Vue from 'vue'
 
 import { Zone } from '@/utils/domain'
-import { SELECTED_ITEMS } from '@/store/mutations'
 import rms from '@/api/rms'
-import { makeData, isEmpty, notEmpty } from '@/utils'
+import Region from '@/utils/domain/region'
+import { identify, includes } from '@/utils/helpers'
 
 export default {
   namespaced: true,
@@ -11,29 +11,15 @@ export default {
   state: {
     available: {},
     current: null,
+    _loading: false,
   },
 
   actions: {
-    select: async ({ commit, dispatch, state, rootState }, selected) => {
-      const ids = selected.map(zone => zone.id)
-      for (const id in state.available) {
-        // TODO: Make sure all regions are also selected, of regions is in use (and this zone has regions)
-        // FIXME: Ensure that 'intermediate' is preserved
-        const toggled = ids.indexOf(id) >= 0
-        if (rootState.regions.use) {
-          // When a zone is (un)toggled, all of its regions should be (un)toggled
-          const zone = state.available[`${id}`]
-          Object.keys(state.available[`${zone.id}`].regions)
-            .forEach(async regionId => {
-              commit('REGION_SELECTED', { zoneId: id, regionId, toggled })
-              if (!toggled && regionId === rootState.regions.current) {
-                await dispatch('regions/current', { id: null }, { root: true })
-              }
-            })
-        }
-        commit('SELECTED', { id, toggled })
+    select: async ({ commit, state }, selected) => {
+      for (const zone of Object.values(state.available)) {
+        const toggled = includes(selected, zone)
+        commit('SELECTED', { zone, toggled })
       }
-      return ids
     },
     current: async ({ commit, dispatch, state }, { id }) => {
       await dispatch('truncationRules/resetTemplate', { type: '', template: '' }, { root: true })
@@ -44,32 +30,24 @@ export default {
       await dispatch('parameters/grid/thickness', zone.name, { root: true })
       await dispatch('parameters/grid/simBox/thickness', zone.name, { root: true })
     },
-    fetch: ({ dispatch, rootGetters }) => {
-      return rms.zones(rootGetters.gridModel)
-        .then(zones => dispatch('populate', { zones }))
-    },
-    populate: async ({ commit, dispatch, state }, { zones }) => {
-      const data = makeData(zones, Zone, state.available)
-      commit('AVAILABLE', data)
-      const selected = Object.values(data).filter(({ selected }) => !!selected)
-      await dispatch('select', selected)
-      return data
-    },
-    update ({ commit, state }, { zones, zoneId, regions }) {
-      if (isEmpty(zones) && notEmpty(regions)) {
-        // We are setting/updating the regions for `zone`
-        if (isEmpty(zoneId)) zoneId = state.current
-        commit('REGIONS', { zoneId, regions })
-        // TODO: Add new GRFs for each region if necessary
-        // All regions selected
-        if (Object.values(regions).every(region => region.selected)) commit('SELECTED', { id: zoneId, toggled: true })
-        // Some region(s) selected
-        else if (Object.values(regions).some(region => region.selected)) commit('SELECTED', { id: zoneId, toggled: 'intermediate' })
-        // No regions selected
-        else commit('SELECTED', { id: zoneId, toggled: false })
-      } else {
-        // TODO?
+    fetch: async ({ commit, dispatch, rootGetters }) => {
+      commit('LOADING', true)
+      try {
+        await dispatch('populate', { zones: await rms.zones(rootGetters.gridModel) })
+      } finally {
+        commit('LOADING', false)
       }
+    },
+    populate: async ({ commit }, { zones }) => {
+      zones.forEach(zone => {
+        if ('regions' in zone && Array.isArray(zone.regions)) {
+          zone.regions = zone.regions.map(region => new Region(region))
+        }
+      })
+      zones = zones.map(zone => new Zone(zone))
+      zones.forEach(zone => { zone.regions.forEach(region => { region.zone = zone }) })
+      commit('AVAILABLE', identify(zones))
+      return zones
     },
   },
 
@@ -77,15 +55,14 @@ export default {
     AVAILABLE: (state, zones) => {
       Vue.set(state, 'available', zones)
     },
-    SELECTED: SELECTED_ITEMS,
+    SELECTED: (state, { zone, toggled }) => {
+      Vue.set(state.available[`${zone.id}`], 'selected', toggled)
+    },
     CURRENT: (state, { id }) => {
       Vue.set(state, 'current', id)
     },
-    REGIONS: (state, { zoneId, regions }) => {
-      Vue.set(state.available[`${zoneId}`], 'regions', regions)
-    },
-    REGION_SELECTED: (state, { zoneId, regionId, toggled }) => {
-      Vue.set(state.available[`${zoneId}`].regions[`${regionId}`], 'selected', toggled)
+    LOADING: (state, toggle) => {
+      Vue.set(state, '_loading', toggle)
     },
   },
 

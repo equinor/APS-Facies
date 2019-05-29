@@ -1,25 +1,11 @@
 import Vue from 'vue'
 
-import { hasParents, newSeed } from '@/utils'
-import { ADD_ITEM } from '@/store/mutations'
-import { addItem } from '@/store/actions'
+import { getId, hasParents, newSeed } from '@/utils'
 import { Trend, Variogram, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 
 import crossSections from '@/store/modules/gaussianRandomFields/crossSections'
 import rms from '@/api/rms'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
-
-const makeFieldData = (fields) => {
-  return fields.reduce((data, field) => {
-    const instance = new GaussianRandomField({
-      variogram: new Variogram(field.variogram || {}),
-      trend: new Trend(field.trend || {}),
-      ...field,
-    })
-    data[instance.id] = instance
-    return data
-  }, {})
-}
 
 const newGaussianFieldName = (state, zone, region) => {
   const name = num => `GRF${num}`
@@ -73,23 +59,31 @@ export default {
   },
 
   actions: {
-    populate ({ dispatch }, fields) {
-      return Promise.all(Object.values(makeFieldData(fields)).map(field => dispatch('addField', { field })))
-    },
-    async addEmptyField ({ dispatch, state, rootGetters }, { zone, region } = {}) {
-      zone = zone || rootGetters.zone
-      region = region || rootGetters.region
-      return dispatch('addField', {
-        field: new GaussianRandomField({
-          name: newGaussianFieldName(state, zone, region),
-          crossSection: await dispatch('crossSections/fetch', { zone, region }),
-          zone,
-          region,
+    populate ({ commit, getters }, fields) {
+      fields.forEach(field => {
+        field = new GaussianRandomField({
+          ...field,
+          variogram: new Variogram(field.variogram || {}),
+          trend: new Trend(field.trend || {}),
+          crossSection: getters['crossSections/byId'](field.settings.crossSection),
         })
+        commit('ADD', field)
       })
     },
+    async addEmptyField ({ dispatch, commit, state, rootGetters }, { zone, region } = {}) {
+      zone = zone || rootGetters.zone
+      region = region || rootGetters.region
+      const field = new GaussianRandomField({
+        name: newGaussianFieldName(state, zone, region),
+        crossSection: await dispatch('crossSections/fetch', { zone, region }),
+        zone,
+        region,
+      })
+      commit('ADD', field)
+      return field
+    },
     addField ({ commit }, { field }) {
-      return addItem({ commit }, { item: field })
+      commit('ADD', field)
     },
     async deleteField ({ state, commit, dispatch }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {
@@ -186,8 +180,8 @@ export default {
 
   mutations: {
     // Gaussian Random Field
-    ADD (state, { id, item }) {
-      ADD_ITEM(state.fields, { id, item })
+    ADD (state, field) {
+      Vue.set(state.fields, field.id, field)
     },
     DELETE (state, { grfId }) {
       Vue.delete(state.fields, grfId)
@@ -255,7 +249,7 @@ export default {
 
   getters: {
     byId: (state) => id => {
-      return state.fields[`${id}`]
+      return state.fields[`${getId(id)}`]
     },
   },
 }

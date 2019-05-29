@@ -13,9 +13,10 @@ from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     get_project_realization_seed,
 )
 from src.utils.roxar.grid_model import getGridAttributes
+from src.utils.methods import get_seed_log_file
 
 
-def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=False):
+def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat'):
     """
     Description: Run gauss simulations for the APS model i sequence
 
@@ -150,20 +151,19 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
         )
     # End loop over all active zones in the model
 
-    seed_file_log = 'seedLogFile.dat'
-    start_seed = nrlib.seed()
     with open(seed_file_log, 'a') as file:
         file.write(
-            'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, start_seed)
+            'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
         )
     print('')
 
 
 def run(roxar=None, project=None, **kwargs):
     model_file = get_specification_file(**kwargs)
+    seed_file_log = get_seed_log_file(**kwargs)
     real_number = project.current_realisation
     is_shared = False
-    run_simulations(project, model_file=model_file, realisation=real_number, is_shared=is_shared)
+    run_simulations(project, model_file, real_number, is_shared, seed_file_log)
     print('Finished simulation of gaussian fields for APS')
 
 

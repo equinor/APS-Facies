@@ -1,9 +1,19 @@
 /* eslint-disable no-undef */
 import store from '@/store'
 
+import { createModel } from '@/utils/helpers/processing/export'
+
 if (typeof rms !== 'undefined') {
   rms.onPluginSave(() => {
-    return store.state
+    let model = null
+    try {
+      model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
+    } catch {
+    }
+    return {
+      ...store.state,
+      model,
+    }
   })
 
   rms.onPluginLoaded(data => {
@@ -13,16 +23,19 @@ if (typeof rms !== 'undefined') {
     if (Object.keys(data).length > 2) {
       store.dispatch('populate', data)
     } else {
-      let gridModel = /^Grid models\/(.*)$/g.exec(data['_treeorigin'])[1]
-      // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character
-      for (const model of store.state.gridModels.available) {
-        if (gridModel.includes(model)) {
-          gridModel = model
-          break
+      const match = /^Grid models\/(.*)$/g.exec(data['_treeorigin'])
+      if (match) {
+        let gridModel = match[1]
+        // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character
+        for (const model of store.state.gridModels.available) {
+          if (gridModel.includes(model)) {
+            gridModel = model
+            break
+          }
         }
-      }
-      if (gridModel) {
-        store.dispatch('gridModels/select', gridModel)
+        if (gridModel) {
+          store.dispatch('gridModels/select', gridModel)
+        }
       }
     }
   })
