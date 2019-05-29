@@ -2,6 +2,68 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.10.0
+
+This release includes two major features; cubic truncation rules, and the implementation of the `run` button in RMS.
+When click, the APS simulation, and truncation workflows are executed, and the result is written back to RMS.
+
+RMS 11.1 add support for staring plugins from the context menu when different data is selected.
+As such, if the APS GUI is started when a specific grid model is selected, that model is preselected in the GUI.
+
+Additionally, there are _many_ improvements, fixes, and some performance gains.
+Multiple regression errors in 0.9.1 has also been addressed.
+
+### What's new?
+* Implemented Cubic truncation rules
+* The user may click 'run' in RMS, and the APS simulation will be executed
+* The project / file name field has been removed from toolbar
+* Aliases of Facies are used, instead of their names
+* Select the given grid model from RMS (requires RMS 11.1, or newer)
+* Loading indication of Zones, Regions, and Facies
+* Sets default Facies Realisation Parameter to 'aps'
+* Gets parameters from RMS
+  * Current workflow name
+  * Project name
+* Added version information, in the GUI, and in the plugin file
+* The seed of a Gaussian Random Field will now be exported
+* Help icon with hover text
+
+### Fixes
+* Added missing \_\_init\_\_.py in the root of the plugin
+* Preserve the `FmuUpdatableValue` class in Gaussian Random Fields
+  * Set curvature to be FMU updatable when changing to hyperbolic trend
+    * Which caused the `curvature` field in a model to be empty if the user selects `HYPERBOLIC` trends
+* Ensures that project name is the name of the project on disk
+* Adds region parameter to model file __only if__ regions are used
+* Ensure types of truncation rules are in the same order
+* Mock
+  * Uses the correct container for data
+  * Implemented `set_shared`
+  * Data is extracted
+  * Data is gotten from the correct realisation
+* Defer build number until it is needed
+* Truncation rule types are added once
+
+### Restructure
+* Improved readability, cleaned up the code base, and made it more robust
+* Added more, and improved type annotations
+* Moved export logic to separate file for easier reuse
+* Moved `APS_main.py` to `rms_jobs`, as it is used as an RMS job
+* Allow `seed_file_log` to be set
+* Regions now ONLY exist inside zones
+* Uses consistent API for (nested) 'selectable'
+* Made `matplotlibrc` into an "heredoc"
+* `selected` is handled by classes, instead of directly by state
+
+### Miscellaneous
+* Updated dependencies
+* Added target for listing all available mock projects
+
+### Performance
+* More efficient serialization of domain objects
+  * Smaller size of RMS jobs (reduced size by a factor of around 6)
+
+
 ## 0.9.1
 
 ### Fixes
