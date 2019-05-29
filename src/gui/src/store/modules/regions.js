@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { promiseSimpleCommit } from '@/store/utils'
 import { Region } from '@/utils/domain'
-import { makeData, isEmpty, notEmpty } from '@/utils'
+import { makeData, isEmpty, notEmpty, includes } from '@/utils'
 import rms from '@/api/rms'
 
 export default {
@@ -18,7 +18,7 @@ export default {
     select: async ({ dispatch, commit }, regions) => {
       regions.forEach(({ zone }) => {
         zone.regions.forEach(region => {
-          commit('TOGGLE', { region, toggled: regions.map(({ id }) => id).includes(region.id) })
+          commit('TOGGLE', { region, toggled: includes(regions, region) })
         })
       })
       await dispatch('zones/update', { regions }, { root: true })

@@ -1,5 +1,6 @@
 import uuidv4 from 'uuid/v4'
 import { ID, Identified } from '@/utils/domain/types'
+import { Identifiable } from '@/utils/domain/bases/interfaces'
 import {
   allSet,
   newSeed,
@@ -42,6 +43,10 @@ function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<Ma
   }, ({} as Identified<HasIdentity<T>>))
 }
 
+function includes<T extends Identifiable> (items: T[], item: T): boolean {
+  return items.map(getId).includes(item.id)
+}
+
 export {
   hex,
   isUUID,
@@ -52,4 +57,5 @@ export {
   getRandomInt,
   isEmpty,
   notEmpty,
+  includes,
 }

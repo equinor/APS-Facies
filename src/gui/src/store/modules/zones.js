@@ -3,7 +3,7 @@ import Vue from 'vue'
 import { Zone } from '@/utils/domain'
 import rms from '@/api/rms'
 import Region from '@/utils/domain/region'
-import { identify } from '@/utils/helpers'
+import { identify, includes } from '@/utils/helpers'
 
 export default {
   namespaced: true,
@@ -18,7 +18,7 @@ export default {
       for (const zone of Object.values(state.available)) {
         // TODO: Make sure all regions are also selected, of regions is in use (and this zone has regions)
         // FIXME: Ensure that 'intermediate' is preserved
-        const toggled = selected.map(zone => zone.id).includes(zone.id)
+        const toggled = includes(selected, zone)
         if (rootState.regions.use) {
           // When a zone is (un)toggled, all of its regions should be (un)toggled
           Object.values(state.available[`${zone.id}`].regions)

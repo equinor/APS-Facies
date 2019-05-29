@@ -15,6 +15,7 @@ import {
   notEmpty,
   allSet,
   isUUID,
+  includes,
 } from '@/utils/helpers'
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 import { RootGetters } from '@/store/typing'
@@ -316,4 +317,5 @@ export {
   sortAlphabetically,
   toIdentifiedObject,
   getParameters,
+  includes,
 }
