@@ -8,6 +8,7 @@ const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 export default {
   projectName: () => api.call('get_project_name'),
   projectDirectory: () => api.call('get_project_dir'),
+  currentWorkflowName: () => api.call('get_current_workflow_name'),
   gridModels: () => api.call('get_grid_model_names'),
   zones: (gridName) => api.call('get_zones', gridName),
   regionParameters: (gridName) => api.call('get_region_parameters', gridName),

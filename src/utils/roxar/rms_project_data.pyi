@@ -18,6 +18,7 @@ class CodeName(NamedTuple):
 
 
 ProjectName = NewType('ProjectName', str)
+WorkflowName = NewType('WorkflowName', str)
 ProjectPath= NewType('ProjectPath', str)
 XML = NewType('XML', str)
 TrendName = NewType('TrendName', str)
@@ -79,6 +80,9 @@ class RMSData:
     def get_project_dir(
             self
     ) -> ProjectPath: ...
+    def get_current_workflow_name(
+            self
+    ) -> WorkflowName: ...
     def get_grid_models(
             self
     ) -> GridModels: ...

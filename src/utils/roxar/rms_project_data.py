@@ -81,6 +81,9 @@ class RMSData:
     def get_project_dir(self):
         return str(Path(self.project.filename).parent)
 
+    def get_current_workflow_name(self):
+        return self.roxar.rms.get_running_workflow_name()
+
     def get_grid_models(self):
         return self.project.grid_models
 

@@ -1,3 +1,5 @@
+import rms from '@/api/rms'
+
 export default {
   namespaced: true,
 
@@ -6,6 +8,9 @@ export default {
   },
 
   actions: {
+    fetch: async ({ dispatch }) => {
+      dispatch('select', await rms.currentWorkflowName())
+    },
     select: ({ commit }, workflowName) => {
       commit('CURRENT', workflowName)
     },
