@@ -2,6 +2,8 @@
   <v-data-table
     v-model="selected"
     :headers="headers"
+    :loading="loading"
+    :no-data-text="noDataText"
     :items="facies"
     must-sort
     item-key="name"
@@ -132,6 +134,12 @@ export default {
     ...mapGetters({
       'canSelect': 'canSpecifyModelSettings',
     }),
+    loading () { return this.$store.state.facies.global._loading },
+    noDataText () {
+      return this.loading
+        ? 'Loading facies table from RMS'
+        : this.$vuetify.noDataText
+    },
     facies () {
       return Object.values(this.$store.state.facies.global.available)
         .map(facies => {

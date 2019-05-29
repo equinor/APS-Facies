@@ -24,6 +24,7 @@ export default {
   state: {
     current: null,
     use: false,
+    _loading: false,
   },
 
   modules: {},
@@ -56,6 +57,7 @@ export default {
     fetch: async ({ commit, rootState, rootGetters, state }, zone) => {
       // TODO: Add new GRFs for each region if necessary
       if (state.use && notEmpty(rootGetters.regionParameter)) {
+        commit('LOADING', true)
         if (isEmpty(zone)) {
           for (const zone of Object.values(rootState.zones.available)) {
             await fetchRegions({ commit, rootGetters }, zone)
@@ -63,6 +65,7 @@ export default {
         } else {
           await fetchRegions({ commit, rootGetters }, zone)
         }
+        commit('LOADING', false)
       }
     },
     use: async ({ commit, dispatch }, { use, fetch = true }) => {
@@ -94,6 +97,9 @@ export default {
     },
     USE: (state, value) => {
       Vue.set(state, 'use', value)
+    },
+    LOADING: (state, toggle) => {
+      Vue.set(state, '_loading', toggle)
     },
   },
 

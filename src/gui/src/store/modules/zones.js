@@ -11,6 +11,7 @@ export default {
   state: {
     available: {},
     current: null,
+    _loading: false,
   },
 
   actions: {
@@ -29,8 +30,13 @@ export default {
       await dispatch('parameters/grid/thickness', zone.name, { root: true })
       await dispatch('parameters/grid/simBox/thickness', zone.name, { root: true })
     },
-    fetch: async ({ dispatch, rootGetters }) => {
-      await dispatch('populate', { zones: await rms.zones(rootGetters.gridModel) })
+    fetch: async ({ commit, dispatch, rootGetters }) => {
+      commit('LOADING', true)
+      try {
+        await dispatch('populate', { zones: await rms.zones(rootGetters.gridModel) })
+      } finally {
+        commit('LOADING', false)
+      }
     },
     populate: async ({ commit }, { zones }) => {
       zones.forEach(zone => {
@@ -54,6 +60,9 @@ export default {
     },
     CURRENT: (state, { id }) => {
       Vue.set(state, 'current', id)
+    },
+    LOADING: (state, toggle) => {
+      Vue.set(state, '_loading', toggle)
     },
   },
 

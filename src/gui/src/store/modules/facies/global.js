@@ -10,13 +10,16 @@ export default {
   state: {
     available: {},
     current: null,
+    _loading: false,
   },
 
   modules: {},
 
   actions: {
-    fetch: async ({ dispatch, rootGetters }) => {
+    fetch: async ({ commit, dispatch, rootGetters }) => {
+      commit('LOADING', true)
       const facies = await rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
+      commit('LOADING', false)
       await dispatch('populate', facies)
     },
     populate: ({ commit, state, rootState }, facies) => {
@@ -73,6 +76,9 @@ export default {
     },
     CURRENT: (state, { id }) => {
       state.current = id
+    },
+    LOADING: (state, toggle) => {
+      Vue.set(state, '_loading', toggle)
     },
     ADD: (state, facies) => {
       Vue.set(state.available, facies.id, facies)

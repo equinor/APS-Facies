@@ -2,8 +2,9 @@
   <v-data-table
     v-model="selected"
     :headers="headers"
+    :loading="loading"
     :items="items"
-    :no-data-text="noDataText"
+    :no-data-text="_noDataText"
     must-sort
     item-key="id"
     class="elevation-1"
@@ -80,6 +81,14 @@ export default {
   },
 
   computed: {
+    _noDataText () {
+      return this.loading
+        ? `Loading ${this.itemType}s`
+        : this.noDataText
+    },
+    loading () {
+      return this.$store.state[`${this.itemType}s`]._loading
+    },
     headers () {
       return [
         {
