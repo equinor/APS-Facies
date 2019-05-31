@@ -49,7 +49,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
+import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import { getId } from '@/utils'
 
 import HelpIcon from '@/components/baseComponents/HelpIcon.vue'
