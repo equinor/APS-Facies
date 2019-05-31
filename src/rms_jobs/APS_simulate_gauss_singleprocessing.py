@@ -151,10 +151,11 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
         )
     # End loop over all active zones in the model
 
-    with open(seed_file_log, 'a') as file:
-        file.write(
-            'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
-        )
+    if seed_file_log:
+        with open(seed_file_log, 'a') as file:
+            file.write(
+                'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
+            )
     print('')
 
 
