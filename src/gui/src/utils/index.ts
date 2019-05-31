@@ -120,27 +120,33 @@ function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
   }
 }
 
+function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: RootGetters}, rule: TruncationRule) {
+  const facies = rootGetters['facies/selected']
+    .filter((facies): boolean => rootGetters.options.filterZeroProbability ? !!facies.previewProbability && facies.previewProbability > 0 : true)
+  const cumulativeProbability = facies.reduce((cum, { previewProbability }): number => cum + Number(previewProbability), 0)
+
+  return facies
+    .map(({ facies: globalFacies, previewProbability, id }) => {
+      let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
+      // @ts-ignore
+      if (isEmpty(polygon) && rule.overlay) {
+        // @ts-ignore
+        polygon = Object.values(rule.overlay).find((polygon): boolean => polygon.facies.id === id)
+      }
+      return {
+        code: globalFacies.code,
+        name: globalFacies.name,
+        probability: Number(previewProbability) / cumulativeProbability,
+        inZone: true,
+        inRule: Object.is(polygon, undefined) ? -1 : (polygon as Polygon).order,
+      }
+    })
+}
+
 function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters) {
   return {
     type: rule.type,
-    globalFaciesTable: rootGetters['facies/selected']
-      .filter((facies): boolean => rootGetters.options.filterZeroProbability ? !!facies.previewProbability && facies.previewProbability > 0 : true)
-      .map(({ facies: globalFacies, previewProbability, id }) => {
-        let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
-        // @ts-ignore
-        if (isEmpty(polygon) && rule.overlay) {
-          // @ts-ignore
-          polygon = Object.values(rule.overlay).find((polygon): boolean => polygon.facies.id === id)
-        }
-        return {
-          code: globalFacies.code,
-          name: globalFacies.name,
-          probability: previewProbability,
-          inZone: true,
-          // @ts-ignore
-          inRule: Object.is(polygon, undefined) ? -1 : polygon.order,
-        }
-      }),
+    globalFaciesTable: makeGlobalFaciesTableSpecification({ rootGetters }, rule),
     gaussianRandomFields: Object.values(rootGetters.fields)
       .map(field => {
         return {
