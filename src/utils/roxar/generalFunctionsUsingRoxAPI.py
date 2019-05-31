@@ -270,14 +270,9 @@ def setContinuous3DParameterValuesInZoneRegion(
 
     # Find grid layers for the zone
     indexer = grid3D.simbox_indexer
-    dimensions = indexer.dimensions
+    nx, ny, nz = indexer.dimensions
     zonation = indexer.zonation
     layer_ranges = zonation[zoneNumber]
-    nx = dimensions[0]
-    ny = dimensions[1]
-    nz = dimensions[2]
-    zoneName = grid3D.zone_names[zoneNumber]
-    zone_cell_numbers = []
     start_layer = nz
     end_layer = 0
     for layer_range in layer_ranges:
@@ -287,11 +282,11 @@ def setContinuous3DParameterValuesInZoneRegion(
             if end_layer < layer:
                 end_layer = layer
     end_layer = end_layer+1
-    start = (0,0,start_layer)
-    end = (nx,ny,end_layer)
-    zone_cell_numbers = indexer.get_cell_numbers_in_range(start,end)
+    start = (0, 0, start_layer)
+    end = (nx, ny, end_layer)
+    zone_cell_numbers = indexer.get_cell_numbers_in_range(start, end)
 
-    nLayers = end_layer-start_layer
+    nLayers = end_layer - start_layer
     # All input data vectors are from the same zone and has the same size
     inputArrayShape = inputValuesForZoneList[0].shape
     if nx != inputArrayShape[0] or ny != inputArrayShape[1] or nLayers != inputArrayShape[2]:
@@ -318,7 +313,7 @@ def setContinuous3DParameterValuesInZoneRegion(
 
     # Loop over all parameter names
     for paramIndx in range(len(parameterNameList)):
-        paramName =  parameterNameList[paramIndx]
+        paramName = parameterNameList[paramIndx]
         inputValuesForZone = inputValuesForZoneList[paramIndx]
         found = False
         propertyParam = None
@@ -354,7 +349,7 @@ def setContinuous3DParameterValuesInZoneRegion(
         # Assign values from input array into the 3D grid array
         # Note that input array is of dimension (nx,ny,nLayers)
         # where nLayers is the number of layers of the input grid
-        # These layers must correspond to layer from start_layer untill but not including end_layer
+        # These layers must correspond to layer from start_layer until but not including end_layer
         # in the full 3D grid
         if regionParamValues is not None:
             for indx in range(len(i_indices)):
@@ -362,15 +357,15 @@ def setContinuous3DParameterValuesInZoneRegion(
                 j = j_indices[indx]
                 k = k_indices[indx]
                 # print('(i,j,k)=({},{},{})'.format(str(i), str(j), str(k)))
-                cell_index = (i,j,k)
+                cell_index = (i, j, k)
                 cell_number = indexer.get_cell_numbers(cell_index)
                 if start_layer <= k < end_layer:
                     if regionParamValues[cell_number] == regionNumber:
-                        currentValues[cell_number] = inputValuesForZone[i,j,k - start_layer]
+                        currentValues[cell_number] = inputValuesForZone[i, j, k - start_layer]
         else:
             # Create 3D array for all cells in the grid including inactive cells
-            new_3D_array = np.zeros((nx,ny,nz), dtype=float,order='F')
-            for k in range(start_layer,end_layer):
+            new_3D_array = np.zeros((nx, ny, nz), dtype=float, order='F')
+            for k in range(start_layer, end_layer):
                 new_3D_array[:, :, k] = inputValuesForZone[:, :, k - start_layer]
 
             # Since the cell numbers and the indices all are based on the same range,

@@ -27,10 +27,13 @@ import NumericField from '@/components/selection/NumericField.vue'
 export default class FractionField extends Vue {
   @Prop({ required: true })
   readonly value!: Optional<number> | FmuUpdatable
+
   @Prop({ required: false, default: false, type: Boolean })
   readonly fmuUpdatable!: boolean
+
   @Prop({ required: false, default: false, type: Boolean })
   readonly disabled!: boolean
+
   @Prop({ required: false, default: '' })
   readonly label!: string
 

@@ -301,7 +301,6 @@ def run_previewer(
     grid2D_dimensions, increments = get_dimensions(
         preview_cross_section.type, preview_grid_size, original_simulation_box_size
     )
-#    facies, facies_fraction = create_facies_map_vectorized(gauss_field_items, truncObject)
     facies, facies_fraction = create_facies_map(gauss_field_items, truncObject)
 
     if write_simulated_fields_to_file:
@@ -313,7 +312,6 @@ def run_previewer(
                 file_name = gaussian_field.name + '_' + preview_cross_section.type.name + '.dat'
                 writeFileRTF(file_name, gaussian_field.field, grid2D_dimensions, increments, x0, y0, debug_level=debug_level)
         writeFileRTF('facies2D.dat', facies, grid2D_dimensions, increments, x0, y0)
-        
 
     if debug_level >= Debug.VERY_VERBOSE:
         facies_fraction_sorted = collections.OrderedDict(sorted(facies_fraction.items()))

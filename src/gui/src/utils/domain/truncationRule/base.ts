@@ -25,7 +25,10 @@ export type TruncationRuleConfiguration<T extends Polygon> = DependentConfigurat
   realization?: number[][]
 }
 
-export default abstract class TruncationRule<T extends Polygon, S extends PolygonSerialization> extends ZoneRegionDependent implements Named {
+export default abstract class TruncationRule<
+  T extends Polygon,
+  S extends PolygonSerialization,
+> extends ZoneRegionDependent implements Named {
   public readonly name: string
 
   public realization: number[][] | null

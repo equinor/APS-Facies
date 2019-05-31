@@ -10,7 +10,7 @@ interface Counts {
 
 export function hasFaciesSpecifiedForMultiplePolygons (
   polygons: Polygon[] | Identified<Polygon>,
-  facies: Facies | GlobalFacies | null = null
+  facies: Facies | GlobalFacies | null = null,
 ): boolean {
   if (polygons instanceof Object) polygons = Object.values(polygons)
   if (!polygons || polygons.length === 0) return false

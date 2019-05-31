@@ -15,7 +15,7 @@ import {
   makeTruncationRuleSpecification,
   notEmpty,
 } from '@/utils'
-import { getId } from '@/utils/helpers'
+import { getId, isUUID } from '@/utils/helpers'
 import { makeRule } from '@/utils/helpers/processing/templates'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
@@ -158,7 +158,7 @@ export default {
               .filter(polygon => getId(polygon.group) === getId(group)).length + 1
           ) > (Object.values(rootState.gaussianRandomFields.fields).length - rule.backgroundFields.length)
         ) {
-          field = await dispatch('gaussianRandomFields/addEmptyField', { ...rule.parent }, { root: true })
+          field = await dispatch('gaussianRandomFields/addEmptyField', rule.parent, { root: true })
         }
         polygon = new OverlayPolygon({ group, field, order })
       } else if (rule.type === 'non-cubic') {
@@ -464,10 +464,10 @@ export default {
         : null
     },
     ready (state) {
-      return (id) => {
-        const rule = id
-          ? state.rules[`${id}`]
-          : null
+      return (rule) => {
+        rule = isUUID(rule)
+          ? state.rules[`${getId(rule)}`]
+          : rule
         return !!rule && rule.ready
       }
     },

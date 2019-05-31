@@ -4,6 +4,16 @@ import { GlobalFacies } from '@/utils/domain'
 import Vue from 'vue'
 import { promiseSimpleCommit } from '@/store/utils'
 
+function getColor ({ rootState }, code) {
+  const colors = rootState.constants.faciesColors.available
+  return colors[`${code % colors.length}`]
+}
+
+async function getFaciesFromRMS ({ rootGetters }) {
+  const facies = await rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
+  return facies
+}
+
 export default {
   namespaced: true,
 
@@ -18,18 +28,15 @@ export default {
   actions: {
     fetch: async ({ commit, dispatch, rootGetters }) => {
       commit('LOADING', true)
-      const facies = await rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
+      const facies = await getFaciesFromRMS({ rootGetters })
       commit('LOADING', false)
       await dispatch('populate', facies)
     },
     populate: ({ commit, state, rootState }, facies) => {
-      // TODO: Add colors (properly)
-      const colors = rootState.constants.faciesColors.available
       const minFaciesCode = facies.map(({ code }) => code).reduce((min, curr) => min < curr ? min : curr, Number.POSITIVE_INFINITY)
       facies.forEach(facies => {
         if (!facies.color) {
-          const colorIndex = (facies.code - minFaciesCode) % colors.length
-          facies.color = colors[`${colorIndex}`]
+          facies.color = getColor({ rootState }, facies.code - minFaciesCode)
         }
       })
       const data = makeData(facies, GlobalFacies, state.available)
@@ -37,7 +44,6 @@ export default {
     },
     new: ({ commit, state, rootState }, { code, name, color }) => {
       if (isEmpty(code) || code < 0) {
-        // TODO: Find the highest values in the Global Facies Table (from rms, as some may have been deleted)
         code = 1 + Object.values(state.available)
           .map(facies => facies.code)
           .reduce((a, b) => Math.max(a, b), 0)
@@ -46,8 +52,7 @@ export default {
         name = `F${code}`
       }
       if (isEmpty(color)) {
-        const colors = rootState.constants.faciesColors.available
-        color = colors[code % colors.length]
+        color = getColor({ rootState }, code)
       }
       const facies = new GlobalFacies({ code, name, color })
       commit('ADD', facies)

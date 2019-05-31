@@ -671,7 +671,7 @@ class Variogram:
          The goal is now to transform the coordinate from this (x',y',z') system back to (x,y,z) and the the matrix M
          in this coordinate system. So the transformation will be the opposite of what was necessary to
          rotate the ellipsoid from standard position with principal main axis in y direction and the second
-         pprincipal direction in x direction and the third in z direction.
+         principal direction in x direction and the third in z direction.
          Note also that the coordinate system (x,y,z) is left handed and z axis is pointing
          downward compared to a right handed coordinate system.
 

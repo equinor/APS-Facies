@@ -1,27 +1,35 @@
+import { Vue } from 'vue/types/vue'
 import flatten from 'flat'
+import uuidv5 from 'uuid/v5'
 
-import { Identifiable, Named, Parent } from '@/utils/domain/bases/interfaces'
+import {
+  Identifiable,
+  Named,
+  Parent,
+  SimulationSettings,
+} from '@/utils/domain/bases/interfaces'
+import { RootGetters } from '@/store/typing'
+
 import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
-import { APSError } from '@/utils/domain/errors'
+import { ID, Identified } from '@/utils/domain/types'
 import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
 import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
 import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
-import { ID, Identified } from '@/utils/domain/types'
-import {
-  getId,
-  newSeed,
-  getRandomInt,
-  isEmpty,
-  notEmpty,
-  allSet,
-  isUUID,
-  includes,
-} from '@/utils/helpers'
-import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
-import { RootGetters } from '@/store/typing'
 
-import uuidv5 from 'uuid/v5'
-import { Vue } from 'vue/types/vue'
+import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
+
+import { APSError } from '@/utils/domain/errors'
+
+import {
+  allSet,
+  getId,
+  getRandomInt,
+  includes,
+  isEmpty,
+  isUUID,
+  newSeed,
+  notEmpty,
+} from '@/utils/helpers'
 
 interface Newable<T> { new (...args: any[]): T }
 
@@ -41,22 +49,6 @@ function makeData<T extends Identifiable, Y extends Identifiable> (
     data[instance.id] = instance
   }
   return data
-}
-
-interface Coordinate2D {
-  x: number
-  y: number
-}
-
-interface Coordinate3D extends Coordinate2D {
-  z: number
-}
-
-export interface SimulationSettings {
-  gridAzimuth: number
-  gridSize: Coordinate3D
-  simulationBox: Coordinate3D
-  simulationBoxOrigin: Coordinate2D
 }
 
 function defaultSimulationSettings (): SimulationSettings {
@@ -276,7 +268,8 @@ const resolve = (path, obj = self, separator = '.'): object => {
 }
 
 function sortAlphabetically<T extends Named> (arr: T[]): T[] {
-  return Object.values(arr).sort((a, b): number => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
+  return Object.values(arr)
+    .sort((a, b): number => a.name.localeCompare(b.name))
 }
 
 function sortByProperty<T extends object> (prop: string): (items: T[]) => T[] {

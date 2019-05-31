@@ -37,7 +37,10 @@ export default class AlphaSelection<P extends Polygon, S extends PolygonSerializ
   @Prop({ default: '' })
   readonly group: ID
 
-  get _fields () { return (this.$store as Store).getters['fields'] }
+  get _fields () {
+    return (this.$store as Store).getters['fields']
+      .sort((a, b) => a.name.localeCompare(b.name))
+  }
 
   get id (): ID | '' { return this.value ? this.value.id : '' }
 
@@ -52,7 +55,7 @@ export default class AlphaSelection<P extends Polygon, S extends PolygonSerializ
   set selected (value) { this.$emit('input', value) }
 
   get fields () {
-    return Object.values(this._fields)
+    return this._fields
       .map(field => {
         /* Is background field, and is not in the same location */
         let disabled = this.rule.isUsedInDifferentAlpha(this.id, this.channel)
@@ -61,15 +64,13 @@ export default class AlphaSelection<P extends Polygon, S extends PolygonSerializ
         if (this.rule instanceof OverlayTruncationRule) {
           if (this.group) {
             if (this.rule.isUsedInBackground(field)) {
-              /* This field is background field */
+              /* A Gaussian Field used in overlay, CANNOT be used in the background, and vice versa */
               disabled = true
             } else {
-              /* This field  MAY be used in overlay */
+              /* This field MAY be used in overlay */
               disabled = (
                 /* A Gaussian Field CANNOT be used twice in the same group */
                 this.rule.isUsedInDifferentOverlayPolygon(this.group, field)
-                /* A Gaussian Field used in overlay, CANNOT be used in the background, and vice versa */
-                || this.rule.isUsedInBackground(field)
               )
             }
           } else {

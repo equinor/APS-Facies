@@ -1,7 +1,7 @@
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import APSTypeError from '@/utils/domain/errors/type'
 import FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
+import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayPolygon, { CENTER, OverlayPolygonSerialization } from '@/utils/domain/polygon/overlay'
 import TruncationRule, {
@@ -9,7 +9,7 @@ import TruncationRule, {
   TruncationRuleSerialization,
 } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
-import { getId, allSet } from '@/utils/helpers'
+import { allSet, getId } from '@/utils/helpers'
 
 export type OverlayTruncationRuleArgs<T extends Polygon> = TruncationRuleConfiguration<T> & {
   overlay?: {
@@ -51,7 +51,7 @@ export default abstract class OverlayTruncationRule<
       : _useOverlay
 
     this._constraints.push(...[
-      (): boolean => allSet(this.overlayPolygons, 'field')
+      (): boolean => allSet(this.overlayPolygons, 'field'),
     ])
   }
 

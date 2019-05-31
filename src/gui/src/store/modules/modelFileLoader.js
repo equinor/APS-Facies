@@ -79,11 +79,10 @@ const handleError = (reason) => {
 
 function getParent ({ rootState }, zoneModel) {
   const zone = Object.values(rootState.zones.available).find(zone => zone.code === parseInt(zoneModel._attributes.number))
-  let region = null
-  if (zoneModel._attributes.regionNumber) {
-    region = Object.values(zone.regions)
+  const region = zoneModel._attributes.regionNumber
+    ? Object.values(zone.regions)
       .find(region => region.code === parseInt(zoneModel._attributes.regionNumber))
-  }
+    : null
   return {
     zone,
     region,
@@ -576,10 +575,10 @@ export default {
     },
 
     /**
-     * Sets the facies probability for facies in zone. If the file spesifies probcubes, the method sets the
-     * probablity to 1/number of fields in order to have the truncation rule visible after load
+     * Sets the facies probability for facies in zone. If the file specifies probCubes, the method sets the
+     * probability to 1/number of fields in order to have the truncation rule visible after load
      * Note:
-     * This will have to be updated in order to set correct selecton based on zone/region.
+     * This will have to be updated in order to set correct selection based on zone/region.
      * as it is now it just updates the facies over and over again for each zone/region combo
      *
      * @param dispatch
@@ -624,7 +623,7 @@ export default {
     },
 
     /**
-     * Sets up Truncation Rules and connects them to fields as specified in the modelfile.
+     * Sets up Truncation Rules and connects them to fields as specified in the model file.
      * @param dispatch
      * @param rootState
      * @param rootGetters

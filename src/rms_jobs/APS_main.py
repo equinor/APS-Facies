@@ -79,7 +79,7 @@ def transform_empiric(cell_index_defined, gauss_values, alpha_values):
 
 def check_and_normalise_probability(
         num_facies, prob_parameter_values_for_facies, use_const_probability, cell_index_defined,
-        eps=0.0000001, tolerance_of_probability_normalisation = 0.01,
+        eps=0.0000001, tolerance_of_probability_normalisation=0.01,
         debug_level=Debug.SOMEWHAT_VERBOSE
 ):
     """

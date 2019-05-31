@@ -1,5 +1,11 @@
-import { hasParents, resolve, sortAlphabetically, sortByProperty } from '@/utils'
 import uuidv4 from 'uuid/v4'
+
+import {
+  hasParents,
+  resolve,
+  sortAlphabetically,
+  sortByProperty,
+} from '@/utils'
 import {
   Bayfill,
   NonCubic,

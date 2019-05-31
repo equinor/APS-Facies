@@ -82,5 +82,6 @@ class APSZoneModel:
         grid_size: Tuple[int, int, int],
         gridAzimuthAngle: float,
         crossSection: CrossSection,
+        original_simulation_box_origin,
     ) -> List[GaussianFieldSimulation]: ...
     def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined): ...

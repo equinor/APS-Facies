@@ -33,7 +33,8 @@ const missingTemplates = (_templates, state) => {
   return templates.templates.filter((template) => names.indexOf(name(template)) === -1)
 }
 
-const addProportions = (proportions, polygons) => {
+const addProportions = (polygons) => {
+  const proportions = []
   if (isEmpty(polygons)) return proportions
   Object.values(polygons).forEach(({ facies, proportion }) => {
     proportions.push({ facies, probability: proportion || 1 })
@@ -190,8 +191,7 @@ export default {
 
       if (autoFill) {
         if (rootGetters['facies/unset']) {
-          const proportions = []
-          addProportions(proportions, rule.polygons)
+          const proportions = addProportions(rule.polygons)
           await Promise.all(normalize(proportions)
             .map(payload => dispatch('facies/updateProbability', payload, { root: true }))
           )
