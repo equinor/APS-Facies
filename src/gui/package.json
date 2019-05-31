@@ -1,6 +1,6 @@
 {
   "name": "aps-gui",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "private": true,
   "description": "The GUI component of the APS workflow",
   "author": "Sindre Nistad <snis@equinor.com>",
