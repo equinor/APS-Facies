@@ -47,6 +47,7 @@ export default abstract class TruncationRule<
     this._constraints = [
       (): boolean => allSet(this.polygons, 'facies'),
       (): boolean => this.polygons.length > 0,
+      (): boolean => this.normalizedFractions,
     ]
   }
 
@@ -94,6 +95,17 @@ export default abstract class TruncationRule<
     } else {
       throw new APSTypeError(`${item} is not valid`)
     }
+  }
+
+  public get normalizedFractions (): boolean {
+    return this.polygons.every((polygon): boolean => this.isPolygonFractionsNormalized(polygon))
+  }
+
+  public isPolygonFractionsNormalized (polygon: T): boolean {
+    const sum = this.polygons
+      .filter(({ facies }): boolean => getId(facies) === getId(polygon.facies))
+      .reduce((sum, polygon): number => polygon.fraction + sum, 0)
+    return sum === 1
   }
 
   protected toJSON (): TruncationRuleSerialization<S> {

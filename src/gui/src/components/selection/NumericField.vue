@@ -28,10 +28,12 @@
           :disabled="disabled"
           :hint="hint"
           :persistent-hint="persistentHint"
+          :append-icon="appendIcon"
           @input.capture="e => updateValue(e)"
           @blur="$v.fieldValue.$touch()"
           @keydown.up="increase"
           @keydown.down="decrease"
+          @click:append="e => $emit('click:append', e)"
         />
       </v-flex>
       <v-flex
@@ -82,6 +84,7 @@ export default Vue.extend({
     value: VueTypes.oneOfType([nullableNumber, updatableType]),
     unit: VueTypes.string.def(''),
     hint: VueTypes.string.def(''),
+    appendIcon: VueTypes.string.def(''),
     persistentHint: VueTypes.bool.def(false),
     optional: VueTypes.bool.def(false),
     discrete: VueTypes.bool.def(false),

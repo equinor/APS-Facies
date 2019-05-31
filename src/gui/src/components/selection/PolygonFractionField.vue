@@ -1,8 +1,10 @@
 <template>
   <fraction-field
     :value="value.fraction"
+    :append-icon="appendIcon"
     :disabled="disabled"
     @input="fraction => updateFactor(value, fraction)"
+    @click:append="normalizeFractions()"
   />
 </template>
 
@@ -15,6 +17,7 @@ import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+import { getId } from '@/utils'
 
 @Component({
   components: {
@@ -30,11 +33,25 @@ export default class PolygonFractionField<T extends Polygon, S extends PolygonSe
 
   get disabled () { return !hasFaciesSpecifiedForMultiplePolygons(this.rule.polygons, this.value.facies) }
 
+  get appendIcon () {
+    return this.disabled || this.rule.isPolygonFractionsNormalized(this.value)
+      ? ''
+      : this.$vuetify.icons.refresh
+  }
+
   async updateFactor (polygon: T, value: number) {
     await this.$store.dispatch(
       'truncationRules/changeProportionFactors',
       { rule: this.rule, polygon, value }, { root: true }
     )
+  }
+
+  async normalizeFractions () {
+    const polygons: T[] = this.rule.polygons
+      .filter((polygon: T): boolean => getId(polygon.facies) === getId(this.value.facies))
+    const sum = polygons
+      .reduce((sum, polygon): number => polygon.fraction + sum, 0)
+    await Promise.all(polygons.map(polygon => this.updateFactor(polygon, polygon.fraction / sum)))
   }
 }
 </script>
