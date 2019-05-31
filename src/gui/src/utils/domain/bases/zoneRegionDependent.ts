@@ -13,8 +13,8 @@ interface ParentConfiguration extends BaseItemConfiguration {
 }
 
 interface ZoneRegionConfiguration extends BaseItemConfiguration {
-  zone: Zone | string
-  region?: Region | string | null
+  zone: Zone | ID
+  region?: Region | ID | null
   parent?: { zone: null, region: null }
 }
 
@@ -27,8 +27,7 @@ export interface DependentSerialization extends BaseItemSerialization {
   }
 }
 
-// @ts-ignore
-export function hasParents (item: any, zone, region): boolean {
+export function hasParents<T extends Dependent> (item: T, zone: Zone | ID, region: Region | ID | null): boolean {
   if (item.parent.zone === getId(zone)) {
     // The Zone ID is consistent
     if (region) {

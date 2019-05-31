@@ -92,11 +92,26 @@ function simplify (specification: BayfillSpecification | NonCubicSpecification |
   }
 }
 
+interface GlobalFaciesSpecification {
+  code: number
+  name: string
+  probability: number
+  inZone: boolean
+  inRule: number | boolean
+}
+
+interface GaussianRandomFieldSpecification {
+  name: string
+  inZone: boolean
+  inRule: number | boolean
+  inBackground: boolean
+}
+
 function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
   return {
     type: rule.type,
     globalFaciesTable: (rule.backgroundPolygons as Polygon[])
-      .map((polygon, index) => {
+      .map((polygon, index): GlobalFaciesSpecification => {
         return {
           code: index,
           name: polygon.id,
@@ -106,7 +121,7 @@ function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
         }
       }),
     gaussianRandomFields: ['GRF1', 'GRF2', 'GRF3']
-      .map(field => {
+      .map((field): GaussianRandomFieldSpecification => {
         const included = !(field === 'GRF3' && rule.type !== 'bayfill')
         return {
           name: field,
@@ -120,13 +135,13 @@ function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
   }
 }
 
-function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: RootGetters}, rule: TruncationRule) {
+function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: RootGetters}, rule: TruncationRule): GlobalFaciesSpecification[] {
   const facies = rootGetters['facies/selected']
     .filter((facies): boolean => rootGetters.options.filterZeroProbability ? !!facies.previewProbability && facies.previewProbability > 0 : true)
   const cumulativeProbability = facies.reduce((cum, { previewProbability }): number => cum + Number(previewProbability), 0)
 
   return facies
-    .map(({ facies: globalFacies, previewProbability, id }) => {
+    .map(({ facies: globalFacies, previewProbability, id }): GlobalFaciesSpecification => {
       let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
       // @ts-ignore
       if (isEmpty(polygon) && rule.overlay) {
@@ -143,19 +158,23 @@ function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: Roo
     })
 }
 
+function makeGaussianRandomFieldSpecification ({ rootGetters }: { rootGetters: RootGetters }, rule: TruncationRule): GaussianRandomFieldSpecification[] {
+  return Object.values(rootGetters.fields)
+    .map((field): GaussianRandomFieldSpecification => {
+      return {
+        name: field.name,
+        inZone: true,
+        inRule: rule.fields.findIndex((item): boolean => item.id === field.id),
+        inBackground: rule.isUsedInBackground(field),
+      }
+    })
+}
+
 function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters) {
   return {
     type: rule.type,
     globalFaciesTable: makeGlobalFaciesTableSpecification({ rootGetters }, rule),
-    gaussianRandomFields: Object.values(rootGetters.fields)
-      .map(field => {
-        return {
-          name: field.name,
-          inZone: true,
-          inRule: rule.fields.findIndex((item): boolean => item.id === field.id),
-          inBackground: rule.isUsedInBackground(field),
-        }
-      }),
+    gaussianRandomFields: makeGaussianRandomFieldSpecification({ rootGetters }, rule),
     values: rule.specification,
     constantParameters: !rootGetters.faciesTable.some((facies): boolean => !!facies.probabilityCube),
   }
@@ -260,10 +279,10 @@ function sortAlphabetically<T extends Named> (arr: T[]): T[] {
   return Object.values(arr).sort((a, b): number => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 }
 
-function sortByProperty<T> (prop: string): (items: T[]) => T[] {
+function sortByProperty<T extends object> (prop: string): (items: T[]) => T[] {
   return function (items: T[]): T[] {
     if (items instanceof Object) items = Object.values(items)
-    items.forEach((item: T) => {
+    items.forEach((item: T): void => {
       if (!item.hasOwnProperty(prop)) {
         throw new Error(`The item (${item}) does not have the required property on which to sort (${prop})`)
       }
@@ -272,7 +291,11 @@ function sortByProperty<T> (prop: string): (items: T[]) => T[] {
   }
 }
 
-function sortByOrder<T> (items: T[], index: number, isDescending: boolean): T[] {
+interface Ordered {
+  order: number
+}
+
+function sortByOrder<T extends Ordered> (items: T[], index: number, isDescending: boolean): T[] {
   // Used in Vuetify's tables
   return sortByProperty<T>('order')(items)
 }
