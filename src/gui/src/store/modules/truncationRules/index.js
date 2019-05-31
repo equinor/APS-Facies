@@ -328,7 +328,7 @@ export default {
       commit('CHANGE_FACIES', { rule, polygon, facies })
 
       if (!rootState.facies.available[`${facies.id}`].previewProbability) {
-        const probability = rule._polygons[`${polygon.id}`].proportion
+        const probability = rule._polygons[`${polygon.id}`].fraction
         await dispatch('facies/updateProbability', { facies, probability }, { root: true })
       }
       await dispatch('normalizeProportionFactors', { rule })
@@ -343,9 +343,6 @@ export default {
     },
     updateOverlayCenter ({ commit }, { rule, polygon, value }) {
       commit('UPDATE_OVERLAY_CENTER', { rule, polygon, value })
-    },
-    updateOverlayFraction ({ commit }, { rule, polygon, value }) {
-      commit('UPDATE_OVERLAY_FRACTION', { rule, polygon, value })
     },
     toggleOverlay ({ commit }, { rule, value }) {
       commit('CHANGE_OVERLAY_USAGE', { rule, value })
@@ -415,9 +412,6 @@ export default {
     },
     UPDATE_OVERLAY_CENTER: (state, { rule, polygon, value }) => {
       state.rules[rule.id]._polygons[polygon.id].center = value
-    },
-    UPDATE_OVERLAY_FRACTION: (state, { rule, polygon, value }) => {
-      state.rules[rule.id]._polygons[polygon.id].fraction = value
     },
     UPDATE_BACKGROUND_GROUP: (state, { rule, polygon, value }) => {
       state.rules[rule.id]._polygons[polygon.id].group = value

@@ -38,10 +38,9 @@
           />
         </td>
         <td v-if="needFraction">
-          <fraction-field
-            :value="props.item.fraction"
-            :disabled="!multipleFaciesSpecified(props.item)"
-            @input="val => updateFraction(props.item, val)"
+          <polygon-fraction-field
+            :value="props.item"
+            :rule="rule"
           />
         </td>
         <td>
@@ -66,13 +65,13 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import FractionField from '@/components/selection/FractionField.vue'
+import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
 import OverlayFaciesSpecification from '@/components/specification/Facies/overlay.vue'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection.vue'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 
-import { Facies } from '@/utils/domain'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
@@ -86,6 +85,7 @@ import { sortByOrder } from '@/utils'
     PolygonOrder,
     OptionalHelpItem,
     FractionField,
+    PolygonFractionField,
   },
 })
 export default class OverlayTable<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> extends Vue {
@@ -162,14 +162,8 @@ export default class OverlayTable<T extends Polygon, S extends PolygonSerializat
     const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
     await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
   }
-  async updateFraction (polygon: OverlayPolygon, val: number) {
-    await this.$store.dispatch('truncationRules/updateOverlayFraction', { rule: this.rule, polygon, value: val })
-  }
   async updateCenter (polygon: OverlayPolygon, val: number) {
     await this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon, value: val })
-  }
-  multipleFaciesSpecified ({ facies }: Facies) {
-    return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons, facies)
   }
 }
 </script>
