@@ -203,7 +203,7 @@ class RMSData:
         realisation_number = self.project.current_realisation
         grid_model = self.project.grid_models[grid_model_name]
         # get zone_values and region_values
-        zone_values = create_zone_parameter(grid_model, realisation_number).get_values(realisation_number)
+        zone_values = create_zone_parameter(grid_model, realization_number=realisation_number).get_values(realisation_number)
         if region_parameter:
             region_values, _ = getDiscrete3DParameterValues(grid_model, region_parameter, realisation_number)
         else:
