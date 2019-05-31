@@ -11,4 +11,5 @@ module.exports = {
   },
   'DEFAULT_CUBIC_LEVELS': 3,
   'DEFAULT_FACIES_REALIZATION_PARAMETER_NAME': 'aps',
+  'DEFAULT_FACIES_AUTOFILL': process.env.NODE_ENV === 'develop',
 }

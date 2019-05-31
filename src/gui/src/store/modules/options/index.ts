@@ -1,3 +1,4 @@
+import { DEFAULT_FACIES_AUTOFILL } from '@/config'
 import { makeOption } from '@/store/utils'
 
 import showNameOrNumber from './nameNumber'
@@ -11,6 +12,6 @@ export default {
     showNameOrNumber,
     automaticAlphaFieldSelection,
     filterZeroProbability,
-    automaticFaciesFill: makeOption(true, [true, false])
+    automaticFaciesFill: makeOption(DEFAULT_FACIES_AUTOFILL, [true, false])
   },
 }

@@ -1,6 +1,7 @@
 import uuidv4 from 'uuid/v4'
 
 import {
+  getId,
   hasParents,
   resolve,
   sortAlphabetically,
@@ -203,7 +204,7 @@ export function processPolygons ({ rootGetters, rootState }, { polygons, type, s
       return {
         ...polygon,
         facies: rootGetters['facies/selected']
-          .find(facies => facies.facies.id === rootGetters['facies/byId'](polygon.facies).id),
+          .find(facies => getId(facies.facies) === getId(rootGetters['facies/byId'](polygon.facies))),
       }
     })
 }

@@ -102,12 +102,14 @@ export default {
     normalize: ({ dispatch, getters }, { selected = null } = {}) => {
       selected = selected || getters.selected
       const cumulativeProbability = selected.map(facies => facies.previewProbability).reduce((sum, prob) => sum + prob, 0)
-      return Promise.all(selected.map(facies => {
-        const probability = !cumulativeProbability
-          ? math.divide(1, selected.length)
-          : math.divide(facies.previewProbability, cumulativeProbability)
-        return updateFaciesProbability(dispatch, facies, probability)
-      }))
+      return Promise.all(selected
+        .filter(facies => facies.previewProbability !== null)
+        .map(facies => {
+          const probability = !cumulativeProbability
+            ? math.divide(1, selected.length)
+            : math.divide(facies.previewProbability, cumulativeProbability)
+          return updateFaciesProbability(dispatch, facies, probability)
+        }))
     },
     populateConstantProbability: ({ commit }, data) => {
       Object.keys(data).forEach(parentId => {
