@@ -225,7 +225,7 @@ export default Vue.extend({
           ? { value: Number(this.fieldValue), updatable: value }
           : { value: Number(value), updatable: this.updatable }
       this.$v.fieldValue.$touch()
-      this.$emit('input', new FmuUpdatableValue(payload))
+      this.$emit('input', this.fmuUpdatable ? new FmuUpdatableValue(payload) : payload)
     },
     updateValue (value) {
       if (typeof value.target !== 'undefined') {
