@@ -21,7 +21,7 @@ interface Icons {
 function makeCustomIcons (): Icons {
   const icons = {
     add: 'fas fa-plus-square',
-    copy: 'fas fa-clone',
+    copy: 'far fa-clone',
     import: 'fas fa-file-import fa-flip-horizontal',
     export: 'fas fa-file-export',
     remove: 'far fa-trash-alt',
