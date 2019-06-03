@@ -11,6 +11,7 @@ interface Counts {
 export function hasFaciesSpecifiedForMultiplePolygons (
   polygons: Polygon[] | Identified<Polygon>,
   facies: Facies | GlobalFacies | null = null,
+  ignoreEmptyFacies: boolean = true,
 ): boolean {
   if (polygons instanceof Object) polygons = Object.values(polygons)
   if (!polygons || polygons.length === 0) return false
@@ -18,6 +19,7 @@ export function hasFaciesSpecifiedForMultiplePolygons (
     .filter((polygon): boolean => facies ? getId(polygon.facies) === getId(facies) : true)
     .reduce((counts: Counts, { facies }): Counts => {
       const id = getId(facies)
+      if (ignoreEmptyFacies && !id) return counts
       counts.hasOwnProperty(id)
         ? counts[`${id}`] += 1
         : counts[`${id}`] = 1
