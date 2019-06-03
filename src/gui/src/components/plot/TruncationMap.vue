@@ -45,7 +45,7 @@ export default {
         )
       },
       shouldUpdate () {
-        return this.$store.getters['truncationRules/ready'](this.value.id)
+        return this.canUpdate()
       },
       default () {
         return {
@@ -61,12 +61,17 @@ export default {
       deep: true,
       handler () {
         // To detect changes in alias
-        this.$asyncComputed.data.update()
+        if (this.canUpdate()) {
+          this.$asyncComputed.data.update()
+        }
       }
     }
   },
 
   methods: {
+    canUpdate () {
+      return this.$store.getters['truncationRules/ready'](this.value)
+    }
   },
 }
 </script>
