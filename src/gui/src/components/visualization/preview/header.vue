@@ -23,6 +23,8 @@ import IconButton from '@/components/selection/IconButton.vue'
 import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
+import { usesAllFacies } from '@/store/utils/helpers'
+
 @Component({
   components: {
     IconButton
@@ -34,7 +36,13 @@ export default class PreviewHeader<T extends Polygon, S extends PolygonSerializa
   @Prop({ required: true })
   readonly value: TruncationRule<T, S>
 
-  get canSimulate () { return this.value && this.value.ready }
+  get canSimulate () {
+    return (
+      this.value
+      && this.value.ready
+      && usesAllFacies({ rootGetters: this.$store.getters }, this.value)
+    )
+  }
 
   async refresh () {
     await this.$store.dispatch('facies/normalize')

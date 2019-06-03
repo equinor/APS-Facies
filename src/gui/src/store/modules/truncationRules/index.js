@@ -23,6 +23,7 @@ import APSTypeError from '@/utils/domain/errors/type'
 import APSError from '@/utils/domain/errors/base'
 import { makePolygonsFromSpecification, normalizeOrder } from '@/utils/helpers/processing/templates/typed'
 import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
+import { isReady } from '@/store/utils/helpers'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -457,12 +458,12 @@ export default {
         ? Object.values(state.rules).find(rule => hasCurrentParents(rule, rootGetters))
         : null
     },
-    ready (state) {
+    ready (state, getters, rootState, rootGetters) {
       return (rule) => {
         rule = isUUID(rule)
           ? state.rules[`${getId(rule)}`]
           : rule
-        return !!rule && rule.ready
+        return isReady({ rootGetters, rootState }, rule)
       }
     },
     relevant (state, getters, rootState, rootGetters) {
