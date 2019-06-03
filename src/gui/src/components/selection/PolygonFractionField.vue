@@ -31,7 +31,12 @@ export default class PolygonFractionField<T extends Polygon, S extends PolygonSe
   @Prop({ required: true })
   readonly rule!: TruncationRule<T, S>
 
-  get disabled () { return !hasFaciesSpecifiedForMultiplePolygons(this.rule.polygons, this.value.facies) }
+  get disabled () {
+    return (
+      !hasFaciesSpecifiedForMultiplePolygons(this.rule.polygons, this.value.facies)
+      || !this.value.facies
+    )
+  }
 
   get appendIcon () {
     return this.disabled || this.rule.isPolygonFractionsNormalized(this.value)
