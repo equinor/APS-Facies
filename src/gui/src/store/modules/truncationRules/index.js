@@ -14,6 +14,7 @@ import {
   isEmpty,
   makeTruncationRuleSpecification,
   notEmpty,
+  hasParents,
 } from '@/utils'
 import { getId, isUUID } from '@/utils/helpers'
 import { makeRule } from '@/utils/helpers/processing/templates'
@@ -345,7 +346,13 @@ export default {
     updateOverlayCenter ({ commit }, { rule, polygon, value }) {
       commit('UPDATE_OVERLAY_CENTER', { rule, polygon, value })
     },
-    toggleOverlay ({ commit }, { rule, value }) {
+    async toggleOverlay ({ commit, dispatch, rootState }, { rule, value }) {
+      // If there are too few GRFs, add more
+      const availableFields = Object.values(rootState.gaussianRandomFields.fields)
+        .filter(field => hasParents(field, rule.parent.zone, rule.parent.region))
+      if (availableFields.length <= rule.backgroundFields.length) {
+        await dispatch('gaussianRandomFields/addEmptyField', rule.parent, { root: true })
+      }
       commit('CHANGE_OVERLAY_USAGE', { rule, value })
     },
     async normalizeProportionFactors ({ dispatch, rootGetters }, { rule }) {

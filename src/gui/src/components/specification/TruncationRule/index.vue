@@ -98,11 +98,6 @@ export default {
       get: function () { return this.rule ? this.rule.useOverlay : false },
       set: function (val) { this.$store.dispatch('truncationRules/toggleOverlay', { rule: this.rule, value: val }) },
     },
-    hasEnoughFields () {
-      const numFieldsAvailable = this.$store.getters.fields.length
-      const numNecessaryFields = 1 + this.rule.backgroundFields.length + this.rule.overlayPolygons.length
-      return numFieldsAvailable >= numNecessaryFields
-    },
     hasEnoughFacies () {
       const numFacies = Object.values(this.$store.state.facies.available).length
       const numFaciesInBackground = [ ...new Set(this.rule.backgroundPolygons
@@ -118,7 +113,6 @@ export default {
       return [
         { check: this.notBayfill, errorMessage: 'Bayfill cannot have user defined overlay facies' },
         { check: this.hasEnoughFacies, errorMessage: 'Too few facies has been selected for this truncation rule' },
-        { check: this.hasEnoughFields, errorMessage: 'There are not enough gaussian random fields to use with overlay' },
       ]
     },
     canUseOverlay () {
