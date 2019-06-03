@@ -1,6 +1,6 @@
 import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { getFaciesName } from '@/utils/domain/polygon/base'
 import { Identified } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 
@@ -26,6 +26,6 @@ export function hasFaciesSpecifiedForMultiplePolygons (
   return Object.values(faciesCount).some((count): boolean => count > 1)
 }
 
-export function getFaciesName (polygon: Polygon): string {
-  return polygon.facies ? polygon.facies.name : ''
+export {
+  getFaciesName,
 }

@@ -28,3 +28,19 @@ export interface Dependent {
   readonly parent: Parent
   isChildOf (parent: Parent): boolean
 }
+
+interface Coordinate2D {
+  x: number
+  y: number
+}
+
+interface Coordinate3D extends Coordinate2D {
+  z: number
+}
+
+export interface SimulationSettings {
+  gridAzimuth: number
+  gridSize: Coordinate3D
+  simulationBox: Coordinate3D
+  simulationBoxOrigin: Coordinate2D
+}

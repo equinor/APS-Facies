@@ -1,7 +1,10 @@
 import BaseItem from '@/utils/domain/bases/baseItem'
 import Facies from '@/utils/domain/facies/local'
 import { ID, Identified, ORDER, PROBABILITY } from '@/utils/domain/types'
-import { getFaciesName } from '@/utils/queries'
+
+export function getFaciesName (polygon: Polygon): string {
+  return polygon.facies ? polygon.facies.name : ''
+}
 
 interface BasePolygonSpec<F> {
   id?: ID
