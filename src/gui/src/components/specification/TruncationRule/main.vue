@@ -1,5 +1,5 @@
 <template>
-  <v-container column>
+  <v-layout column>
     <h3>Alpha selection</h3>
     <v-layout row>
       <alpha-fields
@@ -20,7 +20,7 @@
         </v-layout>
       </v-flex>
     </v-layout>
-  </v-container>
+  </v-layout>
 </template>
 
 <script lang="ts">

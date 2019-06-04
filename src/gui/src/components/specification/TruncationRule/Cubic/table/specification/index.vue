@@ -1,15 +1,25 @@
 <template>
-  <v-layout column>
-    <v-layout>
-      <split-direction
-        :value="value"
-      />
-      <numeric-field
-        v-model="splitInto"
-        :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
-        label="Split into"
-        discrete
-      />
+  <v-layout
+    column
+    justify-center
+  >
+    <v-layout
+      justify-center
+      align-end
+    >
+      <v-flex>
+        <split-direction
+          :value="value"
+        />
+      </v-flex>
+      <v-flex>
+        <numeric-field
+          v-model="splitInto"
+          :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
+          label="Split into"
+          discrete
+        />
+      </v-flex>
     </v-layout>
     <v-layout>
       <v-layout
@@ -36,13 +46,15 @@
         </help-icon>
       </v-layout>
     </v-layout>
-    <v-container>
+    <v-layout
+      justify-center
+    >
       <cubic-topology-specification
         v-if="value.root"
         v-model="selected"
         :rule="value"
       />
-    </v-container>
+    </v-layout>
   </v-layout>
 </template>
 
