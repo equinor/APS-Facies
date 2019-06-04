@@ -1,5 +1,9 @@
 module.exports = {
   'DEFAULT_SIZE': {
+    'max': {
+      'width': Number.POSITIVE_INFINITY,
+      'height': Number.POSITIVE_INFINITY,
+    },
     'width': 200,
     'height': 200,
   },

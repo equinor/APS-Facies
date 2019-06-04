@@ -26,6 +26,8 @@ export default {
     annotations: VueTypes.arrayOf(Object).def([]),
     width: VueTypes.integer.def(DEFAULT_SIZE.width),
     height: VueTypes.integer.def(DEFAULT_SIZE.height),
+    maxWidth: VueTypes.integer.def(DEFAULT_SIZE.max.width),
+    maxHeight: VueTypes.integer.def(DEFAULT_SIZE.max.Height),
     staticSize: VueTypes.bool.def(false),
     svg: VueTypes.bool.def(false),
     expand: VueTypes.bool.def(false),
@@ -113,8 +115,8 @@ export default {
         ? { width: this.width, height: this.height }
         : { width: parent.clientWidth || this.width, height: parent.clientHeight || this.height }
       const val = Math.min(...Object.values(size))
-      size.width = this.expand ? val : this.width
-      size.height = this.expand ? val : this.height
+      size.width = this.expand ? Math.min(val, this.maxWidth) : this.width
+      size.height = this.expand ? Math.min(val, this.maxHeight) : this.height
       return size
     }
   },
