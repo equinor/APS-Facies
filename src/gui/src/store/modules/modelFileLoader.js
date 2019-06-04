@@ -242,33 +242,38 @@ async function makeCubicTruncationRule ({ rootState, dispatch }, container, pare
       order,
     })
   }
-  function getChildren (container, root, level) {
+  function getChildren (container, root) {
     const polygons = []
     let order = 1
+
+    if (!root && container.L1) container = container.L1
+    if (root) polygons.push(root)
+
     if (!container) return polygons
     else if (Array.isArray(container)) {
       container.forEach(element => {
-        polygons.push(...getChildren(element, new CubicPolygon({ parent: root, order }), level + 1))
+        polygons.push(...getChildren(element, new CubicPolygon({ parent: root, order })))
         order += 1
       })
-    } else if (container.ProbFrac) {
-      if (Array.isArray(container.ProbFrac)) {
-        container.ProbFrac.forEach(element => {
-          polygons.push(getPolygon(element, order, root, parent))
+    } else {
+      for (const key of Object.keys(container)) {
+        if (key === 'ProbFrac' && container.ProbFrac) {
+          if (Array.isArray(container.ProbFrac)) {
+            container.ProbFrac.forEach(element => {
+              polygons.push(getPolygon(element, order, root, parent))
+              order += 1
+            })
+          } else {
+            polygons.push(getPolygon(container.ProbFrac, order, root, parent))
+            order += 1
+          }
+        } else if (/L[0-9]+/.exec(key)) {
+          polygons.push(...getChildren(container[`${key}`], new CubicPolygon({ parent: root, order })))
           order += 1
-        })
-      } else {
-        polygons.push(getPolygon(container.ProbFrac, order, root, parent))
+        }
       }
     }
-    if (root) {
-      polygons.push(root)
-    }
-    container = container[`L${level}`]
-    if (container) {
-      root = new CubicPolygon({ parent: root, order })
-    }
-    return polygons.concat(getChildren(container, root, level + 1))
+    return polygons
   }
 
   /* eslint-disable-next-line no-return-await */
@@ -276,7 +281,7 @@ async function makeCubicTruncationRule ({ rootState, dispatch }, container, pare
     { rootState, dispatch },
     container,
     parent,
-    container => getChildren(container, null, 1),
+    container => getChildren(container, null),
     Cubic,
     {
       direction: container.BackGroundModel.L1._attributes.direction,
