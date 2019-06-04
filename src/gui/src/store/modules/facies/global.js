@@ -3,6 +3,7 @@ import { isEmpty, makeData } from '@/utils'
 import { GlobalFacies } from '@/utils/domain'
 import Vue from 'vue'
 import { promiseSimpleCommit } from '@/store/utils'
+import { APSTypeError } from '@/utils/domain/errors'
 
 function getColor ({ rootState }, code) {
   const colors = rootState.constants.faciesColors.available
@@ -14,6 +15,12 @@ async function getFaciesFromRMS ({ rootGetters }) {
   return facies
 }
 
+function findExisting (items, { code, name }) {
+  items = Array.isArray(items) ? items : Object.values(items)
+  return items
+    .find(facies => facies.code === code || facies.name === name)
+}
+
 export default {
   namespaced: true,
 
@@ -21,6 +28,7 @@ export default {
     available: {},
     current: null,
     _loading: false,
+    _inRms: [],
   },
 
   modules: {},
@@ -31,6 +39,7 @@ export default {
       const facies = await getFaciesFromRMS({ rootGetters })
       commit('LOADING', false)
       await dispatch('populate', facies)
+      commit('IN_RMS', facies)
     },
     populate: ({ commit, state, rootState }, facies) => {
       const minFaciesCode = facies.map(({ code }) => code).reduce((min, curr) => min < curr ? min : curr, Number.POSITIVE_INFINITY)
@@ -45,6 +54,7 @@ export default {
     new: ({ commit, state, rootState }, { code, name, color }) => {
       if (isEmpty(code) || code < 0) {
         code = 1 + Object.values(state.available)
+          .concat(state._inRms)
           .map(facies => facies.code)
           .reduce((a, b) => Math.max(a, b), 0)
       }
@@ -53,6 +63,9 @@ export default {
       }
       if (isEmpty(color)) {
         color = getColor({ rootState }, code)
+      }
+      if (findExisting(state._inRms, { code, name })) {
+        throw new APSTypeError(`There already exists a facies with code = ${code}, or name = ${name} in RMS`)
       }
       const facies = new GlobalFacies({ code, name, color })
       commit('ADD', facies)
@@ -88,14 +101,14 @@ export default {
     ADD: (state, facies) => {
       Vue.set(state.available, facies.id, facies)
     },
-    UPDATE: (state, facies) => {
-      Vue.set(state.available, facies.id, facies)
-    },
     REMOVE: (state, { id }) => {
       Vue.delete(state.available, id)
     },
     CHANGE: (state, { id, name, value }) => {
       Vue.set(state.available[`${id}`], name, value)
+    },
+    IN_RMS: (state, facies) => {
+      Vue.set(state, '_inRms', facies)
     },
   },
 
