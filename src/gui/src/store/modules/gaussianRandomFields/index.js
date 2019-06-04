@@ -6,6 +6,8 @@ import { Trend, Variogram, GaussianRandomField } from '@/utils/domain/gaussianRa
 import crossSections from '@/store/modules/gaussianRandomFields/crossSections'
 import rms from '@/api/rms'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
+import { unpackVariogram } from '@/utils/domain/gaussianRandomField/variogram'
+import { unpackTrend } from '@/utils/domain/gaussianRandomField/trend'
 
 const newGaussianFieldName = (state, zone, region) => {
   const name = num => `GRF${num}`
@@ -63,8 +65,8 @@ export default {
       fields.forEach(field => {
         field = new GaussianRandomField({
           ...field,
-          variogram: new Variogram(field.variogram || {}),
-          trend: new Trend(field.trend || {}),
+          variogram: new Variogram(unpackVariogram(field.variogram)),
+          trend: new Trend(unpackTrend(field.trend)),
           crossSection: getters['crossSections/byId'](field.settings.crossSection),
         })
         commit('ADD', field)

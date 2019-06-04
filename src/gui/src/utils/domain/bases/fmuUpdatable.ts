@@ -5,6 +5,8 @@ export interface FmuUpdatable {
   updatable: boolean
 }
 
+export type FmuUpdatableSerialization = FmuUpdatable
+
 export default class FmuUpdatableValue implements FmuUpdatable {
   public value: number
   public updatable: boolean
@@ -25,5 +27,12 @@ export default class FmuUpdatableValue implements FmuUpdatable {
     }
     this.value = value
     this.updatable = updatable
+  }
+
+  public toJSON (): FmuUpdatableSerialization {
+    return {
+      value: this.value,
+      updatable: this.updatable,
+    }
   }
 }

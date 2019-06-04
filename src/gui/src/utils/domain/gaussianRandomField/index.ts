@@ -1,16 +1,34 @@
-import CrossSection, { CrossSectionConfiguration } from '@/utils/domain/gaussianRandomField/crossSection'
+import CrossSection, {
+  CrossSectionSerialization
+} from '@/utils/domain/gaussianRandomField/crossSection'
 import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
 import { Named, Parent } from '@/utils/domain/bases/interfaces'
-import ZoneRegionDependent, { DependentConfiguration } from '@/utils/domain/bases/zoneRegionDependent'
-import { ID, Identified } from '@/utils/domain/types'
+import ZoneRegionDependent, {
+  DependentConfiguration,
+  DependentSerialization
+} from '@/utils/domain/bases/zoneRegionDependent'
+import { Identified } from '@/utils/domain/types'
 
-import Trend from '@/utils/domain/gaussianRandomField/trend'
-import Variogram from '@/utils/domain/gaussianRandomField/variogram'
+import Trend, { TrendSerialization } from '@/utils/domain/gaussianRandomField/trend'
+import Variogram, { VariogramSerialization } from '@/utils/domain/gaussianRandomField/variogram'
 
 interface Settings {
-  crossSection: CrossSectionConfiguration
+  crossSection: CrossSection
+  gridModel: {
+    use: boolean
+    size: {
+      x: number
+      y: number
+      z: number
+    }
+  }
+  seed: number
+}
+
+interface SettingsSerialization {
+  crossSection: CrossSectionSerialization
   gridModel: {
     use: boolean
     size: {
@@ -56,6 +74,13 @@ interface GaussianRandomFieldSpecification {
   variogram: Variogram
 }
 
+interface GaussianRandomFieldSerialization extends DependentSerialization {
+  name: string
+  settings: SettingsSerialization
+  trend: TrendSerialization
+  variogram: VariogramSerialization
+}
+
 class GaussianRandomField extends ZoneRegionDependent implements Named {
   public name: string
   public variogram: Variogram
@@ -96,10 +121,17 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
     }
   }
 
-  public toJSON (): {id: ID, parent: { zone: ID, region: ID | null, [_: string]: any }} {
+  public toJSON (): GaussianRandomFieldSerialization {
     return {
       ...super.toJSON(),
-      ...this.objectify()
+      name: this.name,
+      settings: {
+        crossSection: this.settings.crossSection.toJSON(),
+        gridModel: { ...this.settings.gridModel },
+        seed: this.settings.seed,
+      },
+      variogram: this.variogram.toJSON(),
+      trend: this.trend.toJSON(),
     }
   }
 }
@@ -111,4 +143,6 @@ export {
   Trend,
   GaussianRandomField,
   GaussianRandomFields,
+  TrendSerialization,
+  VariogramSerialization,
 }
