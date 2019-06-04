@@ -15,7 +15,8 @@
       <v-flex>
         <numeric-field
           v-model="splitInto"
-          :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
+          :ranges="{ min: 2, max: Number.POSITIVE_INFINITY }"
+          enforce-ranges
           label="Split into"
           discrete
         />
@@ -119,6 +120,7 @@ export default class CubicTruncationRuleSpecification extends Vue {
     if (!this.canSplit) {
       if (!this.canSplitDeeper) return `A Cubic truncation rule may only be split into ${this.maxLevel} levels`
       if (this.selected.length > 1) return 'Only a single polygon may be split at the time'
+      if (this.selected.length === 0) return 'Click on the polygon that should be split'
     }
     return ''
   }
