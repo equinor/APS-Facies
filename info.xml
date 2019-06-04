@@ -4,7 +4,7 @@
   <meta name="description" content="..." />  <!-- TODO -->
   <meta name="roxapi-version" content="1.2" />
   <meta name="window-size" content="1920x1080" />
-  <meta name="refresh-after-run" content="True" />
+  <meta name="refresh-after-run" content="False" />
   <meta name="enable-mustache" content="False" />
   <meta name="uipy-timeout" content="10000" />
   <tree-location name="Grid models" />
