@@ -2,6 +2,7 @@ import Vue from 'vue'
 import CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
 import { DEFAULT_CROSS_SECTION } from '@/config'
 import { getId } from '@/utils'
+import { APSError } from '@/utils/domain/errors'
 
 async function updateAffectedFields ({ state, rootGetters, dispatch }, id) {
   const crossSection = state.available[`${id}`]
@@ -32,17 +33,29 @@ export default {
       return Object.values(state.available)
         .find(setting => setting.isChildOf({ zone, region }))
     },
-    async populate ({ dispatch }, crossSections) {
+    async populate ({ commit, dispatch, getters, rootState }, crossSections) {
       for (const crossSection of Object.values(crossSections)) {
+        const existing = getters['byParent'](crossSection)
+        if (existing && existing.id !== crossSection.id) {
+          if (Object.values(rootState.gaussianRandomFields.fields).some(field => field.settings.crossSection.id === existing.id)) {
+            throw new APSError('There is a conflict with the cross sections')
+          }
+          commit('DELETE', existing)
+        }
         await dispatch('add', crossSection)
       }
     },
-    add ({ commit, state }, crossSection) {
-      const existing = Object.values(state.available)
-        .find(item => item.isChildOf(crossSection.parent))
+    add ({ commit, getters }, crossSection) {
+      const existing = getters['byParent'](crossSection)
       if (!existing) {
         commit('ADD', new CrossSection({ ...crossSection }))
       }
+    },
+    async remove ({ commit, dispatch, rootState }, crossSection) {
+      await Promise.all(Object.values(rootState.gaussianRandomFields.fields)
+        .filter(field => getId(field.settings.crossSection) === getId(crossSection))
+        .map(field => dispatch('gaussianRandomFields/remove', field, { root: true })))
+      commit('DELETE', crossSection)
     },
     async changeType ({ state, commit, dispatch, rootGetters }, { id, type }) {
       commit('CHANGE_TYPE', { id, type })
@@ -58,6 +71,9 @@ export default {
     ADD (state, crossSection) {
       Vue.set(state.available, crossSection.id, crossSection)
     },
+    DELETE (state, crossSection) {
+      Vue.delete(state.available, crossSection.id)
+    },
     CHANGE_TYPE (state, { id, type }) {
       Vue.set(state.available[`${id}`], 'type', type)
     },
@@ -72,6 +88,10 @@ export default {
       return Object.values(state.available)
         .find(crossSection => crossSection.isChildOf({ zone: rootGetters.zone, region: rootGetters.region }))
       || null
+    },
+    byParent: (state) => ({ parent }) => {
+      return Object.values(state.available)
+        .find(item => item.isChildOf(parent)) || null
     },
     byId: (state) => (id) => {
       return state.available[`${getId(id)}`]

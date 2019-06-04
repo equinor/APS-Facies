@@ -22,6 +22,7 @@ function makeCustomIcons (): Icons {
   const icons = {
     add: 'fas fa-plus-square',
     copy: 'far fa-clone',
+    paste: 'fas fa-paste',
     import: 'fas fa-file-import fa-flip-horizontal',
     export: 'fas fa-file-export',
     remove: 'far fa-trash-alt',

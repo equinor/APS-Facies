@@ -4,6 +4,7 @@ import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
 import { GridModelsState } from '@/store/modules/gridModels/types'
+import CopyPasteState from '@/store/modules/copyPaste/typing'
 import { Polygon, TruncationRule, Parent } from '@/utils/domain'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
 import GlobalFacies from '@/utils/domain/facies/global'
@@ -36,10 +37,15 @@ interface RootState {
     message: string
   }
 
+  copyPaste: CopyPasteState
+
   gridModels: GridModelsState
 
   gaussianRandomFields: {
     fields: Identified<GaussianRandomField>
+    crossSections: {
+      available: Identified<CrossSection>
+    }
   }
 
   facies: {

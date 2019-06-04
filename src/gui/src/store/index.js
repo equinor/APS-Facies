@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import copyPaste from '@/store/modules/copyPaste'
 import gridModels from '@/store/modules/gridModels'
 import zones from '@/store/modules/zones'
 import regions from '@/store/modules/regions'
@@ -35,6 +36,7 @@ const store = new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
 
   modules: {
+    copyPaste,
     gridModels,
     zones,
     regions,

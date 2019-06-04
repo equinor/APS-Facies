@@ -464,7 +464,10 @@ export default {
         rule = isUUID(rule)
           ? state.rules[`${getId(rule)}`]
           : rule
-        return isReady({ rootGetters, rootState }, rule)
+        return (
+          !rootGetters['copyPaste/isPasting'](rule.parent)
+          && isReady({ rootGetters, rootState }, rule)
+        )
       }
     },
     relevant (state, getters, rootState, rootGetters) {
