@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-export function isEmpty (property: any): boolean { return _.isEmpty(property) }
+export function isEmpty (property: any): boolean { return _.isEmpty(property) && !_.isNumber(property) }
 export function notEmpty (property: any): boolean { return !isEmpty(property) }
 
 export function getRandomInt (max: number): number {
