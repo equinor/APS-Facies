@@ -2,6 +2,8 @@
   <static-plot
     :data-definition="data.polygons"
     :annotations="data.annotations"
+    :max-height="maxSize.height"
+    :max-width="maxSize.width"
     expand
     svg
     @click.native="clicked"
@@ -38,6 +40,12 @@ export default {
   },
 
   computed: {
+    maxSize () {
+      return {
+        width: 400,
+        height: 400,
+      }
+    },
     data () {
       return plotify(
         this.polygons
