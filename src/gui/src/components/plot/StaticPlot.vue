@@ -5,6 +5,7 @@
     :options="options"
     auto-resize
     @click.native="e => $emit('click', e)"
+    @resize="resize"
   />
 </template>
 
@@ -35,6 +36,15 @@ export default {
       x: VueTypes.oneOfType([VueTypes.string, null]).def(null),
       y: VueTypes.oneOfType([VueTypes.string, null]).def(null),
     }).def(() => { return { x: null, y: null } })
+  },
+
+  data () {
+    return {
+      size: {
+        height: 0,
+        width: 0,
+      }
+    }
   },
 
   computed: {
@@ -74,7 +84,7 @@ export default {
       }
 
       const layout = {
-        ...this.size(),
+        ...this.size,
         showLegend: false,
         autosize: true,
         margin: {
@@ -103,10 +113,25 @@ export default {
     },
   },
 
+  beforeDestroy () {
+    window.removeEventListener('resize', this.resize)
+  },
+
+  beforeMount () {
+    this.size.width = this.width
+    this.size.height = this.height
+  },
+
+  mounted () {
+    window.addEventListener('resize', this.resize)
+
+    this.$watch('$el', this.resize)
+  },
+
   methods: {
-    size () {
+    resize () {
       const parent = this.$el
-        ? this.$el.parentElement
+        ? this.$el.getElementsByClassName('svg-container')[0]
         : {
           clientWidth: this.width,
           clientHeight: this.height,
@@ -114,11 +139,10 @@ export default {
       const size = this.staticSize
         ? { width: this.width, height: this.height }
         : { width: parent.clientWidth || this.width, height: parent.clientHeight || this.height }
-      const val = Math.min(...Object.values(size))
-      size.width = this.expand ? Math.min(val, this.maxWidth) : this.width
-      size.height = this.expand ? Math.min(val, this.maxHeight) : this.height
-      return size
-    }
+      const val = Math.max(...Object.values(size))
+      this.size.width = this.expand ? Math.min(val, this.maxWidth) : this.width
+      this.size.height = this.expand ? Math.min(val, this.maxHeight) : this.height
+    },
   },
 }
 </script>
