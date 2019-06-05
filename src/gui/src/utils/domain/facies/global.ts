@@ -1,8 +1,7 @@
-import Discrete, { DiscreteSerialization } from '@/utils/domain/bases/discrete'
-import { Discrete as IDiscrete } from '@/utils/domain/bases/interfaces'
+import Discrete, { DiscreteConfiguration, DiscreteSerialization } from '@/utils/domain/bases/discrete'
 import { Color } from '@/utils/domain/facies/helpers/colors'
 
-interface Configuration extends IDiscrete {
+interface Configuration extends DiscreteConfiguration {
   color: Color
   alias?: string
 }

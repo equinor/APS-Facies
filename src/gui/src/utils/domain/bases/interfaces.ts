@@ -44,3 +44,7 @@ export interface SimulationSettings {
   simulationBox: Coordinate3D
   simulationBoxOrigin: Coordinate2D
 }
+
+export interface Ordered {
+  order: number
+}

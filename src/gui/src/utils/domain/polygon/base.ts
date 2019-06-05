@@ -1,4 +1,5 @@
 import BaseItem from '@/utils/domain/bases/baseItem'
+import { Ordered } from '@/utils/domain/bases/interfaces'
 import Facies from '@/utils/domain/facies/local'
 import { ID, Identified, ORDER, PROBABILITY } from '@/utils/domain/types'
 
@@ -27,7 +28,7 @@ export interface PolygonSerialization extends BasePolygonSpec<ID | null> {
   overlay: boolean
 }
 
-export default abstract class Polygon extends BaseItem {
+export default abstract class Polygon extends BaseItem implements Ordered {
   public order: ORDER
   public fraction: PROBABILITY
   public facies: Facies | null

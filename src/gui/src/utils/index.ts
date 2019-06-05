@@ -5,6 +5,7 @@ import uuidv5 from 'uuid/v5'
 import {
   Identifiable,
   Named,
+  Ordered,
   Parent,
   SimulationSettings,
 } from '@/utils/domain/bases/interfaces'
@@ -282,10 +283,6 @@ function sortByProperty<T extends object> (prop: string): (items: T[]) => T[] {
     })
     return items.slice().sort((polygon, other): number => polygon[`${prop}`] - other[`${prop}`])
   }
-}
-
-interface Ordered {
-  order: number
 }
 
 function sortByOrder<T extends Ordered> (items: T[], index: number, isDescending: boolean): T[] {

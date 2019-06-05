@@ -1,10 +1,9 @@
-import { BaseItemConfiguration } from '@/utils/domain/bases/baseItem'
-import Discrete, { DiscreteSerialization } from './discrete'
-import { Discrete as IDiscrete, Selectable } from './interfaces'
+import Discrete, { DiscreteConfiguration, DiscreteSerialization } from './discrete'
+import { Selectable } from './interfaces'
 
 export type SelectedType = boolean | 'intermediate'
 
-export interface SelectableItemConfiguration extends IDiscrete, BaseItemConfiguration {
+export interface SelectableItemConfiguration extends DiscreteConfiguration {
   selected?: SelectedType
 }
 
