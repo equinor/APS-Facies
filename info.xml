@@ -6,7 +6,7 @@
   <meta name="window-size" content="1920x1080" />
   <meta name="refresh-after-run" content="False" />
   <meta name="enable-mustache" content="False" />
-  <meta name="uipy-timeout" content="10000" />
+  <meta name="uipy-timeout" content="3600000" />
   <tree-location name="Grid models" />
   <tree-location name="Grid models/*" />
 </plugin>
