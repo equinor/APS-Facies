@@ -205,6 +205,11 @@ export default {
     availableForBackgroundFacies: (state, getters) => (rule, facies) => {
       return !getters['groups/used'](facies)
         && rule.backgroundPolygons.map(({ facies }) => getId(facies)).includes(getId(facies))
+    },
+    isFromRMS: (state) => facies => {
+      return facies
+        ? !!state.global._inRms.find(({ code, name }) => facies.code === code && facies.name === name)
+        : false
     }
   },
 }

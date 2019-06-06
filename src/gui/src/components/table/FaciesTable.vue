@@ -45,6 +45,7 @@
         </td>
         <td class="text-xs-left">
           <v-edit-dialog
+            v-if="!isFaciesFromRms(props.item)"
             lazy
           >
             <highlight-current-item
@@ -60,6 +61,12 @@
               @keydown.enter="() => changeName(props.item)"
             />
           </v-edit-dialog>
+          <highlight-current-item
+            v-else
+            :style="props.item.current ? selectedStyle : ''"
+            :item="props.item"
+            field="name"
+          />
         </td>
         <td
           v-if="!hideAlias"
@@ -223,6 +230,9 @@ export default {
   },
 
   methods: {
+    isFaciesFromRms (facies) {
+      return this.$store.getters['facies/isFromRMS'](facies)
+    },
     async changeColor (facies, color) {
       if (facies.color !== color) {
         // Only dispatch when the color *actually* changes
