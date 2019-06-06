@@ -71,6 +71,7 @@ interface RootState {
 }
 
 interface RootGetters {
+  'facies': GlobalFacies
   'faciesTable': Facies[]
 
   'facies/byId': (faciesId: ID) => Facies | null
