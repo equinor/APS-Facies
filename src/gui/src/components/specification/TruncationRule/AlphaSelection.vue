@@ -75,7 +75,7 @@ export default class AlphaSelection<P extends Polygon, S extends PolygonSerializ
             }
           } else {
             /* This field MAY have been used in overlay */
-            disabled = this.rule.isUsedInOverlay(field)
+            disabled = disabled || this.rule.isUsedInOverlay(field)
           }
         }
         if (this.value) {
