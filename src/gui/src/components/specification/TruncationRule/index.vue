@@ -99,7 +99,7 @@ export default {
       set: function (val) { this.$store.dispatch('truncationRules/toggleOverlay', { rule: this.rule, value: val }) },
     },
     hasEnoughFacies () {
-      const numFacies = Object.values(this.$store.state.facies.available).length
+      const numFacies = Object.values(this.$store.getters['facies/selected']).length
       const numFaciesInBackground = [ ...new Set(this.rule.backgroundPolygons
         .map(polygon => polygon.facies)
         .filter(name => !!name)
