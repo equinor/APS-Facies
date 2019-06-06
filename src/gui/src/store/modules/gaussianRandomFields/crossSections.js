@@ -19,7 +19,7 @@ export default {
   },
 
   actions: {
-    async fetch ({ state, dispatch, rootGetters }, { zone = null, region = null } = {}) {
+    fetch ({ state, commit, rootGetters }, { zone = null, region = null } = {}) {
       zone = zone || rootGetters.zone
       region = region || rootGetters.region
       let crossSection = Object.values(state.available)
@@ -33,16 +33,18 @@ export default {
             region: region,
           }
         })
-        await dispatch('populate', [crossSection])
+        commit('ADD', crossSection)
       }
       return crossSection
     },
     populate ({ commit }, crossSections) {
-      Object.values(crossSections).forEach(crossSection => {
-        commit('ADD', {
-          crossSection: new CrossSection({ ...crossSection })
+      Object.values(crossSections)
+        .forEach(crossSection => {
+          if (!(crossSection instanceof CrossSection)) {
+            crossSection = new CrossSection({ ...crossSection })
+          }
+          commit('ADD', crossSection)
         })
-      })
     },
     async changeType ({ state, commit, dispatch, rootGetters }, { id, type }) {
       commit('CHANGE_TYPE', { id, type })
@@ -55,7 +57,7 @@ export default {
   },
 
   mutations: {
-    ADD (state, { crossSection }) {
+    ADD (state, crossSection) {
       Vue.set(state.available, crossSection.id, crossSection)
     },
     CHANGE_TYPE (state, { id, type }) {

@@ -487,7 +487,7 @@ export default {
      * @returns {Promise<void>}
      */
     populateGaussianRandomFields: async ({ dispatch, rootState }, zoneModelsFromFile) => {
-      zoneModelsFromFile.forEach(zoneModel => {
+      for (const zoneModel of zoneModelsFromFile) {
         const zoneNumber = parseInt(zoneModel._attributes.number)
         let regionNumber = parseInt(zoneModel._attributes.regionNumber)
         if (isNaN(regionNumber)) regionNumber = null
@@ -499,7 +499,7 @@ export default {
         const region = Object.values(regionsForZone)
           .find(region => region.code === regionNumber)
 
-        zoneModel.GaussField.forEach(async gaussFieldFromFile => {
+        for (const gaussFieldFromFile of zoneModel.GaussField) {
           let trend = null
 
           if (gaussFieldFromFile.Trend) {
@@ -584,8 +584,8 @@ export default {
             },
             { root: true }
           )
-        })
-      })
+        }
+      }
     },
 
     /**
