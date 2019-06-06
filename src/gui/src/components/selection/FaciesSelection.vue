@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import FaciesTable from '@/components/table/FaciesTable.vue'
 
 import { Store } from '@/store/typing'
@@ -31,7 +31,8 @@ import { Store } from '@/store/typing'
   },
 })
 export default class FaciesSelection extends Vue {
-  hideAlias: boolean = false
+  @Prop({ default: false, type: Boolean })
+  readonly hideAlias: boolean
 
   get hasSelected () { return !!(this.$store as Store).state.facies.global.current }
 
