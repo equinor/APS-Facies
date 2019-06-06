@@ -80,6 +80,9 @@ export default {
           dispatch('current', { id: null })
         })
     },
+    changeColor: ({ commit }, { id, color }) => {
+      commit('CHANGE', { id, name: 'color', value: color })
+    },
     changeName: ({ commit }, { id, name }) => {
       commit('CHANGE', { id, name: 'name', value: name })
     },

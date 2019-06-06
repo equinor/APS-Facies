@@ -223,12 +223,10 @@ export default {
   },
 
   methods: {
-    changeColor (facies, color) {
+    async changeColor (facies, color) {
       if (facies.color !== color) {
         // Only dispatch when the color *actually* changes
-        return this.$store.dispatch('facies/global/changed', { id: facies.id, color })
-      } else {
-        return Promise.resolve(facies)
+        await this.$store.dispatch('facies/global/changeColor', { id: facies.id, color })
       }
     },
     current ({ id }) {
