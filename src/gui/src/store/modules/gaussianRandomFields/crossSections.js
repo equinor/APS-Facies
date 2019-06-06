@@ -19,32 +19,30 @@ export default {
   },
 
   actions: {
-    fetch ({ state, commit, rootGetters }, { zone = null, region = null } = {}) {
-      zone = zone || rootGetters.zone
-      region = region || rootGetters.region
-      let crossSection = Object.values(state.available)
-        .find(setting => setting.isChildOf({ zone, region }))
-      if (!crossSection) {
-        crossSection = new CrossSection({
-          type: DEFAULT_CROSS_SECTION.type,
-          relativePosition: DEFAULT_CROSS_SECTION.position,
-          parent: {
-            zone: zone,
-            region: region,
-          }
-        })
-        commit('ADD', crossSection)
+    async fetch ({ state, dispatch, rootGetters }, { zone = null, region = null } = {}) {
+      const parent = {
+        zone: zone || rootGetters.zone,
+        region: region || rootGetters.region,
       }
-      return crossSection
+      await dispatch('add', {
+        type: DEFAULT_CROSS_SECTION.type,
+        relativePosition: DEFAULT_CROSS_SECTION.position,
+        parent,
+      })
+      return Object.values(state.available)
+        .find(setting => setting.isChildOf({ zone, region }))
     },
-    populate ({ commit }, crossSections) {
-      Object.values(crossSections)
-        .forEach(crossSection => {
-          if (!(crossSection instanceof CrossSection)) {
-            crossSection = new CrossSection({ ...crossSection })
-          }
-          commit('ADD', crossSection)
-        })
+    async populate ({ dispatch }, crossSections) {
+      for (const crossSection of Object.values(crossSections)) {
+        await dispatch('add', crossSection)
+      }
+    },
+    add ({ commit, state }, crossSection) {
+      const existing = Object.values(state.available)
+        .find(item => item.isChildOf(crossSection.parent))
+      if (!existing) {
+        commit('ADD', new CrossSection({ ...crossSection }))
+      }
     },
     async changeType ({ state, commit, dispatch, rootGetters }, { id, type }) {
       commit('CHANGE_TYPE', { id, type })
