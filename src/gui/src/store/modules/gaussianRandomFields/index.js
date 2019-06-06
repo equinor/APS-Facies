@@ -84,7 +84,7 @@ export default {
       commit('ADD', field)
       return field
     },
-    addField ({ commit }, { field }) {
+    addField ({ commit }, field) {
       commit('ADD', field)
     },
     async deleteField ({ state, commit, dispatch }, { grfId }) {

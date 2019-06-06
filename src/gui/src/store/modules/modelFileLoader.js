@@ -298,6 +298,83 @@ async function makeCubicTruncationRule ({ rootState, dispatch }, container, pare
   )
 }
 
+function getTrend (gaussFieldFromFile) {
+  if (!gaussFieldFromFile.Trend) return null
+
+  let type = null
+  let trendContainer = null
+  if (gaussFieldFromFile.Trend.Linear3D) {
+    type = 'LINEAR'
+    trendContainer = gaussFieldFromFile.Trend.Linear3D
+  } else if (gaussFieldFromFile.Trend.Elliptic3D) {
+    type = 'ELLIPTIC'
+    trendContainer = gaussFieldFromFile.Trend.Elliptic3D
+  } else if (gaussFieldFromFile.Trend.EllipticCone3D) {
+    type = 'ELLIPTIC_CONE'
+    trendContainer = gaussFieldFromFile.Trend.EllipticCone3D
+  } else if (gaussFieldFromFile.Trend.Hyperbolic3D) {
+    type = 'HYPERBOLIC'
+    trendContainer = gaussFieldFromFile.Trend.Hyperbolic3D
+  } else if (gaussFieldFromFile.Trend.RMSParameter) {
+    type = 'RMS_PARAM'
+    trendContainer = gaussFieldFromFile.Trend.RMSParameter
+  }
+
+  return new Trend({
+    use: true,
+    type: type,
+    azimuth: getNumericValue(trendContainer.azimuth),
+    azimuthUpdatable: isFMUUpdatable(trendContainer.azimuth),
+    stackAngle: getNumericValue(trendContainer.stackAngle),
+    stackAngleUpdatable: isFMUUpdatable(trendContainer.stackAngle),
+    migrationAngle: getNumericValue(trendContainer.migrationAngle),
+    migrationAngleUpdatable: isFMUUpdatable(trendContainer.migrationAngle),
+    stackingDirection: getStackingDirection(trendContainer.directionStacking),
+    parameter: getTextValue(trendContainer.TrendParamName),
+    curvature: getNumericValue(trendContainer.curvature),
+    curvatureUpdatable: isFMUUpdatable(trendContainer.curvature),
+    originX: getNumericValue(trendContainer.origin_x),
+    originXUpdatable: isFMUUpdatable(trendContainer.origin_x),
+    originY: getNumericValue(trendContainer.origin_y),
+    originYUpdatable: isFMUUpdatable(trendContainer.origin_y),
+    originZ: getNumericValue(trendContainer.origin_z_simbox),
+    originZUpdatable: isFMUUpdatable(trendContainer.origin_z_simbox),
+    originType: getOriginType(trendContainer.origintype),
+    relativeSize: getNumericValue(trendContainer.relativeSize),
+    relativeSizeUpdatable: isFMUUpdatable(trendContainer.relativeSize),
+    relativeStdDev: getNumericValue(gaussFieldFromFile.RelStdDev),
+    relativeStdDevUpdatable: isFMUUpdatable(gaussFieldFromFile.RelStdDev),
+  })
+}
+
+function getVariogram (gaussFieldFromFile) {
+  return new Variogram({
+    type: gaussFieldFromFile.Vario._attributes.name.trim(),
+    // Angles
+    azimuth: getNumericValue(gaussFieldFromFile.Vario.AzimuthAngle),
+    azimuthUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.AzimuthAngle),
+    dip: getNumericValue(gaussFieldFromFile.Vario.DipAngle),
+    dipUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.DipAngle),
+    // Ranges
+    main: getNumericValue(gaussFieldFromFile.Vario.MainRange),
+    mainUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.MainRange),
+    perpendicular: getNumericValue(gaussFieldFromFile.Vario.PerpRange),
+    perpendicularUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.PerpRange),
+    vertical: getNumericValue(gaussFieldFromFile.Vario.VertRange),
+    verticalUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.VertRange),
+    power: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
+      ? getNumericValue(gaussFieldFromFile.Vario.Power)
+      : null,
+    powerUpdatable: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
+      && isFMUUpdatable(gaussFieldFromFile.Vario.Power)
+  })
+}
+
+async function getCrossSection ({ dispatch }, parent) {
+  const crossSection = await dispatch('gaussianRandomFields/crossSections/fetch', parent, { root: true })
+  return crossSection
+}
+
 export default {
   namespaced: true,
 
@@ -488,100 +565,17 @@ export default {
      */
     populateGaussianRandomFields: async ({ dispatch, rootState }, zoneModelsFromFile) => {
       for (const zoneModel of zoneModelsFromFile) {
-        const zoneNumber = parseInt(zoneModel._attributes.number)
-        let regionNumber = parseInt(zoneModel._attributes.regionNumber)
-        if (isNaN(regionNumber)) regionNumber = null
-
-        // The corresponding zone and region number in the internal data structures
-        const zone = Object.values(rootState.zones.available)
-          .find(zone => zone.code === zoneNumber)
-        const regionsForZone = zone.regions
-        const region = Object.values(regionsForZone)
-          .find(region => region.code === regionNumber)
+        const parent = getParent({ rootState }, zoneModel)
 
         for (const gaussFieldFromFile of zoneModel.GaussField) {
-          let trend = null
-
-          if (gaussFieldFromFile.Trend) {
-            let type = null
-            let trendContainer = null
-            if (gaussFieldFromFile.Trend.Linear3D) {
-              type = 'LINEAR'
-              trendContainer = gaussFieldFromFile.Trend.Linear3D
-            } else if (gaussFieldFromFile.Trend.Elliptic3D) {
-              type = 'ELLIPTIC'
-              trendContainer = gaussFieldFromFile.Trend.Elliptic3D
-            } else if (gaussFieldFromFile.Trend.EllipticCone3D) {
-              type = 'ELLIPTIC_CONE'
-              trendContainer = gaussFieldFromFile.Trend.EllipticCone3D
-            } else if (gaussFieldFromFile.Trend.Hyperbolic3D) {
-              type = 'HYPERBOLIC'
-              trendContainer = gaussFieldFromFile.Trend.Hyperbolic3D
-            } else if (gaussFieldFromFile.Trend.RMSParameter) {
-              type = 'RMS_PARAM'
-              trendContainer = gaussFieldFromFile.Trend.RMSParameter
-            }
-
-            trend = new Trend({
-              use: true,
-              type: type,
-              azimuth: getNumericValue(trendContainer.azimuth),
-              azimuthUpdatable: isFMUUpdatable(trendContainer.azimuth),
-              stackAngle: getNumericValue(trendContainer.stackAngle),
-              stackAngleUpdatable: isFMUUpdatable(trendContainer.stackAngle),
-              migrationAngle: getNumericValue(trendContainer.migrationAngle),
-              migrationAngleUpdatable: isFMUUpdatable(trendContainer.migrationAngle),
-              stackingDirection: getStackingDirection(trendContainer.directionStacking),
-              // TODO. Load parameters
-              parameter: null,
-              curvature: getNumericValue(trendContainer.curvature),
-              curvatureUpdatable: isFMUUpdatable(trendContainer.curvature),
-              originX: getNumericValue(trendContainer.origin_x),
-              originXUpdatable: isFMUUpdatable(trendContainer.origin_x),
-              originY: getNumericValue(trendContainer.origin_y),
-              originYUpdatable: isFMUUpdatable(trendContainer.origin_y),
-              originZ: getNumericValue(trendContainer.origin_z_simbox),
-              originZUpdatable: isFMUUpdatable(trendContainer.origin_z_simbox),
-              originType: getOriginType(trendContainer.origintype),
-              relativeSize: getNumericValue(trendContainer.relativeSize),
-              relativeSizeUpdateble: isFMUUpdatable(trendContainer.relativeSize),
-              relativeStdDev: getNumericValue(gaussFieldFromFile.RelStdDev),
-              relativeStdDevUpdatable: isFMUUpdatable(gaussFieldFromFile.RelStdDev)
-            })
-          }
-
-          const vario = new Variogram({
-            type: gaussFieldFromFile.Vario._attributes.name.trim(),
-            // Angles
-            azimuth: getNumericValue(gaussFieldFromFile.Vario.AzimuthAngle),
-            azimuthUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.AzimuthAngle),
-            dip: getNumericValue(gaussFieldFromFile.Vario.DipAngle),
-            dipUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.DipAngle),
-            // Ranges
-            main: getNumericValue(gaussFieldFromFile.Vario.MainRange),
-            mainUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.MainRange),
-            perpendicular: getNumericValue(gaussFieldFromFile.Vario.PerpRange),
-            perpendicularUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.PerpRange),
-            vertical: getNumericValue(gaussFieldFromFile.Vario.VertRange),
-            verticalUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.VertRange),
-            power: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
-              ? getNumericValue(gaussFieldFromFile.Vario.Power)
-              : null,
-            powerUpdatable: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
-              && isFMUUpdatable(gaussFieldFromFile.Vario.Power)
-          })
-
           await dispatch('gaussianRandomFields/addField',
-            {
-              field: new GaussianRandomField({
-                name: gaussFieldFromFile._attributes.name,
-                variogram: vario,
-                trend: trend,
-                crossSection: await dispatch('gaussianRandomFields/crossSections/fetch', { zone: zone, region: region }, { root: true }),
-                zone: zone,
-                region: region,
-              })
-            },
+            new GaussianRandomField({
+              name: gaussFieldFromFile._attributes.name,
+              variogram: getVariogram(gaussFieldFromFile),
+              trend: getTrend(gaussFieldFromFile),
+              crossSection: await getCrossSection({ dispatch }, parent),
+              parent,
+            }),
             { root: true }
           )
         }
