@@ -58,7 +58,7 @@ export default class AlphaSelection<P extends Polygon, S extends PolygonSerializ
     return this._fields
       .map(field => {
         /* Is background field, and is not in the same location */
-        let disabled = this.rule.isUsedInDifferentAlpha(this.id, this.channel)
+        let disabled = this.rule.isUsedInDifferentAlpha(field, this.channel)
 
         /* Are we dealing with a field used in overlay? */
         if (this.rule instanceof OverlayTruncationRule) {
