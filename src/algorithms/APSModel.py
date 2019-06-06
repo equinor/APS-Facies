@@ -303,7 +303,7 @@ class APSModel:
         # Read keyword for region parameter
         # Note that the keyword is required if there are zones in the zone model where the zone has
         # attribute regionNumber, otherwise not.
-        zones_with_region_attr = self.__ET_Tree.findall('//Zone[@regionNumber]')
+        zones_with_region_attr = self.__ET_Tree.findall('.//Zone[@regionNumber]')
         keyword = 'RegionParamName'
         value = getTextCommand(
             root, keyword,
