@@ -146,7 +146,7 @@ export default {
       if (autoFill && template.overlay) {
         await Promise.all(template.overlay.items.map(item => getFaciesGroup({ rootGetters, dispatch }, item.over, parent)))
       }
-      const backgroundFields = processFields(rootGetters, rootState, template.fields, template.level)
+      const backgroundFields = processFields(rootGetters, rootState, template.fields, parent)
       const overlay = processOverlay(rootGetters, template.overlay, parent)
       let polygons = processPolygons({ rootGetters, rootState }, { type, polygons: template.polygons, settings: template.settings })
       polygons = combinePolygons(polygons, overlay)
