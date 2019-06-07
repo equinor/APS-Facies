@@ -59,11 +59,13 @@ export default class AlphaFields extends Vue {
   }
 
   update ({ channel }: { channel: number }, fieldId: ID) {
-    const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+    const field = fieldId
+      ? (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+      : null
     return this.$store.dispatch('truncationRules/updateBackgroundField', {
       index: channel - 1,
       rule: this.value,
-      field: field || null
+      field,
     })
   }
 }

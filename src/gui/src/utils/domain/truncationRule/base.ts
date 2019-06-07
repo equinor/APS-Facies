@@ -78,7 +78,7 @@ export default abstract class TruncationRule<
   }
 
   public isUsedInDifferentAlpha (field: GaussianRandomField | ID, channel: number): boolean {
-    const index = this.backgroundFields.findIndex((item): boolean => item.id === getId(field))
+    const index = this.backgroundFields.findIndex((item): boolean => getId(item) === getId(field))
     return index < 0
       ? false
       // Channel is 1-indexed, while order of fields are 0-indexed
