@@ -579,7 +579,7 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
         print('codeNames:')
         print(codeNames)
         # Update the facies table in the discrete 3D parameter
-        update_code_names(code_names, codeNames)
+        update_code_names(p, codeNames)
 
         if debug_level >= Debug.VERY_VERBOSE:
             text = 'Updated facies table: '
@@ -707,13 +707,12 @@ def updateDiscrete3DParameterValues(
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
 
-        code_names = p.code_names
-
         # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones
         # Update the facies table in the discrete 3D parameter
-        update_code_names(code_names, faciesTable)
+        update_code_names(p, faciesTable)
 
+        code_names = p.code_names
         if setDefaultFaciesNameWhenUndefined:
             codeValList = code_names.keys()
             for code in codeValList:
