@@ -51,6 +51,7 @@
         <td>
           <polygon-order
             :value="props.item"
+            :rule="value"
           />
         </td>
       </tr>

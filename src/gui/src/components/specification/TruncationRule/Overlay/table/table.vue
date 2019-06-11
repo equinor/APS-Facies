@@ -52,6 +52,7 @@
         <td>
           <polygon-order
             :value="props.item"
+            :rule="rule"
             overlay
           />
         </td>
