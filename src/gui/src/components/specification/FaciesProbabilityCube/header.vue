@@ -94,20 +94,8 @@ export default {
     validate () {},
     async average () {
       this.calculatingAverages = true
-      const gridModel = this.$store.getters.gridModel
-      const zoneNumber = this.$store.getters.zone.code
-      let regionParameter = null
-      let regionNumber = null
-      if (this.$store.getters.useRegions) {
-        regionParameter = this.$store.getters.regionParameter
-        const region = this.$store.state.getters.region
-        if (region) regionNumber = region.code
-      }
       try {
-        const probabilityCubes = await rms.averageProbabilityCubes(gridModel, this.probabilityCubeParameters, zoneNumber, regionParameter, regionNumber)
-        // Result in the form of { probCubeName_1: average, ...}
-        await this.$store.dispatch('facies/updateProbabilities', { probabilityCubes })
-        await this.normalize()
+        await this.$store.dispatch('facies/averageProbabilityCubes', { probabilityCubes: this.probabilityCubeParameters })
       } finally {
         this.calculatingAverages = false
       }

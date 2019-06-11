@@ -69,6 +69,17 @@ export default {
   getters: {
     selected (state) {
       return Object.keys(state.available).filter(id => state.available[`${id}`].selected)
+    },
+    byCode: (state) => (zoneNumber, regionNumber = null) => {
+      const zone = Object.values(state.available).find(zone => zone.code === zoneNumber)
+      let region = null
+      if (regionNumber && regionNumber !== 0) {
+        region = zone.regions.find(region => region.code === regionNumber)
+      }
+      return {
+        zone,
+        region,
+      }
     }
   },
 }

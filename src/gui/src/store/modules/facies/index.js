@@ -4,6 +4,8 @@ import math from 'mathjs'
 
 import { isNumber } from 'lodash'
 
+import rms from '@/api/rms'
+
 import Facies from '@/utils/domain/facies/local'
 import {
   notEmpty,
@@ -72,15 +74,13 @@ export default {
       facies = makeData(facies, Facies, state.available)
       commit('AVAILABLE', facies)
     },
-    updateProbabilities: async ({ dispatch, state }, { probabilityCubes }) => {
+    updateProbabilities: async ({ dispatch, state }, { probabilityCubes, parent }) => {
       if (notEmpty(probabilityCubes)) {
-        for (const parameter in probabilityCubes) {
-          const facies = Object.values(state.available)
-            .filter(facies => facies.probabilityCube === parameter)
-          await Promise.all(facies.map(facies => updateFaciesProbability(dispatch, facies, probabilityCubes[`${parameter}`])))
-        }
+        const facies = Object.values(state.available)
+          .filter(facies => facies.isChildOf(parent) && !!facies.probabilityCube)
+        await Promise.all(facies.map(facies => updateFaciesProbability(dispatch, facies, probabilityCubes[`${facies.probabilityCube}`])))
+        await dispatch('normalize', { selected: facies })
       }
-      await dispatch('normalizeEmpty')
     },
     updateProbability: ({ dispatch, state, getters }, { facies, probability }) => {
       if (!facies.id) {
@@ -98,6 +98,26 @@ export default {
           ? updateFaciesProbability(dispatch, facies, emptyProbability)
           : new Promise((resolve) => resolve()))
       )
+    },
+    averageProbabilityCubes: async ({ dispatch, state, rootGetters }, { probabilityCubes = null, gridModel = null, zoneNumber = null, useRegions = false, regionParameter = null, regionNumber = null } = {}) => {
+      if (!gridModel) gridModel = rootGetters.gridModel
+      if (!zoneNumber && zoneNumber !== 0) zoneNumber = rootGetters.zone.code
+      if (useRegions || rootGetters.useRegions) {
+        if (!regionParameter) regionParameter = rootGetters.regionParameter
+        const region = rootGetters.region
+        if (region && !regionNumber && regionNumber !== 0) regionNumber = region.code
+      }
+      const parent = rootGetters['zones/byCode'](zoneNumber, useRegions ? regionNumber : null)
+      if (!probabilityCubes) {
+        probabilityCubes = Object.values(state.available)
+          .filter(facies => facies.isChildOf(parent))
+          .map(facies => facies.probabilityCube)
+          .filter(param => notEmpty(param))
+      }
+
+      probabilityCubes = await rms.averageProbabilityCubes(gridModel, probabilityCubes, zoneNumber, regionParameter, regionNumber)
+      // Result in the form of { probCubeName_1: average, ...}
+      await dispatch('updateProbabilities', { probabilityCubes, parent })
     },
     normalize: ({ dispatch, getters }, { selected = null } = {}) => {
       selected = selected || getters.selected
@@ -122,7 +142,7 @@ export default {
       commit('CONSTANT_PROBABILITY', { parentId: _id, toggled: usage })
     },
     setConstantProbability: ({ commit }, { parentId, toggled }) => {
-      if (typeof value === 'boolean') {
+      if (typeof toggled === 'boolean') {
         commit('CONSTANT_PROBABILITY', { parentId, toggled })
       }
     },

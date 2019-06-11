@@ -599,7 +599,6 @@ export default {
         const useConstantProb = getBooleanValue(zoneModel.UseConstProb)
         const parent = getParent({ rootState }, zoneModel)
         // TODO: handle SimBoxThickness (must await implementation from Sindre on this?)
-        const probCubes = []
         for (const faciesModel of zoneModel.FaciesProbForModel.Facies) {
           const facies = await dispatch('facies/add', {
             facies: /* global */ Object.values(rootState.facies.global.available).find(obj => obj.name === faciesModel._attributes.name),
@@ -613,19 +612,11 @@ export default {
             }, { root: true })
           } else {
             const probabilityCube = faciesModel.ProbCube._text.trim()
-            probCubes.push(probabilityCube)
             await dispatch('facies/changeProbabilityCube', { facies, probabilityCube }, { root: true })
           }
         }
-        // hack to set value of preview probability of probCubes to 1/nr of probcubes to have the preview of the truncation rule load immediately
-        // user can always push Average button and get the actual values from project.
         if (!useConstantProb) {
-          await dispatch('facies/updateProbabilities', {
-            probabilityCubes: probCubes.reduce((obj, name) => {
-              obj[`${name}`] = 1 / probCubes.length
-              return obj
-            }, {})
-          }, { root: true })
+          await dispatch('facies/averageProbabilityCubes', { zoneNumber: parent.zone.code, useRegions: !!parent.region, regionNumber: parent.region && parent.region.code }, { root: true })
         }
       }
     },
