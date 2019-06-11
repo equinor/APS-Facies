@@ -533,7 +533,7 @@ function addTruncationRuleNonCubic ({ rootState }: { rootState: RootState }, doc
       const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: faciesName }])
       backGroundModelElem.append(faciesElem)
       // angle element
-      const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${faciesName}_ANGLE`
+      const kwValue = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_NONCUBIC_POLYNUMBER_${polygon.order}_ANGLE`
       faciesElem.append(createElement(doc, 'Angle', polygon.angle.value, polygon.angle.updatable ? [{ name: 'kw', value: kwValue }] : null))
       // ProbFrac element
       faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
