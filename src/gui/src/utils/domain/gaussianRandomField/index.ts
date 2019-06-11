@@ -65,6 +65,7 @@ export type GaussianRandomFieldConfiguration = DependentConfiguration & {
   trend?: Trend | null
   settings?: Settings | null
   crossSection?: CrossSection | null
+  seed?: number | null
 }
 
 interface GaussianRandomFieldSpecification {
@@ -90,7 +91,7 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
 
   private _data: number[][]
 
-  public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, ...rest }: GaussianRandomFieldConfiguration) {
+  public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, seed = null, ...rest }: GaussianRandomFieldConfiguration) {
     super(rest)
     this.name = name
     this.variogram = variogram || new Variogram({})
@@ -98,6 +99,9 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
     this.settings = settings || defaultSettings(this.parent)
     if (crossSection) {
       this.settings.crossSection = crossSection
+    }
+    if (seed && seed >= 0) {
+      this.settings.seed = seed
     }
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
     //   E.g. use a hash of the specification (variogram, trend, and settings)

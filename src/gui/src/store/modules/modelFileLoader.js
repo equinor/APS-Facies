@@ -572,6 +572,7 @@ export default {
               variogram: getVariogram(gaussFieldFromFile),
               trend: getTrend(gaussFieldFromFile),
               crossSection: await getCrossSection({ dispatch }, parent),
+              seed: hasElement(gaussFieldFromFile, 'SeedForPreview') ? getNumericValue(gaussFieldFromFile, 'SeedForPreview') : null,
               parent,
             }),
             { root: true }
