@@ -142,18 +142,18 @@
       </GaussField>
 
       <TruncationRule nGFields="3" name="Trunc3D_Bayfill">
-	<BackGroundModel>
-	  <AlphaFields> GF1 GF2 GF3 </AlphaFields>
-	  <UseConstTruncParam> 1 </UseConstTruncParam>
-	  <Floodplain> F1 </Floodplain>
-	  <Subbay> F2 </Subbay>
-	  <WBF> F3 </WBF>
-	  <BHD> F4 </BHD>
-	  <Lagoon> F5 </Lagoon>
-	  <SF kw="APS_1_0_TRUNC_BAYFILL_SF"> 0.5 </SF>
-	  <YSF kw="APS_1_0_TRUNC_BAYFILL_YSF">  0.5 </YSF>
-	  <SBHD kw="APS_1_0_TRUNC_BAYFILL_SBHD">  0.1 </SBHD>
-	</BackGroundModel>
+    <BackGroundModel>
+      <AlphaFields> GF1 GF2 GF3 </AlphaFields>
+      <UseConstTruncParam> 1 </UseConstTruncParam>
+      <Floodplain> F1 </Floodplain>
+      <Subbay> F2 </Subbay>
+      <WBF> F3 </WBF>
+      <BHD> F4 </BHD>
+      <Lagoon> F5 </Lagoon>
+      <SF kw="APS_1_0_TRUNC_BAYFILL_SF"> 0.5 </SF>
+      <YSF kw="APS_1_0_TRUNC_BAYFILL_YSF">  0.5 </YSF>
+      <SBHD kw="APS_1_0_TRUNC_BAYFILL_SBHD">  0.1 </SBHD>
+    </BackGroundModel>
       </TruncationRule>
     </Zone>
 
@@ -233,8 +233,8 @@
       </GaussField>
 
       <TruncationRule nGFields="4" name="Trunc2D_Angle">
-	<BackGroundModel>
-	  <AlphaFields> GF1 GF2 </AlphaFields>
+    <BackGroundModel>
+      <AlphaFields> GF1 GF2 </AlphaFields>
           <UseConstTruncParam> 1 </UseConstTruncParam>
           <Facies name="F1">
             <Angle> 40.0 </Angle>
@@ -256,8 +256,8 @@
             <Angle> 75.0 </Angle>
             <ProbFrac> 1.0 </ProbFrac>
           </Facies>
-	</BackGroundModel>
-	<OverLayModel>
+    </BackGroundModel>
+    <OverLayModel>
           <Group>
             <AlphaField name="GF3">
               <TruncIntervalCenter> 0.20 </TruncIntervalCenter>
@@ -338,8 +338,8 @@
 
 
       <TruncationRule nGFields="2" name="Trunc2D_Cubic">
-	<BackGroundModel>
-	  <AlphaFields> GF1 GF2 </AlphaFields>
+    <BackGroundModel>
+      <AlphaFields> GF1 GF2 </AlphaFields>
           <L1 direction="V">
             <ProbFrac name="F1"> 1.0 </ProbFrac>
             <ProbFrac name="F2"> 1.0 </ProbFrac>
@@ -348,7 +348,7 @@
               <ProbFrac name="F4"> 1.0 </ProbFrac>
             </L2>
           </L1>
-	</BackGroundModel>
+    </BackGroundModel>
       </TruncationRule>
     </Zone>
 
@@ -430,8 +430,8 @@
       </GaussField>
 
       <TruncationRule nGFields="4" name="Trunc2D_Cubic">
-	<BackGroundModel>
-	  <AlphaFields> GF1 GF2 </AlphaFields>
+    <BackGroundModel>
+      <AlphaFields> GF1 GF2 </AlphaFields>
           <L1 direction="V">
             <ProbFrac name="F1"> 1.0 </ProbFrac>
             <L2>
@@ -444,8 +444,8 @@
               <ProbFrac name="F4"> 1.0 </ProbFrac>
             </L2>
           </L1>
-	</BackGroundModel>
-	<OverLayModel>
+    </BackGroundModel>
+    <OverLayModel>
           <Group>
             <AlphaField name="GF3">
               <TruncIntervalCenter> 0.0 </TruncIntervalCenter>

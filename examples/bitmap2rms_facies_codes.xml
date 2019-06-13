@@ -9,11 +9,11 @@
   <PixelInterval>
     <nx> 1152 </nx>
     <ny> 1152 </ny>
-    <I> 220 770 </I>  
-    <J> 550 1100 </J>  
+    <I> 220 770 </I>
+    <J> 550 1100 </J>
   </PixelInterval>
-  <CropToPixelInterval> 1 </CropToPixelInterval> 
-  <MissingCode> 9999900.000 </MissingCode> 
+  <CropToPixelInterval> 1 </CropToPixelInterval>
+  <MissingCode> 9999900.000 </MissingCode>
   <!-- <MissingCode> -1 </MissingCode> -->
   <UseFaciesCode> 1 </UseFaciesCode>
   <ColorCode facies="1"> 232 </ColorCode>
@@ -25,14 +25,14 @@
   <Files>
     <Input>  examples/img/bitmap/B1.bmp </Input>
     <Output> B1.irap </Output>
-  </Files> 
+  </Files>
   <Files>
     <Input>  examples/img/bitmap/B2.bmp </Input>
     <Output> B2.irap </Output>
-  </Files> 
+  </Files>
   <Files>
     <Input>  examples/img/bitmap/B3.bmp </Input>
     <Output> B3.irap </Output>
-  </Files> 
+  </Files>
 </ConvertBitmapToRMS>
 

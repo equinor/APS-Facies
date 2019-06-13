@@ -2,7 +2,7 @@
 <!-- This model specification is used in the script createProbabilityLogs.py -->
 
 <ProbLogs>
-  <GridModelName>GridModelCoarse</GridModelName>      
+  <GridModelName>GridModelCoarse</GridModelName>
   <BlockedWells> BW  </BlockedWells>
   <FaciesLogName> Facies </FaciesLogName>
   <ZoneLogName>   Zone  </ZoneLogName>
@@ -21,13 +21,13 @@
     <Line>  F3  A  0.0 </Line>
     <Line>  F4  A  0.0 </Line>
     <Line>  F5  A  0.0 </Line>
-    
+
     <Line>  F1  B  0.0 </Line>
     <Line>  F2  B  1.0 </Line>
     <Line>  F3  B  0.0 </Line>
     <Line>  F4  B  0.0 </Line>
     <Line>  F5  B  0.0 </Line>
-    
+
     <Line>  F1  C  0.0 </Line>
     <Line>  F2  C  0.0 </Line>
     <Line>  F3  C  1.0 </Line>

@@ -129,8 +129,8 @@
 
       <TruncationRule>
         <Trunc2D_Angle nGFields="2">
-	<BackGroundModel>
-	  <AlphaFields> GF10 GF12 </AlphaFields>
+    <BackGroundModel>
+      <AlphaFields> GF10 GF12 </AlphaFields>
           <UseConstTruncParam> 1 </UseConstTruncParam>
           <Facies name="F1_1">
             <Angle> 75.0 </Angle>
@@ -144,7 +144,7 @@
             <Angle> 180.0 </Angle>
             <ProbFrac> 1.0 </ProbFrac>
           </Facies>
-	</BackGroundModel>
+    </BackGroundModel>
         </Trunc2D_Angle>
       </TruncationRule>
     </Zone>
@@ -205,8 +205,8 @@
 
       <TruncationRule>
         <Trunc2D_Cubic nGFields="2">
-	<BackGroundModel>
-	  <AlphaFields> GF11 GF12 </AlphaFields>
+    <BackGroundModel>
+      <AlphaFields> GF11 GF12 </AlphaFields>
           <L1 direction="H">
             <ProbFrac name="F2_1"> 0.5 </ProbFrac>
             <ProbFrac name="F2_2"> 0.5 </ProbFrac>
@@ -215,7 +215,7 @@
               <ProbFrac name="F2_2"> 0.5 </ProbFrac>
             </L2>
           </L1>
-	</BackGroundModel>
+    </BackGroundModel>
         </Trunc2D_Cubic>
       </TruncationRule>
     </Zone>
@@ -257,8 +257,8 @@
 
       <TruncationRule>
         <Trunc2D_Cubic nGFields="2">
-	<BackGroundModel>
-	  <AlphaFields> GF10 GF11 </AlphaFields>
+    <BackGroundModel>
+      <AlphaFields> GF10 GF11 </AlphaFields>
           <L1 direction="V">
             <ProbFrac name="F1_1"> 0.7 </ProbFrac>
             <ProbFrac name="F1_3"> 0.5 </ProbFrac>
@@ -267,7 +267,7 @@
               <ProbFrac name="F1_3"> 0.5 </ProbFrac>
             </L2>
           </L1>
-	</BackGroundModel>
+    </BackGroundModel>
         </Trunc2D_Cubic>
       </TruncationRule>
     </Zone>
