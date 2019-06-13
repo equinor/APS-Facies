@@ -437,6 +437,7 @@ clean-integration: clean-workflow-blocks clean-example-link clean-matplotlibrc
 	      *.html \
 	      *.xml \
 	      *.irap \
+	      *.roff \
 	      *.dat
 
 link-example-files: clean-example-link
