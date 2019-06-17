@@ -28,6 +28,7 @@ do
     status_file="statusfile_${workflow}.dat"
     ${RMS} -project "${RMS_PROJECT}" \
            -batch "${workflow}" \
+           -debug \
            -readonly
 
     if [ ! -f "${status_file}" ]; then
