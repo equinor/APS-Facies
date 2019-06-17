@@ -151,6 +151,8 @@ deploy release candidate:
 deploy develop:
   stage: deploy
   script:
-    - "" # TODO
+    - "${MAKE} deploy"
   only:
     - develop
+  dependencies:
+    - build GUI
