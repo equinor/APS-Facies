@@ -136,11 +136,10 @@ build GUI:
 deploy release:
   stage: deploy
   script:
+    - '${MAKE} build-stable-gui'
     - '${MAKE} deploy-stable'
   only:
     - tags
-  dependencies:
-    - build GUI
 
 deploy release candidate:
   stage: deploy
