@@ -298,6 +298,7 @@ class APSGaussModel:
         grid_size: GridSize,
         grid_azimuth: float,
         cross_section: CrossSection,
+        simulation_box_origin,
     ) -> List[GaussianField]: ...
     def calc2DVariogramFrom3DVariogram(
             self,

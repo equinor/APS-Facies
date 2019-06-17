@@ -1,4 +1,4 @@
-import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
+import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 

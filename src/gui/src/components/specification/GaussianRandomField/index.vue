@@ -90,7 +90,7 @@ import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
 
-import { hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
+import { getId, hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
 
 import ItemSelection from '@/components/selection/dropdown/ItemSelection'
 import GaussianPlot from '@/components/plot/GaussianPlot'
@@ -141,8 +141,9 @@ export default {
     alphaChannel: {
       get: function () {
         if (this.rule) {
-          const item = this.rule.fields.find(item => item.field === this.grfId)
-          return item ? item.channel : null
+          /* Channel is 1-indeed */
+          const channel = 1 + this.rule.fields.findIndex(field => getId(field) === this.grfId)
+          return channel || null
         } else {
           return null
         }

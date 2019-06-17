@@ -9,9 +9,8 @@ import roxar
 
 def run(config):
     with create_temporary_model_file(config['model']) as model_file:
-        # TODO: Deal with seedLogFile.dat
         use_constant_probabilities = APSModel(model_file).use_constant_probability
         if not use_constant_probabilities:
             run_normalization(roxar, project, model_file=model_file)
-        run_simulation(roxar, project, model_file=model_file)
+        run_simulation(roxar, project, model_file=model_file, seed_log_file=None)
         run_truncation(roxar, project, model_file=model_file)

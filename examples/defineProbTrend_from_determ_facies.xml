@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<APS_prob_trend>    
+<APS_prob_trend>
   <FaciesProbTrend>
-    <GridModelName>   GridModelFine </GridModelName> 
+    <GridModelName>   GridModelFine </GridModelName>
     <ZoneParamName>  Zone </ZoneParamName>
     <FaciesParamName>  Deterministic_facies </FaciesParamName>
     <ProbParamNamePrefix>  ProbTrend2  </ProbParamNamePrefix>

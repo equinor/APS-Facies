@@ -86,7 +86,7 @@ const fileHandler = (store, fileName) => {
     const fileContent = e.target.result
     let json = null
     try {
-      json = xml2json(fileContent, { compact: true, ignoreComment: true })
+      json = xml2json(fileContent, { compact: false, ignoreComment: true })
     } catch (err) {
       alert('The file you tried to open is not valid XML and cannot be used\n'
         + 'Fix the following error before opening again:\n\n'

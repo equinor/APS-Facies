@@ -137,8 +137,8 @@ const store = new Vuex.Store({
     region: (state, getters) => {
       return state.regions.use && getters.zone ? getters.zone._regions[`${state.regions.current}`] : null
     },
-    facies: (state) => {
-      return state.facies.current
+    facies: (state, getters) => {
+      return getters['facies/byId'](state.facies.global.current)
     },
     truncationRule: (state, getters) => {
       // FIXME: This only works if there is one and ONLY one truncation rule in existence for a given zone/region

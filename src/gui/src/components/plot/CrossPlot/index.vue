@@ -36,6 +36,7 @@ export default {
           mode: 'markers',
           marker: { size: DEFAULT_POINT_SIZE },
           // TODO: Use Array.prototype.flat when possible
+          //       NOTE: Even though flat is part of ECMAScript now, RMS does not support it
           x: flatten(this.field._data),
           y: flatten(this.other._data),
         }]

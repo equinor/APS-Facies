@@ -1,19 +1,25 @@
 import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
-import Polygon from '@/utils/domain/polygon/base'
+import Polygon, { getFaciesName } from '@/utils/domain/polygon/base'
 import { Identified } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 
+interface Counts {
+  [id: string]: number
+}
+
 export function hasFaciesSpecifiedForMultiplePolygons (
   polygons: Polygon[] | Identified<Polygon>,
-  facies: Facies | GlobalFacies | null = null
+  facies: Facies | GlobalFacies | null = null,
+  ignoreEmptyFacies: boolean = true,
 ): boolean {
   if (polygons instanceof Object) polygons = Object.values(polygons)
   if (!polygons || polygons.length === 0) return false
-  const faciesCount = polygons
-    .filter(polygon => facies ? getId(polygon.facies) === getId(facies) : true)
-    .reduce((counts, { facies }) => {
+  const faciesCount: Counts = polygons
+    .filter((polygon): boolean => facies ? getId(polygon.facies) === getId(facies) : true)
+    .reduce((counts: Counts, { facies }): Counts => {
       const id = getId(facies)
+      if (ignoreEmptyFacies && !id) return counts
       counts.hasOwnProperty(id)
         ? counts[`${id}`] += 1
         : counts[`${id}`] = 1
@@ -22,6 +28,6 @@ export function hasFaciesSpecifiedForMultiplePolygons (
   return Object.values(faciesCount).some((count): boolean => count > 1)
 }
 
-export function getFaciesName (polygon: Polygon): string {
-  return polygon.facies ? polygon.facies.name : ''
+export {
+  getFaciesName,
 }

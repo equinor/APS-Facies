@@ -2,12 +2,15 @@ import CodeError from '@/utils/domain/bases/discrete/codeError'
 import { APSTypeError } from '@/utils/domain/errors'
 import { CODE, ID } from '@/utils/domain/types'
 import { isInteger } from 'lodash'
-import BaseItem, { BaseItemSerialization } from '../baseItem'
+import BaseItem, { BaseItemConfiguration, BaseItemSerialization } from '../baseItem'
 import { Discrete as IDiscrete } from '../interfaces'
 
 export interface DiscreteSerialization extends BaseItemSerialization {
   name: string
   code: number
+}
+
+export interface DiscreteConfiguration extends IDiscrete, BaseItemConfiguration {
 }
 
 export default class Discrete extends BaseItem implements IDiscrete {

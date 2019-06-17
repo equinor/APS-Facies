@@ -41,8 +41,6 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
                input_aps_model_file - Name of APS model file
                output_aps_model_file - Name of updated APS model file
     """
-    # Read model file to get workflow name
-#    workflow_name = get_workflow_name()
     print('Workflow name: {}'.format(workflow_name))
     if write_output_file_with_parameter_names:
         output_file_with_parameter_names = 'tmp_' + workflow_name + '.dat'
@@ -93,7 +91,7 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
 def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     input_aps_model_file = params['model_file']
-    debug_level = params['debug_level']
+    debug_level = APSModel(input_aps_model_file).debug_level
     workflow_name = get_workflow_name()
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
     write_output_file_with_parameter_names = False

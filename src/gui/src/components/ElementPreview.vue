@@ -10,7 +10,9 @@
         <div slot="header">
           Preview
         </div>
-        <preview-header />
+        <preview-header
+          :value="rule"
+        />
         <v-card>
           <v-layout
             v-if="!!rule"

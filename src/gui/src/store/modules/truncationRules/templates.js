@@ -33,7 +33,8 @@ const missingTemplates = (_templates, state) => {
   return templates.templates.filter((template) => names.indexOf(name(template)) === -1)
 }
 
-const addProportions = (proportions, polygons) => {
+const addProportions = (polygons) => {
+  const proportions = []
   if (isEmpty(polygons)) return proportions
   Object.values(polygons).forEach(({ facies, proportion }) => {
     proportions.push({ facies, probability: proportion || 1 })
@@ -145,7 +146,7 @@ export default {
       if (autoFill && template.overlay) {
         await Promise.all(template.overlay.items.map(item => getFaciesGroup({ rootGetters, dispatch }, item.over, parent)))
       }
-      const backgroundFields = processFields(rootGetters, rootState, template.fields, template.level)
+      const backgroundFields = processFields(rootGetters, rootState, template.fields, parent)
       const overlay = processOverlay(rootGetters, template.overlay, parent)
       let polygons = processPolygons({ rootGetters, rootState }, { type, polygons: template.polygons, settings: template.settings })
       polygons = combinePolygons(polygons, overlay)
@@ -188,10 +189,14 @@ export default {
       })
       await dispatch('truncationRules/add', rule, { root: true })
 
+      // If there are more facies than the rule uses, we should assume that the user wants to use overlay
+      if (rootGetters['facies/selected'].length > uniqueFacies.length) {
+        await dispatch('truncationRules/toggleOverlay', { rule, value: true }, { root: true })
+      }
+
       if (autoFill) {
         if (rootGetters['facies/unset']) {
-          const proportions = []
-          addProportions(proportions, rule.polygons)
+          const proportions = addProportions(rule.polygons)
           await Promise.all(normalize(proportions)
             .map(payload => dispatch('facies/updateProbability', payload, { root: true }))
           )

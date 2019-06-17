@@ -3,8 +3,8 @@
 import roxar
 import numpy as np
 import collections
-from src.utils.constants.simple import  ProbabilityTolerances, Debug
-from src.utils.roxar.grid_model import  create_zone_parameter, getDiscrete3DParameterValues
+from src.utils.constants.simple import ProbabilityTolerances, Debug
+from src.utils.roxar.grid_model import create_zone_parameter, getDiscrete3DParameterValues
 
 
 def get_facies_code(code_names, facies_name):
@@ -133,7 +133,6 @@ def createProbabilityLogs(
                         modelled_facies_not_observed.append(facies_name)
 
             prob_log_name = prefix_prob_logs + '_' + str(facies_name)
-            prob_log = None
             if prob_log_name not in probability_log_names:
                 probability_log_names.append(prob_log_name)
                 prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
@@ -276,7 +275,6 @@ def createProbabilityLogs(
 
                 if update_prob_log:
                     # This grid cell has facies that belongs to the set of facies that is to be modelled
-                    zone_number_in_log = zone_log_values[i]
                     facies_code_in_log = facies_log_values[i]
                     facies_name_in_log = code_names[facies_code_in_log]
 
@@ -369,44 +367,36 @@ def createCombinedFaciesLogForBlockedWells(
 def cell_numbers_for_blocked_wells(project, grid_model_name, bw_name):
     blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
     blocked_wells_cell_numbers = blocked_wells.get_cell_numbers()
-    for i in range(len(blocked_wells_cell_numbers)):
-        cell_number = blocked_wells_cell_numbers[i]
-    return  blocked_wells_cell_numbers
+    return blocked_wells_cell_numbers
+
 
 def get_facies_in_zone_from_blocked_wells(project, grid_model_name, bw_name, facies_log_name, zone_number,
-                                          region_param_name=None, region_number= 0, realization_number=0):
-    cell_numbers =  cell_numbers_for_blocked_wells(project, grid_model_name, bw_name)
+                                          region_param_name=None, region_number=0, realization_number=0):
+    cell_numbers = cell_numbers_for_blocked_wells(project, grid_model_name, bw_name)
     # Check if zone parameter exist. If not create it
     grid_model = project.grid_models[grid_model_name]
     zone_parameter = create_zone_parameter(grid_model, realization_number)
     zone_values = zone_parameter.get_values(realization_number)
-    zone_values_in_bw = np.zeros(len(cell_numbers), np.uint8)
     zone_values_in_bw = zone_values[cell_numbers]
     code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, facies_log_name)
     assert len(facies_log_values) == len(cell_numbers)
 
     facies_values_found = []
-    region_parameter = None
-    if region_param_name != None:
+    if region_param_name is not None:
         region_values, region_code_names = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number=realization_number)
-        region_values_in_bw = np.zeros(len(cell_numbers), np.uint8)
         region_values_in_bw = region_values[cell_numbers]
         for i in range(len(cell_numbers)):
-            indx = cell_numbers[i]
             zone_val = zone_values_in_bw[i]
             region_val = region_values_in_bw[i]
             if zone_val == zone_number and region_val == region_number:
                 facies_value = facies_log_values[i]
-#                print('cell number: {}  zone value: {}  region_number: {}  facies: {}'.format(indx, zone_val, region_val, facies_value))
                 if facies_value not in facies_values_found:
                     facies_values_found.append(facies_value)
     else:
         for i in range(len(cell_numbers)):
-            indx = cell_numbers[i]
             zone_val = zone_values_in_bw[i]
             if zone_val == zone_number:
                 facies_value = facies_log_values[i]
-#                print('cell number: {}  zone value: {}  facies: {}'.format(indx, zone_val, facies_value))
                 if facies_value not in facies_values_found:
                     facies_values_found.append(facies_value)
 

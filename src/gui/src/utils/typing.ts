@@ -4,6 +4,7 @@ import { Bayfill, Cubic, CubicPolygon, GaussianRandomField, NonCubic } from '@/u
 import { hex, isUUID } from '@/utils/helpers'
 
 type Optional<T> = T | null
+type Maybe<T> = Optional<T> | undefined
 
 // @ts-ignore
 const nullableNumber = VueTypes.oneOfType([VueTypes.number, null]).def(null)
@@ -50,6 +51,7 @@ const AppTypes = {
 
 export {
   Optional,
+  Maybe,
   updatableType,
   nullableNumber,
   AppTypes,

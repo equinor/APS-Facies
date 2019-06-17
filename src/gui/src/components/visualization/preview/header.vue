@@ -16,28 +16,39 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import IconButton from '@/components/selection/IconButton.vue'
 
-import { Store } from '@/store/typing'
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+
+import { usesAllFacies } from '@/store/utils/helpers'
 
 @Component({
   components: {
     IconButton
   },
 })
-export default class PreviewHeader extends Vue {
+export default class PreviewHeader<T extends Polygon, S extends PolygonSerialization> extends Vue {
   waitingForSimulation: boolean = false
 
-  get rule () { return (this.$store as Store).getters.truncationRule }
-  get canSimulate () { return this.rule && this.rule.ready }
+  @Prop({ required: true })
+  readonly value: TruncationRule<T, S>
+
+  get canSimulate () {
+    return (
+      this.value
+      && this.value.ready
+      && usesAllFacies({ rootGetters: this.$store.getters }, this.value)
+    )
+  }
 
   async refresh () {
     await this.$store.dispatch('facies/normalize')
     this.waitingForSimulation = true
     try {
-      await this.$store.dispatch('truncationRules/updateRealization', this.rule)
+      await this.$store.dispatch('truncationRules/updateRealization', this.value)
     } catch (e) {
       alert(e)
     } finally {

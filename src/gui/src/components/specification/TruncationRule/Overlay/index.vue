@@ -8,7 +8,7 @@
       row
       fill-height
     >
-      <h3>Overlay Facies</h3>
+      <h3>Truncation rule specification overlay facies</h3>
     </v-layout>
     <overlay-facies-table
       :value="value"

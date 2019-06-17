@@ -43,15 +43,15 @@
         <td
           v-if="hasMultipleFaciesSpecified"
         >
-          <fraction-field
-            :value="props.item.fraction"
-            :disabled="!multipleFaciesSpecified(props.item)"
-            @input="fraction => updateFactor(props.item, fraction)"
+          <polygon-fraction-field
+            :value="props.item"
+            :rule="value"
           />
         </td>
         <td>
           <polygon-order
             :value="props.item"
+            :rule="value"
           />
         </td>
       </tr>
@@ -63,6 +63,7 @@
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import FractionField from '@/components/selection/FractionField.vue'
+import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
@@ -70,11 +71,9 @@ import BackgroundFaciesSpecification from '@/components/specification/Facies/bac
 
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
-import Facies from '@/utils/domain/facies/local'
 
 import { sortByOrder } from '@/utils'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
-import { updateFactor } from '@/store/actions'
 
 @Component({
   components: {
@@ -82,6 +81,7 @@ import { updateFactor } from '@/store/actions'
     PolygonOrder,
     OptionalHelpItem,
     FractionField,
+    PolygonFractionField,
     NumericField,
   },
 })
@@ -137,16 +137,8 @@ export default class NonCubicTable extends Vue {
 
   ordering (items: NonCubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
 
-  updateFactor (item: NonCubicPolygon, value: number) {
-    return updateFactor(this.$store, this.value, item, value)
-  }
-
   updateAngle (item: NonCubicPolygon, value: number) {
     return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
-  }
-
-  multipleFaciesSpecified ({ facies }: { facies: Facies }) {
-    return hasFaciesSpecifiedForMultiplePolygons(this.value.polygons, facies)
   }
 }
 </script>

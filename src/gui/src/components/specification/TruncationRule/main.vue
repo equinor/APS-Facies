@@ -1,13 +1,13 @@
 <template>
-  <v-container column>
-    <h4>Alpha selection</h4>
+  <v-layout column>
+    <h3>Alpha selection</h3>
     <v-layout row>
       <alpha-fields
         :value="value"
         :min-fields="minFields"
       />
     </v-layout>
-    <h4>Truncation rule specification</h4>
+    <h3>Truncation rule specification background facies</h3>
     <v-layout>
       <v-flex>
         <v-layout>
@@ -20,7 +20,7 @@
         </v-layout>
       </v-flex>
     </v-layout>
-  </v-container>
+  </v-layout>
 </template>
 
 <script lang="ts">

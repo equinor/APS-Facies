@@ -14,8 +14,9 @@ import {
   isEmpty,
   makeTruncationRuleSpecification,
   notEmpty,
+  hasParents,
 } from '@/utils'
-import { getId } from '@/utils/helpers'
+import { getId, isUUID } from '@/utils/helpers'
 import { makeRule } from '@/utils/helpers/processing/templates'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
@@ -23,6 +24,7 @@ import APSTypeError from '@/utils/domain/errors/type'
 import APSError from '@/utils/domain/errors/base'
 import { makePolygonsFromSpecification, normalizeOrder } from '@/utils/helpers/processing/templates/typed'
 import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
+import { isReady } from '@/store/utils/helpers'
 
 const changePreset = (state, thing, item) => {
   Vue.set(state.preset, thing, item)
@@ -158,7 +160,7 @@ export default {
               .filter(polygon => getId(polygon.group) === getId(group)).length + 1
           ) > (Object.values(rootState.gaussianRandomFields.fields).length - rule.backgroundFields.length)
         ) {
-          field = await dispatch('gaussianRandomFields/addEmptyField', { ...rule.parent }, { root: true })
+          field = await dispatch('gaussianRandomFields/addEmptyField', rule.parent, { root: true })
         }
         polygon = new OverlayPolygon({ group, field, order })
       } else if (rule.type === 'non-cubic') {
@@ -328,7 +330,7 @@ export default {
       commit('CHANGE_FACIES', { rule, polygon, facies })
 
       if (!rootState.facies.available[`${facies.id}`].previewProbability) {
-        const probability = rule._polygons[`${polygon.id}`].proportion
+        const probability = rule._polygons[`${polygon.id}`].fraction
         await dispatch('facies/updateProbability', { facies, probability }, { root: true })
       }
       await dispatch('normalizeProportionFactors', { rule })
@@ -344,10 +346,13 @@ export default {
     updateOverlayCenter ({ commit }, { rule, polygon, value }) {
       commit('UPDATE_OVERLAY_CENTER', { rule, polygon, value })
     },
-    updateOverlayFraction ({ commit }, { rule, polygon, value }) {
-      commit('UPDATE_OVERLAY_FRACTION', { rule, polygon, value })
-    },
-    toggleOverlay ({ commit }, { rule, value }) {
+    async toggleOverlay ({ commit, dispatch, rootState }, { rule, value }) {
+      // If there are too few GRFs, add more
+      const availableFields = Object.values(rootState.gaussianRandomFields.fields)
+        .filter(field => hasParents(field, rule.parent.zone, rule.parent.region))
+      if (availableFields.length <= rule.backgroundFields.length) {
+        await dispatch('gaussianRandomFields/addEmptyField', rule.parent, { root: true })
+      }
       commit('CHANGE_OVERLAY_USAGE', { rule, value })
     },
     async normalizeProportionFactors ({ dispatch, rootGetters }, { rule }) {
@@ -416,9 +421,6 @@ export default {
     UPDATE_OVERLAY_CENTER: (state, { rule, polygon, value }) => {
       state.rules[rule.id]._polygons[polygon.id].center = value
     },
-    UPDATE_OVERLAY_FRACTION: (state, { rule, polygon, value }) => {
-      state.rules[rule.id]._polygons[polygon.id].fraction = value
-    },
     UPDATE_BACKGROUND_GROUP: (state, { rule, polygon, value }) => {
       state.rules[rule.id]._polygons[polygon.id].group = value
     },
@@ -463,12 +465,12 @@ export default {
         ? Object.values(state.rules).find(rule => hasCurrentParents(rule, rootGetters))
         : null
     },
-    ready (state) {
-      return (id) => {
-        const rule = id
-          ? state.rules[`${id}`]
-          : null
-        return !!rule && rule.ready
+    ready (state, getters, rootState, rootGetters) {
+      return (rule) => {
+        rule = isUUID(rule)
+          ? state.rules[`${getId(rule)}`]
+          : rule
+        return isReady({ rootGetters, rootState }, rule)
       }
     },
     relevant (state, getters, rootState, rootGetters) {

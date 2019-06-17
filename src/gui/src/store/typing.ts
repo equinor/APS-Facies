@@ -1,5 +1,5 @@
 import ParametersState from '@/store/modules/parameters/typing'
-import { SimulationSettings } from '@/utils'
+import { SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
@@ -71,6 +71,7 @@ interface RootState {
 }
 
 interface RootGetters {
+  'facies': GlobalFacies
   'faciesTable': Facies[]
 
   'facies/byId': (faciesId: ID) => Facies | null

@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 # This script use both nrlib and ROXAR API functions and run simulations sequentially and not in parallel
+from pathlib import Path
 
 import nrlib
 import numpy as np
@@ -151,10 +152,18 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
         )
     # End loop over all active zones in the model
 
-    with open(seed_file_log, 'a') as file:
-        file.write(
-            'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
-        )
+    if seed_file_log:
+        if isinstance(seed_file_log, str):
+            seed_file_log = Path(seed_file_log)
+        if seed_file_log.is_dir():
+            if not seed_file_log.exists():
+                from os import makedirs
+                makedirs(seed_file_log)
+            seed_file_log = seed_file_log / 'seedLogFile.dat'
+        with open(seed_file_log, 'a') as file:
+            file.write(
+                'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
+            )
     print('')
 
 

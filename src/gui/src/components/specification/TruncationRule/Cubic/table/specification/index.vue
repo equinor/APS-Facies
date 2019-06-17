@@ -1,15 +1,26 @@
 <template>
-  <v-layout column>
-    <v-layout>
-      <split-direction
-        :value="value"
-      />
-      <numeric-field
-        v-model="splitInto"
-        :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
-        label="Split into"
-        discrete
-      />
+  <v-layout
+    column
+    justify-center
+  >
+    <v-layout
+      justify-center
+      align-end
+    >
+      <v-flex>
+        <split-direction
+          :value="value"
+        />
+      </v-flex>
+      <v-flex>
+        <numeric-field
+          v-model="splitInto"
+          :ranges="{ min: 2, max: Number.POSITIVE_INFINITY }"
+          enforce-ranges
+          label="Split into"
+          discrete
+        />
+      </v-flex>
     </v-layout>
     <v-layout>
       <v-layout
@@ -36,20 +47,22 @@
         </help-icon>
       </v-layout>
     </v-layout>
-    <v-container>
+    <v-layout
+      justify-center
+    >
       <cubic-topology-specification
         v-if="value.root"
         v-model="selected"
         :rule="value"
       />
-    </v-container>
+    </v-layout>
   </v-layout>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
+import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import { getId } from '@/utils'
 
 import HelpIcon from '@/components/baseComponents/HelpIcon.vue'
@@ -107,6 +120,7 @@ export default class CubicTruncationRuleSpecification extends Vue {
     if (!this.canSplit) {
       if (!this.canSplitDeeper) return `A Cubic truncation rule may only be split into ${this.maxLevel} levels`
       if (this.selected.length > 1) return 'Only a single polygon may be split at the time'
+      if (this.selected.length === 0) return 'Click on the polygon that should be split'
     }
     return ''
   }

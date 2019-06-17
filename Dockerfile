@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.3.1" \
+LABEL version="3.3.4" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -215,7 +215,7 @@ RUN yum update -y \
     # Install pipenv
  && $PIP install --user pipenv \
     # FIXME: Backup distutils/__init__.py, as the compilation of nrlib changes it for some reason
-  && cp "/prog/roxar/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" /distutils.py.bak \
+  && cp "${RMS_PREFIX}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" /distutils.py.bak \
     # Install NRlib to dependencies collection
  && cd ${BUILD_DIR}/nrlib-${NRLIB_VERSION} \
  && MKLROOT=/opt/intel/mkl \
@@ -224,7 +224,7 @@ RUN yum update -y \
          tests \
  && mv nrlib.*.so $DEPENDENCIES_PREFIX \
  # FIXME: Restore distutils from backup
- && cp -f /distutils.py.bak "/prog/roxar/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" \
+ && cp -f /distutils.py.bak "${RMS_PREFIX}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" \
     ##
     # Final clean-up
  && rm -rf $SOURCE_DIR \

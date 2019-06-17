@@ -1,4 +1,3 @@
-import { resolve } from '@/utils'
 import { Variogram, Trend, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import {
   Bayfill,
@@ -21,55 +20,66 @@ const ensureArray = (value) => {
   }
 }
 
-const getNodeValue = (container, prop) => {
-  let value = resolve(prop, container)
+const getNodeValue = (container, prop = null) => {
+  let value = container
+  if (prop) value = container.elements.find(el => el.name === prop)
   if (typeof value === 'undefined') return null
-  if (value._text) {
-    value = value._text.trim()
+  if (value.elements.length === 1 && value.elements[0].type === 'text') {
+    value = value.elements[0].text
   }
   return value
 }
 
-const getOriginType = (elem) => {
-  return elem && elem._text
-    ? elem._text.trim().replace(/'/g, '').toUpperCase()
+const getNodeValues = (container, prop) => {
+  return container.elements
+    .filter(el => el.name === prop)
+}
+
+const getName = (container, prop = null) => {
+  if (prop) container = container.elements.find(el => el.name === prop)
+  return container.attributes.name.trim()
+}
+
+const getOriginType = (elem, prop = null) => {
+  elem = getTextValue(elem, prop)
+  return elem
+    ? elem.replace(/'/g, '').toUpperCase()
     : null
 }
 
-const isFMUUpdatable = (elem) => {
-  return !!(elem && elem._attributes && elem._attributes.kw)
+const isFMUUpdatable = (elem, prop = null) => {
+  if (prop) elem = elem.elements.find(el => el.name === prop)
+  return !!(elem && elem.attributes && elem.attributes.kw)
 }
 
-const getNumericValue = (elem) => {
-  if (elem && elem._text) {
-    return Number(elem._text.trim())
+const getNumericValue = (elem, prop = null) => {
+  const text = getTextValue(elem, prop)
+  if (text) {
+    return Number(text)
   }
   return null
 }
 
-const getTextValue = (elem) => {
-  if (elem && elem._text) {
-    return elem._text.trim()
+const getTextValue = (elem, prop = null) => {
+  elem = getNodeValue(elem, prop)
+  if (elem) {
+    return elem.trim()
   }
   return null
 }
 
-const getBooleanValue = (elem) => {
-  if (elem && elem._text) {
-    return Boolean(Number(elem._text.trim()))
+const getBooleanValue = (elem, prop = null) => {
+  elem = getNumericValue(elem, prop)
+  if (elem || elem === 0) {
+    return Boolean(elem)
   }
   return null
 }
 
-const getStackingDirection = (elem) => {
-  if (elem && elem._text) {
-    if (elem._text.trim() === '1') {
-      return 'PROGRADING'
-    }
-    if (elem._text.trim() === '-1') {
-      return 'RETROGRADING'
-    }
-  }
+const getStackingDirection = (elem, prop = null) => {
+  elem = getTextValue(elem, prop)
+  if (elem === '1') { return 'PROGRADING' }
+  if (elem === '-1') { return 'RETROGRADING' }
   return null
 }
 
@@ -77,17 +87,12 @@ const handleError = (reason) => {
   alert(reason)
 }
 
-function getParent ({ rootState }, zoneModel) {
-  const zone = Object.values(rootState.zones.available).find(zone => zone.code === parseInt(zoneModel._attributes.number))
-  let region = null
-  if (zoneModel._attributes.regionNumber) {
-    region = Object.values(zone.regions)
-      .find(region => region.code === parseInt(zoneModel._attributes.regionNumber))
-  }
-  return {
-    zone,
-    region,
-  }
+function getParent ({ rootGetters }, zoneModel) {
+  const zoneNumber = parseInt(zoneModel.attributes.number)
+  const regionNumber = zoneModel.attributes.regionNumber
+    ? parseInt(zoneModel.attributes.regionNumber)
+    : null
+  return rootGetters['zones/byCode'](zoneNumber, regionNumber)
 }
 
 function getFacies ({ rootState }, name, parent) {
@@ -97,7 +102,7 @@ function getFacies ({ rootState }, name, parent) {
 }
 
 function getBackgroundFacies ({ rootState }, container, parent) {
-  const over = ensureArray(container.BackGround)
+  const over = getNodeValues(container, 'BackGround')
 
   return over.map(el => getFacies({ rootState }, getTextValue(el), parent))
 }
@@ -108,7 +113,7 @@ function getFaciesFromBayfill ({ rootState }, container, item, parent) {
     'Wave influenced Bayfill': 'WBF',
   }
   if (item in mappig) item = mappig[`${item}`]
-  const name = getTextValue(container.BackGroundModel[item])
+  const name = getTextValue(getNodeValue(container, 'BackGroundModel'), item)
   return getFacies({ rootState }, name, parent)
 }
 
@@ -118,11 +123,11 @@ function getSlantFactor (container, item) {
     'Subbay': 'YSF',
     'Bayhead Delta': 'SBHD',
   }
-  const element = container.BackGroundModel
+  const element = getNodeValue(container, 'BackGroundModel')
   return item in mapping
     ? new FmuUpdatableValue({
-      value: getNumericValue(element[mapping[`${item}`]]),
-      updatable: isFMUUpdatable(element[mapping[`${item}`]])
+      value: getNumericValue(element, mapping[`${item}`]),
+      updatable: isFMUUpdatable(element, mapping[`${item}`])
     })
     : null
 }
@@ -134,8 +139,12 @@ function getAlphaField ({ rootState }, name, parent) {
 }
 
 function getAlphaFields ({ rootState }, container, parent) {
-  const alphafields = getTextValue(container.BackGroundModel.AlphaFields)
-  return alphafields.split(' ').map(name => getAlphaField({ rootState }, name, parent))
+  const alphaFields = getTextValue(getNodeValue(container, 'BackGroundModel'), 'AlphaFields')
+  return alphaFields.split(' ').map(name => getAlphaField({ rootState }, name, parent))
+}
+
+function getDirection (container) {
+  return getNodeValue(getNodeValue(container, 'BackGroundModel'), 'L1').attributes.direction
 }
 
 function makeBayfillTruncationRule ({ rootState }, container, parent) {
@@ -168,10 +177,10 @@ function makeBayfillTruncationRule ({ rootState }, container, parent) {
 function getOverlayPolygon ({ rootState }, backgroundFacies, container, order, parent) {
   return new OverlayPolygon({
     group: backgroundFacies,
-    center: getNumericValue(container.TruncIntervalCenter),
-    field: getAlphaField({ rootState }, container._attributes.name, parent),
-    fraction: getNumericValue(container.ProbFrac),
-    facies: getFacies({ rootState }, container.ProbFrac._attributes.name, parent),
+    center: getNumericValue(container, 'TruncIntervalCenter'),
+    field: getAlphaField({ rootState }, container.attributes.name, parent),
+    fraction: getNumericValue(container, 'ProbFrac'),
+    facies: getFacies({ rootState }, getName(container, 'ProbFrac'), parent),
     order,
   })
 }
@@ -182,14 +191,14 @@ async function getOverlayPolygons ({ rootState, dispatch }, group, parent, offse
     parent,
   }, { root: true })
   const _getOverlayPolygon = (el, index = 0) => getOverlayPolygon({ rootState }, backgroundFacies, el, offset + index + 1, parent)
-  const polygons = ensureArray(group.AlphaField)
+  const polygons = ensureArray(getNodeValues(group, 'AlphaField'))
   return polygons.map(_getOverlayPolygon)
 }
 
 async function makeOverlayPolygons ({ dispatch, rootState }, container, parent, offset = 0) {
   const overlayPolygons = []
-  if (container.OverLayModel) {
-    const groups = ensureArray(container.OverLayModel.Group)
+  if (hasElement(container, 'OverLayModel')) {
+    const groups = ensureArray(getNodeValues(getNodeValue(container, 'OverLayModel'), 'Group'))
     for (const group of groups) {
       const polygons = await getOverlayPolygons({ dispatch, rootState }, group, parent, overlayPolygons.length + offset)
       overlayPolygons.push(...polygons)
@@ -200,7 +209,7 @@ async function makeOverlayPolygons ({ dispatch, rootState }, container, parent, 
 
 async function makeOverlayTruncationRule ({ rootState, dispatch }, container, parent, makeBackgroundPolygons, _class, extra = {}) {
   const backgroundFields = getAlphaFields({ rootState }, container, parent)
-  const backgroundPolygons = makeBackgroundPolygons(container.BackGroundModel)
+  const backgroundPolygons = makeBackgroundPolygons(getNodeValue(container, 'BackGroundModel'))
 
   const overlayPolygons = await makeOverlayPolygons({ dispatch, rootState }, container, parent, backgroundPolygons.length)
   const polygons = [...backgroundPolygons, ...overlayPolygons]
@@ -217,10 +226,10 @@ async function makeOverlayTruncationRule ({ rootState, dispatch }, container, pa
 
 async function makeNonCubicTruncationRule ({ rootState, dispatch }, container, parent) {
   function makeNonCubicBackgroundFacies (container) {
-    return container.Facies.map((element, index) => new NonCubicPolygon({
-      angle: getNumericValue(element.Angle),
-      fraction: getNumericValue(element.ProbFrac),
-      facies: getFacies({ rootState }, element._attributes.name, parent),
+    return getNodeValues(container, 'Facies').map((element, index) => new NonCubicPolygon({
+      angle: getNumericValue(element, 'Angle'),
+      fraction: getNumericValue(element, 'ProbFrac'),
+      facies: getFacies({ rootState }, getName(element), parent),
       order: index + 1,
     }))
   }
@@ -239,37 +248,30 @@ async function makeCubicTruncationRule ({ rootState, dispatch }, container, pare
     return new CubicPolygon({
       parent: root,
       fraction: getNumericValue(element),
-      facies: getFacies({ rootState }, element._attributes.name, parent),
+      facies: getFacies({ rootState }, getName(element), parent),
       order,
     })
   }
-  function getChildren (container, root, level) {
+  function getChildren (container, root) {
     const polygons = []
     let order = 1
+
+    if (!root && hasElement(container, 'L1')) {
+      container = getNodeValue(container, 'L1')
+      root = new CubicPolygon({ parent: root, order: -1 })
+    }
+    if (root) polygons.push(root)
+
     if (!container) return polygons
-    else if (Array.isArray(container)) {
-      container.forEach(element => {
-        polygons.push(...getChildren(element, new CubicPolygon({ parent: root, order }), level + 1))
-        order += 1
-      })
-    } else if (container.ProbFrac) {
-      if (Array.isArray(container.ProbFrac)) {
-        container.ProbFrac.forEach(element => {
-          polygons.push(getPolygon(element, order, root, parent))
-          order += 1
-        })
-      } else {
-        polygons.push(getPolygon(container.ProbFrac, order, root, parent))
+    for (const element of container.elements) {
+      if (element.name === 'ProbFrac') {
+        polygons.push(getPolygon(element, order, root, parent))
+      } else if (/L[0-9]+/.exec(element.name)) {
+        polygons.push(...getChildren(element, new CubicPolygon({ parent: root, order })))
       }
+      order += 1
     }
-    if (root) {
-      polygons.push(root)
-    }
-    container = container[`L${level}`]
-    if (container) {
-      root = new CubicPolygon({ parent: root, order })
-    }
-    return polygons.concat(getChildren(container, root, level + 1))
+    return polygons
   }
 
   /* eslint-disable-next-line no-return-await */
@@ -277,12 +279,98 @@ async function makeCubicTruncationRule ({ rootState, dispatch }, container, pare
     { rootState, dispatch },
     container,
     parent,
-    container => getChildren(container, null, 1),
+    container => getChildren(container, null),
     Cubic,
     {
-      direction: container.BackGroundModel.L1._attributes.direction,
+      direction: getDirection(container),
     }
   )
+}
+
+function getTrend (gaussFieldFromFile) {
+  const container = getNodeValue(gaussFieldFromFile, 'Trend')
+  if (!container) return null
+
+  let type = null
+  let trendContainer = null
+  const types = [
+    { name: 'LINEAR', prop: 'Linear3D' },
+    { name: 'ELLIPTIC', prop: 'Elliptic3D' },
+    { name: 'ELLIPTIC_CONE', prop: 'EllipticCone3D' },
+    { name: 'HYPERBOLIC', prop: 'Hyperbolic3D' },
+    { name: 'RMS_PARAM', prop: 'RMSParameter' },
+  ]
+  for (const { name, prop } of types) {
+    if (hasElement(container, prop)) {
+      type = name
+      trendContainer = getNodeValue(container, prop)
+      break
+    }
+  }
+
+  return new Trend({
+    use: true,
+    type: type,
+    azimuth: getNumericValue(trendContainer, 'azimuth'),
+    azimuthUpdatable: isFMUUpdatable(trendContainer, 'azimuth'),
+    stackAngle: getNumericValue(trendContainer, 'stackAngle'),
+    stackAngleUpdatable: isFMUUpdatable(trendContainer, 'stackAngle'),
+    migrationAngle: getNumericValue(trendContainer, 'migrationAngle'),
+    migrationAngleUpdatable: isFMUUpdatable(trendContainer, 'migrationAngle'),
+    stackingDirection: getStackingDirection(trendContainer, 'directionStacking'),
+    parameter: getTextValue(trendContainer, 'TrendParamName'),
+    curvature: getNumericValue(trendContainer, 'curvature'),
+    curvatureUpdatable: isFMUUpdatable(trendContainer, 'curvature'),
+    originX: getNumericValue(trendContainer, 'origin_x'),
+    originXUpdatable: isFMUUpdatable(trendContainer, 'origin_x'),
+    originY: getNumericValue(trendContainer, 'origin_y'),
+    originYUpdatable: isFMUUpdatable(trendContainer, 'origin_y'),
+    originZ: getNumericValue(trendContainer, 'origin_z_simbox'),
+    originZUpdatable: isFMUUpdatable(trendContainer, 'origin_z_simbox'),
+    originType: getOriginType(trendContainer, 'origintype'),
+    relativeSize: getNumericValue(trendContainer, 'relativeSize'),
+    relativeSizeUpdatable: isFMUUpdatable(trendContainer, 'relativeSize'),
+    relativeStdDev: getNumericValue(gaussFieldFromFile, 'RelStdDev'),
+    relativeStdDevUpdatable: isFMUUpdatable(gaussFieldFromFile, 'RelStdDev'),
+  })
+}
+
+function getVariogram (gaussFieldFromFile) {
+  const container = getNodeValue(gaussFieldFromFile, 'Vario')
+  const type = getName(container)
+  return new Variogram({
+    type,
+    // Angles
+    azimuth: getNumericValue(container, 'AzimuthAngle'),
+    azimuthUpdatable: isFMUUpdatable(container, 'AzimuthAngle'),
+    dip: getNumericValue(container, 'DipAngle'),
+    dipUpdatable: isFMUUpdatable(container, 'DipAngle'),
+    // Ranges
+    main: getNumericValue(container, 'MainRange'),
+    mainUpdatable: isFMUUpdatable(container, 'MainRange'),
+    perpendicular: getNumericValue(container, 'PerpRange'),
+    perpendicularUpdatable: isFMUUpdatable(container, 'PerpRange'),
+    vertical: getNumericValue(container, 'VertRange'),
+    verticalUpdatable: isFMUUpdatable(container, 'VertRange'),
+    power: type === 'GENERAL_EXPONENTIAL'
+      ? getNumericValue(container, 'Power')
+      : null,
+    powerUpdatable: type === 'GENERAL_EXPONENTIAL'
+      && isFMUUpdatable(container, 'Power')
+  })
+}
+
+async function getCrossSection ({ dispatch }, parent) {
+  const crossSection = await dispatch('gaussianRandomFields/crossSections/fetch', parent, { root: true })
+  return crossSection
+}
+
+function hasElement (container, property) {
+  const naive = container[`${property}`]
+  if (typeof naive === 'undefined' && container.hasOwnProperty('elements')) {
+    return !!container.elements.find(el => el.name === property)
+  }
+  return !!naive
 }
 
 export default {
@@ -302,7 +390,7 @@ export default {
      * @returns {Promise<void>}
      */
     populateGUI: async ({ dispatch, commit }, { json, fileName }) => {
-      const apsModelContainer = JSON.parse(json).APSModel
+      const apsModelContainer = getNodeValue(JSON.parse(json), 'APSModel')
 
       await dispatch('parameters/names/model/select', fileName, { root: true })
 
@@ -317,14 +405,14 @@ export default {
       ]
       try {
         for (const { action, property, check } of actions) {
-          if (check ? apsModelContainer[`${property}`] : true) {
-            await dispatch(action, getNodeValue(apsModelContainer, property), { root: true })
+          if (check ? hasElement(apsModelContainer, property) : true) {
+            await dispatch(action, getTextValue(apsModelContainer, property), { root: true })
           }
         }
 
-        const apsModels = ensureArray(apsModelContainer.ZoneModels.Zone)
+        const apsModels = getNodeValues(getNodeValue(apsModelContainer, 'ZoneModels'), 'Zone')
 
-        await dispatch('populateGlobalFaciesList', apsModelContainer.MainFaciesTable)
+        await dispatch('populateGlobalFaciesList', getNodeValue(apsModelContainer, 'MainFaciesTable'))
 
         const localActions = [
           'populateGaussianRandomFields',
@@ -354,13 +442,13 @@ export default {
      * @returns {Promise<void>}
      */
     populateGlobalFaciesList: async ({ dispatch, rootState }, mainFaciesTableFromFile) => {
-      await dispatch('parameters/blockedWell/select', mainFaciesTableFromFile._attributes.blockedWell, { root: true })
-      await dispatch('parameters/blockedWellLog/select', mainFaciesTableFromFile._attributes.blockedWellLog, { root: true })
+      await dispatch('parameters/blockedWell/select', mainFaciesTableFromFile.attributes.blockedWell, { root: true })
+      await dispatch('parameters/blockedWellLog/select', mainFaciesTableFromFile.attributes.blockedWellLog, { root: true })
 
-      for (const faciesItemFromFile of mainFaciesTableFromFile.Facies) {
+      for (const faciesContainer of getNodeValues(mainFaciesTableFromFile, 'Facies')) {
         // facies information from the file.
-        const name = faciesItemFromFile._attributes.name.trim()
-        const code = parseInt(faciesItemFromFile.Code._text.trim())
+        const name = getName(faciesContainer)
+        const code = getNumericValue(faciesContainer, 'Code')
 
         // corresponding facies from project
         const facies = Object.values(rootState.facies.global.available)
@@ -392,8 +480,8 @@ export default {
       // This map is then used when selecting zones and regions later
       const zoneRegionsMap = new Map()
       zoneModelsFromFile.forEach(zoneModel => {
-        const zoneNumber = parseInt(zoneModel._attributes.number, 10)
-        const regionNumber = zoneModel._attributes.regionNumber
+        const zoneNumber = parseInt(zoneModel.attributes.number, 10)
+        const regionNumber = zoneModel.attributes.regionNumber
         if (!zoneRegionsMap.has(zoneNumber)) {
           zoneRegionsMap.set(zoneNumber, [])
         }
@@ -473,113 +561,31 @@ export default {
      * @param zoneModelsFromFile
      * @returns {Promise<void>}
      */
-    populateGaussianRandomFields: async ({ dispatch, rootState }, zoneModelsFromFile) => {
-      zoneModelsFromFile.forEach(zoneModel => {
-        const zoneNumber = parseInt(zoneModel._attributes.number)
-        let regionNumber = parseInt(zoneModel._attributes.regionNumber)
-        if (isNaN(regionNumber)) regionNumber = null
+    populateGaussianRandomFields: async ({ dispatch, rootGetters }, zoneModelsFromFile) => {
+      for (const zoneModel of zoneModelsFromFile) {
+        const parent = getParent({ rootGetters }, zoneModel)
 
-        // The corresponding zone and region number in the internal data structures
-        const zone = Object.values(rootState.zones.available)
-          .find(zone => zone.code === zoneNumber)
-        const regionsForZone = zone.regions
-        const region = Object.values(regionsForZone)
-          .find(region => region.code === regionNumber)
-
-        zoneModel.GaussField.forEach(async gaussFieldFromFile => {
-          let trend = null
-
-          if (gaussFieldFromFile.Trend) {
-            let type = null
-            let trendContainer = null
-            if (gaussFieldFromFile.Trend.Linear3D) {
-              type = 'LINEAR'
-              trendContainer = gaussFieldFromFile.Trend.Linear3D
-            } else if (gaussFieldFromFile.Trend.Elliptic3D) {
-              type = 'ELLIPTIC'
-              trendContainer = gaussFieldFromFile.Trend.Elliptic3D
-            } else if (gaussFieldFromFile.Trend.EllipticCone3D) {
-              type = 'ELLIPTIC_CONE'
-              trendContainer = gaussFieldFromFile.Trend.EllipticCone3D
-            } else if (gaussFieldFromFile.Trend.Hyperbolic3D) {
-              type = 'HYPERBOLIC'
-              trendContainer = gaussFieldFromFile.Trend.Hyperbolic3D
-            } else if (gaussFieldFromFile.Trend.RMSParameter) {
-              type = 'RMS_PARAM'
-              trendContainer = gaussFieldFromFile.Trend.RMSParameter
-            }
-
-            trend = new Trend({
-              use: true,
-              type: type,
-              azimuth: getNumericValue(trendContainer.azimuth),
-              azimuthUpdatable: isFMUUpdatable(trendContainer.azimuth),
-              stackAngle: getNumericValue(trendContainer.stackAngle),
-              stackAngleUpdatable: isFMUUpdatable(trendContainer.stackAngle),
-              migrationAngle: getNumericValue(trendContainer.migrationAngle),
-              migrationAngleUpdatable: isFMUUpdatable(trendContainer.migrationAngle),
-              stackingDirection: getStackingDirection(trendContainer.directionStacking),
-              // TODO. Load parameters
-              parameter: null,
-              curvature: getNumericValue(trendContainer.curvature),
-              curvatureUpdatable: isFMUUpdatable(trendContainer.curvature),
-              originX: getNumericValue(trendContainer.origin_x),
-              originXUpdatable: isFMUUpdatable(trendContainer.origin_x),
-              originY: getNumericValue(trendContainer.origin_y),
-              originYUpdatable: isFMUUpdatable(trendContainer.origin_y),
-              originZ: getNumericValue(trendContainer.origin_z_simbox),
-              originZUpdatable: isFMUUpdatable(trendContainer.origin_z_simbox),
-              originType: getOriginType(trendContainer.origintype),
-              relativeSize: getNumericValue(trendContainer.relativeSize),
-              relativeSizeUpdateble: isFMUUpdatable(trendContainer.relativeSize),
-              relativeStdDev: getNumericValue(gaussFieldFromFile.RelStdDev),
-              relativeStdDevUpdatable: isFMUUpdatable(gaussFieldFromFile.RelStdDev)
-            })
-          }
-
-          const vario = new Variogram({
-            type: gaussFieldFromFile.Vario._attributes.name.trim(),
-            // Angles
-            azimuth: getNumericValue(gaussFieldFromFile.Vario.AzimuthAngle),
-            azimuthUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.AzimuthAngle),
-            dip: getNumericValue(gaussFieldFromFile.Vario.DipAngle),
-            dipUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.DipAngle),
-            // Ranges
-            main: getNumericValue(gaussFieldFromFile.Vario.MainRange),
-            mainUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.MainRange),
-            perpendicular: getNumericValue(gaussFieldFromFile.Vario.PerpRange),
-            perpendicularUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.PerpRange),
-            vertical: getNumericValue(gaussFieldFromFile.Vario.VertRange),
-            verticalUpdatable: isFMUUpdatable(gaussFieldFromFile.Vario.VertRange),
-            power: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
-              ? getNumericValue(gaussFieldFromFile.Vario.Power)
-              : null,
-            powerUpdatable: gaussFieldFromFile.Vario._attributes.name === 'GENERAL_EXPONENTIAL'
-              && isFMUUpdatable(gaussFieldFromFile.Vario.Power)
-          })
-
+        for (const gaussFieldFromFile of getNodeValues(zoneModel, 'GaussField')) {
           await dispatch('gaussianRandomFields/addField',
-            {
-              field: new GaussianRandomField({
-                name: gaussFieldFromFile._attributes.name,
-                variogram: vario,
-                trend: trend,
-                crossSection: await dispatch('gaussianRandomFields/crossSections/fetch', { zone: zone, region: region }, { root: true }),
-                zone: zone,
-                region: region,
-              })
-            },
+            new GaussianRandomField({
+              name: gaussFieldFromFile.attributes.name,
+              variogram: getVariogram(gaussFieldFromFile),
+              trend: getTrend(gaussFieldFromFile),
+              crossSection: await getCrossSection({ dispatch }, parent),
+              seed: hasElement(gaussFieldFromFile, 'SeedForPreview') ? getNumericValue(gaussFieldFromFile, 'SeedForPreview') : null,
+              parent,
+            }),
             { root: true }
           )
-        })
-      })
+        }
+      }
     },
 
     /**
-     * Sets the facies probability for facies in zone. If the file spesifies probcubes, the method sets the
-     * probablity to 1/number of fields in order to have the truncation rule visible after load
+     * Sets the facies probability for facies in zone. If the file specifies probCubes, the method sets the
+     * probability to 1/number of fields in order to have the truncation rule visible after load
      * Note:
-     * This will have to be updated in order to set correct selecton based on zone/region.
+     * This will have to be updated in order to set correct selection based on zone/region.
      * as it is now it just updates the facies over and over again for each zone/region combo
      *
      * @param dispatch
@@ -587,79 +593,58 @@ export default {
      * @param zoneModelsFromFile
      * @returns {Promise<void>}
      */
-    populateFaciesProbabilities: async ({ dispatch, rootState }, zoneModelsFromFile) => {
+    populateFaciesProbabilities: async ({ dispatch, rootState, rootGetters }, zoneModelsFromFile) => {
       for (const zoneModel of zoneModelsFromFile) {
-        const useConstantProb = getBooleanValue(zoneModel.UseConstProb)
-        const parent = getParent({ rootState }, zoneModel)
+        const useConstantProb = getBooleanValue(zoneModel, 'UseConstProb')
+        const parent = getParent({ rootGetters }, zoneModel)
         // TODO: handle SimBoxThickness (must await implementation from Sindre on this?)
-        const probCubes = []
-        for (const faciesModel of zoneModel.FaciesProbForModel.Facies) {
+        for (const faciesModel of getNodeValues(getNodeValue(zoneModel, 'FaciesProbForModel'), 'Facies')) {
           const facies = await dispatch('facies/add', {
-            facies: /* global */ Object.values(rootState.facies.global.available).find(obj => obj.name === faciesModel._attributes.name),
+            facies: /* global */ Object.values(rootState.facies.global.available).find(obj => obj.name === getName(faciesModel)),
             parent,
           }, { root: true })
           await dispatch('facies/setConstantProbability', { parentId: facies.parentId, toggled: useConstantProb }, { root: true })
           if (useConstantProb) {
             await dispatch('facies/updateProbability', {
               facies,
-              probability: getNumericValue(faciesModel.ProbCube)
+              probability: getNumericValue(faciesModel, 'ProbCube')
             }, { root: true })
           } else {
-            const probabilityCube = faciesModel.ProbCube._text.trim()
-            probCubes.push(probabilityCube)
+            const probabilityCube = getTextValue(faciesModel, 'ProbCube')
             await dispatch('facies/changeProbabilityCube', { facies, probabilityCube }, { root: true })
           }
         }
-        // hack to set value of preview probability of probCubes to 1/nr of probcubes to have the preview of the truncation rule load immediately
-        // user can always push Average button and get the actual values from project.
         if (!useConstantProb) {
-          await dispatch('facies/updateProbabilities', {
-            probabilityCubes: probCubes.reduce((obj, name) => {
-              obj[`${name}`] = 1 / probCubes.length
-              return obj
-            }, {})
-          }, { root: true })
+          await dispatch('facies/averageProbabilityCubes', { zoneNumber: parent.zone.code, useRegions: !!parent.region, regionNumber: parent.region && parent.region.code }, { root: true })
         }
       }
     },
 
     /**
-     * Sets up Truncation Rules and connects them to fields as specified in the modelfile.
+     * Sets up Truncation Rules and connects them to fields as specified in the model file.
      * @param dispatch
      * @param rootState
      * @param rootGetters
      * @param zoneModelsFromFile
      * @returns {Promise<void>}
      */
-    populateTruncationRules: async ({ dispatch, commit, rootState }, zoneModelsFromFile) => {
+    populateTruncationRules: async ({ dispatch, commit, rootState, rootGetters }, zoneModelsFromFile) => {
       for (const zoneModel of zoneModelsFromFile) {
-        const zoneNumber = parseInt(zoneModel._attributes.number)
-        let regionNumber = parseInt(zoneModel._attributes.regionNumber)
-        if (isNaN(regionNumber)) regionNumber = null
+        const parent = getParent({ rootGetters }, zoneModel)
 
-        const zone = Object.values(rootState.zones.available)
-          .find(zone => zone.code === zoneNumber)
-        const regionsForZone = rootState.zones.available[`${zone.id}`].regions
-        const region = Object.values(regionsForZone)
-          .find(region => region.code === regionNumber) || null
-
-        const parent = {
-          zone,
-          region,
-        }
-        if (zoneModel.TruncationRule) {
-          let truncationRuleContainer = zoneModel.TruncationRule
+        if (hasElement(zoneModel, 'TruncationRule')) {
+          const truncationRuleContainer = getNodeValue(zoneModel, 'TruncationRule')
           let type = ''
           let rule = null
-          if (truncationRuleContainer.Trunc3D_Bayfill) {
+          if (hasElement(truncationRuleContainer, 'Trunc3D_Bayfill')) {
             type = 'Bayfill'
-            rule = makeBayfillTruncationRule({ rootState }, truncationRuleContainer.Trunc3D_Bayfill, parent)
-          } else if (truncationRuleContainer.Trunc2D_Angle) {
+            rule = makeBayfillTruncationRule({ rootState }, getNodeValue(truncationRuleContainer, 'Trunc3D_Bayfill'), parent)
+          } else if (hasElement(truncationRuleContainer, 'Trunc2D_Angle')) {
             type = 'Non-Cubic'
-            rule = await makeNonCubicTruncationRule({ dispatch, rootState }, truncationRuleContainer.Trunc2D_Angle, parent)
+            rule = await makeNonCubicTruncationRule({ dispatch, rootState }, getNodeValue(truncationRuleContainer, 'Trunc2D_Angle'), parent)
           } else {
-            rule = await makeCubicTruncationRule({ dispatch, rootState }, truncationRuleContainer.Trunc2D_Cubic, parent)
             type = 'Cubic'
+            rule = await makeCubicTruncationRule({ dispatch, rootState }, getNodeValue(truncationRuleContainer, 'Trunc2D_Cubic'), parent)
           }
           if (rule) {
             // now we should have everything needed to add the truncationRule.

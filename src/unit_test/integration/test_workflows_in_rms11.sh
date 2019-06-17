@@ -14,8 +14,6 @@ fi
 
 # Example_APS
 # The rest can be check manually, dvs
-#   Test_Update_FMU_parameters
-#   Test_APS_uncertainty_workflow
 #   Example_APS_workflow_multi_process
 
 for workflow in "Example_APS_Coarse_unconditioned" \
@@ -30,8 +28,8 @@ do
     status_file="statusfile_${workflow}.dat"
     ${RMS} -project "${RMS_PROJECT}" \
            -batch "${workflow}" \
+           -debug \
            -readonly
-           # TODO: Add '-readonly'?
 
     if [ ! -f "${status_file}" ]; then
         echo "The workflow (${workflow}) did not complete. Exiting"

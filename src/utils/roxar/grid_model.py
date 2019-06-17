@@ -364,9 +364,9 @@ def modifySelectedGridCells(grid_model, zone_number_list, realization_number, ol
     return old_values
 
 
-def update_code_names(old_code_names, new_code_names):
-    code_val_list = new_code_names.keys()
-    for code in code_val_list:
+def update_code_names(property, new_code_names):
+    old_code_names = property.code_names
+    for code in new_code_names.keys():
         if code not in old_code_names:
             # New code
             u = new_code_names.get(code)

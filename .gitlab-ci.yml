@@ -1,5 +1,5 @@
 image:
-  name: "git.equinor.com:4567/aps/gui/aps-gui:3.3.1"
+  name: "git.equinor.com:4567/aps/gui/aps-gui:3.3.4"
 
 variables:
   GIT_STRATEGY:           "fetch"
@@ -82,6 +82,11 @@ outdated (Node) dependencies:
     - 'eval $MAKE check-node-dependencies'
   allow_failure: true
 
+circular dependencies:
+  stage: check dependencies
+  script:
+    - 'eval $MAKE find-circular-dependencies'
+
 linting (Python):
   stage: testing
   script:
@@ -123,20 +128,18 @@ build GUI:
   stage: build gui
   script:
     - 'eval $MAKE build-gui'
-    - 'mv $CODE_DIR/build $CODE_DIR/plugin'
   artifacts:
     expire_in: 1 month
     paths:
-      - plugin/
+      - '*.plugin'
 
 deploy release:
   stage: deploy
   script:
+    - '${MAKE} build-stable-gui'
     - '${MAKE} deploy-stable'
   only:
     - tags
-  dependencies:
-    - build GUI
 
 deploy release candidate:
   stage: deploy
@@ -148,6 +151,8 @@ deploy release candidate:
 deploy develop:
   stage: deploy
   script:
-    - "" # TODO
+    - "${MAKE} deploy"
   only:
     - develop
+  dependencies:
+    - build GUI

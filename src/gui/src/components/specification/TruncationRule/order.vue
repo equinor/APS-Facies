@@ -11,12 +11,13 @@
 </template>
 
 <script lang="ts">
-import { Store } from '@/store/typing'
 import { Component, Prop, Vue } from 'vue-property-decorator'
+
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import {
   OverlayPolygon,
-  Polygon,
 } from '@/utils/domain'
 
 import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
@@ -26,14 +27,16 @@ import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
     BasePolygonOrder,
   },
 })
-export default class PolygonOrder<T extends Polygon> extends Vue {
+export default class PolygonOrder<T extends Polygon, S extends PolygonSerialization> extends Vue {
   @Prop({ required: true })
   readonly value!: T
 
-  @Prop({ default: false })
+  @Prop({ required: true })
+  readonly rule!: TruncationRule<T, S>
+
+  @Prop({ default: false, type: Boolean })
   readonly overlay: boolean
 
-  get rule () { return (this.$store as Store).getters['truncationRule'] }
   get max () {
     return (this.rule.polygons as Polygon[])
       .filter(polygon => polygon.overlay === this.overlay)
@@ -41,7 +44,11 @@ export default class PolygonOrder<T extends Polygon> extends Vue {
       .reduce((max, order) => order > max ? order : max, 0)
   }
   get min (): number {
-    return 0
+    return Math.min(
+      ...this.rule.polygons
+        .filter(polygon => polygon.overlay === this.overlay)
+        .map(({ order }) => order)
+    )
   }
   get canIncrease () {
     return this.value.order < this.max

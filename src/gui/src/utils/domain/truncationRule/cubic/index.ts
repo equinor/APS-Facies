@@ -1,4 +1,4 @@
-import { DEFAULT_CUBIC_LEVELS } from '@/config.json'
+import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import CubicPolygon, { CubicPolygonSerialization, CubicPolygonSpecification } from '@/utils/domain/polygon/cubic'
 import Direction, { Orientation, OrientationString } from '@/utils/domain/truncationRule/cubic/direction'
 import OverlayTruncationRule, {
