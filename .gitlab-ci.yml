@@ -128,11 +128,10 @@ build GUI:
   stage: build gui
   script:
     - 'eval $MAKE build-gui'
-    - 'mv $CODE_DIR/build $CODE_DIR/plugin'
   artifacts:
     expire_in: 1 month
     paths:
-      - plugin/
+      - '*.plugin'
 
 deploy release:
   stage: deploy
