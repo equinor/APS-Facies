@@ -136,8 +136,8 @@ build GUI:
 deploy release:
   stage: deploy
   script:
-    - '${MAKE} build-stable-gui'
-    - '${MAKE} deploy-stable'
+    - 'eval $MAKE build-stable-gui'
+    - 'eval $MAKE deploy-stable'
   only:
     - tags
 
@@ -151,7 +151,7 @@ deploy release candidate:
 deploy develop:
   stage: deploy
   script:
-    - "${MAKE} deploy"
+    - 'eval $MAKE deploy'
   only:
     - develop
   dependencies:
