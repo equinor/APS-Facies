@@ -122,18 +122,12 @@ REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -e 's/^from src/from .static.py/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI/releases
-SERVERS := \
-        tr-linrgsn019.tr.statoil.no \
-#        st-linrgs236.st.statoil.no \
-#        be-linrgsn097.be.statoil.no \
-#        hou-linrgsn034.hou.statoil.no \
-#        rio-linrgsn003.rio.statoil.no \
-#        cal-linrgsn009.cal.statoil.no \
-#        stjohn-linrgs006.stjohn.statoil.no \
-#        ha-linrgsn050.ha.statoil.no \
-#        st-lcmtop01.st.statoil.no \
-#        hou-lcctop01.hou.statoil.no \
-#        ffs01.hou.statoil.no \
+DEPLOY_SERVER ?= tr-linrgsn019.tr.statoil.no
+
+REMOTE_RGS_DEVELOP := /project/res/APSGUI/DevelopmentBranch/APSGUI
+
+RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
+RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | sed -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
 
 
 # NRlib
@@ -527,17 +521,26 @@ run-rms.uipy-mock:
 # TODO: Add versioning to the plugin file
 deploy:
 	cd $(CODE_DIR) && \
-	for server in $(SERVERS); do \
-	    rsync -avz \
-	          --rsh=ssh \
-	          $(PLUGIN_BIN) $(DEPLOYMENT_USER)@$$server:$(DEPLOYMENT_PATH)/$(PLUGIN_BIN); \
-	done
+	rsync -avz \
+	      --rsh=ssh \
+	      $(PLUGIN_BIN) $(DEPLOYMENT_USER)@$(DEPLOY_SERVER):$(DEPLOYMENT_PATH)/$(PLUGIN_BIN)
+
+update-deployment: update-remote-develop generate-remote-workflows
+
+update-remote-develop:
+	$(RGS_EXEC) 'cd $(REMOTE_RGS_DEVELOP) && git pull'
+
+generate-remote-workflows:
+	$(RGS_EXEC) ' \
+	    cd $(REMOTE_RGS_DEVELOP) && \
+	    PYTHON=/prog/roxar/rms/versions/$(RMS_VERSION)/bin/LINUX_64/python \
+	    LD_LIBRARY_PATH=/prog/roxar/rms/versions/11.0.1/lib/LINUX_64 \
+	    make init-workflow \
+	    '
 
 deploy-stable: deploy
 	cd $(CODE_DIR) && \
-	for server in $(SERVERS); do \
-		ssh $(DEPLOYMENT_USER)@$$server ln -s $(DEPLOYMENT_PATH)/$(PLUGIN_BIN) $(DEPLOYMENT_PATH)/stable/$(PLUGIN_NAME).$(APS_VERSION).plugin; \
-	done
+	ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER) ln -s $(DEPLOYMENT_PATH)/$(PLUGIN_BIN) $(DEPLOYMENT_PATH)/stable/$(PLUGIN_NAME).$(APS_VERSION).plugin
 
 # Getting RMS 11,
 get-rms-repo:

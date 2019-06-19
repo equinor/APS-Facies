@@ -18,6 +18,7 @@ variables:
   SYSTEM_INSTALL_PIPENV:  "yes"
   RMS_VERSION:            "11.0.1"
   GIT_LFS_SKIP_SMUDGE:    "1"
+  RMS_PYTHON:             "/prog/roxar/rms/versions/${RMS_VERSION}/bin/LINUX_64/python"
 
 stages:
   - init
@@ -36,7 +37,7 @@ before_script:
 initialize:
   stage: init
   variables:
-    PYTHON:      "/prog/roxar/rms/versions/${RMS_VERSION}/bin/LINUX_64/python"
+    PYTHON:      "${RMS_PYTHON}"
   script:
     - 'eval $MAKE init'
     - 'eval rm -rf ${WORKON_HOME}/nrlib-*'
@@ -133,26 +134,38 @@ build GUI:
     paths:
       - '*.plugin'
 
+.setup ssh keys:
+  before_script:
+    - 'eval export PYTHON=${RMS_PYTHON}'
+    # Add the SSH key for cicd_aps
+    # From https://docs.gitlab.com/ee/ci/ssh_keys/
+    - 'eval $(ssh-agent -s)'
+    - mkdir ~/.ssh
+    - chmod 700 ~/.ssh
+    - touch ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - $PYTHON -c 'import base64; import os; print(base64.b16decode(os.environ["CICD_APS_PRIVATE_KEY_HEX"]).decode("UTF-8"))' > ~/.ssh/id_rsa
+    - ssh-add
+    - ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
+  after_script:
+    - rm -rf ~/.ssh
+
+
 deploy release:
   stage: deploy
+  extends: .setup ssh keys
   script:
     - 'eval $MAKE build-stable-gui'
     - 'eval $MAKE deploy-stable'
   only:
     - tags
 
-deploy release candidate:
-  stage: deploy
-  script:
-    - ""  # TODO
-  only:
-   - master
-
 deploy develop:
   stage: deploy
+  extends: .setup ssh keys
   script:
-    - 'eval $MAKE deploy'
-  only:
-    - develop
+    - 'eval $MAKE deploy' # update-deployment'
   dependencies:
     - build GUI
+  only:
+    - develop
