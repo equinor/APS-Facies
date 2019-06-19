@@ -2,6 +2,103 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.11.0
+
+This release contains _a lot_ of bug fixes.
+
+
+### What's new?
+* Facies Autofill is disabled for production
+* When the CI/CD-pipeline for `develop` succeeds, a new plugin is added to develop
+* If the user selects more facies than the truncation rule can hold, the GUI will assume that the user will be using overlay
+* the user may no longer edit, or delete facies from RMS
+* Introduced the concept of some Facies being from RMS, while others are user defined
+* Sets the maximum size of cubic specification to 400 pixels
+* Added support for maximum size of plots
+* If the user chooses to use overlay facies, the necessary Gaussian Fields will be created, if there are too few
+
+
+### Fixes
+* The built plugin file is stored
+* The mock, and Docker image has been updated to use the latest test project
+* Temporary ROFF-files are removed before integration tests
+* Ensures that necessary files are created during the integration tests
+* More accurate behaviour regarding assigning code_names
+* Id the given directory for `seedLogFile.dat` does not exist, it is created
+* The random seed of Gaussian Random Fields is loaded from model files
+* The arrows for changing the order of polygons, now works as expected
+* The FMU parameters for non-cubic trends are now consistent with the documentation
+* Cubic truncation rules were imported incorrectly
+* Probability cube names are no longer ignored while importing a model file
+* Improvements to the mock
+    * Properties may be written to the mocked project instance
+        * they will be remembered as long as the `Project` instance lives
+    * Improved how collections are presented in PyCharm's inspector
+    * Unset properties should not need arguments, or fail when arguments are given
+    * Increased performance of `get_cell_numbers_in_range`
+    * Ensure that boolean values are returned from `shared` in `Propery`
+* The names for discrete parameters should now be written to the grid / property
+* Root getter return instance of `GlobalFacies`, not just the `ID`
+* `hideAlias` was not passed as a property to the `FaciesSelection` component
+* Logical errors has been corrected
+* Only the facies that are _SELECTED_ should be counted, when deciding if a truncation rule has enough facies
+* The user may now change which Gaussian random field is associated with which &#593;-direction
+* Which Gaussian fields are available for the different facies, and &#593;-direction has been fixed, as to be consistent with the rules of APS
+* Uses dedicated action for changing color; colors may not be changed
+* The correct &#593;-channel is now displayed for a given Gaussian Random Field
+* Gaussian Random Fields should have the same zone / regions as the truncation rule
+* Ensure that there is only ONE specification for all fields for a zone/region
+    * Gaussian Fields of vertical cross section is now possible again
+* Uses recommended search of XML elements
+* Increased the timeout for calls from the GUI to RMS
+* A cubic truncation rule may not be split into less than two polygons
+* Jobs should not be reloaded after clicking run in RMS
+* Ensure facies names are not renamed while importing, and exporting a model file, or loaded from a saved job
+* A number should not be considered as empty
+* Consistent alignment of truncation rule specification
+* More descriptive truncation rule titles
+* Gaussian Random Fields are not loaded correctly from saved jobs
+* Added circular import check to CI
+* Check that all facies are used, before updating the truncation map
+* Check that truncation map can be updated before reacting to changes in selected facies
+* Polygons with no facies should not have their fraction editable
+* Do not show fractions if no polygon has a facies
+* Enforce normalization of (facies) fractions
+* Do not write `seedLogFile.dat` when running the simulation from RMS
+* Uses default name, and pass realization number as keyword
+* Ensure that probabilities are normalized
+* FMU values are returned only if the field is supposed to be updatable
+
+
+### Restructure
+* The RMS job `rms_jobs/Create_bw_prob_log_from_deterministic_facies_log.py` is not used, and has been removed
+* Uses extended XML representation, when importing a model file
+* Added more type annotations
+* Introduced an `add` action for cross sections
+* Extracted the creation of Variogram/Trend and uses existing method for parent
+* Static plots now listen for resize
+* Introduced the interfaces `Ordered`, and `DiscreteConfiguration`
+* The `PreviewHeader` component now takes a truncation rule as property
+* Moved definitions to avoid circular import dependencies
+* The configuration has been made dynamic
+* Moved common functionality for fraction specification
+* Improved the code quality
+
+### Miscellaneous
+* Removed extraneous whitespaces, and converted tabs to 4 spaces
+* Added more logging
+* The dependencies has been updated
+* The cubic specification has been made larger
+
+
+## 0.10.1
+
+A Minor fix for an import that caused the GUI to not load from RMS
+
+### Fixes
+
+* Imports `roxar.rms` for the API
+
 ## 0.10.0
 
 This release includes two major features; cubic truncation rules, and the implementation of the `run` button in RMS.
