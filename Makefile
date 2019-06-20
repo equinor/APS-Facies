@@ -382,15 +382,15 @@ remove-nrlib-source:
 	rm -f nrlib-$(NRLIB_VERSION).tar.gz
 
 uninstall-nrlib:
-	$(PIPENV) uninstall nrlib || echo "NRlib not installed"
+	$(PIPENV) uninstall nrlib 2>/dev/null || echo "NRlib not installed"
 
 clean-cache: clean-__pycache__ clean-pyc
 
 clean-__pycache__:
-	rm -rf $(shell find $(SOURCE_DIR) -name __pycache__)
+	rm -rf $(shell find $(CODE_DIR) -name __pycache__ -not -path *.rms/*)
 
 clean-pyc:
-	rm -f $(shell find $(SOURCE_DIR) -name *.pyc)
+	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
 docker-image: $(GET_RMS_RESOURCES)
 	docker build --rm --pull --tag $(DOCKER_IMAGE) --file $(DOCKERFILE) $(CODE_DIR)
