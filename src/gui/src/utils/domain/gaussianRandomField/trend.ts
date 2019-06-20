@@ -71,6 +71,7 @@ export interface TrendSerialization {
 export function unpackTrend (trend: TrendSerialization): TrendConfiguration {
   return {
     use: trend.use,
+    type: trend.type,
     azimuth: trend.angle.azimuth.value,
     azimuthUpdatable: trend.angle.azimuth.updatable,
     stackAngle: trend.angle.stacking.value,
