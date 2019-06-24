@@ -5,6 +5,9 @@ from flask_cors import CORS
 
 from src.utils.parsing import parse_signature
 from src.api.ui import call
+from gevent import monkey
+
+monkey.patch_all()
 
 
 def _get_environ(variable_name, default,  divider=':'):
@@ -24,6 +27,9 @@ def _get_client_url():
 
 
 app = Flask(__name__)
+app.secret_key = urandom(64)
+app.debug = _get_environ('FLASK_DEBUG', False)
+
 cors = CORS(app, origins=_get_client_url())
 
 
@@ -43,5 +49,4 @@ if __name__ == '__main__':
         host='127.0.0.1',
         port=5001,
         debug=True,
-        secret_key=urandom(64),
     )
