@@ -71,6 +71,7 @@ export default {
     current (state, getters, rootState, rootGetters) {
       return Object.values(state.available)
         .find(crossSection => crossSection.isChildOf({ zone: rootGetters.zone, region: rootGetters.region }))
+      || null
     },
     byId: (state) => (id) => {
       return state.available[`${getId(id)}`]
