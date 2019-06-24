@@ -4,16 +4,14 @@ import { cloneDeep, isNumber, sample } from 'lodash'
 import api from '@/api/rms'
 
 import templates from '@/store/modules/truncationRules/templates'
+import preset from '@/store/modules/truncationRules/preset'
 
 import { ADD_ITEM } from '@/store/mutations'
-import { addItem } from '@/store/actions'
 import {
   hasCurrentParents,
   minFacies,
   hasEnoughFacies,
-  isEmpty,
   makeTruncationRuleSpecification,
-  notEmpty,
   hasParents,
 } from '@/utils'
 import { getId, isUUID } from '@/utils/helpers'
@@ -26,10 +24,6 @@ import { makePolygonsFromSpecification, normalizeOrder } from '@/utils/helpers/p
 import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { isReady } from '@/store/utils/helpers'
-
-const changePreset = (state, thing, item) => {
-  Vue.set(state.preset, thing, item)
-}
 
 const findPolygonInRule = (rule, polygon) => {
   return rule._polygons[`${polygon.id}`]
@@ -90,14 +84,11 @@ export default {
 
   state: {
     rules: {},
-    preset: {
-      type: '',
-      template: '',
-    },
   },
 
   modules: {
     templates,
+    preset,
   },
 
   actions: {
@@ -122,9 +113,8 @@ export default {
     remove ({ commit }, rule) {
       commit('REMOVE', getId(rule))
     },
-    async populate ({ commit, dispatch }, { rules, templates, preset }) {
-      if (preset.type) commit('CHANGE_TYPE', preset)
-      if (preset.template) commit('CHANGE_TEMPLATE', preset)
+    async populate ({ dispatch }, { rules, templates, preset }) {
+      await dispatch('preset/populate', preset)
       await dispatch('templates/populate', templates)
       await Promise.all(Object.values(rules)
         .map(rule => dispatch('add', rule))
@@ -209,26 +199,6 @@ export default {
 
       // Normalize probabilities again
       await dispatch('normalizeProportionFactors', { rule })
-    },
-    resetTemplate ({ commit }) {
-      commit('CHANGE_TYPE', { type: null })
-      commit('CHANGE_TEMPLATE', { template: { text: null } })
-    },
-    async changePreset ({ commit, dispatch, state, rootGetters }, { type, template }) {
-      const current = rootGetters.truncationRule
-      if (current && type !== state.preset.type && template !== state.preset.template) {
-        commit('REMOVE', current.id)
-      }
-      if (notEmpty(type)) {
-        const types = state.templates.types.available
-        const typeId = Object.keys(types).find(id => types[`${id}`].name === type)
-        commit('CHANGE_TYPE', { type: typeId })
-        commit('CHANGE_TEMPLATE', { template: { text: null } })
-      }
-      if (notEmpty(template)) {
-        commit('CHANGE_TEMPLATE', { template })
-        await dispatch('addRuleFromTemplate')
-      }
     },
     async split ({ dispatch }, { rule, polygon, value }) {
       if (!(rule instanceof Cubic)) throw new APSTypeError('Only Cubic truncation rules may use \'split\'')
@@ -418,8 +388,6 @@ export default {
     UPDATE_BACKGROUND_GROUP: (state, { rule, polygon, value }) => {
       state.rules[rule.id]._polygons[polygon.id].group = value
     },
-    CHANGE_TYPE: (state, { type }) => changePreset(state, 'type', type),
-    CHANGE_TEMPLATE: (state, { template }) => changePreset(state, 'template', template.text),
     CHANGE_FACIES: (state, { rule, polygon, facies }) => {
       Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'facies', facies)
     },

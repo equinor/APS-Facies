@@ -49,9 +49,9 @@ export default {
     current: async ({ commit, dispatch, rootState }, { id }) => {
       const zone = Object.values(rootState.zones.available)
         .find(zone => Object.values(zone.regions).map(region => region.id).includes(id))
-      await dispatch('truncationRules/resetTemplate', undefined, { root: true })
       await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region: id }, { root: true })
       commit('CURRENT', { id })
+      await dispatch('truncationRules/preset/fetch', undefined, { root: true })
     },
     fetch: async ({ commit, rootState, rootGetters, state }, zone) => {
       // TODO: Add new GRFs for each region if necessary

@@ -72,11 +72,11 @@ export default {
           ? type.name
           : ''
       },
-      set: function (type) { this.$store.dispatch('truncationRules/changePreset', { type }) }
+      set: function (type) { this.$store.dispatch('truncationRules/preset/change', { type }) }
     },
     template: {
       get: function () { return this.preset.template },
-      set: function (template) { this.$store.dispatch('truncationRules/changePreset', { template }) },
+      set: function (template) { this.$store.dispatch('truncationRules/preset/change', { template }) },
     },
   },
 

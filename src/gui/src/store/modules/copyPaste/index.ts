@@ -89,7 +89,7 @@ const module: Module<CopyPasteState, RootState> = {
   },
 
   actions: {
-    copy ({ commit }, source: Zone | Region): void {
+    copy ({ commit }, source: Zone | Region | null): void {
       commit('SOURCE', source)
     },
     async paste ({ commit, dispatch, getters, rootState }, target: Zone | Region): Promise<void> {

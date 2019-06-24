@@ -1,4 +1,5 @@
 import ParametersState from '@/store/modules/parameters/typing'
+import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
@@ -63,6 +64,39 @@ interface RootState {
 
   truncationRules: {
     rules: Identified<TruncationRule>
+    preset: PresetState
+    templates: {
+      available: Identified<{
+        id: ID
+        name: string
+        type: string
+        minFields: number
+        polygons: {
+          name: number
+          facies: {
+            name: string
+            index: number
+          }
+          proportion: number
+        }[]
+        settings: object
+        fields: {
+          channel: number
+          field: {
+            name: string
+            index: number
+          }
+        }[]
+      }>
+      types: {
+        available: Identified<{
+          id: ID
+          type: string
+          name: string
+          order: number
+        }>
+      }
+    }
   }
 
   zones: {
