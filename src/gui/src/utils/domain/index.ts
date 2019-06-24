@@ -1,4 +1,4 @@
-import { Facies, GlobalFacies } from '@/utils/domain/facies'
+import { Facies, GlobalFacies, FaciesGroup } from '@/utils/domain/facies'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import Region from '@/utils/domain/region'
 import {
@@ -33,6 +33,7 @@ export {
   Zone,
   GlobalFacies,
   Facies,
+  FaciesGroup,
   GaussianRandomField,
   TruncationRule,
   Bayfill,

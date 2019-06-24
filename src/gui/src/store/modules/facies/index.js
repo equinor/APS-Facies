@@ -7,6 +7,8 @@ import { isNumber } from 'lodash'
 import rms from '@/api/rms'
 
 import Facies from '@/utils/domain/facies/local'
+import GlobalFacies from '@/utils/domain/facies/global'
+
 import {
   notEmpty,
   hasCurrentParents,
@@ -36,15 +38,19 @@ export default {
   },
 
   actions: {
-    add: ({ commit }, { facies, parent, probabilityCube = null, previewProbability = null }) => {
+    add: ({ commit, getters }, { facies, parent, probabilityCube = null, previewProbability = null, id = null }) => {
       const localFacies = new Facies({
-        facies,
+        id,
+        facies: (facies instanceof GlobalFacies) ? facies : getters['byId'](facies),
         probabilityCube,
         previewProbability,
         parent,
       })
       commit('ADD', { facies: localFacies })
       return localFacies
+    },
+    remove: ({ commit }, facies) => {
+      commit('REMOVE', { facies })
     },
     select: async ({ commit, dispatch, state }, { items, parent }) => {
       const getRelevantFacies = () => Object.values(state.available)
@@ -161,6 +167,7 @@ export default {
     ADD: (state, { facies }) => {
       Vue.set(state.available, facies.id, facies)
     },
+    // TODO: Take `facies` as input, and not an object
     REMOVE: (state, { facies }) => {
       Vue.delete(state.available, facies.id)
     },

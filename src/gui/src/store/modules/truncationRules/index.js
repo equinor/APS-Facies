@@ -24,6 +24,7 @@ import APSTypeError from '@/utils/domain/errors/type'
 import APSError from '@/utils/domain/errors/base'
 import { makePolygonsFromSpecification, normalizeOrder } from '@/utils/helpers/processing/templates/typed'
 import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
+import TruncationRule from '@/utils/domain/truncationRule/base'
 import { isReady } from '@/store/utils/helpers'
 
 const changePreset = (state, thing, item) => {
@@ -103,27 +104,8 @@ export default {
     async fetch ({ dispatch }) {
       await dispatch('templates/fetch')
     },
-    async add ({ commit }, rule) {
-      return addItem({ commit }, { item: rule })
-    },
-    remove ({ commit, state, rootGetters }, ruleId) {
-      const correctId = _id => isEmpty(_id) || !state.rules.hasOwnProperty(_id)
-
-      if (correctId(ruleId)) {
-        ruleId = rootGetters.truncationRule.id
-      }
-
-      if (correctId(ruleId)) {
-        commit('REMOVE', ruleId)
-      } else {
-        throw new Error(`The rule with ID ${ruleId} does not exist. Cannot be removed`)
-      }
-    },
-    async populate ({ commit, dispatch, rootGetters }, { rules, templates, preset }) {
-      if (preset.type) commit('CHANGE_TYPE', preset)
-      if (preset.template) commit('CHANGE_TEMPLATE', preset)
-      await dispatch('templates/populate', templates)
-      Object.values(rules).forEach(rule => {
+    async add ({ commit, rootGetters }, rule) {
+      if (!(rule instanceof TruncationRule)) {
         rule.backgroundFields = rule.backgroundFields.map(field => rootGetters['gaussianRandomFields/byId'](field))
         rule.polygons.forEach(polygon => {
           polygon.facies = rootGetters['facies/byId'](polygon.facies)
@@ -133,8 +115,20 @@ export default {
           }
         })
         rule.polygons = makePolygonsFromSpecification(rule.polygons)
-        commit('ADD', { id: rule.id, item: makeRule(rule) })
-      })
+        rule = makeRule(rule)
+      }
+      commit('ADD', rule)
+    },
+    remove ({ commit }, rule) {
+      commit('REMOVE', getId(rule))
+    },
+    async populate ({ commit, dispatch }, { rules, templates, preset }) {
+      if (preset.type) commit('CHANGE_TYPE', preset)
+      if (preset.template) commit('CHANGE_TEMPLATE', preset)
+      await dispatch('templates/populate', templates)
+      await Promise.all(Object.values(rules)
+        .map(rule => dispatch('add', rule))
+      )
     },
     async addPolygon ({ commit, dispatch, rootState }, { rule, group = '', order = null, overlay = false, parent = null, atLevel = 0 }) {
       if (rule.type === 'bayfill') throw new Error('Bayfill must have exactly 5 polygons. Cannot add more.')
@@ -394,8 +388,8 @@ export default {
   },
 
   mutations: {
-    ADD: (state, { id, item }) => {
-      ADD_ITEM(state.rules, { id, item })
+    ADD: (state, rule) => {
+      ADD_ITEM(state.rules, { id: rule.id, item: rule })
     },
     REMOVE: (state, ruleId) => {
       Vue.delete(state.rules, ruleId)

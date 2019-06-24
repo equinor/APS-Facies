@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import { AVAILABLE } from '@/store/mutations'
 
-import { FaciesGroup } from '@/utils/domain/facies'
+import { FaciesGroup, GlobalFacies } from '@/utils/domain'
 import { getId } from '@/utils/helpers'
 import { toIdentifiedObject } from '@/utils'
 
@@ -35,14 +35,18 @@ export default {
       }
       return group
     },
-    add ({ commit, getters, rootGetters }, { facies, parent }) {
+    add ({ commit, getters, rootGetters }, { facies, parent, id = null }) {
       // TODO: Deal with missing parents
       // TODO: ensure that none of the given facies are used
       if (!Array.isArray(facies)) facies = [facies]
       if (facies.some(facies => getters.used(facies))) {
         throw new Error(`The facies, ${facies}, has already been specified`)
       }
-      const group = new FaciesGroup({ facies, zone, region })
+      const group = new FaciesGroup({
+        id,
+        facies: facies.map(facies => facies instanceof GlobalFacies ? facies : rootGetters['facies/byId'](facies)),
+        parent,
+      })
       commit('ADD', group)
       return group
     },

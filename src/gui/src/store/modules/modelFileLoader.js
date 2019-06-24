@@ -566,7 +566,7 @@ export default {
         const parent = getParent({ rootGetters }, zoneModel)
 
         for (const gaussFieldFromFile of getNodeValues(zoneModel, 'GaussField')) {
-          await dispatch('gaussianRandomFields/addField',
+          await dispatch('gaussianRandomFields/add',
             new GaussianRandomField({
               name: gaussFieldFromFile.attributes.name,
               variogram: getVariogram(gaussFieldFromFile),
