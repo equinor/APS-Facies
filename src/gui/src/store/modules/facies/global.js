@@ -2,7 +2,6 @@ import rms from '@/api/rms'
 import { isEmpty, makeData } from '@/utils'
 import { GlobalFacies } from '@/utils/domain'
 import Vue from 'vue'
-import { promiseSimpleCommit } from '@/store/utils'
 import { APSTypeError } from '@/utils/domain/errors'
 
 function getColor ({ rootState }, code) {
@@ -72,13 +71,13 @@ export default {
       return facies
     },
     current: ({ commit }, { id }) => {
-      return promiseSimpleCommit(commit, 'CURRENT', { id })
+      commit('CURRENT', { id })
     },
-    removeSelectedFacies: ({ commit, dispatch, state }) => {
-      return promiseSimpleCommit(commit, 'REMOVE', { id: state.current }, () => !!state.current)
-        .then(() => {
-          dispatch('current', { id: null })
-        })
+    removeSelectedFacies: async ({ commit, dispatch, state }) => {
+      if (state.current) {
+        commit('REMOVE', { id: state.current })
+        await dispatch('current', { id: null })
+      }
     },
     changeColor: ({ commit }, { id, color }) => {
       commit('CHANGE', { id, name: 'color', value: color })

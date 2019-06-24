@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from os import environ
+from os import environ, urandom
 from flask import Flask, jsonify
 from flask_cors import CORS
 
@@ -28,7 +28,7 @@ cors = CORS(app, origins=_get_client_url())
 
 
 @app.route('/<path:signature>', methods=['GET'])
-def call_python(signature: str):
+def call_python(signature: str) -> str:
     method_name, args = parse_signature(signature)
     return jsonify(call(method_name, *args))
 
@@ -39,4 +39,9 @@ def favicon():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5001)
+    app.run(
+        host='127.0.0.1',
+        port=5001,
+        debug=True,
+        secret_key=urandom(64),
+    )

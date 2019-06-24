@@ -20,7 +20,7 @@ const state: GridModelsState = {
 }
 
 const actions: ActionTree<GridModelsState, RootState> = {
-  select: async ({ state, commit, dispatch }, gridModel: GridModel) => {
+  select: async ({ state, commit, dispatch }, gridModel: GridModel): Promise<void> => {
     if (state.available.includes(gridModel)) {
       commit('CURRENT', gridModel)
       await dispatch('zones/fetch', null, { root: true })

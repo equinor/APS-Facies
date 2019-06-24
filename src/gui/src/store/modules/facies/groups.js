@@ -31,11 +31,11 @@ export default {
     async get ({ getters, dispatch }, { facies, parent }) {
       let group = getters.byFacies(facies, parent)
       if (!group) {
-        group = await dispatch('add', { facies, ...parent })
+        group = await dispatch('add', { facies, parent })
       }
       return group
     },
-    add ({ commit, getters }, { facies, zone, region = null }) {
+    add ({ commit, getters, rootGetters }, { facies, parent }) {
       // TODO: Deal with missing parents
       // TODO: ensure that none of the given facies are used
       if (!Array.isArray(facies)) facies = [facies]

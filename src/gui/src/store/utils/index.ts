@@ -6,17 +6,6 @@ import { getId } from '@/utils/helpers'
 import { RootState } from '@/store/typing'
 import { Commit, Dispatch, Module } from 'vuex'
 
-function promiseSimpleCommit (commit: Commit, commitment: string, data: any, check: boolean = true, error: string = ''): Promise<any> {
-  return new Promise((resolve, reject) => {
-    if (check) {
-      commit(commitment, data)
-      resolve(data)
-    } else {
-      reject(error)
-    }
-  })
-}
-
 async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result: string[]): Promise<void> {
   if (result.length === 1) {
     await dispatch('select', result[0])
@@ -88,7 +77,6 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
 }
 
 export {
-  promiseSimpleCommit,
   fetchParameterHelper,
   updateFacies,
   makeOption,
