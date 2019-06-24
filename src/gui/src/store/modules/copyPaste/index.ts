@@ -93,24 +93,37 @@ const module: Module<CopyPasteState, RootState> = {
       commit('SOURCE', source)
     },
     async paste ({ commit, dispatch, getters, rootState }, target: Zone | Region): Promise<void> {
-      const source = getters.parent
       const parent = getParent(target)
-      commit('PASTING', { source: parent, toggle: true })
-      const elements = [
-        { name: 'gaussianRandomFields/crossSections', items: listify(rootState.gaussianRandomFields.crossSections.available), serialization: '' },
-        { name: 'gaussianRandomFields', items: listify(rootState.gaussianRandomFields.fields), serialization: '' },
-        { name: 'facies', items: listify(rootState.facies.available), serialization: '' },
-        { name: 'facies/groups', items: listify(rootState.facies.groups.available), serialization: '' },
-        { name: 'truncationRules', items: listify(rootState.truncationRules.rules), serialization: '' },
-      ]
-      await removeOld({ dispatch }, elements.concat().reverse(), parent)
-      const serialization = giveNewIds(elements, source, parent)
-      for (const [key, items] of Object.entries(JSON.parse(serialization))) {
-        await Promise.all((items as object[])
-          .map((item): Promise<void> => dispatch(`${key}/add`, item, { root: true }))
+
+      if (rootState.regions.use && target instanceof Zone) {
+        commit('PASTING', { source: parent, toggle: true })
+        await Promise.all(target.regions
+          .map((region): Promise<void> => dispatch('paste', region))
         )
+        commit('PASTING', { source: parent, toggle: false })
+      } else {
+        const source = getters.parent
+        commit('PASTING', { source: parent, toggle: true })
+        const elements = [
+          {
+            name: 'gaussianRandomFields/crossSections',
+            items: listify(rootState.gaussianRandomFields.crossSections.available),
+            serialization: ''
+          },
+          { name: 'gaussianRandomFields', items: listify(rootState.gaussianRandomFields.fields), serialization: '' },
+          { name: 'facies', items: listify(rootState.facies.available), serialization: '' },
+          { name: 'facies/groups', items: listify(rootState.facies.groups.available), serialization: '' },
+          { name: 'truncationRules', items: listify(rootState.truncationRules.rules), serialization: '' },
+        ]
+        await removeOld({ dispatch }, elements.concat().reverse(), parent)
+        const serialization = giveNewIds(elements, source, parent)
+        for (const [ key, items ] of Object.entries(JSON.parse(serialization))) {
+          await Promise.all((items as object[])
+            .map((item): Promise<void> => dispatch(`${key}/add`, item, { root: true }))
+          )
+        }
+        commit('PASTING', { source: parent, toggle: false })
       }
-      commit('PASTING', { source: parent, toggle: false })
     },
   },
 
