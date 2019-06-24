@@ -59,7 +59,9 @@
             <icon-button
               v-if="source"
               icon="paste"
+              loading-spinner
               :disabled="!canPaste(props.item)"
+              :waiting="isPasting(props.item)"
               @click="_ => paste(props.item)"
             />
           </v-layout>
@@ -188,6 +190,9 @@ export default {
     canPaste (item) {
       const source = this.source
       return !!source && source.id !== item.id
+    },
+    isPasting (item) {
+      return !!this.$store.getters['copyPaste/isPasting'](this.getItem(item))
     },
     async copy (item) {
       await this.$store.dispatch('copyPaste/copy', this.getItem(item))
