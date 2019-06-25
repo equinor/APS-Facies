@@ -22,5 +22,6 @@ flask = "*"
 dataclasses = "*"
 flask-cors = "*"
 gevent = "*"
+gunicorn = "*"
 
 [requires]
