@@ -196,6 +196,10 @@ NO_COLOR = \033[0m
 build: clean-all init
 
 build-stable-gui:
+	cat $(CODE_DIR)/CHANGELOG.md | grep $(APS_VERSION) >/dev/null || { \
+	    echo "When building a stable version, the changelog MUST have some information of this version ($(APS_VERSION))." ; \
+	    exit 1 ; \
+	}
 	make build-gui VUE_APP_BUILD_MODE=stable
 
 build-gui: clean-build increase-build-number build-front-end compile-files-for-plugin
