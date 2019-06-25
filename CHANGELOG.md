@@ -2,6 +2,19 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.11.1
+
+A minor release that fixes a couple of issues related to import/export of trends
+
+### What's new?
+* Commits to `develop` are released to `/project/res/APSGUI/releases`, as an unstable release
+  * If a commit is tagged, it will be released as a stable version to `/project/res/APSGUI/releases/stable`
+
+
+### Fixes
+* During import, the `type` of trend, was not handled
+* During export, `relativeSize` was, mistakenly, given as `curvature` in the model file
+
 ## 0.11.0
 
 This release contains _a lot_ of bug fixes.
