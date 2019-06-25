@@ -302,7 +302,7 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
 
     if (trendType === 'EllipticCone3D') {
       // relativeSize is specific to EllipticCone3D
-      trendTypeElement.append(createElement(doc, 'curvature', relativeSize.value,
+      trendTypeElement.append(createElement(doc, 'relativeSize', relativeSize.value,
         relativeSize.updatable ? [{ name: 'kw', value: baseKw + 'RELATIVE_SIZE' }] : null))
     }
 
