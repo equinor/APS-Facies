@@ -261,8 +261,7 @@ function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
   return numFacies >= minFacies(rule, getters)
 }
 
-// @ts-ignore
-const resolve = (path, obj = self, separator = '.'): object => {
+const resolve = (path: string | string[], obj = self, separator = '.'): object => {
   const properties = Array.isArray(path) ? path : path.split(separator)
   // @ts-ignore
   return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)
