@@ -63,12 +63,13 @@ from pathlib import Path
 
 import os
 import sys
+import re
 import platform
 
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -83,10 +84,10 @@ root_path = _get_path_from_environment('APS_ROOT', '{root_path}')
 release_location = Path('/project/res/APSGUI/releases')
 
 # Add nrlib to PYTHONPATH
-os_name, os_version, _ = platform.linux_distribution()
-if os_name == 'Red Hat Enterprise Linux Workstation':
+description = platform.platform()
+if 'redhat' in description:
     # Assuming we are on RGS
-    major = os_version[0]
+    major = re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
     sys.path.insert(0, '/project/res/nrlib/nrlib-dist-RHEL{{}}-RMS{{}}'.format(major, roxar.rms.get_version()))
 
 # Path to where the file below is located within the repository
@@ -104,7 +105,7 @@ except NameError:
 model_root = _get_path_from_environment('APS_RESOURCES', project_location_path)
 
 # Add path to searchable path
-sys.path.append(root_path)
+sys.path.insert(0, root_path)
 
 
 # Generating necessary paths
