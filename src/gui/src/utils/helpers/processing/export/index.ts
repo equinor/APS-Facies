@@ -187,7 +187,7 @@ function addFaciesProb ({ rootState, rootGetters }: Context, doc: Document, pare
       value = facies.probabilityCube
       valueSource = 'probability cube'
     }
-    if (!value) {
+    if (!value && value !== 0) {
       let errMessage = `No ${valueSource} given for facies ${faciesName} in Zone ${parent.zone.code}`
       if (parent.region) {
         errMessage = errMessage + ` Region ${parent.region.code}`
