@@ -386,7 +386,7 @@ export default {
       alert(`dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
             dialogFMUParameterListLocation: ${this.fmuParameterListLocation}`)
       await Promise.all([
-        this.$store.dispatch('parameters/path/select', this.apsModelFileLocation),
+        this.$store.dispatch('parameters/path/project/select', this.apsModelFileLocation),
         this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
         this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
         this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
