@@ -10,12 +10,13 @@ This is called when running 'make init', and 'make generate-workflow-files'.
 The resulting stubs are given in the 'workflow' directory (which again is inside the root of the repo)
 
 Usage:
-    ./bin/generate_workflow_blocks.py [--read-only] [--copy-to-rms-project <path to rms project>]
-    ./generate_workflow_blocks.py <path to project folder> [--read-only] [--copy-to-rms-project <path to rms project>]
+    ./bin/generate_workflow_blocks.py [--read-only] [--use-temporary-workflow-dir] [--copy-to-rms-project <path to rms project>]
+    ./generate_workflow_blocks.py <path to project folder> [--read-only] [--use-temporary-workflow-dir] [--copy-to-rms-project <path to rms project>]
 """
 from pathlib import Path
 from shutil import copy
 from sys import argv
+from tempfile import gettempdir
 
 import os
 
@@ -23,9 +24,11 @@ import os
 def run():
     root_path = get_root_path()
     workflows = get_workflows()
+    use_temporary = '--use-temporary-workflow-dir' in argv
+
     for relative_path, items in workflows.items():
         for file_name in items:
-            create_workflow_block_file(file_name, root_path, relative_path)
+            create_workflow_block_file(file_name, root_path, relative_path, use_temporary)
 
     for i in range(len(argv)):
         arg = argv[i]
@@ -33,7 +36,7 @@ def run():
             set_file_attributes(root_path)
         elif arg == '--copy-to-rms-project':
             project_location = Path(argv[i + 1]).absolute()
-            workflow_dir = get_workflow_dir(root_path)
+            workflow_dir = get_workflow_dir(root_path, use_temporary)
             add_ipl_scripts(root_path, project_location)
             for rms_name, workflow_name in get_rms_mapping().items():
                 if workflow_name is not None:
@@ -217,7 +220,7 @@ module.run(roxar, project, **kwargs)
 
 
 def get_root_path():
-    if len(argv) == 1 or argv[1] in ['--read-only',  '--copy-to-rms-project']:
+    if len(argv) == 1 or argv[1] in ['--read-only',  '--copy-to-rms-project', '--use-temporary-workflow-dir']:
         return Path('.').absolute()
     else:
         return Path(argv[1])
@@ -291,18 +294,20 @@ def get_file_mapping():
     return {file: rms_name for rms_name, file in get_rms_mapping().items() if file}
 
 
-def get_workflow_dir(root_path):
+def get_workflow_dir(root_path, use_temporary=False):
+    if use_temporary:
+        root_path = Path(gettempdir())
     workflow_dir = root_path / 'workflow'
     if not _OS.exists(workflow_dir):
         _OS.makedirs(workflow_dir.absolute())
     return workflow_dir
 
 
-def create_workflow_block_file(file_name, root_path, relative_path):
+def create_workflow_block_file(file_name, root_path, relative_path, use_temporary=False):
     script_name = file_name + '.py'
     script_path = root_path / relative_path / script_name
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
-    workflow_dir = get_workflow_dir(root_path)
+    workflow_dir = get_workflow_dir(root_path, use_temporary)
     workflow_path = str(workflow_dir / get_file_mapping()[script_name])
     workflow_block = get_workflow_block(file_name, root_path, relative_path)
     with open(workflow_path, 'w') as f:
