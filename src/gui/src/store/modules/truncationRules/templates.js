@@ -164,13 +164,22 @@ export default {
           }
           return facies
         }, new Set())]
-      await Promise.all(uniqueFacies.map(async facies => {
-        if (facies) {
-          await dispatch('facies/updateProbability', { facies, probability: 1 / uniqueFacies.length }, { root: true })
-        } else {
-          throw new APSError(`The facies ${facies} does not exist`)
-        }
-      }))
+      const hasSetProbabilities = uniqueFacies.some(({ previewProbability }) => !!previewProbability || previewProbability === 0)
+      if (hasSetProbabilities) {
+        await Promise.all(uniqueFacies.map(async facies => {
+          if (facies) {
+            await dispatch(
+              'facies/updateProbability', {
+                facies,
+                probability: 1 / uniqueFacies.length,
+              },
+              { root: true }
+            )
+          } else {
+            throw new APSError(`The facies ${facies} does not exist`)
+          }
+        }))
+      }
       if (uniqueFacies.length === 0) {
         // This is a simple template, without any facies specification
         // However, at least two facies HAS to be selected in order to create a truncation rule
