@@ -129,6 +129,7 @@ DEPLOYMENT_PATH := /project/res/APSGUI/releases
 DEPLOY_SERVER ?= tr-linrgsn019.tr.statoil.no
 
 REMOTE_RGS_DEVELOP := /project/res/APSGUI/DevelopmentBranch/APSGUI
+REMOTE_RGS_MASTER := /project/res/APSGUI/MasterBranch
 
 RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
 RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | sed -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
@@ -533,18 +534,11 @@ deploy:
 	      --rsh=ssh \
 	      $(PLUGIN_BIN) $(DEPLOYMENT_USER)@$(DEPLOY_SERVER):$(DEPLOYMENT_PATH)/$(PLUGIN_BIN)
 
-update-deployment: update-remote-develop generate-remote-workflows
-
 update-remote-develop:
 	$(RGS_EXEC) 'cd $(REMOTE_RGS_DEVELOP) && git pull'
 
-generate-remote-workflows:
-	$(RGS_EXEC) ' \
-	    cd $(REMOTE_RGS_DEVELOP) && \
-	    PYTHON=/prog/roxar/rms/versions/$(RMS_VERSION)/bin/LINUX_64/python \
-	    LD_LIBRARY_PATH=/prog/roxar/rms/versions/11.0.1/lib/LINUX_64 \
-	    make init-workflow \
-	    '
+update-remote-master:
+	$(RGS_EXEC) 'cd $(REMOTE_RGS_MASTER) && git pull'
 
 deploy-stable: deploy
 	cd $(CODE_DIR) && \
