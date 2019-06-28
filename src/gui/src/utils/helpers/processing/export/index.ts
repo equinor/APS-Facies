@@ -43,7 +43,6 @@ type Value = string | number
  * @param attributes: null | an array of objects in the form  {name: '<name>', value: '<value>'}
  * @returns {HTMLElement | any | ActiveX.IXMLDOMElement}
  */
-// @ts-ignore
 function createElement (doc: Document, elemName: string, elemValue?: Value | null, attributes?: null | { name: string, value: Value }[]): HTMLElement {
   const elem = doc.createElement(elemName)
   if (attributes) {
@@ -187,7 +186,7 @@ function addFaciesProb ({ rootState, rootGetters }: Context, doc: Document, pare
       value = facies.probabilityCube
       valueSource = 'probability cube'
     }
-    if (!value) {
+    if (!value && value !== 0) {
       let errMessage = `No ${valueSource} given for facies ${faciesName} in Zone ${parent.zone.code}`
       if (parent.region) {
         errMessage = errMessage + ` Region ${parent.region.code}`
@@ -610,7 +609,6 @@ function addZoneModels ({ rootState, rootGetters }: Context, doc: Document, pare
   })
 }
 
-// @ts-ignore
 function addContent ({ rootState, rootGetters }: Context, doc: Document, rootElem: HTMLElement): void {
   addRMSProjectName(rootState, doc, rootElem)
   addRMSWorkflowName(rootState, doc, rootElem)
@@ -625,7 +623,6 @@ function addContent ({ rootState, rootGetters }: Context, doc: Document, rootEle
   addZoneModels({ rootState, rootGetters }, doc, rootElem)
 }
 
-// @ts-ignore
 export function createModel ({ rootState, rootGetters }: Context): string {
   const doc = document.implementation.createDocument('', '', null)
   const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])

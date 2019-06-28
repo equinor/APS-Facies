@@ -40,7 +40,7 @@ export default class FractionField extends Vue {
   readonly label!: string
 
   @Prop({ required: false, default: '' })
-  readonly appendIcon: string
+  readonly appendIcon!: string
 
   get ranges () {
     return {

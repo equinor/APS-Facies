@@ -8,6 +8,7 @@
     />
     <choose-parameter
       :disabled="!useRegions"
+      regular
       parameter-type="region"
       label="Region parameter"
     />

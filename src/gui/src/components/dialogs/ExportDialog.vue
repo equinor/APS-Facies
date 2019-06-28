@@ -81,7 +81,6 @@ export default {
   },
   methods: {
     chooseAPSModelFile () {
-      // eslint-disable-next-line no-undef
       rms.chooseFile('save', '', '').then(result => { // setting parameters filter and suggestion does not seem to work...
         if (result) {
           this.path = result

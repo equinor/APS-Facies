@@ -34,9 +34,12 @@ export default class ChooseParameter<T = any> extends Vue {
   @Prop({ default: false })
   readonly disabled!: boolean
 
+  @Prop({ default: false, type: Boolean })
+  readonly regular!: boolean
+
   get available (): T[] { return (this.$store as Store).state.parameters[this.parameterType].available }
   get selected (): T { return (this.$store as Store).state.parameters[this.parameterType].selected }
-  get isDisabled (): boolean { return (this.available ? this.available.length <= 1 : false) || this.disabled }
+  get isDisabled (): boolean { return (!this.regular && this.available ? this.available.length <= 1 : false) || this.disabled }
   get isShown (): boolean { return !(this.hideIfDisabled && this.isDisabled) }
 
   getter () { return this.selected }

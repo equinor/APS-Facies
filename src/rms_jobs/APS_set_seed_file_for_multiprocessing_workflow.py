@@ -15,7 +15,7 @@ def run(roxar=None, project=None, **kwargs):
     apsModel = APSModel(model_file)
     debug_level = apsModel.debug_level
     seedFileName = apsModel.seed_file_name
-    writeSeedFile = apsModel.writeSeeds
+    writeSeedFile = apsModel.write_seeds
 
     # Set seed file to point to seed file for this realisation
     seedFileNameNew = 'seed_list_' + str(real_number + 1) + '.dat'
