@@ -49,6 +49,23 @@
         >
           {{ props.item.code }}
         </td>
+        <td>
+          <v-layout row>
+            <icon-button
+              icon="copy"
+              :color="getColor(props.item)"
+              @click="_ => copy(props.item)"
+            />
+            <icon-button
+              v-if="source"
+              icon="paste"
+              loading-spinner
+              :disabled="!canPaste(props.item)"
+              :waiting="isPasting(props.item)"
+              @click="_ => paste(props.item)"
+            />
+          </v-layout>
+        </td>
       </tr>
     </template>
   </v-data-table>
@@ -59,9 +76,13 @@ import VueTypes from 'vue-types'
 
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem'
+import IconButton from '@/components/selection/IconButton'
+
+import { getId } from '@/utils'
 
 export default {
   components: {
+    IconButton,
     OptionalHelpItem,
     HighlightCurrentItem,
   },
@@ -115,11 +136,17 @@ export default {
           }]
           : []
         ),
+        {
+          text: 'Copy/Paste',
+          align: 'left',
+          sortable: false,
+        },
       ]
     },
+    _items () { return this.$store.getters[`${this.itemType}s`] },
     items () {
       const current = this.$store.state[`${this.itemType}s`].current
-      return this.$store.getters[`${this.itemType}s`]
+      return this._items
         .map(item => {
           return {
             id: item.id,
@@ -142,12 +169,36 @@ export default {
         background: this.$vuetify.theme.primary,
         color: 'white'
       }
+    },
+    source () {
+      return this.$store.state.copyPaste.source
     }
   },
 
   methods: {
     current (id) {
       this.$store.dispatch(`${this.itemType}s/current`, { id })
+    },
+    getItem (item) {
+      return this._items.find(({ id }) => id === item.id)
+    },
+    getColor (item) {
+      return getId(this.source) === item.id
+        ? 'accent'
+        : undefined
+    },
+    canPaste (item) {
+      const source = this.source
+      return !!source && source.id !== item.id
+    },
+    isPasting (item) {
+      return !!this.$store.getters['copyPaste/isPasting'](this.getItem(item))
+    },
+    async copy (item) {
+      await this.$store.dispatch('copyPaste/copy', this.getItem(item))
+    },
+    async paste (item) {
+      await this.$store.dispatch('copyPaste/paste', this.getItem(item))
     }
   }
 

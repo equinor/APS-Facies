@@ -42,6 +42,10 @@ export function hasParents<T extends Dependent> (item: T, zone: Zone | ID, regio
   }
 }
 
+export function getParentId (parent: Parent): ID {
+  return uuidv5(getId(parent.region), getId(parent.zone))
+}
+
 export default abstract class ZoneRegionDependent extends BaseItem implements Dependent {
   public readonly parent: Parent
 
@@ -70,7 +74,7 @@ export default abstract class ZoneRegionDependent extends BaseItem implements De
 
   public get parentId (): ID {
     if (this.parent.region) {
-      return uuidv5(getId(this.parent.region), getId(this.parent.zone))
+      return getParentId(this.parent)
     } else {
       return getId(this.parent.zone)
     }

@@ -34,6 +34,10 @@
 
     <v-spacer />
 
+    <export-state
+      v-if="isDevelop"
+    />
+
     <project-settings />
 
     <v-btn
@@ -73,6 +77,7 @@ import ProjectSettings from '@/components/dialogs/ProjectSettings'
 import rms from '@/api/rms'
 import IconButton from '@/components/selection/IconButton'
 import { resetState } from '@/store'
+import ExportState from '@/components/debugging/exportState'
 
 const parse = xmlString => {
   const parser = new DOMParser()
@@ -114,6 +119,7 @@ const fileHandler = (store, fileName) => {
 
 export default {
   components: {
+    ExportState,
     ExportDialog,
     ProjectSettings,
     IconButton,
@@ -130,6 +136,7 @@ export default {
         ? `${this.versionNumber}.${this.buildNumber}-${this.commitHash} (beta)`
         : 'live'
     },
+    isDevelop () { return process.env.NODE_ENV === 'develop' },
   },
 
   methods: {
@@ -173,7 +180,7 @@ export default {
             + result.error)
         }
       }
-    }
+    },
   },
 }
 </script>

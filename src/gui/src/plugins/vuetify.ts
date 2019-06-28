@@ -21,7 +21,11 @@ interface Icons {
 function makeCustomIcons (): Icons {
   const icons = {
     add: 'fas fa-plus-square',
-    copy: 'fas fa-clone',
+    copy: 'far fa-clone',
+    paste: 'fas fa-paste',
+    clipboard: 'far fa-clipboard',
+    clipboardFailed: 'fas fa-exclamation-triangle',
+    clipboardSuccess: 'fas fa-clipboard-check',
     import: 'fas fa-file-import fa-flip-horizontal',
     export: 'fas fa-file-export',
     remove: 'far fa-trash-alt',

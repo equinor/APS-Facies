@@ -61,18 +61,12 @@ export default {
   },
 
   actions: {
-    populate ({ commit, getters }, fields) {
-      fields.forEach(field => {
-        field = new GaussianRandomField({
-          ...field,
-          variogram: new Variogram(unpackVariogram(field.variogram)),
-          trend: new Trend(unpackTrend(field.trend)),
-          crossSection: getters['crossSections/byId'](field.settings.crossSection),
-        })
-        commit('ADD', field)
-      })
+    async populate ({ dispatch }, fields) {
+      await Promise.all(fields.map(field => {
+        return dispatch('add', field)
+      }))
     },
-    async addEmptyField ({ dispatch, commit, state, rootGetters }, { zone, region } = {}) {
+    async addEmptyField ({ dispatch, state, rootGetters }, { zone, region } = {}) {
       zone = zone || rootGetters.zone
       region = region || rootGetters.region
       const field = new GaussianRandomField({
@@ -81,11 +75,23 @@ export default {
         zone,
         region,
       })
-      commit('ADD', field)
+      await dispatch('add', field)
       return field
     },
-    addField ({ commit }, field) {
+    add ({ commit, getters }, field) {
+      if (!(field instanceof GaussianRandomField)) {
+        field = new GaussianRandomField({
+          ...field,
+          variogram: new Variogram(unpackVariogram(field.variogram)),
+          trend: new Trend(unpackTrend(field.trend)),
+          crossSection: getters['crossSections/byId'](field.settings.crossSection),
+        })
+      }
       commit('ADD', field)
+    },
+    async remove ({ commit, dispatch }, field) {
+      await dispatch('truncationRules/deleteField', { grfId: field.id }, { root: true })
+      commit('DELETE', { grfId: getId(field) })
     },
     async deleteField ({ state, commit, dispatch }, { grfId }) {
       if (state.fields.hasOwnProperty(grfId)) {

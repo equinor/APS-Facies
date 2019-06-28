@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from os import environ
+from os import environ, urandom
 from flask import Flask, jsonify
 from flask_cors import CORS
 
 from src.utils.parsing import parse_signature
 from src.api.ui import call
+from gevent import monkey
+
+monkey.patch_all()
 
 
 def _get_environ(variable_name, default,  divider=':'):
@@ -24,11 +27,14 @@ def _get_client_url():
 
 
 app = Flask(__name__)
+app.secret_key = urandom(64)
+app.debug = _get_environ('FLASK_DEBUG', False)
+
 cors = CORS(app, origins=_get_client_url())
 
 
 @app.route('/<path:signature>', methods=['GET'])
-def call_python(signature: str):
+def call_python(signature: str) -> str:
     method_name, args = parse_signature(signature)
     return jsonify(call(method_name, *args))
 
@@ -39,4 +45,8 @@ def favicon():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5001)
+    app.run(
+        host='127.0.0.1',
+        port=5001,
+        debug=True,
+    )

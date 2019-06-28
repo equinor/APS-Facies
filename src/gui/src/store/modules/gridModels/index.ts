@@ -20,11 +20,12 @@ const state: GridModelsState = {
 }
 
 const actions: ActionTree<GridModelsState, RootState> = {
-  select: async ({ state, commit, dispatch }, gridModel: GridModel) => {
+  select: async ({ state, commit, dispatch }, gridModel: GridModel): Promise<void> => {
     if (state.available.includes(gridModel)) {
       commit('CURRENT', gridModel)
       await dispatch('zones/fetch', null, { root: true })
       await Promise.all(parametersDependentOnGrid.map(param => dispatch(`parameters/${param}/fetch`, undefined, { root: true })))
+      await dispatch('copyPaste/copy', null, { root: true })
       // This takes quite a bit more time, and is not worth waiting for, as the rough estimates earlier are good enough for now
       // Hence no `await`
       dispatch('parameters/grid/simBox/fetch', false, { root: true })

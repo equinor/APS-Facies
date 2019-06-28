@@ -520,6 +520,15 @@ package.json:
 	$(YARN) install --dev
 
 
+run-api-gunicorn:
+	gunicorn --workers 8 \
+	         --chdir $(CODE_DIR)/src/api \
+	         --bind $(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT) \
+	         --timeout 1200 \
+	         --graceful-timeout 1200 \
+	         --reload \
+	         app:app
+
 run-rms.uipy-mock:
 	FLASK_APP=$(SOURCE_DIR)/api/app.py \
 	FLASK_ENV=development \

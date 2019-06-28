@@ -25,9 +25,7 @@
           </v-flex>
         </v-layout>
       </div>
-      <cross-section
-        :value="fields"
-      />
+      <cross-section />
       <v-expansion-panel>
         <v-expansion-panel-content
           v-for="field in fields"

@@ -45,8 +45,13 @@ import FractionField from '@/components/selection/FractionField.vue'
 
   computed: {
     relativePosition: {
-      get (this: CrossSection) { return this.crossSection.relativePosition },
+      get (this: CrossSection) {
+        return this.crossSection
+          ? this.crossSection.relativePosition
+          : 0.5
+      },
       set: debounce(function (this: CrossSection, value) {
+        if (!this.crossSection) return
         this.$store.dispatch('gaussianRandomFields/crossSections/changeRelativePosition', {
           id: this.crossSection.id,
           relativePosition: value
@@ -58,7 +63,10 @@ import FractionField from '@/components/selection/FractionField.vue'
 export default class CrossSection extends Vue {
   get crossSection () { return (this.$store as Store).getters['gaussianRandomFields/crossSections/current'] }
 
-  public get type (): string { return this.crossSection.type }
-  public set type (value: string) { this.$store.dispatch('gaussianRandomFields/crossSections/changeType', { id: this.crossSection.id, type: value }) }
+  public get type (): string { return this.crossSection ? this.crossSection.type : 'IJ' }
+  public set type (value: string) {
+    if (!this.crossSection) return
+    this.$store.dispatch('gaussianRandomFields/crossSections/changeType', { id: this.crossSection.id, type: value })
+  }
 }
 </script>

@@ -1,9 +1,11 @@
 import ParametersState from '@/store/modules/parameters/typing'
+import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
 import { GridModelsState } from '@/store/modules/gridModels/types'
+import CopyPasteState from '@/store/modules/copyPaste/typing'
 import { Polygon, TruncationRule, Parent } from '@/utils/domain'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
 import GlobalFacies from '@/utils/domain/facies/global'
@@ -36,10 +38,15 @@ interface RootState {
     message: string
   }
 
+  copyPaste: CopyPasteState
+
   gridModels: GridModelsState
 
   gaussianRandomFields: {
     fields: Identified<GaussianRandomField>
+    crossSections: {
+      available: Identified<CrossSection>
+    }
   }
 
   facies: {
@@ -57,6 +64,39 @@ interface RootState {
 
   truncationRules: {
     rules: Identified<TruncationRule>
+    preset: PresetState
+    templates: {
+      available: Identified<{
+        id: ID
+        name: string
+        type: string
+        minFields: number
+        polygons: {
+          name: number
+          facies: {
+            name: string
+            index: number
+          }
+          proportion: number
+        }[]
+        settings: object
+        fields: {
+          channel: number
+          field: {
+            name: string
+            index: number
+          }
+        }[]
+      }>
+      types: {
+        available: Identified<{
+          id: ID
+          type: string
+          name: string
+          order: number
+        }>
+      }
+    }
   }
 
   zones: {
@@ -89,7 +129,9 @@ interface RootGetters {
   'truncationRules/typeById': (id: ID) => string | null
   'truncationRules/ruleTypes': { text: string, disabled: boolean, order: number }[]
 
-  'gaussianRandomFields/crossSections/current': CrossSection
+  'gaussianRandomFields/crossSections/current': CrossSection | null
+  'gaussianRandomFields/crossSections/byId': (id: ID) => CrossSection | null
+  'gaussianRandomFields/crossSections/byParent': ({ parent }: { parent: Parent }) => CrossSection | null
 
   options: {
     filterZeroProbability: boolean

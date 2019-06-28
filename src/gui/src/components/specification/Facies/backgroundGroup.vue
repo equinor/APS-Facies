@@ -55,7 +55,7 @@ export default class BackgroundGroupFaciesSpecification<P extends Polygon, S ext
   async update (ids: ID[]) {
     const facies = ids.map(id => (this.$store.getters as RootGetters)['facies/byId'](id))
     if (!this.group) {
-      const group = await this.$store.dispatch('facies/groups/add', { facies, ...this.rule.parent })
+      const group = await this.$store.dispatch('facies/groups/add', { facies, parent: this.rule.parent })
       await this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, group, overlay: true })
     } else {
       await this.$store.dispatch('facies/groups/update', { group: this.group, facies })
