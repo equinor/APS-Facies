@@ -2,6 +2,29 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.11.2
+
+### What's new
+* Added script to initialize an RMS project for APS
+  * Available at `/project/res/APSGUI/initialize-project.sh`
+  * Added option to save generated workflows in a temporary directory, which is used by this script
+
+### Fixes
+* The job `APS_simulate_gauss_singleprocessing.py` will now respect the `<WriteSeed>` keyword in model files
+* Facies probabilities will no longer be reset when changing truncation rule template
+* The region parameter should not be selected, and hidden if only one option exists
+* Facies may now have a probability of `0`
+* The path to the project used the wrong action to store the value
+* Only update branches in `/project/res/APSGUI`
+* The detection of with version of RedHat is used on RGS has been made future-proof
+
+### Restructure
+* All references to `writeSeeds` have been renamed to `write_seeds` (PEP8)
+* Minor improvements to the type annotations
+
+### Miscellaneous
+* Minor improvements to the code base
+
 ## 0.11.1
 
 A minor release that fixes a couple of issues related to import/export of trends
