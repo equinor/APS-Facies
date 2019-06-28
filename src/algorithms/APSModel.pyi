@@ -45,6 +45,7 @@ class APSModel:
     preview_cross_section: CrossSection
     sorted_zone_models: OrderedDict
     use_constant_probability: bool
+    write_seeds: bool
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(cls, xml_content: str) -> APSModel: ...

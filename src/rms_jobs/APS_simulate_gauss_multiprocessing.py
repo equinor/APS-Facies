@@ -185,7 +185,7 @@ def run_simulations(
     apsModel = APSModel(modelFile)
     debug_level = apsModel.debug_level
     seedFileName = apsModel.seed_file_name
-    writeSeedFile = apsModel.writeSeeds
+    writeSeedFile = apsModel.write_seeds
     if writeSeedFile:
         if debug_level >= Debug.ON:
             print('Write seed file: ' + str(seedFileName))

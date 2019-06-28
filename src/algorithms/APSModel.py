@@ -23,7 +23,7 @@ class APSModel:
       def __init__(
             self, modelFileName=None,  apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='',
             rmsGridModelName='', rmsZoneParameterName='', rmsRegionParameterName='',
-            rmsFaciesParameterName='', seedFileName='seed.dat', writeSeeds=True,
+            rmsFaciesParameterName='', seedFileName='seed.dat', write_seeds=True,
             mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
             previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF):
@@ -147,7 +147,7 @@ class APSModel:
              with regions.
          rmsFaciesParameterName - Facies parameter to be updated in the grid model in the RMS project by the APS model.
          seedFileName - Name of seed file to be used. Used by scripts for simulation of gaussian fields.
-         writeSeeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read.
+         write_seeds - Boolean variable. True if the seed is to be written to seed file, False if the seed file is to be read.
                       Used by scripts simulating gaussian fields.
          mainFaciesTable - Object containing the global facies table with facies names an associated
                            facies code common for the RMS project. All facies to be modelled must be defined
@@ -188,7 +188,7 @@ class APSModel:
         self.__rmsRegionParamName = rms_region_parameter_name
         self.__rmsFaciesParamName = rms_facies_parameter_name
         self.__seed_file_name = seed_file_name
-        self.writeSeeds = write_seeds
+        self.write_seeds = write_seeds
 
         self.__faciesTable = main_facies_table
         self.__zoneModelTable = zone_model_table if zone_model_table else {}
@@ -320,13 +320,13 @@ class APSModel:
         value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat', modelFile=modelFileName, required=False)
         self.__seed_file_name = value
 
-        # Read optional keyword to specify the boolean variable writeSeeds
+        # Read optional keyword to specify the boolean variable write_seeds
         keyword = 'WriteSeeds'
         value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=modelFileName, required=False)
         if value.upper() == 'YES':
-            self.writeSeeds = True
+            self.write_seeds = True
         else:
-            self.writeSeeds = False
+            self.write_seeds = False
 
         # Read all facies names available
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
@@ -1000,7 +1000,7 @@ class APSModel:
             ('ResultFaciesParamName', self.__rmsFaciesParamName),
             ('PrintInfo', str(self.debug_level.value)),
             ('SeedFile', self.seed_file_name),
-            ('WriteSeeds', 'yes' if self.writeSeeds else 'no'),
+            ('WriteSeeds', 'yes' if self.write_seeds else 'no'),
         ]
 
         for tag, value in tags:
