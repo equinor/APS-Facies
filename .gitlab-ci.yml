@@ -160,11 +160,20 @@ deploy release:
   only:
     - tags
 
+update master:
+  stage: deploy
+  extends: .setup ssh keys
+  script:
+    - 'eval $MAKE update-remote-master'
+  only:
+    - master
+
+
 deploy develop:
   stage: deploy
   extends: .setup ssh keys
   script:
-    - 'eval $MAKE deploy' # update-deployment'
+    - 'eval $MAKE deploy update-remote-develop'
   dependencies:
     - build GUI
   only:
