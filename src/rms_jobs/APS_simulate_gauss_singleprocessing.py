@@ -152,7 +152,7 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
         )
     # End loop over all active zones in the model
 
-    if seed_file_log:
+    if seed_file_log and aps_model.write_seeds:
         if isinstance(seed_file_log, str):
             seed_file_log = Path(seed_file_log)
         if seed_file_log.is_dir():
