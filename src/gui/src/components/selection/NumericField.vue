@@ -59,19 +59,18 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import math, { BigNumber } from 'mathjs'
+import { BigNumber } from 'mathjs'
 import { isNumber } from 'lodash'
 
 import { required as requiredField, between, numeric } from 'vuelidate/lib/validators'
+
+import math from '@/plugins/mathjs'
+
 
 import { Optional } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
-
-math.config({
-  number: 'BigNumber'
-})
 
 interface AdditionalRule {
   name: string

@@ -48,6 +48,13 @@ module.exports = {
       })
   },
 
+  // These dependencies contains various ECMA Script features, or syntax that are not supported by RMS 11
+  // It uses Qt web browser, which, as of RMS 11, runs Chromium 56
+  transpileDependencies: [
+    // These dependencies contains spread operators
+    'mathjs',
+  ],
+
   configureWebpack: {
     plugins: [
       new LodashModuleReplacementPlugin({

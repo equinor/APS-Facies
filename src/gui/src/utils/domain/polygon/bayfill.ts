@@ -38,6 +38,7 @@ export default class BayfillPolygon extends Polygon {
   public constructor ({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
+    // @ts-ignore
     if (Object.values(SlantFactorFacies).includes(name)) {
       if (slantFactor) {
         this.slantFactor = new FmuUpdatableValue(slantFactor)

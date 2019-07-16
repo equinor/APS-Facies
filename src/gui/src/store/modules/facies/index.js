@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-import math from 'mathjs'
+import { divide } from 'mathjs'
 
 import { isNumber } from 'lodash'
 
@@ -132,8 +132,8 @@ export default {
         .filter(facies => facies.previewProbability !== null)
         .map(facies => {
           const probability = !cumulativeProbability
-            ? math.divide(1, selected.length)
-            : math.divide(facies.previewProbability, cumulativeProbability)
+            ? divide(1, selected.length)
+            : divide(facies.previewProbability, cumulativeProbability)
           return updateFaciesProbability(dispatch, facies, probability)
         }))
     },

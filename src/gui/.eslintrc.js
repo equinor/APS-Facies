@@ -87,7 +87,7 @@ module.exports = {
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
-    ecmaVersion: 2017,
+    ecmaVersion: 2019,
     sourceType: 'module',
     ecmaFeatures: { // See https://github.com/babel/babel-eslint/issues/662
       legacyDecorators: true,
