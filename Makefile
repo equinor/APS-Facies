@@ -440,6 +440,14 @@ check-node-dependencies:
 safety-check:
 	$(PIPENV) check
 
+update-dependencies: update-node-dependencies update-python-dependencies
+
+update-node-dependencies:
+	$(YARN) upgrade
+
+update-python-dependencies:
+	$(PIPENV) update --dev
+
 integration-tests: clean-integration init-workflow link-example-files
 	MATPLOTLIB_BACKEND="Agg" \
 	make clean-matplotlibrc matplotlibrc-links
