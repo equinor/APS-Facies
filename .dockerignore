@@ -1,11 +1,3 @@
-.git/
-.idea/
-venv/
-src/gui/node_modules/
-output-virtualbox-iso/
-packer_cache/
-documentation/
-.rms/.local-root/
-aps_gui/
-aps_gui*.plugin
-examples/mock-data/
+*
+!.rms/APS-workflows.rms11.tar.gz
+!.rms/bundle.rms-*.tar.gz
