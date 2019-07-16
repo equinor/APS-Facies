@@ -46,7 +46,7 @@ def favicon():
 
 if __name__ == '__main__':
     app.run(
-        host='127.0.0.1',
-        port=5001,
+        host=_get_environ('VUE_APP_APS_SERVER', '127.0.0.1'),
+        port=_get_environ('VUE_APP_APS_API_PORT', 5000),
         debug=True,
     )

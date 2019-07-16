@@ -23,5 +23,6 @@ dataclasses = "*"
 flask-cors = "*"
 gevent = "*"
 gunicorn = "*"
+python-dotenv = "*"
 
 [requires]
