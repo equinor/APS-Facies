@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from src.utils.roxar.rms_project_data import RMSData
-import roxar
 import roxar.rms
 
 

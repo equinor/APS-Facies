@@ -130,7 +130,8 @@ export default {
       template.type = Object.keys(state.types.available).find(id => state.types.available[`${id}`].type === template.type)
       return addItem({ commit }, { item: template })
     },
-    async createRule ({ dispatch, state, rootGetters, rootState }, { name, type, parent = null }) {
+    async createRule (context, { name, type, parent = null }) {
+      const { dispatch, state, rootGetters, rootState } = context
       const autoFill = rootState.options.automaticFaciesFill.value
 
       parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
@@ -144,11 +145,11 @@ export default {
         }
       }
       if (autoFill && template.overlay) {
-        await Promise.all(template.overlay.items.map(item => getFaciesGroup({ rootGetters, dispatch }, item.over, parent)))
+        await Promise.all(template.overlay.items.map(item => getFaciesGroup(context, item.over, parent)))
       }
-      const backgroundFields = processFields(rootGetters, rootState, template.fields, parent)
-      const overlay = processOverlay(rootGetters, template.overlay, parent)
-      let polygons = processPolygons({ rootGetters, rootState }, { type, polygons: template.polygons, settings: template.settings })
+      const backgroundFields = processFields(context, template.fields, parent)
+      const overlay = processOverlay(context, template.overlay, parent)
+      let polygons = processPolygons(context, { type, polygons: template.polygons, settings: template.settings })
       polygons = combinePolygons(polygons, overlay)
       polygons = structurePolygons(polygons)
       const levels = polygons.map(({ level }) => level)

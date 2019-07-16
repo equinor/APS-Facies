@@ -9,7 +9,6 @@ import ZoneRegionDependent, {
   DependentConfiguration,
   DependentSerialization
 } from '@/utils/domain/bases/zoneRegionDependent'
-import { Identified } from '@/utils/domain/types'
 
 import Trend, { TrendSerialization } from '@/utils/domain/gaussianRandomField/trend'
 import Variogram, { VariogramSerialization } from '@/utils/domain/gaussianRandomField/variogram'
@@ -140,13 +139,10 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
   }
 }
 
-type GaussianRandomFields = Identified<GaussianRandomField>
-
 export {
   Variogram,
   Trend,
   GaussianRandomField,
-  GaussianRandomFields,
   TrendSerialization,
   VariogramSerialization,
 }

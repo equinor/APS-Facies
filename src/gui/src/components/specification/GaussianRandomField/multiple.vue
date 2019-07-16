@@ -94,8 +94,8 @@ export default class MultipleGaussianRandomFields extends Vue {
   get isOpen () { return this.expanded === 0 }
   get ids () { return Object.keys(this.fields) }
 
-  addField () {
-    this.$store.dispatch('gaussianRandomFields/addEmptyField')
+  async addField () {
+    await this.$store.dispatch('gaussianRandomFields/addEmptyField')
   }
 
   deleteField (field: Field) {

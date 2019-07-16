@@ -23,7 +23,7 @@ MATPLOTLIB_BACKEND ?= Agg
 endif
 TAR_EXCRACT := $(TAR) -xf
 LOG_DIR := logs
-# Mode bay be 'production', or 'development'
+# Mode may be 'production', or 'development'
 MODE ?= production
 # Valid options: TRACE, DEBUG, INFO (default), WARN, ERROR, CRITICAL
 LOG_LEVEL := INFO
@@ -91,7 +91,7 @@ LIB_PREFIX := $(CODE_DIR)/libraries
 LIB_SOURCE := $(LIB_PREFIX)/sources
 LIBGAUSS_FIELD_PATH := $(LIB_PREFIX)/libgaussField
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
-ENTRY_POINT := $(SOURCE_DIR)/gui/$(MAIN_FILE)
+ENTRY_POINT := $(WEB_DIR)/$(MAIN_FILE)
 TEST_FOLDER := $(SOURCE_DIR)/unit_test
 INTEGRATION_TESTS := $(TEST_FOLDER)/integration
 AUXILLARY := $(CODE_DIR)/auxillary

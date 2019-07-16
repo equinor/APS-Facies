@@ -11,7 +11,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
-export default class BaseDropdown<T = any> extends Vue {
+export default class BaseDropdown<T> extends Vue {
   @Prop({ required: true })
   readonly label!: string
 

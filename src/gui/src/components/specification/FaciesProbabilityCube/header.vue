@@ -72,11 +72,7 @@ export default class FaciesProbabilityCubeHeader extends Vue {
       .map(facies => facies.probabilityCube)
       .filter(param => notEmpty(param))
   }
-  get zoneCodes () {
-    return Object.values((this.$store as Store).state.zones.available)
-      .filter(zone => !!zone.selected)
-      .map(zone => zone.code)
-  }
+
   get selectedFacies () {
     const state = this.$store.state
     const getters = this.$store.getters

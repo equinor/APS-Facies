@@ -68,8 +68,8 @@
 </template>
 
 <script lang="ts">
-import { Store } from '@/store/typing'
 import { Component, Vue } from 'vue-property-decorator'
+import { Store } from '@/store/typing'
 
 import { xml2json } from 'xml-js'
 
@@ -83,6 +83,7 @@ import ExportState from '@/components/debugging/exportState.vue'
 
 import rms from '@/api/rms'
 import { resetState } from '@/store'
+import { inDevelopmentMode } from '@/utils/helpers'
 
 function parse (xmlString: string): Document {
   const parser = new DOMParser()
@@ -149,7 +150,7 @@ export default class TheToolBar extends Vue {
       : 'live'
   }
 
-  get isDevelop () { return process.env.NODE_ENV === 'develop' }
+  get isDevelop () { return inDevelopmentMode() }
 
   goToHelp () {
     rms.openWikiHelp()

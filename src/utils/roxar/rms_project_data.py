@@ -102,9 +102,6 @@ class RMSData:
     def get_realization_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_discrete)
 
-    def get_zone_parameters(self, grid_model_name):
-        return self._get_parameter_names(grid_model_name, self.is_zone_parameter)
-
     def get_region_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_region_parameter)
 

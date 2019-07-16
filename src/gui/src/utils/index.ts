@@ -151,8 +151,8 @@ function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: Roo
     })
 }
 
-function makeGaussianRandomFieldSpecification ({ rootGetters }: { rootGetters: RootGetters }, rule: TruncationRule): GaussianRandomFieldSpecification[] {
-  return Object.values(rootGetters.fields)
+function makeGaussianRandomFieldSpecification (rule: TruncationRule): GaussianRandomFieldSpecification[] {
+  return rule.fields
     .map((field): GaussianRandomFieldSpecification => {
       return {
         name: field.name,
@@ -167,7 +167,7 @@ function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: Roo
   return {
     type: rule.type,
     globalFaciesTable: makeGlobalFaciesTableSpecification({ rootGetters }, rule),
-    gaussianRandomFields: makeGaussianRandomFieldSpecification({ rootGetters }, rule),
+    gaussianRandomFields: makeGaussianRandomFieldSpecification(rule),
     values: rule.specification,
     constantParameters: !rootGetters.faciesTable.some((facies): boolean => !!facies.probabilityCube),
   }

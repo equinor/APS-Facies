@@ -4,10 +4,10 @@ export default {
   namespaced: true,
 
   actions: {
-    createModelFileFromStore: ({ rootState, rootGetters }) => {
+    createModelFileFromStore: (context) => {
       return new Promise((resolve, reject) => {
         try {
-          const xmlString = createModel({ rootState, rootGetters })
+          const xmlString = createModel(context)
           resolve(xmlString)
         } catch (error) {
           reject(error)

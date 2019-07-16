@@ -54,7 +54,7 @@
             <icon-button
               icon="copy"
               :color="getColor(props.item)"
-              @click="_ => copy(props.item)"
+              @click="() => copy(props.item)"
             />
             <icon-button
               v-if="source"
@@ -62,7 +62,7 @@
               loading-spinner
               :disabled="!canPaste(props.item)"
               :waiting="isPasting(props.item)"
-              @click="_ => paste(props.item)"
+              @click="() => paste(props.item)"
             />
           </v-layout>
         </td>

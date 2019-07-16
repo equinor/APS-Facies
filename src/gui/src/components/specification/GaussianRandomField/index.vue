@@ -97,7 +97,7 @@ import GaussianPlot from '@/components/plot/GaussianPlot'
 import TrendSpecification from '@/components/specification/Trend'
 import RangeSpecification from '@/components/specification/GaussianRandomField/Range'
 import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection'
-import Power from '@/components/specification/GaussianRandomField/Power'
+import PowerSpecification from '@/components/specification/GaussianRandomField/Power'
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
 import IconButton from '@/components/selection/IconButton'
 import { AppTypes } from '@/utils/typing'
@@ -108,7 +108,7 @@ export default {
   components: {
     ItemSelection,
     IconButton,
-    PowerSpecification: Power,
+    PowerSpecification,
     AnisotropyDirection,
     RangeSpecification,
     GaussianPlot,

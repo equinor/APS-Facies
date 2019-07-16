@@ -1,4 +1,3 @@
-import { fetchParameterHelper } from '@/store/utils'
 import rms from '@/api/rms'
 
 export default {

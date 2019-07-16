@@ -18,8 +18,6 @@ import TruncationRule from '@/components/specification/TruncationRule/index.vue'
 
 import { isEmpty } from '@/utils'
 
-import { ID } from '@/utils/domain/types'
-
 @Component({
   components: {
     FaciesProbabilityCube,
@@ -58,23 +56,6 @@ export default class ElementSettings extends Vue {
       : this.options.region === 'name'
         ? current.name
         : `Region ${current.code}`
-  }
-
-  get zoneModels () {
-    const selectedZones = this.$store.getters['zones/selected']
-    // const currentZone = this.$store.state.zones.current
-
-    if (selectedZones == null) {
-      return []
-    } else {
-      const models: { zoneNumber: number, regionNumber: number }[] = []
-      const zones = this.$store.state.zones.available
-      selectedZones.forEach(function (zoneId: ID) {
-        const zone = zones[`${zoneId}`]
-        models.push({ zoneNumber: zone.code, regionNumber: 0 })
-      })
-      return models
-    }
   }
 
   get hasFacies () { return Object.keys(this.$store.state.facies.available).length > 0 }

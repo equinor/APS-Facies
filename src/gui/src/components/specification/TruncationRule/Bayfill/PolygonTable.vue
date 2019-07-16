@@ -99,7 +99,7 @@ export default class BayfillPolygonTable extends Vue {
   }
 
   async updateFactor (item: BayfillPolygon, value: number) {
-    return this.$store.dispatch('truncationRules/changeSlantFactors', {
+    await this.$store.dispatch('truncationRules/changeSlantFactors', {
       rule: this.value,
       polygon: item,
       value

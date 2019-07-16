@@ -14,7 +14,7 @@ import MainPage from '@/pages/MainPage.vue'
 @Component({
   components: {
     MainPage,
-    ToolBar
+    ToolBar,
   },
 })
 export default class App extends Vue {

@@ -345,7 +345,6 @@ export default class ProjectSettings extends Vue {
   }
 
   chooseAPSModelFileLocation () {
-    // eslint-disable-next-line no-undef
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this.apsModelFileLocation = path
@@ -353,7 +352,6 @@ export default class ProjectSettings extends Vue {
     })
   }
   chooseTruncationRuleFileLocation () {
-    // eslint-disable-next-line no-undef
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this.truncationRuleLocation = path
@@ -361,7 +359,6 @@ export default class ProjectSettings extends Vue {
     })
   }
   chooseFMUparametersFileLocation () {
-    // eslint-disable-next-line no-undef
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this.fmuParameterListLocation = path

@@ -139,5 +139,3 @@ export default abstract class TruncationRule<
       .reduce((sum, { previewProbability }): number => sum + (previewProbability || 0), 0)
   }
 }
-
-export type TruncationRules<T extends Polygon, S extends PolygonSerialization> = Identified<TruncationRule<T, S>>

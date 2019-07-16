@@ -48,6 +48,10 @@ function includes<T extends Identifiable> (items: T[], item: T): boolean {
   return items.map(getId).includes(item.id)
 }
 
+function inDevelopmentMode (): boolean {
+  return process.env.NODE_ENV === 'develop'
+}
+
 export {
   hex,
   isUUID,
@@ -60,4 +64,5 @@ export {
   notEmpty,
   includes,
   NoCache,
+  inDevelopmentMode,
 }

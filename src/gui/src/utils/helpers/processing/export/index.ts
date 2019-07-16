@@ -14,7 +14,7 @@ import {
 } from '@/utils/domain'
 import Variogram from '@/utils/domain/gaussianRandomField/variogram'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
-import { Identified } from '@/utils/domain/types'
+import { Identified } from '@/utils/domain/bases/interfaces'
 import { getFaciesName } from '@/utils/queries'
 
 class APSExportError extends Error {
@@ -56,20 +56,20 @@ function createElement (doc: Document, elemName: string, elemValue?: Value | nul
   return elem
 }
 
-function addRMSProjectName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addRMSProjectName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const name = rootState.parameters.names.project.selected || '[ UNKNOWN ]'
   parentElement.appendChild(createElement(doc, 'RMSProjectName', name))
 }
 
-function addRMSWorkflowName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addRMSWorkflowName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.parameters.names.workflow.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'RMSWorkflowName', value))
   }
 }
 
-function addGridModelName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
-  const value = rootState.gridModels.current
+function addGridModelName ({ rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
+  const value = rootGetters.gridModel
   if (value) {
     parentElement.appendChild(createElement(doc, 'GridModelName', value))
   } else {
@@ -77,7 +77,7 @@ function addGridModelName (rootState: RootState, doc: Document, parentElement: H
   }
 }
 
-function addZoneParamName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addZoneParamName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   /**
    * zoneParamName : Kommentar fra Oddvar:
    * GUI henter info direkte fra gridet. Workflow leser soneparameteren, men jeg har en funksjon som oppretter
@@ -99,13 +99,13 @@ function addZoneParamName (rootState: RootState, doc: Document, parentElement: H
   }
 }
 
-function addRegionParamName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addRegionParamName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   if (rootState.regions.use) {
     parentElement.appendChild(createElement(doc, 'RegionParamName', rootState.parameters.region.selected))
   }
 }
 
-function addResultFaciesParamName (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addResultFaciesParamName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = rootState.parameters.realization.selected
   if (value) {
     parentElement.appendChild(createElement(doc, 'ResultFaciesParamName', value))
@@ -114,7 +114,7 @@ function addResultFaciesParamName (rootState: RootState, doc: Document, parentEl
   }
 }
 
-function addPrintInfo (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addPrintInfo ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here?'
   if (value) {
     // setting to 0:
@@ -122,7 +122,7 @@ function addPrintInfo (rootState: RootState, doc: Document, parentElement: HTMLE
   }
 }
 
-function addSeedFile (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addSeedFile ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here??? Seed.dat is said to be default value?'
   if (value) {
     // hard coded to seed.dat
@@ -130,18 +130,21 @@ function addSeedFile (rootState: RootState, doc: Document, parentElement: HTMLEl
   }
 }
 
-function addWriteSeeds (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addWriteSeeds ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'No'
   if (value) {
     parentElement.appendChild(createElement(doc, 'WriteSeeds', value))
   }
 }
 
-function addMainFaciesTable (rootState: RootState, doc: Document, parentElement: HTMLElement): void {
+function addMainFaciesTable ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   // getting blockedWell and blockedWellLog
   const bwParam = rootState.parameters.blockedWell
-  const bwlogParam = rootState.parameters.blockedWellLog
-  const mainFaciesElement = createElement(doc, 'MainFaciesTable', null, [{ name: 'blockedWell', value: bwParam.selected }, { name: 'blockedWellLog', value: bwlogParam.selected }])
+  const bwLogParam = rootState.parameters.blockedWellLog
+  const mainFaciesElement = createElement(doc, 'MainFaciesTable', null, [
+    { name: 'blockedWell', value: bwParam.selected || '' },
+    { name: 'blockedWellLog', value: bwLogParam.selected || '' },
+  ])
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
   const allFacies = Object.values(rootState.facies.global.available)
@@ -197,36 +200,36 @@ function addFaciesProb ({ rootState, rootGetters }: Context, doc: Document, pare
   })
 }
 
-function addVario (doc: Document, variogram: Variogram, baseKw: string, fieldElement: HTMLElement): void {
-  const varioElement = createElement(doc, 'Vario', null, [{ name: 'name', value: variogram.type }])
+function addVariogram (doc: Document, variogram: Variogram, baseKw: string, fieldElement: HTMLElement): void {
+  const variogramElement = createElement(doc, 'Vario', null, [{ name: 'name', value: variogram.type }])
 
-  varioElement.append(createElement(doc, 'MainRange',
+  variogramElement.append(createElement(doc, 'MainRange',
     variogram.range.main.value,
     variogram.range.main.updatable ? [{ name: 'kw', value: baseKw + '_RESIDUAL_MAINRANGE' }] : null))
 
-  varioElement.append(createElement(doc, 'PerpRange',
+  variogramElement.append(createElement(doc, 'PerpRange',
     variogram.range.perpendicular.value,
     variogram.range.perpendicular.updatable ? [{ name: 'kw', value: baseKw + '_RESIDUAL_PERPRANGE' }] : null))
 
-  varioElement.append(createElement(doc, 'VertRange',
+  variogramElement.append(createElement(doc, 'VertRange',
     variogram.range.vertical.value,
     variogram.range.vertical.updatable ? [{ name: 'kw', value: baseKw + '_RESIDUAL_VERTRANGE' }] : null))
 
-  varioElement.append(createElement(doc, 'AzimuthAngle',
+  variogramElement.append(createElement(doc, 'AzimuthAngle',
     variogram.angle.azimuth.value,
     variogram.angle.azimuth.updatable ? [{ name: 'kw', value: baseKw + '_RESIDUAL_AZIMUTHANGLE' }] : null))
 
-  varioElement.append(createElement(doc, 'DipAngle',
+  variogramElement.append(createElement(doc, 'DipAngle',
     variogram.angle.dip.value,
     variogram.angle.dip.updatable ? [{ name: 'kw', value: baseKw + '_RESIDUAL_DIPANGLE' }] : null))
 
   if (variogram.type === 'GENERAL_EXPONENTIAL') {
-    varioElement.append(createElement(doc, 'Power',
+    variogramElement.append(createElement(doc, 'Power',
       variogram.power.value,
       variogram.power.updatable ? [{ name: 'kw', value: baseKw + '_POWER' }] : null))
   }
 
-  fieldElement.append(varioElement)
+  fieldElement.append(variogramElement)
 }
 
 function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, baseKw: string, fieldElement: HTMLElement): void {
@@ -308,19 +311,19 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
     if (trendType !== 'Linear3D') {
       // Origin information applies to everything not Linear3D
 
-      // origin_x,
+      // origin, x direction,
       trendTypeElement.append(createElement(doc, 'origin_x', originX.value,
         originX.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_X' }] : null))
 
-      // origin_y,
+      // origin, y direction,
       trendTypeElement.append(createElement(doc, 'origin_y', originY.value,
         originY.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_Y' }] : null))
 
-      // origin_z_simbox
+      // origin, z direction (simulation box)
       trendTypeElement.append(createElement(doc, 'origin_z_simbox', originZ.value,
         originZ.updatable ? [{ name: 'kw', value: baseKw + '_TREND_ORIGIN_Z_SIMBOX' }] : null))
 
-      // origintype
+      // origin type
       trendTypeElement.append(createElement(doc, 'origintype', originType))
     }
   }
@@ -333,7 +336,7 @@ function addGaussianRandomField (doc: Document, field: GaussianRandomField, pare
   const regionCode = parent.region ? parent.region.code : 0
   const baseKw = `APS_${parent.zone.code}_${regionCode}_GF_${field.name}`
   // attach vario, trend, relative standard deviation and seed to field:
-  addVario(doc, field.variogram, baseKw, fieldElement)
+  addVariogram(doc, field.variogram, baseKw, fieldElement)
   if (field.trend.use && field.trend.type !== 'NONE') {
     addTrend(doc, field, parent, baseKw, fieldElement)
     fieldElement.append(createElement(doc, 'RelStdDev',
@@ -342,7 +345,7 @@ function addGaussianRandomField (doc: Document, field: GaussianRandomField, pare
   fieldElement.append(createElement(doc, 'SeedForPreview', field.settings.seed))
 }
 
-function addGaussianRandomFields (rootState: RootState, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
+function addGaussianRandomFields ({ rootState }: Context, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
   const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
     .filter((field): boolean => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
     .sort((a, b): number => a.name.localeCompare(b.name, undefined, { numeric: true }))
@@ -361,7 +364,7 @@ function addGaussianRandomFields (rootState: RootState, doc: Document, parent: P
   }
 }
 
-function getNumberOfFieldsForTruncRule ({ rootState }: { rootState: RootState }, parent: Parent): number {
+function getNumberOfFieldsForTruncRule ({ rootState }: Context, parent: Parent): number {
   const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
     .filter((field): boolean => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
   return relevantFields ? relevantFields.length : 0
@@ -379,8 +382,8 @@ function getAlphaNames<P extends Polygon, S extends PolygonSerialization> (trunc
   return alphaFields.map((field): string => field.name).join(' ')
 }
 
-function addTruncationRuleBayFill ({ rootState }: { rootState: RootState }, doc: Document, parent: Parent, truncRule: Bayfill, truncRuleElem: HTMLElement): void {
-  const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
+function addTruncationRuleBayFill (context: Context, doc: Document, parent: Parent, truncRule: Bayfill, truncRuleElem: HTMLElement): void {
+  const numberOfFields = getNumberOfFieldsForTruncRule(context, parent)
   const bayFillElem = createElement(doc, 'Trunc3D_Bayfill', null,
     [{ name: 'nGFields', value: numberOfFields }])
   truncRuleElem.append(bayFillElem)
@@ -420,7 +423,7 @@ function addTruncationRuleOverlay<
   Sp extends PolygonSpecification,
   T extends OverlayTruncationRule<P, S, Sp>
 > (
-  { rootState }: { rootState: RootState },
+  context: Context,
   doc: Document,
   parent: Parent,
   truncRule: T,
@@ -428,7 +431,8 @@ function addTruncationRuleOverlay<
   elementName: string,
   backgroundPolygonsHandler: (backGroundModelElem: HTMLElement) => void
 ): void {
-  const numberOfFields = getNumberOfFieldsForTruncRule({ rootState }, parent)
+  const { rootState } = context
+  const numberOfFields = getNumberOfFieldsForTruncRule(context, parent)
   const truncElement = createElement(doc, elementName, null,
     [{ name: 'nGFields', value: numberOfFields }])
   truncRuleElem.append(truncElement)
@@ -488,7 +492,7 @@ function addTruncationRuleOverlay<
   }
 }
 
-function addTruncationRuleCubic ({ rootState }: { rootState: RootState }, doc: Document, parent: Parent, truncRule: Cubic, truncRuleElem: HTMLElement): void {
+function addTruncationRuleCubic (context: Context, doc: Document, parent: Parent, truncRule: Cubic, truncRuleElem: HTMLElement): void {
   function handleBackgroundPolygons (backGroundModelElem: HTMLElement): void {
     function addFraction (element: HTMLElement, polygon: CubicPolygon): void {
       element.append(createElement(doc, 'ProbFrac', polygon.fraction, [{ name: 'name', value: getFaciesName(polygon) }]))
@@ -513,7 +517,7 @@ function addTruncationRuleCubic ({ rootState }: { rootState: RootState }, doc: D
     }
   }
   addTruncationRuleOverlay(
-    { rootState },
+    context,
     doc,
     parent,
     truncRule,
@@ -523,7 +527,7 @@ function addTruncationRuleCubic ({ rootState }: { rootState: RootState }, doc: D
   )
 }
 
-function addTruncationRuleNonCubic ({ rootState }: { rootState: RootState }, doc: Document, parent: Parent, truncRule: NonCubic, truncRuleElem: HTMLElement): void {
+function addTruncationRuleNonCubic (context: Context, doc: Document, parent: Parent, truncRule: NonCubic, truncRuleElem: HTMLElement): void {
   function handleBackgroundPolygons (backGroundModelElem: HTMLElement): void {
     backGroundModelElem.append(createElement(doc, 'UseConstTruncParam', 1)) // See issue 101 (https://git.equinor.com/APS/GUI/issues/101)
     truncRule.backgroundPolygons.forEach((polygon): void => {
@@ -538,10 +542,11 @@ function addTruncationRuleNonCubic ({ rootState }: { rootState: RootState }, doc
       faciesElem.append(createElement(doc, 'ProbFrac', polygon.fraction))
     })
   }
-  addTruncationRuleOverlay({ rootState }, doc, parent, truncRule, truncRuleElem, 'Trunc2D_Angle', handleBackgroundPolygons)
+  addTruncationRuleOverlay(context, doc, parent, truncRule, truncRuleElem, 'Trunc2D_Angle', handleBackgroundPolygons)
 }
 
-function addTruncationRule ({ rootState }: { rootState: RootState}, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
+function addTruncationRule (context: Context, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
+  const { rootState } = context
   const truncRuleElem = createElement(doc, 'TruncationRule')
   zoneElement.append(truncRuleElem)
 
@@ -554,17 +559,18 @@ function addTruncationRule ({ rootState }: { rootState: RootState}, doc: Documen
     throw new APSExportError(errMessage)
   }
   if (truncRule instanceof Bayfill) {
-    addTruncationRuleBayFill({ rootState }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleBayFill(context, doc, parent, truncRule, truncRuleElem)
   }
   if (truncRule instanceof NonCubic) {
-    addTruncationRuleNonCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleNonCubic(context, doc, parent, truncRule, truncRuleElem)
   }
   if (truncRule instanceof Cubic) {
-    addTruncationRuleCubic({ rootState }, doc, parent, truncRule, truncRuleElem)
+    addTruncationRuleCubic(context, doc, parent, truncRule, truncRuleElem)
   }
 }
 
-function addZoneModel ({ rootState, rootGetters }: Context, doc: Document, parent: Parent, zoneModelsElement: HTMLElement): void {
+function addZoneModel (context: Context, doc: Document, parent: Parent, zoneModelsElement: HTMLElement): void {
+  const { rootGetters } = context
   const zoneRegionAttributes = []
   zoneRegionAttributes.push({ name: 'number', value: parent.zone.code })
   if (parent.region) {
@@ -578,14 +584,15 @@ function addZoneModel ({ rootState, rootGetters }: Context, doc: Document, paren
 
   zoneElement.append(createElement(doc, 'SimBoxThickness', rootGetters.simulationSettings().simulationBox.z))
 
-  addFaciesProb({ rootState, rootGetters }, doc, parent, zoneElement)
+  addFaciesProb(context, doc, parent, zoneElement)
 
-  addGaussianRandomFields(rootState, doc, parent, zoneElement)
+  addGaussianRandomFields(context, doc, parent, zoneElement)
 
-  addTruncationRule({ rootState }, doc, parent, zoneElement)
+  addTruncationRule(context, doc, parent, zoneElement)
 }
 
-function addZoneModels ({ rootState, rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
+function addZoneModels (context: Context, doc: Document, parentElement: HTMLElement): void {
+  const { rootState } = context
   const zoneModelsElem = createElement(doc, 'ZoneModels', null, null)
   parentElement.appendChild(zoneModelsElem)
   const selectedZones = Object.values(rootState.zones.available)
@@ -597,38 +604,38 @@ function addZoneModels ({ rootState, rootGetters }: Context, doc: Document, pare
   selectedZones.forEach((zone): void => {
     const useRegions = rootState.regions.use && !!rootState.parameters.region.selected
     if (!useRegions) {
-      addZoneModel({ rootState, rootGetters }, doc, { zone: zone, region: null }, zoneModelsElem)
+      addZoneModel(context, doc, { zone: zone, region: null }, zoneModelsElem)
     } else {
       const selectedRegions = Object.values(zone.regions)
         .filter((region): boolean => !!region.selected)
         .sort((r1, r2): number => r1.code - r2.code)
       selectedRegions.forEach((region): void => {
-        addZoneModel({ rootState, rootGetters }, doc, { zone: zone, region: region }, zoneModelsElem)
+        addZoneModel(context, doc, { zone: zone, region: region }, zoneModelsElem)
       })
     }
   })
 }
 
-function addContent ({ rootState, rootGetters }: Context, doc: Document, rootElem: HTMLElement): void {
-  addRMSProjectName(rootState, doc, rootElem)
-  addRMSWorkflowName(rootState, doc, rootElem)
-  addGridModelName(rootState, doc, rootElem)
-  addZoneParamName(rootState, doc, rootElem)
-  addRegionParamName(rootState, doc, rootElem)
-  addResultFaciesParamName(rootState, doc, rootElem)
-  addPrintInfo(rootState, doc, rootElem)
-  addSeedFile(rootState, doc, rootElem)
-  addWriteSeeds(rootState, doc, rootElem)
-  addMainFaciesTable(rootState, doc, rootElem)
-  addZoneModels({ rootState, rootGetters }, doc, rootElem)
+function addContent (context: Context, doc: Document, rootElem: HTMLElement): void {
+  addRMSProjectName(context, doc, rootElem)
+  addRMSWorkflowName(context, doc, rootElem)
+  addGridModelName(context, doc, rootElem)
+  addZoneParamName(context, doc, rootElem)
+  addRegionParamName(context, doc, rootElem)
+  addResultFaciesParamName(context, doc, rootElem)
+  addPrintInfo(context, doc, rootElem)
+  addSeedFile(context, doc, rootElem)
+  addWriteSeeds(context, doc, rootElem)
+  addMainFaciesTable(context, doc, rootElem)
+  addZoneModels(context, doc, rootElem)
 }
 
-export function createModel ({ rootState, rootGetters }: Context): string {
+export function createModel (context: Context): string {
   const doc = document.implementation.createDocument('', '', null)
   const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
   doc.appendChild(rootElem)
 
-  addContent({ rootState, rootGetters }, doc, rootElem)
+  addContent(context, doc, rootElem)
   const serializer = new XMLSerializer()
   return serializer.serializeToString(doc)
 }

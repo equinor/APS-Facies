@@ -51,11 +51,11 @@ const process = (getters, items, target, type, path) => {
   })
 }
 
-export function processFields (getters, state, fields, parent = {}) {
-  if (state.options.automaticAlphaFieldSelection.value) {
+export function processFields ({ rootGetters, rootState }, fields, parent = {}) {
+  if (rootState.options.automaticAlphaFieldSelection.value) {
     return fields
       .map(item => {
-        const field = findField(getters, item.field, parent)
+        const field = findField(rootGetters, item.field, parent)
         return {
           channel: item.channel,
           field: field || null
@@ -64,7 +64,7 @@ export function processFields (getters, state, fields, parent = {}) {
       .sort((a, b) => a.channel - b.channel)
       .map(({ field }) => field)
   } else {
-    return process(getters, fields, 'field', 'gaussianRandomField', 'field.name')
+    return process(rootGetters, fields, 'field', 'gaussianRandomField', 'field.name')
   }
 }
 
@@ -168,7 +168,7 @@ const findFacies = (getters, facies) => {
   })(getters, facies)
 }
 
-export function processOverlay (getters, overlay, parent) {
+export function processOverlay ({ rootGetters }, overlay, parent) {
   if (!overlay) return null
   const items = {}
   overlay.items.forEach(({ over, polygons }, index) => {
@@ -176,9 +176,9 @@ export function processOverlay (getters, overlay, parent) {
       const id = uuidv4()
       items[`${id}`] = {
         id,
-        group: findOverlayGroup(getters, over, parent),
-        field: findField(getters, field),
-        facies: findFacies(getters, facies),
+        group: findOverlayGroup(rootGetters, over, parent),
+        field: findField(rootGetters, field),
+        facies: findFacies(rootGetters, facies),
         fraction: probability,
         center: interval,
         order: index,

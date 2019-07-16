@@ -17,8 +17,6 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import FaciesSpecificationBase from './base.vue'
 
-import { updateFacies } from '@/store/utils'
-
 @Component({
   components: {
     FaciesSpecificationBase,
@@ -37,7 +35,11 @@ export default class FaciesSpecification<P extends Polygon, S extends PolygonSer
   async updateFacies (faciesId: ID) {
     const facies = (this.$store as Store).getters['facies/byId'](faciesId)
     if (facies) {
-      await updateFacies(this.$store.dispatch, this.rule, this.value, facies, false)
+      await this.$store.dispatch('truncationRules/updateFacies', {
+        rule: this.rule,
+        polygon: this.value,
+        facies,
+      })
     }
   }
 }

@@ -25,28 +25,6 @@ import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { isReady } from '@/store/utils/helpers'
 
-const findPolygonInRule = (rule, polygon) => {
-  return rule._polygons[`${polygon.id}`]
-}
-
-const setFacies = (polygons, src, dest) => {
-  polygons[`${dest.id}`].facies = src.facies
-}
-
-function swapFacies (rule, polygons) {
-  // FIXME: Should be done without 'cloneDeep', as it "objectifies" the polygons
-  if (polygons.length !== 2) throw new Error('Only two polygons may be swapped')
-  const newPolygons = cloneDeep(rule._polygons)
-
-  const first = findPolygonInRule(rule, polygons[0])
-  const other = findPolygonInRule(rule, polygons[1])
-
-  setFacies(newPolygons, first, other)
-  setFacies(newPolygons, other, first)
-
-  return newPolygons
-}
-
 const setPolygonValue = (state, rule, polygon, property, value) => {
   Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], property, value)
 }
@@ -242,14 +220,14 @@ export default {
     async updateRealization ({ commit, dispatch, rootGetters }, rule) {
       await dispatch('facies/normalize', undefined, { root: true })
       const { fields, faciesMap: data } = await api.simulateRealization(
-        Object.values(rootGetters.fields)
+        rule.fields
           .map(field => field.specification({ rootGetters })),
         makeTruncationRuleSpecification(rule, rootGetters)
       )
       commit('UPDATE_REALIZATION', { rule, data })
       await Promise.all(fields.map(field => {
         return dispatch('gaussianRandomFields/updateSimulationData', {
-          grfId: Object.values(rootGetters.fields).find(item => item.name === field.name).id,
+          grfId: rule.fields.find(item => item.name === field.name).id,
           data: field.data,
         }, { root: true })
       }))
@@ -285,9 +263,6 @@ export default {
     },
     updateOverlayField ({ commit }, { rule, polygon, field }) {
       commit('CHANGE_OVERLAY_FIELD', { rule, polygon, field })
-    },
-    swapFacies ({ commit }, { rule, polygons }) {
-      commit('SET_FACIES', { ruleId: rule.id, polygons: swapFacies(rule, polygons) })
     },
     async updateFacies ({ commit, dispatch, rootState }, { rule, polygon, facies }) {
       if (facies instanceof String) facies = rootState.facies.available[`${facies}`]

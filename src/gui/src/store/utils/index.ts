@@ -1,8 +1,3 @@
-import { Facies } from '@/utils/domain'
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
-import { ID } from '@/utils/domain/types'
-import { getId } from '@/utils/helpers'
 import { RootState } from '@/store/typing'
 import { Commit, Dispatch, Module } from 'vuex'
 
@@ -18,27 +13,6 @@ async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dis
   const result = await promise
   commit('AVAILABLE', result)
   await selectOnlyParameter({ dispatch }, result)
-}
-
-function updateFacies<P extends Polygon, S extends PolygonSerialization> (
-  dispatch: Dispatch,
-  rule: TruncationRule<P, S>,
-  polygon: Polygon,
-  facies: Facies | ID,
-  swap: boolean = true
-): Promise<void> {
-  const existing = rule.polygons
-    .find((polygon): boolean => getId(polygon.facies) === getId(facies))
-  return existing && swap
-    ? dispatch('truncationRules/swapFacies', {
-      rule,
-      polygons: [polygon, existing]
-    })
-    : dispatch('truncationRules/updateFacies', {
-      rule,
-      polygon,
-      facies,
-    })
 }
 
 interface OptionState<T> {
@@ -78,7 +52,6 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
 
 export {
   fetchParameterHelper,
-  updateFacies,
   makeOption,
   selectOnlyParameter,
 }

@@ -97,8 +97,6 @@ def apply_truncations_vectorized(
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('nValues: ' + str(nValues))
         print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
-    alphaCoord = {}
-    faciesReal = []
     alphaCoord_vectors = np.zeros((nValues, nGaussFields), np.float32)
     # Loop through the Gaussian field array in c-index ordering
     for n in range(nGaussFields):

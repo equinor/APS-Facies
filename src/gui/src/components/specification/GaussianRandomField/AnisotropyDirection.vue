@@ -16,6 +16,7 @@
       value-type="dip"
       label="Dip"
       unit="°"
+      use-modulus
     />
   </div>
 </template>

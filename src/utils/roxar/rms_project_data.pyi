@@ -137,10 +137,6 @@ class RMSData:
             zone_name:                   ZoneName,
             region_parameter:            RegionParameter,
     ) -> Properties: ...
-    def is_zone_parameter(
-            self,
-            param:                       Property
-    ) -> bool: ...
     def is_region_parameter(
             self,
             param:                       Property
@@ -186,7 +182,7 @@ class RMSData:
     ) -> List[str]: ...
     def get_facies_table_from_blocked_well_log(
             self,
-            grid_model_name:             str,
+            grid_model_name:             GridModel,
             bw_name:                     str,
             facies_log_name:             str
     ) -> Dict[str, int]: ...

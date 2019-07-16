@@ -14,7 +14,7 @@
       <v-card-text>
         <fieldset>
           <legend>
-            Select File to save to:
+            Select File to save to
           </legend>
           <v-layout
             row
@@ -64,10 +64,11 @@
 </template>
 
 <script lang="ts">
-import { APSError } from '@/utils/domain/errors'
 import { Component, Vue } from 'vue-property-decorator'
 
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
+
+import { APSError } from '@/utils/domain/errors'
 import rms from '@/api/rms'
 
 @Component({

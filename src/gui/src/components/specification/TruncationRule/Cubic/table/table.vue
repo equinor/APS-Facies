@@ -52,7 +52,7 @@ import FractionField from '@/components/selection/FractionField.vue'
 import PolygonFractionField from '@/components/selection/PolygonFractionField.vue'
 
 import { sortByOrder } from '@/utils'
-import { CubicPolygon, Facies } from '@/utils/domain'
+import { CubicPolygon } from '@/utils/domain'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 
 import Cubic from '@/utils/domain/truncationRule/cubic'
@@ -106,10 +106,6 @@ export default class CubicFaciesSelection extends Vue {
 
   get hasMultipleFaciesSpecified () {
     return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
-  }
-
-  multipleFaciesSpecified ({ facies }: Facies) {
-    return hasFaciesSpecifiedForMultiplePolygons(this.value.polygons, facies)
   }
 
   ordering (items: CubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }

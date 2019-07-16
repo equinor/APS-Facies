@@ -18,5 +18,5 @@ export function createFacies (num: number): GlobalFacies[] {
     .map((_, index) => {
       return { name: `F0${index + 1}`, code: index }
     })
-    .map(conf => new GlobalFacies({ ...conf, color: defaultColors[conf.code] }))
+    .map(conf => new GlobalFacies({ ...conf, color: defaultColors[conf.code % defaultColors.length] }))
 }
