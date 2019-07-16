@@ -4,6 +4,8 @@ import { Color } from '@/utils/domain/facies/helpers/colors'
 
 import colors from 'vuetify/es5/util/colors'
 
+import { PolygonDescription } from '@/api/types'
+
 function svgPoint (point: [number, number], width: number = 1, height: number = 1): string {
   return `${point[0] * width},${point[1] * height}`
 }
@@ -92,15 +94,14 @@ interface AnnotationSpecification {
   showarrow: boolean
 }
 
-interface PlotSpecification {
+export interface PlotSpecification {
   polygons: PolygonSpecification[]
   annotations: AnnotationSpecification[]
 }
 
-type Polygons = {name: string, polygon: [number, number][]}[]
 type FaciesTable = {name: string, color: string, alias: string}[]
 
-export function plotify (polygons: Polygons, faciesTable: FaciesTable, fillColor: string = ''): PlotSpecification {
+export function plotify (polygons: PolygonDescription[], faciesTable: FaciesTable, fillColor: string = ''): PlotSpecification {
   return polygons.reduce((obj, { name, polygon }): PlotSpecification => {
     const facies = faciesTable.find((facies): boolean => facies.name === name)
     if (!facies) {

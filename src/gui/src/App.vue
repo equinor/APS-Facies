@@ -5,21 +5,23 @@
   </v-app>
 </template>
 
-<script>
-import ToolBar from '@/components/TheToolBar'
-import MainPage from '@/pages/MainPage'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
-  name: 'App',
+import ToolBar from '@/components/TheToolBar.vue'
+import MainPage from '@/pages/MainPage.vue'
+
+@Component({
   components: {
     MainPage,
     ToolBar
   },
-
+})
+export default class App extends Vue {
   beforeMount () {
     // Fetch various parameters
     return this.$store.dispatch('fetch')
-  },
+  }
 }
 </script>
 

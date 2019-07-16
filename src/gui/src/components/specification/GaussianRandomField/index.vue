@@ -211,7 +211,7 @@ export default {
       }
     },
     async openVisualizationSettings () {
-      const { save, settings } = await this.$refs.visualisationSettings.open(cloneDeep(this.value.settings), {})
+      const { save, settings } = await this.$refs.visualisationSettings.open(cloneDeep(this.value.settings))
       if (save) {
         await this.$store.dispatch('gaussianRandomFields/changeSettings', {
           grfId: this.grfId,

@@ -8,12 +8,15 @@
   />
 </template>
 
-<script>
-import SelectionTable from '@/components/table/SelectionTable'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import SelectionTable from '@/components/table/SelectionTable.vue'
 
-export default {
+@Component({
   components: {
     SelectionTable
   },
+})
+export default class RegionSelection extends Vue {
 }
 </script>

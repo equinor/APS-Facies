@@ -67,16 +67,18 @@
   </v-expansion-panel>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-import GaussianRandomField from '@/components/specification/GaussianRandomField'
-import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog'
-import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName'
-import IconButton from '@/components/selection/IconButton'
-import CrossSection from '@/components/specification/GaussianRandomField/CrossSection'
+import GaussianRandomField from '@/components/specification/GaussianRandomField/index.vue'
+import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
+import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName.vue'
+import IconButton from '@/components/selection/IconButton.vue'
+import CrossSection from '@/components/specification/GaussianRandomField/CrossSection.vue'
 
-export default {
+import { GaussianRandomField as Field } from '@/utils/domain'
+
+@Component({
   components: {
     CrossSection,
     IconButton,
@@ -84,31 +86,23 @@ export default {
     ConfirmationDialog,
     GaussianRandomField,
   },
+})
+export default class MultipleGaussianRandomFields extends Vue {
+  expanded: number | null = null
 
-  data () {
-    return {
-      expanded: null,
-    }
-  },
+  get fields () { return this.$store.getters['fields'] }
+  get isOpen () { return this.expanded === 0 }
+  get ids () { return Object.keys(this.fields) }
 
-  computed: {
-    ...mapGetters({
-      fields: 'fields'
-    }),
-    isOpen () { return this.expanded === 0 },
-    ids () { return Object.keys(this.fields) },
-  },
+  addField () {
+    this.$store.dispatch('gaussianRandomFields/addEmptyField')
+  }
 
-  methods: {
-    addField () {
-      this.$store.dispatch('gaussianRandomFields/addEmptyField')
-    },
-    deleteField (field) {
-      this.$refs[`confirmation_${field.id}`][0].open('Are you sure?', `This will delete the Gaussian random field '${field.name}'`, {})
-        .then(confirmed => {
-          if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { grfId: field.id })
-        })
-    },
+  deleteField (field: Field) {
+    this.$refs[`confirmation_${field.id}`][0].open('Are you sure?', `This will delete the Gaussian random field '${field.name}'`)
+      .then((confirmed: boolean) => {
+        if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { grfId: field.id })
+      })
   }
 }
 </script>

@@ -23,7 +23,7 @@ module.exports = {
   ],
 
   settings: {
-    'vue-types/namespace': ['VueTypes', 'AppTypes'],
+    'vue-types/namespace': ['VueTypes'],
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],

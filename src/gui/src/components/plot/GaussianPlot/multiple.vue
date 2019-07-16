@@ -39,55 +39,58 @@
   </v-container>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import GaussianPlot from './index'
-import { AppTypes } from '@/utils/typing'
+import GaussianPlot from './index.vue'
+
+import { GaussianRandomField } from '@/utils/domain'
 
 import { DEFAULT_SIZE } from '@/config'
 
-export default {
-  name: 'MultipleGaussianPlots',
+interface Size {
+  max?: {
+    width: number
+    height: number
+  }
+  width: number
+  height: number
+}
 
+@Component({
   components: {
     GaussianPlot,
   },
+})
+export default class MultipleGaussianPlots extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField[]
 
-  props: {
-    value: VueTypes.arrayOf(AppTypes.gaussianRandomField).isRequired,
-  },
+  size: Size = DEFAULT_SIZE
 
-  data () {
-    return {
-      size: DEFAULT_SIZE,
-    }
-  },
-
-  watch: {
-    content () {
-      this.$nextTick(() => {
-        this.size = this.value
-          .map(field => {
-            if (Object.values(this.$refs).length > 0) {
-              const el = this.$refs[`v-flex:${field.id}`][0].firstChild
-              return {
-                width: el.clientWidth,
-                height: el.clientHeight,
-              }
-            } else {
-              return DEFAULT_SIZE
-            }
-          })
-          .reduce((max, curr) => {
-            const air = 0.1
+  @Watch('content')
+  handle () {
+    this.$nextTick(() => {
+      this.size = this.value
+        .map(field => {
+          if (Object.values(this.$refs).length > 0) {
+            const el = this.$refs[`v-flex:${field.id}`][0].firstChild
             return {
-              width: Math.floor(Math.max(max.width, curr.width) * (1 - air)),
-              height: Math.floor(Math.max(max.height, curr.height) * (1 - air)),
+              width: el.clientWidth,
+              height: el.clientHeight,
             }
-          })
-      })
-    }
+          } else {
+            return DEFAULT_SIZE
+          }
+        })
+        .reduce((max, curr) => {
+          const air = 0.1
+          return {
+            width: Math.floor(Math.max(max.width, curr.width) * (1 - air)),
+            height: Math.floor(Math.max(max.height, curr.height) * (1 - air)),
+          }
+        })
+    })
   }
 }
 </script>

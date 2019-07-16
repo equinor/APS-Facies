@@ -15,24 +15,26 @@
   </v-layout>
 </template>
 
-<script>
-import ChooseParameter from '@/components/selection/dropdown/ChooseParameter'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
+
+import { NoCache } from '@/utils/helpers'
+
+@Component({
   components: {
     ChooseParameter
   },
+})
+export default class ChooseRegionParameter extends Vue {
+  @NoCache
+  get useRegions () {
+    return this.$store.state.regions.use
+  }
 
-  computed: {
-    useRegions: {
-      cache: false,
-      get: function () {
-        return this.$store.state.regions.use
-      },
-      set: function (value) {
-        this.$store.dispatch('regions/use', { use: value })
-      }
-    },
+  set useRegions (value) {
+    this.$store.dispatch('regions/use', { use: value })
   }
 }
 </script>

@@ -6,12 +6,16 @@
   />
 </template>
 
-<script>
-import ChooseParameter from '@/components/selection/dropdown/ChooseParameter'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
+
+@Component({
   components: {
     ChooseParameter
   },
+})
+export default class ChooseBlockedWellParameter extends Vue {
 }
 </script>

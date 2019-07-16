@@ -54,15 +54,20 @@
   </v-container>
 </template>
 
-<script>
-import TruncationMap from '@/components/plot/TruncationMap'
-import FaciesRealization from '@/components/plot/FaciesRealization'
-import GaussianPlots from '@/components/plot/GaussianPlot/multiple'
+<script lang="ts">
+import { Store } from '@/store/typing'
+import { Component, Vue } from 'vue-property-decorator'
 
-import PreviewHeader from '@/components/visualization/preview/header'
-import CrossPlots from '@/components/plot/CrossPlot/multiple'
+import { Optional } from '@/utils/typing'
 
-export default {
+import TruncationMap from '@/components/plot/TruncationMap.vue'
+import FaciesRealization from '@/components/plot/FaciesRealization.vue'
+import GaussianPlots from '@/components/plot/GaussianPlot/multiple.vue'
+
+import PreviewHeader from '@/components/visualization/preview/header.vue'
+import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
+
+@Component({
   components: {
     CrossPlots,
     PreviewHeader,
@@ -70,23 +75,20 @@ export default {
     FaciesRealization,
     TruncationMap,
   },
+})
+export default class ElementPreview extends Vue {
+  panels: Optional<number> = null
 
-  data () {
-    return {
-      panels: null,
-    }
-  },
+  get expanded () { return this.isGaussianFieldsSimulated ? 0 : null }
 
-  computed: {
-    expanded: {
-      get () { return this.isGaussianFieldsSimulated ? 0 : null },
-      set (val) { this.panels = val }
-    },
-    fields () { return Object.values(this.$store.getters.fields) },
-    rule () { return this.$store.getters.truncationRule },
-    isGaussianFieldsSimulated () {
-      return this.fields.every(field => field.simulated)
-    },
-  },
+  set expanded (val) { this.panels = val }
+
+  get fields () { return Object.values((this.$store as Store).getters['fields']) }
+
+  get rule () { return this.$store.getters.truncationRule }
+
+  get isGaussianFieldsSimulated () {
+    return this.fields.every(field => field.simulated)
+  }
 }
 </script>

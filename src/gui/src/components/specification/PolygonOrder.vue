@@ -45,16 +45,16 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
 export default class BasePolygonOrder extends Vue {
-  @Prop({ default: true })
+  @Prop({ default: true, type: Boolean })
   readonly canIncrease: boolean
 
-  @Prop({ default: true })
+  @Prop({ default: true, type: Boolean })
   readonly canDecrease: boolean
 
-  @Prop({ default: true })
+  @Prop({ default: true, type: Boolean })
   readonly canRemove: boolean
 
-  @Prop({ default: true })
+  @Prop({ default: true, type: Boolean })
   readonly canAdd: boolean
 }
 </script>

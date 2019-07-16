@@ -8,27 +8,28 @@
   </v-layout>
 </template>
 
-<script>
-import ChooseRegionParameter from '@/components/selection/dropdown/ChooseRegionParameter'
-import RegionSelection from './RegionSelection'
-import ZoneSelection from './ZoneSelection'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+
+import ChooseRegionParameter from '@/components/selection/dropdown/ChooseRegionParameter.vue'
+import RegionSelection from './RegionSelection.vue'
+import ZoneSelection from './ZoneSelection.vue'
 
 import { notEmpty } from '@/utils'
 
-export default {
+@Component({
   components: {
     ChooseRegionParameter,
     RegionSelection,
     ZoneSelection,
   },
-
-  computed: {
-    canShowRegions () {
-      return (
-        this.$store.state.regions.use
-        && notEmpty(this.$store.getters.regionParameter)
-      )
-    },
-  },
+})
+export default class ZoneRegion extends Vue {
+  get canShowRegions () {
+    return (
+      this.$store.state.regions.use
+      && notEmpty(this.$store.getters.regionParameter)
+    )
+  }
 }
 </script>

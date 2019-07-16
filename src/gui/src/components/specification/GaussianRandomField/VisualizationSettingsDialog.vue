@@ -139,7 +139,7 @@ export default {
   },
 
   methods: {
-    open (settings, options) {
+    open (settings, options = {}) {
       this.dialog = true
       this.settings = settings
       this.options = Object.assign(this.options, options)

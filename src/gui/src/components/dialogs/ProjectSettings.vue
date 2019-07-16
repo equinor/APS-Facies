@@ -295,33 +295,16 @@
   </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue, Watch } from 'vue-property-decorator'
+
 import rms from '@/api/rms'
 
-import BoldButton from '@/components/baseComponents/BoldButton'
-import NumericField from '@/components/selection/NumericField'
+import BoldButton from '@/components/baseComponents/BoldButton.vue'
+import NumericField from '@/components/selection/NumericField.vue'
 
-export default {
-
-  components: {
-    NumericField,
-    BoldButton
-  },
-
-  data () {
-    return {
-      dialog: false,
-      apsModelFileLocation: '',
-      truncationRuleLocation: '',
-      fmuParameterListLocation: '',
-      showZoneNameNumber: '',
-      showRegionNameNumber: '',
-      automaticAlphaFieldSelection: '',
-      automaticFaciesFill: '',
-      filterZeroProbability: false,
-    }
-  },
-
+@Component({
+  // @ts-ignore
   asyncComputed: {
     async title () {
       const name = await rms.projectName()
@@ -329,73 +312,78 @@ export default {
     },
   },
 
-  computed: {
-    simulationSettings () {
-      return this.$store.getters.simulationSettings()
-    },
-    gridSize () {
-      return this.simulationSettings.gridSize
-    },
-    version () {
-      return process.env.VUE_APP_APS_VERSION || ''
-    }
+  components: {
+    NumericField,
+    BoldButton
   },
+})
+export default class ProjectSettings extends Vue {
+  dialog: boolean = false
+  apsModelFileLocation: string = ''
+  truncationRuleLocation: string = ''
+  fmuParameterListLocation: string = ''
+  showZoneNameNumber: string = ''
+  showRegionNameNumber: string = ''
+  automaticAlphaFieldSelection: string = ''
+  automaticFaciesFill: string = ''
+  filterZeroProbability: boolean = false
 
-  watch: {
-    dialog: function (value) {
-      if (value) {
-        this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
-        this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
-        this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
-        this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
-        this.automaticFaciesFill = this.$store.state.options.automaticFaciesFill.value
-        this.filterZeroProbability = this.$store.state.options.filterZeroProbability.value
+  get simulationSettings () { return this.$store.getters.simulationSettings() }
+  get gridSize () { return this.simulationSettings.gridSize }
+  get version () { return process.env.VUE_APP_APS_VERSION || '' }
+
+  @Watch('dialog')
+  onActivation (value: boolean) {
+    if (value) {
+      this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
+      this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
+      this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
+      this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
+      this.automaticFaciesFill = this.$store.state.options.automaticFaciesFill.value
+      this.filterZeroProbability = this.$store.state.options.filterZeroProbability.value
+    }
+  }
+
+  chooseAPSModelFileLocation () {
+    // eslint-disable-next-line no-undef
+    rms.chooseDir('load').then((path: string): void => {
+      if (path) {
+        this.apsModelFileLocation = path
       }
-    },
-  },
-
-  methods: {
-    chooseAPSModelFileLocation (e) {
-      // eslint-disable-next-line no-undef
-      rms.chooseDir('load').then(path => {
-        if (path) {
-          this.apsModelFileLocation = path
-        }
-      })
-    },
-    chooseTruncationRuleFileLocation (e) {
-      // eslint-disable-next-line no-undef
-      rms.chooseDir('load').then(path => {
-        if (path) {
-          this.truncationRuleLocation = path
-        }
-      })
-    },
-    chooseFMUparametersFileLocation (e) {
-      // eslint-disable-next-line no-undef
-      rms.chooseDir('load').then(path => {
-        if (path) {
-          this.fmuParameterListLocation = path
-        }
-      })
-    },
-    cancel (e) {
-      this.dialog = false
-    },
-    async ok (e) {
-      alert(`dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
-            dialogFMUParameterListLocation: ${this.fmuParameterListLocation}`)
-      await Promise.all([
-        this.$store.dispatch('parameters/path/project/select', this.apsModelFileLocation),
-        this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
-        this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
-        this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
-        this.$store.dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
-        this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection),
-      ])
-      this.dialog = false
-    }
-  },
+    })
+  }
+  chooseTruncationRuleFileLocation () {
+    // eslint-disable-next-line no-undef
+    rms.chooseDir('load').then((path: string): void => {
+      if (path) {
+        this.truncationRuleLocation = path
+      }
+    })
+  }
+  chooseFMUparametersFileLocation () {
+    // eslint-disable-next-line no-undef
+    rms.chooseDir('load').then((path: string): void => {
+      if (path) {
+        this.fmuParameterListLocation = path
+      }
+    })
+  }
+  cancel () {
+    this.dialog = false
+  }
+  async ok () {
+    alert(`dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
+          dialogFMUParameterListLocation: ${this.fmuParameterListLocation}`)
+    await Promise.all([
+      this.$store.dispatch('parameters/path/project/select', this.apsModelFileLocation),
+      this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
+      this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
+      this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
+      this.$store.dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
+      this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection),
+    ])
+    this.dialog = false
+  }
 }
 
 </script>

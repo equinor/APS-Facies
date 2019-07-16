@@ -1,3 +1,4 @@
+import { Color } from '@/utils/domain/facies/helpers/colors'
 import { CODE, ID } from '@/utils/domain/types'
 
 export interface Identifiable {
@@ -47,4 +48,9 @@ export interface SimulationSettings {
 
 export interface Ordered {
   order: number
+}
+
+export interface DialogOptions {
+  color?: Color
+  width?: number
 }

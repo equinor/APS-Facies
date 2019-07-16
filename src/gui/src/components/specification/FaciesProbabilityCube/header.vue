@@ -50,59 +50,61 @@
   </v-layout>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import { Store } from '@/store/typing'
+import { Component, Vue } from 'vue-property-decorator'
 
-import rms from '@/api/rms'
 import { hasCurrentParents, notEmpty } from '@/utils'
-import WaitBtn from '@/components/baseComponents/WaitButton'
 
-export default {
+import WaitBtn from '@/components/baseComponents/WaitButton.vue'
+
+@Component({
   components: {
-    WaitBtn
+    WaitBtn,
   },
-  data () {
-    return {
-      calculatingAverages: false,
-    }
-  },
+})
+export default class FaciesProbabilityCubeHeader extends Vue {
+  calculatingAverages: boolean = false
 
-  computed: {
-    ...mapState({
-      probabilityCubeParameters: state => Object.values(state.facies.available)
-        .map(facies => facies.probabilityCube)
-        .filter(param => notEmpty(param)),
-      zoneCodes: state => Object.values(state.zones.available)
-        .filter(zone => !!zone.selected)
-        .map(zone => zone.code)
-    }),
-    selectedFacies () {
-      const state = this.$store.state
-      const getters = this.$store.getters
-      return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
-    },
-    useProbabilityCubes: {
-      get () { return !this.$store.getters['facies/constantProbability']() },
-      set (value) { this.$store.dispatch('facies/toggleConstantProbability') },
-    },
-    canCalculateAverages () { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 },
-    disabled () { return this.selectedFacies.length === 0 },
-    shouldNormalize () { return !this.disabled && this.$store.getters['facies/cumulative'] !== 1 }
-  },
+  get probabilityCubeParameters () {
+    const state = (this.$store as Store).state
+    return Object.values(state.facies.available)
+      .map(facies => facies.probabilityCube)
+      .filter(param => notEmpty(param))
+  }
+  get zoneCodes () {
+    return Object.values((this.$store as Store).state.zones.available)
+      .filter(zone => !!zone.selected)
+      .map(zone => zone.code)
+  }
+  get selectedFacies () {
+    const state = this.$store.state
+    const getters = this.$store.getters
+    return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
+  }
 
-  methods: {
-    validate () {},
-    async average () {
-      this.calculatingAverages = true
-      try {
-        await this.$store.dispatch('facies/averageProbabilityCubes', { probabilityCubes: this.probabilityCubeParameters })
-      } finally {
-        this.calculatingAverages = false
-      }
-    },
-    normalize () {
-      return this.$store.dispatch('facies/normalize')
+  get useProbabilityCubes () { return !this.$store.getters['facies/constantProbability']() }
+  set useProbabilityCubes (value) { this.$store.dispatch('facies/toggleConstantProbability') }
+
+  get canCalculateAverages () { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 }
+
+  get disabled () { return this.selectedFacies.length === 0 }
+
+  get shouldNormalize () { return !this.disabled && this.$store.getters['facies/cumulative'] !== 1 }
+
+  validate () {}
+
+  async average () {
+    this.calculatingAverages = true
+    try {
+      await this.$store.dispatch('facies/averageProbabilityCubes', { probabilityCubes: this.probabilityCubeParameters })
+    } finally {
+      this.calculatingAverages = false
     }
-  },
+  }
+
+  normalize () {
+    return this.$store.dispatch('facies/normalize')
+  }
 }
 </script>

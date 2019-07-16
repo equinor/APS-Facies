@@ -12,6 +12,7 @@
       >
         <v-slider
           v-model="sliderValue"
+          :disabled="disabled"
           :max="steps"
           :step="100/steps"
         />
@@ -44,6 +45,7 @@
           <span slot="activator">
             <v-checkbox
               v-model="updatable"
+              :disabled="disabled"
               persistent-hint
             />
           </span>
@@ -54,16 +56,15 @@
   </div>
 </template>
 
-<script>
-import Vue from 'vue'
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import math from 'mathjs'
+import math, { BigNumber } from 'mathjs'
 import { isNumber } from 'lodash'
 
 import { required as requiredField, between, numeric } from 'vuelidate/lib/validators'
 
-import { updatableType, nullableNumber } from '@/utils/typing'
+import { Optional } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
@@ -72,227 +73,306 @@ math.config({
   number: 'BigNumber'
 })
 
-export default Vue.extend({
-  props: {
-    label: {
-      required: true,
-      type: String,
-    },
-    valueType: VueTypes.string.def(''),
-    slider: VueTypes.bool.def(false),
-    onlySlider: VueTypes.bool.def(false),
-    value: VueTypes.oneOfType([nullableNumber, updatableType]),
-    unit: VueTypes.string.def(''),
-    hint: VueTypes.string.def(''),
-    appendIcon: VueTypes.string.def(''),
-    persistentHint: VueTypes.bool.def(false),
-    optional: VueTypes.bool.def(false),
-    discrete: VueTypes.bool.def(false),
-    disabled: VueTypes.bool.def(false),
-    fmuUpdatable: VueTypes.bool.def(false),
-    allowNegative: VueTypes.bool.def(false),
-    strictlyGreater: VueTypes.bool.def(false),
-    strictlySmaller: VueTypes.bool.def(false),
-    useModulus: VueTypes.bool.def(false),
-    additionalRules: VueTypes.arrayOf(VueTypes.shape({
-      name: VueTypes.string.isRequired,
-      check: VueTypes.func.isRequired,
-      error: VueTypes.string.isRequired,
-    })).def([]),
-    steps: VueTypes.number.def(10000),
-    arrowStep: VueTypes.number.def(1),
-    enforceRanges: VueTypes.bool.def(false),
-    ranges: VueTypes.oneOfType([VueTypes.shape({
-      min: VueTypes.number.isRequired,
-      max: VueTypes.number.isRequired,
-    }), null])
-  },
+interface AdditionalRule {
+  name: string
+  check: (value: number) => boolean
+  error: string
+}
 
-  data () {
-    return {
-      fieldValue: this.getValue(this.value),
-    }
-  },
+type InternalValue = BigNumber | number | string | null
 
+@Component({
+  // @ts-ignore
   validations () {
     const fieldValue = {
       required: this.optional ? true : requiredField,
       between: between(this.min, this.max),
       discrete: this.discrete ? numeric : true,
-      strictlyGreater: this.strictlyGreater ? value => value > this.min : true,
-      strictlySmaller: this.strictlySmaller ? value => value < this.max : true,
+      strictlyGreater: this.strictlyGreater ? (value: number) => value > this.min : true,
+      strictlySmaller: this.strictlySmaller ? (value: number) => value < this.max : true,
       // TODO: Add option to add more validations
     }
-    this.additionalRules.forEach(rule => {
-      fieldValue[`${rule.name}`] = value => rule.check(value)
+    this.additionalRules.forEach((rule: AdditionalRule) => {
+      fieldValue[`${rule.name}`] = (value: number) => rule.check(value)
     })
     return {
       fieldValue: {
+        // @ts-ignore
         required: this.optional ? true : requiredField,
+        // @ts-ignore
         between: between(this.min, this.max),
+        // @ts-ignore
         discrete: this.discrete ? numeric : true,
-        strictlyGreater: this.strictlyGreater ? value => value > this.min : true,
-        strictlySmaller: this.strictlySmaller ? value => value < this.max : true,
+        // @ts-ignore
+        strictlyGreater: this.strictlyGreater ? (value: number) => value > this.min : true,
+        // @ts-ignore
+        strictlySmaller: this.strictlySmaller ? (value: number) => value < this.max : true,
       },
     }
   },
 
-  computed: {
-    updatable: {
-      get: function () { return this.getUpdatable(this.value) },
-      set: function (value) { this.setUpdatable(value) },
-    },
-    sliderValue: {
-      get () { return (this.fieldValue - this.min) * this.steps / (this.max - this.min) },
-      set (val) { this.fieldValue = val / this.steps * (this.max - this.min) + this.min },
-    },
-    constants () {
-      return notEmpty(this.ranges)
-        ? this.ranges
-        : this.valueType !== '' && this.$store.state.constants.ranges.hasOwnProperty(this.valueType)
-          ? this.$store.state.constants.ranges[this.valueType]
-          : { max: Infinity, min: this.allowNegative ? -Infinity : 0 }
-    },
-    _unit () {
-      if (this.discrete) {
-        if (!this.unit) return ''
-        const irregular = {
-        }
-        return this.value === 1
-          ? this.unit
-          : irregular.hasOwnProperty(this.unit)
-            ? irregular[this.unit]
-            : `${this.unit}s`
-      } else {
-        return this.unit
-      }
-    },
-    max () {
-      return this.constants.max
-    },
-    min () {
-      return this.constants.min
-    },
-    canShowSlider () {
-      return this.slider && this.max < Infinity && this.min > -Infinity
-    },
-    canShowField () {
-      return this.canShowSlider ? !this.onlySlider : true
-    },
-    isFmuUpdatable () {
-      return this.fmuUpdatable && typeof this.value.updatable !== 'undefined'
-    },
-    errors () {
-      const errors = []
-      if (!this.$v.fieldValue.$dirty) return errors
-      !this.$v.fieldValue.required && errors.push('Is required')
-      !this.$v.fieldValue.discrete && errors.push('Must be a whole number')
-      !this.$v.fieldValue.between && errors.push(`Must be between [${this.min}, ${this.max}]`)
-      !this.$v.fieldValue.strictlyGreater && errors.push(`Must be strictly greater than ${this.min}`)
-      !this.$v.fieldValue.strictlySmaller && errors.push(`Must be strictly smaller than ${this.max}`)
-      this.additionalRules.forEach(rule => {
-        !this.$v.fieldValue[`${rule.name}`] && errors.push(rule.error)
-      })
-      return errors
-    },
-    binding () {
-      const binding = {}
-      // FIXME: Hack to adjust the checkboxes for Origin coordinates
-      if (['X', 'Y', 'Z'].indexOf(this.label) !== -1) binding.xs2 = true
-      else binding.xs1 = true
-      return binding
-    },
-  },
+})
+export default class NumericField extends Vue {
+  @Prop({ required: true })
+  readonly value!: FmuUpdatableValue | number | null
 
-  watch: {
-    value (value) {
-      if (this.hasChanged(value)) {
-        this.fieldValue = this.getValue(value)
+  @Prop({ required: true })
+  readonly label!: string
+
+  @Prop({ default: '' })
+  readonly valueType!: string
+
+  @Prop({ default: '' })
+  readonly unit!: string
+
+  @Prop({ default: '' })
+  readonly hint!: string
+
+  @Prop({ default: '' })
+  readonly appendIcon!: string
+
+  @Prop({ default: false, type: Boolean })
+  readonly slider!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly onlySlider!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly persistentHint!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly optional!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly discrete!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly disabled!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly fmuUpdatable!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly allowNegative!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly strictlyGreater!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly strictlySmaller!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly useModulus!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly dense!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly enforceRanges!: boolean
+
+  @Prop({ default: null })
+  readonly ranges!: Optional<{ min: number, max: number }>
+
+  @Prop({ default: () => [] })
+  readonly additionalRules!: AdditionalRule[]
+
+  @Prop({ default: 10000 })
+  readonly steps!: number
+
+  @Prop({ default: 1 })
+  readonly arrowStep!: number
+
+  fieldValue: InternalValue = null
+
+  get updatable () { return NumericField.getUpdatable(this.value) }
+  set updatable (value) { this.setUpdatable(value) }
+
+  // @ts-ignore
+  get sliderValue () { return (this.fieldValue - this.min) * this.steps / (this.max - this.min) }
+  set sliderValue (val) { this.fieldValue = val / this.steps * (this.max - this.min) + this.min }
+
+  get constants () {
+    return notEmpty(this.ranges)
+      ? this.ranges
+      : this.valueType !== '' && this.$store.state.constants.ranges.hasOwnProperty(this.valueType)
+        ? this.$store.state.constants.ranges[this.valueType]
+        : { max: Infinity, min: this.allowNegative ? -Infinity : 0 }
+  }
+
+  get _unit () {
+    if (this.discrete) {
+      if (!this.unit) return ''
+      const irregular = {
+      }
+      return this.value === 1
+        ? this.unit
+        : irregular.hasOwnProperty(this.unit)
+          ? irregular[this.unit]
+          : `${this.unit}s`
+    } else {
+      return this.unit
+    }
+  }
+
+  get max (): number { return this.constants.max }
+  get min (): number { return this.constants.min }
+
+  get canShowSlider () { return this.slider && this.max < Infinity && this.min > -Infinity }
+  get canShowField () { return this.canShowSlider ? !this.onlySlider : true }
+
+  get isFmuUpdatable () {
+    return this.fmuUpdatable
+      && (
+        this.value instanceof FmuUpdatableValue
+        || (this.value !== null && this.value.hasOwnProperty('updatable')
+        )
+      )
+  }
+
+  get errors () {
+    const errors: string[] = []
+    // @ts-ignore
+    if (!this.$v.fieldValue.$dirty) return errors
+    // @ts-ignore
+    !this.$v.fieldValue.required && errors.push('Is required')
+    // @ts-ignore
+    !this.$v.fieldValue.discrete && errors.push('Must be a whole number')
+    // @ts-ignore
+    !this.$v.fieldValue.between && errors.push(`Must be between [${this.min}, ${this.max}]`)
+    // @ts-ignore
+    !this.$v.fieldValue.strictlyGreater && errors.push(`Must be strictly greater than ${this.min}`)
+    // @ts-ignore
+    !this.$v.fieldValue.strictlySmaller && errors.push(`Must be strictly smaller than ${this.max}`)
+    this.additionalRules.forEach(rule => {
+      // @ts-ignore
+      !this.$v.fieldValue[`${rule.name}`] && errors.push(rule.error)
+    })
+    return errors
+  }
+
+  get binding () {
+    const binding: { [_: string]: boolean } = {}
+    // FIXME: Hack to adjust the checkboxes for Origin coordinates
+    if (['X', 'Y', 'Z'].indexOf(this.label) !== -1) binding.xs2 = true
+    else binding.xs1 = true
+    return binding
+  }
+
+  @Watch('value')
+  onValueChange (value: FmuUpdatableValue | BigNumber) {
+    if (this.hasChanged(value)) {
+      this.fieldValue = this.getValue(value)
+    }
+  }
+
+  mounted () {
+    this.fieldValue = this.getValue(this.value)
+  }
+
+  hasChanged (value: BigNumber | FmuUpdatableValue) {
+    // Helper method to deal with letting the '.' appear in the textfield
+    // Returns this.fieldValue != value, in the proper types
+    try {
+      return math.unequal(math.bignumber(this.fieldValue), (this.getValue(value) || 0))
+    } catch (e) {
+      return false
+    }
+  }
+
+  setUpdatable (event: boolean) {
+    this.emitChange(!!event)
+  }
+
+  emitChange (value: BigNumber | boolean | null) {
+    const payload = this.value === null || !this.value.hasOwnProperty('value')
+      ? Number(value)
+      : typeof value === 'boolean'
+        ? { value: Number(this.fieldValue), updatable: value }
+        : { value: Number(value), updatable: this.updatable }
+    // @ts-ignore
+    this.$v.fieldValue.$touch()
+    this.$emit('input', this.fmuUpdatable ? new FmuUpdatableValue(payload) : payload)
+  }
+
+  updateValue (value: BigNumber | string) {
+    // value may also be of type InputEvent, which is dealt with here
+    // @ts-ignore
+    if (typeof value.target !== 'undefined') {
+      // An event has been passed
+      // @ts-ignore
+      value = value.target.value
+    }
+    if (typeof value === 'string') {
+      value = value.replace(',', '.')
+      value = value.replace(/[^\d.+-]*/g, '')
+      if (/^[+-].*$/.test(value)) value = value[0] + value.slice(1).replace(/[+-]/g, '')
+      if (value.length >= 1) {
+        if (value[0] === '+') value = value.slice(1)
+        if (value[0] === '.') value = '0' + value
       }
     }
-  },
 
-  methods: {
-    hasChanged (value) {
-      // Helper method to deal with letting the '.' appear in the textfield
-      // Returns this.fieldValue != value, in the proper types
-      return math.unequal(math.bignumber(this.fieldValue), this.getValue(value))
-    },
-    setUpdatable (event) {
-      this.emitChange(!!event)
-    },
-    emitChange (value) {
-      const payload = this.value === null || typeof this.value.value === 'undefined'
-        ? Number(value)
-        : typeof value === 'boolean'
-          ? { value: Number(this.fieldValue), updatable: value }
-          : { value: Number(value), updatable: this.updatable }
-      this.$v.fieldValue.$touch()
-      this.$emit('input', this.fmuUpdatable ? new FmuUpdatableValue(payload) : payload)
-    },
-    updateValue (value) {
-      if (typeof value.target !== 'undefined') {
-        // An event has been passed
-        value = value.target.value
-      }
-      if (typeof value === 'string') {
-        value = value.replace(',', '.')
-        value = value.replace(/[^\d.+-]*/g, '')
-        if (/^[+-].*$/.test(value)) value = value[0] + value.slice(1).replace(/[+-]/g, '')
-        if (value.length >= 1) {
-          if (value[0] === '+') value = value.slice(1)
-          if (value[0] === '.') value = '0' + value
-        }
-      }
+    let numericValue = this.getValue(value)
+    if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value.toString())) {
+      numericValue = this.getValue(value)
+    } else if (value === '') {
+      // @ts-ignore
+      value = null
+      numericValue = null
+    } else if (value === '-') {
+      value = '-'
+    } else if (value === '+') {
+      value = ''
+    } else {
+      // @ts-ignore
+      value = this.value instanceof FmuUpdatableValue ? this.value.value : this.value
+      // Hack to make sure illegal values are not displayed in the text field
+      // @ts-ignore
+      this.$refs.input.lazyValue = value
+    }
+    if (/^[+-]?\d+\.0*$/.test((value || '').toString())) {
+      this.fieldValue = value
+    } else if (/^[+-]?\d+\.\d+0+$/.test((value || '').toString())) {
+      this.fieldValue = (numericValue || 0).toFixed((value || '').toString().split('.')[1].length)
+    } else if (/^[+-]$/.test((value || '').toString())) {
+      this.fieldValue = value
+      numericValue = null
+    } else {
+      this.fieldValue = numericValue
+    }
+    this.emitChange(numericValue)
+  }
+  getValue (value: FmuUpdatableValue | InternalValue): BigNumber | null {
+    if (value === null) return null
+    if (isEmpty(value) && !isNumber(value)) return null
+    if (value instanceof FmuUpdatableValue) value = value.value
+    if (value === '-') value = 0
+    if (this.useModulus) {
+      if (math.larger(value, this.max)) value = this.min
+      else if (math.smaller(value, this.min)) value = this.max
+    }
+    if (this.enforceRanges) {
+      if (value < this.min) value = this.min
+      if (value > this.max) value = this.max
+    }
+    return math.bignumber((value as number))
+  }
 
-      let numericValue = this.getValue(value)
-      if (/^[+-]?(\d+(\.\d*)?|\.\d+)$/.test(value)) {
-        numericValue = this.getValue(value)
-      } else if (value === '') {
-        value = null
-        numericValue = null
-      } else if (value === '-') {
-        value = '-'
-      } else if (value === '+') {
-        value = ''
-      } else {
-        value = this.value ? this.value.value : this.value
-        // Hack to make sure illegal values are not displayed in the text field
-        this.$refs.input.lazyValue = value
-      }
-      if (/^[+-]?\d+\.0*$/.test(value)) {
-        this.fieldValue = value
-      } else if (/^[+-]?\d+\.\d+0+$/.test(value)) {
-        this.fieldValue = numericValue.toFixed(value.split('.')[1].length)
-      } else {
-        this.fieldValue = numericValue
-      }
-      this.emitChange(numericValue)
-    },
-    getValue (value) {
-      if (isEmpty(value) && !isNumber(value)) return null
-      if (typeof value.value !== 'undefined') value = value.value
-      if (this.modulus) value = math.mod(value, this.max)
-      if (this.enforceRanges) {
-        if (value < this.min) value = this.min
-        if (value > this.max) value = this.max
-      }
-      return math.bignumber(value)
-    },
-    getUpdatable (val) {
-      const defaultValue = false
-      return isEmpty(val)
-        ? defaultValue
-        : typeof val.updatable !== 'undefined'
-          ? val.updatable
-          : defaultValue
-    },
-    increase () {
-      this.updateValue(math.add(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)))
-    },
-    decrease () {
-      this.updateValue(math.subtract(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)))
-    },
-  },
-})
+  static getUpdatable (val: FmuUpdatableValue | number | null): boolean {
+    const defaultValue = false
+    return isEmpty(val)
+      ? defaultValue
+      : val instanceof FmuUpdatableValue
+        ? val.updatable
+        : defaultValue
+  }
+
+  increase (): void {
+    this.updateValue((math.add(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep))) as BigNumber)
+  }
+
+  decrease (): void {
+    this.updateValue((math.subtract(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)) as BigNumber))
+  }
+}
 </script>

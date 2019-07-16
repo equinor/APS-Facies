@@ -61,15 +61,17 @@
   </v-container>
 </template>
 
-<script>
-import ZoneRegion from '@/components/selection/ZoneRegionSelection'
-import GridModel from '@/components/selection/dropdown/ChooseGridModel'
-import FaciesSelection from '@/components/selection/FaciesSelection'
-import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter'
-import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter'
-import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import ZoneRegion from '@/components/selection/ZoneRegionSelection.vue'
+import GridModel from '@/components/selection/dropdown/ChooseGridModel.vue'
+import FaciesSelection from '@/components/selection/FaciesSelection.vue'
+import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter.vue'
+import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter.vue'
+import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter.vue'
+
+@Component({
   components: {
     ChooseFaciesRealizationParameter,
     ZoneRegion,
@@ -78,34 +80,27 @@ export default {
     ChooseBlockedWellLogParameter,
     FaciesSelection
   },
+})
+export default class ElementSelection extends Vue {
+  disabled: boolean = false
+  readonly: boolean = false
 
-  data () {
-    return {
-      toggledZoneRegion: false,
-      disabled: false,
-      readonly: false
-    }
-  },
-
-  computed: {
-    hasWellParameters () {
-      return this.$store.state.parameters.blockedWell.available.length > 0
-    },
-    hasBlockedWellLogParameter () {
-      return !!this.$store.getters.blockedWellLogParameter
-    },
-    hasBlockedWellParameter () {
-      return !!this.$store.getters.blockedWellParameter
-    },
-    currentGridModel () {
-      return this.$store.state.gridModels.current
-    },
-    panel () {
-      return this.currentGridModel
-        ? [true, true]
-        : [false, false]
-    }
+  get hasWellParameters (): boolean {
+    return this.$store.state.parameters.blockedWell.available.length > 0
   }
-
+  get hasBlockedWellLogParameter (): boolean {
+    return !!this.$store.getters.blockedWellLogParameter
+  }
+  get hasBlockedWellParameter (): boolean {
+    return !!this.$store.getters.blockedWellParameter
+  }
+  get currentGridModel (): boolean {
+    return this.$store.state.gridModels.current
+  }
+  get panel (): boolean[] {
+    return this.currentGridModel
+      ? [true, true]
+      : [false, false]
+  }
 }
 </script>

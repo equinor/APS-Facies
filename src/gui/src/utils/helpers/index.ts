@@ -8,6 +8,7 @@ import {
   isEmpty,
   notEmpty,
 } from '@/utils/helpers/simple'
+import { NoCache } from '@/utils/helpers/decorators'
 
 const hex = '[0-9a-f]'
 
@@ -58,4 +59,5 @@ export {
   isEmpty,
   notEmpty,
   includes,
+  NoCache,
 }

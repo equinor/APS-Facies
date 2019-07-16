@@ -7,44 +7,32 @@
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import rms from '@/api/rms'
 
-import StaticPlot from '@/components/plot/StaticPlot'
+import StaticPlot from '@/components/plot/StaticPlot.vue'
+
+import { TruncationRule } from '@/utils/domain'
 
 import { makeTruncationRuleSpecification } from '@/utils'
-import { AppTypes } from '@/utils/typing'
-import { plotify } from '@/utils/plotting'
+import { plotify, PlotSpecification } from '@/utils/plotting'
 
-export default {
-  name: 'TruncationMap',
-
-  components: {
-    StaticPlot,
-  },
-
-  props: {
-    value: AppTypes.truncationRule.isRequired,
-    expand: VueTypes.bool.def(false),
-  },
-
-  computed: {
-    selectedFacies () {
-      return this.$store.getters['facies/global/selected']
-    },
-  },
-
+@Component({
+  // @ts-ignore
   asyncComputed: {
     data: {
-      async get () {
+      async get (): Promise<PlotSpecification> {
         return plotify(
+          // @ts-ignore
           await rms.truncationPolygons(makeTruncationRuleSpecification(this.value, this.$store.getters)),
+          // @ts-ignore
           this.selectedFacies
         )
       },
-      shouldUpdate () {
+      shouldUpdate (): boolean {
+        // @ts-ignore
         return this.canUpdate()
       },
       default () {
@@ -56,22 +44,32 @@ export default {
     },
   },
 
-  watch: {
-    selectedFacies: {
-      deep: true,
-      handler () {
-        // To detect changes in alias
-        if (this.canUpdate()) {
-          this.$asyncComputed.data.update()
-        }
-      }
-    }
+  components: {
+    StaticPlot,
   },
+})
+export default class TruncationMap extends Vue {
+  @Prop({ required: true })
+  readonly value!: TruncationRule
 
-  methods: {
-    canUpdate () {
-      return this.$store.getters['truncationRules/ready'](this.value)
+  @Prop({ default: false, type: Boolean })
+  readonly expand!: boolean
+
+  get selectedFacies () {
+    return this.$store.getters['facies/global/selected']
+  }
+
+  @Watch('selectedFacies', { deep: true })
+  handler () {
+    // To detect changes in alias
+    if (this.canUpdate()) {
+      // @ts-ignore
+      this.$asyncComputed.data.update()
     }
-  },
+  }
+
+  canUpdate (): boolean {
+    return this.$store.getters['truncationRules/ready'](this.value)
+  }
 }
 </script>

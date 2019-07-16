@@ -23,14 +23,18 @@
   </v-expansion-panel>
 </template>
 
-<script>
-import ProbabilityCubeHeader from './header'
-import FaciesProbabilityCubeTable from './table'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import ProbabilityCubeHeader from './header.vue'
+import FaciesProbabilityCubeTable from './table.vue'
+
+@Component({
   components: {
     ProbabilityCubeHeader,
     FaciesProbabilityCubeTable,
   },
+})
+export default class FaciesProbabilityCube extends Vue {
 }
 </script>

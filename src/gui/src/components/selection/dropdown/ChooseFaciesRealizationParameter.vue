@@ -4,22 +4,18 @@
     :items="available"
     :append-icon="''"
     :append-outer-icon="'$vuetify.icons.search'"
-    label="Facies Realisation parameter"
+    label="Facies Realization parameter"
   />
 </template>
 
-<script>
-export default {
-  name: 'ChooseFaciesRealizationParameter',
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-  computed: {
-    faciesRealizationParameter: {
-      get: function () { return this.$store.state.parameters.realization.selected },
-      set: async function (value) { await this.$store.dispatch('parameters/realization/select', value) },
-    },
-    available () {
-      return this.$store.state.parameters.realization.available
-    },
-  },
+@Component
+export default class ChooseFaciesRealizationParameter extends Vue {
+  get faciesRealizationParameter () { return this.$store.state.parameters.realization.selected }
+  set faciesRealizationParameter (value) { this.$store.dispatch('parameters/realization/select', value) }
+
+  get available () { return this.$store.state.parameters.realization.available }
 }
 </script>
