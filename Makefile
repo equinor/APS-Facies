@@ -580,7 +580,7 @@ run-api-gunicorn:
 	         --reload \
 	         app:app
 
-run-rms.uipy-mock:
+run-rms.uipy-mock: matplotlibrc
 	FLASK_APP=$(SOURCE_DIR)/api/app.py \
 	FLASK_ENV=development \
 	APS_MODE='develop' \
