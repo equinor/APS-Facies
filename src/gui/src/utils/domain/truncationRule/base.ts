@@ -48,6 +48,7 @@ export default abstract class TruncationRule<
       (): boolean => allSet(this.polygons, 'facies'),
       (): boolean => this.polygons.length > 0,
       (): boolean => this.normalizedFractions,
+      (): boolean => this.cumulativeFaciesProbability === 1,
     ]
   }
 
@@ -121,6 +122,21 @@ export default abstract class TruncationRule<
       backgroundFields: this.backgroundFields.map((field): ID => field.id),
       realization: this.realization,
     }
+  }
+
+  private get facies (): Facies[] {
+    const facies: Set<Facies> = new Set()
+    for (const polygon of this.polygons) {
+      if (polygon.facies) {
+        facies.add(polygon.facies)
+      }
+    }
+    return [...facies]
+  }
+
+  private get cumulativeFaciesProbability (): number {
+    return this.facies
+      .reduce((sum, { previewProbability }): number => sum + (previewProbability || 0), 0)
   }
 }
 
