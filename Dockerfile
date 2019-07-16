@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.3.5" \
+LABEL version="3.3.6" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -19,7 +19,7 @@ ENV TK_VERSION=${TCL_VERSION}
 ENV NODE_ARCH='x64' \
     INTEL_MKL="l_mkl_${INTEL_MKL_VERSION}" \
     RMS_LINUX="LINUX_64" \
-    RMS_LINUX_LONG="linux-amd64-gcc_4_4-release/" \
+    RMS_LINUX_LONG="linux-amd64-gcc_4_4-release" \
     CA_FILE="/etc/ssl/certs/ca-bundle.crt"
 
 # Prefixes
@@ -51,6 +51,7 @@ ${RMS_BIN_PREFIX}:\
 ${PYTHONUSERBASE}/bin:\
 ${PATH}" \
     LD_LIBRARY_PATH="\
+/lib64:\
 ${ROXAR_RMS_ROOT}/lib:\
 ${ROXAR_RMS_ROOT}/bin:\
 ${RMS_LIB_PREFIX}:\
