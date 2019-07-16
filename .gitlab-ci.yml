@@ -9,7 +9,7 @@ variables:
   NO_PROXY:               "git.equinor.com"
   CODE_DIR:               "${CI_PROJECT_DIR}"
   ARTIFACTS:              "${CODE_DIR}/artifacts"
-  MAKE:                   "make --makefile=${CODE_DIR}/Makefile"
+  MAKE:                   "make --directory=${CODE_DIR}"
   MKL_ROOT:               "/opt/intel/mkl"
   PYTHON:                 "${CODE_DIR}/.venv/bin/python"
   SHELL:                  "/bin/bash"
