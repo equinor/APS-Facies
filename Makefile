@@ -122,7 +122,7 @@ MAIN.PY := $(PYTHON_API_DIR)/main.py
 INFO.XML := $(CODE_DIR)/info.xml
 
 MKDIR := mkdir -p
-REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -e 's/^from src/from .static.py/g'
+REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^( *from )src/\1aps/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI/releases
@@ -223,7 +223,7 @@ gather-python-scripts: copy-python-files __init__.py
 __init__.py:
 	touch $(PLUGIN_DIR)/__init__.py
 
-compile-python-files: ensure-relative-import-statements-in-plugin move-python-files-to-static remove-extraneous-files
+compile-python-files: ensure-relative-import-statements-in-plugin compile-pydist remove-extraneous-files
 
 increase-build-number:
 	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
@@ -231,10 +231,12 @@ increase-build-number:
 ensure-relative-import-statements-in-plugin:
 	$(PYTHON) $(BIN_DIR)/convert2relative.py $(PLUGIN_DIR)/src --base-name src
 
-move-python-files-to-static:
-	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/static/py
+compile-pydist: move-python-files-to-pydist
 	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(PLUGIN_DIR)/ui.py \
 	                                  $(PLUGIN_DIR)/main.py
+
+move-python-files-to-pydist:
+	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/pydist/aps
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
