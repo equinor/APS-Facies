@@ -231,15 +231,19 @@ increase-build-number:
 ensure-relative-import-statements-in-plugin:
 	$(PYTHON) $(BIN_DIR)/convert2relative.py $(PLUGIN_DIR)/src --base-name src
 
-compile-pydist: move-python-files-to-pydist
+compile-pydist: move-pydist move-python-files-to-pydist
 	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(PLUGIN_DIR)/ui.py \
-	                                  $(PLUGIN_DIR)/main.py
+	                                  $(PLUGIN_DIR)/main.py \
+	                                  $(PLUGIN_DIR)/pydist/nrlib/__init__.py
 
 move-python-files-to-pydist:
 	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/pydist/aps
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
+
+move-pydist:
+	mv $(PLUGIN_DIR)/src/pydist $(PLUGIN_DIR)
 
 remove-extraneous-files: remove-node_modules-stubs
 
