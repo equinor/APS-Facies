@@ -257,7 +257,9 @@ clean-build-dir:
 	rm -rf $(BUILD_DIR)
 
 clean-plugin:
-	rm -rf $(PLUGIN_DIR) $(PLUGIN_DIR).plugin
+	rm -rf $(PLUGIN_DIR) \
+	       $(PLUGIN_DIR).plugin \
+	       $(PLUGIN_DIR).*.plugin
 
 build-front-end: $(PACKAGE.JSON) build-dir
 	VUE_APP_APS_VERSION="$(APS_VERSION)" \
