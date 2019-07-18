@@ -3,7 +3,8 @@
     v-model="dialog"
     persistent
     max-width="500px"
-    @keydown.esc="cancel"
+    @keydown.esc="abort"
+    @keydown.enter="choose"
   >
     <v-card>
       <v-card-title>
