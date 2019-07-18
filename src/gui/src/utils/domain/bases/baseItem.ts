@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid'
 
 import { ID } from '@/utils/domain/types'
 import { isUUID } from '@/utils/helpers'
-import { Identifiable } from './interfaces'
+import { Identifiable, Identified } from './interfaces'
 
 export interface BaseItemSerialization {
   id: ID
@@ -45,4 +45,8 @@ export default class BaseItem implements Identifiable {
 
     return jsonObj
   }
+}
+
+export interface ItemsState<T extends BaseItem> {
+  available: Identified<T>
 }

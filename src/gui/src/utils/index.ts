@@ -1,3 +1,4 @@
+import { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { Vue } from 'vue/types/vue'
 import flatten from 'flat'
 import uuidv5 from 'uuid/v5'
@@ -8,11 +9,13 @@ import {
   Ordered,
   Parent,
   SimulationSettings,
+  Newable,
+  Identified,
 } from '@/utils/domain/bases/interfaces'
 import { RootGetters } from '@/store/typing'
 
 import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
-import { ID, Identified } from '@/utils/domain/types'
+import { ID } from '@/utils/domain/types'
 import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
 import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
 import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
@@ -32,21 +35,19 @@ import {
   notEmpty,
 } from '@/utils/helpers'
 
-interface Newable<T> { new (...args: any[]): T }
-
-function makeData<T extends Identifiable, Y extends Identifiable> (
-  items: T[],
-  _class: Newable<Y>,
-  originals: T[] | null = null
-): Identified<Y> {
+function makeData<C extends Identifiable> (
+  items: any[],
+  _class: Newable<C>,
+  originals: Identified<C> | C[] | null = null
+): Identified<C> {
   if (items.length === 0) return {}
   originals = originals ? Object.values(originals) : []
   const data = {}
   for (const item of items) {
-    const instance = originals
+    const instance = (originals
       .find((original): boolean => Object.keys(item)
         .every((key): boolean => original[`${key}`] === item[`${key}`])
-      ) || new _class(item)
+      ) || new _class(item)) as C
     data[instance.id] = instance
   }
   return data
@@ -61,7 +62,9 @@ function defaultSimulationSettings (): SimulationSettings {
   }
 }
 
-function simplify (specification: BayfillSpecification | NonCubicSpecification | CubicSpecification, rule: TruncationRule, includeOverlay: boolean = true) {
+type TruncationRuleSpecification = BayfillSpecification | NonCubicSpecification | CubicSpecification
+
+function simplify (specification: TruncationRuleSpecification, rule: TruncationRule, includeOverlay: boolean = true): TruncationRuleSpecification {
   if (specification instanceof Array) {
     return specification
       .map((spec, index) => {
@@ -100,7 +103,15 @@ interface GaussianRandomFieldSpecification {
   inBackground: boolean
 }
 
-function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
+export interface TruncationRuleDescription {
+  type: TruncationRuleType
+  globalFaciesTable: GlobalFaciesSpecification[]
+  gaussianRandomFields: GaussianRandomFieldSpecification[]
+  values: TruncationRuleSpecification
+  constantParameters: boolean
+}
+
+function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule): TruncationRuleDescription {
   return {
     type: rule.type,
     globalFaciesTable: (rule.backgroundPolygons as Polygon[])
@@ -163,7 +174,7 @@ function makeGaussianRandomFieldSpecification (rule: TruncationRule): GaussianRa
     })
 }
 
-function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters) {
+function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters): TruncationRuleDescription {
   return {
     type: rule.type,
     globalFaciesTable: makeGlobalFaciesTableSpecification({ rootGetters }, rule),
@@ -261,7 +272,7 @@ function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
   return numFacies >= minFacies(rule, getters)
 }
 
-const resolve = (path: string | string[], obj = self, separator = '.'): object => {
+const resolve = (path: string | string[], obj: object = self, separator = '.'): object => {
   const properties = Array.isArray(path) ? path : path.split(separator)
   // @ts-ignore
   return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)

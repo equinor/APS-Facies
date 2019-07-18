@@ -68,7 +68,7 @@ export default abstract class ZoneRegionDependent extends BaseItem implements De
     }
   }
 
-  public isChildOf ({ zone, region = null }: Parent): boolean {
+  public isChildOf ({ zone, region = null }: Parent | { zone: Zone, region: Region | null }): boolean {
     return hasParents(this, zone, region)
   }
 

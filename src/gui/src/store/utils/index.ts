@@ -1,3 +1,4 @@
+import { OptionState } from '@/store/modules/options/typing'
 import { RootState } from '@/store/typing'
 import { Commit, Dispatch, Module, Store } from 'vuex'
 
@@ -13,11 +14,6 @@ async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dis
   const result = await promise
   commit('AVAILABLE', result)
   await selectOnlyParameter({ dispatch }, result)
-}
-
-interface OptionState<T> {
-  value: T
-  legal: T[]
 }
 
 function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {

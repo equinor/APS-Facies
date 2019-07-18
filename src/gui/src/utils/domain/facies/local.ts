@@ -8,9 +8,9 @@ import { ID } from '@/utils/domain/types'
 type Probability = number
 
 // TODO: Make ProbabilityCube into its own class
-type ProbabilityCube = string
+export type ProbabilityCube = string
 
-export type FaciesArgs = DependentConfiguration & {
+export type FaciesConfiguration = DependentConfiguration & {
   facies: GlobalFacies
   probabilityCube?: ProbabilityCube | null
   previewProbability?: Probability | null
@@ -31,7 +31,7 @@ export default class Facies extends ZoneRegionDependent {
     facies,
     probabilityCube = null,
     previewProbability = null,
-    ...rest }: FaciesArgs) {
+    ...rest }: FaciesConfiguration) {
     super(rest)
     this.facies = facies
     this.probabilityCube = probabilityCube
@@ -40,6 +40,7 @@ export default class Facies extends ZoneRegionDependent {
 
   public get name (): string { return this.facies.name }
   public get alias (): string { return this.facies.alias }
+  public get code (): number { return this.facies.code }
 
   public toJSON (): FaciesSerialization {
     return {

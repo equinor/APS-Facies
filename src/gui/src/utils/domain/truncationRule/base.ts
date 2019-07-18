@@ -1,4 +1,5 @@
 import { Named } from '@/utils/domain/bases'
+import { Identified } from '@/utils/domain/bases/interfaces'
 import ZoneRegionDependent, {
   DependentConfiguration,
   DependentSerialization,
@@ -7,16 +8,18 @@ import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
-import { ID, Identified } from '@/utils/domain/types'
+import { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 
-export interface TruncationRuleSerialization<S extends PolygonSerialization> extends DependentSerialization {
+export interface TruncationRuleSerialization<S extends PolygonSerialization=PolygonSerialization> extends DependentSerialization {
   name: string
   type: string
   polygons: S[]
   backgroundFields: ID[]
   realization: number[][] | null
 }
+
+export type TruncationRuleType = 'bayfill' | 'non-cubic' | 'cubic'
 
 export type TruncationRuleConfiguration<T extends Polygon = Polygon> = DependentConfiguration & {
   name: string
@@ -52,11 +55,12 @@ export default abstract class TruncationRule<
     ]
   }
 
-  abstract get type (): string
+  abstract get type (): TruncationRuleType
 
   public get ready (): boolean {
     return this._constraints.every((constraint): boolean => constraint())
   }
+
   public abstract get specification (): PolygonSpecification[] | object
 
   public get backgroundFields (): GaussianRandomField[] {

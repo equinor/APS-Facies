@@ -39,7 +39,7 @@ export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolyg
       .map((polygon): BayfillPolygonSpecification => polygon.specification)
   }
 
-  public get type (): string {
+  public get type (): 'bayfill' {
     return 'bayfill'
   }
 }

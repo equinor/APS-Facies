@@ -1,4 +1,5 @@
-import { ID, Identified } from '@/utils/domain/types'
+import { Identified } from '@/utils/domain/bases/interfaces'
+import { ID } from '@/utils/domain/types'
 import { identify } from '@/utils/helpers'
 import SelectableItem, {
   SelectableItemConfiguration,

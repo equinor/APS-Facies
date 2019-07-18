@@ -9,7 +9,6 @@
         :channel="item.channel"
         :value="item.selected"
         :rule="value"
-        group=""
         @input="val => update(item, val)"
       />
     </v-flex>
@@ -20,7 +19,9 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { ID } from '@/utils/domain/types'
-import { TruncationRule } from '@/utils/domain'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import { GaussianRandomField } from '@/utils/domain'
 import { Store } from '@/store/typing'
 
 import AlphaSelection from './AlphaSelection.vue'
@@ -39,9 +40,12 @@ function defaultChannels (num: number): { channel: number, selected: ID | '' }[]
     AlphaSelection,
   },
 })
-export default class AlphaFields extends Vue {
+export default class AlphaFields<
+  T extends Polygon,
+  S extends PolygonSerialization,
+> extends Vue {
   @Prop({ required: true })
-  readonly value!: TruncationRule
+  readonly value!: TruncationRule<T, S>
 
   @Prop({ default: 2 })
   readonly minFields!: number
@@ -58,7 +62,7 @@ export default class AlphaFields extends Vue {
       : defaultChannels(this.minFields)
   }
 
-  update ({ channel }: { channel: number }, fieldId: ID) {
+  update ({ channel }: { channel: number }, fieldId: ID | GaussianRandomField) {
     const field = fieldId
       ? (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
       : null

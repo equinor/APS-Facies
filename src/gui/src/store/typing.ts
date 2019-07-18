@@ -1,11 +1,14 @@
+import { ConstantsState } from '@/store/modules/constants/typing'
 import MessageState from '@/store/modules/message/typing'
+import OptionsState from '@/store/modules/options/typing'
 import ParametersState from '@/store/modules/parameters/typing'
 import PresetState from '@/store/modules/truncationRules/preset/typing'
-import { SimulationSettings } from '@/utils/domain/bases/interfaces'
+import { TruncationRuleTemplateState } from '@/store/modules/truncationRules/typing'
+import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
-import { GridModelsState } from '@/store/modules/gridModels/types'
+import { GridModel, GridModelsState } from '@/store/modules/gridModels/types'
 import CopyPasteState from '@/store/modules/copyPaste/typing'
 import { Polygon, TruncationRule, Parent } from '@/utils/domain'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
@@ -15,7 +18,7 @@ import Facies from '@/utils/domain/facies/local'
 import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
 import Region from '@/utils/domain/region'
-import { ID, Identified } from '@/utils/domain/types'
+import { ID } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
 
 interface Context<S, G> {
@@ -30,6 +33,8 @@ interface Context<S, G> {
 interface Store {
   state: RootState
   getters: RootGetters
+  dispatch: Dispatch
+  commit: Commit
 }
 
 interface RootState {
@@ -38,6 +43,8 @@ interface RootState {
     value: boolean
     message: string
   }
+
+  constants: ConstantsState
 
   copyPaste: CopyPasteState
 
@@ -91,16 +98,11 @@ interface RootState {
           }
         }[]
       }>
-      types: {
-        available: Identified<{
-          id: ID
-          type: string
-          name: string
-          order: number
-        }>
-      }
+      types: TruncationRuleTemplateState
     }
   }
+
+  options: OptionsState
 
   zones: {
     available: Identified<Zone>
@@ -114,6 +116,14 @@ interface RootState {
 }
 
 interface RootGetters {
+  'allFields': GaussianRandomField[]
+
+  'gridModel': GridModel
+  'blockedWellParameter': string
+  'blockedWellLogParameter': string
+
+  'regionParameter': string
+
   'facies': GlobalFacies
   'faciesTable': Facies[]
 

@@ -1,6 +1,6 @@
 import uuidv4 from 'uuid/v4'
-import { ID, Identified } from '@/utils/domain/types'
-import { Identifiable } from '@/utils/domain/bases/interfaces'
+import { ID } from '@/utils/domain/types'
+import { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
 import {
   allSet,
   newSeed,

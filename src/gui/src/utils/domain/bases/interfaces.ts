@@ -1,8 +1,14 @@
 import { Color } from '@/utils/domain/facies/helpers/colors'
 import { CODE, ID } from '@/utils/domain/types'
+import { Optional } from '@/utils/typing/simple'
+
+export interface Newable<T> {
+  new (...args: any[]): T
+}
 
 export interface Identifiable {
   id: ID
+  [_: string]: any
 }
 
 export interface Selectable {
@@ -31,16 +37,16 @@ export interface Dependent {
 }
 
 interface Coordinate2D {
-  x: number
-  y: number
+  x: Optional<number>
+  y: Optional<number>
 }
 
 interface Coordinate3D extends Coordinate2D {
-  z: number
+  z: Optional<number>
 }
 
 export interface SimulationSettings {
-  gridAzimuth: number
+  gridAzimuth: Optional<number>
   gridSize: Coordinate3D
   simulationBox: Coordinate3D
   simulationBoxOrigin: Coordinate2D
@@ -53,4 +59,8 @@ export interface Ordered {
 export interface DialogOptions {
   color?: Color
   width?: number
+}
+
+export interface Identified<T> {
+  [id: string]: T
 }

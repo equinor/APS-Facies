@@ -28,7 +28,7 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
     this.direction = new Direction(direction)
   }
 
-  public get type (): string {
+  public get type (): 'cubic' {
     return 'cubic'
   }
 

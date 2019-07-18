@@ -30,7 +30,7 @@ interface OriginSerialization {
   type: OriginType
 }
 
-interface TrendConfiguration {
+export interface TrendConfiguration {
   use?: boolean
   type?: TrendType
   azimuth?: number

@@ -6,7 +6,6 @@ import api from '@/api/rms'
 import templates from '@/store/modules/truncationRules/templates'
 import preset from '@/store/modules/truncationRules/preset'
 
-import { ADD_ITEM } from '@/store/mutations'
 import {
   hasCurrentParents,
   minFacies,
@@ -334,7 +333,7 @@ export default {
 
   mutations: {
     ADD: (state, rule) => {
-      ADD_ITEM(state.rules, { id: rule.id, item: rule })
+      Vue.set(state.rules, rule.id, rule)
     },
     REMOVE: (state, ruleId) => {
       Vue.delete(state.rules, ruleId)

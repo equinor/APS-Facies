@@ -24,7 +24,7 @@ interface RangeSerialization {
 
 type VariogramType = string
 
-interface VariogramConfiguration {
+export interface VariogramConfiguration {
   type?: VariogramType
   azimuth?: number
   azimuthUpdatable?: boolean

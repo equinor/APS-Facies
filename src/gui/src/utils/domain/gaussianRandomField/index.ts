@@ -67,14 +67,14 @@ export type GaussianRandomFieldConfiguration = DependentConfiguration & {
   seed?: number | null
 }
 
-interface GaussianRandomFieldSpecification {
+export interface GaussianRandomFieldSpecification {
   name: string
   settings: Settings
   trend: Trend
   variogram: Variogram
 }
 
-interface GaussianRandomFieldSerialization extends DependentSerialization {
+export interface GaussianRandomFieldSerialization extends DependentSerialization {
   name: string
   settings: SettingsSerialization
   trend: TrendSerialization
@@ -138,6 +138,8 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
     }
   }
 }
+
+export default GaussianRandomField
 
 export {
   Variogram,

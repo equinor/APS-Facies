@@ -66,7 +66,7 @@ import { required as requiredField, between, numeric } from 'vuelidate/lib/valid
 
 import math from '@/plugins/mathjs'
 
-
+import { MinMax } from '@/api/types'
 import { Optional } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
 
@@ -170,7 +170,7 @@ export default class NumericField extends Vue {
   readonly enforceRanges!: boolean
 
   @Prop({ default: null })
-  readonly ranges!: Optional<{ min: number, max: number }>
+  readonly ranges!: Optional<MinMax>
 
   @Prop({ default: () => [] })
   readonly additionalRules!: AdditionalRule[]

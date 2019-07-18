@@ -1,7 +1,7 @@
 import BaseItem from '@/utils/domain/bases/baseItem'
-import { Ordered } from '@/utils/domain/bases/interfaces'
+import { Identified, Ordered } from '@/utils/domain/bases/interfaces'
 import Facies from '@/utils/domain/facies/local'
-import { ID, Identified, ORDER, PROBABILITY } from '@/utils/domain/types'
+import { ID, ORDER, PROBABILITY } from '@/utils/domain/types'
 
 export function getFaciesName (polygon: Polygon): string {
   return polygon.facies ? polygon.facies.name : ''

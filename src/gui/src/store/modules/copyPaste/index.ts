@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import { Parent } from '@/utils/domain/bases/interfaces'
+import { Identified, Parent } from '@/utils/domain/bases/interfaces'
 import ZoneRegionDependent, { getParentId } from '@/utils/domain/bases/zoneRegionDependent'
 import { APSTypeError } from '@/utils/domain/errors'
 import uuidv4 from 'uuid/v4'
 
-import { ID, Identified } from '@/utils/domain/types'
+import { ID } from '@/utils/domain/types'
 import { Dispatch, Module } from 'vuex'
 
 import { Zone, Region } from '@/utils/domain'

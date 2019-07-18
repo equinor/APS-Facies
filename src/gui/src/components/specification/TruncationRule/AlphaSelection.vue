@@ -38,7 +38,7 @@ export default class AlphaSelection<
   readonly channel: number
 
   @Prop({ default: '' })
-  readonly group: ID
+  readonly group: ID | ''
 
   get _fields () {
     return (this.$store as Store).getters['fields']
