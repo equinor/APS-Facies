@@ -34,7 +34,6 @@ export default class App extends Vue {
     -moz-osx-font-smoothing grayscale
     text-align center
     color @pretty-blue
-    margin-top 60px
 
   h1, h2
     font-weight normal
