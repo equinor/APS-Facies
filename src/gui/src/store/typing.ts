@@ -1,3 +1,4 @@
+import MessageState from '@/store/modules/message/typing'
 import ParametersState from '@/store/modules/parameters/typing'
 import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { SimulationSettings } from '@/utils/domain/bases/interfaces'
@@ -39,6 +40,8 @@ interface RootState {
   }
 
   copyPaste: CopyPasteState
+
+  message: MessageState
 
   gridModels: GridModelsState
 

@@ -21,3 +21,5 @@ export const DEFAULT_CUBIC_LEVELS = 3
 export const DEFAULT_FACIES_REALIZATION_PARAMETER_NAME = 'aps'
 
 export const DEFAULT_FACIES_AUTOFILL = process.env.NODE_ENV === 'develop'
+
+export const DEFAULT_TIME_UNTIL_MESSAGE_DISMISSAL = 10000

@@ -1,5 +1,6 @@
 <template>
   <v-app id="app">
+    <information-bar />
     <tool-bar />
     <main-page />
   </v-app>
@@ -9,12 +10,14 @@
 import { Component, Vue } from 'vue-property-decorator'
 
 import ToolBar from '@/components/TheToolBar.vue'
+import InformationBar from '@/components/TheInformationBar.vue'
 import MainPage from '@/pages/MainPage.vue'
 
 @Component({
   components: {
     MainPage,
     ToolBar,
+    InformationBar,
   },
 })
 export default class App extends Vue {

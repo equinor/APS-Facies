@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 import copyPaste from '@/store/modules/copyPaste'
+import message from '@/store/modules/message'
 import gridModels from '@/store/modules/gridModels'
 import zones from '@/store/modules/zones'
 import regions from '@/store/modules/regions'
@@ -37,6 +38,7 @@ const store = new Vuex.Store({
 
   modules: {
     copyPaste,
+    message,
     gridModels,
     zones,
     regions,
