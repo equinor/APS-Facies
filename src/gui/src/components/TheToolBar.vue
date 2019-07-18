@@ -70,6 +70,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { Store } from '@/store/typing'
+import { ErrorMessage, SuccessMessage } from '@/utils/domain/messages'
 
 import { xml2json } from 'xml-js'
 
@@ -102,9 +103,13 @@ function fileHandler (store: Store, fileName: string) {
     try {
       json = xml2json(fileContent, { compact: false, ignoreComment: true })
     } catch (err) {
-      alert('The file you tried to open is not valid XML and cannot be used\n'
-        + 'Fix the following error before opening again:\n\n'
-        + err.message)
+      store.dispatch(
+        'message/change',
+        new ErrorMessage(
+          'The file you tried to open is not valid XML and cannot be used\n'
+          + 'Fix the following error before opening again:\n\n'
+          + err.message
+        ))
     }
     if (json) {
       const dom = parse(fileContent)
@@ -117,9 +122,14 @@ function fileHandler (store: Store, fileName: string) {
                 store.dispatch('modelFileLoader/populateGUI', { json, fileName })
               })
           } else {
-            alert('The file you tried to open is not a valid APS model file and cannot be used\n'
+            store.dispatch(
+              'message/change',
+              new ErrorMessage(
+                'The file you tried to open is not a valid APS model file and cannot be used\n'
               + 'Fix the following error before opening again:\n\n'
-              + result.error)
+              + result.error
+              )
+            )
           }
         })
     }
@@ -168,7 +178,7 @@ export default class TheToolBar extends Vue {
   async exportModelFile () {
     const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
       .catch(error => {
-        alert(error.message)
+        this.$store.dispatch('message/change', new ErrorMessage(error.message))
       })
     if (exportedXMLString) {
       const result = await rms.isApsModelValid(btoa(exportedXMLString))
@@ -181,18 +191,23 @@ export default class TheToolBar extends Vue {
               const resultPromise = rms.save(path, btoa(exportedXMLString))
               resultPromise.then((success: boolean): void => {
                 if (success) {
-                  alert(`model file was saved to ${path}`)
+                  this.$store.dispatch('message/change', new SuccessMessage(`The model file was saved to ${path}`))
                 }
                 if (!success) {
-                  alert('Saving failed. Did you choose a path that does not exist?')
+                  this.$store.dispatch('message/change', new ErrorMessage('Saving failed. Did you choose a path that does not exist?'))
                 }
               })
             }
           })
       } else {
-        alert('The model you have defined is not valid and cannot be exported\n'
-          + 'Fix the following error before exporting again:\n\n'
-          + result.error)
+        this.$store.dispatch(
+          'message/change',
+          new ErrorMessage(
+            'The model you have defined is not valid and cannot be exported\n'
+            + 'Fix the following error before exporting again:\n\n'
+            + result.error
+          )
+        )
       }
     }
   }

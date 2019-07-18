@@ -8,6 +8,9 @@ import {
   CubicPolygon,
   OverlayPolygon,
 } from '@/utils/domain'
+import {
+  ErrorMessage,
+} from '@/utils/domain/messages'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 const ensureArray = (value) => {
@@ -81,10 +84,6 @@ const getStackingDirection = (elem, prop = null) => {
   if (elem === '1') { return 'PROGRADING' }
   if (elem === '-1') { return 'RETROGRADING' }
   return null
-}
-
-const handleError = (reason) => {
-  alert(reason)
 }
 
 function getParent ({ rootGetters }, zoneModel) {
@@ -425,7 +424,7 @@ export default {
           await dispatch(action, apsModels)
         }
       } catch (reason) {
-        handleError(reason)
+        await dispatch('message/change', new ErrorMessage(reason), { root: true })
       } finally {
         commit('LOADING', { loading: false }, { root: true })
       }

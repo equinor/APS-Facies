@@ -25,6 +25,8 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { usesAllFacies } from '@/store/utils/helpers'
 
+import { ErrorMessage } from '@/utils/domain/messages'
+
 @Component({
   components: {
     IconButton
@@ -50,7 +52,7 @@ export default class PreviewHeader<T extends Polygon, S extends PolygonSerializa
     try {
       await this.$store.dispatch('truncationRules/updateRealization', this.value)
     } catch (e) {
-      alert(e)
+      this.$store.dispatch('message/change', new ErrorMessage(e))
     } finally {
       this.waitingForSimulation = false
     }
