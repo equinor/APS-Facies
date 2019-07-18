@@ -28,8 +28,8 @@ import { isEmpty } from '@/utils'
 export default class ElementSettings extends Vue {
   get options () {
     return {
-      zone: this.$store.state.options.showNameOrNumber.zone.show,
-      region: this.$store.state.options.showNameOrNumber.region.show,
+      zone: this.$store.state.options.showNameOrNumber.zone.value,
+      region: this.$store.state.options.showNameOrNumber.region.value,
     }
   }
 
