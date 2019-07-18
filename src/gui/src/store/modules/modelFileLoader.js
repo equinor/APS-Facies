@@ -654,8 +654,8 @@ export default {
           type = Object.values(rootState.truncationRules.templates.types.available)
             .find(item => item.name === type)
           // Changing presents must be done after the truncation rule is added (the command above must run to completion)
-          commit('truncationRules/CHANGE_TYPE', { type }, { root: true })
-          commit('truncationRules/CHANGE_TEMPLATE', { template: { text: 'Imported' } }, { root: true })
+          commit('truncationRules/preset/CHANGE_TYPE', { type }, { root: true })
+          commit('truncationRules/preset/CHANGE_TEMPLATE', { template: { text: 'Imported' } }, { root: true })
         }
       }
     }
