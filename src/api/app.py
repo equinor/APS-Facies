@@ -5,9 +5,6 @@ from flask_cors import CORS
 
 from src.utils.parsing import parse_signature
 from src.api.ui import call
-from gevent import monkey
-
-monkey.patch_all()
 
 
 def _get_environ(variable_name, default, divider=':'):
