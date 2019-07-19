@@ -303,7 +303,7 @@ import rms from '@/api/rms'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 
-import { WarningMessage } from '@/utils/domain/messages'
+import { displayWarning } from '@/utils/helpers/storeInteraction'
 
 @Component({
   // @ts-ignore
@@ -371,11 +371,11 @@ export default class ProjectSettings extends Vue {
     this.dialog = false
   }
   async ok () {
-    this.$store.dispatch('message/change', new WarningMessage(
+    await displayWarning(
       'The following settings where not saved:\n'
       + '* Location of truncation rules\n' /* I.e. this.truncationRuleLocation */
       + '* Location of FMU parameter list location\n' /* I.e. this.fmuParameterListLocation */
-    ))
+    )
     await Promise.all([
       this.$store.dispatch('parameters/path/project/select', this.apsModelFileLocation),
       this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),

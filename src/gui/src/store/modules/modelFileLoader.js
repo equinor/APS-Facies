@@ -8,9 +8,7 @@ import {
   CubicPolygon,
   OverlayPolygon,
 } from '@/utils/domain'
-import {
-  ErrorMessage,
-} from '@/utils/domain/messages'
+import { displayMessage } from '@/store/utils'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
 const ensureArray = (value) => {
@@ -424,7 +422,7 @@ export default {
           await dispatch(action, apsModels)
         }
       } catch (reason) {
-        await dispatch('message/change', new ErrorMessage(reason), { root: true })
+        await displayMessage({ dispatch }, reason, 'error')
       } finally {
         commit('LOADING', { loading: false }, { root: true })
       }

@@ -25,7 +25,7 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { usesAllFacies } from '@/store/utils/helpers'
 
-import { ErrorMessage } from '@/utils/domain/messages'
+import { displayError } from '@/utils/helpers/storeInteraction'
 
 @Component({
   components: {
@@ -52,7 +52,7 @@ export default class PreviewHeader<T extends Polygon, S extends PolygonSerializa
     try {
       await this.$store.dispatch('truncationRules/updateRealization', this.value)
     } catch (e) {
-      this.$store.dispatch('message/change', new ErrorMessage(e))
+      await displayError(e)
     } finally {
       this.waitingForSimulation = false
     }

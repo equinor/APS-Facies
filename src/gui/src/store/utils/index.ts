@@ -1,5 +1,5 @@
 import { RootState } from '@/store/typing'
-import { Commit, Dispatch, Module } from 'vuex'
+import { Commit, Dispatch, Module, Store } from 'vuex'
 
 async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result: string[]): Promise<void> {
   if (result.length === 1) {
@@ -50,8 +50,24 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
   }
 }
 
+async function displayMessage (
+  context: Store<RootState> | { dispatch: Dispatch },
+  message: string,
+  type: string,
+): Promise<void> {
+  const action = 'message/change'
+  const payload = { message, type }
+
+  if (context instanceof Store) {
+    await context.dispatch(action, payload)
+  } else {
+    await context.dispatch(action, payload, { root: true })
+  }
+}
+
 export {
   fetchParameterHelper,
   makeOption,
   selectOnlyParameter,
+  displayMessage,
 }
