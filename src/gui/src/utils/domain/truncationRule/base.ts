@@ -18,7 +18,7 @@ export interface TruncationRuleSerialization<S extends PolygonSerialization> ext
   realization: number[][] | null
 }
 
-export type TruncationRuleConfiguration<T extends Polygon> = DependentConfiguration & {
+export type TruncationRuleConfiguration<T extends Polygon = Polygon> = DependentConfiguration & {
   name: string
   polygons: Identified<T> | T[]
   backgroundFields: GaussianRandomField[]
@@ -26,8 +26,8 @@ export type TruncationRuleConfiguration<T extends Polygon> = DependentConfigurat
 }
 
 export default abstract class TruncationRule<
-  T extends Polygon,
-  S extends PolygonSerialization,
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
 > extends ZoneRegionDependent implements Named {
   public readonly name: string
 

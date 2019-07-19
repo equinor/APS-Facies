@@ -24,7 +24,10 @@ import { getId } from '@/utils'
     FractionField,
   },
 })
-export default class PolygonFractionField<T extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class PolygonFractionField<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: T
 

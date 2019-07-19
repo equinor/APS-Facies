@@ -32,7 +32,10 @@ import { displayError } from '@/utils/helpers/storeInteraction'
     IconButton
   },
 })
-export default class PreviewHeader<T extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class PreviewHeader<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+> extends Vue {
   waitingForSimulation: boolean = false
 
   @Prop({ required: true })

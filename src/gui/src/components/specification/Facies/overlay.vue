@@ -20,7 +20,11 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
     FaciesSpecification,
   }
 })
-export default class OverlayFaciesSpecification<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> extends Vue {
+export default class OverlayFaciesSpecification<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: OverlayPolygon
 

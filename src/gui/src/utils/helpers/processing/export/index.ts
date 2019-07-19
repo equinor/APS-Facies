@@ -377,7 +377,10 @@ function findFaciesNameForNamedPolygon (truncRule: Bayfill, polygonName: string)
     : ''
 }
 
-function getAlphaNames<P extends Polygon, S extends PolygonSerialization> (truncRule: TruncationRuleBase<P, S>): string {
+function getAlphaNames<
+  P extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+> (truncRule: TruncationRuleBase<P, S>): string {
   const alphaFields = truncRule.backgroundFields
   return alphaFields.map((field): string => field.name).join(' ')
 }
@@ -418,10 +421,10 @@ function addTruncationRuleBayFill (context: Context, doc: Document, parent: Pare
 }
 
 function addTruncationRuleOverlay<
-  P extends Polygon,
-  S extends PolygonSerialization,
-  Sp extends PolygonSpecification,
-  T extends OverlayTruncationRule<P, S, Sp>
+  T extends OverlayTruncationRule<P, S, Sp>,
+  P extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  Sp extends PolygonSpecification = PolygonSpecification,
 > (
   context: Context,
   doc: Document,

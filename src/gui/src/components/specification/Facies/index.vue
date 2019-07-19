@@ -22,7 +22,10 @@ import FaciesSpecificationBase from './base.vue'
     FaciesSpecificationBase,
   }
 })
-export default class FaciesSpecification<P extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class FaciesSpecification<
+  P extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+> extends Vue {
   @Prop({ required: true })
   readonly value: Polygon
 

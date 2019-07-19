@@ -9,8 +9,8 @@ interface Context {
 }
 
 export function usesAllFacies<
-  T extends Polygon,
-  S extends PolygonSerialization
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
 > (
   { rootGetters }: { rootGetters: RootGetters },
   rule: TruncationRule<T, S>,
@@ -29,8 +29,8 @@ export function usesAllFacies<
 }
 
 export function isReady<
-  T extends Polygon,
-  S extends PolygonSerialization,
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
 > (
   { rootGetters }: Context,
   rule: TruncationRule<T, S>,

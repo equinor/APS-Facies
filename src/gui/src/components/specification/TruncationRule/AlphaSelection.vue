@@ -24,7 +24,10 @@ import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
 
 @Component
-export default class AlphaSelection<P extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class AlphaSelection<
+  P extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField | null
 

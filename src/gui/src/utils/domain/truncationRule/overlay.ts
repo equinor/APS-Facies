@@ -11,7 +11,7 @@ import TruncationRule, {
 import { ID } from '@/utils/domain/types'
 import { allSet, getId } from '@/utils/helpers'
 
-export type OverlayTruncationRuleArgs<T extends Polygon> = TruncationRuleConfiguration<T> & {
+export type OverlayTruncationRuleArgs<T extends Polygon = Polygon> = TruncationRuleConfiguration<T> & {
   overlay?: {
     use: boolean
   }
@@ -24,19 +24,19 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
   over: string[]
 }
 
-export interface OverlaySpecification<P extends PolygonSpecification> {
+export interface OverlaySpecification<P extends PolygonSpecification = PolygonSpecification> {
   overlay: OverlayPolygonSpecification[] | null
   polygons: P[]
 }
 
-export interface OverlaySerialization<P extends PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
+export interface OverlaySerialization<P extends PolygonSerialization =PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
   _useOverlay: boolean
 }
 
 export default abstract class OverlayTruncationRule<
-  T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > extends TruncationRule<
   T | OverlayPolygon,
   S | OverlayPolygonSerialization

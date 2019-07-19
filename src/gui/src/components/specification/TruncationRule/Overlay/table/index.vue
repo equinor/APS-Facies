@@ -56,12 +56,20 @@ import BackgroundGroupFaciesSpecification from '@/components/specification/Facie
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonTable from './table.vue'
 
-function hasAvailableBackgroundFacies<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> (store: Store, rule: OverlayTruncationRule<T, S, P>): boolean {
+function hasAvailableBackgroundFacies<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> (store: Store, rule: OverlayTruncationRule<T, S, P>): boolean {
   return Object.values(store.state.facies.available)
     .some(facies => store.getters['facies/availableForBackgroundFacies'](rule, facies))
 }
 
-function allBackgroundPolygonsHasSomeFacies<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> (rule: OverlayTruncationRule<T, S, P>): boolean {
+function allBackgroundPolygonsHasSomeFacies<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> (rule: OverlayTruncationRule<T, S, P>): boolean {
   return rule.overlayPolygons
     .every(({ group }) => group ? group.facies.length > 0 : true)
 }
@@ -73,7 +81,11 @@ function allBackgroundPolygonsHasSomeFacies<T extends Polygon, S extends Polygon
     PolygonTable,
   },
 })
-export default class BackgroundFacies<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> extends Vue {
+export default class BackgroundFacies<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: OverlayTruncationRule<T, S, P>
 

@@ -27,7 +27,10 @@ import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
     BasePolygonOrder,
   },
 })
-export default class PolygonOrder<T extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class PolygonOrder<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: T
 
