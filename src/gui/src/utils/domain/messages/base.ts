@@ -1,9 +1,9 @@
-export type MessageType = 'error' | 'info' | 'success' | 'warning' // Save as Vuetify's
+export type MessageType = 'error' | 'info' | 'success' | 'warning' // Same as Vuetify's
 
 export default abstract class BaseMessage {
-  public value: string
+  public value: string | Error
 
-  protected constructor (message: string) {
+  protected constructor (message: string | Error) {
     this.value = message
   }
 

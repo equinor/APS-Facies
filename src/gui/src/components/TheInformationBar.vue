@@ -30,6 +30,13 @@ export default class InformationBar extends Vue {
 
   get message () {
     let message = this._message.value
+    if (message instanceof Error) {
+      if (process.env.NODE_ENV === 'develop') {
+        throw message
+      } else {
+        message = message.message
+      }
+    }
     if (message) message = message.trim()
     return message
   }
