@@ -3,11 +3,24 @@
 # Usage ./gather-python-files.py CODE_DIR APS_DIR
 # Finds all Python files in CODE_DIR/src and adds them to APS_DIR/src with the same hierarchy
 
+import re
 from os import walk, makedirs
 from os.path import exists
 from sys import argv
 from shutil import copyfile
 from pathlib import Path
+
+
+_ignored = [
+    r'.*/node_modules/.*',
+]
+
+
+def is_ignored(file):
+    for exp in _ignored:
+        if re.findall(exp, file):
+            return True
+    return False
 
 
 def gather_files(source_dir, file_ending):
@@ -30,7 +43,8 @@ def copy_files(files, source_dir, target_dir):
         target_file_dir = '/'.join(target.split('/')[:-1])
         if not exists(target_file_dir):
             makedirs(target_file_dir, exist_ok=True)
-        copyfile(source, target, follow_symlinks=True)
+        if not is_ignored(source):
+            copyfile(source, target, follow_symlinks=True)
 
 
 def run():

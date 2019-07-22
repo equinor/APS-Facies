@@ -122,7 +122,7 @@ MAIN.PY := $(PYTHON_API_DIR)/main.py
 INFO.XML := $(CODE_DIR)/info.xml
 
 MKDIR := mkdir -p
-REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -e 's/^from src/from .static.py/g'
+REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^( *from )src/\1aps/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI/releases
@@ -223,7 +223,7 @@ gather-python-scripts: copy-python-files __init__.py
 __init__.py:
 	touch $(PLUGIN_DIR)/__init__.py
 
-compile-python-files: ensure-relative-import-statements-in-plugin move-python-files-to-static
+compile-python-files: ensure-relative-import-statements-in-plugin compile-pydist remove-extraneous-files
 
 increase-build-number:
 	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
@@ -231,13 +231,25 @@ increase-build-number:
 ensure-relative-import-statements-in-plugin:
 	$(PYTHON) $(BIN_DIR)/convert2relative.py $(PLUGIN_DIR)/src --base-name src
 
-move-python-files-to-static:
-	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/static/py
+compile-pydist: move-pydist move-python-files-to-pydist
 	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(PLUGIN_DIR)/ui.py \
-	                                  $(PLUGIN_DIR)/main.py
+	                                  $(PLUGIN_DIR)/main.py \
+	                                  $(PLUGIN_DIR)/pydist/nrlib/__init__.py
+
+move-python-files-to-pydist:
+	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/pydist/aps
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
+
+move-pydist:
+	mv $(PLUGIN_DIR)/src/pydist $(PLUGIN_DIR)
+
+remove-extraneous-files: remove-node_modules-stubs
+
+remove-node_modules-stubs:
+	rm -rf $(PLUGIN_DIR)/pydist/aps/gui/node_modules
+	rmdir $(PLUGIN_DIR)/pydist/aps/gui
 
 clean-build: clean-plugin clean-links clean-build-dir
 
@@ -245,7 +257,9 @@ clean-build-dir:
 	rm -rf $(BUILD_DIR)
 
 clean-plugin:
-	rm -rf $(PLUGIN_DIR) $(PLUGIN_DIR).plugin
+	rm -rf $(PLUGIN_DIR) \
+	       $(PLUGIN_DIR).plugin \
+	       $(PLUGIN_DIR).*.plugin
 
 build-front-end: $(PACKAGE.JSON) build-dir
 	VUE_APP_APS_VERSION="$(APS_VERSION)" \
@@ -430,6 +444,7 @@ integration-tests: clean-integration init-workflow link-example-files
 	cd $(INTEGRATION_TESTS) && \
 	RMS_PROJECT="$(RMS_PROJECT)" \
 	APS_RESOURCES="$(INTEGRATION_TESTS)" \
+	APS_ROOT="$(CODE_DIR)" \
 	./test_workflows_in_rms11.sh
 
 clean-integration: clean-workflow-blocks clean-example-link clean-matplotlibrc
