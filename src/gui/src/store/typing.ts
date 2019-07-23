@@ -1,4 +1,5 @@
 import { ConstantsState } from '@/store/modules/constants/typing'
+import { GaussianRandomFieldState } from '@/store/modules/gaussianRandomFields/typing'
 import MessageState from '@/store/modules/message/typing'
 import OptionsState from '@/store/modules/options/typing'
 import ParametersState from '@/store/modules/parameters/typing'
@@ -52,8 +53,7 @@ interface RootState {
 
   gridModels: GridModelsState
 
-  gaussianRandomFields: {
-    fields: Identified<GaussianRandomField>
+  gaussianRandomFields: GaussianRandomFieldState & {
     crossSections: {
       available: Identified<CrossSection>
     }

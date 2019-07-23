@@ -70,7 +70,7 @@ export default {
     ...mapState({
       availableOriginTypes: state => state.constants.options.origin.available,
     }),
-    trend () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend },
+    trend () { return this.$store.state.gaussianRandomFields.available[this.grfId].trend },
     isEllipticCone () { return this.trend.type === 'ELLIPTIC_CONE' },
     originType: {
       get: function () { return this.trend.origin.type },

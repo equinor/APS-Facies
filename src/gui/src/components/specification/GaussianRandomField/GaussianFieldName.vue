@@ -33,7 +33,7 @@ export default {
   },
 
   computed: {
-    fields () { return this.$store.state.gaussianRandomFields.fields },
+    fields () { return this.$store.state.gaussianRandomFields.available },
     name () { return this.value.name },
     errors () {
       const errors = []

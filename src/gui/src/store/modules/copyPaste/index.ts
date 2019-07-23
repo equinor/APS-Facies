@@ -110,7 +110,7 @@ const module: Module<CopyPasteState, RootState> = {
             items: listify(rootState.gaussianRandomFields.crossSections.available),
             serialization: ''
           },
-          { name: 'gaussianRandomFields', items: listify(rootState.gaussianRandomFields.fields), serialization: '' },
+          { name: 'gaussianRandomFields', items: listify(rootState.gaussianRandomFields.available), serialization: '' },
           { name: 'facies', items: listify(rootState.facies.available), serialization: '' },
           { name: 'facies/groups', items: listify(rootState.facies.groups.available), serialization: '' },
           { name: 'truncationRules', items: listify(rootState.truncationRules.rules), serialization: '' },

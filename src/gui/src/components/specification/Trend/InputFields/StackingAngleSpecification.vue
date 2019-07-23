@@ -32,7 +32,7 @@ export default {
     ...mapState({
       availableStackingDirection: state => state.constants.options.stacking.available,
     }),
-    trend () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend },
+    trend () { return this.$store.state.gaussianRandomFields.available[this.grfId].trend },
     stackingDirection: {
       get: function () { return this.trend.stackingDirection },
       set: function (value) { this.$store.dispatch('gaussianRandomFields/stackingDirection', { grfId: this.grfId, value }) }

@@ -119,7 +119,7 @@ export default {
           (
             rule.overlayPolygons
               .filter(polygon => getId(polygon.group) === getId(group)).length + 1
-          ) > (Object.values(rootState.gaussianRandomFields.fields).length - rule.backgroundFields.length)
+          ) > (Object.values(rootState.gaussianRandomFields.available).length - rule.backgroundFields.length)
         ) {
           field = await dispatch('gaussianRandomFields/addEmptyField', rule.parent, { root: true })
         }
@@ -286,7 +286,7 @@ export default {
     },
     async toggleOverlay ({ commit, dispatch, rootState }, { rule, value }) {
       // If there are too few GRFs, add more
-      const availableFields = Object.values(rootState.gaussianRandomFields.fields)
+      const availableFields = Object.values(rootState.gaussianRandomFields.available)
         .filter(field => hasParents(field, rule.parent.zone, rule.parent.region))
       if (availableFields.length <= rule.backgroundFields.length) {
         await dispatch('gaussianRandomFields/addEmptyField', rule.parent, { root: true })

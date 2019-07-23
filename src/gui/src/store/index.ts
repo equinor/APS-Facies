@@ -116,7 +116,7 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Gaussian Random Fields
         await dispatch('gaussianRandomFields/crossSections/populate', Object.values(data.gaussianRandomFields.crossSections.available))
-        await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.fields))
+        await dispatch('gaussianRandomFields/populate', Object.values(data.gaussianRandomFields.available))
 
         // Truncation rules
         await dispatch('truncationRules/populate', data.truncationRules)
@@ -172,16 +172,16 @@ const store: Store<RootState> = new Vuex.Store({
       return state.parameters.blockedWellLog.selected
     },
     allFields: (state): GaussianRandomField[] => {
-      return Object.values(state.gaussianRandomFields.fields)
+      return Object.values(state.gaussianRandomFields.available)
     },
     fields: (state, getters): GaussianRandomField[] => {
       return sortAlphabetically(
-        Object.values(state.gaussianRandomFields.fields)
+        Object.values(state.gaussianRandomFields.available)
           .filter((field): boolean => hasCurrentParents(field, getters))
       )
     },
     field: (state): (id: ID) => Optional<GaussianRandomField> => (id: ID): Optional<GaussianRandomField> => {
-      return state.gaussianRandomFields.fields[`${id}`] || null
+      return state.gaussianRandomFields.available[`${id}`] || null
     },
     // These are the 'available' for various modules / properties
     zones: (state): Zone[] => {
@@ -205,7 +205,7 @@ const store: Store<RootState> = new Vuex.Store({
     simulationSettings: (state, getters): (grfId: ID) => SimulationSettings => (grfId: ID): SimulationSettings => {
       const grid = state.parameters.grid
       const fieldSettings = grfId
-        ? state.gaussianRandomFields.fields[`${grfId}`].settings
+        ? state.gaussianRandomFields.available[`${grfId}`].settings
         : {
           gridModel: null,
         }
@@ -244,7 +244,7 @@ const store: Store<RootState> = new Vuex.Store({
     // Utility method for getting IDs
     id: (state): (type: string, name: string) => Optional<ID> => (type: string, name: string): Optional<ID> => {
       const mapping = {
-        'gaussianRandomField': 'gaussianRandomFields.fields',
+        'gaussianRandomField': 'gaussianRandomFields.available',
         'facies': 'facies.global.available',
       }
       const items = resolve(mapping[`${type}`], state)
@@ -258,7 +258,7 @@ const store: Store<RootState> = new Vuex.Store({
     },
     byId: (state) => (id: ID) => {
       const relevant = Object.values(state)
-        .map((thing): Identified<BaseItem> => thing.available || thing.field)
+        .map((thing): Identified<BaseItem> => thing.available)
         .filter((items): boolean => items && items.hasOwnProperty(id))
       return relevant.length > 0
         ? relevant[0][`${id}`]

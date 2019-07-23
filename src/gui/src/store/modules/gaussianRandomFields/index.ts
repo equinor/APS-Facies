@@ -1,6 +1,6 @@
 import { Context as RootContext, RootState } from '@/store/typing'
 import { Region } from '@/utils/domain'
-import { Identified } from '@/utils/domain/bases/interfaces'
+import { GaussianRandomFieldState } from '@/store/modules/gaussianRandomFields/typing'
 import { ID } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
 import Vue from 'vue'
@@ -20,10 +20,6 @@ import { unpackVariogram } from '@/utils/domain/gaussianRandomField/variogram'
 import { unpackTrend } from '@/utils/domain/gaussianRandomField/trend'
 import { Module } from 'vuex'
 
-interface GaussianRandomFieldState {
-  fields: Identified<GaussianRandomField>
-}
-
 type Context = RootContext<GaussianRandomFieldState, RootState>
 
 function setValue (
@@ -32,7 +28,7 @@ function setValue (
 ): void {
   const checks: ([() => boolean, string])[] = [
     [
-      (): boolean => state.fields.hasOwnProperty(grfId),
+      (): boolean => state.available.hasOwnProperty(grfId),
       `The gaussian field (${grfId}) does not exists`
     ],
     [
@@ -54,7 +50,7 @@ function setValue (
 function getRelevantFields (state: GaussianRandomFieldState, zone: Zone, region: Region): GaussianRandomField[] {
   const zoneId = zone.id || zone
   const regionId = region ? (region.id || region) : null
-  return Object.values(state.fields)
+  return Object.values(state.available)
     .filter((field): boolean => hasParents(field, zoneId, regionId))
 }
 
@@ -73,7 +69,7 @@ const module: Module<GaussianRandomFieldState, RootState> = {
   namespaced: true,
 
   state: {
-    fields: {
+    available: {
     },
   },
 
@@ -115,13 +111,13 @@ const module: Module<GaussianRandomFieldState, RootState> = {
       commit('DELETE', { grfId: getId(field) })
     },
     async deleteField ({ state, commit, dispatch }, { grfId }): Promise<void> {
-      if (state.fields.hasOwnProperty(grfId)) {
+      if (state.available.hasOwnProperty(grfId)) {
         await dispatch('truncationRules/deleteField', { grfId }, { root: true })
         commit('DELETE', { grfId })
       }
     },
     async updateSimulation ({ state, commit, dispatch, rootGetters }, { grfId }): Promise<void> {
-      const field = state.fields[`${grfId}`]
+      const field = state.available[`${grfId}`]
       commit('CHANGE_WAITING', { grfId, value: true })
       try {
         await dispatch('updateSimulationData', {
@@ -184,7 +180,7 @@ const module: Module<GaussianRandomFieldState, RootState> = {
     async trendType (context, { grfId, value }): Promise<void> {
       const { dispatch, state, rootState } = context
       setValue(context, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
-      const field = state.fields[`${grfId}`]
+      const field = state.available[`${grfId}`]
       if (field.trend.type === 'HYPERBOLIC') {
         const curvature = field.trend.curvature
         if (curvature.value <= 1) {
@@ -213,75 +209,75 @@ const module: Module<GaussianRandomFieldState, RootState> = {
   mutations: {
     // Gaussian Random Field
     ADD (state, field): void {
-      Vue.set(state.fields, field.id, field)
+      Vue.set(state.available, field.id, field)
     },
     DELETE (state, { grfId }): void {
-      Vue.delete(state.fields, grfId)
+      Vue.delete(state.available, grfId)
     },
     CHANGE_NAME (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`], 'name', value)
+      Vue.set(state.available[`${grfId}`], 'name', value)
     },
     CHANGE_SETTINGS (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`], 'settings', value)
+      Vue.set(state.available[`${grfId}`], 'settings', value)
     },
     CHANGE_SEED (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].settings, 'seed', value)
+      Vue.set(state.available[`${grfId}`].settings, 'seed', value)
     },
     CHANGE_SIMULATION (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`], '_data', value)
+      Vue.set(state.available[`${grfId}`], '_data', value)
     },
     CHANGE_OVERLAY (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`], 'overlay', value)
+      Vue.set(state.available[`${grfId}`], 'overlay', value)
     },
     CHANGE_WAITING (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`], 'waiting', value)
+      Vue.set(state.available[`${grfId}`], 'waiting', value)
     },
     // Variogram
     CHANGE_RANGE (state, { grfId, type, value }): void {
-      Vue.set(state.fields[`${grfId}`].variogram.range, type, value)
+      Vue.set(state.available[`${grfId}`].variogram.range, type, value)
     },
     CHANGE_ANGLE (state, { grfId, variogramOrTrend, type, value }): void {
-      Vue.set(state.fields[`${grfId}`][`${variogramOrTrend}`].angle, type, value)
+      Vue.set(state.available[`${grfId}`][`${variogramOrTrend}`].angle, type, value)
     },
     CHANGE_VARIOGRAM_TYPE (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].variogram, 'type', value)
+      Vue.set(state.available[`${grfId}`].variogram, 'type', value)
     },
     CHANGE_POWER (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].variogram, 'power', value)
+      Vue.set(state.available[`${grfId}`].variogram, 'power', value)
     },
     // Trend
     USE_TREND (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend, 'use', value)
+      Vue.set(state.available[`${grfId}`].trend, 'use', value)
     },
     CHANGE_TREND_TYPE (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend, 'type', value)
+      Vue.set(state.available[`${grfId}`].trend, 'type', value)
     },
     CHANGE_RELATIVE_STANDARD_DEVIATION (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend, 'relativeStdDev', value)
+      Vue.set(state.available[`${grfId}`].trend, 'relativeStdDev', value)
     },
     CHANGE_RELATIVE_SIZE_OF_ELLIPSE (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend, 'relativeSize', value)
+      Vue.set(state.available[`${grfId}`].trend, 'relativeSize', value)
     },
     CHANGE_STACKING_DIRECTION (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend, 'stackingDirection', value)
+      Vue.set(state.available[`${grfId}`].trend, 'stackingDirection', value)
     },
     CHANGE_CURVATURE (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend, 'curvature', value)
+      Vue.set(state.available[`${grfId}`].trend, 'curvature', value)
     },
     CHANGE_ORIGIN_COORDINATE (state, { grfId, type, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend.origin, type, value)
+      Vue.set(state.available[`${grfId}`].trend.origin, type, value)
     },
     CHANGE_ORIGIN_TYPE (state, { grfId, value }): void {
-      Vue.set(state.fields[`${grfId}`].trend.origin, 'type', value)
+      Vue.set(state.available[`${grfId}`].trend.origin, 'type', value)
     },
     CHANGE_RMS_TREND_PARAM (state, { grfId, value }): void {
-      state.fields[`${grfId}`].trend.parameter = value
+      state.available[`${grfId}`].trend.parameter = value
     }
   },
 
   getters: {
     byId: (state): (id: ID) => GaussianRandomField | undefined => (id: ID): GaussianRandomField | undefined => {
-      return state.fields[`${getId(id)}`]
+      return state.available[`${getId(id)}`]
     },
   },
 }

@@ -68,8 +68,8 @@ function addRMSWorkflowName ({ rootState }: Context, doc: Document, parentElemen
   }
 }
 
-function addGridModelName ({ rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
-  const value = rootGetters.gridModel
+function addGridModelName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
+  const value = rootState.gridModels.current
   if (value) {
     parentElement.appendChild(createElement(doc, 'GridModelName', value))
   } else {
@@ -346,7 +346,7 @@ function addGaussianRandomField (doc: Document, field: GaussianRandomField, pare
 }
 
 function addGaussianRandomFields ({ rootState }: Context, doc: Document, parent: Parent, zoneElement: HTMLElement): void {
-  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
+  const relevantFields = Object.values(rootState.gaussianRandomFields.available)
     .filter((field): boolean => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
     .sort((a, b): number => a.name.localeCompare(b.name, undefined, { numeric: true }))
   if (relevantFields.length < 2) {
@@ -365,7 +365,7 @@ function addGaussianRandomFields ({ rootState }: Context, doc: Document, parent:
 }
 
 function getNumberOfFieldsForTruncRule ({ rootState }: Context, parent: Parent): number {
-  const relevantFields = Object.values(rootState.gaussianRandomFields.fields)
+  const relevantFields = Object.values(rootState.gaussianRandomFields.available)
     .filter((field): boolean => hasParents(field, parent.zone.id, parent.region ? parent.region.id : null))
   return relevantFields ? relevantFields.length : 0
 }

@@ -119,7 +119,7 @@ export default {
       availableRmsTrendParameters: state => state.parameters.rmsTrend.available,
       availableTrends: state => state.constants.options.trends.available,
     }),
-    trend () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend },
+    trend () { return this.$store.state.gaussianRandomFields.available[this.grfId].trend },
     hasLinearProperties () {
       return (
         notEmpty(this.trendType)
@@ -148,7 +148,7 @@ export default {
       return this.trend.type === 'RMS_PARAM'
     },
     trendType: {
-      get: function () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend.type },
+      get: function () { return this.$store.state.gaussianRandomFields.available[this.grfId].trend.type },
       set: function (value) { this.$store.dispatch('gaussianRandomFields/trendType', { grfId: this.grfId, value }) }
     },
     trendParameter: {

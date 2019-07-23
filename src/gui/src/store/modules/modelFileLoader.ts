@@ -188,7 +188,7 @@ function getSlantFactor (container: XMLElement, item: string): Optional<FmuUpdat
 }
 
 function getAlphaField ({ rootState }: Context, name: string, parent: Parent): GaussianRandomField {
-  const field = Object.values(rootState.gaussianRandomFields.fields)
+  const field = Object.values(rootState.gaussianRandomFields.available)
     .filter((field): boolean => field.isChildOf(parent))
     .find((field): boolean => field.name === name)
   if (!field) throw new APSError(`The Gaussian Random Field, with name ${name}, and parent; ${parent} does not exist`)

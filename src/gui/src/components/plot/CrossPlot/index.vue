@@ -45,7 +45,7 @@ export default class CrossPlot extends Vue {
 
   _getField (item: GaussianRandomField | ID) {
     return typeof item === 'string'
-      ? this.$store.state.gaussianRandomFields.fields[`${item}`]
+      ? this.$store.state.gaussianRandomFields.available[`${item}`]
       : item
   }
 }

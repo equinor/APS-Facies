@@ -64,7 +64,7 @@ export default class AlphaFields<
 
   update ({ channel }: { channel: number }, fieldId: ID | GaussianRandomField) {
     const field = fieldId
-      ? (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+      ? (this.$store as Store).state.gaussianRandomFields.available[`${fieldId}`]
       : null
     return this.$store.dispatch('truncationRules/updateBackgroundField', {
       index: channel - 1,

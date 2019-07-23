@@ -51,7 +51,7 @@ export default {
   },
 
   computed: {
-    field () { return this.$store.state.gaussianRandomFields.fields[this.grfId][this.variogramOrTrend] },
+    field () { return this.$store.state.gaussianRandomFields.available[this.grfId][this.variogramOrTrend] },
     propertyValue: {
       get: function () { return this.getValue() },
       set: function (value) { this.dispatchChange(value) },

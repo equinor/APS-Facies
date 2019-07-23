@@ -4,7 +4,7 @@ import { Module } from 'vuex'
 import { Context as RootContext, RootState } from '@/store/typing'
 import { Parent } from '@/utils/domain/bases/interfaces'
 import { ID } from '@/utils/domain/types'
-import { ItemsState } from '@/utils/domain/bases/baseItem'
+import { CrossSectionsState } from '@/store/modules/gaussianRandomFields/typing'
 import { Optional } from '@/utils/typing'
 
 import CrossSection, {
@@ -13,8 +13,6 @@ import CrossSection, {
 import { DEFAULT_CROSS_SECTION } from '@/config'
 import { getId } from '@/utils'
 import { APSError } from '@/utils/domain/errors'
-
-type CrossSectionsState = ItemsState<CrossSection>
 
 type Context = RootContext<CrossSectionsState, RootState>
 
@@ -51,7 +49,7 @@ const module: Module<CrossSectionsState, RootState> = {
       for (const crossSection of Object.values(crossSections)) {
         const existing = getters['byParent'](crossSection)
         if (existing && existing.id !== crossSection.id) {
-          if (Object.values(rootState.gaussianRandomFields.fields).some((field): boolean => field.settings.crossSection.id === existing.id)) {
+          if (Object.values(rootState.gaussianRandomFields.available).some((field): boolean => field.settings.crossSection.id === existing.id)) {
             throw new APSError('There is a conflict with the cross sections')
           }
           commit('DELETE', existing)
@@ -66,7 +64,7 @@ const module: Module<CrossSectionsState, RootState> = {
       }
     },
     async remove ({ commit, dispatch, rootState }, crossSection): Promise<void> {
-      await Promise.all(Object.values(rootState.gaussianRandomFields.fields)
+      await Promise.all(Object.values(rootState.gaussianRandomFields.available)
         .filter((field): boolean => getId(field.settings.crossSection) === getId(crossSection))
         .map((field): Promise<void> => dispatch('gaussianRandomFields/remove', field, { root: true })))
       commit('DELETE', crossSection)

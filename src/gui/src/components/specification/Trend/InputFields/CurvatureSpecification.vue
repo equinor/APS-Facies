@@ -25,7 +25,7 @@ export default {
 
   computed: {
     minCurvature () {
-      const field = this.$store.state.gaussianRandomFields.fields[`${this.grfId}`]
+      const field = this.$store.state.gaussianRandomFields.available[`${this.grfId}`]
       return field && field.trend && field.trend.type === 'HYPERBOLIC'
         ? 1
         : 0

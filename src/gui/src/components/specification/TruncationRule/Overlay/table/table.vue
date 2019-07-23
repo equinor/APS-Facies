@@ -164,7 +164,7 @@ export default class OverlayTable<
 
   ordering (items: OverlayPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
   async updateField (polygon: OverlayPolygon, fieldId: ID) {
-    const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+    const field = (this.$store as Store).state.gaussianRandomFields.available[`${fieldId}`]
     await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
   }
   async updateCenter (polygon: OverlayPolygon, val: number) {
