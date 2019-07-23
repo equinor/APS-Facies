@@ -113,7 +113,7 @@ const module: Module<CopyPasteState, RootState> = {
           { name: 'gaussianRandomFields', items: listify(rootState.gaussianRandomFields.available), serialization: '' },
           { name: 'facies', items: listify(rootState.facies.available), serialization: '' },
           { name: 'facies/groups', items: listify(rootState.facies.groups.available), serialization: '' },
-          { name: 'truncationRules', items: listify(rootState.truncationRules.rules), serialization: '' },
+          { name: 'truncationRules', items: listify(rootState.truncationRules.available), serialization: '' },
         ]
         await removeOld({ dispatch }, elements.concat().reverse(), parent)
         const serialization = giveNewIds(elements, source, parent)

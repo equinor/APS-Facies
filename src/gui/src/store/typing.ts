@@ -73,7 +73,7 @@ interface RootState {
   parameters: ParametersState
 
   truncationRules: {
-    rules: Identified<TruncationRule>
+    available: Identified<TruncationRule>
     preset: PresetState
     templates: {
       available: Identified<{

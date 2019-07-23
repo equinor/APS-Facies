@@ -553,7 +553,7 @@ function addTruncationRule (context: Context, doc: Document, parent: Parent, zon
   const truncRuleElem = createElement(doc, 'TruncationRule')
   zoneElement.append(truncRuleElem)
 
-  const truncRule = Object.values(rootState.truncationRules.rules).find((rule): boolean => hasParents(rule, parent.zone, parent.region))
+  const truncRule = Object.values(rootState.truncationRules.available).find((rule): boolean => hasParents(rule, parent.zone, parent.region))
   if (!truncRule) {
     let errMessage = `No truncation rule specified for zone ${parent.zone.code}`
     if (parent.region) {

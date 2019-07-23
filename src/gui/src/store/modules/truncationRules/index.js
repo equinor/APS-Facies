@@ -25,11 +25,11 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 import { isReady } from '@/store/utils/helpers'
 
 const setPolygonValue = (state, rule, polygon, property, value) => {
-  Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], property, value)
+  Vue.set(state.available[`${rule.id}`]._polygons[`${polygon.id}`], property, value)
 }
 
 const setProperty = (state, rule, property, values) => {
-  Vue.set(state.rules[`${rule.id}`], property, values)
+  Vue.set(state.available[`${rule.id}`], property, values)
 }
 
 function compareTemplate (rootGetters, a, b) {
@@ -60,7 +60,7 @@ export default {
   namespaced: true,
 
   state: {
-    rules: {},
+    available: {},
   },
 
   modules: {
@@ -90,7 +90,7 @@ export default {
     remove ({ commit }, rule) {
       commit('REMOVE', getId(rule))
     },
-    async populate ({ dispatch }, { rules, templates, preset }) {
+    async populate ({ dispatch }, { available: rules, templates, preset }) {
       await dispatch('preset/populate', preset)
       await dispatch('templates/populate', templates)
       await Promise.all(Object.values(rules)
@@ -234,7 +234,7 @@ export default {
     deleteField ({ dispatch, state, rootGetters }, { grfId }) {
       const field = rootGetters.field(grfId)
       return Promise.all(
-        Object.values(state.rules)
+        Object.values(state.available)
           .filter(rule => !!rule.fields.some(({ field }) => getId(field) === grfId))
           .map(rule => rule.isUsedInBackground(field)
             ? dispatch('updateBackgroundField', {
@@ -333,52 +333,52 @@ export default {
 
   mutations: {
     ADD: (state, rule) => {
-      Vue.set(state.rules, rule.id, rule)
+      Vue.set(state.available, rule.id, rule)
     },
     REMOVE: (state, ruleId) => {
-      Vue.delete(state.rules, ruleId)
+      Vue.delete(state.available, ruleId)
     },
     ADD_POLYGON: (state, { rule, polygon }) => {
-      Vue.set(state.rules[`${rule.id}`]._polygons, polygon.id, polygon)
+      Vue.set(state.available[`${rule.id}`]._polygons, polygon.id, polygon)
     },
     REMOVE_POLYGON: (state, { rule, polygon }) => {
-      Vue.delete(state.rules[`${rule.id}`]._polygons, polygon.id)
+      Vue.delete(state.available[`${rule.id}`]._polygons, polygon.id)
     },
     REMOVE_CHILD: (state, { child }) => {
       Vue.delete(child.parent.children, child.parent.children.findIndex(polygon => getId(polygon) === getId(child)))
     },
     SET_FACIES: (state, { ruleId, polygons }) => {
-      Vue.set(state.rules[`${ruleId}`], '_polygons', polygons)
+      Vue.set(state.available[`${ruleId}`], '_polygons', polygons)
     },
     UPDATE_REALIZATION: (state, { rule, data }) => {
-      Vue.set(state.rules[`${rule.id}`], 'realization', data)
+      Vue.set(state.available[`${rule.id}`], 'realization', data)
     },
     CHANGE_OVERLAY_USAGE: (state, { rule, value }) => {
-      state.rules[`${rule.id}`]._useOverlay = value
+      state.available[`${rule.id}`]._useOverlay = value
     },
     UPDATE_OVERLAY_CENTER: (state, { rule, polygon, value }) => {
-      state.rules[rule.id]._polygons[polygon.id].center = value
+      state.available[rule.id]._polygons[polygon.id].center = value
     },
     UPDATE_BACKGROUND_GROUP: (state, { rule, polygon, value }) => {
-      state.rules[rule.id]._polygons[polygon.id].group = value
+      state.available[rule.id]._polygons[polygon.id].group = value
     },
     CHANGE_FACIES: (state, { rule, polygon, facies }) => {
-      Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'facies', facies)
+      Vue.set(state.available[`${rule.id}`]._polygons[`${polygon.id}`], 'facies', facies)
     },
     CHANGE_POLYGONS: (state, { rule, polygons }) => {
       setProperty(state, rule, '_polygons', polygons)
     },
     CHANGE_ORDER: (state, { rule, polygon, order }) => {
-      state.rules[`${rule.id}`]._polygons[`${polygon.id}`].order = order
+      state.available[`${rule.id}`]._polygons[`${polygon.id}`].order = order
     },
     CHANGE_ANGLES: (state, { rule, polygon, value }) => {
-      Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'angle', value)
+      Vue.set(state.available[`${rule.id}`]._polygons[`${polygon.id}`], 'angle', value)
     },
     CHANGE_BACKGROUND_FIELD: (state, { rule, index, field }) => {
-      state.rules[`${rule.id}`]._backgroundFields.splice(index, 1, field)
+      state.available[`${rule.id}`]._backgroundFields.splice(index, 1, field)
     },
     CHANGE_OVERLAY_FIELD: (state, { rule, polygon, field }) => {
-      Vue.set(state.rules[`${rule.id}`]._polygons[`${polygon.id}`], 'field', field)
+      Vue.set(state.available[`${rule.id}`]._polygons[`${polygon.id}`], 'field', field)
     },
     CHANGE_PROPORTION_FACTOR: (state, { rule, polygon, value }) => {
       setPolygonValue(state, rule, polygon, 'fraction', value)
@@ -387,7 +387,7 @@ export default {
       setPolygonValue(state, rule, polygon, 'slantFactor', value)
     },
     CHANGE_DIRECTION: (state, { rule, value }) => {
-      Vue.set(state.rules[`${rule.id}`], 'direction', value)
+      Vue.set(state.available[`${rule.id}`], 'direction', value)
     },
     ADD_CHILD_POLYGON: (state, { parent, child }) => {
       parent.children.push(child)
@@ -397,14 +397,14 @@ export default {
 
   getters: {
     current (state, getters, rootState, rootGetters) {
-      return state.rules
-        ? Object.values(state.rules).find(rule => hasCurrentParents(rule, rootGetters))
+      return state.available
+        ? Object.values(state.available).find(rule => hasCurrentParents(rule, rootGetters))
         : null
     },
     ready (state, getters, rootState, rootGetters) {
       return (rule) => {
         rule = isUUID(rule)
-          ? state.rules[`${getId(rule)}`]
+          ? state.available[`${getId(rule)}`]
           : rule
         return (
           !rootGetters['copyPaste/isPasting'](rule.parent)
@@ -413,7 +413,7 @@ export default {
       }
     },
     relevant (state, getters, rootState, rootGetters) {
-      return Object.values(state.rules)
+      return Object.values(state.available)
         .filter(rule => hasCurrentParents(rule, rootGetters) && hasEnoughFacies(rule, rootGetters))
     },
     typeById (state) {
