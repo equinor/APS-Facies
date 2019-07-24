@@ -63,10 +63,12 @@
         <span>Anisotropy direction</span>
         <anisotropy-direction
           :value="value"
+          @update:error="e => update('anisotropyDirection', e)"
         />
         <power-specification
           v-if="isGeneralExponential"
           :value="value"
+          @update:error="e => update('power', e)"
         />
       </v-flex>
       <v-flex xs1 />
@@ -74,24 +76,26 @@
         Ranges
         <range-specification
           :value="value"
+          @update:error="e => update('range', e)"
         />
       </v-flex>
       <!--New line-->
       <trend-specification
         :value="value"
+        @update:error="e => update('trend', e)"
       />
     </v-layout>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
 
-import { getId, hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
+import { getId, invalidateChildren, notEmpty } from '@/utils'
 
 import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
 import GaussianPlot from '@/components/plot/GaussianPlot/index.vue'
@@ -104,6 +108,13 @@ import IconButton from '@/components/selection/IconButton.vue'
 
 import { TruncationRule } from '@/utils/domain'
 import Field, { Trend, Variogram } from '@/utils/domain/gaussianRandomField'
+
+interface Invalid {
+  anisotropyDirection: boolean
+  power: boolean
+  range: boolean
+  trend: boolean
+}
 
 @Component({
   components: {
@@ -122,6 +133,12 @@ export default class GaussianRandomField extends Vue {
   readonly value!: Field
 
   waitingForSimulation: boolean = false
+  invalid: Invalid = {
+    anisotropyDirection: false,
+    power: false,
+    range: false,
+    trend: false,
+  }
 
   get rule (): TruncationRule { return this.$store.getters['truncationRule'] }
 
@@ -162,7 +179,9 @@ export default class GaussianRandomField extends Vue {
       && !this.waitingForSimulation
     )
   }
-  get isValid (): boolean { return hasValidChildren(this) }
+  get isValid (): boolean {
+    return Object.values(this.invalid).every(invalid => !invalid)
+  }
 
   get variogramType () { return this.variogram.type }
   set variogramType (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { field: this.value, value }) }
@@ -207,6 +226,15 @@ export default class GaussianRandomField extends Vue {
       })
       await this.updateSimulation()
     }
+  }
+
+  update (type: string, value: boolean): void {
+    Vue.set(this.invalid, type, value)
+  }
+
+  @Watch('isValid')
+  async changeValidity (value: boolean): Promise<void> {
+    await this.$store.dispatch('gaussianRandomFields/changeValidity', { field: this.value, value })
   }
 }
 </script>

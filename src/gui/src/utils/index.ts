@@ -203,12 +203,6 @@ function invalidateChildren (component: Vue): void {
   goTroughChildren(component, (child): void => child.$v.$touch())
 }
 
-function hasValidChildren (component: Vue): boolean {
-  let valid = true
-  goTroughChildren(component, (): void => { valid = false }, true)
-  return valid
-}
-
 function hasCurrentParents (item: any, getters: RootGetters): boolean {
   return !!getters && getters.zone
     ? hasParents(item, getters.zone, getters.region)
@@ -330,7 +324,6 @@ export {
   makeData,
   makeSimplifiedTruncationRuleSpecification,
   makeTruncationRuleSpecification,
-  hasValidChildren,
   invalidateChildren,
   hasCurrentParents,
   hasParents,

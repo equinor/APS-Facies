@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { required } from 'vuelidate/lib/validators'
 
 /* TODO: Remove // @ts-ignore when vuelidate OFFICIALLY  supports TypeScript */
@@ -49,6 +49,11 @@ export default class ItemSelection<T = any> extends Vue {
     // @ts-ignore
     !this.$v.value.required && errors.push('Is required')
     return errors
+  }
+
+  @Watch('$v.$invalid')
+  onInvalidChanged (value: boolean) {
+    this.$emit('update:error', value)
   }
 }
 </script>

@@ -6,6 +6,7 @@
     value-type="power"
     label="Power"
     unit=""
+    @update:error="e => propagateError(e)"
   />
 </template>
 
@@ -26,5 +27,9 @@ export default class PowerSpecification extends Vue {
   readonly value!: GaussianRandomField
 
   get propertyType () { return 'power' }
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
+  }
 }
 </script>

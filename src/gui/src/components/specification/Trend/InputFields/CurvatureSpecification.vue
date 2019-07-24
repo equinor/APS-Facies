@@ -7,6 +7,7 @@
     strictly-greater
     :ranges="{ min: minCurvature, max: Number.POSITIVE_INFINITY }"
     trend
+    @update:error="e => propagateError(e)"
   />
 </template>
 
@@ -30,6 +31,10 @@ export default class CurvatureSpecification extends Vue {
     return field && field.trend && field.trend.type === 'HYPERBOLIC'
       ? 1
       : 0
+  }
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
   }
 }
 </script>

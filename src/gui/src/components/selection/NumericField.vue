@@ -35,6 +35,7 @@
           @keydown.up="increase"
           @keydown.down="decrease"
           @click:append="e => $emit('click:append', e)"
+          @update:error="e => propagateEvent('update:error', e)"
         />
       </v-flex>
       <v-flex
@@ -372,6 +373,10 @@ export default class NumericField extends Vue {
 
   decrease (): void {
     this.updateValue((math.subtract(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)) as BigNumber))
+  }
+
+  propagateEvent (type: string, value: boolean): void {
+    this.$emit(type, value)
   }
 }
 </script>

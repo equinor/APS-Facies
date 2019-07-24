@@ -6,6 +6,7 @@
     property-type="relativeStdDev"
     label="Relative std. dev."
     trend
+    @update:error="e => propagateError(e)"
   />
 </template>
 
@@ -25,6 +26,10 @@ export default class RelativeStandardDeviation extends Vue {
 
   get ranges () {
     return { min: 0, max: 1 }
+  }
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
   }
 }
 </script>

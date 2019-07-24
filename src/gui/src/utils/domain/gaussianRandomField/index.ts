@@ -88,6 +88,7 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
   public settings: Settings
   public waiting: boolean
 
+  public valid: boolean
   private _data: number[][]
 
   public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, seed = null, ...rest }: GaussianRandomFieldConfiguration) {
@@ -105,6 +106,7 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
     //   E.g. use a hash of the specification (variogram, trend, and settings)
     this.waiting = false
+    this.valid = true
     this._data = []
   }
 

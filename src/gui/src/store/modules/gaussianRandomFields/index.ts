@@ -144,6 +144,9 @@ const module: Module<GaussianRandomFieldState, RootState> = {
     changeSettings (context, { field, settings }): void {
       setValue(context, { field, value: settings, commitName: 'CHANGE_SETTINGS' })
     },
+    changeValidity ({ commit }, { field, value }): void {
+      commit('CHANGE_VALIDITY', { field, value })
+    },
     newSeed (context, { field }): void {
       setValue(context, { field, value: newSeed(), commitName: 'CHANGE_SEED' })
     },
@@ -232,6 +235,9 @@ const module: Module<GaussianRandomFieldState, RootState> = {
     },
     CHANGE_WAITING (state, { field, value }): void {
       Vue.set(state.available[`${field.id}`], 'waiting', value)
+    },
+    CHANGE_VALIDITY (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`], 'valid', value)
     },
     // Variogram
     CHANGE_RANGE (state, { field, type, value }): void {

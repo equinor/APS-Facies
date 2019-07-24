@@ -7,6 +7,7 @@
     label="Stacking angle"
     unit="°"
     trend
+    @update:error="e => propagateError(e)"
   />
 </template>
 
@@ -23,5 +24,9 @@ import StorableNumericField from '@/components/specification/StorableNumericFiel
 export default class StackingAngle extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
+  }
 }
 </script>

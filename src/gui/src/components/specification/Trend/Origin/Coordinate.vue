@@ -8,6 +8,7 @@
     :arrow-step="arrowStep"
     allow-negative
     trend
+    @update:error="e => propagateError(e)"
   />
 </template>
 
@@ -47,5 +48,9 @@ export default class CoordinateSpecification extends Vue {
   get shownLabel () { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() }
 
   get arrowStep () { return this.isRelative ? 0.001 : 1 }
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
+  }
 }
 </script>

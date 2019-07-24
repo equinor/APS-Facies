@@ -52,6 +52,7 @@ export default abstract class TruncationRule<
       (): boolean => this.polygons.length > 0,
       (): boolean => this.normalizedFractions,
       (): boolean => this.cumulativeFaciesProbability === 1,
+      (): boolean => this.fields.every((field): boolean => field.valid),
     ]
   }
 

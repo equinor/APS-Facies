@@ -10,6 +10,7 @@
     :ranges="ranges"
     :arrow-step="arrowStep"
     :use-modulus="useModulus"
+    @update:error="e => propagateError(e)"
   />
 </template>
 
@@ -84,8 +85,13 @@ export default class StorableNumericField extends Vue {
   dispatchChange (value: number) {
     this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { field: this.value, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
   }
+
   getValue () {
     return getValue(this.field, this.propertyType, this.subPropertyType)
+  }
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
   }
 }
 </script>
