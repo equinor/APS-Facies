@@ -202,10 +202,10 @@ const store: Store<RootState> = new Vuex.Store({
         }, {})
     },
     // ...
-    simulationSettings: (state, getters): (grfId: ID) => SimulationSettings => (grfId: ID): SimulationSettings => {
+    simulationSettings: (state, getters): (field: GaussianRandomField) => SimulationSettings => (field: GaussianRandomField): SimulationSettings => {
       const grid = state.parameters.grid
-      const fieldSettings = grfId
-        ? state.gaussianRandomFields.available[`${grfId}`].settings
+      const fieldSettings = field
+        ? field.settings
         : {
           gridModel: null,
         }

@@ -1,6 +1,6 @@
 <template>
   <storable-numeric-field
-    :grf-id="grfId"
+    :value="value"
     :property-type="propertyType"
     :ranges="ranges"
     :sub-property-type="coordinateAxis"
@@ -11,36 +11,41 @@
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
+import { GaussianRandomField } from '@/utils/domain'
+
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
 import { notEmpty } from '@/utils'
-import { AppTypes } from '@/utils/typing'
 
-export default {
+@Component({
   components: {
-    StorableNumericField
+    StorableNumericField,
   },
+})
+export default class CoordinateSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-    originType: {
-      required: true,
-      type: String,
-    },
-    coordinateAxis: {
-      required: true,
-      type: String,
-    },
-    label: VueTypes.string.def(''),
-  },
+  @Prop({ required: true })
+  readonly originType: string
 
-  computed: {
-    propertyType () { return 'origin' },
-    isRelative () { return this.originType === 'RELATIVE' },
-    ranges () { return this.isRelative ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity } },
-    shownLabel () { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() },
-    arrowStep () { return this.isRelative ? 0.001 : 1 },
-  },
+  @Prop({ required: true })
+  readonly coordinateAxis!: string
+
+  @Prop({ default: '' })
+  readonly label!: string
+
+  get propertyType () { return 'origin' }
+
+  get isRelative () { return this.originType === 'RELATIVE' }
+
+  get ranges () { return this.isRelative ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity } }
+
+  get shownLabel () { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() }
+
+  get arrowStep () { return this.isRelative ? 0.001 : 1 }
 }
 </script>

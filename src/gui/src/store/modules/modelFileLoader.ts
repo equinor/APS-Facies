@@ -18,7 +18,7 @@ import {
 import { displayMessage } from '@/store/utils'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
-import { TrendConfiguration } from '@/utils/domain/gaussianRandomField/trend'
+import { TrendConfiguration, TrendType } from '@/utils/domain/gaussianRandomField/trend'
 import { VariogramConfiguration } from '@/utils/domain/gaussianRandomField/variogram'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import { Optional } from '@/utils/typing'
@@ -365,11 +365,11 @@ function getTrend (gaussFieldFromFile: XMLElement): Optional<Trend> {
   const container = getNodeValue(gaussFieldFromFile, 'Trend')
   if (!container) return null
 
-  let type: Optional<string> = null
+  let type: Optional<TrendType> = null
   let trendContainer: Optional<XMLElement> = null
-  const [LINEAR, ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC, RMS_PARAM] = ['LINEAR', 'ELLIPTIC', 'ELLIPTIC_CONE', 'HYPERBOLIC', 'RMS_PARAM']
+  const [LINEAR, ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC, RMS_PARAM] = (['LINEAR', 'ELLIPTIC', 'ELLIPTIC_CONE', 'HYPERBOLIC', 'RMS_PARAM'] as TrendType[])
 
-  const types = [
+  const types: { name: TrendType, prop: string }[] = [
     { name: LINEAR, prop: 'Linear3D' },
     { name: ELLIPTIC, prop: 'Elliptic3D' },
     { name: ELLIPTIC_CONE, prop: 'EllipticCone3D' },

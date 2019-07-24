@@ -29,7 +29,7 @@
           <gaussian-plot
             pa-0
             ma-0
-            :data="field._data"
+            :value="field"
             :size="size"
             :show-scale="index === (value.length - 1)"
           />

@@ -13,7 +13,7 @@
         lg3
       >
         <origin-x
-          :grf-id="grfId"
+          :value="value"
           :origin-type="originType"
           coordinate-axis="x"
         />
@@ -24,7 +24,7 @@
         lg3
       >
         <origin-y
-          :grf-id="grfId"
+          :value="value"
           :origin-type="originType"
           coordinate-axis="y"
         />
@@ -36,7 +36,7 @@
         lg3
       >
         <origin-z
-          :grf-id="grfId"
+          :value="value"
           :origin-type="originType"
           coordinate-axis="z"
         />
@@ -50,32 +50,29 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { AppTypes } from '@/utils/typing'
-import OriginCoordinate from './Coordinate'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { GaussianRandomField } from '@/utils/domain'
+import OriginCoordinate from './Coordinate.vue'
 
-export default {
+@Component({
   components: {
     originX: OriginCoordinate,
     originY: OriginCoordinate,
     originZ: OriginCoordinate,
   },
+})
+export default class OriginSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
+  get availableOriginTypes () { return this.$store.state.constants.options.origin.available }
 
-  computed: {
-    ...mapState({
-      availableOriginTypes: state => state.constants.options.origin.available,
-    }),
-    trend () { return this.$store.state.gaussianRandomFields.available[this.grfId].trend },
-    isEllipticCone () { return this.trend.type === 'ELLIPTIC_CONE' },
-    originType: {
-      get: function () { return this.trend.origin.type },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/originType', { grfId: this.grfId, value }) }
-    },
-  },
+  get trend () { return this.value.trend }
+
+  get isEllipticCone () { return this.trend.type === 'ELLIPTIC_CONE' }
+
+  get originType () { return this.trend.origin.type }
+  set originType (value) { this.$store.dispatch('gaussianRandomFields/originType', { field: this.value, value }) }
 }
 </script>

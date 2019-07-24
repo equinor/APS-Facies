@@ -101,64 +101,89 @@
   </v-dialog>
 </template>
 
-<script>
-import NumericField from '@/components/selection/NumericField'
-import IconButton from '@/components/selection/IconButton'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+
+import APSError from '@/utils/domain/errors/base'
+
+import { DialogOptions } from '@/utils/domain/bases/interfaces'
+import { Optional } from '@/utils/typing'
+
+import NumericField from '@/components/selection/NumericField.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
 import { newSeed } from '@/utils'
 
-export default {
+interface Settings {
+  crossSection: {
+    type: Optional<'IJ' | 'IK' | 'JK'>
+    relativePosition: Optional<number>
+  }
+  gridModel: {
+    use: boolean
+    size: {
+      x: number
+      y: number
+      z: number
+    }
+  }
+  seed: Optional<number>
+}
+
+interface ReturnValue {
+  save: boolean
+  settings: Settings | {}
+}
+
+@Component({
   components: {
     IconButton,
     NumericField,
   },
-
-  data () {
-    return {
-      dialog: false,
-      resolve: null,
-      reject: null,
-      settings: {
-        crossSection: {
-          type: null,
-          relativePosition: null,
-        },
-        gridModel: {
-          use: false,
-          size: {
-            x: 100, y: 100, z: 1,
-          },
-        },
-        seed: null,
+})
+export default class VisualizationSettingsDialog extends Vue {
+  dialog: boolean = false
+  resolve: Optional<({ save, settings }: ReturnValue) => void> = null
+  reject: Optional<({ save, settings }: ReturnValue) => void> = null
+  settings: Settings = {
+    crossSection: {
+      type: null,
+      relativePosition: null,
+    },
+    gridModel: {
+      use: false,
+      size: {
+        x: 100, y: 100, z: 1,
       },
-      options: {
-        color: 'primary',
-        width: 290,
-      }
-    }
-  },
+    },
+    seed: null,
+  }
+  options: DialogOptions = {
+    color: 'primary',
+    width: 290,
+  }
 
-  methods: {
-    open (settings, options = {}) {
-      this.dialog = true
-      this.settings = settings
-      this.options = Object.assign(this.options, options)
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve
-        this.reject = reject
-      })
-    },
-    save () {
-      this.resolve({ save: true, settings: this.settings })
-      this.dialog = false
-    },
-    cancel () {
-      this.resolve({ save: false, settings: {} })
-      this.dialog = false
-    },
-    newSeed () {
-      return newSeed()
-    },
-  },
+  open (settings: Settings, options: DialogOptions = {}) {
+    this.dialog = true
+    this.settings = settings
+    this.options = Object.assign(this.options, options)
+    return new Promise((resolve, reject) => {
+      this.resolve = resolve
+      this.reject = reject
+    })
+  }
+  save () {
+    if (!this.resolve) throw new APSError('The `resolve` callback has not been set')
+    this.resolve({ save: true, settings: this.settings })
+    this.dialog = false
+  }
+  cancel () {
+    if (!this.resolve) throw new APSError('The `resolve` callback has not been set')
+    this.resolve({ save: false, settings: {} })
+    this.dialog = false
+  }
+  newSeed () {
+    return newSeed()
+  }
 }
 </script>

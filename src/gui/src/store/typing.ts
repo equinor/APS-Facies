@@ -152,7 +152,7 @@ interface RootGetters {
   'region': Region
   'zone': Zone
 
-  simulationSettings: (grfId?: ID) => SimulationSettings
+  simulationSettings: (field?: GaussianRandomField) => SimulationSettings
 }
 
 export {

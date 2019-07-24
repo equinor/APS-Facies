@@ -112,6 +112,10 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
     return this._data.length > 0 && this._data[0].length > 0
   }
 
+  public get simulation (): number[][] {
+    return this._data
+  }
+
   public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => object } } = {}): GaussianRandomFieldSpecification {
     return {
       name: this.name,

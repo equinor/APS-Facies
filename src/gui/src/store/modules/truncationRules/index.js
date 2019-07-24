@@ -226,13 +226,13 @@ export default {
       commit('UPDATE_REALIZATION', { rule, data })
       await Promise.all(fields.map(field => {
         return dispatch('gaussianRandomFields/updateSimulationData', {
-          grfId: rule.fields.find(item => item.name === field.name).id,
+          field: rule.fields.find(item => item.name === field.name),
           data: field.data,
         }, { root: true })
       }))
     },
-    deleteField ({ dispatch, state, rootGetters }, { grfId }) {
-      const field = rootGetters.field(grfId)
+    deleteField ({ dispatch, state }, { field }) {
+      const grfId = field.id
       return Promise.all(
         Object.values(state.available)
           .filter(rule => !!rule.fields.some(({ field }) => getId(field) === grfId))
@@ -244,7 +244,7 @@ export default {
             })
             : Promise.all(
               rule.overlayPolygons
-                .filter(polygon => getId(polygon.field) === grfId)
+                .filter(polygon => getId(polygon.field) === field.id)
                 .map(polygon => dispatch('updateOverlayField', {
                   rule,
                   polygon,

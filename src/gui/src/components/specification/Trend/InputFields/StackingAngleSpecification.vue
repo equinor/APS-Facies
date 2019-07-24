@@ -1,7 +1,7 @@
 <template>
   <div>
     <stacking-angle
-      :grf-id="grfId"
+      :value="value"
     />
     <item-selection
       v-model="stackingDirection"
@@ -12,31 +12,28 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { AppTypes } from '@/utils/typing'
-import StackingAngle from './StackingAngle'
-import ItemSelection from '@/components/selection/dropdown/ItemSelection'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import { GaussianRandomField } from '@/utils/domain'
+
+import StackingAngle from './StackingAngle.vue'
+import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
+
+@Component({
   components: {
     ItemSelection,
     StackingAngle,
   },
+})
+export default class StackingAngleSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
+  get availableStackingDirection () { return this.$store.state.constants.options.stacking.available }
+  get trend () { return this.value.trend }
 
-  computed: {
-    ...mapState({
-      availableStackingDirection: state => state.constants.options.stacking.available,
-    }),
-    trend () { return this.$store.state.gaussianRandomFields.available[this.grfId].trend },
-    stackingDirection: {
-      get: function () { return this.trend.stackingDirection },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/stackingDirection', { grfId: this.grfId, value }) }
-    },
-  },
+  get stackingDirection () { return this.trend.stackingDirection }
+  set stackingDirection (value) { this.$store.dispatch('gaussianRandomFields/stackingDirection', { field: this.value, value }) }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <storable-numeric-field
-    :grf-id="grfId"
+    :value="value"
     :property-type="propertyType"
     :arrow-step="0.01"
     value-type="power"
@@ -9,21 +9,22 @@
   />
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import { GaussianRandomField } from '@/utils/domain'
+
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
+@Component({
   components: {
     StorableNumericField,
   },
+})
+export default class PowerSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
-  computed: {
-    propertyType () { return 'power' }
-  }
+  get propertyType () { return 'power' }
 }
 </script>

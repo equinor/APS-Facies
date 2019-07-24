@@ -7,7 +7,7 @@
     >
       <v-flex xs6>
         <gaussian-plot
-          :data="gaussianFieldData"
+          :value="value"
           expand
         />
       </v-flex>
@@ -62,49 +62,50 @@
       <v-flex xs6>
         <span>Anisotropy direction</span>
         <anisotropy-direction
-          :grf-id="grfId"
+          :value="value"
         />
         <power-specification
           v-if="isGeneralExponential"
-          :grf-id="grfId"
+          :value="value"
         />
       </v-flex>
       <v-flex xs1 />
       <v-flex xs5>
         Ranges
         <range-specification
-          :grf-id="grfId"
+          :value="value"
         />
       </v-flex>
       <!--New line-->
       <trend-specification
-        :grf-id="grfId"
+        :value="value"
       />
     </v-layout>
   </v-container>
 </template>
 
-<script>
-import { mapState, mapGetters } from 'vuex'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
 import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
 
 import { getId, hasValidChildren, invalidateChildren, notEmpty } from '@/utils'
 
-import ItemSelection from '@/components/selection/dropdown/ItemSelection'
-import GaussianPlot from '@/components/plot/GaussianPlot'
-import TrendSpecification from '@/components/specification/Trend'
-import RangeSpecification from '@/components/specification/GaussianRandomField/Range'
-import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection'
-import PowerSpecification from '@/components/specification/GaussianRandomField/Power'
-import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog'
-import IconButton from '@/components/selection/IconButton'
-import { AppTypes } from '@/utils/typing'
+import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
+import GaussianPlot from '@/components/plot/GaussianPlot/index.vue'
+import TrendSpecification from '@/components/specification/Trend/index.vue'
+import RangeSpecification from '@/components/specification/GaussianRandomField/Range.vue'
+import AnisotropyDirection from '@/components/specification/GaussianRandomField/AnisotropyDirection.vue'
+import PowerSpecification from '@/components/specification/GaussianRandomField/Power.vue'
+import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
-export default {
-  name: 'GaussianRandomField',
+import { TruncationRule } from '@/utils/domain'
+import Field, { Trend, Variogram } from '@/utils/domain/gaussianRandomField'
 
+@Component({
   components: {
     ItemSelection,
     IconButton,
@@ -115,111 +116,97 @@ export default {
     TrendSpecification,
     VisualizationSettingsDialog,
   },
+})
+export default class GaussianRandomField extends Vue {
+  @Prop({ required: true })
+  readonly value!: Field
 
-  props: {
-    value: AppTypes.gaussianRandomField.isRequired,
-  },
+  waitingForSimulation: boolean = false
 
-  data () {
-    return {
-      waitingForSimulation: false,
+  get rule (): TruncationRule { return this.$store.getters['truncationRule'] }
+
+  get availableVariograms (): string[] { return this.$store.state.constants.options.variograms.available }
+
+  get alphaChannel () {
+    if (this.rule) {
+      /* Channel is 1-indeed */
+      const channel = 1 + this.rule.fields.findIndex(field => getId(field) === this.grfId)
+      return channel || null
+    } else {
+      return null
     }
-  },
+  }
+  set alphaChannel (channel) { this.$store.dispatch('truncationRules/updateFields', { channel, selected: this.grfId }) }
 
-  computed: {
-    ...mapGetters({
-      rule: 'truncationRule',
-    }),
-    ...mapState({
-      availableVariograms: state => state.constants.options.variograms.available,
-    }),
-    gaussianFieldData () {
-      return this.value
-        ? this.value._data
-        : []
-    },
-    alphaChannel: {
-      get: function () {
-        if (this.rule) {
-          /* Channel is 1-indeed */
-          const channel = 1 + this.rule.fields.findIndex(field => getId(field) === this.grfId)
-          return channel || null
-        } else {
-          return null
-        }
-      },
-      set: function (channel) { this.$store.dispatch('truncationRules/updateFields', { channel, selected: this.grfId }) }
-    },
-    alphaChannels () {
-      return this.rule
-        ? this.rule.fields.map((_, index) => index + 1)
-        : []
-    },
-    isGeneralExponential () { return this.variogramType === 'GENERAL_EXPONENTIAL' },
-    grfId () { return this.value.id },
-    variogram () { return this.value.variogram },
-    trend () { return this.value.trend },
-    fieldName () { return this.value.name },
-    canSimulate: {
-      cache: true,
-      get: function () {
-        return (
-          notEmpty(this.variogramType)
-          && (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true)
-          && this.isValid
-          && !this.waitingForSimulation
-        )
-      },
-    },
-    isValid: {
-      cache: true,
-      get: function () { return hasValidChildren(this) }
-    },
-    variogramType: {
-      get: function () { return this.variogram.type },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { grfId: this.grfId, value }) }
-    },
-  },
+  get alphaChannels () {
+    return this.rule
+      ? this.rule.fields.map((_, index: number) => index + 1)
+      : []
+  }
+
+  get isGeneralExponential (): boolean { return this.variogramType === 'GENERAL_EXPONENTIAL' }
+
+  get grfId () { return this.value.id }
+
+  get variogram (): Variogram { return this.value.variogram }
+
+  get trend (): Trend { return this.value.trend }
+
+  get fieldName (): string { return this.value.name }
+
+  get canSimulate (): boolean {
+    return (
+      notEmpty(this.variogramType)
+      && (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true)
+      && this.isValid
+      && !this.waitingForSimulation
+    )
+  }
+  get isValid (): boolean { return hasValidChildren(this) }
+
+  get variogramType () { return this.variogram.type }
+  set variogramType (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { field: this.value, value }) }
 
   beforeMount () {
     this.updateSimulation()
-  },
+  }
 
-  methods: {
-    async simulation (renew = false) {
-      if (renew) {
-        await this.$store.dispatch('gaussianRandomFields/newSeed', { grfId: this.grfId })
-      }
-      await this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
-        grfId: this.grfId,
-        data: await rms.simulateGaussianField({
-          name: this.value.name,
-          variogram: this.variogram,
-          trend: this.trend,
-          settings: this.$store.getters.simulationSettings(this.grfId),
-        })
+  async simulation (renew: boolean = false): Promise<void> {
+    if (renew) {
+      await this.$store.dispatch('gaussianRandomFields/newSeed', { field: this.value })
+    }
+    await this.$store.dispatch('gaussianRandomFields/updateSimulationData', {
+      field: this.value,
+      data: await rms.simulateGaussianField({
+        name: this.value.name,
+        variogram: this.variogram,
+        trend: this.trend,
+        settings: this.$store.getters.simulationSettings(this.value),
       })
-    },
-    async updateSimulation (renew = false) {
-      this.waitingForSimulation = true
-      try {
-        await this.simulation(renew)
-      } catch (reason) {
-        invalidateChildren(this)
-      } finally {
-        this.waitingForSimulation = false
-      }
-    },
-    async openVisualizationSettings () {
-      const { save, settings } = await this.$refs.visualisationSettings.open(cloneDeep(this.value.settings))
-      if (save) {
-        await this.$store.dispatch('gaussianRandomFields/changeSettings', {
-          grfId: this.grfId,
-          settings
-        })
-        await this.updateSimulation()
-      }
-    },
+    })
+  }
+
+  async updateSimulation (renew: boolean = false): Promise<void> {
+    this.waitingForSimulation = true
+    try {
+      await this.simulation(renew)
+    } catch (reason) {
+      invalidateChildren(this)
+    } finally {
+      this.waitingForSimulation = false
+    }
+  }
+
+  async openVisualizationSettings (): Promise<void> {
+    // @ts-ignore
+    const { save, settings } = await (this.$refs.visualisationSettings as VisualizationSettingsDialog).open(cloneDeep(this.value.settings))
+    if (save) {
+      await this.$store.dispatch('gaussianRandomFields/changeSettings', {
+        field: this.value,
+        settings
+      })
+      await this.updateSimulation()
+    }
   }
 }
 </script>

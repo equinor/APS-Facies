@@ -1,6 +1,6 @@
 <template>
   <storable-numeric-field
-    :grf-id="grfId"
+    :value="value"
     property-type="angle"
     sub-property-type="stacking"
     value-type="stacking"
@@ -10,18 +10,18 @@
   />
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { GaussianRandomField } from '@/utils/domain'
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 
-export default {
+@Component({
   components: {
     StorableNumericField,
   },
-
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
+})
+export default class StackingAngle extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 }
 </script>

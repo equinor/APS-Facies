@@ -1,6 +1,6 @@
 <template>
   <storable-numeric-field
-    :grf-id="grfId"
+    :value="value"
     property-type="curvature"
     value-type="curvature"
     label="Curvature of ellipse"
@@ -10,27 +10,26 @@
   />
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import { GaussianRandomField } from '@/utils/domain'
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
+@Component({
   components: {
     StorableNumericField,
   },
+})
+export default class CurvatureSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
-  computed: {
-    minCurvature () {
-      const field = this.$store.state.gaussianRandomFields.available[`${this.grfId}`]
-      return field && field.trend && field.trend.type === 'HYPERBOLIC'
-        ? 1
-        : 0
-    }
-  },
-
+  get minCurvature () {
+    const field = this.value
+    return field && field.trend && field.trend.type === 'HYPERBOLIC'
+      ? 1
+      : 0
+  }
 }
 </script>

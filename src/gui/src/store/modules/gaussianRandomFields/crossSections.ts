@@ -20,7 +20,7 @@ async function updateAffectedFields ({ state, rootGetters, dispatch }: Context, 
   const crossSection = state.available[`${id}`]
   const relevantFields = Object.values(rootGetters.allFields.filter((field): boolean => field.isChildOf(crossSection.parent)))
   await Promise.all(relevantFields
-    .map((field): Promise<void> => dispatch('gaussianRandomFields/updateSimulation', { grfId: field.id }, { root: true }))
+    .map((field): Promise<void> => dispatch('gaussianRandomFields/updateSimulation', { field }, { root: true }))
   )
 }
 

@@ -1,6 +1,6 @@
 import FmuUpdatableValue, { FmuUpdatableSerialization } from '@/utils/domain/bases/fmuUpdatable'
 
-type TrendType = string
+export type TrendType = 'NONE' | 'LINEAR' | 'ELLIPTIC' | 'ELLIPTIC_CONE' | 'HYPERBOLIC' | 'RMS_PARAM'
 type StackingDirectionType = 'PROGRADING' | 'RETROGRADING'
 type OriginType = 'RELATIVE' | 'ABSOLUTE'
 

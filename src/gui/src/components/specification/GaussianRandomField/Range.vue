@@ -1,7 +1,7 @@
 <template>
   <div>
     <main-range
-      :grf-id="grfId"
+      :value="value"
       :property-type="propertyType"
       sub-property-type="main"
       label="Parallel to Azimuth"
@@ -9,7 +9,7 @@
       strictly-greater
     />
     <perpendicular-range
-      :grf-id="grfId"
+      :value="value"
       :property-type="propertyType"
       sub-property-type="perpendicular"
       label="Normal to Azimuth"
@@ -17,7 +17,7 @@
       strictly-greater
     />
     <vertical-range
-      :grf-id="grfId"
+      :value="value"
       :property-type="propertyType"
       sub-property-type="vertical"
       label="Vertical (normal to dip)"
@@ -27,23 +27,24 @@
   </div>
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import { GaussianRandomField } from '@/utils/domain'
+
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
+@Component({
   components: {
     MainRange: StorableNumericField,
     PerpendicularRange: StorableNumericField,
     VerticalRange: StorableNumericField,
   },
+})
+export default class RangeSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
-  computed: {
-    propertyType () { return 'range' },
-  },
+  get propertyType () { return 'range' }
 }
 </script>

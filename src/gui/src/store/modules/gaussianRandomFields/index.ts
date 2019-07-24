@@ -24,12 +24,12 @@ type Context = RootContext<GaussianRandomFieldState, RootState>
 
 function setValue (
   { state, commit }: Context,
-  { commitName, grfId, type, legalTypes, variogramOrTrend, value }: { commitName: string, grfId: ID, type?: string, legalTypes?: string[], variogramOrTrend?: 'variogram' | 'trend', value: any }
+  { commitName, field, type, legalTypes, variogramOrTrend, value }: { commitName: string, field: GaussianRandomField, type?: string, legalTypes?: string[], variogramOrTrend?: 'variogram' | 'trend', value: any }
 ): void {
   const checks: ([() => boolean, string])[] = [
     [
-      (): boolean => state.available.hasOwnProperty(grfId),
-      `The gaussian field (${grfId}) does not exists`
+      (): boolean => state.available.hasOwnProperty(field.id),
+      `The gaussian field (${field}) does not exists`
     ],
     [
       // @ts-ignore
@@ -44,7 +44,7 @@ function setValue (
   checks.forEach(([check, errorMessage]): void => {
     if (!check()) throw new Error(errorMessage)
   })
-  commit(commitName, { grfId, type, variogramOrTrend, value })
+  commit(commitName, { field, type, variogramOrTrend, value })
 }
 
 function getRelevantFields (state: GaussianRandomFieldState, zone: Zone, region: Region): GaussianRandomField[] {
@@ -63,6 +63,10 @@ function newGaussianFieldName (state: GaussianRandomFieldState, zone: Zone, regi
     grfNumber += 1
   }
   return name(grfNumber)
+}
+
+interface Field {
+  field: GaussianRandomField
 }
 
 const module: Module<GaussianRandomFieldState, RootState> = {
@@ -106,103 +110,101 @@ const module: Module<GaussianRandomFieldState, RootState> = {
       }
       commit('ADD', field)
     },
-    async remove ({ commit, dispatch }, field): Promise<void> {
-      await dispatch('truncationRules/deleteField', { grfId: field.id }, { root: true })
-      commit('DELETE', { grfId: getId(field) })
+    async remove ({ commit, dispatch }, field: GaussianRandomField): Promise<void> {
+      await dispatch('truncationRules/deleteField', { field }, { root: true })
+      commit('DELETE', { field })
     },
-    async deleteField ({ state, commit, dispatch }, { grfId }): Promise<void> {
-      if (state.available.hasOwnProperty(grfId)) {
-        await dispatch('truncationRules/deleteField', { grfId }, { root: true })
-        commit('DELETE', { grfId })
+    async deleteField ({ state, commit, dispatch }, { field }: Field): Promise<void> {
+      if (state.available.hasOwnProperty(field.id)) {
+        await dispatch('truncationRules/deleteField', { field }, { root: true })
+        commit('DELETE', { field })
       }
     },
-    async updateSimulation ({ state, commit, dispatch, rootGetters }, { grfId }): Promise<void> {
-      const field = state.available[`${grfId}`]
-      commit('CHANGE_WAITING', { grfId, value: true })
+    async updateSimulation ({ commit, dispatch, rootGetters }, { field }): Promise<void> {
+      commit('CHANGE_WAITING', { field, value: true })
       try {
         await dispatch('updateSimulationData', {
-          grfId: grfId,
+          field,
           data: await rms.simulateGaussianField({
             name: field.name,
             variogram: field.variogram,
             trend: field.trend,
-            settings: rootGetters['simulationSettings'](grfId),
+            settings: rootGetters['simulationSettings'](field),
           })
         })
       } finally {
-        commit('CHANGE_WAITING', { grfId, value: false })
+        commit('CHANGE_WAITING', { field, value: false })
       }
     },
-    updateSimulationData (context, { grfId, data }): void {
-      setValue(context, { grfId, value: data, commitName: 'CHANGE_SIMULATION' })
+    updateSimulationData (context, { field, data }): void {
+      setValue(context, { field, value: data, commitName: 'CHANGE_SIMULATION' })
     },
-    changeName (context, { grfId, name }): void {
-      setValue(context, { grfId, value: name, commitName: 'CHANGE_NAME' })
+    changeName (context, { field, name }): void {
+      setValue(context, { field, value: name, commitName: 'CHANGE_NAME' })
     },
-    changeSettings (context, { grfId, settings }): void {
-      setValue(context, { grfId, value: settings, commitName: 'CHANGE_SETTINGS' })
+    changeSettings (context, { field, settings }): void {
+      setValue(context, { field, value: settings, commitName: 'CHANGE_SETTINGS' })
     },
-    newSeed (context, { grfId }): void {
-      setValue(context, { grfId, value: newSeed(), commitName: 'CHANGE_SEED' })
+    newSeed (context, { field }): void {
+      setValue(context, { field, value: newSeed(), commitName: 'CHANGE_SEED' })
     },
-    seed (context, { grfId, value }): void {
-      setValue(context, { grfId, value, commitName: 'CHANGE_SEED' })
+    seed (context, { field, value }): void {
+      setValue(context, { field, value, commitName: 'CHANGE_SEED' })
     },
-    overlay (context, { grfId, value }): void {
-      setValue(context, { grfId, value, commitName: 'CHANGE_OVERLAY' })
+    overlay (context, { field, value }): void {
+      setValue(context, { field, value, commitName: 'CHANGE_OVERLAY' })
     },
     // TODO: check values are appropriate
     // Variogram
-    range (context, { grfId, type, value }): void {
-      setValue(context, { grfId, type, value, legalTypes: ['main', 'perpendicular', 'vertical'], commitName: 'CHANGE_RANGE' })
+    range (context, { field, type, value }): void {
+      setValue(context, { field, type, value, legalTypes: ['main', 'perpendicular', 'vertical'], commitName: 'CHANGE_RANGE' })
     },
-    angle (context, { grfId, variogramOrTrend, type, value }): void {
+    angle (context, { field, variogramOrTrend, type, value }): void {
       const legalTypes = variogramOrTrend === 'variogram' ? ['azimuth', 'dip'] : ['azimuth', 'stacking', 'migration']
-      setValue(context, { grfId, type, variogramOrTrend, value, legalTypes, commitName: 'CHANGE_ANGLE' })
+      setValue(context, { field, type, variogramOrTrend, value, legalTypes, commitName: 'CHANGE_ANGLE' })
     },
-    variogramType (context, { grfId, value }): void {
+    variogramType (context, { field, value }): void {
       const { rootState } = context
-      setValue(context, { grfId, value, type: value, legalTypes: rootState.constants.options.variograms.available, commitName: 'CHANGE_VARIOGRAM_TYPE' })
+      setValue(context, { field, value, type: value, legalTypes: rootState.constants.options.variograms.available, commitName: 'CHANGE_VARIOGRAM_TYPE' })
     },
-    power (context, { grfId, value }): void {
-      setValue(context, { grfId, value, commitName: 'CHANGE_POWER' })
+    power (context, { field, value }): void {
+      setValue(context, { field, value, commitName: 'CHANGE_POWER' })
     },
     // Trend
-    useTrend (context, { grfId, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, commitName: 'USE_TREND' })
+    useTrend (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'USE_TREND' })
     },
-    relativeStdDev (context, { grfId, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_STANDARD_DEVIATION' })
+    relativeStdDev (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_STANDARD_DEVIATION' })
     },
-    relativeSize (context, { grfId, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_SIZE_OF_ELLIPSE' })
+    relativeSize (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RELATIVE_SIZE_OF_ELLIPSE' })
     },
-    async trendType (context, { grfId, value }): Promise<void> {
-      const { dispatch, state, rootState } = context
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
-      const field = state.available[`${grfId}`]
+    async trendType (context, { field, value }): Promise<void> {
+      const { dispatch, rootState } = context
+      setValue(context, { field, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.trends.available, commitName: 'CHANGE_TREND_TYPE' })
       if (field.trend.type === 'HYPERBOLIC') {
         const curvature = field.trend.curvature
         if (curvature.value <= 1) {
-          await dispatch('curvature', { grfId, value: new FmuUpdatableValue(1.01, curvature.updatable) })
+          await dispatch('curvature', { field, value: new FmuUpdatableValue(1.01, curvature.updatable) })
         }
       }
     },
-    trendParameter (context, { grfId, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_PARAM' })
+    trendParameter (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_PARAM' })
     },
-    stackingDirection (context, { grfId, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_STACKING_DIRECTION' })
+    stackingDirection (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_STACKING_DIRECTION' })
     },
-    curvature (context, { grfId, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, commitName: 'CHANGE_CURVATURE' })
+    curvature (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_CURVATURE' })
     },
-    originType (context, { grfId, value }): void {
+    originType (context, { field, value }): void {
       const { rootState } = context
-      setValue(context, { grfId, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.origin.available, commitName: 'CHANGE_ORIGIN_TYPE' })
+      setValue(context, { field, variogramOrTrend: 'trend', value, type: value, legalTypes: rootState.constants.options.origin.available, commitName: 'CHANGE_ORIGIN_TYPE' })
     },
-    origin (context, { grfId, type, value }): void {
-      setValue(context, { grfId, variogramOrTrend: 'trend', type, value, legalTypes: ['x', 'y', 'z'], commitName: 'CHANGE_ORIGIN_COORDINATE' })
+    origin (context, { field, type, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', type, value, legalTypes: ['x', 'y', 'z'], commitName: 'CHANGE_ORIGIN_COORDINATE' })
     },
   },
 
@@ -211,67 +213,67 @@ const module: Module<GaussianRandomFieldState, RootState> = {
     ADD (state, field): void {
       Vue.set(state.available, field.id, field)
     },
-    DELETE (state, { grfId }): void {
-      Vue.delete(state.available, grfId)
+    DELETE (state, { field }): void {
+      Vue.delete(state.available, field.id)
     },
-    CHANGE_NAME (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`], 'name', value)
+    CHANGE_NAME (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`], 'name', value)
     },
-    CHANGE_SETTINGS (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`], 'settings', value)
+    CHANGE_SETTINGS (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`], 'settings', value)
     },
-    CHANGE_SEED (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].settings, 'seed', value)
+    CHANGE_SEED (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].settings, 'seed', value)
     },
-    CHANGE_SIMULATION (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`], '_data', value)
+    CHANGE_SIMULATION (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`], '_data', value)
     },
-    CHANGE_OVERLAY (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`], 'overlay', value)
+    CHANGE_OVERLAY (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`], 'overlay', value)
     },
-    CHANGE_WAITING (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`], 'waiting', value)
+    CHANGE_WAITING (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`], 'waiting', value)
     },
     // Variogram
-    CHANGE_RANGE (state, { grfId, type, value }): void {
-      Vue.set(state.available[`${grfId}`].variogram.range, type, value)
+    CHANGE_RANGE (state, { field, type, value }): void {
+      Vue.set(state.available[`${field.id}`].variogram.range, type, value)
     },
-    CHANGE_ANGLE (state, { grfId, variogramOrTrend, type, value }): void {
-      Vue.set(state.available[`${grfId}`][`${variogramOrTrend}`].angle, type, value)
+    CHANGE_ANGLE (state, { field, variogramOrTrend, type, value }): void {
+      Vue.set(state.available[`${field.id}`][`${variogramOrTrend}`].angle, type, value)
     },
-    CHANGE_VARIOGRAM_TYPE (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].variogram, 'type', value)
+    CHANGE_VARIOGRAM_TYPE (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].variogram, 'type', value)
     },
-    CHANGE_POWER (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].variogram, 'power', value)
+    CHANGE_POWER (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].variogram, 'power', value)
     },
     // Trend
-    USE_TREND (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend, 'use', value)
+    USE_TREND (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend, 'use', value)
     },
-    CHANGE_TREND_TYPE (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend, 'type', value)
+    CHANGE_TREND_TYPE (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend, 'type', value)
     },
-    CHANGE_RELATIVE_STANDARD_DEVIATION (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend, 'relativeStdDev', value)
+    CHANGE_RELATIVE_STANDARD_DEVIATION (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend, 'relativeStdDev', value)
     },
-    CHANGE_RELATIVE_SIZE_OF_ELLIPSE (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend, 'relativeSize', value)
+    CHANGE_RELATIVE_SIZE_OF_ELLIPSE (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend, 'relativeSize', value)
     },
-    CHANGE_STACKING_DIRECTION (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend, 'stackingDirection', value)
+    CHANGE_STACKING_DIRECTION (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend, 'stackingDirection', value)
     },
-    CHANGE_CURVATURE (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend, 'curvature', value)
+    CHANGE_CURVATURE (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend, 'curvature', value)
     },
-    CHANGE_ORIGIN_COORDINATE (state, { grfId, type, value }): void {
-      Vue.set(state.available[`${grfId}`].trend.origin, type, value)
+    CHANGE_ORIGIN_COORDINATE (state, { field, type, value }): void {
+      Vue.set(state.available[`${field.id}`].trend.origin, type, value)
     },
-    CHANGE_ORIGIN_TYPE (state, { grfId, value }): void {
-      Vue.set(state.available[`${grfId}`].trend.origin, 'type', value)
+    CHANGE_ORIGIN_TYPE (state, { field, value }): void {
+      Vue.set(state.available[`${field.id}`].trend.origin, 'type', value)
     },
-    CHANGE_RMS_TREND_PARAM (state, { grfId, value }): void {
-      state.available[`${grfId}`].trend.parameter = value
+    CHANGE_RMS_TREND_PARAM (state, { field, value }): void {
+      state.available[`${field.id}`].trend.parameter = value
     }
   },
 

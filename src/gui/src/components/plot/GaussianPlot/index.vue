@@ -13,6 +13,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
 import { Color } from '@/utils/domain/facies/helpers/colors'
+import { GaussianRandomField } from '@/utils/domain'
 
 import { DEFAULT_SIZE, DEFAULT_COLOR_SCALE } from '@/config'
 
@@ -23,7 +24,7 @@ import { DEFAULT_SIZE, DEFAULT_COLOR_SCALE } from '@/config'
 })
 export default class GaussianPlot extends Vue {
   @Prop({ required: true })
-  readonly data!: number[][]
+  readonly value!: GaussianRandomField
 
   @Prop({ default: false, type: Boolean })
   readonly showScale!: boolean
@@ -39,7 +40,7 @@ export default class GaussianPlot extends Vue {
 
   get dataDefinition () {
     return [{
-      z: this.data,
+      z: this.value.simulation,
       zsmooth: 'best',
       type: 'heatmap',
       hoverinfo: 'none',

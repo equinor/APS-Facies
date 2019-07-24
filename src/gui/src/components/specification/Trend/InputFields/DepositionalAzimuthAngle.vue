@@ -1,6 +1,6 @@
 <template>
   <storable-numeric-field
-    :grf-id="grfId"
+    :value="value"
     label="Azimuth (depositional)"
     property-type="angle"
     sub-property-type="azimuth"
@@ -11,18 +11,20 @@
   />
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import { GaussianRandomField } from '@/utils/domain'
+
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
+@Component({
   components: {
     StorableNumericField,
   },
-
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
+})
+export default class DepositionalAzimuthAngle extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 }
 </script>

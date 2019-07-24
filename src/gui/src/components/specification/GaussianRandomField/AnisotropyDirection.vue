@@ -1,7 +1,7 @@
 <template>
   <div>
     <azimuth-angle
-      :grf-id="grfId"
+      :value="value"
       :property-type="propertyType"
       sub-property-type="azimuth"
       value-type="azimuth"
@@ -10,7 +10,7 @@
       use-modulus
     />
     <dip-angle
-      :grf-id="grfId"
+      :value="value"
       :property-type="propertyType"
       sub-property-type="dip"
       value-type="dip"
@@ -21,22 +21,23 @@
   </div>
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
+
+import { GaussianRandomField } from '@/utils/domain'
+
+@Component({
   components: {
     azimuthAngle: StorableNumericField,
     dipAngle: StorableNumericField,
   },
+})
+export default class AnisotropyDirection extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
-  computed: {
-    propertyType () { return 'angle' },
-  },
+  get propertyType () { return 'angle' }
 }
 </script>
