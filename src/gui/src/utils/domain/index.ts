@@ -1,5 +1,5 @@
 import { Facies, GlobalFacies, FaciesGroup } from '@/utils/domain/facies'
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import Region from '@/utils/domain/region'
 import {
   Bayfill,

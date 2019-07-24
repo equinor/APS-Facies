@@ -2,7 +2,7 @@ import { RootState, Context as BaseContext } from '@/store/typing'
 import { Newable } from '@/utils/domain/bases/interfaces'
 import APSError from '@/utils/domain/errors/base'
 import FaciesGroup from '@/utils/domain/facies/group'
-import { Variogram, Trend, GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField, { Variogram, Trend } from '@/utils/domain/gaussianRandomField'
 import {
   Bayfill,
   BayfillPolygon,

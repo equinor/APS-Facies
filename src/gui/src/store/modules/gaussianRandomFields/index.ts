@@ -6,10 +6,9 @@ import Zone from '@/utils/domain/zone'
 import Vue from 'vue'
 
 import { getId, hasParents, newSeed } from '@/utils'
-import {
+import GaussianRandomField, {
   Trend,
   Variogram,
-  GaussianRandomField,
   GaussianRandomFieldSerialization
 } from '@/utils/domain/gaussianRandomField'
 

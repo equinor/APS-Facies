@@ -6,7 +6,7 @@ import ZoneRegionDependent, {
 } from '@/utils/domain/bases/zoneRegionDependent'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'

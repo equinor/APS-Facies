@@ -1,4 +1,4 @@
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import BayfillPolygon, {
   BayfillPolygonSerialization,
   BayfillPolygonSpecification

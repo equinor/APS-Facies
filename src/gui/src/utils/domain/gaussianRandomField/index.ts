@@ -81,7 +81,7 @@ export interface GaussianRandomFieldSerialization extends DependentSerialization
   variogram: VariogramSerialization
 }
 
-class GaussianRandomField extends ZoneRegionDependent implements Named {
+export default class GaussianRandomField extends ZoneRegionDependent implements Named {
   public name: string
   public variogram: Variogram
   public trend: Trend
@@ -143,12 +143,9 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
   }
 }
 
-export default GaussianRandomField
-
 export {
   Variogram,
   Trend,
-  GaussianRandomField,
   TrendSerialization,
   VariogramSerialization,
 }

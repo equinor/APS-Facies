@@ -1,6 +1,6 @@
 import GlobalFacies from '@/utils/domain/facies/global'
 import { defaultColors } from '@/utils/domain/facies/helpers/colors'
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import { CODE } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
 

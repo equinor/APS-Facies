@@ -1,7 +1,7 @@
 import APSTypeError from '@/utils/domain/errors/type'
 import FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayPolygon, { CENTER, OverlayPolygonSerialization } from '@/utils/domain/polygon/overlay'
 import TruncationRule, {
