@@ -34,19 +34,26 @@
           <section-title>Facies</section-title>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <div v-if="currentGridModel">
-            <div
+          <v-layout v-if="currentGridModel">
+            <v-layout
               v-if="hasWellParameters"
+              wrap
             >
-              <choose-blocked-well-parameter />
-              <choose-blocked-well-log-parameter
-                v-if="hasBlockedWellParameter"
-              />
-              <facies-selection
-                v-if="hasBlockedWellLogParameter"
-              />
-            </div>
-          </div>
+              <v-flex xs6>
+                <choose-blocked-well-parameter />
+              </v-flex>
+              <v-flex xs6>
+                <choose-blocked-well-log-parameter
+                  v-if="hasBlockedWellParameter"
+                />
+              </v-flex>
+              <v-flex xs12>
+                <facies-selection
+                  v-if="hasBlockedWellLogParameter"
+                />
+              </v-flex>
+            </v-layout>
+          </v-layout>
           <div v-else>
             Selection of facies is not available until Grid Model is selected
           </div>
