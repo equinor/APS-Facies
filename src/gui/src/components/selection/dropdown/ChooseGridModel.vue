@@ -4,6 +4,7 @@
     :model-getter="getter"
     :model-setter="setter"
     label="Grid model"
+    :no-data-text="'No grids available'"
   />
 </template>
 
