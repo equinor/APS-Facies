@@ -24,19 +24,18 @@
     </v-layout>
     <v-layout>
       <v-layout
-        row
         justify-center
       >
         <wait-button
           title="Split"
-          :outline="true"
+          outlined
           :disabled="!canSplit"
           :tooltip-text="splitError"
           @click="split"
         />
         <wait-button
           title="Merge"
-          outline
+          outlined
           :disabled="!canMerge"
           :tooltip-text="mergeError"
           @click="merge"

@@ -1,41 +1,39 @@
 <template>
-  <v-expansion-panel
-    v-model="expanded"
-  >
-    <v-expansion-panel-content>
-      <div slot="header">
-        <v-layout
-          justify-center
-          align-center
-          row
-          pa-0
-          ma-0
+  <v-expansion-panel>
+    <v-expansion-panel-header v-slot="{ open }">
+      <v-layout
+        justify-center
+        align-center
+        pa-0
+        ma-0
+      >
+        <v-flex>
+          <section-title>Gaussian Random Fields (GRF)</section-title>
+        </v-flex>
+        <v-flex
+          v-show="open"
+          xs2
         >
-          <v-flex>
-            <h2>Gaussian Random Fields (GRF)</h2>
-          </v-flex>
-          <v-flex
-            v-show="isOpen"
-            xs2
-          >
-            <icon-button
-              icon="add"
-              @click="addField"
-            />
-          </v-flex>
-        </v-layout>
-      </div>
+          <icon-button
+            icon="add"
+            @click="addField"
+          />
+        </v-flex>
+      </v-layout>
+    </v-expansion-panel-header>
+    <v-expansion-panel-content>
       <cross-section />
-      <v-expansion-panel>
-        <v-expansion-panel-content
+      <v-expansion-panels
+        accordion
+      >
+        <v-expansion-panel
           v-for="field in fields"
           :key="field.id"
         >
-          <div slot="header">
+          <v-expansion-panel-header>
             <v-layout
               align-center
               justify-start
-              row
               fill-height
               wrap
             >
@@ -55,14 +53,14 @@
                 <confirmation-dialog :ref="`confirmation_${field.id}`" />
               </v-flex>
             </v-layout>
-          </div>
-          <v-card>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
             <gaussian-random-field
               :value="field"
             />
-          </v-card>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </v-expansion-panel-content>
   </v-expansion-panel>
 </template>
@@ -75,11 +73,13 @@ import ConfirmationDialog from '@/components/specification/GaussianRandomField/C
 import GaussianFieldName from '@/components/specification/GaussianRandomField/GaussianFieldName.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import CrossSection from '@/components/specification/GaussianRandomField/CrossSection.vue'
+import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { GaussianRandomField as Field } from '@/utils/domain'
 
 @Component({
   components: {
+    SectionTitle,
     CrossSection,
     IconButton,
     GaussianFieldName,
@@ -88,10 +88,7 @@ import { GaussianRandomField as Field } from '@/utils/domain'
   },
 })
 export default class MultipleGaussianRandomFields extends Vue {
-  expanded: number | null = null
-
   get fields () { return this.$store.getters['fields'] }
-  get isOpen () { return this.expanded === 0 }
   get ids () { return Object.keys(this.fields) }
 
   async addField () {

@@ -1,49 +1,37 @@
 <template>
-  <v-data-table
+  <base-table
     :headers="headers"
     :items="polygons"
-    item-key="name"
-    class="elevation-1"
-    hide-actions
     @input.stop
   >
     <template
-      slot="headerCell"
-      slot-scope="props"
-    >
-      <optional-help-item
-        :value="props.header"
-      />
-    </template>
-    <template
-      slot="items"
-      slot-scope="props"
+      v-slot:item="{ item }"
     >
       <tr>
-        <td class="text-xs-left">
+        <td class="text-left">
           <optional-help-item
-            :value="props.item.name"
+            :value="item.name"
           />
         </td>
-        <td class="text-xs-left">
+        <td class="text-left">
           <!--TODO: Figure out why input happens twice-->
           <facies-specification
-            :value="props.item"
+            :value="item"
             :rule="value"
           />
         </td>
         <td>
           <fraction-field
-            v-if="!!props.item.slantFactor"
-            :value="props.item.slantFactor"
+            v-if="!!item.slantFactor"
+            :value="item.slantFactor"
             fmu-updatable
-            @input="factor => updateFactor(props.item, factor)"
+            @input="factor => updateFactor(item, factor)"
           />
           <slot v-else />
         </td>
       </tr>
     </template>
-  </v-data-table>
+  </base-table>
 </template>
 
 <script lang="ts">
@@ -52,11 +40,13 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import FractionField from '@/components/selection/FractionField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
+import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import { Bayfill, BayfillPolygon } from '@/utils/domain'
 
 @Component({
   components: {
+    BaseTable,
     OptionalHelpItem,
     FractionField,
     FaciesSpecification,
@@ -76,24 +66,15 @@ export default class BayfillPolygonTable extends Vue {
     return [
       {
         text: 'Polygon',
-        align: 'left',
-        sortable: false,
         value: 'name',
-        help: '',
       },
       {
         text: 'Facies',
-        align: 'left',
-        sortable: false,
         value: 'facies',
-        help: '',
       },
       {
         text: 'Slant Factor',
-        align: 'left',
-        sortable: false,
         value: 'factor',
-        help: '',
       }
     ]
   }

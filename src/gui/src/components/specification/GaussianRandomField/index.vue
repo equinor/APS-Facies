@@ -2,7 +2,6 @@
   <v-container>
     <v-layout
       child-flex
-      row
       wrap
     >
       <v-flex xs6>
@@ -27,14 +26,12 @@
           label="Truncation Rule Role"
         >
           <template
-            slot="item"
-            slot-scope="{ item }"
+            v-slot:item="{ item }"
           >
             ɑ<sub>{{ item }}</sub>
           </template>
           <template
-            slot="selection"
-            slot-scope="{ item }"
+            v-slot:selection="{ item }"
           >
             ɑ<sub>{{ item }}</sub>
           </template>
@@ -59,7 +56,11 @@
         />
       </v-flex>
       <!--New line-->
-      <v-flex xs6>
+      <v-flex
+        align-self-start
+        xs6
+        column
+      >
         <span>Anisotropy direction</span>
         <anisotropy-direction
           :value="value"
@@ -80,10 +81,12 @@
         />
       </v-flex>
       <!--New line-->
-      <trend-specification
-        :value="value"
-        @update:error="e => update('trend', e)"
-      />
+      <v-layout>
+        <trend-specification
+          :value="value"
+          @update:error="e => update('trend', e)"
+        />
+      </v-layout>
     </v-layout>
   </v-container>
 </template>

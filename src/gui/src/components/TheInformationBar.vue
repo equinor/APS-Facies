@@ -56,11 +56,13 @@ export default class InformationBar extends Vue {
 }
 </script>
 
-<style lang="stylus" scoped>
-  #information-bar
-    .v-alert
-      margin: 0px auto
-      border-width: 0 0 0
-      white-space pre-line
-      line-height 1.0
+<style lang="scss" scoped>
+  #information-bar {
+    .v-alert {
+      margin: 0 auto;
+      border-width: 0 0 0;
+      white-space: pre-line;
+      line-height: 1.0;
+    }
+  }
 </style>

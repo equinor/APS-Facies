@@ -5,6 +5,7 @@
     no-data-text="A Zone must be selected, before its regions may be shown"
     show-name
     show-code
+    loading-text="Loading Regions"
   />
 </template>
 

@@ -1,57 +1,49 @@
 <template>
-  <v-expansion-panel
-    :value="0"
-  >
-    <v-expansion-panel-content>
-      <div slot="header">
-        <h2>Truncation Rules</h2>
-      </div>
-      <truncation-header />
-      <v-layout
-        v-if="rule"
-        row
+  <div>
+    <truncation-header />
+    <v-layout
+      v-if="rule"
+    >
+      <v-flex
+        v-if="notBayfill"
+        xs12
       >
-        <v-flex
-          v-if="notBayfill"
-          xs12
+        <v-popover
+          :disabled="canUseOverlay"
+          trigger="hover"
         >
-          <v-popover
-            :disabled="canUseOverlay"
-            trigger="hover"
+          <v-checkbox
+            v-model="useOverlay"
+            :disabled="!canUseOverlay"
+            class="tooltip-target"
+            label="Include Overlay Facies"
+          />
+          <span
+            slot="popover"
           >
-            <v-checkbox
-              v-model="useOverlay"
-              :disabled="!canUseOverlay"
-              class="tooltip-target"
-              label="Include Overlay Facies"
-            />
-            <span
-              slot="popover"
-            >
-              {{ useOverlayTooltip }}
-            </span>
-          </v-popover>
-        </v-flex>
-      </v-layout>
-      <v-flex xs12>
-        <component
-          :is="truncationRuleComponent"
-          v-if="truncationRuleComponent"
+            {{ useOverlayTooltip }}
+          </span>
+        </v-popover>
+      </v-flex>
+    </v-layout>
+    <v-flex xs12>
+      <component
+        :is="truncationRuleComponent"
+        v-if="truncationRuleComponent && rule"
+        :value="rule"
+      />
+    </v-flex>
+    <v-layout>
+      <v-flex
+        v-if="useOverlay"
+        xs12
+      >
+        <overlay-facies
           :value="rule"
         />
       </v-flex>
-      <v-layout row>
-        <v-flex
-          v-if="useOverlay"
-          xs12
-        >
-          <overlay-facies
-            :value="rule"
-          />
-        </v-flex>
-      </v-layout>
-    </v-expansion-panel-content>
-  </v-expansion-panel>
+    </v-layout>
+  </div>
 </template>
 
 <script lang="ts">
@@ -62,12 +54,14 @@ import NonCubicSpecification from '@/components/specification/TruncationRule/Non
 import CubicSpecification from '@/components/specification/TruncationRule/Cubic/index.vue'
 import TruncationHeader from '@/components/specification/TruncationRule/header.vue'
 import OverlayFacies from '@/components/specification/TruncationRule/Overlay/index.vue'
+import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { isUUID } from '@/utils/helpers'
 import { Bayfill, Facies } from '@/utils/domain'
 
 @Component({
   components: {
+    SectionTitle,
     TruncationHeader,
     OverlayFacies,
   },

@@ -1,6 +1,6 @@
 <template>
-  <v-layout row>
-    <v-flex xs5>
+  <v-layout>
+    <v-flex xs3>
       <v-select
         ref="chooseTruncationRuleType"
         v-model="type"
@@ -8,7 +8,7 @@
         label="Rule"
       />
     </v-flex>
-    <v-flex xs5>
+    <v-flex xs3>
       <v-combobox
         ref="chooseTruncationRuleTemplate"
         v-model="template"
@@ -17,21 +17,23 @@
         label="Template"
       />
     </v-flex>
-    <icon-button
-      icon="add"
-      disabled
-      @click="addTemplate"
-    />
-    <icon-button
-      icon="copy"
-      disabled
-      @click="copyTemplate"
-    />
-    <icon-button
-      icon="remove"
-      disabled
-      @click="deleteTemplate"
-    />
+    <v-flex xs6>
+      <icon-button
+        icon="add"
+        disabled
+        @click="addTemplate"
+      />
+      <icon-button
+        icon="copy"
+        disabled
+        @click="copyTemplate"
+      />
+      <icon-button
+        icon="remove"
+        disabled
+        @click="deleteTemplate"
+      />
+    </v-flex>
   </v-layout>
 </template>
 

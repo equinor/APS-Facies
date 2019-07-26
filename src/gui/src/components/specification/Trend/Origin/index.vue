@@ -4,7 +4,6 @@
     <v-layout
       align-center
       justify-center
-      row
       wrap
       fill-height
     >

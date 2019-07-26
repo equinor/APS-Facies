@@ -1,60 +1,57 @@
 <template>
-  <div>
-    <v-layout
-      align-center
-      justify-center
-      row
-      fill-height
+  <v-layout
+    align-center
+    justify-center
+    fill-height
+    :class="__class"
+  >
+    <v-flex
+      v-if="canShowSlider"
+      xs8
     >
-      <v-flex
-        v-if="canShowSlider"
-        xs8
-      >
-        <v-slider
-          v-model="sliderValue"
-          :disabled="disabled"
-          :max="steps"
-          :step="100/steps"
-        />
-      </v-flex>
-      <v-flex
-        v-if="canShowField"
-      >
-        <v-text-field
-          ref="input"
-          :value="fieldValue"
-          :error-messages="errors"
-          :label="label"
-          :suffix="_unit"
-          :disabled="disabled"
-          :hint="hint"
-          :persistent-hint="persistentHint"
-          :append-icon="appendIcon"
-          @input.capture="e => updateValue(e)"
-          @blur="$v.fieldValue.$touch()"
-          @keydown.up="increase"
-          @keydown.down="decrease"
-          @click:append="e => $emit('click:append', e)"
-          @update:error="e => propagateEvent('update:error', e)"
-        />
-      </v-flex>
-      <v-flex
-        v-if="isFmuUpdatable"
-        v-bind="binding"
-      >
-        <v-tooltip bottom>
-          <span slot="activator">
-            <v-checkbox
-              v-model="updatable"
-              :disabled="disabled"
-              persistent-hint
-            />
-          </span>
-          <span>Toggle whether "this field" should be updatable in FMU</span>
-        </v-tooltip>
-      </v-flex>
-    </v-layout>
-  </div>
+      <v-slider
+        v-model="sliderValue"
+        :disabled="disabled"
+        :max="steps"
+        :step="100/steps"
+      />
+    </v-flex>
+    <v-flex
+      v-if="canShowField"
+      :class="__class"
+    >
+      <v-text-field
+        ref="input"
+        :class="__class"
+        :value="fieldValue"
+        :error-messages="errors"
+        :label="label"
+        :suffix="_unit"
+        :disabled="disabled"
+        :hint="hint"
+        :persistent-hint="persistentHint"
+        :append-icon="appendIcon"
+        @input.capture="e => updateValue(e)"
+        @blur="$v.fieldValue.$touch()"
+        @keydown.up="increase"
+        @keydown.down="decrease"
+        @click:append="e => $emit('click:append', e)"
+        @update:error="e => propagateEvent('update:error', e)"
+      />
+    </v-flex>
+    <v-flex
+      v-if="isFmuUpdatable"
+      v-bind="binding"
+    >
+      <v-checkbox
+        v-model="updatable"
+        v-tooltip.bottom="`Toggle whether this should be updatable in FMU`"
+        :class="__class"
+        :disabled="disabled"
+        persistent-hint
+      />
+    </v-flex>
+  </v-layout>
 </template>
 
 <script lang="ts">
@@ -212,6 +209,12 @@ export default class NumericField extends Vue {
     } else {
       return this.unit
     }
+  }
+
+  get __class (): string[] {
+    const classes: string[] = []
+    if (this.dense) classes.push('dense')
+    return classes
   }
 
   get max (): number { return this.constants.max }

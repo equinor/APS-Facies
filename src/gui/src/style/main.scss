@@ -1,0 +1,14 @@
+$color-pack: true;
+
+@import "~vuetify/src/styles/main";
+
+$font-family: 'Roboto', 'Avenir', Helvetica, Arial, sans-serif;
+
+.dense {
+  padding: 0;
+}
+
+.v-expansion-panel-content__wrap {
+  padding-left: 0;
+  padding-right: 0;
+}

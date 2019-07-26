@@ -1,5 +1,4 @@
-type Optional<T> = T | null
-type Maybe<T> = Optional<T> | undefined
+import { Optional, Maybe } from '@/utils/typing/simple'
 
 export {
   Optional,

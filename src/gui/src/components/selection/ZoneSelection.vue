@@ -4,6 +4,7 @@
     item-type="zone"
     show-name
     show-code
+    loading-text="Loading Zones"
   />
 </template>
 

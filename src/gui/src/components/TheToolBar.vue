@@ -1,5 +1,8 @@
 <template>
-  <v-toolbar>
+  <v-toolbar
+    flat
+    color="#fafafa"
+  >
     <!--
       NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly
       This is *exactly* the same as what's done in the source code for the upload button
@@ -18,7 +21,7 @@
         <v-icon
           color="black"
         >
-          {{ $vuetify.icons.import }}
+          {{ $vuetify.icons.values.import }}
         </v-icon>
       </template>
     </upload-button>
@@ -42,7 +45,7 @@
 
     <v-btn
       disabled
-      outline
+      outlined
       color="primary"
     >
       Run Settings
@@ -137,7 +140,7 @@ function fileHandler (store: Store, fileName: string) {
     ExportDialog,
     ProjectSettings,
     IconButton,
-    UploadButton
+    UploadButton,
   },
 })
 export default class TheToolBar extends Vue {

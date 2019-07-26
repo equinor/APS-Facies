@@ -60,7 +60,7 @@ export default class CubicTopologySpecification extends Vue {
         return {
           name: polygon.id,
           color: this.has(polygon)
-            ? (this.$vuetify.theme.primary as string)
+            ? (this.$vuetify.theme.themes.light.primary as string)
             : '#000',
           alias: polygon.level.filter(lvl => lvl !== 0).join('.'),
         }

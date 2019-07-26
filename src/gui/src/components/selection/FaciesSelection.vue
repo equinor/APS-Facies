@@ -3,30 +3,25 @@
     column
   >
     <v-layout
-      row
       fill-height
       justify-start
     >
       <v-flex xs2>
-        <v-btn
-          icon
+        <icon-button
+          icon="add"
           @click="add"
-        >
-          <v-icon>{{ $vuetify.icons.add }}</v-icon>
-        </v-btn>
+        />
       </v-flex>
       <v-flex xs2>
         <v-popover
           :disabled="canRemove"
           trigger="hover"
         >
-          <v-btn
-            icon
+          <icon-button
+            icon="remove"
             :disabled="!canRemove"
             @click="remove"
-          >
-            <v-icon>{{ $vuetify.icons.remove }}</v-icon>
-          </v-btn>
+          />
           <span slot="popover">
             {{ removeError }}
           </span>
@@ -41,11 +36,13 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import FaciesTable from '@/components/table/FaciesTable.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
 import { Store } from '@/store/typing'
 
 @Component({
   components: {
+    IconButton,
     FaciesTable,
   },
 })

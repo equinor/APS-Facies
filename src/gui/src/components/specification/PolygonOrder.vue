@@ -1,9 +1,10 @@
 <template>
   <v-layout
-    row
     wrap
+    align-center
+    justify-center
   >
-    <v-flex
+    <v-layout
       xs6
       column
     >
@@ -11,16 +12,16 @@
         :disabled="!canDecrease"
         small
         @click="() => $emit('input', -1)"
-        v-text="'$vuetify.icons.up'"
+        v-text="'$vuetify.icons.values.up'"
       />
       <v-icon
         :disabled="!canIncrease"
         small
         @click="() => $emit('input', +1)"
-        v-text="'$vuetify.icons.down'"
+        v-text="'$vuetify.icons.values.down'"
       />
-    </v-flex>
-    <v-flex
+    </v-layout>
+    <v-layout
       xs6
       column
     >
@@ -28,15 +29,15 @@
         :diabled="!canRemove"
         small
         @click="() => $emit('delete')"
-        v-text="'$vuetify.icons.remove'"
+        v-text="'$vuetify.icons.values.remove'"
       />
       <v-icon
         :disabled="!canAdd"
         small
         @click="() => $emit('add')"
-        v-text="'$vuetify.icons.add'"
+        v-text="'$vuetify.icons.values.add'"
       />
-    </v-flex>
+    </v-layout>
   </v-layout>
 </template>
 

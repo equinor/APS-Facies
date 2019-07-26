@@ -1,18 +1,10 @@
 <template>
-  <v-layout
-    row
-    align-center
-    justify-end
-  >
-    <v-flex>
-      <icon-button
-        :disabled="!canSimulate"
-        :waiting="waitingForSimulation"
-        icon="refresh"
-        @click="refresh"
-      />
-    </v-flex>
-  </v-layout>
+  <icon-button
+    :disabled="!canSimulate"
+    :waiting="waitingForSimulation"
+    icon="refresh"
+    @click="refresh"
+  />
 </template>
 
 <script lang="ts">

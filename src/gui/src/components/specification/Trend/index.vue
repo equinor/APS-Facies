@@ -1,9 +1,7 @@
 <template>
   <v-flex>
     Trend
-    <v-layout
-      row
-    >
+    <v-layout>
       <v-flex xs6>
         <v-checkbox
           v-model="useTrend"
@@ -26,7 +24,6 @@
         <v-layout
           align-center
           justify-center
-          row
           fill-height
         >
           <v-flex xs6>

@@ -3,15 +3,18 @@
     v-model="dialog"
     persistent
     max-width="800"
+    scrollable
   >
-    <v-btn
-      slot="activator"
-      outline
-      color="primary"
-      dark
-    >
-      Project Settings
-    </v-btn>
+    <template v-slot:activator="{ on }">
+      <v-btn
+        outlined
+        color="primary"
+        dark
+        v-on="on"
+      >
+        Project Settings
+      </v-btn>
+    </template>
     <v-card>
       <v-card-title
         class="headline"
@@ -19,12 +22,17 @@
         {{ title }}
       </v-card-title>
       <v-card-text>
-        <fieldset>
-          <legend>
-            Folder Settings:
-          </legend>
+        <v-card
+          outlined
+        >
+          <v-list-item>
+            <v-list-item-title
+              class="headline"
+            >
+              Folder Settings
+            </v-list-item-title>
+          </v-list-item>
           <v-layout
-            row
             wrap
           >
             <v-flex
@@ -49,12 +57,13 @@
             >
               <bold-button
                 title="Select Directory"
-                @click="chooseAPSModelFileLocation"
+                @click="chooseApsModelFileLocation"
               />
             </v-flex>
 
             <v-flex
               xs3
+              pa-2
             >
               Truncation Rule File Location:
             </v-flex>
@@ -83,6 +92,7 @@
             </v-flex>
             <v-flex
               xs5
+              pa-2
             >
               <v-text-field
                 v-model="fmuParameterListLocation"
@@ -92,56 +102,67 @@
             </v-flex>
             <v-flex
               xs4
+              pa-2
             >
               <bold-button
                 title="Select Directory"
-                @click="chooseFMUparametersFileLocation"
+                @click="chooseFmuParametersFileLocation"
               />
             </v-flex>
           </v-layout>
-        </fieldset>
+        </v-card>
         <br>
-        <fieldset>
-          <legend>
-            Display Settings:
-          </legend>
+        <v-card
+          outlined
+        >
+          <v-list-item>
+            <v-list-item-title
+              class="headline"
+            >
+              Display Settings
+            </v-list-item-title>
+          </v-list-item>
           <v-layout>
-            <v-flex
-              pa-2
+            <v-layout
+              wrap
             >
-              <v-radio-group
-                v-model="showZoneNameNumber"
-                column
-                label="Show:"
+              <v-flex
+                pa-2
               >
-                <v-radio
-                  label="Zone Name"
-                  value="name"
-                />
-                <v-radio
-                  label="Zone Number"
-                  value="number"
-                />
-              </v-radio-group>
-            </v-flex>
-            <v-flex
-              pa-2
-            >
-              <v-radio-group
-                v-model="showRegionNameNumber"
-                colum
-                label="Show:"
+                <v-radio-group
+                  v-model="showZoneNameNumber"
+                  column
+                  label="Show:"
+                >
+                  <v-radio
+                    label="Zone Name"
+                    value="name"
+                  />
+                  <v-radio
+                    label="Zone Number"
+                    value="number"
+                  />
+                </v-radio-group>
+              </v-flex>
+              <v-flex
+                pa-2
               >
-                <v-radio
-                  label="Region Name"
-                  value="name"
-                />
-                <v-radio
-                  label="Region Number"
-                  value="number"
-                />
-              </v-radio-group>
-            </v-flex>
+                <v-radio-group
+                  v-model="showRegionNameNumber"
+                  colum
+                  label="Show:"
+                >
+                  <v-radio
+                    label="Region Name"
+                    value="name"
+                  />
+                  <v-radio
+                    label="Region Number"
+                    value="number"
+                  />
+                </v-radio-group>
+              </v-flex>
+            </v-layout>
             <v-layout column>
               <v-flex>
                 <v-checkbox
@@ -163,20 +184,26 @@
               </v-flex>
             </v-layout>
           </v-layout>
-        </fieldset>
-        <fieldset
+        </v-card>
+        <v-card
           v-if="!!$store.getters.gridModel"
+          outlined
         >
-          <legend>Grid model</legend>
+          <v-list-item>
+            <v-list-item-title
+              class="headline"
+            >
+              Grid model
+            </v-list-item-title>
+          </v-list-item>
           <v-container
-            v-if="!$store.getters['simulationSettings/waiting']"
+            v-if="!$store.getters['parameters/grid/waiting']"
             grid-list-md
-            text-xs-center
+            text-center
           >
             <v-layout
               justify-space-around
               align-space-around
-              row
               fill
               wrap
             >
@@ -268,19 +295,23 @@
               </v-flex>
             </v-layout>
           </v-container>
-          <v-layout
+          <v-container
             v-else
-            justify-center
           >
-            <v-icon
-              x-large
-              v-text="$vuetify.icons.refreshSpinner"
-            />
-          </v-layout>
-        </fieldset>
+            <v-layout
+              justify-center
+              align-center
+            >
+              <v-icon
+                x-large
+                v-text="$vuetify.icons.values.refreshSpinner"
+              />
+            </v-layout>
+          </v-container>
+        </v-card>
       </v-card-text>
       <v-card-actions>
-        Version: {{ version }}
+        {{ version && `Version: ${version}` }}
         <v-spacer />
         <bold-button
           title="Cancel"
@@ -337,16 +368,18 @@ export default class ProjectSettings extends Vue {
   @Watch('dialog')
   onActivation (value: boolean) {
     if (value) {
+      const options = this.$store.state.options
+
       this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
-      this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
-      this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
-      this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
-      this.automaticFaciesFill = this.$store.state.options.automaticFaciesFill.value
-      this.filterZeroProbability = this.$store.state.options.filterZeroProbability.value
+      this.showZoneNameNumber = options.showNameOrNumber.zone.value
+      this.showRegionNameNumber = options.showNameOrNumber.region.value
+      this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
+      this.automaticFaciesFill = options.automaticFaciesFill.value
+      this.filterZeroProbability = options.filterZeroProbability.value
     }
   }
 
-  chooseAPSModelFileLocation () {
+  chooseApsModelFileLocation () {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this.apsModelFileLocation = path
@@ -360,7 +393,7 @@ export default class ProjectSettings extends Vue {
       }
     })
   }
-  chooseFMUparametersFileLocation () {
+  chooseFmuParametersFileLocation () {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this.fmuParameterListLocation = path
@@ -376,13 +409,14 @@ export default class ProjectSettings extends Vue {
       + '* Location of truncation rules\n' /* I.e. this.truncationRuleLocation */
       + '* Location of FMU parameter list location\n' /* I.e. this.fmuParameterListLocation */
     )
+    const dispatch = this.$store.dispatch
     await Promise.all([
-      this.$store.dispatch('parameters/path/project/select', this.apsModelFileLocation),
-      this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
-      this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
-      this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
-      this.$store.dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
-      this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection),
+      dispatch('parameters/path/project/select', this.apsModelFileLocation),
+      dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
+      dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
+      dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
+      dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
+      dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
     ])
     this.dialog = false
   }
@@ -390,7 +424,7 @@ export default class ProjectSettings extends Vue {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 input[type=text] {
     border: 2px solid blue;
     border-radius: 4px;

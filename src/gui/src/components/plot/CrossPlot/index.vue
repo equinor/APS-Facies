@@ -11,7 +11,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { DEFAULT_POINT_SIZE } from '@/config'
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 import { GaussianRandomField } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
 
 const flatten = (arr: number[][]) => {
   // TODO: Should be superfluous when Array.prototype.flat is part of ECMAScript
@@ -25,10 +24,11 @@ const flatten = (arr: number[][]) => {
 })
 export default class CrossPlot extends Vue {
   @Prop({ required: true })
-  readonly value: GaussianRandomField | ID
+  readonly value: [GaussianRandomField, GaussianRandomField]
 
-  get field () { return this._getField(this.value[0]) }
-  get other () { return this._getField(this.value[1]) }
+  get field () { return this.value[0] }
+  get other () { return this.value[1] }
+
   get dataDefinition () {
     return this.field.simulated && this.other.simulated
       ? [{
@@ -41,12 +41,6 @@ export default class CrossPlot extends Vue {
         y: flatten(this.other.simulation),
       }]
       : []
-  }
-
-  _getField (item: GaussianRandomField | ID) {
-    return typeof item === 'string'
-      ? this.$store.state.gaussianRandomFields.available[`${item}`]
-      : item
   }
 }
 </script>

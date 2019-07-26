@@ -5,7 +5,6 @@
     <v-layout
       align-center
       justify-space-between
-      row
       fill-height
     >
       <h3>Truncation rule specification overlay facies</h3>

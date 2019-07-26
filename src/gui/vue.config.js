@@ -44,6 +44,7 @@ module.exports = {
   transpileDependencies: [
     // These dependencies contains spread operators
     'mathjs',
+    'vuetify',
   ],
 
   configureWebpack: {

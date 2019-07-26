@@ -1,62 +1,50 @@
 <template>
   <v-layout
     align-center
-    justify-start
-    row
+    justify-space-around
     fill-height
     wrap
   >
     <v-flex>
-      <v-tooltip bottom>
-        <v-checkbox
-          slot="activator"
-          v-model="useProbabilityCubes"
-          :disabled="disabled"
-          label="Use cubes"
-        />
-        <span>Toggles whether constant probabilities, or probability cubes should be used</span>
-      </v-tooltip>
+      <v-checkbox
+        v-model="useProbabilityCubes"
+        v-tooltip.bottom="'Toggles whether constant probabilities, or probability cubes should be used'"
+        :disabled="disabled"
+        label="Use cubes"
+      />
     </v-flex>
     <v-flex>
-      <v-tooltip
-        v-show="useProbabilityCubes"
-        bottom
+      <wait-btn
+        v-if="useProbabilityCubes"
+        v-tooltip.bottom="'Calculate average probability (for previewer)'"
+        :disabled="!canCalculateAverages"
+        :waiting="calculatingAverages"
+        color=""
+        @click.stop="average"
       >
-        <wait-btn
-          slot="activator"
-          :disabled="!canCalculateAverages"
-          :waiting="calculatingAverages"
-          color=""
-          @click.stop="average"
-        >
-          Average
-        </wait-btn>
-        <span>Calculate average probability (for previewer)</span>
-      </v-tooltip>
-      <v-tooltip
-        v-show="!useProbabilityCubes"
-        bottom
+        Average
+      </wait-btn>
+      <v-btn
+        v-else
+        v-tooltip.bottom="'Normalize the probabilities'"
+        :disabled="!shouldNormalize"
+        @click.stop="normalize"
       >
-        <v-btn
-          slot="activator"
-          :disabled="!shouldNormalize"
-          @click.stop="normalize"
-        >
-          Normalize
-        </v-btn>
-        <span>Normalize the probabilities</span>
-      </v-tooltip>
+        Normalize
+      </v-btn>
     </v-flex>
   </v-layout>
 </template>
 
 <script lang="ts">
-import { Store } from '@/store/typing'
 import { Component, Vue } from 'vue-property-decorator'
 
-import { hasCurrentParents, notEmpty } from '@/utils'
-
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
+
+import { RootState, Store } from '@/store/typing'
+
+import { hasCurrentParents, notEmpty } from '@/utils'
+import { Facies } from '@/utils/domain'
 
 @Component({
   components: {
@@ -73,8 +61,8 @@ export default class FaciesProbabilityCubeHeader extends Vue {
       .filter(param => notEmpty(param))
   }
 
-  get selectedFacies () {
-    const state = this.$store.state
+  get selectedFacies (): Facies[] {
+    const state: RootState = this.$store.state
     const getters = this.$store.getters
     return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
   }
@@ -99,8 +87,12 @@ export default class FaciesProbabilityCubeHeader extends Vue {
     }
   }
 
-  normalize () {
-    return this.$store.dispatch('facies/normalize')
+  async normalize () {
+    const normalize = this.selectedFacies
+      .every(facies => facies.previewProbability === null)
+      ? 'normalizeEmpty'
+      : 'normalize'
+    await this.$store.dispatch(`facies/${normalize}`)
   }
 }
 </script>

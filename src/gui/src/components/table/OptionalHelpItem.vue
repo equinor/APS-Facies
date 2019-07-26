@@ -4,9 +4,9 @@
       v-if="hasHelp"
       bottom
     >
-      <span slot="activator">
-        {{ text }}
-      </span>
+      <template v-slot:activator="{ on }">
+        <span v-on="on">{{ text }}</span>
+      </template>
       <span>
         {{ help }}
       </span>
@@ -51,7 +51,7 @@ export default class OptionalHelpItem extends Vue {
   }
   get hasHelp () {
     // @ts-ignore
-    return notEmpty(this.value.help)
+    return notEmpty(this.help)
   }
 }
 </script>

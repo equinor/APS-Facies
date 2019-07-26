@@ -3,6 +3,7 @@
     v-model="dialog"
     :max-width="options.width"
     @keydown.esc="cancel()"
+    @keydown.enter="agree()"
   >
     <v-toolbar
       :color="options.color"
@@ -20,15 +21,15 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
-          color="primary darken-1"
-          flat
+          color="warning darken-1"
+          text
           @click.native="agree()"
         >
           Yes
         </v-btn>
         <v-btn
           color="grey"
-          flat
+          text
           @click.native="cancel()"
         >
           Cancel
@@ -65,6 +66,7 @@ import { Component, Vue } from 'vue-property-decorator'
 
 import { APSError } from '@/utils/domain/errors'
 import { DialogOptions } from '@/utils/domain/bases/interfaces'
+import { Color } from '@/utils/domain/facies/helpers/colors'
 
 @Component
 export default class ConfirmationDialog extends Vue {
@@ -74,7 +76,7 @@ export default class ConfirmationDialog extends Vue {
   message: string | null = null
   title: string | null = null
   options: DialogOptions = {
-    color: 'primary',
+    color: (this.$vuetify.theme.themes.light.warning as Color),
     width: 290,
   }
 

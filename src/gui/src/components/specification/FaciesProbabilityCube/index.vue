@@ -1,26 +1,17 @@
 <template>
-  <v-expansion-panel>
-    <v-expansion-panel-content>
-      <div slot="header">
-        <h2>Probabilities for Facies</h2>
-      </div>
-      <v-card>
-        <v-container>
-          <v-layout
-            child-flex
-            align-center
-            justify-start
-            column
-            fill-height
-            wrap
-          >
-            <probability-cube-header />
-            <facies-probability-cube-table />
-          </v-layout>
-        </v-container>
-      </v-card>
-    </v-expansion-panel-content>
-  </v-expansion-panel>
+  <v-layout
+    align-center
+    justify-center
+    fill-height
+    wrap
+  >
+    <v-flex>
+      <probability-cube-header />
+    </v-flex>
+    <v-flex xs12>
+      <facies-probability-cube-table />
+    </v-flex>
+  </v-layout>
 </template>
 
 <script lang="ts">

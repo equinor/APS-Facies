@@ -1,36 +1,24 @@
 <template>
-  <v-data-table
+  <base-table
     :headers="headers"
     :items="groups"
     item-key="id"
-    class="elevation-1"
-    hide-actions
     @input.stop
   >
     <template
-      slot="header-cell"
-      slot-scope="props"
-      class="text-xs-left"
-    >
-      <optional-help-item
-        :value="props.header"
-      />
-    </template>
-    <template
-      slot="items"
-      slot-scope="props"
+      v-slot:item="{ item }"
     >
       <tr>
         <td>
           <background-group-facies-specification
-            :value="props.item"
+            :value="item"
             :rule="value"
           />
         </td>
         <td>
           <polygon-table
-            v-if="props.item.polygons.length > 0"
-            :value="props.item.polygons"
+            v-if="item.polygons.length > 0"
+            :value="item.polygons"
             :rule="value"
           />
           <span v-else>
@@ -39,10 +27,11 @@
         </td>
       </tr>
     </template>
-  </v-data-table>
+  </base-table>
 </template>
 
 <script lang="ts">
+import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import Facies from '@/utils/domain/facies/local'
@@ -76,6 +65,7 @@ function allBackgroundPolygonsHasSomeFacies<
 
 @Component({
   components: {
+    BaseTable,
     OptionalHelpItem,
     BackgroundGroupFaciesSpecification,
     PolygonTable,
@@ -113,16 +103,12 @@ export default class BackgroundFacies<
     return [
       {
         text: 'Background',
-        align: 'left',
-        sortable: false,
         value: 'group',
         class: 'text-wrap-newline',
         help: 'Which facies this overlay polygon should cover',
       },
       {
         text: 'Polygons',
-        align: 'left',
-        sortable: false,
         value: 'polygon',
         help: 'Specification of the polygons',
       },

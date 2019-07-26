@@ -1,7 +1,7 @@
 <template>
   <v-layout column>
     <h3>Alpha selection</h3>
-    <v-layout row>
+    <v-layout>
       <alpha-fields
         :value="value"
         :min-fields="minFields"

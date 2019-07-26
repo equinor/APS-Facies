@@ -1,8 +1,16 @@
 <template>
-  <static-plot
-    :data-definition="dataDefinition"
-    :expand="expand"
-  />
+  <v-layout
+    ma-0
+    pa-0
+    shrink
+    align-center
+    justify-center
+  >
+    <static-plot
+      :data-definition="dataDefinition"
+      :expand="expand"
+    />
+  </v-layout>
 </template>
 
 <script lang="ts">
@@ -47,7 +55,8 @@ export default class FaciesRealization extends Vue {
         }
       })
   }
-  @Watch('value.realization')
+
+  @Watch('value.realization', { deep: true })
   onRealizationChanged (value: number[][] | null): void {
     this.data = value
   }

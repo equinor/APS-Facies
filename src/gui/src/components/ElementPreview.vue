@@ -3,62 +3,82 @@
     align-start
     justify-start
   >
-    <v-expansion-panel
-      v-model="expanded"
+    <v-layout
+      align-center
+      justify-start
     >
-      <v-expansion-panel-content>
-        <div slot="header">
-          Preview
-        </div>
-        <preview-header
-          :value="rule"
-        />
-        <v-card>
-          <v-layout
-            v-if="!!rule"
-            row
-            wrap
+      <section-title>Preview</section-title>
+      <preview-header
+        :value="rule"
+      />
+    </v-layout>
+    <v-expansion-panels
+      v-model="expanded"
+      accordion
+      multiple
+    >
+      <v-expansion-panel
+        v-tooltip.bottom="truncationRuleError"
+        :disabled="!hasTruncationRule"
+      >
+        <v-expansion-panel-header>
+          <h3>Truncation rule</h3>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-flex
+            justify-center
+            align-center
           >
-            <v-flex xs1 />
-            <v-flex>
-              <h3>Truncation rule</h3>
-              <truncation-map
-                :value="rule"
-              />
-            </v-flex>
-            <v-flex xs1 />
-            <v-flex>
-              <h3>Realization</h3>
-              <facies-realization
-                :value="rule"
-              />
-            </v-flex>
-            <v-flex xs1 />
-            <v-flex xs12>
-              <gaussian-plots
-                v-if="isGaussianFieldsSimulated"
-                :value="fields"
-              />
-            </v-flex>
-          </v-layout>
-          <v-layout>
-            <v-flex xs12>
-              <cross-plots
-                :value="fields"
-              />
-            </v-flex>
-          </v-layout>
-        </v-card>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
+            <truncation-map
+              v-if="!!rule"
+              :value="rule"
+            />
+          </v-flex>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel
+        v-tooltip.bottom="realizationError"
+        :disabled="!hasRealization"
+      >
+        <v-expansion-panel-header>
+          <h3>Realization</h3>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <facies-realization
+            v-if="rule"
+            :value="rule"
+          />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <v-expansion-panel-header>
+          <h3>Gaussian Random Fields</h3>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <gaussian-plots
+            v-if="isGaussianFieldsSimulated"
+            :value="fields"
+          />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <v-expansion-panel-header>
+          <h3>Cross plots</h3>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <cross-plots
+            :value="fields"
+          />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Store } from '@/store/typing'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
-import { Optional } from '@/utils/typing'
+import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import TruncationMap from '@/components/plot/TruncationMap.vue'
 import FaciesRealization from '@/components/plot/FaciesRealization.vue'
@@ -67,8 +87,15 @@ import GaussianPlots from '@/components/plot/GaussianPlot/multiple.vue'
 import PreviewHeader from '@/components/visualization/preview/header.vue'
 import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
 
+import { Store } from '@/store/typing'
+import { GaussianRandomField, TruncationRule } from '@/utils/domain'
+
+const TRUNCATION_MAP_ORDER = 0
+const REALIZATION_ORDER = 1
+
 @Component({
   components: {
+    SectionTitle,
     CrossPlots,
     PreviewHeader,
     GaussianPlots,
@@ -77,18 +104,42 @@ import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
   },
 })
 export default class ElementPreview extends Vue {
-  panels: Optional<number> = null
+  expanded: number[] = []
 
-  get expanded () { return this.isGaussianFieldsSimulated ? 0 : null }
+  get fields (): GaussianRandomField[] { return Object.values((this.$store as Store).getters['fields']) }
 
-  set expanded (val) { this.panels = val }
-
-  get fields () { return Object.values((this.$store as Store).getters['fields']) }
-
-  get rule () { return this.$store.getters.truncationRule }
+  get rule (): TruncationRule { return this.$store.getters.truncationRule }
 
   get isGaussianFieldsSimulated () {
     return this.fields.every(field => field.simulated)
+  }
+
+  get hasTruncationRule (): boolean { return !!this.rule }
+
+  get hasRealization (): boolean { return !!(this.rule && this.rule.realization) }
+
+  get truncationRuleError (): string | undefined {
+    return !this.hasTruncationRule
+      ? 'No truncation rule has been specified'
+      : undefined
+  }
+  get realizationError (): string | undefined {
+    return this.truncationRuleError || !this.hasRealization
+      ? 'The realization has not been simulated'
+      : undefined
+  }
+
+  @Watch('rule')
+  showTruncationMap (value: TruncationRule) {
+    if (value) {
+      if (this.isGaussianFieldsSimulated && !this.expanded.includes(TRUNCATION_MAP_ORDER)) {
+        this.expanded.push(TRUNCATION_MAP_ORDER)
+      }
+
+      if (value.realization && !this.expanded.includes(REALIZATION_ORDER)) {
+        this.expanded.push(REALIZATION_ORDER)
+      }
+    }
   }
 }
 </script>

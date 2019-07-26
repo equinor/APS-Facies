@@ -14,7 +14,7 @@
       <v-card-text>
         <v-container grid-list-md>
           <v-layout wrap>
-            <v-layout row>
+            <v-layout>
               <!--Seed-->
               <v-flex xs10>
                 <numeric-field
@@ -43,7 +43,6 @@
             <v-layout
               v-if="settings.gridModel.use"
               justify-space-around
-              row
               wrap
             >
               <v-flex xs4>
@@ -84,14 +83,14 @@
         <v-spacer />
         <v-btn
           color="blue darken-1"
-          flat
+          text
           @click="cancel"
         >
           Close
         </v-btn>
         <v-btn
           color="blue darken-1"
-          flat
+          text
           @click="save"
         >
           Save
@@ -108,6 +107,7 @@ import APSError from '@/utils/domain/errors/base'
 
 import { DialogOptions } from '@/utils/domain/bases/interfaces'
 import { Optional } from '@/utils/typing'
+import { Color } from '@/utils/domain/facies/helpers/colors'
 
 import NumericField from '@/components/selection/NumericField.vue'
 import IconButton from '@/components/selection/IconButton.vue'
@@ -159,7 +159,7 @@ export default class VisualizationSettingsDialog extends Vue {
     seed: null,
   }
   options: DialogOptions = {
-    color: 'primary',
+    color: (this.$vuetify.theme.themes.light.primary as Color),
     width: 290,
   }
 

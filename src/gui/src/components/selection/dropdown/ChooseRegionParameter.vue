@@ -1,17 +1,19 @@
 <template>
-  <v-layout
-    row
-  >
-    <v-checkbox
-      v-model="useRegions"
-      label="Use regions?"
-    />
-    <choose-parameter
-      :disabled="!useRegions"
-      regular
-      parameter-type="region"
-      label="Region parameter"
-    />
+  <v-layout>
+    <v-flex xs3>
+      <v-checkbox
+        v-model="useRegions"
+        label="Use regions?"
+      />
+    </v-flex>
+    <v-flex xs9>
+      <choose-parameter
+        :disabled="!useRegions"
+        regular
+        parameter-type="region"
+        label="Region parameter"
+      />
+    </v-flex>
   </v-layout>
 </template>
 

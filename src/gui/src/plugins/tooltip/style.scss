@@ -1,6 +1,10 @@
+@import '../../style/main';
+
 .tooltip {
   display: block !important;
   z-index: 10000;
+  font-family: $font-family;
+  font-size: 16px;
 
   .tooltip-inner {
     background: black;

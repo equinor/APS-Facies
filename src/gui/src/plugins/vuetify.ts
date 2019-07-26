@@ -1,16 +1,16 @@
 import '@babel/polyfill'
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
-import 'vuetify/src/stylus/app.styl'
 import 'vuetify/dist/vuetify.min.css'
+import '@/style/main.scss'
 
-import colors from 'vuetify/es5/util/colors'
+import colors from 'vuetify/lib/util/colors'
 
 // Icons
 import '@fortawesome/fontawesome-free/css/all.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 // @ts-ignore
-import Ripple from 'vuetify/es5/directives/ripple'
+import { Ripple } from 'vuetify/lib/directives'
 import { notEmpty } from '@/utils'
 
 type Icon = string
@@ -81,19 +81,28 @@ export const icons: Icons = {
 }
 
 Vue.use(Vuetify, {
-  iconfont: 'fa', // 'md' || 'mdi' || 'fa' || 'fa4'
-  icons,
-  customProperties: true,
   directives: {
-    Ripple
+    Ripple,
   },
+})
+
+export default new Vuetify({
+  icons: {
+    iconfont: 'fa', // 'md' || 'mdi' || 'fa' || 'fa4'
+    values: icons,
+  },
+  customProperties: true,
   theme: {
-    primary: colors.blue.darken2, // '#1976D2',
-    secondary: colors.grey.darken3, // '#424242',
-    accent: colors.blue.accent1, // '#82B1FF',
-    error: colors.red.accent2, // '#FF5252',
-    info: colors.blue.base, // '#2196F3',
-    success: colors.green.base, // '#4CAF50',
-    warning: colors.amber.base, // '#FFC107'
+    themes: {
+      light: {
+        primary: colors.blue.darken2, // '#1976D2',
+        secondary: colors.grey.darken3, // '#424242',
+        accent: colors.blue.accent1, // '#82B1FF',
+        error: colors.red.accent2, // '#FF5252',
+        info: colors.blue.base, // '#2196F3',
+        success: colors.green.base, // '#4CAF50',
+        warning: colors.amber.base, // '#FFC107'
+      },
+    }
   },
 })

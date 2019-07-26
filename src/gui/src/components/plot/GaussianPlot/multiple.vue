@@ -1,15 +1,11 @@
 <template>
   <v-container
     grid-list-md
-    text-xs-center
+    text-center
     ma-0
     pa-0
   >
-    <v-flex xs12>
-      <h3>Gaussian Random Fields</h3>
-    </v-flex>
     <v-layout
-      row
       wrap
       xs12
       pa-0

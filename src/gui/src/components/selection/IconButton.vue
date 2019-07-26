@@ -9,7 +9,7 @@
     :right="right"
     :small="small"
     icon
-    flat
+    text
     @click.stop="e => $emit('click', e)"
   >
     <v-icon
@@ -46,7 +46,7 @@ export default class IconButton extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly loadingSpinner!: boolean
 
-  @Prop({ default: undefined })
+  @Prop({ default: 'black' })
   readonly color!: Color | undefined
 
   @Prop({ default: false, type: Boolean })
@@ -78,9 +78,9 @@ export default class IconButton extends Vue {
 
   get fullIconName () {
     if (this.loadingSpinner && this.waiting) {
-      return '$vuetify.icons.refreshSpinner'
+      return '$vuetify.icons.values.refreshSpinner'
     } else {
-      return `$vuetify.icons.${this.icon}${this.waiting ? 'Spinner' : ''}`
+      return `$vuetify.icons.values.${this.icon}${this.waiting ? 'Spinner' : ''}`
     }
   }
 }

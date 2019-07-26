@@ -18,7 +18,6 @@
             Select File to save to
           </legend>
           <v-layout
-            row
             wrap
           >
             <v-flex
@@ -47,14 +46,14 @@
         <v-spacer />
         <v-btn
           color="blue darken-1"
-          flat
+          text
           @click="choose"
         >
           Save
         </v-btn>
         <v-btn
           color="blue darken-1"
-          flat
+          text
           @click="abort"
         >
           Abort

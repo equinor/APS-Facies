@@ -1,10 +1,18 @@
 <template>
-  <static-plot
-    :data-definition="data.polygons"
-    :annotations="data.annotations"
-    :expand="expand"
-    svg
-  />
+  <v-layout
+    ma-0
+    pa-0
+    shrink
+    align-center
+    justify-center
+  >
+    <static-plot
+      :data-definition="data.polygons"
+      :annotations="data.annotations"
+      :expand="expand"
+      svg
+    />
+  </v-layout>
 </template>
 
 <script lang="ts">

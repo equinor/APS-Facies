@@ -1,206 +1,183 @@
 <template>
-  <v-data-table
+  <base-selection-table
     v-model="selected"
     :headers="headers"
     :loading="loading"
+    :loading-text="loadingText"
     :items="items"
     :no-data-text="_noDataText"
-    must-sort
-    item-key="id"
-    class="elevation-1"
-    hide-actions
+    :current.sync="current"
   >
     <template
-      slot="headerCell"
-      slot-scope="props"
+      v-slot:item="{ item }"
     >
-      <optional-help-item
-        :value="props.header"
-      />
-    </template>
-    <template
-      slot="items"
-      slot-scope="props"
-    >
-      <tr
-        :style="props.item.current ? selectedStyle : ''"
-        @click="() => current(props.item.id)"
+      <td
+        v-if="showName"
+        class="text-start"
       >
-        <td>
-          <v-checkbox
-            v-model="props.selected"
-            :indeterminate="props.item.selected === 'intermediate'"
-            primary
-            hide-details
-          />
-        </td>
-        <td
-          v-if="showName"
-          class="text-xs-left"
+        <highlight-current-item
+          :value="item"
+          :current="current"
+          field="name"
+        />
+      </td>
+      <td
+        v-if="showCode"
+        class="text-start"
+      >
+        {{ item.code }}
+      </td>
+      <td>
+        <v-layout
+          justify-center
+          align-center
         >
-          <highlight-current-item
-            :item="props.item"
-            field="name"
+          <icon-button
+            icon="copy"
+            :color="getColor(item)"
+            @click="() => copy(item)"
           />
-        </td>
-        <td
-          v-if="showCode"
-          class="text-xs-left"
-        >
-          {{ props.item.code }}
-        </td>
-        <td>
-          <v-layout row>
-            <icon-button
-              icon="copy"
-              :color="getColor(props.item)"
-              @click="() => copy(props.item)"
-            />
-            <icon-button
-              v-if="source"
-              icon="paste"
-              loading-spinner
-              :disabled="!canPaste(props.item)"
-              :waiting="isPasting(props.item)"
-              @click="() => paste(props.item)"
-            />
-          </v-layout>
-        </td>
-      </tr>
+          <icon-button
+            v-if="source"
+            icon="paste"
+            loading-spinner
+            :disabled="!canPaste(item)"
+            :waiting="isPasting(item)"
+            @click="() => paste(item)"
+          />
+        </v-layout>
+      </td>
     </template>
-  </v-data-table>
+  </base-selection-table>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem'
-import OptionalHelpItem from '@/components/table/OptionalHelpItem'
-import IconButton from '@/components/selection/IconButton'
+import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
+import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
+import IconButton from '@/components/selection/IconButton.vue'
+
+import SelectableItem from '@/utils/domain/bases/selectableItem'
 
 import { getId } from '@/utils'
 
-export default {
+@Component({
   components: {
+    BaseSelectionTable,
     IconButton,
-    OptionalHelpItem,
     HighlightCurrentItem,
   },
+})
+export default class SelectionTable<T extends SelectableItem> extends Vue {
+  @Prop({ required: true })
+  readonly headerName!: string
 
-  props: {
-    headerName: {
-      required: true,
-      type: String,
-    },
-    itemType: {
-      required: true,
-      type: String,
-    },
-    noDataText: VueTypes.string.def('$vuetify.noDataText'),
-    showName: VueTypes.bool.def(false),
-    showCode: VueTypes.bool.def(false),
-  },
+  @Prop({ required: true })
+  readonly itemType!: 'zone' | 'region'
 
-  computed: {
-    _noDataText () {
-      return this.loading
-        ? `Loading ${this.itemType}s`
-        : this.noDataText
-    },
-    loading () {
-      return this.$store.state[`${this.itemType}s`]._loading
-    },
-    headers () {
-      return [
-        {
-          text: 'Use',
-          align: 'left',
-          sortable: false,
-          value: 'selected',
-        },
-        ...(this.showName
-          ? [{
-            text: this.headerName,
-            align: 'left',
-            sortable: false,
-            value: 'name',
-          }]
-          : []
-        ),
-        ...(this.showCode
-          ? [{
-            text: 'Code',
-            align: 'left',
-            sortable: true,
-            value: 'code',
-          }]
-          : []
-        ),
-        {
-          text: 'Copy/Paste',
-          align: 'left',
-          sortable: false,
-        },
-      ]
-    },
-    _items () { return this.$store.getters[`${this.itemType}s`] },
-    items () {
-      const current = this.$store.state[`${this.itemType}s`].current
-      return this._items
-        .map(item => {
-          return {
-            id: item.id,
-            name: item.name,
-            code: item.code,
-            selected: item.selected,
-            current: item.id === current,
-          }
-        })
-    },
-    selected: {
-      get: function () { return this.items.filter(item => item.selected) },
-      set: function (values) {
-        values = this.$store.getters[`${this.itemType}s`].filter(item => values.map(({ id }) => id).includes(item.id))
-        this.$store.dispatch(`${this.itemType}s/select`, values)
-      },
-    },
-    selectedStyle () {
-      return {
-        background: this.$vuetify.theme.primary,
-        color: 'white'
-      }
-    },
-    source () {
-      return this.$store.state.copyPaste.source
-    }
-  },
+  @Prop({ default: '$vuetify.noDataText' })
+  readonly noDataText!: string
 
-  methods: {
-    current (id) {
-      this.$store.dispatch(`${this.itemType}s/current`, { id })
-    },
-    getItem (item) {
-      return this._items.find(({ id }) => id === item.id)
-    },
-    getColor (item) {
-      return getId(this.source) === item.id
-        ? 'accent'
-        : undefined
-    },
-    canPaste (item) {
-      const source = this.source
-      return !!source && source.id !== item.id
-    },
-    isPasting (item) {
-      return !!this.$store.getters['copyPaste/isPasting'](this.getItem(item))
-    },
-    async copy (item) {
-      await this.$store.dispatch('copyPaste/copy', this.getItem(item))
-    },
-    async paste (item) {
-      await this.$store.dispatch('copyPaste/paste', this.getItem(item))
-    }
+  @Prop({ default: false, type: Boolean })
+  readonly showName!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly showCode!: boolean
+
+  @Prop({ default: '$vuetify.dataIterator.loadingText' })
+  readonly loadingText!: string
+
+  get _noDataText () {
+    return this.loading
+      ? `Loading ${this.itemType}s`
+      : this.noDataText
   }
 
+  get loading (): boolean { return this.$store.state[`${this.itemType}s`]._loading }
+
+  get headers () {
+    return [
+      {
+        text: 'Use',
+        value: 'selected',
+      },
+      ...(this.showName
+        ? [{
+          text: this.headerName,
+          value: 'name',
+        }]
+        : []
+      ),
+      ...(this.showCode
+        ? [{
+          text: 'Code',
+          sortable: true,
+          value: 'code',
+        }]
+        : []
+      ),
+      {
+        text: 'Copy/Paste',
+      },
+    ]
+  }
+
+  get items (): T[] {
+    return this.$store.getters[`${this.itemType}s`]
+      .sort((a: T, b: T) => a.code - b.code)
+  }
+
+  get current () { return this.$store.state[`${this.itemType}s`].current }
+  set current (item: T) { this.$store.dispatch(`${this.itemType}s/current`, item) }
+
+  get selected () { return this.items.filter(item => !!item.selected) }
+  set selected (values) {
+    values = this.items.filter(item => values.map(({ id }) => id).includes(item.id))
+    this.$store.dispatch(`${this.itemType}s/select`, values)
+  }
+
+  get source () {
+    return this.$store.state.copyPaste.source
+  }
+
+  getItem (item: T) { return this.items.find(({ id }) => id === item.id) }
+
+  getColor (item: T): 'accent' | undefined {
+    return getId(this.source) === item.id
+      ? 'accent'
+      : undefined
+  }
+
+  canPaste (item: T): boolean {
+    const source = this.source
+    return !!source && source.id !== item.id
+  }
+
+  isPasting (item: T) {
+    return !!this.$store.getters['copyPaste/isPasting'](this.getItem(item))
+  }
+
+  async copy (item: T) {
+    await this.$store.dispatch('copyPaste/copy', this.getItem(item))
+  }
+
+  async paste (item: T) {
+    await this.$store.dispatch('copyPaste/paste', this.getItem(item))
+  }
+
+  updateSelection (item: T, value: boolean) {
+    if (value) {
+      this.selected = [...this.selected, item]
+    } else {
+      this.selected = this.selected.filter(el => el.id !== item.id)
+    }
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+  div {
+    flex-wrap: nowrap;
+  }
+</style>
