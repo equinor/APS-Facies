@@ -98,6 +98,12 @@ function getDirection (settings) {
     : null
 }
 
+async function removeExtraneousFaciesGroups ({ rootState, dispatch }, parent) {
+  const groups = Object.values(rootState.facies.groups.available)
+    .filter(group => group.isChildOf(parent))
+  await Promise.all(groups.map(group => dispatch('facies/groups/remove', group, { root: true })))
+}
+
 export default {
   namespaced: true,
 
@@ -143,6 +149,7 @@ export default {
           await dispatch('gaussianRandomFields/addEmptyField', {}, { root: true })
         }
       }
+      await removeExtraneousFaciesGroups(context, parent)
       if (autoFill && template.overlay) {
         await Promise.all(template.overlay.items.map(item => getFaciesGroup(context, item.over, parent)))
       }
