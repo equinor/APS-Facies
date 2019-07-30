@@ -75,7 +75,7 @@ export default abstract class OverlayTruncationRule<
   }
 
   public get fields (): GaussianRandomField[] {
-    const backgroundFields = this.backgroundFields
+    const backgroundFields = super.fields
     const overlayFields: GaussianRandomField[] = []
     this.overlayPolygons
       .sort((a, b): number => a.order - b.order)

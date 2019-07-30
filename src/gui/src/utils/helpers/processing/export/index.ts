@@ -382,7 +382,7 @@ function getAlphaNames<
   S extends PolygonSerialization = PolygonSerialization,
 > (truncRule: TruncationRuleBase<P, S>): string {
   const alphaFields = truncRule.backgroundFields
-  return alphaFields.map((field): string => field.name).join(' ')
+  return alphaFields.map((field): string => field ? field.name : '').join(' ')
 }
 
 function addTruncationRuleBayFill (context: Context, doc: Document, parent: Parent, truncRule: Bayfill, truncRuleElem: HTMLElement): void {

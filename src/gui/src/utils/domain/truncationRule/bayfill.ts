@@ -1,4 +1,3 @@
-import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import BayfillPolygon, {
   BayfillPolygonSerialization,
   BayfillPolygonSpecification
@@ -25,14 +24,6 @@ export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolyg
         }, 0) === 5
       }
     ])
-  }
-
-  public get fields (): GaussianRandomField[] {
-    return Object.values(this._backgroundFields)
-  }
-
-  public get backgroundFields (): GaussianRandomField[] {
-    return this.fields
   }
 
   public get specification (): BayfillSpecification {

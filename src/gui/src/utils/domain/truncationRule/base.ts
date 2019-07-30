@@ -24,7 +24,7 @@ export type TruncationRuleType = 'bayfill' | 'non-cubic' | 'cubic'
 export type TruncationRuleConfiguration<T extends Polygon = Polygon> = DependentConfiguration & {
   name: string
   polygons: Identified<T> | T[]
-  backgroundFields: GaussianRandomField[]
+  backgroundFields: (GaussianRandomField | null)[]
   realization?: number[][]
 }
 
@@ -38,7 +38,7 @@ export default abstract class TruncationRule<
 
   protected _requiredGaussianFields: number
   protected _polygons: Identified<T>
-  protected _backgroundFields: GaussianRandomField[]
+  protected _backgroundFields: (GaussianRandomField | null)[]
   protected _constraints: (() => boolean)[]
 
   protected constructor ({ name, polygons, backgroundFields, realization, ...rest }: TruncationRuleConfiguration<T>) {
@@ -67,12 +67,12 @@ export default abstract class TruncationRule<
 
   public abstract get specification (): PolygonSpecification[] | object
 
-  public get backgroundFields (): GaussianRandomField[] {
-    return Object.values(this._backgroundFields)
-  }
+  public get backgroundFields (): (GaussianRandomField | null)[] { return this._backgroundFields }
 
   public get fields (): GaussianRandomField[] {
-    return this.backgroundFields
+    const fields: GaussianRandomField[] = []
+    this.backgroundFields.forEach((field): void => { if (field) fields.push(field) })
+    return fields
   }
 
   public get useOverlay (): boolean { return false }
@@ -96,7 +96,7 @@ export default abstract class TruncationRule<
 
   public isUsedInBackground (item: GaussianRandomField | Facies): boolean {
     if (item instanceof GaussianRandomField) {
-      return this.backgroundFields.some((field): boolean => field.id === item.id)
+      return this.backgroundFields.some((field): boolean => getId(field) === item.id)
     } else if (item instanceof Facies) {
       for (const { facies } of this.backgroundPolygons) {
         if (facies && facies.id === item.id) {
@@ -127,7 +127,7 @@ export default abstract class TruncationRule<
       name: this.name,
       parent: this.parent,
       polygons: Object.values(this._polygons).map((polygon): S => (polygon.toJSON() as S)),
-      backgroundFields: this.backgroundFields.map((field): ID => field.id),
+      backgroundFields: this.backgroundFields.map((field): ID => getId(field)),
       realization: this.realization,
     }
   }
