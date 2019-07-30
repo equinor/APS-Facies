@@ -230,7 +230,7 @@ build-stable-gui:
 build-gui: clean-build increase-build-number build-front-end compile-files-for-plugin
 	cd $(BUILD_DIR) && \
 	$(ZIP) $(PLUGIN_BIN) $(PLUGIN_NAME)
-	mv $(BUILD_DIR)/$(PLUGIN_BIN) $(CODE_DIR)
+	mv $(BUILD_DIR)/$(PLUGIN_BIN) $(CODE_DIR) 2>/dev/null || mv $(BUILD_DIR)/zip.zip $(CODE_DIR)/$(PLUGIN_BIN)
 
 compile-files-for-plugin: gather-python-scripts auxillary-files compile-python-files
 
