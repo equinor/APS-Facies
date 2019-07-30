@@ -12,8 +12,10 @@ export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolyg
   public constructor (props: TruncationRuleConfiguration<BayfillPolygon>) {
     super(props)
 
+    this._requiredGaussianFields = 3
+
     this._constraints.push(...[
-      (): boolean => this.fields.length === 3,
+      (): boolean => this.fields.length === this._requiredGaussianFields,
       (): boolean => this.polygons.length === 5,
       (): boolean => (new Set(this.polygons.map(({ facies }): ID | null => facies ? facies.id : facies))).size === 5,
       (): boolean => {

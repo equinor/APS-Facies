@@ -36,6 +36,7 @@ export default abstract class TruncationRule<
 
   public realization: number[][] | null
 
+  protected _requiredGaussianFields: number
   protected _polygons: Identified<T>
   protected _backgroundFields: GaussianRandomField[]
   protected _constraints: (() => boolean)[]
@@ -45,6 +46,7 @@ export default abstract class TruncationRule<
     this.name = name
     this._polygons = identify(polygons)
     this._backgroundFields = backgroundFields
+    this._requiredGaussianFields = 2
     this.realization = realization || null
 
     this._constraints = [
@@ -52,6 +54,7 @@ export default abstract class TruncationRule<
       (): boolean => this.polygons.length > 0,
       (): boolean => this.normalizedFractions,
       (): boolean => this.cumulativeFaciesProbability === 1,
+      (): boolean => this.backgroundFields.filter((field): boolean => !!field).length === this._requiredGaussianFields,
       (): boolean => this.fields.every((field): boolean => field.valid),
     ]
   }
