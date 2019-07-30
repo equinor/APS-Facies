@@ -9,6 +9,7 @@
     -->
     <upload-button
       ref="uploadButton"
+      v-tooltip.bottom="'Import an existing model file'"
       color=""
       icon
       @file-update="importModelFile"
@@ -27,6 +28,7 @@
     </upload-button>
 
     <icon-button
+      v-tooltip.bottom="'Export the current specification as a model file'"
       icon="export"
       @click="exportModelFile"
     />
@@ -103,6 +105,8 @@ function fileHandler (store: Store, fileName: string) {
   return (e) => {
     const fileContent = e.target.result
     let json: string | null = null
+
+    store.commit('LOADING', { loading: true, message: `Checking the model file, "${fileName}", for consistency` }, { root: true })
     try {
       json = xml2json(fileContent, { compact: false, ignoreComment: true })
     } catch (err) {
@@ -118,6 +122,7 @@ function fileHandler (store: Store, fileName: string) {
         .then((result: { valid: boolean, error: string }) => {
           if (result.valid) {
             resetState()
+            store.commit('LOADING', { loading: true, message: 'Resetting the state...' }, { root: true })
             store.dispatch('fetch')
               .then(() => {
                 store.dispatch('modelFileLoader/populateGUI', { json, fileName })
@@ -131,6 +136,7 @@ function fileHandler (store: Store, fileName: string) {
           }
         })
     }
+    store.commit('LOADING', { loading: false }, { root: true })
   }
 }
 

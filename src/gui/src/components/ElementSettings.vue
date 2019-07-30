@@ -6,6 +6,7 @@
     <section-title>{{ title }}</section-title>
     <v-expansion-panel
       v-if="hasFacies"
+      v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
     >
       <v-expansion-panel-header>
         <section-title>Probabilities for Facies</section-title>
@@ -16,6 +17,7 @@
     </v-expansion-panel>
     <v-expansion-panel
       v-if="hasFacies"
+      v-tooltip.bottom="!hasEnoughFacies && 'Too few Facies has been selected'"
     >
       <v-expansion-panel-header>
         <section-title>Truncation Rule</section-title>
@@ -81,7 +83,13 @@ export default class ElementSettings extends Vue {
         : `Region ${current.code}`
   }
 
-  get hasFacies () { return Object.keys(this.$store.state.facies.available).length > 0 }
+  get _facies () {
+    return Object.values(this.$store.state.facies.available)
+  }
+
+  get hasFacies () { return this._facies.length > 0 }
+
+  get hasEnoughFacies () { return this._facies.length >= 2 /* TODO: Use a constant */ }
 
   get expanded () { return this.hasFacies ? [1] : [] }
 }

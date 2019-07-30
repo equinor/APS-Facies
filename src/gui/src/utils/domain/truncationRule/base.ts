@@ -39,7 +39,7 @@ export default abstract class TruncationRule<
   protected _requiredGaussianFields: number
   protected _polygons: Identified<T>
   protected _backgroundFields: (GaussianRandomField | null)[]
-  protected _constraints: (() => boolean)[]
+  protected _constraints: ([() => boolean, string])[]
 
   protected constructor ({ name, polygons, backgroundFields, realization, ...rest }: TruncationRuleConfiguration<T>) {
     super(rest)
@@ -50,19 +50,26 @@ export default abstract class TruncationRule<
     this.realization = realization || null
 
     this._constraints = [
-      (): boolean => allSet(this.polygons, 'facies'),
-      (): boolean => this.polygons.length > 0,
-      (): boolean => this.normalizedFractions,
-      (): boolean => this.cumulativeFaciesProbability === 1,
-      (): boolean => this.backgroundFields.filter((field): boolean => !!field).length === this._requiredGaussianFields,
-      (): boolean => this.fields.every((field): boolean => field.valid),
+      [(): boolean => allSet(this.polygons, 'facies'), 'Some polygons does not have a facies assigned to it'],
+      [(): boolean => this.polygons.length > 0, 'No polygons have been specified'],
+      [(): boolean => this.normalizedFractions, 'Some fraction of facies does not sum to one'],
+      [(): boolean => this.cumulativeFaciesProbability === 1, 'The sum of facies probabilities does not sum to one'],
+      [(): boolean => this.backgroundFields.filter((field): boolean => !!field).length === this._requiredGaussianFields, `The truncation rule must have ${this._requiredGaussianFields} background fields`],
+      [(): boolean => this.fields.every((field): boolean => field.valid), 'Some field is invalid'],
     ]
   }
 
   abstract get type (): TruncationRuleType
 
   public get ready (): boolean {
-    return this._constraints.every((constraint): boolean => constraint())
+    return this._constraints.every(([constraint, _]): boolean => constraint())
+  }
+
+  public get errorMessage (): string | undefined {
+    for (const [constraint, error] of this._constraints) {
+      if (!constraint()) return error
+    }
+    return undefined
   }
 
   public abstract get specification (): PolygonSpecification[] | object

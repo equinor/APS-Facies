@@ -241,7 +241,13 @@ export default class NumericField extends Vue {
     // @ts-ignore
     !this.$v.fieldValue.discrete && errors.push('Must be a whole number')
     // @ts-ignore
-    !this.$v.fieldValue.between && errors.push(`Must be between [${this.min}, ${this.max}]`)
+    !this.$v.fieldValue.between && errors.push(
+      this.max === Infinity
+        ? `Must be greater than ${this.min}`
+        : this.min === -Infinity
+          ? `Must be smaller than ${this.max}`
+          : `Must be between [${this.min}, ${this.max}]`
+    )
     // @ts-ignore
     !this.$v.fieldValue.strictlyGreater && errors.push(`Must be strictly greater than ${this.min}`)
     // @ts-ignore

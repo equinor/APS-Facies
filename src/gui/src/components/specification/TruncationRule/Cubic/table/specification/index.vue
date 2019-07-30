@@ -126,7 +126,11 @@ export default class CubicTruncationRuleSpecification extends Vue {
 
   get mergeError () {
     if (!this.canMerge) {
+      const length = this.selected.length
+      if (length === 0) return 'No polygons are selected for merging'
+      if (length === 1) return 'A single polygon cannot be merged into itself'
       if (!this.singleParentSelected) return 'Only polygons having the same parent may be merged'
+      return 'Unable to merge'
     }
     return ''
   }

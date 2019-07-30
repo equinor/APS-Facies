@@ -2,6 +2,7 @@
   <base-table
     :headers="headers"
     :items="groups"
+    :no-data-text="noDataText"
     item-key="id"
     @input.stop
   >
@@ -113,6 +114,14 @@ export default class BackgroundFacies<
         help: 'Specification of the polygons',
       },
     ]
+  }
+
+  get noDataText (): string {
+    if (this.value.polygons.every(polygon => !polygon.facies)) {
+      return 'No background facies are given'
+    } else {
+      return '$vuetify.noDataText'
+    }
   }
 }
 </script>

@@ -1,10 +1,19 @@
 <template>
-  <icon-button
-    :disabled="!canSimulate"
-    :waiting="waitingForSimulation"
-    icon="refresh"
-    @click="refresh"
-  />
+  <v-popover
+    bottom
+    :disabled="canSimulate"
+    trigger="hover"
+  >
+    <icon-button
+      :disabled="!canSimulate"
+      :waiting="waitingForSimulation"
+      icon="refresh"
+      @click="refresh"
+    />
+    <template slot="popover">
+      {{ _explanation }}
+    </template>
+  </v-popover>
 </template>
 
 <script lang="ts">
@@ -33,12 +42,21 @@ export default class PreviewHeader<
   @Prop({ required: true })
   readonly value: TruncationRule<T, S>
 
+  get _allFaciesUsed () { return usesAllFacies({ rootGetters: this.$store.getters }, this.value) }
+
   get canSimulate () {
     return (
       this.value
       && this.value.ready
-      && usesAllFacies({ rootGetters: this.$store.getters }, this.value)
+      && this._allFaciesUsed
     )
+  }
+
+  get _explanation (): string | undefined {
+    if (!this.value) return 'No truncation rule has been specified'
+    if (!this._allFaciesUsed) return 'More facies are selected, than are used'
+    if (!this.value.ready) return this.value.errorMessage
+    return undefined
   }
 
   async refresh () {

@@ -50,9 +50,10 @@ export default abstract class OverlayTruncationRule<
       ? (overlay ? overlay.use : false)
       : _useOverlay
 
-    this._constraints.push(...[
-      (): boolean => allSet(this.overlayPolygons, 'field'),
-    ])
+    const additionalConstraints: ([() => boolean, string])[] = [
+      [(): boolean => allSet(this.overlayPolygons, 'field'), 'All overlay polygons must have a Gaussian Random Field assigned to it'],
+    ]
+    this._constraints.push(...additionalConstraints)
   }
 
   public get useOverlay (): boolean { return this._useOverlay }
