@@ -89,9 +89,6 @@ import CrossPlots from '@/components/plot/CrossPlot/multiple.vue'
 import { Store } from '@/store/typing'
 import { GaussianRandomField, TruncationRule } from '@/utils/domain'
 
-const TRUNCATION_MAP_ORDER = 0
-const REALIZATION_ORDER = 1
-
 @Component({
   components: {
     SectionTitle,
@@ -103,7 +100,8 @@ const REALIZATION_ORDER = 1
   },
 })
 export default class ElementPreview extends Vue {
-  expanded: number[] = []
+  get expanded (): number[] { return this.$store.getters['panels/preview'] }
+  set expanded (indices) { this.$store.dispatch('panels/change', { type: 'preview', indices }) }
 
   get fields (): GaussianRandomField[] { return Object.values((this.$store as Store).getters['fields']) }
 
@@ -124,16 +122,15 @@ export default class ElementPreview extends Vue {
       : undefined
   }
 
-  @Watch('rule')
-  showTruncationMap (value: TruncationRule) {
+  @Watch('rule', { deep: true })
+  async showTruncationMap (value: TruncationRule) {
+    const type = 'preview'
     if (value) {
-      if (this.isGaussianFieldsSimulated && !this.expanded.includes(TRUNCATION_MAP_ORDER)) {
-        this.expanded.push(TRUNCATION_MAP_ORDER)
-      }
+      await this.$store.dispatch('panels/open', { type, panel: 'truncationRuleMap' })
 
-      if (value.realization && !this.expanded.includes(REALIZATION_ORDER)) {
-        this.expanded.push(REALIZATION_ORDER)
-      }
+      await this.$store.dispatch(`panels/${value.realization ? 'open' : 'close'}`, { type, panel: 'truncationRuleRealization' })
+    } else {
+      await this.$store.dispatch('panels/close', { type, panel: ['truncationRuleMap', 'truncationRuleRealization'] })
     }
   }
 }

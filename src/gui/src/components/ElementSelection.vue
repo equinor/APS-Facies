@@ -10,7 +10,7 @@
 
     <v-expansion-panels
       v-if="currentGridModel"
-      v-model="panel"
+      v-model="panels"
       accordion
       multiple
     >
@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 
 import ZoneRegion from '@/components/selection/ZoneRegionSelection.vue'
 import GridModel from '@/components/selection/dropdown/ChooseGridModel.vue'
@@ -89,7 +89,8 @@ export default class ElementSelection extends Vue {
   disabled: boolean = false
   readonly: boolean = false
 
-  panel: number[] = []
+  get panels (): number[] { return this.$store.getters['panels/selection'] }
+  set panels (indices) { this.$store.dispatch('panels/change', { type: 'selection', indices }) }
 
   get hasWellParameters (): boolean {
     return this.$store.state.parameters.blockedWell.available.length > 0
@@ -102,13 +103,6 @@ export default class ElementSelection extends Vue {
   }
   get currentGridModel (): string {
     return this.$store.state.gridModels.current
-  }
-
-  @Watch('currentGridModel')
-  onChangedGridModel (value: string) {
-    if (value) {
-      this.panel = [0, 1]
-    }
   }
 }
 </script>

@@ -3,6 +3,7 @@ import Vuex, { Store } from 'vuex'
 
 import copyPaste from '@/store/modules/copyPaste'
 import message from '@/store/modules/message'
+import panels from '@/store/modules/panels'
 import gridModels from '@/store/modules/gridModels'
 import zones from '@/store/modules/zones'
 import regions from '@/store/modules/regions'
@@ -51,6 +52,7 @@ const store: Store<RootState> = new Vuex.Store({
   modules: {
     copyPaste,
     message,
+    panels,
     gridModels,
     zones,
     regions,
@@ -120,6 +122,9 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Truncation rules
         await dispatch('truncationRules/populate', data.truncationRules)
+
+        // Reopen the different panels
+        await dispatch('panels/populate', data.panels)
       } finally {
         commit('LOADING', { loading: false })
       }

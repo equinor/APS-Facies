@@ -1,12 +1,13 @@
 <template>
   <v-expansion-panels
-    :expanded="expanded"
+    v-model="expanded"
     accordion
+    multiple
   >
     <section-title>{{ title }}</section-title>
     <v-expansion-panel
-      v-if="hasFacies"
       v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
+      :disabled="!hasFacies"
     >
       <v-expansion-panel-header>
         <section-title>Probabilities for Facies</section-title>
@@ -16,8 +17,8 @@
       </v-expansion-panel-content>
     </v-expansion-panel>
     <v-expansion-panel
-      v-if="hasFacies"
       v-tooltip.bottom="!hasEnoughFacies && 'Too few Facies has been selected'"
+      :disabled="!hasEnoughFacies"
     >
       <v-expansion-panel-header>
         <section-title>Truncation Rule</section-title>
@@ -31,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
 import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple.vue'
 import FaciesProbabilityCube from '@/components/specification/FaciesProbabilityCube/index.vue'
@@ -52,11 +53,15 @@ import { isEmpty } from '@/utils'
 })
 export default class ElementSettings extends Vue {
   get options () {
+    const showNameOrNumber = this.$store.state.options.showNameOrNumber
     return {
-      zone: this.$store.state.options.showNameOrNumber.zone.value,
-      region: this.$store.state.options.showNameOrNumber.region.value,
+      zone: showNameOrNumber.zone.value,
+      region: showNameOrNumber.region.value,
     }
   }
+
+  get expanded (): number[] { return this.$store.getters['panels/settings'] }
+  set expanded (indices) { this.$store.dispatch('panels/change', { type: 'settings', indices }) }
 
   get title () { return `Settings for ${this.zoneName}`.concat(this.useRegions ? ` / ${this.regionName}` : '') }
 
@@ -83,14 +88,18 @@ export default class ElementSettings extends Vue {
         : `Region ${current.code}`
   }
 
-  get _facies () {
-    return Object.values(this.$store.state.facies.available)
-  }
+  get _facies () { return this.$store.getters['facies/selected'] }
 
   get hasFacies () { return this._facies.length > 0 }
 
   get hasEnoughFacies () { return this._facies.length >= 2 /* TODO: Use a constant */ }
 
-  get expanded () { return this.hasFacies ? [1] : [] }
+  @Watch('_facies', { deep: true })
+  async truncationRuleVisibility () {
+    await this.$store.dispatch(`panels/${this.hasEnoughFacies ? 'open' : 'close'}`, { type: 'settings', panel: 'truncationRule' })
+    if (!this.hasFacies) {
+      await this.$store.dispatch('panels/close', { type: 'settings', panel: ['truncationRule', 'faciesProbability'] })
+    }
+  }
 }
 </script>

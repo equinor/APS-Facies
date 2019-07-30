@@ -42,6 +42,7 @@ export default class FaciesRealization extends Vue {
   readonly expand!: boolean
 
   get faciesTable () { return (this.$store as Store).getters['facies/global/selected'] }
+
   get dataDefinition () {
     return this.faciesTable
       .map(({ color, code }) => {
@@ -59,6 +60,10 @@ export default class FaciesRealization extends Vue {
   @Watch('value.realization', { deep: true })
   onRealizationChanged (value: number[][] | null): void {
     this.data = value
+  }
+
+  mounted () {
+    this.data = this.value.realization
   }
 }
 </script>

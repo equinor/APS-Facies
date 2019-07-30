@@ -2,6 +2,7 @@ import { ConstantsState } from '@/store/modules/constants/typing'
 import { GaussianRandomFieldState } from '@/store/modules/gaussianRandomFields/typing'
 import MessageState from '@/store/modules/message/typing'
 import OptionsState from '@/store/modules/options/typing'
+import { PanelsState } from '@/store/modules/panels/typing'
 import ParametersState from '@/store/modules/parameters/typing'
 import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { TruncationRuleTemplateState } from '@/store/modules/truncationRules/typing'
@@ -50,6 +51,8 @@ interface RootState {
   copyPaste: CopyPasteState
 
   message: MessageState
+
+  panels: PanelsState
 
   gridModels: GridModelsState
 

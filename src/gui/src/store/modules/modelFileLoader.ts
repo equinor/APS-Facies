@@ -505,6 +505,10 @@ const module: Module<{}, RootState> = {
         for (const action of localActions) {
           await dispatch(action, apsModels)
         }
+        await Promise.all([
+          { type: 'settings', panel: 'truncationRule' },
+          { type: 'preview', panel: 'truncationRuleMap' },
+        ].map((payload): Promise<void> => dispatch('panels/open', payload, { root: true })))
       } catch (reason) {
         await displayMessage({ dispatch }, reason, 'error')
       } finally {

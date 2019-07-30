@@ -24,6 +24,7 @@
     <v-expansion-panel-content>
       <cross-section />
       <v-expansion-panels
+        v-model="panel"
         accordion
       >
         <v-expansion-panel
@@ -76,6 +77,7 @@ import CrossSection from '@/components/specification/GaussianRandomField/CrossSe
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { GaussianRandomField as Field } from '@/utils/domain'
+import { isNumber } from 'lodash'
 
 @Component({
   components: {
@@ -88,6 +90,9 @@ import { GaussianRandomField as Field } from '@/utils/domain'
   },
 })
 export default class MultipleGaussianRandomFields extends Vue {
+  get panel () { return this.$store.state.panels.settings.gaussianRandomFields }
+  set panel (value) { this.$store.dispatch('panels/set', { type: 'settings', panel: 'gaussianRandomFields', toggled: isNumber(value) ? value : true }) }
+
   get fields () { return this.$store.getters['fields'] }
   get ids () { return Object.keys(this.fields) }
 

@@ -23,6 +23,7 @@ const actions: ActionTree<GridModelsState, RootState> = {
   select: async ({ state, commit, dispatch }, gridModel: GridModel): Promise<void> => {
     if (state.available.includes(gridModel)) {
       commit('CURRENT', gridModel)
+      await dispatch(`panels/${gridModel ? 'open' : 'close'}`, 'selection', { root: true })
       await dispatch('zones/fetch', null, { root: true })
       await Promise.all(parametersDependentOnGrid.map(param => dispatch(`parameters/${param}/fetch`, undefined, { root: true })))
       await dispatch('copyPaste/copy', null, { root: true })
