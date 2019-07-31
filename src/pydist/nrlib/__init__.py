@@ -18,9 +18,10 @@ def __bootstrap__():
 
     name = 'nrlib'
 
-    if name not in sys.modules:
-        spec = importlib.util.spec_from_file_location(name, path + '/nrlib.so')
-        sys.modules[name] = importlib.util.module_from_spec(spec)
+    del sys.modules[name]
+
+    spec = importlib.util.spec_from_file_location(name, path + '/nrlib.so')
+    sys.modules[name] = importlib.util.module_from_spec(spec)
 
 
 __bootstrap__()
