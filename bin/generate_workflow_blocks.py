@@ -13,6 +13,8 @@ Usage:
     ./bin/generate_workflow_blocks.py [--read-only] [--use-temporary-workflow-dir] [--copy-to-rms-project <path to rms project>]
     ./generate_workflow_blocks.py <path to project folder> [--read-only] [--use-temporary-workflow-dir] [--copy-to-rms-project <path to rms project>]
 """
+import random
+import string
 from pathlib import Path
 from shutil import copy
 from sys import argv
@@ -27,10 +29,13 @@ def run():
     root_path = get_root_path()
     workflows = get_workflows()
     use_temporary = '--use-temporary-workflow-dir' in argv
+    salt = None
+    if use_temporary:
+        salt = get_random_name()
 
     for relative_path, items in workflows.items():
         for file_name in items:
-            create_workflow_block_file(file_name, root_path, relative_path, use_temporary)
+            create_workflow_block_file(file_name, root_path, relative_path, use_temporary, salt)
 
     for i in range(len(argv)):
         arg = argv[i]
@@ -38,7 +43,7 @@ def run():
             set_file_attributes(root_path)
         elif arg == '--copy-to-rms-project':
             project_location = Path(argv[i + 1]).absolute()
-            workflow_dir = get_workflow_dir(root_path, use_temporary)
+            workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
             add_ipl_scripts(root_path, project_location)
             for rms_name, workflow_name in get_rms_mapping().items():
                 if workflow_name is not None:
@@ -363,24 +368,31 @@ def get_rms_mapping():
     }
 
 
+def get_random_name(length=5):
+    characters = string.ascii_letters + string.digits
+    return ''.join([random.choice(characters) for _ in range(length)])
+
+
 def get_file_mapping():
     return {file: rms_name for rms_name, file in get_rms_mapping().items() if file}
 
 
-def get_workflow_dir(root_path, use_temporary=False):
+def get_workflow_dir(root_path, use_temporary=False, salt=None):
     if use_temporary:
         root_path = Path(gettempdir())
-    workflow_dir = root_path / 'workflow'
+    workflow_dir = root_path / 'aps_workflows'
+    if salt:
+        workflow_dir = workflow_dir / salt
     if not _OS.exists(workflow_dir):
         _OS.makedirs(workflow_dir.absolute())
     return workflow_dir
 
 
-def create_workflow_block_file(file_name, root_path, relative_path, use_temporary=False):
+def create_workflow_block_file(file_name, root_path, relative_path, use_temporary=False, salt=None):
     script_name = file_name + '.py'
     script_path = root_path / relative_path / script_name
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
-    workflow_dir = get_workflow_dir(root_path, use_temporary)
+    workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
     workflow_path = str(workflow_dir / get_file_mapping()[script_name])
     workflow_block = get_workflow_block(file_name, relative_path)
     with open(workflow_path, 'w') as f:

@@ -55,12 +55,14 @@ endif
 RMS_DIR := $(CODE_DIR)/.rms
 RMS_PROJECT ?= $(RMS_DIR)/testAPSWorkflow_new.rms11.0.0
 WORKFLOWS_TO_PROJECT := $(EMPTY)
+CREATE_WORKFLOW_DIR := create-workflow-dir
 WRITE_WORKFLOW_FILES_TO_PROJECT ?= no
 ifeq ($(WRITE_WORKFLOW_FILES_TO_PROJECT),yes)
 WORKFLOWS_TO_PROJECT := --copy-to-rms-project $(RMS_PROJECT)
 USE_TEMORARY_DIR ?= no
 ifeq ($(USE_TEMORARY_DIR),yes)
 WORKFLOWS_TO_PROJECT := --use-temporary-workflow-dir $(WORKFLOWS_TO_PROJECT)
+CREATE_WORKFLOW_DIR := $(EMPTY)
 endif
 endif
 
@@ -313,7 +315,7 @@ clean-links: clean-matplotlibrc
 	rm -f $(CODE_DIR)/workflow/ConvertBitMapToRMS.py
 	rm -f $(BIN_DIR)/bitmap2rms_xml.py
 
-generate-workflow-files: create-workflow-dir
+generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
 dependencies: libdraw2D.so nrlib requirements $(TEST_NRLIB)

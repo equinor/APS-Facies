@@ -31,10 +31,10 @@ fi
 get_abs_filename() {
   # Taken from https://stackoverflow.com/a/21188136
   # $1 : relative filename
-  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
+  echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")" | sed -E 's|^/+|/|g'
 }
 
-project=`get_abs_filename $1`
+project=$(get_abs_filename "$1")
 
 if [ ! -f "${project}/.master" ]; then
     echo "The given directory is not an RMS project"
@@ -52,5 +52,6 @@ WRITE_WORKFLOW_FILES_TO_PROJECT="yes" \
 RMS_PROJECT="${project}" \
 USE_TEMORARY_DIR="yes" \
 PYTHON=${RMS_PYTHON} \
+PYTHONPATH="${make_dir}:$PYTHONPATH" \
 LD_LIBRARY_PATH=${RMS_LIB}:${LD_LIBRARY_PATH} \
 make -C "${make_dir}" generate-workflow-files
