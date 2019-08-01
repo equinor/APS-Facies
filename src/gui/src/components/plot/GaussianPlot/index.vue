@@ -1,5 +1,6 @@
 <template>
   <static-plot
+    v-tooltip.bottom="errorMessage"
     :data-definition="dataDefinition"
     :expand="expand"
     :width="size.width"
@@ -38,6 +39,9 @@ export default class GaussianPlot extends Vue {
   @Prop({ default: () => DEFAULT_SIZE })
   readonly size!: { width: number, height: number }
 
+  @Prop({ default: false, type: Boolean })
+  readonly disabled: boolean
+
   get dataDefinition () {
     return [{
       z: this.value.simulation,
@@ -46,8 +50,16 @@ export default class GaussianPlot extends Vue {
       hoverinfo: 'none',
       colorscale: this.colorMapping,
       showscale: this.showScale,
+      opacity: this._disabled ? 0.258823529 : 1,
     }]
   }
+
+  get errorMessage () {
+    return this._disabled
+      ? 'The field has changed since it was simulated'
+      : undefined
+  }
+
   get colorMapping () {
     if (Array.isArray(this.colorScale)) {
       const colors = []
@@ -61,5 +73,7 @@ export default class GaussianPlot extends Vue {
       return this.colorScale
     }
   }
+
+  get _disabled (): boolean { return this.disabled || !this.value.isRepresentative }
 }
 </script>

@@ -90,6 +90,7 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
 
   public valid: boolean
   private _data: number[][]
+  private _dataHash: string
 
   public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, seed = null, ...rest }: GaussianRandomFieldConfiguration) {
     super(rest)
@@ -108,6 +109,7 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
     this.waiting = false
     this.valid = true
     this._data = []
+    this._dataHash = ''
   }
 
   public get simulated (): boolean {
@@ -116,6 +118,14 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
 
   public get simulation (): number[][] {
     return this._data
+  }
+  public set simulation (data) {
+    this._data = data
+    this._dataHash = this.hash
+  }
+
+  public get isRepresentative (): boolean {
+    return this._dataHash === this.hash
   }
 
   public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => object } } = {}): GaussianRandomFieldSpecification {

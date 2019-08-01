@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid'
+import hash from 'object-hash'
 
 import { ID } from '@/utils/domain/types'
 import { isUUID } from '@/utils/helpers'
@@ -25,6 +26,12 @@ export default class BaseItem implements Identifiable {
       id: this.id
     }
   }
+
+  protected get hash (): string {
+    return hash(this.toJSON(), {
+    })
+  }
+
   protected objectify (): { [_: string]: any } {
     // Include all (computed) properties, while dumping state to JSON
     // This makes reconstruction / population _much_ easier

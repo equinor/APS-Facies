@@ -239,7 +239,7 @@ const module: Module<GaussianRandomFieldState, RootState> = {
       Vue.set(state.available[`${field.id}`].settings, 'seed', value)
     },
     CHANGE_SIMULATION (state, { field, value }): void {
-      Vue.set(state.available[`${field.id}`], '_data', value)
+      Vue.set(state.available[`${field.id}`], 'simulation', value)
     },
     CHANGE_OVERLAY (state, { field, value }): void {
       Vue.set(state.available[`${field.id}`], 'overlay', value)
