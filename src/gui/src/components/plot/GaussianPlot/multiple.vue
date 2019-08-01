@@ -23,11 +23,17 @@
         >
           <h5>{{ field.name }}</h5>
           <gaussian-plot
+            v-if="field.simulated"
             pa-0
             ma-0
             :value="field"
             :size="size"
             :show-scale="index === (value.length - 1)"
+          />
+          <v-progress-circular
+            v-else
+            :size="70"
+            indeterminate
           />
         </v-layout>
       </v-flex>
@@ -64,6 +70,13 @@ export default class MultipleGaussianPlots extends Vue {
 
   size: Size = DEFAULT_SIZE
 
+  @Watch('value')
+  updateSimulation (fields: GaussianRandomField[]) {
+    if (this.$store.state.panels.preview.gaussianRandomFields) {
+      this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields })
+    }
+  }
+
   @Watch('content')
   handle () {
     this.$nextTick(() => {
@@ -87,6 +100,10 @@ export default class MultipleGaussianPlots extends Vue {
           }
         })
     })
+  }
+
+  beforeMount () {
+    this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields: this.value })
   }
 }
 </script>

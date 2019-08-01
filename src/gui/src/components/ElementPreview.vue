@@ -56,7 +56,6 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <gaussian-plots
-            v-if="isGaussianFieldsSimulated"
             :value="fields"
           />
         </v-expansion-panel-content>
@@ -109,10 +108,6 @@ export default class ElementPreview extends Vue {
   get fields (): GaussianRandomField[] { return Object.values((this.$store as Store).getters['fields']) }
 
   get rule (): TruncationRule { return this.$store.getters.truncationRule }
-
-  get isGaussianFieldsSimulated () {
-    return this.fields.every(field => field.simulated)
-  }
 
   get hasTruncationRule (): boolean { return !!this.rule }
 

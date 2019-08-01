@@ -2,7 +2,7 @@
   <v-container
     text-center
     align-center
-    row
+    column
     wrap
   >
     <v-layout>
@@ -21,11 +21,17 @@
       justify-space-around
     >
       <v-flex
-        v-for="(pair, index) in combinations"
+        v-for="([field, other], index) in combinations"
         :key="index"
       >
         <cross-plot
-          :value="pair"
+          v-if="field.simulated && other.simulated "
+          :value="[field, other]"
+        />
+        <v-progress-circular
+          v-else
+          :size="70"
+          indeterminate
         />
       </v-flex>
     </v-layout>
@@ -75,6 +81,11 @@ export default class CrossPlots extends Vue {
       }
     }
     return pairs
+  }
+
+  @Watch('selected', { deep: true })
+  selectionChanged (fields: ID[]) {
+    this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields })
   }
 
   @Watch('available', { deep: true })

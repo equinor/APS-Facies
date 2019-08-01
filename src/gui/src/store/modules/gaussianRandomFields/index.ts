@@ -135,6 +135,17 @@ const module: Module<GaussianRandomFieldState, RootState> = {
         commit('CHANGE_WAITING', { field, value: false })
       }
     },
+    async updateSimulations ({ dispatch, state }, { fields, all = false }: { fields: (GaussianRandomField | ID)[], all: boolean }): Promise<void> {
+      const _fields: GaussianRandomField[] = fields
+        .map((field): GaussianRandomField => !(field instanceof GaussianRandomField)
+          ? state.available[`${field}`]
+          : field
+        )
+      const notSimulated = all ? _fields : _fields.filter((field): boolean => !field.simulated)
+      if (notSimulated.length > 0) {
+        await Promise.all(notSimulated.map((field): Promise<void> => dispatch('updateSimulation', { field })))
+      }
+    },
     updateSimulationData (context, { field, data }): void {
       setValue(context, { field, value: data, commitName: 'CHANGE_SIMULATION' })
     },
