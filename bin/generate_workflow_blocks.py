@@ -307,10 +307,6 @@ def get_root_path():
 def get_workflows():
     return {
         'bin': [
-            'updateAPSModelFromFMU',
-            'updateAPSModelFromUncertaintyTable',
-            'createProbabilityLogs',
-            'createRedefinedBlockedFaciesLog',
         ],
         'depricated': [
         ],
@@ -324,6 +320,10 @@ def get_workflows():
             'APS_set_seed_file_for_multiprocessing_workflow',
             'bitmap2rms',
             'Compare_files_with_uncertainty_parameters',
+            'updateAPSModelFromFMU',
+            'updateAPSModelFromUncertaintyTable',
+            'createProbabilityLogs',
+            'createRedefinedBlockedFaciesLog',
         ],
         'src/algorithms': [
             'setupFMUtags',
