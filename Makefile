@@ -130,7 +130,7 @@ MAIN.PY := $(PYTHON_API_DIR)/main.py
 INFO.XML := $(CODE_DIR)/info.xml
 
 MKDIR := mkdir -p
-REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^( *from )src/\1aps/g'
+REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^(\# *)?( *from )src/\2aps/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI/releases
@@ -243,18 +243,13 @@ gather-python-scripts: copy-python-files __init__.py
 __init__.py:
 	touch $(PLUGIN_DIR)/__init__.py
 
-compile-python-files: ensure-relative-import-statements-in-plugin compile-pydist remove-extraneous-files
+compile-python-files: compile-pydist remove-extraneous-files
 
 increase-build-number:
 	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
 
-ensure-relative-import-statements-in-plugin:
-	$(PYTHON) $(BIN_DIR)/convert2relative.py $(PLUGIN_DIR)/src --base-name src
-
 compile-pydist: move-pydist move-python-files-to-pydist
-	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(PLUGIN_DIR)/ui.py \
-	                                  $(PLUGIN_DIR)/main.py \
-	                                  $(PLUGIN_DIR)/pydist/nrlib/__init__.py
+	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(shell find $(PLUGIN_DIR) -name *.py)
 
 move-python-files-to-pydist:
 	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/pydist/aps

@@ -75,7 +75,7 @@ import sys
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -103,13 +103,8 @@ def _get_path_from_environment(environment_name, default_name):
 
 # The path to the repository's root folder
 temp_dir = Path(roxar.rms.get_tmp_dir())
-root_path = _get_path_from_environment(APS_ROOT, temp_dir / 'aps_gui')
+root_path = _get_path_from_environment(APS_ROOT, temp_dir / 'aps_gui' / 'pydist')
 release_location = Path('/project/res/APSGUI/releases')
-
-# Add nrlib to PYTHONPATH
-nrlib_path = Path('{nrlib_path}')
-if nrlib_path.exists():
-    sys.path.insert(0, str(nrlib_path.absolute()))
 
 # Path to where the file below is located within the repository
 relative_path = '{relative_path}'
@@ -151,6 +146,10 @@ def get_current_plugin_path():
     return None
 
 
+def stringify_path(path):
+    return str(path.absolute())
+
+
 def extract_plugin():
     extracted = temp_dir / 'aps_gui'
 
@@ -177,14 +176,24 @@ model_root = _get_path_from_environment(APS_RESOURCES, project_location_path)
 if APS_ROOT not in os.environ:
     # Add the path to searchable path
     # Assumed that the plugin should not be used, if 'APS_ROOT' is set
+    
+    # When a plugin is used, it includes a stump for importing nrlib as well
     extract_plugin()
-    sys.path.insert(0, root_path)
+    sys.path.insert(0, stringify_path(root_path))
+else:
+    # Add nrlib to PYTHONPATH
+    nrlib_path = Path('{nrlib_path}')
+    if nrlib_path.exists():
+        sys.path.insert(0, stringify_path(nrlib_path))
 
 
 # Generating necessary paths
 def _load_module():
     module_path = relative_path.replace('/', '.') + '.' + file_name
-    return import_module(module_path)
+    try:
+        return import_module(module_path)
+    except ModuleNotFoundError:
+        return import_module(module_path.replace('src', 'aps'))
 
 
 # Getting the location of the necessary files
@@ -284,7 +293,7 @@ kwargs = {{
 # Stringify Paths
 for key, value in kwargs.items():
     if isinstance(value, Path):
-        kwargs[key] = str(value.absolute())
+        kwargs[key] = stringify_path(value)
 
 module = _load_module()
 module.run(roxar, project, **kwargs)
