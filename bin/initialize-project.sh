@@ -25,6 +25,7 @@ fi
 
 if [[ "$#" -ne 1 ]]; then
     echo "${usage}"
+    echo "Optionally, the variable 'APS_PROJECT_DIR' may be set to use a custom location of the APS repo"
     exit 1
 fi
 
@@ -46,6 +47,10 @@ if [[ ${use_unstable} == true ]]; then
     make_dir="${aps_project_root}/DevelopmentBranch/APSGUI"
 else
     make_dir="${aps_project_root}/MasterBranch"
+fi
+
+if [ -n "$APS_PROJECT_DIR" ]; then
+  make_dir=$(get_abs_filename "$APS_PROJECT_DIR")
 fi
 
 WRITE_WORKFLOW_FILES_TO_PROJECT="yes" \
