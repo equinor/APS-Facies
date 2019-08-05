@@ -13,10 +13,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-import { Color } from '@/utils/domain/facies/helpers/colors'
 import { GaussianRandomField } from '@/utils/domain'
 
 import { DEFAULT_SIZE, DEFAULT_COLOR_SCALE } from '@/config'
+import { colorMapping, ColorScale } from '../utils'
 
 @Component({
   components: {
@@ -31,7 +31,7 @@ export default class GaussianPlot extends Vue {
   readonly showScale!: boolean
 
   @Prop({ default: DEFAULT_COLOR_SCALE })
-  readonly colorScale!: string | { value: number, color: Color}[]
+  readonly colorScale!: ColorScale
 
   @Prop({ default: false, type: Boolean })
   readonly expand!: boolean
@@ -61,17 +61,7 @@ export default class GaussianPlot extends Vue {
   }
 
   get colorMapping () {
-    if (Array.isArray(this.colorScale)) {
-      const colors = []
-      for (const item of this.colorScale) {
-        // Plot.ly does not offer an easier way of ensure the values are discrete
-        colors.push([(item.value - 1) / this.colorScale.length, item.color])
-        colors.push([item.value / this.colorScale.length, item.color])
-      }
-      return colors
-    } else {
-      return this.colorScale
-    }
+    return colorMapping(this.colorScale)
   }
 
   get _disabled (): boolean { return this.disabled || !this.value.isRepresentative }

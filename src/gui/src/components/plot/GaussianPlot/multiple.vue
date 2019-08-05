@@ -4,6 +4,7 @@
     text-center
     ma-0
     pa-0
+    fluid
   >
     <v-layout
       wrap
@@ -11,15 +12,16 @@
       pa-0
       ma-0
     >
-      <v-flex
-        v-for="(field, index) in value"
-        :key="field.id"
-        :ref="`v-flex:${field.id}`"
-        column
+      <v-layout
+        align-center
+        justify-center
+        wrap
       >
-        <v-layout
-          column
-          align-center
+        <v-flex
+          v-for="field in value"
+          :key="field.id"
+          :ref="`v-flex:${field.id}`"
+          shrink
         >
           <h5>{{ field.name }}</h5>
           <gaussian-plot
@@ -28,15 +30,22 @@
             ma-0
             :value="field"
             :size="size"
-            :show-scale="index === (value.length - 1)"
           />
           <v-progress-circular
             v-else
             :size="70"
             indeterminate
           />
-        </v-layout>
-      </v-flex>
+        </v-flex>
+        <v-flex
+          xs1
+          align-self-end
+        >
+          <color-scale
+            v-if="someSimulated"
+          />
+        </v-flex>
+      </v-layout>
     </v-layout>
   </v-container>
 </template>
@@ -45,6 +54,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import GaussianPlot from './index.vue'
+import ColorScale from '@/components/plot/ColorScale.vue'
 
 import { GaussianRandomField } from '@/utils/domain'
 
@@ -61,6 +71,7 @@ interface Size {
 
 @Component({
   components: {
+    ColorScale,
     GaussianPlot,
   },
 })
@@ -69,6 +80,8 @@ export default class MultipleGaussianPlots extends Vue {
   readonly value!: GaussianRandomField[]
 
   size: Size = DEFAULT_SIZE
+
+  get someSimulated (): boolean { return this.value.some(field => field.simulated) }
 
   @Watch('value')
   updateSimulation (fields: GaussianRandomField[]) {
