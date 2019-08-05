@@ -118,6 +118,9 @@ try:
 except NameError:
     project_location_path = root_path  # or '.'
 
+# Where RMS is started from
+start_path = Path('.').absolute()
+
 
 def get_plugin_dir():
     major, minor, patch = roxar.rms.get_version().split('.')
@@ -266,7 +269,7 @@ def get_debug_level():
 
 
 def prepend_absolute_path(file):
-    return model_root / file
+    return start_path / file
 
 
 # Keywords to pass along to the various modules
