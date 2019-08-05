@@ -101,9 +101,5 @@ export default class MultipleGaussianPlots extends Vue {
         })
     })
   }
-
-  beforeMount () {
-    this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields: this.value })
-  }
 }
 </script>
