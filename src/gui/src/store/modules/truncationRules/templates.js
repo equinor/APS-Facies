@@ -166,7 +166,7 @@ export default {
           return facies
         }, new Set())]
       const hasSetProbabilities = uniqueFacies.some(({ previewProbability }) => !!previewProbability || previewProbability === 0)
-      if (hasSetProbabilities) {
+      if (!hasSetProbabilities) {
         await Promise.all(uniqueFacies.map(async facies => {
           if (facies) {
             await dispatch(
