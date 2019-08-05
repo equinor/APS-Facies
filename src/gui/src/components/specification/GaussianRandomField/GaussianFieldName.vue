@@ -35,7 +35,7 @@ export default class GaussianFieldName extends Vue {
 
   fieldName: Optional<string> = null
 
-  get fields () { return Object.values(this.$store.state.gaussianRandomFields.available) }
+  get fields () { return this.$store.getters['fields'] }
 
   get name () { return this.value.name }
 
