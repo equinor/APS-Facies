@@ -40,7 +40,10 @@ interface Store {
 }
 
 interface RootState {
-  _loaded: boolean
+  _loaded: {
+    value: boolean
+    loading: boolean
+  }
   _loading: {
     value: boolean
     message: string
@@ -119,6 +122,8 @@ interface RootState {
 }
 
 interface RootGetters {
+  mayLoadParameters: boolean
+
   'allFields': GaussianRandomField[]
 
   'gridModel': string

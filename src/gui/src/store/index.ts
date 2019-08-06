@@ -40,7 +40,10 @@ Vue.use(Vuex)
 const store: Store<RootState> = new Vuex.Store({
   // @ts-ignore
   state: {
-    _loaded: false,
+    _loaded: {
+      value: false,
+      loading: false,
+    },
     _loading: {
       value: false,
       message: '',
@@ -67,8 +70,9 @@ const store: Store<RootState> = new Vuex.Store({
   },
 
   actions: {
-    async fetch ({ dispatch, commit, state }): Promise<void> {
-      if (!state._loaded) {
+    async fetch ({ dispatch, commit, getters }): Promise<void> {
+      if (getters.mayLoadParameters) {
+        commit('LOADING_PARAMETERS')
         await Promise.all([
           dispatch('gridModels/fetch'),
           dispatch('constants/fetch'),
@@ -137,7 +141,11 @@ const store: Store<RootState> = new Vuex.Store({
       Object.assign(state, initial)
     },
     FINISHED: (state): void => {
-      state._loaded = true
+      state._loaded.value = true
+      state._loaded.loading = false
+    },
+    LOADING_PARAMETERS: (state): void => {
+      state._loaded.loading = true
     },
     LOADING: (state, { loading, message = '' }): void => {
       state._loading.value = loading
@@ -146,6 +154,9 @@ const store: Store<RootState> = new Vuex.Store({
   },
 
   getters: {
+    mayLoadParameters: (state): boolean => {
+      return !(state._loaded.value || state._loaded.loading)
+    },
     // Various checks used throughout the app
     canSpecifyModelSettings: (state, getters): boolean => {
       return !!getters.zone && (state.regions.use ? !!getters.region : true)
