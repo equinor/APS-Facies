@@ -65,29 +65,6 @@
               xs3
               pa-2
             >
-              Truncation Rule File Location:
-            </v-flex>
-            <v-flex
-              xs5
-            >
-              <v-text-field
-                v-model="truncationRuleLocation"
-                single-line
-                solo
-              />
-            </v-flex>
-            <v-flex
-              xs4
-            >
-              <bold-button
-                title="Select Directory"
-                @click="chooseTruncationRuleFileLocation"
-              />
-            </v-flex>
-
-            <v-flex
-              xs3
-            >
               FMU Parameters List Location:
             </v-flex>
             <v-flex
@@ -353,7 +330,6 @@ import { displayWarning } from '@/utils/helpers/storeInteraction'
 export default class ProjectSettings extends Vue {
   dialog: boolean = false
   apsModelFileLocation: string = ''
-  truncationRuleLocation: string = ''
   fmuParameterListLocation: string = ''
   showZoneNameNumber: string = ''
   showRegionNameNumber: string = ''
@@ -386,13 +362,6 @@ export default class ProjectSettings extends Vue {
       }
     })
   }
-  chooseTruncationRuleFileLocation () {
-    rms.chooseDir('load').then((path: string): void => {
-      if (path) {
-        this.truncationRuleLocation = path
-      }
-    })
-  }
   chooseFmuParametersFileLocation () {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
@@ -406,7 +375,6 @@ export default class ProjectSettings extends Vue {
   async ok () {
     await displayWarning(
       'The following settings where not saved:\n'
-      + '* Location of truncation rules\n' /* I.e. this.truncationRuleLocation */
       + '* Location of FMU parameter list location\n' /* I.e. this.fmuParameterListLocation */
     )
     const dispatch = this.$store.dispatch

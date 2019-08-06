@@ -46,6 +46,7 @@
     <project-settings />
 
     <v-btn
+      v-if="false"
       disabled
       outlined
       color="primary"
