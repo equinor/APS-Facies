@@ -86,6 +86,7 @@ const store: Store<RootState> = new Vuex.Store({
         await dispatch('fetch')
 
         // Grid model
+        await dispatch('gridModels/populate', Object.values(data.gridModels.available))
         await dispatch('gridModels/select', data.gridModels.current)
 
         // Parameters
@@ -151,7 +152,15 @@ const store: Store<RootState> = new Vuex.Store({
     },
     // These are the 'current' of the various modules
     gridModel: (state): Optional<string> => {
-      return state.gridModels.current
+      const id = state.gridModels.current
+      if (id) {
+        const gridModel = state.gridModels.available[`${id}`]
+        return gridModel
+          ? gridModel.name
+          : null
+      } else {
+        return null
+      }
     },
     zone: (state): Optional<Zone> => {
       return state.zones.current ? state.zones.available[`${state.zones.current}`] : null
@@ -175,6 +184,9 @@ const store: Store<RootState> = new Vuex.Store({
     },
     blockedWellLogParameter: (state): Optional<string> => {
       return state.parameters.blockedWellLog.selected
+    },
+    gridModels: (state, getters): string[] => {
+      return getters['gridModels/names']
     },
     allFields: (state): GaussianRandomField[] => {
       return Object.values(state.gaussianRandomFields.available)

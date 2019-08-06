@@ -23,11 +23,19 @@ type GridModel = string
 })
 export default class ChooseGridModel extends Vue {
   get available () {
-    return (this.$store as Store).state.gridModels.available
+    return Object.values((this.$store as Store).state.gridModels.available)
+      .map(grid => {
+        return {
+          text: grid.name,
+          value: grid,
+          disabled: !grid.exists,
+        }
+      })
   }
 
   getter () {
-    return (this.$store as Store).state.gridModels.current
+    const id = (this.$store as Store).state.gridModels.current
+    return (this.$store as Store).state.gridModels.available[`${id}`]
   }
   async setter (value: GridModel) {
     await this.$store.dispatch('gridModels/select', value)

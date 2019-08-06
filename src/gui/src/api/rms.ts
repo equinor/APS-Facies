@@ -14,7 +14,7 @@ export default {
   projectName: (): Promise<string> => api.call('get_project_name'),
   projectDirectory: (): Promise<string> => api.call('get_project_dir'),
   currentWorkflowName: (): Promise<string> => api.call('get_current_workflow_name'),
-  gridModels: (): Promise<string[]> => api.call('get_grid_model_names'),
+  gridModels: (): Promise<{ name: string, exists: boolean}[]> => api.call('get_grid_model_names'),
   zones: (gridName: string): Promise<string[]> => api.call('get_zones', gridName),
   regionParameters: (gridName: string): Promise<string[]> => api.call('get_region_parameters', gridName),
   regions: (gridName: string, zoneName: string, regionParameter: string): Promise<CodeName[]> => api.call('get_regions', gridName, zoneName, regionParameter),

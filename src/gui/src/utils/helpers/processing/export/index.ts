@@ -68,8 +68,8 @@ function addRMSWorkflowName ({ rootState }: Context, doc: Document, parentElemen
   }
 }
 
-function addGridModelName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-  const value = rootState.gridModels.current
+function addGridModelName ({ rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
+  const value = rootGetters.gridModel
   if (value) {
     parentElement.appendChild(createElement(doc, 'GridModelName', value))
   } else {

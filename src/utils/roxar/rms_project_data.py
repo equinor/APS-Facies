@@ -97,7 +97,17 @@ class RMSData:
         return self.get_grid_model(name).get_grid(realization)
 
     def get_grid_model_names(self):
-        return [grid_model.name for grid_model in self.get_grid_models()]
+        grid_models = self.get_grid_models()
+        models = []
+        for grid_model in grid_models:
+            name = grid_model.name
+            try:
+                self.get_grid(name)
+                exists = True
+            except KeyError:
+                exists = False
+            models.append({'name': name, 'exists': exists})
+        return models
 
     def get_realization_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_discrete)

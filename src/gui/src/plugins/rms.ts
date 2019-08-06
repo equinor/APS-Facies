@@ -40,7 +40,7 @@ if (typeof rms !== 'undefined') {
       if (match) {
         let gridModel = match[1]
         // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character
-        for (const model of store.state.gridModels.available) {
+        for (const model of store.getters.gridModels) {
           if (gridModel.includes(model)) {
             gridModel = model
             break

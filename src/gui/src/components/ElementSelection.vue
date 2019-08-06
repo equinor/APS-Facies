@@ -74,6 +74,9 @@ import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/Choos
 import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter.vue'
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
+import { ID } from '@/utils/domain/types'
+import { Optional } from '@/utils/typing'
+
 @Component({
   components: {
     SectionTitle,
@@ -101,7 +104,7 @@ export default class ElementSelection extends Vue {
   get hasBlockedWellParameter (): boolean {
     return !!this.$store.getters.blockedWellParameter
   }
-  get currentGridModel (): string {
+  get currentGridModel (): Optional<ID> {
     return this.$store.state.gridModels.current
   }
 }

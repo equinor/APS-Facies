@@ -10,7 +10,7 @@ import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
-import { GridModel, GridModelsState } from '@/store/modules/gridModels/types'
+import { GridModelsState } from '@/store/modules/gridModels/types'
 import CopyPasteState from '@/store/modules/copyPaste/typing'
 import { Polygon, TruncationRule, Parent } from '@/utils/domain'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
@@ -121,7 +121,11 @@ interface RootState {
 interface RootGetters {
   'allFields': GaussianRandomField[]
 
-  'gridModel': GridModel
+  'gridModel': string
+  'gridModels': string[]
+
+  'gridModels/name': string[]
+
   'blockedWellParameter': string
   'blockedWellLogParameter': string
 
