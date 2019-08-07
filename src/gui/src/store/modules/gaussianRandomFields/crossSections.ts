@@ -39,7 +39,6 @@ const module: Module<CrossSectionsState, RootState> = {
       }
       await dispatch('add', {
         type: DEFAULT_CROSS_SECTION.type,
-        relativePosition: DEFAULT_CROSS_SECTION.position,
         parent,
       })
       return Object.values(state.available)
@@ -74,11 +73,6 @@ const module: Module<CrossSectionsState, RootState> = {
       commit('CHANGE_TYPE', { id, type })
       await updateAffectedFields(context, id)
     },
-    async changeRelativePosition (context, { id, relativePosition }): Promise<void> {
-      const { commit } = context
-      commit('CHANGE_RELATIVE_POSITION', { id, relativePosition })
-      await updateAffectedFields(context, id)
-    },
   },
 
   mutations: {
@@ -91,10 +85,6 @@ const module: Module<CrossSectionsState, RootState> = {
     CHANGE_TYPE (state, { id, type }): void {
       Vue.set(state.available[`${id}`], 'type', type)
     },
-    CHANGE_RELATIVE_POSITION (state, { id, relativePosition }): void {
-      Vue.set(state.available[`${id}`], 'relativePosition', relativePosition)
-    },
-
   },
 
   getters: {

@@ -185,5 +185,5 @@ class CrossSection:
     def from_dict(cls, **kwargs):
         return cls(
             type=kwargs['type'],
-            relative_position=kwargs['relativePosition']
+            relative_position=kwargs.get('relativePosition', 0.5)
         )

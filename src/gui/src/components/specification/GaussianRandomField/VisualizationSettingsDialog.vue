@@ -117,7 +117,6 @@ import { newSeed } from '@/utils'
 interface Settings {
   crossSection: {
     type: Optional<'IJ' | 'IK' | 'JK'>
-    relativePosition: Optional<number>
   }
   gridModel: {
     use: boolean
@@ -148,7 +147,6 @@ export default class VisualizationSettingsDialog extends Vue {
   settings: Settings = {
     crossSection: {
       type: null,
-      relativePosition: null,
     },
     gridModel: {
       use: false,

@@ -13,7 +13,6 @@ export const DEFAULT_COLOR_SCALE = 'Viridis'
 
 export const DEFAULT_CROSS_SECTION = {
   'type': 'IJ',
-  'position': 0.5,
 }
 
 export const DEFAULT_CUBIC_LEVELS = 3

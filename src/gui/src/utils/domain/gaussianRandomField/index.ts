@@ -43,7 +43,6 @@ function defaultSettings (parent: Parent): Settings {
   return {
     crossSection: new CrossSection({
       type: 'IJ',
-      relativePosition: 0.5,
       parent,
     }),
     gridModel: {
