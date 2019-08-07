@@ -1,5 +1,6 @@
 import rms from '@/api/rms'
 import { fetchParameterHelper } from '@/store/utils'
+import { removeFaciesDependent } from '@/store/utils/helpers'
 
 import { Module } from 'vuex'
 import { SelectableChoice } from '@/store/modules/parameters/typing/helpers'
@@ -14,8 +15,10 @@ const module: Module<SelectableChoice<string>, RootState> = {
   },
 
   actions: {
-    select: async ({ commit, dispatch }, blockedWellLog): Promise<void> => {
+    select: async (context, blockedWellLog): Promise<void> => {
+      const { commit, dispatch } = context
       commit('CURRENT', blockedWellLog)
+      await removeFaciesDependent(context)
       await dispatch('facies/global/fetch', null, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }): Promise<void> => {

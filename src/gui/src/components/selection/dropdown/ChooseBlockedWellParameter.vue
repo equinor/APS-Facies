@@ -3,6 +3,8 @@
     :hide-if-disabled="false"
     parameter-type="blockedWell"
     label="Blocked well parameter"
+    warn
+    warn-message="This will remove all facies, and truncation rules."
   />
 </template>
 

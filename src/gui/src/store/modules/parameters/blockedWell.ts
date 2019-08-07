@@ -16,6 +16,7 @@ const module: Module<SelectableChoice<string>, RootState> = {
   actions: {
     select: async ({ commit, dispatch }, blockedWell): Promise<void> => {
       commit('CURRENT', blockedWell)
+      await dispatch('parameters/blockedWellLog/select', null, { root: true })
       await dispatch('parameters/blockedWellLog/fetch', null, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }): Promise<void> => {
