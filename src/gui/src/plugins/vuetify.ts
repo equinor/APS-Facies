@@ -63,7 +63,7 @@ function makeVuetifyIcons (): Icons {
     'checkboxIndeterminate': '',
     'delimiter': '', // for carousel
     'sort': '',
-    'expand': 'fas fa-angle-down', // 'menu': '',
+    'expand': 'fas fa-chevron-down', // 'menu': '',
     'subgroup': '',
     'dropdown': 'fas fa-caret-down fa-sm',
     'radioOn': '',
