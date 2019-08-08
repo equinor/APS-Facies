@@ -220,6 +220,7 @@ const store: Store<RootState> = new Vuex.Store({
     },
     faciesTable: (state): GlobalFacies[] => {
       return Object.values(state.facies.global.available)
+        .sort((a, b): number => a.code - b.code)
     },
     // User options
     options: (state): object => {

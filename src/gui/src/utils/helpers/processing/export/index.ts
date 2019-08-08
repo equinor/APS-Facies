@@ -137,7 +137,7 @@ function addWriteSeeds ({ rootState }: Context, doc: Document, parentElement: HT
   }
 }
 
-function addMainFaciesTable ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
+function addMainFaciesTable ({ rootState, rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
   // getting blockedWell and blockedWellLog
   const bwParam = rootState.parameters.blockedWell
   const bwLogParam = rootState.parameters.blockedWellLog
@@ -147,7 +147,7 @@ function addMainFaciesTable ({ rootState }: Context, doc: Document, parentElemen
   ])
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
-  const allFacies = Object.values(rootState.facies.global.available)
+  const allFacies = rootGetters['faciesTable']
   allFacies.forEach((facies): void => {
     const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: facies.name }])
     mainFaciesElement.append(faciesElem)
