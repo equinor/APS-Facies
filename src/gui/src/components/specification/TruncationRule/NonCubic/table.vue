@@ -13,6 +13,7 @@
           <numeric-field
             :value="item.angle"
             :ranges="{min: -180.0, max: 180.0}"
+            :disabled="isLast(item)"
             fmu-updatable
             enforce-ranges
             allow-negative
@@ -118,6 +119,10 @@ export default class NonCubicTable extends Vue {
 
   updateAngle (item: NonCubicPolygon, value: number) {
     return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
+  }
+
+  isLast (polygon: NonCubicPolygon): boolean {
+    return this.polygons.findIndex(({ id }) => id === polygon.id) === (this.polygons.length - 1)
   }
 }
 </script>
