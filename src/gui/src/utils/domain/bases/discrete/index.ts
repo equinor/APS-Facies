@@ -32,4 +32,8 @@ export default class Discrete extends BaseItem implements IDiscrete {
       code: this.code,
     }
   }
+
+  protected toString (): string {
+    return `${this.constructor.name}(name='${this.name}', code=${this.code})`
+  }
 }

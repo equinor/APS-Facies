@@ -35,4 +35,8 @@ export default class FmuUpdatableValue implements FmuUpdatable {
       updatable: this.updatable,
     }
   }
+
+  public toString (): string {
+    return `FmuUpdatable(${this.value}, ${this.updatable})`
+  }
 }
