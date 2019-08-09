@@ -127,7 +127,7 @@ DOCKER_IMAGE := $(DOCKER_REGISTRY)/$(IMAGE_NAME)
 
 UI.PY := $(PYTHON_API_DIR)/ui.py
 MAIN.PY := $(PYTHON_API_DIR)/main.py
-INFO.XML := $(CODE_DIR)/info.xml
+INFO.XML := $(WEB_DIR)/static/info.xml
 
 MKDIR := mkdir -p
 REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^(\# *)?( *from )src/\2aps/g'
