@@ -12,6 +12,7 @@ module.exports = {
   runtimeCompiler: !isProduction,
   productionSourceMap: false,
   parallel: canParallelize,
+  integrity: isProduction,
 
   css: {
     sourceMap: !isProduction,
