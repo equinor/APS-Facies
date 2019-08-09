@@ -65,6 +65,7 @@ const module: Module<RegionState, RootState> = {
         commit('LOADING', true)
         if (isEmpty(zone)) {
           for (const zone of Object.values(rootState.zones.available)) {
+            commit('REMOVE_ALL', zone)
             await fetchRegions(context, zone)
           }
         } else {
@@ -90,6 +91,9 @@ const module: Module<RegionState, RootState> = {
   mutations: {
     ADD: (state, region): void => {
       Vue.set(region.zone._regions, region.id, region)
+    },
+    REMOVE_ALL: (state, zone): void => {
+      Vue.set(zone, '_regions', {})
     },
     TOGGLE: (state, { region, toggled }): void => {
       Vue.set(region.zone._regions[`${region.id}`], 'selected', toggled)

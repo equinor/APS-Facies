@@ -177,7 +177,6 @@ class RMSData:
         # TODO: Implement properly
         return (
             self.is_discrete(param)
-            and any([name != '' for name in param.code_names.values()])
             and len(param.code_names) > 0
         )
 
