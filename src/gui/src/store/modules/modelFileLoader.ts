@@ -301,7 +301,10 @@ async function makeOverlayTruncationRule<P extends Polygon, T extends OverlayTru
 async function makeNonCubicTruncationRule (context: Context, container: XMLElement, parent: Parent): Promise<NonCubic> {
   function makeNonCubicBackgroundFacies (container: XMLElement): NonCubicPolygon[] {
     return getNodeValues(container, 'Facies').map((element, index): NonCubicPolygon => new NonCubicPolygon({
-      angle: getMandatoryNumericValue(element, 'Angle'),
+      angle: {
+        value: getMandatoryNumericValue(element, 'Angle'),
+        updatable: isFMUUpdatable(element, 'Angle'),
+      },
       fraction: getMandatoryNumericValue(element, 'ProbFrac'),
       facies: getFacies(context, getName(element), parent),
       order: index + 1,
