@@ -1,53 +1,48 @@
 import { Named } from '@/utils/domain/bases'
 import { Identified } from '@/utils/domain/bases/interfaces'
-import ZoneRegionDependent, {
-  DependentConfiguration,
-  DependentSerialization,
-} from '@/utils/domain/bases/zoneRegionDependent'
+import Simulation, {
+  SimulationConfiguration,
+  SimulationSerialization,
+} from '@/utils/domain/bases/simulation'
 import APSTypeError from '@/utils/domain/errors/type'
 import Facies from '@/utils/domain/facies/local'
-import GaussianRandomField from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField, { GaussianRandomFieldSerialization } from '@/utils/domain/gaussianRandomField'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
 
-export interface TruncationRuleSerialization<S extends PolygonSerialization=PolygonSerialization> extends DependentSerialization {
+export interface TruncationRuleSerialization<S extends PolygonSerialization=PolygonSerialization> extends SimulationSerialization {
   name: string
   type: string
   polygons: S[]
   backgroundFields: ID[]
-  realization: number[][] | null
 }
 
 export type TruncationRuleType = 'bayfill' | 'non-cubic' | 'cubic'
 
-export type TruncationRuleConfiguration<T extends Polygon = Polygon> = DependentConfiguration & {
+export type TruncationRuleConfiguration<T extends Polygon = Polygon> = SimulationConfiguration & {
   name: string
   polygons: Identified<T> | T[]
   backgroundFields: (GaussianRandomField | null)[]
-  realization?: number[][]
 }
 
 export default abstract class TruncationRule<
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
-> extends ZoneRegionDependent implements Named {
+> extends Simulation implements Named {
   public readonly name: string
-
-  public realization: number[][] | null
 
   protected _requiredGaussianFields: number
   protected _polygons: Identified<T>
   protected _backgroundFields: (GaussianRandomField | null)[]
   protected _constraints: ([() => boolean, string])[]
 
-  protected constructor ({ name, polygons, backgroundFields, realization, ...rest }: TruncationRuleConfiguration<T>) {
+  protected constructor ({ name, polygons, backgroundFields, ...rest }: TruncationRuleConfiguration<T>) {
     super(rest)
     this.name = name
     this._polygons = identify(polygons)
     this._backgroundFields = backgroundFields
     this._requiredGaussianFields = 2
-    this.realization = realization || null
 
     this._constraints = [
       [(): boolean => allSet(this.polygons, 'facies'), 'Some polygons does not have a facies assigned to it'],
@@ -64,6 +59,9 @@ export default abstract class TruncationRule<
   public get ready (): boolean {
     return this._constraints.every(([constraint, _]): boolean => constraint())
   }
+
+  public get realization (): number[][] | null { return this.simulation }
+  public set realization (data) { this.simulation = data }
 
   public get errorMessage (): string | undefined {
     for (const [constraint, error] of this._constraints) {
@@ -135,8 +133,13 @@ export default abstract class TruncationRule<
       parent: this.parent,
       polygons: Object.values(this._polygons).map((polygon): S => (polygon.toJSON() as S)),
       backgroundFields: this.backgroundFields.map((field): ID => getId(field)),
-      realization: this.realization,
     }
+  }
+
+  protected _hashify (): object {
+    const spec: TruncationRuleSerialization<S> & { fields?: GaussianRandomFieldSerialization[] } = this.toJSON()
+    spec.fields = this.fields.map(field => field.toJSON())
+    return spec
   }
 
   private get facies (): Facies[] {

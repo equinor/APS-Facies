@@ -15,10 +15,13 @@ export interface BaseItemConfiguration {
 
 export default class BaseItem implements Identifiable {
   public readonly id: ID
+  protected readonly _excludeFromHash: string[]
+
   public constructor ({ id }: BaseItemConfiguration = { id: undefined }) {
     if (!id) id = uuid()
     if (!isUUID(id)) throw TypeError('An item must have a valid UUID, as id')
     this.id = id
+    this._excludeFromHash = []
   }
 
   protected toJSON (): BaseItemSerialization {
@@ -27,8 +30,11 @@ export default class BaseItem implements Identifiable {
     }
   }
 
+  protected _hashify (): object { return this.toJSON() }
+
   protected get hash (): string {
-    return hash(this.toJSON(), {
+    return hash(this._hashify(), {
+      excludeKeys: (key): boolean => this._excludeFromHash.includes(key)
     })
   }
 

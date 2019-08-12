@@ -5,10 +5,10 @@ import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
 import { Named, Parent } from '@/utils/domain/bases/interfaces'
-import ZoneRegionDependent, {
-  DependentConfiguration,
-  DependentSerialization
-} from '@/utils/domain/bases/zoneRegionDependent'
+import Simulation, {
+  SimulationConfiguration,
+  SimulationSerialization,
+} from '@/utils/domain/bases/simulation'
 
 import Trend, { TrendSerialization } from '@/utils/domain/gaussianRandomField/trend'
 import Variogram, { VariogramSerialization } from '@/utils/domain/gaussianRandomField/variogram'
@@ -55,7 +55,7 @@ function defaultSettings (parent: Parent): Settings {
   }
 }
 
-export type GaussianRandomFieldConfiguration = DependentConfiguration & {
+export type GaussianRandomFieldConfiguration = SimulationConfiguration & {
   name: string
   overlay?: boolean
   channel?: number | null
@@ -73,14 +73,14 @@ export interface GaussianRandomFieldSpecification {
   variogram: Variogram
 }
 
-export interface GaussianRandomFieldSerialization extends DependentSerialization {
+export interface GaussianRandomFieldSerialization extends SimulationSerialization {
   name: string
   settings: SettingsSerialization
   trend: TrendSerialization
   variogram: VariogramSerialization
 }
 
-export default class GaussianRandomField extends ZoneRegionDependent implements Named {
+export default class GaussianRandomField extends Simulation implements Named {
   public name: string
   public variogram: Variogram
   public trend: Trend
@@ -88,8 +88,6 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
   public waiting: boolean
 
   public valid: boolean
-  private _data: number[][]
-  private _dataHash: string
 
   public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, seed = null, ...rest }: GaussianRandomFieldConfiguration) {
     super(rest)
@@ -107,25 +105,10 @@ export default class GaussianRandomField extends ZoneRegionDependent implements 
     //   E.g. use a hash of the specification (variogram, trend, and settings)
     this.waiting = false
     this.valid = true
-    this._data = []
-    this._dataHash = ''
   }
 
-  public get simulated (): boolean {
-    return this._data.length > 0 && this._data[0].length > 0
-  }
-
-  public get simulation (): number[][] {
-    return this._data
-  }
-  public set simulation (data) {
-    this._data = data
-    this._dataHash = this.hash
-  }
-
-  public get isRepresentative (): boolean {
-    return this._dataHash === this.hash
-  }
+  public get simulation (): number[][] | null { return super.simulation }
+  public set simulation (data) { super.simulation = data }
 
   public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => object } } = {}): GaussianRandomFieldSpecification {
     return {

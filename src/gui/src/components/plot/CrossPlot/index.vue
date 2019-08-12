@@ -12,9 +12,11 @@ import { DEFAULT_POINT_SIZE } from '@/config'
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 import { GaussianRandomField } from '@/utils/domain'
 
-const flatten = (arr: number[][]) => {
+function flatten (arr: number[][] | null): number[] {
   // TODO: Should be superfluous when Array.prototype.flat is part of ECMAScript
-  return arr.reduce((flat, a) => flat.concat(a))
+  return arr
+    ? arr.reduce((flat, a) => flat.concat(a))
+    : []
 }
 
 @Component({

@@ -190,7 +190,9 @@ export default class GaussianRandomField extends Vue {
   set variogramType (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { field: this.value, value }) }
 
   beforeMount () {
-    this.updateSimulation()
+    if (!this.value.isRepresentative) {
+      this.updateSimulation()
+    }
   }
 
   async simulation (renew: boolean = false): Promise<void> {

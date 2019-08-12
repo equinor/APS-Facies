@@ -2,6 +2,7 @@
   <static-plot
     v-tooltip.bottom="errorMessage"
     :data-definition="dataDefinition"
+    :disabled="_disabled"
     :expand="expand"
     :width="size.width"
     :height="size.height"
@@ -50,7 +51,6 @@ export default class GaussianPlot extends Vue {
       hoverinfo: 'none',
       colorscale: this.colorMapping,
       showscale: this.showScale,
-      opacity: this._disabled ? 0.258823529 : 1,
     }]
   }
 

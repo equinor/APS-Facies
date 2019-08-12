@@ -20,6 +20,7 @@ import { notEmpty } from '@/utils'
 import { DEFAULT_SIZE } from '@/config'
 
 import { Optional } from '@/utils/typing'
+import { PlotData } from 'plotly.js'
 
 @Component({
   components: {
@@ -28,7 +29,7 @@ import { Optional } from '@/utils/typing'
 })
 export default class StaticPlot extends Vue {
   @Prop({ required: true })
-  readonly dataDefinition!: object[]
+  readonly dataDefinition!: Partial<PlotData>[]
 
   @Prop({ default: () => [] })
   readonly annotations!: object[]
@@ -54,6 +55,9 @@ export default class StaticPlot extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly expand!: boolean
 
+  @Prop({ default: false, type: Boolean })
+  readonly disabled: boolean
+
   @Prop({ default: () => { return { x: null, y: null } } })
   readonly axisNames!: { x: Optional<string>, y: Optional<string> }
 
@@ -65,6 +69,11 @@ export default class StaticPlot extends Vue {
   get __content () {
     if (!this.svg) {
       return this.dataDefinition
+        .map(obj => {
+          // @ts-ignore
+          obj.opacity = this.disabled ? 0.258823529 : 1
+          return obj
+        })
     } else {
       return [{
         type: 'scatter',
