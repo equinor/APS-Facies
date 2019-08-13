@@ -30,6 +30,7 @@
               primary
               hide-details
               @change="e => updateSelection(item, e)"
+              @click.passive.stop
             />
             <span slot="popover">
               {{ selectError }}
