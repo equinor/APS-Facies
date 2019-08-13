@@ -19,23 +19,6 @@
           :constraints="{ required: true }"
           label="Variogram"
         />
-        <v-select
-          v-model="alphaChannel"
-          :items="alphaChannels"
-          no-data-text="No truncation rule has been selected"
-          label="Truncation Rule Role"
-        >
-          <template
-            v-slot:item="{ item }"
-          >
-            ɑ<sub>{{ item }}</sub>
-          </template>
-          <template
-            v-slot:selection="{ item }"
-          >
-            ɑ<sub>{{ item }}</sub>
-          </template>
-        </v-select>
         <icon-button
           :disabled="!canSimulate"
           icon="random"
@@ -98,7 +81,7 @@ import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
 
-import { getId, invalidateChildren, notEmpty } from '@/utils'
+import { invalidateChildren, notEmpty } from '@/utils'
 
 import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
 import GaussianPlot from '@/components/plot/GaussianPlot/index.vue'
@@ -109,7 +92,6 @@ import PowerSpecification from '@/components/specification/GaussianRandomField/P
 import VisualizationSettingsDialog from '@/components/specification/GaussianRandomField/VisualizationSettingsDialog.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 
-import { TruncationRule } from '@/utils/domain'
 import Field, { Trend, Variogram } from '@/utils/domain/gaussianRandomField'
 
 interface Invalid {
@@ -143,30 +125,9 @@ export default class GaussianRandomField extends Vue {
     trend: false,
   }
 
-  get rule (): TruncationRule { return this.$store.getters['truncationRule'] }
-
   get availableVariograms (): string[] { return this.$store.state.constants.options.variograms.available }
 
-  get alphaChannel () {
-    if (this.rule) {
-      /* Channel is 1-indeed */
-      const channel = 1 + this.rule.fields.findIndex(field => getId(field) === this.grfId)
-      return channel || null
-    } else {
-      return null
-    }
-  }
-  set alphaChannel (channel) { this.$store.dispatch('truncationRules/updateFields', { channel, selected: this.grfId }) }
-
-  get alphaChannels () {
-    return this.rule
-      ? this.rule.fields.map((_, index: number) => index + 1)
-      : []
-  }
-
   get isGeneralExponential (): boolean { return this.variogramType === 'GENERAL_EXPONENTIAL' }
-
-  get grfId () { return this.value.id }
 
   get variogram (): Variogram { return this.value.variogram }
 
