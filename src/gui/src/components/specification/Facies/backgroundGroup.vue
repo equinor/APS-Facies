@@ -41,6 +41,7 @@ export default class BackgroundGroupFaciesSpecification<P extends Polygon, S ext
 
   get facies () {
     return (Object.values(this.$store.state.facies.available) as Facies[])
+      .filter(facies => facies.isChildOf(this.rule.parent))
       .map(facies => {
         return {
           value: facies,
