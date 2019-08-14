@@ -139,6 +139,15 @@
                   />
                 </v-radio-group>
               </v-flex>
+              <v-flex
+                pa-2
+              >
+                <v-select
+                  v-model="colorScale"
+                  label="Color scale of Gaussian Random Fields"
+                  :items="$store.state.options.colorScale.legal"
+                />
+              </v-flex>
             </v-layout>
             <v-layout column>
               <v-flex>
@@ -336,6 +345,7 @@ export default class ProjectSettings extends Vue {
   automaticAlphaFieldSelection: string = ''
   automaticFaciesFill: string = ''
   filterZeroProbability: boolean = false
+  colorScale: string = ''
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -352,6 +362,7 @@ export default class ProjectSettings extends Vue {
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
+      this.colorScale = options.colorScale.value
     }
   }
 
@@ -385,6 +396,7 @@ export default class ProjectSettings extends Vue {
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
+      dispatch('options/colorScale/set', this.colorScale),
     ])
     this.dialog = false
   }

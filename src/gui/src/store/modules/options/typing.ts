@@ -9,4 +9,5 @@ export default interface OptionsState {
   filterZeroProbability: OptionState<boolean>
   automaticFaciesFill: OptionState<boolean>
   automaticFaciesSelection: OptionState<boolean>
+  colorScale: OptionState<string>
 }

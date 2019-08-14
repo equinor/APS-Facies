@@ -11,6 +11,27 @@ export const DEFAULT_POINT_SIZE = 1.2
 
 export const DEFAULT_COLOR_SCALE = 'Viridis'
 
+export const COLOR_SCALES = [
+  'Blackbody',
+  'Bluered',
+  'Blues',
+  'Cividis',
+  'Earth',
+  'Electric',
+  'Greens',
+  'Greys',
+  'Hot',
+  'Jet',
+  'Picnic',
+  'Portland',
+  'Rainbow',
+  'RdBu',
+  'Reds',
+  'Viridis',
+  'YlGnBu',
+  'YlOrRd',
+]
+
 export const DEFAULT_CROSS_SECTION = {
   'type': 'IJ',
 }

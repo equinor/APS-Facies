@@ -16,7 +16,7 @@ import StaticPlot from '@/components/plot/StaticPlot.vue'
 
 import { GaussianRandomField } from '@/utils/domain'
 
-import { DEFAULT_SIZE, DEFAULT_COLOR_SCALE } from '@/config'
+import { DEFAULT_SIZE } from '@/config'
 import { colorMapping, ColorScale } from '../utils'
 
 @Component({
@@ -31,7 +31,7 @@ export default class GaussianPlot extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly showScale!: boolean
 
-  @Prop({ default: DEFAULT_COLOR_SCALE })
+  @Prop({ default: undefined })
   readonly colorScale!: ColorScale
 
   @Prop({ default: false, type: Boolean })
@@ -60,8 +60,12 @@ export default class GaussianPlot extends Vue {
       : undefined
   }
 
+  get _colorScale () {
+    return this.colorScale || this.$store.state.options.colorScale.value
+  }
+
   get colorMapping () {
-    return colorMapping(this.colorScale)
+    return colorMapping(this._colorScale)
   }
 
   get _disabled (): boolean { return this.disabled || !this.value.isRepresentative }

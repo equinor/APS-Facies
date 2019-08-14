@@ -1,4 +1,8 @@
-import { DEFAULT_FACIES_AUTOFILL } from '@/config'
+import {
+  COLOR_SCALES,
+  DEFAULT_COLOR_SCALE,
+  DEFAULT_FACIES_AUTOFILL,
+} from '@/config'
 import { makeOption } from '@/store/utils'
 
 import { Module } from 'vuex'
@@ -18,6 +22,7 @@ const module: Module<OptionsState, RootState> = {
     automaticAlphaFieldSelection,
     filterZeroProbability,
     automaticFaciesFill: makeOption(DEFAULT_FACIES_AUTOFILL, [true, false]),
+    colorScale: makeOption(DEFAULT_COLOR_SCALE, COLOR_SCALES),
   },
 }
 
