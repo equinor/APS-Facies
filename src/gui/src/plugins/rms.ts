@@ -18,13 +18,16 @@ if (typeof rms !== 'undefined') {
   // @ts-ignore
   rms.onPluginSave((): SerializedState => {
     let model = null
+    let errorMessage = null
     try {
       model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
-    } catch {
+    } catch ({ message }) {
+      errorMessage = message
     }
     return {
       ...store.state,
       model,
+      errorMessage,
     }
   })
 
