@@ -60,7 +60,10 @@
           />
         </v-expansion-panel-content>
       </v-expansion-panel>
-      <v-expansion-panel>
+      <v-expansion-panel
+        v-tooltip.bottom="crossPlotErrors"
+        :disabled="!hasEnoughFieldsForCrossPlot"
+      >
         <v-expansion-panel-header>
           <h3>Cross plots</h3>
         </v-expansion-panel-header>
@@ -111,15 +114,30 @@ export default class ElementPreview extends Vue {
 
   get hasRealization (): boolean { return !!(this.rule && this.rule.realization) }
 
+  get hasEnoughFieldsForCrossPlot () { return this.fields.length >= 2 }
+
   get truncationRuleError (): string | undefined {
     return !this.hasTruncationRule
       ? 'No truncation rule has been specified'
       : undefined
   }
+
   get realizationError (): string | undefined {
     return this.truncationRuleError || !this.hasRealization
       ? 'The realization has not been simulated'
       : undefined
+  }
+  get crossPlotErrors (): string | undefined {
+    return !this.hasEnoughFieldsForCrossPlot
+      ? 'There must be at least two Gaussian Fields before their cross variance plot can be made'
+      : undefined
+  }
+
+  @Watch('fields', { deep: true })
+  async showCrossPlot (fields: GaussianRandomField[]) {
+    if (fields.length < 2) {
+      await this.$store.dispatch('panels/close', { type: 'preview', panel: 'crossPlots' })
+    }
   }
 
   @Watch('rule', { deep: true })
