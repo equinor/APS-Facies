@@ -7,6 +7,7 @@ import ParametersState from '@/store/modules/parameters/typing'
 import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { TruncationRuleTemplateState } from '@/store/modules/truncationRules/typing'
 import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
+import { Color } from '@/utils/domain/facies/helpers/colors'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Commit, Dispatch } from 'vuex'
 
@@ -133,6 +134,8 @@ interface RootGetters {
 
   'blockedWellParameter': string
   'blockedWellLogParameter': string
+
+  'constants/faciesColors/byCode': (code: number) => Color
 
   'regionParameter': string
 

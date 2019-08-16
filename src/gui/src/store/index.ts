@@ -124,6 +124,9 @@ const store: Store<RootState> = new Vuex.Store({
           await dispatch('regions/current', { id: data.regions.current })
         }
 
+        // Color library
+        await dispatch('constants/faciesColors/populate', data.constants.faciesColors)
+
         // Facies
         await dispatch('facies/global/populate', Object.values(data.facies.global.available))
         await dispatch('facies/populate', Object.values(data.facies.available))

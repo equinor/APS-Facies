@@ -11,6 +11,8 @@ export const DEFAULT_POINT_SIZE = 1.2
 
 export const DEFAULT_COLOR_SCALE = 'Viridis'
 
+export const DEFAULT_COLOR_LIBRARY = 'Default'
+
 export const COLOR_SCALES = [
   'Blackbody',
   'Bluered',

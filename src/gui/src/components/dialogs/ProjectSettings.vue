@@ -139,15 +139,47 @@
                   />
                 </v-radio-group>
               </v-flex>
-              <v-flex
+              <v-layout
                 pa-2
               >
-                <v-select
-                  v-model="colorScale"
-                  label="Color scale of Gaussian Random Fields"
-                  :items="$store.state.options.colorScale.legal"
-                />
-              </v-flex>
+                <v-flex
+                  md6
+                >
+                  <v-select
+                    v-model="colorScale"
+                    label="Color scale of Gaussian Random Fields"
+                    :items="$store.state.options.colorScale.legal"
+                  />
+                </v-flex>
+                <v-flex
+                  md6
+                >
+                  <v-select
+                    v-model="faciesColorLibrary"
+                    label="The color library for Facies"
+                    :items="$store.getters['constants/faciesColors/libraries']"
+                  >
+                    <template v-slot:item="{ item }">
+                      <v-layout
+                        justify-space-between
+                        column
+                      >
+                        {{ item.text }}
+                        <v-layout
+                          wrap
+                        >
+                          <v-flex
+                            v-for="color in item.value.colors"
+                            :key="color"
+                            :style="{ backgroundColor: color }"
+                            pa-2
+                          />
+                        </v-layout>
+                      </v-layout>
+                    </template>
+                  </v-select>
+                </v-flex>
+              </v-layout>
             </v-layout>
             <v-layout column>
               <v-flex>
@@ -320,6 +352,9 @@ import rms from '@/api/rms'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 
+import ColorLibrary from '@/utils/domain/colorLibrary'
+import { Optional } from '@/utils/typing'
+
 import { displayWarning } from '@/utils/helpers/storeInteraction'
 
 @Component({
@@ -346,6 +381,7 @@ export default class ProjectSettings extends Vue {
   automaticFaciesFill: string = ''
   filterZeroProbability: boolean = false
   colorScale: string = ''
+  faciesColorLibrary: Optional<ColorLibrary> = null
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -363,6 +399,7 @@ export default class ProjectSettings extends Vue {
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.colorScale = options.colorScale.value
+      this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }
   }
 
@@ -397,6 +434,7 @@ export default class ProjectSettings extends Vue {
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
       dispatch('options/colorScale/set', this.colorScale),
+      dispatch('constants/faciesColors/set', this.faciesColorLibrary),
     ])
     this.dialog = false
   }

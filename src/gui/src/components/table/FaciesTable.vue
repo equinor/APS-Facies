@@ -183,7 +183,7 @@ export default class FaciesTable extends Vue {
   }
   set selected (value) { this.$store.dispatch('facies/select', { items: value, parent: this.parent }) }
 
-  get availableColors () { return this.$store.state.constants.faciesColors.available }
+  get availableColors () { return this.$store.getters['constants/faciesColors/available'] }
 
   get selectFaciesError () {
     const item = this.$store.state.regions.use && !this.parent.region

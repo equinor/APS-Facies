@@ -12,9 +12,8 @@ import { Module } from 'vuex'
 import rms from '@/api/rms'
 import { isEmpty, makeData } from '@/utils'
 
-function getColor ({ rootState }: Context<GlobalFaciesState, RootState>, code: number): Color {
-  const colors = rootState.constants.faciesColors.available
-  return colors[`${code % colors.length}`]
+function getColor ({ rootGetters }: Context<GlobalFaciesState, RootState>, code: number): Color {
+  return rootGetters['constants/faciesColors/byCode'](code)
 }
 
 async function getFaciesFromRMS ({ rootGetters }: Context<GlobalFaciesState, RootState>): Promise<CodeName[]> {
@@ -37,8 +36,6 @@ const module: Module<GlobalFaciesState, RootState> = {
     _loading: false,
     _inRms: [],
   },
-
-  modules: {},
 
   actions: {
     fetch: async (context): Promise<void> => {
@@ -95,6 +92,10 @@ const module: Module<GlobalFaciesState, RootState> = {
         commit('REMOVE', { id: state.current })
         await dispatch('current', { id: null })
       }
+    },
+    changeColorPallet: async ({ dispatch, state }, mapping: Map<Color, Color>) => {
+      await Promise.all(Object.values(state.available)
+        .map(facies => dispatch('changeColor', { id: facies.id, color: mapping.get(facies.color) })))
     },
     changeColor: async ({ commit }, { id, color }): Promise<void> => {
       commit('CHANGE', { id, name: 'color', value: color })
