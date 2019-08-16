@@ -36,6 +36,10 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
           commit('SET', value)
         }
       },
+
+      populate: async ({ dispatch }, { value }): Promise<void> => {
+        await dispatch('set', value)
+      },
     },
     mutations: {
       SET: (state, value): void => {

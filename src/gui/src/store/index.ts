@@ -109,6 +109,9 @@ const store: Store<RootState> = new Vuex.Store({
           }
         }
 
+        // Options
+        await dispatch('options/populate', data.options)
+
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
         if (data.zones.current) {

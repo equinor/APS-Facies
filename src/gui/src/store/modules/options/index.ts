@@ -24,6 +24,14 @@ const module: Module<OptionsState, RootState> = {
     automaticFaciesFill: makeOption(DEFAULT_FACIES_AUTOFILL, [true, false]),
     colorScale: makeOption(DEFAULT_COLOR_SCALE, COLOR_SCALES),
   },
+
+  actions: {
+    async populate ({ dispatch }, options): Promise<void> {
+      await Promise.all(Object.keys(options)
+        .map(option => dispatch(`${option}/populate`, options[`${option}`]))
+      )
+    },
+  },
 }
 
 export default module
