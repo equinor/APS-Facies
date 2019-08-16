@@ -91,7 +91,9 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Grid model
         await dispatch('gridModels/populate', Object.values(data.gridModels.available))
-        await dispatch('gridModels/select', data.gridModels.current)
+        if (data.gridModels.current) {
+          await dispatch('gridModels/select', data.gridModels.current)
+        }
 
         // Parameters
         for (const parameter of getParameters(data.parameters)) {
@@ -109,11 +111,15 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
-        await dispatch('zones/current', { id: data.zones.current })
+        if (data.zones.current) {
+          await dispatch('zones/current', { id: data.zones.current })
+        }
 
         // Regions
         await dispatch('regions/use', { use: data.regions.use, fetch: false })
-        await dispatch('regions/current', { id: data.regions.current })
+        if (data.regions.current) {
+          await dispatch('regions/current', { id: data.regions.current })
+        }
 
         // Facies
         await dispatch('facies/global/populate', Object.values(data.facies.global.available))
