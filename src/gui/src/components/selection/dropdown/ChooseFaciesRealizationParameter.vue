@@ -1,6 +1,7 @@
 <template>
   <v-combobox
-    v-model="faciesRealizationParameter"
+    :value="faciesRealizationParameter"
+    :search-input.sync="faciesRealizationParameter"
     :items="available"
     :append-icon="''"
     :append-outer-icon="'$vuetify.icons.values.search'"
