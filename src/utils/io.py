@@ -113,7 +113,7 @@ class TemporaryFile:
         self._file = file
 
     def __repr__(self):
-        return f'TemporaryFile(name="{str(self)}")'
+        return 'TemporaryFile(name="{name}")'.format(name=str(self))
 
     def __str__(self):
         return self._file.name
