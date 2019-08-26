@@ -123,11 +123,15 @@ start_path = Path('.').absolute()
 
 
 def get_plugin_dir():
-    major, minor, patch = roxar.rms.get_version().split('.')
-    if minor == '0':
-        rms_version = major
-    else:
-        rms_version = major + '.' + minor
+    version = roxar.rms.get_version()
+    try:
+        major, minor, patch = version.split('.')
+        if minor == '0':
+            rms_version = major
+        else:
+            rms_version = major + '.' + minor
+    except ValueError:
+        rms_version = version
     preferences = Path(Path.home() / '.roxar/rms-{{}}/preferences.master'.format(rms_version))
     with open(preferences) as f:
         lines = f.readlines()
