@@ -186,7 +186,6 @@ class RMSData:
     def is_probability_cube(self, param):
         return (
             self.is_continuous(param)
-            and param.name.lower().startswith('prob')
         )
 
     def _get_blocked_well_set(self, grid_model_name):
