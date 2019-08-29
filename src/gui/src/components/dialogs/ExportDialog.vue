@@ -17,29 +17,27 @@
           <legend>
             Select File to save to
           </legend>
-          <v-layout
-            wrap
-          >
-            <v-flex
-              xs5
-              pa-2
+          <v-row>
+            <v-col
+              class="pa-2"
+              cols="5"
             >
               <v-text-field
                 v-model="path"
                 single-line
                 solo
               />
-            </v-flex>
-            <v-flex
-              xs4
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="4"
             >
               <bold-button
                 title="Select File"
                 @click="chooseAPSModelFile"
               />
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </fieldset>
       </v-card-text>
       <v-card-actions>

@@ -5,10 +5,10 @@
       flat
       color="#fafafa"
     >
-      <v-flex column>
+      <v-col class="column">
         <tool-bar />
         <information-bar />
-      </v-flex>
+      </v-col>
     </v-app-bar>
     <v-content>
       <main-page />

@@ -28,9 +28,9 @@
         {{ item.code }}
       </td>
       <td>
-        <v-layout
-          justify-center
-          align-center
+        <v-row
+          justify="center"
+          align="center"
         >
           <icon-button
             icon="copy"
@@ -45,7 +45,7 @@
             :waiting="isPasting(item)"
             @click="() => paste(item)"
           />
-        </v-layout>
+        </v-row>
       </td>
     </template>
   </base-selection-table>

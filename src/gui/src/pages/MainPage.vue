@@ -1,40 +1,44 @@
 <template>
-  <v-container fluid>
-    <v-layout
+  <v-container
+    fluid
+  >
+    <v-row
       v-if="loading"
-      column
-      align-center
-      justify-center
-      fill-height
     >
-      <v-flex />
-      <v-flex>
-        <v-progress-circular
-          :size="70"
-          indeterminate
-        />
-      </v-flex>
-      <v-flex>
-        <span>{{ loadingMessage }}</span>
-      </v-flex>
-      <v-flex />
-    </v-layout>
-    <v-layout
+      <v-col cols="12">
+        <v-row
+          justify="center"
+          align="center"
+        >
+          <v-progress-circular
+            :size="70"
+            indeterminate
+          />
+        </v-row>
+        <v-row
+          justify="center"
+          align="center"
+        >
+          <span>{{ loadingMessage }}</span>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row
       v-else
-      wrap
+      no-gutters
     >
-      <v-flex xs4>
+      <v-col cols="4">
         <selection />
-      </v-flex>
-      <v-flex xs4>
+      </v-col>
+      <v-col cols="4">
         <preview v-if="hasSimulations" />
-      </v-flex>
-      <v-flex xs4>
+      </v-col>
+      <v-col cols="4">
         <settings
           v-if="canSpecifyModelSettings"
         />
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

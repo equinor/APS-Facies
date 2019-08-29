@@ -1,18 +1,17 @@
 <template>
-  <v-layout
-    ma-2
-    wrap
+  <v-row
+    class="ma-2"
   >
     <!--Cross section-->
-    <v-flex>
+    <v-col>
       <v-select
         v-model="type"
         :items="['IJ', 'IK', 'JK']"
         label="Cross section type"
         required
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

@@ -1,26 +1,22 @@
 <template>
   <v-container
-    text-center
-    align-center
-    column
-    wrap
+    class="text-center column wrap align"
   >
-    <v-layout>
-      <v-flex xs12>
+    <v-row>
+      <v-col cols="12">
         <v-select
           v-model="selected"
           :items="available"
           label="Gaussian Fields to be used"
           multiple
         />
-      </v-flex>
-    </v-layout>
-    <v-layout
-      wrap
-      align-center
-      justify-space-around
+      </v-col>
+    </v-row>
+    <v-row
+      align="center"
+      justify="space-around"
     >
-      <v-flex
+      <v-col
         v-for="([field, other], index) in combinations"
         :key="index"
       >
@@ -33,8 +29,8 @@
           :size="70"
           indeterminate
         />
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

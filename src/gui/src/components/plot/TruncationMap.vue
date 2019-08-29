@@ -1,10 +1,8 @@
 <template>
-  <v-layout
-    ma-0
-    pa-0
-    shrink
-    align-center
-    justify-center
+  <v-row
+    class="ma-0 pa-0 shrink"
+    align="center"
+    justify="center"
   >
     <static-plot
       :data-definition="data.polygons"
@@ -12,7 +10,7 @@
       :expand="expand"
       svg
     />
-  </v-layout>
+  </v-row>
 </template>
 
 <script lang="ts">

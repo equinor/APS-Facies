@@ -1,19 +1,18 @@
 <template>
-  <v-layout
-    align-center
-    justify-space-around
-    fill-height
-    wrap
+  <v-row
+    class="fill-height"
+    align="center"
+    justify="space-around"
   >
-    <v-flex>
+    <v-col>
       <v-checkbox
         v-model="useProbabilityCubes"
         v-tooltip.bottom="'Toggles whether constant probabilities, or probability cubes should be used'"
         :disabled="disabled"
         label="Use cubes"
       />
-    </v-flex>
-    <v-flex>
+    </v-col>
+    <v-col>
       <wait-btn
         v-if="useProbabilityCubes"
         v-tooltip.bottom="'Calculate average probability (for previewer)'"
@@ -32,8 +31,8 @@
       >
         Normalize
       </v-btn>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

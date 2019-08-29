@@ -1,11 +1,15 @@
 <template>
-  <v-layout column>
-    <zone-selection />
-    <choose-region-parameter />
-    <region-selection
-      v-show="canShowRegions"
-    />
-  </v-layout>
+  <v-row
+    no-gutters
+  >
+    <v-col>
+      <zone-selection />
+      <choose-region-parameter />
+      <region-selection
+        v-show="canShowRegions"
+      />
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

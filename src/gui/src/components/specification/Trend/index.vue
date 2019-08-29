@@ -1,89 +1,87 @@
 <template>
-  <v-flex>
+  <v-col cols="12">
     Trend
-    <v-layout>
-      <v-flex xs6>
+    <v-row>
+      <v-col cols="6">
         <v-checkbox
           v-model="useTrend"
           label="Apply trend to field"
         />
-      </v-flex>
-      <v-flex xs1 />
-      <v-flex xs5>
+      </v-col>
+      <v-spacer />
+      <v-col cols="6">
         <relative-standard-deviation
           v-if="useTrend"
           :value="value"
           @update:error="e => update('relativeStdDev', e)"
         />
-      </v-flex>
-    </v-layout>
-    <v-flex
+      </v-col>
+    </v-row>
+    <v-col
       v-if="useTrend"
     >
-      <v-container>
-        <v-layout
-          align-center
-          justify-center
-          fill-height
-        >
-          <v-flex xs6>
-            <item-selection
-              v-model="trendType"
-              :items="availableTrends"
-              :constraints="{ required: true }"
-              label="Trend type"
-              @update:error="e => update('type', e)"
-            />
-            <div
-              v-if="hasLinearProperties"
-            >
-              <depositional-azimuth-angle
-                :value="value"
-                @update:error="e => update('azimuth', e)"
-              />
-              <stacking-angle-specification
-                :value="value"
-                @update:error="e => update('stacking', e)"
-              />
-            </div>
-            <migration-angle
-              v-if="hasHyperbolicProperties"
+      <v-row
+        class="fill-height"
+        align="center"
+        justify="center"
+      >
+        <v-col cols="6">
+          <item-selection
+            v-model="trendType"
+            :items="availableTrends"
+            :constraints="{ required: true }"
+            label="Trend type"
+            @update:error="e => update('type', e)"
+          />
+          <div
+            v-if="hasLinearProperties"
+          >
+            <depositional-azimuth-angle
               :value="value"
-              @update:error="e => update('migration', e)"
+              @update:error="e => update('azimuth', e)"
             />
-          </v-flex>
-          <v-flex xs1 />
-          <v-flex xs5>
-            <v-select
-              v-if="isRmsParameter"
-              v-model="trendParameter"
-              :items="availableRmsTrendParameters"
-              label="Trend parameter"
+            <stacking-angle-specification
+              :value="value"
+              @update:error="e => update('stacking', e)"
             />
-            <div
-              v-if="hasEllipticProperties"
-            >
-              <curvature-specification
-                :value="value"
-                @update:error="e => update('curvature', e)"
-              />
-              <origin-specification
-                :value="value"
-                @update:error="e => update('origin', e)"
-              />
-            </div>
-            <v-flex>
-              <relative-size-of-ellipse
-                v-if="hasEllipticConeProperties"
-                :value="value"
-                @update:error="e => update('relativeEllipseSize', e)"
-              />
-            </v-flex>
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-flex>
-  </v-flex>
+          </div>
+          <migration-angle
+            v-if="hasHyperbolicProperties"
+            :value="value"
+            @update:error="e => update('migration', e)"
+          />
+        </v-col>
+        <v-spacer />
+        <v-col cols="5">
+          <v-select
+            v-if="isRmsParameter"
+            v-model="trendParameter"
+            :items="availableRmsTrendParameters"
+            label="Trend parameter"
+          />
+          <div
+            v-if="hasEllipticProperties"
+          >
+            <curvature-specification
+              :value="value"
+              @update:error="e => update('curvature', e)"
+            />
+            <origin-specification
+              :value="value"
+              @update:error="e => update('origin', e)"
+            />
+          </div>
+          <v-col>
+            <relative-size-of-ellipse
+              v-if="hasEllipticConeProperties"
+              :value="value"
+              @update:error="e => update('relativeEllipseSize', e)"
+            />
+          </v-col>
+        </v-col>
+      </v-row>
+    </v-col>
+  </v-col>
 </template>
 
 <script lang="ts">

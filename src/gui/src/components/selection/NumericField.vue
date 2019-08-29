@@ -1,13 +1,14 @@
 <template>
-  <v-layout
-    align-center
-    justify-center
-    fill-height
+  <v-row
+    class="fill-height"
+    align="center"
+    justify="center"
+    no-gutters
     :class="__class"
   >
-    <v-flex
+    <v-col
       v-if="canShowSlider"
-      xs8
+      cols="8"
     >
       <v-slider
         v-model="sliderValue"
@@ -15,9 +16,10 @@
         :max="steps"
         :step="100/steps"
       />
-    </v-flex>
-    <v-flex
+    </v-col>
+    <v-col
       v-if="canShowField"
+      cols="10"
       :class="__class"
     >
       <v-text-field
@@ -38,8 +40,8 @@
         @click:append="e => $emit('click:append', e)"
         @update:error="e => propagateEvent('update:error', e)"
       />
-    </v-flex>
-    <v-flex
+    </v-col>
+    <v-col
       v-if="isFmuUpdatable"
       v-bind="binding"
     >
@@ -50,8 +52,8 @@
         :disabled="disabled"
         persistent-hint
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
@@ -260,10 +262,11 @@ export default class NumericField extends Vue {
   }
 
   get binding () {
-    const binding: { [_: string]: boolean } = {}
+    const binding: { [_: string]: string } = {}
     // FIXME: Hack to adjust the checkboxes for Origin coordinates
-    if (['X', 'Y', 'Z'].indexOf(this.label) !== -1) binding.xs2 = true
-    else binding.xs1 = true
+    binding.cols = (['X', 'Y', 'Z'].indexOf(this.label) !== -1)
+      ? '2'
+      : '1'
     return binding
   }
 

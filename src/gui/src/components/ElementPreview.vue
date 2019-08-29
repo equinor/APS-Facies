@@ -1,17 +1,17 @@
 <template>
   <v-container
-    align-start
-    justify-start
+    class="align justify"
+    fluid
   >
-    <v-layout
-      align-center
-      justify-start
+    <v-row
+      align="center"
+      justify="center"
     >
       <section-title>Preview</section-title>
       <preview-header
         :value="rule"
       />
-    </v-layout>
+    </v-row>
     <v-expansion-panels
       v-model="expanded"
       accordion
@@ -25,15 +25,14 @@
           <h3>Truncation rule</h3>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <v-flex
-            justify-center
-            align-center
+          <v-col
+            class="justify-center align-center"
           >
             <truncation-map
               v-if="!!rule"
               :value="rule"
             />
-          </v-flex>
+          </v-col>
         </v-expansion-panel-content>
       </v-expansion-panel>
       <v-expansion-panel

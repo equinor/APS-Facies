@@ -1,34 +1,39 @@
 <template>
-  <v-expansion-panels
-    v-model="expanded"
-    accordion
-    multiple
+  <v-container
+    class="align justify center"
+    fluid
   >
-    <section-title>{{ title }}</section-title>
-    <v-expansion-panel
-      v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
-      :disabled="!hasFacies"
+    <v-expansion-panels
+      v-model="expanded"
+      accordion
+      multiple
     >
-      <v-expansion-panel-header>
-        <section-title>Probabilities for Facies</section-title>
-      </v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <facies-probability-cube />
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-    <v-expansion-panel
-      v-tooltip.bottom="!hasEnoughFacies && 'Too few Facies has been selected'"
-      :disabled="!hasEnoughFacies"
-    >
-      <v-expansion-panel-header>
-        <section-title>Truncation Rule</section-title>
-      </v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <truncation-rule />
-      </v-expansion-panel-content>
-    </v-expansion-panel>
-    <gaussian-random-fields />
-  </v-expansion-panels>
+      <section-title>{{ title }}</section-title>
+      <v-expansion-panel
+        v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
+        :disabled="!hasFacies"
+      >
+        <v-expansion-panel-header>
+          <section-title>Probabilities for Facies</section-title>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <facies-probability-cube />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel
+        v-tooltip.bottom="!hasEnoughFacies && 'Too few Facies has been selected'"
+        :disabled="!hasEnoughFacies"
+      >
+        <v-expansion-panel-header>
+          <section-title>Truncation Rule</section-title>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <truncation-rule />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <gaussian-random-fields />
+    </v-expansion-panels>
+  </v-container>
 </template>
 
 <script lang="ts">

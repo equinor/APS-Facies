@@ -1,18 +1,18 @@
 <template>
-  <v-layout
-    column
+  <v-row
+    no-gutters
   >
-    <v-layout
-      fill-height
-      justify-start
+    <v-row
+      class="fill-height"
+      justify="start"
     >
-      <v-flex xs2>
+      <v-col cols="2">
         <icon-button
           icon="add"
           @click="add"
         />
-      </v-flex>
-      <v-flex xs2>
+      </v-col>
+      <v-col cols="2">
         <v-popover
           :disabled="canRemove"
           trigger="hover"
@@ -26,11 +26,13 @@
             {{ removeError }}
           </span>
         </v-popover>
-      </v-flex>
-      <v-flex xs8 />
-    </v-layout>
-    <facies-table :hide-alias="hideAlias" />
-  </v-layout>
+      </v-col>
+      <v-col cols="8" />
+    </v-row>
+    <v-col cols="12">
+      <facies-table :hide-alias="hideAlias" />
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

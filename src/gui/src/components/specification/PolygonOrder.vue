@@ -1,29 +1,31 @@
 <template>
-  <v-layout
-    wrap
-    align-center
-    justify-center
+  <v-row
+    align="center"
+    justify="center"
+    no-gutters
   >
-    <v-layout
-      xs6
-      column
+    <v-col
+      cols="6"
     >
-      <v-icon
-        :disabled="!canDecrease"
-        small
-        @click="() => $emit('input', -1)"
-        v-text="'$vuetify.icons.values.up'"
-      />
-      <v-icon
-        :disabled="!canIncrease"
-        small
-        @click="() => $emit('input', +1)"
-        v-text="'$vuetify.icons.values.down'"
-      />
-    </v-layout>
-    <v-layout
-      xs6
-      column
+      <v-col class="pa-0">
+        <v-icon
+          :disabled="!canDecrease"
+          small
+          @click="() => $emit('input', -1)"
+          v-text="'$vuetify.icons.values.up'"
+        />
+      </v-col>
+      <v-col class="pa-0">
+        <v-icon
+          :disabled="!canIncrease"
+          small
+          @click="() => $emit('input', +1)"
+          v-text="'$vuetify.icons.values.down'"
+        />
+      </v-col>
+    </v-col>
+    <v-col
+      cols="6"
     >
       <v-icon
         :diabled="!canRemove"
@@ -37,8 +39,8 @@
         @click="() => $emit('add')"
         v-text="'$vuetify.icons.values.add'"
       />
-    </v-layout>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

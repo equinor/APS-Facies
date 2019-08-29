@@ -1,9 +1,13 @@
 <template>
-  <v-layout>
-    <v-flex
+  <v-row
+    align="center"
+    justify="center"
+    no-gutters
+  >
+    <v-col
       v-for="item in alphas"
       :key="item.channel"
-      pa-1
+      class="pa-0"
     >
       <alpha-selection
         :channel="item.channel"
@@ -11,8 +15,8 @@
         :rule="value"
         @input="val => update(item, val)"
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

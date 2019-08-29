@@ -1,20 +1,23 @@
 <template>
-  <v-layout>
-    <v-flex xs3>
+  <v-row
+    justify="space-between"
+    no-gutters
+  >
+    <v-col cols="3">
       <v-checkbox
         v-model="useRegions"
         label="Use regions?"
       />
-    </v-flex>
-    <v-flex xs9>
+    </v-col>
+    <v-col cols="9">
       <choose-parameter
         :disabled="!useRegions"
         regular
         parameter-type="region"
         label="Region parameter"
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

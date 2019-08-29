@@ -1,77 +1,74 @@
 <template>
-  <v-container>
-    <v-layout
-      child-flex
-      wrap
+  <v-row
+    no-gutters
+  >
+    <v-col cols="6">
+      <gaussian-plot
+        :value="value"
+        expand
+      />
+    </v-col>
+    <v-col cols="1" />
+    <v-col cols="5">
+      <span>Variogram selection</span>
+      <item-selection
+        v-model="variogramType"
+        :items="availableVariograms"
+        :constraints="{ required: true }"
+        label="Variogram"
+      />
+      <icon-button
+        :disabled="!canSimulate"
+        icon="random"
+        @click="() => updateSimulation(true)"
+      />
+      <icon-button
+        :disabled="!canSimulate"
+        :waiting="waitingForSimulation"
+        icon="refresh"
+        @click="() => updateSimulation(false)"
+      />
+      <icon-button
+        icon="settings"
+        @click="openVisualizationSettings"
+      />
+      <visualization-settings-dialog
+        ref="visualisationSettings"
+      />
+    </v-col>
+    <!--New line-->
+    <v-col
+      class="column"
+      align-self="start"
+      cols="6"
     >
-      <v-flex xs6>
-        <gaussian-plot
-          :value="value"
-          expand
-        />
-      </v-flex>
-      <v-flex xs1 />
-      <v-flex xs5>
-        <span>Variogram selection</span>
-        <item-selection
-          v-model="variogramType"
-          :items="availableVariograms"
-          :constraints="{ required: true }"
-          label="Variogram"
-        />
-        <icon-button
-          :disabled="!canSimulate"
-          icon="random"
-          @click="() => updateSimulation(true)"
-        />
-        <icon-button
-          :disabled="!canSimulate"
-          :waiting="waitingForSimulation"
-          icon="refresh"
-          @click="() => updateSimulation(false)"
-        />
-        <icon-button
-          icon="settings"
-          @click="openVisualizationSettings"
-        />
-        <visualization-settings-dialog
-          ref="visualisationSettings"
-        />
-      </v-flex>
-      <!--New line-->
-      <v-flex
-        align-self-start
-        xs6
-        column
-      >
-        <span>Anisotropy direction</span>
-        <anisotropy-direction
-          :value="value"
-          @update:error="e => update('anisotropyDirection', e)"
-        />
-        <power-specification
-          v-if="isGeneralExponential"
-          :value="value"
-          @update:error="e => update('power', e)"
-        />
-      </v-flex>
-      <v-flex xs1 />
-      <v-flex xs5>
-        Ranges
-        <range-specification
-          :value="value"
-          @update:error="e => update('range', e)"
-        />
-      </v-flex>
-      <!--New line-->
-      <v-layout>
-        <trend-specification
-          :value="value"
-          @update:error="e => update('trend', e)"
-        />
-      </v-layout>
-    </v-layout>
-  </v-container>
+      <span>Anisotropy direction</span>
+      <anisotropy-direction
+        :value="value"
+        @update:error="e => update('anisotropyDirection', e)"
+      />
+      <power-specification
+        v-if="isGeneralExponential"
+        :value="value"
+        @update:error="e => update('power', e)"
+      />
+    </v-col>
+    <v-col cols="1" />
+    <v-col cols="5">
+      Ranges
+      <range-specification
+        :value="value"
+        @update:error="e => update('range', e)"
+      />
+    </v-col>
+    <!--New line-->
+    <v-row>
+      <trend-specification
+        :value="value"
+        @update:error="e => update('trend', e)"
+      />
+    </v-row>
+  </v-row>
 </template>
 
 <script lang="ts">

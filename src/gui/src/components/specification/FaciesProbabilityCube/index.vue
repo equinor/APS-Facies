@@ -1,17 +1,16 @@
 <template>
-  <v-layout
-    align-center
-    justify-center
-    fill-height
-    wrap
+  <v-row
+    class="fill-height"
+    align="center"
+    justify="center"
   >
-    <v-flex>
+    <v-col>
       <probability-cube-header />
-    </v-flex>
-    <v-flex xs12>
+    </v-col>
+    <v-col cols="12">
       <facies-probability-cube-table />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

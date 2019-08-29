@@ -1,26 +1,30 @@
 <template>
-  <v-layout column>
+  <v-row
+    no-gutters
+  >
     <h3>Alpha selection</h3>
-    <v-layout>
-      <alpha-fields
-        :value="value"
-        :min-fields="minFields"
-      />
-    </v-layout>
+    <alpha-fields
+      :value="value"
+      :min-fields="minFields"
+    />
     <h3>Truncation rule specification background facies</h3>
-    <v-layout>
-      <v-flex>
-        <v-layout>
-          <v-flex>
+    <v-row
+      no-gutters
+    >
+      <v-col>
+        <v-row
+          no-gutters
+        >
+          <v-col>
             <component
               :is="table"
               :value="value"
             />
-          </v-flex>
-        </v-layout>
-      </v-flex>
-    </v-layout>
-  </v-layout>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-row>
 </template>
 
 <script lang="ts">

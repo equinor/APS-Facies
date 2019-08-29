@@ -1,15 +1,14 @@
 <template>
   <div>
     Origin
-    <v-layout
-      align-center
-      justify-center
-      wrap
-      fill-height
+    <v-row
+      class="fill-height"
+      align="center"
+      justify="center"
     >
-      <v-flex
-        md11
-        lg3
+      <v-col
+        md="11"
+        lg="3"
       >
         <origin-x
           :value="value"
@@ -17,11 +16,11 @@
           coordinate-axis="x"
           @update:error="e => update('x', e)"
         />
-      </v-flex>
-      <v-flex xs1 />
-      <v-flex
-        md11
-        lg3
+      </v-col>
+      <v-col cols="1" />
+      <v-col
+        md="11"
+        lg="3"
       >
         <origin-y
           :value="value"
@@ -29,12 +28,12 @@
           coordinate-axis="y"
           @update:error="e => update('y', e)"
         />
-      </v-flex>
-      <v-flex xs1 />
-      <v-flex
+      </v-col>
+      <v-col cols="1" />
+      <v-col
         v-if="!isEllipticCone"
-        md11
-        lg3
+        md="11"
+        lg="3"
       >
         <origin-z
           :value="value"
@@ -42,8 +41,8 @@
           coordinate-axis="z"
           @update:error="e => update('z', e)"
         />
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
     <v-select
       v-model="originType"
       :items="availableOriginTypes"

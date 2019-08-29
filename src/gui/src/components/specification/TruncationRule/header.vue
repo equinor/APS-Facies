@@ -1,14 +1,14 @@
 <template>
-  <v-layout>
-    <v-flex>
+  <v-row no-gutters>
+    <v-col>
       <v-select
         ref="chooseTruncationRuleType"
         v-model="type"
         :items="truncationRules"
         label="Rule"
       />
-    </v-flex>
-    <v-flex>
+    </v-col>
+    <v-col>
       <v-combobox
         ref="chooseTruncationRuleTemplate"
         v-model="template"
@@ -16,10 +16,10 @@
         :disabled="!type"
         label="Template"
       />
-    </v-flex>
-    <v-flex
+    </v-col>
+    <v-col
       v-if="false"
-      xs6
+      cols="6"
     >
       <icon-button
         icon="add"
@@ -36,8 +36,8 @@
         disabled
         @click="deleteTemplate"
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

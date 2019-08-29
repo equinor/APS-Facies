@@ -1,25 +1,24 @@
 <template>
   <v-expansion-panel>
     <v-expansion-panel-header v-slot="{ open }">
-      <v-layout
-        justify-center
-        align-center
-        pa-0
-        ma-0
+      <v-row
+        class="pa-0 ma-0"
+        justify="center"
+        align="center"
       >
-        <v-flex>
+        <v-col>
           <section-title>Gaussian Random Fields (GRF)</section-title>
-        </v-flex>
-        <v-flex
+        </v-col>
+        <v-col
           v-show="open"
-          xs2
+          cols="2"
         >
           <icon-button
             icon="add"
             @click="addField"
           />
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </v-expansion-panel-header>
     <v-expansion-panel-content>
       <cross-section />
@@ -32,28 +31,27 @@
           :key="field.id"
         >
           <v-expansion-panel-header>
-            <v-layout
-              align-center
-              justify-start
-              fill-height
-              wrap
+            <v-row
+              class="fill-height"
+              align="center"
+              justify="start"
             >
-              <v-flex xs2>
+              <v-col cols="4">
                 <gaussian-field-name
                   :ref="field.id"
                   :value="field"
                 />
-              </v-flex>
-              <v-flex
-                xs1
+              </v-col>
+              <v-col
+                cols="1"
               >
                 <icon-button
                   icon="remove"
                   @click.stop="deleteField(field)"
                 />
                 <confirmation-dialog :ref="`confirmation_${field.id}`" />
-              </v-flex>
-            </v-layout>
+              </v-col>
+            </v-row>
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <gaussian-random-field

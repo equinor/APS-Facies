@@ -1,18 +1,16 @@
 <template>
-  <v-layout
-    column
+  <v-row
+    no-gutters
   >
-    <v-layout
-      align-center
-      justify-space-between
-      fill-height
-    >
+    <v-col cols="12">
       <h3>Truncation rule specification overlay facies</h3>
-    </v-layout>
-    <overlay-facies-table
-      :value="value"
-    />
-  </v-layout>
+    </v-col>
+    <v-col cols="12">
+      <overlay-facies-table
+        :value="value"
+      />
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

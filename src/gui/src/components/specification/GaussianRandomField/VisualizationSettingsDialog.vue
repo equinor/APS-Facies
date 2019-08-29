@@ -12,72 +12,69 @@
         </span>
       </v-card-title>
       <v-card-text>
-        <v-container grid-list-md>
-          <v-layout wrap>
-            <v-layout>
-              <!--Seed-->
-              <v-flex xs10>
-                <numeric-field
-                  v-model="settings.seed"
-                  :ranges="{min: 0, max: Math.pow(2, 64) - 1}"
-                  label="Seed"
-                />
-              </v-flex>
-              <v-flex
-                xs2
-              >
-                <icon-button
-                  icon="random"
-                  @click="settings.seed = newSeed()"
-                />
-              </v-flex>
-            </v-layout>
-            <v-flex xs6>
-              <v-checkbox
-                :value="settings.gridModel.use"
-                label="Use model grid"
-                @change="val => settings.gridModel.use = val"
+        <v-row>
+          <v-row>
+            <!--Seed-->
+            <v-col cols="10">
+              <numeric-field
+                v-model="settings.seed"
+                :ranges="{min: 0, max: Math.pow(2, 64) - 1}"
+                label="Seed"
               />
-            </v-flex>
-            <v-flex xs6 />
-            <v-layout
-              v-if="settings.gridModel.use"
-              justify-space-around
-              wrap
+            </v-col>
+            <v-col
+              cols="2"
             >
-              <v-flex xs4>
-                <numeric-field
-                  v-model="settings.gridModel.size.x"
-                  discrete
-                  unit="cell"
-                  label="X"
-                  hint="The size of the grid to be simulated"
-                  persistent-hint
-                />
-              </v-flex>
-              <v-flex xs4>
-                <numeric-field
-                  v-model="settings.gridModel.size.y"
-                  discrete
-                  unit="cell"
-                  label="Y"
-                  hint="The size of the grid to be simulated"
-                  persistent-hint
-                />
-              </v-flex>
-              <v-flex xs4>
-                <numeric-field
-                  v-model="settings.gridModel.size.z"
-                  discrete
-                  unit="cell"
-                  label="Z"
-                  hint="The size of the grid to be simulated"
-                  persistent-hint
-                />
-              </v-flex>
-            </v-layout>
-          </v-layout>
-        </v-container>
+              <icon-button
+                icon="random"
+                @click="settings.seed = newSeed()"
+              />
+            </v-col>
+          </v-row>
+          <v-col cols="6">
+            <v-checkbox
+              :value="settings.gridModel.use"
+              label="Use model grid"
+              @change="val => settings.gridModel.use = val"
+            />
+          </v-col>
+          <v-col cols="6" />
+          <v-row
+            v-if="settings.gridModel.use"
+            justify="space-around"
+          >
+            <v-col cols="4">
+              <numeric-field
+                v-model="settings.gridModel.size.x"
+                discrete
+                unit="cell"
+                label="X"
+                hint="The size of the grid to be simulated"
+                persistent-hint
+              />
+            </v-col>
+            <v-col cols="4">
+              <numeric-field
+                v-model="settings.gridModel.size.y"
+                discrete
+                unit="cell"
+                label="Y"
+                hint="The size of the grid to be simulated"
+                persistent-hint
+              />
+            </v-col>
+            <v-col cols="4">
+              <numeric-field
+                v-model="settings.gridModel.size.z"
+                discrete
+                unit="cell"
+                label="Z"
+                hint="The size of the grid to be simulated"
+                persistent-hint
+              />
+            </v-col>
+          </v-row>
+        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-spacer />

@@ -1,27 +1,20 @@
 <template>
   <v-container
-    grid-list-md
-    text-center
-    ma-0
-    pa-0
+    class="text-center ma-0 pa-0"
     fluid
   >
-    <v-layout
-      wrap
-      xs12
-      pa-0
-      ma-0
+    <v-row
+      class="xs12 pa-0 ma-0"
     >
-      <v-layout
-        align-center
-        justify-center
-        wrap
+      <v-row
+        align="center"
+        justify="center"
       >
-        <v-flex
+        <v-col
           v-for="field in value"
           :key="field.id"
           :ref="`v-flex:${field.id}`"
-          shrink
+          class="shrink"
         >
           <h5>{{ field.name }}</h5>
           <gaussian-plot
@@ -36,17 +29,17 @@
             :size="70"
             indeterminate
           />
-        </v-flex>
-        <v-flex
-          xs1
-          align-self-end
+        </v-col>
+        <v-col
+          cols="1"
+          align-self="end"
         >
           <color-scale
             v-if="someSimulated"
           />
-        </v-flex>
-      </v-layout>
-    </v-layout>
+        </v-col>
+      </v-row>
+    </v-row>
   </v-container>
 </template>
 

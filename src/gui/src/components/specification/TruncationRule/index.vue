@@ -1,49 +1,59 @@
 <template>
-  <div>
+  <v-row
+    no-gutters
+  >
     <truncation-header />
-    <v-layout
-      v-if="rule"
-    >
-      <v-flex
-        v-if="notBayfill"
-        xs12
+    <div v-if="rule">
+      <v-row
+        no-gutters
       >
-        <v-popover
-          :disabled="canUseOverlay"
-          trigger="hover"
+        <v-col
+          v-if="notBayfill"
+          cols="12"
         >
-          <v-checkbox
-            v-model="useOverlay"
-            :disabled="!canUseOverlay"
-            class="tooltip-target"
-            label="Include Overlay Facies"
-          />
-          <span
-            slot="popover"
+          <v-popover
+            :disabled="canUseOverlay"
+            trigger="hover"
           >
-            {{ useOverlayTooltip }}
-          </span>
-        </v-popover>
-      </v-flex>
-    </v-layout>
-    <v-flex xs12>
-      <component
-        :is="truncationRuleComponent"
-        v-if="truncationRuleComponent && rule"
-        :value="rule"
-      />
-    </v-flex>
-    <v-layout>
-      <v-flex
-        v-if="useOverlay"
-        xs12
+            <v-checkbox
+              v-model="useOverlay"
+              :disabled="!canUseOverlay"
+              class="tooltip-target"
+              label="Include Overlay Facies"
+            />
+            <span
+              slot="popover"
+            >
+              {{ useOverlayTooltip }}
+            </span>
+          </v-popover>
+        </v-col>
+      </v-row>
+      <v-row
+        no-gutters
       >
-        <overlay-facies
-          :value="rule"
-        />
-      </v-flex>
-    </v-layout>
-  </div>
+        <v-col cols="12">
+          <component
+            :is="truncationRuleComponent"
+            v-if="truncationRuleComponent && rule"
+            :value="rule"
+          />
+        </v-col>
+      </v-row>
+      <v-row
+        v-if="useOverlay"
+        no-gutters
+      >
+        <v-col
+          cols="12"
+        >
+          <overlay-facies
+            :value="rule"
+          />
+        </v-col>
+      </v-row>
+    </div>
+  </v-row>
 </template>
 
 <script lang="ts">

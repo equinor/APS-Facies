@@ -58,8 +58,8 @@ module.exports = {
     }],
     'vuetify/no-deprecated-classes': 'error',
     // To be added when the documentation for v-col / v-row has been improved (made available)
-    // 'vuetify/grid-unknown-attributes': 'error',
-    // 'vuetify/no-legacy-grid': 'error',
+    'vuetify/grid-unknown-attributes': 'error',
+    'vuetify/no-legacy-grid': 'error',
   },
   overrides: [
     {

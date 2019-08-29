@@ -32,61 +32,60 @@
               Folder Settings
             </v-list-item-title>
           </v-list-item>
-          <v-layout
-            wrap
-          >
-            <v-flex
-              xs3
-              pa-2
+          <v-row no-gutters>
+            <v-col
+              class="pa-2"
+              cols="3"
             >
               APS Model File Location:
-            </v-flex>
-            <v-flex
-              xs5
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="5"
             >
               <v-text-field
                 v-model="apsModelFileLocation"
                 single-line
                 solo
               />
-            </v-flex>
-            <v-flex
-              xs4
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="4"
             >
               <bold-button
                 title="Select Directory"
                 @click="chooseApsModelFileLocation"
               />
-            </v-flex>
-
-            <v-flex
-              xs3
-              pa-2
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col
+              class="pa-2"
+              cols="3"
             >
               FMU Parameters List Location:
-            </v-flex>
-            <v-flex
-              xs5
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="5"
             >
               <v-text-field
                 v-model="fmuParameterListLocation"
                 single-line
                 solo
               />
-            </v-flex>
-            <v-flex
-              xs4
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="4"
             >
               <bold-button
                 title="Select Directory"
                 @click="chooseFmuParametersFileLocation"
               />
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-card>
         <br>
         <v-card
@@ -99,60 +98,62 @@
               Display Settings
             </v-list-item-title>
           </v-list-item>
-          <v-layout>
-            <v-layout
-              wrap
-            >
-              <v-flex
-                pa-2
-              >
-                <v-radio-group
-                  v-model="showZoneNameNumber"
-                  column
-                  label="Show:"
+          <v-row
+            no-gutters
+          >
+            <v-col cols="8">
+              <v-row>
+                <v-col
+                  class="pa-2"
                 >
-                  <v-radio
-                    label="Zone Name"
-                    value="name"
-                  />
-                  <v-radio
-                    label="Zone Number"
-                    value="number"
-                  />
-                </v-radio-group>
-              </v-flex>
-              <v-flex
-                pa-2
-              >
-                <v-radio-group
-                  v-model="showRegionNameNumber"
-                  colum
-                  label="Show:"
+                  <v-radio-group
+                    v-model="showZoneNameNumber"
+                    column
+                    label="Show:"
+                  >
+                    <v-radio
+                      label="Zone Name"
+                      value="name"
+                    />
+                    <v-radio
+                      label="Zone Number"
+                      value="number"
+                    />
+                  </v-radio-group>
+                </v-col>
+                <v-col
+                  class="pa-2"
                 >
-                  <v-radio
-                    label="Region Name"
-                    value="name"
-                  />
-                  <v-radio
-                    label="Region Number"
-                    value="number"
-                  />
-                </v-radio-group>
-              </v-flex>
-              <v-layout
-                pa-2
+                  <v-radio-group
+                    v-model="showRegionNameNumber"
+                    colum
+                    label="Show:"
+                  >
+                    <v-radio
+                      label="Region Name"
+                      value="name"
+                    />
+                    <v-radio
+                      label="Region Number"
+                      value="number"
+                    />
+                  </v-radio-group>
+                </v-col>
+              </v-row>
+              <v-row
+                class="pa-2"
               >
-                <v-flex
-                  md6
+                <v-col
+                  md="6"
                 >
                   <v-select
                     v-model="colorScale"
                     label="Color scale of Gaussian Random Fields"
                     :items="$store.state.options.colorScale.legal"
                   />
-                </v-flex>
-                <v-flex
-                  md6
+                </v-col>
+                <v-col
+                  md="6"
                 >
                   <v-select
                     v-model="faciesColorLibrary"
@@ -160,49 +161,47 @@
                     :items="$store.getters['constants/faciesColors/libraries']"
                   >
                     <template v-slot:item="{ item }">
-                      <v-layout
-                        justify-space-between
-                        column
+                      <v-col
+                        align-self="space-between"
                       >
                         {{ item.text }}
-                        <v-layout
-                          wrap
-                        >
-                          <v-flex
+                        <v-row>
+                          <v-col
                             v-for="color in item.value.colors"
                             :key="color"
+                            class="pa-2"
                             :style="{ backgroundColor: color }"
-                            pa-2
                           />
-                        </v-layout>
-                      </v-layout>
+                        </v-row>
+                      </v-col>
                     </template>
                   </v-select>
-                </v-flex>
-              </v-layout>
-            </v-layout>
-            <v-layout column>
-              <v-flex>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col>
+              <v-col>
                 <v-checkbox
                   v-model="automaticAlphaFieldSelection"
                   label="Automatically assign fields to alpha channels"
                 />
-              </v-flex>
-              <v-flex>
+              </v-col>
+              <v-col>
                 <v-checkbox
                   v-model="automaticFaciesFill"
                   label="Automatically assign facies to templates"
                 />
-              </v-flex>
-              <v-flex>
+              </v-col>
+              <v-col>
                 <v-checkbox
                   v-model="filterZeroProbability"
                   label="Ignore Facies with 0 probability"
                 />
-              </v-flex>
-            </v-layout>
-          </v-layout>
+              </v-col>
+            </v-col>
+          </v-row>
         </v-card>
+        <br>
         <v-card
           v-if="!!$store.getters.gridModel"
           outlined
@@ -216,16 +215,13 @@
           </v-list-item>
           <v-container
             v-if="!$store.getters['parameters/grid/waiting']"
-            grid-list-md
-            text-center
+            class="text-center"
           >
-            <v-layout
-              justify-space-around
-              align-space-around
-              fill
-              wrap
+            <v-row
+              class="fill"
+              justify="space-around"
             >
-              <v-flex xs4>
+              <v-col cols="4">
                 <numeric-field
                   v-model="gridSize.x"
                   discrete
@@ -234,8 +230,8 @@
                   hint="The size of the grid"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   v-model="gridSize.y"
                   discrete
@@ -244,8 +240,8 @@
                   hint="The size of the grid"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   v-model="gridSize.z"
                   discrete
@@ -254,9 +250,9 @@
                   hint="The size of the grid"
                   persistent-hint
                 />
-              </v-flex>
+              </v-col>
               <v-spacer />
-              <v-flex xs4>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBox.x"
                   label="X"
@@ -264,8 +260,8 @@
                   hint="The size of the simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBox.y"
                   label="Y"
@@ -273,8 +269,8 @@
                   hint="The size of the simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBox.z"
                   label="Z"
@@ -282,8 +278,8 @@
                   hint="The size of the simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.gridAzimuth"
                   :ranges="{min: -360, max: 360}"
@@ -292,8 +288,8 @@
                   hint="The angle between the grid, and UTM"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBoxOrigin.x"
                   label="X"
@@ -301,8 +297,8 @@
                   hint="Origin of simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBoxOrigin.y"
                   label="Y"
@@ -310,21 +306,21 @@
                   hint="Origin of simulation box"
                   persistent-hint
                 />
-              </v-flex>
-            </v-layout>
+              </v-col>
+            </v-row>
           </v-container>
           <v-container
             v-else
           >
-            <v-layout
-              justify-center
-              align-center
+            <v-row
+              justify="center"
+              align="center"
             >
               <v-icon
                 x-large
                 v-text="$vuetify.icons.values.refreshSpinner"
               />
-            </v-layout>
+            </v-row>
           </v-container>
         </v-card>
       </v-card-text>
