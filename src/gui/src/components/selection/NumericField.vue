@@ -7,18 +7,6 @@
     :class="__class"
   >
     <v-col
-      v-if="canShowSlider"
-      cols="8"
-    >
-      <v-slider
-        v-model="sliderValue"
-        :disabled="disabled"
-        :max="steps"
-        :step="100/steps"
-      />
-    </v-col>
-    <v-col
-      v-if="canShowField"
       cols="10"
       :class="__class"
     >
@@ -131,12 +119,6 @@ export default class NumericField extends Vue {
   readonly appendIcon!: string
 
   @Prop({ default: false, type: Boolean })
-  readonly slider!: boolean
-
-  @Prop({ default: false, type: Boolean })
-  readonly onlySlider!: boolean
-
-  @Prop({ default: false, type: Boolean })
   readonly persistentHint!: boolean
 
   @Prop({ default: false, type: Boolean })
@@ -175,9 +157,6 @@ export default class NumericField extends Vue {
   @Prop({ default: () => [] })
   readonly additionalRules!: AdditionalRule[]
 
-  @Prop({ default: 10000 })
-  readonly steps!: number
-
   @Prop({ default: 1 })
   readonly arrowStep!: number
 
@@ -185,10 +164,6 @@ export default class NumericField extends Vue {
 
   get updatable () { return NumericField.getUpdatable(this.value) }
   set updatable (value) { this.setUpdatable(value) }
-
-  // @ts-ignore
-  get sliderValue () { return (this.fieldValue - this.min) * this.steps / (this.max - this.min) }
-  set sliderValue (val) { this.fieldValue = val / this.steps * (this.max - this.min) + this.min }
 
   get constants () {
     return notEmpty(this.ranges)
@@ -221,9 +196,6 @@ export default class NumericField extends Vue {
 
   get max (): number { return this.constants.max }
   get min (): number { return this.constants.min }
-
-  get canShowSlider () { return this.slider && this.max < Infinity && this.min > -Infinity }
-  get canShowField () { return this.canShowSlider ? !this.onlySlider : true }
 
   get isFmuUpdatable () {
     return this.fmuUpdatable
