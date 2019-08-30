@@ -13,7 +13,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import {
@@ -30,12 +30,13 @@ import BasePolygonOrder from '@/components/specification/PolygonOrder.vue'
 export default class PolygonOrder<
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > extends Vue {
   @Prop({ required: true })
   readonly value!: T
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<T, S>
+  readonly rule!: TruncationRule<T, S, P>
 
   @Prop({ default: false, type: Boolean })
   readonly overlay: boolean

@@ -7,6 +7,7 @@ import OverlayPolygon, { CENTER, OverlayPolygonSerialization } from '@/utils/dom
 import TruncationRule, {
   TruncationRuleConfiguration,
   TruncationRuleSerialization,
+  TruncationRuleSpecification,
 } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { allSet, getId } from '@/utils/helpers'
@@ -24,12 +25,11 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
   over: string[]
 }
 
-export interface OverlaySpecification<P extends PolygonSpecification = PolygonSpecification> {
+export interface OverlaySpecification<P extends PolygonSpecification = PolygonSpecification> extends TruncationRuleSpecification<P> {
   overlay: OverlayPolygonSpecification[] | null
-  polygons: P[]
 }
 
-export interface OverlaySerialization<P extends PolygonSerialization =PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
+export interface OverlaySerialization<P extends PolygonSerialization = PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
   _useOverlay: boolean
 }
 
@@ -39,7 +39,8 @@ export default abstract class OverlayTruncationRule<
   P extends PolygonSpecification = PolygonSpecification,
 > extends TruncationRule<
   T | OverlayPolygon,
-  S | OverlayPolygonSerialization
+  S | OverlayPolygonSerialization,
+  P | OverlayPolygonSpecification
   > {
   protected _useOverlay: boolean
 

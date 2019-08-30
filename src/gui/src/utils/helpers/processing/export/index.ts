@@ -414,7 +414,7 @@ function addTruncationRuleBayFill (context: Context, doc: Document, parent: Pare
   // slant factors
   const baseKw = `APS_${parent.zone.code}_${parent.region ? parent.region.code : 0}_TRUNC_BAYFILL`
 
-  truncRule.specification.forEach((setting): void => {
+  truncRule.specification.polygons.forEach((setting): void => {
     BackGroundModelElem.append(createElement(doc, setting.name, setting.factor.value,
       setting.factor.updatable ? [{ name: 'kw', value: baseKw + `_${setting.name}` }] : null))
   })

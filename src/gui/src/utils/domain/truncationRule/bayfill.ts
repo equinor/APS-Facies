@@ -2,12 +2,15 @@ import BayfillPolygon, {
   BayfillPolygonSerialization,
   BayfillPolygonSpecification
 } from '@/utils/domain/polygon/bayfill'
-import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
+import TruncationRule, {
+  TruncationRuleConfiguration,
+  TruncationRuleSpecification
+} from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 
-export type BayfillSpecification = BayfillPolygonSpecification[]
+export type BayfillSpecification = TruncationRuleSpecification<BayfillPolygonSpecification>
 
-export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolygonSerialization> {
+export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolygonSerialization, BayfillPolygonSpecification> {
   public constructor (props: TruncationRuleConfiguration<BayfillPolygon>) {
     super(props)
 
@@ -28,9 +31,11 @@ export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolyg
   }
 
   public get specification (): BayfillSpecification {
-    return this.polygons
-      .filter((polygon): boolean => !!polygon.slantFactor)
-      .map((polygon): BayfillPolygonSpecification => polygon.specification)
+    return {
+      polygons: this.polygons
+        .filter((polygon): boolean => !!polygon.slantFactor)
+        .map((polygon): BayfillPolygonSpecification => polygon.specification)
+    }
   }
 
   public get type (): 'bayfill' {

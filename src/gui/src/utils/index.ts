@@ -1,4 +1,3 @@
-import { TruncationRuleType } from '@/utils/domain/truncationRule/base'
 import { Vue } from 'vue/types/vue'
 import flatten from 'flat'
 import uuidv5 from 'uuid/v5'
@@ -14,11 +13,11 @@ import {
 } from '@/utils/domain/bases/interfaces'
 import { RootGetters } from '@/store/typing'
 
-import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
+import { PolygonSpecification } from '@/utils/domain/polygon/base'
+import { TruncationRule } from '@/utils/domain/truncationRule'
+import { TruncationRuleSpecification, TruncationRuleType } from '@/utils/domain/truncationRule/base'
+import { Polygon } from '@/utils/domain'
 import { ID } from '@/utils/domain/types'
-import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
-import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
-import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
 
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 
@@ -62,29 +61,21 @@ function defaultSimulationSettings (): SimulationSettings {
   }
 }
 
-type TruncationRuleSpecification = BayfillSpecification | NonCubicSpecification | CubicSpecification
-
-function simplify (specification: TruncationRuleSpecification, rule: TruncationRule, includeOverlay: boolean = true): TruncationRuleSpecification {
-  if (specification instanceof Array) {
-    return specification
-      .map((spec, index) => {
-        spec.facies = rule.polygons[`${index}`].id
-        return spec
-      })
-  } else {
+function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpecification<P>> (specification: Spec, includeOverlay: boolean = true): Spec {
+  return {
+    ...specification,
+    polygons: specification.polygons
+      // @ts-ignore
+      .filter((polygon: P): boolean => polygon.overlay ? includeOverlay : true)
+      .map((polygon: P): P => {
+        return {
+          ...polygon,
+          facies: polygon.id,
+          fraction: 1,
+        }
+      }),
     // @ts-ignore
-    specification.polygons = specification.polygons
-      .filter((polygon: Polygon): boolean => polygon instanceof OverlayPolygon ? includeOverlay : true)
-      .map((polygon: Polygon): Polygon => {
-        // @ts-ignore
-        polygon.facies = polygon.id
-        polygon.fraction = 1
-        return polygon
-      })
-    if (!includeOverlay) {
-      specification.overlay = null
-    }
-    return specification
+    overlay: includeOverlay ? specification.overlay : null
   }
 }
 
@@ -134,7 +125,7 @@ function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule): Trunc
           inBackground: included,
         }
       }),
-    values: simplify(rule.specification, rule, false),
+    values: simplify(rule.specification, false),
     constantParameters: true,
   }
 }

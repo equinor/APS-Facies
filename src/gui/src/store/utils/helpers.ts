@@ -1,7 +1,7 @@
 import { Context as RootContext, RootGetters, RootState } from '@/store/typing'
 import { Identified, Parent } from '@/utils/domain/bases/interfaces'
 import ZoneRegionDependent from '@/utils/domain/bases/zoneRegionDependent'
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { Dispatch } from 'vuex'
@@ -11,9 +11,10 @@ type Context = RootContext<{}, RootGetters>
 export function usesAllFacies<
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > (
   { rootGetters }: { rootGetters: RootGetters },
-  rule: TruncationRule<T, S>,
+  rule: TruncationRule<T, S, P>,
 ): boolean {
   const available = new Set(rootGetters['facies/selected'].map(({ id }): ID => id))
   const used = rule.polygons.reduce((facies, polygon): Set<ID> => {
@@ -31,9 +32,10 @@ export function usesAllFacies<
 export function isReady<
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > (
   { rootGetters }: Context,
-  rule: TruncationRule<T, S>,
+  rule: TruncationRule<T, S, P>,
 ): boolean {
   return (
     !!rule

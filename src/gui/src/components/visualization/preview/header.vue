@@ -21,7 +21,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import IconButton from '@/components/selection/IconButton.vue'
 
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { usesAllFacies } from '@/store/utils/helpers'
@@ -36,11 +36,12 @@ import { displayError } from '@/utils/helpers/storeInteraction'
 export default class PreviewHeader<
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > extends Vue {
   waitingForSimulation: boolean = false
 
   @Prop({ required: true })
-  readonly value: TruncationRule<T, S>
+  readonly value: TruncationRule<T, S, P>
 
   get _allFaciesUsed () { return usesAllFacies({ rootGetters: this.$store.getters }, this.value) }
 

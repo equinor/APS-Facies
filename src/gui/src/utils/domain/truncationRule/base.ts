@@ -27,9 +27,14 @@ export type TruncationRuleConfiguration<T extends Polygon = Polygon> = Simulatio
   backgroundFields: (GaussianRandomField | null)[]
 }
 
+export interface TruncationRuleSpecification<P extends PolygonSpecification = PolygonSpecification> {
+  polygons: P[]
+}
+
 export default abstract class TruncationRule<
   T extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > extends Simulation implements Named {
   public readonly name: string
 
@@ -71,7 +76,7 @@ export default abstract class TruncationRule<
     return undefined
   }
 
-  public abstract get specification (): PolygonSpecification[] | object
+  public abstract get specification (): TruncationRuleSpecification<P>
 
   public get backgroundFields (): (GaussianRandomField | null)[] { return this._backgroundFields }
 

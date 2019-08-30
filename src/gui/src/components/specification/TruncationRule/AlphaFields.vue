@@ -24,7 +24,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { ID } from '@/utils/domain/types'
 import TruncationRule from '@/utils/domain/truncationRule/base'
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { GaussianRandomField } from '@/utils/domain'
 import { Store } from '@/store/typing'
 
@@ -47,9 +47,10 @@ function defaultChannels (num: number): { channel: number, selected: ID | '' }[]
 export default class AlphaFields<
   T extends Polygon,
   S extends PolygonSerialization,
+  P extends PolygonSpecification,
 > extends Vue {
   @Prop({ required: true })
-  readonly value!: TruncationRule<T, S>
+  readonly value!: TruncationRule<T, S, P>
 
   @Prop({ default: 2 })
   readonly minFields!: number
