@@ -28,7 +28,7 @@
       cols="6"
     >
       <v-icon
-        :diabled="!canRemove"
+        :disabled="!canRemove"
         small
         @click="() => $emit('delete')"
         v-text="'$vuetify.icons.values.remove'"
