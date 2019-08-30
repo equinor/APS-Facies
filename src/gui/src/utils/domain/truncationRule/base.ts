@@ -10,6 +10,7 @@ import GaussianRandomField, { GaussianRandomFieldSerialization } from '@/utils/d
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { getId, identify, allSet } from '@/utils/helpers'
+import { isCloseToUnity } from '@/utils/helpers/simple'
 
 export interface TruncationRuleSerialization<S extends PolygonSerialization=PolygonSerialization> extends SimulationSerialization {
   name: string
@@ -48,7 +49,7 @@ export default abstract class TruncationRule<
       [(): boolean => allSet(this.polygons, 'facies'), 'Some polygons does not have a facies assigned to it'],
       [(): boolean => this.polygons.length > 0, 'No polygons have been specified'],
       [(): boolean => this.normalizedFractions, 'Some fraction of facies does not sum to one'],
-      [(): boolean => this.cumulativeFaciesProbability === 1, 'The sum of facies probabilities does not sum to one'],
+      [(): boolean => isCloseToUnity(this.cumulativeFaciesProbability), 'The sum of facies probabilities does not sum to one'],
       [(): boolean => this.backgroundFields.filter((field): boolean => !!field).length === this._requiredGaussianFields, `The truncation rule must have ${this._requiredGaussianFields} background fields`],
       [(): boolean => this.fields.every((field): boolean => field.valid), 'Some field is invalid'],
     ]
@@ -122,7 +123,7 @@ export default abstract class TruncationRule<
     const sum = this.polygons
       .filter(({ facies }): boolean => getId(facies) === getId(polygon.facies))
       .reduce((sum, polygon): number => polygon.fraction + sum, 0)
-    return sum === 1
+    return isCloseToUnity(sum)
   }
 
   protected toJSON (): TruncationRuleSerialization<S> {

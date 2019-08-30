@@ -44,6 +44,7 @@ import { RootState, Store } from '@/store/typing'
 
 import { hasCurrentParents, notEmpty } from '@/utils'
 import { Facies } from '@/utils/domain'
+import { isCloseToUnity } from '@/utils/helpers/simple'
 
 @Component({
   components: {
@@ -73,7 +74,7 @@ export default class FaciesProbabilityCubeHeader extends Vue {
 
   get disabled () { return this.selectedFacies.length === 0 }
 
-  get shouldNormalize () { return !this.disabled && this.$store.getters['facies/cumulative'] !== 1 }
+  get shouldNormalize () { return !this.disabled && !isCloseToUnity(this.$store.getters['facies/cumulative']) }
 
   validate () {}
 
