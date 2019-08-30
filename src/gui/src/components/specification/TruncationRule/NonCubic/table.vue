@@ -41,6 +41,7 @@
           <polygon-order
             :value="item"
             :rule="value"
+            min-polygons="2"
           />
         </td>
       </tr>

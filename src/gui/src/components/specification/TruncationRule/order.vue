@@ -15,6 +15,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
+import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 
 import {
   OverlayPolygon,
@@ -41,6 +42,9 @@ export default class PolygonOrder<
   @Prop({ default: false, type: Boolean })
   readonly overlay: boolean
 
+  @Prop({ default: 0 })
+  readonly minPolygons: number
+
   get max () {
     return (this.rule.polygons as Polygon[])
       .filter(polygon => polygon.overlay === this.overlay)
@@ -61,7 +65,11 @@ export default class PolygonOrder<
     return this.value.order > this.min
   }
   get canRemove (): boolean {
-    return true
+    return (
+      (this.overlay && this.rule instanceof OverlayTruncationRule)
+        ? this.rule.overlayPolygons
+        : this.rule.backgroundPolygons
+    ).length > this.minPolygons
   }
   get canAdd (): boolean {
     return true
