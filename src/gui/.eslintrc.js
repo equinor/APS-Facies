@@ -17,13 +17,11 @@ module.exports = {
     '@vue/standard',
     'plugin:security/recommended',
     'plugin:vue/recommended',
-    'plugin:vue-types/strongly-recommended',
     '@vue/typescript',
     'plugin:@typescript-eslint/recommended',
   ],
 
   settings: {
-    'vue-types/namespace': ['VueTypes', 'AppTypes'],
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],
@@ -34,6 +32,7 @@ module.exports = {
   // required to lint *.vue files
   plugins: [
     'vue',
+    'vuetify',
     'security',
     // 'html'
     '@typescript-eslint',
@@ -57,6 +56,10 @@ module.exports = {
     'vue/component-name-in-template-casing': ['error', 'kebab-case', {
       ignores: []
     }],
+    'vuetify/no-deprecated-classes': 'error',
+    // To be added when the documentation for v-col / v-row has been improved (made available)
+    'vuetify/grid-unknown-attributes': 'error',
+    'vuetify/no-legacy-grid': 'error',
   },
   overrides: [
     {
@@ -87,7 +90,7 @@ module.exports = {
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
-    ecmaVersion: 2017,
+    ecmaVersion: 2019,
     sourceType: 'module',
     ecmaFeatures: { // See https://github.com/babel/babel-eslint/issues/662
       legacyDecorators: true,

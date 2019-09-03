@@ -1,76 +1,87 @@
 <template>
   <v-container
-    align-start
-    justify-start
+    class="align justify center"
+    fluid
   >
     <grid-model />
     <choose-facies-realization-parameter
       v-if="currentGridModel"
     />
 
-    <v-expansion-panel
+    <v-expansion-panels
       v-if="currentGridModel"
-      v-model="panel"
-      expand
+      v-model="panels"
+      accordion
+      multiple
     >
-      <v-expansion-panel-content>
-        <div slot="header">
-          <h2>Zones and regions</h2>
-        </div>
-        <v-card>
-          <div v-if="currentGridModel">
-            <zone-region />
-          </div>
-          <div v-else>
+      <v-expansion-panel
+        expand
+      >
+        <v-expansion-panel-header>
+          <section-title>Zones and Regions</section-title>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <zone-region
+            v-if="currentGridModel"
+          />
+          <span v-else>
             Selection of zones and regions is not available until Grid Model is selected
-          </div>
-        </v-card>
-      </v-expansion-panel-content>
-
-      <v-expansion-panel-content>
-        <div slot="header">
-          <h2>Facies</h2>
-        </div>
-        <v-card>
-          <div v-if="currentGridModel">
-            <div
+          </span>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel>
+        <v-expansion-panel-header>
+          <section-title>Facies</section-title>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <v-row
+            v-if="currentGridModel"
+          >
+            <v-row
               v-if="hasWellParameters"
+              no-gutters
             >
-              <choose-blocked-well-parameter />
-              <choose-blocked-well-log-parameter
-                v-if="hasBlockedWellParameter"
-              />
-              <div
-                v-if="hasBlockedWellLogParameter"
-              >
-                <facies-selection />
-              </div>
-            </div>
-            <div
-              v-else
-            >
-              <facies-selection />
-            </div>
-          </div>
+              <v-col cols="6">
+                <choose-blocked-well-parameter />
+              </v-col>
+              <v-col cols="6">
+                <choose-blocked-well-log-parameter
+                  v-if="hasBlockedWellParameter"
+                />
+              </v-col>
+              <v-col cols="12">
+                <facies-selection
+                  v-if="hasBlockedWellLogParameter"
+                />
+              </v-col>
+            </v-row>
+          </v-row>
           <div v-else>
             Selection of facies is not available until Grid Model is selected
           </div>
-        </v-card>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-container>
 </template>
 
-<script>
-import ZoneRegion from '@/components/selection/ZoneRegionSelection'
-import GridModel from '@/components/selection/dropdown/ChooseGridModel'
-import FaciesSelection from '@/components/selection/FaciesSelection'
-import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter'
-import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter'
-import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import ZoneRegion from '@/components/selection/ZoneRegionSelection.vue'
+import GridModel from '@/components/selection/dropdown/ChooseGridModel.vue'
+import FaciesSelection from '@/components/selection/FaciesSelection.vue'
+import ChooseBlockedWellParameter from '@/components/selection/dropdown/ChooseBlockedWellParameter.vue'
+import ChooseBlockedWellLogParameter from '@/components/selection/dropdown/ChooseBlockedWellLogParameter.vue'
+import ChooseFaciesRealizationParameter from '@/components/selection/dropdown/ChooseFaciesRealizationParameter.vue'
+import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
+
+import { ID } from '@/utils/domain/types'
+import { Optional } from '@/utils/typing'
+
+@Component({
   components: {
+    SectionTitle,
     ChooseFaciesRealizationParameter,
     ZoneRegion,
     GridModel,
@@ -78,34 +89,31 @@ export default {
     ChooseBlockedWellLogParameter,
     FaciesSelection
   },
+})
+export default class ElementSelection extends Vue {
+  disabled: boolean = false
+  readonly: boolean = false
 
-  data () {
-    return {
-      toggledZoneRegion: false,
-      disabled: false,
-      readonly: false
-    }
-  },
+  get panels (): number[] { return this.$store.getters['panels/selection'] }
+  set panels (indices) { this.$store.dispatch('panels/change', { type: 'selection', indices }) }
 
-  computed: {
-    hasWellParameters () {
-      return this.$store.state.parameters.blockedWell.available.length > 0
-    },
-    hasBlockedWellLogParameter () {
-      return !!this.$store.getters.blockedWellLogParameter
-    },
-    hasBlockedWellParameter () {
-      return !!this.$store.getters.blockedWellParameter
-    },
-    currentGridModel () {
-      return this.$store.state.gridModels.current
-    },
-    panel () {
-      return this.currentGridModel
-        ? [true, true]
-        : [false, false]
-    }
+  get hasWellParameters (): boolean {
+    return this.$store.state.parameters.blockedWell.available.length > 0
   }
-
+  get hasBlockedWellLogParameter (): boolean {
+    return !!this.$store.getters.blockedWellLogParameter
+  }
+  get hasBlockedWellParameter (): boolean {
+    return !!this.$store.getters.blockedWellParameter
+  }
+  get currentGridModel (): Optional<ID> {
+    return this.$store.state.gridModels.current
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+  .v-expansion-panel-content {
+    overflow: auto;
+  }
+</style>

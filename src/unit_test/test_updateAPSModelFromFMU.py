@@ -1,8 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from bin.updateAPSModelFromFMU import updateAPSModelFromFMU
+from src.rms_jobs.updateAPSModelFromFMU import updateAPSModelFromFMU
 from src.utils.constants.simple import Debug
 from src.unit_test.helpers import assert_identical_files
+
 
 def test_update_aps_model():
     input_aps_model_file = 'testData_updateAPSModel/APS.xml'

@@ -12,24 +12,26 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import { Store } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import Facies from '@/utils/domain/facies/local'
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import FaciesSpecificationBase from './base.vue'
-
-import { updateFacies } from '@/store/utils'
 
 @Component({
   components: {
     FaciesSpecificationBase,
   }
 })
-export default class FaciesSpecification<P extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class FaciesSpecification<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
   readonly value: Polygon
 
   @Prop({ required: true })
-  readonly rule: TruncationRule<P, S>
+  readonly rule: TruncationRule<T, S, P>
 
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean
@@ -37,7 +39,11 @@ export default class FaciesSpecification<P extends Polygon, S extends PolygonSer
   async updateFacies (faciesId: ID) {
     const facies = (this.$store as Store).getters['facies/byId'](faciesId)
     if (facies) {
-      await updateFacies(this.$store.dispatch, this.rule, this.value, facies, false)
+      await this.$store.dispatch('truncationRules/updateFacies', {
+        rule: this.rule,
+        polygon: this.value,
+        facies,
+      })
     }
   }
 }

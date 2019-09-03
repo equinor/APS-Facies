@@ -7,53 +7,59 @@
     @blur="$v.fieldName.$touch()"
   />
 </template>
-<script>
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+
 import { required } from 'vuelidate/lib/validators'
-import { AppTypes } from '@/utils/typing'
+import { GaussianRandomField } from '@/utils/domain'
+import { Optional } from '@/utils/typing'
 
-export default {
-  props: {
-    value: AppTypes.gaussianRandomField.isRequired,
-  },
-
-  data () {
+@Component({
+  validations () {
     return {
-      fieldName: null,
-    }
-  },
-
-  validations: {
-    fieldName: {
-      required,
-      isUnique (value) {
-        const current = this.value.id
-        return !Object.values(this.fields).some(({ name, id }) => name === value && id !== current)
+      fieldName: {
+        required,
+        isUnique (value) {
+          // @ts-ignore
+          const current = this.value.id
+          // @ts-ignore
+          return !this.fields.some(({ name, id }) => name === value && id !== current)
+        },
       },
-    },
-  },
-
-  computed: {
-    fields () { return this.$store.state.gaussianRandomFields.fields },
-    name () { return this.value.name },
-    errors () {
-      const errors = []
-      if (!this.$v.fieldName.$dirty) return errors
-      !this.$v.fieldName.required && errors.push('Is required')
-      !this.$v.fieldName.isUnique && errors.push('Must be unique')
-      return errors
-    },
-  },
-
-  watch: {
-    fieldName (value) {
-      if (!this.$v.fieldName.$invalid) {
-        this.$store.dispatch('gaussianRandomFields/changeName', { grfId: this.value.id, name: value })
-      }
     }
   },
+})
+export default class GaussianFieldName extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
+
+  fieldName: Optional<string> = null
+
+  get fields () { return this.$store.getters['fields'] }
+
+  get name () { return this.value.name }
+
+  get errors () {
+    const errors: string[] = []
+    // @ts-ignore
+    if (!this.$v.fieldName.$dirty) return errors
+    // @ts-ignore
+    !this.$v.fieldName.required && errors.push('Is required')
+    // @ts-ignore
+    !this.$v.fieldName.isUnique && errors.push('Must be unique')
+    return errors
+  }
+
+  @Watch('fieldName')
+  onNameChange (value: string) {
+    // @ts-ignore
+    if (!this.$v.fieldName.$invalid) {
+      this.$store.dispatch('gaussianRandomFields/changeName', { field: this.value, name: value })
+    }
+  }
 
   mounted () {
     this.fieldName = this.name
-  },
+  }
 }
 </script>

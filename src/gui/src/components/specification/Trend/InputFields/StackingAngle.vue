@@ -1,27 +1,32 @@
 <template>
   <storable-numeric-field
-    :grf-id="grfId"
+    :value="value"
     property-type="angle"
     sub-property-type="stacking"
     value-type="stacking"
     label="Stacking angle"
     unit="°"
     trend
+    @update:error="e => propagateError(e)"
   />
 </template>
 
-<script>
-import { AppTypes } from '@/utils/typing'
-import StorableNumericField from '@/components/specification/StorableNumericField'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { GaussianRandomField } from '@/utils/domain'
+import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 
-export default {
+@Component({
   components: {
     StorableNumericField,
   },
+})
+export default class StackingAngle extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
-
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
+  }
 }
 </script>

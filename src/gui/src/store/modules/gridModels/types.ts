@@ -1,6 +1,7 @@
-export type GridModel = string
+import { ItemsState } from '@/utils/domain/bases/baseItem'
+import GridModel from '@/utils/domain/gridModel'
+import { ID } from '@/utils/domain/types'
 
-export interface GridModelsState {
-  available: GridModel[]
-  current: GridModel | null
+export interface GridModelsState extends ItemsState<GridModel> {
+  current: ID | null
 }

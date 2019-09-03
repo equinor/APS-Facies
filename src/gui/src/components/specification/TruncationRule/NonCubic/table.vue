@@ -1,42 +1,31 @@
 <template>
-  <v-data-table
+  <base-table
     :headers="headers"
     :items="polygons"
     :custom-sort="ordering"
-    item-key="name"
-    class="elevation-1"
-    hide-actions
     @input.stop
   >
     <template
-      slot="headerCell"
-      slot-scope="props"
-    >
-      <optional-help-item
-        :value="props.header"
-      />
-    </template>
-    <template
-      slot="items"
-      slot-scope="props"
+      v-slot:item="{ item }"
     >
       <tr>
-        <td class="text-xs-left">
+        <td class="text-left">
           <numeric-field
-            :value="props.item.angle"
+            :value="item.angle"
             :ranges="{min: -180.0, max: 180.0}"
+            :disabled="isLast(item)"
             fmu-updatable
             enforce-ranges
             allow-negative
             use-modulus
             unit="°"
             label=""
-            @input="angle => updateAngle(props.item, angle)"
+            @input="angle => updateAngle(item, angle)"
           />
         </td>
-        <td class="text-xs-left">
+        <td class="text-left">
           <background-facies-specification
-            :value="props.item"
+            :value="item"
             :rule="value"
           />
         </td>
@@ -44,22 +33,24 @@
           v-if="hasMultipleFaciesSpecified"
         >
           <polygon-fraction-field
-            :value="props.item"
+            :value="item"
             :rule="value"
           />
         </td>
         <td>
           <polygon-order
-            :value="props.item"
+            :value="item"
             :rule="value"
+            min-polygons="2"
           />
         </td>
       </tr>
     </template>
-  </v-data-table>
+  </base-table>
 </template>
 
 <script lang="ts">
+import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import FractionField from '@/components/selection/FractionField.vue'
@@ -77,6 +68,7 @@ import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 
 @Component({
   components: {
+    BaseTable,
     BackgroundFaciesSpecification,
     PolygonOrder,
     OptionalHelpItem,
@@ -100,33 +92,22 @@ export default class NonCubicTable extends Vue {
     return [
       {
         text: 'Angle',
-        align: 'left',
-        sortable: false,
         value: 'angle',
-        help: '',
       },
       {
         text: 'Facies',
-        align: 'left',
-        sortable: false,
         value: 'facies',
-        help: '',
       },
       ...(this.hasMultipleFaciesSpecified ? [
         {
           text: 'Probability Fraction',
-          align: 'left',
-          sortable: false,
           value: 'fraction',
           help: 'The fraction of the facies probability assigned to the individual polygon',
         },
       ] : []),
       {
         text: 'Order',
-        align: 'left',
-        sortable: false,
         value: 'order',
-        help: '',
       }
     ]
   }
@@ -139,6 +120,10 @@ export default class NonCubicTable extends Vue {
 
   updateAngle (item: NonCubicPolygon, value: number) {
     return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
+  }
+
+  isLast (polygon: NonCubicPolygon): boolean {
+    return this.polygons.findIndex(({ id }) => id === polygon.id) === (this.polygons.length - 1)
   }
 }
 </script>

@@ -1,26 +1,31 @@
 <template>
-  <v-layout>
-    <v-flex
+  <v-row
+    align="center"
+    justify="center"
+    no-gutters
+  >
+    <v-col
       v-for="item in alphas"
       :key="item.channel"
-      pa-1
+      class="pa-0"
     >
       <alpha-selection
         :channel="item.channel"
         :value="item.selected"
         :rule="value"
-        group=""
         @input="val => update(item, val)"
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { ID } from '@/utils/domain/types'
-import { TruncationRule } from '@/utils/domain'
+import TruncationRule from '@/utils/domain/truncationRule/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import { GaussianRandomField } from '@/utils/domain'
 import { Store } from '@/store/typing'
 
 import AlphaSelection from './AlphaSelection.vue'
@@ -39,9 +44,13 @@ function defaultChannels (num: number): { channel: number, selected: ID | '' }[]
     AlphaSelection,
   },
 })
-export default class AlphaFields extends Vue {
+export default class AlphaFields<
+  T extends Polygon,
+  S extends PolygonSerialization,
+  P extends PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
-  readonly value!: TruncationRule
+  readonly value!: TruncationRule<T, S, P>
 
   @Prop({ default: 2 })
   readonly minFields!: number
@@ -58,9 +67,9 @@ export default class AlphaFields extends Vue {
       : defaultChannels(this.minFields)
   }
 
-  update ({ channel }: { channel: number }, fieldId: ID) {
+  update ({ channel }: { channel: number }, fieldId: ID | GaussianRandomField) {
     const field = fieldId
-      ? (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+      ? (this.$store as Store).state.gaussianRandomFields.available[`${fieldId}`]
       : null
     return this.$store.dispatch('truncationRules/updateBackgroundField', {
       index: channel - 1,

@@ -1,45 +1,44 @@
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
 import BayfillPolygon, {
   BayfillPolygonSerialization,
   BayfillPolygonSpecification
 } from '@/utils/domain/polygon/bayfill'
-import TruncationRule, { TruncationRuleConfiguration } from '@/utils/domain/truncationRule/base'
+import TruncationRule, {
+  TruncationRuleConfiguration,
+  TruncationRuleSpecification
+} from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 
-export type BayfillSpecification = BayfillPolygonSpecification[]
+export type BayfillSpecification = TruncationRuleSpecification<BayfillPolygonSpecification>
 
-export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolygonSerialization> {
+export default class Bayfill extends TruncationRule<BayfillPolygon, BayfillPolygonSerialization, BayfillPolygonSpecification> {
   public constructor (props: TruncationRuleConfiguration<BayfillPolygon>) {
     super(props)
 
-    this._constraints.push(...[
-      (): boolean => this.fields.length === 3,
-      (): boolean => this.polygons.length === 5,
-      (): boolean => (new Set(this.polygons.map(({ facies }): ID | null => facies ? facies.id : facies))).size === 5,
-      (): boolean => {
+    this._requiredGaussianFields = 3
+
+    const additionalConstraints: [() => boolean, string][] = [
+      [(): boolean => this.fields.length === this._requiredGaussianFields, `3 Gaussian Random Fields must be used (${this.fields.length} was given)`],
+      [(): boolean => this.polygons.length === 5, 'A Bayfill truncation rule must have exactly 5 polygons'],
+      [(): boolean => (new Set(this.polygons.map(({ facies }): ID | null => facies ? facies.id : facies))).size === 5, 'A Bayfill truncation rule must use exactly 5 facies'],
+      [(): boolean => {
         return this.polygons.reduce((numHasFacies, polygon): number => {
           if (polygon.facies) numHasFacies += 1
           return numHasFacies
         }, 0) === 5
-      }
-    ])
-  }
-
-  public get fields (): GaussianRandomField[] {
-    return Object.values(this._backgroundFields)
-  }
-
-  public get backgroundFields (): GaussianRandomField[] {
-    return this.fields
+      }, 'All facies of a Bayfill truncation rule must be unique'],
+    ]
+    this._constraints.push(...additionalConstraints)
   }
 
   public get specification (): BayfillSpecification {
-    return this.polygons
-      .filter((polygon): boolean => !!polygon.slantFactor)
-      .map((polygon): BayfillPolygonSpecification => polygon.specification)
+    return {
+      polygons: this.polygons
+        .filter((polygon): boolean => !!polygon.slantFactor)
+        .map((polygon): BayfillPolygonSpecification => polygon.specification)
+    }
   }
 
-  public get type (): string {
+  public get type (): 'bayfill' {
     return 'bayfill'
   }
 }

@@ -3,6 +3,7 @@
     v-model="dialog"
     :max-width="options.width"
     @keydown.esc="cancel()"
+    @keydown.enter="agree()"
   >
     <v-toolbar
       :color="options.color"
@@ -20,15 +21,15 @@
       <v-card-actions>
         <v-spacer />
         <v-btn
-          color="primary darken-1"
-          flat
+          color="warning darken-1"
+          text
           @click.native="agree()"
         >
           Yes
         </v-btn>
         <v-btn
           color="grey"
-          flat
+          text
           @click.native="cancel()"
         >
           Cancel
@@ -38,7 +39,7 @@
   </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
 /**
  * Vuetify Confirm Dialog component
  * Borrowed from: https://gist.github.com/eolant/ba0f8a5c9135d1a146e1db575276177d
@@ -61,40 +62,45 @@
  *   this.$root.$confirm = this.$refs.confirm.open;
  * }
  */
-export default {
-  data () {
-    return {
-      dialog: false,
-      resolve: null,
-      reject: null,
-      message: null,
-      title: null,
-      options: {
-        color: 'primary',
-        width: 290,
-      }
-    }
-  },
+import { Component, Vue } from 'vue-property-decorator'
 
-  methods: {
-    open (title, message, options) {
-      this.dialog = true
-      this.title = title
-      this.message = message
-      this.options = Object.assign(this.options, options)
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve
-        this.reject = reject
-      })
-    },
-    agree () {
-      this.resolve(true)
-      this.dialog = false
-    },
-    cancel () {
-      this.resolve(false)
-      this.dialog = false
-    },
-  },
+import { APSError } from '@/utils/domain/errors'
+import { DialogOptions } from '@/utils/domain/bases/interfaces'
+import { Color } from '@/utils/domain/facies/helpers/colors'
+
+@Component
+export default class ConfirmationDialog extends Vue {
+  dialog: boolean = false
+  resolve: ((answer: boolean) => void) | null = null
+  reject: ((answer: boolean) => void) | null = null
+  message: string | null = null
+  title: string | null = null
+  options: DialogOptions = {
+    color: (this.$vuetify.theme.themes.light.warning as Color),
+    width: 290,
+  }
+
+  open (title: string, message: string, options: DialogOptions = {}): Promise<boolean> {
+    this.dialog = true
+    this.title = title
+    this.message = message
+    this.options = Object.assign(this.options, options)
+    return new Promise((resolve: (answer: boolean) => void, reject: (answer: boolean) => void) => {
+      this.resolve = resolve
+      this.reject = reject
+    })
+  }
+  agree () {
+    if (!this.resolve) throw new APSError('resolve has not been set')
+
+    this.resolve(true)
+    this.dialog = false
+  }
+  cancel () {
+    if (!this.resolve) throw new APSError('resolve has not been set')
+
+    this.resolve(false)
+    this.dialog = false
+  }
 }
 </script>

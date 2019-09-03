@@ -1,77 +1,110 @@
 <template>
-  <div>
-    <h2>{{ title }}</h2>
-    <facies-probability-cube
-      v-if="hasFacies"
-    />
-    <truncation-rule />
-    <gaussian-random-fields />
-  </div>
+  <v-container
+    class="align justify center"
+    fluid
+  >
+    <v-expansion-panels
+      v-model="expanded"
+      accordion
+      multiple
+    >
+      <section-title>{{ title }}</section-title>
+      <v-expansion-panel
+        v-tooltip.bottom-start="!hasFacies && 'No Facies has been selected'"
+        :disabled="!hasFacies"
+      >
+        <v-expansion-panel-header>
+          <section-title>Probabilities for Facies</section-title>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <facies-probability-cube />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <v-expansion-panel
+        v-tooltip.bottom="!hasEnoughFacies && 'Too few Facies has been selected'"
+        :disabled="!hasEnoughFacies"
+      >
+        <v-expansion-panel-header>
+          <section-title>Truncation Rule</section-title>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+          <truncation-rule />
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+      <gaussian-random-fields />
+    </v-expansion-panels>
+  </v-container>
 </template>
 
-<script>
-import { mapState } from 'vuex'
+<script lang="ts">
+import { Component, Vue, Watch } from 'vue-property-decorator'
 
-import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple'
-import FaciesProbabilityCube from '@/components/specification/FaciesProbabilityCube'
-import TruncationRule from '@/components/specification/TruncationRule'
+import GaussianRandomFields from '@/components/specification/GaussianRandomField/multiple.vue'
+import FaciesProbabilityCube from '@/components/specification/FaciesProbabilityCube/index.vue'
+import TruncationRule from '@/components/specification/TruncationRule/index.vue'
+import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
 import { isEmpty } from '@/utils'
 
-export default {
+@Component({
   components: {
+    IconButton,
+    SectionTitle,
     FaciesProbabilityCube,
     GaussianRandomFields,
     TruncationRule,
   },
+})
+export default class ElementSettings extends Vue {
+  get options () {
+    const showNameOrNumber = this.$store.state.options.showNameOrNumber
+    return {
+      zone: showNameOrNumber.zone.value,
+      region: showNameOrNumber.region.value,
+    }
+  }
 
-  computed: {
-    ...mapState({
-      options: state => {
-        return {
-          zone: state.options.showNameOrNumber.zone.show,
-          region: state.options.showNameOrNumber.region.show,
-        }
-      }
-    }),
-    title () { return `Settings for ${this.zoneName}`.concat(this.useRegions ? ` / ${this.regionName}` : '') },
-    useRegions () {
-      return this.$store.state.regions.use
-    },
-    // TODO: Combine common logic in zone/regionName
-    zoneName () {
-      const current = this.$store.getters.zone
-      return isEmpty(current)
-        ? ''
-        : this.options.zone === 'name'
-          ? current.name
-          : `Zone ${current.code}`
-    },
-    regionName () {
-      const current = this.$store.getters.region
-      return isEmpty(current)
-        ? ''
-        : this.options.region === 'name'
-          ? current.name
-          : `Region ${current.code}`
-    },
-    zoneModels () {
-      const selectedZones = this.$store.getters['zones/selected']
-      // const currentZone = this.$store.state.zones.current
+  get expanded (): number[] { return this.$store.getters['panels/settings'] }
+  set expanded (indices) { this.$store.dispatch('panels/change', { type: 'settings', indices }) }
 
-      if (selectedZones == null) {
-        return []
-      } else {
-        const models = []
-        const zones = this.$store.state.zones.available
-        selectedZones.forEach(function (zoneId) {
-          const zone = zones[`${zoneId}`]
-          models.push({ zoneNumber: zone.code, regionNumber: 0 })
-        })
-        return models
-      }
-    },
-    hasFacies () { return Object.keys(this.$store.state.facies.available).length > 0 },
-  },
+  get title () { return `Settings for ${this.zoneName}`.concat(this.useRegions ? ` / ${this.regionName}` : '') }
+
+  get useRegions () {
+    return this.$store.state.regions.use
+  }
+
+  // TODO: Combine common logic in zone/regionName
+  get zoneName () {
+    const current = this.$store.getters.zone
+    return isEmpty(current)
+      ? ''
+      : this.options.zone === 'name'
+        ? current.name
+        : `Zone ${current.code}`
+  }
+
+  get regionName () {
+    const current = this.$store.getters.region
+    return isEmpty(current)
+      ? ''
+      : this.options.region === 'name'
+        ? current.name
+        : `Region ${current.code}`
+  }
+
+  get _facies () { return this.$store.getters['facies/selected'] }
+
+  get hasFacies () { return this._facies.length > 0 }
+
+  get hasEnoughFacies () { return this._facies.length >= 2 /* TODO: Use a constant */ }
+
+  @Watch('_facies', { deep: true })
+  async truncationRuleVisibility () {
+    await this.$store.dispatch(`panels/${this.hasEnoughFacies ? 'open' : 'close'}`, { type: 'settings', panel: 'truncationRule' })
+    if (!this.hasFacies) {
+      await this.$store.dispatch('panels/close', { type: 'settings', panel: ['truncationRule', 'faciesProbability'] })
+    }
+  }
 }
 </script>

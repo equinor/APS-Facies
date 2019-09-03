@@ -3,15 +3,18 @@
     v-model="dialog"
     persistent
     max-width="800"
+    scrollable
   >
-    <v-btn
-      slot="activator"
-      outline
-      color="primary"
-      dark
-    >
-      Project Settings
-    </v-btn>
+    <template v-slot:activator="{ on }">
+      <v-btn
+        outlined
+        color="primary"
+        dark
+        v-on="on"
+      >
+        Project Settings
+      </v-btn>
+    </template>
     <v-card>
       <v-card-title
         class="headline"
@@ -19,168 +22,206 @@
         {{ title }}
       </v-card-title>
       <v-card-text>
-        <fieldset>
-          <legend>
-            Folder Settings:
-          </legend>
-          <v-layout
-            row
-            wrap
-          >
-            <v-flex
-              xs3
-              pa-2
+        <v-card
+          outlined
+        >
+          <v-list-item>
+            <v-list-item-title
+              class="headline"
+            >
+              Folder Settings
+            </v-list-item-title>
+          </v-list-item>
+          <v-row no-gutters>
+            <v-col
+              class="pa-2"
+              cols="3"
             >
               APS Model File Location:
-            </v-flex>
-            <v-flex
-              xs5
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="5"
             >
               <v-text-field
                 v-model="apsModelFileLocation"
                 single-line
                 solo
               />
-            </v-flex>
-            <v-flex
-              xs4
-              pa-2
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="4"
             >
               <bold-button
                 title="Select Directory"
-                @click="chooseAPSModelFileLocation"
+                @click="chooseApsModelFileLocation"
               />
-            </v-flex>
-
-            <v-flex
-              xs3
-            >
-              Truncation Rule File Location:
-            </v-flex>
-            <v-flex
-              xs5
-            >
-              <v-text-field
-                v-model="truncationRuleLocation"
-                single-line
-                solo
-              />
-            </v-flex>
-            <v-flex
-              xs4
-            >
-              <bold-button
-                title="Select Directory"
-                @click="chooseTruncationRuleFileLocation"
-              />
-            </v-flex>
-
-            <v-flex
-              xs3
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col
+              class="pa-2"
+              cols="3"
             >
               FMU Parameters List Location:
-            </v-flex>
-            <v-flex
-              xs5
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="5"
             >
               <v-text-field
                 v-model="fmuParameterListLocation"
                 single-line
                 solo
               />
-            </v-flex>
-            <v-flex
-              xs4
+            </v-col>
+            <v-col
+              class="pa-2"
+              cols="4"
             >
               <bold-button
                 title="Select Directory"
-                @click="chooseFMUparametersFileLocation"
+                @click="chooseFmuParametersFileLocation"
               />
-            </v-flex>
-          </v-layout>
-        </fieldset>
+            </v-col>
+          </v-row>
+        </v-card>
         <br>
-        <fieldset>
-          <legend>
-            Display Settings:
-          </legend>
-          <v-layout>
-            <v-flex
-              pa-2
+        <v-card
+          outlined
+        >
+          <v-list-item>
+            <v-list-item-title
+              class="headline"
             >
-              <v-radio-group
-                v-model="showZoneNameNumber"
-                column
-                label="Show:"
+              Display Settings
+            </v-list-item-title>
+          </v-list-item>
+          <v-row
+            no-gutters
+          >
+            <v-col cols="8">
+              <v-row>
+                <v-col
+                  class="pa-2"
+                >
+                  <v-radio-group
+                    v-model="showZoneNameNumber"
+                    column
+                    label="Show:"
+                  >
+                    <v-radio
+                      label="Zone Name"
+                      value="name"
+                    />
+                    <v-radio
+                      label="Zone Number"
+                      value="number"
+                    />
+                  </v-radio-group>
+                </v-col>
+                <v-col
+                  class="pa-2"
+                >
+                  <v-radio-group
+                    v-model="showRegionNameNumber"
+                    colum
+                    label="Show:"
+                  >
+                    <v-radio
+                      label="Region Name"
+                      value="name"
+                    />
+                    <v-radio
+                      label="Region Number"
+                      value="number"
+                    />
+                  </v-radio-group>
+                </v-col>
+              </v-row>
+              <v-row
+                class="pa-2"
               >
-                <v-radio
-                  label="Zone Name"
-                  value="name"
-                />
-                <v-radio
-                  label="Zone Number"
-                  value="number"
-                />
-              </v-radio-group>
-            </v-flex>
-            <v-flex
-              pa-2
-            >
-              <v-radio-group
-                v-model="showRegionNameNumber"
-                colum
-                label="Show:"
-              >
-                <v-radio
-                  label="Region Name"
-                  value="name"
-                />
-                <v-radio
-                  label="Region Number"
-                  value="number"
-                />
-              </v-radio-group>
-            </v-flex>
-            <v-layout column>
-              <v-flex>
+                <v-col
+                  md="6"
+                >
+                  <v-select
+                    v-model="colorScale"
+                    label="Color scale of Gaussian Random Fields"
+                    :items="$store.state.options.colorScale.legal"
+                  />
+                </v-col>
+                <v-col
+                  md="6"
+                >
+                  <v-select
+                    v-model="faciesColorLibrary"
+                    label="The color library for Facies"
+                    :items="$store.getters['constants/faciesColors/libraries']"
+                  >
+                    <template v-slot:item="{ item }">
+                      <v-col
+                        align-self="space-between"
+                      >
+                        {{ item.text }}
+                        <v-row>
+                          <v-col
+                            v-for="color in item.value.colors"
+                            :key="color"
+                            class="pa-2"
+                            :style="{ backgroundColor: color }"
+                          />
+                        </v-row>
+                      </v-col>
+                    </template>
+                  </v-select>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col>
+              <v-col>
                 <v-checkbox
                   v-model="automaticAlphaFieldSelection"
                   label="Automatically assign fields to alpha channels"
                 />
-              </v-flex>
-              <v-flex>
+              </v-col>
+              <v-col>
                 <v-checkbox
                   v-model="automaticFaciesFill"
                   label="Automatically assign facies to templates"
                 />
-              </v-flex>
-              <v-flex>
+              </v-col>
+              <v-col>
                 <v-checkbox
                   v-model="filterZeroProbability"
                   label="Ignore Facies with 0 probability"
                 />
-              </v-flex>
-            </v-layout>
-          </v-layout>
-        </fieldset>
-        <fieldset
+              </v-col>
+            </v-col>
+          </v-row>
+        </v-card>
+        <br>
+        <v-card
           v-if="!!$store.getters.gridModel"
+          outlined
         >
-          <legend>Grid model</legend>
-          <v-container
-            v-if="!$store.getters['simulationSettings/waiting']"
-            grid-list-md
-            text-xs-center
-          >
-            <v-layout
-              justify-space-around
-              align-space-around
-              row
-              fill
-              wrap
+          <v-list-item>
+            <v-list-item-title
+              class="headline"
             >
-              <v-flex xs4>
+              Grid model
+            </v-list-item-title>
+          </v-list-item>
+          <v-container
+            v-if="!$store.getters['parameters/grid/waiting']"
+            class="text-center"
+          >
+            <v-row
+              class="fill"
+              justify="space-around"
+            >
+              <v-col cols="4">
                 <numeric-field
                   v-model="gridSize.x"
                   discrete
@@ -189,8 +230,8 @@
                   hint="The size of the grid"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   v-model="gridSize.y"
                   discrete
@@ -199,8 +240,8 @@
                   hint="The size of the grid"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   v-model="gridSize.z"
                   discrete
@@ -209,9 +250,9 @@
                   hint="The size of the grid"
                   persistent-hint
                 />
-              </v-flex>
+              </v-col>
               <v-spacer />
-              <v-flex xs4>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBox.x"
                   label="X"
@@ -219,8 +260,8 @@
                   hint="The size of the simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBox.y"
                   label="Y"
@@ -228,8 +269,8 @@
                   hint="The size of the simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBox.z"
                   label="Z"
@@ -237,8 +278,8 @@
                   hint="The size of the simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.gridAzimuth"
                   :ranges="{min: -360, max: 360}"
@@ -247,8 +288,8 @@
                   hint="The angle between the grid, and UTM"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBoxOrigin.x"
                   label="X"
@@ -256,8 +297,8 @@
                   hint="Origin of simulation box"
                   persistent-hint
                 />
-              </v-flex>
-              <v-flex xs4>
+              </v-col>
+              <v-col cols="4">
                 <numeric-field
                   :value="simulationSettings.simulationBoxOrigin.y"
                   label="Y"
@@ -265,22 +306,26 @@
                   hint="Origin of simulation box"
                   persistent-hint
                 />
-              </v-flex>
-            </v-layout>
+              </v-col>
+            </v-row>
           </v-container>
-          <v-layout
+          <v-container
             v-else
-            justify-center
           >
-            <v-icon
-              x-large
-              v-text="$vuetify.icons.refreshSpinner"
-            />
-          </v-layout>
-        </fieldset>
+            <v-row
+              justify="center"
+              align="center"
+            >
+              <v-icon
+                x-large
+                v-text="$vuetify.icons.values.refreshSpinner"
+              />
+            </v-row>
+          </v-container>
+        </v-card>
       </v-card-text>
       <v-card-actions>
-        Version: {{ version }}
+        {{ version && `Version: ${version}` }}
         <v-spacer />
         <bold-button
           title="Cancel"
@@ -295,33 +340,21 @@
   </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue, Watch } from 'vue-property-decorator'
+
 import rms from '@/api/rms'
 
-import BoldButton from '@/components/baseComponents/BoldButton'
-import NumericField from '@/components/selection/NumericField'
+import BoldButton from '@/components/baseComponents/BoldButton.vue'
+import NumericField from '@/components/selection/NumericField.vue'
 
-export default {
+import ColorLibrary from '@/utils/domain/colorLibrary'
+import { Optional } from '@/utils/typing'
 
-  components: {
-    NumericField,
-    BoldButton
-  },
+import { displayWarning } from '@/utils/helpers/storeInteraction'
 
-  data () {
-    return {
-      dialog: false,
-      apsModelFileLocation: '',
-      truncationRuleLocation: '',
-      fmuParameterListLocation: '',
-      showZoneNameNumber: '',
-      showRegionNameNumber: '',
-      automaticAlphaFieldSelection: '',
-      automaticFaciesFill: '',
-      filterZeroProbability: false,
-    }
-  },
-
+@Component({
+  // @ts-ignore
   asyncComputed: {
     async title () {
       const name = await rms.projectName()
@@ -329,78 +362,83 @@ export default {
     },
   },
 
-  computed: {
-    simulationSettings () {
-      return this.$store.getters.simulationSettings()
-    },
-    gridSize () {
-      return this.simulationSettings.gridSize
-    },
-    version () {
-      return process.env.VUE_APP_APS_VERSION || ''
-    }
+  components: {
+    NumericField,
+    BoldButton
   },
+})
+export default class ProjectSettings extends Vue {
+  dialog: boolean = false
+  apsModelFileLocation: string = ''
+  fmuParameterListLocation: string = ''
+  showZoneNameNumber: string = ''
+  showRegionNameNumber: string = ''
+  automaticAlphaFieldSelection: string = ''
+  automaticFaciesFill: string = ''
+  filterZeroProbability: boolean = false
+  colorScale: string = ''
+  faciesColorLibrary: Optional<ColorLibrary> = null
 
-  watch: {
-    dialog: function (value) {
-      if (value) {
-        this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
-        this.showZoneNameNumber = this.$store.state.options.showNameOrNumber.zone.value
-        this.showRegionNameNumber = this.$store.state.options.showNameOrNumber.region.value
-        this.automaticAlphaFieldSelection = this.$store.state.options.automaticAlphaFieldSelection.value
-        this.automaticFaciesFill = this.$store.state.options.automaticFaciesFill.value
-        this.filterZeroProbability = this.$store.state.options.filterZeroProbability.value
+  get simulationSettings () { return this.$store.getters.simulationSettings() }
+  get gridSize () { return this.simulationSettings.gridSize }
+  get version () { return process.env.VUE_APP_APS_VERSION || '' }
+
+  @Watch('dialog')
+  onActivation (value: boolean) {
+    if (value) {
+      const options = this.$store.state.options
+
+      this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
+      this.showZoneNameNumber = options.showNameOrNumber.zone.value
+      this.showRegionNameNumber = options.showNameOrNumber.region.value
+      this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
+      this.automaticFaciesFill = options.automaticFaciesFill.value
+      this.filterZeroProbability = options.filterZeroProbability.value
+      this.colorScale = options.colorScale.value
+      this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
+    }
+  }
+
+  chooseApsModelFileLocation () {
+    rms.chooseDir('load').then((path: string): void => {
+      if (path) {
+        this.apsModelFileLocation = path
       }
-    },
-  },
-
-  methods: {
-    chooseAPSModelFileLocation (e) {
-      // eslint-disable-next-line no-undef
-      rms.chooseDir('load').then(path => {
-        if (path) {
-          this.apsModelFileLocation = path
-        }
-      })
-    },
-    chooseTruncationRuleFileLocation (e) {
-      // eslint-disable-next-line no-undef
-      rms.chooseDir('load').then(path => {
-        if (path) {
-          this.truncationRuleLocation = path
-        }
-      })
-    },
-    chooseFMUparametersFileLocation (e) {
-      // eslint-disable-next-line no-undef
-      rms.chooseDir('load').then(path => {
-        if (path) {
-          this.fmuParameterListLocation = path
-        }
-      })
-    },
-    cancel (e) {
-      this.dialog = false
-    },
-    async ok (e) {
-      alert(`dialogTruncationRuleLocation:   ${this.truncationRuleLocation}
-            dialogFMUParameterListLocation: ${this.fmuParameterListLocation}`)
-      await Promise.all([
-        this.$store.dispatch('parameters/path/project/select', this.apsModelFileLocation),
-        this.$store.dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
-        this.$store.dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
-        this.$store.dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
-        this.$store.dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
-        this.$store.dispatch('options/filterZeroProbability/set', this.automaticAlphaFieldSelection),
-      ])
-      this.dialog = false
-    }
-  },
+    })
+  }
+  chooseFmuParametersFileLocation () {
+    rms.chooseDir('load').then((path: string): void => {
+      if (path) {
+        this.fmuParameterListLocation = path
+      }
+    })
+  }
+  cancel () {
+    this.dialog = false
+  }
+  async ok () {
+    await displayWarning(
+      'The following settings where not saved:\n'
+      + '* Location of FMU parameter list location\n' /* I.e. this.fmuParameterListLocation */
+    )
+    const dispatch = this.$store.dispatch
+    await Promise.all([
+      dispatch('parameters/path/project/select', this.apsModelFileLocation),
+      dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
+      dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
+      dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
+      dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
+      dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
+      dispatch('options/colorScale/set', this.colorScale),
+      dispatch('constants/faciesColors/set', this.faciesColorLibrary),
+    ])
+    this.dialog = false
+  }
 }
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 input[type=text] {
     border: 2px solid blue;
     border-radius: 4px;

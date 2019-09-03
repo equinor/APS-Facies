@@ -1,6 +1,6 @@
 import uuidv4 from 'uuid/v4'
-import { ID, Identified } from '@/utils/domain/types'
-import { Identifiable } from '@/utils/domain/bases/interfaces'
+import { ID } from '@/utils/domain/types'
+import { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
 import {
   allSet,
   newSeed,
@@ -8,6 +8,7 @@ import {
   isEmpty,
   notEmpty,
 } from '@/utils/helpers/simple'
+import { NoCache } from '@/utils/helpers/decorators'
 
 const hex = '[0-9a-f]'
 
@@ -47,6 +48,10 @@ function includes<T extends Identifiable> (items: T[], item: T): boolean {
   return items.map(getId).includes(item.id)
 }
 
+function inDevelopmentMode (): boolean {
+  return process.env.NODE_ENV === 'develop'
+}
+
 export {
   hex,
   isUUID,
@@ -58,4 +63,6 @@ export {
   isEmpty,
   notEmpty,
   includes,
+  NoCache,
+  inDevelopmentMode,
 }

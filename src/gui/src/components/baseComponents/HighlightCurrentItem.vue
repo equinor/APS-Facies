@@ -1,19 +1,28 @@
 <template>
-  <span :class="item.current ? 'font-weight-bold' : ''">
-    {{ item[field] }}
+  <span
+    :class="isCurrent ? 'font-weight-bold' : ''"
+  >
+    {{ value[field] }}
   </span>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-export default {
-  props: {
-    item: VueTypes.shape({
-      current: VueTypes.bool.isRequired,
-    }).loose.isRequired,
-    field: AppTypes.name.isRequired,
-  }
+import BaseItem from '@/utils/domain/bases/baseItem'
+import { ID } from '@/utils/domain/types'
+
+@Component
+export default class HighlightCurrentItem<T extends BaseItem> extends Vue {
+  @Prop({ required: true })
+  readonly value!: T
+
+  @Prop({ required: true })
+  readonly field!: string
+
+  @Prop({ default: undefined })
+  readonly current!: ID | undefined
+
+  get isCurrent () { return this.value.id === this.current }
 }
 </script>

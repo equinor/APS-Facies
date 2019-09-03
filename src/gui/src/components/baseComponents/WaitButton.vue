@@ -6,9 +6,9 @@
     <v-btn
       :disabled="waiting || disabled"
       :dark="dark"
-      :flat="flat"
+      :text="text"
       :color="color"
-      :outline="outline"
+      :outlined="outlined"
       @click="e => $emit('click', e)"
     >
       <slot
@@ -41,19 +41,19 @@ export default class WaitButton extends Vue {
   @Prop({ default: '' })
   readonly tooltipText: string
 
-  @Prop({ default: false })
+  @Prop({ default: false, type: Boolean })
   readonly waiting: boolean
 
-  @Prop({ default: false })
+  @Prop({ default: false, type: Boolean })
   readonly disabled: boolean
 
-  @Prop({ default: false })
-  readonly outline: boolean
+  @Prop({ default: false, type: Boolean })
+  readonly outlined: boolean
 
-  @Prop({ default: false })
-  readonly flat: boolean
+  @Prop({ default: false, type: Boolean })
+  readonly text: boolean
 
-  @Prop({ default: false })
+  @Prop({ default: false, type: Boolean })
   readonly dark: boolean
 
   @Prop({ default: '' })

@@ -1,94 +1,99 @@
 <template>
-  <v-flex>
+  <v-col cols="12">
     Trend
-    <v-layout
-      row
-    >
-      <v-flex xs6>
+    <v-row>
+      <v-col cols="6">
         <v-checkbox
           v-model="useTrend"
           label="Apply trend to field"
         />
-      </v-flex>
-      <v-flex xs1 />
-      <v-flex xs5>
+      </v-col>
+      <v-spacer />
+      <v-col cols="6">
         <relative-standard-deviation
           v-if="useTrend"
-          :grf-id="grfId"
+          :value="value"
+          @update:error="e => update('relativeStdDev', e)"
         />
-      </v-flex>
-    </v-layout>
-    <v-flex
+      </v-col>
+    </v-row>
+    <v-col
       v-if="useTrend"
     >
-      <v-container>
-        <v-layout
-          align-center
-          justify-center
-          row
-          fill-height
-        >
-          <v-flex xs6>
-            <item-selection
-              v-model="trendType"
-              :items="availableTrends"
-              :constraints="{ required: true }"
-              label="Trend type"
+      <v-row
+        class="fill-height"
+        align="center"
+        justify="center"
+      >
+        <v-col cols="6">
+          <item-selection
+            v-model="trendType"
+            :items="availableTrends"
+            :constraints="{ required: true }"
+            label="Trend type"
+            @update:error="e => update('type', e)"
+          />
+          <div
+            v-if="hasLinearProperties"
+          >
+            <depositional-azimuth-angle
+              :value="value"
+              @update:error="e => update('azimuth', e)"
             />
-            <div
-              v-if="hasLinearProperties"
-            >
-              <depositional-azimuth-angle
-                :grf-id="grfId"
-              />
-              <stacking-angle-specification
-                :grf-id="grfId"
-              />
-            </div>
-            <migration-angle
-              v-if="hasHyperbolicProperties"
-              :grf-id="grfId"
+            <stacking-angle-specification
+              :value="value"
+              @update:error="e => update('stacking', e)"
             />
-          </v-flex>
-          <v-flex xs1 />
-          <v-flex xs5>
-            <v-select
-              v-if="isRmsParameter"
-              v-model="trendParameter"
-              :items="availableRmsTrendParameters"
-              label="Trend parameter"
+          </div>
+          <migration-angle
+            v-if="hasHyperbolicProperties"
+            :value="value"
+            @update:error="e => update('migration', e)"
+          />
+        </v-col>
+        <v-spacer />
+        <v-col cols="5">
+          <v-select
+            v-if="isRmsParameter"
+            v-model="trendParameter"
+            :items="availableRmsTrendParameters"
+            label="Trend parameter"
+          />
+          <div
+            v-if="hasEllipticProperties"
+          >
+            <curvature-specification
+              :value="value"
+              @update:error="e => update('curvature', e)"
             />
-            <div
-              v-if="hasEllipticProperties"
-            >
-              <curvature-specification
-                :grf-id="grfId"
-              />
-              <origin-specification
-                :grf-id="grfId"
-              />
-            </div>
-            <v-flex>
-              <relative-size-of-ellipse
-                v-if="hasEllipticConeProperties"
-                :grf-id="grfId"
-              />
-            </v-flex>
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-flex>
-  </v-flex>
+            <origin-specification
+              :value="value"
+              @update:error="e => update('origin', e)"
+            />
+          </div>
+          <v-col>
+            <relative-size-of-ellipse
+              v-if="hasEllipticConeProperties"
+              :value="value"
+              @update:error="e => update('relativeEllipseSize', e)"
+            />
+          </v-col>
+        </v-col>
+      </v-row>
+    </v-col>
+  </v-col>
 </template>
 
-<script>
-import { mapState } from 'vuex'
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+
+import { GaussianRandomField } from '@/utils/domain'
+import { TrendType } from '@/utils/domain/gaussianRandomField/trend'
 
 import { notEmpty } from '@/utils'
 
-import ItemSelection from '@/components/selection/dropdown/ItemSelection'
-import OriginSpecification from '@/components/specification/Trend/Origin'
+import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
+import OriginSpecification from '@/components/specification/Trend/Origin/index.vue'
 import {
   StackingAngleSpecification,
   CurvatureSpecification,
@@ -98,7 +103,18 @@ import {
   RelativeStandardDeviation,
 } from '@/components/specification/Trend/InputFields'
 
-export default {
+interface Invalid {
+  relativeStdDev: boolean
+  type: boolean
+  azimuth: boolean
+  stacking: boolean
+  migration: boolean
+  curvature: boolean
+  origin: boolean
+  relativeEllipseSize: boolean
+}
+
+@Component({
   components: {
     ItemSelection,
     StackingAngleSpecification,
@@ -109,73 +125,74 @@ export default {
     DepositionalAzimuthAngle,
     MigrationAngle,
   },
+})
+export default class TrendSpecification extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-  },
+  invalid: Invalid = {
+    relativeStdDev: false,
+    type: false,
+    azimuth: false,
+    stacking: false,
+    migration: false,
+    curvature: false,
+    origin: false,
+    relativeEllipseSize: false,
+  }
 
-  computed: {
-    ...mapState({
-      availableRmsTrendParameters: state => state.parameters.rmsTrend.available,
-      availableTrends: state => state.constants.options.trends.available,
-    }),
-    trend () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend },
-    hasLinearProperties () {
-      return (
-        notEmpty(this.trendType)
-        && this.notOneOf(['RMS_PARAM', 'NONE'])
-      )
-    },
-    hasEllipticProperties () {
-      return (
-        this.hasLinearProperties
-        && this.notOneOf(['LINEAR'])
-      )
-    },
-    hasHyperbolicProperties () {
-      return (
-        this.hasEllipticProperties
-        && this.notOneOf(['ELLIPTIC'])
-      )
-    },
-    hasEllipticConeProperties () {
-      return (
-        this.hasHyperbolicProperties
-        && this.notOneOf(['HYPERBOLIC'])
-      )
-    },
-    isRmsParameter () {
-      return this.trend.type === 'RMS_PARAM'
-    },
-    trendType: {
-      get: function () { return this.$store.state.gaussianRandomFields.fields[this.grfId].trend.type },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/trendType', { grfId: this.grfId, value }) }
-    },
-    trendParameter: {
-      get: function () { return this.trend.parameter },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', { grfId: this.grfId, value }) }
-    },
-    useTrend: {
-      get: function () { return this.trend.use },
-      set: function (value) { this.$store.dispatch('gaussianRandomFields/useTrend', { grfId: this.grfId, value }) },
-    },
-  },
+  get availableRmsTrendParameters () { return this.$store.state.parameters.rmsTrend.available }
+  get availableTrends () { return this.$store.state.constants.options.trends.available }
 
-  methods: {
-    notOneOf (types) {
-      return types.indexOf(this.trend.type) === -1
-    },
-    setTrend (event) {
-      this.$store.dispatch('gaussianRandomFields/useTrend', event)
-    },
-    updateValue (prop, value) {
-      if (prop === 'use') {
-        this.trend.use = Boolean(value)
-      } else {
-        this.trend[`${prop}`] = value
-      }
-      this.$emit('input', this.trend)
-    },
+  get trend () { return this.value.trend }
+
+  get hasLinearProperties () {
+    return (
+      notEmpty(this.trendType)
+      && this.notOneOf(['RMS_PARAM', 'NONE'])
+    )
+  }
+  get hasEllipticProperties () {
+    return (
+      this.hasLinearProperties
+      && this.notOneOf(['LINEAR'])
+    )
+  }
+  get hasHyperbolicProperties () {
+    return (
+      this.hasEllipticProperties
+      && this.notOneOf(['ELLIPTIC'])
+    )
+  }
+  get hasEllipticConeProperties () {
+    return (
+      this.hasHyperbolicProperties
+      && this.notOneOf(['HYPERBOLIC'])
+    )
+  }
+  get isRmsParameter () { return this.trend.type === 'RMS_PARAM' }
+
+  get trendType () { return this.value.trend.type }
+  set trendType (value) { this.$store.dispatch('gaussianRandomFields/trendType', { field: this.value, value }) }
+
+  get trendParameter () { return this.trend.parameter }
+  set trendParameter (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', { field: this.value, value }) }
+
+  get useTrend () { return this.trend.use }
+  set useTrend (value) { this.$store.dispatch('gaussianRandomFields/useTrend', { field: this.value, value }) }
+
+  notOneOf (types: TrendType[]): boolean {
+    return types.indexOf(this.trend.type) === -1
+  }
+
+  @Watch('invalid', { deep: true })
+  onInvalidChanged (value: Invalid) {
+    const invalid = Object.values(value).some(invalid => invalid)
+    this.$emit('update:error', this.useTrend && invalid)
+  }
+
+  update (type: string, value: boolean) {
+    Vue.set(this.invalid, type, value)
   }
 }
 </script>

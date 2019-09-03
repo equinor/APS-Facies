@@ -28,7 +28,7 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
     this.direction = new Direction(direction)
   }
 
-  public get type (): string {
+  public get type (): 'cubic' {
     return 'cubic'
   }
 
@@ -43,7 +43,7 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
 
   public get polygons () {
     return super.polygons
-      .filter((polygon): boolean => polygon instanceof CubicPolygon ? polygon.children.length === 0 : true)
+      .filter((polygon): boolean => polygon instanceof CubicPolygon ? polygon.children.length === 0 && !!polygon.parent : true)
       .sort((a, b): number => a instanceof CubicPolygon && b instanceof CubicPolygon
         ? a.level.join('').localeCompare(b.level.join(''), undefined, { numeric: true })
         : a.order - b.order

@@ -5,7 +5,7 @@
     <v-icon
       :color="color"
     >
-      {{ $vuetify.icons.help }}
+      {{ $vuetify.icons.values.help }}
     </v-icon>
     <span slot="popover">
       <slot />

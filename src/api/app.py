@@ -5,13 +5,15 @@ from flask_cors import CORS
 
 from src.utils.parsing import parse_signature
 from src.api.ui import call
-from gevent import monkey
-
-monkey.patch_all()
 
 
-def _get_environ(variable_name, default,  divider=':'):
-    return environ.get(variable_name, default).split(divider)
+def _get_environ(variable_name, default, divider=':'):
+    value = environ.get(variable_name, default)
+    if value is None:
+        value = ''
+    if isinstance(value, str):
+        value = value.split(divider)
+    return value
 
 
 def _get_client_url():
@@ -46,7 +48,7 @@ def favicon():
 
 if __name__ == '__main__':
     app.run(
-        host='127.0.0.1',
-        port=5001,
+        host=_get_environ('VUE_APP_APS_SERVER', '127.0.0.1'),
+        port=_get_environ('VUE_APP_APS_API_PORT', 5000),
         debug=True,
     )

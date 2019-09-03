@@ -1,65 +1,73 @@
 <template>
   <static-plot
+    v-tooltip.bottom="errorMessage"
     :data-definition="dataDefinition"
+    :disabled="_disabled"
     :expand="expand"
     :width="size.width"
     :height="size.height"
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import StaticPlot from '@/components/plot/StaticPlot'
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { DEFAULT_SIZE, DEFAULT_COLOR_SCALE } from '@/config'
+import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-export default {
+import { GaussianRandomField } from '@/utils/domain'
+
+import { DEFAULT_SIZE } from '@/config'
+import { colorMapping, ColorScale } from '../utils'
+
+@Component({
   components: {
     StaticPlot,
   },
+})
+export default class GaussianPlot extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    data: VueTypes.arrayOf(VueTypes.arrayOf(VueTypes.number)).isRequired,
-    showScale: VueTypes.bool.def(false),
-    colorScale: VueTypes.oneOfType([
-      VueTypes.string,
-      VueTypes.arrayOf(VueTypes.shape({
-        value: VueTypes.integer.isRequired,
-        color: AppTypes.color.isRequired,
-      }))
-    ]).def(DEFAULT_COLOR_SCALE),
-    expand: VueTypes.bool.def(false),
-    size: VueTypes.shape({
-      width: VueTypes.integer.isRequired,
-      height: VueTypes.integer.isRequired,
-    }).def(() => DEFAULT_SIZE).loose
-  },
+  @Prop({ default: false, type: Boolean })
+  readonly showScale!: boolean
 
-  computed: {
-    dataDefinition () {
-      return [{
-        z: this.data,
-        zsmooth: 'best',
-        type: 'heatmap',
-        hoverinfo: 'none',
-        colorscale: this.colorMapping,
-        showscale: this.showScale,
-      }]
-    },
-    colorMapping () {
-      if (Array.isArray(this.colorScale)) {
-        const colors = []
-        for (const item of this.colorScale) {
-          // Plot.ly does not offer an easier way of ensure the values are discrete
-          colors.push([(item.value - 1) / this.colorScale.length, item.color])
-          colors.push([item.value / this.colorScale.length, item.color])
-        }
-        return colors
-      } else {
-        return this.colorScale
-      }
-    }
-  },
+  @Prop({ default: undefined })
+  readonly colorScale!: ColorScale
+
+  @Prop({ default: false, type: Boolean })
+  readonly expand!: boolean
+
+  @Prop({ default: () => DEFAULT_SIZE })
+  readonly size!: { width: number, height: number }
+
+  @Prop({ default: false, type: Boolean })
+  readonly disabled: boolean
+
+  get dataDefinition () {
+    return [{
+      z: this.value.simulation,
+      zsmooth: 'best',
+      type: 'heatmap',
+      hoverinfo: 'none',
+      colorscale: this.colorMapping,
+      showscale: this.showScale,
+    }]
+  }
+
+  get errorMessage () {
+    return this._disabled
+      ? 'The field has changed since it was simulated'
+      : undefined
+  }
+
+  get _colorScale () {
+    return this.colorScale || this.$store.state.options.colorScale.value
+  }
+
+  get colorMapping () {
+    return colorMapping(this._colorScale)
+  }
+
+  get _disabled (): boolean { return this.disabled || !this.value.isRepresentative }
 }
 </script>

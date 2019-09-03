@@ -63,32 +63,34 @@ describe('While creating a Bayfill truncation rule', () => {
 
     expect(rule.polygons.length).toBe(5)
     expect(rule.fields.length).toBe(3)
-    expect(rule.specification).toEqual([
-      {
-        facies: 'F01',
-        factor: new FmuUpdatableValue(0.5, false),
-        fraction: 1,
-        name: 'SF',
-        order: 0,
-        polygon: 'Floodplain',
-      },
-      {
-        facies: 'F02',
-        factor: new FmuUpdatableValue(0.5, false),
-        fraction: 1,
-        name: 'YSF',
-        order: 1,
-        polygon: 'Subbay',
-      },
-      {
-        facies: 'F04',
-        factor: new FmuUpdatableValue(0.5, false),
-        fraction: 1,
-        name: 'SBHD',
-        order: 3,
-        polygon: 'Bayhead Delta',
-      },
-    ],
+    expect(rule.specification).toEqual({
+      polygons: [
+        {
+          facies: 'F01',
+          factor: new FmuUpdatableValue(0.5, false),
+          fraction: 1,
+          name: 'SF',
+          order: 0,
+          polygon: 'Floodplain',
+        },
+        {
+          facies: 'F02',
+          factor: new FmuUpdatableValue(0.5, false),
+          fraction: 1,
+          name: 'YSF',
+          order: 1,
+          polygon: 'Subbay',
+        },
+        {
+          facies: 'F04',
+          factor: new FmuUpdatableValue(0.5, false),
+          fraction: 1,
+          name: 'SBHD',
+          order: 3,
+          polygon: 'Bayhead Delta',
+        },
+      ],
+    },
     )
   })
 })

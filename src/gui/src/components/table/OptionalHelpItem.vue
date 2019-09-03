@@ -4,9 +4,9 @@
       v-if="hasHelp"
       bottom
     >
-      <span slot="activator">
-        {{ text }}
-      </span>
+      <template v-slot:activator="{ on }">
+        <span v-on="on">{{ text }}</span>
+      </template>
       <span>
         {{ help }}
       </span>
@@ -17,32 +17,41 @@
   </div>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+
 import { notEmpty } from '@/utils'
 
-export default {
-  props: {
-    value: VueTypes.oneOfType([
-      VueTypes.shape({
-        text: VueTypes.string.isRequired,
-        help: VueTypes.string,
-      }).loose,
-      VueTypes.shape({
-        name: VueTypes.string.isRequired,
-        help: VueTypes.string,
-      }).loose,
-      VueTypes.string,
-      VueTypes.number,
-    ]).isRequired
-  },
+interface MaybeHelpText {
+  help?: string
+}
 
-  computed: {
-    text () { return this.value.text || this.value.name || this.value },
-    help () { return this.value.help },
-    hasHelp () {
-      return notEmpty(this.value.help)
-    }
+interface Text extends MaybeHelpText {
+  text: string
+  [_: string]: any
+}
+
+interface Named extends MaybeHelpText {
+  name: string
+  [_: string]: any
+}
+
+@Component
+export default class OptionalHelpItem extends Vue {
+  @Prop({ required: true })
+  readonly value!: Text | Named | string | number
+
+  get text () {
+    // @ts-ignore
+    return this.value.text || this.value.name || this.value
+  }
+  get help () {
+    // @ts-ignore
+    return this.value.help
+  }
+  get hasHelp () {
+    // @ts-ignore
+    return notEmpty(this.help)
   }
 }
 </script>

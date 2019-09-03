@@ -1,73 +1,70 @@
 <template>
-  <v-container fluid>
-    <v-layout
+  <v-container
+    fluid
+  >
+    <v-row
       v-if="loading"
-      column
-      align-center
-      justify-center
-      fill-height
     >
-      <v-flex />
-      <v-flex>
-        <v-progress-circular
-          :size="70"
-          indeterminate
-        />
-      </v-flex>
-      <v-flex>
-        <span>{{ loadingMessage }}</span>
-      </v-flex>
-      <v-flex />
-    </v-layout>
-    <v-layout
+      <v-col cols="12">
+        <v-row
+          justify="center"
+          align="center"
+        >
+          <v-progress-circular
+            :size="70"
+            indeterminate
+          />
+        </v-row>
+        <v-row
+          justify="center"
+          align="center"
+        >
+          <span>{{ loadingMessage }}</span>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row
       v-else
-      wrap
+      no-gutters
     >
-      <v-flex xs4>
+      <v-col cols="4">
         <selection />
-      </v-flex>
-      <v-flex xs4>
+      </v-col>
+      <v-col cols="4">
         <preview v-if="hasSimulations" />
-      </v-flex>
-      <v-flex xs4>
+      </v-col>
+      <v-col cols="4">
         <settings
           v-if="canSpecifyModelSettings"
         />
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-import Selection from '@/components/ElementSelection'
-import Settings from '@/components/ElementSettings'
-import Preview from '@/components/ElementPreview'
+import Selection from '@/components/ElementSelection.vue'
+import Settings from '@/components/ElementSettings.vue'
+import Preview from '@/components/ElementPreview.vue'
 
-export default {
+@Component({
   components: {
     Selection,
     Settings,
     Preview
   },
+})
+export default class MainPage extends Vue {
+  get canSpecifyModelSettings () { return this.$store.getters['canSpecifyModelSettings'] }
 
-  computed: {
-    ...mapGetters([
-      'canSpecifyModelSettings',
-    ]),
-    loading () {
-      return this.$store.state._loading.value
-    },
-    loadingMessage () {
-      return this.$store.state._loading.message
-    },
-    fields () {
-      return Object.values(this.$store.getters.fields)
-    },
-    hasSimulations () {
-      return this.fields.length > 0
-    },
-  }
+  get loading () { return this.$store.state._loading.value }
+
+  get loadingMessage () { return this.$store.state._loading.message }
+
+  get fields () { return Object.values(this.$store.getters.fields) }
+
+  get hasSimulations () { return this.fields.length > 0 }
 }
 </script>

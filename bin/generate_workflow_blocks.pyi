@@ -16,6 +16,7 @@ def get_file_mapping() -> Dict[str, str]: ...
 def get_workflow_dir(
         root_path: Path,
         use_temporary: Optional[bool] = False,
+        salt:          Optional[str]  = None,
 ) -> Path: ...
 
 def create_workflow_block_file(
@@ -23,6 +24,7 @@ def create_workflow_block_file(
         root_path: Path,
         relative_path: str,
         use_temporary: Optional[bool] = False,
+        salt:          Optional[str]  = None,
 ) -> None: ...
 
 def get_ipl_scripts(root_path: Path) -> List[Path]: ...

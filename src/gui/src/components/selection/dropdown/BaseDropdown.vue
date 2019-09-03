@@ -4,6 +4,7 @@
     :items="items"
     :label="label"
     :disabled="disabled"
+    :no-data-text="noDataText"
   />
 </template>
 
@@ -11,7 +12,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component
-export default class BaseDropdown<T = any> extends Vue {
+export default class BaseDropdown<T> extends Vue {
   @Prop({ required: true })
   readonly label!: string
 
@@ -26,6 +27,9 @@ export default class BaseDropdown<T = any> extends Vue {
 
   @Prop({ default: false })
   readonly disabled!: boolean
+
+  @Prop({ default: '$vuetify.noDataText' })
+  readonly noDataText!: string
 
   get selected () { return this.modelGetter() }
   set selected (value) { this.modelSetter(value) }

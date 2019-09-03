@@ -1,55 +1,45 @@
 <template>
-  <v-data-table
+  <base-table
     :headers="headers"
     :items="items"
     :no-data-text="noDataText"
-    item-key="name"
-    class="elevation-1"
-    hide-actions
+    elevation="0"
   >
     <template
-      slot="headerCell"
-      slot-scope="props"
-    >
-      <optional-help-item
-        :value="props.header"
-      />
-    </template>
-    <template
-      slot="items"
-      slot-scope="props"
+      v-slot:item="{ item }"
     >
       <tr>
         <td>
-          {{ props.item.name }}
+          {{ item.name }}
         </td>
         <td
           v-if="useProbabilityCubes"
         >
           <v-autocomplete
-            :value="props.item.probabilityCube"
+            :value="item.probabilityCube"
             :items="probabilityCubes"
             clearable
-            @input="cube => changeProbabilityCube(props.item, cube)"
+            @input="cube => changeProbabilityCube(item, cube)"
           />
         </td>
         <td
           v-if="useProbabilityCubes"
         >
-          {{ props.item.previewProbability }}
+          {{ item.previewProbability }}
         </td>
         <td
           v-else
         >
           <fraction-field
-            :value="props.item.previewProbability"
+            :value="item.previewProbability"
             label=""
-            @input="prob => changeProbability(props.item, prob)"
+            dense
+            @input="prob => changeProbability(item, prob)"
           />
         </td>
       </tr>
     </template>
-  </v-data-table>
+  </base-table>
 </template>
 
 <script lang="ts">
@@ -57,6 +47,7 @@ import { Component, Vue } from 'vue-property-decorator'
 
 import FractionField from '@/components/selection/FractionField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import Facies from '@/utils/domain/facies/local'
 import { Store } from '@/store/typing'
@@ -65,6 +56,7 @@ import { hasCurrentParents } from '@/utils'
 
 @Component({
   components: {
+    BaseTable,
     OptionalHelpItem,
     FractionField,
   },
@@ -112,20 +104,14 @@ export default class FaciesProbabilityCubeTable extends Vue {
     const headers = [
       {
         text: 'Facies',
-        align: 'left',
-        sortable: false,
         value: 'name',
       },
       {
         text: 'Probability Cube',
-        align: 'left',
-        sortable: false,
         value: 'probabilityCube',
       },
       {
         text: this.useProbabilityCubes ? 'Preview Probability' : 'Probability',
-        align: 'left',
-        sortable: false,
         value: 'previewProbability',
       },
     ]

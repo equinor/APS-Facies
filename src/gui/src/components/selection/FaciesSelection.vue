@@ -1,51 +1,50 @@
 <template>
-  <v-layout
-    column
+  <v-row
+    no-gutters
   >
-    <v-layout
-      row
-      fill-height
-      justify-start
+    <v-row
+      class="fill-height"
+      justify="start"
     >
-      <v-flex xs2>
-        <v-btn
-          icon
+      <v-col cols="2">
+        <icon-button
+          icon="add"
           @click="add"
-        >
-          <v-icon>{{ $vuetify.icons.add }}</v-icon>
-        </v-btn>
-      </v-flex>
-      <v-flex xs2>
+        />
+      </v-col>
+      <v-col cols="2">
         <v-popover
           :disabled="canRemove"
           trigger="hover"
         >
-          <v-btn
-            icon
+          <icon-button
+            icon="remove"
             :disabled="!canRemove"
             @click="remove"
-          >
-            <v-icon>{{ $vuetify.icons.remove }}</v-icon>
-          </v-btn>
+          />
           <span slot="popover">
             {{ removeError }}
           </span>
         </v-popover>
-      </v-flex>
-      <v-flex xs8 />
-    </v-layout>
-    <facies-table :hide-alias="hideAlias" />
-  </v-layout>
+      </v-col>
+      <v-col cols="8" />
+    </v-row>
+    <v-col cols="12">
+      <facies-table :hide-alias="hideAlias" />
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import FaciesTable from '@/components/table/FaciesTable.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
 import { Store } from '@/store/typing'
 
 @Component({
   components: {
+    IconButton,
     FaciesTable,
   },
 })

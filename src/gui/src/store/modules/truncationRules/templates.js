@@ -5,8 +5,7 @@ import templates from '@/store/templates/truncationRules'
 import simpleTemplates from '@/store/templates/simpleTruncationRules'
 import types from '@/store/modules/truncationRules/types'
 import { addItem } from '@/store/actions'
-import { ADD_ITEM } from '@/store/mutations'
-import { isUUID } from '@/utils/helpers'
+import { inDevelopmentMode, isUUID } from '@/utils/helpers'
 import {
   combinePolygons,
   getFaciesGroup,
@@ -99,6 +98,12 @@ function getDirection (settings) {
     : null
 }
 
+async function removeExtraneousFaciesGroups ({ rootState, dispatch }, parent) {
+  const groups = Object.values(rootState.facies.groups.available)
+    .filter(group => group.isChildOf(parent))
+  await Promise.all(groups.map(group => dispatch('facies/groups/remove', group, { root: true })))
+}
+
 export default {
   namespaced: true,
 
@@ -114,7 +119,9 @@ export default {
     fetch ({ dispatch }) {
       return Promise.all([
         dispatch('types/fetch'),
-        ...templates.templates.map(template => dispatch('add', template)),
+        ...templates.templates
+          .filter(template => template.overlay ? inDevelopmentMode() : true)
+          .map(template => dispatch('add', template)),
         ...simpleTemplates.templates.map(template => dispatch('add', template))
       ])
     },
@@ -130,7 +137,8 @@ export default {
       template.type = Object.keys(state.types.available).find(id => state.types.available[`${id}`].type === template.type)
       return addItem({ commit }, { item: template })
     },
-    async createRule ({ dispatch, state, rootGetters, rootState }, { name, type, parent = null }) {
+    async createRule (context, { name, type, parent = null }) {
+      const { dispatch, state, rootGetters, rootState } = context
       const autoFill = rootState.options.automaticFaciesFill.value
 
       parent = parent || { zone: rootGetters.zone, region: rootGetters.region }
@@ -143,12 +151,13 @@ export default {
           await dispatch('gaussianRandomFields/addEmptyField', {}, { root: true })
         }
       }
+      await removeExtraneousFaciesGroups(context, parent)
       if (autoFill && template.overlay) {
-        await Promise.all(template.overlay.items.map(item => getFaciesGroup({ rootGetters, dispatch }, item.over, parent)))
+        await Promise.all(template.overlay.items.map(item => getFaciesGroup(context, item.over, parent)))
       }
-      const backgroundFields = processFields(rootGetters, rootState, template.fields, parent)
-      const overlay = processOverlay(rootGetters, template.overlay, parent)
-      let polygons = processPolygons({ rootGetters, rootState }, { type, polygons: template.polygons, settings: template.settings })
+      const backgroundFields = processFields(context, template.fields, parent)
+      const overlay = processOverlay(context, template.overlay, parent)
+      let polygons = processPolygons(context, { type, polygons: template.polygons, settings: template.settings })
       polygons = combinePolygons(polygons, overlay)
       polygons = structurePolygons(polygons)
       const levels = polygons.map(({ level }) => level)
@@ -165,7 +174,7 @@ export default {
           return facies
         }, new Set())]
       const hasSetProbabilities = uniqueFacies.some(({ previewProbability }) => !!previewProbability || previewProbability === 0)
-      if (hasSetProbabilities) {
+      if (!hasSetProbabilities) {
         await Promise.all(uniqueFacies.map(async facies => {
           if (facies) {
             await dispatch(
@@ -216,7 +225,7 @@ export default {
 
   mutations: {
     ADD: (state, { id, item }) => {
-      ADD_ITEM(state.available, { id, item })
+      Vue.set(state.available, id, item)
     },
     AVAILABLE: (state, templates) => {
       Vue.set(state, 'available', templates)

@@ -79,7 +79,7 @@ class RMSData:
         return Path(self.project.filename).name
 
     def get_project_dir(self):
-        return str(Path(self.project.filename).parent)
+        return str(Path(self.project.filename).parent.absolute())
 
     def get_current_workflow_name(self):
         return self.roxar.rms.get_running_workflow_name()
@@ -97,13 +97,20 @@ class RMSData:
         return self.get_grid_model(name).get_grid(realization)
 
     def get_grid_model_names(self):
-        return [grid_model.name for grid_model in self.get_grid_models()]
+        grid_models = self.get_grid_models()
+        models = []
+        for grid_model in grid_models:
+            name = grid_model.name
+            try:
+                self.get_grid(name)
+                exists = True
+            except KeyError:
+                exists = False
+            models.append({'name': name, 'exists': exists})
+        return models
 
     def get_realization_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_discrete)
-
-    def get_zone_parameters(self, grid_model_name):
-        return self._get_parameter_names(grid_model_name, self.is_zone_parameter)
 
     def get_region_parameters(self, grid_model_name):
         return self._get_parameter_names(grid_model_name, self.is_region_parameter)
@@ -170,7 +177,6 @@ class RMSData:
         # TODO: Implement properly
         return (
             self.is_discrete(param)
-            and any([name != '' for name in param.code_names.values()])
             and len(param.code_names) > 0
         )
 
@@ -180,7 +186,6 @@ class RMSData:
     def is_probability_cube(self, param):
         return (
             self.is_continuous(param)
-            and param.name.lower().startswith('prob')
         )
 
     def _get_blocked_well_set(self, grid_model_name):
@@ -362,250 +367,3 @@ class RMSData:
     def open_wiki_help():
         import webbrowser
         webbrowser.open('https://wiki.equinor.com/wiki/index.php/Res:APS_Adaptive_Plurigaussian_Simulation')
-
-
-def list_all_wells(project):
-    """ Make a list of all well names in project """
-    well_names = []
-    for w in project.wells:
-        well_names.append(w.name)
-        print(w.name)
-
-
-def list_all_wellbores(project):
-    """ For each well list all wellbores"""
-    well_names = []
-    well_bore_names = []
-    i = 0
-    for well in project.wells:
-        well_names.append(well.name)
-        well_bore_names.append([])
-        print(well.name)
-
-        for wb in well.all_wellbores:
-            well_bore_names[i].append(wb.name)
-            print('   ' + wb.name)
-        i = i + 1
-
-
-def list_all_trajectories(project):
-    """ For each well and each wellbore list all trajectories"""
-    well_names = []
-    well_bore_names = []
-    well_trajectory_names = []
-    i = 0
-    for well in project.wells:
-        well_names.append(well.name)
-        well_bore_names.append([])
-        well_trajectory_names.append([])
-        print(well.name)
-        j = 0
-        for wb in well.all_wellbores:
-            well_bore_names[i].append(wb.name)
-            well_trajectory_names[i].append([])
-            print('   ' + wb.name)
-            for trj in wb.trajectories:
-                well_trajectory_names[i][j].append(trj.name)
-                print('      ' + trj.name)
-            j = j + 1
-        i = i + 1
-
-
-def list_all_logruns(project):
-    """ For each well and each wellbore and each trajectory list all logruns"""
-    well_names = []
-    well_bore_names = []
-    well_trajectory_names = []
-    well_logruns_names = []
-    i = 0
-    for well in project.wells:
-        well_names.append(well.name)
-        well_bore_names.append([])
-        well_trajectory_names.append([])
-        well_logruns_names.append([])
-        print(well.name)
-        j = 0
-        for wb in well.all_wellbores:
-            well_bore_names[i].append(wb.name)
-            well_trajectory_names[i].append([])
-            well_logruns_names[i].append([])
-            print('   ' + wb.name)
-            k = 0
-            for trj in wb.trajectories:
-                well_trajectory_names[i][j].append(trj.name)
-                well_logruns_names[i][j].append([])
-                print('      ' + trj.name)
-                n = 0
-                for logrun in trj.log_runs:
-                    well_logruns_names[i][j][k].append(logrun.name)
-                    print('         ' + logrun.name)
-                    n = n + 1
-                k = k + 1
-            j = j + 1
-        i = i + 1
-
-
-def get_code_names(project):
-    """ For each well and each wellbore and each trajectory list all logruns"""
-    return {well.name: _get_well_bores(well) for well in project.wells}
-
-
-def _get_well_bores(well):
-    return {well_bore.name: _get_trajectories(well_bore) for well_bore in well.all_wellbores}
-
-
-def _get_trajectories(well_bore):
-    return {trajectory.name: _get_log_runs(trajectory) for trajectory in well_bore.trajectories}
-
-
-def _get_log_runs(trajectory):
-    return {logrun.name: _get_code_names(logrun) for logrun in trajectory.log_runs}
-
-
-def _get_code_names(logrun):
-    return {log.name: log.get_code_names() for log in logrun.log_curves if log.is_discrete}
-
-
-def list_all_logs(project):
-    """ For each well and each wellbore and each trajectory and each logrun list all logs"""
-    well_names = []
-    well_bore_names = []
-    well_trajectory_names = []
-    well_logruns_names = []
-    well_logs_names = []
-    i = 0
-    for well in project.wells:
-        well_names.append(well.name)
-        well_bore_names.append([])
-        well_trajectory_names.append([])
-        well_logruns_names.append([])
-        well_logs_names.append([])
-        print(well.name)
-        j = 0
-        for wb in well.all_wellbores:
-            well_bore_names[i].append(wb.name)
-            well_trajectory_names[i].append([])
-            well_logruns_names[i].append([])
-            well_logs_names[i].append([])
-            print('   ' + wb.name)
-            k = 0
-            for trj in wb.trajectories:
-                well_trajectory_names[i][j].append(trj.name)
-                well_logruns_names[i][j].append([])
-                well_logs_names[i][j].append([])
-                print('      ' + trj.name)
-                n = 0
-                for logrun in trj.log_runs:
-                    well_logruns_names[i][j][k].append(logrun.name)
-                    well_logs_names[i][j][k].append([])
-                    print('         ' + logrun.name)
-                    m = 0
-                    for log in logrun.log_curves:
-                        well_logs_names[i][j][k][n].append(log.name)
-                        if log.is_discrete:
-                            logtype = 'Discrete'
-                        else:
-                            logtype = 'Continuous'
-                        print('            ' + log.name + ' type: ' + logtype)
-                        m = m + 1
-                    n = n + 1
-                k = k + 1
-            j = j + 1
-        i = i + 1
-
-
-def get_code_names_for_log(project, name):
-    """ Run through all wells and check if a log with specified name exist. Save the code_names and code_values.
-        If there are more than one well with the specified log name, check that the code_names and
-        code_values are equal. If this is true, return the code_names dictionary else return None.
-    """
-    list_of_list_of_code_names = []
-    code_names = None
-    for well in project.wells:
-
-        for wb in well.all_wellbores:
-            # print('   ' + wb.name)
-            for trj in wb.trajectories:
-                # print('      ' + trj.name)
-                for logrun in trj.log_runs:
-                    # print('      ' + logrun.name)
-                    for log in logrun.log_curves:
-                        if log.is_discrete:
-                            if log.name == name:
-                                # Found a log with correct name
-                                code_names = log.get_code_names()
-                                for cn in list_of_list_of_code_names:
-                                    # Check that the two dictionaries are equal
-                                    testValue = cmp(cn, code_names)
-                                    if testValue != 0:
-                                        print('code_names:')
-                                        print(code_names)
-                                        print('cn:')
-                                        print(cn)
-                                        return None
-                            # print('         ' + log.name + ' type: ' + logtype)
-        print('Facies table for log with name {}'.format(name))
-        print(code_names)
-    return code_names
-
-
-def all_trajectories_in_project(project):
-    """Generate all the trajectories associated with a given project."""
-    for well in project.wells:
-        for wellbore in well.all_wellbores:
-            for trajectory in wellbore.trajectories:
-                yield trajectory
-
-
-def all_log_curves_with_name(project, name):
-    """Generate all log curves bearing a specified name."""
-    for trajectory in all_trajectories_in_project(project):
-        for log_run in trajectory.log_runs:
-            try:
-                yield log_run.log_curves[name]
-            except KeyError:
-                pass
-
-
-def search(project, name):
-    """
-        Display all log curves with a specific name. This function displays the well name, trajectory name,
-        log run name and log curve name of matching log curves found in the project.
-    """
-    for log_curve in all_log_curves_with_name(project, name):
-        print("{} : {} : {} : {}".format(log_curve.log_run.trajectory.wellbore.name, log_curve.log_run.trajectory.name,
-                                         log_curve.log_run.name, log_curve.name))
-    # --------------------------------------------------------------
-
-
-# Main script body
-# Define a name to search for
-# log_curve_name = 'Facies'
-# search(project, log_curve_name)
-#
-# print('List of all wells in RMS project:')
-# list_all_wells(project)
-#
-# print('\nList of all wells with well bores in RMS project:')
-# list_all_wellbores(project)
-#
-# print('\nList of all wells with well bores and trajectories in RMS project:')
-# list_all_trajectories(project)
-#
-# print('\nList of all wells with well bores and trajectories and logruns in RMS project:')
-# list_all_logruns(project)
-#
-# print('\nList of all wells with well bores and trajectories and logruns and logs in RMS project:')
-# list_all_logs(project)
-#
-# name = 'Facies'
-# code_names = get_code_names_for_log(project, name)
-# if code_names is not None:
-#     print('Log with name: {} has Code_names:'.format(name))
-#     print(code_names)
-# else:
-#     print(
-#        'Could not find any log with name {} or the log is not defined with same code_names in all wells where the log exists'
-#         ''.format(name))
-
-# list_all_logruns(project)

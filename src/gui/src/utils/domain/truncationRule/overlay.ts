@@ -1,17 +1,18 @@
 import APSTypeError from '@/utils/domain/errors/type'
 import FaciesGroup from '@/utils/domain/facies/group'
 import Facies from '@/utils/domain/facies/local'
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import OverlayPolygon, { CENTER, OverlayPolygonSerialization } from '@/utils/domain/polygon/overlay'
 import TruncationRule, {
   TruncationRuleConfiguration,
   TruncationRuleSerialization,
+  TruncationRuleSpecification,
 } from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { allSet, getId } from '@/utils/helpers'
 
-export type OverlayTruncationRuleArgs<T extends Polygon> = TruncationRuleConfiguration<T> & {
+export type OverlayTruncationRuleArgs<T extends Polygon = Polygon> = TruncationRuleConfiguration<T> & {
   overlay?: {
     use: boolean
   }
@@ -24,22 +25,22 @@ interface OverlayPolygonSpecification extends PolygonSpecification {
   over: string[]
 }
 
-export interface OverlaySpecification<P extends PolygonSpecification> {
+export interface OverlaySpecification<P extends PolygonSpecification = PolygonSpecification> extends TruncationRuleSpecification<P> {
   overlay: OverlayPolygonSpecification[] | null
-  polygons: P[]
 }
 
-export interface OverlaySerialization<P extends PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
+export interface OverlaySerialization<P extends PolygonSerialization = PolygonSerialization> extends TruncationRuleSerialization<P | OverlayPolygonSerialization> {
   _useOverlay: boolean
 }
 
 export default abstract class OverlayTruncationRule<
-  T extends Polygon,
-  S extends PolygonSerialization,
-  P extends PolygonSpecification,
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
 > extends TruncationRule<
   T | OverlayPolygon,
-  S | OverlayPolygonSerialization
+  S | OverlayPolygonSerialization,
+  P | OverlayPolygonSpecification
   > {
   protected _useOverlay: boolean
 
@@ -50,9 +51,10 @@ export default abstract class OverlayTruncationRule<
       ? (overlay ? overlay.use : false)
       : _useOverlay
 
-    this._constraints.push(...[
-      (): boolean => allSet(this.overlayPolygons, 'field'),
-    ])
+    const additionalConstraints: ([() => boolean, string])[] = [
+      [(): boolean => allSet(this.overlayPolygons, 'field'), 'All overlay polygons must have a Gaussian Random Field assigned to it'],
+    ]
+    this._constraints.push(...additionalConstraints)
   }
 
   public get useOverlay (): boolean { return this._useOverlay }
@@ -75,7 +77,7 @@ export default abstract class OverlayTruncationRule<
   }
 
   public get fields (): GaussianRandomField[] {
-    const backgroundFields = this.backgroundFields
+    const backgroundFields = super.fields
     const overlayFields: GaussianRandomField[] = []
     this.overlayPolygons
       .sort((a, b): number => a.order - b.order)

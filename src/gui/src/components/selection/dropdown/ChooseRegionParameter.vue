@@ -1,38 +1,45 @@
 <template>
-  <v-layout
-    row
+  <v-row
+    justify="space-between"
+    no-gutters
   >
-    <v-checkbox
-      v-model="useRegions"
-      label="Use regions?"
-    />
-    <choose-parameter
-      :disabled="!useRegions"
-      regular
-      parameter-type="region"
-      label="Region parameter"
-    />
-  </v-layout>
+    <v-col cols="3">
+      <v-checkbox
+        v-model="useRegions"
+        label="Use regions?"
+      />
+    </v-col>
+    <v-col cols="9">
+      <choose-parameter
+        :disabled="!useRegions"
+        regular
+        parameter-type="region"
+        label="Region parameter"
+      />
+    </v-col>
+  </v-row>
 </template>
 
-<script>
-import ChooseParameter from '@/components/selection/dropdown/ChooseParameter'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import ChooseParameter from '@/components/selection/dropdown/ChooseParameter.vue'
+
+import { NoCache } from '@/utils/helpers'
+
+@Component({
   components: {
     ChooseParameter
   },
+})
+export default class ChooseRegionParameter extends Vue {
+  @NoCache
+  get useRegions () {
+    return this.$store.state.regions.use
+  }
 
-  computed: {
-    useRegions: {
-      cache: false,
-      get: function () {
-        return this.$store.state.regions.use
-      },
-      set: function (value) {
-        this.$store.dispatch('regions/use', { use: value })
-      }
-    },
+  set useRegions (value) {
+    this.$store.dispatch('regions/use', { use: value })
   }
 }
 </script>

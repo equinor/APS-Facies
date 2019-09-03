@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-matplotlib = "!=3.1.0"
+matplotlib = "<3.1.0"
 numpy = "*"
 pillow = "*"
 scipy = "*"
@@ -23,5 +23,6 @@ dataclasses = "*"
 flask-cors = "*"
 gevent = "*"
 gunicorn = "*"
+python-dotenv = "*"
 
 [requires]

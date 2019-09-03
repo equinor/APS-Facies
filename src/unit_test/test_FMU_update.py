@@ -4,7 +4,7 @@
 import xml.etree.ElementTree as ET
 import pytest
 from src.utils.constants.simple import Debug
-from bin.updateAPSModelFromFMU import updateAPSModelFromFMU
+from src.rms_jobs.updateAPSModelFromFMU import updateAPSModelFromFMU
 from src.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_markers, get_apsmodel_with_all_fmu_markers
 
 

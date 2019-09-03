@@ -4,15 +4,20 @@
     item-type="zone"
     show-name
     show-code
+    loading-text="Loading Zones"
   />
 </template>
 
-<script>
-import SelectionTable from '@/components/table/SelectionTable'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
 
-export default {
+import SelectionTable from '@/components/table/SelectionTable.vue'
+
+@Component({
   components: {
     SelectionTable
   },
+})
+export default class ZoneSelection extends Vue {
 }
 </script>

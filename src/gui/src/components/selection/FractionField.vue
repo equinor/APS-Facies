@@ -7,6 +7,7 @@
     :disabled="disabled"
     :label="label"
     :append-icon="appendIcon"
+    :dense="dense"
     optional
     enforce-ranges
     @input="e => propagate(e, 'input')"
@@ -41,6 +42,9 @@ export default class FractionField extends Vue {
 
   @Prop({ required: false, default: '' })
   readonly appendIcon!: string
+
+  @Prop({ default: false, type: Boolean })
+  readonly dense!: boolean
 
   get ranges () {
     return {

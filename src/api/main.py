@@ -8,6 +8,8 @@ import roxar
 
 
 def run(config):
+    if config['errorMessage']:
+        raise ValueError(config['errorMessage'])
     with create_temporary_model_file(config['model']) as model_file:
         use_constant_probabilities = APSModel(model_file).use_constant_probability
         if not use_constant_probabilities:

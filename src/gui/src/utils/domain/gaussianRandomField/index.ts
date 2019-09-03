@@ -5,11 +5,10 @@ import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
 import { Named, Parent } from '@/utils/domain/bases/interfaces'
-import ZoneRegionDependent, {
-  DependentConfiguration,
-  DependentSerialization
-} from '@/utils/domain/bases/zoneRegionDependent'
-import { Identified } from '@/utils/domain/types'
+import Simulation, {
+  SimulationConfiguration,
+  SimulationSerialization,
+} from '@/utils/domain/bases/simulation'
 
 import Trend, { TrendSerialization } from '@/utils/domain/gaussianRandomField/trend'
 import Variogram, { VariogramSerialization } from '@/utils/domain/gaussianRandomField/variogram'
@@ -44,7 +43,6 @@ function defaultSettings (parent: Parent): Settings {
   return {
     crossSection: new CrossSection({
       type: 'IJ',
-      relativePosition: 0.5,
       parent,
     }),
     gridModel: {
@@ -57,7 +55,7 @@ function defaultSettings (parent: Parent): Settings {
   }
 }
 
-export type GaussianRandomFieldConfiguration = DependentConfiguration & {
+export type GaussianRandomFieldConfiguration = SimulationConfiguration & {
   name: string
   overlay?: boolean
   channel?: number | null
@@ -68,28 +66,28 @@ export type GaussianRandomFieldConfiguration = DependentConfiguration & {
   seed?: number | null
 }
 
-interface GaussianRandomFieldSpecification {
+export interface GaussianRandomFieldSpecification {
   name: string
   settings: Settings
   trend: Trend
   variogram: Variogram
 }
 
-interface GaussianRandomFieldSerialization extends DependentSerialization {
+export interface GaussianRandomFieldSerialization extends SimulationSerialization {
   name: string
   settings: SettingsSerialization
   trend: TrendSerialization
   variogram: VariogramSerialization
 }
 
-class GaussianRandomField extends ZoneRegionDependent implements Named {
+export default class GaussianRandomField extends Simulation implements Named {
   public name: string
   public variogram: Variogram
   public trend: Trend
   public settings: Settings
   public waiting: boolean
 
-  private _data: number[][]
+  public valid: boolean
 
   public constructor ({ name, variogram = null, trend = null, settings = null, crossSection = null, seed = null, ...rest }: GaussianRandomFieldConfiguration) {
     super(rest)
@@ -106,12 +104,11 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
     // TODO: Make sure the class knows that the data is actually from the CURRENT specification
     //   E.g. use a hash of the specification (variogram, trend, and settings)
     this.waiting = false
-    this._data = []
+    this.valid = true
   }
 
-  public get simulated (): boolean {
-    return this._data.length > 0 && this._data[0].length > 0
-  }
+  public get simulation (): number[][] | null { return super.simulation }
+  public set simulation (data) { super.simulation = data }
 
   public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => object } } = {}): GaussianRandomFieldSpecification {
     return {
@@ -140,13 +137,9 @@ class GaussianRandomField extends ZoneRegionDependent implements Named {
   }
 }
 
-type GaussianRandomFields = Identified<GaussianRandomField>
-
 export {
   Variogram,
   Trend,
-  GaussianRandomField,
-  GaussianRandomFields,
   TrendSerialization,
   VariogramSerialization,
 }

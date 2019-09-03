@@ -1,29 +1,21 @@
 import Vue from 'vue'
-import { Parent } from '@/utils/domain/bases/interfaces'
-import ZoneRegionDependent, { getParentId } from '@/utils/domain/bases/zoneRegionDependent'
-import { APSTypeError } from '@/utils/domain/errors'
 import uuidv4 from 'uuid/v4'
 
-import { ID, Identified } from '@/utils/domain/types'
-import { Dispatch, Module } from 'vuex'
+import { Element, getElements, removeOld } from '@/store/utils/helpers'
 
-import { Zone, Region } from '@/utils/domain'
+import { getParentId } from '@/utils/domain/bases/zoneRegionDependent'
+import { APSTypeError } from '@/utils/domain/errors'
+
+import { ID } from '@/utils/domain/types'
+import { Module } from 'vuex'
+import { Region, Zone } from '@/utils/domain'
+import { Parent } from '@/utils/domain/bases/interfaces'
 
 import { RootState } from '@/store/typing'
 import CopyPasteState from '@/store/modules/copyPaste/typing'
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 type IDMapping = Map<ID, ID>
-
-interface Element {
-  name: string
-  items: ZoneRegionDependent[]
-  serialization: string
-}
-
-function listify (obj: Identified<ZoneRegionDependent>): ZoneRegionDependent[] {
-  return Object.values(obj)
-}
 
 function getParent (item: Zone | Region): Parent {
   if (item instanceof Zone) {
@@ -72,14 +64,6 @@ function giveNewIds (elements: Element[], source: Parent, target: Parent): strin
   return serialization
 }
 
-async function removeOld ({ dispatch }: { dispatch: Dispatch }, elements: Element[], target: Parent): Promise<void> {
-  for (const element of elements) {
-    for (const item of element.items.filter((item): boolean => item.isChildOf(target))) {
-      await dispatch(`${element.name}/remove`, item, { root: true })
-    }
-  }
-}
-
 const module: Module<CopyPasteState, RootState> = {
   namespaced: true,
 
@@ -104,17 +88,8 @@ const module: Module<CopyPasteState, RootState> = {
       } else {
         const source = getters.parent
         commit('PASTING', { source: parent, toggle: true })
-        const elements = [
-          {
-            name: 'gaussianRandomFields/crossSections',
-            items: listify(rootState.gaussianRandomFields.crossSections.available),
-            serialization: ''
-          },
-          { name: 'gaussianRandomFields', items: listify(rootState.gaussianRandomFields.fields), serialization: '' },
-          { name: 'facies', items: listify(rootState.facies.available), serialization: '' },
-          { name: 'facies/groups', items: listify(rootState.facies.groups.available), serialization: '' },
-          { name: 'truncationRules', items: listify(rootState.truncationRules.rules), serialization: '' },
-        ]
+        const elements = getElements({ rootState })
+
         await removeOld({ dispatch }, elements.concat().reverse(), parent)
         const serialization = giveNewIds(elements, source, parent)
         for (const [ key, items ] of Object.entries(JSON.parse(serialization))) {

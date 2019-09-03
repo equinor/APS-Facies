@@ -11,10 +11,14 @@ export interface FaciesGroupSerialization extends DependentSerialization {
   facies: ID[]
 }
 
+export type FaciesGroupConfiguration = DependentConfiguration & {
+  facies: Facies[]
+}
+
 export default class FaciesGroup extends ZoneRegionDependent {
   public facies: Facies[]
 
-  public constructor ({ facies, ...rest }: DependentConfiguration & { facies: Facies[]}) {
+  public constructor ({ facies, ...rest }: FaciesGroupConfiguration) {
     super(rest)
     facies.forEach((facies): void => {
       checkFaciesId(facies)

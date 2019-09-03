@@ -541,6 +541,7 @@ src/unit_test/Overview_truncation_maps.png
 !src/unit_test/testData_updateAPSModel/APS*.xml
 src/unit_test/matplotlibrc
 src/unit_test/integration/matplotlibrc
+src/unit_test/testData_trunc_settings/trunc_rules_out.dat
 
 # Symbolic links
 bin/APS_make_gauss_IPL.py

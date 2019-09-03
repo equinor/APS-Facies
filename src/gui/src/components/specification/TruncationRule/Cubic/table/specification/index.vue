@@ -1,18 +1,21 @@
 <template>
-  <v-layout
-    column
-    justify-center
+  <v-container
+    class="column"
   >
-    <v-layout
-      justify-center
-      align-end
+    <v-row
+      justify="center"
+      align="end"
     >
-      <v-flex>
+      <v-col
+        cols="6"
+      >
         <split-direction
           :value="value"
         />
-      </v-flex>
-      <v-flex>
+      </v-col>
+      <v-col
+        cols="6"
+      >
         <numeric-field
           v-model="splitInto"
           :ranges="{ min: 2, max: Number.POSITIVE_INFINITY }"
@@ -20,23 +23,25 @@
           label="Split into"
           discrete
         />
-      </v-flex>
-    </v-layout>
-    <v-layout>
-      <v-layout
-        row
-        justify-center
+      </v-col>
+    </v-row>
+    <v-row
+      class="ma-1"
+    >
+      <v-row
+        justify="center"
+        align="center"
       >
         <wait-button
           title="Split"
-          :outline="true"
+          outlined
           :disabled="!canSplit"
           :tooltip-text="splitError"
           @click="split"
         />
         <wait-button
           title="Merge"
-          outline
+          outlined
           :disabled="!canMerge"
           :tooltip-text="mergeError"
           @click="merge"
@@ -45,18 +50,19 @@
           Click in the table below to split/merge for Level 2 / Level 3.<br>
           When finished, add Facies with Proportion Fraction to the table.
         </help-icon>
-      </v-layout>
-    </v-layout>
-    <v-layout
-      justify-center
+      </v-row>
+    </v-row>
+    <v-row
+      justify="center"
+      no-gutters
     >
       <cubic-topology-specification
         v-if="value.root"
         v-model="selected"
         :rule="value"
       />
-    </v-layout>
-  </v-layout>
+    </v-row>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -127,7 +133,11 @@ export default class CubicTruncationRuleSpecification extends Vue {
 
   get mergeError () {
     if (!this.canMerge) {
+      const length = this.selected.length
+      if (length === 0) return 'No polygons are selected for merging'
+      if (length === 1) return 'A single polygon cannot be merged into itself'
       if (!this.singleParentSelected) return 'Only polygons having the same parent may be merged'
+      return 'Unable to merge'
     }
     return ''
   }

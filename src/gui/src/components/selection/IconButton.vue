@@ -9,7 +9,7 @@
     :right="right"
     :small="small"
     icon
-    flat
+    text
     @click.stop="e => $emit('click', e)"
   >
     <v-icon
@@ -28,38 +28,60 @@
   </v-btn>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Color } from '@/utils/domain/facies/helpers/colors'
 
-export default {
-  props: {
-    icon: {
-      required: true,
-      type: String,
-    },
-    waiting: VueTypes.bool.def(false),
-    disabled: VueTypes.bool.def(false),
-    loadingSpinner: VueTypes.bool.def(false),
-    color: VueTypes.oneOfType([VueTypes.string, undefined]).def(undefined),
-    dark: VueTypes.bool.def(false),
-    large: VueTypes.bool.def(false),
-    left: VueTypes.bool.def(false),
-    light: VueTypes.bool.def(false),
-    medium: VueTypes.bool.def(false),
-    right: VueTypes.bool.def(false),
-    size: VueTypes.oneOfType([VueTypes.number, VueTypes.string, undefined]).def(undefined),
-    small: VueTypes.bool.def(false),
-    xLarge: VueTypes.bool.def(false),
-  },
+@Component
+export default class IconButton extends Vue {
+  @Prop({ required: true })
+  readonly icon!: string
 
-  computed: {
-    fullIconName () {
-      if (this.loadingSpinner && this.waiting) {
-        return '$vuetify.icons.refreshSpinner'
-      } else {
-        return `$vuetify.icons.${this.icon}${this.waiting ? 'Spinner' : ''}`
-      }
+  @Prop({ default: false, type: Boolean })
+  readonly waiting!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly disabled!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly loadingSpinner!: boolean
+
+  @Prop({ default: 'black' })
+  readonly color!: Color | undefined
+
+  @Prop({ default: false, type: Boolean })
+  readonly dark!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly large!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly left!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly light!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly medium!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly right!: boolean
+
+  @Prop({ default: undefined })
+  readonly size!: number | string | undefined
+
+  @Prop({ default: false, type: Boolean })
+  readonly small!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly xLarge!: boolean
+
+  get fullIconName () {
+    if (this.loadingSpinner && this.waiting) {
+      return '$vuetify.icons.values.refreshSpinner'
+    } else {
+      return `$vuetify.icons.values.${this.icon}${this.waiting ? 'Spinner' : ''}`
     }
-  },
+  }
 }
 </script>

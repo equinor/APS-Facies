@@ -1,64 +1,52 @@
 <template>
-  <v-data-table
+  <base-table
     :headers="headers"
     :items="polygons"
     :custom-sort="ordering"
-    item-key="id"
-    class="elevation-0"
-    hide-actions
+    elevation="0"
     @input.stop
   >
     <template
-      slot="header-cell"
-      slot-scope="props"
-      class="text-xs-left"
-    >
-      <optional-help-item
-        :value="props.header"
-      />
-    </template>
-    <template
-      slot="items"
-      slot-scope="props"
+      v-slot:item="{ item }"
     >
       <tr>
         <td>
           <alpha-selection
-            :value="props.item.field"
+            :value="item.field"
             :rule="rule"
-            :group="props.item.group.id"
+            :group="item.group.id"
             hide-label
-            @input="field => updateField(props.item, field)"
+            @input="field => updateField(item, field)"
           />
         </td>
         <td>
           <overlay-facies-specification
-            :value="props.item"
+            :value="item"
             :rule="rule"
           />
         </td>
         <td v-if="needFraction">
           <polygon-fraction-field
-            :value="props.item"
+            :value="item"
             :rule="rule"
           />
         </td>
         <td>
           <fraction-field
-            :value="props.item.center"
-            @input="val => updateCenter(props.item, val)"
+            :value="item.center"
+            @input="val => updateCenter(item, val)"
           />
         </td>
         <td>
           <polygon-order
-            :value="props.item"
+            :value="item"
             :rule="rule"
             overlay
           />
         </td>
       </tr>
     </template>
-  </v-data-table>
+  </base-table>
 </template>
 
 <script lang="ts">
@@ -72,6 +60,7 @@ import PolygonOrder from '@/components/specification/TruncationRule/order.vue'
 import OverlayFaciesSpecification from '@/components/specification/Facies/overlay.vue'
 import AlphaSelection from '@/components/specification/TruncationRule/AlphaSelection.vue'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
+import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import { ID } from '@/utils/domain/types'
@@ -81,6 +70,7 @@ import { sortByOrder } from '@/utils'
 
 @Component({
   components: {
+    BaseTable,
     AlphaSelection,
     OverlayFaciesSpecification,
     PolygonOrder,
@@ -89,7 +79,11 @@ import { sortByOrder } from '@/utils'
     PolygonFractionField,
   },
 })
-export default class OverlayTable<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> extends Vue {
+export default class OverlayTable<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: OverlayPolygon[]
 
@@ -117,31 +111,21 @@ export default class OverlayTable<T extends Polygon, S extends PolygonSerializat
     return [
       {
         text: 'GRF',
-        align: 'left',
-        sortable: false,
         value: 'field',
         help: 'Gaussian Random Field',
       },
       {
         text: 'Overlay Facies',
-        align: 'left',
-        sortable: false,
         value: 'facies',
-        help: '',
       },
       ...(this.needFraction
         ? [{
           text: 'Probability Fraction',
-          align: 'left',
-          sortable: false,
           value: 'fraction',
-          help: '',
         }]
         : []),
       {
         text: 'Center',
-        align: 'left',
-        sortable: false,
         value: 'center',
         help: 'Truncation Interval Center Point',
         /* or: The overlay facies will look more continuous if the value of the center point of
@@ -150,17 +134,14 @@ export default class OverlayTable<T extends Polygon, S extends PolygonSerializat
       },
       {
         text: 'Order',
-        align: 'left',
-        sortable: false,
         value: 'order',
-        help: '',
       }
     ]
   }
 
   ordering (items: OverlayPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
   async updateField (polygon: OverlayPolygon, fieldId: ID) {
-    const field = (this.$store as Store).state.gaussianRandomFields.fields[`${fieldId}`]
+    const field = (this.$store as Store).state.gaussianRandomFields.available[`${fieldId}`]
     await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
   }
   async updateCenter (polygon: OverlayPolygon, val: number) {
@@ -169,7 +150,7 @@ export default class OverlayTable<T extends Polygon, S extends PolygonSerializat
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 th {
   white-space: normal;
   overflow-wrap: break-spaces;

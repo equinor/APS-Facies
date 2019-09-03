@@ -1,20 +1,21 @@
 <template>
-  <v-layout
-    column
-    justify-center
+  <v-row
+    justify="center"
+    align="center"
+    no-gutters
   >
-    <v-flex>
+    <v-col cols="12">
       <cubic-truncation-rule-specification
         :value="value"
       />
-    </v-flex>
-    <v-flex>
+    </v-col>
+    <v-col cols="12">
       <cubic-facies-selection
         v-if="value.root"
         :value="value"
       />
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">

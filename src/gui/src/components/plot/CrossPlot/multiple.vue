@@ -1,104 +1,103 @@
 <template>
   <v-container
-    grid-list-md
-    text-xs-center
+    class="text-center column wrap align"
   >
-    <v-flex xs12>
-      <h3>Cross plots</h3>
-    </v-flex>
-    <v-container
-      align-center
-      row
-      wrap
+    <v-row>
+      <v-col cols="12">
+        <v-select
+          v-model="selected"
+          :items="available"
+          label="Gaussian Fields to be used"
+          multiple
+        />
+      </v-col>
+    </v-row>
+    <v-row
+      align="center"
+      justify="space-around"
     >
-      <v-layout
-        row
+      <v-col
+        v-for="([field, other], index) in combinations"
+        :key="index"
       >
-        <v-flex xs12>
-          <v-select
-            v-model="selected"
-            :items="available"
-            label="Gaussian Fields to be used"
-            multiple
-          />
-        </v-flex>
-      </v-layout>
-      <v-layout
-        row
-        wrap
-        align-center
-        justify-space-around
-      >
-        <v-flex
-          v-for="(pair, index) in combinations"
-          :key="index"
-        >
-          <cross-plot
-            :value="pair"
-          />
-        </v-flex>
-      </v-layout>
-    </v-container>
+        <cross-plot
+          v-if="field.simulated && other.simulated "
+          :value="[field, other]"
+        />
+        <v-progress-circular
+          v-else
+          :size="70"
+          indeterminate
+        />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
-<script>
-import VueTypes from 'vue-types'
+<script lang="ts">
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-import { AppTypes } from '@/utils/typing'
+import { GaussianRandomField } from '@/utils/domain'
+import { ID } from '@/utils/domain/types'
 
-import CrossPlot from './index'
+import CrossPlot from './index.vue'
 
-export default {
+interface Item {
+  value: ID
+  text: string
+}
+
+@Component({
   components: {
     CrossPlot,
   },
+})
+export default class CrossPlots extends Vue {
+  @Prop({ required: true })
+  value: GaussianRandomField[]
 
-  props: {
-    value: VueTypes.arrayOf(AppTypes.gaussianRandomField).isRequired,
-  },
+  selected: ID[] = []
 
-  data () {
-    return {
-      selected: []
-    }
-  },
-
-  computed: {
-    available () {
-      return this.value.map(field => {
-        return {
-          value: field.id,
-          text: field.name,
-        }
-      })
-    },
-    combinations () {
-      const pairs = []
-      const available = this.selected
-      if (!available) return pairs
-      for (let i = 0; i < available.length; i++) {
-        for (let j = i + 1; j < available.length; j++) {
-          pairs.push([available[`${i}`], available[`${j}`]])
-        }
+  get available (): Item[] {
+    return this.value.map(field => {
+      return {
+        value: field.id,
+        text: field.name,
       }
-      return pairs
-    },
-  },
-
-  watch: {
-    available (value) {
-      if (this.selected.some(selectedItem => value.indexOf(availableItem => availableItem.value === selectedItem.value) === -1)) {
-        // That is, if there is some selected value that is no longer available
-        this.selected = this.available.filter(availableItem => this.selected.some(selectedItem => selectedItem.value === availableItem.value))
+    })
+  }
+  get combinations () {
+    const pairs: number[][] = []
+    const available = this.selected
+      .map(id => this.$store.state.gaussianRandomFields.available[`${id}`])
+    if (!available) return pairs
+    for (let i = 0; i < available.length; i++) {
+      for (let j = i + 1; j < available.length; j++) {
+        pairs.push([available[`${i}`], available[`${j}`]])
       }
     }
-  },
+    return pairs
+  }
+
+  @Watch('selected', { deep: true })
+  selectionChanged (fields: ID[]) {
+    this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields })
+  }
+
+  @Watch('available', { deep: true })
+  onChange (value: Item[]) {
+    if (this.selected.some(selectedItem => !value.find(availableItem => availableItem.value === selectedItem))) {
+      // That is, if there is some selected value that is no longer available
+      this.selected = this.available
+        .filter(availableItem => this.selected.some(selectedItem => selectedItem === availableItem.value))
+        .map(el => el.value)
+    }
+  }
 
   beforeMount () {
     if (this.selected.length === 0 && this.value.length >= 2) {
       this.value.slice(0, 2).forEach(field => this.selected.push(field.id))
     }
-  },
+  }
 }
 </script>

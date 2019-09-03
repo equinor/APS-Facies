@@ -10,63 +10,88 @@
     :ranges="ranges"
     :arrow-step="arrowStep"
     :use-modulus="useModulus"
+    @update:error="e => propagateError(e)"
   />
 </template>
 
-<script>
-import VueTypes from 'vue-types'
-import NumericField from '@/components/selection/NumericField'
-import { AppTypes } from '@/utils/typing'
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
-const getValue = (field, property, subProperty) => {
+import { MinMax } from '@/api/types'
+import { Optional } from '@/utils/typing'
+import { GaussianRandomField } from '@/utils/domain'
+import Trend from '@/utils/domain/gaussianRandomField/trend'
+import Variogram from '@/utils/domain/gaussianRandomField/variogram'
+
+import NumericField from '@/components/selection/NumericField.vue'
+
+function getValue (field: Variogram | Trend, property: string, subProperty: string): any {
   return field[`${property}`].hasOwnProperty(subProperty)
     ? field[`${property}`][`${subProperty}`]
     : field[`${property}`]
 }
 
-export default {
+@Component({
   components: {
     NumericField
   },
+})
+export default class StorableNumericField extends Vue {
+  @Prop({ required: true })
+  readonly value!: GaussianRandomField
 
-  props: {
-    grfId: AppTypes.id.isRequired,
-    propertyType: {
-      required: true,
-      type: String,
-    },
-    subPropertyType: VueTypes.string.def(''),
-    label: VueTypes.string.def(''),
-    valueType: VueTypes.string.def(''),
-    unit: VueTypes.string.def(''),
-    strictlyGreater: VueTypes.bool.def(false),
-    allowNegative: VueTypes.bool.def(false),
-    useModulus: VueTypes.bool.def(false),
-    arrowStep: VueTypes.number.def(1),
-    ranges: VueTypes.oneOfType([VueTypes.shape({
-      min: VueTypes.number.isRequired,
-      max: VueTypes.number.isRequired,
-    }), null]),
-    trend: VueTypes.bool.def(false),
-  },
+  @Prop({ required: true })
+  readonly propertyType!: string
 
-  computed: {
-    field () { return this.$store.state.gaussianRandomFields.fields[this.grfId][this.variogramOrTrend] },
-    propertyValue: {
-      get: function () { return this.getValue() },
-      set: function (value) { this.dispatchChange(value) },
-    },
-    fmuUpdatable () { return this.propertyValue.hasOwnProperty('updatable') },
-    variogramOrTrend () { return this.trend ? 'trend' : 'variogram' },
-  },
+  @Prop({ default: '' })
+  readonly subPropertyType!: string
 
-  methods: {
-    dispatchChange (value) {
-      this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { grfId: this.grfId, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
-    },
-    getValue () {
-      return getValue(this.field, this.propertyType, this.subPropertyType)
-    }
-  },
+  @Prop({ default: '' })
+  readonly label!: string
+
+  @Prop({ default: '' })
+  readonly valueType!: string
+
+  @Prop({ default: '' })
+  readonly unit!: string
+
+  @Prop({ default: false, type: Boolean })
+  readonly strictlyGreater!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly allowNegative!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly useModulus!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly trend!: boolean
+
+  @Prop({ default: 1 })
+  readonly arrowStep!: number
+
+  @Prop()
+  readonly ranges!: Optional<MinMax>
+
+  get field () { return this.value[this.variogramOrTrend] }
+
+  get propertyValue () { return this.getValue() }
+  set propertyValue (value) { this.dispatchChange(value) }
+
+  get fmuUpdatable () { return this.propertyValue.hasOwnProperty('updatable') }
+
+  get variogramOrTrend () { return this.trend ? 'trend' : 'variogram' }
+
+  dispatchChange (value: number) {
+    this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { field: this.value, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
+  }
+
+  getValue () {
+    return getValue(this.field, this.propertyType, this.subPropertyType)
+  }
+
+  propagateError (value: boolean) {
+    this.$emit('update:error', value)
+  }
 }
 </script>

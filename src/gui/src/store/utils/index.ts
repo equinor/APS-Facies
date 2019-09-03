@@ -1,10 +1,6 @@
-import { Facies } from '@/utils/domain'
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
-import TruncationRule from '@/utils/domain/truncationRule/base'
-import { ID } from '@/utils/domain/types'
-import { getId } from '@/utils/helpers'
+import { OptionState } from '@/store/modules/options/typing'
 import { RootState } from '@/store/typing'
-import { Commit, Dispatch, Module } from 'vuex'
+import { Commit, Dispatch, Module, Store } from 'vuex'
 
 async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result: string[]): Promise<void> {
   if (result.length === 1) {
@@ -18,32 +14,6 @@ async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dis
   const result = await promise
   commit('AVAILABLE', result)
   await selectOnlyParameter({ dispatch }, result)
-}
-
-function updateFacies<P extends Polygon, S extends PolygonSerialization> (
-  dispatch: Dispatch,
-  rule: TruncationRule<P, S>,
-  polygon: Polygon,
-  facies: Facies | ID,
-  swap: boolean = true
-): Promise<void> {
-  const existing = rule.polygons
-    .find((polygon): boolean => getId(polygon.facies) === getId(facies))
-  return existing && swap
-    ? dispatch('truncationRules/swapFacies', {
-      rule,
-      polygons: [polygon, existing]
-    })
-    : dispatch('truncationRules/updateFacies', {
-      rule,
-      polygon,
-      facies,
-    })
-}
-
-interface OptionState<T> {
-  value: T
-  legal: T[]
 }
 
 function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
@@ -66,6 +36,10 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
           commit('SET', value)
         }
       },
+
+      populate: async ({ dispatch }, { value }): Promise<void> => {
+        await dispatch('set', value)
+      },
     },
     mutations: {
       SET: (state, value): void => {
@@ -76,9 +50,24 @@ function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {
   }
 }
 
+async function displayMessage (
+  context: Store<RootState> | { dispatch: Dispatch },
+  message: string,
+  type: string,
+): Promise<void> {
+  const action = 'message/change'
+  const payload = { message, type }
+
+  if (context instanceof Store) {
+    await context.dispatch(action, payload)
+  } else {
+    await context.dispatch(action, payload, { root: true })
+  }
+}
+
 export {
   fetchParameterHelper,
-  updateFacies,
   makeOption,
   selectOnlyParameter,
+  displayMessage,
 }

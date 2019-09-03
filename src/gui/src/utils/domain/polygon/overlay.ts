@@ -1,5 +1,5 @@
 import APSError from '@/utils/domain/errors/base'
-import { GaussianRandomField } from '@/utils/domain/gaussianRandomField'
+import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import FaciesGroup from '@/utils/domain/facies/group'
 import { ID } from '@/utils/domain/types'
 import Polygon, { PolygonArgs, PolygonSerialization, PolygonSpecification } from './base'

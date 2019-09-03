@@ -13,7 +13,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import FractionField from '@/components/selection/FractionField.vue'
 
-import Polygon, { PolygonSerialization } from '@/utils/domain/polygon/base'
+import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
@@ -24,12 +24,16 @@ import { getId } from '@/utils'
     FractionField,
   },
 })
-export default class PolygonFractionField<T extends Polygon, S extends PolygonSerialization> extends Vue {
+export default class PolygonFractionField<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: T
 
   @Prop({ required: true })
-  readonly rule!: TruncationRule<T, S>
+  readonly rule!: TruncationRule<T, S, P>
 
   get disabled () {
     return (
@@ -41,7 +45,8 @@ export default class PolygonFractionField<T extends Polygon, S extends PolygonSe
   get appendIcon () {
     return this.disabled || this.rule.isPolygonFractionsNormalized(this.value)
       ? ''
-      : this.$vuetify.icons.refresh
+      // @ts-ignore
+      : this.$vuetify.icons.values.refresh
   }
 
   async updateFactor (polygon: T, value: number) {

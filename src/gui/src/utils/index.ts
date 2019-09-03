@@ -8,14 +8,16 @@ import {
   Ordered,
   Parent,
   SimulationSettings,
+  Newable,
+  Identified,
 } from '@/utils/domain/bases/interfaces'
 import { RootGetters } from '@/store/typing'
 
-import { OverlayPolygon, Polygon, TruncationRule } from '@/utils/domain'
-import { ID, Identified } from '@/utils/domain/types'
-import { BayfillSpecification } from '@/utils/domain/truncationRule/bayfill'
-import { CubicSpecification } from '@/utils/domain/truncationRule/cubic'
-import { NonCubicSpecification } from '@/utils/domain/truncationRule/nonCubic'
+import { PolygonSpecification } from '@/utils/domain/polygon/base'
+import { TruncationRule } from '@/utils/domain/truncationRule'
+import { TruncationRuleSpecification, TruncationRuleType } from '@/utils/domain/truncationRule/base'
+import { Polygon } from '@/utils/domain'
+import { ID } from '@/utils/domain/types'
 
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
 
@@ -32,21 +34,19 @@ import {
   notEmpty,
 } from '@/utils/helpers'
 
-interface Newable<T> { new (...args: any[]): T }
-
-function makeData<T extends Identifiable, Y extends Identifiable> (
-  items: T[],
-  _class: Newable<Y>,
-  originals: T[] | null = null
-): Identified<Y> {
+function makeData<C extends Identifiable> (
+  items: any[],
+  _class: Newable<C>,
+  originals: Identified<C> | C[] | null = null
+): Identified<C> {
   if (items.length === 0) return {}
   originals = originals ? Object.values(originals) : []
   const data = {}
   for (const item of items) {
-    const instance = originals
+    const instance = (originals
       .find((original): boolean => Object.keys(item)
         .every((key): boolean => original[`${key}`] === item[`${key}`])
-      ) || new _class(item)
+      ) || new _class(item)) as C
     data[instance.id] = instance
   }
   return data
@@ -61,27 +61,21 @@ function defaultSimulationSettings (): SimulationSettings {
   }
 }
 
-function simplify (specification: BayfillSpecification | NonCubicSpecification | CubicSpecification, rule: TruncationRule, includeOverlay: boolean = true) {
-  if (specification instanceof Array) {
-    return specification
-      .map((spec, index) => {
-        spec.facies = rule.polygons[`${index}`].id
-        return spec
-      })
-  } else {
+function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpecification<P>> (specification: Spec, includeOverlay: boolean = true): Spec {
+  return {
+    ...specification,
+    polygons: specification.polygons
+      // @ts-ignore
+      .filter((polygon: P): boolean => polygon.overlay ? includeOverlay : true)
+      .map((polygon: P): P => {
+        return {
+          ...polygon,
+          facies: polygon.id,
+          fraction: 1,
+        }
+      }),
     // @ts-ignore
-    specification.polygons = specification.polygons
-      .filter((polygon: Polygon): boolean => polygon instanceof OverlayPolygon ? includeOverlay : true)
-      .map((polygon: Polygon): Polygon => {
-        // @ts-ignore
-        polygon.facies = polygon.id
-        polygon.fraction = 1
-        return polygon
-      })
-    if (!includeOverlay) {
-      specification.overlay = null
-    }
-    return specification
+    overlay: includeOverlay ? specification.overlay : null
   }
 }
 
@@ -100,7 +94,15 @@ interface GaussianRandomFieldSpecification {
   inBackground: boolean
 }
 
-function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
+export interface TruncationRuleDescription {
+  type: TruncationRuleType
+  globalFaciesTable: GlobalFaciesSpecification[]
+  gaussianRandomFields: GaussianRandomFieldSpecification[]
+  values: TruncationRuleSpecification
+  constantParameters: boolean
+}
+
+function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule): TruncationRuleDescription {
   return {
     type: rule.type,
     globalFaciesTable: (rule.backgroundPolygons as Polygon[])
@@ -123,7 +125,7 @@ function makeSimplifiedTruncationRuleSpecification (rule: TruncationRule) {
           inBackground: included,
         }
       }),
-    values: simplify(rule.specification, rule, false),
+    values: simplify(rule.specification, false),
     constantParameters: true,
   }
 }
@@ -151,8 +153,8 @@ function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: Roo
     })
 }
 
-function makeGaussianRandomFieldSpecification ({ rootGetters }: { rootGetters: RootGetters }, rule: TruncationRule): GaussianRandomFieldSpecification[] {
-  return Object.values(rootGetters.fields)
+function makeGaussianRandomFieldSpecification (rule: TruncationRule): GaussianRandomFieldSpecification[] {
+  return rule.fields
     .map((field): GaussianRandomFieldSpecification => {
       return {
         name: field.name,
@@ -163,11 +165,11 @@ function makeGaussianRandomFieldSpecification ({ rootGetters }: { rootGetters: R
     })
 }
 
-function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters) {
+function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: RootGetters): TruncationRuleDescription {
   return {
     type: rule.type,
     globalFaciesTable: makeGlobalFaciesTableSpecification({ rootGetters }, rule),
-    gaussianRandomFields: makeGaussianRandomFieldSpecification({ rootGetters }, rule),
+    gaussianRandomFields: makeGaussianRandomFieldSpecification(rule),
     values: rule.specification,
     constantParameters: !rootGetters.faciesTable.some((facies): boolean => !!facies.probabilityCube),
   }
@@ -190,12 +192,6 @@ function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEa
 
 function invalidateChildren (component: Vue): void {
   goTroughChildren(component, (child): void => child.$v.$touch())
-}
-
-function hasValidChildren (component: Vue): boolean {
-  let valid = true
-  goTroughChildren(component, (): void => { valid = false }, true)
-  return valid
 }
 
 function hasCurrentParents (item: any, getters: RootGetters): boolean {
@@ -261,7 +257,7 @@ function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
   return numFacies >= minFacies(rule, getters)
 }
 
-const resolve = (path: string | string[], obj = self, separator = '.'): object => {
+const resolve = (path: string | string[], obj: object = self, separator = '.'): object => {
   const properties = Array.isArray(path) ? path : path.split(separator)
   // @ts-ignore
   return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)
@@ -319,7 +315,6 @@ export {
   makeData,
   makeSimplifiedTruncationRuleSpecification,
   makeTruncationRuleSpecification,
-  hasValidChildren,
   invalidateChildren,
   hasCurrentParents,
   hasParents,

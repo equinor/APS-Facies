@@ -1,19 +1,16 @@
 <template>
-  <v-layout
-    column
+  <v-row
+    no-gutters
   >
-    <v-layout
-      align-center
-      justify-space-between
-      row
-      fill-height
-    >
+    <v-col cols="12">
       <h3>Truncation rule specification overlay facies</h3>
-    </v-layout>
-    <overlay-facies-table
-      :value="value"
-    />
-  </v-layout>
+    </v-col>
+    <v-col cols="12">
+      <overlay-facies-table
+        :value="value"
+      />
+    </v-col>
+  </v-row>
 </template>
 
 <script lang="ts">
@@ -29,7 +26,11 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
     OverlayFaciesTable,
   },
 })
-export default class OverlaySpecification<T extends Polygon, S extends PolygonSerialization, P extends PolygonSpecification> extends Vue {
+export default class OverlaySpecification<
+  T extends Polygon = Polygon,
+  S extends PolygonSerialization = PolygonSerialization,
+  P extends PolygonSpecification = PolygonSpecification,
+> extends Vue {
   @Prop({ required: true })
   readonly value!: OverlayTruncationRule<T, S, P>
 }
