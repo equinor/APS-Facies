@@ -2,6 +2,46 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.12.0
+This release _mostly_ fixes various issues.
+Some of the feedback from the First User has been addressed.
+
+### What's new
+* The plugin is now self-contained
+  * the user no longer need to set additional paths in RMS from APS, and NRlib
+  * Workflows in RMS runs from the plugin
+* The settings from a Zone/Region may be reused in a different Zone/Region
+* Components that may not be used, are disabled
+  * When hovering over something disabled, an explanation will often be presented
+* Introduces user selectable color pallets for Facies and Gaussian Random Fields
+* If the user changes the well log parameters, a warning is resented
+* When Gaussian Random Fields changes, their simulation becomes grayed out
+* All `alert`s where replaced with a banner message
+
+### Fixes
+* Fixed various regression errors
+* The user options will now be restored, when opening a stored Job
+* Selecting a Zone/Region no longer causes it to be the current Zone/Region
+* Region parameters with no names are allowed
+* The facies realization parameter now updates continuously
+  * There is no longer a need to deselect the area, or click `enter`
+* The workflows should now work on RMS 10
+* Probability cubes must no longer start with `prob`
+* Workflows now work in RMS11.1 RC / 12
+* Multiple usability issues
+
+### Restructure
+* Improved code quality
+  * Removed unused methods, and components
+    * Support for sliders was removed
+  * All components have been migrated to TypeScript
+  * The internal state is now more consistent
+* Comparing floats to unity is now more robust
+
+### Miscellaneous
+* Dependencies where upgraded
+  * Vuetify 2.0, with its new grid
+
 ## 0.11.2
 
 ### What's new
