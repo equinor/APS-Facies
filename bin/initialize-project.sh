@@ -5,7 +5,7 @@
 # This script is made to add the auxiliary Python jobs to a given RMS project.
 #
 # Author: Sindre Nistad <snis@equinor.com>
-# Version: 1.0.0
+# Version: 1.0.1
 ##
 
 RMS_VERSION="11.0.1"
@@ -55,8 +55,9 @@ fi
 
 WRITE_WORKFLOW_FILES_TO_PROJECT="yes" \
 RMS_PROJECT="${project}" \
-USE_TEMORARY_DIR="yes" \
+USE_TEMORARY_DIR="${USE_TEMORARY_DIR:-yes}" \
 PYTHON=${RMS_PYTHON} \
 PYTHONPATH="${make_dir}:$PYTHONPATH" \
 LD_LIBRARY_PATH=${RMS_LIB}:${LD_LIBRARY_PATH} \
+STUB_SUFFIX="${STUB_SUFFIX:-.stub.py}" \
 make -C "${make_dir}" generate-workflow-files

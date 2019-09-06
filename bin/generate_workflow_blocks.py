@@ -10,8 +10,10 @@ This is called when running 'make init', and 'make generate-workflow-files'.
 The resulting stubs are given in the 'workflow' directory (which again is inside the root of the repo)
 
 Usage:
-    ./bin/generate_workflow_blocks.py [--read-only] [--use-temporary-workflow-dir] [--copy-to-rms-project <path to rms project>]
-    ./generate_workflow_blocks.py <path to project folder> [--read-only] [--use-temporary-workflow-dir] [--copy-to-rms-project <path to rms project>]
+    ./bin/generate_workflow_blocks.py [--read-only] [--use-temporary-workflow-dir] [--suffix <endig to all files>] [--copy-to-rms-project <path to rms project>]
+    ./generate_workflow_blocks.py <path to project folder> [--read-only] [--use-temporary-workflow-dir] [--suffix <endig to all files>] [--copy-to-rms-project <path to rms project>]
+
+The suffix MUST include a dot if a file ending is intended.
 """
 import random
 import string
@@ -33,9 +35,13 @@ def run():
     if use_temporary:
         salt = get_random_name()
 
+    suffix = ''
+    if '--suffix' in argv:
+        suffix = argv[argv.index('--suffix') + 1]
+
     for relative_path, items in workflows.items():
         for file_name in items:
-            create_workflow_block_file(file_name, root_path, relative_path, use_temporary, salt)
+            create_workflow_block_file(file_name, root_path, relative_path, use_temporary, salt, suffix)
 
     for i in range(len(argv)):
         arg = argv[i]
@@ -45,7 +51,7 @@ def run():
             project_location = Path(argv[i + 1]).absolute()
             workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
             add_ipl_scripts(root_path, project_location)
-            for rms_name, workflow_name in get_rms_mapping().items():
+            for rms_name, workflow_name in get_rms_mapping(suffix).items():
                 if workflow_name is not None:
                     _OS.copy(workflow_dir / rms_name, project_location / 'pythoncomp' / rms_name)
 
@@ -355,32 +361,35 @@ def get_workflows():
     }
 
 
-def get_rms_mapping():
+def get_rms_mapping(suffix=''):
     return {
-        'APS_truncate': 'APS_main.py',
-        'Test_APS': None,
-        'APS_test_preview': 'testPreview.py',
-        'APS_update_from_FMU': 'updateAPSModelFromFMU.py',
-        'APS_define_depositional_trend': 'defineFaciesProbMapDepTrend.py',
-        'APS_simulate_gauss_fields_multiprocessing': 'APS_simulate_gauss_multiprocessing.py',
-        'APS_import_simulated_gauss_fields': 'APS_update_gauss_rms.py',
-        'APS_simulate_gauss_fields': 'APS_simulate_gauss_singleprocessing.py',
-        'APS_export_grid_model_info': 'getGridModelAttributes.py',
-        'test_welldata_api': None,
-        'test_gridmodel_parameters_api': None,
-        'Example_discrete_parameter_info': None,
-        'Example_zone_and_region_parameter': None,
-        'APS_update_from_rms_uncertainty_table': 'updateAPSModelFromUncertaintyTable.py',
-        'Compare_files_with_uncertainty_parameters': 'Compare_files_with_uncertainty_parameters.py',
-        'APS_define_probability_logs': 'createProbabilityLogs.py',
-        'APS_merge_facies_logs': 'createRedefinedBlockedFaciesLog.py',
-        'APS_create_FMU_tags': 'setupFMUtags.py',
-        'APS_define_probability_trends': 'defineFaciesProbTrend.py',
-        'Compare_files_updated_with_FMU_parameters': None,
-        'APS_normalize_prob_cubes': 'APS_normalize_prob_cubes.py',
-        'APS_bitmap2rms': 'bitmap2rms.py',
-        'APS_set_seed_file_for_multiprocessing_workflow': 'APS_set_seed_file_for_multiprocessing_workflow.py',
-        'APS_compare_files': 'compare_files.py',
+        rms_name + suffix: stub
+        for rms_name, stub in [
+            ('APS_truncate', 'APS_main.py'),
+            ('Test_APS', None),
+            ('APS_test_preview', 'testPreview.py'),
+            ('APS_update_from_FMU', 'updateAPSModelFromFMU.py'),
+            ('APS_define_depositional_trend', 'defineFaciesProbMapDepTrend.py'),
+            ('APS_simulate_gauss_fields_multiprocessing', 'APS_simulate_gauss_multiprocessing.py'),
+            ('APS_import_simulated_gauss_fields', 'APS_update_gauss_rms.py'),
+            ('APS_simulate_gauss_fields', 'APS_simulate_gauss_singleprocessing.py'),
+            ('APS_export_grid_model_info', 'getGridModelAttributes.py'),
+            ('test_welldata_api', None),
+            ('test_gridmodel_parameters_api', None),
+            ('Example_discrete_parameter_info', None),
+            ('Example_zone_and_region_parameter', None),
+            ('APS_update_from_rms_uncertainty_table', 'updateAPSModelFromUncertaintyTable.py'),
+            ('Compare_files_with_uncertainty_parameters', 'Compare_files_with_uncertainty_parameters.py'),
+            ('APS_define_probability_logs', 'createProbabilityLogs.py'),
+            ('APS_merge_facies_logs', 'createRedefinedBlockedFaciesLog.py'),
+            ('APS_create_FMU_tags', 'setupFMUtags.py'),
+            ('APS_define_probability_trends', 'defineFaciesProbTrend.py'),
+            ('Compare_files_updated_with_FMU_parameters', None),
+            ('APS_normalize_prob_cubes', 'APS_normalize_prob_cubes.py'),
+            ('APS_bitmap2rms', 'bitmap2rms.py'),
+            ('APS_set_seed_file_for_multiprocessing_workflow', 'APS_set_seed_file_for_multiprocessing_workflow.py'),
+            ('APS_compare_files', 'compare_files.py'),
+        ]
     }
 
 
@@ -389,8 +398,8 @@ def get_random_name(length=5):
     return ''.join([random.choice(characters) for _ in range(length)])
 
 
-def get_file_mapping():
-    return {file: rms_name for rms_name, file in get_rms_mapping().items() if file}
+def get_file_mapping(suffix=''):
+    return {file: rms_name for rms_name, file in get_rms_mapping(suffix).items() if file}
 
 
 def get_workflow_dir(root_path, use_temporary=False, salt=None):
@@ -404,12 +413,12 @@ def get_workflow_dir(root_path, use_temporary=False, salt=None):
     return workflow_dir
 
 
-def create_workflow_block_file(file_name, root_path, relative_path, use_temporary=False, salt=None):
+def create_workflow_block_file(file_name, root_path, relative_path, use_temporary=False, salt=None, suffix=''):
     script_name = file_name + '.py'
     script_path = root_path / relative_path / script_name
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
     workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
-    workflow_path = str(workflow_dir / get_file_mapping()[script_name])
+    workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
     workflow_block = get_workflow_block(file_name, relative_path)
     with open(workflow_path, 'w') as f:
         f.write(workflow_block)
