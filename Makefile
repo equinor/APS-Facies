@@ -141,6 +141,17 @@ REMOTE_RGS_MASTER := /project/res/APSGUI/MasterBranch
 
 RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
 RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | sed -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
+RGS_UPDATE_APS := git pull \
+&& rm -rf workflow \
+&& mkdir -p workflow/pythoncomp/ \
+&& touch workflow/.master \
+&& USE_TEMORARY_DIR=no \
+APS_PROJECT_DIR=`pwd` \
+./bin/initialize-project.sh workflow/ \
+&& mv workflow/pythoncomp/* workflow \
+&& rm -rf workflow/pythoncomp \
+          workflow/.master \
+          aps_workflows
 
 
 # NRlib
@@ -590,10 +601,10 @@ deploy:
 	      $(PLUGIN_BIN) $(DEPLOYMENT_USER)@$(DEPLOY_SERVER):$(DEPLOYMENT_PATH)/$(PLUGIN_BIN)
 
 update-remote-develop:
-	$(RGS_EXEC) 'cd $(REMOTE_RGS_DEVELOP) && git pull'
+	$(RGS_EXEC) 'cd $(REMOTE_RGS_DEVELOP) && $(RGS_UPDATE_APS)'
 
 update-remote-master:
-	$(RGS_EXEC) 'cd $(REMOTE_RGS_MASTER) && git pull'
+	$(RGS_EXEC) 'cd $(REMOTE_RGS_MASTER) && $(RGS_UPDATE_APS)'
 
 deploy-stable: deploy
 	cd $(CODE_DIR) && \
