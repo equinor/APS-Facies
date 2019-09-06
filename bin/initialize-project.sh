@@ -59,4 +59,5 @@ USE_TEMORARY_DIR="${USE_TEMORARY_DIR:-yes}" \
 PYTHON=${RMS_PYTHON} \
 PYTHONPATH="${make_dir}:$PYTHONPATH" \
 LD_LIBRARY_PATH=${RMS_LIB}:${LD_LIBRARY_PATH} \
+STUB_SUFFIX="${STUB_SUFFIX:-.stub.py}" \
 make -C "${make_dir}" generate-workflow-files
