@@ -47,3 +47,8 @@ export const DEFAULT_FACIES_AUTOFILL = process.env.NODE_ENV === 'develop'
 export const DEFAULT_TIME_UNTIL_MESSAGE_DISMISSAL = 10000
 
 export const ERROR_TOLERENCE = 0.0001
+
+export const DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE = {
+  width: 100,
+  height: 100,
+}

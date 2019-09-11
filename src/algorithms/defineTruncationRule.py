@@ -4,6 +4,8 @@
 # class DefineTruncationRule
 # Description: Handle truncation rule settings
 # --------------------------------------------------------
+import os
+from pathlib import Path
 from sys import argv
 
 import copy
@@ -13,6 +15,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 
+from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
@@ -27,6 +30,23 @@ from src.utils.xmlUtils import prettify
 from xml.etree.ElementTree import Element
 
 
+def conditional_directory(name):
+    path = Path(name)
+    if not path.exists():
+        os.mkdir(name)
+
+    def wrapper(func):
+        def inner_wrapper(self, *args, **kwargs):
+            old = self._DefineTruncationRule__directory
+            if self.write_to_directories:
+                self._DefineTruncationRule__directory = name
+            result = func(self, *args, **kwargs)
+            self._DefineTruncationRule__directory = old
+            return result
+        return inner_wrapper
+    return wrapper
+
+
 class DefineTruncationRule:
     """
     This class read truncation rule settings for Cubic or NonCubic truncation rules
@@ -37,7 +57,15 @@ class DefineTruncationRule:
     - enable GUI to create mini pictures (icons) for truncation rule settings
     """
 
-    def __init__(self, directory='', debug_level=Debug.VERBOSE):
+    def __init__(
+            self,
+            directory='',
+            debug_level=Debug.VERBOSE,
+            show_title=True,
+            write_overlay=True,
+            write_overview=True,
+            write_to_directories=False,
+    ):
         ''' Dictionaries for Cubic and NonCubic settings and Cubic and NonCubic with overlay truncation settings.
             Data structure:
             Background truncation model of type 'Cubic':
@@ -147,6 +175,8 @@ class DefineTruncationRule:
               itemNonCubic = itemNonCubicOverlay[STRUCT_NONCUBIC_INDX]
               overlayGroups = itemNonCubicOverlay[OVERLAYGROUP_INDX]
         '''
+        self.__tableBayfill = {}
+
         # Table Cubic contains items of type Cubic which is a truncation model for background facies.
         # An item = [direction, polygon, polygon, polygon, ...]
         # where polygon = [faciesName, probabilityFraction, L1, L2, L3]
@@ -185,6 +215,10 @@ class DefineTruncationRule:
         self.__inputFileName = None
         self.debug_level = debug_level
         self.__directory = directory
+        self.show_title = show_title
+        self.write_overlay = write_overlay
+        self.write_overview = write_overview
+        self.write_to_directories = write_to_directories
 
     def readFile(self, inputFileName):
         ''' Read ascii file with definition of truncation rule settings for background facies.'''
@@ -206,7 +240,11 @@ class DefineTruncationRule:
                     if len(words) > 0 and words[0] != '#':
                         ruleType = words[0]
 
-                        if ruleType == 'Cubic':
+                        if ruleType == 'Bayfill':
+                            name = words[1]
+                            truncStructureBayfill = self.__getTruncSettingsBayfillFromFile(words)
+                            self.__tableBayfill[name] = truncStructureBayfill
+                        elif ruleType == 'Cubic':
                             name = words[1]
                             truncStructureCubic = self.__getTruncSettingsCubicFromFile(words)
                             self.__tableCubic[name] = truncStructureCubic
@@ -308,6 +346,27 @@ class DefineTruncationRule:
                 outString = 'NonCubicAndOverlay' + ' ' + name + '  ' + nameBG + ' ' + nameOL
                 file.write(outString)
                 file.write('\n')
+
+    def __getTruncSettingsBayfillFromFile(self, words):
+        print(words)
+        num_polygons = int(words[2])
+        truncItem = []
+        offset = 3
+
+        def strip(word):
+            return word.strip(',').replace('[', '').replace(']', '').strip('\'"')
+
+        for i in range(num_polygons):
+            facies = words[offset + i]
+            polygon = [strip(facies)]
+            if ']' not in facies:
+                # That is, a slant factor must be extracted
+                factor = strip(words[offset + i + 1])
+                value = float(strip(words[offset + i + 2]))
+                polygon.extend([factor, value])
+                offset += 2
+            truncItem.append(polygon)
+        return truncItem
 
     def __getTruncSettingsCubicFromFile(self, words):
         ''' Read details about Cubic truncation rule settings. Is used in function to read settings'''
@@ -429,6 +488,7 @@ class DefineTruncationRule:
             Facies names and Gauss field names are given default values.
             The default facies names are those specified in the settings for the truncation rule.
         '''
+        itemBayfill = None
         itemCubic = None
         itemNonCubic = None
         itemCubicOverlay = None
@@ -445,7 +505,25 @@ class DefineTruncationRule:
                     try:
                         itemNonCubicOverlay = self.__tableNonCubicAndOverlay[name]
                     except KeyError:
-                        return None
+                        try:
+                            itemBayfill = self.__tableBayfill[name]
+                        except KeyError:
+                            return None
+
+        if itemBayfill is not None:
+            truncObj = Trunc3D_bayfill()
+            mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies = self.__background(itemBayfill, 'Bayfill')
+            truncObj.initialize(
+                mainFaciesTable,
+                faciesInZone,
+                [polygon[0] for polygon in itemBayfill],
+                gaussFieldsInZone,
+                alphaFieldNameForBackGroundFacies,
+                itemBayfill[0][2], '', False,
+                itemBayfill[1][2], False,
+                itemBayfill[3][2], False,
+                1,
+            )
 
         if itemCubic is not None:
             if self.debug_level >= Debug.VERBOSE:
@@ -533,6 +611,11 @@ class DefineTruncationRule:
             startIndx = 0
             endIndx = nPolygons
             FACIES_NAME_INDX = NonCubicPolygonIndices.FACIES_NAME_INDX
+        elif truncType == 'Bayfill':
+            nPolygons = 5
+            startIndx = 0
+            endIndx = nPolygons
+            FACIES_NAME_INDX = 0
 
         fNameList = []
         fTable = {}
@@ -550,6 +633,9 @@ class DefineTruncationRule:
         mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
         gaussFieldsInZone = ['GRF01', 'GRF02']
         alphaFieldNameForBackGroundFacies = ['GRF01', 'GRF02']
+        if truncType == 'Bayfill':
+            for fields in [gaussFieldsInZone, alphaFieldNameForBackGroundFacies]:
+                fields.append('GRF03')
         return mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies
 
     def __checkOverlayFacies(self, backgroundFaciesList, overlayGroups):
@@ -626,6 +712,9 @@ class DefineTruncationRule:
 
         polyItem = [faciesName, probFrac, L1, L2, L3]
         truncStructureCubic.append(polyItem)
+
+    def addTruncationRuleSettingsBayfill(self, name, settings):
+        self.__tableBayfill[name] = settings
 
     def addTruncationRuleSettingsCubic(self, name, truncStructureSetting, replace=False):
         ''' Add a truncation rule settings for Cubic rule to the truncation rule settings dictionary
@@ -861,6 +950,10 @@ class DefineTruncationRule:
         ''' Remove a truncation setting from dictionary. If a truncation rule using overlay facies is removed, it will not remove
             the background settings which still will be available for truncation rule settings without overlay. '''
 
+        if name in self.__tableBayfill:
+            print('Remove: {}'.format(name))
+            del self.__tableBayfill[name]
+
         if name in self.__tableCubic:
             NAME_BG_INDX = CubicAndOverlayIndices.NAME_BG_INDX
             # Check that this setting is not used in settings with overlay facies
@@ -1050,6 +1143,7 @@ class DefineTruncationRule:
         """ Find truncation settings for background facies. Specified name is name of truncation setting of either type Cubic or NonCubic"""
         itemCubic = None
         itemNonCubic = None
+        itemBayfill = None
         overlay_setting_list = []
         try:
             itemCubic = self.__tableCubic[name]
@@ -1057,8 +1151,11 @@ class DefineTruncationRule:
             try:
                 itemNonCubic = self.__tableNonCubic[name]
             except:
-                raise KeyError('Truncation setting with name {} is not defined.'
-                               ''.format(name))
+                try:
+                    itemBayfill = self.__tableBayfill[name]
+                except KeyError:
+                    raise KeyError('Truncation setting with name {} is not defined.'
+                                   ''.format(name))
 
         if itemCubic is not None:
             # Search for all overlay settings that are consistent with background model
@@ -1071,6 +1168,10 @@ class DefineTruncationRule:
             for key, itemOverlay in sortedDictionary.items():
                 if self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(itemNonCubic, itemOverlay):
                     overlay_setting_list.append(key)
+        elif itemBayfill is not None:
+            sortedDictionary = collections.OrderedDict(sorted(self.__tableBayfill.items()))
+            for key, item in sortedDictionary.items():
+                overlay_setting_list.append(key)
         else:
             raise ValueError(
                 'Specified truncation setting {} is not defined.'
@@ -1083,6 +1184,12 @@ class DefineTruncationRule:
         fig = plt.figure(figsize=[2.0, 2.0], frameon=False)
         axTrunc = self.__makeTruncationMapSubPlot(name, fig, 1, 1, 1)
         axTrunc.set_aspect('equal', 'box')
+        if not self.show_title:
+            axTrunc.get_xaxis().set_visible(False)
+            axTrunc.get_yaxis().set_visible(False)
+            fig.patch.set_visible(False)
+            axTrunc.axis('off')
+            plt.autoscale(tight=True)
         if writePngFile:
             plotFileName = name + '.png'
             if self.__directory:
@@ -1110,7 +1217,10 @@ class DefineTruncationRule:
 
         # Truncation map is plotted
         plt.axis('off')
-        axTrunc = plt.subplot(Nrow, Ncol, indx)
+        if self.show_title:
+            axTrunc = plt.subplot(Nrow, Ncol, indx)
+        else:
+            axTrunc = fig.add_axes([0, 0, 1, 1])
         colors = get_colors(nFacies)
 
         # Create the colormap
@@ -1123,27 +1233,38 @@ class DefineTruncationRule:
             poly = faciesPolygons[i]
             polygon = Polygon(poly, closed=True, facecolor=colors[fIndx])
             axTrunc.add_patch(polygon)
-        axTrunc.set_title(name)
+        if self.show_title:
+            axTrunc.set_title(name)
         return axTrunc
 
+    @conditional_directory('Bayfill')
+    def createAllBayfillPlots(self):
+        sortedDictionaryBayfill = collections.OrderedDict(sorted(self.__tableBayfill.items()))
+        for name, spec in sortedDictionaryBayfill.items():
+            self.makeTruncationMapPlot(name)
+
+    @conditional_directory('Cubic')
     def createAllCubicPlots(self):
         ''' Make truncation map plots for all specified settings for Cubic truncation rule in dictionarly'''
         sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubic.items()))
         for name, truncStructItem in sortedDictionaryCubic.items():
             self.makeTruncationMapPlot(name)
 
+    @conditional_directory('Cubic')
     def createAllCubicWithOverlayPlots(self):
         ''' Make truncation map plots for all specified settings for Cubic truncation rule with overlay facies in dictionarly'''
         sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubicAndOverlay.items()))
         for name, truncStructItem in sortedDictionaryCubic.items():
             self.makeTruncationMapPlot(name)
 
+    @conditional_directory('Non-Cubic')
     def createAllNonCubicPlots(self):
         ''' Make truncation map plots for all specified settings for NonCubic truncation rule in dictionarly'''
         sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubic.items()))
         for name, truncStructItem in sortedDictionaryNonCubic.items():
             self.makeTruncationMapPlot(name)
 
+    @conditional_directory('Non-Cubic')
     def createAllNonCubicWithOverlayPlots(self):
         ''' Make truncation map plots for all specified settings for NonCubic truncation rule with overlay facies in dictionarly'''
         sortedDictionaryNonCubic = collections.OrderedDict(sorted(self.__tableNonCubicAndOverlay.items()))

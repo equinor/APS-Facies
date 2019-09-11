@@ -1,5 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import os
 from src.algorithms.defineTruncationRule import DefineTruncationRule
 from src.utils.numeric import isNumber
 
@@ -16,6 +17,38 @@ def getInteger(text, minVal=0):
                 print('Must be >= {}'.format(str(minVal)))
                 ok = False
     return n
+
+
+def get_numeric_value_from_user(prompt, min=0, max=1):
+    has_number = False
+    value = None
+
+    while not has_number:
+        try:
+            value = int(input(prompt))
+        except ValueError:
+            print('That is not a valid number')
+        if min <= value <= max:
+            has_number = True
+        else:
+            print('The number given, has to be between {}, and {}'.format(min, max))
+    return value
+
+
+def addCommandBayfill(rules):
+    name = input('Give a name for the new Bayfill truncation setting: ')
+    spec = [name]
+    for key, prompt in [
+        ('SF', 'Please give SF (between 0, and 1): '),
+        ('YSF', 'Please give YSF (between 0, and 1): '),
+        (None, None),
+        ('SBHD', 'Please give SBHD (between 0, and 1): '),
+        (None, None),
+    ]:
+        facies = input('Please provide the name of a facies')
+        if key and prompt:
+            spec.append([facies, key, get_numeric_value_from_user(prompt)])
+    rules.addTruncationRuleSettingsBayfill(name, spec)
 
 
 def addCommandCubic(rules):
@@ -181,6 +214,7 @@ def addCommand(rules):
     while not finished:
         typeTrunc = input(
             'Add truncation setting for:\n'
+            '  Bayfill (B)\n'
             '  Cubic (C)\n'
             '  NonCubic (N)\n'
             '  Overlay (A)\n'
@@ -188,7 +222,10 @@ def addCommand(rules):
             '  NonCubicAndOverlay (NA)\n'
             '  :'
         )
-        if typeTrunc in ['Cubic', 'C', 'c']:
+        if typeTrunc.lower() in ['bayfill', 'b']:
+            addCommandBayfill(rules)
+            finished = True
+        elif typeTrunc in ['Cubic', 'C', 'c']:
             addCommandCubic(rules)
             finished = True
         elif typeTrunc in ['NonCubic', 'N', 'n']:
@@ -233,6 +270,7 @@ def listCommand(rules):
     while not finished:
         typeTrunc = input(
             'Type of truncation settings to list to screen:\n'
+            '  Bayfill (B)\n'
             '  Cubic (C)\n'
             '  NonCubic (N)\n'
             '  Cubic with overlay (CA)\n'
@@ -241,6 +279,10 @@ def listCommand(rules):
             '  Background with N facies and overlay with M facies  (B)\n'
             '  :'
         )
+        if typeTrunc.lower() in ['bayfill', 'b']:
+            typeTrunc = 'Bayfill'
+            settings_list = rules.getListOfOverlaySettings(typeTrunc)
+
         if typeTrunc in ['Cubic', 'C', 'c']:
             typeTrunc = 'Cubic'
             settings_list = rules.getListOfSettings(typeTrunc)
@@ -349,12 +391,15 @@ def mapCommand(rules):
         if name in ['Q', 'q', 'Quit', 'quit']:
             finished = True
         elif name in ['A', 'a']:
+            rules.createAllBayfillPlots()
             rules.createAllCubicPlots()
             rules.createAllNonCubicPlots()
-            rules.createAllCubicWithOverlayPlots()
-            rules.createAllNonCubicWithOverlayPlots()
-            rules.createOverviewPlotCubic('Cubic_overview')
-            rules.createOverviewPlotNonCubic('NonCubic_overview')
+            if rules.write_overlay:
+                rules.createAllCubicWithOverlayPlots()
+                rules.createAllNonCubicWithOverlayPlots()
+            if rules.write_overview:
+                rules.createOverviewPlotCubic('Cubic_overview')
+                rules.createOverviewPlotNonCubic('NonCubic_overview')
 
         else:
             rules.makeTruncationMapPlot(name, writePngFile=False)
@@ -379,8 +424,17 @@ def removeCommand(rules):
 
 
 def run():
+    show_title = not is_affirmative('HIDE_TITLE')
+    write_overlay = not is_affirmative('DONT_WRITE_OVERLAY')
+    write_overview = not is_affirmative('DONT_RITE_OVERVIEW')
+    write_to_directories = is_affirmative('WRITE_TO_DIRECTORIES')
 
-    rules = DefineTruncationRule()
+    rules = DefineTruncationRule(
+        show_title=show_title,
+        write_overlay=write_overlay,
+        write_overview=write_overview,
+        write_to_directories=write_to_directories,
+    )
 
     finished = False
     while not finished:
@@ -410,6 +464,10 @@ def run():
         elif command in ['Write', 'W', 'w']:
             outputFile = input('Name of file to save/update truncation settings: ')
             rules.writeFile(outputFile)
+
+
+def is_affirmative(name):
+    return os.environ.get(name, '').lower() in ['1', 'y', 'yes', 'true']
 
 
 if __name__ == '__main__':

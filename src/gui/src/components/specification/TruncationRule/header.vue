@@ -15,7 +15,15 @@
         :items="templates"
         :disabled="!type"
         label="Template"
-      />
+      >
+        <template v-slot:item="{ item }">
+          <truncation-rule-preview
+            :value="item.text"
+            :type="type"
+            :disabled="item.disabled"
+          />
+        </template>
+      </v-combobox>
     </v-col>
     <v-col
       v-if="false"
@@ -46,11 +54,14 @@ import { Component, Vue } from 'vue-property-decorator'
 import { RootGetters, RootState } from '@/store/typing'
 
 import IconButton from '@/components/selection/IconButton.vue'
+import TruncationRulePreview from './TruncationRulePreview.vue'
+
 import { isUUID } from '@/utils/helpers'
 
 @Component({
   components: {
-    IconButton
+    TruncationRulePreview,
+    IconButton,
   },
 })
 export default class TruncationHeader extends Vue {
