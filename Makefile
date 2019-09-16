@@ -82,7 +82,7 @@ ifeq ($(ALLWAYS_GET_RMS_RESOURCES),yes)
 GET_RMS_RESOURCES := get-rms get-rms-project
 endif
 
-APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | sed -e "s/v//g")
+APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | $(SED) -e "s/v//g")
 APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH := $(shell git rev-parse --short HEAD)
 LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
@@ -145,7 +145,7 @@ REMOTE_RGS_DEVELOP := /project/res/APSGUI/DevelopmentBranch/APSGUI
 REMOTE_RGS_MASTER := /project/res/APSGUI/MasterBranch
 
 RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
-RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | sed -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
+RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | $(SED) -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
 RGS_UPDATE_APS := git pull \
 && rm -rf workflow \
 && mkdir -p workflow/pythoncomp/ \
