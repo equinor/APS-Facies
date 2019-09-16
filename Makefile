@@ -265,7 +265,7 @@ increase-build-number:
 	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
 
 compile-pydist: move-pydist move-python-files-to-pydist
-	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(shell find $(PLUGIN_DIR) -name *.py)
+	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(shell find $(PLUGIN_DIR) -name '*.py')
 
 move-python-files-to-pydist:
 	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/pydist/aps
