@@ -21,6 +21,9 @@ TAR := gtar
 SED := gsed
 MATPLOTLIB_BACKEND ?= Agg
 endif
+ifneq ("$(wildcard /.dockerenv)","")
+MATPLOTLIB_BACKEND ?= Agg
+endif
 TAR_EXCRACT := $(TAR) -xf
 LOG_DIR := logs
 # Mode may be 'production', or 'development'
@@ -299,7 +302,7 @@ build-front-end: $(PACKAGE.JSON) build-dir generate-truncation-rule-images
 	$(YARN) build && \
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
 
-truncation-rule-vislualization-dir: clean-matplotlibrc matplotlibrc
+truncation-rule-vislualization-dir: relink-matplotlibrc
 	$(MKDIR) $(TRUNCATION_RULE_VISUALIZATIONS)
 	ln -sf $(CODE_DIR)/matplotlibrc $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
 
@@ -312,6 +315,7 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 	HIDE_TITLE='yes' \
 	DONT_RITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
+	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
 	$(PYTHON) $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
 
 build-dir:
@@ -404,6 +408,8 @@ install-pipenv:
 requirements: matplotlibrc
 	cd $(CODE_DIR) && \
 	$(PIPENV) install --dev
+
+relink-matplotlibrc: clean-matplotlibrc matplotlibrc matplotlibrc-links
 
 matplotlibrc:
 	echo "$$MATPLOTLIBRC" > $(CODE_DIR)/matplotlibrc

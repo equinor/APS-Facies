@@ -19,6 +19,7 @@ variables:
   RMS_VERSION:            "11.0.1"
   GIT_LFS_SKIP_SMUDGE:    "1"
   RMS_PYTHON:             "/prog/roxar/rms/versions/${RMS_VERSION}/bin/LINUX_64/python"
+  MATPLOTLIB_BACKEND:     "Agg"
 
 stages:
   - init
