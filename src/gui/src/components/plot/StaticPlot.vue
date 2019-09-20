@@ -10,6 +10,7 @@
 </template>
 
 <script lang="ts">
+import { getDisabledOpacity } from '@/utils/helpers/simple'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 // @ts-ignore
@@ -71,7 +72,7 @@ export default class StaticPlot extends Vue {
       return this.dataDefinition
         .map(obj => {
           // @ts-ignore
-          obj.opacity = this.disabled ? 0.258823529 : 1
+          obj.opacity = getDisabledOpacity(this.disabled)
           return obj
         })
     } else {

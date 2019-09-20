@@ -28,3 +28,11 @@ export function isCloseTo (val: number, target: number): boolean {
 export function isCloseToUnity (val: number): boolean {
   return isCloseTo(val, 1)
 }
+
+export function isDevelopmentBuild () {
+  return process.env.NODE_ENV === 'develop'
+}
+
+export function getDisabledOpacity (disabled: boolean): number {
+  return disabled ? 0.258823529 : 1
+}

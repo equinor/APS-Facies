@@ -62,7 +62,12 @@ class _OS:
     def listdir(path: Path) -> Iterable: ...
 
     @staticmethod
-    def _exec(path: Path, fun: Callable) -> Optional[Any]: ...
+    def _exec(
+            path: Path,
+            fun: Callable,
+            args,
+            kwargs,
+    ) -> Optional[Any]: ...
 
     @staticmethod
     def _get_absolute_path(path: Path) -> str: ...

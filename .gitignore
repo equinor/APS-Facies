@@ -561,3 +561,6 @@ monkeytype.sqlite3
 
 # Word temporary files
 doc/~$*.docx
+
+truncation-rules
+src/gui/public/truncation-rules

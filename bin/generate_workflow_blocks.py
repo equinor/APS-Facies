@@ -471,11 +471,11 @@ class _OS:
 
     @staticmethod
     def makedirs(path):
-        _OS._exec(path, os.makedirs)
+        _OS._exec(path, os.makedirs, kwargs={'exist_ok': True})
 
     @staticmethod
-    def _exec(path, fun):
-        return fun(_OS._get_absolute_path(path))
+    def _exec(path, fun, args=(), kwargs={}):
+        return fun(_OS._get_absolute_path(path), *args, **kwargs)
 
     @staticmethod
     def _get_absolute_path(path):
