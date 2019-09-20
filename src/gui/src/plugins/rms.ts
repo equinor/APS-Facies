@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import store from '@/store'
 
-import { createModel } from '@/utils/helpers/processing/export'
+import { dumpState } from '@/utils/helpers/processing/export'
 
 interface SerializedState {
   [_: string]: any
@@ -17,18 +17,7 @@ interface RmsJob extends SerializedState {
 if (typeof rms !== 'undefined') {
   // @ts-ignore
   rms.onPluginSave((): SerializedState => {
-    let model = null
-    let errorMessage = null
-    try {
-      model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
-    } catch ({ message }) {
-      errorMessage = message
-    }
-    return {
-      ...store.state,
-      model,
-      errorMessage,
-    }
+    return dumpState(store)
   })
 
   // @ts-ignore

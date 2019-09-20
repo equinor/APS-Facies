@@ -1,4 +1,4 @@
-import { RootGetters, RootState } from '@/store/typing'
+import { RootGetters, RootState, Store } from '@/store/typing'
 import { hasParents } from '@/utils'
 import { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRuleBase from '@/utils/domain/truncationRule/base'
@@ -641,4 +641,19 @@ export function createModel (context: Context): string {
   addContent(context, doc, rootElem)
   const serializer = new XMLSerializer()
   return serializer.serializeToString(doc)
+}
+
+export function dumpState (store: Store) {
+  let model = null
+  let errorMessage = null
+  try {
+    model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
+  } catch ({ message }) {
+    errorMessage = message
+  }
+  return {
+    ...store.state,
+    model,
+    errorMessage,
+  }
 }
