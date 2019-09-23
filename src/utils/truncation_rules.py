@@ -76,7 +76,7 @@ class TruncationSpecification:
         if self.type == TruncationType.BAYFILL:
             values = {
                 item['name'].lower(): FmuProperty(item['factor']['value'], item['factor']['updatable'])
-                for item in self._values
+                for item in self._values['polygons']
             }
             return {
                 'sf_value': values['sf'].value,
