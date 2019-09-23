@@ -7,10 +7,28 @@ from src.utils.io import create_temporary_model_file
 import roxar
 
 
+class Config:
+    def __init__(self, config):
+        self._config = config
+
+    @property
+    def error_message(self):
+        return self._config['errorMessage']
+
+    @property
+    def model(self):
+        return self._config['model']
+
+    @property
+    def run_fmu_workflows(self):
+        return self._config['options']['runFmuWorkflows']['value']
+
+
 def run(config):
-    if config['errorMessage']:
-        raise ValueError(config['errorMessage'])
-    with create_temporary_model_file(config['model']) as model_file:
+    config = Config(config)
+    if config.error_message:
+        raise ValueError(config.error_message)
+    with create_temporary_model_file(config.model) as model_file:
         use_constant_probabilities = APSModel(model_file).use_constant_probability
         if not use_constant_probabilities:
             run_normalization(roxar, project, model_file=model_file)
