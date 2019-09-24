@@ -208,7 +208,10 @@ export default {
       await dispatch('truncationRules/add', rule, { root: true })
 
       // If there are more facies than the rule uses, we should assume that the user wants to use overlay
-      if (rootGetters['facies/selected'].length > uniqueFacies.length) {
+      if (
+        uniqueFacies.length > 0
+        && rootGetters['facies/selected'].length > uniqueFacies.length
+      ) {
         await dispatch('truncationRules/toggleOverlay', { rule, value: true }, { root: true })
       }
 
