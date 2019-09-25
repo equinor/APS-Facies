@@ -3,7 +3,7 @@
     :value="value"
     property-type="curvature"
     value-type="curvature"
-    label="Curvature of ellipse"
+    label="Curvature"
     strictly-greater
     :ranges="{ min: minCurvature, max: Number.POSITIVE_INFINITY }"
     trend
