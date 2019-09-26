@@ -127,7 +127,7 @@ export default class Trend {
     originZ = 0.5,
     originZUpdatable = false,
     originType = 'RELATIVE',
-    relativeSize = 0,
+    relativeSize = 1,
     relativeSizeUpdatable = false,
     relativeStdDev = 0.001,
     relativeStdDevUpdatable = false,
