@@ -24,6 +24,7 @@ import IconButton from '@/components/selection/IconButton.vue'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
+import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 import { usesAllFacies } from '@/store/utils/helpers'
 
 import { displayError } from '@/utils/helpers/storeInteraction'
@@ -45,17 +46,36 @@ export default class PreviewHeader<
 
   get _allFaciesUsed () { return usesAllFacies({ rootGetters: this.$store.getters }, this.value) }
 
+  get _canSimulateAllTrends () {
+    return (
+      this.value
+      && !this.value.fields
+        .some(field => (
+          field.trend
+          && field.trend.use
+          && TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.includes(field.trend.type))
+        )
+    )
+  }
+
   get canSimulate () {
     return (
       this.value
       && this.value.ready
       && this._allFaciesUsed
+      && this._canSimulateAllTrends
     )
   }
 
   get _explanation (): string | undefined {
     if (!this.value) return 'No truncation rule has been specified'
     if (!this._allFaciesUsed) return 'More facies are selected, than are used'
+    if (!this._canSimulateAllTrends) {
+      return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${
+        TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION
+          .reduce((prev: string, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`, '')
+      })`
+    }
     if (!this.value.ready) return this.value.errorMessage
     return undefined
   }
