@@ -52,3 +52,8 @@ export const DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE = {
   width: 100,
   height: 100,
 }
+
+export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION = [
+  'RMS_PARAM',
+  'NONE',
+]
