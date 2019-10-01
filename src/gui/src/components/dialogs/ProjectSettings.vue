@@ -102,7 +102,7 @@
             no-gutters
           >
             <v-col cols="8">
-              <v-row>
+              <v-row no-gutters>
                 <v-col
                   class="pa-2"
                 >
@@ -179,23 +179,29 @@
                 </v-col>
               </v-row>
             </v-col>
-            <v-col>
-              <v-col>
+            <v-col class="dense">
+              <v-col class="dense">
                 <v-checkbox
                   v-model="automaticAlphaFieldSelection"
                   label="Automatically assign fields to alpha channels"
                 />
               </v-col>
-              <v-col>
+              <v-col class="dense">
                 <v-checkbox
                   v-model="automaticFaciesFill"
                   label="Automatically assign facies to templates"
                 />
               </v-col>
-              <v-col>
+              <v-col class="dense">
                 <v-checkbox
                   v-model="filterZeroProbability"
                   label="Ignore Facies with 0 probability"
+                />
+              </v-col>
+              <v-col class="dense">
+                <v-checkbox
+                  v-model="runFmuWorkflows"
+                  label="Run FMU workflows"
                 />
               </v-col>
             </v-col>
@@ -351,8 +357,6 @@ import NumericField from '@/components/selection/NumericField.vue'
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
 
-import { displayWarning } from '@/utils/helpers/storeInteraction'
-
 @Component({
   // @ts-ignore
   asyncComputed: {
@@ -376,6 +380,7 @@ export default class ProjectSettings extends Vue {
   automaticAlphaFieldSelection: string = ''
   automaticFaciesFill: string = ''
   filterZeroProbability: boolean = false
+  runFmuWorkflows: boolean = false
   colorScale: string = ''
   faciesColorLibrary: Optional<ColorLibrary> = null
 
@@ -387,13 +392,16 @@ export default class ProjectSettings extends Vue {
   onActivation (value: boolean) {
     if (value) {
       const options = this.$store.state.options
+      const path = this.$store.state.parameters.path
 
-      this.apsModelFileLocation = this.$store.state.parameters.path.project.selected
+      this.apsModelFileLocation = path.project.selected
+      this.fmuParameterListLocation = path.fmuParameterListLocation.selected
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
+      this.runFmuWorkflows = options.runFmuWorkflows.value
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }
@@ -417,18 +425,16 @@ export default class ProjectSettings extends Vue {
     this.dialog = false
   }
   async ok () {
-    await displayWarning(
-      'The following settings where not saved:\n'
-      + '* Location of FMU parameter list location\n' /* I.e. this.fmuParameterListLocation */
-    )
     const dispatch = this.$store.dispatch
     await Promise.all([
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
+      dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
+      dispatch('options/runFmuWorkflows/set', this.runFmuWorkflows),
       dispatch('options/colorScale/set', this.colorScale),
       dispatch('constants/faciesColors/set', this.faciesColorLibrary),
     ])

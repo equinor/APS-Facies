@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from src.algorithms.APSModel import APSModel
 from src.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
 from src.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
 from src.rms_jobs.APS_main import run as run_truncation
+from src.rms_jobs.updateAPSModelFromFMU import run as run_fmu
 from src.utils.io import create_temporary_model_file
 
 import roxar
@@ -23,6 +26,23 @@ class Config:
     def run_fmu_workflows(self):
         return self._config['options']['runFmuWorkflows']['value']
 
+    @property
+    def global_include_file(self):
+        project_location = Path(self._config['parameters']['path']['project']['selected'])
+        config_location = project_location / '../input/config/aps_gui'
+        file_priority = [
+            'global_variables.yml',
+            'global_variables.yaml',
+            'global_variables.ipl',
+        ]
+        if config_location.exists():
+            if config_location.is_dir():
+                for file_name in file_priority:
+                    location = config_location / file_name
+                    if location.exists():
+                        return str(location.absolute())
+        return None
+
 
 def run(config):
     config = Config(config)
@@ -32,5 +52,7 @@ def run(config):
         use_constant_probabilities = APSModel(model_file).use_constant_probability
         if not use_constant_probabilities:
             run_normalization(roxar, project, model_file=model_file)
+        if config.run_fmu_workflows:
+            run_fmu(roxar, project, model_file=model_file, output_model_file=model_file, global_include_file=config.global_include_file)
         run_simulation(roxar, project, model_file=model_file, seed_log_file=None)
         run_truncation(roxar, project, model_file=model_file)

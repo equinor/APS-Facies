@@ -643,17 +643,31 @@ export function createModel (context: Context): string {
   return serializer.serializeToString(doc)
 }
 
+export function extractFmuVariables (doc: string): string {
+  const fmuParameters: string[] = (doc.match(/kw=["'][\w\d_]+['"]/gu) || [])
+    .map(match => match.split('=')[1].replace(/["']/g, ''))
+  return fmuParameters.reduce((content, parameter) => `${content}${parameter}\n`, '')
+}
+
+export function createFmuVariables (context: Context): string {
+  let doc = createModel(context)
+  return extractFmuVariables(doc)
+}
+
 export function dumpState (store: Store) {
   let model = null
+  let globalFmuVariables = null
   let errorMessage = null
   try {
     model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
+    globalFmuVariables = extractFmuVariables(model)
   } catch ({ message }) {
     errorMessage = message
   }
   return {
     ...store.state,
     model,
+    globalFmuVariables,
     errorMessage,
   }
 }

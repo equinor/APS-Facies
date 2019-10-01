@@ -1,5 +1,5 @@
 import { RootState } from '@/store/typing'
-import { createModel } from '@/utils/helpers/processing/export'
+import { createFmuVariables, createModel } from '@/utils/helpers/processing/export'
 import { Module } from 'vuex'
 
 const module: Module<{}, RootState> = {
@@ -13,6 +13,16 @@ const module: Module<{}, RootState> = {
           resolve(xmlString)
         } catch (error) {
           reject(error)
+        }
+      })
+    },
+    createGlobalVariables: (context): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        try {
+          const globalVariables = createFmuVariables(context)
+          resolve(globalVariables)
+        } catch (e) {
+          reject(e)
         }
       })
     }

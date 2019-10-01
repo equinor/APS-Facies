@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 import numpy as np
 from enum import Enum
 from typing import List, Dict, Union, Callable, NamedTuple, NewType, Type, Optional
@@ -20,6 +21,7 @@ class CodeName(NamedTuple):
 ProjectName = NewType('ProjectName', str)
 WorkflowName = NewType('WorkflowName', str)
 ProjectPath= NewType('ProjectPath', str)
+FmuParameterListPath = NewType('FmuParameterListPath', str)
 XML = NewType('XML', str)
 TrendName = NewType('TrendName', str)
 VariogramName = NewType('VariogramName', str)
@@ -80,6 +82,12 @@ class RMSData:
     def get_project_dir(
             self
     ) -> ProjectPath: ...
+    def _get_project_location(
+            self,
+    ) -> Path: ...
+    def get_fmu_parameter_list_dir(
+            self,
+    ) -> FmuParameterListPath: ...
     def get_current_workflow_name(
             self
     ) -> WorkflowName: ...
@@ -190,6 +198,12 @@ class RMSData:
     def save_model(
             path:                        str,
             content:                     XML,
+    ) -> bool: ...
+    @staticmethod
+    def save_file(
+            path:                        str,
+            content:                     XML,
+            prettifier:                  Optional[Callable[[str], str]]  = None,
     ) -> bool: ...
     @staticmethod
     def get_constant(

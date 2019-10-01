@@ -81,6 +81,12 @@ class RMSData:
     def get_project_dir(self):
         return str(Path(self.project.filename).parent.absolute())
 
+    def _get_project_location(self):
+        return Path(self.project.filename).parent
+
+    def get_fmu_parameter_list_dir(self):
+        return str((self._get_project_location()).absolute())
+
     def get_current_workflow_name(self):
         return self.roxar.rms.get_running_workflow_name()
 
@@ -243,9 +249,15 @@ class RMSData:
 
     @staticmethod
     def save_model(path, content):
+        return RMSData.save_file(path, content, prettify)
+
+    @staticmethod
+    def save_file(path, content, prettifier=None):
+        if prettifier is None:
+            prettifier = lambda _: _
         try:
             with open(Path(path), 'w') as f:
-                f.write(prettify(b64decode(content).decode()))
+                f.write(prettifier(b64decode(content).decode()))
             return True
         except FileNotFoundError:
             return False
