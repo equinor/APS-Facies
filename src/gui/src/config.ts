@@ -9,9 +9,9 @@ export const DEFAULT_SIZE = {
 
 export const DEFAULT_POINT_SIZE = 1.2
 
-export const DEFAULT_COLOR_SCALE = 'Viridis'
+export const DEFAULT_COLOR_SCALE = 'Rainbow'
 
-export const DEFAULT_COLOR_LIBRARY = 'APS'
+export const DEFAULT_COLOR_LIBRARY = 'Facies'
 
 export const COLOR_SCALES = [
   'Blackbody',
