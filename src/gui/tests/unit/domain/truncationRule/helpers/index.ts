@@ -1,5 +1,5 @@
 import GlobalFacies from '@/utils/domain/facies/global'
-import { defaultColors } from '@/utils/domain/facies/helpers/colors'
+import { apsColors } from '@/utils/domain/facies/helpers/colors'
 import GaussianRandomField from '@/utils/domain/gaussianRandomField'
 import { CODE } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
@@ -18,5 +18,5 @@ export function createFacies (num: number): GlobalFacies[] {
     .map((_, index) => {
       return { name: `F0${index + 1}`, code: index }
     })
-    .map(conf => new GlobalFacies({ ...conf, color: defaultColors[conf.code % defaultColors.length] }))
+    .map(conf => new GlobalFacies({ ...conf, color: apsColors[conf.code % apsColors.length] }))
 }

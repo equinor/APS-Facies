@@ -1,6 +1,6 @@
 export type Color = string // TODO: Make into a proper type
 
-export const defaultColors: Color[] = [
+export const apsColors: Color[] = [
   '#7cfc00', // lawngreen
   '#808080', // grey
   '#1e90ff', // dodgerblue
@@ -51,7 +51,7 @@ export const faciesColors: Color[] = [
 ]
 
 export const colorLibraries = {
-  'Default': defaultColors,
+  'APS': apsColors,
   'General Colors': generalColors,
   'Facies': faciesColors,
 }
