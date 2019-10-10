@@ -295,12 +295,17 @@ clean-plugin:
 	       $(PLUGIN_DIR).plugin \
 	       $(PLUGIN_DIR).*.plugin
 
-build-front-end: $(PACKAGE.JSON) build-dir generate-truncation-rule-images
+build-front-end: $(PACKAGE.JSON) build-dir generate-truncation-rule-images _build-front-end copy-changelog.md
+
+_build-front-end:
 	VUE_APP_APS_VERSION="$(APS_VERSION)" \
 	VUE_APP_BUILD_NUMBER="$(BUILD_NUMBER)" \
 	VUE_APP_HASH="$(LATEST_COMMIT_HASH)" \
 	$(YARN) build && \
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
+
+copy-changelog.md:
+	cp $(CODE_DIR)/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
 
 truncation-rule-vislualization-dir: relink-matplotlibrc
 	$(MKDIR) $(TRUNCATION_RULE_VISUALIZATIONS)
@@ -342,7 +347,7 @@ dotenv:
 	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
 
 
-links: clean-links create-workflow-dir matplotlibrc-links
+links: clean-links create-workflow-dir matplotlibrc-links changelog-link
 	ln -sf $(CODE_DIR)/depricated/APS_make_gauss_IPL.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/depricated/APSGaussFieldJobs.py $(SOURCE_DIR)/algorithms
 	ln -sf $(CODE_DIR)/depricated/APSupdateVarioAsimuth.py $(SOURCE_DIR)/utils
@@ -355,10 +360,13 @@ links: clean-links create-workflow-dir matplotlibrc-links
 	ln -sf $(CODE_DIR)/src/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
 	ln -sf $(CODE_DIR)/src/rms_jobs/bitmap2rms.py $(BIN_DIR)/bitmap2rms_xml.py
 
+changelog-link:
+	ln -sf $(CODE_DIR)/CHANGELOG.md $(WEB_DIR)/public/CHANGELOG.md
+
 create-workflow-dir:
 	$(MKDIR) $(CODE_DIR)/workflow
 
-clean-links: clean-matplotlibrc
+clean-links: clean-matplotlibrc clean-changelog-link
 	rm -f $(BIN_DIR)/APS_make_gauss_IPL.py
 	rm -f $(SOURCE_DIR)/algorithms/APSGaussFieldJobs.py
 	rm -f $(SOURCE_DIR)/utils/APSupdateVarioAsimuth.py
@@ -370,6 +378,9 @@ clean-links: clean-matplotlibrc
 	rm -f $(BIN_DIR)/APS_simulate_gauss_singleprocessing.py
 	rm -f $(CODE_DIR)/workflow/ConvertBitMapToRMS.py
 	rm -f $(BIN_DIR)/bitmap2rms_xml.py
+
+clean-changelog-link:
+	rm -f $(WEB_DIR)/public/CHANGELOG.md
 
 generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)

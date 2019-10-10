@@ -36,6 +36,7 @@ function makeCustomIcons (): Icons {
     up: 'fas fa-angle-up',
     search: 'fas fa-search',
     help: 'fas fa-question-circle',
+    changelog: 'far fa-newspaper',
   }
   Object.keys(icons).forEach((key: string): void => {
     if (notEmpty(icons[`${key}`])) {

@@ -555,6 +555,7 @@ examples/DefineTruncStructure.py
 workflow/Cleanup_tmpdir.ipl
 workflow/APS_simulate_gauss_multiprocessing.ipl
 src/unit_test/integration/examples
+src/gui/public/CHANGELOG.md
 
 # Data stores
 monkeytype.sqlite3
