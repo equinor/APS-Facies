@@ -57,6 +57,19 @@
       trigger="hover"
     >
       <icon-button
+        icon="changelog"
+        color="primary"
+        @click="() => openChangelog()"
+      />
+      <span slot="popover">
+        What's new?
+      </span>
+    </v-popover>
+    <ChangelogDialog ref="changelogDialog" />
+    <v-popover
+      trigger="hover"
+    >
+      <icon-button
         icon="help"
         color="primary"
         @click="() => goToHelp()"
@@ -84,6 +97,7 @@ import { xml2json } from 'xml-js'
 import UploadButton from 'vuetify-upload-button'
 
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
+import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
 import ProjectSettings from '@/components/dialogs/ProjectSettings.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
@@ -148,6 +162,7 @@ function fileHandler (store: Store, fileName: string) {
     ProjectSettings,
     IconButton,
     UploadButton,
+    ChangelogDialog,
   },
 })
 export default class TheToolBar extends Vue {
@@ -169,6 +184,11 @@ export default class TheToolBar extends Vue {
 
   goToHelp () {
     rms.openWikiHelp()
+  }
+
+  openChangelog () {
+    // @ts-ignore
+    this.$refs.changelogDialog.open()
   }
 
   importModelFile (file: File | null) {
