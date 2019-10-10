@@ -77,6 +77,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import cloneDeep from 'lodash/cloneDeep'
 
 import rms from '@/api/rms'
+import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
 
 import { invalidateChildren, notEmpty } from '@/utils'
 
@@ -135,7 +136,7 @@ export default class GaussianRandomField extends Vue {
   get canSimulate (): boolean {
     return (
       notEmpty(this.variogramType)
-      && (this.trend.use ? ['NONE'].indexOf(this.trend.type) === -1 : true)
+      && (this.trend.use ? TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION.indexOf(this.trend.type) === -1 : true)
       && this.isValid
       && !this.waitingForSimulation
     )

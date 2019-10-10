@@ -103,6 +103,8 @@ import {
   RelativeStandardDeviation,
 } from '@/components/specification/Trend/InputFields'
 
+import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
+
 interface Invalid {
   relativeStdDev: boolean
   type: boolean
@@ -149,7 +151,8 @@ export default class TrendSpecification extends Vue {
   get hasLinearProperties () {
     return (
       notEmpty(this.trendType)
-      && this.notOneOf(['RMS_PARAM', 'NONE'])
+      // @ts-ignore
+      && this.notOneOf(TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION)
     )
   }
   get hasEllipticProperties () {
