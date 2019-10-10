@@ -82,7 +82,7 @@ def get_rms_project_data_file(**kwargs):
 
 
 def get_global_ipl_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file'], default_name='test_global_include.ipl')
+    return _get_file_name(kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file', 'global_include_file'], default_name='test_global_include.ipl')
 
 
 def get_debug_level(**kwargs):

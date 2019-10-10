@@ -9,6 +9,8 @@ export const DEFAULT_SIZE = {
 
 export const DEFAULT_POINT_SIZE = 1.2
 
+export const DEFAULT_RUN_FMU_MODE = false
+
 export const DEFAULT_COLOR_SCALE = 'Rainbow'
 
 export const DEFAULT_COLOR_LIBRARY = 'Facies'

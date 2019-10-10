@@ -17,7 +17,7 @@ import { Component, Vue } from 'vue-property-decorator'
 
 import IconButton from '@/components/selection/IconButton.vue'
 
-import { createModel } from '@/utils/helpers/processing/export'
+import { dumpState } from '@/utils/helpers/processing/export'
 
 type Option = 'may' | 'success' | 'failure'
 
@@ -38,16 +38,7 @@ export default class ExportState extends Vue {
   }
 
   async save () {
-    const store = this.$store
-    let model = null
-    try {
-      model = btoa(createModel({ rootState: store.state, rootGetters: store.getters }))
-    } catch {
-    }
-    const state = JSON.stringify({
-      ...store.state,
-      model: model,
-    })
+    const state = JSON.stringify(dumpState(this.$store))
     try {
       await navigator.clipboard.writeText(state)
       this.status = 'success'

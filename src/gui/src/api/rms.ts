@@ -13,6 +13,7 @@ const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 export default {
   projectName: (): Promise<string> => api.call('get_project_name'),
   projectDirectory: (): Promise<string> => api.call('get_project_dir'),
+  fmuParameterList: (): Promise<string> => api.call('get_fmu_parameter_list_dir'),
   currentWorkflowName: (): Promise<string> => api.call('get_current_workflow_name'),
   gridModels: (): Promise<{ name: string, exists: boolean}[]> => api.call('get_grid_model_names'),
   zones: (gridName: string): Promise<string[]> => api.call('get_zones', gridName),
@@ -34,7 +35,7 @@ export default {
   averageProbabilityCubes: (gridName: string, probabilityCubeParameters: string, zoneNumber: number, regionParameter: Optional<string> = null, regionNumber: Optional<number> = null): Promise<AverageParameterProbabilities> => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, zoneNumber, regionParameter, regionNumber),
   openWikiHelp: (): Promise<void> => api.call('open_wiki_help'),
   isApsModelValid: (fileContent: string): Promise<{ valid: boolean, error: string }> => api.call('is_aps_model_valid', fileContent),
-  save: (path: string, content: string): Promise<boolean> => api.call('save_model', path, content),
+  save: (path: string, content: string, prettify: boolean = true): Promise<boolean> => api.call(prettify ? 'save_model' : 'save_file', path, content),
   // @ts-ignore
   chooseDir: (mode: string, suggestion: string = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve, reject) => resolve(null)),
   // @ts-ignore

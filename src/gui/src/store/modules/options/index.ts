@@ -2,6 +2,7 @@ import {
   COLOR_SCALES,
   DEFAULT_COLOR_SCALE,
   DEFAULT_FACIES_AUTOFILL,
+  DEFAULT_RUN_FMU_MODE,
 } from '@/config'
 import { makeOption } from '@/store/utils'
 
@@ -23,6 +24,7 @@ const module: Module<OptionsState, RootState> = {
     filterZeroProbability,
     automaticFaciesFill: makeOption(DEFAULT_FACIES_AUTOFILL, [true, false]),
     colorScale: makeOption(DEFAULT_COLOR_SCALE, COLOR_SCALES),
+    runFmuWorkflows: makeOption(DEFAULT_RUN_FMU_MODE, [true, false]),
   },
 
   actions: {
