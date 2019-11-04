@@ -53,6 +53,20 @@ def run(config):
         if not use_constant_probabilities:
             run_normalization(roxar, project, model_file=model_file)
         if config.run_fmu_workflows:
+            # Rename to "update model_file" or something similar
+            # Add flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run (user specified in the GUI)
             run_fmu(roxar, project, model_file=model_file, output_model_file=model_file, global_include_file=config.global_include_file)
+            # run_initial_ensable is equivalent to running the APS workflows ONCE
+            # Once that is done, (that is the the facies realization, and GRFs with trends exists), only loading from disk, and running `run_truncation` should be done
+
+        # Move functionality for "normalizing" GRFs + trend from `run_truncation` to `run_simulation`
         run_simulation(roxar, project, model_file=model_file, seed_log_file=None)
+        # The GRFs should not be written to RMS if Debug is not set, and we are not in FMU mode
+        # 3D parameter for
+        # 1. (Transformed GRF + trend) May be needed in `run_truncation` depending on what is moved
+        # 2. Trend
+        # 3. Trend + residual
+        # It still need to write residual (+ trend) to RMS (used in `run_truncation`)
+
+        # Script for moving stuff from "FMU" grid to "regular" grid
         run_truncation(roxar, project, model_file=model_file)
