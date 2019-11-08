@@ -55,6 +55,8 @@ def run(config):
         if config.run_fmu_workflows:
             # Rename to "update model_file" or something similar
             # Add flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run (user specified in the GUI)
+            # We also need to get / update the truncation rule parameters (in the model file) that FMU may change
+            # That is, to use a different fmu_variables file (similar / equivalent to global_variables.ipl)
             run_fmu(roxar, project, model_file=model_file, output_model_file=model_file, global_include_file=config.global_include_file)
             # run_initial_ensable is equivalent to running the APS workflows ONCE
             # Once that is done, (that is the the facies realization, and GRFs with trends exists), only loading from disk, and running `run_truncation` should be done
