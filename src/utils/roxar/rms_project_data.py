@@ -110,7 +110,7 @@ class RMSData:
             try:
                 self.get_grid(name)
                 exists = True
-            except KeyError:
+            except (KeyError, ValueError):
                 exists = False
             models.append({'name': name, 'exists': exists})
         return models
