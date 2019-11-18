@@ -7,16 +7,22 @@ from src.utils.constants.simple import Debug
 from src.utils.methods import get_run_parameters
 
 
-def updateAPSModelFromFMU(globalIPLFile, inputAPSModelFile, outputAPSModelFile, debug_level=Debug.OFF):
+def update_aps_model_from_fmu(
+        global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level=Debug.OFF,
+        project=None, workflow_name=None,
+  ):
     # Create empty APSModel object
-    apsModel = APSModel()
+    aps_model = APSModel()
 
     # Read model file and parameter file and update values in xml tree but no data
     # is put into APSModel data structure but instead an updated XML data tree is returned.
-    eTree = apsModel.updateXMLModelFile(modelFileName=inputAPSModelFile, parameterFileName=globalIPLFile, debug_level=debug_level)
+    tree = aps_model.updateXMLModelFile(
+        modelFileName=input_aps_model_file, parameterFileName=global_ipl_file,
+        project=project, workflow_name=workflow_name, debug_level=debug_level,
+    )
 
     # Write the updated XML tree for the model parameters to a new file
-    apsModel.writeModelFromXMLRoot(eTree, outputAPSModelFile)
+    aps_model.writeModelFromXMLRoot(tree, output_aps_model_file)
 
 
 # -------  Main ----------------
@@ -26,7 +32,11 @@ def run(roxar=None, project=None, **kwargs):
     global_ipl_file = params['global_include_file']
     debug_level = params['debug_level']
     output_aps_model_file = params['output_model_file']
-    updateAPSModelFromFMU(global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level)
+    workflow_name = params['workflow_name']
+    update_aps_model_from_fmu(
+        global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level,
+        project=project, workflow_name=workflow_name,
+    )
 
 
 if __name__ == '__main__':

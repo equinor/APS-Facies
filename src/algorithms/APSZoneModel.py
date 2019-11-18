@@ -16,6 +16,7 @@ from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword, getTextCommand, getBoolCommand
 from src.algorithms.Memoization import MemoizationItem, RoundOffConstant
 
+
 class APSZoneModel:
     """
     Keep data structure for a zone
@@ -352,6 +353,10 @@ class APSZoneModel:
     def truncation_rule(self):
         return self.__trunc_rule
 
+    @property
+    def gaussian_fields(self):
+        return self.__gaussModelObject.fields
+
     @truncation_rule.setter
     def truncation_rule(self, value):
         if value is None:
@@ -479,10 +484,11 @@ class APSZoneModel:
     def updateGaussFieldTrendParam(self, gfName, trendModelObj, relStdDev):
         self.__gaussModelObject.updateGaussFieldTrendParam(gfName, trendModelObj, relStdDev)
 
-    def applyTruncations(self, probDefined, alpha_fields, faciesReal, nDefinedCells, cellIndexDefined):
+    def applyTruncations(self, probDefined, alpha_fields, faciesReal, cellIndexDefined):
         ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
             The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
 
+        nDefinedCells = len(cellIndexDefined)
         debug_level = self.__debug_level
         faciesNames = self.getFaciesInZoneModel()
         nFacies = len(faciesNames)
@@ -568,7 +574,6 @@ class APSZoneModel:
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
 
-
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
@@ -623,10 +628,11 @@ class APSZoneModel:
             volFrac[f] = volFrac[f] / float(nDefinedCells)
         return faciesReal, volFrac
 
-    def applyTruncations_vectorized(self, probDefined, alpha_fields, faciesReal, nDefinedCells, cellIndexDefined):
+    def applyTruncations_vectorized(self, probDefined, alpha_fields, faciesReal, cellIndexDefined):
         ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
             The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
 
+        nDefinedCells = len(cellIndexDefined)
         debug_level = self.__debug_level
         order_index = self.truncation_rule.getOrderIndex()
         faciesNames = self.getFaciesInZoneModel()

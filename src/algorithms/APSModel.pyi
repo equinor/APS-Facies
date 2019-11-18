@@ -5,7 +5,7 @@ from src.algorithms.properties import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug, CrossSectionType
-from typing import Any, List, Optional, Tuple, Dict
+from typing import Any, List, Optional, Tuple, Dict, Type
 from xml.etree.ElementTree import Element, ElementTree
 
 from roxar import Project
@@ -36,6 +36,7 @@ class APSModel:
             preview_scale: float = 1.0,
             debug_level: Debug = Debug.OFF
     ) -> None: ...
+    grid_model_name: str
     debug_level: Debug
     seed_file_name: str
     preview_scale: float
@@ -43,7 +44,7 @@ class APSModel:
     preview_cross_section_relative_position: float
     __preview_cross_section: CrossSection
     preview_cross_section: CrossSection
-    sorted_zone_models: OrderedDict
+    sorted_zone_models: OrderedDict[Tuple[int, int], APSZoneModel]
     use_constant_probability: bool
     write_seeds: bool
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
@@ -98,8 +99,23 @@ class APSModel:
     def setRmsZoneParamName(self, name: str) -> None: ...
     def setRmsRegionParamName(self, name: str) -> None: ...
     def setSelectedZoneAndRegionNumber(self, selectedZoneNumber: int, selectedRegionNumber: int = 0) -> None: ...
-    def writeModel(self, modelFileName: str, attributesFileName: str, debug_level: Debug = Debug.OFF) -> None: ...
+    def dump(
+            self,
+            name:                       str,
+            attributes_file_name:       Optional[str]       = None,
+            debug_level:                Debug               = Debug.OFF,
+    ) -> None: ...
+    def writeModel(
+            self,
+            modelFileName:              str,
+            attributesFileName:         Optional[str]       = None,
+            debug_level:                Debug               = Debug.OFF,
+    ) -> None: ...
     @staticmethod
     def __readParamFromFile(inputFile: str, debug_level: Debug = Debug.OFF): ...
     @staticmethod
+    def __getParamFromRMSTable(project: Project, workflow_name: str, uncertainty_variable_names, realisation_number: int, debug_level: Debug = Debug.OFF) -> List[Tuple[str, str]]: ...
+    @staticmethod
     def writeModelFromXMLRoot(inputETree, outputModelFileName): ...
+
+ApsModel = Type[APSModel]

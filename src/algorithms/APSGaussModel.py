@@ -1058,6 +1058,10 @@ class APSGaussModel:
             )
 
     @property
+    def fields(self):
+        return self._gaussian_models.values()
+
+    @property
     def num_gaussian_fields(self):
         return len(self._gaussian_models)
 

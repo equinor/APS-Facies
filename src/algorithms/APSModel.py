@@ -4,9 +4,9 @@ import collections
 import copy
 import xml.etree.ElementTree as ET
 
-from src.algorithms.properties import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
+from src.algorithms.properties import CrossSection
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
@@ -298,7 +298,7 @@ class APSModel:
         for keyword, variable, required in placement:
             prefix = '_' + self.__class__.__name__
             value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName, required=required)
-            self.__setattr__(prefix + variable, value)
+            setattr(self, prefix + variable, value)
 
         # Read keyword for region parameter
         # Note that the keyword is required if there are zones in the zone model where the zone has
@@ -489,9 +489,16 @@ class APSModel:
             print('------------ End reading model file in APSModel ------------------')
             print('')
 
-    def updateXMLModelFile(self, modelFileName=None, parameterFileName=None,
-                           project=None, workflow_name=None, uncertainty_variable_names=None,
-                           realisation_number=0, debug_level=Debug.OFF):
+    def updateXMLModelFile(
+            self,
+            modelFileName=None,
+            parameterFileName=None,
+            project=None,
+            workflow_name=None,
+            uncertainty_variable_names=None,
+            realisation_number=0,
+            debug_level=Debug.OFF,
+    ):
         # Read XML model file
         tree = ET.parse(modelFileName)
         root = tree.getroot()
@@ -520,8 +527,9 @@ class APSModel:
             assert project
             assert workflow_name
             assert uncertainty_variable_names
-            keywordsRead = self.__getParamFromRMSTable(project, workflow_name, uncertainty_variable_names,
-                                                       realisation_number)
+            keywordsRead = self.__getParamFromRMSTable(
+                project, workflow_name, uncertainty_variable_names, realisation_number,
+            )
         # keywordsRead = [name,value]
 
         # Set new values
@@ -702,14 +710,13 @@ class APSModel:
         wf = project.workflows[workflow_name]
         rms_table_name = wf.report_table_name
         parametersUncertainty = []
-        for i in range(len(uncertainty_variable_names)):
-            name = uncertainty_variable_names[i]
+        for name in uncertainty_variable_names:
             value = project.workflows.get_uncertainty(
                 table_name=rms_table_name,
                 uncertainty_name=name,
                 realisation=realisation_number
             )
-            item = [name, str(value)]
+            item = (name, str(value))
             parametersUncertainty.append(item)
         return parametersUncertainty
 
@@ -773,6 +780,10 @@ class APSModel:
     def sorted_zone_models(self):
         # Define sorted sequence of the zone models
         return collections.OrderedDict(sorted(self.__zoneModelTable.items()))
+
+    @property
+    def grid_model_name(self):
+        return self.__rmsGridModelName
 
     def getGridModelName(self):
         return copy.copy(self.__rmsGridModelName)
@@ -1023,6 +1034,10 @@ class APSModel:
         rootReformatted = prettify(root)
         return rootReformatted
 
+    def dump(self, name, attributes_file_name=None, debug_level=Debug.OFF):
+        """Writes the representation of this APS model to a model file"""
+        self.writeModel(name, attributes_file_name, debug_level)
+
     def writeModel(self, modelFileName, attributesFileName=None, debug_level=Debug.OFF):
         fmu_attributes = list()
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
@@ -1046,3 +1061,6 @@ class APSModel:
         with open(outputModelFileName, 'w') as file:
             file.write(rootReformatted)
             file.write('\n')
+
+
+ApsModel = APSModel

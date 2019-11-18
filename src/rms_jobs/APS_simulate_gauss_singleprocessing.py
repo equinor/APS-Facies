@@ -74,8 +74,7 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
             print('--   Grid layers: {}     Start layer: {}     End layer: {}'.format(num_layers, start + 1, end + 1))
 
         gauss_result_list_for_zone = []
-        for i in range(len(gauss_field_names)):
-            gauss_field_name = gauss_field_names[i]
+        for gauss_field_name in gauss_field_names:
             azimuth = zone_model.getAzimuthAngle(gauss_field_name)
             dip = zone_model.getDipAngle(gauss_field_name)
             power = zone_model.getPower(gauss_field_name)
@@ -150,6 +149,7 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
             regionNumber=region_number, regionParamName=aps_model.getRegionParamName(),
             realNumber=realisation, isShared=is_shared, debug_level=debug_level
         )
+
     # End loop over all active zones in the model
 
     if seed_file_log and aps_model.write_seeds:
