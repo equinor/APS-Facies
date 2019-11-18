@@ -196,6 +196,7 @@ class Variogram:
 class APSGaussModel:
     debug_level: Debug
     num_gaussian_fields: int
+    fields: List[GaussianField]
     used_gaussian_field_names: List[GaussianFieldName]
     _gaussian_models: Dict[GaussianFieldName, GaussianField]
     __xml_keyword: Dict[PropertyName, XMLKeyword]

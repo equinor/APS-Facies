@@ -74,15 +74,22 @@ def get_colors(n, min_colors=2):
 
 
 def get_model_file_name(_default_name='APS.xml', **kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model_file', 'model'], default_name=_default_name)
+    return _get_file_name(
+        kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model_file', 'model'], default_name=_default_name,
+    )
 
 
 def get_rms_project_data_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['output_rms_data_file'], default_name='rms_project_data_for_APS_gui.xml')
+    return _get_file_name(
+        kwargs, legal_kwargs=['output_rms_data_file'], default_name='rms_project_data_for_APS_gui.xml',
+    )
 
 
 def get_global_ipl_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file', 'global_include_file'], default_name='test_global_include.ipl')
+    return _get_file_name(
+        kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file', 'global_include_file'],
+        default_name='test_global_include.ipl',
+    )
 
 
 def get_debug_level(**kwargs):
@@ -105,7 +112,10 @@ def get_debug_level(**kwargs):
 
 
 def get_fmu_variables_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['fmu_variables_file', 'input_selected_fmu_variable_file'], default_name='examples/FMU_selected_variables.dat')
+    return _get_file_name(
+        kwargs, legal_kwargs=['fmu_variables_file', 'input_selected_fmu_variable_file'],
+        default_name='examples/FMU_selected_variables.dat',
+    )
 
 
 def get_output_model_file(**kwargs):
@@ -113,7 +123,9 @@ def get_output_model_file(**kwargs):
 
 
 def get_output_tagged_variables_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['output_tagged_variables_file'], default_name='output_list_of_FMU_tagged_variables.dat')
+    return _get_file_name(
+        kwargs, legal_kwargs=['output_tagged_variables_file'], default_name='output_list_of_FMU_tagged_variables.dat',
+    )
 
 
 def get_tag_all_variables(**kwargs):

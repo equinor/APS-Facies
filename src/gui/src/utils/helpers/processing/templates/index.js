@@ -122,7 +122,7 @@ export function combinePolygons (polygons, overlay, _isParsed = false) {
   }
 }
 
-export function structurePolygons (polygons,) {
+export function structurePolygons (polygons) {
   return polygons.map((polygon, index) => {
     if (polygon.level) {
       /* I.E. Dealing with cubic polygons */

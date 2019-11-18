@@ -9,6 +9,7 @@ from src.algorithms.defineFacies import BaseDefineFacies
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingKeyword
 
+
 class DefineFaciesProb(BaseDefineFacies):
     def __init__(self, model_file_name, project, debug_level=Debug.OFF):
         super().__init__(model_file_name, project, 'FaciesProbTrend', debug_level)

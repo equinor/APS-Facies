@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from src.algorithms.APSFaciesProb import APSFaciesProb
-from src.algorithms.APSGaussModel import APSGaussModel, GaussianFieldSimulation, GaussianFieldName
+from src.algorithms.APSGaussModel import APSGaussModel, GaussianFieldSimulation, GaussianFieldName, GaussianField
 from src.algorithms.properties import CrossSection
 from src.algorithms.Trend3D import Trend3D_elliptic, Trend3D_hyperbolic, Trend3D_linear, Trend3D_rms_param, Trend3D
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
@@ -20,6 +20,7 @@ class APSZoneModel:
     region_number: int
     debug_level: Debug
     used_gaussian_field_names: List[GaussianFieldName]
+    gaussian_fields: List[GaussianField]
     __faciesProbObject: APSFaciesProb
     __gaussModelObject: APSGaussModel
     def __init__(
@@ -84,4 +85,5 @@ class APSZoneModel:
         crossSection: CrossSection,
         original_simulation_box_origin,
     ) -> List[GaussianFieldSimulation]: ...
-    def applyTruncations(self, probDefined, GFAlphaList, faciesReal, nDefinedCells, cellIndexDefined): ...
+    def applyTruncations(self, probDefined, GFAlphaList, faciesReal, cellIndexDefined): ...
+    def applyTruncations_vectorized(self, probDefined, alpha_fields, faciesReal, cellIndexDefined): ...

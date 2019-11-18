@@ -272,7 +272,7 @@ class Trend3D:
             'Can not use: {} object as a trend object. Use sub classes of this as trend'.format(self._class_name)
         )
 
-    def createTrend(self, grid_model, realization_number, num_defined_cells, cell_index_defined, zone_number, sim_box_thickness):
+    def createTrend(self, grid_model, realization_number, cell_index_defined, zone_number, sim_box_thickness):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
         """
@@ -297,7 +297,7 @@ class Trend3D:
         zonation = grid_indexer.zonation
         layer_ranges = zonation[zone_number - 1]
         n = 0
-        start_layer = 99999999
+        start_layer = np.infty
         end_layer = -1
         for layer in layer_ranges:
             if start_layer > layer[0]:
@@ -358,6 +358,7 @@ class Trend3D:
             values_in_selected_cells = values_in_active_cells[cell_index_defined]
 
         else:
+            num_defined_cells = len(cell_index_defined)
             values_in_selected_cells = np.zeros(num_defined_cells, np.float32)
             parameters_for_trend_calc = self._calculateTrendModelParam()
             for indx in range(num_defined_cells):
@@ -851,6 +852,9 @@ class Trend3D_conic(Trend3D):
             origin_type=self.origin_type,
         ))
         return representation
+
+
+ConicTrend = Trend3D_conic
 
 
 class Trend3D_elliptic(Trend3D_conic):

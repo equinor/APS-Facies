@@ -4,7 +4,7 @@
 import xml.etree.ElementTree as ET
 import pytest
 from src.utils.constants.simple import Debug
-from src.rms_jobs.updateAPSModelFromFMU import updateAPSModelFromFMU
+from src.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
 from src.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_markers, get_apsmodel_with_all_fmu_markers
 
 
@@ -102,7 +102,7 @@ def test_global_include_file_has_all_necessary_update_values(original_values, up
 
 def test_all_element_values_are_correctly_updated(original_values, update_values):
 
-    updateAPSModelFromFMU('testData_FMU/test_global_include.ipl', 'testData_models/APS.xml',
+    update_aps_model_from_fmu('testData_FMU/test_global_include.ipl', 'testData_models/APS.xml',
                           'testData_models/APS_FMUupdated.xml', Debug.VERBOSE)
 
     parsed_output_file = ET.parse('testData_models/APS_FMUupdated.xml')

@@ -521,6 +521,7 @@ state.db
 libraries/nrlib
 .tool-versions
 *.plugin
+*.plugin.gpg
 
 !examples/*
 !src/gui/build/*
@@ -564,4 +565,5 @@ monkeytype.sqlite3
 doc/~$*.docx
 
 truncation-rules
+aps_workflows
 src/gui/public/truncation-rules
