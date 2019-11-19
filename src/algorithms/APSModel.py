@@ -1058,7 +1058,7 @@ class APSModel:
         print('Write file: ' + outputModelFileName)
         root = inputETree.getroot()
         rootReformatted = minify(root)
-        with open(outputModelFileName, 'w') as file:
+        with open(outputModelFileName, 'w', encoding='utf-8') as file:
             file.write(rootReformatted)
             file.write('\n')
 

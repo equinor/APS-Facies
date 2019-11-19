@@ -13,7 +13,7 @@ def prettify(elem, indent="  ", new_line="\n"):
     if isinstance(elem, str):
         rough_string = elem
     else:
-        rough_string = ET.tostring(elem, 'utf-8')
+        rough_string = ET.tostring(elem, encoding='unicode')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent=indent, newl=new_line)
 
