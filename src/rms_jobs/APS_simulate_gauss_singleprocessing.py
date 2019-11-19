@@ -17,7 +17,10 @@ from src.utils.roxar.grid_model import getGridAttributes
 from src.utils.methods import get_seed_log_file
 
 
-def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat'):
+def run_simulations(
+        project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
+        layers_per_zone=None,
+):
     """
     Description: Run gauss simulations for the APS model i sequence
 
@@ -41,6 +44,9 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
         _, _, _, _, _, _, sim_box_x_length, sim_box_y_length, azimuth_angle_grid,
         _, _, nx, ny, _, _, _, num_layers_per_zone, start_layer_per_zone, end_layer_per_zone
     ] = getGridAttributes(grid, Debug.OFF)
+
+    if layers_per_zone is not None:
+        num_layers_per_zone = layers_per_zone
 
     # Calculate grid cell size
     dx = sim_box_x_length / nx
@@ -170,9 +176,13 @@ def run_simulations(project, model_file='APS.xml', realisation=0, is_shared=Fals
 def run(roxar=None, project=None, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
+    layers_per_zone = kwargs.get('layers_per_zone', None)
     real_number = project.current_realisation
     is_shared = False
-    run_simulations(project, model_file, real_number, is_shared, seed_file_log)
+    run_simulations(
+        project, model_file, real_number, is_shared, seed_file_log,
+        layers_per_zone=layers_per_zone,
+    )
     print('Finished simulation of gaussian fields for APS')
 
 

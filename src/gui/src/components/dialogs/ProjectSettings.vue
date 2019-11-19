@@ -59,34 +59,13 @@
               />
             </v-col>
           </v-row>
-          <v-row no-gutters>
-            <v-col
-              class="pa-2"
-              cols="3"
-            >
-              FMU Parameters List Location:
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="5"
-            >
-              <v-text-field
-                v-model="fmuParameterListLocation"
-                single-line
-                solo
-              />
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="4"
-            >
-              <bold-button
-                title="Select Directory"
-                @click="chooseFmuParametersFileLocation"
-              />
-            </v-col>
-          </v-row>
         </v-card>
+        <br>
+        <FmuSettings
+          :fmu-parameter-list-location.sync="fmuParameterListLocation"
+          :run-fmu-workflows.sync="runFmuWorkflows"
+          :max-layers-in-fmu.sync="maxLayersInFmu"
+        />
         <br>
         <v-card
           outlined
@@ -196,12 +175,6 @@
                 <v-checkbox
                   v-model="filterZeroProbability"
                   label="Ignore Facies with 0 probability"
-                />
-              </v-col>
-              <v-col class="dense">
-                <v-checkbox
-                  v-model="runFmuWorkflows"
-                  label="Run FMU workflows"
                 />
               </v-col>
             </v-col>
@@ -353,6 +326,7 @@ import rms from '@/api/rms'
 
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
+import FmuSettings from '@/components/dialogs/FmuSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -367,6 +341,7 @@ import { Optional } from '@/utils/typing'
   },
 
   components: {
+    FmuSettings,
     NumericField,
     BoldButton
   },
@@ -383,6 +358,7 @@ export default class ProjectSettings extends Vue {
   runFmuWorkflows: boolean = false
   colorScale: string = ''
   faciesColorLibrary: Optional<ColorLibrary> = null
+  maxLayersInFmu: Optional<number> = null
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -396,6 +372,7 @@ export default class ProjectSettings extends Vue {
 
       this.apsModelFileLocation = path.project.selected
       this.fmuParameterListLocation = path.fmuParameterListLocation.selected
+      this.maxLayersInFmu = this.$store.state.parameters.fmu.maxDepth
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
@@ -414,13 +391,6 @@ export default class ProjectSettings extends Vue {
       }
     })
   }
-  chooseFmuParametersFileLocation () {
-    rms.chooseDir('load').then((path: string): void => {
-      if (path) {
-        this.fmuParameterListLocation = path
-      }
-    })
-  }
   cancel () {
     this.dialog = false
   }
@@ -429,6 +399,7 @@ export default class ProjectSettings extends Vue {
     await Promise.all([
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
+      dispatch('parameters/fmu/set', this.maxLayersInFmu),
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
