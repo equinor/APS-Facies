@@ -136,3 +136,11 @@ def create_temporary_model_file(model):
     finally:
         file.close()
     return TemporaryFile(file)
+
+
+def ensure_folder_exists(seed_file_log):
+    if not seed_file_log.is_dir():
+        seed_file_log = seed_file_log.parent
+    if not seed_file_log.exists():
+        from os import makedirs
+        makedirs(seed_file_log)
