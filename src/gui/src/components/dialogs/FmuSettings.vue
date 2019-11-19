@@ -43,16 +43,31 @@
           />
         </v-col>
       </v-row>
+      <v-row>
+        <v-col>
+          <numeric-field
+            v-model="_maxLayersInFmu"
+            :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
+            label="FMU grid depth"
+            enforce-ranges
+            @update:error="e => update('fmuGridDepth', e)"
+          />
+        </v-col>
+      </v-row>
     </div>
   </v-card>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import rms from '@/api/rms'
 
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
+
+interface Invalid {
+  fmuGridDepth: boolean
+}
 
 @Component({
   components: {
@@ -61,11 +76,18 @@ import NumericField from '@/components/selection/NumericField.vue'
   }
 })
 export default class FmuSettings extends Vue {
+  invalid: Invalid = {
+    fmuGridDepth: false
+  }
+
   @Prop({ required: true })
   readonly fmuParameterListLocation: string
 
   @Prop({ required: true, type: Boolean })
   readonly runFmuWorkflows: boolean
+
+  @Prop({ required: true })
+  readonly maxLayersInFmu: number
 
   get _fmuParameterListLocation (): string { return this.fmuParameterListLocation }
   set _fmuParameterListLocation (path: string) { this.$emit('update:fmuParameterListLocation', path)}
@@ -73,12 +95,26 @@ export default class FmuSettings extends Vue {
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
   set _runFmuWorkflows (toggled: boolean) { this.$emit('update:runFmuWorkflows', toggled) }
 
+  get _maxLayersInFmu (): number { return this.maxLayersInFmu }
+  set _maxLayersInFmu (value: number) { this.$emit('update:maxLayersInFmu', value) }
+
   chooseFmuParametersFileLocation () {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this._fmuParameterListLocation = path
       }
     })
+  }
+
+  update (type: string, value: boolean): void {
+    Vue.set(this.invalid, type, value)
+  }
+
+  get hasErrors (): boolean { return Object.values(this.invalid).some(invalid => invalid) }
+
+  @Watch('hasErrors', { deep: true })
+  isInvalid (valid: boolean) {
+    this.$emit('update:error', valid)
   }
 }
 </script>

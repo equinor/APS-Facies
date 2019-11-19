@@ -27,6 +27,10 @@ class Config:
         return self._config['options']['runFmuWorkflows']['value']
 
     @property
+    def max_fmu_grid_depth(self):
+        return self._config['parameters']['fmu']['maxDepth']
+
+    @property
     def global_include_file(self):
         project_location = Path(self._config['parameters']['path']['project']['selected'])
         config_location = project_location / '../input/config/aps_gui'
@@ -61,8 +65,19 @@ def run(config):
             # run_initial_ensable is equivalent to running the APS workflows ONCE
             # Once that is done, (that is the the facies realization, and GRFs with trends exists), only loading from disk, and running `run_truncation` should be done
 
+        kwargs = {}
+        if config.run_fmu_workflows:
+            kwargs = {
+                'layers_per_zone': [config.max_fmu_grid_depth for _ in range(len(project.zones))],
+            }
         # Move functionality for "normalizing" GRFs + trend from `run_truncation` to `run_simulation`
-        run_simulation(roxar, project, model_file=model_file, seed_log_file=None)
+        run_simulation(
+            roxar, project,
+            model_file=model_file,
+            seed_log_file=None,
+            fmu_mode=config.run_fmu_workflows,
+            **kwargs,
+        )
         # The GRFs should not be written to RMS if Debug is not set, and we are not in FMU mode
         # 3D parameter for
         # 1. (Transformed GRF + trend) May be needed in `run_truncation` depending on what is moved

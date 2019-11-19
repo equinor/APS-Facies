@@ -12,6 +12,7 @@ import grid from '@/store/modules/parameters/grid'
 import realization from '@/store/modules/parameters/realization'
 import path from '@/store/modules/parameters/path'
 import names from '@/store/modules/parameters/names'
+import fmu from '@/store/modules/parameters/fmu'
 
 const module: Module<ParametersState, RootState> = {
   namespaced: true,
@@ -27,6 +28,7 @@ const module: Module<ParametersState, RootState> = {
     realization,
     path,
     names,
+    fmu,
   },
 }
 

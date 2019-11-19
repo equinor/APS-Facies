@@ -26,6 +26,7 @@ const module: Module<GridParameterState, RootState> = {
     async fetch ({ commit, dispatch, rootGetters }, rough: boolean = true): Promise<void> {
       commit('_WAITING', true)
       const [x, y, z] = await api.gridSize(rootGetters.gridModel)
+      await dispatch('parameters/fmu/fetch', z, { root: true })
       const azimuth = await dispatch('simBox/fetch', rough)
       await dispatch('populate', { azimuth, size: { x, y, z } })
       commit('_WAITING', false)

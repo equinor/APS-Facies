@@ -64,6 +64,7 @@
         <FmuSettings
           :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
+          :max-layers-in-fmu.sync="maxLayersInFmu"
         />
         <br>
         <v-card
@@ -357,6 +358,7 @@ export default class ProjectSettings extends Vue {
   runFmuWorkflows: boolean = false
   colorScale: string = ''
   faciesColorLibrary: Optional<ColorLibrary> = null
+  maxLayersInFmu: Optional<number> = null
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -370,6 +372,7 @@ export default class ProjectSettings extends Vue {
 
       this.apsModelFileLocation = path.project.selected
       this.fmuParameterListLocation = path.fmuParameterListLocation.selected
+      this.maxLayersInFmu = this.$store.state.parameters.fmu.maxDepth
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
@@ -396,6 +399,7 @@ export default class ProjectSettings extends Vue {
     await Promise.all([
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
+      dispatch('parameters/fmu/set', this.maxLayersInFmu),
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
