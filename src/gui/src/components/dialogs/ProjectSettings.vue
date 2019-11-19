@@ -59,34 +59,12 @@
               />
             </v-col>
           </v-row>
-          <v-row no-gutters>
-            <v-col
-              class="pa-2"
-              cols="3"
-            >
-              FMU Parameters List Location:
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="5"
-            >
-              <v-text-field
-                v-model="fmuParameterListLocation"
-                single-line
-                solo
-              />
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="4"
-            >
-              <bold-button
-                title="Select Directory"
-                @click="chooseFmuParametersFileLocation"
-              />
-            </v-col>
-          </v-row>
         </v-card>
+        <br>
+        <FmuSettings
+          :fmu-parameter-list-location.sync="fmuParameterListLocation"
+          :run-fmu-workflows.sync="runFmuWorkflows"
+        />
         <br>
         <v-card
           outlined
@@ -196,12 +174,6 @@
                 <v-checkbox
                   v-model="filterZeroProbability"
                   label="Ignore Facies with 0 probability"
-                />
-              </v-col>
-              <v-col class="dense">
-                <v-checkbox
-                  v-model="runFmuWorkflows"
-                  label="Run FMU workflows"
                 />
               </v-col>
             </v-col>
@@ -353,6 +325,7 @@ import rms from '@/api/rms'
 
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
+import FmuSettings from '@/components/dialogs/FmuSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -367,6 +340,7 @@ import { Optional } from '@/utils/typing'
   },
 
   components: {
+    FmuSettings,
     NumericField,
     BoldButton
   },
@@ -411,13 +385,6 @@ export default class ProjectSettings extends Vue {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this.apsModelFileLocation = path
-      }
-    })
-  }
-  chooseFmuParametersFileLocation () {
-    rms.chooseDir('load').then((path: string): void => {
-      if (path) {
-        this.fmuParameterListLocation = path
       }
     })
   }
