@@ -2,6 +2,7 @@ from pathlib import Path
 
 from src.algorithms.APSModel import APSModel
 from src.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
+from src.rms_jobs.update_trend_location_relative_to_fmu import run as run_update_trend_location
 from src.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
 from src.rms_jobs.APS_main import run as run_truncation
 from src.rms_jobs.updateAPSModelFromFMU import run as run_fmu
@@ -67,6 +68,11 @@ def run(config):
 
         kwargs = {}
         if config.run_fmu_workflows:
+            run_update_trend_location(
+                roxar, project,
+                model_file=model_file,
+                max_fmu_grid_depth=config.max_fmu_grid_depth,
+            )
             kwargs = {
                 'layers_per_zone': [config.max_fmu_grid_depth for _ in range(len(project.zones))],
             }
