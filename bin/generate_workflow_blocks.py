@@ -81,7 +81,7 @@ import sys
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.8.1"
+__version__ = "0.8.2"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -243,7 +243,7 @@ def get_rms_data_file():
 def get_global_include_file():
     # Location/name of test_global_include.ipl
     # TODO: Migrate to yml
-    return _get_file(APS_GLOBAL_INCLUDE_FILE, 'test_global_include.ipl')
+    return _get_file(APS_GLOBAL_INCLUDE_FILE, 'global_variables.ipl')
 
 
 def get_fmu_variables_file():

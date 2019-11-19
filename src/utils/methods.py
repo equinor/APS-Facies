@@ -88,7 +88,7 @@ def get_rms_project_data_file(**kwargs):
 def get_global_ipl_file(**kwargs):
     return _get_file_name(
         kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file', 'global_include_file'],
-        default_name='test_global_include.ipl',
+        default_name='../../fmuconfig/output/global_variables.ipl',
     )
 
 
