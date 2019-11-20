@@ -11,21 +11,22 @@ Output:
 """
 from collections import OrderedDict
 
-# from src.utils.check_performance import do_cprofile
 import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.checks import check_probability_values, check_probability_normalisation
 from src.utils.constants.simple import Debug, ProbabilityTolerances
+from src.utils.grid import update_rms_parameter
 from src.utils.methods import calc_average, get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
-    setContinuous3DParameterValues, updateContinuous3DParameterValues, updateDiscrete3DParameterValues,
+    updateDiscrete3DParameterValues,
 )
 from src.utils.roxar.grid_model import (
     get3DParameter, getContinuous3DParameterValues,
     isParameterDefinedWithValuesInRMS, getDiscrete3DParameterValues,
     find_defined_cells, create_zone_parameter,
 )
+from src.utils.simulation import initialize_rms_parameters
 
 
 def transform_empiric(cell_index_defined, gauss_values, alpha_values):
@@ -213,44 +214,6 @@ def check_and_normalise_probability(
     return probability_defined, num_cell_with_modified_probability
 
 
-def get_all_gauss_field_names_in_model(aps_model):
-    '''
-    Returns the lists:
-         - all gauss field names specified in any zone in the whole model
-         - all gauss field names used in one or more zones in the whole model
-    Returns also a list with all gauss field names used in at least one zone and which has trend.
-    '''
-    all_zone_models = aps_model.sorted_zone_models
-    gauss_field_names_specified = []
-    gauss_field_names_used = []
-    gauss_field_names_with_trend = []
-    for key, zone_model in all_zone_models.items():
-        zone_number = key[0]
-        region_number = key[1]
-        if not aps_model.isSelected(zone_number, region_number):
-            continue
-
-        zone_model = aps_model.getZoneModel(zone_number, region_number)
-
-        # Gauss fields defined for the zone in model file
-        gf_names_for_zone = zone_model.used_gaussian_field_names
-
-        # Gauss fields used in truncation rule for the zone in model file
-        gf_names_for_truncation_rule = zone_model.getGaussFieldsInTruncationRule()
-
-        for name in gf_names_for_zone:
-            if name not in gauss_field_names_specified:
-                gauss_field_names_specified.append(name)
-            if name in gf_names_for_truncation_rule:
-                if name not in gauss_field_names_used:
-                    gauss_field_names_used.append(name)
-                if zone_model.hasTrendModel(name):
-                    if name not in gauss_field_names_with_trend:
-                        gauss_field_names_with_trend.append(name)
-
-    return gauss_field_names_specified, gauss_field_names_used, gauss_field_names_with_trend
-
-
 def get_used_gauss_field_names_in_zone(gauss_field_names_in_zone, gauss_field_names_in_truncation_rule):
     '''
     input:
@@ -263,225 +226,6 @@ def get_used_gauss_field_names_in_zone(gauss_field_names_in_zone, gauss_field_na
     for name in gauss_field_names_in_zone:
         use_gauss_field_in_zone[name] = name in gauss_field_names_in_truncation_rule
     return use_gauss_field_in_zone
-
-
-def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_purpose):
-    '''
-    Returns dictionaries with numpy arrays containing the gauss field values, trend values, transformed gauss field values for each gauss field name. The key is gauss field name.
-    '''
-    grid_model_name = aps_model.getGridModelName()
-    realization_number = project.current_realisation
-    grid_model = project.grid_models[grid_model_name]
-    grid3D = grid_model.get_grid(realization_number)
-    number_of_active_cells = grid3D.defined_cell_count
-    debug_level = aps_model.debug_level
-
-    # all_gauss_field_names is a list of all gauss fields used in at least one zone
-    # all_gauss_field_names_with_trend is a list of all gauss fields used in at least one zone and which has trend
-    gauss_field_names_specified, gauss_field_names_used, gauss_field_names_with_trend = get_all_gauss_field_names_in_model(aps_model)
-
-    # Keeps all simulated gauss fields (residual fields)
-    gf_all_values = OrderedDict()
-
-    # Keeps all transformed gauss fields (gauss field with trends that are transformed to [0,1] distribution)
-    gf_all_alpha = OrderedDict()
-
-    # Keeps all trend values  and untransformed gauss fields with trend
-    gf_all_trend_values = OrderedDict()
-    gf_all_values_untransformed = OrderedDict()
-
-    # Initialize all values to 0
-    if debug_level >= Debug.VERBOSE:
-        print('--- Initialize values for:')
-    for name in gauss_field_names_used:
-        gf_all_values[name] = np.zeros(number_of_active_cells, np.float32)
-        gf_all_alpha[name] = np.zeros(number_of_active_cells, np.float32)
-        if debug_level >= Debug.VERBOSE:
-            print('---    {}'.format(name))
-
-    # Simulated gauss fields that are used in some zones are read from RMS
-    # They are required and must exist.
-    for name in gauss_field_names_used:
-        values = getContinuous3DParameterValues(grid_model, name, realization_number)
-        gf_all_values[name] = values
-
-    # Initialize the RMS 3D parameters for QC with extension _trend, _transf, _untransf
-    if write_rms_parameters_for_qc_purpose:
-        # Write initial values to transformed gauss parameters
-        zone_number_list = []
-        for name in gauss_field_names_used:
-            parameter_name = name + '_transf'
-            input_values = gf_all_alpha[name]
-            setContinuous3DParameterValues(
-                grid_model, parameter_name, input_values,
-                zone_number_list, realization_number
-            )
-
-        if len(gauss_field_names_with_trend) > 0:
-            if debug_level >= Debug.VERBOSE:
-                print('--- Initialize trend values for:')
-            for name in gauss_field_names_with_trend:
-                gf_all_trend_values[name] = np.zeros(number_of_active_cells, np.float32)
-                gf_all_values_untransformed[name] = np.zeros(number_of_active_cells, np.float32)
-                if debug_level >= Debug.VERBOSE:
-                    print('---    {}'.format(name))
-
-            # Write initial values to trend gauss parameters
-            for name in gauss_field_names_with_trend:
-                parameter_name = name + '_untransf'
-                input_values = gf_all_values_untransformed[name]
-                setContinuous3DParameterValues(
-                    grid_model, parameter_name, input_values,
-                    zone_number_list, realization_number
-                )
-                parameter_name = name + '_trend'
-                input_values = gf_all_trend_values[name]
-                setContinuous3DParameterValues(
-                    grid_model, parameter_name, input_values,
-                    zone_number_list, realization_number
-                )
-
-    return gf_all_values, gf_all_alpha, gf_all_trend_values, gf_all_values_untransformed
-
-
-def add_trend_to_gauss_field(
-        project, aps_model,
-        zone_number, region_number, use_regions,
-        gauss_field_name,
-        gauss_field_values,
-        cell_index_defined,
-):
-    '''
-    Calculate trend and add trend to simulated gaussian residual field to get the gaussian field with trend.
-    Standard deviation for residual field is calculated by using the specified relative standard deviation and the trend max minus min of trend function.
-    Returns gauss field where the grid cells defined by cell_index_defined are updated. All other grid cell values are not modified.
-    The lenght of this array is equal to the length of all active grid cells in the grid model.
-    Returns also trend values in a separate array, but this array has length equal to cell_index_defined and does only contain the values for the grid cells
-    that are selected by cell_index_defined.
-    '''
-    grid_model_name = aps_model.getGridModelName()
-    realization_number = project.current_realisation
-    grid_model = project.grid_models[grid_model_name]
-    debug_level = aps_model.debug_level
-    key = (zone_number, region_number)
-    zone_model = aps_model.sorted_zone_models[key]
-
-    # Get trend model, relative standard deviation
-    use_trend, trend_model, rel_std_dev, rel_std_dev_fmu = zone_model.getTrendModel(gauss_field_name)
-
-    if debug_level >= Debug.VERBOSE:
-        trend_type = trend_model.type.name
-        if use_regions:
-            print(
-                '--- Calculate trend for: {} for (zone,region)=({},{})\n'
-                '--- Trend type: {}'
-                ''.format(gauss_field_name, zone_number, region_number, trend_type)
-            )
-        else:
-            print(
-                '--- Calculate trend for: {} for zone: {}\n'
-                '--- Trend type: {}'
-                ''.format(gauss_field_name, zone_number, trend_type)
-            )
-
-    sim_box_thickness = zone_model.getSimBoxThickness()
-    # trend_values contain trend values for the cells belonging to the set defined by cell_index_defined
-    minmax_difference, trend_values = trend_model.createTrend(
-        grid_model, realization_number, cell_index_defined, zone_number, sim_box_thickness
-    )
-
-    # Calculate trend plus residual for the cells defined by cell_index_defined
-    # and replace the residual values by trend + residual in array: gauss_field_values
-    sigma = rel_std_dev * minmax_difference
-    residual_values = gauss_field_values[cell_index_defined]
-    val = trend_values + sigma * residual_values
-    # updates array values for the selected grid cells
-    gauss_field_values[cell_index_defined] = val
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: Trend minmax_difference = ' + str(minmax_difference))
-        print('Debug output: SimBoxThickness = ' + str(sim_box_thickness))
-        print('Debug output: RelStdDev = ' + str(rel_std_dev))
-        print('Debug output: Sigma = ' + str(sigma))
-        print('Debug output: Min trend, max trend    : ' + str(trend_values.min()) + ' ' + str(trend_values.max()))
-        print('Debug output: Residual min,max        : ' + str(sigma * residual_values.min()) + ' ' + str(sigma * residual_values.max()))
-        print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
-
-    return gauss_field_values, trend_values
-
-
-def update_rms_parameters_for_qc_purpose(
-        grid_model, gauss_field_name,
-        gauss_field_values,
-        gauss_field_trend_values,
-        cell_index_defined,
-        realization_number,
-        use_regions,
-        zone_number,
-        region_number,
-        debug_level,
-):
-    # Write back to RMS project the untransformed gaussian values with trend for the zone
-    update_rms_parameter(
-        grid_model,
-        gauss_field_name,
-        gauss_field_values,
-        cell_index_defined,
-        realization_number,
-        variable_name_extension='untransf',
-        use_regions=use_regions,
-        zone_number=zone_number,
-        region_number=region_number,
-        debug_level=debug_level,
-    )
-
-    # Write back to RMS project the trend values for the zone
-    update_rms_parameter(
-        grid_model,
-        gauss_field_name,
-        gauss_field_trend_values,
-        cell_index_defined,
-        realization_number,
-        variable_name_extension='trend',
-        use_regions=use_regions,
-        zone_number=zone_number,
-        region_number=region_number,
-        debug_level=debug_level,
-    )
-
-
-def update_rms_parameter(
-        grid_model,
-        gauss_field_name,
-        values,
-        cell_index_defined,
-        realization_number,
-        variable_name_extension=None,
-        use_regions=False,
-        zone_number=0,
-        region_number=0,
-        debug_level=Debug.OFF,
-):
-    # Write back to RMS project the updated rms 3D parameter
-    if variable_name_extension is None:
-        rms_variable_name = gauss_field_name
-    else:
-        rms_variable_name = gauss_field_name + '_' + variable_name_extension
-
-    updateContinuous3DParameterValues(
-        grid_model,
-        rms_variable_name,
-        values,
-        cell_index_defined,
-        realization_number,
-        isShared=False, setInitialValues=False,
-        debug_level=debug_level
-    )
-    if debug_level >= Debug.VERBOSE:
-        if use_regions:
-            print('--- Create or update parameter: {} for (zone,region)= ({},{})'.format(rms_variable_name, zone_number,
-                                                                                         region_number))
-        else:
-            print('--- Create or update parameter: {} for zone number: {}'.format(rms_variable_name, zone_number))
 
 
 # @do_cprofile
@@ -548,7 +292,7 @@ def run(
                   ''.format(result_param_name, rms_project_name))
 
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
-    gf_all_values, gf_all_alpha, gf_all_trend_values, gf_all_values_untransformed = initialize_rms_parameters(
+    gf_all_values, gf_all_alpha, gf_all_trend_values = initialize_rms_parameters(
         project, aps_model, write_rms_parameters_for_qc_purpose
     )
     # Probability related lists
@@ -606,9 +350,6 @@ def run(
         # Number of gauss fields used in truncation rule for the zone in model file
         gf_names_for_truncation_rule = zone_model.getGaussFieldsInTruncationRule()
 
-        # This dictionary has value True/False depending on whether a gauss field is used or not in the truncation rule for current zone (or zone/region).
-        use_gauss_field_in_zone = get_used_gauss_field_names_in_zone(gf_names_for_zone, gf_names_for_truncation_rule)
-
         facies_names_for_zone = zone_model.getFaciesInZoneModel()
         num_facies = len(facies_names_for_zone)
 
@@ -622,7 +363,7 @@ def run(
 
         # For current (zone,region) find the active cells
         cell_index_defined = find_defined_cells(
-            zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF,
+            zone_values, zone_number, region_values, region_number, debug_level=debug_level,
         )
         if debug_level >= Debug.VERBOSE:
             if use_regions:
@@ -644,34 +385,14 @@ def run(
         # NOTE: The dictionary for alpha fields for current zone must be ordered in the same sequence as gf_names_for_zone
         gf_alpha_for_current_zone = OrderedDict()
         for gf_name in gf_names_for_zone:
-            if use_gauss_field_in_zone[gf_name]:
+            if gf_name in gf_names_for_truncation_rule:
                 gauss_field_values_all = gf_all_values[gf_name]
-                if zone_model.hasTrendModel(gf_name):
-                    gauss_field_values_all, trend_values_for_zone = add_trend_to_gauss_field(
-                        project, aps_model, zone_number, region_number,
-                        use_regions, gf_name, gauss_field_values_all, cell_index_defined
-                    )
-                    if write_rms_parameters_for_qc_purpose:
-                        # Update array trend for the selected grid cells
-                        # Note that the numpy vector trend contains values for all active grid cells
-                        # while trend_values_for_zone contain values calculated for the current zone and current parameter
-                        trend_values_all = gf_all_trend_values[gf_name]
-                        trend_values_all[cell_index_defined] = trend_values_for_zone
-                        gf_all_trend_values[gf_name] = trend_values_all
-
-                        update_rms_parameters_for_qc_purpose(
-                            grid_model, gf_name, gauss_field_values_all,
-                            trend_values_all, cell_index_defined, realization_number,
-                            use_regions, zone_number, region_number, debug_level
-                        )
 
                 if debug_level >= Debug.VERBOSE:
                     if use_regions:
                         print('--- Transform: {} for zone: {}'.format(gf_name, zone_number))
                     else:
-                        print(
-                            '--- Transform: {} for (zone, region)=({},{})'.format(gf_name, zone_number, region_number)
-                        )
+                        print('--- Transform: {} for (zone, region)=({},{})'.format(gf_name, zone_number, region_number))
                 # Update alpha for current zone
                 alpha_all = gf_all_alpha[gf_name]
                 alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
@@ -721,8 +442,7 @@ def run(
                             ''.format(probability_parameter, facies_name, zone_number)
                         )
 
-                    values = getContinuous3DParameterValues(grid_model, probability_parameter, realization_number,
-                                                            debug_level)
+                    values = getContinuous3DParameterValues(grid_model, probability_parameter, realization_number, debug_level)
 
                     # Add the probability values to a common list containing probabilities for
                     # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
@@ -745,7 +465,7 @@ def run(
                                 ''.format(probability_parameter, facies_name, zone_number)
                             )
 
-                    index = -999
+                    index = -np.infty
                     # Get the probability values from the common list since it already is loaded
                     for i in range(len(probability_parameter_all_values)):
                         name = probability_parameter_all_values[i][NAME]
@@ -908,7 +628,7 @@ def run(
     updateDiscrete3DParameterValues(
         grid_model, result_param_name, facies_real, faciesTable=code_names,
         realNumber=realization_number, isShared=False, setInitialValues=False,
-        debug_level=Debug.OFF
+        debug_level=debug_level,
     )
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print('- Create or update parameter: ' + result_param_name)
