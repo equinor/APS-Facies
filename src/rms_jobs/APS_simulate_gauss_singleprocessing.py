@@ -8,6 +8,7 @@ import numpy as np
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
+from src.utils.io import ensure_folder_exists
 from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     setContinuous3DParameterValuesInZoneRegion,
@@ -161,12 +162,10 @@ def run_simulations(
     if seed_file_log and aps_model.write_seeds:
         if isinstance(seed_file_log, str):
             seed_file_log = Path(seed_file_log)
+        ensure_folder_exists(seed_file_log)
         if seed_file_log.is_dir():
-            if not seed_file_log.exists():
-                from os import makedirs
-                makedirs(seed_file_log)
             seed_file_log = seed_file_log / 'seedLogFile.dat'
-        with open(seed_file_log, 'a') as file:
+        with open(seed_file_log, 'a+') as file:
             file.write(
                 'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
             )
