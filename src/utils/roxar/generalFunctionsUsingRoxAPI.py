@@ -25,6 +25,11 @@ import roxar
 # isOK                         = setDiscrete3DParameterValues(gridModel, parameterName, values, codeNames, realNumber=0, isShared=True, debug_level=1)
 
 
+def get_grid_dimension(project, name):
+    grid = project.grid_models[name].get_grid(project.current_realisation)
+    return grid.grid_indexer.dimensions
+
+
 def get_project_realization_seed(project):
     return project.seed + project.current_realisation + 1
 
