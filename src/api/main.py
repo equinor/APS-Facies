@@ -5,7 +5,7 @@ from src.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
 from src.rms_jobs.update_trend_location_relative_to_fmu import run as run_update_trend_location
 from src.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
 from src.rms_jobs.APS_main import run as run_truncation
-from src.rms_jobs.updateAPSModelFromFMU import run as run_fmu
+from src.rms_jobs.updateAPSModelFromFMU import run as run_update_fmu_variables_in_model_file
 from src.utils.io import create_temporary_model_file
 
 import roxar
@@ -62,7 +62,12 @@ def run(config):
             # Add flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run (user specified in the GUI)
             # We also need to get / update the truncation rule parameters (in the model file) that FMU may change
             # That is, to use a different fmu_variables file (similar / equivalent to global_variables.ipl)
-            run_fmu(roxar, project, model_file=model_file, output_model_file=model_file, global_include_file=config.global_include_file)
+            run_update_fmu_variables_in_model_file(
+                roxar, project,
+                model_file=model_file,
+                output_model_file=model_file,
+                global_include_file=config.global_include_file,
+            )
             # run_initial_ensable is equivalent to running the APS workflows ONCE
             # Once that is done, (that is the the facies realization, and GRFs with trends exists), only loading from disk, and running `run_truncation` should be done
 
