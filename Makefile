@@ -359,6 +359,7 @@ links: clean-links create-workflow-dir matplotlibrc-links changelog-link
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/src/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
 	ln -sf $(CODE_DIR)/src/rms_jobs/bitmap2rms.py $(BIN_DIR)/bitmap2rms_xml.py
+	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
 
 changelog-link:
 	ln -sf $(CODE_DIR)/CHANGELOG.md $(WEB_DIR)/public/CHANGELOG.md
