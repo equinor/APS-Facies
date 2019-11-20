@@ -119,7 +119,7 @@ def get_fmu_variables_file(**kwargs):
 
 
 def get_output_model_file(**kwargs):
-    return _get_file_name(kwargs, legal_kwargs=['output_model_file'], default_name='APS_with_FMU_tags.xml')
+    return _get_file_name(kwargs, legal_kwargs=['output_model_file'], default_name='APS_updated.xml')
 
 
 def get_output_tagged_variables_file(**kwargs):
