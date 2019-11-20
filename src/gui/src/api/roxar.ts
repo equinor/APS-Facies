@@ -1,7 +1,7 @@
 'use strict'
 import axios from 'axios'
 const API_PROTOCOL = process.env.VUE_APP_APS_PROTOCOL || 'http'
-const API_SERVER = process.env.VUE_APP_APS_SERVER || 'localhost'
+const API_SERVER = process.env.VUE_APP_APS_SERVER || '127.0.0.1'
 const API_PORT = process.env.VUE_APP_APS_API_PORT || 5000
 
 function callPythonFunction (code: string): Promise<JSON> {
