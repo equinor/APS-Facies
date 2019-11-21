@@ -98,7 +98,7 @@ import UploadButton from 'vuetify-upload-button'
 
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
 import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
-import ProjectSettings from '@/components/dialogs/ProjectSettings.vue'
+import ProjectSettings from '@/components/dialogs/ProjectSettings/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
 

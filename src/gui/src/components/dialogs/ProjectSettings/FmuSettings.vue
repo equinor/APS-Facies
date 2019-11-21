@@ -1,12 +1,5 @@
 <template>
-  <v-card outlined>
-    <v-list-item>
-      <v-list-item-title
-        class="headline"
-      >
-        FMU Settings
-      </v-list-item-title>
-    </v-list-item>
+  <SettingsPanel title="FMU Settings">
     <v-col class="dense">
       <v-checkbox
         v-model="_runFmuWorkflows"
@@ -55,13 +48,14 @@
         </v-col>
       </v-row>
     </div>
-  </v-card>
+  </SettingsPanel>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import rms from '@/api/rms'
 
+import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 
@@ -71,6 +65,7 @@ interface Invalid {
 
 @Component({
   components: {
+    SettingsPanel,
     NumericField,
     BoldButton,
   }
@@ -90,7 +85,7 @@ export default class FmuSettings extends Vue {
   readonly maxLayersInFmu: number
 
   get _fmuParameterListLocation (): string { return this.fmuParameterListLocation }
-  set _fmuParameterListLocation (path: string) { this.$emit('update:fmuParameterListLocation', path)}
+  set _fmuParameterListLocation (path: string) { this.$emit('update:fmuParameterListLocation', path) }
 
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
   set _runFmuWorkflows (toggled: boolean) { this.$emit('update:runFmuWorkflows', toggled) }
