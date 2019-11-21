@@ -47,6 +47,9 @@ class APSModel:
     sorted_zone_models: OrderedDict[Tuple[int, int], APSZoneModel]
     use_constant_probability: bool
     write_seeds: bool
+    zone_parameter: str
+    region_parameter: str
+    use_regions: bool
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(cls, xml_content: str) -> APSModel: ...

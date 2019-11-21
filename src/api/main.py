@@ -59,7 +59,8 @@ def run(config):
             run_normalization(roxar, project, model_file=model_file)
         if config.run_fmu_workflows:
             # Rename to "update model_file" or something similar
-            # Add flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run (user specified in the GUI)
+            # Add a flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run
+            # (user specified in the GUI)
             # We also need to get / update the truncation rule parameters (in the model file) that FMU may change
             # That is, to use a different fmu_variables file (similar / equivalent to global_variables.ipl)
             run_update_fmu_variables_in_model_file(
@@ -69,7 +70,8 @@ def run(config):
                 global_include_file=config.global_include_file,
             )
             # run_initial_ensable is equivalent to running the APS workflows ONCE
-            # Once that is done, (that is the the facies realization, and GRFs with trends exists), only loading from disk, and running `run_truncation` should be done
+            # Once that is done, (that is the the facies realization, and GRFs with trends exists),
+            # only loading from disk, and running `run_truncation` should be done
 
         kwargs = {}
         if config.run_fmu_workflows:
@@ -87,6 +89,7 @@ def run(config):
             model_file=model_file,
             seed_log_file=None,
             fmu_mode=config.run_fmu_workflows,
+            write_rms_parameters_for_qc_purpose=False,
             **kwargs,
         )
         # The GRFs should not be written to RMS if Debug is not set, and we are not in FMU mode
@@ -97,4 +100,8 @@ def run(config):
         # It still need to write residual (+ trend) to RMS (used in `run_truncation`)
 
         # Script for moving stuff from "FMU" grid to "regular" grid
-        run_truncation(roxar, project, model_file=model_file)
+        run_truncation(
+            roxar, project,
+            model_file=model_file,
+            write_rms_parameters_for_qc_purpose=False,
+        )

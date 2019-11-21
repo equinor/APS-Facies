@@ -831,13 +831,24 @@ class APSModel:
                     gfAllZones.append(gf)
         return copy.copy(gfAllZones)
 
-    def getZoneParamName(self):
-        return copy.copy(self.__rmsZoneParamName)
+    @property
+    def zone_parameter(self):
+        return self.getZoneParamName()
 
-    # Get pointer to facies table object
+    @property
+    def region_parameter(self):
+        return self.getRegionParamName()
+
+    @property
+    def use_regions(self):
+        return bool(self.region_parameter)
+
+    def getZoneParamName(self):
+        return self.__rmsZoneParamName
+
     def getRegionParamName(self):
         if self.__rmsRegionParamName:
-            return copy.copy(self.__rmsRegionParamName)
+            return self.__rmsRegionParamName
         else:
             return ''
 

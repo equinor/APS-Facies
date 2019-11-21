@@ -16,11 +16,12 @@ from src.utils.roxar.generalFunctionsUsingRoxAPI import (
 )
 from src.utils.roxar.grid_model import getGridAttributes
 from src.utils.methods import get_seed_log_file
+from src.utils.trend import add_trends
 
 
 def run_simulations(
         project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
-        layers_per_zone=None,
+        layers_per_zone=None, write_rms_parameters_for_qc_purpose=True,
 ):
     """
     Description: Run gauss simulations for the APS model i sequence
@@ -152,9 +153,21 @@ def run_simulations(
 
         # End loop over gauss fields for one zone
         setContinuous3DParameterValuesInZoneRegion(
-            grid_model, gauss_field_names, gauss_result_list_for_zone, zone_number - 1,
-            regionNumber=region_number, regionParamName=aps_model.getRegionParamName(),
-            realNumber=realisation, isShared=is_shared, debug_level=debug_level
+            grid_model,
+            gauss_field_names,
+            gauss_result_list_for_zone,
+            zone_number - 1,
+            regionNumber=region_number,
+            regionParamName=aps_model.region_parameter,
+            realNumber=realisation,
+            isShared=is_shared,
+            debug_level=debug_level
+        )
+
+        add_trends(
+            project, aps_model, zone_number, region_number,
+            write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
+            debug_level=debug_level,
         )
 
     # End loop over all active zones in the model
@@ -176,11 +189,17 @@ def run(roxar=None, project=None, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
     layers_per_zone = kwargs.get('layers_per_zone', None)
+    write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose', True)
     real_number = project.current_realisation
     is_shared = False
     run_simulations(
-        project, model_file, real_number, is_shared, seed_file_log,
+        project,
+        model_file,
+        real_number,
+        is_shared,
+        seed_file_log,
         layers_per_zone=layers_per_zone,
+        write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
     )
     print('Finished simulation of gaussian fields for APS')
 

@@ -19,7 +19,10 @@ def _get_environ(variable_name, default, divider=':'):
 def _get_client_url():
     protocols = _get_environ('VUE_APP_APS_PROTOCOL', 'http:https')
     servers = _get_environ('VUE_APP_APS_SERVER', 'localhost:127.0.0.1')
-    ports = _get_environ('VUE_APP_APS_GUI_PORT', '8080')
+    ports = (
+        _get_environ('VUE_APP_APS_GUI_PORT', '8080')
+        + _get_environ('VUE_APP_APS_API_PORT', '5000')
+    )
     return [
         '{protocol}://{server}:{port}'.format(protocol=protocol, server=server, port=port)
         for protocol in protocols
@@ -32,7 +35,7 @@ app = Flask(__name__)
 app.secret_key = urandom(64)
 app.debug = _get_environ('FLASK_DEBUG', False)
 
-cors = CORS(app, origins=_get_client_url())
+cors = CORS(app)  #, origins=_get_client_url())
 
 
 @app.route('/<path:signature>', methods=['GET'])
