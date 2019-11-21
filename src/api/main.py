@@ -6,9 +6,10 @@ from src.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
 from src.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
 from src.rms_jobs.updateAPSModelFromFMU import run as run_update_fmu_variables_in_model_file
 from src.rms_jobs.update_trend_location_relative_to_fmu import run as run_update_trend_location
+from src.utils.constants.simple import Debug
 from src.utils.io import create_temporary_model_file
 
-import roxar
+import roxar.rms
 
 
 class Config:
@@ -28,7 +29,13 @@ class Config:
             ] if self.run_fmu_workflows else None,
             'fmu_mode': self.run_fmu_workflows,
             'seed_log_file': None,
-            'write_rms_parameters_for_qc_purpose': False,
+            'write_rms_parameters_for_qc_purpose': (
+                    not self.run_fmu_workflows
+                    or roxar.rms.get_execution_mode() == roxar.ExecutionMode.Default
+                    or self.debug_level >= Debug.ON
+            ),
+            'debug_level': self.debug_level,
+
         }
 
     @property
@@ -46,6 +53,10 @@ class Config:
     @property
     def max_fmu_grid_depth(self):
         return self._config['parameters']['fmu']['maxDepth']
+
+    @property
+    def debug_level(self):
+        return Debug(self._config['parameters']['debugLevel']['selected'])
 
     @property
     def global_include_file(self):
@@ -85,7 +96,6 @@ def run(config):
             # only loading from disk, and running `run_truncation` should be done
             run_update_trend_location(**kwargs)
         run_simulation(**kwargs)
-        # The GRFs should not be written to RMS if Debug is not set, and we are not in FMU mode
 
         # Script for moving stuff from "FMU" grid to "regular" grid
         run_truncation(**kwargs)

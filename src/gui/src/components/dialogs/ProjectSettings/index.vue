@@ -32,6 +32,10 @@
           :max-layers-in-fmu.sync="maxLayersInFmu"
         />
         <br>
+        <LoggingSettings
+          :debug-level.sync="debugLevel"
+        />
+        <br>
         <SettingsPanel title="Display Settings">
           <v-row
             no-gutters
@@ -269,6 +273,7 @@
 </template>
 
 <script lang="ts">
+import LoggingSettings from '@/components/dialogs/ProjectSettings/LoggingSettings.vue'
 import FolderSettings from '@/components/dialogs/ProjectSettings/FolderSettings.vue'
 import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
 import { Component, Vue, Watch } from 'vue-property-decorator'
@@ -292,6 +297,7 @@ import { Optional } from '@/utils/typing'
   },
 
   components: {
+    LoggingSettings,
     FolderSettings,
     SettingsPanel,
     FmuSettings,
@@ -312,6 +318,7 @@ export default class ProjectSettings extends Vue {
   colorScale: string = ''
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
+  debugLevel: number = 0
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -321,11 +328,13 @@ export default class ProjectSettings extends Vue {
   onActivation (value: boolean) {
     if (value) {
       const options = this.$store.state.options
-      const path = this.$store.state.parameters.path
+      const parameters = this.$store.state.parameters
+      const path = parameters.path
 
       this.apsModelFileLocation = path.project.selected
       this.fmuParameterListLocation = path.fmuParameterListLocation.selected
-      this.maxLayersInFmu = this.$store.state.parameters.fmu.maxDepth
+      this.debugLevel = parameters.debugLevel.selected
+      this.maxLayersInFmu = parameters.fmu.maxDepth
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
@@ -346,6 +355,7 @@ export default class ProjectSettings extends Vue {
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
       dispatch('parameters/fmu/set', this.maxLayersInFmu),
+      dispatch('parameters/debugLevel/set', this.debugLevel),
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
