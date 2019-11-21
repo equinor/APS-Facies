@@ -15,6 +15,22 @@ class Config:
     def __init__(self, config):
         self._config = config
 
+    def get_parameters(self, model_file):
+        return {
+            'roxar': roxar,
+            'project': project,
+            'model_file': model_file,
+            'output_model_file': model_file,
+            'global_include_file': self.global_include_file,
+            'max_fmu_grid_depth': self.max_fmu_grid_depth,
+            'layers_per_zone': [
+                self.max_fmu_grid_depth for _ in range(len(project.zones))
+            ] if self.run_fmu_workflows else None,
+            'fmu_mode': self.run_fmu_workflows,
+            'seed_log_file': None,
+            'write_rms_parameters_for_qc_purpose': False,
+        }
+
     @property
     def error_message(self):
         return self._config['errorMessage']
@@ -54,20 +70,7 @@ def run(config):
     if config.error_message:
         raise ValueError(config.error_message)
     with create_temporary_model_file(config.model) as model_file:
-        kwargs = {
-            'roxar': roxar,
-            'project': project,
-            'model_file': model_file,
-            'output_model_file': model_file,
-            'global_include_file': config.global_include_file,
-            'max_fmu_grid_depth': config.max_fmu_grid_depth,
-            'layers_per_zone': [
-                config.max_fmu_grid_depth for _ in range(len(project.zones))
-            ] if config.run_fmu_workflows else None,
-            'fmu_mode': config.run_fmu_workflows,
-            'seed_log_file': None,
-            'write_rms_parameters_for_qc_purpose': False,
-        }
+        kwargs = config.get_parameters(model_file)
         use_constant_probabilities = APSModel(model_file).use_constant_probability
         if not use_constant_probabilities:
             run_normalization(**kwargs)
