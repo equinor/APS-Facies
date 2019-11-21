@@ -18,6 +18,7 @@ from src.utils.checks import check_probability_values, check_probability_normali
 from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.grid import update_rms_parameter
 from src.utils.methods import calc_average, get_specification_file
+from src.utils.records import Probability
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     updateDiscrete3DParameterValues,
 )
@@ -131,8 +132,6 @@ def check_and_normalise_probability(
     """
     # The list prob_parameter_values_for_facies has items =[name,values]
     # Define index names for this item
-    NAME = 0
-    VAL = 1
 
     num_defined_cells = len(cell_index_defined)
 
@@ -150,8 +149,8 @@ def check_and_normalise_probability(
         for f in range(num_facies):
             probability_defined.append(np.zeros(num_defined_cells, np.float32))
             item = prob_parameter_values_for_facies[f]
-            facies_name = item[NAME]
-            values = item[VAL]
+            facies_name = item.name
+            values = item.value
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Facies: ' + facies_name)
 
@@ -195,8 +194,8 @@ def check_and_normalise_probability(
     else:
         for f in range(num_facies):
             item = prob_parameter_values_for_facies[f]
-            facies_name = item[NAME]
-            values = item[VAL]
+            facies_name = item.name
+            values = item.value
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Facies: {} with constant probability: '.format(facies_name, values[0]))
             probability_defined.append(values[0])
@@ -300,9 +299,6 @@ def run(
     probability_parameter_all_values = []
     # The two lists: probability_parameter_all_values, probability_parameter_values_for_facies,
     # will use a list of items where the item is of the form item =[name,value]
-    # Index values are defined by:
-    NAME = 0  # Name of index in items = [ name, values]
-    VAL = 1  # Name of index in items = [ name, values]
 
     # List of modelled facies names
     all_facies_names_modelled = []
@@ -429,10 +425,10 @@ def run(
                 values.append(float(probability_parameter))
                 # Add the probability values to a common list containing probabilities for
                 # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
-                probability_parameter_all_values.append([facies_name, values])
+                probability_parameter_all_values.append(Probability(facies_name, values))
 
                 # Probabilities for each facies for current zone
-                probability_parameter_values_for_facies.append([facies_name, values])
+                probability_parameter_values_for_facies.append(Probability(facies_name, values))
             else:
                 if probability_parameter not in probability_parameter_names_already_read:
                     probability_parameter_names_already_read.append(probability_parameter)
@@ -446,10 +442,10 @@ def run(
 
                     # Add the probability values to a common list containing probabilities for
                     # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
-                    probability_parameter_all_values.append([facies_name, values])
+                    probability_parameter_all_values.append(Probability(facies_name, values))
 
                     # Probabilities for each facies for current zone
-                    probability_parameter_values_for_facies.append([facies_name, values])
+                    probability_parameter_values_for_facies.append(Probability(facies_name, values))
 
                 else:
                     if debug_level >= Debug.VERY_VERBOSE:
@@ -468,13 +464,13 @@ def run(
                     index = -np.infty
                     # Get the probability values from the common list since it already is loaded
                     for i in range(len(probability_parameter_all_values)):
-                        name = probability_parameter_all_values[i][NAME]
+                        name = probability_parameter_all_values[i].name
                         if facies_name == name:
                             index = i
                             break
                     # Probabilities for each facies for current zone
-                    values = probability_parameter_all_values[index][VAL]
-                    probability_parameter_values_for_facies.append([facies_name, values])
+                    values = probability_parameter_all_values[index].value
+                    probability_parameter_values_for_facies.append(Probability(facies_name, values))
 
         # end for
 
@@ -518,10 +514,10 @@ def run(
                         facies_name = facies_names_for_zone[f]
                         facies_code = main_facies_table.getFaciesCodeForFaciesName(facies_name)
                         item = probability_parameter_values_for_facies[f]
-                        if facies_name != item[NAME]:
+                        if facies_name != item.name:
                             raise ValueError('Inconsistencies in data structure in APS_main')
 
-                        probabilities = item[VAL]
+                        probabilities = item.value
                         print('{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'.format(
                             zone_number, region_number, facies_code, facies_name, probabilities[0], volume_fraction[f])
                         )
@@ -534,10 +530,10 @@ def run(
                         facies_name = facies_names_for_zone[f]
                         facies_code = main_facies_table.getFaciesCodeForFaciesName(facies_name)
                         item = probability_parameter_values_for_facies[f]
-                        if facies_name != item[NAME]:
+                        if facies_name != item.name:
                             raise ValueError('Inconsistencies in data structure in APS_main')
 
-                        probabilities = item[VAL]
+                        probabilities = item.value
                         print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
                             zone_number, facies_code, facies_name, probabilities[0], volume_fraction[f])
                         )
@@ -552,10 +548,10 @@ def run(
                         facies_name = facies_names_for_zone[f]
                         facies_code = main_facies_table.getFaciesCodeForFaciesName(facies_name)
                         item = probability_parameter_values_for_facies[f]
-                        if facies_name != item[NAME]:
+                        if facies_name != item.name:
                             raise ValueError('Inconsistencies in data structure in APS_main')
 
-                        values = item[VAL]
+                        values = item.value
                         average_probabilities = calc_average(cell_index_defined, values)
                         print(
                             '{0:4d} {1:4d} {2:4d}  {3:10}  {4:.3f}   {5:.3f}'
@@ -573,10 +569,10 @@ def run(
                         facies_name = facies_names_for_zone[f]
                         facies_code = main_facies_table.getFaciesCodeForFaciesName(facies_name)
                         item = probability_parameter_values_for_facies[f]
-                        if facies_name != item[NAME]:
+                        if facies_name != item.name:
                             raise ValueError('Inconsistencies in data structure in APS_main')
 
-                        values = item[VAL]
+                        values = item.value
                         average_probabilities = calc_average(cell_index_defined, values)
                         print('{0:4d} {1:4d}  {2:10}  {3:.3f}   {4:.3f}'.format(
                             zone_number, facies_code, facies_name, volume_fraction[f], average_probabilities)
