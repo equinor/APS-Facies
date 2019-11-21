@@ -6,14 +6,37 @@ from src.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
 from src.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
 from src.rms_jobs.updateAPSModelFromFMU import run as run_update_fmu_variables_in_model_file
 from src.rms_jobs.update_trend_location_relative_to_fmu import run as run_update_trend_location
+from src.utils.constants.simple import Debug
 from src.utils.io import create_temporary_model_file
 
-import roxar
+import roxar.rms
 
 
 class Config:
     def __init__(self, config):
         self._config = config
+
+    def get_parameters(self, model_file):
+        return {
+            'roxar': roxar,
+            'project': project,
+            'model_file': model_file,
+            'output_model_file': model_file,
+            'global_include_file': self.global_include_file,
+            'max_fmu_grid_depth': self.max_fmu_grid_depth,
+            'layers_per_zone': [
+                self.max_fmu_grid_depth for _ in range(len(project.zones))
+            ] if self.run_fmu_workflows else None,
+            'fmu_mode': self.run_fmu_workflows,
+            'seed_log_file': None,
+            'write_rms_parameters_for_qc_purpose': (
+                    not self.run_fmu_workflows
+                    or roxar.rms.get_execution_mode() == roxar.ExecutionMode.Default
+                    or self.debug_level >= Debug.ON
+            ),
+            'debug_level': self.debug_level,
+
+        }
 
     @property
     def error_message(self):
@@ -30,6 +53,10 @@ class Config:
     @property
     def max_fmu_grid_depth(self):
         return self._config['parameters']['fmu']['maxDepth']
+
+    @property
+    def debug_level(self):
+        return Debug(self._config['parameters']['debugLevel']['selected'])
 
     @property
     def global_include_file(self):
@@ -54,20 +81,7 @@ def run(config):
     if config.error_message:
         raise ValueError(config.error_message)
     with create_temporary_model_file(config.model) as model_file:
-        kwargs = {
-            'roxar': roxar,
-            'project': project,
-            'model_file': model_file,
-            'output_model_file': model_file,
-            'global_include_file': config.global_include_file,
-            'max_fmu_grid_depth': config.max_fmu_grid_depth,
-            'layers_per_zone': [
-                config.max_fmu_grid_depth for _ in range(len(project.zones))
-            ] if config.run_fmu_workflows else None,
-            'fmu_mode': config.run_fmu_workflows,
-            'seed_log_file': None,
-            'write_rms_parameters_for_qc_purpose': False,
-        }
+        kwargs = config.get_parameters(model_file)
         use_constant_probabilities = APSModel(model_file).use_constant_probability
         if not use_constant_probabilities:
             run_normalization(**kwargs)
@@ -82,7 +96,6 @@ def run(config):
             # only loading from disk, and running `run_truncation` should be done
             run_update_trend_location(**kwargs)
         run_simulation(**kwargs)
-        # The GRFs should not be written to RMS if Debug is not set, and we are not in FMU mode
 
         # Script for moving stuff from "FMU" grid to "regular" grid
         run_truncation(**kwargs)

@@ -117,8 +117,7 @@ function addResultFaciesParamName ({ rootState }: Context, doc: Document, parent
 function addPrintInfo ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here?'
   if (value) {
-    // setting to 0:
-    parentElement.appendChild(createElement(doc, 'PrintInfo', 0))
+    parentElement.appendChild(createElement(doc, 'PrintInfo', rootState.parameters.debugLevel.selected))
   }
 }
 

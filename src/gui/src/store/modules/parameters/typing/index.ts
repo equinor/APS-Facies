@@ -21,4 +21,5 @@ export default interface ParametersState {
     available: string[]
   }
   fmu: FmuState
+  debugLevel: Selectable<number>
 }

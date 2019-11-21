@@ -22,44 +22,9 @@
         {{ title }}
       </v-card-title>
       <v-card-text>
-        <v-card
-          outlined
-        >
-          <v-list-item>
-            <v-list-item-title
-              class="headline"
-            >
-              Folder Settings
-            </v-list-item-title>
-          </v-list-item>
-          <v-row no-gutters>
-            <v-col
-              class="pa-2"
-              cols="3"
-            >
-              APS Model File Location:
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="5"
-            >
-              <v-text-field
-                v-model="apsModelFileLocation"
-                single-line
-                solo
-              />
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="4"
-            >
-              <bold-button
-                title="Select Directory"
-                @click="chooseApsModelFileLocation"
-              />
-            </v-col>
-          </v-row>
-        </v-card>
+        <FolderSettings
+          :aps-model-file-location.sync="apsModelFileLocation"
+        />
         <br>
         <FmuSettings
           :fmu-parameter-list-location.sync="fmuParameterListLocation"
@@ -67,16 +32,11 @@
           :max-layers-in-fmu.sync="maxLayersInFmu"
         />
         <br>
-        <v-card
-          outlined
-        >
-          <v-list-item>
-            <v-list-item-title
-              class="headline"
-            >
-              Display Settings
-            </v-list-item-title>
-          </v-list-item>
+        <LoggingSettings
+          :debug-level.sync="debugLevel"
+        />
+        <br>
+        <SettingsPanel title="Display Settings">
           <v-row
             no-gutters
           >
@@ -179,19 +139,12 @@
               </v-col>
             </v-col>
           </v-row>
-        </v-card>
+        </SettingsPanel>
         <br>
-        <v-card
+        <SettingsPanel
           v-if="!!$store.getters.gridModel"
-          outlined
+          title="Grid model"
         >
-          <v-list-item>
-            <v-list-item-title
-              class="headline"
-            >
-              Grid model
-            </v-list-item-title>
-          </v-list-item>
           <v-container
             v-if="!$store.getters['parameters/grid/waiting']"
             class="text-center"
@@ -301,7 +254,7 @@
               />
             </v-row>
           </v-container>
-        </v-card>
+        </SettingsPanel>
       </v-card-text>
       <v-card-actions>
         {{ version && `Version: ${version}` }}
@@ -320,13 +273,16 @@
 </template>
 
 <script lang="ts">
+import LoggingSettings from '@/components/dialogs/ProjectSettings/LoggingSettings.vue'
+import FolderSettings from '@/components/dialogs/ProjectSettings/FolderSettings.vue'
+import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 
 import rms from '@/api/rms'
 
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
-import FmuSettings from '@/components/dialogs/FmuSettings.vue'
+import FmuSettings from '@/components/dialogs/ProjectSettings/FmuSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -341,6 +297,9 @@ import { Optional } from '@/utils/typing'
   },
 
   components: {
+    LoggingSettings,
+    FolderSettings,
+    SettingsPanel,
     FmuSettings,
     NumericField,
     BoldButton
@@ -359,6 +318,7 @@ export default class ProjectSettings extends Vue {
   colorScale: string = ''
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
+  debugLevel: number = 0
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -368,11 +328,13 @@ export default class ProjectSettings extends Vue {
   onActivation (value: boolean) {
     if (value) {
       const options = this.$store.state.options
-      const path = this.$store.state.parameters.path
+      const parameters = this.$store.state.parameters
+      const path = parameters.path
 
       this.apsModelFileLocation = path.project.selected
       this.fmuParameterListLocation = path.fmuParameterListLocation.selected
-      this.maxLayersInFmu = this.$store.state.parameters.fmu.maxDepth
+      this.debugLevel = parameters.debugLevel.selected
+      this.maxLayersInFmu = parameters.fmu.maxDepth
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
@@ -384,13 +346,6 @@ export default class ProjectSettings extends Vue {
     }
   }
 
-  chooseApsModelFileLocation () {
-    rms.chooseDir('load').then((path: string): void => {
-      if (path) {
-        this.apsModelFileLocation = path
-      }
-    })
-  }
   cancel () {
     this.dialog = false
   }
@@ -400,6 +355,7 @@ export default class ProjectSettings extends Vue {
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
       dispatch('parameters/fmu/set', this.maxLayersInFmu),
+      dispatch('parameters/debugLevel/set', this.debugLevel),
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
