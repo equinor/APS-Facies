@@ -58,7 +58,6 @@ def run(config):
         if not use_constant_probabilities:
             run_normalization(roxar, project, model_file=model_file)
         if config.run_fmu_workflows:
-            # Rename to "update model_file" or something similar
             # Add a flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run
             # (user specified in the GUI)
             # We also need to get / update the truncation rule parameters (in the model file) that FMU may change
@@ -83,7 +82,6 @@ def run(config):
             kwargs = {
                 'layers_per_zone': [config.max_fmu_grid_depth for _ in range(len(project.zones))],
             }
-        # Move functionality for "normalizing" GRFs + trend from `run_truncation` to `run_simulation`
         run_simulation(
             roxar, project,
             model_file=model_file,
@@ -93,11 +91,6 @@ def run(config):
             **kwargs,
         )
         # The GRFs should not be written to RMS if Debug is not set, and we are not in FMU mode
-        # 3D parameter for
-        # 1. (Transformed GRF + trend) May be needed in `run_truncation` depending on what is moved
-        # 2. Trend
-        # 3. Trend + residual
-        # It still need to write residual (+ trend) to RMS (used in `run_truncation`)
 
         # Script for moving stuff from "FMU" grid to "regular" grid
         run_truncation(
