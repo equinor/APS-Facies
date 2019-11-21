@@ -50,3 +50,14 @@ FaciesProbabilityRecord = namedtuple(
         'Probability'
     ]
 )
+
+
+class Probability:
+    __slots__ = 'name', 'value'
+
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+    def __iter__(self):
+        return (self.name, self.value).__iter__()

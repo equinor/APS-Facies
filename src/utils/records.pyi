@@ -43,3 +43,9 @@ class FaciesRecord(NamedTuple):
 class FaciesProbabilityRecord(NamedTuple):
     Name: str
     Probability: Union[str, float]
+
+
+class Probability:
+    __slots__ = 'name', 'value'
+    def __init__(self, name: str, value): ...
+    def __iter__(self): ...

@@ -435,13 +435,13 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cel
         )
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
-    found = 0
+    found = False
     for p in gridModel.properties:
         if p.name == parameterName:
-            found = 1
+            found = True
             break
 
-    if found == 0:
+    if not found:
         if debug_level >= Debug.VERY_VERBOSE:
             text = ' Create specified parameter: ' + parameterName + ' in ' + gridModel.name
             print_debug_information(functionName, text)
