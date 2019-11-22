@@ -37,7 +37,7 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col>
+        <v-col cols="6">
           <numeric-field
             v-model="_maxLayersInFmu"
             :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
@@ -45,6 +45,22 @@
             enforce-ranges
             @update:error="e => update('fmuGridDepth', e)"
           />
+        </v-col>
+        <v-col cols="6">
+          <v-radio-group
+            v-model="_importFields"
+            row
+            label="How are the Gaussian Random Fields calculated?"
+          >
+            <v-radio
+              label="Simulated"
+              value="generate"
+            />
+            <v-radio
+              label="Imported"
+              value="import"
+            />
+          </v-radio-group>
         </v-col>
       </v-row>
     </div>
@@ -63,6 +79,8 @@ interface Invalid {
   fmuGridDepth: boolean
 }
 
+type FieldUsage = 'generate' | 'import'
+
 @Component({
   components: {
     SettingsPanel,
@@ -74,6 +92,9 @@ export default class FmuSettings extends Vue {
   invalid: Invalid = {
     fmuGridDepth: false
   }
+
+  @Prop({ required: true, type: Boolean })
+  readonly importFields: boolean
 
   @Prop({ required: true })
   readonly fmuParameterListLocation: string
@@ -92,6 +113,16 @@ export default class FmuSettings extends Vue {
 
   get _maxLayersInFmu (): number { return this.maxLayersInFmu }
   set _maxLayersInFmu (value: number) { this.$emit('update:maxLayersInFmu', value) }
+
+  get _importFields (): FieldUsage {
+    if (this.importFields) return 'import'
+    else return 'generate'
+  }
+  set _importFields (value: FieldUsage) {
+    if (value === 'generate') this.$emit('update:importFields', false)
+    else if (value === 'import') this.$emit('update:importFields', true)
+    else throw Error(`Invalid value, '${value}'`)
+  }
 
   chooseFmuParametersFileLocation () {
     rms.chooseDir('load').then((path: string): void => {

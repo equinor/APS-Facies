@@ -51,6 +51,11 @@ class Config:
         return self._config['options']['runFmuWorkflows']['value']
 
     @property
+    def simulate_fields(self):
+        # The stored value is whether to import the fields, or not
+        return not self._config['options']['importFields']['value']
+
+    @property
     def max_fmu_grid_depth(self):
         return self._config['parameters']['fmu']['maxDepth']
 

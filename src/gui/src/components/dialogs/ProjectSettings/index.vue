@@ -30,6 +30,7 @@
           :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
           :max-layers-in-fmu.sync="maxLayersInFmu"
+          :import-fields.sync="importFields"
         />
         <br>
         <LoggingSettings
@@ -319,6 +320,7 @@ export default class ProjectSettings extends Vue {
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
   debugLevel: number = 0
+  importFields: boolean = false
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -341,6 +343,7 @@ export default class ProjectSettings extends Vue {
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.runFmuWorkflows = options.runFmuWorkflows.value
+      this.importFields = options.importFields.value
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }
@@ -362,6 +365,7 @@ export default class ProjectSettings extends Vue {
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
       dispatch('options/runFmuWorkflows/set', this.runFmuWorkflows),
+      dispatch('options/importFields/set', this.importFields),
       dispatch('options/colorScale/set', this.colorScale),
       dispatch('constants/faciesColors/set', this.faciesColorLibrary),
     ])
