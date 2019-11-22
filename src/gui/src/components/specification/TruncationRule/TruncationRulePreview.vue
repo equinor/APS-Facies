@@ -22,6 +22,7 @@
       >
         <v-img
           aspect-ratio="1"
+          eager
           :style="style"
           :alt="altText"
           :src="imagePath"
