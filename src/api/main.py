@@ -22,7 +22,7 @@ class Config:
             'project': project,
             'model_file': model_file,
             'output_model_file': model_file,
-            'global_include_file': self.global_include_file,
+            'global_variables': self.global_variables_file,
             'max_fmu_grid_depth': self.max_fmu_grid_depth,
             'layers_per_zone': [
                 self.max_fmu_grid_depth for _ in range(len(project.zones))
@@ -64,7 +64,7 @@ class Config:
         return Debug(self._config['parameters']['debugLevel']['selected'])
 
     @property
-    def global_include_file(self):
+    def global_variables_file(self):
         project_location = Path(self._config['parameters']['path']['project']['selected'])
         config_location = project_location / '../input/config/aps_gui'
         file_priority = [
@@ -95,7 +95,8 @@ def run(config):
             # (user specified in the GUI)
             # We also need to get / update the truncation rule parameters (in the model file) that FMU may change
             # That is, to use a different fmu_variables file (similar / equivalent to global_variables.ipl)
-            run_update_fmu_variables_in_model_file(**kwargs)
+            if config.global_variables_file:
+                run_update_fmu_variables_in_model_file(**kwargs)
             # run_initial_ensable is equivalent to running the APS workflows ONCE
             # Once that is done, (that is the the facies realization, and GRFs with trends exists),
             # only loading from disk, and running `run_truncation` should be done

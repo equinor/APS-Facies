@@ -32,7 +32,7 @@ def update_aps_model_from_fmu(
 def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     input_aps_model_file = params['model_file']
-    global_ipl_file = params['global_include_file']
+    global_ipl_file = params['global_variables_file']
     debug_level = params['debug_level']
     output_aps_model_file = params['output_model_file']
     workflow_name = params['workflow_name']

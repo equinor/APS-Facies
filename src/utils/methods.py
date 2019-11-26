@@ -87,7 +87,7 @@ def get_rms_project_data_file(**kwargs):
 
 def get_global_ipl_file(**kwargs):
     return _get_file_name(
-        kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file', 'global_include_file'],
+        kwargs, legal_kwargs=['globalIPLFile', 'global_ipl_file', 'global_include_file', 'global_variables_file'],
         default_name='../../fmuconfig/output/global_variables.ipl',
     )
 
@@ -203,7 +203,7 @@ def get_run_parameters(**kwargs):
         'model_file': get_specification_file(**kwargs),
         'output_model_file': get_output_model_file(**kwargs),
         'rms_data_file': get_rms_project_data_file(**kwargs),
-        'global_include_file': get_global_ipl_file(**kwargs),
+        'global_variables_file': get_global_ipl_file(**kwargs),
         'output_tagged_variables_file': get_output_tagged_variables_file(**kwargs),
         'tag_all_variables': get_tag_all_variables(**kwargs),
         'fmu_variables_file': get_fmu_variables_file(**kwargs),
