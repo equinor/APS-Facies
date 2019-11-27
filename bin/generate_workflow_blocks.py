@@ -259,7 +259,7 @@ def get_tag_all_variables():
 
 
 def get_output_fmu_tagged_model_file():
-    return _get_file(APS_OUTPUT_FMU_MODEL_FILE, 'APS_with_FMU_tags.xml')
+    return _get_file(APS_OUTPUT_FMU_MODEL_FILE, 'APS_modified.xml')
 
 
 def get_write_logfile():
