@@ -81,7 +81,7 @@ import sys
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.8.2"
+__version__ = "0.8.3"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
