@@ -24,6 +24,7 @@ from src.utils.constants.simple import (
     OriginType,
 )
 from src.utils.exceptions.xml import ApsXmlError
+from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 from src.utils.roxar.grid_model import (
     getGridSimBoxSize,
     get_simulation_box_thickness,
@@ -79,7 +80,7 @@ class RMSData:
         return Path(self.project.filename).name
 
     def get_project_dir(self):
-        return str(Path(self.project.filename).parent.absolute())
+        return str(get_project_dir(self.project))
 
     def _get_project_location(self):
         return Path(self.project.filename).parent

@@ -45,6 +45,10 @@ def get_project_realization_seed(project=None):
     return project.seed + project.current_realisation + 1
 
 
+def get_project_dir(project):
+    return Path(project.filename).parent.absolute()
+
+
 def setContinuous3DParameterValues(
         gridModel, parameterName, inputValues, zoneNumberList,
         realNumber=0, isShared=True, debug_level=Debug.OFF,
