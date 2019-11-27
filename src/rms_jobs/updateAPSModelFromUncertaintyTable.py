@@ -42,7 +42,7 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
                output_aps_model_file - Name of updated APS model file
     """
     print('Workflow name: {}'.format(workflow_name))
-    if write_output_file_with_parameter_names:
+    if write_output_file_with_parameter_names and workflow_name:
         output_file_with_parameter_names = 'tmp_' + workflow_name + '.dat'
     else:
         output_file_with_parameter_names = None

@@ -28,6 +28,7 @@ class Config:
                 self.max_fmu_grid_depth for _ in range(len(project.zones))
             ] if self.run_fmu_workflows else None,
             'fmu_mode': self.run_fmu_workflows,
+            'workflow_name': roxar.rms.get_running_workflow_name(),
             'seed_log_file': None,
             'write_rms_parameters_for_qc_purpose': (
                     not self.run_fmu_workflows
