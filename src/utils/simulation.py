@@ -88,8 +88,13 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
     # Simulated gauss fields that are used in some zones are read from RMS
     # They are required and must exist.
     for name in gauss_field_names_used:
-        values = _get_field(name)
-        gf_all_values[name] = values
+        try:
+            values = _get_field(name)
+            gf_all_values[name] = values
+        except ValueError:
+            setContinuous3DParameterValues(
+                grid_model, name, gf_all_values[name], [], realization_number
+            )
 
     # Initialize the RMS 3D parameters for QC with extension _trend, _transf, _untransf
     if write_rms_parameters_for_qc_purpose:
