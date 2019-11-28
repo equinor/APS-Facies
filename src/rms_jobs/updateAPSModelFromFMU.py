@@ -36,6 +36,13 @@ def run(roxar=None, project=None, **kwargs):
     debug_level = params['debug_level']
     output_aps_model_file = params['output_model_file']
     workflow_name = params['workflow_name']
+
+    print(
+        'Updating {model_file} with the FMU parameters from {include_file}'.format(
+            model_file=input_aps_model_file,
+            include_file=global_ipl_file,
+        )
+    )
     update_aps_model_from_fmu(
         global_ipl_file, input_aps_model_file, output_aps_model_file,
         debug_level=debug_level,

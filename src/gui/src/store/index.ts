@@ -15,6 +15,7 @@ import constants from '@/store/modules/constants'
 import options from '@/store/modules/options'
 import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelFileExporter from '@/store/modules/modelFileExporter'
+import fmu from '@/store/modules/fmu'
 
 import { RootState } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
@@ -60,6 +61,7 @@ const store: Store<RootState> = new Vuex.Store({
     zones,
     regions,
     facies,
+    fmu,
     gaussianRandomFields,
     truncationRules,
     parameters,
@@ -80,6 +82,7 @@ const store: Store<RootState> = new Vuex.Store({
           dispatch('parameters/path/fetch'),
           dispatch('parameters/names/workflow/fetch'),
           dispatch('parameters/names/project/fetch'),
+          dispatch('fmu/fetch'),
         ])
         commit('FINISHED')
       }
@@ -111,6 +114,9 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Options
         await dispatch('options/populate', data.options)
+
+        // FMU settings
+        await dispatch('fmu/populate', data.fmu)
 
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
@@ -234,7 +240,7 @@ const store: Store<RootState> = new Vuex.Store({
       return Object.values(state.facies.global.available)
         .sort((a, b): number => a.code - b.code)
     },
-    fmuMode: (state): boolean => state.options.runFmuWorkflows.value,
+    fmuMode: (state): boolean => state.fmu.runFmuWorkflows.value,
     // User options
     options: (state): object => {
       return Object.keys(state.options)

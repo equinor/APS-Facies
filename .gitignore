@@ -331,6 +331,7 @@ __pycache__/
 
 # Additional compiled libraries, not maintained within Statoil / this project
 libraries/source
+libraries/xtgeo*
 
 # C extensions
 

@@ -498,7 +498,7 @@ const module: Module<{}, RootState> = {
             await dispatch(action, getTextValue(apsModelContainer, property), { root: true })
           }
         }
-        await dispatch('options/runFmuWorkflows/set', json.includes('"kw":'), { root: true })
+        await dispatch('fmu/runFmuWorkflows/set', json.includes('"kw":'), { root: true })
 
         const apsModels = getNodeValues(getMandatoryNodeValue(apsModelContainer, 'ZoneModels'), 'Zone')
 

@@ -1,4 +1,5 @@
 import { ConstantsState } from '@/store/modules/constants/typing'
+import { FmuState } from '@/store/modules/fmu/typing'
 import { GaussianRandomFieldState } from '@/store/modules/gaussianRandomFields/typing'
 import MessageState from '@/store/modules/message/typing'
 import OptionsState from '@/store/modules/options/typing'
@@ -8,6 +9,7 @@ import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { TruncationRuleTemplateState } from '@/store/modules/truncationRules/typing'
 import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { Color } from '@/utils/domain/facies/helpers/colors'
+import GridModel from '@/utils/domain/gridModel'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
 import { Optional } from '@/utils/typing'
 import { Commit, Dispatch } from 'vuex'
@@ -78,6 +80,8 @@ interface RootState {
     }
   }
 
+  fmu: FmuState
+
   parameters: ParametersState
 
   truncationRules: {
@@ -132,6 +136,7 @@ interface RootGetters {
   'gridModels': string[]
 
   'gridModels/name': string[]
+  'gridModels/current': Optional<GridModel>
 
   'blockedWellParameter': string
   'blockedWellLogParameter': string

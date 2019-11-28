@@ -1,4 +1,5 @@
-import api from '@/api/rms'
+import GridModel from '@/utils/domain/gridModel'
+import { Optional } from '@/utils/typing'
 
 import simBox from './simBox'
 
@@ -25,10 +26,13 @@ const module: Module<GridParameterState, RootState> = {
   actions: {
     async fetch ({ commit, dispatch, rootGetters }, rough: boolean = true): Promise<void> {
       commit('_WAITING', true)
-      const [x, y, z] = await api.gridSize(rootGetters.gridModel)
-      await dispatch('parameters/fmu/fetch', z, { root: true })
-      const azimuth = await dispatch('simBox/fetch', rough)
-      await dispatch('populate', { azimuth, size: { x, y, z } })
+      const grid: Optional<GridModel> = rootGetters['gridModels/current']
+      if (grid) {
+        const { x, y, z } = grid.dimension
+        await dispatch('fmu/maxDepth/fetch', z, { root: true })
+        const azimuth = await dispatch('simBox/fetch', rough)
+        await dispatch('populate', { azimuth, size: { x, y, z } })
+      }
       commit('_WAITING', false)
     },
     populate ({ commit }, { azimuth, size }): void {

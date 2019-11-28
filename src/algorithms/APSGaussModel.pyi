@@ -301,7 +301,7 @@ class APSGaussModel:
     ) -> int: ...
     def _add_xml_element(
             self,
-            gf_name: GaussianFieldName,
+            grf: GaussianField,
             property_name: str,
             parent: Element,
             variogram_element: Element,

@@ -770,8 +770,16 @@ class APSModel:
         return collections.OrderedDict(sorted(self.__zoneModelTable.items()))
 
     @property
+    def zone_models(self):
+        return self.sorted_zone_models.values()
+
+    @property
     def grid_model_name(self):
         return self.__rmsGridModelName
+
+    @grid_model_name.setter
+    def grid_model_name(self, name):
+        self.__rmsGridModelName = name
 
     def getGridModelName(self):
         return copy.copy(self.__rmsGridModelName)

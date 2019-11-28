@@ -56,13 +56,15 @@ Tip: GridModelName in the APS model file must be one of { ${gridModels.join()} }
       commit('AVAILABLE', identify(gridModels.map(conf => new GridModel(conf))))
     },
     fetch: async ({ dispatch }): Promise<void> => {
-      const gridModels = (await rms.gridModels())
-        .map((conf, index): GridModelConfiguration => {
+      const gridModels = await Promise.all((await rms.gridModels())
+        .map(async (conf, index): Promise<GridModelConfiguration> => {
+          const [x, y, z] = await rms.gridSize(conf.name)
           return {
             ...conf,
             order: index,
+            dimension: { x, y, z },
           }
-        })
+        }))
       await dispatch('populate', gridModels)
     }
   },
@@ -77,6 +79,12 @@ Tip: GridModelName in the APS model file must be one of { ${gridModels.join()} }
   },
 
   getters: {
+    current ({ current, available }): Optional<GridModel> {
+      if (current) {
+        return available[`${current}`]
+      }
+      return null
+    },
     names (state): string[] {
       return Object.values(state.available)
         .sort((a, b): number => a.order - b.order)

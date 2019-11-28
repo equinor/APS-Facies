@@ -22,6 +22,7 @@ from src.utils.trend import add_trends
 def run_simulations(
         project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
         layers_per_zone=None, write_rms_parameters_for_qc_purpose=True,
+        fmu_mode=False,
 ):
     """
     Description: Run gauss simulations for the APS model i sequence
@@ -44,10 +45,7 @@ def run_simulations(
     grid = grid_model.get_grid()
     grid_attributes = GridAttributes(grid)
 
-    if layers_per_zone is not None:
-        num_layers_per_zone = layers_per_zone
-    else:
-        num_layers_per_zone = grid_attributes.num_layers_per_zone
+    num_layers_per_zone = grid_attributes.num_layers_per_zone
 
     nx, ny, nz = grid_attributes.sim_box_size.dimensions
 
@@ -65,22 +63,29 @@ def run_simulations(
         zone_number, region_number = key
         if not aps_model.isSelected(zone_number, region_number):
             continue
-        gauss_field_names = zone_model.gaussian_fields_in_truncation_rule
+        gauss_field_names = zone_model.gaussian_fields_in_truncation_rule  # Add zone names / number, if FMU
         sim_box_thickness = zone_model.sim_box_thickness
 
-        # Zone index is counted from 0 while zone number from 1
-        start = grid_attributes.start_layers_per_zone[zone_number - 1]
-        end = grid_attributes.end_layers_per_zone[zone_number - 1]
-        num_layers = num_layers_per_zone[zone_number - 1]
+        if fmu_mode:
+            assert len(num_layers_per_zone) == 1
+            zone_index = 0
+        else:
+            # Zone index is counted from 0 while zone number from 1
+            zone_index = zone_number - 1
+        num_layers = num_layers_per_zone[zone_index]
 
         # Calculate grid cell size in z direction
         nz = num_layers
         dz = sim_box_thickness / nz
+        if layers_per_zone is not None:
+            dz = sim_box_thickness / layers_per_zone[zone_number - 1]
 
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
             print('-- Zone: {}'.format(zone_number))
         if debug_level >= Debug.VERBOSE:
-            print('--   Grid layers: {}     Start layer: {}     End layer: {}'.format(num_layers, start + 1, end + 1))
+            start = grid_attributes.start_layers_per_zone[zone_index]
+            end = grid_attributes.end_layers_per_zone[zone_index]
+            print('--   Grid layers: {}     Start layer: {}     End layer: {}'.format(num_layers, start + 1, end))
 
         gauss_result_list_for_zone = []
         for gauss_field_name in gauss_field_names:
@@ -156,18 +161,20 @@ def run_simulations(
             grid_model,
             gauss_field_names,
             gauss_result_list_for_zone,
-            zone_number - 1,
+            zone_number,
             regionNumber=region_number,
             regionParamName=aps_model.region_parameter,
             realNumber=realisation,
             isShared=is_shared,
-            debug_level=debug_level
+            debug_level=debug_level,
+            fmu_mode=fmu_mode,
         )
 
         add_trends(
             project, aps_model, zone_number, region_number,
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
+            fmu_mode=fmu_mode,
         )
         # End loop over gauss fields for one zone
 
@@ -190,6 +197,7 @@ def run(roxar=None, project=None, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
     layers_per_zone = kwargs.get('layers_per_zone', None)
+    fmu_mode = kwargs.get('fmu_mode', False)
     write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose', True)
     real_number = project.current_realisation
     is_shared = False
@@ -202,6 +210,7 @@ def run(roxar=None, project=None, **kwargs):
         seed_file_log,
         layers_per_zone=layers_per_zone,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
+        fmu_mode=fmu_mode,
     )
     print('Finished simulation of gaussian fields for APS')
 

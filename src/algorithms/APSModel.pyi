@@ -45,6 +45,7 @@ class APSModel:
     __preview_cross_section: CrossSection
     preview_cross_section: CrossSection
     sorted_zone_models: OrderedDict[Tuple[int, int], APSZoneModel]
+    zone_models: List[APSZoneModel]
     use_constant_probability: bool
     write_seeds: bool
     zone_parameter: str

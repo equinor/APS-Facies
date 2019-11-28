@@ -6,7 +6,12 @@ from src.rms_jobs.APS_normalize_prob_cubes import run as run_normalization
 from src.rms_jobs.APS_simulate_gauss_singleprocessing import run as run_simulation
 from src.rms_jobs.updateAPSModelFromFMU import run as run_update_fmu_variables_in_model_file
 from src.rms_jobs.update_trend_location_relative_to_fmu import run as run_update_trend_location
+from src.rms_jobs.import_fields_from_disk import run as run_import_fields
+from src.rms_jobs.export_fields_to_disk import run as run_export_fields
+from src.rms_jobs.export_simbox_grid_to_disk import run as run_export_aps_grid
+from src.rms_jobs.create_simulation_grid import run as run_create_simulation_grid
 from src.utils.constants.simple import Debug
+from src.utils.fmu import get_grid, get_export_location, fmu_aware_model_file
 from src.utils.io import create_temporary_model_file
 
 import roxar.rms
@@ -17,6 +22,7 @@ class Config:
         self._config = config
 
     def get_parameters(self, model_file):
+        aps_model = APSModel(model_file)  # Represents the ORIGINAL APS model
         return {
             'roxar': roxar,
             'project': project,
@@ -24,20 +30,30 @@ class Config:
             'output_model_file': model_file,
             'global_variables': self.global_variables_file,
             'max_fmu_grid_depth': self.max_fmu_grid_depth,
-            'layers_per_zone': [
-                self.max_fmu_grid_depth for _ in range(len(project.zones))
-            ] if self.run_fmu_workflows else None,
+            'layers_per_zone': self._get_layers_per_zone(aps_model),
             'fmu_mode': self.run_fmu_workflows,
+            'fmu_simulation_grid_name': self.fmu_grid_name,
+            'rms_grid_name': aps_model.grid_model_name,
+            'aps_model': aps_model,
+            'use_constant_probabilities': aps_model.use_constant_probability,
             'workflow_name': roxar.rms.get_running_workflow_name(),
             'seed_log_file': None,
-            'write_rms_parameters_for_qc_purpose': (
-                    not self.run_fmu_workflows
-                    or roxar.rms.get_execution_mode() == roxar.ExecutionMode.Default
-                    or self.debug_level >= Debug.ON
-            ),
+            'write_rms_parameters_for_qc_purpose': self.write_rms_parameters_for_qc_purpose,
             'debug_level': self.debug_level,
-
         }
+
+    def _get_layers_per_zone(self, aps_model):
+        if not self.run_fmu_workflows:
+            return None
+
+        nx, ny, nz = get_grid(project, aps_model).simbox_indexer.dimensions
+        return [nz for _ in range(len(project.zones))]
+
+        grid = get_grid(project, aps_model)
+        layers = []
+        for zonation, *reverse in grid.grid_indexer.zonation.values():
+            layers.append(zonation.stop - zonation.start)
+        return layers
 
     @property
     def error_message(self):
@@ -48,8 +64,19 @@ class Config:
         return self._config['model']
 
     @property
+    def create_fmu_grid(self):
+        return (
+            self._config['fmu']['create']['value']
+            and self.fmu_grid_name not in project.grid_models
+        )
+
+    @property
+    def fmu_grid_name(self):
+        return self._config['fmu']['simulationGrid']['current']
+
+    @property
     def run_fmu_workflows(self):
-        return self._config['options']['runFmuWorkflows']['value']
+        return self._config['fmu']['runFmuWorkflows']['value']
 
     @property
     def simulate_fields(self):
@@ -58,7 +85,7 @@ class Config:
 
     @property
     def max_fmu_grid_depth(self):
-        return self._config['parameters']['fmu']['maxDepth']
+        return self._config['fmu']['maxDepth']['value']
 
     @property
     def debug_level(self):
@@ -81,6 +108,13 @@ class Config:
                         return str(location.absolute())
         return None
 
+    @property
+    def write_rms_parameters_for_qc_purpose(self):
+        return (
+                not self.run_fmu_workflows
+                or self.debug_level >= Debug.ON
+        )
+
 
 def run(config):
     config = Config(config)
@@ -88,21 +122,48 @@ def run(config):
         raise ValueError(config.error_message)
     with create_temporary_model_file(config.model) as model_file:
         kwargs = config.get_parameters(model_file)
-        use_constant_probabilities = APSModel(model_file).use_constant_probability
-        if not use_constant_probabilities:
+
+        if not kwargs['use_constant_probabilities']:
             run_normalization(**kwargs)
         if config.run_fmu_workflows:
-            # Add a flag for whether `run_initial_ensable`, or `run_import_from_fmu` should be run
-            # (user specified in the GUI)
-            # We also need to get / update the truncation rule parameters (in the model file) that FMU may change
-            # That is, to use a different fmu_variables file (similar / equivalent to global_variables.ipl)
+            if config.create_fmu_grid:
+                run_create_simulation_grid(**kwargs)
+            # TODO?: Create a new simbox grid of the appropriate size, (and update the model file)
+            # Create new Grid model, based on the original grid.
+            # This should be changeable from the GUI
+
             if config.global_variables_file:
                 run_update_fmu_variables_in_model_file(**kwargs)
-            # run_initial_ensable is equivalent to running the APS workflows ONCE
-            # Once that is done, (that is the the facies realization, and GRFs with trends exists),
-            # only loading from disk, and running `run_truncation` should be done
             run_update_trend_location(**kwargs)
-        run_simulation(**kwargs)
+        with fmu_aware_model_file(**kwargs):
+            if config.simulate_fields:
+                # If FMU, use the FMU grid to simulate stuff
+                # The sizes for nrlib should be the same as the ORIGINAL grid
+                # I.e. `max_fmu_grid_depth` should be rewritten to return the depth of the original grid
+                run_simulation(**kwargs)
+                if config.run_fmu_workflows:
+                    run_export_aps_grid(**kwargs)
+                    run_export_fields(**kwargs)
+
+                    run_import_fields(
+                        load_dir=get_export_location(project),
+                        grid_name=kwargs['rms_grid_name'],
+                        **kwargs
+                    )
+            else:
+                run_import_fields(
+                    grid_name=kwargs['rms_grid_name'],
+                    **kwargs
+                )
+
+        # if config.run_fmu_workflows:
+        #     # The Gaussian Random Fields where simulated in the ERT grid, and
+        #     # must be copied over to the original grid for truncation.
+        #     run_copy_simulated_fields(
+        #         from_grid=kwargs['fmu_simulation_grid_name'],
+        #         to_grid=kwargs['aps_model'].grid_model_name,
+        #         **kwargs
+        #     )
 
         # Script for moving stuff from "FMU" grid to "regular" grid
         run_truncation(**kwargs)
