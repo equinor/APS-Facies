@@ -3,7 +3,7 @@
     <v-col class="dense">
       <v-checkbox
         v-model="_runFmuWorkflows"
-        label="Run FMU workflows"
+        label="Run APS facies update in AHM/ERT"
       />
     </v-col>
     <div v-if="_runFmuWorkflows">
@@ -41,7 +41,7 @@
           <numeric-field
             v-model="_maxLayersInFmu"
             :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
-            label="FMU grid depth"
+            label="Number of layers in FMU simulation box grid"
             enforce-ranges
             @update:error="e => update('fmuGridDepth', e)"
           />
