@@ -290,10 +290,6 @@ def read_write_model(apsmodel, debug_level=Debug.OFF):
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = compare(outfile1, outfile2)
 
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     assert check is True
     print('')
 
@@ -308,10 +304,6 @@ def read_write_model_update(debug_level=Debug.OFF):
     print('Compare file: ' + outfile1 + ' and ' + outfile2)
     check = compare(outfile1, outfile2)
 
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     assert check is True
     print('')
 
@@ -413,10 +405,6 @@ def test_read_and_write_APSModel():
     reference_file = 'testData_models/APS_sorted.xml'
     print('Compare file: ' + outfile3 + ' and ' + reference_file)
     check = compare(outfile3, reference_file)
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     assert check is True
 
 
@@ -427,7 +415,6 @@ def test_updating_model1():
     apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
     # Do some updates of the model
     zoneNumber = 1
-    regionNumber = 0
     zone = apsmodel.getZoneModel(zoneNumber)
     gaussFieldNames = zone.used_gaussian_field_names
     nGaussFields = len(gaussFieldNames)
@@ -447,6 +434,7 @@ def test_updating_model1():
     azimuthAngleFmuUpdatableList = [True, False, True, False, True]
     dipAngleFmuUpdatableList = [True, False, True, False, True]
     powerFmuUpdatableList = [True, False, True, True, True]
+    gridLayputs = ['BaseConform', None, 'BaseConform', 'BaseConform', 'BaseConform']
     for i in range(nGaussFields):
         gfName = gaussFieldNames[i]
         print('Update zone ' + str(zoneNumber) + ' and gauss field ' + gfName)
@@ -497,10 +485,6 @@ def test_updating_model1():
     reference_file = 'testData_models/APS_updated1.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
     check = compare(outfile2, reference_file)
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     assert check is True
 
 
@@ -559,10 +543,6 @@ def test_updating_model2():
     reference_file = 'testData_models/APS_updated2.xml'
     print('Compare file: ' + outfile2 + ' and ' + reference_file)
     check = compare(outfile2, reference_file)
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     assert check is True
 
 
@@ -675,10 +655,6 @@ def test_updating_model3():
     reference_file = 'testData_models/APS_updated3.xml'
     print('Compare file: ' + outfile3 + ' and ' + reference_file)
     check = compare(outfile3, reference_file)
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     assert check is True
 
 
