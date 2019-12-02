@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from enum import Enum
 from src.algorithms.APSFaciesProb import APSFaciesProb
 from src.algorithms.APSGaussModel import APSGaussModel, GaussianFieldSimulation, GaussianFieldName, GaussianField
 from src.algorithms.properties import CrossSection
@@ -14,10 +15,17 @@ Trend = Union[Trend3D_linear, Trend3D_hyperbolic, Trend3D_rms_param, Trend3D_ell
 TruncationRule = Union[Trunc3D_bayfill, Trunc2D_Cubic, Trunc2D_Angle]
 
 
+class Conform(Enum):
+    Proportional = 'Proportional'
+    TopConform = 'TopConform'
+    BaseConform = 'BaseConform'
+
+
 class APSZoneModel:
     truncation_rule: TruncationRule
     zone_number: int
     region_number: int
+    grid_layout: Optional[Conform]
     uses_region: bool
     debug_level: Debug
     used_gaussian_field_names: List[GaussianFieldName]
@@ -25,6 +33,8 @@ class APSZoneModel:
     gaussian_fields: List[GaussianField]
     __faciesProbObject: APSFaciesProb
     __gaussModelObject: APSGaussModel
+    _grid_layout: Optional[Conform]
+
     def __init__(
         self,
         ET_Tree: Optional[ElementTree] = None,
@@ -38,7 +48,8 @@ class APSZoneModel:
         gaussModelObject: Optional[APSGaussModel] = None,
         truncRuleObject: Optional[TruncationRule] = None,
         debug_level: Debug = Debug.OFF,
-        keyResolution: int = 100
+        keyResolution: int = 100,
+        grid_layout: Optional[Union[str, Conform]] = None,
     ) -> None: ...
     def __interpretXMLTree(self, ET_Tree, modelFileName): ...
     def XMLAddElement(self, parent: Element, fmu_attributes: List[str]) -> None: ...

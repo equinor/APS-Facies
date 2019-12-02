@@ -66,6 +66,13 @@ export default abstract class TruncationRule<
     return this._constraints.every(([constraint, _]): boolean => constraint())
   }
 
+  public get isFmuUpdatable (): boolean {
+    return (
+      this.fields.some(field => field.isFmuUpdatable)
+      || this.polygons.some(polygon => polygon.isFmuUpdatable)
+    )
+  }
+
   public get realization (): number[][] | null { return this.simulation }
   public set realization (data) { this.simulation = data }
 

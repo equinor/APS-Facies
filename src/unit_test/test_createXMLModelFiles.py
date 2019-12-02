@@ -103,6 +103,7 @@ def addZoneParam(
         ysf_fmu_updatable=None,
         sbhd=None,
         sbhd_fmu_updatable=None,
+        grid_layouts=None,
         debug_level=Debug.OFF
 ):
     main_facies_table = apsmodel.getMainFaciesTable()
@@ -251,9 +252,15 @@ def addZoneParam(
 
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
-        zoneNumber=zoneNumber, regionNumber=regionNumber, useConstProb=useConstProb, simBoxThickness=simBoxThickness,
+        zoneNumber=zoneNumber,
+        regionNumber=regionNumber,
+        useConstProb=useConstProb,
+        simBoxThickness=simBoxThickness,
         faciesProbObject=facies_probabilities,
-        gaussModelObject=gauss_model, truncRuleObject=truncRuleObj, debug_level=debug_level
+        gaussModelObject=gauss_model,
+        truncRuleObject=truncRuleObj,
+        grid_layout=grid_layouts[i] if grid_layouts else None,
+        debug_level=debug_level,
     )
 
     # Add zone to APSModel
@@ -981,6 +988,7 @@ def add_zone_with_region_number(apsmodel):
         sf_name=None,
         ysf=0.0,
         sbhd=0.0,
+        grid_layouts=['TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1030,6 +1038,7 @@ def add_zone_without_region_number(apsmodel):
         sf_name=None,
         ysf=0.0,
         sbhd=0.0,
+        grid_layouts=['TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1080,6 +1089,7 @@ def add_zone_1_for_case_1(apsmodel):
         sf_name=None,
         ysf=0.0,
         sbhd=0.0,
+        grid_layouts=['TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1135,6 +1145,7 @@ def add_zone_2_for_case_1(apsmodel):
         truncStructureList=[['F1', 0.0, 1.0, True], ['F3', 45.0, 1.0, False]],
         overlayGroups=[[[['GRF5', 'F2', 1.0, 0.5]], ['F1', 'F3']]],
         useConstTruncParam=1,
+        grid_layouts=['TopConform', 'TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1190,6 +1201,7 @@ def add_zone_1_for_case_2(apsmodel):
         truncStructureList=['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0]],
         overlayGroups=[[[['GRF8', 'F5', 1.0, 0.0]], ['F1']], [[['GRF9', 'F7', 1.0, 0.8]], ['F2']]],
         useConstTruncParam=1,
+        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1245,6 +1257,7 @@ def add_zone_2_for_case_2(apsmodel):
         truncStructureList=[['F1', 0.0, 1.0, True], ['F3', 45.0, 1.0, True], ['F2', -35.0, 1.0, True], ['F5', 145.0, 1.0, True]],
         overlayGroups=[[[['GRF8', 'F6', 1.0, 0.5]], ['F1', 'F3']], [[['GRF9', 'F7', 1.0, 0.7]], ['F2', 'F5']]],
         useConstTruncParam=1,
+        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1302,6 +1315,7 @@ def add_zone_1_for_case_3(apsmodel):
         sbhd=0.55,
         useConstTruncParam=1,
         faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
+        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 
@@ -1361,6 +1375,7 @@ def add_zone_1_for_case_4(apsmodel):
         sbhd=0.55,
         useConstTruncParam=1,
         faciesInTruncRule=['F1', 'F2', 'F3', 'F5', 'F7'],
+        grid_layouts=['TopConform', 'TopConform', 'TopConform', 'TopConform'],
         debug_level=NO_VERBOSE_DEBUG
     )
 

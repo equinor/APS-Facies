@@ -48,6 +48,7 @@
   </MainFaciesTable>
   <ZoneModels>
     <Zone number="5">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -111,6 +112,7 @@
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="1">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -174,6 +176,7 @@
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="3">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -312,6 +315,7 @@
       </TruncationRule>
     </Zone>
     <Zone number="2" regionNumber="4">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -417,6 +421,7 @@
       </TruncationRule>
     </Zone>
     <Zone number="4">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -523,6 +528,7 @@
       </TruncationRule>
     </Zone>
     <Zone number="1">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 0 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -629,6 +635,7 @@
       </TruncationRule>
     </Zone>
     <Zone number="6" regionNumber="10">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 4.0 </SimBoxThickness>
       <FaciesProbForModel>

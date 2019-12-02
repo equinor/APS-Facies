@@ -22,6 +22,10 @@ export default class NonCubicPolygon extends Polygon {
     this.angle = new FmuUpdatableValue(angle)
   }
 
+  public get isFmuUpdatable (): boolean {
+    return super.isFmuUpdatable || this.angle.updatable
+  }
+
   public get specification (): NonCubicPolygonSpecification {
     return {
       ...super.specification,

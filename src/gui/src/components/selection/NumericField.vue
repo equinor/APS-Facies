@@ -199,7 +199,7 @@ export default class NumericField extends Vue {
 
   get isFmuUpdatable () {
     return this.fmuUpdatable
-      && this.$store.state.options.runFmuWorkflows.value
+      && this.$store.getters.fmuMode
       && (
         this.value instanceof FmuUpdatableValue
         || (this.value !== null && this.value.hasOwnProperty('updatable')

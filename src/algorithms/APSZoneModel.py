@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from enum import Enum
 from warnings import warn
 from xml.etree.ElementTree import Element
 
@@ -18,9 +19,16 @@ from src.utils.xmlUtils import (
     getFloatCommand,
     getIntCommand,
     getKeyword,
+    getTextCommand,
     getBoolCommand,
     get_region_number,
 )
+
+
+class Conform(Enum):
+    Proportional = 'Proportional'
+    TopConform = 'TopConform'
+    BaseConform = 'BaseConform'
 
 
 class APSZoneModel:
@@ -107,7 +115,7 @@ class APSZoneModel:
             self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
             useConstProb=False, simBoxThickness=10.0,
             faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
-            debug_level=Debug.OFF, keyResolution=100
+            debug_level=Debug.OFF, keyResolution=100, grid_layout=None,
     ):
         """
          If the object is created by reading the xml tree for model parameters, it is required that
@@ -135,6 +143,7 @@ class APSZoneModel:
         self.truncation_rule = truncRuleObject
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
+        self.grid_layout = grid_layout
 
         if ET_Tree is not None:
             self.__interpretXMLTree(ET_Tree, modelFileName)
@@ -183,6 +192,9 @@ class APSZoneModel:
             else:
                 if self.__debug_level == Debug.VERY_VERBOSE:
                     print('Debug output: Zone number: {}'.format(str(zone_number)))
+
+            grid_layout = getTextCommand(zone, 'GridLayout', 'Zone', modelFile=modelFileName, required=False)
+            self.grid_layout = grid_layout
 
             if zone_number == self.zone_number and region_number == self.__regionNumber:
 
@@ -280,6 +292,16 @@ class APSZoneModel:
     @property
     def uses_region(self):
         return self.region_number > 0
+
+    @property
+    def grid_layout(self):
+        return self._grid_layout
+
+    @grid_layout.setter
+    def grid_layout(self, value):
+        if value is not None:
+            value = Conform(value)
+        self._grid_layout = value
 
     @property
     def zone_number(self):
@@ -860,6 +882,12 @@ class APSZoneModel:
         elem = Element(tag, attribute)
         zoneElement = elem
         parent.append(zoneElement)
+
+        # Add proportionality
+        if self.grid_layout:
+            elem = Element('GridLayout')
+            elem.text = self.grid_layout.value
+            zoneElement.append(elem)
 
         # Add child command UseConstProb
         tag = 'UseConstProb'

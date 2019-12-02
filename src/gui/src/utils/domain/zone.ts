@@ -9,8 +9,11 @@ import SelectableItem, {
 
 type Regions = Identified<Region>
 
+export type ZoneConformOption = 'top' | 'bottom' | 'proportional' | null
+
 export interface ZoneSerialization extends SelectableSerialization {
   regions: RegionSerialization[] | null
+  conformity: ZoneConformOption
 }
 
 export interface RegionSerialization extends SelectableSerialization {
@@ -39,14 +42,17 @@ export class Region extends SelectableItem {
 
 export interface ZoneConfiguration extends SelectableItemConfiguration {
   regions?: Region[] | null
+  conformity?: ZoneConformOption
 }
 
 export default class Zone extends SelectableItem {
   private _regions: Regions
+  public conformity: ZoneConformOption
 
-  public constructor ({ regions = null, ...rest }: ZoneConfiguration) {
+  public constructor ({ regions = null, conformity = null, ...rest }: ZoneConfiguration) {
     super(rest)
     this._regions = regions ? identify(regions) : {}
+    this.conformity = conformity
   }
 
   public get regions (): Region[] {
@@ -83,6 +89,7 @@ export default class Zone extends SelectableItem {
     return {
       ...super.toJSON(),
       regions: this.regions.length > 0 ? this.regions.map((region): RegionSerialization => region.toJSON()) : null,
+      conformity: this.conformity,
     }
   }
 }

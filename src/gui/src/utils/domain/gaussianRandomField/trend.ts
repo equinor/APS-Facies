@@ -153,6 +153,28 @@ export default class Trend {
     this.relativeStdDev = new FmuUpdatableValue(relativeStdDev, !!relativeStdDevUpdatable)
   }
 
+  public get isFmuUpdatable (): boolean {
+    return (
+      this.relativeStdDev.updatable
+      || (this.type !== 'RMS_PARAM' && (
+        this.angle.azimuth.updatable
+        || this.angle.stacking.updatable
+        || (this.type !== 'LINEAR' && (
+          this.curvature.updatable
+          || this.origin.x.updatable
+          || this.origin.y.updatable
+          || (['ELLIPTIC', 'HYPERBOLIC'].includes(this.type) && (
+            this.origin.z.updatable
+          ))
+          || (['ELLIPTIC_CONE', 'HYPERBOLIC'].includes(this.type) && (
+            this.angle.migration.updatable
+            || this.relativeSize.updatable
+          ))
+        ))
+      ))
+    )
+  }
+
   public toJSON (): TrendSerialization {
     return {
       use: this.use,

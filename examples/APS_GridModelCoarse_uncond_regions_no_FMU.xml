@@ -80,6 +80,7 @@
   <ZoneModels>
     <!--  Zone 1 Region 1-->
     <Zone number="1" regionNumber="1">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 10.0  </SimBoxThickness>
       <FaciesProbForModel>
@@ -151,6 +152,7 @@
 
     <!--  Zone 1 Region 2 -->
     <Zone number="1" regionNumber="2">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness>4.0 </SimBoxThickness>
       <FaciesProbForModel>
@@ -222,6 +224,7 @@
 
     <!--  Zone 4  Region 2 -->
     <Zone number="4" regionNumber="2">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb> 1 </UseConstProb>
       <SimBoxThickness> 10.35 </SimBoxThickness>
       <FaciesProbForModel>

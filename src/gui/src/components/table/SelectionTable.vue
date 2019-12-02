@@ -27,6 +27,14 @@
       >
         {{ item.code }}
       </td>
+      <td
+        v-if="showConformity"
+        class="text-start"
+      >
+        <conform-selection
+          :value="item"
+        />
+      </td>
       <td>
         <v-row
           justify="center"
@@ -57,6 +65,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 import IconButton from '@/components/selection/IconButton.vue'
+import ConformSelection from '@/components/selection/dropdown/ConformSelection.vue'
 
 import SelectableItem from '@/utils/domain/bases/selectableItem'
 
@@ -64,6 +73,7 @@ import { getId } from '@/utils'
 
 @Component({
   components: {
+    ConformSelection,
     BaseSelectionTable,
     IconButton,
     HighlightCurrentItem,
@@ -117,6 +127,13 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
         }]
         : []
       ),
+      ...(this.showConformity
+        ? [{
+          text: 'Conformity',
+          value: 'conformity',
+        }]
+        : []
+      ),
       {
         text: 'Copy/Paste',
       },
@@ -140,6 +157,8 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
   get source () {
     return this.$store.state.copyPaste.source
   }
+
+  get showConformity (): boolean { return this.$store.getters.fmuMode && this.itemType === 'zone' }
 
   getItem (item: T) { return this.items.find(({ id }) => id === item.id) }
 

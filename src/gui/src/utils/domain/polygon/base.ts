@@ -52,6 +52,10 @@ export default abstract class Polygon extends BaseItem implements Ordered {
     }
   }
 
+  public get isFmuUpdatable (): boolean {
+    return false
+  }
+
   public toJSON (): PolygonSerialization {
     return {
       id: this.id,
