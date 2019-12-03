@@ -82,7 +82,7 @@ Tip: GridModelName in the APS model file must be one of { ${gridModels.join()} }
         .sort((a, b): number => a.order - b.order)
         .map((model): string => model.name)
     }
-  }
+  },
 }
 
 export default gridModels

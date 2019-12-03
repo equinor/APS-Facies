@@ -162,6 +162,21 @@ def fmu_xml_element(tag, value, updatable, zone_number, region_number, gf_name, 
     return obj
 
 
+def get_region_number(zone):
+    region_number = zone.get('regionNumber')
+    if region_number is not None:
+        region_number = int(region_number)
+        if region_number < 0:
+            raise ValueError(
+                'Region number must be positive integer if region is used.\n'
+                'Zero as region number means that regions is not used for the zone.\n'
+                'Can not have negative region number: {}'.format(region_number)
+            )
+    else:
+        region_number = 0
+    return region_number
+
+
 def _coerce_none_to_integers(func):
     @wraps(func)
     def wrapper(*args):

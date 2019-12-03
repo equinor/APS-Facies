@@ -74,8 +74,8 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
     # Use the tagged model file and update this file with new values and write it out again,
     # now with updated values for the tagged parameters
     eTree = apsModel.updateXMLModelFile(
-        modelFileName=output_aps_model_file,
-        parameterFileName=None,
+        model_file_name=output_aps_model_file,
+        parameter_file_name=None,
         project=project,
         workflow_name=workflow_name,
         uncertainty_variable_names=uncertainty_variable_names,

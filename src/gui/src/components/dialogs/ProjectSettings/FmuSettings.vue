@@ -86,7 +86,7 @@ type FieldUsage = 'generate' | 'import'
     SettingsPanel,
     NumericField,
     BoldButton,
-  }
+  },
 })
 export default class FmuSettings extends Vue {
   invalid: Invalid = {

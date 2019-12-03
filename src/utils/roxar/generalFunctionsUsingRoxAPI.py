@@ -308,17 +308,17 @@ def setContinuous3DParameterValuesInZoneRegion(
     end = (nx, ny, end_layer)
     zone_cell_numbers = indexer.get_cell_numbers_in_range(start, end)
 
-    nLayers = end_layer - start_layer
+    num_layers = end_layer - start_layer
     # All input data vectors are from the same zone and has the same size
-    inputArrayShape = inputValuesForZoneList[0].shape
-    if nx != inputArrayShape[0] or ny != inputArrayShape[1] or nLayers != inputArrayShape[2]:
-        raise IOError('Input array with values has different dimensions than the grid model:\n'
-                      'Grid model nx: {}  Input array nx: {}\n'
-                      'Grid model ny: {}  Input array ny: {}\n'
-                      'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-                      ''.format(nx, inputArrayShape[0], ny, inputArrayShape[1],
-                                zoneNumber, nLayers, inputArrayShape[2])
-                      )
+    nx_in, ny_in, nz_in = inputValuesForZoneList[0].shape
+    if nx != nx_in or ny != ny_in or num_layers > nz_in:
+        raise IOError(
+            'Input array with values has different dimensions than the grid model:\n'
+            'Grid model nx: {}  Input array nx: {}\n'
+            'Grid model ny: {}  Input array ny: {}\n'
+            'Grid model nLayers for zone {} is: {}    Input array nz: {}'
+            ''.format(nx, nx_in, ny, ny_in, zoneNumber, num_layers, nz_in)
+        )
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)

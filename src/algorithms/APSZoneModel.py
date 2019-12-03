@@ -5,16 +5,22 @@ from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
-from collections import OrderedDict
+
 from src.algorithms.APSFaciesProb import APSFaciesProb
 from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.Memoization import MemoizationItem, RoundOffConstant
 from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
 from src.utils.constants.simple import Debug
-from src.utils.xmlUtils import getFloatCommand, getIntCommand, getKeyword, getTextCommand, getBoolCommand
-from src.algorithms.Memoization import MemoizationItem, RoundOffConstant
+from src.utils.xmlUtils import (
+    getFloatCommand,
+    getIntCommand,
+    getKeyword,
+    getBoolCommand,
+    get_region_number,
+)
 
 
 class APSZoneModel:
@@ -165,30 +171,20 @@ class APSZoneModel:
 
         mainFaciesTable = APSMainFaciesTable(ET_Tree, modelFileName)
 
-        zoneModels = getKeyword(root, 'ZoneModels', 'Root', modelFile=modelFileName)
-        for zone in zoneModels.findall('Zone'):
-            zoneNumber = int(zone.get('number'))
-            if zoneNumber <= 0:
+        zone_models = getKeyword(root, 'ZoneModels', 'Root', modelFile=modelFileName)
+        for zone in zone_models.findall('Zone'):
+            zone_number = int(zone.get('number'))
+            if zone_number <= 0:
                 raise ValueError('Zone number must be a positive integer number')
 
-            regionNumberAsText = zone.get('regionNumber')
-            if regionNumberAsText is not None:
-                regionNumber = int(regionNumberAsText)
-                if regionNumber < 0:
-                    raise ValueError(
-                        'Region number must be positive integer if region is used.\n'
-                        'Zero as region number means that regions is not used for the zone.\n'
-                        'Can not have negative region number: {}'.format(regionNumber)
-                    )
-            else:
-                regionNumber = 0
+            region_number = get_region_number(zone)
             if self.__debug_level == Debug.VERY_VERBOSE:
-                    print('Debug output: Zone number: {}  Region number: {}'.format(zoneNumber, regionNumber))
+                print('Debug output: Zone number: {}  Region number: {}'.format(zone_number, region_number))
             else:
                 if self.__debug_level == Debug.VERY_VERBOSE:
-                    print('Debug output: Zone number: {}'.format(str(zoneNumber)))
+                    print('Debug output: Zone number: {}'.format(str(zone_number)))
 
-            if zoneNumber == self.zone_number and regionNumber == self.__regionNumber:
+            if zone_number == self.zone_number and region_number == self.__regionNumber:
 
                 useConstProb = getBoolCommand(zone, 'UseConstProb', 'Zone', model_file_name=modelFileName)
                 self.__useConstProb = useConstProb
@@ -198,8 +194,8 @@ class APSZoneModel:
                 self.__simBoxThickness = simBoxThickness
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zoneNumber))
-                    print('Debug output: From APSZoneModel: RegionNumber:    ' + str(regionNumber))
+                    print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zone_number))
+                    print('Debug output: From APSZoneModel: RegionNumber:    ' + str(region_number))
                     print('Debug output: From APSZoneModel: useConstProb:    ' + str(self.__useConstProb))
                     print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
 
@@ -282,6 +278,10 @@ class APSZoneModel:
         return self.__faciesProbObject.hasFacies(fName)
 
     @property
+    def uses_region(self):
+        return self.region_number > 0
+
+    @property
     def zone_number(self):
         return self.__zoneNumber
 
@@ -297,7 +297,7 @@ class APSZoneModel:
     def key_resolution(self):
         return self.__keyResolution
 
-    def useConstProb(self) -> bool:
+    def useConstProb(self):
         return self.__useConstProb
 
     def getFaciesInZoneModel(self):
@@ -305,7 +305,9 @@ class APSZoneModel:
 
     @property
     def used_gaussian_field_names(self):
-        return self.__gaussModelObject.used_gaussian_field_names
+        if self.__gaussModelObject:
+            return self.__gaussModelObject.used_gaussian_field_names
+        return []
 
     def getVariogramType(self, gaussFieldName):
         return copy.copy(self.__gaussModelObject.getVariogramType(gaussFieldName))
@@ -355,13 +357,19 @@ class APSZoneModel:
 
     @property
     def gaussian_fields(self):
-        return self.__gaussModelObject.fields
+        if self.__gaussModelObject:
+            return self.__gaussModelObject.fields
+        return []
 
     @truncation_rule.setter
     def truncation_rule(self, value):
         if value is None:
             warn('The truncation rule cannot be None for a zone model')
         self.__trunc_rule = value
+
+    @property
+    def sim_box_thickness(self):
+        return self.__simBoxThickness
 
     def getTrendModel(self, gfName):
         return self.__gaussModelObject.getTrendModel(gfName)
@@ -395,6 +403,10 @@ class APSZoneModel:
 
     def getConstProbValue(self, fName):
         return self.__faciesProbObject.getConstProbValue(fName)
+
+    @property
+    def gaussian_fields_in_truncation_rule(self):
+        return self.truncation_rule.getGaussFieldsInTruncationRule()
 
     def getGaussFieldsInTruncationRule(self):
         return self.truncation_rule.getGaussFieldsInTruncationRule()
@@ -645,7 +657,8 @@ class APSZoneModel:
 
         useConstTruncParam = self.truncation_rule.useConstTruncModelParam()
         if not useConstTruncParam:
-            raise IOError('Cannot use optimization if the truncation parameters  (angles) are not constant in non-cubic rule')
+            raise IOError(
+                'Cannot use optimization if the truncation parameters  (angles) are not constant in non-cubic rule')
 
         nGaussFields = len(alpha_fields)
 
@@ -681,9 +694,9 @@ class APSZoneModel:
             for gfName, alphaDataArray in alpha_fields.items():
                 if alphaDataArray is None:
                     # This gauss field is not used for this zone, but numpy vector operations require that the vector exists
-                    alpha_coord_vectors[:,gaussFieldIndx] = -1
+                    alpha_coord_vectors[:, gaussFieldIndx] = -1
                 else:
-                    alpha_coord_vectors[:,gaussFieldIndx] = alphaDataArray[cellIndexDefined]
+                    alpha_coord_vectors[:, gaussFieldIndx] = alphaDataArray[cellIndexDefined]
                 gaussFieldIndx += 1
 
             fCode_vector, fIndx_vector = self.truncation_rule.defineFaciesByTruncRule_vectorized(alpha_coord_vectors)
@@ -703,7 +716,7 @@ class APSZoneModel:
             # varying truncation parameter from cell to cell
             if debug_level >= Debug.VERBOSE:
                 print('--- Using spatially varying probabilities for facies.')
-            faciesProb = np.zeros((nDefinedCells,nFacies), dtype=np.float32)
+            faciesProb = np.zeros((nDefinedCells, nFacies), dtype=np.float32)
 
             for f in range(nFacies):
                 faciesProb[:, f] = probDefined[f]
@@ -714,9 +727,9 @@ class APSZoneModel:
             for gfName, alphaDataArray in alpha_fields.items():
                 if alphaDataArray is None:
                     # This gauss field is not used for this zone, but numpy vector operations require that the vector exists
-                    alpha_coord_vectors[:,gaussFieldIndx] = -1
+                    alpha_coord_vectors[:, gaussFieldIndx] = -1
                 else:
-                    alpha_coord_vectors[:,gaussFieldIndx] = alphaDataArray[cellIndexDefined]
+                    alpha_coord_vectors[:, gaussFieldIndx] = alphaDataArray[cellIndexDefined]
                 gaussFieldIndx += 1
 
             # Calculate how many different truncation maps are necessary and add a set of grid cell indices to each item
@@ -739,8 +752,9 @@ class APSZoneModel:
                     cell_indices_trunc_rule = item.get_cell_indices()
                     if len(cell_indices_trunc_rule) > 1:
                         # More than one cell having the same truncation cube
-                        alpha_coord_selected = alpha_coord_vectors[cell_indices_trunc_rule,:]
-                        faciesCode_vector, fIndx_vector = self.truncation_rule.defineFaciesByTruncRule_vectorized(alpha_coord_selected)
+                        alpha_coord_selected = alpha_coord_vectors[cell_indices_trunc_rule, :]
+                        faciesCode_vector, fIndx_vector = self.truncation_rule.defineFaciesByTruncRule_vectorized(
+                            alpha_coord_selected)
 
                         # Facies codes for the selected cells are updated om faciesReal
                         faciesReal[cellIndexDefined[cell_indices_trunc_rule]] = faciesCode_vector
@@ -757,7 +771,7 @@ class APSZoneModel:
                         count_single_cell_truncation_cubes += 1
                         nCells += 1
                         index = cell_indices_trunc_rule[0]
-                        alpha_coord = alpha_coord_vectors[index,:]
+                        alpha_coord = alpha_coord_vectors[index, :]
                         faciesCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alpha_coord)
                         faciesReal[cellIndexDefined[index]] = faciesCode
                         volFrac[fIndx] += 1
@@ -776,9 +790,10 @@ class APSZoneModel:
                                 print('--- Calculate facies for cell number: {}'.format(nCells))
 
                 if debug_level >= Debug.VERBOSE:
-                    print('--- Number of cells where the truncation map is not shared with other cells is {} out of a total of {} cells.'
-                          ''.format(count_single_cell_truncation_cubes, nDefinedCells)
-                          )
+                    print(
+                        '--- Number of cells where the truncation map is not shared with other cells is {} out of a total of {} cells.'
+                        ''.format(count_single_cell_truncation_cubes, nDefinedCells)
+                    )
                     print('--- Number of different truncation cubes is {} out of a total of {} cells.'
                           ''.format(count_unique_truncation_cubes, nDefinedCells)
                           )
@@ -799,7 +814,7 @@ class APSZoneModel:
                     for i in range(len(cell_indices_trunc_rule)):
                         nCells += 1
                         index = cell_indices_trunc_rule[i]
-                        alpha_coord = alpha_coord_vectors[index,:]
+                        alpha_coord = alpha_coord_vectors[index, :]
                         faciesCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alpha_coord)
                         faciesReal[cellIndexDefined[index]] = faciesCode
                         volFrac[fIndx] += 1
@@ -821,11 +836,12 @@ class APSZoneModel:
 
             if debug_level >= Debug.VERY_VERBOSE:
                 truncRuleName = self.truncation_rule.getClassName()
-                if  truncRuleName == 'Trunc2D_Angle':
+                if truncRuleName == 'Trunc2D_Angle':
                     nCount = self.truncation_rule.getNCountShiftAlpha()
-                    print('Debug output: In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
-                          '    are done {} number of times for numerical reasons.'
-                          ''.format(truncRuleName, nCount))
+                    print(
+                        'Debug output: In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
+                        '    are done {} number of times for numerical reasons.'
+                        ''.format(truncRuleName, nCount))
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -878,7 +894,7 @@ class APSZoneModel:
             # The value used when memoization is not used
             resolution = 100
 
-        dValue = 1.0/resolution
+        dValue = 1.0 / resolution
         # num_defined_cells = len(cell_index_defined)
         # for i in range(num_defined_cells):
         #    for j in range(num_facies):
@@ -917,7 +933,7 @@ class APSZoneModel:
             key = (tuple(probabilities[i, :]))
             if key not in memo:
                 # Create new item to keep truncation map/cube
-                memo[key]= MemoizationItem(cell_index=i)
+                memo[key] = MemoizationItem(cell_index=i)
             else:
                 # Existing item. Add the cell_index to this item.
                 memo[key].add_cell_index(i)

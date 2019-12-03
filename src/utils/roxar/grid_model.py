@@ -530,7 +530,7 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
     for zone_index in zone_indices:
         zone_name = grid.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
-        code_names[zone_index+1] = zone_name
+        code_names[zone_index + 1] = zone_name
         for lr in layer_ranges:
             # Get all the cell numbers for the layer range
             if debug_level >= Debug.VERBOSE:

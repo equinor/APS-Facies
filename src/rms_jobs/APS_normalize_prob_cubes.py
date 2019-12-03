@@ -206,9 +206,15 @@ def run(
         **kwargs
 ):
     real_number = project.current_realisation
-    print('Run: APS_normalize_prob_cubes  on realisation ' + str(real_number + 1))
+    print('Run: APS_normalize_prob_cubes on realisation ' + str(real_number + 1))
     model_file = get_specification_file(**kwargs)
-    check_and_normalize_probabilities_for_APS(project, model_file, tolerance_of_probability_normalisation, eps, overwrite)
+    check_and_normalize_probabilities_for_APS(
+        project,
+        model_file,
+        tolerance_of_probability_normalisation,
+        eps,
+        overwrite,
+    )
     print('Finished APS_normalize_prob_cubes')
 
 

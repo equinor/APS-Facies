@@ -86,8 +86,9 @@ def add_trends(
     gf_all_values, gf_all_alpha, gf_all_trend_values = initialize_rms_parameters(
         project, aps_model, write_rms_parameters_for_qc_purpose
     )
-    cell_index_defined = get_defined_cells(project, aps_model, debug_level, grid_model,
-                                           region_number, zone_number)
+    cell_index_defined = get_defined_cells(
+        project, aps_model, grid_model, region_number, zone_number, debug_level,
+    )
 
     for gf_name in gf_names_for_zone:
         if gf_name in gf_names_for_truncation_rule:
@@ -112,10 +113,10 @@ def add_trends(
 def get_defined_cells(
         project,
         aps_model,
-        debug_level,
         grid_model,
         region_number,
         zone_number,
+        debug_level=Debug.OFF,
 ):
     realization_number = project.current_realisation
     zone_param = create_zone_parameter(

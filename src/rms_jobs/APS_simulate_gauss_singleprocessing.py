@@ -40,7 +40,7 @@ def run_simulations(
     # before calling the current script.
 
     # Get grid dimensions
-    grid_model = project.grid_models[aps_model.getGridModelName()]
+    grid_model = project.grid_models[aps_model.grid_model_name]
     grid = grid_model.get_grid()
     [
         _, _, _, _, _, _, sim_box_x_length, sim_box_y_length, azimuth_angle_grid,
@@ -64,8 +64,8 @@ def run_simulations(
         zone_number, region_number = key
         if not aps_model.isSelected(zone_number, region_number):
             continue
-        gauss_field_names = zone_model.getGaussFieldsInTruncationRule()
-        sim_box_thickness = zone_model.getSimBoxThickness()
+        gauss_field_names = zone_model.gaussian_fields_in_truncation_rule
+        sim_box_thickness = zone_model.sim_box_thickness
 
         # Zone index is counted from 0 while zone number from 1
         start = start_layer_per_zone[zone_number - 1]
@@ -151,7 +151,6 @@ def run_simulations(
                       ''.format(gauss_field_name, zone_number, region_number))
                 print('')
 
-        # End loop over gauss fields for one zone
         setContinuous3DParameterValuesInZoneRegion(
             grid_model,
             gauss_field_names,
@@ -169,6 +168,7 @@ def run_simulations(
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
         )
+        # End loop over gauss fields for one zone
 
     # End loop over all active zones in the model
 
@@ -192,6 +192,7 @@ def run(roxar=None, project=None, **kwargs):
     write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose', True)
     real_number = project.current_realisation
     is_shared = False
+
     run_simulations(
         project,
         model_file,

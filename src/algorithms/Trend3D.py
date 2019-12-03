@@ -82,6 +82,7 @@ class Trend3D:
         self.stacking_direction = direction
 
         self._debug_level = debug_level
+        self._sim_box_azimuth = None
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(
@@ -293,7 +294,6 @@ class Trend3D:
         cell_center_points = grid_3d.get_cell_centers(cell_index_defined)
         cell_indices = grid_indexer.get_indices(cell_index_defined)
 
-        zone_name = grid_3d.zone_names[zone_number - 1]
         zonation = grid_indexer.zonation
         layer_ranges = zonation[zone_number - 1]
         n = 0
@@ -314,6 +314,7 @@ class Trend3D:
         self._end_layer = end_layer
         zinc = sim_box_thickness / num_layers_in_zone
         if self._debug_level >= Debug.VERY_VERBOSE:
+            zone_name = grid_3d.zone_names[zone_number - 1]
             print(
                 'Debug output:  In {}\n'
                 'Debug output:  Zone name: {}\n'

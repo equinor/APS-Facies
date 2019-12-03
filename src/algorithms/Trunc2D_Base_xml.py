@@ -1427,6 +1427,10 @@ Background facies:
                 sum_prob += delta
         return facies_prob
 
+    @property
+    def gaussian_fields_in_truncation_rule(self):
+        return self.getGaussFieldsInTruncationRule()
+
     def getGaussFieldsInTruncationRule(self):
         # Return list of the gauss field names actually used in the truncation rule
         gfUsed = []

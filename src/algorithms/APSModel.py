@@ -10,7 +10,7 @@ from src.algorithms.properties import CrossSection
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
-from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify
+from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
 
 
 class APSModel:
@@ -29,7 +29,7 @@ class APSModel:
             previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF):
 
 
-      def updateXMLModelFile(self, modelFileName, parameterFileName, debug_level=Debug.OFF)
+      def updateXMLModelFile(self, modelFileName, parameter_file_name, debug_level=Debug.OFF)
                 - Read xml model file and IPL parameter file and write
                   updated xml model file without putting any data into the data structure.
 
@@ -368,22 +368,13 @@ class APSModel:
                     'Error: Missing keyword Zone in keyword ZoneModels'
                     ''.format(modelFileName)
                 )
-            region_number = 0
             zone_number = int(zone.get('number'))
             if zone_number <= 0:
                 raise ValueError(
-                    'Zone number must be positive integer. '
+                    'Zone number must be a positive integer. '
                     'Can not have zone number: {}'.format(zone_number)
                 )
-            regionNumberAsText = zone.get('regionNumber')
-            if regionNumberAsText is not None:
-                region_number = int(regionNumberAsText)
-            if region_number < 0:
-                raise ValueError(
-                    'Region number must be positive integer if region is used.\n'
-                    'Zero as region number means that regions is not used for the zone.\n'
-                    'Can not have negative region number: {}'.format(region_number)
-                )
+            region_number = get_region_number(zone)
 
             # The model is identified by the combination (zoneNumber, regionNumber)
             zoneModelKey = (zone_number, region_number)
@@ -491,8 +482,8 @@ class APSModel:
 
     def updateXMLModelFile(
             self,
-            modelFileName=None,
-            parameterFileName=None,
+            model_file_name=None,
+            parameter_file_name=None,
             project=None,
             workflow_name=None,
             uncertainty_variable_names=None,
@@ -500,7 +491,7 @@ class APSModel:
             debug_level=Debug.OFF,
     ):
         # Read XML model file
-        tree = ET.parse(modelFileName)
+        tree = ET.parse(model_file_name)
         root = tree.getroot()
 
         # Scan XML model file for variables that can be updated by FMU/ERT
@@ -511,36 +502,34 @@ class APSModel:
             print('')
             print('-- Model parameters marked as possible to update when running in batch mode')
             print('Keyword:                        Tag:                Value:')
-        keywordsDefinedForUpdating = []
+        keywords_defined_for_updating = []
         for obj in root.findall(".//*[@kw]"):
-            keyWord = obj.get('kw')
+            key_word = obj.get('kw')
             tag = obj.tag
             value = obj.text
-            keywordsDefinedForUpdating.append([keyWord.strip(), value.strip()])
+            keywords_defined_for_updating.append([key_word.strip(), value.strip()])
             if debug_level > Debug.SOMEWHAT_VERBOSE:
-                print('{0:30} {1:20}  {2:10}'.format(keyWord, tag, value))
+                print('{0:30} {1:20}  {2:10}'.format(key_word, tag, value))
 
-        # Read keywords from parameterFileName (Global IPL include file with variables updated by FMU/ERT)
-        if parameterFileName is not None:
-            keywordsRead = self.__readParamFromFile(parameterFileName, debug_level)
+        # Read keywords from parameter_file_name (Global IPL include file with variables updated by FMU/ERT)
+        if parameter_file_name is not None:
+            keywords_read = self.__readParamFromFile(parameter_file_name, debug_level)
         else:
             assert project
             assert workflow_name
             assert uncertainty_variable_names
-            keywordsRead = self.__getParamFromRMSTable(
+            keywords_read = self.__getParamFromRMSTable(
                 project, workflow_name, uncertainty_variable_names, realisation_number,
             )
         # keywordsRead = [name,value]
 
         # Set new values
-        for i in range(len(keywordsDefinedForUpdating)):
-            item = keywordsDefinedForUpdating[i]
+        for i in range(len(keywords_defined_for_updating)):
+            item = keywords_defined_for_updating[i]
             keyword = item[0]
-            oldValue = item[1]
-            for j in range(len(keywordsRead)):
-                itemRead = keywordsRead[j]
-                kw = itemRead[0]
-                value = itemRead[1]
+            old_value = item[1]
+            for j in range(len(keywords_read)):
+                kw, value = keywords_read[j]
                 if kw == keyword:
                     # set new value
                     item[1] = ' ' + value.strip() + ' '
@@ -548,23 +537,22 @@ class APSModel:
             print('Debug output:  Keywords and values that is updated in xml tree:')
 
         for obj in root.findall(".//*[@kw]"):
-            keyWord = obj.get('kw')
-            tag = obj.tag
-            oldValue = obj.text
+            key_word = obj.get('kw')
+            old_value = obj.text
 
             found = False
-            for i in range(len(keywordsDefinedForUpdating)):
-                item = keywordsDefinedForUpdating[i]
+            for i in range(len(keywords_defined_for_updating)):
+                item = keywords_defined_for_updating[i]
                 kw = item[0]
                 val = item[1]
-                if kw == keyWord:
+                if kw == key_word:
                     # Update value in XML tree for this keyword
                     obj.text = val
                     found = True
                     break
             if found:
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print('{0:30} {1:20}  {2:10}'.format(keyWord, oldValue, obj.text))
+                    print('{0:30} {1:20}  {2:10}'.format(key_word, old_value, obj.text))
             else:
                 raise ValueError(
                     'Error: Inconsistency. Programming error in function updateXMLModelFile in class APSModel'
@@ -818,6 +806,10 @@ class APSModel:
 
     def getPreviewRegionNumber(self):
         return self.__previewRegion
+
+    @property
+    def gaussian_field_names(self):
+        return self.getAllGaussFieldNamesUsed()
 
     def getAllGaussFieldNamesUsed(self):
         gfAllZones = []
