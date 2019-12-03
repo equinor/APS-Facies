@@ -9,6 +9,7 @@ import { TruncationRuleTemplateState } from '@/store/modules/truncationRules/typ
 import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { Color } from '@/utils/domain/facies/helpers/colors'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
+import { Optional } from '@/utils/typing'
 import { Commit, Dispatch } from 'vuex'
 
 import { GridModelsState } from '@/store/modules/gridModels/types'
@@ -168,6 +169,7 @@ interface RootGetters {
   'zone': Zone
 
   simulationSettings: (field?: GaussianRandomField) => SimulationSettings
+  'zones/byCode': (zoneNumber: number, regionNumber?: Optional<number>) => Parent
 }
 
 export {
