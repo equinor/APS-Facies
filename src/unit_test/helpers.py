@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from genericpath import exists
 
-import difflib
-from filecmp import cmp
 from PIL import ImageChops, Image
 
 import numpy as np
 import os
 
+from src.utils.checks import compare
 from src.utils.constants.simple import Debug
 from src.utils.io import writeFile, readFile
 
@@ -123,28 +122,6 @@ def apply_truncations_vectorized(
         raise ValueError('Error: Files are different')
     elif debug_level >= Debug.ON:
         print('Files are equal: OK')
-
-
-def compare(source, reference, verbose=True):
-    prefix = ''
-    if not exists(reference):
-        prefix = 'src/unit_test/'
-        if not exists(prefix + reference):
-            prefix = prefix + 'integration/'
-    check = cmp(prefix + reference, source)
-
-    if verbose:
-        if check:
-            print('Files are equal. OK')
-        else:
-            with open(source) as f, open(reference) as ref:
-                diff = difflib.Differ().compare(
-                    f.readlines(),
-                    ref.readlines(),
-                )
-            print('Files are different. NOT OK')
-            print(''.join(diff))
-    return check
 
 
 def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):

@@ -14,7 +14,8 @@ from src.unit_test.constants import (
     FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
     REGION_PARAM_NAME, NO_VERBOSE_DEBUG, VERY_VERBOSE_DEBUG, SEED_FILE_NAME,
 )
-from src.unit_test.helpers import compare, get_model_file_path
+from src.unit_test.helpers import get_model_file_path
+from src.utils.checks import compare
 from src.utils.constants.simple import Debug, OriginType, TrendType, VariogramType
 import pytest
 

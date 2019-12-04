@@ -24,3 +24,10 @@ def check_probability_normalisation(
         tolerance_of_probability_normalisation,
         max_allowed_fraction_of_values_outside_tolerance: float      = 0.1,
 ): ...
+
+
+def compare(
+        source: str,
+        reference: str,
+        verbose: bool = True,
+) -> bool: ...

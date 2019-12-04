@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.unit_test.helpers import compare
+from src.utils.checks import compare
 from src.utils.io import write_status_file
 
 
