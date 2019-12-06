@@ -144,7 +144,7 @@
         <br>
         <SettingsPanel
           v-if="!!$store.getters.gridModel"
-          title="Grid model"
+          title="Preview settings"
         >
           <v-container
             v-if="!$store.getters['parameters/grid/waiting']"
