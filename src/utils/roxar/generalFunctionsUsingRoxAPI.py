@@ -1,6 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import sys
+from pathlib import Path
+
 import numpy as np
 from warnings import warn
 
@@ -30,7 +32,16 @@ def get_grid_dimension(project, name):
     return grid.grid_indexer.dimensions
 
 
-def get_project_realization_seed(project):
+def get_project_realization_seed(project=None):
+    external_seed = Path('./RMS_SEED_USED')
+    if external_seed.exists():
+        # For use in ERT, when the project seed is not set
+        with open(external_seed) as f:
+            content = ''.join(f.readlines()).strip()
+        seed = int(content.split()[-1])
+        return seed
+    if project is None:
+        raise TypeError("'project' is required when {} does not exist".format(external_seed))
     return project.seed + project.current_realisation + 1
 
 
