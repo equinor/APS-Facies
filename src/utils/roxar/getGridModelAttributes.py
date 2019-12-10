@@ -7,7 +7,7 @@ This script will read grid dimensions of the grid for the specified grid model i
 
 from xml.etree.ElementTree import Element
 
-from src.utils.roxar.grid_model import getGridAttributes
+from src.utils.roxar.grid_model import GridAttributes
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.methods import get_run_parameters
@@ -33,12 +33,11 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     grid = gridModel.get_grid()
 
     # Get Grid attributes
-    [_, _, _, _, _, _, simBoxXLength, simBoxYLength,
-     azimuthAngle, x0, y0, nx, ny, _, _,
-     zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone] = getGridAttributes(grid, debug_level)
+    grid_attributes = GridAttributes(grid)
 
-    xinc = simBoxXLength/nx
-    yinc = simBoxYLength/ny
+    nx, ny, nz = grid_attributes.dimensions
+    xinc = grid_attributes.sim_box_size.x_length / nx
+    yinc = grid_attributes.sim_box_size.y_length / ny
 
     # Create xml tree with output
     topElement = Element('RMS_grid_model_data')
@@ -46,25 +45,25 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     gmElement = Element('GridModel', attribute)
     topElement.append(gmElement)
 
-    for i in range(len(zoneNames)):
+    for i in range(len(grid_attributes.zone_names)):
         tag = 'ZoneName'
         attribute = {
             'number': str(i + 1),
-            'nLayers': str(nLayersPerZone[i]),
-            'start': str(startLayerPerZone[i]),
-            'end': str(endLayerPerZone[i])
+            'nLayers': str(grid_attributes.num_layers_per_zone[i]),
+            'start': str(grid_attributes.start_layers_per_zone[i]),
+            'end': str(grid_attributes.end_layers_per_zone[i] - 1)
         }
-        name = zoneNames[i]
+        name = grid_attributes.zone_names[i]
         zNameObj = Element(tag, attribute)
         zNameObj.text = ' ' + name.strip() + ' '
         gmElement.append(zNameObj)
 
     tags = [
-        ('XSize', simBoxXLength),
-        ('YSize', simBoxYLength),
-        ('AzimuthAngle', azimuthAngle),
-        ('OrigoX', x0),
-        ('OrigoY', y0),
+        ('XSize', grid_attributes.sim_box_size.x_length),
+        ('YSize', grid_attributes.sim_box_size.y_length),
+        ('AzimuthAngle', grid_attributes.sim_box_size.azimuth_angle),
+        ('OrigoX', grid_attributes.sim_box_size.x0),
+        ('OrigoY', grid_attributes.sim_box_size.y0),
         ('NX', nx),
         ('NY', ny),
         ('Xinc', xinc),

@@ -277,7 +277,7 @@ class Trend3D:
         """
         Description: Create trend values for 3D grid zone using Roxar API.
         """
-        from src.utils.roxar.grid_model import getGridSimBoxSize
+        from src.utils.roxar.grid_model import GridSimBoxSize
         # Check if specified grid model exists and is not empty
         if grid_model.is_empty():
             raise ValueError('Error: Specified grid model: ' + grid_model.name + ' is empty.')
@@ -285,11 +285,18 @@ class Trend3D:
         grid_indexer = grid_3d.simbox_indexer
         (nx, ny, nz) = grid_indexer.dimensions
 
-        sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid_3d, self._debug_level)
-        self._sim_box_azimuth = azimuth_angle
+        sim_box_attributes = GridSimBoxSize(grid_3d, self._debug_level)
+        self._sim_box_azimuth = sim_box_attributes.azimuth_angle
 
         # Define self._x_center, self._y_center for the trend
-        self._setTrendCenter(x0, y0, azimuth_angle, sim_box_x_length, sim_box_y_length, sim_box_thickness)
+        self._setTrendCenter(
+            sim_box_attributes.x0,
+            sim_box_attributes.y0,
+            sim_box_attributes.azimuth_angle,
+            sim_box_attributes.x_length,
+            sim_box_attributes.y_length,
+            sim_box_thickness,
+        )
 
         cell_center_points = grid_3d.get_cell_centers(cell_index_defined)
         cell_indices = grid_indexer.get_indices(cell_index_defined)
@@ -305,7 +312,7 @@ class Trend3D:
             if end_layer < layer[-1]:
                 end_layer = layer[-1]
 
-            for k in layer:
+            for _ in layer:
                 n += 1
         num_layers_in_zone = n
 

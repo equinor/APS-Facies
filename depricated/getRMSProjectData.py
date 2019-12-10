@@ -44,7 +44,6 @@ Example input file to be specified before running this script.
 
 import copy
 import datetime
-import sys
 from warnings import warn
 from xml.etree.ElementTree import Element, parse
 
@@ -53,7 +52,7 @@ import numpy as np
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     get2DMapDimensions, setConstantValueInHorizon, createHorizonDataTypeObject
 )
-from src.utils.roxar.grid_model import getDiscrete3DParameterValues, getGridAttributes
+from src.utils.roxar.grid_model import getDiscrete3DParameterValues, GridAttributes
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
 from src.utils.methods import get_prefix
@@ -371,35 +370,36 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         gmElement.append(gfElement)
 
     # Get grid dimensions etc for the grid model
-    zoneNames = []
-    nLayersPerZone = []
     grid = gridModel.get_grid()
-    (
-        xmin, xmax, ymin, ymax, zmin, zmax, xLength, yLength,
-        azimuthAngle, x0, y0, nx, ny, nz, nZonesGrid, zoneNames, nLayersPerZone, startLayerPerZone, endLayerPerZone
-    ) = getGridAttributes(grid, debug_level)
-    xinc = xLength / nx
-    yinc = yLength / ny
+    grid_attributes = GridAttributes(grid, debug_level)
+    nx, ny, nz = grid_attributes.dimensions
+    xinc = grid_attributes.sim_box_size.x_length / nx
+    yinc = grid_attributes.sim_box_size.y_length / ny
 
     tag = 'NZones'
     nZonesObj = Element(tag)
-    nZonesObj.text = ' ' + str(nZonesGrid) + ' '
+    nZonesObj.text = ' ' + str(grid_attributes.num_zones) + ' '
     gmElement.append(nZonesObj)
 
-    for i in range(len(zoneNames)):
+    for i in range(len(grid_attributes.zone_names)):
         tag = 'ZoneName'
-        attribute = {'number': str(i + 1), 'nLayers': str(nLayersPerZone[i]), 'start': str(startLayerPerZone[i]), 'end': str(endLayerPerZone[i])}
-        name = zoneNames[i]
+        attribute = {
+            'number': str(i + 1),
+            'nLayers': str(grid_attributes.num_layers_per_zone[i]),
+            'start': str(grid_attributes.start_layers_per_zone[i]),
+            'end': str(grid_attributes.end_layers_per_zone[i] - 1),
+        }
+        name = grid_attributes.zone_names[i]
         zNameObj = Element(tag, attribute)
         zNameObj.text = ' ' + name.strip() + ' '
         gmElement.append(zNameObj)
 
     tags = [
-        ('XSize', xLength),
-        ('YSize', yLength),
-        ('AzimuthAngle', azimuthAngle),
-        ('OrigoX', x0),
-        ('OrigoY', y0),
+        ('XSize', grid_attributes.sim_box_size.x_length),
+        ('YSize', grid_attributes.sim_box_size.y_length),
+        ('AzimuthAngle', grid_attributes.sim_box_size.azimuth_angle),
+        ('OrigoX', grid_attributes.sim_box_size.x0),
+        ('OrigoY', grid_attributes.sim_box_size.y0),
         ('NX', nx),
         ('NY', ny),
         ('Xinc', xinc),

@@ -14,7 +14,7 @@ from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     setContinuous3DParameterValuesInZoneRegion,
     get_project_realization_seed,
 )
-from src.utils.roxar.grid_model import getGridAttributes
+from src.utils.roxar.grid_model import GridAttributes
 from src.utils.methods import get_seed_log_file
 from src.utils.trend import add_trends
 
@@ -42,17 +42,18 @@ def run_simulations(
     # Get grid dimensions
     grid_model = project.grid_models[aps_model.grid_model_name]
     grid = grid_model.get_grid()
-    [
-        _, _, _, _, _, _, sim_box_x_length, sim_box_y_length, azimuth_angle_grid,
-        _, _, nx, ny, _, _, _, num_layers_per_zone, start_layer_per_zone, end_layer_per_zone
-    ] = getGridAttributes(grid, Debug.OFF)
+    grid_attributes = GridAttributes(grid)
 
     if layers_per_zone is not None:
         num_layers_per_zone = layers_per_zone
+    else:
+        num_layers_per_zone = grid_attributes.num_layers_per_zone
+
+    nx, ny, nz = grid_attributes.sim_box_size.dimensions
 
     # Calculate grid cell size
-    dx = sim_box_x_length / nx
-    dy = sim_box_y_length / ny
+    dx = grid_attributes.sim_box_size.x_length / nx
+    dy = grid_attributes.sim_box_size.y_length / ny
 
     # Set start seed
     start_seed = get_project_realization_seed(project)
@@ -68,8 +69,8 @@ def run_simulations(
         sim_box_thickness = zone_model.sim_box_thickness
 
         # Zone index is counted from 0 while zone number from 1
-        start = start_layer_per_zone[zone_number - 1]
-        end = end_layer_per_zone[zone_number - 1]
+        start = grid_attributes.start_layers_per_zone[zone_number - 1]
+        end = grid_attributes.end_layers_per_zone[zone_number - 1]
         num_layers = num_layers_per_zone[zone_number - 1]
 
         # Calculate grid cell size in z direction
@@ -92,7 +93,7 @@ def run_simulations(
             perpendicular_range = zone_model.getPerpRange(gauss_field_name)
             vertical_range = zone_model.getVertRange(gauss_field_name)
 
-            azimuth_value_sim_box = azimuth - azimuth_angle_grid
+            azimuth_value_sim_box = azimuth - grid_attributes.sim_box_size.azimuth_angle
 
             if debug_level >= Debug.VERBOSE:
                 print(
