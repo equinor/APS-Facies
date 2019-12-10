@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { ERROR_TOLERENCE } from '@/config'
+import { ERROR_TOLERENCE, isDevelopmentBuild } from '@/config'
 
 export function isEmpty (property: any): boolean { return _.isEmpty(property) && !_.isNumber(property) }
 export function notEmpty (property: any): boolean { return !isEmpty(property) }
@@ -29,10 +29,10 @@ export function isCloseToUnity (val: number): boolean {
   return isCloseTo(val, 1)
 }
 
-export function isDevelopmentBuild () {
-  return process.env.NODE_ENV === 'develop'
-}
-
 export function getDisabledOpacity (disabled: boolean): number {
   return disabled ? 0.258823529 : 1
+}
+
+export {
+  isDevelopmentBuild,
 }

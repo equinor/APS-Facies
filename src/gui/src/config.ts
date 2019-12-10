@@ -1,4 +1,6 @@
-import { isDevelopmentBuild } from '@/utils/helpers/simple'
+export function isDevelopmentBuild (): boolean {
+  return process.env.NODE_ENV === 'develop'
+}
 
 export const DEFAULT_SIZE = {
   'max': {

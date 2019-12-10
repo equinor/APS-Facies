@@ -104,7 +104,7 @@ import ExportState from '@/components/debugging/exportState.vue'
 
 import rms from '@/api/rms'
 import { resetState } from '@/store'
-import { inDevelopmentMode } from '@/utils/helpers'
+import { isDevelopmentBuild } from '@/utils/helpers/simple'
 import { extractFmuVariables } from '@/utils/helpers/processing/export'
 
 function parse (xmlString: string): Document {
@@ -181,7 +181,7 @@ export default class TheToolBar extends Vue {
       : 'live'
   }
 
-  get isDevelop () { return inDevelopmentMode() }
+  get isDevelop () { return isDevelopmentBuild() }
 
   goToHelp () {
     rms.openWikiHelp()
