@@ -15,6 +15,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
+import rms from '@/api/rms'
+
 import IconButton from '@/components/selection/IconButton.vue'
 
 import { dumpState } from '@/utils/helpers/processing/export'
@@ -44,6 +46,7 @@ export default class ExportState extends Vue {
       this.status = 'success'
     } catch (e) {
       this.status = 'failure'
+      rms.save('./state.json', btoa(state), false)
       throw new DOMException(e)
     } finally {
       setTimeout(() => { this.status = 'may' }, 2000)
