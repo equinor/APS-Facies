@@ -95,6 +95,8 @@ class RMSData:
         return self.project.grid_models
 
     def get_grid_model(self, name):
+        if not isinstance(name, str):
+            raise ValueError('The name of a grid model must be a string')
         grid_models = self.get_grid_models()
         return grid_models[name]
 
