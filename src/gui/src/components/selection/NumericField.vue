@@ -7,7 +7,7 @@
     :class="__class"
   >
     <v-col
-      cols="10"
+      :cols="fmuUpdatable ? 10 : 12"
       :class="__class"
     >
       <v-text-field
