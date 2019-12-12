@@ -72,8 +72,23 @@ class Config:
         return self._config['fmu']['simulationGrid']['current']
 
     @property
-    def run_fmu_workflows(self):
+    def fmu_mode(self):
         return self._config['fmu']['runFmuWorkflows']['value']
+
+    @property
+    def run_fmu_workflows(self):
+        return self.fmu_mode and not self._only_run_fmu_variables_update
+
+    @property
+    def _only_run_fmu_variables_update(self):
+        return self._config['fmu']['onlyUpdateFromFmu']['value']
+
+    @property
+    def update_model_with_fmu_variables(self):
+        return (
+                self._only_run_fmu_variables_update
+                or self.fmu_mode
+        ) and self.global_variables_file
 
     @property
     def simulate_fields(self):
@@ -126,9 +141,9 @@ def run(config):
             if config.create_fmu_grid:
                 run_create_simulation_grid(**kwargs)
 
-            if config.global_variables_file:
-                run_update_fmu_variables_in_model_file(**kwargs)
             run_update_trend_location(**kwargs)
+        if config.update_model_with_fmu_variables:
+            run_update_fmu_variables_in_model_file(**kwargs)
         with fmu_aware_model_file(**kwargs):
             if config.simulate_fields:
                 run_simulation(**kwargs)

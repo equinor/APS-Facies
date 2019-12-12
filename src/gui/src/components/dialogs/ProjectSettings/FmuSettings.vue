@@ -1,12 +1,22 @@
 <template>
   <SettingsPanel title="FMU Settings">
-    <v-col class="dense">
-      <v-checkbox
-        v-model="_runFmuWorkflows"
-        label="Run APS facies update in AHM/ERT"
-      />
-    </v-col>
-    <div v-if="_runFmuWorkflows">
+    <v-row
+      no-gutters
+    >
+      <v-col class="dense">
+        <v-checkbox
+          v-model="_runFmuWorkflows"
+          label="Run APS facies update in AHM/ERT"
+        />
+      </v-col>
+      <v-col>
+        <v-checkbox
+          v-model="_onlyUpdateFromFmu"
+          label="Only run uncertainty update"
+        />
+      </v-col>
+    </v-row>
+    <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
       <v-row
         no-gutters
       >
@@ -36,7 +46,9 @@
           />
         </v-col>
       </v-row>
-      <v-row>
+      <v-row
+        v-if="!_onlyUpdateFromFmu"
+      >
         <v-col cols="6">
           <v-popover
             trigger="hover"
@@ -134,6 +146,9 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true, type: Boolean })
   readonly runFmuWorkflows: boolean
 
+  @Prop({ required: true, type: Boolean })
+  readonly onlyUpdateFromFmu: boolean
+
   @Prop({ required: true })
   readonly fmuGrid: string
 
@@ -152,6 +167,9 @@ export default class FmuSettings extends Vue {
     }
     this.$emit('update:fmuGrid', value)
   }
+
+  get _onlyUpdateFromFmu (): boolean { return this.onlyUpdateFromFmu }
+  set _onlyUpdateFromFmu (toggle: boolean) { this.$emit('update:onlyUpdateFromFmu', toggle) }
 
   get _createFmuGrid (): boolean { return this.createFmuGrid }
   set _createFmuGrid (value: boolean) { this.$emit('update:createFmuGrid', value) }

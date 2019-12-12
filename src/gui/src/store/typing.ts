@@ -145,6 +145,9 @@ interface RootGetters {
 
   'regionParameter': string
 
+  'fmuMode': boolean
+  'fmuUpdatable': boolean
+
   'facies': GlobalFacies
   'faciesTable': Facies[]
 

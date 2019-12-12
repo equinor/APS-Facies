@@ -12,6 +12,7 @@ export interface SimulationGridModelsState {
 export interface FmuState {
   maxDepth: FmuLayersState
   runFmuWorkflows: OptionState<boolean>
+  onlyUpdateFromFmu: OptionState<boolean>
   create: OptionState<boolean>
   simulationGrid: SimulationGridModelsState
 }

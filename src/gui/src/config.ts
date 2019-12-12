@@ -17,6 +17,8 @@ export const DEFAULT_IMPORT_FIELDS_IN_FMU = false
 
 export const DEFAULT_RUN_FMU_MODE = false
 
+export const DEFAULT_RUN_ONLY_FMU_UPDATE = false
+
 export const DEFAULT_CREATE_FMU_GRID = isDevelopmentBuild()
 
 export const DEFAULT_FMU_SIMULATION_GRID_NAME = 'ERTBOX'

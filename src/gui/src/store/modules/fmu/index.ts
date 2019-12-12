@@ -1,4 +1,4 @@
-import { DEFAULT_CREATE_FMU_GRID, DEFAULT_RUN_FMU_MODE } from '@/config'
+import { DEFAULT_CREATE_FMU_GRID, DEFAULT_RUN_FMU_MODE, DEFAULT_RUN_ONLY_FMU_UPDATE } from '@/config'
 import { makeOption } from '@/store/utils'
 import { Module } from 'vuex'
 
@@ -13,6 +13,7 @@ const module: Module<FmuState, RootState> = {
   modules: {
     maxDepth,
     runFmuWorkflows: makeOption(DEFAULT_RUN_FMU_MODE, [true, false]),
+    onlyUpdateFromFmu: makeOption(DEFAULT_RUN_ONLY_FMU_UPDATE, [true, false]),
     create: makeOption(DEFAULT_CREATE_FMU_GRID, [true, false]),
     simulationGrid,
   },

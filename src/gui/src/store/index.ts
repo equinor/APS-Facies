@@ -240,7 +240,8 @@ const store: Store<RootState> = new Vuex.Store({
       return Object.values(state.facies.global.available)
         .sort((a, b): number => a.code - b.code)
     },
-    fmuMode: (state): boolean => state.fmu.runFmuWorkflows.value,
+    fmuMode: (state, getters): boolean => getters.fmuUpdatable && !state.fmu.onlyUpdateFromFmu.value,
+    fmuUpdatable: (state): boolean => state.fmu.runFmuWorkflows.value || state.fmu.onlyUpdateFromFmu.value,
     // User options
     options: (state): object => {
       return Object.keys(state.options)

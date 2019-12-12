@@ -29,6 +29,7 @@
         <FmuSettings
           :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
+          :only-update-from-fmu.sync="onlyUpdateFromFmu"
           :max-layers-in-fmu.sync="maxLayersInFmu"
           :import-fields.sync="importFields"
           :fmu-grid.sync="fmuGrid"
@@ -325,6 +326,7 @@ export default class ProjectSettings extends Vue {
   importFields: boolean = false
   fmuGrid: string = ''
   createFmuGrid: boolean = false
+  onlyUpdateFromFmu: boolean = false
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -343,6 +345,7 @@ export default class ProjectSettings extends Vue {
 
       this.maxLayersInFmu = fmu.maxDepth.value
       this.runFmuWorkflows = fmu.runFmuWorkflows.value
+      this.onlyUpdateFromFmu = fmu.onlyUpdateFromFmu.value
       this.fmuGrid = fmu.simulationGrid.current
       this.createFmuGrid = fmu.create.value
 
@@ -370,6 +373,7 @@ export default class ProjectSettings extends Vue {
 
       dispatch('fmu/maxDepth/set', this.maxLayersInFmu),
       dispatch('fmu/runFmuWorkflows/set', this.runFmuWorkflows),
+      dispatch('fmu/onlyUpdateFromFmu/set', this.onlyUpdateFromFmu),
       dispatch('fmu/simulationGrid/set', this.fmuGrid),
       dispatch('fmu/create/set', this.createFmuGrid),
 
