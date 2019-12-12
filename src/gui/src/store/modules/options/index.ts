@@ -4,7 +4,7 @@ import {
   DEFAULT_FACIES_AUTOFILL,
   DEFAULT_IMPORT_FIELDS_IN_FMU,
 } from '@/config'
-import { makeOption } from '@/store/utils'
+import { makeOption, populateState } from '@/store/utils'
 
 import { Module } from 'vuex'
 import OptionsState from '@/store/modules/options/typing'
@@ -28,10 +28,8 @@ const module: Module<OptionsState, RootState> = {
   },
 
   actions: {
-    async populate ({ dispatch }, options): Promise<void> {
-      await Promise.all(Object.keys(options)
-        .map(option => dispatch(`${option}/populate`, options[`${option}`]))
-      )
+    async populate (context, options): Promise<void> {
+      await populateState(context, options)
     },
   },
 }

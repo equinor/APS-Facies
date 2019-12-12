@@ -1,5 +1,5 @@
 import { DEFAULT_CREATE_FMU_GRID, DEFAULT_RUN_FMU_MODE, DEFAULT_RUN_ONLY_FMU_UPDATE } from '@/config'
-import { makeOption } from '@/store/utils'
+import { makeOption, populateState } from '@/store/utils'
 import { Module } from 'vuex'
 
 import { RootState } from '@/store/typing'
@@ -23,11 +23,8 @@ const module: Module<FmuState, RootState> = {
       await dispatch('simulationGrid/fetch')
     },
 
-    async populate ({ dispatch, state }, options: FmuState): Promise<void> {
-      await Promise.all(
-        Object.keys(options)
-          .map(name => dispatch(`${name}/populate`, options[name]))
-      )
+    async populate (context, options: FmuState): Promise<void> {
+      await populateState(context, options)
     }
   },
 }
