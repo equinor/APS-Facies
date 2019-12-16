@@ -10,6 +10,7 @@ from src.rms_jobs.import_fields_from_disk import run as run_import_fields
 from src.rms_jobs.export_fields_to_disk import run as run_export_fields
 from src.rms_jobs.export_simbox_grid_to_disk import run as run_export_aps_grid
 from src.rms_jobs.create_simulation_grid import run as run_create_simulation_grid
+from src.utils.decorators import loggable
 from src.utils.constants.simple import Debug
 from src.utils.fmu import get_grid, get_export_location, fmu_aware_model_file
 from src.utils.io import create_temporary_model_file
@@ -128,6 +129,7 @@ class Config:
         )
 
 
+@loggable
 def run(config):
     config = Config(config)
     if config.error_message:
