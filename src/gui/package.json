@@ -86,6 +86,7 @@
     "vue-axios": "^2.1.1",
     "vue-class-component": "^7.0.1",
     "vue-cli-plugin-vuetify": "^0.6.3",
+    "vue-meta": "^2.3.1",
     "vue-property-decorator": "^8.1.0",
     "vue-template-compiler": "^2.5.16",
     "vuetify-loader": "^1.0.5",
@@ -134,7 +135,6 @@
       "<rootDir>/(tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx))"
     ],
     "collectCoverage": true,
-    "mapCoverage": true,
     "globals": {
       "ts-jest": {
         "babelConfig": false
