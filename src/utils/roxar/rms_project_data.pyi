@@ -145,6 +145,10 @@ class RMSData:
             zone_name:                   ZoneName,
             region_parameter:            RegionParameter,
     ) -> Properties: ...
+    def grid_exists(
+            self,
+            name: GridName,
+    ) -> bool: ...
     def is_region_parameter(
             self,
             param:                       Property

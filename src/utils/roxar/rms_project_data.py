@@ -108,12 +108,7 @@ class RMSData:
         models = []
         for grid_model in grid_models:
             name = grid_model.name
-            try:
-                self.get_grid(name)
-                exists = True
-            except (KeyError, ValueError):
-                exists = False
-            models.append({'name': name, 'exists': exists})
+            models.append({'name': name, 'exists': self.grid_exists(name)})
         return models
 
     def get_realization_parameters(self, grid_model_name):
@@ -179,6 +174,14 @@ class RMSData:
         grid_model = self.get_grid_model(grid_model_name)
         regions = self.get_code_names(grid_model.properties[region_parameter])
         return regions
+
+    def grid_exists(self, name):
+        exists = True
+        try:
+            self.get_grid(name)
+        except (KeyError, ValueError):
+            exists = False
+        return exists
 
     def is_region_parameter(self, param):
         # TODO: Implement properly
