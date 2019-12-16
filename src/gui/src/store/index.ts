@@ -88,6 +88,8 @@ const store: Store<RootState> = new Vuex.Store({
       }
     },
     async populate ({ dispatch, commit }, data): Promise<void> {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      resetState()
       commit('LOADING', { loading: true, message: 'Loading job. Please wait.' })
       try {
         await dispatch('fetch')
