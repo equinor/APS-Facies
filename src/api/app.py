@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from os import environ, urandom
 from flask import Flask, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 from src.utils.parsing import parse_signature
 from src.api.ui import call
@@ -39,6 +39,7 @@ cors = CORS(app)  #, origins=_get_client_url())
 
 
 @app.route('/<path:signature>', methods=['GET'])
+@cross_origin()
 def call_python(signature: str) -> str:
     method_name, args = parse_signature(signature)
     return jsonify(call(method_name, *args))
