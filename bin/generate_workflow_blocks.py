@@ -320,7 +320,7 @@ module.run(roxar, project, **kwargs)
 
 
 def get_root_path():
-    if len(argv) == 1 or argv[1] in ['--read-only',  '--copy-to-rms-project', '--use-temporary-workflow-dir']:
+    if len(argv) == 1 or argv[1] in ['--read-only', '--copy-to-rms-project', '--use-temporary-workflow-dir']:
         return Path('.').absolute()
     else:
         return Path(argv[1])

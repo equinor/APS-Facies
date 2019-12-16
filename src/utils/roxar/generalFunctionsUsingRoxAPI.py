@@ -235,7 +235,7 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
         currentValues = propertyParam.get_values(realNumber)
 
         # Create 3D array for all cells in the grid including inactive cells
-        new_3D_array = np.zeros((nx,ny,nz), dtype=float,order='F')
+        new_3D_array = np.zeros((nx, ny, nz), dtype=float, order='F')
 
         # Assign values from input array into the 3D grid array
         # Note that input array is of dimension (nx,ny,nLayers)
