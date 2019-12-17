@@ -125,18 +125,12 @@ def run(config):
         if config.run_fmu_workflows:
             if config.create_fmu_grid:
                 run_create_simulation_grid(**kwargs)
-            # TODO?: Create a new simbox grid of the appropriate size, (and update the model file)
-            # Create new Grid model, based on the original grid.
-            # This should be changeable from the GUI
 
             if config.global_variables_file:
                 run_update_fmu_variables_in_model_file(**kwargs)
             run_update_trend_location(**kwargs)
         with fmu_aware_model_file(**kwargs):
             if config.simulate_fields:
-                # If FMU, use the FMU grid to simulate stuff
-                # The sizes for nrlib should be the same as the ORIGINAL grid
-                # I.e. `max_fmu_grid_depth` should be rewritten to return the depth of the original grid
                 run_simulation(**kwargs)
                 if config.run_fmu_workflows:
                     run_export_aps_grid(**kwargs)
@@ -153,14 +147,4 @@ def run(config):
                     **kwargs
                 )
 
-        # if config.run_fmu_workflows:
-        #     # The Gaussian Random Fields where simulated in the ERT grid, and
-        #     # must be copied over to the original grid for truncation.
-        #     run_copy_simulated_fields(
-        #         from_grid=kwargs['fmu_simulation_grid_name'],
-        #         to_grid=kwargs['aps_model'].grid_model_name,
-        #         **kwargs
-        #     )
-
-        # Script for moving stuff from "FMU" grid to "regular" grid
         run_truncation(**kwargs)
