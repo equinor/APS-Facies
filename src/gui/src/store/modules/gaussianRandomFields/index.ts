@@ -128,7 +128,7 @@ const module: Module<GaussianRandomFieldState, RootState> = {
             name: field.name,
             variogram: field.variogram,
             trend: field.trend,
-            settings: rootGetters['simulationSettings'](field),
+            settings: rootGetters['simulationSettings']({ field }),
           })
         })
       } finally {

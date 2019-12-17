@@ -173,7 +173,7 @@ interface RootGetters {
   'region': Region
   'zone': Zone
 
-  simulationSettings: (field?: GaussianRandomField) => SimulationSettings
+  simulationSettings: ({ field, zone }: { field?: GaussianRandomField, zone?: Zone }) => SimulationSettings
   'zones/byCode': (zoneNumber: number, regionNumber?: Optional<number>) => Parent
 }
 

@@ -164,7 +164,7 @@ export default class GaussianRandomField extends Vue {
         name: this.value.name,
         variogram: this.variogram,
         trend: this.trend,
-        settings: this.$store.getters.simulationSettings(this.value),
+        settings: this.$store.getters.simulationSettings({ field: this.value }),
       })
     })
   }

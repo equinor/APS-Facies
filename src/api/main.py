@@ -46,9 +46,6 @@ class Config:
         if not self.run_fmu_workflows:
             return None
 
-        nx, ny, nz = get_grid(project, aps_model).simbox_indexer.dimensions
-        return [nz for _ in range(len(project.zones))]
-
         grid = get_grid(project, aps_model)
         layers = []
         for zonation, *reverse in grid.grid_indexer.zonation.values():

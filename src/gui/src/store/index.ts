@@ -250,13 +250,14 @@ const store: Store<RootState> = new Vuex.Store({
         }, {})
     },
     // ...
-    simulationSettings: (state, getters): (field: GaussianRandomField) => SimulationSettings => (field: GaussianRandomField): SimulationSettings => {
+    simulationSettings: (state, getters): ({ field, zone }: { field?: GaussianRandomField, zone?: Zone}) => SimulationSettings => ({ field = undefined, zone = undefined }: { field?: GaussianRandomField, zone?: Zone } = { zone: undefined, field: undefined }): SimulationSettings => {
       const grid = state.parameters.grid
       const fieldSettings = field
         ? field.settings
         : {
           gridModel: null,
         }
+      zone = zone || getters.zone
       const globalSettings = grid && !grid._waiting
         ? {
           gridAzimuth: grid.azimuth,
@@ -272,10 +273,10 @@ const store: Store<RootState> = new Vuex.Store({
             // TODO: Get Z (thickness) based on the zone name
             // TODO: Add quality
             ...grid.simBox.size,
-            z: getters.zone
+            z: zone
               // @ts-ignore
               ? grid.simBox.size.z instanceof Object
-                ? grid.simBox.size.z[getters.zone.code]
+                ? grid.simBox.size.z[zone.code]
                 : grid.simBox.size.z // Assuming it is a number
               : 0,
           },

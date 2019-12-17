@@ -127,17 +127,12 @@ class RMSData:
         grid = self.get_grid(grid_model_name)
         sim_box_attributes = GridSimBoxSize(grid)
         kwargs = {}
-        zone_indices = list(grid.grid_indexer.zonation.keys())
 
         if rough:
-            kwargs['zone'] = zone_indices[0]
             kwargs['max_number_of_selected_cells'] = 10
 
         sim_box_z_length = get_simulation_box_thickness(grid, **kwargs)
 
-        if rough:
-            _, sim_box_z_length = sim_box_z_length.popitem()
-            sim_box_z_length = {zone_index + 1: sim_box_z_length for zone_index in zone_indices}
         return {
             'size': {
                 'x': sim_box_attributes.x_length,
