@@ -532,6 +532,7 @@ workflow/
 aps_gui/
 .rms/
 prog/
+*state.json
 
 # Unit testing
 src/unit_test/fmu_attributes.txt
