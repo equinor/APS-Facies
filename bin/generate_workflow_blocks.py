@@ -81,7 +81,7 @@ import sys
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -92,7 +92,7 @@ APS_ROOT                  = 'APS_ROOT'
 APS_RESOURCES             = 'APS_RESOURCES'
 APS_MODEL_FILE            = 'APS_MODEL_FILE'
 APS_RMS_DATA_FILE         = 'APS_RMS_DATA_FILE'
-APS_GLOBAL_INCLUDE_FILE   = 'APS_GLOBAL_INCLUDE_FILE'
+APS_GLOBAL_VARIABLES_FILE = 'APS_GLOBAL_VARIABLES_FILE'
 APS_FMU_VARIABLES_FILE    = 'APS_FMU_VARIABLES_FILE'
 APS_FMU_TAGS_FILE         = 'APS_FMU_TAGS_FILE'
 APS_TAG_ALL_VARIABLES     = 'APS_TAG_ALL_VARIABLES'
@@ -240,10 +240,10 @@ def get_rms_data_file():
     return _get_file(APS_RMS_DATA_FILE, 'rms_project_data_for_APS_gui.xml')
 
 
-def get_global_include_file():
+def get_global_variables_file():
     # Location/name of test_global_include.ipl
     # TODO: Migrate to yml
-    return _get_file(APS_GLOBAL_INCLUDE_FILE, 'global_variables.ipl')
+    return _get_file(APS_GLOBAL_VARIABLES_FILE, '../../fmuconfig/output/global_variables.ipl')
 
 
 def get_fmu_variables_file():
@@ -294,7 +294,7 @@ kwargs = {{
     # APS model file
     'model_file_name': get_model_file(),
     'output_rms_data_file': get_rms_data_file(),
-    'global_ipl_file': get_global_include_file(),
+    'global_ipl_file': get_global_variables_file(),
     'output_model_file': get_output_fmu_tagged_model_file(),
     # FMU parameters
     'tagged_variables_file': get_tagged_variables_file(),
@@ -320,7 +320,7 @@ module.run(roxar, project, **kwargs)
 
 
 def get_root_path():
-    if len(argv) == 1 or argv[1] in ['--read-only',  '--copy-to-rms-project', '--use-temporary-workflow-dir']:
+    if len(argv) == 1 or argv[1] in ['--read-only', '--copy-to-rms-project', '--use-temporary-workflow-dir']:
         return Path('.').absolute()
     else:
         return Path(argv[1])

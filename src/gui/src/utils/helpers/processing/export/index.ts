@@ -581,10 +581,15 @@ function addZoneModel (context: Context, doc: Document, parent: Parent, zoneMode
   const zoneElement = createElement(doc, 'Zone', null, zoneRegionAttributes)
   zoneModelsElement.append(zoneElement)
 
+  const { zone } = rootGetters['zones/byCode'](parent.zone.code)
+  if (zone.conformity) {
+    zoneElement.append(createElement(doc, 'GridLayout', zone.conformity))
+  }
+
   const useConstantProbability = rootGetters['facies/constantProbability'](parent) ? 1 : 0
   zoneElement.append(createElement(doc, 'UseConstProb', useConstantProbability))
 
-  zoneElement.append(createElement(doc, 'SimBoxThickness', rootGetters.simulationSettings().simulationBox.z))
+  zoneElement.append(createElement(doc, 'SimBoxThickness', rootGetters.simulationSettings({ zone }).simulationBox.z))
 
   addFaciesProb(context, doc, parent, zoneElement)
 

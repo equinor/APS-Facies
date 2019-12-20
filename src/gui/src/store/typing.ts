@@ -1,4 +1,5 @@
 import { ConstantsState } from '@/store/modules/constants/typing'
+import { FmuState } from '@/store/modules/fmu/typing'
 import { GaussianRandomFieldState } from '@/store/modules/gaussianRandomFields/typing'
 import MessageState from '@/store/modules/message/typing'
 import OptionsState from '@/store/modules/options/typing'
@@ -8,7 +9,9 @@ import PresetState from '@/store/modules/truncationRules/preset/typing'
 import { TruncationRuleTemplateState } from '@/store/modules/truncationRules/typing'
 import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 import { Color } from '@/utils/domain/facies/helpers/colors'
+import GridModel from '@/utils/domain/gridModel'
 import { PolygonSerialization } from '@/utils/domain/polygon/base'
+import { Optional } from '@/utils/typing'
 import { Commit, Dispatch } from 'vuex'
 
 import { GridModelsState } from '@/store/modules/gridModels/types'
@@ -77,6 +80,8 @@ interface RootState {
     }
   }
 
+  fmu: FmuState
+
   parameters: ParametersState
 
   truncationRules: {
@@ -131,6 +136,7 @@ interface RootGetters {
   'gridModels': string[]
 
   'gridModels/name': string[]
+  'gridModels/current': Optional<GridModel>
 
   'blockedWellParameter': string
   'blockedWellLogParameter': string
@@ -138,6 +144,9 @@ interface RootGetters {
   'constants/faciesColors/byCode': (code: number) => Color
 
   'regionParameter': string
+
+  'fmuMode': boolean
+  'fmuUpdatable': boolean
 
   'facies': GlobalFacies
   'faciesTable': Facies[]
@@ -167,7 +176,8 @@ interface RootGetters {
   'region': Region
   'zone': Zone
 
-  simulationSettings: (field?: GaussianRandomField) => SimulationSettings
+  simulationSettings: ({ field, zone }: { field?: GaussianRandomField, zone?: Zone }) => SimulationSettings
+  'zones/byCode': (zoneNumber: number, regionNumber?: Optional<number>) => Parent
 }
 
 export {

@@ -32,7 +32,7 @@
       ]
     },
     "lib": [
-      "es6",
+      "es7",
       "esnext",
       "dom",
       "dom.iterable",
@@ -41,6 +41,7 @@
   },
   "files": [
     "./node_modules/vuex/types/vue.d.ts",
+    "./node_modules/vuetify/src/globals.d.ts",
     "./src/vue-shims.d.ts"
   ],
   "include": [

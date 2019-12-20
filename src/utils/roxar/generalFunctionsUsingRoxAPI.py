@@ -45,6 +45,10 @@ def get_project_realization_seed(project=None):
     return project.seed + project.current_realisation + 1
 
 
+def get_project_dir(project):
+    return Path(project.filename).parent.absolute()
+
+
 def setContinuous3DParameterValues(
         gridModel, parameterName, inputValues, zoneNumberList,
         realNumber=0, isShared=True, debug_level=Debug.OFF,
@@ -231,7 +235,7 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
         currentValues = propertyParam.get_values(realNumber)
 
         # Create 3D array for all cells in the grid including inactive cells
-        new_3D_array = np.zeros((nx,ny,nz), dtype=float,order='F')
+        new_3D_array = np.zeros((nx, ny, nz), dtype=float, order='F')
 
         # Assign values from input array into the 3D grid array
         # Note that input array is of dimension (nx,ny,nLayers)
@@ -252,7 +256,8 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
 
 def setContinuous3DParameterValuesInZoneRegion(
         gridModel, parameterNameList, inputValuesForZoneList, zoneNumber,
-        regionNumber=0, regionParamName=None, realNumber=0, isShared=False, debug_level=Debug.OFF
+        regionNumber=0, regionParamName=None, realNumber=0, isShared=False,
+        debug_level=Debug.OFF, fmu_mode=False,
 ):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
@@ -289,32 +294,22 @@ def setContinuous3DParameterValuesInZoneRegion(
     # Find grid layers for the zone
     indexer = grid3D.simbox_indexer
     nx, ny, nz = indexer.dimensions
-    zonation = indexer.zonation
-    layer_ranges = zonation[zoneNumber]
-    start_layer = nz
-    end_layer = 0
-    for layer_range in layer_ranges:
-        for layer in layer_range:
-            if start_layer > layer:
-                start_layer = layer
-            if end_layer < layer:
-                end_layer = layer
-    end_layer = end_layer+1
+    end_layer, start_layer = get_layer_range(indexer, zoneNumber, fmu_mode)
     start = (0, 0, start_layer)
     end = (nx, ny, end_layer)
     zone_cell_numbers = indexer.get_cell_numbers_in_range(start, end)
 
-    nLayers = end_layer - start_layer
+    num_layers = end_layer - start_layer
     # All input data vectors are from the same zone and has the same size
-    inputArrayShape = inputValuesForZoneList[0].shape
-    if nx != inputArrayShape[0] or ny != inputArrayShape[1] or nLayers != inputArrayShape[2]:
-        raise IOError('Input array with values has different dimensions than the grid model:\n'
-                      'Grid model nx: {}  Input array nx: {}\n'
-                      'Grid model ny: {}  Input array ny: {}\n'
-                      'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-                      ''.format(nx, inputArrayShape[0], ny, inputArrayShape[1],
-                                zoneNumber, nLayers, inputArrayShape[2])
-                      )
+    nx_in, ny_in, nz_in = inputValuesForZoneList[0].shape
+    if nx != nx_in or ny != ny_in or num_layers > nz_in:
+        raise IOError(
+            'Input array with values has different dimensions than the grid model:\n'
+            'Grid model nx: {}  Input array nx: {}\n'
+            'Grid model ny: {}  Input array ny: {}\n'
+            'Grid model nLayers for zone {} is: {}    Input array nz: {}'
+            ''.format(nx, nx_in, ny, ny_in, zoneNumber, num_layers, nz_in)
+        )
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
@@ -381,18 +376,37 @@ def setContinuous3DParameterValuesInZoneRegion(
                     if regionParamValues[cell_number] == regionNumber:
                         currentValues[cell_number] = inputValuesForZone[i, j, k - start_layer]
         else:
-            # Create 3D array for all cells in the grid including inactive cells
+            # Create a 3D array for all cells in the grid including inactive cells
             new_3D_array = np.zeros((nx, ny, nz), dtype=float, order='F')
             for k in range(start_layer, end_layer):
                 new_3D_array[:, :, k] = inputValuesForZone[:, :, k - start_layer]
 
-            # Since the cell numbers and the indices all are based on the same range,
+            # Since the cell numbers, and the indices all are based on the same range,
             # it is possible to use numpy vectorization to copy
             currentValues[zone_cell_numbers] = new_3D_array[i_indices, j_indices, k_indices]
 
         propertyParam.set_values(currentValues, realNumber)
 
     return True
+
+
+def get_layer_range(indexer, zone_number, fmu_mode=False):
+    _, _, nz = indexer.dimensions
+    if fmu_mode:
+        if len(indexer.zonation) == 1:
+            layer_ranges = indexer.zonation[0]
+        else:
+            raise ValueError('While in FMU / ERT mode, the grid must have EXACTLY 1 zone')
+    else:
+        layer_ranges = indexer.zonation[zone_number - 1]  # Zonation is 0-indexed, while zone numbers are 1-indexed
+    start_layer = nz
+    end_layer = 0
+    for layer_range in layer_ranges:
+        if start_layer > layer_range.start:
+            start_layer = layer_range.start
+        if end_layer < layer_range.stop:
+            end_layer = layer_range.stop
+    return end_layer, start_layer
 
 
 def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cellIndexDefined=None,

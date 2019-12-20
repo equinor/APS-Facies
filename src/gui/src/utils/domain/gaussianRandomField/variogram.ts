@@ -101,6 +101,17 @@ export default class Variogram {
     this.power = new FmuUpdatableValue(power, !!powerUpdatable)
   }
 
+  public get isFmuUpdatable (): boolean {
+    return (
+      this.angle.azimuth.updatable
+      || this.angle.dip.updatable
+      || this.range.main.updatable
+      || this.range.perpendicular.updatable
+      || this.range.vertical.updatable
+      || (this.type === 'GENERAL_EXPONENTIAL' && this.power.updatable)
+    )
+  }
+
   public toJSON (): VariogramSerialization {
     return {
       type: this.type,

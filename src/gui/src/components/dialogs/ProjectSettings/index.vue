@@ -29,7 +29,11 @@
         <FmuSettings
           :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
+          :only-update-from-fmu.sync="onlyUpdateFromFmu"
           :max-layers-in-fmu.sync="maxLayersInFmu"
+          :import-fields.sync="importFields"
+          :fmu-grid.sync="fmuGrid"
+          :create-fmu-grid="createFmuGrid"
         />
         <br>
         <LoggingSettings
@@ -143,7 +147,7 @@
         <br>
         <SettingsPanel
           v-if="!!$store.getters.gridModel"
-          title="Grid model"
+          title="Preview settings"
         >
           <v-container
             v-if="!$store.getters['parameters/grid/waiting']"
@@ -273,13 +277,13 @@
 </template>
 
 <script lang="ts">
-import LoggingSettings from '@/components/dialogs/ProjectSettings/LoggingSettings.vue'
-import FolderSettings from '@/components/dialogs/ProjectSettings/FolderSettings.vue'
-import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 
 import rms from '@/api/rms'
 
+import LoggingSettings from '@/components/dialogs/ProjectSettings/LoggingSettings.vue'
+import FolderSettings from '@/components/dialogs/ProjectSettings/FolderSettings.vue'
+import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import FmuSettings from '@/components/dialogs/ProjectSettings/FmuSettings.vue'
@@ -319,6 +323,10 @@ export default class ProjectSettings extends Vue {
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
   debugLevel: number = 0
+  importFields: boolean = false
+  fmuGrid: string = ''
+  createFmuGrid: boolean = false
+  onlyUpdateFromFmu: boolean = false
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -329,18 +337,25 @@ export default class ProjectSettings extends Vue {
     if (value) {
       const options = this.$store.state.options
       const parameters = this.$store.state.parameters
+      const fmu = this.$store.state.fmu
       const path = parameters.path
 
       this.apsModelFileLocation = path.project.selected
       this.fmuParameterListLocation = path.fmuParameterListLocation.selected
+
+      this.maxLayersInFmu = fmu.maxDepth.value
+      this.runFmuWorkflows = fmu.runFmuWorkflows.value
+      this.onlyUpdateFromFmu = fmu.onlyUpdateFromFmu.value
+      this.fmuGrid = fmu.simulationGrid.current
+      this.createFmuGrid = fmu.create.value
+
       this.debugLevel = parameters.debugLevel.selected
-      this.maxLayersInFmu = parameters.fmu.maxDepth
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
-      this.runFmuWorkflows = options.runFmuWorkflows.value
+      this.importFields = options.importFields.value
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }
@@ -354,15 +369,22 @@ export default class ProjectSettings extends Vue {
     await Promise.all([
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
-      dispatch('parameters/fmu/set', this.maxLayersInFmu),
       dispatch('parameters/debugLevel/set', this.debugLevel),
+
+      dispatch('fmu/maxDepth/set', this.maxLayersInFmu),
+      dispatch('fmu/runFmuWorkflows/set', this.runFmuWorkflows),
+      dispatch('fmu/onlyUpdateFromFmu/set', this.onlyUpdateFromFmu),
+      dispatch('fmu/simulationGrid/set', this.fmuGrid),
+      dispatch('fmu/create/set', this.createFmuGrid),
+
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
-      dispatch('options/runFmuWorkflows/set', this.runFmuWorkflows),
+      dispatch('options/importFields/set', this.importFields),
       dispatch('options/colorScale/set', this.colorScale),
+
       dispatch('constants/faciesColors/set', this.faciesColorLibrary),
     ])
     this.dialog = false

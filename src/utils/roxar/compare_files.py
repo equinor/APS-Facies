@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from src.unit_test.helpers import compare
+from src.utils.checks import compare
 from src.utils.io import write_status_file
 
 
@@ -10,10 +10,6 @@ def run(roxar=None, project=None, **kwargs):
     print('Compare file: ' + file_name1 + ' and ' + file_name2)
     check = compare(file_name1, file_name2)
 
-    if check:
-        print('Files are equal. OK')
-    else:
-        print('Files are different. NOT OK')
     write_status_file(check)
     assert check is True
 

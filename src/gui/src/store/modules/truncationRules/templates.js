@@ -5,7 +5,8 @@ import templates from '@/store/templates/truncationRules'
 import simpleTemplates from '@/store/templates/simpleTruncationRules'
 import types from '@/store/modules/truncationRules/types'
 import { addItem } from '@/store/actions'
-import { inDevelopmentMode, isUUID } from '@/utils/helpers'
+import { isDevelopmentBuild } from '@/utils/helpers/simple'
+import { isUUID } from '@/utils/helpers'
 import {
   combinePolygons,
   getFaciesGroup,
@@ -120,7 +121,7 @@ export default {
       return Promise.all([
         dispatch('types/fetch'),
         ...templates.templates
-          .filter(template => template.overlay ? inDevelopmentMode() : true)
+          .filter(template => template.overlay ? isDevelopmentBuild() : true)
           .map(template => dispatch('add', template)),
         ...simpleTemplates.templates.map(template => dispatch('add', template))
       ])

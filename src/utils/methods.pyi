@@ -27,7 +27,7 @@ class RunParameters(NamedTuple):
     model_file: ModelFile
     output_model_file: OutputModelFile
     rms_data_file: RmsProjectDataFile
-    global_include_file: GlobalIplFile
+    global_variables_file: GlobalIplFile
     tagged_variables_file: TaggedVariableFile
     tag_all_variables: bool
     fmu_variables_file: FmuVariablesFile

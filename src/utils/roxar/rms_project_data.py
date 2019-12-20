@@ -24,12 +24,13 @@ from src.utils.constants.simple import (
     OriginType,
 )
 from src.utils.exceptions.xml import ApsXmlError
+from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 from src.utils.roxar.grid_model import (
-    getGridSimBoxSize,
     get_simulation_box_thickness,
     average_of_property_inside_zone_region,
     getDiscrete3DParameterValues,
     create_zone_parameter,
+    GridSimBoxSize,
 )
 from src.utils.plotting import create_facies_map
 from src.utils.truncation_rules import make_truncation_rule
@@ -79,7 +80,7 @@ class RMSData:
         return Path(self.project.filename).name
 
     def get_project_dir(self):
-        return str(Path(self.project.filename).parent.absolute())
+        return str(get_project_dir(self.project))
 
     def _get_project_location(self):
         return Path(self.project.filename).parent
@@ -94,6 +95,8 @@ class RMSData:
         return self.project.grid_models
 
     def get_grid_model(self, name):
+        if not isinstance(name, str):
+            raise ValueError('The name of a grid model must be a string')
         grid_models = self.get_grid_models()
         return grid_models[name]
 
@@ -107,12 +110,7 @@ class RMSData:
         models = []
         for grid_model in grid_models:
             name = grid_model.name
-            try:
-                self.get_grid(name)
-                exists = True
-            except (KeyError, ValueError):
-                exists = False
-            models.append({'name': name, 'exists': exists})
+            models.append({'name': name, 'exists': self.grid_exists(name)})
         return models
 
     def get_realization_parameters(self, grid_model_name):
@@ -129,29 +127,24 @@ class RMSData:
 
     def get_simulation_box_size(self, grid_model_name, rough=False):
         grid = self.get_grid(grid_model_name)
-        sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid)
+        sim_box_attributes = GridSimBoxSize(grid)
         kwargs = {}
-        zone_indices = list(grid.grid_indexer.zonation.keys())
 
         if rough:
-            kwargs['zone'] = zone_indices[0]
             kwargs['max_number_of_selected_cells'] = 10
 
         sim_box_z_length = get_simulation_box_thickness(grid, **kwargs)
 
-        if rough:
-            _, sim_box_z_length = sim_box_z_length.popitem()
-            sim_box_z_length = {zone_index + 1: sim_box_z_length for zone_index in zone_indices}
         return {
             'size': {
-                'x': sim_box_x_length,
-                'y': sim_box_y_length,
+                'x': sim_box_attributes.x_length,
+                'y': sim_box_attributes.y_length,
                 'z': sim_box_z_length,
             },
-            'rotation': azimuth_angle,
+            'rotation': sim_box_attributes.azimuth_angle,
             'origin': {
-                'x': x0,
-                'y': y0,
+                'x': sim_box_attributes.x0,
+                'y': sim_box_attributes.y0,
             },
         }
 
@@ -178,6 +171,14 @@ class RMSData:
         grid_model = self.get_grid_model(grid_model_name)
         regions = self.get_code_names(grid_model.properties[region_parameter])
         return regions
+
+    def grid_exists(self, name):
+        exists = True
+        try:
+            self.get_grid(name)
+        except (KeyError, ValueError):
+            exists = False
+        return exists
 
     def is_region_parameter(self, param):
         # TODO: Implement properly

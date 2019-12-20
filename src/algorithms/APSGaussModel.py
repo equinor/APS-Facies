@@ -211,6 +211,10 @@ class GaussianField:
     def name(self):
         return self._name
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def variogram(self):
         return self._variogram
@@ -413,6 +417,10 @@ class Trend:
     @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
     def model(self):
@@ -1059,7 +1067,7 @@ class APSGaussModel:
 
     @property
     def fields(self):
-        return self._gaussian_models.values()
+        return list(self._gaussian_models.values())
 
     @property
     def num_gaussian_fields(self):
@@ -1375,16 +1383,16 @@ class APSGaussModel:
             properties = ['main', 'perpendicular', 'vertical', 'azimuth', 'dip']
 
             for prop in properties:
-                self._add_xml_element(gf_name, prop, parent, variogram_element, fmu_attributes, createFMUvariableNameForResidual)
+                self._add_xml_element(grf, prop, parent, variogram_element, fmu_attributes, createFMUvariableNameForResidual)
 
             if variogram_type in ['GENERAL_EXPONENTIAL', VariogramType.GENERAL_EXPONENTIAL]:
-                self._add_xml_element(gf_name, 'power', parent, variogram_element, fmu_attributes, createFMUvariableNameForResidual)
+                self._add_xml_element(grf, 'power', parent, variogram_element, fmu_attributes, createFMUvariableNameForResidual)
 
             if use_trend:
                 # Add trend
                 trend_obj.XMLAddElement(gf_element, zone_number, region_number, gf_name, fmu_attributes)
 
-                self._add_xml_element(gf_name, 'relative_std_dev', parent, gf_element, fmu_attributes, createFMUvariableNameForTrend)
+                self._add_xml_element(grf, 'relative_std_dev', parent, gf_element, fmu_attributes, createFMUvariableNameForTrend)
 
             tag = 'SeedForPreview'
             elem = Element(tag)
@@ -1392,15 +1400,15 @@ class APSGaussModel:
             elem.text = ' ' + str(seed) + ' '
             gf_element.append(elem)
 
-    def _add_xml_element(self, gf_name, property_name, parent, xml_element, fmu_attributes, create_fmu_variable):
+    def _add_xml_element(self, grf, property_name, parent, xml_element, fmu_attributes, create_fmu_variable):
         zone_number = parent.get('number')
         region_number = parent.get('regionNumber')
         tag = self.__xml_keyword[property_name]
-        value = self._gaussian_models[gf_name][property_name]
+        value = grf[property_name]
         elem = Element(tag)
         elem.text = ' ' + str(value) + ' '
         if value.updatable:
-            fmu_attribute = create_fmu_variable(tag, gf_name, zone_number, region_number)
+            fmu_attribute = create_fmu_variable(tag, grf.name, zone_number, region_number)
             fmu_attributes.append(fmu_attribute)
             elem.attrib = dict(kw=fmu_attribute)
         xml_element.append(elem)

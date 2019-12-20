@@ -15,6 +15,7 @@ import constants from '@/store/modules/constants'
 import options from '@/store/modules/options'
 import modelFileLoader from '@/store/modules/modelFileLoader'
 import modelFileExporter from '@/store/modules/modelFileExporter'
+import fmu from '@/store/modules/fmu'
 
 import { RootState } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
@@ -60,6 +61,7 @@ const store: Store<RootState> = new Vuex.Store({
     zones,
     regions,
     facies,
+    fmu,
     gaussianRandomFields,
     truncationRules,
     parameters,
@@ -80,11 +82,14 @@ const store: Store<RootState> = new Vuex.Store({
           dispatch('parameters/path/fetch'),
           dispatch('parameters/names/workflow/fetch'),
           dispatch('parameters/names/project/fetch'),
+          dispatch('fmu/fetch'),
         ])
         commit('FINISHED')
       }
     },
     async populate ({ dispatch, commit }, data): Promise<void> {
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      resetState()
       commit('LOADING', { loading: true, message: 'Loading job. Please wait.' })
       try {
         await dispatch('fetch')
@@ -111,6 +116,9 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Options
         await dispatch('options/populate', data.options)
+
+        // FMU settings
+        await dispatch('fmu/populate', data.fmu)
 
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
@@ -234,6 +242,8 @@ const store: Store<RootState> = new Vuex.Store({
       return Object.values(state.facies.global.available)
         .sort((a, b): number => a.code - b.code)
     },
+    fmuMode: (state, getters): boolean => getters.fmuUpdatable && !state.fmu.onlyUpdateFromFmu.value,
+    fmuUpdatable: (state): boolean => state.fmu.runFmuWorkflows.value || state.fmu.onlyUpdateFromFmu.value,
     // User options
     options: (state): object => {
       return Object.keys(state.options)
@@ -243,13 +253,14 @@ const store: Store<RootState> = new Vuex.Store({
         }, {})
     },
     // ...
-    simulationSettings: (state, getters): (field: GaussianRandomField) => SimulationSettings => (field: GaussianRandomField): SimulationSettings => {
+    simulationSettings: (state, getters): ({ field, zone }: { field?: GaussianRandomField, zone?: Zone}) => SimulationSettings => ({ field = undefined, zone = undefined }: { field?: GaussianRandomField, zone?: Zone } = { zone: undefined, field: undefined }): SimulationSettings => {
       const grid = state.parameters.grid
       const fieldSettings = field
         ? field.settings
         : {
           gridModel: null,
         }
+      zone = zone || getters.zone
       const globalSettings = grid && !grid._waiting
         ? {
           gridAzimuth: grid.azimuth,
@@ -265,10 +276,10 @@ const store: Store<RootState> = new Vuex.Store({
             // TODO: Get Z (thickness) based on the zone name
             // TODO: Add quality
             ...grid.simBox.size,
-            z: getters.zone
+            z: zone
               // @ts-ignore
               ? grid.simBox.size.z instanceof Object
-                ? grid.simBox.size.z[getters.zone.code]
+                ? grid.simBox.size.z[zone.code]
                 : grid.simBox.size.z // Assuming it is a number
               : 0,
           },

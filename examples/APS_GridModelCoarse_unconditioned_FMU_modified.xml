@@ -55,6 +55,7 @@
   </MainFaciesTable>
   <ZoneModels>
     <Zone number="1">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb>1</UseConstProb>
       <SimBoxThickness>10.0</SimBoxThickness>
       <FaciesProbForModel>
@@ -140,6 +141,7 @@
     </Zone>
 
     <Zone number="2">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb>1</UseConstProb>
       <SimBoxThickness>4.0</SimBoxThickness>
       <FaciesProbForModel>
@@ -259,6 +261,7 @@
     </Zone>
 
     <Zone number="3">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb>1</UseConstProb>
       <SimBoxThickness>10.35</SimBoxThickness>
       <FaciesProbForModel>
@@ -341,6 +344,7 @@
     </Zone>
 
     <Zone number="4">
+      <GridLayout>BaseConform</GridLayout>
       <UseConstProb>1</UseConstProb>
       <SimBoxThickness>20.0</SimBoxThickness>
       <FaciesProbForModel>

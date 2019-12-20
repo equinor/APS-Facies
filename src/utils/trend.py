@@ -10,6 +10,7 @@ def add_trend_to_gauss_field(
         gauss_field_name,
         gauss_field_values,
         cell_index_defined,
+        fmu_mode=False,
 ):
     '''
     Calculate trend and add trend to simulated gaussian residual field to get the gaussian field with trend.
@@ -47,7 +48,11 @@ def add_trend_to_gauss_field(
     sim_box_thickness = zone_model.getSimBoxThickness()
     # trend_values contain trend values for the cells belonging to the set defined by cell_index_defined
     minmax_difference, trend_values = trend_model.createTrend(
-        grid_model, realization_number, cell_index_defined, zone_number, sim_box_thickness
+        grid_model,
+        realization_number,
+        cell_index_defined,
+        zone_number=1 if fmu_mode else zone_number,
+        sim_box_thickness=sim_box_thickness,
     )
 
     # Calculate trend plus residual for the cells defined by cell_index_defined
@@ -76,6 +81,7 @@ def add_trends(
         region_number,
         write_rms_parameters_for_qc_purpose=False,
         debug_level=Debug.OFF,
+        fmu_mode=False,
 ):
     grid_model = project.grid_models[aps_model.getGridModelName()]
     zone_model = aps_model.getZoneModel(zone_number, region_number)
@@ -83,11 +89,14 @@ def add_trends(
     gf_names_for_truncation_rule = zone_model.getGaussFieldsInTruncationRule()
     realization_number = project.current_realisation
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
+    if fmu_mode:
+        write_rms_parameters_for_qc_purpose = False
     gf_all_values, gf_all_alpha, gf_all_trend_values = initialize_rms_parameters(
         project, aps_model, write_rms_parameters_for_qc_purpose
     )
-    cell_index_defined = get_defined_cells(project, aps_model, debug_level, grid_model,
-                                           region_number, zone_number)
+    cell_index_defined = get_defined_cells(
+        project, aps_model, grid_model, region_number, zone_number, debug_level, fmu_mode,
+    )
 
     for gf_name in gf_names_for_zone:
         if gf_name in gf_names_for_truncation_rule:
@@ -106,16 +115,18 @@ def add_trends(
                     zone_number,
                     write_rms_parameters_for_qc_purpose,
                     debug_level,
+                    fmu_mode=fmu_mode,
                 )
 
 
 def get_defined_cells(
         project,
         aps_model,
-        debug_level,
         grid_model,
         region_number,
         zone_number,
+        debug_level=Debug.OFF,
+        fmu_mode=False,
 ):
     realization_number = project.current_realisation
     zone_param = create_zone_parameter(
@@ -129,6 +140,8 @@ def get_defined_cells(
     if aps_model.use_regions:
         region_values, _ = getDiscrete3DParameterValues(grid_model, aps_model.region_parameter, realization_number, debug_level)
     zone_values = zone_param.get_values(realization_number)
+    if fmu_mode:
+        zone_number = 1
     return find_defined_cells(
         zone_values, zone_number, region_values, region_number, debug_level=debug_level,
     )
@@ -147,11 +160,13 @@ def add_trends_to_field(
         zone_number,
         write_rms_parameters_for_qc_purpose=False,
         debug_level=Debug.OFF,
+        fmu_mode=False,
 ):
     use_regions = aps_model.use_regions
     gauss_field_values_all, trend_values_for_zone = add_trend_to_gauss_field(
         project, aps_model, zone_number, region_number,
-        use_regions, gf_name, gauss_field_values_all, cell_index_defined
+        use_regions, gf_name, gauss_field_values_all, cell_index_defined,
+        fmu_mode
     )
 
     # Write back to RMS project the untransformed gaussian values with trend for the zone

@@ -76,6 +76,9 @@ def isFMUUpdatable(
     keyword: str
 ) -> bool: ...
 
+def get_region_number(zone: Element) -> int: ...
+
+
 def fmu_xml_element(
         tag: str,
         value: Any,
@@ -85,7 +88,7 @@ def fmu_xml_element(
         gf_name: GaussianFieldName,
         fmu_creator: Callable[[str, str, int, int], Any],
         fmu_attributes: List
-):
+): ...
 
 
 def createFMUvariableNameForTrend(

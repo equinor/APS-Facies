@@ -1342,7 +1342,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
         parent.append(trRuleElement)
 
         attribute = {
-            'nGFields': str(nGF)}
+            'nGFields': str(nGF),
+        }
         trRuleTypeElement = Element('Trunc2D_Cubic', attribute)
         trRuleElement.append(trRuleTypeElement)
 

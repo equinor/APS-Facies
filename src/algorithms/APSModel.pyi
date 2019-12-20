@@ -27,8 +27,8 @@ class APSModel:
             rms_facies_parameter_name: str = '',
             seed_file_name: str = 'seed.dat',
             write_seeds: bool = True,
-            main_facies_table: Optional[] = None,
-            zone_model_table: Optional[] = None,
+            main_facies_table: Optional[APSMainFaciesTable] = None,
+            zone_model_table: Optional[APSZoneModel] = None,
             preview_zone: int = 0,
             preview_region: int = 0,
             preview_cross_section_type: str = 'IJ',
@@ -45,24 +45,26 @@ class APSModel:
     __preview_cross_section: CrossSection
     preview_cross_section: CrossSection
     sorted_zone_models: OrderedDict[Tuple[int, int], APSZoneModel]
+    zone_models: List[APSZoneModel]
     use_constant_probability: bool
     write_seeds: bool
     zone_parameter: str
     region_parameter: str
     use_regions: bool
+    gaussian_field_names: List[str]
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(cls, xml_content: str) -> APSModel: ...
     def __interpretTree(
             self,
-            root:          Element,
-            debug_level:   Debug         = Debug.OFF,
-            modelFileName: Optional[str] = None
+            root:                       Element,
+            debug_level:                Debug               = Debug.OFF,
+            modelFileName:              Optional[str]       = None
     ) -> None: ...
     def updateXMLModelFile(
             self,
-            modelFileName:              Optional[str]       = None,
-            parameterFileName:          Optional[str]       = None,
+            model_file_name:            Optional[str]       = None,
+            parameter_file_name:        Optional[str]       = None,
             project:                    Optional[Project]   = None,
             workflow_name:              Optional[str]       = None,
             uncertainty_variable_names: Optional[List[str]] = None,
@@ -88,7 +90,7 @@ class APSModel:
     def isAllZoneRegionModelsSelected(self): ...
     def isSelected(self, zoneNumber: int, regionNumber: int) -> bool: ...
     def getZoneModel(self, zoneNumber: int, regionNumber: int = 0) -> APSZoneModel: ...
-    def getAllGaussFieldNamesUsed(self): ...
+    def getAllGaussFieldNamesUsed(self) -> List[str]: ...
     def getZoneParamName(self): ...
     def getRegionParamName(self): ...
     def getZoneNumberList(self) -> List[int]: ...
@@ -117,8 +119,14 @@ class APSModel:
     @staticmethod
     def __readParamFromFile(inputFile: str, debug_level: Debug = Debug.OFF): ...
     @staticmethod
-    def __getParamFromRMSTable(project: Project, workflow_name: str, uncertainty_variable_names, realisation_number: int, debug_level: Debug = Debug.OFF) -> List[Tuple[str, str]]: ...
+    def __getParamFromRMSTable(
+            project:                    Project,
+            workflow_name: str,
+            uncertainty_variable_names,
+            realisation_number:         int,
+            debug_level:                Debug               = Debug.OFF,
+    ) -> List[Tuple[str, str]]: ...
     @staticmethod
     def writeModelFromXMLRoot(inputETree, outputModelFileName): ...
 
-ApsModel = Type[APSModel]
+ApsModel: Type[APSModel]

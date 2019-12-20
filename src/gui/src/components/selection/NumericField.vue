@@ -7,7 +7,7 @@
     :class="__class"
   >
     <v-col
-      cols="10"
+      :cols="fmuUpdatable ? 10 : 12"
       :class="__class"
     >
       <v-text-field
@@ -199,7 +199,7 @@ export default class NumericField extends Vue {
 
   get isFmuUpdatable () {
     return this.fmuUpdatable
-      && this.$store.state.options.runFmuWorkflows.value
+      && this.$store.getters.fmuUpdatable
       && (
         this.value instanceof FmuUpdatableValue
         || (this.value !== null && this.value.hasOwnProperty('updatable')

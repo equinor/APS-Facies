@@ -1,3 +1,7 @@
+export function isDevelopmentBuild (): boolean {
+  return process.env.NODE_ENV === 'develop'
+}
+
 export const DEFAULT_SIZE = {
   'max': {
     'width': Number.POSITIVE_INFINITY,
@@ -9,7 +13,15 @@ export const DEFAULT_SIZE = {
 
 export const DEFAULT_POINT_SIZE = 1.2
 
+export const DEFAULT_IMPORT_FIELDS_IN_FMU = false
+
 export const DEFAULT_RUN_FMU_MODE = false
+
+export const DEFAULT_RUN_ONLY_FMU_UPDATE = false
+
+export const DEFAULT_CREATE_FMU_GRID = isDevelopmentBuild()
+
+export const DEFAULT_FMU_SIMULATION_GRID_NAME = 'ERTBOX'
 
 export const DEFAULT_COLOR_SCALE = 'Rainbow'
 
@@ -44,7 +56,7 @@ export const DEFAULT_CUBIC_LEVELS = 3
 
 export const DEFAULT_FACIES_REALIZATION_PARAMETER_NAME = 'aps'
 
-export const DEFAULT_FACIES_AUTOFILL = process.env.NODE_ENV === 'develop'
+export const DEFAULT_FACIES_AUTOFILL = isDevelopmentBuild()
 
 export const DEFAULT_TIME_UNTIL_MESSAGE_DISMISSAL = 10000
 

@@ -1,3 +1,5 @@
+import { getId } from '@/utils'
+import { Dependent } from '@/utils/domain/bases/interfaces'
 import Vue from 'vue'
 
 import { Module } from 'vuex'
@@ -9,7 +11,7 @@ import { ZoneConfiguration } from '@/utils/domain/zone'
 import { Optional } from '@/utils/typing'
 
 import rms from '@/api/rms'
-import { Parent, Zone, Region } from '@/utils/domain'
+import { Parent, Zone, Region, TruncationRule } from '@/utils/domain'
 import { identify, includes } from '@/utils/helpers'
 
 const module: Module<ZoneState, RootState> = {
@@ -63,6 +65,9 @@ const module: Module<ZoneState, RootState> = {
       commit('AVAILABLE', identify(instances))
       return instances
     },
+    conformity: async ({ commit }, { zone, value }): Promise<void> => {
+      commit('CONFORMITY', { zone, value })
+    },
   },
 
   mutations: {
@@ -78,11 +83,22 @@ const module: Module<ZoneState, RootState> = {
     LOADING: (state, toggle): void => {
       Vue.set(state, '_loading', toggle)
     },
+    CONFORMITY: (state, { zone, value }) => {
+      Vue.set(state.available[`${zone.id}`], 'conformity', value)
+    },
   },
 
   getters: {
     selected (state): ID[] {
       return Object.keys(state.available).filter((id): boolean => !!state.available[`${id}`].selected)
+    },
+    isFmuUpdatable: (state, getters, rootState): (zone: Zone) => boolean => (zone: Zone): boolean => {
+      const belongsToZone = (item: Dependent): boolean => item.parent.zone === getId(zone) /* Ignore regions */
+
+      const truncationRules = Object.values(rootState.truncationRules.available)
+        .filter(rule => belongsToZone(rule))
+      return truncationRules
+        .some((rule: TruncationRule): boolean => rule.isFmuUpdatable)
     },
     byCode: (state): (zoneNumber: number, regionNumber: Optional<number>) => Parent => (zoneNumber: number, regionNumber: Optional<number> = null): Parent => {
       const zone = Object.values(state.available).find((zone): boolean => zone.code === zoneNumber)

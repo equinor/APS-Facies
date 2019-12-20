@@ -12,6 +12,7 @@ from src.utils.numeric import isNumber
 from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand, isFMUUpdatable, createFMUvariableNameForNonCubicTruncation
 from src.algorithms.Memoization import RoundOffConstant
 
+
 class Trunc2D_Angle(Trunc2D_Base):
     """
     This class implements adaptive plurigaussian field truncation

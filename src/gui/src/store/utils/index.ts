@@ -1,5 +1,5 @@
 import { OptionState } from '@/store/modules/options/typing'
-import { RootState } from '@/store/typing'
+import { Context, RootState } from '@/store/typing'
 import { Commit, Dispatch, Module, Store } from 'vuex'
 
 async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result: string[]): Promise<void> {
@@ -65,9 +65,17 @@ async function displayMessage (
   }
 }
 
+async function populateState<G, S> ({ dispatch }: Context<G, S>, options: {[_: string]: any}): Promise<void> {
+  await Promise.all(
+    Object.keys(options)
+      .map(option => dispatch(`${option}/populate`, options[`${option}`]))
+  )
+}
+
 export {
   fetchParameterHelper,
   makeOption,
   selectOnlyParameter,
   displayMessage,
+  populateState,
 }

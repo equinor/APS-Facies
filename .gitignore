@@ -331,6 +331,7 @@ __pycache__/
 
 # Additional compiled libraries, not maintained within Statoil / this project
 libraries/source
+libraries/xtgeo*
 
 # C extensions
 
@@ -531,6 +532,7 @@ workflow/
 aps_gui/
 .rms/
 prog/
+*state.json
 
 # Unit testing
 src/unit_test/fmu_attributes.txt

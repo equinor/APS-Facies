@@ -219,6 +219,7 @@ class Trunc2D_Base:
 
         self._setEmpty()
         self._className = self.__class__.__name__
+        self._gaussFieldsInZone = []
         self._debug_level = debug_level
         self._keyResolution = keyResolution
         self._nGaussFieldsInBackGroundModel = nGaussFieldsInBackGroundModel
@@ -966,6 +967,14 @@ Background facies:
             representation += '\nAlpha coordinate number {} corresponds to gauss field {}'.format(i + 1, gfName)
         return representation
 
+    @property
+    def names_of_gaussian_fields(self):
+        return self._gaussFieldsInZone
+
+    @names_of_gaussian_fields.setter
+    def names_of_gaussian_fields(self, names):
+        self._gaussFieldsInZone = names
+
     def getClassName(self):
         return copy.copy(self._className)
 
@@ -1426,6 +1435,10 @@ Background facies:
                 facies_prob[index_max] += delta
                 sum_prob += delta
         return facies_prob
+
+    @property
+    def gaussian_fields_in_truncation_rule(self):
+        return self.getGaussFieldsInTruncationRule()
 
     def getGaussFieldsInTruncationRule(self):
         # Return list of the gauss field names actually used in the truncation rule

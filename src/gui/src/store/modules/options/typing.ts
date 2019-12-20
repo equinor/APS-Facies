@@ -9,5 +9,7 @@ export default interface OptionsState {
   filterZeroProbability: OptionState<boolean>
   automaticFaciesFill: OptionState<boolean>
   automaticFaciesSelection: OptionState<boolean>
+  runFmuWorkflows: OptionState<boolean>
+  importFields: OptionState<boolean>
   colorScale: OptionState<string>
 }

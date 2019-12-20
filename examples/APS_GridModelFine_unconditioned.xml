@@ -65,6 +65,7 @@
     <ZoneModels>
         <!--  Zone 1 -->
         <Zone number="1">
+            <GridLayout>Proportional</GridLayout>
             <UseConstProb>1</UseConstProb>
             <SimBoxThickness>10.0</SimBoxThickness>
             <FaciesProbForModel>
@@ -192,6 +193,7 @@
 
         <!--  Zone 2 -->
         <Zone number="2">
+            <GridLayout>Proportional</GridLayout>
             <UseConstProb>1</UseConstProb>
             <SimBoxThickness>4.0</SimBoxThickness>
             <FaciesProbForModel>
@@ -315,6 +317,7 @@
 
         <!--  Zone 3 -->
         <Zone number="3">
+            <GridLayout>Proportional</GridLayout>
             <UseConstProb>1</UseConstProb>
             <SimBoxThickness>10.35</SimBoxThickness>
             <FaciesProbForModel>
@@ -398,6 +401,7 @@
 
         <!--  Zone 4 -->
         <Zone number="4">
+            <GridLayout>Proportional</GridLayout>
             <UseConstProb>1</UseConstProb>
             <SimBoxThickness>10.35</SimBoxThickness>
             <FaciesProbForModel>
@@ -512,6 +516,7 @@
 
         <!--  Zone 5 -->
         <Zone number="5">
+            <GridLayout>Proportional</GridLayout>
             <UseConstProb>1</UseConstProb>
             <SimBoxThickness>4.02</SimBoxThickness>
             <FaciesProbForModel>
@@ -632,6 +637,7 @@
 
         <!--  Zone 6 -->
         <Zone number="6">
+            <GridLayout>Proportional</GridLayout>
             <UseConstProb>1</UseConstProb>
             <SimBoxThickness>4.55</SimBoxThickness>
             <FaciesProbForModel>

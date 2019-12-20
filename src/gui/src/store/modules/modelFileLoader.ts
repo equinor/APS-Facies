@@ -459,6 +459,11 @@ async function getCrossSection ({ dispatch }: Context, parent: Parent): Promise<
   return await dispatch('gaussianRandomFields/crossSections/fetch', parent, { root: true })
 }
 
+function getZoneNumber (zoneModel: XMLElement): number {
+  const zoneNumber = parseInt(zoneModel.attributes.number, 10)
+  return zoneNumber
+}
+
 const module: Module<{}, RootState> = {
   namespaced: true,
 
@@ -493,6 +498,7 @@ const module: Module<{}, RootState> = {
             await dispatch(action, getTextValue(apsModelContainer, property), { root: true })
           }
         }
+        await dispatch('fmu/runFmuWorkflows/set', json.includes('"kw":'), { root: true })
 
         const apsModels = getNodeValues(getMandatoryNodeValue(apsModelContainer, 'ZoneModels'), 'Zone')
 
@@ -502,6 +508,7 @@ const module: Module<{}, RootState> = {
           'populateGaussianRandomFields',
           'populateFaciesProbabilities',
           'populateTruncationRules',
+          'populateGridLayout',
           // Now we can select zones and regions on the left-hand side of the gui.
           'selectZonesAndRegions',
         ]
@@ -516,6 +523,17 @@ const module: Module<{}, RootState> = {
         await displayMessage({ dispatch }, reason, 'error')
       } finally {
         commit('LOADING', { loading: false }, { root: true })
+      }
+    },
+
+    populateGridLayout: async ({ dispatch, rootState, rootGetters }, apsModels: any[]): Promise<void> => {
+      for (const apsModel of apsModels) {
+        const gridLayout = getTextValue(apsModel, 'GridLayout')
+        if (gridLayout) {
+          const zoneNumber = getZoneNumber(apsModel)
+          const { zone } = rootGetters['zones/byCode'](zoneNumber)
+          await dispatch('zones/conformity', { zone, value: gridLayout }, { root: true })
+        }
       }
     },
 
@@ -568,7 +586,7 @@ const module: Module<{}, RootState> = {
       // This map is then used when selecting zones and regions later
       const zoneRegionsMap = new Map()
       zoneModelsFromFile.forEach((zoneModel): void => {
-        const zoneNumber = parseInt(zoneModel.attributes.number, 10)
+        const zoneNumber = getZoneNumber(zoneModel)
         const regionNumber = zoneModel.attributes.regionNumber
         if (!zoneRegionsMap.has(zoneNumber)) {
           zoneRegionsMap.set(zoneNumber, [])

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from src.utils.constants.simple import Debug, GridModelConstants
+from src.utils.decorators import cached
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
 from src.utils.methods import calc_average
@@ -420,94 +421,6 @@ def get_zone_layer_numbering(grid):
     return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
 
 
-def get_simulation_box_thickness_old(grid, debug_level=Debug.OFF, max_number_of_selected_cells=100):
-    ''' Estimate simulation box thickness for each zone.
-        This is done by assuming that it is sufficient to calculate difference
-        between top of some selected grid cell for top layer and bottom of
-        the corresponding grid cells at bottom layer.
-        The difference is calculated and average is calculated.
-        This is done for all zones in the grid adn a dictionary with values
-        for each zone number is returned. The input parameter max_number_of_selected_cells
-        define how many grid cells to be used in the average thickness calculation.
-        NOTE: This function does not work for grids with reverse faults, only normal faults.
-    '''
-    thickness_per_zone = {}
-    # List of number of layers per zone
-    number_of_layers, start_layers, end_layers = get_zone_layer_numbering(grid)
-    number_of_zones = len(number_of_layers)
-    simbox_indexer = grid.simbox_indexer
-    grid_indexer = grid.grid_indexer
-    (nx, ny, nz) = simbox_indexer.dimensions
-
-    for i in range(number_of_zones):
-        start = start_layers[i]
-        end = end_layers[i]
-        # All cell numbers in the zone
-        zone_cell_numbers_top_layer = simbox_indexer.get_cell_numbers_in_range((0, 0, start), (nx, ny, start + 1))
-
-        # Pick max_number_of_selected_cells arbitrary grid cells among the defined grid cells (from the zone_cell_numbers)
-        n_cells_active_in_zone_top = len(zone_cell_numbers_top_layer)
-        if n_cells_active_in_zone_top < max_number_of_selected_cells:
-            step_top = 1
-        else:
-            step_top = int(n_cells_active_in_zone_top/max_number_of_selected_cells+1)+1
-
-        sum_thickness_for_selected_cells = 0.0
-        n_cells_selected = 0
-        for j in range(0, n_cells_active_in_zone_top, step_top):
-            cell_number = zone_cell_numbers_top_layer[j]
-            ijk_index_top = grid_indexer.get_indices(cell_number)
-            ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], end)
-            if simbox_indexer.is_defined(ijk_index_bottom):
-                # Both the grid cell at top and bottom of the zone are defined.
-                # Get z coordinates and find thickness (approximately)
-                # print(ijk_index_top)
-                # print(ijk_index_bottom)
-                corner_top = grid.get_cell_corners_by_index(ijk_index_top)
-                corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
-                sum_thickness_in_cell = 0.0
-                for n in range(4):
-                    z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
-                    z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
-                    sum_thickness_in_cell += (z_bottom - z_top)
-                average_thickness_in_cell = sum_thickness_in_cell/4
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print('IJK_index top: {}   IJK_index bottom: {}   Average cell thickness; {}'.format(ijk_index_top, ijk_index_bottom, average_thickness_in_cell))
-                sum_thickness_for_selected_cells +=  average_thickness_in_cell
-                n_cells_selected += 1
-
-        if n_cells_selected == 0:
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('\n'
-                      'When estimating simbox thickness:  Have to use also inactive cells since there are 0 pairs of cells\n'
-                      '                                   where both are active and one is at top zone layer\n'
-                      '                                   and one at bottom zone layer')
-            for j in range(0, n_cells_active_in_zone_top, step_top):
-                cell_number = zone_cell_numbers_top_layer[j]
-                ijk_index_top = simbox_indexer.get_indices(cell_number)
-                ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], end)
-
-                # Use bottom cell even though it is inactive
-                # Get z coordinates and find thickness (approximately)
-                corner_top = grid.get_cell_corners_by_index(ijk_index_top)
-                corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
-                sum_thickness_in_cell = 0.0
-                for n in range(4):
-                    z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
-                    z_bottom = corner_bottom[n+4, 2]  # Bottom nodes of grid cell at bottom layer of zone
-                    sum_thickness_in_cell += (z_bottom - z_top)
-                average_thickness_in_cell = sum_thickness_in_cell/4
-                sum_thickness_for_selected_cells += average_thickness_in_cell
-                n_cells_selected += 1
-
-        assert n_cells_selected > 0
-        average_thickness_selected_cells = sum_thickness_for_selected_cells / n_cells_selected
-        thickness_per_zone[i + 1] = average_thickness_selected_cells
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('Zone number: {}   Estimated sim box thickness {}'.format(i+1, average_thickness_selected_cells))
-    return thickness_per_zone
-
-
 def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_number_of_selected_cells=1000):
     ''' Estimate simulation box thickness for each zone.
         This is done by assuming that it is sufficient to calculate difference
@@ -530,7 +443,7 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
     for zone_index in zone_indices:
         zone_name = grid.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
-        code_names[zone_index+1] = zone_name
+        code_names[zone_index + 1] = zone_name
         for lr in layer_ranges:
             # Get all the cell numbers for the layer range
             if debug_level >= Debug.VERBOSE:
@@ -603,35 +516,103 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
     return thickness_per_zone
 
 
-def getGridSimBoxSize(grid, debug_level=Debug.OFF):
-    indexer = grid.grid_indexer
-    (nx, ny, nz) = indexer.dimensions
+class GridSimBoxSize:
+    def __init__(self, grid, debug_level=Debug.OFF):
+        self.grid = grid
+        self.debug_level = debug_level
 
-    # Calculate dimensions of the simulation box
-    cell_00 = grid.get_cell_corners_by_index((0, 0, 0))
-    cell_10 = grid.get_cell_corners_by_index((nx - 1, 0, 0))
-    cell_01 = grid.get_cell_corners_by_index((0, ny - 1, 0))
+        if self.debug_level >= Debug.VERY_VERBOSE:
+            print('Debug output: Length in x direction:  ' + str(self.x_length))
+            print('Debug output: Length in y direction:  ' + str(self.y_length))
+            print('Debug output: Sim box rotation angle: ' + str(self.azimuth_angle))
 
-    x2 = cell_01[2][0]
-    x1 = cell_10[1][0]
-    x0 = cell_00[0][0]
-    y2 = cell_01[2][1]
-    y1 = cell_10[1][1]
-    y0 = cell_00[0][1]
+    @property
+    @cached
+    def dimensions(self):
+        return self.grid.grid_indexer.dimensions
 
-    sim_box_x_length = np.sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0))
-    sim_box_y_length = np.sqrt((x2 - x0) * (x2 - x0) + (y2 - y0) * (y2 - y0))
+    @property
+    @cached
+    def nx(self):
+        nx, *_ = self.grid.grid_indexer.dimensions
+        return nx
 
-    cos_theta = (y2 - y0) / sim_box_y_length
-    sin_theta = (x2 - x0) / sim_box_y_length
+    @property
+    @cached
+    def ny(self):
+        _, ny, _ = self.grid.grid_indexer.dimensions
+        return ny
 
-    azimuth_angle = np.arctan(sin_theta / cos_theta)
-    azimuth_angle *= 180.0 / np.pi
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: Length in x direction:  ' + str(sim_box_x_length))
-        print('Debug output: Length in y direction:  ' + str(sim_box_y_length))
-        print('Debug output: Sim box rotation angle: ' + str(azimuth_angle))
-    return sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0
+    @property
+    @cached
+    def cell_00(self):
+        return self.grid.get_cell_corners_by_index((0, 0, 0))
+
+    @property
+    @cached
+    def cell_10(self):
+        return self.grid.get_cell_corners_by_index((self.nx - 1, 0, 0))
+
+    @property
+    @cached
+    def cell_01(self):
+        return self.grid.get_cell_corners_by_index((0, self.ny - 1, 0))
+
+    @property
+    @cached
+    def x0(self):
+        return self.cell_00[0][0]
+
+    @property
+    @cached
+    def y0(self):
+        return self.cell_00[0][1]
+
+    @property
+    @cached
+    def x1(self):
+        return self.cell_10[1][0]
+
+    @property
+    @cached
+    def y1(self):
+        return self.cell_10[1][1]
+
+    @property
+    @cached
+    def x2(self):
+        return self.cell_01[2][0]
+
+    @property
+    @cached
+    def y2(self):
+        return self.cell_01[2][1]
+
+    @property
+    @cached
+    def y_length(self):
+        return np.sqrt(
+            (self.x2 - self.x0) * (self.x2 - self.x0)
+            + (self.y2 - self.y0) * (self.y2 - self.y0)
+        )
+
+    @property
+    @cached
+    def x_length(self):
+        return np.sqrt(
+            (self.x1 - self.x0) * (self.x1 - self.x0)
+            + (self.y1 - self.y0) * (self.y1 - self.y0)
+        )
+
+    @property
+    @cached
+    def azimuth_angle(self):
+        cos_theta = (self.y2 - self.y0) / self.y_length
+        sin_theta = (self.x2 - self.x0) / self.y_length
+
+        azimuth_angle = np.arctan(sin_theta / cos_theta)
+        azimuth_angle *= 180.0 / np.pi
+        return azimuth_angle
 
 
 def getNumberOfLayersPerZone(grid, zone_number):
@@ -680,78 +661,150 @@ def getZoneLayerNumbering(grid_model, realization_number=0):
     return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
 
 
-def getGridAttributes(grid, debug_level=Debug.OFF):
-    indexer = grid.simbox_indexer
-    dimensions = indexer.dimensions
+class GridAttributes:
+    def __init__(self, grid, debug_level=Debug.OFF):
+        self.grid = grid
+        self.debug_level = debug_level
 
-    # Get Max and Min coordinates
-    cell_numbers = indexer.get_cell_numbers_in_range((0, 0, 0), dimensions)
-    cell_corners = grid.get_cell_corners(cell_numbers)
+        if self.debug_level >= Debug.VERY_VERBOSE:
+            print('Min. X: {}   | Max. X: {}'.format(self.xmin, self.xmax))
+            print('Min. Y: {}   | Max. Y: {}'.format(self.ymin, self.ymax))
+            print('Min. Z: {}   | Max. Z: {}'.format(self.zmin, self.zmax))
+            print('------------------------------------------------')
 
-    xmin = cell_corners[:, :, 0].min()
-    xmax = cell_corners[:, :, 0].max()
-    ymin = cell_corners[:, :, 1].min()
-    ymax = cell_corners[:, :, 1].max()
-    zmin = cell_corners[:, :, 2].min()
-    zmax = cell_corners[:, :, 2].max()
+            # Get number of cells
+            nx, ny, nz = self.dimensions
+            total_cells = nx * ny * nz
 
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('Min. X: {}   | Max. X: {}'.format(xmin, xmax))
-        print('Min. Y: {}   | Max. Y: {}'.format(ymin, ymax))
-        print('Min. Z: {}   | Max. Z: {}'.format(zmin, zmax))
-        print('------------------------------------------------')
+            # Get Zone names
+            zone_names = []
+            for i, zone_index in enumerate(self.indexer.zonation.keys(), start=1):
+                zone_name = self.grid.zone_names[zone_index]
+                zone_names.append(zone_name)
 
-    # Get number of cells
-    total_cells = dimensions[0] * dimensions[1] * dimensions[2]
+            print('Total no. of cells:', total_cells)
+            print('No. of defined cells:', self.grid.defined_cell_count)
+            print('No. of undefined cells:', total_cells - self.grid.defined_cell_count)
+            print('------------------------------------------------')
 
-    # Get Zone names
-    zone_names = []
-    for i, zone_index in enumerate(indexer.zonation.keys(), start=1):
-        zone_name = grid.zone_names[zone_index]
-        zone_names.append(zone_name)
+            # Get dimensions
+            print('Number of columns:', nx)
+            print('Number of rows:', ny)
+            print('Number of layers:', nz)
+            print('No. of zones:', len(self.num_zones))
+            print('------------------------------------------------')
 
-    if debug_level >= Debug.VERY_VERBOSE:
-        print('Total no. of cells:', total_cells)
-        print('No. of defined cells:', grid.defined_cell_count)
-        print('No. of undefined cells:', total_cells - grid.defined_cell_count)
-        print('------------------------------------------------')
+            for i, zone_index in enumerate(self.indexer.zonation.keys(), start=1):
+                zone_name = grid.zone_names[zone_index]
+                # Only one interval of layers per zone for grid layers in sim box
+                assert len(self.indexer.zonation[zone_index]) == 1
+                layer_range = self.indexer.zonation[zone_index]
+                start, *_, end = layer_range[0]
+                num_layers_in_zone = (end + 1 - start)
+                # Indexes start with 0, so add 1 to give user-friendly output
+                layers_text = "{}-{} ".format(str(start + 1), str(end + 1))
+                print('Zone{}: "{}", Layers {} ({} layers)\n'.format(i, zone_name, layers_text, num_layers_in_zone))
 
-        # Get dimensions
-        print('Number of columns:', dimensions[0])
-        print('Number of rows:', dimensions[1])
-        print('Number of layers:', dimensions[2])
-        print('No. of zones:', len(indexer.zonation))
-        print('------------------------------------------------')
+    @property
+    @cached
+    def num_zones(self):
+        return len(self.indexer.zonation)
 
-    # Print Zones and Layers
-    zone_names = []
-    start_layer_per_zone = []
-    end_layer_per_zone = []
-    num_layers_per_zone = []
-    for i, zone_index in enumerate(indexer.zonation.keys(), start=1):
-        zone_name = grid.zone_names[zone_index]
-        zone_names.append(zone_name)
-        # Only one interval of layers per zone for grid layers in sim box
-        assert len(indexer.zonation[zone_index]) == 1
-        layer_range = indexer.zonation[zone_index]
-        current_range = layer_range[0]
-        start = current_range[0]
-        end = current_range[-1]
-        start_layer_per_zone.append(start)
-        end_layer_per_zone.append(end)
-        num_layers_in_zone = (end + 1 - start)
-        num_layers_per_zone.append(num_layers_in_zone)
-        # Indexes start with 0, so add 1 to give user-friendly output
-        if debug_level >= Debug.VERY_VERBOSE:
-            layers_text = "{}-{} ".format(str(start + 1), str(end + 1))
-            print('Zone{}: "{}", Layers {} ({} layers)\n'.format(i, zone_name, layers_text, num_layers_in_zone))
-    num_zones = len(indexer.zonation)
-    sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0 = getGridSimBoxSize(grid, debug_level)
-    return (
-        xmin, xmax, ymin, ymax, zmin, zmax, sim_box_x_length, sim_box_y_length, azimuth_angle, x0, y0,
-        dimensions[0], dimensions[1], dimensions[2], num_zones, zone_names, num_layers_per_zone, start_layer_per_zone,
-        end_layer_per_zone
-    )
+    @property
+    @cached
+    def sim_box_size(self):
+        return GridSimBoxSize(self.grid, self.debug_level)
+
+    @property
+    @cached
+    def cell_corners(self):
+        # Get Max and Min coordinates
+        cell_numbers = self.indexer.get_cell_numbers_in_range((0, 0, 0), self.dimensions)
+        cell_corners = self.grid.get_cell_corners(cell_numbers)
+        return cell_corners
+
+    @property
+    @cached
+    def xmin(self):
+        return self.cell_corners[:, :, 0].min()
+
+    @property
+    @cached
+    def xmax(self):
+        return self.cell_corners[:, :, 0].max()
+
+    @property
+    @cached
+    def ymin(self):
+        return self.cell_corners[:, :, 1].min()
+
+    @property
+    @cached
+    def ymax(self):
+        return self.cell_corners[:, :, 1].max()
+
+    @property
+    @cached
+    def zmin(self):
+        return self.cell_corners[:, :, 2].min()
+
+    @property
+    @cached
+    def zmax(self):
+        return self.cell_corners[:, :, 2].max()
+
+    @property
+    @cached
+    def zone_names(self):
+        zone_names = []
+        for zone_index in self.indexer.zonation.keys():
+            zone_name = self.grid.zone_names[zone_index]
+            zone_names.append(zone_name)
+        return zone_names
+
+    @property
+    @cached
+    def start_layers_per_zone(self):
+        start_layer_per_zone = []
+        for zone_index in self.indexer.zonation.keys():
+            # Only one interval of layers per zone for grid layers in sim box
+            assert len(self.indexer.zonation[zone_index]) == 1
+            layer_range, *_reverse = self.indexer.zonation[zone_index]
+            start_layer_per_zone.append(layer_range.start)
+        return start_layer_per_zone
+
+    @property
+    @cached
+    def end_layers_per_zone(self):
+        end_layer_per_zone = []
+        for zone_index in self.indexer.zonation.keys():
+            # Only one interval of layers per zone for grid layers in sim box
+            assert len(self.indexer.zonation[zone_index]) == 1
+            layer_range, *_reverse = self.indexer.zonation[zone_index]
+            end_layer_per_zone.append(layer_range.stop)
+        return end_layer_per_zone
+
+    @property
+    @cached
+    def num_layers_per_zone(self):
+        num_layers_per_zone = []
+        for zone_index in self.indexer.zonation.keys():
+            # Only one interval of layers per zone for grid layers in sim box
+            assert len(self.indexer.zonation[zone_index]) == 1
+            layer_range, *_reverse = self.indexer.zonation[zone_index]
+            num_layers_in_zone = (layer_range.stop - layer_range.start)
+            num_layers_per_zone.append(num_layers_in_zone)
+        return num_layers_per_zone
+
+    @property
+    @cached
+    def indexer(self):
+        return self.grid.simbox_indexer
+
+    @property
+    @cached
+    def dimensions(self):
+        return self.indexer.dimensions
 
 
 def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realization_number=0, set_shared=False, debug_level=Debug.OFF):

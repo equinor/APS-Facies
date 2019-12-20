@@ -48,6 +48,10 @@ export default class BayfillPolygon extends Polygon {
     }
   }
 
+  public get isFmuUpdatable (): boolean {
+    return super.isFmuUpdatable || (this.slantFactor !== null && this.slantFactor.updatable)
+  }
+
   public get specification (): BayfillPolygonSpecification {
     const _mapping: {[_: string]: string} = {
       'Bayhead Delta': 'SBHD',
