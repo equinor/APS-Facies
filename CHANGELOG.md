@@ -2,6 +2,69 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 0.13.0
+The main new feature of this release, is the integration with FMU / AHM / ERT.
+
+There are also several bug-fixes, and improvements.  Most of them, are related to making the APS GUI production-ready, and to iron out some usability issues.
+
+### What's new
+* Support for running APS in ERT / AHM / FMU
+  * Import / export of fields used in FMU from / to disk
+  * The user may specify each zone's conformity
+    * This information is captured in the model file with the new keyword, GridLayout
+  * The user may, still, update from FMU variables, without simulating GRF in FMU simbox
+  * If the model file has any parameters that are FMU updatable, the GUI will assume the imported model is to be run as a FMU / ERT job
+  * The user may select whether to import, or simulate fields
+  * Added support for reading seed from the file ERT uses (`RMS_SEED_USED`)
+  * Updates model file relative to FMU thickness
+  * Hide FMU checkboxes when not in FMU mode
+
+* Initial support for ensuring backwards, and possibly forwards, compatibility
+
+* Allow user to set debug level
+  * Write model file, and state to disk if debugging "run"
+
+* These release notes may be viewed in the GUI
+* Truncation rule templates are now presented as images
+
+### Deprecations
+* Do not allow simulation of `RMS_PARAM`
+
+
+### Fixes
+* Get, and use the correct zone thickness for all zones
+* Ensure state is clean when loading new job
+* Miscellaneous fixes to the export, and usage of the RMS mock
+* More explicit error message if the given input is not a string
+* Moved compare outside of unit tests, as it is used elsewhere
+* Create fields if they do not already exist
+* Updated default name of 'global IPL file'
+* Use unicode when writing model file
+* Ensure that the relative size of an ellipse is given in %
+* Overlay Facies is no longer toggled when selecting a template
+* Updates workflows when changing `master` and `develop`
+
+
+### Restructure
+* Moved trend calculation to the simulation step
+* Changed the default colors for Facies and Gaussian Fields
+* Improved various descriptions clearer, and less confusing
+* Created cached class of grid attributes
+* Removed old, and unused code
+* Reuses similar logic, and control flow
+* Improved type annotation
+* Consistent usage of `global_variables` instead of `global_include`
+* Cleaner API, and more compliant with PEP8
+* Renamed the "Default" colors to "APS"
+* Gathered all usage of 'NONE', and 'RMS_PARAM', when checking type
+* 'Curvature of ellipse' -> 'Curvature'
+
+
+### Miscellaneous
+* Ignores test data
+* Updated dependencies
+
+
 ## 0.12.0
 This release _mostly_ fixes various issues.
 Some of the feedback from the First User has been addressed.
