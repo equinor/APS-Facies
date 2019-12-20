@@ -87,10 +87,10 @@ const store: Store<RootState> = new Vuex.Store({
         commit('FINISHED')
       }
     },
-    async populate ({ dispatch, commit }, data): Promise<void> {
+    async populate ({ dispatch }, data): Promise<void> {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       resetState()
-      commit('LOADING', { loading: true, message: 'Loading job. Please wait.' })
+      await dispatch('startLoading')
       try {
         await dispatch('fetch')
 
@@ -151,9 +151,15 @@ const store: Store<RootState> = new Vuex.Store({
         // Reopen the different panels
         await dispatch('panels/populate', data.panels)
       } finally {
-        commit('LOADING', { loading: false })
+        await dispatch('finnishLoading')
       }
     },
+    async startLoading ({ commit }): Promise<void> {
+      commit('LOADING', { loading: true, message: 'Loading job. Please wait.' })
+    },
+    async finnishLoading ({ commit }): Promise<void> {
+      commit('LOADING', { loading: false })
+    }
   },
 
   mutations: {
