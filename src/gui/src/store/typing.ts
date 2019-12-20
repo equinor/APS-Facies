@@ -44,6 +44,7 @@ interface Store {
 }
 
 interface RootState {
+  version: string
   _loaded: {
     value: boolean
     loading: boolean
