@@ -28,6 +28,7 @@ import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
 import BaseItem from '@/utils/domain/bases/baseItem'
 
+import migrate from '@/store/utils/migration'
 import {
   defaultSimulationSettings,
   getParameters,
@@ -41,6 +42,7 @@ Vue.use(Vuex)
 const store: Store<RootState> = new Vuex.Store({
   // @ts-ignore
   state: {
+    version: '1.0.0',
     _loaded: {
       value: false,
       loading: false,
@@ -87,10 +89,11 @@ const store: Store<RootState> = new Vuex.Store({
         commit('FINISHED')
       }
     },
-    async populate ({ dispatch }, data): Promise<void> {
+    async populate ({ dispatch, state }, data): Promise<void> {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       resetState()
       await dispatch('startLoading')
+      data = migrate(data, state.version)
       try {
         await dispatch('fetch')
 
