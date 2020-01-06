@@ -105,7 +105,6 @@ def run(roxar=None, project=None, **kwargs):
             project,
             grid_model_name,
             field_name,
-            saveproject=True,
             realisation=project.current_realisation,
         )
 
