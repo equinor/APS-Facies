@@ -134,7 +134,7 @@ export default class FaciesTable extends Vue {
   get noDataText () {
     return this.loading
       ? 'Loading facies table from RMS'
-      : 'There are no facies for the selected well logs'
+      : 'There are no facies for the selected well logs. You may still add new facies.'
   }
 
   get facies () { return this.$store.getters['faciesTable'] }
