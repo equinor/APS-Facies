@@ -51,6 +51,9 @@ export default class ChooseParameter<T = any> extends Vue {
   @Prop({ default: '' })
   readonly warnMessage!: string
 
+  @Prop({ default: false, type: Boolean })
+  readonly warnEvenWhenEmpty: boolean
+
   get available (): T[] { return (this.$store as Store).state.parameters[this.parameterType].available }
   get isDisabled (): boolean { return (!this.regular && this.available ? this.available.length <= 1 : false) || this.disabled }
   get isShown (): boolean { return !(this.hideIfDisabled && this.isDisabled) }
@@ -59,7 +62,7 @@ export default class ChooseParameter<T = any> extends Vue {
   set selected (value: T) {
     const changeValue = () => this.$store.dispatch(`parameters/${this.parameterType}/select`, value)
 
-    if (this.warn && !!this.selected) {
+    if (this.warn && (!!this.selected || this.warnEvenWhenEmpty)) {
       // @ts-ignore
       (this.$refs['confirm'] as ConfirmationDialog).open('Are you sure?', this.warnMessage)
         .then((confirmed: boolean) => {

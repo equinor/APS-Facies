@@ -50,9 +50,22 @@
                 />
               </v-col>
               <v-col cols="12">
-                <facies-selection
-                  v-if="hasBlockedWellLogParameter"
-                />
+                <facies-selection />
+              </v-col>
+            </v-row>
+            <v-row
+              v-else
+              no-gutters
+            >
+              <v-col
+                cols="12"
+              >
+                <p class="text-center">
+                  {{ gridName }} has no blocked well parameters
+                </p>
+              </v-col>
+              <v-col cols="12">
+                <facies-selection />
               </v-col>
             </v-row>
           </v-row>
@@ -100,15 +113,14 @@ export default class ElementSelection extends Vue {
   get hasWellParameters (): boolean {
     return this.$store.state.parameters.blockedWell.available.length > 0
   }
-  get hasBlockedWellLogParameter (): boolean {
-    return !!this.$store.getters.blockedWellLogParameter
-  }
   get hasBlockedWellParameter (): boolean {
     return !!this.$store.getters.blockedWellParameter
   }
   get currentGridModel (): Optional<ID> {
     return this.$store.state.gridModels.current
   }
+
+  get gridName (): string { return this.$store.getters.gridModel }
 }
 </script>
 
