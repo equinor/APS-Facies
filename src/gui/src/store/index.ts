@@ -183,6 +183,8 @@ const store: Store<RootState> = new Vuex.Store({
   },
 
   getters: {
+    loaded: (state): boolean => state._loaded.value,
+    loading: (state): boolean => state._loading.value,
     mayLoadParameters: (state): boolean => {
       return !(state._loaded.value || state._loaded.loading)
     },

@@ -32,8 +32,13 @@ import MainPage from '@/pages/MainPage.vue'
 })
 export default class App extends Vue {
   beforeMount () {
-    // Fetch various parameters
-    return this.$store.dispatch('fetch')
+    if (
+      !this.$store.getters.loaded
+      && !this.$store.getters.loading
+    ) {
+      // Fetch various parameters
+      this.$store.dispatch('fetch')
+    }
   }
 }
 </script>
