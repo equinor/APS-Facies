@@ -369,7 +369,7 @@ export default class ProjectSettings extends Vue {
     await Promise.all([
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
-      dispatch('parameters/debugLevel/set', this.debugLevel),
+      dispatch('parameters/debugLevel/select', this.debugLevel),
 
       dispatch('fmu/maxDepth/set', this.maxLayersInFmu),
       dispatch('fmu/runFmuWorkflows/set', this.runFmuWorkflows),

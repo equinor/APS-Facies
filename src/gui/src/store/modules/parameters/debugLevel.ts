@@ -10,7 +10,7 @@ const module: Module<Selectable<number>, RootState> = {
   },
 
   actions: {
-    set ({ commit }, level: number) {
+    select ({ commit }, level: number) {
       if (level >= 0 && level <= 4) {
         commit('SET', level)
       } else {
