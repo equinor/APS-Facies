@@ -16,12 +16,6 @@ module.exports = {
 
   css: {
     sourceMap: !isProduction,
-    modules: false,
-    loaderOptions: {
-      css: {
-        minimize: isProduction,
-      },
-    }
   },
 
   chainWebpack: config => {
