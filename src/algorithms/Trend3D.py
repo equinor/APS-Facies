@@ -273,7 +273,15 @@ class Trend3D:
             'Can not use: {} object as a trend object. Use sub classes of this as trend'.format(self._class_name)
         )
 
-    def createTrend(self, grid_model, realization_number, cell_index_defined, zone_number, sim_box_thickness):
+    def createTrend(
+            self,
+            grid_model,
+            realization_number,
+            cell_index_defined,
+            zone_number,
+            sim_box_thickness,
+            zinc=None,
+    ):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
         """
@@ -303,23 +311,24 @@ class Trend3D:
 
         zonation = grid_indexer.zonation
         layer_ranges = zonation[zone_number - 1]
-        n = 0
+
         start_layer = np.infty
-        end_layer = -1
+        end_layer = -np.infty
         for layer in layer_ranges:
             if start_layer > layer[0]:
                 start_layer = layer[0]
             if end_layer < layer[-1]:
                 end_layer = layer[-1]
 
-            for _ in layer:
-                n += 1
-        num_layers_in_zone = n
-
         # Set start and end layer for this zone
         self._start_layer = start_layer
         self._end_layer = end_layer
-        zinc = sim_box_thickness / num_layers_in_zone
+        if zinc is None:
+            num_layers_in_zone = 0
+            for layer in layer_ranges:
+                num_layers_in_zone += len(layer)
+
+            zinc = sim_box_thickness / num_layers_in_zone
         if self._debug_level >= Debug.VERY_VERBOSE:
             zone_name = grid_3d.zone_names[zone_number - 1]
             print(
@@ -328,12 +337,11 @@ class Trend3D:
                 'Debug output:  SimboxThickness: {}\n'
                 'Debug output:  Zinc: {}\n'
                 'Debug output:  nx,ny,nz: {}, {}, {}\n'
-                'Debug output:  Number of layers in zone: {}\n'
                 'Debug output:  Start layer in zone: {}\n'
                 'Debug output:  End layer in zone: {}\n'
                 'Debug output:  Trend type: {}'
                 ''.format(
-                    self._class_name, zone_name, sim_box_thickness, zinc, nx, ny, nz, num_layers_in_zone,
+                    self._class_name, zone_name, sim_box_thickness, zinc, nx, ny, nz,
                     start_layer + 1, end_layer + 1, self.type.name
                 )
             )

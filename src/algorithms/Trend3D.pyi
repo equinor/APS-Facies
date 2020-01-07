@@ -106,7 +106,15 @@ class Trend3D:
             yinc,
             zinc
     ): ...
-    def createTrend(self, grid_model, realization_number, cell_index_defined, zone_number, sim_box_thickness): ...
+    def createTrend(
+            self,
+            grid_model,
+            realization_number,
+            cell_index_defined,
+            zone_number,
+            sim_box_thickness,
+            zinc: Optional[float] = None,
+    ): ...
     def createTrendFor2DProjection(
         self,
         sim_box_size,
