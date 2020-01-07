@@ -88,8 +88,8 @@ function organizeCubicPolygons (polygons, levels) {
 
 function getDirection (settings) {
   const mapping = {
-    'H': Orientation.HORIZONTAL,
-    'V': Orientation.VERTICAL,
+    H: Orientation.HORIZONTAL,
+    V: Orientation.VERTICAL,
   }
   let direction = settings[0].direction
   if (typeof direction !== 'string') return null

@@ -2,7 +2,7 @@ import store from '@/store'
 
 import { displayMessage as baseDisplayMessage } from '@/store/utils'
 
-export async function displayMessage (message: string, type: string = 'info'): Promise<void> {
+export async function displayMessage (message: string, type = 'info'): Promise<void> {
   await baseDisplayMessage(store, message, type)
 }
 

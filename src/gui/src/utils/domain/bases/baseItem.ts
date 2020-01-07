@@ -43,6 +43,7 @@ export default class BaseItem implements Identifiable {
     // This makes reconstruction / population _much_ easier
     // Adapted from https://stackoverflow.com/a/50785428, and https://stackoverflow.com/a/8024294
     const jsonObj = Object.assign({}, this)
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let proto = this
     do {
       for (const key of Object.getOwnPropertyNames(proto)) {

@@ -91,7 +91,7 @@ import { Cubic, CubicPolygon } from '@/utils/domain'
   }
 })
 export default class CubicTruncationRuleSpecification extends Vue {
-  splitInto: number = 2
+  splitInto = 2
   selected: CubicPolygon[] = []
 
   @Prop({ required: true })
@@ -103,6 +103,7 @@ export default class CubicTruncationRuleSpecification extends Vue {
       : this.value.root || new CubicPolygon({ order: -1 })
     this.$store.dispatch('truncationRules/split', { rule: this.value, polygon, value: this.splitInto })
   }
+
   merge () { this.$store.dispatch('truncationRules/merge', { rule: this.value, polygons: this.selected.splice(0, this.selected.length) }) }
 
   get canSplit (): boolean {

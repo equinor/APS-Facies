@@ -23,6 +23,7 @@
     "baseUrl": ".",
     "types": [
       "vuetify",
+      "node",
       "webpack-env",
       "jest"
     ],
@@ -41,6 +42,7 @@
   },
   "files": [
     "./node_modules/vuex/types/vue.d.ts",
+    "./node_modules/vuetify/types/index.d.ts",
     "./node_modules/vuetify/src/globals.d.ts",
     "./src/vue-shims.d.ts"
   ],

@@ -13,7 +13,7 @@ export default class FmuUpdatableValue implements FmuUpdatable {
 
   public constructor (
     value: number | FmuUpdatable,
-    updatable: boolean = false,
+    updatable = false,
   ) {
     if (value instanceof Object) {
       if ('updatable' in (value as object)) {

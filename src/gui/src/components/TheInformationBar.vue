@@ -19,7 +19,7 @@ import BaseMessage from '@/utils/domain/messages/base'
 
 @Component
 export default class InformationBar extends Vue {
-  shown: boolean = false
+  shown = false
 
   get _message () {
     return this.$store.state.message.value || {

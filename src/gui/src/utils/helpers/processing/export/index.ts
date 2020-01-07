@@ -15,6 +15,7 @@ import {
 import Variogram from '@/utils/domain/gaussianRandomField/variogram'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import { Identified } from '@/utils/domain/bases/interfaces'
+import { hasOwnProperty } from '@/utils/helpers'
 import { getFaciesName } from '@/utils/queries'
 
 class APSExportError extends Error {
@@ -146,7 +147,7 @@ function addMainFaciesTable ({ rootState, rootGetters }: Context, doc: Document,
   ])
   parentElement.appendChild(mainFaciesElement)
   // finding all available facies
-  const allFacies = rootGetters['faciesTable']
+  const allFacies = rootGetters.faciesTable
   allFacies.forEach((facies): void => {
     const faciesElem = createElement(doc, 'Facies', null, [{ name: 'name', value: facies.name }])
     mainFaciesElement.append(faciesElem)
@@ -450,7 +451,7 @@ function addTruncationRuleOverlay<
   const overlayGroups: Identified<OverlayPolygon[]> = truncRule.overlayPolygons
     .reduce((obj, polygon): Identified<OverlayPolygon[]> => {
       const groupId = polygon.group.id
-      if (!obj.hasOwnProperty(groupId)) obj[`${groupId}`] = []
+      if (!hasOwnProperty(obj, groupId)) obj[`${groupId}`] = []
       obj[`${groupId}`].push(polygon)
       return obj
     }, {})
@@ -654,7 +655,7 @@ export function extractFmuVariables (doc: string): string {
 }
 
 export function createFmuVariables (context: Context): string {
-  let doc = createModel(context)
+  const doc = createModel(context)
   return extractFmuVariables(doc)
 }
 

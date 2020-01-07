@@ -43,6 +43,7 @@ import FaciesSpecification from '@/components/specification/Facies/index.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import { Bayfill, BayfillPolygon } from '@/utils/domain'
+import { HeaderItems } from '@/utils/typing'
 
 @Component({
   components: {
@@ -56,13 +57,13 @@ export default class BayfillPolygonTable extends Vue {
   @Prop({ required: true })
   readonly value!: Bayfill
 
-  get polygons () {
+  get polygons (): BayfillPolygon[] {
     return !this.value
       ? []
       : this.value.backgroundPolygons
   }
 
-  get headers () {
+  get headers (): HeaderItems {
     return [
       {
         text: 'Polygon',
@@ -79,7 +80,7 @@ export default class BayfillPolygonTable extends Vue {
     ]
   }
 
-  async updateFactor (item: BayfillPolygon, value: number) {
+  async updateFactor (item: BayfillPolygon, value: number): Promise<void> {
     await this.$store.dispatch('truncationRules/changeSlantFactors', {
       rule: this.value,
       polygon: item,

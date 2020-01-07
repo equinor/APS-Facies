@@ -104,8 +104,8 @@ import { Optional } from '@/utils/typing'
   },
 })
 export default class ElementSelection extends Vue {
-  disabled: boolean = false
-  readonly: boolean = false
+  disabled = false
+  readonly = false
 
   get panels (): number[] { return this.$store.getters['panels/selection'] }
   set panels (indices) { this.$store.dispatch('panels/change', { type: 'selection', indices }) }
@@ -113,9 +113,11 @@ export default class ElementSelection extends Vue {
   get hasWellParameters (): boolean {
     return this.$store.state.parameters.blockedWell.available.length > 0
   }
+
   get hasBlockedWellParameter (): boolean {
     return !!this.$store.getters.blockedWellParameter
   }
+
   get currentGridModel (): Optional<ID> {
     return this.$store.state.gridModels.current
   }

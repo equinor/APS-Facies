@@ -51,6 +51,7 @@ export default class PolygonOrder<
       .map(polygon => polygon.order)
       .reduce((max, order) => order > max ? order : max, 0)
   }
+
   get min (): number {
     return Math.min(
       ...this.rule.polygons
@@ -58,12 +59,15 @@ export default class PolygonOrder<
         .map(({ order }) => order)
     )
   }
+
   get canIncrease () {
     return this.value.order < this.max
   }
+
   get canDecrease () {
     return this.value.order > this.min
   }
+
   get canRemove (): boolean {
     return (
       (this.overlay && this.rule instanceof OverlayTruncationRule)
@@ -71,6 +75,7 @@ export default class PolygonOrder<
         : this.rule.backgroundPolygons
     ).length > this.minPolygons
   }
+
   get canAdd (): boolean {
     return true
   }
@@ -83,9 +88,11 @@ export default class PolygonOrder<
       group: this.value instanceof OverlayPolygon ? this.value.group : null,
     })
   }
+
   deletePolygon () {
     return this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })
   }
+
   changeOrder (direction: number) {
     return this.$store.dispatch('truncationRules/changeOrder', { rule: this.rule, polygon: this.value, direction })
   }

@@ -37,6 +37,7 @@ export default class ChooseGridModel extends Vue {
     const id = (this.$store as Store).state.gridModels.current
     return (this.$store as Store).state.gridModels.available[`${id}`]
   }
+
   async setter (value: GridModel) {
     await this.$store.dispatch('gridModels/select', value)
   }

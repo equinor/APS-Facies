@@ -27,6 +27,7 @@ import {
   allSet,
   getId,
   getRandomInt,
+  hasOwnProperty,
   includes,
   isEmpty,
   isUUID,
@@ -61,10 +62,11 @@ function defaultSimulationSettings (): SimulationSettings {
   }
 }
 
-function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpecification<P>> (specification: Spec, includeOverlay: boolean = true): Spec {
+function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpecification<P>> (specification: Spec, includeOverlay = true): Spec {
   return {
     ...specification,
     polygons: specification.polygons
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       .filter((polygon: P): boolean => polygon.overlay ? includeOverlay : true)
       .map((polygon: P): P => {
@@ -74,6 +76,7 @@ function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpe
           fraction: 1,
         }
       }),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     overlay: includeOverlay ? specification.overlay : null
   }
@@ -138,8 +141,10 @@ function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: Roo
   return facies
     .map(({ facies: globalFacies, previewProbability, id }): GlobalFaciesSpecification => {
       let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       if (isEmpty(polygon) && rule.overlay) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
         polygon = Object.values(rule.overlay).find((polygon): boolean => polygon.facies.id === id)
       }
@@ -175,10 +180,11 @@ function makeTruncationRuleSpecification (rule: TruncationRule, rootGetters: Roo
   }
 }
 
-function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEarly: boolean = false): void {
+function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEarly = false): void {
   let children = component.$children.slice()
   while (children.length > 0) {
     const child = children.shift()
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     if (typeof child !== 'undefined' && child.dialog !== false) {
       if (child.$v && child.$v.$invalid) {
@@ -209,8 +215,8 @@ function parentId ({ zone, region }: Parent): ID {
 }
 
 function faciesName (obj: any) {
-  if (obj.hasOwnProperty('facies')) obj = obj.facies
-  if (obj.hasOwnProperty('name')) obj = obj.name
+  if (hasOwnProperty(obj, 'facies')) obj = obj.facies
+  if (hasOwnProperty(obj, 'name')) obj = obj.name
   return obj
 }
 
@@ -225,18 +231,14 @@ function minFacies (rule: any, getters: RootGetters): number {
     || [type, rule.type].includes('cubic')
   ) {
     if (rule.polygons) {
-      // @ts-ignore
-      const uniqueFacies = new Set(rule.polygons.map((polygon): string => faciesName(polygon)))
+      const uniqueFacies = new Set(rule.polygons.map((polygon: any): string => faciesName(polygon)))
       if (rule.overlay) {
         const items = Object.values(rule.overlay.items || rule.overlay)
-        items.forEach((item): void => {
-          // @ts-ignore
+        items.forEach((item: any): void => {
           item.polygons
-          // @ts-ignore
-            ? item.polygons.forEach((polygon): void => {
+            ? item.polygons.forEach((polygon: any): void => {
               uniqueFacies.add(polygon.facies.name)
             })
-          // @ts-ignore
             : uniqueFacies.add(item.facies)
         })
       }
@@ -259,7 +261,6 @@ function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
 
 const resolve = (path: string | string[], obj: object = self, separator = '.'): object => {
   const properties = Array.isArray(path) ? path : path.split(separator)
-  // @ts-ignore
   return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)
 }
 
@@ -272,7 +273,7 @@ function sortByProperty<T extends object> (prop: string): (items: T[]) => T[] {
   return function (items: T[]): T[] {
     if (items instanceof Object) items = Object.values(items)
     items.forEach((item: T): void => {
-      if (!item.hasOwnProperty(prop)) {
+      if (!hasOwnProperty(item, prop)) {
         throw new Error(`The item (${item}) does not have the required property on which to sort (${prop})`)
       }
     })
@@ -293,7 +294,7 @@ function toIdentifiedObject<T> (items: T[]): Identified<T> {
   }, {})
 }
 
-function getParameters (collection: object, delimiter: string = '.'): string[] {
+function getParameters (collection: object, delimiter = '.'): string[] {
   const parameters = new Set(Object.keys(collection))
   const selectable = Object.keys(flatten(collection, { delimiter }))
     .filter((param): boolean => param.endsWith('selected'))

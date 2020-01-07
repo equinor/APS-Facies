@@ -304,24 +304,24 @@ import { Optional } from '@/utils/typing'
   },
 })
 export default class JobSettings extends Vue {
-  dialog: boolean = false
-  apsModelFileLocation: string = ''
-  fmuParameterListLocation: string = ''
-  showZoneNameNumber: string = ''
-  showRegionNameNumber: string = ''
-  automaticAlphaFieldSelection: string = ''
-  automaticFaciesFill: string = ''
-  filterZeroProbability: boolean = false
-  runFmuWorkflows: boolean = false
-  colorScale: string = ''
+  dialog = false
+  apsModelFileLocation = ''
+  fmuParameterListLocation = ''
+  showZoneNameNumber = ''
+  showRegionNameNumber = ''
+  automaticAlphaFieldSelection = ''
+  automaticFaciesFill = ''
+  filterZeroProbability = false
+  runFmuWorkflows = false
+  colorScale = ''
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
-  debugLevel: number = 0
-  importFields: boolean = false
-  fmuGrid: string = ''
-  createFmuGrid: boolean = false
-  onlyUpdateFromFmu: boolean = false
-  maxAllowedFractionOfValuesOutsideTolerance: number = 0
+  debugLevel = 0
+  importFields = false
+  fmuGrid = ''
+  createFmuGrid = false
+  onlyUpdateFromFmu = false
+  maxAllowedFractionOfValuesOutsideTolerance = 0
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -360,6 +360,7 @@ export default class JobSettings extends Vue {
   cancel () {
     this.dialog = false
   }
+
   async ok () {
     const dispatch = this.$store.dispatch
     await Promise.all([

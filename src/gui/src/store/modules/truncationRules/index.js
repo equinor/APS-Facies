@@ -299,7 +299,7 @@ export default {
         .reduce((obj, polygon) => {
           const id = getId(polygon.facies)
           if (id) {
-            if (!obj.hasOwnProperty(id)) obj[`${id}`] = []
+            if (!hasOwnProperty(obj, id)) obj[`${id}`] = []
             obj[`${id}`].push(polygon)
           }
           return obj

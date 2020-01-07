@@ -61,7 +61,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 
 import BaseItem from '@/utils/domain/bases/baseItem'
 import { ID } from '@/utils/domain/types'
-import { compareFn } from 'vuetify/src/util/helpers'
+import { DataTableCompareFunction } from 'vuetify/types'
 
 interface Header {
   text: string
@@ -111,7 +111,7 @@ export default class SelectionTable<T extends BaseItem> extends Vue {
   readonly elevation: string
 
   @Prop({ default: undefined })
-  readonly customSort!: ((items: T[], sortBy: string[], sortDesc: boolean[], locale: string, customSorters?: Record<string, compareFn>) => T[]) | undefined
+  readonly customSort!: ((items: T[], sortBy: string[], sortDesc: boolean[], locale: string, customSorters?: Record<string, DataTableCompareFunction>) => T[]) | undefined
 
   @Prop({ default: false, type: Boolean })
   readonly dense!: boolean

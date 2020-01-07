@@ -34,10 +34,6 @@ const module: Module<ZoneState, RootState> = {
       await dispatch('gaussianRandomFields/crossSections/fetch', { zone: id }, { root: true })
       commit('CURRENT', { id })
       await dispatch('truncationRules/preset/fetch', undefined, { root: true })
-
-      const zone = state.available[`${id}`]
-      await dispatch('parameters/grid/thickness', zone.name, { root: true })
-      await dispatch('parameters/grid/simBox/thickness', zone.name, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }): Promise<void> => {
       commit('LOADING', true)
@@ -57,6 +53,7 @@ const module: Module<ZoneState, RootState> = {
       instances.forEach((zone): void => {
         if (zone.regions) {
           zone.regions.forEach((region): void => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
             // @ts-ignore
             region.zone = zone
           })

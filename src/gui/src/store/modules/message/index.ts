@@ -22,10 +22,10 @@ const module: Module<MessageState, RootState> = {
     change ({ commit }, value: BaseMessage | { message: string, type: MessageType }): void {
       if (!(value instanceof BaseMessage)) {
         const _class = {
-          'error': ErrorMessage,
-          'info': Message,
-          'warning': WarningMessage,
-          'success': SuccessMessage,
+          error: ErrorMessage,
+          info: Message,
+          warning: WarningMessage,
+          success: SuccessMessage,
         }[value.type]
         value = new _class(value.message)
       }

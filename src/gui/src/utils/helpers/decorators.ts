@@ -5,6 +5,7 @@ export const NoCache = createDecorator((options, key): void => {
   // component options should be passed to the callback
   // and update for the options object affect the component
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   options.computed[`${key}`].cache = false
 })

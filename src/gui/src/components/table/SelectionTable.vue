@@ -71,6 +71,8 @@ import SelectableItem from '@/utils/domain/bases/selectableItem'
 
 import { getId } from '@/utils'
 
+import { HeaderItems } from '@/utils/typing'
+
 @Component({
   components: {
     ConformSelection,
@@ -98,7 +100,7 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
   @Prop({ default: '$vuetify.dataIterator.loadingText' })
   readonly loadingText!: string
 
-  get _noDataText () {
+  get _noDataText (): string {
     return this.loading
       ? `Loading ${this.itemType}s`
       : this.noDataText
@@ -106,7 +108,7 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
 
   get loading (): boolean { return this.$store.state[`${this.itemType}s`]._loading }
 
-  get headers () {
+  get headers (): HeaderItems {
     return [
       {
         text: 'Use',
@@ -154,7 +156,7 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
     this.$store.dispatch(`${this.itemType}s/select`, values)
   }
 
-  get source () {
+  get source (): T {
     return this.$store.state.copyPaste.source
   }
 
@@ -173,19 +175,19 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
     return !!source && source.id !== item.id
   }
 
-  isPasting (item: T) {
+  isPasting (item: T): boolean {
     return !!this.$store.getters['copyPaste/isPasting'](this.getItem(item))
   }
 
-  async copy (item: T) {
+  async copy (item: T): Promise<void> {
     await this.$store.dispatch('copyPaste/copy', this.getItem(item))
   }
 
-  async paste (item: T) {
+  async paste (item: T): Promise<void> {
     await this.$store.dispatch('copyPaste/paste', this.getItem(item))
   }
 
-  updateSelection (item: T, value: boolean) {
+  updateSelection (item: T, value: boolean): void {
     if (value) {
       this.selected = [...this.selected, item]
     } else {

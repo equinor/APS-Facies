@@ -3,12 +3,12 @@ export function isDevelopmentBuild (): boolean {
 }
 
 export const DEFAULT_SIZE = {
-  'max': {
-    'width': Number.POSITIVE_INFINITY,
-    'height': Number.POSITIVE_INFINITY,
+  max: {
+    width: Number.POSITIVE_INFINITY,
+    height: Number.POSITIVE_INFINITY,
   },
-  'width': 200,
-  'height': 200,
+  width: 200,
+  height: 200,
 }
 
 export const DEFAULT_POINT_SIZE = 1.2
@@ -49,7 +49,7 @@ export const COLOR_SCALES = [
 ]
 
 export const DEFAULT_CROSS_SECTION = {
-  'type': 'IJ',
+  type: 'IJ',
 }
 
 export const DEFAULT_CUBIC_LEVELS = 3
@@ -67,7 +67,7 @@ export const DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE = {
   height: 100,
 }
 
-export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION = [
+export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION: ('RMS_PARAM' | 'NONE' | 'LINEAR' | 'ELLIPTIC' | 'ELLIPTIC_CONE' | 'HYPERBOLIC')[] = [
   'RMS_PARAM',
   'NONE',
 ]

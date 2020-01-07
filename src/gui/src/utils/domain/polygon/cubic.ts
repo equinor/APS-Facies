@@ -52,7 +52,7 @@ export default class CubicPolygon extends Polygon {
   }
 
   public get atLevel (): number {
-    let level: number = this.level.findIndex((level): boolean => level === 0)
+    const level: number = this.level.findIndex((level): boolean => level === 0)
     return level >= 0 ? level : this.level.length
   }
 

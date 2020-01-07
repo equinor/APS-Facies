@@ -5,7 +5,7 @@ import ColorLibrary from '@/utils/domain/colorLibrary'
 import APSError from '@/utils/domain/errors/base'
 
 import { Color, colorLibraries } from '@/utils/domain/facies/helpers/colors'
-import { identify } from '@/utils/helpers'
+import { hasOwnProperty, identify } from '@/utils/helpers'
 import Vue from 'vue'
 import { Module } from 'vuex'
 
@@ -37,7 +37,7 @@ const module: Module<FaciesColorsState, RootState> = {
     },
 
     async populate ({ commit, dispatch, state }, { available, current }): Promise<void> {
-      const name = available.hasOwnProperty(current)
+      const name = hasOwnProperty(available, current)
         ? available[`${current}`].name
         : DEFAULT_COLOR_LIBRARY
       if (Object.values(state.available).length === 0) {

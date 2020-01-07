@@ -9,10 +9,11 @@ import { TruncationRuleTemplate, TruncationRuleTemplateType, TruncationRuleTempl
 import { RootState } from '@/store/typing'
 import { Identified } from '@/utils/domain/bases/interfaces'
 
-function isEqual (values: TruncationRuleTemplateType[], others: Identified<TruncationRuleTemplate>): boolean {
+function isEqual (values: (TruncationRuleTemplateType | any)[], others: Identified<TruncationRuleTemplate>): boolean {
   const _values = Object.values(values)
   const _others = Object.values(others)
   return _values.length === _others.length
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     && _values.every((value): boolean => _others.indexOf(({ name, type }) => value.name === name && type === value.type))
 }
@@ -30,7 +31,6 @@ const module: Module<TruncationRuleTemplateState, RootState> = {
       commit('AVAILABLE', types)
     },
     populate ({ commit }, types): void {
-      // @ts-ignore
       if (isEqual(templates.types, types)) {
         commit('AVAILABLE', types)
       } else {

@@ -87,6 +87,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import Swatches from 'vue-swatches'
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
@@ -115,7 +116,7 @@ export default class FaciesTable extends Vue {
 
   expanded: Facies[] = []
 
-  get canSelect () { return this.$store.getters['canSpecifyModelSettings'] }
+  get canSelect () { return this.$store.getters.canSpecifyModelSettings }
 
   get loading () { return this.$store.state.facies.global._loading }
 
@@ -128,7 +129,7 @@ export default class FaciesTable extends Vue {
       : 'There are no facies for the selected well logs. You may still add new facies.'
   }
 
-  get facies () { return this.$store.getters['faciesTable'] }
+  get facies () { return this.$store.getters.faciesTable }
 
   get parent () {
     const state = this.$store.state
@@ -137,6 +138,7 @@ export default class FaciesTable extends Vue {
       region: state.regions.current
     }
   }
+
   get headers () {
     return [
       {
@@ -164,6 +166,7 @@ export default class FaciesTable extends Vue {
       },
     ]
   }
+
   get selected () {
     const state: RootState = this.$store.state
     const getters: RootGetters = this.$store.getters
@@ -172,6 +175,7 @@ export default class FaciesTable extends Vue {
         .filter(facies => hasCurrentParents(facies, getters))
         .findIndex(localFacies => localFacies.facies.id === facies.id) >= 0)
   }
+
   set selected (value) { this.$store.dispatch('facies/select', { items: value, parent: this.parent }) }
 
   get availableColors () { return this.$store.getters['constants/faciesColors/available'] }

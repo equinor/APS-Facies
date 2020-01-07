@@ -26,13 +26,13 @@ const module: Module<FaciesGroupState, RootState> = {
       groups = groups.map((group): FaciesGroup => new FaciesGroup(group))
       groups.forEach((group): void => {
         if (group.facies.some((facies): boolean => !rootGetters['facies/byId'](facies))) {
-          throw new Error(`The group reference a facies that does not exist`)
+          throw new Error('The group reference a facies that does not exist')
         }
       })
       commit('AVAILABLE', toIdentifiedObject(groups))
     },
     async get ({ getters, dispatch }, { facies, parent }): Promise<FaciesGroup> {
-      let group = getters['byFacies'](facies, parent)
+      let group = getters.byFacies(facies, parent)
       if (!group) {
         group = await dispatch('add', { facies, parent })
       }

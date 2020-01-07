@@ -35,6 +35,7 @@
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
+import { HeaderItems } from '@/utils/typing'
 import Facies from '@/utils/domain/facies/local'
 import { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
@@ -45,6 +46,8 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import BackgroundGroupFaciesSpecification from '@/components/specification/Facies/backgroundGroup.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import PolygonTable from './table.vue'
+
+import { hasOwnProperty } from '@/utils/helpers'
 
 function hasAvailableBackgroundFacies<
   T extends Polygon = Polygon,
@@ -80,13 +83,13 @@ export default class BackgroundFacies<
   @Prop({ required: true })
   readonly value!: OverlayTruncationRule<T, S, P>
 
-  get groups () {
+  get groups (): { group: ID, polygons: Facies[] }[] {
     let overlay: { group: ID, polygons: Facies[] }[] = []
     if (this.value) {
       const groups = {}
       const polygons = this.value.overlayPolygons
       polygons.forEach((polygon): void => {
-        if (!groups.hasOwnProperty(polygon.group.id)) groups[polygon.group.id] = []
+        if (!hasOwnProperty(groups, polygon.group.id)) groups[polygon.group.id] = []
         groups[polygon.group.id].push(polygon)
       })
       overlay = Object.keys(groups).map(groupId => { return { group: groupId, polygons: groups[`${groupId}`] } })
@@ -100,7 +103,7 @@ export default class BackgroundFacies<
     return overlay
   }
 
-  get headers () {
+  get headers (): HeaderItems {
     return [
       {
         text: 'Background',

@@ -21,7 +21,7 @@ function callPythonFunction (code: string): Promise<JSON> {
 
 // utilities
 // eslint-disable-next-line camelcase, @typescript-eslint/camelcase
-let uipy_handler = {
+const uipy_handler = {
   get (target: unknown, propKey: string): (...args: any[]) => Promise<JSON> {
     return function (...args: any[]): Promise<JSON> {
       let argstr = ''

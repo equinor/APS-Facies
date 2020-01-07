@@ -68,6 +68,9 @@ import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { isUUID } from '@/utils/helpers'
 import { Bayfill, Facies } from '@/utils/domain'
+import { Optional } from '@/utils/typing'
+import { Identified } from '@/utils/domain/bases/interfaces'
+import { TruncationRuleTemplate } from '@/store/modules/truncationRules/typing'
 
 @Component({
   components: {
@@ -77,24 +80,23 @@ import { Bayfill, Facies } from '@/utils/domain'
   },
 })
 export default class TruncationRule extends Vue {
-  get truncationRuleType () {
-    const available = this.$store.state.truncationRules.templates.types.available
+  get truncationRuleType (): Optional<TruncationRuleTemplate> {
+    const available: Identified<TruncationRuleTemplate> = this.$store.state.truncationRules.templates.types.available
     const type = this.$store.state.truncationRules.preset.type
     if (type && isUUID(type)) {
       return available[`${type}`]
     } else {
       return this.rule
-        // @ts-ignore
-        ? Object.values(available).find(item => item.type === this.rule.type) || null
+        ? Object.values(available).find((item) => item.type === this.rule.type) || null
         : null
     }
   }
 
-  get truncationRuleComponent () {
+  get truncationRuleComponent (): Optional<CubicSpecification | NonCubicSpecification | BayfillSpecification> {
     const mapping = {
-      'Cubic': CubicSpecification,
+      Cubic: CubicSpecification,
       'Non-Cubic': NonCubicSpecification,
-      'Bayfill': BayfillSpecification,
+      Bayfill: BayfillSpecification,
     }
     return this.truncationRuleType && this.rule
       ? mapping[this.truncationRuleType.name]
@@ -103,32 +105,32 @@ export default class TruncationRule extends Vue {
 
   get rule () { return this.$store.getters.truncationRule }
 
-  get useOverlay () { return this.rule ? this.rule.useOverlay : false }
+  get useOverlay (): boolean { return this.rule ? this.rule.useOverlay : false }
   set useOverlay (val) { this.$store.dispatch('truncationRules/toggleOverlay', { rule: this.rule, value: val }) }
 
-  get hasEnoughFacies () {
+  get hasEnoughFacies (): boolean {
     const numFacies = Object.values(this.$store.getters['facies/selected']).length
-    const numFaciesInBackground = [ ...new Set((this.rule.backgroundPolygons as Facies[])
+    const numFaciesInBackground = [...new Set((this.rule.backgroundPolygons as Facies[])
       .map(polygon => polygon.facies)
       .filter(name => !!name)
     )].length
     return numFacies > numFaciesInBackground
   }
 
-  get notBayfill () { return !(this.rule instanceof Bayfill) }
+  get notBayfill (): boolean { return !(this.rule instanceof Bayfill) }
 
-  get overlayErrors () {
+  get overlayErrors (): { check: boolean, errorMessage: string }[] {
     return [
       { check: this.notBayfill, errorMessage: 'Bayfill cannot have user defined overlay facies' },
       { check: this.hasEnoughFacies, errorMessage: 'Too few facies has been selected for this truncation rule' },
     ]
   }
 
-  get canUseOverlay () {
+  get canUseOverlay (): boolean {
     return this.overlayErrors.every(({ check }) => check) || this.rule.useOverlay
   }
 
-  get useOverlayTooltip () {
+  get useOverlayTooltip (): Optional<string> {
     for (const { check, errorMessage } of this.overlayErrors) {
       if (!check) return errorMessage
     }

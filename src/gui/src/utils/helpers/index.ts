@@ -40,12 +40,15 @@ function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<Ma
     }
     obj[`${_id}`] = (item as HasIdentity<T>)
     return obj
-  /* eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion */
   }, ({} as Identified<HasIdentity<T>>))
 }
 
 function includes<T extends Identifiable> (items: T[], item: T): boolean {
   return items.map(getId).includes(item.id)
+}
+
+function hasOwnProperty (obj: any, val: string): boolean {
+  return Object.prototype.hasOwnProperty.call(obj, val)
 }
 
 export {
@@ -60,4 +63,5 @@ export {
   notEmpty,
   includes,
   NoCache,
+  hasOwnProperty,
 }

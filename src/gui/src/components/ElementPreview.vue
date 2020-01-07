@@ -105,7 +105,7 @@ export default class ElementPreview extends Vue {
   get expanded (): number[] { return this.$store.getters['panels/preview'] }
   set expanded (indices) { this.$store.dispatch('panels/change', { type: 'preview', indices }) }
 
-  get fields (): GaussianRandomField[] { return Object.values((this.$store as Store).getters['fields']) }
+  get fields (): GaussianRandomField[] { return Object.values((this.$store as Store).getters.fields) }
 
   get rule (): TruncationRule { return this.$store.getters.truncationRule }
 
@@ -126,6 +126,7 @@ export default class ElementPreview extends Vue {
       ? 'The realization has not been simulated'
       : undefined
   }
+
   get crossPlotErrors (): string | undefined {
     return !this.hasEnoughFieldsForCrossPlot
       ? 'There must be at least two Gaussian Fields before their cross variance plot can be made'

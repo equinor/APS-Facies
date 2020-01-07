@@ -34,6 +34,7 @@ export default class RelativeSizeOfEllipse extends Vue {
       updatable
     })
   }
+
   set relativeSize ({ value, updatable }) {
     this.$store.dispatch('gaussianRandomFields/relativeSize', {
       field: this.value,

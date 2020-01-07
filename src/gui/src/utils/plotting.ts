@@ -7,11 +7,11 @@ import colors from 'vuetify/es5/util/colors'
 
 import { PolygonDescription } from '@/api/types'
 
-function svgPoint (point: [number, number], width: number = 1, height: number = 1): string {
+function svgPoint (point: [number, number], width = 1, height = 1): string {
   return `${point[0] * width},${point[1] * height}`
 }
 
-function polygon2svg (polygon: [number, number][], width: number = 1, height: number = 1): string {
+function polygon2svg (polygon: [number, number][], width = 1, height = 1): string {
   return polygon.reduce((path, point): string => path.concat(` L ${svgPoint(point, width, height)}`), `M ${svgPoint(polygon[0], width, height)}`).concat(' Z')
 }
 
@@ -122,7 +122,7 @@ export interface PlotSpecification {
 
 type FaciesTable = {name: string, color: string, alias: string}[]
 
-export function plotify (polygons: PolygonDescription[], faciesTable: FaciesTable, fillColor: string = ''): PlotSpecification {
+export function plotify (polygons: PolygonDescription[], faciesTable: FaciesTable, fillColor = ''): PlotSpecification {
   return polygons.reduce((obj, { name, polygon }): PlotSpecification => {
     const facies = faciesTable.find((facies): boolean => facies.name === name)
     if (!facies) {

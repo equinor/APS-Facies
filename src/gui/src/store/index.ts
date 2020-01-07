@@ -36,10 +36,12 @@ import {
   resolve,
   sortAlphabetically,
 } from '@/utils'
+import { hasOwnProperty } from '@/utils/helpers'
 
 Vue.use(Vuex)
 
 const store: Store<RootState> = new Vuex.Store({
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   state: {
     version: '1.1.0',
@@ -103,8 +105,7 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Parameters
         for (const parameter of getParameters(data.parameters)) {
-          // @ts-ignore
-          const { selected } = resolve(parameter, data.parameters)
+          const { selected }: { selected?: string} = resolve(parameter, data.parameters)
           if (selected) {
             await dispatch(`parameters/${parameter.replace('.', '/')}/select`, selected)
           } else if (parameter === 'grid') {
@@ -286,6 +287,7 @@ const store: Store<RootState> = new Vuex.Store({
             // TODO: Add quality
             ...grid.simBox.size,
             z: zone
+              // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
               // @ts-ignore
               ? grid.simBox.size.z instanceof Object
                 ? grid.simBox.size.z[zone.code]
@@ -305,8 +307,8 @@ const store: Store<RootState> = new Vuex.Store({
     // Utility method for getting IDs
     id: (state): (type: string, name: string) => Optional<ID> => (type: string, name: string): Optional<ID> => {
       const mapping = {
-        'gaussianRandomField': 'gaussianRandomFields.available',
-        'facies': 'facies.global.available',
+        gaussianRandomField: 'gaussianRandomFields.available',
+        facies: 'facies.global.available',
       }
       const items = resolve(mapping[`${type}`], state)
       if (items) {
@@ -320,7 +322,7 @@ const store: Store<RootState> = new Vuex.Store({
     byId: (state) => (id: ID) => {
       const relevant = Object.values(state)
         .map((thing): Identified<BaseItem> => thing.available)
-        .filter((items): boolean => items && items.hasOwnProperty(id))
+        .filter((items): boolean => items && hasOwnProperty(items, id))
       return relevant.length > 0
         ? relevant[0][`${id}`]
         : null

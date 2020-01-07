@@ -21,7 +21,7 @@ import { Region } from '@/utils/domain'
   },
 })
 export default class RegionSelection extends Vue {
-  get regions (): Region[] { return this.$store.getters['regions'] }
+  get regions (): Region[] { return this.$store.getters.regions }
 
   get showName (): boolean { return this.regions.some(region => !!region.name) }
 }

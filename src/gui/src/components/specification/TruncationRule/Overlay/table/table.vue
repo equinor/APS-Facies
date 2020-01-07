@@ -65,6 +65,7 @@ import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
+import { HeaderItems } from '@/utils/typing'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { sortByOrder } from '@/utils'
 
@@ -90,11 +91,12 @@ export default class OverlayTable<
   @Prop({ required: true })
   readonly rule!: OverlayTruncationRule<T, S, P>
 
-  get polygons () {
+  get polygons (): OverlayPolygon[] {
     // TODO: Include 'help' messages
     return this.value
   }
-  get fieldOptions () {
+
+  get fieldOptions (): { value: ID, text: string, disabled: boolean }[] {
     return Object.values((this.$store as Store).getters.fields)
       .map(field => {
         return {
@@ -104,10 +106,12 @@ export default class OverlayTable<
         }
       })
   }
-  get needFraction () {
+
+  get needFraction (): boolean {
     return hasFaciesSpecifiedForMultiplePolygons(this.rule.overlayPolygons)
   }
-  get headers () {
+
+  get headers (): HeaderItems {
     return [
       {
         text: 'GRF',
@@ -139,12 +143,13 @@ export default class OverlayTable<
     ]
   }
 
-  ordering (items: OverlayPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
-  async updateField (polygon: OverlayPolygon, fieldId: ID) {
+  ordering (items: OverlayPolygon[], index: number, isDescending: boolean): OverlayPolygon[] { return sortByOrder(items, index, isDescending) }
+  async updateField (polygon: OverlayPolygon, fieldId: ID): Promise<void> {
     const field = (this.$store as Store).state.gaussianRandomFields.available[`${fieldId}`]
     await this.$store.dispatch('truncationRules/updateOverlayField', { rule: this.rule, polygon, field })
   }
-  async updateCenter (polygon: OverlayPolygon, val: number) {
+
+  async updateCenter (polygon: OverlayPolygon, val: number): Promise<void> {
     await this.$store.dispatch('truncationRules/updateOverlayCenter', { rule: this.rule, polygon, value: val })
   }
 }

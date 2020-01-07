@@ -45,6 +45,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { BigNumber } from 'mathjs'
@@ -57,6 +58,7 @@ import math from '@/plugins/mathjs'
 import { MinMax } from '@/api/types'
 import { Optional } from '@/utils/typing'
 import { notEmpty, isEmpty } from '@/utils'
+import { hasOwnProperty } from '@/utils/helpers'
 
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 
@@ -84,16 +86,11 @@ type InternalValue = BigNumber | number | string | null
     })
     return {
       fieldValue: {
-        // @ts-ignore
-        required: this.optional ? true : requiredField,
-        // @ts-ignore
-        between: between(this.min, this.max),
-        // @ts-ignore
-        discrete: this.discrete ? numeric : true,
-        // @ts-ignore
-        strictlyGreater: this.strictlyGreater ? (value: number) => value > this.min : true,
-        // @ts-ignore
-        strictlySmaller: this.strictlySmaller ? (value: number) => value < this.max : true,
+        required: (this as NumericField).optional ? true : requiredField,
+        between: between((this as NumericField).min, (this as NumericField).max),
+        discrete: (this as NumericField).discrete ? numeric : true,
+        strictlyGreater: (this as NumericField).strictlyGreater ? (value: number): boolean => value > (this as NumericField).min : true,
+        strictlySmaller: (this as NumericField).strictlySmaller ? (value: number): boolean => value < (this as NumericField).max : true,
       },
     }
   },
@@ -162,25 +159,25 @@ export default class NumericField extends Vue {
 
   fieldValue: InternalValue = null
 
-  get updatable () { return NumericField.getUpdatable(this.value) }
+  get updatable (): boolean { return NumericField.getUpdatable(this.value) }
   set updatable (value) { this.setUpdatable(value) }
 
-  get constants () {
+  get constants (): { max: number, min: number } {
     return notEmpty(this.ranges)
       ? this.ranges
-      : this.valueType !== '' && this.$store.state.constants.ranges.hasOwnProperty(this.valueType)
+      : this.valueType !== '' && hasOwnProperty(this.$store.state.constants.ranges, this.valueType)
         ? this.$store.state.constants.ranges[this.valueType]
         : { max: Infinity, min: this.allowNegative ? -Infinity : 0 }
   }
 
-  get _unit () {
+  get _unit (): string {
     if (this.discrete) {
       if (!this.unit) return ''
       const irregular = {
       }
       return this.value === 1
         ? this.unit
-        : irregular.hasOwnProperty(this.unit)
+        : hasOwnProperty(irregular, this.unit)
           ? irregular[this.unit]
           : `${this.unit}s`
     } else {
@@ -197,25 +194,22 @@ export default class NumericField extends Vue {
   get max (): number { return this.constants.max }
   get min (): number { return this.constants.min }
 
-  get isFmuUpdatable () {
+  get isFmuUpdatable (): boolean {
     return this.fmuUpdatable
       && this.$store.getters.fmuUpdatable
       && (
         this.value instanceof FmuUpdatableValue
-        || (this.value !== null && this.value.hasOwnProperty('updatable')
+        || (this.value !== null && hasOwnProperty(this.value, 'updatable')
         )
       )
   }
 
-  get errors () {
+  get errors (): string[] {
+    if (!this.$v.fieldValue) return []
     const errors: string[] = []
-    // @ts-ignore
     if (!this.$v.fieldValue.$dirty) return errors
-    // @ts-ignore
     !this.$v.fieldValue.required && errors.push('Is required')
-    // @ts-ignore
     !this.$v.fieldValue.discrete && errors.push('Must be a whole number')
-    // @ts-ignore
     !this.$v.fieldValue.between && errors.push(
       this.max === Infinity
         ? `Must be greater than ${this.min}`
@@ -223,9 +217,7 @@ export default class NumericField extends Vue {
           ? `Must be smaller than ${this.max}`
           : `Must be between [${this.min}, ${this.max}]`
     )
-    // @ts-ignore
     !this.$v.fieldValue.strictlyGreater && errors.push(`Must be strictly greater than ${this.min}`)
-    // @ts-ignore
     !this.$v.fieldValue.strictlySmaller && errors.push(`Must be strictly smaller than ${this.max}`)
     this.additionalRules.forEach(rule => {
       // @ts-ignore
@@ -234,7 +226,7 @@ export default class NumericField extends Vue {
     return errors
   }
 
-  get binding () {
+  get binding (): { [_: string]: string } {
     const binding: { [_: string]: string } = {}
     // FIXME: Hack to adjust the checkboxes for Origin coordinates
     binding.cols = (['X', 'Y', 'Z'].indexOf(this.label) !== -1)
@@ -244,13 +236,13 @@ export default class NumericField extends Vue {
   }
 
   @Watch('value')
-  onValueChange (value: FmuUpdatableValue | BigNumber) {
+  onValueChange (value: FmuUpdatableValue | BigNumber): void {
     if (this.hasChanged(value)) {
       this.fieldValue = this.getValue(value)
     }
   }
 
-  mounted () {
+  mounted (): void {
     this.fieldValue = this.getValue(this.value)
   }
 
@@ -268,18 +260,17 @@ export default class NumericField extends Vue {
     this.emitChange(!!event)
   }
 
-  emitChange (value: BigNumber | boolean | null) {
-    const payload = this.value === null || !this.value.hasOwnProperty('value')
+  emitChange (value: BigNumber | boolean | null): void {
+    const payload = this.value === null || !hasOwnProperty(this.value, 'value')
       ? Number(value)
       : typeof value === 'boolean'
         ? { value: Number(this.fieldValue), updatable: value }
         : { value: Number(value), updatable: this.updatable }
-    // @ts-ignore
-    this.$v.fieldValue.$touch()
+    this.$v.fieldValue && this.$v.fieldValue.$touch()
     this.$emit('input', this.fmuUpdatable ? new FmuUpdatableValue(payload) : payload)
   }
 
-  updateValue (value: BigNumber | string) {
+  updateValue (value: BigNumber | string): void {
     // value may also be of type InputEvent, which is dealt with here
     // @ts-ignore
     if (typeof value.target !== 'undefined') {
@@ -327,6 +318,7 @@ export default class NumericField extends Vue {
     }
     this.emitChange(numericValue)
   }
+
   getValue (value: FmuUpdatableValue | InternalValue): BigNumber | null {
     if (value === null) return null
     if (isEmpty(value) && !isNumber(value)) return null

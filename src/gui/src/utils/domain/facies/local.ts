@@ -31,7 +31,8 @@ export default class Facies extends ZoneRegionDependent {
     facies,
     probabilityCube = null,
     previewProbability = null,
-    ...rest }: FaciesConfiguration) {
+    ...rest
+  }: FaciesConfiguration) {
     super(rest)
     this.facies = facies
     this.probabilityCube = probabilityCube

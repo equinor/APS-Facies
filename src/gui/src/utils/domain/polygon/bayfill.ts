@@ -38,6 +38,7 @@ export default class BayfillPolygon extends Polygon {
   public constructor ({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     if (Object.values(SlantFactorFacies).includes(name)) {
       if (slantFactor) {
@@ -55,8 +56,8 @@ export default class BayfillPolygon extends Polygon {
   public get specification (): BayfillPolygonSpecification {
     const _mapping: {[_: string]: string} = {
       'Bayhead Delta': 'SBHD',
-      'Floodplain': 'SF',
-      'Subbay': 'YSF',
+      Floodplain: 'SF',
+      Subbay: 'YSF',
     }
     if (!Object.keys(_mapping).includes(this.name) || !this.slantFactor) throw new APSError('A Bayfill polygon without a slant factor, CANNOT be used in a specification')
     return {
