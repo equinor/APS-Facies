@@ -93,7 +93,7 @@ def run(roxar=None, project=None, **kwargs):
                 field = load_field_values(full_field_name, fmu_grid, path)
                 field_values += extract_values(field, defined, zone)
             else:
-                warn('The file {} could not be found. Skipping it.'.format(path))
+                raise FileNotFoundError('The file {} could not be found.'.format(path))
         nx, ny, nz = rms_grid.dimensions
         field_model = xtgeo.GridProperty(
             ncol=nx, nrow=ny, nlay=nz,
