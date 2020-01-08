@@ -175,6 +175,7 @@ def run_simulations(
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
+            dz=dz,
         )
         # End loop over gauss fields for one zone
 
