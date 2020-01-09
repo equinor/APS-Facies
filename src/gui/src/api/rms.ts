@@ -1,7 +1,7 @@
 /**
  * Mock of the rms.uipy object available in RMS 11
  */
-import { AverageParameterProbabilities, CodeName, MinMax, PolygonDescription, SimulationBoxSize } from '@/api/types'
+import { AverageParameterProbabilities, CodeName, Constants, PolygonDescription, SimulationBoxSize } from '@/api/types'
 import { TruncationRuleDescription } from '@/utils'
 import { GaussianRandomFieldSpecification } from '@/utils/domain/gaussianRandomField'
 import { Optional } from '@/utils/typing'
@@ -26,7 +26,7 @@ export default {
   truncationPolygons: <T extends TruncationRuleDescription>(specification: T): Promise<PolygonDescription[]> => api.call('get_truncation_map_polygons', specification),
   trendParameters: (gridName: string): Promise<string[]> => api.call('get_rms_trend_parameters', gridName),
   probabilityCubeParameters: (gridName: string): Promise<string[]> => api.call('get_probability_cube_parameters', gridName),
-  constants: (constantName: string, constantType: string): Promise<MinMax> => api.call('get_constant', constantName, constantType),
+  constants: (constantName: string, constantType: string): Promise<Constants> => api.call('get_constant', constantName, constantType),
   options: (name: string): Promise<string[]> => api.call('get_options', name),
   gridSize: (name: string): Promise<number[]> => api.call('get_grid_size', name),
   simulationBoxOrigin: (name: string, rough: boolean = false): Promise<SimulationBoxSize> => api.call('get_simulation_box_size', name, rough),

@@ -10,6 +10,10 @@ export interface MinMax {
   max: number
 }
 
+export interface Constants extends MinMax{
+  tolerance: number
+}
+
 export interface SimulationBoxSize {
   size: {
     x: number

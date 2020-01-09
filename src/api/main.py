@@ -41,6 +41,7 @@ class Config:
             'seed_log_file': None,
             'write_rms_parameters_for_qc_purpose': self.write_rms_parameters_for_qc_purpose,
             'debug_level': self.debug_level,
+            'max_allowed_fraction_of_values_outside_tolerance': self._max_allowed_fraction_of_values_outside_tolerance,
         }
 
     def _get_layers_per_zone(self, aps_model):
@@ -99,6 +100,10 @@ class Config:
     @property
     def max_fmu_grid_depth(self):
         return self._config['fmu']['maxDepth']['value']
+
+    @property
+    def _max_allowed_fraction_of_values_outside_tolerance(self):
+        return self._config['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected']
 
     @property
     def debug_level(self):

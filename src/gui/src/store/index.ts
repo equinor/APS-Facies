@@ -42,7 +42,7 @@ Vue.use(Vuex)
 const store: Store<RootState> = new Vuex.Store({
   // @ts-ignore
   state: {
-    version: '1.0.0',
+    version: '1.1.0',
     _loaded: {
       value: false,
       loading: false,
@@ -81,9 +81,7 @@ const store: Store<RootState> = new Vuex.Store({
           dispatch('gridModels/fetch'),
           dispatch('constants/fetch'),
           dispatch('truncationRules/fetch'),
-          dispatch('parameters/path/fetch'),
-          dispatch('parameters/names/workflow/fetch'),
-          dispatch('parameters/names/project/fetch'),
+          dispatch('parameters/fetch'),
           dispatch('fmu/fetch'),
         ])
         commit('FINISHED')

@@ -1,4 +1,5 @@
 import cmp from 'semver-compare'
+import rms from '@/api/rms'
 import { displayWarning } from '@/utils/helpers/storeInteraction'
 
 interface Migration {
@@ -8,7 +9,18 @@ interface Migration {
   down?: (state: any) => Promise<any>
 }
 
-const migrations: Migration[] = []
+const migrations: Migration[] = [
+  {
+    from: '1.0.0',
+    to: '1.1.0',
+    up: async (state) => {
+      const { tolerance } = await rms.constants('max_allowed_fraction_of_values_outside_tolerance', 'tolerance')
+      state['parameters']['maxAllowedFractionOfValuesOutsideTolerance'] = {}
+      state['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected'] = tolerance
+      return state
+    },
+  }
+]
 
 function getMigrations (fromVersion: string, toVersion: string): Migration[] {
   const _migrations = migrations
@@ -41,6 +53,7 @@ export default async function migrate (state: any, toVersion: string): Promise<a
 
   for (const migration of getMigrations(fromVersion, toVersion)) {
     state = await migration.up(state)
+    state.from = migration.to
   }
   return state
 }
