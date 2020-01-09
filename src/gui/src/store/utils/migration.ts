@@ -4,8 +4,8 @@ import { displayWarning } from '@/utils/helpers/storeInteraction'
 interface Migration {
   from: string
   to: string
-  up: (state: any) => any
-  down?: (state: any) => any
+  up: (state: any) => Promise<any>
+  down?: (state: any) => Promise<any>
 }
 
 const migrations: Migration[] = []
@@ -29,7 +29,7 @@ function canMigrate (fromVersion: string, toVersion: string): boolean {
   return version === toVersion
 }
 
-export default function migrate (state: any, toVersion: string): any {
+export default async function migrate (state: any, toVersion: string): Promise<any> {
   /* Inspired by: https://typeofnan.dev/an-approach-to-js-object-schema-migration/ */
   const fromVersion = state.version
   if (fromVersion === toVersion) return state
@@ -40,7 +40,7 @@ export default function migrate (state: any, toVersion: string): any {
   }
 
   for (const migration of getMigrations(fromVersion, toVersion)) {
-    state = migration.up(state)
+    state = await migration.up(state)
   }
   return state
 }

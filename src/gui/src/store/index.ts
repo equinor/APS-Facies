@@ -93,7 +93,7 @@ const store: Store<RootState> = new Vuex.Store({
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       resetState()
       await dispatch('startLoading')
-      data = migrate(data, state.version)
+      data = await migrate(data, state.version)
       try {
         await dispatch('fetch')
 
