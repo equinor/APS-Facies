@@ -12,7 +12,7 @@ const migrations: Migration[] = []
 
 function getMigrations (fromVersion: string, toVersion: string): Migration[] {
   const _migrations = migrations
-    .filter(migration => cmp(toVersion, migration.from) === 1 && cmp(fromVersion, migration.to) === 1)
+    .filter(migration => cmp(toVersion, migration.from) === 1 && cmp(fromVersion, migration.to) === -1)
   return cmp(toVersion, fromVersion) === 1
     ? _migrations
     : _migrations.slice().reverse()
