@@ -77,11 +77,12 @@ from pathlib import Path
 
 import os
 import sys
+import shutil
 
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.8.4"
+__version__ = "0.8.5"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -180,7 +181,7 @@ def extract_plugin():
                     break
         if not get_current_plugin_path().match('*' + extracted_version + '*'):
             # A refresh is required
-            os.rmdir(extracted)
+            shutil.rmtree(extracted, ignore_errors=True)
             unzip()
 
 
