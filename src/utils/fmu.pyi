@@ -48,7 +48,6 @@ def get_grid(
         grid_model_name: str,
 ) -> Grid3D: ...
 
-def layers_in_geo_model_zones(project: Project, aps_model: APSModel) -> List[int]: ...
 def _get_grid_name(arg: Union[str, APSModel]) -> str: ...
 
 
@@ -62,6 +61,17 @@ class UpdateModel(ABC, FmuModelChange):
     aps_model: APSModel
     zone_models: List[APSZoneModel]
     def __init__(self, aps_model: APSModel, **kwargs): ...
+
+class SimBoxDependentUpdate(ABC, UpdateModel):
+    project: Project
+    ert_grid_name: str
+
+    # Properties
+    layers_in_geo_model_zones: List[int]
+    nz_fmu_box: int
+
+    def __init__(self, *, project: Project, fmu_simulation_grid_name: str, **kwargs): ...
+
 
 class FmuModelChanges(list, FmuModelChange):
     def __init__(self, changes: List[FmuModelChange]): ...

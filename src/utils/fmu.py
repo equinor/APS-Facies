@@ -67,14 +67,6 @@ def get_grid(project, aps_model):
     return project.grid_models[_get_grid_name(aps_model)].get_grid(project.current_realisation)
 
 
-def layers_in_geo_model_zones(project, aps_model):
-    grid = get_grid(project, aps_model)
-    layers = []
-    for zonation, *reverse in grid.grid_indexer.zonation.values():
-        layers.append(zonation.stop - zonation.start)
-    return layers
-
-
 def _get_grid_name(arg):
     if isinstance(arg, str):
         grid_name = arg
@@ -113,6 +105,28 @@ class UpdateModel(ABC, FmuModelChange):
     @property
     def zone_models(self):
         return self.aps_model.zone_models
+
+
+class SimBoxDependentUpdate(ABC, UpdateModel):
+    def __init__(self, *, project, fmu_simulation_grid_name, **kwargs):
+        super().__init__(**kwargs)
+        self.project = project
+        self.ert_grid_name = fmu_simulation_grid_name
+
+    @property
+    @cached
+    def layers_in_geo_model_zones(self):
+        grid = get_grid(self.project, self.aps_model)
+        layers = []
+        for zonation, *reverse in grid.grid_indexer.zonation.values():
+            layers.append(zonation.stop - zonation.start)
+        return layers
+
+    @property
+    @cached
+    def nz_fmu_box(self):
+        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
+        return nz
 
 
 class UpdateGridModelName(UpdateModel):
@@ -199,11 +213,9 @@ class UpdateFieldNamesInZones(UpdateModel):
             rule.names_of_gaussian_fields = [mapping[name] for name in rule.names_of_gaussian_fields]
 
 
-class UpdateSimBoxThicknessInZones(UpdateModel):
-    def __init__(self, project, fmu_simulation_grid_name, **kwargs):
+class UpdateSimBoxThicknessInZones(SimBoxDependentUpdate):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.project = project
-        self.ert_grid_name = fmu_simulation_grid_name
 
         self._original = {
             zone_model.zone_number: zone_model.sim_box_thickness
@@ -219,22 +231,10 @@ class UpdateSimBoxThicknessInZones(UpdateModel):
         for zone_model in self.zone_models:
             zone_model.sim_box_thickness = self._original[zone_model.zone_number]
 
-    @property
-    @cached
-    def layers_in_geo_model_zones(self):
-        return layers_in_geo_model_zones(self.project, self.aps_model)
 
-    @property
-    @cached
-    def nz_fmu_box(self):
-        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
-        return nz
-
-
-class UpdateRelativeSizeForEllipticConeTrend(UpdateModel):
-    def __init__(self, project, fmu_simulation_grid_name, **kwargs):
-        self.project = project
-        self.ert_grid_name = fmu_simulation_grid_name
+class UpdateRelativeSizeForEllipticConeTrend(SimBoxDependentUpdate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._original_relative_sizes = self.get_relative_sizes(self.aps_model)
 
     def before(self):
@@ -263,17 +263,6 @@ class UpdateRelativeSizeForEllipticConeTrend(UpdateModel):
                 if self.has_elliptic_cone_trend(field):
                     field.trend.model.relative_size_of_ellipse = self._original_relative_sizes[zone_model.zone_number][field.name]
 
-    @property
-    @cached
-    def nz_fmu_box(self):
-        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
-        return nz
-
-    @property
-    @cached
-    def layers_in_geo_model_zones(self):
-        return layers_in_geo_model_zones(self.project, self.aps_model)
-
     def get_original_relative_size(self, zone_model, field_model):
         return self._original_relative_sizes[zone_model.zone_number][field_model.name]
 
@@ -295,10 +284,9 @@ class UpdateRelativeSizeForEllipticConeTrend(UpdateModel):
         )
 
 
-class UpdateRelativePositionOfTrends(UpdateModel):
-    def __init__(self, project, fmu_simulation_grid_name, **kwargs):
-        self.project = project
-        self.ert_grid_name = fmu_simulation_grid_name
+class UpdateRelativePositionOfTrends(SimBoxDependentUpdate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._original_relative_depths = self._get_relative_depths(self.aps_model)
 
     def before(self):
@@ -334,17 +322,6 @@ class UpdateRelativePositionOfTrends(UpdateModel):
             for field in zone_model.gaussian_fields:
                 if self.has_conic_trend(field):
                     field.trend.model.origin.z = self._original_relative_depths[zone_model.zone_number][field.name]
-
-    @property
-    @cached
-    def nz_fmu_box(self):
-        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
-        return nz
-
-    @property
-    @cached
-    def layers_in_geo_model_zones(self):
-        return layers_in_geo_model_zones(self.project, self.aps_model)
 
     @staticmethod
     def has_conic_trend(field):
