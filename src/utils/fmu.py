@@ -1,5 +1,5 @@
 import os
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from collections import defaultdict
 from typing import Dict
@@ -8,7 +8,7 @@ import numpy as np
 import xtgeo
 
 from src.algorithms.APSModel import APSModel
-from src.algorithms.APSZoneModel import APSZoneModel, Conform
+from src.algorithms.APSZoneModel import Conform
 from src.algorithms.Trend3D import Trend3D_elliptic_cone, ConicTrend
 from src.utils.constants.simple import OriginType
 from src.utils.decorators import cached
@@ -75,7 +75,7 @@ def _get_grid_name(arg):
     return grid_name
 
 
-class FmuModelChange(ABC):
+class FmuModelChange(metaclass=ABCMeta):
     @abstractmethod
     def before(self):
         pass
@@ -98,7 +98,7 @@ class FmuModelChanges(list, FmuModelChange):
             change.after()
 
 
-class UpdateModel(ABC, FmuModelChange):
+class UpdateModel(FmuModelChange, metaclass=ABCMeta):
     def __init__(self, *, aps_model, **kwargs):
         self.aps_model = aps_model
 
@@ -107,7 +107,7 @@ class UpdateModel(ABC, FmuModelChange):
         return self.aps_model.zone_models
 
 
-class SimBoxDependentUpdate(ABC, UpdateModel):
+class SimBoxDependentUpdate(UpdateModel, metaclass=ABCMeta):
     def __init__(self, *, project, fmu_simulation_grid_name, **kwargs):
         super().__init__(**kwargs)
         self.project = project
@@ -127,6 +127,51 @@ class SimBoxDependentUpdate(ABC, UpdateModel):
     def nz_fmu_box(self):
         _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
         return nz
+
+
+class TrendUpdate(SimBoxDependentUpdate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._original_values = self.get_original_values(self.aps_model)
+
+    def before(self):
+        necessary = False
+        for zone_model in self.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_appropriate_trend(field):
+                    necessary = True
+                    self.update_trend(zone_model, field)
+        if necessary and self.update_message:
+            print(self.update_message)
+
+    def after(self):
+        for zone_model in self.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_appropriate_trend(field):
+                    self.restore_trend(zone_model, field)
+
+    def get_original_value(self, zone_model, field_model):
+        return self._original_values[zone_model.zone_number][field_model.name]
+
+    @abstractmethod
+    def update_trend(self, zone_model, field_model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def restore_trend(self, zone_model, field_model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_original_values(self, aps_model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def has_appropriate_trend(self, field):
+        raise NotImplementedError
+
+    @property
+    def update_message(self):
+        return None
 
 
 class UpdateGridModelName(UpdateModel):
@@ -232,110 +277,82 @@ class UpdateSimBoxThicknessInZones(SimBoxDependentUpdate):
             zone_model.sim_box_thickness = self._original[zone_model.zone_number]
 
 
-class UpdateRelativeSizeForEllipticConeTrend(SimBoxDependentUpdate):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._original_relative_sizes = self.get_relative_sizes(self.aps_model)
-
-    def before(self):
+class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
+    def update_trend(self, zone_model, field_model):
         nz_fmu_box = self.nz_fmu_box
-        for zone_model in self.zone_models:
-            nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
-            for field in zone_model.gaussian_fields:
-                if self.has_elliptic_cone_trend(field):
-                    original_relative_size = self.get_original_relative_size(zone_model, field)
-                    if zone_model.grid_layout in [Conform.Proportional, Conform.TopConform]:
-                        fmu_relative_size = original_relative_size / (
-                            1 + (nz_fmu_box - nz_geo_grid) * (1 - original_relative_size) / nz_geo_grid
-                        )
-                    elif zone_model.grid_layout in [Conform.BaseConform]:
-                        if original_relative_size >= 1 - nz_geo_grid / nz_fmu_box:
-                            fmu_relative_size = 1 - nz_fmu_box * (1 - original_relative_size) / nz_geo_grid
-                        else:
-                            fmu_relative_size = 0.001
-                    else:
-                        raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
-                    field.trend.model.relative_size_of_ellipse = fmu_relative_size
+        nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+        original_relative_size = self.get_original_value(zone_model, field_model)
+        if zone_model.grid_layout in [Conform.Proportional, Conform.TopConform]:
+            fmu_relative_size = original_relative_size / (
+                1 + (nz_fmu_box - nz_geo_grid) * (1 - original_relative_size) / nz_geo_grid
+            )
+        elif zone_model.grid_layout in [Conform.BaseConform]:
+            if original_relative_size >= 1 - nz_geo_grid / nz_fmu_box:
+                fmu_relative_size = 1 - nz_fmu_box * (1 - original_relative_size) / nz_geo_grid
+            else:
+                fmu_relative_size = 0.001
+        else:
+            raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
+        field_model.trend.model.relative_size_of_ellipse = fmu_relative_size
 
-    def after(self):
-        for zone_model in self.zone_models:
-            for field in zone_model.gaussian_fields:
-                if self.has_elliptic_cone_trend(field):
-                    field.trend.model.relative_size_of_ellipse = self._original_relative_sizes[zone_model.zone_number][field.name]
+    def restore_trend(self, zone_model, field_model):
+        field_model.trend.model.relative_size_of_ellipse = self.get_original_value(zone_model, field_model)
 
-    def get_original_relative_size(self, zone_model, field_model):
-        return self._original_relative_sizes[zone_model.zone_number][field_model.name]
-
-    @classmethod
-    def get_relative_sizes(cls, aps_model: APSModel):
-        sizes: Dict[int, Dict[str, float]] = defaultdict(dict)
+    def get_original_values(self, aps_model):
+        relative_sizes: Dict[int, Dict[str, float]] = defaultdict(dict)
         for zone_model in aps_model.zone_models:
             for field in zone_model.gaussian_fields:
                 trend = field.trend
-                if cls.is_elliptic_cone(trend):
-                    sizes[zone_model.zone_number][field.name] = trend.model.relative_size_of_ellipse.value
-        return sizes
+                if self.has_appropriate_trend(field):
+                    relative_sizes[zone_model.zone_number][field.name] = trend.model.relative_size_of_ellipse.value
+        return relative_sizes
 
-    @staticmethod
-    def has_elliptic_cone_trend(field):
+    def has_appropriate_trend(self, field):
         return (
             field.trend.use_trend
             and isinstance(field.trend.model, Trend3D_elliptic_cone)
         )
 
 
-class UpdateRelativePositionOfTrends(SimBoxDependentUpdate):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._original_relative_depths = self._get_relative_depths(self.aps_model)
-
-    def before(self):
+class UpdateRelativePositionOfTrends(TrendUpdate):
+    def update_trend(self, zone_model, field_model):
         nz_fmu = self.nz_fmu_box
         indexer = get_grid(self.project, self.aps_model.grid_model_name).simbox_indexer
 
-        necessary = False
-        for zone in self.aps_model.sorted_zone_models.values():
-            zonation, *_reverse = indexer.zonation[zone.zone_number - 1]
-            nz_zone = zonation.stop - zonation.start
+        zonation, *_reverse = indexer.zonation[zone_model.zone_number - 1]
+        nz_zone = zonation.stop - zonation.start
 
-            for field in zone.gaussian_fields:
-                if field.trend and field.trend.use_trend:
-                    trend = field.trend.model
-                    if self.has_conic_trend(trend):
-                        z_original = float(trend.origin.z)
-                        # Update trend
-                        necessary = True
-                        if zone.grid_layout is None:
-                            raise MissingConformityException(zone)
-                        if zone.grid_layout in [Conform.TopConform, Conform.Proportional]:
-                            trend.origin.z = z_original * nz_zone / nz_fmu
-                        elif zone.grid_layout in [Conform.BaseConform]:
-                            trend.origin.z = 1 - (nz_zone * (1 - z_original) / nz_fmu)
-                        else:
-                            raise NotImplementedError('{} is not supported'.format(zone.grid_layout))
+        trend = field_model.trend.model
+        if self.has_appropriate_trend(field_model):
+            z_original = float(trend.origin.z)
+            # Update trend
+            if zone_model.grid_layout is None:
+                raise MissingConformityException(zone_model)
+            if zone_model.grid_layout in [Conform.TopConform, Conform.Proportional]:
+                trend.origin.z = z_original * nz_zone / nz_fmu
+            elif zone_model.grid_layout in [Conform.BaseConform]:
+                trend.origin.z = 1 - (nz_zone * (1 - z_original) / nz_fmu)
+            else:
+                raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
 
-        if necessary:
-            print('Updating the location of relative trends')
+    @property
+    def update_message(self):
+        return 'Updating the location of relative trends'
 
-    def after(self):
-        for zone_model in self.zone_models:
-            for field in zone_model.gaussian_fields:
-                if self.has_conic_trend(field):
-                    field.trend.model.origin.z = self._original_relative_depths[zone_model.zone_number][field.name]
+    def restore_trend(self, zone_model, field_model):
+        field_model.trend.model.origin.z = self.get_original_value(zone_model, field_model)
 
-    @staticmethod
-    def has_conic_trend(field):
+    def has_appropriate_trend(self, field):
         trend = field.trend.model
         return isinstance(trend, ConicTrend) and trend.origin_type == OriginType.RELATIVE
 
-    @classmethod
-    def _get_relative_depths(cls, aps_model: APSModel):
-        depths = defaultdict(dict)
+    def get_original_values(self, aps_model):
+        relative_depths = defaultdict(dict)
         for zone_model in aps_model.zone_models:
             for field in zone_model.gaussian_fields:
-                if cls.has_conic_trend(field):
-                    depths[zone_model.zone_number][field.name] = field.trend.model.origin.z
-        return depths
+                if self.has_appropriate_trend(field):
+                    relative_depths[zone_model.zone_number][field.name] = field.trend.model.origin.z
+        return relative_depths
 
 
 class UpdateTrends(FmuModelChanges):

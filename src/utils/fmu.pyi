@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod, ABCMeta
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Union, overload, Callable, Optional, Generator, List, Tuple, Dict, Iterable
@@ -51,18 +51,18 @@ def get_grid(
 def _get_grid_name(arg: Union[str, APSModel]) -> str: ...
 
 
-class FmuModelChange(ABC):
+class FmuModelChange(metaclass=ABCMeta):
     @abstractmethod
     def before(self) -> None: ...
     @abstractmethod
     def after(self) -> None: ...
 
-class UpdateModel(ABC, FmuModelChange):
+class UpdateModel(FmuModelChange, metaclass=ABCMeta):
     aps_model: APSModel
     zone_models: List[APSZoneModel]
     def __init__(self, aps_model: APSModel, **kwargs): ...
 
-class SimBoxDependentUpdate(ABC, UpdateModel):
+class SimBoxDependentUpdate(UpdateModel, metaclass=ABCMeta):
     project: Project
     ert_grid_name: str
 
@@ -71,6 +71,24 @@ class SimBoxDependentUpdate(ABC, UpdateModel):
     nz_fmu_box: int
 
     def __init__(self, *, project: Project, fmu_simulation_grid_name: str, **kwargs): ...
+
+
+class TrendUpdate(SimBoxDependentUpdate, metaclass=ABCMeta):
+    _original_values: Dict[int, Dict[str, float]]
+    update_message: Optional[str]
+
+    def before(self) -> None: ...
+    def after(self) -> None: ...
+
+    @abstractmethod
+    def update_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None: ...
+    @abstractmethod
+    def restore_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None: ...
+    @abstractmethod
+    def get_original_values(self, aps_model: APSModel) -> Dict[int, Dict[str, float]]: ...
+    def get_original_value(self, zone_model: APSZoneModel, field_model: GaussianField) -> float: ...
+    @abstractmethod
+    def has_appropriate_trend(self, field: GaussianField) -> bool: ...
 
 
 class FmuModelChanges(list, FmuModelChange):
@@ -106,21 +124,12 @@ class UpdateFieldNamesInZones(UpdateModel):
     def _change_names(self, name_getter: Callable[[APSZoneModel, GaussianField, int], str]) -> None: ...
 
 
-class UpdateRelativeSizeForEllipticConeTrend(UpdateModel):
-    project: Project
-    layers_in_geo_model_zones: List[int]
-    nz_fmu_box: int
-    _original_relative_sizes: Dict[int, Dict[str, float]]
+class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
+    def update_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None: ...
+    def restore_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None: ...
 
-    def __init__(self, project: Project, fmu_simulation_grid_name: str, **kwargs): ...
-    def before(self) -> None: ...
-    def after(self) -> None: ...
-
-    def get_original_relative_size(self, zone_model: APSZoneModel, field_model: GaussianField) -> float: ...
-    @classmethod
-    def get_relative_sizes(cls, aps_model: APSModel) -> Dict[int, Dict[str, float]]: ...
-    @staticmethod
-    def has_elliptic_cone_trend(field: GaussianField) -> bool: ...
+    def get_original_values(self, aps_model: APSModel) -> Dict[int, Dict[str, float]]: ...
+    def has_appropriate_trend(self, field: GaussianField) -> bool: ...
 
 
 class UpdateSimBoxThicknessInZones(UpdateModel):
@@ -138,21 +147,14 @@ class UpdateSimBoxThicknessInZones(UpdateModel):
     def after(self) -> None: ...
 
 
-class UpdateRelativePositionOfTrends(UpdateModel):
-    project: Project
-    nz_fmu_box: int
-    layers_in_geo_model_zones: List[int]
-    _original_relative_depths: Dict[int, Dict[str, float]]
+class UpdateRelativePositionOfTrends(TrendUpdate):
+    update_message: str
 
-    def __init__(self, project: Project, fmu_simulation_grid_name: str, **kwargs): ...
+    def update_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None: ...
+    def restore_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None: ...
 
-    def before(self) -> None: ...
-    def after(self) -> None: ...
-
-    @staticmethod
-    def has_conic_trend(field: GaussianField) -> bool: ...
-    @classmethod
-    def _get_relative_depths(cls, aps_model: APSModel) -> Dict[int, Dict[str, float]]:
+    def has_appropriate_trend(self, field: GaussianField) -> bool: ...
+    def get_original_values(self, aps_model: APSModel) -> Dict[int, Dict[str, float]]: ...
 
 
 class UpdateTrends(FmuModelChanges):
