@@ -88,7 +88,7 @@ class FmuModelChanges(list, FmuModelChange):
             change.before()
 
     def after(self):
-        for change in self:
+        for change in reversed(self):
             change.after()
 
 
