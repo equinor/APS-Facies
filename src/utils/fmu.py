@@ -9,8 +9,10 @@ import xtgeo
 
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import APSZoneModel, Conform
-from src.algorithms.Trend3D import Trend3D_elliptic_cone
+from src.algorithms.Trend3D import Trend3D_elliptic_cone, ConicTrend
+from src.utils.constants.simple import OriginType
 from src.utils.decorators import cached
+from src.utils.exceptions.zone import MissingConformityException
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 
 
@@ -290,13 +292,88 @@ class UpdateRelativeSizeForEllipticConeTrend(FmuModelChange):
         )
 
 
+class UpdateRelativePositionOfTrends(FmuModelChange):
+    def __init__(self, project, aps_model, fmu_simulation_grid_name, **kwargs):
+        self.project = project
+        self.aps_model = aps_model
+        self.ert_grid_name = fmu_simulation_grid_name
+        self._original_relative_depths = self._get_relative_depths(aps_model)
+
+    def before(self):
+        nz_fmu = self.nz_fmu_box
+        indexer = get_grid(self.project, self.aps_model.grid_model_name).simbox_indexer
+
+        necessary = False
+        for zone in self.aps_model.sorted_zone_models.values():
+            zonation, *_reverse = indexer.zonation[zone.zone_number - 1]
+            nz_zone = zonation.stop - zonation.start
+
+            for field in zone.gaussian_fields:
+                if field.trend and field.trend.use_trend:
+                    trend = field.trend.model
+                    if self.has_conic_trend(trend):
+                        z_original = float(trend.origin.z)
+                        # Update trend
+                        necessary = True
+                        if zone.grid_layout is None:
+                            raise MissingConformityException(zone)
+                        if zone.grid_layout in [Conform.TopConform, Conform.Proportional]:
+                            trend.origin.z = z_original * nz_zone / nz_fmu
+                        elif zone.grid_layout in [Conform.BaseConform]:
+                            trend.origin.z = 1 - (nz_zone * (1 - z_original) / nz_fmu)
+                        else:
+                            raise NotImplementedError('{} is not supported'.format(zone.grid_layout))
+
+        if necessary:
+            print('Updating the location of relative trends')
+
+    def after(self):
+        for zone_model in self.aps_model.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_conic_trend(field):
+                    field.trend.model.origin.z = self._original_relative_depths[zone_model.zone_number][field.name]
+
+    @property
+    @cached
+    def nz_fmu_box(self):
+        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
+        return nz
+
+    @property
+    @cached
+    def layers_in_geo_model_zones(self):
+        return layers_in_geo_model_zones(self.project, self.aps_model)
+
+    @staticmethod
+    def has_conic_trend(field):
+        trend = field.trend.model
+        return isinstance(trend, ConicTrend) and trend.origin_type == OriginType.RELATIVE
+
+    @classmethod
+    def _get_relative_depths(cls, aps_model: APSModel):
+        depths = defaultdict(dict)
+        for zone_model in aps_model.zone_models:
+            for field in zone_model.gaussian_fields:
+                if cls.has_conic_trend(field):
+                    depths[zone_model.zone_number][field.name] = field.trend.model.origin.z
+        return depths
+
+
+class UpdateTrends(FmuModelChanges):
+    def __init__(self, **kwargs):
+        super(FmuModelChanges, self).__init__([
+            UpdateRelativeSizeForEllipticConeTrend(**kwargs),
+            UpdateRelativePositionOfTrends(**kwargs),
+        ])
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
     aps_model = kwargs['aps_model']
     model_file = kwargs['model_file']
     changes = FmuModelChanges([
-        UpdateRelativeSizeForEllipticConeTrend(**kwargs),
+        UpdateTrends(**kwargs),
         UpdateSimBoxThicknessInZones(**kwargs),
         UpdateFieldNamesInZones(**kwargs),
         UpdateGridModelName(**kwargs),

@@ -151,6 +151,12 @@ class FmuProperty:
             other = other.value
         return self.value < other
 
+    def __float__(self):
+        return float(self.value)
+
+    def __int__(self):
+        return int(self.value)
+
 
 class CrossSection:
     __slots__ = '_type', '_relative_position'

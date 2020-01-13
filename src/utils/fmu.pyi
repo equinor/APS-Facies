@@ -127,6 +127,28 @@ class UpdateSimBoxThicknessInZones(FmuModelChange):
     def after(self) -> None: ...
 
 
+class UpdateRelativePositionOfTrends(FmuModelChange):
+    project: Project
+    aps_model: APSModel
+    nz_fmu_box: int
+    layers_in_geo_model_zones: List[int]
+    _original_relative_depths: Dict[int, Dict[str, float]]
+
+    def __init__(self, project: Project, aps_model: APSModel, fmu_simulation_grid_name: str, **kwargs): ...
+
+    def before(self) -> None: ...
+    def after(self) -> None: ...
+
+    @staticmethod
+    def has_conic_trend(field: GaussianField) -> bool: ...
+    @classmethod
+    def _get_relative_depths(cls, aps_model: APSModel) -> Dict[int, Dict[str, float]]:
+
+
+class UpdateTrends(FmuModelChanges):
+    def __init__(self, **kwargs): ...
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> Generator[str]: ...
 
