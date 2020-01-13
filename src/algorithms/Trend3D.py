@@ -280,7 +280,6 @@ class Trend3D:
             cell_index_defined,
             zone_number,
             sim_box_thickness,
-            zinc=None,
     ):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
@@ -323,12 +322,11 @@ class Trend3D:
         # Set start and end layer for this zone
         self._start_layer = start_layer
         self._end_layer = end_layer
-        if zinc is None:
-            num_layers_in_zone = 0
-            for layer in layer_ranges:
-                num_layers_in_zone += len(layer)
+        num_layers_in_zone = 0
+        for layer in layer_ranges:
+            num_layers_in_zone += len(layer)
 
-            zinc = sim_box_thickness / num_layers_in_zone
+        zinc = sim_box_thickness / num_layers_in_zone
         if self._debug_level >= Debug.VERY_VERBOSE:
             zone_name = grid_3d.zone_names[zone_number - 1]
             print(

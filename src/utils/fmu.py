@@ -176,12 +176,53 @@ class UpdateFieldNamesInZones(FmuModelChange):
             rule.names_of_gaussian_fields = [mapping[name] for name in rule.names_of_gaussian_fields]
 
 
+class UpdateSimBoxThicknessInZones(FmuModelChange):
+    def __init__(self, project, aps_model, fmu_simulation_grid_name, **kwargs):
+        self.project = project
+        self.aps_model: APSModel = aps_model
+        self.ert_grid_name = fmu_simulation_grid_name
+
+        self._original = {
+            zone_model.zone_number: zone_model.sim_box_thickness
+            for zone_model in self.zone_models
+        }
+
+    def before(self):
+        for zone_model in self.zone_models:
+            nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+            zone_model.sim_box_thickness = zone_model.sim_box_thickness * self.nz_fmu_box / nz_geo_grid
+
+    def after(self):
+        for zone_model in self.zone_models:
+            zone_model.sim_box_thickness = self._original[zone_model.zone_number]
+
+    @property
+    @cached
+    def layers_in_geo_model_zones(self):
+        grid = get_grid(self.project, self.aps_model)
+        layers = []
+        for zonation, *reverse in grid.grid_indexer.zonation.values():
+            layers.append(zonation.stop - zonation.start)
+        return layers
+
+    @property
+    def zone_models(self):
+        return self.aps_model.zone_models
+
+    @property
+    @cached
+    def nz_fmu_box(self):
+        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
+        return nz
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
     aps_model = kwargs['aps_model']
     model_file = kwargs['model_file']
     changes = FmuModelChanges([
+        UpdateSimBoxThicknessInZones(**kwargs),
         UpdateFieldNamesInZones(**kwargs),
         UpdateGridModelName(**kwargs),
     ])

@@ -393,6 +393,10 @@ class APSZoneModel:
     def sim_box_thickness(self):
         return self.__simBoxThickness
 
+    @sim_box_thickness.setter
+    def sim_box_thickness(self, thickness):
+        self.__simBoxThickness = thickness
+
     def getTrendModel(self, gfName):
         return self.__gaussModelObject.getTrendModel(gfName)
 

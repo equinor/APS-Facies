@@ -34,6 +34,7 @@ class APSZoneModel:
     __faciesProbObject: APSFaciesProb
     __gaussModelObject: APSGaussModel
     _grid_layout: Optional[Conform]
+    __simBoxThickness: float
 
     def __init__(
         self,

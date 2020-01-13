@@ -92,6 +92,22 @@ class UpdateFieldNamesInZones(FmuModelChange):
     def _change_names(self, name_getter: Callable[[APSZoneModel, GaussianField, int], str]) -> None: ...
 
 
+class UpdateSimBoxThicknessInZones(FmuModelChange):
+    project: Project
+    aps_model: APSModel
+    _original: Dict[int, float]
+
+    # Properties
+    layers_in_geo_model_zones: List[int]
+    nz_fmu_box: int
+    ert_grid_name: str
+    zone_models: List[APSZoneModel]
+
+    def __init__(self, project: Project, aps_model: APSModel, fmu_simulation_grid_name: str, **kwargs): ...
+    def before(self) -> None: ...
+    def after(self) -> None: ...
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> Generator[str]: ...
 
