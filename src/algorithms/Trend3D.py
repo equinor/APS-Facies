@@ -1344,6 +1344,12 @@ class Trend3D_elliptic_cone(Trend3D_conic):
         )
         self.relative_size_of_ellipse = FmuProperty(relative_size, relative_size_fmu_updatable)
 
+    relative_size_of_ellipse = make_ranged_property(
+        'relative_size_of_ellipse',
+        'The relative size must be between 0, and 1. ',
+        minimum=0, maximum=1,
+    )
+
     @classmethod
     def from_xml(cls, trend_rule_xml, model_file_name=None, debug_level=Debug.OFF, **kwargs):
         conic_trunc = super().from_xml(trend_rule_xml, model_file_name, debug_level, get_origin_z=False)

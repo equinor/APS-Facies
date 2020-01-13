@@ -8,7 +8,7 @@ import xtgeo
 
 from src.algorithms import APSModel
 from src.algorithms.APSGaussModel import GaussianField
-from src.algorithms.APSZoneModel import APSZoneModel
+from src.algorithms.APSZoneModel import APSZoneModel, Trend
 
 from roxar import Project
 from roxar.grids import Grid3D, GridModel
@@ -48,6 +48,7 @@ def get_grid(
         grid_model_name: str,
 ) -> Grid3D: ...
 
+def layers_in_geo_model_zones(project: Project, aps_model: APSModel) -> List[int]: ...
 def _get_grid_name(arg: Union[str, APSModel]) -> str: ...
 
 
@@ -90,6 +91,24 @@ class UpdateFieldNamesInZones(FmuModelChange):
     def _get_original_field_name(self, zone_model: APSZoneModel) -> str: ...
     def _get_fmu_field_name(self, zone_model: APSZoneModel, field_model: GaussianField) -> str: ...
     def _change_names(self, name_getter: Callable[[APSZoneModel, GaussianField, int], str]) -> None: ...
+
+
+class UpdateRelativeSizeForEllipticConeTrend(FmuModelChange):
+    project: Project
+    aps_model: APSModel
+    layers_in_geo_model_zones: List[int]
+    nz_fmu_box: int
+    _original_relative_sizes: Dict[int, Dict[str, float]]
+
+    def __init__(self, project: Project, aps_model: APSModel, fmu_simulation_grid_name: str, **kwargs): ...
+    def before(self) -> None: ...
+    def after(self) -> None: ...
+
+    def get_original_relative_size(self, zone_model: APSZoneModel, field_model: GaussianField) -> float: ...
+    @classmethod
+    def get_relative_sizes(cls, aps_model: APSModel) -> Dict[int, Dict[str, float]]: ...
+    @staticmethod
+    def has_elliptic_cone_trend(field: GaussianField) -> bool: ...
 
 
 class UpdateSimBoxThicknessInZones(FmuModelChange):

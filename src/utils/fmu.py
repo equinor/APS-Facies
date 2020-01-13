@@ -1,11 +1,15 @@
 import os
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
+from collections import defaultdict
+from typing import Dict
 
 import numpy as np
 import xtgeo
 
 from src.algorithms.APSModel import APSModel
+from src.algorithms.APSZoneModel import APSZoneModel, Conform
+from src.algorithms.Trend3D import Trend3D_elliptic_cone
 from src.utils.decorators import cached
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 
@@ -59,6 +63,14 @@ def get_export_location(project, create=True):
 
 def get_grid(project, aps_model):
     return project.grid_models[_get_grid_name(aps_model)].get_grid(project.current_realisation)
+
+
+def layers_in_geo_model_zones(project, aps_model):
+    grid = get_grid(project, aps_model)
+    layers = []
+    for zonation, *reverse in grid.grid_indexer.zonation.values():
+        layers.append(zonation.stop - zonation.start)
+    return layers
 
 
 def _get_grid_name(arg):
@@ -199,11 +211,7 @@ class UpdateSimBoxThicknessInZones(FmuModelChange):
     @property
     @cached
     def layers_in_geo_model_zones(self):
-        grid = get_grid(self.project, self.aps_model)
-        layers = []
-        for zonation, *reverse in grid.grid_indexer.zonation.values():
-            layers.append(zonation.stop - zonation.start)
-        return layers
+        return layers_in_geo_model_zones(self.project, self.aps_model)
 
     @property
     def zone_models(self):
@@ -216,12 +224,79 @@ class UpdateSimBoxThicknessInZones(FmuModelChange):
         return nz
 
 
+class UpdateRelativeSizeForEllipticConeTrend(FmuModelChange):
+    def __init__(self, project, aps_model, fmu_simulation_grid_name, **kwargs):
+        self.project = project
+        self.aps_model: APSModel = aps_model
+        self.ert_grid_name = fmu_simulation_grid_name
+        self._original_relative_sizes = self.get_relative_sizes(aps_model)
+
+    def before(self):
+        nz_fmu_box = self.nz_fmu_box
+        for zone_model in self.aps_model.zone_models:
+            zone_model: APSZoneModel
+            nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+            for field in zone_model.gaussian_fields:
+                if self.has_elliptic_cone_trend(field):
+                    original_relative_size = self.get_original_relative_size(zone_model, field)
+                    if zone_model.grid_layout in [Conform.Proportional, Conform.TopConform]:
+                        fmu_relative_size = original_relative_size / (
+                            1 + (nz_fmu_box - nz_geo_grid) * (1 - original_relative_size) / nz_geo_grid
+                        )
+                    elif zone_model.grid_layout in [Conform.BaseConform]:
+                        if original_relative_size >= 1 - nz_geo_grid / nz_fmu_box:
+                            fmu_relative_size = 1 - nz_fmu_box * (1 - original_relative_size) / nz_geo_grid
+                        else:
+                            fmu_relative_size = 0.001
+                    else:
+                        raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
+                    field.trend.model.relative_size_of_ellipse = fmu_relative_size
+
+    def after(self):
+        for zone_model in self.aps_model.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_elliptic_cone_trend(field):
+                    field.trend.model.relative_size_of_ellipse = self._original_relative_sizes[zone_model.zone_number][field.name]
+
+    @property
+    @cached
+    def nz_fmu_box(self):
+        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
+        return nz
+
+    @property
+    @cached
+    def layers_in_geo_model_zones(self):
+        return layers_in_geo_model_zones(self.project, self.aps_model)
+
+    def get_original_relative_size(self, zone_model, field_model):
+        return self._original_relative_sizes[zone_model.zone_number][field_model.name]
+
+    @classmethod
+    def get_relative_sizes(cls, aps_model: APSModel):
+        sizes: Dict[int, Dict[str, float]] = defaultdict(dict)
+        for zone_model in aps_model.zone_models:
+            for field in zone_model.gaussian_fields:
+                trend = field.trend
+                if cls.is_elliptic_cone(trend):
+                    sizes[zone_model.zone_number][field.name] = trend.model.relative_size_of_ellipse.value
+        return sizes
+
+    @staticmethod
+    def has_elliptic_cone_trend(field):
+        return (
+            field.trend.use_trend
+            and isinstance(field.trend.model, Trend3D_elliptic_cone)
+        )
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
     aps_model = kwargs['aps_model']
     model_file = kwargs['model_file']
     changes = FmuModelChanges([
+        UpdateRelativeSizeForEllipticConeTrend(**kwargs),
         UpdateSimBoxThicknessInZones(**kwargs),
         UpdateFieldNamesInZones(**kwargs),
         UpdateGridModelName(**kwargs),

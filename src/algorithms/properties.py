@@ -146,6 +146,11 @@ class FmuProperty:
             return self.value == other.value and self.updatable == other.updatable
         return self.value == other
 
+    def __lt__(self, other):
+        if isinstance(other, FmuProperty):
+            other = other.value
+        return self.value < other
+
 
 class CrossSection:
     __slots__ = '_type', '_relative_position'

@@ -1336,7 +1336,7 @@ def add_zone_1_for_case_4(apsmodel):
         curvatureFmuUpdatable=[True, True, True, True],
         migrationAngle=[89.5, 88.0, 0, 0],
         migrationAngleFmuUpdatable=[True, True, True, True],
-        relativeSize=[0, 1.5, 0, 0],
+        relativeSize=[0, 1.0, 0, 0],
         relativeSizeFmuUpdatable=[True, True, True, True],
         origin_x=[0.5, 0.5, 0.5, 0.5],
         origin_y=[0.0, 0.0, 0.0, 0.0],
