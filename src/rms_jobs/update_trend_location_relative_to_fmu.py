@@ -31,9 +31,7 @@ def run(roxar=None, project=None, **kwargs):
                     if zone.grid_layout in [Conform.TopConform, Conform.Proportional]:
                         trend.origin.z = trend.origin.z * nz_zone / nz_fmu
                     elif zone.grid_layout in [Conform.BaseConform]:
-                        abs_nz = trend.origin.z * nz_zone
-                        n_above = nz_fmu - nz_zone
-                        trend.origin.z = (abs_nz + n_above) / nz_fmu
+                        trend.origin.z = 1 - (nz_zone * (1 - trend.origin.z) / nz_fmu)
                     else:
                         raise NotImplementedError('{} is not supported'.format(zone.grid_layout))
 
