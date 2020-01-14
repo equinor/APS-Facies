@@ -588,15 +588,15 @@ class APSModel:
                 zoneNumbers.append(zNumber)
 
     @staticmethod
-    def __readParamFromFile(inputFile, debug_level=Debug.OFF):
+    def __readParamFromFile(global_variables_file, debug_level=Debug.OFF):
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('- Read file: ' + inputFile)
+            print('- Read file: ' + global_variables_file)
         nKeywords = 0
         keywordsFMU = []
-        with open(inputFile, 'r') as file:
+        with open(global_variables_file, 'r') as file:
             lines = file.readlines()
 
             for line in lines:
@@ -616,7 +616,7 @@ class APSModel:
                     keyword = copy.copy(words[0])
                     keywordsFMU.append([keyword, value])
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Keywords and values found in parameter file:  ' + inputFile)
+            print('Debug output: Keywords and values found in parameter file:  ' + global_variables_file)
             for item in keywordsFMU:
                 kw = item[0]
                 val = item[1]

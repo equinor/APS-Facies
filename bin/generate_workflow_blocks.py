@@ -82,7 +82,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -242,9 +242,8 @@ def get_rms_data_file():
 
 
 def get_global_variables_file():
-    # Location/name of test_global_include.ipl
-    # TODO: Migrate to yml
-    return _get_file(APS_GLOBAL_VARIABLES_FILE, '../../fmuconfig/output/global_variables.ipl')
+    # Location/name of global_variables.yml
+    return _get_file(APS_GLOBAL_VARIABLES_FILE, '../../fmuconfig/output/global_variables.yml')
 
 
 def get_fmu_variables_file():
@@ -297,7 +296,7 @@ kwargs = {{
     # APS model file
     'model_file_name': get_model_file(),
     'output_rms_data_file': get_rms_data_file(),
-    'global_ipl_file': get_global_variables_file(),
+    'global_variables_file': get_global_variables_file(),
     'output_model_file': get_output_fmu_tagged_model_file(),
     # FMU parameters
     'tagged_variables_file': get_tagged_variables_file(),
