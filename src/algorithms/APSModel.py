@@ -11,6 +11,7 @@ from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
 from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
+from src.utils.io import GlobalVariables
 
 
 class APSModel:
@@ -594,37 +595,17 @@ class APSModel:
         # like e.g VARIABLE_NAME = 10
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
             print('- Read file: ' + global_variables_file)
-        nKeywords = 0
-        keywordsFMU = []
-        with open(global_variables_file, 'r') as file:
-            lines = file.readlines()
-
-            for line in lines:
-                words = line.split()
-                nWords = len(words)
-                if nWords < 3:
-                    # Skip line (searching for an assignment like keyword = value with at least 3 words
-                    continue
-                if words[0] == '//':
-                    # Skip line
-                    continue
-
-                if words[1] == '=':
-                    # This is assumed to be an assignment
-                    nKeywords += 1
-                    value = copy.copy(words[2])
-                    keyword = copy.copy(words[0])
-                    keywordsFMU.append([keyword, value])
+        keywords = GlobalVariables.parse(global_variables_file)
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Keywords and values found in parameter file:  ' + global_variables_file)
-            for item in keywordsFMU:
+            for item in keywords:
                 kw = item[0]
                 val = item[1]
                 print('  {0:30} {1:20}'.format(kw, val))
             print('')
         # End read file
 
-        return keywordsFMU
+        return keywords
 
     # ----- Properties ----
     @property

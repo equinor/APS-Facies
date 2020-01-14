@@ -144,3 +144,37 @@ def ensure_folder_exists(seed_file_log):
     if not seed_file_log.exists():
         from os import makedirs
         makedirs(seed_file_log)
+
+
+class GlobalVariables:
+    @classmethod
+    def parse(cls, global_variables_file):
+        global_variables_file = Path(global_variables_file)
+        suffix = global_variables_file.suffix.lower().strip('.')
+        if suffix == 'ipl':
+            return cls._read_ipl(global_variables_file)
+        elif suffix in ['yaml', 'yml']:
+            return cls._read_yaml(global_variables_file)
+        else:
+            raise NotImplementedError('{} is an unknown suffix, which cannot be read'.format(suffix))
+
+    @staticmethod
+    def _read_ipl(global_variables_file):
+        keywords = []
+        with open(global_variables_file, 'r') as file:
+            lines = file.readlines()
+
+        for line in lines:
+            words = line.split()
+            if len(words) < 3:
+                # Skip line (searching for an assignment like keyword = value with at least 3 words
+                continue
+            if words[0] == '//':
+                # Skip line
+                continue
+
+            if words[1] == '=':
+                # This is assumed to be an assignment
+                keyword, _, value, *_ = words
+                keywords.append([keyword, value])
+        return keywords
