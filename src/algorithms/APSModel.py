@@ -533,7 +533,7 @@ class APSModel:
                 kw, value = keywords_read[j]
                 if kw == keyword:
                     # set new value
-                    item[1] = ' ' + value.strip() + ' '
+                    item[1] = value
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Keywords and values that is updated in xml tree:')
 
@@ -548,7 +548,9 @@ class APSModel:
                 val = item[1]
                 if kw == key_word:
                     # Update value in XML tree for this keyword
-                    obj.text = val
+                    if isinstance(val, str):
+                        val = val.strip()
+                    obj.text = str(val)
                     found = True
                     break
             if found:
@@ -685,7 +687,7 @@ class APSModel:
                 uncertainty_name=name,
                 realisation=realisation_number
             )
-            item = (name, str(value))
+            item = (name, value)
             parametersUncertainty.append(item)
         return parametersUncertainty
 

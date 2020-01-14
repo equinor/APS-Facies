@@ -178,3 +178,26 @@ class GlobalVariables:
                 keyword, _, value, *_ = words
                 keywords.append([keyword, value])
         return keywords
+
+    @classmethod
+    def _read_yaml(cls, global_variables_file):
+        try:
+            import yaml
+        except ImportError:
+            raise NotImplementedError('PyYaml is required')
+        with open(global_variables_file, 'r') as file:
+            global_variables = yaml.load(file, Loader=yaml.BaseLoader)
+
+        global_variables = list(global_variables.get('rms', {}).items())
+        return [
+            (key, val) for key, val in global_variables
+            if cls.is_numeric(val)
+        ]
+
+    @staticmethod
+    def is_numeric(val):
+        try:
+            float(val)
+        except (ValueError, TypeError):
+            return False
+        return True
