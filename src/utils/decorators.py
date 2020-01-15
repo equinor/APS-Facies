@@ -4,6 +4,7 @@ import string
 import time
 from base64 import b64decode
 from functools import wraps
+from zipfile import ZipFile, ZIP_LZMA
 
 from src.utils.constants.simple import Debug
 
@@ -41,10 +42,11 @@ def loggable(func):
                     random=''.join(random.choices(string.ascii_letters + string.digits, k=5)),
                 )
                 model = config['model']
-                with open(prefix + '.model.xml', 'wb') as f:
-                    f.write(b64decode(model))
-                with open(prefix + '.state.json', 'w') as f:
-                    json.dump(config, f)
+                with ZipFile(prefix + '.zip', mode='x', compression=ZIP_LZMA) as zipfile:
+                    with zipfile.open('model.xml', 'wb') as f:
+                        f.write(b64decode(model))
+                    with zipfile.open('state.json', 'w') as f:
+                        json.dump(config, f)
             raise e
 
     return wrapper
