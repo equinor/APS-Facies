@@ -31,7 +31,7 @@
           :max-layers-in-fmu.sync="maxLayersInFmu"
           :import-fields.sync="importFields"
           :fmu-grid.sync="fmuGrid"
-          :create-fmu-grid="createFmuGrid"
+          :create-fmu-grid.sync="createFmuGrid"
         />
         <br>
         <LoggingSettings
