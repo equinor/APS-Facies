@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
+import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 
 interface DebugLevel {
   value: number

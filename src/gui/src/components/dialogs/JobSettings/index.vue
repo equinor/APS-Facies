@@ -12,15 +12,13 @@
         dark
         v-on="on"
       >
-        Project Settings
+        Job Settings
       </v-btn>
     </template>
     <v-card>
       <v-card-title
         class="headline"
-      >
-        {{ title }}
-      </v-card-title>
+      />
       <v-card-text>
         <FolderSettings
           :aps-model-file-location.sync="apsModelFileLocation"
@@ -283,28 +281,18 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 
-import rms from '@/api/rms'
-
-import LoggingSettings from '@/components/dialogs/ProjectSettings/LoggingSettings.vue'
-import FolderSettings from '@/components/dialogs/ProjectSettings/FolderSettings.vue'
-import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
+import LoggingSettings from '@/components/dialogs/JobSettings/LoggingSettings.vue'
+import FolderSettings from '@/components/dialogs/JobSettings/FolderSettings.vue'
+import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
-import FmuSettings from '@/components/dialogs/ProjectSettings/FmuSettings.vue'
-import RunSettings from '@/components/dialogs/ProjectSettings/RunSettings.vue'
+import FmuSettings from '@/components/dialogs/JobSettings/FmuSettings.vue'
+import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
 
 @Component({
-  // @ts-ignore
-  asyncComputed: {
-    async title () {
-      const name = await rms.projectName()
-      return name ? `Project settings for ${name}` : 'Project settings'
-    },
-  },
-
   components: {
     RunSettings,
     LoggingSettings,
@@ -315,7 +303,7 @@ import { Optional } from '@/utils/typing'
     BoldButton
   },
 })
-export default class ProjectSettings extends Vue {
+export default class JobSettings extends Vue {
   dialog: boolean = false
   apsModelFileLocation: string = ''
   fmuParameterListLocation: string = ''

@@ -43,7 +43,7 @@
       v-if="isDevelop"
     />
 
-    <project-settings />
+    <job-settings />
 
     <v-btn
       v-if="false"
@@ -98,7 +98,7 @@ import UploadButton from 'vuetify-upload-button'
 
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
 import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
-import ProjectSettings from '@/components/dialogs/ProjectSettings/index.vue'
+import JobSettings from '@/components/dialogs/JobSettings/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
 
@@ -160,7 +160,7 @@ function fileHandler (store: Store, fileName: string) {
   components: {
     ExportState,
     ExportDialog,
-    ProjectSettings,
+    JobSettings,
     IconButton,
     UploadButton,
     ChangelogDialog,
