@@ -47,9 +47,18 @@
       </td>
       <td class="text-left">
         <highlight-current-item
+          v-if="blockedWellLogParameter"
           :value="facies"
           :current="current"
           field="code"
+        />
+        <editable-cell
+          v-else
+          :value="facies"
+          :current="current"
+          field="code"
+          numeric
+          @submit="changeCode"
         />
       </td>
       <td
@@ -176,6 +185,10 @@ export default class FaciesTable extends Vue {
       : ''
   }
 
+  get blockedWellLogParameter (): boolean {
+    return !!this.$store.getters.blockedWellLogParameter
+  }
+
   isFaciesFromRms (facies: GlobalFacies) {
     return this.$store.getters['facies/isFromRMS'](facies)
   }
@@ -193,6 +206,10 @@ export default class FaciesTable extends Vue {
 
   changeAlias (facies: GlobalFacies) {
     return this.$store.dispatch('facies/global/changeAlias', { id: facies.id, alias: facies.alias })
+  }
+
+  changeCode (facies: GlobalFacies) {
+    return this.$store.dispatch('facies/global/changeCode', facies)
   }
 
   changeColorSelection (facies: Facies) {

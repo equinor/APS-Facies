@@ -12,6 +12,7 @@
       slot="input"
       v-model="$data._fieldValue"
       :label="label"
+      :type="numeric ? 'number' : 'text'"
       single-line
       @keydown.enter="submit"
     />
@@ -44,6 +45,9 @@ export default class EditableCell<T> extends Vue {
 
   @Prop({ required: true })
   readonly current: ID
+
+  @Prop({ default: false, type: Boolean })
+  readonly numeric: boolean
 
   get fieldValue (): string { return this.value[this.field] }
 
