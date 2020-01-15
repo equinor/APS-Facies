@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import FaciesTable from '@/components/table/FaciesTable.vue'
+import FaciesTable from '@/components/table/FaciesTable/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 
 import { Store } from '@/store/typing'
