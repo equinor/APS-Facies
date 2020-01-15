@@ -169,7 +169,12 @@ export default class FmuSettings extends Vue {
   }
 
   get _onlyUpdateFromFmu (): boolean { return this.onlyUpdateFromFmu }
-  set _onlyUpdateFromFmu (toggle: boolean) { this.$emit('update:onlyUpdateFromFmu', toggle) }
+  set _onlyUpdateFromFmu (toggle: boolean) {
+    this.$emit('update:onlyUpdateFromFmu', toggle)
+    if (toggle) {
+      this._runFmuWorkflows = false
+    }
+  }
 
   get _createFmuGrid (): boolean { return this.createFmuGrid }
   set _createFmuGrid (value: boolean) { this.$emit('update:createFmuGrid', value) }
@@ -178,7 +183,12 @@ export default class FmuSettings extends Vue {
   set _fmuParameterListLocation (path: string) { this.$emit('update:fmuParameterListLocation', path) }
 
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
-  set _runFmuWorkflows (toggled: boolean) { this.$emit('update:runFmuWorkflows', toggled) }
+  set _runFmuWorkflows (toggled: boolean) {
+    this.$emit('update:runFmuWorkflows', toggled)
+    if (toggled) {
+      this._onlyUpdateFromFmu = false
+    }
+  }
 
   get _maxLayersInFmu (): number { return this.maxLayersInFmu }
   set _maxLayersInFmu (value: number) { this.$emit('update:maxLayersInFmu', value) }
