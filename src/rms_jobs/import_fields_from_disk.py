@@ -93,6 +93,9 @@ def run(roxar=None, project=None, **kwargs):
                 field = load_field_values(full_field_name, fmu_grid, path)
                 field_values += extract_values(field, defined, zone)
             else:
+                if full_field_name not in zone.gaussian_fields_in_truncation_rule:
+                    # This is OK, as we don't need this field
+                    continue
                 raise FileNotFoundError('The file {} could not be found.'.format(path))
         nx, ny, nz = rms_grid.dimensions
         field_model = xtgeo.GridProperty(
