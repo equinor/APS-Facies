@@ -51,7 +51,7 @@
       </v-expansion-panel>
       <v-expansion-panel>
         <v-expansion-panel-header>
-          <h3>Gaussian Random Fields</h3>
+          <h3>Transformed Gaussian Random Fields</h3>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <gaussian-plots
