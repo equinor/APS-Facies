@@ -91,8 +91,7 @@ class JobConfig:
 
     @property
     def global_variables_file(self):
-        project_location = Path(self._config['parameters']['path']['project']['selected'])
-        config_location = project_location / '../input/config/aps_gui'
+        config_location = Path(self._config['parameters']['path']['fmuParameterListLocation']['selected'])
         file_priority = [
             'global_variables.yml',
             'global_variables.yaml',
