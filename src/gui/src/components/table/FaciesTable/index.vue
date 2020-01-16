@@ -12,32 +12,22 @@
     :select-error="selectFaciesError"
   >
     <template
-      v-slot:item="{ item, expand }"
+      v-slot:item="{ item : facies }"
     >
       <td class="text-left">
-        <v-edit-dialog
-          v-if="!isFaciesFromRms(item)"
-          lazy
-        >
-          <highlight-current-item
-            :value="item"
-            :current="current"
-            field="name"
-          />
-          <v-text-field
-            slot="input"
-            v-model="item.name"
-            label="Edit"
-            single-line
-            @keydown.enter="() => changeName(item)"
-          />
-        </v-edit-dialog>
+        <editable-cell
+          v-if="!isFaciesFromRms(facies)"
+          :value="facies"
+          :current="current"
+          field="name"
+          @submit="changeName"
+        />
         <v-popover
           v-else
           trigger="hover"
         >
           <highlight-current-item
-            :value="item"
+            :value="facies"
             :current="current"
             field="name"
           />
@@ -48,33 +38,32 @@
         v-if="!hideAlias"
         class="text-left"
       >
-        <v-edit-dialog
-          lazy
-        >
-          <highlight-current-item
-            :value="item"
-            :current="current"
-            field="alias"
-          />
-          <v-text-field
-            slot="input"
-            v-model="item.alias"
-            label="Edit"
-            single-line
-            @keydown.enter="() => changeAlias(item)"
-          />
-        </v-edit-dialog>
+        <editable-cell
+          :value="facies"
+          :current="current"
+          field="alias"
+          @submit="changeAlias"
+        />
       </td>
       <td class="text-left">
         <highlight-current-item
-          :value="item"
+          v-if="blockedWellLogParameter"
+          :value="facies"
           :current="current"
           field="code"
         />
+        <editable-cell
+          v-else
+          :value="facies"
+          :current="current"
+          field="code"
+          numeric
+          @submit="changeCode"
+        />
       </td>
       <td
-        :style="{backgroundColor: item.color}"
-        @click.stop="() => changeColorSelection(item)"
+        :style="{backgroundColor: facies.color}"
+        @click.stop="() => changeColorSelection(facies)"
       />
     </template>
     <template
@@ -102,6 +91,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import Swatches from 'vue-swatches'
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
+import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 
 import { Facies, GlobalFacies } from '@/utils/domain'
@@ -116,6 +106,7 @@ import { hasCurrentParents } from '@/utils'
     OptionalHelpItem,
     HighlightCurrentItem,
     Swatches,
+    EditableCell,
   }
 })
 export default class FaciesTable extends Vue {
@@ -194,6 +185,10 @@ export default class FaciesTable extends Vue {
       : ''
   }
 
+  get blockedWellLogParameter (): boolean {
+    return !!this.$store.getters.blockedWellLogParameter
+  }
+
   isFaciesFromRms (facies: GlobalFacies) {
     return this.$store.getters['facies/isFromRMS'](facies)
   }
@@ -211,6 +206,10 @@ export default class FaciesTable extends Vue {
 
   changeAlias (facies: GlobalFacies) {
     return this.$store.dispatch('facies/global/changeAlias', { id: facies.id, alias: facies.alias })
+  }
+
+  changeCode (facies: GlobalFacies) {
+    return this.$store.dispatch('facies/global/changeCode', facies)
   }
 
   changeColorSelection (facies: Facies) {

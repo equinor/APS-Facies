@@ -106,6 +106,9 @@ const module: Module<GlobalFaciesState, RootState> = {
     changeAlias: async ({ commit }, { id, alias }): Promise<void> => {
       commit('CHANGE', { id, name: 'alias', value: alias })
     },
+    changeCode: async ({ commit }, { id, code }): Promise<void> => {
+      commit('CHANGE', { id, name: 'code', value: code })
+    }
   },
 
   mutations: {
