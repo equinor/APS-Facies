@@ -50,7 +50,7 @@ def get_project_dir(project):
 
 
 def setContinuous3DParameterValues(
-        gridModel, parameterName, inputValues, zoneNumberList,
+        gridModel, parameterName, inputValues, zoneNumberList=None,
         realNumber=0, isShared=True, debug_level=Debug.OFF,
 ):
     """Set 3D parameter with values for specified grid model.
@@ -79,6 +79,8 @@ def setContinuous3DParameterValues(
         print_error(functionName, text)
         return False
 
+    if zoneNumberList is None:
+        zoneNumberList = []
     # Check if specified parameter name exists and create new parameter if it does not exist.
     found = 0
     for p in gridModel.properties:
