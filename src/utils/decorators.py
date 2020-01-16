@@ -43,7 +43,7 @@ def loggable(func):
                 )
                 model = config['model']
                 with ZipFile(prefix + '.zip', mode='x', compression=ZIP_LZMA) as zipfile:
-                    with zipfile.open('model.xml', 'wb') as f:
+                    with zipfile.open('model.xml', 'w') as f:
                         f.write(b64decode(model))
                     with zipfile.open('state.json', 'w') as f:
                         json.dump(config, f)
