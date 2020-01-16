@@ -13,10 +13,12 @@ from src.utils.fmu import fmu_aware_model_file
 from src.utils.io import create_temporary_model_file
 from src.utils.roxar.job import JobConfig
 
+import roxar.rms
+
 
 @loggable
 def run(config):
-    config = JobConfig(config)
+    config = JobConfig(roxar, project, config)
     if config.error_message:
         raise ValueError(config.error_message)
     with create_temporary_model_file(config.model) as model_file:

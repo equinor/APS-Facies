@@ -5,18 +5,18 @@ from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.fmu import get_grid, get_export_location
 
-import roxar.rms
-
 
 class JobConfig:
-    def __init__(self, config: Dict):
+    def __init__(self, roxar, project, config: Dict):
+        self.roxar = roxar
+        self.project = project
         self._config = config
 
     def get_parameters(self, model_file):
         aps_model = APSModel(model_file)  # Represents the ORIGINAL APS model
         return {
-            'roxar': roxar,
-            'project': project,
+            'roxar': self.roxar,
+            'project': self.project,
             'model_file': model_file,
             'output_model_file': model_file,
             'global_variables': self.global_variables_file,
@@ -25,10 +25,10 @@ class JobConfig:
             'fmu_mode': self.run_fmu_workflows,
             'fmu_simulation_grid_name': self.fmu_grid_name,
             'rms_grid_name': aps_model.grid_model_name,
-            'fmu_export_location': get_export_location(project),
+            'fmu_export_location': get_export_location(self.project),
             'aps_model': aps_model,
             'use_constant_probabilities': aps_model.use_constant_probability,
-            'workflow_name': roxar.rms.get_running_workflow_name(),
+            'workflow_name': self.roxar.rms.get_running_workflow_name(),
             'seed_log_file': None,
             'write_rms_parameters_for_qc_purpose': self.write_rms_parameters_for_qc_purpose,
             'debug_level': self.debug_level,
@@ -38,7 +38,7 @@ class JobConfig:
         if not self.run_fmu_workflows:
             return None
 
-        grid = get_grid(project, aps_model)
+        grid = get_grid(self.project, aps_model)
         layers = []
         for zonation, *reverse in grid.grid_indexer.zonation.values():
             layers.append(zonation.stop - zonation.start)
@@ -56,7 +56,7 @@ class JobConfig:
     def create_fmu_grid(self):
         return (
             self._config['fmu']['create']['value']
-            and self.fmu_grid_name not in project.grid_models
+            and self.fmu_grid_name not in self.project.grid_models
         )
 
     @property
