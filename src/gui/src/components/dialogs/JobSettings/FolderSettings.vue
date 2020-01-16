@@ -34,7 +34,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import rms from '@/api/rms'
 
-import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vue'
+import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 
 @Component({
