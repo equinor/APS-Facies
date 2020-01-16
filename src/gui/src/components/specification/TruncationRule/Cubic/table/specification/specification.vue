@@ -47,6 +47,7 @@ export default class CubicTopologySpecification extends Vue {
       height: 400,
     }
   }
+
   get __data () {
     return plotify(
       this.polygons
@@ -68,6 +69,7 @@ export default class CubicTopologySpecification extends Vue {
       '#fff',
     )
   }
+
   get boundingBoxes () {
     return this.polygons.map(({ name, polygon }) => {
       return {
@@ -113,6 +115,7 @@ export default class CubicTopologySpecification extends Vue {
       this.$emit('input', [...this.value, this.rule.polygons.find(polygon => getId(polygon) === name)])
     }
   }
+
   relativeClickPosition (e: MouseEvent) {
     const { top, bottom, left, right } = this.$el.getElementsByClassName('svg-container')[0].getBoundingClientRect()
     const getMax = (direction: string) => Math.max(...this.boundingBoxes.map(({ boundingBox }) => boundingBox[`max${direction.toUpperCase()}`]))
@@ -121,6 +124,7 @@ export default class CubicTopologySpecification extends Vue {
       y: Math.min((e.clientY - top) / (bottom - top), getMax('y')),
     }
   }
+
   has (item: CubicPolygon | ID | undefined) {
     return this.value.map(getId).includes(getId(item))
   }

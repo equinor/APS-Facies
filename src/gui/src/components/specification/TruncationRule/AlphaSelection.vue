@@ -42,7 +42,7 @@ export default class AlphaSelection<
   readonly group: ID | ''
 
   get _fields () {
-    return (this.$store as Store).getters['fields']
+    return (this.$store as Store).getters.fields
       .sort((a, b) => a.name.localeCompare(b.name))
   }
 
@@ -56,6 +56,7 @@ export default class AlphaSelection<
     }
     return null
   }
+
   set selected (value) { this.$emit('input', value) }
 
   get fields () {

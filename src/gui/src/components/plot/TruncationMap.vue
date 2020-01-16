@@ -26,20 +26,16 @@ import { makeTruncationRuleSpecification } from '@/utils'
 import { plotify, PlotSpecification } from '@/utils/plotting'
 
 @Component({
-  // @ts-ignore
   asyncComputed: {
     data: {
       async get (): Promise<PlotSpecification> {
         return plotify(
-          // @ts-ignore
-          await rms.truncationPolygons(makeTruncationRuleSpecification(this.value, this.$store.getters)),
-          // @ts-ignore
-          this.selectedFacies
+          await rms.truncationPolygons(makeTruncationRuleSpecification((this as TruncationMap).value, this.$store.getters)),
+          (this as TruncationMap).selectedFacies
         )
       },
       shouldUpdate (): boolean {
-        // @ts-ignore
-        return this.canUpdate()
+        return (this as TruncationMap).canUpdate()
       },
       default () {
         return {
@@ -69,7 +65,6 @@ export default class TruncationMap extends Vue {
   handler () {
     // To detect changes in alias
     if (this.canUpdate()) {
-      // @ts-ignore
       this.$asyncComputed.data.update()
     }
   }

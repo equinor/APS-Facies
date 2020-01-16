@@ -91,7 +91,7 @@ export default class MultipleGaussianRandomFields extends Vue {
   get panel () { return this.$store.state.panels.settings.gaussianRandomFields }
   set panel (value) { this.$store.dispatch('panels/set', { type: 'settings', panel: 'gaussianRandomFields', toggled: isNumber(value) ? value : true }) }
 
-  get fields () { return this.$store.getters['fields'] }
+  get fields () { return this.$store.getters.fields }
   get ids () { return Object.keys(this.fields) }
 
   async addField () {

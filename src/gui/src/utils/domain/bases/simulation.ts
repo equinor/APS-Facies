@@ -35,6 +35,7 @@ export default abstract class Simulation extends ZoneRegionDependent {
   protected get simulation (): number[][] | null {
     return this._simulation
   }
+
   protected set simulation (data) {
     this._simulation = data
     this._dataHash = this.hash

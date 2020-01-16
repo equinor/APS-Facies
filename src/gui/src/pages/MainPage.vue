@@ -57,7 +57,7 @@ import Preview from '@/components/ElementPreview.vue'
   },
 })
 export default class MainPage extends Vue {
-  get canSpecifyModelSettings () { return this.$store.getters['canSpecifyModelSettings'] }
+  get canSpecifyModelSettings () { return this.$store.getters.canSpecifyModelSettings }
 
   get loading () { return this.$store.state._loading.value }
 

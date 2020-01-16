@@ -17,7 +17,7 @@ const module: Module<SimulationBoxState, RootState> = {
   },
 
   actions: {
-    async fetch ({ dispatch, rootGetters }, rough: boolean = false): Promise<number> {
+    async fetch ({ dispatch, rootGetters }, rough = false): Promise<number> {
       const simBox = await api.simulationBoxOrigin(rootGetters.gridModel, rough)
       await dispatch('populate', simBox)
       return simBox.rotation
@@ -26,7 +26,6 @@ const module: Module<SimulationBoxState, RootState> = {
       commit('SIZE', size)
       commit('ORIGIN', origin)
     },
-    thickness ({ commit }, zoneName) {},
   },
 
   mutations: {

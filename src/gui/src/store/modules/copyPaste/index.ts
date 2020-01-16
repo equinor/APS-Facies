@@ -57,7 +57,7 @@ function giveNewIds (elements: Element[], source: Parent, target: Parent): strin
     _serialization[element.name] = JSON.parse(element.serialization)
   }
   let serialization = JSON.stringify(_serialization)
-  for (const [ key, value ] of idMapping) {
+  for (const [key, value] of idMapping) {
     const regex = new RegExp(key, 'gi') // Necessary to change _all_ occurrences, instead of just the first
     serialization = serialization.replace(regex, value)
   }
@@ -92,7 +92,7 @@ const module: Module<CopyPasteState, RootState> = {
 
         await removeOld({ dispatch }, elements.concat().reverse(), parent)
         const serialization = giveNewIds(elements, source, parent)
-        for (const [ key, items ] of Object.entries(JSON.parse(serialization))) {
+        for (const [key, items] of Object.entries(JSON.parse(serialization))) {
           await Promise.all((items as object[])
             .map((item): Promise<void> => dispatch(`${key}/add`, item, { root: true }))
           )

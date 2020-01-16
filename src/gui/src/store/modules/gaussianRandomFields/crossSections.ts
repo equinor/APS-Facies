@@ -46,7 +46,7 @@ const module: Module<CrossSectionsState, RootState> = {
     },
     async populate ({ commit, dispatch, getters, rootState }, crossSections: CrossSection | CrossSectionSerialization): Promise<void> {
       for (const crossSection of Object.values(crossSections)) {
-        const existing = getters['byParent'](crossSection)
+        const existing = getters.byParent(crossSection)
         if (existing && existing.id !== crossSection.id) {
           if (Object.values(rootState.gaussianRandomFields.available).some((field): boolean => field.settings.crossSection.id === existing.id)) {
             throw new APSError('There is a conflict with the cross sections')
@@ -57,7 +57,7 @@ const module: Module<CrossSectionsState, RootState> = {
       }
     },
     add ({ commit, getters }, crossSection): void {
-      const existing = getters['byParent'](crossSection)
+      const existing = getters.byParent(crossSection)
       if (!existing) {
         commit('ADD', new CrossSection({ ...crossSection }))
       }

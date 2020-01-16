@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import store from '@/store'
 
 import { dumpState } from '@/utils/helpers/processing/export'
@@ -28,7 +29,7 @@ if (typeof rms !== 'undefined') {
     if (Object.keys(data).length > 2) {
       store.dispatch('populate', data)
     } else {
-      const match = /^Grid models\/(.*)$/g.exec(data['_treeorigin'])
+      const match = /^Grid models\/(.*)$/g.exec(data._treeorigin)
       if (match) {
         let gridModel = match[1]
         // The resulting output may include a nested path (/-separated), while a grid model MAY have the '/' character

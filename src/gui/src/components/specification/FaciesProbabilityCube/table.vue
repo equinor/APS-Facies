@@ -51,6 +51,7 @@ import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
 import Facies from '@/utils/domain/facies/local'
 import { Store } from '@/store/typing'
+import { HeaderItems } from '@/utils/typing'
 
 import { hasCurrentParents } from '@/utils'
 
@@ -100,7 +101,7 @@ export default class FaciesProbabilityCubeTable extends Vue {
     return 'No Facies selected'
   }
 
-  get headers () {
+  get headers (): HeaderItems {
     const headers = [
       {
         text: 'Facies',

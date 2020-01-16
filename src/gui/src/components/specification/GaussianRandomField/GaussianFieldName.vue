@@ -20,10 +20,12 @@ import { Optional } from '@/utils/typing'
       fieldName: {
         required,
         isUnique (value) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore
           const current = this.value.id
+          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore
-          return !this.fields.some(({ name, id }) => name === value && id !== current)
+          return !this.fields.some(({ name, id }: GaussianRandomField) => name === value && id !== current)
         },
       },
     }
@@ -35,30 +37,28 @@ export default class GaussianFieldName extends Vue {
 
   fieldName: Optional<string> = null
 
-  get fields () { return this.$store.getters['fields'] }
+  get fields (): GaussianRandomField[] { return this.$store.getters.fields }
 
-  get name () { return this.value.name }
+  get name (): string { return this.value.name }
 
-  get errors () {
+  get errors (): string[] {
+    if (!this.$v.fieldName) return []
+
     const errors: string[] = []
-    // @ts-ignore
     if (!this.$v.fieldName.$dirty) return errors
-    // @ts-ignore
     !this.$v.fieldName.required && errors.push('Is required')
-    // @ts-ignore
     !this.$v.fieldName.isUnique && errors.push('Must be unique')
     return errors
   }
 
   @Watch('fieldName')
-  onNameChange (value: string) {
-    // @ts-ignore
-    if (!this.$v.fieldName.$invalid) {
+  onNameChange (value: string): void {
+    if (this.$v.fieldName && !this.$v.fieldName.$invalid) {
       this.$store.dispatch('gaussianRandomFields/changeName', { field: this.value, name: value })
     }
   }
 
-  mounted () {
+  mounted (): void {
     this.fieldName = this.name
   }
 }

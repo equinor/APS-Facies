@@ -3,6 +3,7 @@ import { Region } from '@/utils/domain'
 import { GaussianRandomFieldState } from '@/store/modules/gaussianRandomFields/typing'
 import { ID } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
+import { hasOwnProperty } from '@/utils/helpers'
 import Vue from 'vue'
 
 import { getId, hasParents, newSeed } from '@/utils'
@@ -27,17 +28,16 @@ function setValue (
 ): void {
   const checks: ([() => boolean, string])[] = [
     [
-      (): boolean => state.available.hasOwnProperty(field.id),
+      (): boolean => hasOwnProperty(state.available, field.id),
       `The gaussian field (${field}) does not exists`
     ],
     [
-      // @ts-ignore
-      (): boolean => typeof type === 'undefined' || legalTypes.indexOf(type) !== -1,
+      (): boolean => typeof type === 'undefined' || (!!legalTypes && legalTypes.indexOf(type) !== -1),
       `The type '${type}' is not a legal value (${legalTypes})`
     ],
     [
       (): boolean => typeof variogramOrTrend === 'undefined' || ['variogram', 'trend'].indexOf(variogramOrTrend) >= 0,
-      `When specifying 'variogramOrTrend', is MUST be either 'variogram', or 'trend'`
+      'When specifying \'variogramOrTrend\', is MUST be either \'variogram\', or \'trend\''
     ],
   ]
   checks.forEach(([check, errorMessage]): void => {
@@ -114,7 +114,7 @@ const module: Module<GaussianRandomFieldState, RootState> = {
       commit('DELETE', { field })
     },
     async deleteField ({ state, commit, dispatch }, { field }: Field): Promise<void> {
-      if (state.available.hasOwnProperty(field.id)) {
+      if (hasOwnProperty(state.available, field.id)) {
         await dispatch('truncationRules/deleteField', { field }, { root: true })
         commit('DELETE', { field })
       }
@@ -128,7 +128,7 @@ const module: Module<GaussianRandomFieldState, RootState> = {
             name: field.name,
             variogram: field.variogram,
             trend: field.trend,
-            settings: rootGetters['simulationSettings']({ field }),
+            settings: rootGetters.simulationSettings({ field }),
           })
         })
       } finally {

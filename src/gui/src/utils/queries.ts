@@ -2,7 +2,7 @@ import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
 import Polygon, { getFaciesName } from '@/utils/domain/polygon/base'
 import { Identified } from '@/utils/domain/bases/interfaces'
-import { getId } from '@/utils/helpers'
+import { getId, hasOwnProperty } from '@/utils/helpers'
 
 interface Counts {
   [id: string]: number
@@ -11,7 +11,7 @@ interface Counts {
 export function hasFaciesSpecifiedForMultiplePolygons (
   polygons: Polygon[] | Identified<Polygon>,
   facies: Facies | GlobalFacies | null = null,
-  ignoreEmptyFacies: boolean = true,
+  ignoreEmptyFacies = true,
 ): boolean {
   if (polygons instanceof Object) polygons = Object.values(polygons)
   if (!polygons || polygons.length === 0) return false
@@ -20,7 +20,7 @@ export function hasFaciesSpecifiedForMultiplePolygons (
     .reduce((counts: Counts, { facies }): Counts => {
       const id = getId(facies)
       if (ignoreEmptyFacies && !id) return counts
-      counts.hasOwnProperty(id)
+      hasOwnProperty(counts, id)
         ? counts[`${id}`] += 1
         : counts[`${id}`] = 1
       return counts

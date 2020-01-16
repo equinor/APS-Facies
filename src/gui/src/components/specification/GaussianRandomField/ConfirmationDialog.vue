@@ -70,7 +70,7 @@ import { Color } from '@/utils/domain/facies/helpers/colors'
 
 @Component
 export default class ConfirmationDialog extends Vue {
-  dialog: boolean = false
+  dialog = false
   resolve: ((answer: boolean) => void) | null = null
   reject: ((answer: boolean) => void) | null = null
   message: string | null = null
@@ -90,12 +90,14 @@ export default class ConfirmationDialog extends Vue {
       this.reject = reject
     })
   }
+
   agree () {
     if (!this.resolve) throw new APSError('resolve has not been set')
 
     this.resolve(true)
     this.dialog = false
   }
+
   cancel () {
     if (!this.resolve) throw new APSError('resolve has not been set')
 

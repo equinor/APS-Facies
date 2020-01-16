@@ -34,46 +34,46 @@ class Panels {
 
   public constructor () {
     this._panels = {
-      'selection': {
-        'zoneRegion': {
+      selection: {
+        zoneRegion: {
           order: 0,
           actions: [],
         },
-        'facies': {
+        facies: {
           order: 1,
           actions: [],
         },
       },
-      'preview': {
-        'truncationRuleMap': {
+      preview: {
+        truncationRuleMap: {
           order: 0,
           actions: [],
         },
-        'truncationRuleRealization': {
+        truncationRuleRealization: {
           order: 1,
           actions: [],
         },
-        'gaussianRandomFields': {
+        gaussianRandomFields: {
           order: 2,
           actions: [
             async ({ dispatch, rootGetters }): Promise<void> => { await dispatch('gaussianRandomFields/updateSimulations', { fields: rootGetters.fields }, { root: true }) },
           ],
         },
-        'crossPlots': {
+        crossPlots: {
           order: 3,
           actions: [],
         },
       },
-      'settings': {
-        'faciesProbability': {
+      settings: {
+        faciesProbability: {
           order: 0,
           actions: [],
         },
-        'truncationRule': {
+        truncationRule: {
           order: 1,
           actions: [],
         },
-        'gaussianRandomFields': {
+        gaussianRandomFields: {
           order: 2,
           actions: [],
         },

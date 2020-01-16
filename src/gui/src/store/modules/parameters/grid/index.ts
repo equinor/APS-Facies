@@ -10,6 +10,7 @@ import { RootState } from '@/store/typing'
 const module: Module<GridParameterState, RootState> = {
   namespaced: true,
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   state: {
     _waiting: false,
@@ -24,7 +25,7 @@ const module: Module<GridParameterState, RootState> = {
   },
 
   actions: {
-    async fetch ({ commit, dispatch, rootGetters }, rough: boolean = true): Promise<void> {
+    async fetch ({ commit, dispatch, rootGetters }, rough = true): Promise<void> {
       commit('_WAITING', true)
       const grid: Optional<GridModel> = rootGetters['gridModels/current']
       if (grid) {
@@ -39,7 +40,6 @@ const module: Module<GridParameterState, RootState> = {
       commit('SIZE', size)
       commit('AZIMUTH', azimuth)
     },
-    thickness ({ commit }, zoneName) {},
   },
   mutations: {
     SIZE: (state, { x, y, z }): void => {
@@ -58,7 +58,6 @@ const module: Module<GridParameterState, RootState> = {
     waiting: (state): boolean => {
       return state._waiting
     },
-    settings: (state, getters, rootState, rootGetters) => {},
   },
 }
 

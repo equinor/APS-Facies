@@ -35,6 +35,7 @@ function updateFaciesProbability (dispatch: Dispatch, facies: Facies, probabilit
 const module: Module<FaciesState, RootState> = {
   namespaced: true,
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   state: {
     available: {},
@@ -50,7 +51,7 @@ const module: Module<FaciesState, RootState> = {
     add: ({ commit, getters }, { facies, parent, probabilityCube = null, previewProbability = null, id = null }): Facies => {
       const localFacies = new Facies({
         id,
-        facies: (facies instanceof GlobalFacies) ? facies : getters['byId'](facies),
+        facies: (facies instanceof GlobalFacies) ? facies : getters.byId(facies),
         probabilityCube,
         previewProbability,
         parent,
@@ -84,7 +85,7 @@ const module: Module<FaciesState, RootState> = {
     },
     populate: ({ commit, state, getters }, facies: FaciesSerialization[]): void => {
       facies.forEach((facies): void => {
-        facies.facies = getters['byId'](getId(facies.facies))
+        facies.facies = getters.byId(getId(facies.facies))
       })
       commit('AVAILABLE', makeData(facies, Facies, state.available))
     },
@@ -164,7 +165,7 @@ const module: Module<FaciesState, RootState> = {
     },
     toggleConstantProbability: ({ commit, getters, rootGetters }): void => {
       const _id = parentId({ zone: rootGetters.zone, region: rootGetters.region })
-      const usage = !getters['constantProbability']()
+      const usage = !getters.constantProbability()
       commit('CONSTANT_PROBABILITY', { parentId: _id, toggled: usage })
     },
     setConstantProbability: ({ commit }, { parentId, toggled }): void => {
@@ -212,15 +213,15 @@ const module: Module<FaciesState, RootState> = {
   },
 
   getters: {
-    name: (state, getters): (id: ID | Identifiable) => string => (id: ID | Identifiable): string => {
+    name: (state, getters): (id: ID | Identifiable) => string | string[] => (id: ID | Identifiable): string | string[] => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
       // @ts-ignore
       id = isUUID(id) ? id : id.id
-      const facies: Facies | Facies[] = getters['byId'](id)
+      const facies: Facies | Facies[] = getters.byId(id)
       if (facies instanceof Array) {
-        // @ts-ignore
         return facies.map((id): string => getters.name(id))
       }
-      return facies.name || getters['byId'](facies.facies).name
+      return facies.name || getters.byId(facies.facies).name
     },
     byId: (state, getters): (id: ID) => Facies | Facies[] | null => (id: ID): Facies | Facies[] | null => {
       id = getId(id)

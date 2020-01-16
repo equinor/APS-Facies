@@ -18,6 +18,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { notEmpty } from '@/utils'
@@ -41,16 +42,17 @@ export default class OptionalHelpItem extends Vue {
   @Prop({ required: true })
   readonly value!: Text | Named | string | number
 
-  get text () {
+  get text (): string {
     // @ts-ignore
     return this.value.text || this.value.name || this.value
   }
-  get help () {
+
+  get help (): string {
     // @ts-ignore
     return this.value.help
   }
-  get hasHelp () {
-    // @ts-ignore
+
+  get hasHelp (): boolean {
     return notEmpty(this.help)
   }
 }

@@ -21,6 +21,7 @@ import CrossSection from '@/utils/domain/gaussianRandomField/crossSection'
 import { TrendConfiguration, TrendType } from '@/utils/domain/gaussianRandomField/trend'
 import { VariogramConfiguration } from '@/utils/domain/gaussianRandomField/variogram'
 import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
+import { hasOwnProperty } from '@/utils/helpers'
 import { Optional } from '@/utils/typing'
 import { Module } from 'vuex'
 
@@ -173,8 +174,8 @@ function getFaciesFromBayfill (context: Context, container: XMLElement, item: st
 
 function getSlantFactor (container: XMLElement, item: string): Optional<FmuUpdatableValue> {
   const mapping = {
-    'Floodplain': 'SF',
-    'Subbay': 'YSF',
+    Floodplain: 'SF',
+    Subbay: 'YSF',
     'Bayhead Delta': 'SBHD',
   }
   const element = getNodeValue(container, 'BackGroundModel')
@@ -249,20 +250,20 @@ async function getOverlayPolygons (context: Context, group: XMLElement, parent: 
     facies: getBackgroundFacies(context, group, parent),
     parent,
   }, { root: true })
-  const _getOverlayPolygon = (el: XMLElement, index: number = 0): OverlayPolygon => getOverlayPolygon(context, backgroundFacies, el, offset + index + 1, parent)
+  const _getOverlayPolygon = (el: XMLElement, index = 0): OverlayPolygon => getOverlayPolygon(context, backgroundFacies, el, offset + index + 1, parent)
   const polygons = ensureArray(getNodeValues(group, 'AlphaField'))
   return polygons.map(_getOverlayPolygon)
 }
 
 function hasElement (container: XMLElement, property: string): boolean {
   const naive = container[`${property}`]
-  if (typeof naive === 'undefined' && container.hasOwnProperty('elements')) {
+  if (typeof naive === 'undefined' && hasOwnProperty(container, 'elements')) {
     return !!container.elements.find((el): boolean => el.name === property)
   }
   return !!naive
 }
 
-async function makeOverlayPolygons (context: Context, container: XMLElement, parent: Parent, offset: number = 0): Promise<OverlayPolygon[]> {
+async function makeOverlayPolygons (context: Context, container: XMLElement, parent: Parent, offset = 0): Promise<OverlayPolygon[]> {
   const overlayPolygons = []
   if (hasElement(container, 'OverLayModel')) {
     const groups = ensureArray(getNodeValues(getMandatoryNodeValue(container, 'OverLayModel'), 'Group'))
@@ -615,7 +616,7 @@ const module: Module<{}, RootState> = {
             if (!zoneToSetAsCurrent) {
               zoneToSetAsCurrent = zone
             }
-            let regionsInZone = zoneRegionsItem[1]
+            const regionsInZone = zoneRegionsItem[1]
             for (let i = 0; i < regionsInZone.length; i++) {
               const regionIdFromFile = regionsInZone[`${i}`]
               let regionFound = false

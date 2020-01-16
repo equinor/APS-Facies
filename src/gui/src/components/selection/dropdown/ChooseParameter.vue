@@ -16,6 +16,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
@@ -60,17 +61,17 @@ export default class ChooseParameter<T = any> extends Vue {
 
   get selected (): T { return (this.$store as Store).state.parameters[this.parameterType].selected }
   set selected (value: T) {
-    const changeValue = () => this.$store.dispatch(`parameters/${this.parameterType}/select`, value)
+    const changeValue = (): Promise<void> => this.$store.dispatch(`parameters/${this.parameterType}/select`, value)
 
     if (this.warn && (!!this.selected || this.warnEvenWhenEmpty)) {
       // @ts-ignore
-      (this.$refs['confirm'] as ConfirmationDialog).open('Are you sure?', this.warnMessage)
+      (this.$refs.confirm as ConfirmationDialog).open('Are you sure?', this.warnMessage)
         .then((confirmed: boolean) => {
           if (confirmed) changeValue()
           else {
             // The component must be made aware that its value was not updated
             // @ts-ignore
-            this.$refs['selection'].lazyValue = this.selected
+            this.$refs.selection.lazyValue = this.selected
           }
         })
     } else {

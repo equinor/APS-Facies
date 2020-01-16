@@ -115,7 +115,7 @@ export default class GaussianRandomField extends Vue {
   @Prop({ required: true })
   readonly value!: Field
 
-  waitingForSimulation: boolean = false
+  waitingForSimulation = false
   invalid: Invalid = {
     anisotropyDirection: false,
     power: false,
@@ -141,6 +141,7 @@ export default class GaussianRandomField extends Vue {
       && !this.waitingForSimulation
     )
   }
+
   get isValid (): boolean {
     return Object.values(this.invalid).every(invalid => !invalid)
   }
@@ -154,7 +155,7 @@ export default class GaussianRandomField extends Vue {
     }
   }
 
-  async simulation (renew: boolean = false): Promise<void> {
+  async simulation (renew = false): Promise<void> {
     if (renew) {
       await this.$store.dispatch('gaussianRandomFields/newSeed', { field: this.value })
     }
@@ -169,7 +170,7 @@ export default class GaussianRandomField extends Vue {
     })
   }
 
-  async updateSimulation (renew: boolean = false): Promise<void> {
+  async updateSimulation (renew = false): Promise<void> {
     this.waitingForSimulation = true
     try {
       await this.simulation(renew)
@@ -181,6 +182,7 @@ export default class GaussianRandomField extends Vue {
   }
 
   async openVisualizationSettings (): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     const { save, settings } = await (this.$refs.visualisationSettings as VisualizationSettingsDialog).open(cloneDeep(this.value.settings))
     if (save) {

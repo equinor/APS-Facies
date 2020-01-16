@@ -75,7 +75,7 @@ import rms from '@/api/rms'
   },
 })
 export default class ExportDialog extends Vue {
-  dialog: boolean = false
+  dialog = false
   resolve: ((value: { save: boolean, path: string }) => void) | null = null
   reject: ((reason: string) => void) | null = null
   path: string | null = null

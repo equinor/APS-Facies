@@ -119,9 +119,11 @@ export default class SelectionTable<T extends BaseItem> extends Vue {
     if (!this.current) return false
     return item.id === this.current
   }
+
   propagateCurrent (item: T) {
     this.$emit('update:current', item)
   }
+
   updateSelection (item: T, value: boolean): void {
     if (value) {
       this.$emit('input', [...this.value, item])

@@ -39,14 +39,14 @@ export default class PreviewHeader<
   S extends PolygonSerialization = PolygonSerialization,
   P extends PolygonSpecification = PolygonSpecification,
 > extends Vue {
-  waitingForSimulation: boolean = false
+  waitingForSimulation = false
 
   @Prop({ required: true })
   readonly value: TruncationRule<T, S, P>
 
-  get _allFaciesUsed () { return usesAllFacies({ rootGetters: this.$store.getters }, this.value) }
+  get _allFaciesUsed (): boolean { return usesAllFacies({ rootGetters: this.$store.getters }, this.value) }
 
-  get _canSimulateAllTrends () {
+  get _canSimulateAllTrends (): boolean {
     return (
       this.value
       && !this.value.fields

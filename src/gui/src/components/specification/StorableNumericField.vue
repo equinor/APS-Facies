@@ -25,8 +25,10 @@ import Variogram from '@/utils/domain/gaussianRandomField/variogram'
 
 import NumericField from '@/components/selection/NumericField.vue'
 
+import { hasOwnProperty } from '@/utils/helpers'
+
 function getValue (field: Variogram | Trend, property: string, subProperty: string): any {
-  return field[`${property}`].hasOwnProperty(subProperty)
+  return hasOwnProperty(field[`${property}`], subProperty)
     ? field[`${property}`][`${subProperty}`]
     : field[`${property}`]
 }
@@ -73,24 +75,24 @@ export default class StorableNumericField extends Vue {
   @Prop()
   readonly ranges!: Optional<MinMax>
 
-  get field () { return this.value[this.variogramOrTrend] }
+  get field (): Trend | Variogram { return this.value[this.variogramOrTrend] }
 
-  get propertyValue () { return this.getValue() }
+  get propertyValue (): any { return this.getValue() }
   set propertyValue (value) { this.dispatchChange(value) }
 
-  get fmuUpdatable () { return this.propertyValue.hasOwnProperty('updatable') }
+  get fmuUpdatable (): boolean { return hasOwnProperty(this.propertyValue, 'updatable') }
 
-  get variogramOrTrend () { return this.trend ? 'trend' : 'variogram' }
+  get variogramOrTrend (): 'trend' | 'variogram' { return this.trend ? 'trend' : 'variogram' }
 
-  dispatchChange (value: number) {
+  dispatchChange (value: number): void {
     this.$store.dispatch(`gaussianRandomFields/${this.propertyType}`, { field: this.value, variogramOrTrend: this.variogramOrTrend, type: this.subPropertyType, value })
   }
 
-  getValue () {
+  getValue (): any {
     return getValue(this.field, this.propertyType, this.subPropertyType)
   }
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

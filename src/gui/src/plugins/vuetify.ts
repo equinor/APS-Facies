@@ -1,4 +1,5 @@
-import '@babel/polyfill'
+import 'core-js/stable'
+import 'regenerator-runtime/runtime'
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 import 'vuetify/dist/vuetify.min.css'
@@ -9,7 +10,6 @@ import colors from 'vuetify/lib/util/colors'
 // Icons
 import '@fortawesome/fontawesome-free/css/all.css'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
-// @ts-ignore
 import { Ripple } from 'vuetify/lib/directives'
 import { notEmpty } from '@/utils'
 
@@ -48,28 +48,28 @@ function makeCustomIcons (): Icons {
 
 function makeVuetifyIcons (): Icons {
   const icons: Icons = {
-    'complete': '',
-    'cancel': '',
-    'close': '',
-    'delete': '', // delete (e.g. v-chip close)
-    'clear': 'fas fa-times fa-sm',
-    'success': '',
-    'info': '',
-    'warning': '',
-    'error': '',
-    'prev': '',
-    'next': '',
-    'checkboxOn': '',
-    'checkboxOff': '',
-    'checkboxIndeterminate': '',
-    'delimiter': '', // for carousel
-    'sort': '',
-    'expand': 'fas fa-chevron-down', // 'menu': '',
-    'subgroup': '',
-    'dropdown': 'fas fa-caret-down fa-sm',
-    'radioOn': '',
-    'radioOff': '',
-    'edit': '',
+    complete: '',
+    cancel: '',
+    close: '',
+    delete: '', // delete (e.g. v-chip close)
+    clear: 'fas fa-times fa-sm',
+    success: '',
+    info: '',
+    warning: '',
+    error: '',
+    prev: '',
+    next: '',
+    checkboxOn: '',
+    checkboxOff: '',
+    checkboxIndeterminate: '',
+    delimiter: '', // for carousel
+    sort: '',
+    expand: 'fas fa-chevron-down', // 'menu': '',
+    subgroup: '',
+    dropdown: 'fas fa-caret-down fa-sm',
+    radioOn: '',
+    radioOff: '',
+    edit: '',
   }
   Object.keys(icons).forEach((key: Icon): void => {
     if (icons[`${key}`] === '') delete icons[`${key}`]

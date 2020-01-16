@@ -10,6 +10,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
 import { getDisabledOpacity } from '@/utils/helpers/simple'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
@@ -129,6 +130,7 @@ export default class StaticPlot extends Vue {
       ...(this.annotations && { annotations: this.annotations }),
     }
   }
+
   get __options () {
     return {
       staticPlot: true,

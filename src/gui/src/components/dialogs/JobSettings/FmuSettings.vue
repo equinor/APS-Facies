@@ -158,8 +158,10 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true })
   readonly maxLayersInFmu: number
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   set _fmuGrid (value: string | { value: string }) {
     if (typeof (value) !== 'string') {
@@ -197,6 +199,7 @@ export default class FmuSettings extends Vue {
     if (this.importFields) return 'import'
     else return 'generate'
   }
+
   set _importFields (value: FieldUsage) {
     if (value === 'generate') this.$emit('update:importFields', false)
     else if (value === 'import') this.$emit('update:importFields', true)

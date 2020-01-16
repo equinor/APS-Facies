@@ -62,6 +62,7 @@ import BackgroundFaciesSpecification from '@/components/specification/Facies/bac
 
 import NonCubic from '@/utils/domain/truncationRule/nonCubic'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
+import { HeaderItems } from '@/utils/typing'
 
 import { sortByOrder } from '@/utils'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
@@ -81,14 +82,14 @@ export default class NonCubicTable extends Vue {
   @Prop({ required: true })
   readonly value!: NonCubic
 
-  get polygons () {
+  get polygons (): NonCubicPolygon[] {
     // TODO: Include 'help' messages
     return !this.value
       ? []
       : this.value.backgroundPolygons
   }
 
-  get headers () {
+  get headers (): HeaderItems {
     return [
       {
         text: 'Angle',
@@ -112,14 +113,14 @@ export default class NonCubicTable extends Vue {
     ]
   }
 
-  get hasMultipleFaciesSpecified () {
+  get hasMultipleFaciesSpecified (): boolean {
     return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
   }
 
-  ordering (items: NonCubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
+  ordering (items: NonCubicPolygon[], index: number, isDescending: boolean): NonCubicPolygon[] { return sortByOrder(items, index, isDescending) }
 
-  updateAngle (item: NonCubicPolygon, value: number) {
-    return this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
+  async updateAngle (item: NonCubicPolygon, value: number): Promise<void> {
+    await this.$store.dispatch('truncationRules/changeAngles', { rule: this.value, polygon: item, value })
   }
 
   isLast (polygon: NonCubicPolygon): boolean {

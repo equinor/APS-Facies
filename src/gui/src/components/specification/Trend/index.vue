@@ -88,7 +88,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { GaussianRandomField } from '@/utils/domain'
-import { TrendType } from '@/utils/domain/gaussianRandomField/trend'
+import Trend, { TrendType } from '@/utils/domain/gaussianRandomField/trend'
 
 import { notEmpty } from '@/utils'
 
@@ -143,45 +143,48 @@ export default class TrendSpecification extends Vue {
     relativeEllipseSize: false,
   }
 
-  get availableRmsTrendParameters () { return this.$store.state.parameters.rmsTrend.available }
-  get availableTrends () { return this.$store.state.constants.options.trends.available }
+  get availableRmsTrendParameters (): string[] { return this.$store.state.parameters.rmsTrend.available }
+  get availableTrends (): string[] { return this.$store.state.constants.options.trends.available }
 
-  get trend () { return this.value.trend }
+  get trend (): Trend { return this.value.trend }
 
-  get hasLinearProperties () {
+  get hasLinearProperties (): boolean {
     return (
       notEmpty(this.trendType)
-      // @ts-ignore
       && this.notOneOf(TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION)
     )
   }
-  get hasEllipticProperties () {
+
+  get hasEllipticProperties (): boolean {
     return (
       this.hasLinearProperties
       && this.notOneOf(['LINEAR'])
     )
   }
-  get hasHyperbolicProperties () {
+
+  get hasHyperbolicProperties (): boolean {
     return (
       this.hasEllipticProperties
       && this.notOneOf(['ELLIPTIC'])
     )
   }
-  get hasEllipticConeProperties () {
+
+  get hasEllipticConeProperties (): boolean {
     return (
       this.hasHyperbolicProperties
       && this.notOneOf(['HYPERBOLIC'])
     )
   }
-  get isRmsParameter () { return this.trend.type === 'RMS_PARAM' }
 
-  get trendType () { return this.value.trend.type }
+  get isRmsParameter (): boolean { return this.trend.type === 'RMS_PARAM' }
+
+  get trendType (): TrendType { return this.value.trend.type }
   set trendType (value) { this.$store.dispatch('gaussianRandomFields/trendType', { field: this.value, value }) }
 
-  get trendParameter () { return this.trend.parameter }
+  get trendParameter (): string | null { return this.trend.parameter }
   set trendParameter (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', { field: this.value, value }) }
 
-  get useTrend () { return this.trend.use }
+  get useTrend (): boolean { return this.trend.use }
   set useTrend (value) { this.$store.dispatch('gaussianRandomFields/useTrend', { field: this.value, value }) }
 
   notOneOf (types: TrendType[]): boolean {
@@ -189,12 +192,12 @@ export default class TrendSpecification extends Vue {
   }
 
   @Watch('invalid', { deep: true })
-  onInvalidChanged (value: Invalid) {
+  onInvalidChanged (value: Invalid): void {
     const invalid = Object.values(value).some(invalid => invalid)
     this.$emit('update:error', this.useTrend && invalid)
   }
 
-  update (type: string, value: boolean) {
+  update (type: string, value: boolean): void {
     Vue.set(this.invalid, type, value)
   }
 }

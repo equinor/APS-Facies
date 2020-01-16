@@ -27,8 +27,8 @@ import md from '@/plugins/markdown'
 
 @Component({})
 export default class ChangelogDialog extends Vue {
-  public dialog: boolean = false
-  public changelog: string = ''
+  public dialog = false
+  public changelog = ''
 
   async fetchChangelog () {
     const { data } = await axios.get('/CHANGELOG.md')

@@ -16,14 +16,13 @@ import { required } from 'vuelidate/lib/validators'
 /* TODO: Remove // @ts-ignore when vuelidate OFFICIALLY  supports TypeScript */
 
 @Component({
-// @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   validations () {
     return {
       value: {
-        // @ts-ignore
-        required: this.constraints.required ? required : true,
-        // @ts-ignore
-        legalChoice: this.items.includes(this.value)
+        required: (this as ItemSelection).constraints.required ? required : true,
+        legalChoice: (this as ItemSelection).items.includes((this as ItemSelection).value)
       },
     }
   },
@@ -46,18 +45,17 @@ export default class ItemSelection<T = any> extends Vue {
   }
 
   get errors (): string[] {
+    if (!this.$v.value) return []
+
     const errors: string[] = []
-    // @ts-ignore
     if (!this.$v.value.$dirty) return errors
-    // @ts-ignore
     !this.$v.value.required && errors.push('Is required')
-    // @ts-ignore
     !this.$v.value.legalChoice && errors.push('Illegal choice')
     return errors
   }
 
   @Watch('$v.$invalid')
-  onInvalidChanged (value: boolean) {
+  onInvalidChanged (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

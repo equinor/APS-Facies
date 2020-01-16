@@ -45,10 +45,11 @@ import PolygonFractionField from '@/components/selection/PolygonFractionField.vu
 import { sortByOrder } from '@/utils'
 import { CubicPolygon } from '@/utils/domain'
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
+import { HeaderItems } from '@/utils/typing'
 
 import Cubic from '@/utils/domain/truncationRule/cubic'
 
-function makeLevelsHeader (levels: number) {
+function makeLevelsHeader (levels: number): { text: string, value: string }[] {
   return [...new Array(levels)].map((_, index) => {
     return {
       text: `Level ${index + 1}`,
@@ -70,7 +71,7 @@ export default class CubicFaciesSelection extends Vue {
   @Prop({ required: true })
   readonly value!: Cubic
 
-  get headers () {
+  get headers (): HeaderItems {
     return [
       ...(makeLevelsHeader(this.value.levels)),
       {
@@ -88,12 +89,12 @@ export default class CubicFaciesSelection extends Vue {
     ]
   }
 
-  get polygons () { return this.value.backgroundPolygons }
+  get polygons (): CubicPolygon[] { return this.value.backgroundPolygons }
 
-  get hasMultipleFaciesSpecified () {
+  get hasMultipleFaciesSpecified (): boolean {
     return hasFaciesSpecifiedForMultiplePolygons(this.polygons)
   }
 
-  ordering (items: CubicPolygon[], index: number, isDescending: boolean) { return sortByOrder(items, index, isDescending) }
+  ordering (items: CubicPolygon[], index: number, isDescending: boolean): CubicPolygon[] { return sortByOrder(items, index, isDescending) }
 }
 </script>

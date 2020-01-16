@@ -138,7 +138,7 @@ interface ReturnValue {
   },
 })
 export default class VisualizationSettingsDialog extends Vue {
-  dialog: boolean = false
+  dialog = false
   resolve: Optional<({ save, settings }: ReturnValue) => void> = null
   reject: Optional<({ save, settings }: ReturnValue) => void> = null
   settings: Settings = {
@@ -153,6 +153,7 @@ export default class VisualizationSettingsDialog extends Vue {
     },
     seed: null,
   }
+
   options: DialogOptions = {
     color: (this.$vuetify.theme.themes.light.primary as Color),
     width: 290,
@@ -167,16 +168,19 @@ export default class VisualizationSettingsDialog extends Vue {
       this.reject = reject
     })
   }
+
   save () {
     if (!this.resolve) throw new APSError('The `resolve` callback has not been set')
     this.resolve({ save: true, settings: this.settings })
     this.dialog = false
   }
+
   cancel () {
     if (!this.resolve) throw new APSError('The `resolve` callback has not been set')
     this.resolve({ save: false, settings: {} })
     this.dialog = false
   }
+
   newSeed () {
     return newSeed()
   }

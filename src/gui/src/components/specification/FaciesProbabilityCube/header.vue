@@ -52,7 +52,7 @@ import { isCloseToUnity } from '@/utils/helpers/simple'
   },
 })
 export default class FaciesProbabilityCubeHeader extends Vue {
-  calculatingAverages: boolean = false
+  calculatingAverages = false
 
   get probabilityCubeParameters () {
     const state = (this.$store as Store).state
@@ -67,18 +67,16 @@ export default class FaciesProbabilityCubeHeader extends Vue {
     return Object.values(state.facies.available).filter(facies => hasCurrentParents(facies, getters))
   }
 
-  get useProbabilityCubes () { return !this.$store.getters['facies/constantProbability']() }
+  get useProbabilityCubes (): boolean { return !this.$store.getters['facies/constantProbability']() }
   set useProbabilityCubes (value) { this.$store.dispatch('facies/toggleConstantProbability') }
 
-  get canCalculateAverages () { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 }
+  get canCalculateAverages (): boolean { return !this.disabled && !this.calculatingAverages && this.probabilityCubeParameters.length !== 0 }
 
-  get disabled () { return this.selectedFacies.length === 0 }
+  get disabled (): boolean { return this.selectedFacies.length === 0 }
 
-  get shouldNormalize () { return !this.disabled && !isCloseToUnity(this.$store.getters['facies/cumulative']) }
+  get shouldNormalize (): boolean { return !this.disabled && !isCloseToUnity(this.$store.getters['facies/cumulative']) }
 
-  validate () {}
-
-  async average () {
+  async average (): Promise<void> {
     this.calculatingAverages = true
     try {
       await this.$store.dispatch('facies/averageProbabilityCubes', { probabilityCubes: this.probabilityCubeParameters })
@@ -87,7 +85,7 @@ export default class FaciesProbabilityCubeHeader extends Vue {
     }
   }
 
-  async normalize () {
+  async normalize (): Promise<void> {
     const normalize = this.selectedFacies
       .every(facies => facies.previewProbability === null)
       ? 'normalizeEmpty'

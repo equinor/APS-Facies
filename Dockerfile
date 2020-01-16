@@ -1,5 +1,5 @@
-FROM git.equinor.com:4567/sdp/sdpsoft/centos:6
-LABEL version="3.3.8" \
+FROM git.equinor.com:4567/sdp/sdpsoft/centos:7
+LABEL version="4.0.0" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -8,11 +8,11 @@ LABEL version="3.3.8" \
 ENV RMS_VERSION=11.0.1 \
     PYTHON_VERSION=3.6 \
     TCL_VERSION=8.6 \
-    INTEL_MKL_VERSION=2018.3.222 \
-    INTEL_MKL_SEED=13005 \
-    NODE_VERSION=10.16.0 \
+    INTEL_MKL_VERSION=2019.5.281 \
+    INTEL_MKL_SEED=15816 \
+    NODE_VERSION=12.14.1 \
     NRLIB_VERSION=1.1-r7 \
-    YARN_VERSION=1.17.3
+    YARN_VERSION=1.21.1
 ENV TK_VERSION=${TCL_VERSION}
 
 # Auxillary (version) information
@@ -101,6 +101,8 @@ RUN yum update -y \
     xz-devel \
     expat-devel \
     mesa-libGL-devel \
+    libstdc++-static \
+    which \
     # RMS dependencies
     mesa-libEGL \
     mesa-libGLU \

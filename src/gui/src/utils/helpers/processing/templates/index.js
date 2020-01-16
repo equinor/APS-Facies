@@ -84,13 +84,13 @@ const findItem = ({ findByIndex, findByName, findDefaultName = (arg) => null }) 
 }
 
 const typeMapping = {
-  'bayfill': Bayfill,
+  bayfill: Bayfill,
   'non-cubic': NonCubic,
-  'cubic': Cubic,
+  cubic: Cubic,
 }
 
 export function makeRule ({ type, ...rest }) {
-  if (!typeMapping.hasOwnProperty(type)) {
+  if (!hasOwnProperty(typeMapping, type)) {
     throw new Error(`The truncation rule of type ${type} is not implemented`)
   }
   return new typeMapping[`${type}`]({ type, ...rest })

@@ -33,9 +33,9 @@ export default class ExportState extends Vue {
 
   get clipboardIcon () {
     return {
-      'may': 'clipboard',
-      'failure': 'clipboardFailed',
-      'success': 'clipboardSuccess',
+      may: 'clipboard',
+      failure: 'clipboardFailed',
+      success: 'clipboardSuccess',
     }[this.status]
   }
 

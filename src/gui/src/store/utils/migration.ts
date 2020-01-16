@@ -15,8 +15,8 @@ const migrations: Migration[] = [
     to: '1.1.0',
     up: async (state) => {
       const { tolerance } = await rms.constants('max_allowed_fraction_of_values_outside_tolerance', 'tolerance')
-      state['parameters']['maxAllowedFractionOfValuesOutsideTolerance'] = {}
-      state['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected'] = tolerance
+      state.parameters.maxAllowedFractionOfValuesOutsideTolerance = {}
+      state.parameters.maxAllowedFractionOfValuesOutsideTolerance.selected = tolerance
       return state
     },
   }

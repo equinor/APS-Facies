@@ -45,7 +45,6 @@ export default class PolygonFractionField<
   get appendIcon () {
     return this.disabled || this.rule.isPolygonFractionsNormalized(this.value)
       ? ''
-      // @ts-ignore
       : this.$vuetify.icons.values.refresh
   }
 

@@ -93,6 +93,7 @@ import { displayError, displaySuccess } from '@/utils/helpers/storeInteraction'
 
 import { xml2json } from 'xml-js'
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import UploadButton from 'vuetify-upload-button'
 
@@ -117,8 +118,7 @@ function parse (xmlString: string): Document {
 }
 
 function fileHandler (store: Store, fileName: string) {
-  // @ts-ignore
-  return (e) => {
+  return (e: any) => {
     const fileContent = e.target.result
     let json: string | null = null
 
@@ -188,8 +188,7 @@ export default class TheToolBar extends Vue {
   }
 
   openChangelog () {
-    // @ts-ignore
-    this.$refs.changelogDialog.open()
+    (this.$refs.changelogDialog as ChangelogDialog).open()
   }
 
   importModelFile (file: File | null) {
@@ -210,7 +209,6 @@ export default class TheToolBar extends Vue {
       const result = await rms.isApsModelValid(btoa(exportedXMLString))
       if (result.valid) {
         const defaultPath = `${this.$store.state.parameters.path.project.selected}/myApsExport.xml`;
-        // @ts-ignore
         (this.$refs.exportDialog as ExportDialog).open(defaultPath)
           .then(({ save, path }: { save: boolean, path: string }) => {
             if (save) {

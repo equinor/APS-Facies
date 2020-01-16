@@ -25,26 +25,6 @@
         </template>
       </v-combobox>
     </v-col>
-    <v-col
-      v-if="false"
-      cols="6"
-    >
-      <icon-button
-        icon="add"
-        disabled
-        @click="addTemplate"
-      />
-      <icon-button
-        icon="copy"
-        disabled
-        @click="copyTemplate"
-      />
-      <icon-button
-        icon="remove"
-        disabled
-        @click="deleteTemplate"
-      />
-    </v-col>
   </v-row>
 </template>
 
@@ -65,8 +45,8 @@ import { isUUID } from '@/utils/helpers'
   },
 })
 export default class TruncationHeader extends Vue {
-  get truncationRules () { return (this.$store.getters as RootGetters)['truncationRules/ruleTypes'] }
-  get templates () { return (this.$store.getters as RootGetters)['truncationRules/ruleNames'] }
+  get truncationRules (): { text: string, disabled: boolean, order: number }[] { return (this.$store.getters as RootGetters)['truncationRules/ruleTypes'] }
+  get templates (): { text: string, disabled: boolean }[] { return (this.$store.getters as RootGetters)['truncationRules/ruleNames'] }
 
   get preset () {
     const rule = this.$store.getters.truncationRule
@@ -79,7 +59,7 @@ export default class TruncationHeader extends Vue {
     }
   }
 
-  get type () {
+  get type (): string {
     let type = this.preset.type
     if (!!type && isUUID(type)) {
       type = this.$store.state.truncationRules.templates.types.available[`${type}`]
@@ -90,13 +70,10 @@ export default class TruncationHeader extends Vue {
       ? type.name
       : ''
   }
+
   set type (type) { this.$store.dispatch('truncationRules/preset/change', { type }) }
 
   get template () { return this.preset.template }
   set template (template) { this.$store.dispatch('truncationRules/preset/change', { template }) }
-
-  addTemplate () {}
-  copyTemplate () {}
-  deleteTemplate () {}
 }
 </script>

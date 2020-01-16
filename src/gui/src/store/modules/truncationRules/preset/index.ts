@@ -6,6 +6,7 @@ import { RootState } from '@/store/typing'
 import PresetState from '@/store/modules/truncationRules/preset/typing'
 
 import { notEmpty } from '@/utils'
+import { hasOwnProperty } from '@/utils/helpers'
 
 const state: Module<PresetState, RootState> = {
   namespaced: true,
@@ -65,7 +66,7 @@ const state: Module<PresetState, RootState> = {
       Vue.set(state, 'type', type)
     },
     CHANGE_TEMPLATE: (state, { template }): void => {
-      if (template && template.hasOwnProperty('text')) {
+      if (template && hasOwnProperty(template, 'text')) {
         template = template.text
       }
       Vue.set(state, 'template', template)

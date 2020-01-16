@@ -51,7 +51,7 @@ export const faciesColors: Color[] = [
 ]
 
 export const colorLibraries = {
-  'APS': apsColors,
+  APS: apsColors,
   'General Colors': generalColors,
-  'Facies': faciesColors,
+  Facies: faciesColors,
 }

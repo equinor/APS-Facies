@@ -1,5 +1,5 @@
 image:
-  name: "git.equinor.com:4567/aps/gui/aps-gui:3.3.8"
+  name: "git.equinor.com:4567/aps/gui/aps-gui:4.0.0"
 
 variables:
   GIT_STRATEGY:           "fetch"
@@ -39,7 +39,8 @@ initialize:
   variables:
     PYTHON:      "${RMS_PYTHON}"
   script:
-    - 'eval $MAKE init'
+    - 'unset MAKE'
+    - 'eval make --directory=${CODE_DIR} init'
     - 'eval rm -rf ${WORKON_HOME}/nrlib-*'
     - 'eval rm -f  ${CODE_DIR}/libraries/libgaussField/*.o'
   artifacts:

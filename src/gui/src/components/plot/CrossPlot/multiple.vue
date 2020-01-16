@@ -66,6 +66,7 @@ export default class CrossPlots extends Vue {
       }
     })
   }
+
   get combinations () {
     const pairs: number[][] = []
     const available = this.selected
