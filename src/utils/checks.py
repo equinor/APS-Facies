@@ -4,7 +4,7 @@ from filecmp import cmp
 from os.path import exists
 
 import numpy as np
-from src.utils.constants.simple import VariogramType, Debug
+from src.utils.constants.simple import VariogramType, Debug, ProbabilityTolerances
 
 
 def isVariogramTypeOK(_type, debug_level=Debug.OFF):
@@ -40,7 +40,7 @@ def check_probability_values(
         tolerance_of_probability_normalisation,
         facies_name=" ",
         parameter_name=" ",
-        max_allowed_fraction_of_values_outside_tolerance=0.1
+        max_allowed_fraction_of_values_outside_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
 ):
     ''' The input numpy array prob_values is checked that the values are legal probabilities. A tolerance is accepted.
         Returns prob_values in [0,1] and raise error if illegal probability values (outside tolerance)
@@ -67,7 +67,7 @@ def check_probability_values(
             )
 
     above_one_fraction = num_above_one / num_defined_cells
-    if above_one_fraction >  max_allowed_fraction_of_values_outside_tolerance:
+    if above_one_fraction > max_allowed_fraction_of_values_outside_tolerance:
         raise ValueError(
             'Probability for facies {} in {} has {} values above 1.0'
             ''.format(facies_name, parameter_name, num_above_one)
@@ -81,7 +81,7 @@ def check_probability_values(
 def check_probability_normalisation(
         sum_probability_values,
         eps, tolerance_of_probability_normalisation,
-        max_allowed_fraction_of_values_outside_tolerance=0.1
+        max_allowed_fraction_of_values_outside_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
 ):
     num_defined_cells = len(sum_probability_values)
     ones = np.ones(num_defined_cells, np.float32)
@@ -99,12 +99,24 @@ def check_probability_normalisation(
             largest_prob_sum = sum_probability_values.max()
             smallest_prob_sum = sum_probability_values.min()
             raise ValueError(
-                'Sum of input facies probabilities is either less than: {} or larger than: {} in: {} cells.\n'
-                'Input probabilities should be normalised and the sum close to 1.0 but found a minimum value of: {} and a maximum value of: {}\n'
+                'Sum of input facies probabilities is either less than: {min} or larger than: {max} in: {num} cells.\n'
+                'Input probabilities should be normalised, and the sum close to 1.0, '
+                'but found a minimum value of: {min_prob} and a maximum value of: {max_prob}\n'
                 'Check input probabilities!'
+                '\n'
+                'The portion of values that are unacceptable is {frac:.2f}%, '
+                'while the maximum allowed is {max_frac:.2f}%'
+                '\n'
+                'If the probability cubes are sensible, you may increase the maximum fraction, in project settings, to '
+                'at least {frac:.2f}%.'
                 ''.format(
-                    min_acceptable_prob_sum, max_acceptable_prob_sum,
-                    unacceptable_prob_normalisation, smallest_prob_sum, largest_prob_sum
+                    min=min_acceptable_prob_sum,
+                    max=max_acceptable_prob_sum,
+                    num=unacceptable_prob_normalisation,
+                    min_prob=smallest_prob_sum,
+                    max_prob=largest_prob_sum,
+                    frac=unacceptable_prob_normalisation_fraction * 100,
+                    max_frac=max_allowed_fraction_of_values_outside_tolerance * 100,
                 )
             )
     return normalise_is_necessary

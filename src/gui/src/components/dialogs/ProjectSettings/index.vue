@@ -40,6 +40,10 @@
           :debug-level.sync="debugLevel"
         />
         <br>
+        <RunSettings
+          :max-allowed-fraction-of-values-outside-tolerance.sync="maxAllowedFractionOfValuesOutsideTolerance"
+        />
+        <br>
         <SettingsPanel title="Display Settings">
           <v-row
             no-gutters
@@ -287,6 +291,7 @@ import SettingsPanel from '@/components/dialogs/ProjectSettings/SettingsPanel.vu
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import FmuSettings from '@/components/dialogs/ProjectSettings/FmuSettings.vue'
+import RunSettings from '@/components/dialogs/ProjectSettings/RunSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -301,6 +306,7 @@ import { Optional } from '@/utils/typing'
   },
 
   components: {
+    RunSettings,
     LoggingSettings,
     FolderSettings,
     SettingsPanel,
@@ -327,6 +333,7 @@ export default class ProjectSettings extends Vue {
   fmuGrid: string = ''
   createFmuGrid: boolean = false
   onlyUpdateFromFmu: boolean = false
+  maxAllowedFractionOfValuesOutsideTolerance: number = 0
 
   get simulationSettings () { return this.$store.getters.simulationSettings() }
   get gridSize () { return this.simulationSettings.gridSize }
@@ -350,6 +357,7 @@ export default class ProjectSettings extends Vue {
       this.createFmuGrid = fmu.create.value
 
       this.debugLevel = parameters.debugLevel.selected
+      this.maxAllowedFractionOfValuesOutsideTolerance = parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
@@ -370,6 +378,7 @@ export default class ProjectSettings extends Vue {
       dispatch('parameters/path/project/select', this.apsModelFileLocation),
       dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
       dispatch('parameters/debugLevel/select', this.debugLevel),
+      dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
 
       dispatch('fmu/maxDepth/set', this.maxLayersInFmu),
       dispatch('fmu/runFmuWorkflows/set', this.runFmuWorkflows),

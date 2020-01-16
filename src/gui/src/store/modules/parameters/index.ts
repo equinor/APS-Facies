@@ -13,6 +13,7 @@ import realization from '@/store/modules/parameters/realization'
 import path from '@/store/modules/parameters/path'
 import names from '@/store/modules/parameters/names'
 import debugLevel from '@/store/modules/parameters/debugLevel'
+import maxAllowedFractionOfValuesOutsideTolerance from '@/store/modules/parameters/maxAllowedFractionOfValuesOutsideTolerance'
 
 const module: Module<ParametersState, RootState> = {
   namespaced: true,
@@ -29,6 +30,18 @@ const module: Module<ParametersState, RootState> = {
     path,
     names,
     debugLevel,
+    maxAllowedFractionOfValuesOutsideTolerance,
+  },
+
+  actions: {
+    async fetch ({ dispatch }) {
+      await Promise.all([
+        dispatch('path/fetch'),
+        dispatch('names/workflow/fetch'),
+        dispatch('names/project/fetch'),
+        dispatch('maxAllowedFractionOfValuesOutsideTolerance/fetch'),
+      ])
+    }
   },
 }
 

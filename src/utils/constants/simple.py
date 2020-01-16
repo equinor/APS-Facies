@@ -104,6 +104,10 @@ class Values(metaclass=GettableClass):
     CURVATURE = NotImplemented
     MIGRATION_ANGLE = NotImplemented
     RELATIVE_ELLIPSE_SIZE = NotImplemented
+    # Tolerances
+    MAX_ALLOWED_DEVIATION_BEFORE_ERROR = NotImplemented
+    MAX_DEVIATION_BEFORE_ACTION = NotImplemented
+    MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE = NotImplemented
 
     @property
     def mapping(self):
@@ -121,6 +125,10 @@ class Values(metaclass=GettableClass):
             'curvature': self.CURVATURE,
             'migration_angle': self.MIGRATION_ANGLE,
             'relative_size_of_ellipse': self.RELATIVE_ELLIPSE_SIZE,
+            # Tolerances
+            'max_allowed_deviation_before_error': self.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
+            'max_deviation_before_action': self.MAX_DEVIATION_BEFORE_ACTION,
+            'max_allowed_fraction_of_values_outside_tolerance': self.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
         }
 
     def __getitem__(self, item):
@@ -163,6 +171,7 @@ class MaximumValues(Values):
 class ProbabilityTolerances(Values):
     MAX_ALLOWED_DEVIATION_BEFORE_ERROR = 0.2
     MAX_DEVIATION_BEFORE_ACTION = 0.00005
+    MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE = 0.1
 
 
 class GridModelConstants:

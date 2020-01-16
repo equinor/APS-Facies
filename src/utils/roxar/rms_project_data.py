@@ -22,6 +22,7 @@ from src.utils.constants.simple import (
     TrendType,
     Direction,
     OriginType,
+    ProbabilityTolerances,
 )
 from src.utils.exceptions.xml import ApsXmlError
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
@@ -308,12 +309,18 @@ class RMSData:
 
     @staticmethod
     def get_constant(_property, _type='min,max'):
-        res = {}
+        res = {
+            'min': None,
+            'max': None,
+            'tolerance': None,
+        }
         for item in _type.lower().split(','):
             if item in ['min', 'minimum']:
                 res['min'] = MinimumValues[_property]
             elif item in ['max', 'maximum']:
                 res['max'] = MaximumValues[_property]
+            elif item in ['tolerance']:
+                res['tolerance'] = ProbabilityTolerances[_property]
             else:
                 raise ValueError('The property type \'{}\' is not known'.format(item))
         return res
