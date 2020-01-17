@@ -22,7 +22,7 @@ import { notEmpty } from '@/utils'
 import { DEFAULT_SIZE } from '@/config'
 
 import { Optional } from '@/utils/typing'
-import { PlotData } from 'plotly.js'
+import { Config, Layout, LayoutAxis, PlotData, Shape } from 'plotly.js'
 
 @Component({
   components: {
@@ -31,7 +31,7 @@ import { PlotData } from 'plotly.js'
 })
 export default class StaticPlot extends Vue {
   @Prop({ required: true })
-  readonly dataDefinition!: Partial<PlotData>[]
+  readonly dataDefinition!: Partial<PlotData | Shape>[]
 
   @Prop({ default: () => [] })
   readonly annotations!: object[]
@@ -68,9 +68,9 @@ export default class StaticPlot extends Vue {
     width: 0,
   }
 
-  get __content () {
+  get __content (): Partial<PlotData>[] {
     if (!this.svg) {
-      return this.dataDefinition
+      return (this.dataDefinition as Partial<PlotData>[])
         .map(obj => {
           // @ts-ignore
           obj.opacity = getDisabledOpacity(this.disabled)
@@ -85,13 +85,13 @@ export default class StaticPlot extends Vue {
     }
   }
 
-  get __layout () {
+  get __layout (): Partial<Layout> {
     const scaleRatio = notEmpty(this.__content) && this.__content.length > 0
       // @ts-ignore
       ? this.__content.length / this.__content[0].length
       : 1
 
-    const _axis = {
+    const _axis: Partial<LayoutAxis> = {
       ticks: '',
       visible: false,
       zeroline: false,
@@ -103,8 +103,8 @@ export default class StaticPlot extends Vue {
         family: 'Roboto'
       },
     }
-    const xaxis = this.axisNames.x ? { ..._axis, visible: true, title: this.axisNames.x } : _axis
-    const yaxis = {
+    const xaxis: Partial<LayoutAxis> = this.axisNames.x ? { ..._axis, visible: true, title: this.axisNames.x } : _axis
+    const yaxis: Partial<LayoutAxis> = {
       ..._axis,
       scaleanchor: 'x',
       ...(this.axisNames.y && {
@@ -115,7 +115,7 @@ export default class StaticPlot extends Vue {
 
     return {
       ...this.size,
-      showLegend: false,
+      showlegend: false,
       autosize: true,
       margin: {
         l: 0, r: 0, t: 0, b: 0,
@@ -126,34 +126,34 @@ export default class StaticPlot extends Vue {
       paper_bgcolor: 'rgba(0,0,0,0)',
       /* eslint-disable-next-line @typescript-eslint/camelcase */
       plot_bgcolor: 'rgba(0,0,0,0)',
-      ...(this.svg && { shapes: this.dataDefinition }),
+      ...(this.svg && { shapes: (this.dataDefinition as Partial<Shape>[]) }),
       ...(this.annotations && { annotations: this.annotations }),
     }
   }
 
-  get __options () {
+  get __options (): Partial<Config> {
     return {
       staticPlot: true,
       responsive: true,
     }
   }
 
-  beforeDestroy () {
+  beforeDestroy (): void {
     window.removeEventListener('resize', this.resize)
   }
 
-  beforeMount () {
+  beforeMount (): void {
     this.size.width = this.width
     this.size.height = this.height
   }
 
-  mounted () {
+  mounted (): void {
     window.addEventListener('resize', this.resize)
 
     this.$watch('$el', this.resize)
   }
 
-  resize () {
+  resize (): void {
     const parent = this.$el
       ? this.$el.getElementsByClassName('svg-container')[0]
       : {

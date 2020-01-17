@@ -17,7 +17,8 @@ import StaticPlot from '@/components/plot/StaticPlot.vue'
 import { GaussianRandomField } from '@/utils/domain'
 
 import { DEFAULT_SIZE } from '@/config'
-import { colorMapping, ColorScale } from '../utils'
+import { colorMapping, ColorScale, ColorMapping } from '../utils'
+import { PlotData } from 'plotly.js'
 
 @Component({
   components: {
@@ -43,28 +44,30 @@ export default class GaussianPlot extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly disabled: boolean
 
-  get dataDefinition () {
+  get dataDefinition (): Partial<PlotData>[] {
     return [{
-      z: this.value.simulation,
+      z: this.value.simulation || undefined,
       zsmooth: 'best',
       type: 'heatmap',
       hoverinfo: 'none',
       colorscale: this.colorMapping,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // @ts-ignore -> Type annotations are incorrect
       showscale: this.showScale,
     }]
   }
 
-  get errorMessage () {
+  get errorMessage (): string | undefined {
     return this._disabled
       ? 'The field has changed since it was simulated'
       : undefined
   }
 
-  get _colorScale () {
+  get _colorScale (): ColorScale {
     return this.colorScale || this.$store.state.options.colorScale.value
   }
 
-  get colorMapping () {
+  get colorMapping (): ColorMapping {
     return colorMapping(this._colorScale)
   }
 

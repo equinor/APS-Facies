@@ -16,7 +16,9 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import { TruncationRule } from '@/utils/domain'
+import { PlotData } from 'plotly.js'
+
+import { GlobalFacies, TruncationRule } from '@/utils/domain'
 import { Store } from '@/store/typing'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
@@ -42,17 +44,17 @@ export default class FaciesRealization extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly disabled: boolean
 
-  get faciesTable () { return (this.$store as Store).getters['facies/global/selected'] }
+  get faciesTable (): GlobalFacies[] { return (this.$store as Store).getters['facies/global/selected'] }
 
   get _disabled (): boolean { return this.disabled || !this.value.isRepresentative }
 
-  get errorMessage () {
+  get errorMessage (): string | undefined {
     return this._disabled
       ? 'The truncation rule has changed since it was simulated'
       : undefined
   }
 
-  get dataDefinition () {
+  get dataDefinition (): Partial<PlotData>[] {
     return this.faciesTable
       .map(({ color, code }) => {
         return {

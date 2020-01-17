@@ -29,7 +29,7 @@ export default {
   probabilityCubeParameters: (gridName: string): Promise<string[]> => api.call('get_probability_cube_parameters', gridName),
   constants: (constantName: string, constantType: string): Promise<Constants> => api.call('get_constant', constantName, constantType),
   options: (name: string): Promise<string[]> => api.call('get_options', name),
-  gridSize: (name: string): Promise<number[]> => api.call('get_grid_size', name),
+  gridSize: (name: string): Promise<[number, number, number]> => api.call('get_grid_size', name),
   simulationBoxOrigin: (name: string, rough = false): Promise<SimulationBoxSize> => api.call('get_simulation_box_size', name, rough),
   simulateGaussianField: (field: GaussianRandomFieldSpecification): Promise<number[][]> => api.call('simulate_gaussian_field', field),
   simulateRealization: (fields: GaussianRandomFieldSpecification[], truncationRule: TruncationRuleDescription): Promise<number[][]> => api.call('simulate_realization', fields, truncationRule),

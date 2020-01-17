@@ -25,7 +25,14 @@ import CubicPolygon from '@/utils/domain/polygon/cubic'
 import { PolygonDescription } from '@/api/types'
 
 import { getId, makeSimplifiedTruncationRuleSpecification } from '@/utils'
-import { plotify } from '@/utils/plotting'
+import { plotify, PlotSpecification } from '@/utils/plotting'
+
+interface BoundingBox {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
 
 @Component({
   components: {
@@ -41,14 +48,14 @@ export default class CubicTopologySpecification extends Vue {
 
   polygons: PolygonDescription[] = []
 
-  get maxSize () {
+  get maxSize (): { width: number, height: number } {
     return {
       width: 400,
       height: 400,
     }
   }
 
-  get __data () {
+  get __data (): PlotSpecification {
     return plotify(
       this.polygons
         .concat() /* Necessary to copy the array, as to not sort it in-place */
@@ -70,7 +77,7 @@ export default class CubicTopologySpecification extends Vue {
     )
   }
 
-  get boundingBoxes () {
+  get boundingBoxes (): { name: string, boundingBox: BoundingBox }[] {
     return this.polygons.map(({ name, polygon }) => {
       return {
         name,
@@ -91,7 +98,7 @@ export default class CubicTopologySpecification extends Vue {
   }
 
   @Watch('rule', { deep: true, immediate: true })
-  async handler () {
+  async handler (): Promise<void> {
     let polygons = null
     try {
       polygons = await rms.truncationPolygons(makeSimplifiedTruncationRuleSpecification(this.rule))
@@ -101,7 +108,7 @@ export default class CubicTopologySpecification extends Vue {
     if (polygons) this.polygons = polygons
   }
 
-  clicked (e: MouseEvent) {
+  clicked (e: MouseEvent): void {
     const { x, y } = this.relativeClickPosition(e)
     const { name } = this.boundingBoxes.find(({ boundingBox }) => (
       boundingBox.minX <= x && x <= boundingBox.maxX
@@ -116,7 +123,7 @@ export default class CubicTopologySpecification extends Vue {
     }
   }
 
-  relativeClickPosition (e: MouseEvent) {
+  relativeClickPosition (e: MouseEvent): { x: number, y: number } {
     const { top, bottom, left, right } = this.$el.getElementsByClassName('svg-container')[0].getBoundingClientRect()
     const getMax = (direction: string) => Math.max(...this.boundingBoxes.map(({ boundingBox }) => boundingBox[`max${direction.toUpperCase()}`]))
     return {
@@ -125,7 +132,7 @@ export default class CubicTopologySpecification extends Vue {
     }
   }
 
-  has (item: CubicPolygon | ID | undefined) {
+  has (item: CubicPolygon | ID | undefined): boolean {
     return this.value.map(getId).includes(getId(item))
   }
 }

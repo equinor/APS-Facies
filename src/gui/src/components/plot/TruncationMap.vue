@@ -21,6 +21,7 @@ import rms from '@/api/rms'
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
 import { TruncationRule } from '@/utils/domain'
+import GlobalFacies from '@/utils/domain/facies/global'
 
 import { makeTruncationRuleSpecification } from '@/utils'
 import { plotify, PlotSpecification } from '@/utils/plotting'
@@ -37,10 +38,10 @@ import { plotify, PlotSpecification } from '@/utils/plotting'
       shouldUpdate (): boolean {
         return (this as TruncationMap).canUpdate()
       },
-      default () {
+      default (): PlotSpecification {
         return {
           polygons: [],
-          annotations: null,
+          annotations: [],
         }
       },
     },
@@ -57,12 +58,12 @@ export default class TruncationMap extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly expand!: boolean
 
-  get selectedFacies () {
+  get selectedFacies (): GlobalFacies[] {
     return this.$store.getters['facies/global/selected']
   }
 
   @Watch('selectedFacies', { deep: true })
-  handler () {
+  handler (): void {
     // To detect changes in alias
     if (this.canUpdate()) {
       this.$asyncComputed.data.update()
