@@ -90,10 +90,11 @@ const typeMapping = {
 }
 
 export function makeRule ({ type, ...rest }) {
-  if (!hasOwnProperty(typeMapping, type)) {
+  const TruncationRule = typeMapping[`${type}`]
+  if (!(TruncationRule)) {
     throw new Error(`The truncation rule of type ${type} is not implemented`)
   }
-  return new typeMapping[`${type}`]({ type, ...rest })
+  return new TruncationRule({ type, ...rest })
 }
 
 export function getFaciesGroup ({ rootGetters, dispatch }, over, parent) {
