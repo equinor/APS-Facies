@@ -13,7 +13,7 @@ import {
   makeTruncationRuleSpecification,
   hasParents,
 } from '@/utils'
-import { getId, isUUID } from '@/utils/helpers'
+import { getId, isUUID, hasOwnProperty } from '@/utils/helpers'
 import { makeRule } from '@/utils/helpers/processing/templates'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
