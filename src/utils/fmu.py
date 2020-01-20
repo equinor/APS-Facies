@@ -138,7 +138,7 @@ class UpdateFieldNamesInZones(FmuModelChange):
         return self.grid_model.properties[self.aps_model.region_parameter].code_names
 
     def _get_fmu_field_name(self, zone_model, field_model):
-        zone_name = self.zone_names[zone_model.zone_number - 1]
+        zone_name = self.zone_names[zone_model.zone_number]
         region_name = ''
         if zone_model.uses_region:
             region_name = self.region_names[zone_model.region_number]
