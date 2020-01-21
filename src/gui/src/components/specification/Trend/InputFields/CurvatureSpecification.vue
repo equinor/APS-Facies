@@ -26,14 +26,14 @@ export default class CurvatureSpecification extends Vue {
   @Prop({ required: true })
   readonly value: GaussianRandomField
 
-  get minCurvature () {
+  get minCurvature (): number {
     const field = this.value
     return field && field.trend && field.trend.type === 'HYPERBOLIC'
       ? 1
       : 0
   }
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

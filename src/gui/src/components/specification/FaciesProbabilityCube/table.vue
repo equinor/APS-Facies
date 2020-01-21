@@ -49,9 +49,10 @@ import FractionField from '@/components/selection/FractionField.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
-import Facies from '@/utils/domain/facies/local'
+import Facies, { ProbabilityCube } from '@/utils/domain/facies/local'
 import { Store } from '@/store/typing'
-import { HeaderItems } from '@/utils/typing'
+import { HeaderItems, ListItem } from '@/utils/typing'
+import { ID } from '@/utils/domain/types'
 
 import { hasCurrentParents } from '@/utils'
 
@@ -68,7 +69,7 @@ export default class FaciesProbabilityCubeTable extends Vue {
       .filter(facies => hasCurrentParents(facies, this.$store.getters))
   }
 
-  get probabilityCubes () {
+  get probabilityCubes (): ListItem<ProbabilityCube>[] {
     return [{ text: '', disabled: false }]
       .concat((this.$store as Store).state.parameters.probabilityCube.available
         .map((parameter: string) => {
@@ -82,11 +83,11 @@ export default class FaciesProbabilityCubeTable extends Vue {
       )
   }
 
-  get useProbabilityCubes () {
+  get useProbabilityCubes (): boolean {
     return !(this.$store as Store).getters['facies/constantProbability']()
   }
 
-  get items () {
+  get items (): {id: ID, name: string }[] {
     return this.facies
       .map(item => {
         return {
@@ -97,7 +98,7 @@ export default class FaciesProbabilityCubeTable extends Vue {
       })
   }
 
-  get noDataText () {
+  get noDataText (): string {
     return 'No Facies selected'
   }
 
@@ -123,11 +124,11 @@ export default class FaciesProbabilityCubeTable extends Vue {
       )
   }
 
-  changeProbabilityCube (facies: Facies, probabilityCube: string) {
+  changeProbabilityCube (facies: Facies, probabilityCube: string): void {
     this.$store.dispatch('facies/changeProbabilityCube', { facies, probabilityCube })
   }
 
-  changeProbability (facies: Facies, prob: number) {
+  changeProbability (facies: Facies, prob: number): void {
     this.$store.dispatch('facies/changePreviewProbability', { facies, previewProbability: prob })
   }
 }

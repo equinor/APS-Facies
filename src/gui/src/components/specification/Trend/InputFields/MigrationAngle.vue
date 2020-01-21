@@ -27,7 +27,7 @@ export default class MigrationAngle extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

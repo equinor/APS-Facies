@@ -125,7 +125,7 @@ export default class CubicTopologySpecification extends Vue {
 
   relativeClickPosition (e: MouseEvent): { x: number, y: number } {
     const { top, bottom, left, right } = this.$el.getElementsByClassName('svg-container')[0].getBoundingClientRect()
-    const getMax = (direction: string) => Math.max(...this.boundingBoxes.map(({ boundingBox }) => boundingBox[`max${direction.toUpperCase()}`]))
+    const getMax = (direction: string): number => Math.max(...this.boundingBoxes.map(({ boundingBox }) => boundingBox[`max${direction.toUpperCase()}`]))
     return {
       x: Math.min((e.clientX - left) / (right - left), getMax('x')),
       y: Math.min((e.clientY - top) / (bottom - top), getMax('y')),

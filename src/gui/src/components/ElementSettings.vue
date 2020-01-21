@@ -47,6 +47,10 @@ import IconButton from '@/components/selection/IconButton.vue'
 
 import { isEmpty } from '@/utils'
 
+import { Facies } from '@/utils/domain'
+
+type Option = 'number' | 'name'
+
 @Component({
   components: {
     IconButton,
@@ -57,7 +61,7 @@ import { isEmpty } from '@/utils'
   },
 })
 export default class ElementSettings extends Vue {
-  get options () {
+  get options (): { zone: Option, region: Option } {
     const showNameOrNumber = this.$store.state.options.showNameOrNumber
     return {
       zone: showNameOrNumber.zone.value,
@@ -68,14 +72,14 @@ export default class ElementSettings extends Vue {
   get expanded (): number[] { return this.$store.getters['panels/settings'] }
   set expanded (indices) { this.$store.dispatch('panels/change', { type: 'settings', indices }) }
 
-  get title () { return `Settings for ${this.zoneName}`.concat(this.useRegions ? ` / ${this.regionName}` : '') }
+  get title (): string { return `Settings for ${this.zoneName}`.concat(this.useRegions ? ` / ${this.regionName}` : '') }
 
-  get useRegions () {
+  get useRegions (): boolean {
     return this.$store.state.regions.use
   }
 
   // TODO: Combine common logic in zone/regionName
-  get zoneName () {
+  get zoneName (): string {
     const current = this.$store.getters.zone
     return isEmpty(current)
       ? ''
@@ -84,7 +88,7 @@ export default class ElementSettings extends Vue {
         : `Zone ${current.code}`
   }
 
-  get regionName () {
+  get regionName (): string {
     const current = this.$store.getters.region
     return isEmpty(current)
       ? ''
@@ -93,14 +97,14 @@ export default class ElementSettings extends Vue {
         : `Region ${current.code}`
   }
 
-  get _facies () { return this.$store.getters['facies/selected'] }
+  get _facies (): Facies[] { return this.$store.getters['facies/selected'] }
 
-  get hasFacies () { return this._facies.length > 0 }
+  get hasFacies (): boolean { return this._facies.length > 0 }
 
-  get hasEnoughFacies () { return this._facies.length >= 2 /* TODO: Use a constant */ }
+  get hasEnoughFacies (): boolean { return this._facies.length >= 2 /* TODO: Use a constant */ }
 
   @Watch('_facies', { deep: true })
-  async truncationRuleVisibility () {
+  async truncationRuleVisibility (): Promise<void> {
     await this.$store.dispatch(`panels/${this.hasEnoughFacies ? 'open' : 'close'}`, { type: 'settings', panel: 'truncationRule' })
     if (!this.hasFacies) {
       await this.$store.dispatch('panels/close', { type: 'settings', panel: ['truncationRule', 'faciesProbability'] })

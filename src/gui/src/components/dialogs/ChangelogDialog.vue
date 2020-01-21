@@ -30,18 +30,18 @@ export default class ChangelogDialog extends Vue {
   public dialog = false
   public changelog = ''
 
-  async fetchChangelog () {
+  async fetchChangelog (): Promise<void> {
     const { data } = await axios.get('/CHANGELOG.md')
     this.changelog = md.render(data)
   }
 
-  mounted () {
+  mounted (): void {
     this.fetchChangelog()
   }
 
-  public close () { this.dialog = false }
+  public close (): void { this.dialog = false }
 
-  public open () { this.dialog = true }
+  public open (): void { this.dialog = true }
 }
 </script>
 

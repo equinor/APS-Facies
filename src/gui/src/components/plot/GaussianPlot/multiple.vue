@@ -77,14 +77,14 @@ export default class MultipleGaussianPlots extends Vue {
   get someSimulated (): boolean { return this.value.some(field => field.simulated) }
 
   @Watch('value')
-  updateSimulation (fields: GaussianRandomField[]) {
+  updateSimulation (fields: GaussianRandomField[]): void {
     if (this.$store.state.panels.preview.gaussianRandomFields) {
       this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields })
     }
   }
 
   @Watch('content')
-  handle () {
+  handle (): void {
     this.$nextTick(() => {
       this.size = this.value
         .map(field => {

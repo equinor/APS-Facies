@@ -34,7 +34,7 @@ const module: Module<ParametersState, RootState> = {
   },
 
   actions: {
-    async fetch ({ dispatch }) {
+    async fetch ({ dispatch }): Promise<void> {
       await Promise.all([
         dispatch('path/fetch'),
         dispatch('names/workflow/fetch'),

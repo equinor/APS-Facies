@@ -23,7 +23,7 @@ import { Store } from '@/store/typing'
 
 import StaticPlot from '@/components/plot/StaticPlot.vue'
 
-function filterOnCode (data: number[][] | null, code: number) {
+function filterOnCode (data: number[][] | null, code: number): (1 | null)[][] {
   if (!data) return []
   return data
     .map(arr => arr.map(val => val === code ? 1 : null))

@@ -67,7 +67,7 @@ export default class CrossPlots extends Vue {
     })
   }
 
-  get combinations () {
+  get combinations (): number[][] {
     const pairs: number[][] = []
     const available = this.selected
       .map(id => this.$store.state.gaussianRandomFields.available[`${id}`])
@@ -81,12 +81,12 @@ export default class CrossPlots extends Vue {
   }
 
   @Watch('selected', { deep: true })
-  selectionChanged (fields: ID[]) {
+  selectionChanged (fields: ID[]): void {
     this.$store.dispatch('gaussianRandomFields/updateSimulations', { fields })
   }
 
   @Watch('available', { deep: true })
-  onChange (value: Item[]) {
+  onChange (value: Item[]): void {
     if (this.selected.some(selectedItem => !value.find(availableItem => availableItem.value === selectedItem))) {
       // That is, if there is some selected value that is no longer available
       this.selected = this.available
@@ -95,7 +95,7 @@ export default class CrossPlots extends Vue {
     }
   }
 
-  beforeMount () {
+  beforeMount (): void {
     if (this.selected.length === 0 && this.value.length >= 2) {
       this.value.slice(0, 2).forEach(field => this.selected.push(field.id))
     }

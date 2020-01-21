@@ -60,14 +60,14 @@ export default class RangeSpecification extends Vue {
     vertical: false,
   }
 
-  get propertyType () { return 'range' }
+  get propertyType (): string { return 'range' }
 
   @Watch('invalid', { deep: true })
-  onInvalidChanged ({ vertical, perpendicular, main }: Invalid) {
+  onInvalidChanged ({ vertical, perpendicular, main }: Invalid): void {
     this.$emit('update:error', vertical || perpendicular || main)
   }
 
-  update (type: string, value: boolean) {
+  update (type: string, value: boolean): void {
     Vue.set(this.invalid, type, value)
   }
 }

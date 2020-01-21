@@ -14,6 +14,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 import { GaussianRandomField } from '@/utils/domain'
+import { MinMax } from '@/api/types'
 
 @Component({
   components: {
@@ -24,11 +25,11 @@ export default class RelativeStandardDeviation extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField
 
-  get ranges () {
+  get ranges (): MinMax {
     return { min: 0, max: 1 }
   }
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

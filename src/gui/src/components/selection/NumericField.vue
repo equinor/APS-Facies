@@ -77,12 +77,12 @@ type InternalValue = BigNumber | number | string | null
       required: this.optional ? true : requiredField,
       between: between(this.min, this.max),
       discrete: this.discrete ? numeric : true,
-      strictlyGreater: this.strictlyGreater ? (value: number) => value > this.min : true,
-      strictlySmaller: this.strictlySmaller ? (value: number) => value < this.max : true,
+      strictlyGreater: this.strictlyGreater ? (value: number): boolean => value > this.min : true,
+      strictlySmaller: this.strictlySmaller ? (value: number): boolean => value < this.max : true,
       // TODO: Add option to add more validations
     }
     this.additionalRules.forEach((rule: AdditionalRule) => {
-      fieldValue[`${rule.name}`] = (value: number) => rule.check(value)
+      fieldValue[`${rule.name}`] = (value: number): boolean => rule.check(value)
     })
     return {
       fieldValue: {
@@ -256,7 +256,7 @@ export default class NumericField extends Vue {
     }
   }
 
-  setUpdatable (event: boolean) {
+  setUpdatable (event: boolean): void {
     this.emitChange(!!event)
   }
 

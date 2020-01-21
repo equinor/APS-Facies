@@ -10,6 +10,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { Zone } from '@/utils/domain'
 import { ZoneConformOption } from '@/utils/domain/zone'
+import { ListItem } from '@/utils/typing'
 
 @Component({
 })
@@ -22,7 +23,7 @@ export default class ConformSelection extends Vue {
     this.$store.dispatch('zones/conformity', { zone: this.value, value }, { root: true })
   }
 
-  get options () {
+  get options (): ListItem<string>[] {
     return [
       {
         value: 'TopConform',

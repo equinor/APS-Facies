@@ -75,6 +75,7 @@ import CrossSection from '@/components/specification/GaussianRandomField/CrossSe
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { GaussianRandomField as Field } from '@/utils/domain'
+import { ID } from '@/utils/domain/types'
 import { isNumber } from 'lodash'
 
 @Component({
@@ -88,17 +89,17 @@ import { isNumber } from 'lodash'
   },
 })
 export default class MultipleGaussianRandomFields extends Vue {
-  get panel () { return this.$store.state.panels.settings.gaussianRandomFields }
+  get panel (): number { return this.$store.state.panels.settings.gaussianRandomFields }
   set panel (value) { this.$store.dispatch('panels/set', { type: 'settings', panel: 'gaussianRandomFields', toggled: isNumber(value) ? value : true }) }
 
-  get fields () { return this.$store.getters.fields }
-  get ids () { return Object.keys(this.fields) }
+  get fields (): Field[] { return this.$store.getters.fields }
+  get ids (): ID[] { return Object.keys(this.fields) }
 
-  async addField () {
+  async addField (): Promise<void> {
     await this.$store.dispatch('gaussianRandomFields/addEmptyField')
   }
 
-  deleteField (field: Field) {
+  deleteField (field: Field): void {
     this.$refs[`confirmation_${field.id}`][0].open('Are you sure?', `This will delete the Gaussian random field '${field.name}'`)
       .then((confirmed: boolean) => {
         if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { field })

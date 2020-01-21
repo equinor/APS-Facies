@@ -80,7 +80,7 @@ export default class ExportDialog extends Vue {
   reject: ((reason: string) => void) | null = null
   path: string | null = null
 
-  chooseAPSModelFile () {
+  chooseAPSModelFile (): void {
     rms.chooseFile('save', '', '').then((result: string | null): void => { // setting parameters filter and suggestion does not seem to work...
       if (result) {
         this.path = result
@@ -97,7 +97,7 @@ export default class ExportDialog extends Vue {
     })
   }
 
-  choose () {
+  choose (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
     if (!this.path) throw new APSError('path has not been set')
 
@@ -105,7 +105,7 @@ export default class ExportDialog extends Vue {
     this.dialog = false
   }
 
-  abort () {
+  abort (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
 
     this.resolve({ save: false, path: '' })

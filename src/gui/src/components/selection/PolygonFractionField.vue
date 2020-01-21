@@ -18,6 +18,7 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import { hasFaciesSpecifiedForMultiplePolygons } from '@/utils/queries'
 import { getId } from '@/utils'
+import { VuetifyIcon } from 'vuetify/types/services/icons'
 
 @Component({
   components: {
@@ -35,27 +36,27 @@ export default class PolygonFractionField<
   @Prop({ required: true })
   readonly rule!: TruncationRule<T, S, P>
 
-  get disabled () {
+  get disabled (): boolean {
     return (
       !hasFaciesSpecifiedForMultiplePolygons(this.rule.polygons, this.value.facies)
       || !this.value.facies
     )
   }
 
-  get appendIcon () {
+  get appendIcon (): VuetifyIcon {
     return this.disabled || this.rule.isPolygonFractionsNormalized(this.value)
       ? ''
       : this.$vuetify.icons.values.refresh
   }
 
-  async updateFactor (polygon: T, value: number) {
+  async updateFactor (polygon: T, value: number): Promise<void> {
     await this.$store.dispatch(
       'truncationRules/changeProportionFactors',
       { rule: this.rule, polygon, value }, { root: true }
     )
   }
 
-  async normalizeFractions () {
+  async normalizeFractions (): Promise<void> {
     const polygons: T[] = this.rule.polygons
       .filter((polygon: T): boolean => getId(polygon.facies) === getId(this.value.facies))
     const sum = polygons

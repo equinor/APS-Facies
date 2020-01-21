@@ -62,14 +62,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import BaseItem from '@/utils/domain/bases/baseItem'
 import { ID } from '@/utils/domain/types'
 import { DataTableCompareFunction } from 'vuetify/types'
-
-interface Header {
-  text: string
-  align?: string
-  sortable?: boolean
-  value: string
-  help?: string
-}
+import { HeaderItems } from '@/utils/typing'
 
 @Component({
   components: {
@@ -81,7 +74,7 @@ export default class SelectionTable<T extends BaseItem> extends Vue {
   readonly value!: T[]
 
   @Prop({ required: true })
-  readonly headers!: Header[]
+  readonly headers!: HeaderItems
 
   @Prop({ required: true })
   readonly items!: T[]
@@ -116,7 +109,7 @@ export default class SelectionTable<T extends BaseItem> extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly dense!: boolean
 
-  get _headers () {
+  get _headers (): HeaderItems {
     return this.headers
       .map(header => {
         return {

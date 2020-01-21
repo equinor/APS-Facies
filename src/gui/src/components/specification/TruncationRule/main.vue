@@ -46,7 +46,7 @@ export default class TruncationRuleSpecification extends Vue {
   @Prop({ required: true })
   readonly table!: Vue
 
-  get minFields () {
+  get minFields (): number {
     return this.value.type === 'bayfill'
       ? 3
       : 2

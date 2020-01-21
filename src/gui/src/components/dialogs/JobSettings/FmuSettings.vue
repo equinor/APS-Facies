@@ -118,6 +118,7 @@ import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 
 import { Store } from '@/store/typing'
+import { ListItem } from '@/utils/typing'
 
 interface Invalid {
   fmuGridDepth: boolean
@@ -206,7 +207,7 @@ export default class FmuSettings extends Vue {
     else throw Error(`Invalid value, '${value}'`)
   }
 
-  chooseFmuParametersFileLocation () {
+  chooseFmuParametersFileLocation (): void {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this._fmuParameterListLocation = path
@@ -233,7 +234,7 @@ export default class FmuSettings extends Vue {
 
   get availableGridModels (): GridModel[] { return Object.values((this.$store as Store).state.gridModels.available) }
 
-  get fmuGrids () {
+  get fmuGrids (): ListItem<string>[] {
     const selectedGrid = this.$store.getters['gridModels/current']
     if (!selectedGrid) return []
 
@@ -252,7 +253,7 @@ export default class FmuSettings extends Vue {
   }
 
   @Watch('hasErrors', { deep: true })
-  isInvalid (valid: boolean) {
+  isInvalid (valid: boolean): void {
     this.$emit('update:error', valid)
   }
 }

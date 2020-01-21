@@ -22,10 +22,10 @@ export default class SplitDirection extends Vue {
   @Prop({ required: true })
   readonly value!: Cubic
 
-  get splitDirection () { return this.value.direction.toInteger() }
+  get splitDirection (): 1 | 0 { return this.value.direction.toInteger() }
   set splitDirection (value) { this.$store.dispatch('truncationRules/changeDirection', { rule: this.value, value }) }
 
-  get labels () {
+  get labels (): { [_: number]: string } {
     return {
       0: 'Vertical',
       1: 'Horizontal',

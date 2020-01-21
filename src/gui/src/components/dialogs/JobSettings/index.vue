@@ -291,6 +291,7 @@ import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
+import { Coordinate3D, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
 @Component({
   components: {
@@ -323,12 +324,12 @@ export default class JobSettings extends Vue {
   onlyUpdateFromFmu = false
   maxAllowedFractionOfValuesOutsideTolerance = 0
 
-  get simulationSettings () { return this.$store.getters.simulationSettings() }
-  get gridSize () { return this.simulationSettings.gridSize }
-  get version () { return process.env.VUE_APP_APS_VERSION || '' }
+  get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
+  get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
+  get version (): string { return process.env.VUE_APP_APS_VERSION || '' }
 
   @Watch('dialog')
-  onActivation (value: boolean) {
+  onActivation (value: boolean): void {
     if (value) {
       const options = this.$store.state.options
       const parameters = this.$store.state.parameters
@@ -357,11 +358,11 @@ export default class JobSettings extends Vue {
     }
   }
 
-  cancel () {
+  cancel (): void {
     this.dialog = false
   }
 
-  async ok () {
+  async ok (): Promise<void> {
     const dispatch = this.$store.dispatch
     await Promise.all([
       dispatch('parameters/path/project/select', this.apsModelFileLocation),

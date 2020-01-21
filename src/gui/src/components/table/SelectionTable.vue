@@ -147,10 +147,10 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
       .sort((a: T, b: T) => a.code - b.code)
   }
 
-  get current () { return this.$store.state[`${this.itemType}s`].current }
+  get current (): T { return this.$store.state[`${this.itemType}s`].current }
   set current (item: T) { this.$store.dispatch(`${this.itemType}s/current`, item) }
 
-  get selected () { return this.items.filter(item => !!item.selected) }
+  get selected (): T[] { return this.items.filter(item => !!item.selected) }
   set selected (values) {
     values = this.items.filter(item => values.map(({ id }) => id).includes(item.id))
     this.$store.dispatch(`${this.itemType}s/select`, values)
@@ -162,7 +162,7 @@ export default class SelectionTable<T extends SelectableItem> extends Vue {
 
   get showConformity (): boolean { return this.$store.getters.fmuMode && this.itemType === 'zone' }
 
-  getItem (item: T) { return this.items.find(({ id }) => id === item.id) }
+  getItem (item: T): T | undefined { return this.items.find(({ id }) => id === item.id) }
 
   getColor (item: T): 'accent' | undefined {
     return getId(this.source) === item.id

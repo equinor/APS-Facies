@@ -93,7 +93,7 @@ const module: Module<GlobalFaciesState, RootState> = {
         await dispatch('current', { id: null })
       }
     },
-    changeColorPallet: async ({ dispatch, state }, mapping: Map<Color, Color>) => {
+    changeColorPallet: async ({ dispatch, state }, mapping: Map<Color, Color>): Promise<void> => {
       await Promise.all(Object.values(state.available)
         .map(facies => dispatch('changeColor', { id: facies.id, color: mapping.get(facies.color) })))
     },

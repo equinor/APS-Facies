@@ -67,7 +67,9 @@ import OverlayFacies from '@/components/specification/TruncationRule/Overlay/ind
 import SectionTitle from '@/components/baseComponents/headings/SectionTitle.vue'
 
 import { isUUID } from '@/utils/helpers'
-import { Bayfill, Facies } from '@/utils/domain'
+import { Bayfill } from '@/utils/domain'
+import Polygon from '@/utils/domain/polygon/base'
+import TruncationRuleType from '@/utils/domain/truncationRule/base'
 import { Optional } from '@/utils/typing'
 import { Identified } from '@/utils/domain/bases/interfaces'
 import { TruncationRuleTemplate } from '@/store/modules/truncationRules/typing'
@@ -87,7 +89,7 @@ export default class TruncationRule extends Vue {
       return available[`${type}`]
     } else {
       return this.rule
-        ? Object.values(available).find((item) => item.type === this.rule.type) || null
+        ? Object.values(available).find((item) => !!this.rule && item.type === this.rule.type) || null
         : null
     }
   }
@@ -103,14 +105,15 @@ export default class TruncationRule extends Vue {
       : null
   }
 
-  get rule () { return this.$store.getters.truncationRule }
+  get rule (): Optional<TruncationRuleType> { return this.$store.getters.truncationRule }
 
   get useOverlay (): boolean { return this.rule ? this.rule.useOverlay : false }
   set useOverlay (val) { this.$store.dispatch('truncationRules/toggleOverlay', { rule: this.rule, value: val }) }
 
   get hasEnoughFacies (): boolean {
+    if (!this.rule) return true
     const numFacies = Object.values(this.$store.getters['facies/selected']).length
-    const numFaciesInBackground = [...new Set((this.rule.backgroundPolygons as Facies[])
+    const numFaciesInBackground = [...new Set((this.rule.backgroundPolygons as Polygon[])
       .map(polygon => polygon.facies)
       .filter(name => !!name)
     )].length
@@ -127,7 +130,7 @@ export default class TruncationRule extends Vue {
   }
 
   get canUseOverlay (): boolean {
-    return this.overlayErrors.every(({ check }) => check) || this.rule.useOverlay
+    return this.overlayErrors.every(({ check }) => check) || (!!this.rule && this.rule.useOverlay)
   }
 
   get useOverlayTooltip (): Optional<string> {

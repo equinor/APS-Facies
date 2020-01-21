@@ -20,6 +20,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { FmuUpdatable } from '@/utils/domain/bases/fmuUpdatable'
 
 import { Optional } from '@/utils/typing'
+import { MinMax } from '@/api/types'
 import NumericField from '@/components/selection/NumericField.vue'
 
 @Component({
@@ -46,14 +47,14 @@ export default class FractionField extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly dense!: boolean
 
-  get ranges () {
+  get ranges (): MinMax {
     return {
       min: 0,
       max: 1,
     }
   }
 
-  propagate (value: any, event: string) {
+  propagate (value: any, event: string): void {
     this.$emit(event, value)
   }
 }

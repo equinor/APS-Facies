@@ -33,7 +33,7 @@ const module: Module<FmuLayersState, RootState> = {
   },
 
   mutations: {
-    SET (state, value) {
+    SET (state, value): void {
       state.value = value
     },
   },

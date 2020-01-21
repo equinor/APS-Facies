@@ -31,7 +31,7 @@ type Option = 'may' | 'success' | 'failure'
 export default class ExportState extends Vue {
   status: Option = 'may'
 
-  get clipboardIcon () {
+  get clipboardIcon (): string {
     return {
       may: 'clipboard',
       failure: 'clipboardFailed',
@@ -39,14 +39,14 @@ export default class ExportState extends Vue {
     }[this.status]
   }
 
-  async save () {
+  async save (): Promise<void> {
     const state = JSON.stringify(dumpState(this.$store))
     try {
       await navigator.clipboard.writeText(state)
       this.status = 'success'
     } catch (e) {
       this.status = 'failure'
-      rms.save('./state.json', btoa(state), false)
+      await rms.save('./state.json', btoa(state), false)
       throw new DOMException(e)
     } finally {
       setTimeout(() => { this.status = 'may' }, 2000)

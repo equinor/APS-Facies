@@ -29,7 +29,7 @@ import { notEmpty } from '@/utils'
   },
 })
 export default class ZoneRegion extends Vue {
-  get canShowRegions () {
+  get canShowRegions (): boolean {
     return (
       this.$store.state.regions.use
       && notEmpty(this.$store.getters.regionParameter)

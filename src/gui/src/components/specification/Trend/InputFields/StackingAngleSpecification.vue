@@ -18,6 +18,7 @@
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { GaussianRandomField } from '@/utils/domain'
+import Trend, { StackingDirectionType } from '@/utils/domain/gaussianRandomField/trend'
 
 import StackingAngle from './StackingAngle.vue'
 import ItemSelection from '@/components/selection/dropdown/ItemSelection.vue'
@@ -42,18 +43,18 @@ export default class StackingAngleSpecification extends Vue {
     type: false,
   }
 
-  get availableStackingDirection () { return this.$store.state.constants.options.stacking.available }
-  get trend () { return this.value.trend }
+  get availableStackingDirection (): StackingDirectionType[] { return this.$store.state.constants.options.stacking.available }
+  get trend (): Trend { return this.value.trend }
 
-  get stackingDirection () { return this.trend.stackingDirection }
+  get stackingDirection (): StackingDirectionType { return this.trend.stackingDirection }
   set stackingDirection (value) { this.$store.dispatch('gaussianRandomFields/stackingDirection', { field: this.value, value }) }
 
   @Watch('invalid', { deep: true })
-  propagateError ({ angle, type }: Invalid) {
+  propagateError ({ angle, type }: Invalid): void {
     this.$emit('update:error', angle || type)
   }
 
-  update (type: string, value: boolean) {
+  update (type: string, value: boolean): void {
     Vue.set(this.invalid, type, value)
   }
 }

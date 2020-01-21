@@ -1,5 +1,6 @@
 import { DEFAULT_CUBIC_LEVELS } from '@/config'
 import CubicPolygon, { CubicPolygonSerialization, CubicPolygonSpecification } from '@/utils/domain/polygon/cubic'
+import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import Direction, { Orientation, OrientationString } from '@/utils/domain/truncationRule/cubic/direction'
 import OverlayTruncationRule, {
   OverlaySerialization,
@@ -41,7 +42,7 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
     return polygon
   }
 
-  public get polygons () {
+  public get polygons (): (CubicPolygon | OverlayPolygon)[] {
     return super.polygons
       .filter((polygon): boolean => polygon instanceof CubicPolygon ? polygon.children.length === 0 && !!polygon.parent : true)
       .sort((a, b): number => a instanceof CubicPolygon && b instanceof CubicPolygon

@@ -103,6 +103,8 @@ import JobSettings from '@/components/dialogs/JobSettings/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
 
+import { Optional } from '@/utils/typing'
+
 import rms from '@/api/rms'
 import { resetState } from '@/store'
 import { isDevelopmentBuild } from '@/utils/helpers/simple'
@@ -117,8 +119,8 @@ function parse (xmlString: string): Document {
     : dom
 }
 
-function fileHandler (store: Store, fileName: string) {
-  return (e: any) => {
+function fileHandler (store: Store, fileName: string): (e: any) => void {
+  return (e: any): void => {
     const fileContent = e.target.result
     let json: string | null = null
 
@@ -167,31 +169,31 @@ function fileHandler (store: Store, fileName: string) {
   },
 })
 export default class TheToolBar extends Vue {
-  get betaBuild () { return process.env.VUE_APP_BUILD_MODE !== 'stable' }
+  get betaBuild (): boolean { return process.env.VUE_APP_BUILD_MODE !== 'stable' }
 
-  get versionNumber () { return process.env.VUE_APP_APS_VERSION }
+  get versionNumber (): Optional<string> { return process.env.VUE_APP_APS_VERSION || null }
 
-  get buildNumber () { return process.env.VUE_APP_BUILD_NUMBER }
+  get buildNumber (): Optional<string> { return process.env.VUE_APP_BUILD_NUMBER || null }
 
-  get commitHash () { return process.env.VUE_APP_HASH }
+  get commitHash (): Optional<string> { return process.env.VUE_APP_HASH || null }
 
-  get versionInformation () {
+  get versionInformation (): string {
     return this.versionNumber && this.buildNumber && this.commitHash
       ? `${this.versionNumber}.${this.buildNumber}-${this.commitHash} (beta)`
       : 'live'
   }
 
-  get isDevelop () { return isDevelopmentBuild() }
+  get isDevelop (): boolean { return isDevelopmentBuild() }
 
-  goToHelp () {
+  goToHelp (): void {
     rms.openWikiHelp()
   }
 
-  openChangelog () {
+  openChangelog (): void {
     (this.$refs.changelogDialog as ChangelogDialog).open()
   }
 
-  importModelFile (file: File | null) {
+  importModelFile (file: File | null): void {
     if (file) {
       const reader = new FileReader()
       reader.onloadend = fileHandler(this.$store, file.name)
@@ -200,7 +202,7 @@ export default class TheToolBar extends Vue {
     }
   }
 
-  async exportModelFile () {
+  async exportModelFile (): Promise<void> {
     const exportedXMLString = await this.$store.dispatch('modelFileExporter/createModelFileFromStore', {})
       .catch(async error => {
         await displayError(error.message)

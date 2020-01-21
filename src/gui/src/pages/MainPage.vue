@@ -49,6 +49,8 @@ import Selection from '@/components/ElementSelection.vue'
 import Settings from '@/components/ElementSettings.vue'
 import Preview from '@/components/ElementPreview.vue'
 
+import { GaussianRandomField } from '@/utils/domain'
+
 @Component({
   components: {
     Selection,
@@ -57,14 +59,14 @@ import Preview from '@/components/ElementPreview.vue'
   },
 })
 export default class MainPage extends Vue {
-  get canSpecifyModelSettings () { return this.$store.getters.canSpecifyModelSettings }
+  get canSpecifyModelSettings (): boolean { return this.$store.getters.canSpecifyModelSettings }
 
-  get loading () { return this.$store.state._loading.value }
+  get loading (): boolean { return this.$store.state._loading.value }
 
-  get loadingMessage () { return this.$store.state._loading.message }
+  get loadingMessage (): string { return this.$store.state._loading.message }
 
-  get fields () { return Object.values(this.$store.getters.fields) }
+  get fields (): GaussianRandomField[] { return Object.values(this.$store.getters.fields) }
 
-  get hasSimulations () { return this.fields.length > 0 }
+  get hasSimulations (): boolean { return this.fields.length > 0 }
 }
 </script>

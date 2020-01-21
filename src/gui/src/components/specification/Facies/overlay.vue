@@ -31,7 +31,7 @@ export default class OverlayFaciesSpecification<
   @Prop({ required: true })
   readonly rule!: OverlayTruncationRule<T, S, P>
 
-  backgroundFacies (facies: Facies) {
+  backgroundFacies (facies: Facies): boolean {
     return this.rule.isUsedInBackground(facies)
   }
 }

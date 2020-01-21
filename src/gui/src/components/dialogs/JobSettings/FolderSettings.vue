@@ -50,7 +50,7 @@ export default class FolderSettings extends Vue {
   get _apsModelFileLocation (): string { return this.apsModelFileLocation }
   set _apsModelFileLocation (value: string) { this.$emit('update:apsModelFileLocation', value) }
 
-  chooseApsModelFileLocation () {
+  chooseApsModelFileLocation (): void {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this._apsModelFileLocation = path

@@ -51,14 +51,14 @@ export default class EditableCell<T> extends Vue {
 
   get fieldValue (): string { return this.value[this.field] }
 
-  submit () {
+  submit (): void {
     this.$emit('submit', {
       ...this.value,
       [this.field]: this.$data._fieldValue
     })
   }
 
-  reset () {
+  reset (): void {
     this.$data._fieldValue = this.fieldValue
   }
 }

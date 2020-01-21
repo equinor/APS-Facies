@@ -36,7 +36,7 @@ export default class FaciesSpecification<
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean
 
-  async updateFacies (faciesId: ID) {
+  async updateFacies (faciesId: ID): Promise<void> {
     const facies = (this.$store as Store).getters['facies/byId'](faciesId)
     if (facies) {
       await this.$store.dispatch('truncationRules/updateFacies', {

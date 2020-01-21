@@ -17,18 +17,22 @@ import { delay } from 'lodash'
 
 import BaseMessage from '@/utils/domain/messages/base'
 
+import { Optional } from '@/utils/typing'
+
+type MessageType = 'info' | 'error' | 'success' | 'warning'
+
 @Component
 export default class InformationBar extends Vue {
   shown = false
 
-  get _message () {
+  get _message (): { value: Optional<string | Error>, kind: MessageType } {
     return this.$store.state.message.value || {
       value: null,
       kind: 'info',
     }
   }
 
-  get message () {
+  get message (): Optional<string> {
     let message = this._message.value
     if (message instanceof Error) {
       if (process.env.NODE_ENV === 'develop') {
@@ -41,10 +45,10 @@ export default class InformationBar extends Vue {
     return message
   }
 
-  get type () { return this._message.kind }
+  get type (): MessageType { return this._message.kind }
 
   @Watch('_message')
-  onUpdate (message: BaseMessage) {
+  onUpdate (message: BaseMessage): void {
     if (message.value) {
       this.shown = true
       const { use, wait } = this.$store.state.message.autoDismiss

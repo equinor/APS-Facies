@@ -31,7 +31,7 @@ export default class BaseDropdown<T> extends Vue {
   @Prop({ default: '$vuetify.noDataText' })
   readonly noDataText!: string
 
-  get selected () { return this.modelGetter() }
-  set selected (value) { this.modelSetter(value) }
+  get selected (): T { return this.modelGetter() }
+  set selected (value: T) { this.modelSetter(value) }
 }
 </script>
