@@ -58,6 +58,7 @@ export default class TruncationRulePreview extends Vue {
 
   get imagePath (): string {
     try {
+      // eslint-disable-next-line security/detect-non-literal-require
       return require(`@/../public/truncation-rules/${this.type}/${this.value}.png`)
     } catch {
       return ''
