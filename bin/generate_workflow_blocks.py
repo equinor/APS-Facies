@@ -82,7 +82,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.8.5"
+__version__ = "0.9.0"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -285,6 +285,8 @@ def prepend_absolute_path(file):
 
 # Keywords to pass along to the various modules
 kwargs = {{
+    'roxar': roxar,
+    'project': project,
     # Legal values: 0..4 (0 is off, while 4 is very verbose)
     'debug_level': get_debug_level(),
     # Misc. flags
@@ -310,7 +312,7 @@ for key, value in kwargs.items():
         kwargs[key] = stringify_path(value)
 
 module = _load_module()
-module.run(roxar, project, **kwargs)
+module.run(**kwargs)
 '''
 
     return template.format(

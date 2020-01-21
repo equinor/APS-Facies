@@ -1,26 +1,38 @@
 import xtgeo
 
 from src.algorithms.APSModel import APSModel
-from src.utils.fmu import get_grid
-from src.utils.methods import get_specification_file
+from src.utils.constants.simple import Debug
 
 
-def run(roxar=None, project=None, **kwargs):
-    aps_model = APSModel(get_specification_file(**kwargs))
-    simulation_grid_name = kwargs.get('fmu_simulation_grid_name')
-    max_fmu_grid_depth = kwargs.get('max_fmu_grid_depth')
+def get_grid_rotation(geometry):
+    return geometry['avg_rotation']
 
-    reference_grid = get_grid(project, aps_model)
-    nx, ny, _ = reference_grid.grid_indexer.dimensions
+
+def get_origin(geometry):
+    keys = ['xori', 'yori', 'zori']
+    return tuple(geometry[key] for key in keys)
+
+
+def run(
+        *,
+        project,
+        aps_model:                APSModel,
+        fmu_simulation_grid_name: str,
+        max_fmu_grid_depth:       int,
+        debug_level:              Debug,
+        **kwargs,
+):
+    if debug_level >= Debug.ON:
+        print(f'Creating ERT simulation box; {fmu_simulation_grid_name}')
+    reference_grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
+    nx, ny, _ = reference_grid.dimensions
     dimension = nx, ny, max_fmu_grid_depth
+    geometry = reference_grid.get_geometrics(return_dict=True)
 
     simulation_grid = xtgeo.Grid()
     simulation_grid.create_box(
-
+        dimension,
+        origin=get_origin(geometry),
+        rotation=get_grid_rotation(geometry),
     )
-
-
-if __name__ == '__main__':
-    import roxar
-
-    run(roxar, project)
+    simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)
