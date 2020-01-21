@@ -1,11 +1,11 @@
 <template>
-  <SettingsPanel title="Logging settings">
+  <settings-panel title="Logging settings">
     <v-select
       v-model="_debugLevel"
       label="Debug level"
       :items="debugLevels"
     />
-  </SettingsPanel>
+  </settings-panel>
 </template>
 
 <script lang="ts">

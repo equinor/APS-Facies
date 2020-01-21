@@ -65,7 +65,7 @@
         What's new?
       </span>
     </v-popover>
-    <ChangelogDialog ref="changelogDialog" />
+    <changelog-dialog ref="changelogDialog" />
     <v-popover
       trigger="hover"
     >

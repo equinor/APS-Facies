@@ -20,11 +20,11 @@
         class="headline"
       />
       <v-card-text>
-        <FolderSettings
+        <folder-settings
           :aps-model-file-location.sync="apsModelFileLocation"
         />
         <br>
-        <FmuSettings
+        <fmu-settings
           :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
           :only-update-from-fmu.sync="onlyUpdateFromFmu"
@@ -34,15 +34,15 @@
           :create-fmu-grid.sync="createFmuGrid"
         />
         <br>
-        <LoggingSettings
+        <logging-settings
           :debug-level.sync="debugLevel"
         />
         <br>
-        <RunSettings
+        <run-settings
           :max-allowed-fraction-of-values-outside-tolerance.sync="maxAllowedFractionOfValuesOutsideTolerance"
         />
         <br>
-        <SettingsPanel title="Display Settings">
+        <settings-panel title="Display Settings">
           <v-row
             no-gutters
           >
@@ -145,9 +145,9 @@
               </v-col>
             </v-col>
           </v-row>
-        </SettingsPanel>
+        </settings-panel>
         <br>
-        <SettingsPanel
+        <settings-panel
           v-if="!!$store.getters.gridModel"
           title="Preview settings"
         >
@@ -260,7 +260,7 @@
               />
             </v-row>
           </v-container>
-        </SettingsPanel>
+        </settings-panel>
       </v-card-text>
       <v-card-actions>
         {{ version && `Version: ${version}` }}

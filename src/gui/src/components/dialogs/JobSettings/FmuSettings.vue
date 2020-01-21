@@ -1,5 +1,5 @@
 <template>
-  <SettingsPanel title="FMU Settings">
+  <settings-panel title="FMU Settings">
     <v-row
       no-gutters
     >
@@ -105,7 +105,7 @@
         </v-col>
       </v-row>
     </div>
-  </SettingsPanel>
+  </settings-panel>
 </template>
 
 <script lang="ts">

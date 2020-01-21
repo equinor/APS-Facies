@@ -1,5 +1,5 @@
 <template>
-  <SettingsPanel title="Folder Settings">
+  <settings-panel title="Folder Settings">
     <v-row no-gutters>
       <v-col
         class="pa-2"
@@ -27,7 +27,7 @@
         />
       </v-col>
     </v-row>
-  </SettingsPanel>
+  </settings-panel>
 </template>
 
 <script lang="ts">
