@@ -377,7 +377,7 @@ install-pipenv:
 
 requirements: matplotlibrc
 	cd $(CODE_DIR) && \
-	$(PIPENV) install --dev
+	$(PIPENV) install --dev --keep-outdated
 
 relink-matplotlibrc: clean-matplotlibrc matplotlibrc matplotlibrc-links
 
@@ -540,7 +540,7 @@ web-build:
 web-install-dev: $(PACKAGE.JSON)
 
 package.json:
-	$(YARN) install --dev
+	$(YARN) install --dev --frozen-lockfile
 
 
 run-api-gunicorn:
