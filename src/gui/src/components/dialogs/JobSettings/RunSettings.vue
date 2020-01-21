@@ -37,7 +37,3 @@ export default class RunSettings extends Vue {
   set _maxAllowedFractionOfValuesOutsideTolerance (value: number) { this.$emit('update:maxAllowedFractionOfValuesOutsideTolerance', value / 100) }
 }
 </script>
-
-<style lang="scss" scoped>
-
-</style>

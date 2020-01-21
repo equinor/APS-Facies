@@ -38,7 +38,7 @@ export default {
   isApsModelValid: (fileContent: string): Promise<{ valid: boolean, error: string }> => api.call('is_aps_model_valid', fileContent),
   save: (path: string, content: string, prettify = true): Promise<boolean> => api.call(prettify ? 'save_model' : 'save_file', path, content),
   // @ts-ignore
-  chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve, reject) => resolve(null)),
+  chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve) => resolve(null)),
   // @ts-ignore
-  chooseFile: (mode: string, filter: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseFile(mode, filter, suggestion) : new Promise((resolve, reject) => resolve(null)),
+  chooseFile: (mode: string, filter: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseFile(mode, filter, suggestion) : new Promise((resolve) => resolve(null)),
 }
