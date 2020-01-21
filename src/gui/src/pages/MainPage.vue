@@ -55,7 +55,7 @@ import { GaussianRandomField } from '@/utils/domain'
   components: {
     Selection,
     Settings,
-    Preview
+    Preview,
   },
 })
 export default class MainPage extends Vue {

@@ -301,7 +301,7 @@ import { Coordinate3D, SimulationSettings } from '@/utils/domain/bases/interface
     SettingsPanel,
     FmuSettings,
     NumericField,
-    BoldButton
+    BoldButton,
   },
 })
 export default class JobSettings extends Vue {

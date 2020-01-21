@@ -29,7 +29,7 @@ import { NoCache } from '@/utils/helpers'
 
 @Component({
   components: {
-    ChooseParameter
+    ChooseParameter,
   },
 })
 export default class ChooseRegionParameter extends Vue {

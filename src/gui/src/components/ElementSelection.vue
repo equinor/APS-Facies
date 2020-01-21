@@ -100,7 +100,7 @@ import { Optional } from '@/utils/typing'
     GridModel,
     ChooseBlockedWellParameter,
     ChooseBlockedWellLogParameter,
-    FaciesSelection
+    FaciesSelection,
   },
 })
 export default class ElementSelection extends Vue {

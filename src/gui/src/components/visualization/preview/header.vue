@@ -31,7 +31,7 @@ import { displayError } from '@/utils/helpers/storeInteraction'
 
 @Component({
   components: {
-    IconButton
+    IconButton,
   },
 })
 export default class PreviewHeader<
