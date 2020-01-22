@@ -818,14 +818,8 @@ def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realiz
 
     grid3d = grid_model.get_grid(realization_number)
     properties = grid_model.properties
-    found_zone_parameter = False
-    zone_parameter = None
-    for p in properties:
-        if p.name == name:
-            found_zone_parameter = True
-            zone_parameter = p
-            break
-    if found_zone_parameter:
+    if name in properties:
+        zone_parameter = properties[name]
         if debug_level >= Debug.VERBOSE:
             print('Found existing zone parameter with name {}'.format(zone_parameter.name))
 
@@ -854,12 +848,12 @@ def zone_parameter_values(grid3d, debug_level=Debug.OFF):
     """ Description: Return numpy array for the active grid cells with zone number in each grid cell. """
     code_names = {}
     indexer = grid3d.grid_indexer
-    dim_i, dim_j, dim_k = indexer.dimensions
+    dim_i, dim_j, _ = indexer.dimensions
     values = grid3d.generate_values(data_type=np.uint16)
     for zone_index in indexer.zonation:
         zone_name = grid3d.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
-        code_names[zone_index+1] = zone_name
+        code_names[zone_index + 1] = zone_name
         for lr in layer_ranges:
             # Get all the cell numbers for the layer range
             if debug_level >= Debug.VERBOSE:

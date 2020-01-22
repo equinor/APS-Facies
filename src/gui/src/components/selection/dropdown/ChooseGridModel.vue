@@ -13,8 +13,8 @@ import { Component, Vue } from 'vue-property-decorator'
 import BaseDropdown from '@/components/selection/dropdown/BaseDropdown.vue'
 
 import { Store } from '@/store/typing'
-
-type GridModel = string
+import { ListItem } from '@/utils/typing'
+import GridModel from '@/utils/domain/gridModel'
 
 @Component({
   components: {
@@ -22,7 +22,7 @@ type GridModel = string
   }
 })
 export default class ChooseGridModel extends Vue {
-  get available () {
+  get available (): ListItem<GridModel>[] {
     return Object.values((this.$store as Store).state.gridModels.available)
       .map(grid => {
         return {
@@ -33,12 +33,12 @@ export default class ChooseGridModel extends Vue {
       })
   }
 
-  getter () {
+  getter (): GridModel | undefined {
     const id = (this.$store as Store).state.gridModels.current
     return (this.$store as Store).state.gridModels.available[`${id}`]
   }
 
-  async setter (value: GridModel) {
+  async setter (value: GridModel): Promise<void> {
     await this.$store.dispatch('gridModels/select', value)
   }
 }

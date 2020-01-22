@@ -31,7 +31,7 @@ import { displayError } from '@/utils/helpers/storeInteraction'
 
 @Component({
   components: {
-    IconButton
+    IconButton,
   },
 })
 export default class PreviewHeader<
@@ -58,7 +58,7 @@ export default class PreviewHeader<
     )
   }
 
-  get canSimulate () {
+  get canSimulate (): boolean {
     return (
       this.value
       && this.value.ready
@@ -80,7 +80,7 @@ export default class PreviewHeader<
     return undefined
   }
 
-  async refresh () {
+  async refresh (): Promise<void> {
     await this.$store.dispatch('facies/normalize')
     this.waitingForSimulation = true
     try {

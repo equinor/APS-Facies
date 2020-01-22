@@ -15,7 +15,7 @@ import SelectionTable from '@/components/table/SelectionTable.vue'
 
 @Component({
   components: {
-    SelectionTable
+    SelectionTable,
   },
 })
 export default class ZoneSelection extends Vue {

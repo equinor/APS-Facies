@@ -18,16 +18,16 @@ import { required } from 'vuelidate/lib/validators'
 @Component({
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
-  validations () {
+  validations<T> () {
     return {
       value: {
-        required: (this as ItemSelection).constraints.required ? required : true,
-        legalChoice: (this as ItemSelection).items.includes((this as ItemSelection).value)
+        required: (this as ItemSelection<T>).constraints.required ? required : true,
+        legalChoice: (this as ItemSelection<T>).items.includes((this as ItemSelection<T>).value)
       },
     }
   },
 })
-export default class ItemSelection<T = any> extends Vue {
+export default class ItemSelection<T> extends Vue {
   @Prop({ required: true })
   value: T
 

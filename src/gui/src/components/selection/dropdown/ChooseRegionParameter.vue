@@ -29,16 +29,16 @@ import { NoCache } from '@/utils/helpers'
 
 @Component({
   components: {
-    ChooseParameter
+    ChooseParameter,
   },
 })
 export default class ChooseRegionParameter extends Vue {
   @NoCache
-  get useRegions () {
+  get useRegions (): boolean {
     return this.$store.state.regions.use
   }
 
-  set useRegions (value) {
+  set useRegions (value: boolean) {
     this.$store.dispatch('regions/use', { use: value })
   }
 }

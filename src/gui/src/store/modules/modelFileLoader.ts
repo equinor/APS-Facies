@@ -527,7 +527,7 @@ const module: Module<{}, RootState> = {
       }
     },
 
-    populateGridLayout: async ({ dispatch, rootState, rootGetters }, apsModels: any[]): Promise<void> => {
+    populateGridLayout: async ({ dispatch, rootState, rootGetters }, apsModels: XMLElement[]): Promise<void> => {
       for (const apsModel of apsModels) {
         const gridLayout = getTextValue(apsModel, 'GridLayout')
         if (gridLayout) {

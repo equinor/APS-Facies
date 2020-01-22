@@ -22,7 +22,7 @@ function flatten (arr: number[][] | null): number[] {
 
 @Component({
   components: {
-    StaticPlot
+    StaticPlot,
   },
 })
 export default class CrossPlot extends Vue {

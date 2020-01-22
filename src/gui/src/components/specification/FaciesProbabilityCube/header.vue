@@ -41,6 +41,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import WaitBtn from '@/components/baseComponents/WaitButton.vue'
 
 import { RootState, Store } from '@/store/typing'
+import { ProbabilityCube } from '@/utils/domain/facies/local'
 
 import { hasCurrentParents, notEmpty } from '@/utils'
 import { Facies } from '@/utils/domain'
@@ -54,11 +55,11 @@ import { isCloseToUnity } from '@/utils/helpers/simple'
 export default class FaciesProbabilityCubeHeader extends Vue {
   calculatingAverages = false
 
-  get probabilityCubeParameters () {
+  get probabilityCubeParameters (): ProbabilityCube[] {
     const state = (this.$store as Store).state
-    return Object.values(state.facies.available)
+    return (Object.values(state.facies.available)
       .map(facies => facies.probabilityCube)
-      .filter(param => notEmpty(param))
+      .filter(param => notEmpty(param)) as ProbabilityCube[])
   }
 
   get selectedFacies (): Facies[] {

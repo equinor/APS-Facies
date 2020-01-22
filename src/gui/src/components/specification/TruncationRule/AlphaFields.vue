@@ -30,7 +30,12 @@ import { Store } from '@/store/typing'
 
 import AlphaSelection from './AlphaSelection.vue'
 
-function defaultChannels (num: number): { channel: number, selected: ID | '' }[] {
+interface AlphaField {
+  channel: number
+  selected: GaussianRandomField | string | null
+}
+
+function defaultChannels (num: number): AlphaField[] {
   const items = []
   for (let i = 1; i <= num; i++) {
     // NOTE: The alpha channels are (supposed to be) 1-indexed
@@ -55,7 +60,7 @@ export default class AlphaFields<
   @Prop({ default: 2 })
   readonly minFields!: number
 
-  get alphas () {
+  get alphas (): AlphaField[] {
     return this.value
       ? this.value.backgroundFields
         .map((field, index) => {
@@ -67,11 +72,11 @@ export default class AlphaFields<
       : defaultChannels(this.minFields)
   }
 
-  update ({ channel }: { channel: number }, fieldId: ID | GaussianRandomField) {
+  async update ({ channel }: { channel: number }, fieldId: ID | GaussianRandomField): Promise<void> {
     const field = fieldId
       ? (this.$store as Store).state.gaussianRandomFields.available[`${fieldId}`]
       : null
-    return this.$store.dispatch('truncationRules/updateBackgroundField', {
+    await this.$store.dispatch('truncationRules/updateBackgroundField', {
       index: channel - 1,
       rule: this.value,
       field,

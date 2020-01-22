@@ -80,7 +80,7 @@ const module: Module<ZoneState, RootState> = {
     LOADING: (state, toggle): void => {
       Vue.set(state, '_loading', toggle)
     },
-    CONFORMITY: (state, { zone, value }) => {
+    CONFORMITY: (state, { zone, value }): void => {
       Vue.set(state.available[`${zone.id}`], 'conformity', value)
     },
   },

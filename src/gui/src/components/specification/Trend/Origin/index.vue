@@ -54,6 +54,7 @@
 <script lang="ts">
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { GaussianRandomField } from '@/utils/domain'
+import Trend, { OriginType } from '@/utils/domain/gaussianRandomField/trend'
 import OriginCoordinate from './Coordinate.vue'
 
 interface Invalid {
@@ -79,21 +80,21 @@ export default class OriginSpecification extends Vue {
     z: false,
   }
 
-  get availableOriginTypes () { return this.$store.state.constants.options.origin.available }
+  get availableOriginTypes (): string[] { return this.$store.state.constants.options.origin.available }
 
-  get trend () { return this.value.trend }
+  get trend (): Trend { return this.value.trend }
 
-  get isEllipticCone () { return this.trend.type === 'ELLIPTIC_CONE' }
+  get isEllipticCone (): boolean { return this.trend.type === 'ELLIPTIC_CONE' }
 
-  get originType () { return this.trend.origin.type }
+  get originType (): OriginType { return this.trend.origin.type }
   set originType (value) { this.$store.dispatch('gaussianRandomFields/originType', { field: this.value, value }) }
 
   @Watch('invalid', { deep: true })
-  propagateError ({ x, y, z }: Invalid) {
+  propagateError ({ x, y, z }: Invalid): void {
     this.$emit('update:error', x || y || (!this.isEllipticCone && z))
   }
 
-  update (type: string, value: boolean) {
+  update (type: string, value: boolean): void {
     Vue.set(this.invalid, type, value)
   }
 }

@@ -8,6 +8,12 @@ interface HeaderItem {
   sortable?: boolean
 }
 
+interface ListItem<T> {
+  value?: T
+  text: string
+  disabled?: boolean
+}
+
 type HeaderItems = HeaderItem[]
 
 export {
@@ -15,4 +21,5 @@ export {
   Maybe,
   HeaderItem,
   HeaderItems,
+  ListItem,
 }

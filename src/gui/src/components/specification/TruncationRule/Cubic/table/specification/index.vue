@@ -97,14 +97,14 @@ export default class CubicTruncationRuleSpecification extends Vue {
   @Prop({ required: true })
   readonly value!: Cubic
 
-  split () {
+  split (): void {
     const polygon = (this.selected.length > 0)
       ? this.selected.pop()
       : this.value.root || new CubicPolygon({ order: -1 })
     this.$store.dispatch('truncationRules/split', { rule: this.value, polygon, value: this.splitInto })
   }
 
-  merge () { this.$store.dispatch('truncationRules/merge', { rule: this.value, polygons: this.selected.splice(0, this.selected.length) }) }
+  merge (): void { this.$store.dispatch('truncationRules/merge', { rule: this.value, polygons: this.selected.splice(0, this.selected.length) }) }
 
   get canSplit (): boolean {
     return (
@@ -123,7 +123,7 @@ export default class CubicTruncationRuleSpecification extends Vue {
       : true
   }
 
-  get splitError () {
+  get splitError (): string {
     if (!this.canSplit) {
       if (!this.canSplitDeeper) return `A Cubic truncation rule may only be split into ${this.maxLevel} levels`
       if (this.selected.length > 1) return 'Only a single polygon may be split at the time'
@@ -132,7 +132,7 @@ export default class CubicTruncationRuleSpecification extends Vue {
     return ''
   }
 
-  get mergeError () {
+  get mergeError (): string {
     if (!this.canMerge) {
       const length = this.selected.length
       if (length === 0) return 'No polygons are selected for merging'
@@ -143,7 +143,7 @@ export default class CubicTruncationRuleSpecification extends Vue {
     return ''
   }
 
-  get maxLevel () { return DEFAULT_CUBIC_LEVELS }
+  get maxLevel (): number { return DEFAULT_CUBIC_LEVELS }
 
   get singleParentSelected (): boolean {
     const parents = this.selected.reduce((parents, polygon) => {

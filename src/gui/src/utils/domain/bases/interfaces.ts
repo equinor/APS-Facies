@@ -41,7 +41,7 @@ interface Coordinate2D {
   y: Optional<number>
 }
 
-interface Coordinate3D extends Coordinate2D {
+export interface Coordinate3D extends Coordinate2D {
   z: Optional<number>
 }
 

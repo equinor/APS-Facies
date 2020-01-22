@@ -19,7 +19,7 @@ import { Optional } from '@/utils/typing'
     return {
       fieldName: {
         required,
-        isUnique (value) {
+        isUnique (value): boolean {
           // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
           // @ts-ignore
           const current = this.value.id

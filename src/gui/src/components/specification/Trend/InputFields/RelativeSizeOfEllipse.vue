@@ -27,7 +27,7 @@ export default class RelativeSizeOfEllipse extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField
 
-  get relativeSize () {
+  get relativeSize (): FmuUpdatableValue {
     const { value, updatable } = this.value.trend.relativeSize
     return new FmuUpdatableValue({
       value: value * 100,
@@ -46,7 +46,7 @@ export default class RelativeSizeOfEllipse extends Vue {
     })
   }
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

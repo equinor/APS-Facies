@@ -17,6 +17,8 @@ import { ID } from '@/utils/domain/types'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 
+import { ListItem } from '@/utils/typing'
+
 function isFaciesSelected (group: FaciesGroup | undefined, facies: Facies): boolean {
   return group
     ? group.has(facies)
@@ -37,13 +39,13 @@ export default class BackgroundGroupFaciesSpecification<
 
   get group (): FaciesGroup | undefined { return this.$store.state.facies.groups.available[`${this.value.group}`] }
 
-  get selected () {
+  get selected (): Facies[] {
     return this.group
       ? this.group.facies
       : []
   }
 
-  get facies () {
+  get facies (): ListItem<Facies>[] {
     return (Object.values(this.$store.state.facies.available) as Facies[])
       .filter(facies => facies.isChildOf(this.rule.parent))
       .map(facies => {
@@ -56,7 +58,7 @@ export default class BackgroundGroupFaciesSpecification<
       })
   }
 
-  async update (facies: Facies[]) {
+  async update (facies: Facies[]): Promise<void> {
     if (!this.group) {
       const group = await this.$store.dispatch('facies/groups/add', { facies, parent: this.rule.parent })
       await this.$store.dispatch('truncationRules/addPolygon', { rule: this.rule, group, overlay: true })

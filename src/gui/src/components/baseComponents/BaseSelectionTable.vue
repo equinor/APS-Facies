@@ -64,6 +64,7 @@ import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import BaseItem from '@/utils/domain/bases/baseItem'
 import SelectableItem from '@/utils/domain/bases/selectableItem'
 import { ID } from '@/utils/domain/types'
+import { VuetifyThemeItem } from 'vuetify/types/services/theme'
 
 interface Header {
   text: string
@@ -108,7 +109,7 @@ export default class SelectionTable<T extends BaseItem> extends Vue {
   @Prop({ default: undefined })
   readonly selectError!: string | undefined
 
-  get selectedStyle () {
+  get selectedStyle (): { background: VuetifyThemeItem, color: string } {
     return {
       background: this.$vuetify.theme.themes.light.primary,
       color: 'white',
@@ -120,7 +121,7 @@ export default class SelectionTable<T extends BaseItem> extends Vue {
     return item.id === this.current
   }
 
-  propagateCurrent (item: T) {
+  propagateCurrent (item: T): void {
     this.$emit('update:current', item)
   }
 

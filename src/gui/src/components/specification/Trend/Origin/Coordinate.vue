@@ -16,6 +16,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { GaussianRandomField } from '@/utils/domain'
+import { MinMax } from '@/api/types'
 
 import StorableNumericField from '@/components/specification/StorableNumericField.vue'
 
@@ -39,17 +40,17 @@ export default class CoordinateSpecification extends Vue {
   @Prop({ default: '' })
   readonly label!: string
 
-  get propertyType () { return 'origin' }
+  get propertyType (): string { return 'origin' }
 
-  get isRelative () { return this.originType === 'RELATIVE' }
+  get isRelative (): boolean { return this.originType === 'RELATIVE' }
 
-  get ranges () { return this.isRelative ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity } }
+  get ranges (): MinMax { return this.isRelative ? { min: 0, max: 1 } : { min: -Infinity, max: Infinity } }
 
-  get shownLabel () { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() }
+  get shownLabel (): string { return notEmpty(this.label) ? this.label : this.coordinateAxis.toUpperCase() }
 
-  get arrowStep () { return this.isRelative ? 0.001 : 1 }
+  get arrowStep (): number { return this.isRelative ? 0.001 : 1 }
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

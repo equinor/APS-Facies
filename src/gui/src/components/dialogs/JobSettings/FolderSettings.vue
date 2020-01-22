@@ -1,5 +1,5 @@
 <template>
-  <SettingsPanel title="Folder Settings">
+  <settings-panel title="Folder Settings">
     <v-row no-gutters>
       <v-col
         class="pa-2"
@@ -27,7 +27,7 @@
         />
       </v-col>
     </v-row>
-  </SettingsPanel>
+  </settings-panel>
 </template>
 
 <script lang="ts">
@@ -50,7 +50,7 @@ export default class FolderSettings extends Vue {
   get _apsModelFileLocation (): string { return this.apsModelFileLocation }
   set _apsModelFileLocation (value: string) { this.$emit('update:apsModelFileLocation', value) }
 
-  chooseApsModelFileLocation () {
+  chooseApsModelFileLocation (): void {
     rms.chooseDir('load').then((path: string): void => {
       if (path) {
         this._apsModelFileLocation = path

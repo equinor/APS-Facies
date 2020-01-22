@@ -58,17 +58,18 @@ export default class TruncationRulePreview extends Vue {
 
   get imagePath (): string {
     try {
+      // eslint-disable-next-line security/detect-non-literal-require
       return require(`@/../public/truncation-rules/${this.type}/${this.value}.png`)
     } catch {
       return ''
     }
   }
 
-  get isDevelop () { return isDevelopmentBuild() }
+  get isDevelop (): boolean { return isDevelopmentBuild() }
 
-  get size () { return DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE }
+  get size (): { width: number, height: number } { return DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE }
 
-  get style () {
+  get style (): { opacity: number } {
     return {
       opacity: getDisabledOpacity(this.disabled)
     }

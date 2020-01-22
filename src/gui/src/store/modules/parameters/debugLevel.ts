@@ -10,7 +10,7 @@ const module: Module<Selectable<number>, RootState> = {
   },
 
   actions: {
-    select ({ commit }, level: number) {
+    async select ({ commit }, level: number): Promise<void> {
       if (level >= 0 && level <= 4) {
         commit('SET', level)
       } else {

@@ -103,12 +103,12 @@ const module: Module<FaciesState, RootState> = {
       }
       return updateFaciesProbability(dispatch, facies, probability)
     },
-    normalizeEmpty: ({ dispatch, getters }) => {
+    normalizeEmpty: async ({ dispatch, getters }): Promise<void> => {
       const selectedFacies: Facies[] = getters.selected
       const probabilities = selectedFacies
         .map((facies): number => facies.previewProbability ? facies.previewProbability : 0)
       const emptyProbability = (1 - probabilities.reduce((sum: number, prob: number): number => sum + prob, 0)) / probabilities.filter((prob: number): boolean => prob === 0).length
-      return Promise.all(selectedFacies
+      await Promise.all(selectedFacies
         .map((facies): Promise<void> => !facies.previewProbability
           ? updateFaciesProbability(dispatch, facies, emptyProbability)
           : new Promise((resolve) => resolve()))

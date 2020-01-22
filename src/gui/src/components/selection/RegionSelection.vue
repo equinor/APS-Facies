@@ -17,7 +17,7 @@ import { Region } from '@/utils/domain'
 
 @Component({
   components: {
-    SelectionTable
+    SelectionTable,
   },
 })
 export default class RegionSelection extends Vue {

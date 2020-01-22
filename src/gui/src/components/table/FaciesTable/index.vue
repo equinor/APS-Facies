@@ -95,9 +95,10 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 
-import { Facies, GlobalFacies } from '@/utils/domain'
-import { ID } from '@/utils/domain/types'
+import { Facies, GlobalFacies, Parent } from '@/utils/domain'
 import { RootGetters, RootState } from '@/store/typing'
+import { Color } from '@/utils/domain/facies/helpers/colors'
+import { HeaderItems } from '@/utils/typing'
 
 import { hasCurrentParents } from '@/utils'
 
@@ -116,22 +117,22 @@ export default class FaciesTable extends Vue {
 
   expanded: Facies[] = []
 
-  get canSelect () { return this.$store.getters.canSpecifyModelSettings }
+  get canSelect (): boolean { return this.$store.getters.canSpecifyModelSettings }
 
-  get loading () { return this.$store.state.facies.global._loading }
+  get loading (): boolean { return this.$store.state.facies.global._loading }
 
-  get current () { return this.$store.state.facies.global.current }
-  set current ({ id }: { id: ID }) { this.$store.dispatch('facies/global/current', { id }) }
+  get current (): GlobalFacies { return this.$store.state.facies.global.current }
+  set current ({ id }: GlobalFacies) { this.$store.dispatch('facies/global/current', { id }) }
 
-  get noDataText () {
+  get noDataText (): string {
     return this.loading
       ? 'Loading facies table from RMS'
       : 'There are no facies for the selected well logs. You may still add new facies.'
   }
 
-  get facies () { return this.$store.getters.faciesTable }
+  get facies (): Facies[] { return this.$store.getters.faciesTable }
 
-  get parent () {
+  get parent (): Parent {
     const state = this.$store.state
     return {
       zone: state.zones.current,
@@ -139,7 +140,7 @@ export default class FaciesTable extends Vue {
     }
   }
 
-  get headers () {
+  get headers (): HeaderItems {
     return [
       {
         text: 'Use',
@@ -167,7 +168,7 @@ export default class FaciesTable extends Vue {
     ]
   }
 
-  get selected () {
+  get selected (): GlobalFacies[] {
     const state: RootState = this.$store.state
     const getters: RootGetters = this.$store.getters
     return Object.values(state.facies.global.available)
@@ -178,9 +179,9 @@ export default class FaciesTable extends Vue {
 
   set selected (value) { this.$store.dispatch('facies/select', { items: value, parent: this.parent }) }
 
-  get availableColors () { return this.$store.getters['constants/faciesColors/available'] }
+  get availableColors (): Color[] { return this.$store.getters['constants/faciesColors/available'] }
 
-  get selectFaciesError () {
+  get selectFaciesError (): string {
     const item = this.$store.state.regions.use && !this.parent.region
       ? 'Region'
       : 'Zone'
@@ -193,30 +194,30 @@ export default class FaciesTable extends Vue {
     return !!this.$store.getters.blockedWellLogParameter
   }
 
-  isFaciesFromRms (facies: GlobalFacies) {
+  isFaciesFromRms (facies: GlobalFacies): boolean {
     return this.$store.getters['facies/isFromRMS'](facies)
   }
 
-  async changeColor (facies: GlobalFacies, color: string) {
+  async changeColor (facies: GlobalFacies, color: string): Promise<void> {
     if (facies.color !== color) {
       // Only dispatch when the color *actually* changes
       await this.$store.dispatch('facies/global/changeColor', { id: facies.id, color })
     }
   }
 
-  changeName (facies: GlobalFacies) {
-    return this.$store.dispatch('facies/global/changeName', { id: facies.id, name: facies.name || `F${facies.code}` })
+  async changeName (facies: GlobalFacies): Promise<void> {
+    await this.$store.dispatch('facies/global/changeName', { id: facies.id, name: facies.name || `F${facies.code}` })
   }
 
-  changeAlias (facies: GlobalFacies) {
-    return this.$store.dispatch('facies/global/changeAlias', { id: facies.id, alias: facies.alias })
+  async changeAlias (facies: GlobalFacies): Promise<void> {
+    await this.$store.dispatch('facies/global/changeAlias', facies)
   }
 
-  changeCode (facies: GlobalFacies) {
-    return this.$store.dispatch('facies/global/changeCode', facies)
+  async changeCode (facies: GlobalFacies): Promise<void> {
+    await this.$store.dispatch('facies/global/changeCode', facies)
   }
 
-  changeColorSelection (facies: Facies) {
+  changeColorSelection (facies: Facies): void {
     const previous = this.expanded.pop()
     if (previous && previous.id === facies.id) {
       this.expanded = []

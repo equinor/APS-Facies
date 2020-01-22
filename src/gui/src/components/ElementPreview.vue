@@ -113,7 +113,7 @@ export default class ElementPreview extends Vue {
 
   get hasRealization (): boolean { return !!(this.rule && this.rule.realization) }
 
-  get hasEnoughFieldsForCrossPlot () { return this.fields.length >= 2 }
+  get hasEnoughFieldsForCrossPlot (): boolean { return this.fields.length >= 2 }
 
   get truncationRuleError (): string | undefined {
     return !this.hasTruncationRule
@@ -134,14 +134,14 @@ export default class ElementPreview extends Vue {
   }
 
   @Watch('fields', { deep: true })
-  async showCrossPlot (fields: GaussianRandomField[]) {
+  async showCrossPlot (fields: GaussianRandomField[]): Promise<void> {
     if (fields.length < 2) {
       await this.$store.dispatch('panels/close', { type: 'preview', panel: 'crossPlots' })
     }
   }
 
   @Watch('rule', { deep: true })
-  async showTruncationMap (value: TruncationRule) {
+  async showTruncationMap (value: TruncationRule): Promise<void> {
     const type = 'preview'
     if (value) {
       await this.$store.dispatch('panels/open', { type, panel: 'truncationRuleMap' })

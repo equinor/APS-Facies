@@ -17,6 +17,7 @@ import OverlayTruncationRule from '@/utils/domain/truncationRule/overlay'
 import { Identified } from '@/utils/domain/bases/interfaces'
 import { hasOwnProperty } from '@/utils/helpers'
 import { getFaciesName } from '@/utils/queries'
+import { Optional } from '@/utils/typing'
 
 class APSExportError extends Error {
   public constructor (message: string) {
@@ -659,7 +660,13 @@ export function createFmuVariables (context: Context): string {
   return extractFmuVariables(doc)
 }
 
-export function dumpState (store: Store) {
+interface Job extends RootState {
+  model: Optional<string>
+  globalFmuVariables: Optional<string>
+  errorMessage: string
+}
+
+export function dumpState (store: Store): Job {
   let model = null
   let globalFmuVariables = null
   let errorMessage = null

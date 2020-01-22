@@ -22,6 +22,7 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import { ID } from '@/utils/domain/types'
 import { Store } from '@/store/typing'
+import { ListItem } from '@/utils/typing'
 
 @Component
 export default class AlphaSelection<
@@ -41,7 +42,7 @@ export default class AlphaSelection<
   @Prop({ default: '' })
   readonly group: ID | ''
 
-  get _fields () {
+  get _fields (): GaussianRandomField[] {
     return (this.$store as Store).getters.fields
       .sort((a, b) => a.name.localeCompare(b.name))
   }
@@ -59,7 +60,7 @@ export default class AlphaSelection<
 
   set selected (value) { this.$emit('input', value) }
 
-  get fields () {
+  get fields (): ListItem<string>[] {
     return this._fields
       .map(field => {
         /* Is background field, and is not in the same location */

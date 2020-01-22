@@ -91,14 +91,14 @@ export default class ConfirmationDialog extends Vue {
     })
   }
 
-  agree () {
+  agree (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
 
     this.resolve(true)
     this.dialog = false
   }
 
-  cancel () {
+  cancel (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
 
     this.resolve(false)

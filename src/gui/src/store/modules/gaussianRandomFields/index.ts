@@ -22,9 +22,9 @@ import { Module } from 'vuex'
 
 type Context = RootContext<GaussianRandomFieldState, RootState>
 
-function setValue (
+function setValue<T> (
   { state, commit }: Context,
-  { commitName, field, type, legalTypes, variogramOrTrend, value }: { commitName: string, field: GaussianRandomField, type?: string, legalTypes?: string[], variogramOrTrend?: 'variogram' | 'trend', value: any }
+  { commitName, field, type, legalTypes, variogramOrTrend, value }: { commitName: string, field: GaussianRandomField, type?: string, legalTypes?: string[], variogramOrTrend?: 'variogram' | 'trend', value: T }
 ): void {
   const checks: ([() => boolean, string])[] = [
     [

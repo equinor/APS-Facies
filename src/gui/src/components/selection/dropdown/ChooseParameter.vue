@@ -30,7 +30,7 @@ import { Store } from '@/store/typing'
     ConfirmationDialog,
   },
 })
-export default class ChooseParameter<T = any> extends Vue {
+export default class ChooseParameter<T> extends Vue {
   @Prop({ required: true })
   readonly label!: string
 

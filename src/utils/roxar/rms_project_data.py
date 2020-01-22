@@ -274,7 +274,7 @@ class RMSData:
     def simulate_realization(fields, specification, grid_index_order='F'):
         simulations = [RMSData._simulate_gaussian_field(field) for field in fields]
         truncation_rule = make_truncation_rule(specification)
-        facies, facies_fraction = create_facies_map(simulations, truncation_rule, use_code=True)
+        facies, _ = create_facies_map(simulations, truncation_rule, use_code=True)
 
         data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order).transpose()
         return {

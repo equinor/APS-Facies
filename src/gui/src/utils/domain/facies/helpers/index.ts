@@ -1,8 +1,9 @@
+import { Facies } from '@/utils/domain'
 import { ID } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 
-export function checkFaciesId (facies: any): ID {
-  facies = getId(facies)
-  if (!facies) throw new Error(`'facies' MUST be a valid ID (uuid). Was ${facies}`)
-  return facies
+export function checkFaciesId (facies: Facies): ID {
+  const id = getId(facies)
+  if (!id) throw new Error(`'facies' MUST be a valid ID (uuid). Was ${id}`)
+  return id
 }

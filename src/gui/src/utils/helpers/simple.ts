@@ -2,8 +2,8 @@ import _ from 'lodash'
 
 import { ERROR_TOLERENCE, isDevelopmentBuild } from '@/config'
 
-export function isEmpty (property: any): boolean { return _.isEmpty(property) && !_.isNumber(property) }
-export function notEmpty (property: any): boolean { return !isEmpty(property) }
+export function isEmpty<T> (property: T): boolean { return _.isEmpty(property) && !_.isNumber(property) }
+export function notEmpty<T> (property: T): boolean { return !isEmpty(property) }
 
 export function getRandomInt (max: number): number {
   return Math.floor(Math.random() * max)

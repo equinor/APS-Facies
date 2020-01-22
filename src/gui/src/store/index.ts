@@ -23,10 +23,11 @@ import { Optional } from '@/utils/typing'
 import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
 import Zone, { Region } from '@/utils/domain/zone'
-import { GaussianRandomField, TruncationRule } from '@/utils/domain'
+import { GaussianRandomField } from '@/utils/domain'
 import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
 import BaseItem from '@/utils/domain/bases/baseItem'
+import TruncationRule from '@/utils/domain/truncationRule/base'
 
 import migrate from '@/store/utils/migration'
 import {
@@ -319,9 +320,9 @@ const store: Store<RootState> = new Vuex.Store({
       }
       return null
     },
-    byId: (state) => (id: ID) => {
+    byId: (state): <T extends BaseItem>(id: ID) => Optional<T> => <T extends BaseItem>(id: ID): Optional<T> => {
       const relevant = Object.values(state)
-        .map((thing): Identified<BaseItem> => thing.available)
+        .map((thing): Identified<T> => thing.available)
         .filter((items): boolean => items && hasOwnProperty(items, id))
       return relevant.length > 0
         ? relevant[0][`${id}`]

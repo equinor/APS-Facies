@@ -35,8 +35,8 @@ import {
   notEmpty,
 } from '@/utils/helpers'
 
-function makeData<C extends Identifiable> (
-  items: any[],
+function makeData<C extends Identifiable, T> (
+  items: T[],
   _class: Newable<C>,
   originals: Identified<C> | C[] | null = null
 ): Identified<C> {
@@ -214,7 +214,7 @@ function parentId ({ zone, region }: Parent): ID {
   }
 }
 
-function faciesName (obj: any) {
+function faciesName (obj: any): any {
   if (hasOwnProperty(obj, 'facies')) obj = obj.facies
   if (hasOwnProperty(obj, 'name')) obj = obj.name
   return obj

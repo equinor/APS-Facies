@@ -23,6 +23,6 @@ export default class HighlightCurrentItem<T extends BaseItem> extends Vue {
   @Prop({ default: undefined })
   readonly current!: ID | undefined
 
-  get isCurrent () { return this.value.id === this.current }
+  get isCurrent (): boolean { return this.value.id === this.current }
 }
 </script>

@@ -146,10 +146,10 @@ export default class GaussianRandomField extends Vue {
     return Object.values(this.invalid).every(invalid => !invalid)
   }
 
-  get variogramType () { return this.variogram.type }
+  get variogramType (): string { return this.variogram.type }
   set variogramType (value) { this.$store.dispatch('gaussianRandomFields/variogramType', { field: this.value, value }) }
 
-  beforeMount () {
+  beforeMount (): void {
     if (!this.value.isRepresentative) {
       this.updateSimulation()
     }
@@ -184,6 +184,7 @@ export default class GaussianRandomField extends Vue {
   async openVisualizationSettings (): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const { save, settings } = await (this.$refs.visualisationSettings as VisualizationSettingsDialog).open(cloneDeep(this.value.settings))
     if (save) {
       await this.$store.dispatch('gaussianRandomFields/changeSettings', {

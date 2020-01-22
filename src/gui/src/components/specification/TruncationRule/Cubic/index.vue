@@ -12,6 +12,7 @@ import TruncationRuleSpecification from '../main.vue'
 import PolygonTable from './table/index.vue'
 
 import { Cubic } from '@/utils/domain'
+import { Newable } from '@/utils/domain/bases/interfaces'
 
 @Component({
   components: {
@@ -22,6 +23,6 @@ export default class CubicTruncationRule extends Vue {
   @Prop({ required: true })
   readonly value!: Cubic
 
-  get table () { return PolygonTable }
+  get table (): Newable<Vue> { return PolygonTable }
 }
 </script>

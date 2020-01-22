@@ -35,7 +35,7 @@ function getValue (field: Variogram | Trend, property: string, subProperty: stri
 
 @Component({
   components: {
-    NumericField
+    NumericField,
   },
 })
 export default class StorableNumericField extends Vue {

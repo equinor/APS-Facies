@@ -50,14 +50,14 @@ export default class AnisotropyDirection extends Vue {
     dip: false,
   }
 
-  get propertyType () { return 'angle' }
+  get propertyType (): string { return 'angle' }
 
   @Watch('invalid', { deep: true })
-  onInvalidChange ({ azimuth, dip }: Invalid) {
+  onInvalidChange ({ azimuth, dip }: Invalid): void {
     this.$emit('update:error', azimuth || dip)
   }
 
-  update (type: 'dip' | 'azimuth', value: boolean) {
+  update (type: 'dip' | 'azimuth', value: boolean): void {
     Vue.set(this.invalid, type, value)
   }
 }

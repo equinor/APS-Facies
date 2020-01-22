@@ -10,7 +10,7 @@ async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result
   }
 }
 
-async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dispatch: Dispatch }, promise: Promise<any>): Promise<void> {
+async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dispatch: Dispatch }, promise: Promise<string[]>): Promise<void> {
   const result = await promise
   commit('AVAILABLE', result)
   await selectOnlyParameter({ dispatch }, result)

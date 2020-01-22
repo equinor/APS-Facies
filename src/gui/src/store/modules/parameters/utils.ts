@@ -1,8 +1,8 @@
 import { Selectable } from '@/store/modules/parameters/typing/helpers'
 import { RootState } from '@/store/typing'
-import { ActionContext } from 'vuex'
+import { ActionContext, Module } from 'vuex'
 
-export function makeSelectionModule (fetch: () => Promise<string>) {
+export function makeSelectionModule (fetch: () => Promise<string>): Module<Selectable, RootState> {
   return {
     namespaced: true,
     state: {

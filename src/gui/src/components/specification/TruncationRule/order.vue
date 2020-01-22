@@ -45,7 +45,7 @@ export default class PolygonOrder<
   @Prop({ default: 0 })
   readonly minPolygons: number
 
-  get max () {
+  get max (): number {
     return (this.rule.polygons as Polygon[])
       .filter(polygon => polygon.overlay === this.overlay)
       .map(polygon => polygon.order)
@@ -60,11 +60,11 @@ export default class PolygonOrder<
     )
   }
 
-  get canIncrease () {
+  get canIncrease (): boolean {
     return this.value.order < this.max
   }
 
-  get canDecrease () {
+  get canDecrease (): boolean {
     return this.value.order > this.min
   }
 
@@ -80,8 +80,8 @@ export default class PolygonOrder<
     return true
   }
 
-  addPolygon () {
-    return this.$store.dispatch('truncationRules/addPolygon', {
+  async addPolygon (): Promise<void> {
+    await this.$store.dispatch('truncationRules/addPolygon', {
       rule: this.rule,
       order: this.value.order + 1,
       overlay: this.value.overlay,
@@ -89,12 +89,12 @@ export default class PolygonOrder<
     })
   }
 
-  deletePolygon () {
-    return this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })
+  async deletePolygon (): Promise<void> {
+    await this.$store.dispatch('truncationRules/removePolygon', { rule: this.rule, polygon: this.value })
   }
 
-  changeOrder (direction: number) {
-    return this.$store.dispatch('truncationRules/changeOrder', { rule: this.rule, polygon: this.value, direction })
+  async changeOrder (direction: number): Promise<void> {
+    await this.$store.dispatch('truncationRules/changeOrder', { rule: this.rule, polygon: this.value, direction })
   }
 }
 </script>

@@ -41,6 +41,7 @@ import FaciesTable from '@/components/table/FaciesTable/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 
 import { Store } from '@/store/typing'
+import { GlobalFacies } from '@/utils/domain'
 
 @Component({
   components: {
@@ -52,9 +53,9 @@ export default class FaciesSelection extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly hideAlias: boolean
 
-  get current () { return (this.$store as Store).getters.facies }
+  get current (): GlobalFacies { return (this.$store as Store).getters.facies }
 
-  get canRemove () {
+  get canRemove (): boolean {
     return (
       this.current
         ? !this.$store.getters['facies/isFromRMS'](this.current)
@@ -62,18 +63,18 @@ export default class FaciesSelection extends Vue {
     )
   }
 
-  get removeError () {
+  get removeError (): string {
     if (!this.current) return 'A facies must be selected'
     if (!this.canRemove) return `The selected facies, ${this.current.name}, is from RMS, and cannot be deleted from this GUI`
     return ''
   }
 
-  add () {
-    return this.$store.dispatch('facies/global/new', {})
+  async add (): Promise<void> {
+    await this.$store.dispatch('facies/global/new', {})
   }
 
-  remove () {
-    return this.$store.dispatch('facies/global/removeSelectedFacies')
+  async remove (): Promise<void> {
+    await this.$store.dispatch('facies/global/removeSelectedFacies')
   }
 }
 </script>

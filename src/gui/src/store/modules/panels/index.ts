@@ -102,7 +102,7 @@ class Panels {
 const PANELS = new Panels()
 
 function hasPanel (type: string, panel: string | undefined = undefined): boolean {
-  if (PANELS[type] !== undefined) {
+  if (PANELS[`${type}`] !== undefined) {
     return panel
       ? PANELS[`${type}`].includes(panel)
       : true
@@ -113,7 +113,7 @@ function hasPanel (type: string, panel: string | undefined = undefined): boolean
 
 function getIndices (state: PanelsState, type: Section): number[] {
   return PANELS[type]
-    .map((panel, index): [boolean, number] => [state[type][panel], index])
+    .map((panel, index): [boolean, number] => [state[`${type}`][`${panel}`], index])
     .filter(([toggled, _]): boolean => toggled || isNumber(toggled))
     .map(([_, index]): number => index)
 }

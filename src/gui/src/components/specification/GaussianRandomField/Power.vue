@@ -26,9 +26,9 @@ export default class PowerSpecification extends Vue {
   @Prop({ required: true })
   readonly value!: GaussianRandomField
 
-  get propertyType () { return 'power' }
+  get propertyType (): string { return 'power' }
 
-  propagateError (value: boolean) {
+  propagateError (value: boolean): void {
     this.$emit('update:error', value)
   }
 }

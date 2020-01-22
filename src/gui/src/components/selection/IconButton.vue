@@ -76,7 +76,7 @@ export default class IconButton extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly xLarge!: boolean
 
-  get fullIconName () {
+  get fullIconName (): string {
     if (this.loadingSpinner && this.waiting) {
       return '$vuetify.icons.values.refreshSpinner'
     } else {

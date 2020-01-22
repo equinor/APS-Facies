@@ -26,11 +26,11 @@ const module: Module<TruncationRuleTemplateState, RootState> = {
   },
 
   actions: {
-    fetch ({ commit }): void {
+    async fetch ({ commit }): Promise<void> {
       const types = identify(templates.types)
       commit('AVAILABLE', types)
     },
-    populate ({ commit }, types): void {
+    async populate ({ commit }, types): Promise<void> {
       if (isEqual(templates.types, types)) {
         commit('AVAILABLE', types)
       } else {

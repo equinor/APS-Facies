@@ -13,6 +13,7 @@ import { getId } from '@/utils/helpers'
 import { Store } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import Facies from '@/utils/domain/facies/local'
+import { ListItem } from '@/utils/typing'
 
 @Component
 export default class FaciesSpecificationBase extends Vue {
@@ -22,7 +23,7 @@ export default class FaciesSpecificationBase extends Vue {
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean
 
-  get selectedFacies () {
+  get selectedFacies (): Facies[] {
     return (this.$store as Store).getters['facies/selected']
   }
 
@@ -31,7 +32,7 @@ export default class FaciesSpecificationBase extends Vue {
     return getId(this.value)
   }
 
-  get faciesOptions () {
+  get faciesOptions (): ListItem<string>[] {
     return this.selectedFacies
       .map(facies => {
         return {

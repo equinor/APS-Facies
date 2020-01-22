@@ -159,29 +159,29 @@ export default class VisualizationSettingsDialog extends Vue {
     width: 290,
   }
 
-  open (settings: Settings, options: DialogOptions = {}) {
+  open (settings: Settings, options: DialogOptions = {}): Promise<void> {
     this.dialog = true
     this.settings = settings
     this.options = Object.assign(this.options, options)
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve: () => void, reject) => {
       this.resolve = resolve
       this.reject = reject
     })
   }
 
-  save () {
+  save (): void {
     if (!this.resolve) throw new APSError('The `resolve` callback has not been set')
     this.resolve({ save: true, settings: this.settings })
     this.dialog = false
   }
 
-  cancel () {
+  cancel (): void {
     if (!this.resolve) throw new APSError('The `resolve` callback has not been set')
     this.resolve({ save: false, settings: {} })
     this.dialog = false
   }
 
-  newSeed () {
+  newSeed (): number {
     return newSeed()
   }
 }
