@@ -18,7 +18,7 @@ def run(roxar=None, project=None, **kwargs):
 
     field_location = kwargs.get('save_dir', None)
     if field_location is None:
-        field_location = get_export_location(project)
+        field_location = get_export_location()
 
     fmu_mode = kwargs.get('fmu_mode', False)
 

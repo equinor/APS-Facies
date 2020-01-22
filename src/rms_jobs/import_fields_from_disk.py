@@ -7,7 +7,7 @@ import xtgeo
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import Conform
 from src.utils.exceptions.zone import MissingConformityException
-from src.utils.fmu import create_get_property, find_zone_range
+from src.utils.fmu import create_get_property, find_zone_range, get_ert_location
 from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 
@@ -77,7 +77,7 @@ def run(roxar=None, project=None, **kwargs):
 
     field_location = kwargs.get('load_dir', None)
     if field_location is None:
-        field_location = get_project_dir(project) / '..' / '..'
+        field_location = get_ert_location() / '..' / '..'
 
     rms_grid = xtgeo.grid_from_roxar(project, grid_model_name)
     fmu_grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name)

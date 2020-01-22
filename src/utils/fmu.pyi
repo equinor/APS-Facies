@@ -32,8 +32,8 @@ def create_get_property(
         aps_model:  Optional[Union[APSModel, str]],
 ) -> Callable[[str, Optional[str]], xtgeo.GridProperty]:...
 
+def get_ert_location() -> Path: ...
 def get_export_location(
-        project:    Project,
         create:     bool    = True,
 ) -> Path: ...
 

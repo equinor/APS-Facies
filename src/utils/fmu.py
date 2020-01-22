@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from collections import defaultdict
 from typing import Dict
+from pathlib import Path
 
 import numpy as np
 import xtgeo
@@ -56,8 +57,12 @@ def create_get_property(project, aps_model=None):
     return get_property
 
 
-def get_export_location(project, create=True):
-    field_location = get_project_dir(project) / '..' / 'output' / 'aps'
+def get_ert_location():
+    return Path(os.getcwd())
+
+
+def get_export_location(create=True):
+    field_location = get_ert_location() / '..' / 'output' / 'aps'
     if create and not field_location.exists():
         os.makedirs(field_location, exist_ok=True)
     return field_location

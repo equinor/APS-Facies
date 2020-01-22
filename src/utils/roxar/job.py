@@ -24,7 +24,7 @@ class JobConfig:
             'fmu_mode': self.run_fmu_workflows,
             'fmu_simulation_grid_name': self.fmu_grid_name,
             'rms_grid_name': aps_model.grid_model_name,
-            'fmu_export_location': get_export_location(self.project),
+            'fmu_export_location': get_export_location(),
             'aps_model': aps_model,
             'use_constant_probabilities': aps_model.use_constant_probability,
             'workflow_name': self.roxar.rms.get_running_workflow_name(),
