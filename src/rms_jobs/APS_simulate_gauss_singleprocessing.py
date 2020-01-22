@@ -21,7 +21,7 @@ from src.utils.trend import add_trends
 
 def run_simulations(
         project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
-        layers_per_zone=None, write_rms_parameters_for_qc_purpose=True,
+        write_rms_parameters_for_qc_purpose=True,
         fmu_mode=False,
 ):
     """
@@ -64,7 +64,6 @@ def run_simulations(
         if not aps_model.isSelected(zone_number, region_number):
             continue
         gauss_field_names = zone_model.gaussian_fields_in_truncation_rule  # Add zone names / number, if FMU
-        sim_box_thickness = zone_model.sim_box_thickness
 
         if fmu_mode:
             assert len(num_layers_per_zone) == 1
@@ -76,9 +75,7 @@ def run_simulations(
 
         # Calculate grid cell size in z direction
         nz = num_layers
-        dz = sim_box_thickness / nz
-        if layers_per_zone is not None:
-            dz = sim_box_thickness / layers_per_zone[zone_number - 1]
+        dz = zone_model.sim_box_thickness / nz
 
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
             print('-- Zone: {}'.format(zone_number))
@@ -175,7 +172,6 @@ def run_simulations(
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
-            dz=dz,
         )
         # End loop over gauss fields for one zone
 
@@ -197,7 +193,6 @@ def run_simulations(
 def run(roxar=None, project=None, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
-    layers_per_zone = kwargs.get('layers_per_zone', None)
     fmu_mode = kwargs.get('fmu_mode', False)
     write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose', True)
     real_number = project.current_realisation
@@ -209,7 +204,6 @@ def run(roxar=None, project=None, **kwargs):
         real_number,
         is_shared,
         seed_file_log,
-        layers_per_zone=layers_per_zone,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
         fmu_mode=fmu_mode,
     )

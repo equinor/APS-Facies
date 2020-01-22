@@ -5,7 +5,7 @@
     unit="%"
     fmu-updatable
     enforce-ranges
-    :ranges="{min: 0, max: 100}"
+    :ranges="{min: 0, max: 1}"
     @update:error="e => propagateError(e)"
   />
 </template>

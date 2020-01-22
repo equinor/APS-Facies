@@ -399,7 +399,7 @@ class Angles:
 
 
 class Trend:
-    # __slots__ = '_name', '_use_trend', '_model', '_relative_std_dev'
+    __slots__ = '_name', '_use_trend', '_model', '_relative_std_dev'
 
     def __init__(self, name, use_trend=False, model=None, relative_std_dev=None):
         if relative_std_dev is None:
@@ -411,7 +411,7 @@ class Trend:
         self.relative_std_dev = relative_std_dev
         self.use_trend = use_trend
 
-    relative_srd_dev = make_lower_bounded_property('relative_std_dev')
+    relative_std_dev = make_lower_bounded_property('relative_std_dev')
     use_trend = make_trend_property('use_trend')
 
     @property

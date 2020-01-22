@@ -280,7 +280,6 @@ class Trend3D:
             cell_index_defined,
             zone_number,
             sim_box_thickness,
-            zinc=None,
     ):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
@@ -323,12 +322,11 @@ class Trend3D:
         # Set start and end layer for this zone
         self._start_layer = start_layer
         self._end_layer = end_layer
-        if zinc is None:
-            num_layers_in_zone = 0
-            for layer in layer_ranges:
-                num_layers_in_zone += len(layer)
+        num_layers_in_zone = 0
+        for layer in layer_ranges:
+            num_layers_in_zone += len(layer)
 
-            zinc = sim_box_thickness / num_layers_in_zone
+        zinc = sim_box_thickness / num_layers_in_zone
         if self._debug_level >= Debug.VERY_VERBOSE:
             zone_name = grid_3d.zone_names[zone_number - 1]
             print(
@@ -1345,6 +1343,12 @@ class Trend3D_elliptic_cone(Trend3D_conic):
             **kwargs
         )
         self.relative_size_of_ellipse = FmuProperty(relative_size, relative_size_fmu_updatable)
+
+    relative_size_of_ellipse = make_ranged_property(
+        'relative_size_of_ellipse',
+        'The relative size must be between 0, and 1. ',
+        minimum=0, maximum=1,
+    )
 
     @classmethod
     def from_xml(cls, trend_rule_xml, model_file_name=None, debug_level=Debug.OFF, **kwargs):

@@ -1,12 +1,18 @@
 import os
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
+from collections import defaultdict
+from typing import Dict
 
 import numpy as np
 import xtgeo
 
 from src.algorithms.APSModel import APSModel
+from src.algorithms.APSZoneModel import Conform
+from src.algorithms.Trend3D import Trend3D_elliptic_cone, ConicTrend
+from src.utils.constants.simple import OriginType
 from src.utils.decorators import cached
+from src.utils.exceptions.zone import MissingConformityException
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 
 
@@ -69,7 +75,7 @@ def _get_grid_name(arg):
     return grid_name
 
 
-class FmuModelChange(ABC):
+class FmuModelChange(metaclass=ABCMeta):
     @abstractmethod
     def before(self):
         pass
@@ -88,14 +94,90 @@ class FmuModelChanges(list, FmuModelChange):
             change.before()
 
     def after(self):
-        for change in self:
+        for change in reversed(self):
             change.after()
 
 
-class UpdateGridModelName(FmuModelChange):
-    def __init__(self, aps_model, fmu_simulation_grid_name, **kwargs):
+class UpdateModel(FmuModelChange, metaclass=ABCMeta):
+    def __init__(self, *, aps_model, **kwargs):
         self.aps_model = aps_model
-        self._original = aps_model.grid_model_name
+
+    @property
+    def zone_models(self):
+        return self.aps_model.zone_models
+
+
+class SimBoxDependentUpdate(UpdateModel, metaclass=ABCMeta):
+    def __init__(self, *, project, fmu_simulation_grid_name, **kwargs):
+        super().__init__(**kwargs)
+        self.project = project
+        self.ert_grid_name = fmu_simulation_grid_name
+
+    @property
+    @cached
+    def layers_in_geo_model_zones(self):
+        grid = get_grid(self.project, self.aps_model)
+        layers = []
+        for zonation, *reverse in grid.grid_indexer.zonation.values():
+            layers.append(zonation.stop - zonation.start)
+        return layers
+
+    @property
+    @cached
+    def nz_fmu_box(self):
+        _, _, nz = get_grid(self.project, self.ert_grid_name).simbox_indexer.dimensions
+        return nz
+
+
+class TrendUpdate(SimBoxDependentUpdate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._original_values = self.get_original_values(self.aps_model)
+
+    def before(self):
+        necessary = False
+        for zone_model in self.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_appropriate_trend(field):
+                    necessary = True
+                    self.update_trend(zone_model, field)
+        if necessary and self.update_message:
+            print(self.update_message)
+
+    def after(self):
+        for zone_model in self.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_appropriate_trend(field):
+                    self.restore_trend(zone_model, field)
+
+    def get_original_value(self, zone_model, field_model):
+        return self._original_values[zone_model.zone_number][field_model.name]
+
+    @abstractmethod
+    def update_trend(self, zone_model, field_model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def restore_trend(self, zone_model, field_model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_original_values(self, aps_model):
+        raise NotImplementedError
+
+    @abstractmethod
+    def has_appropriate_trend(self, field):
+        raise NotImplementedError
+
+    @property
+    def update_message(self):
+        return None
+
+
+class UpdateGridModelName(UpdateModel):
+    def __init__(self, fmu_simulation_grid_name, **kwargs):
+        super().__init__(**kwargs)
+        self._original = self.aps_model.grid_model_name
         self.fmu_simulation_grid_name = fmu_simulation_grid_name
 
     def before(self):
@@ -105,11 +187,11 @@ class UpdateGridModelName(FmuModelChange):
         self.aps_model.grid_model_name = self._original
 
 
-class UpdateFieldNamesInZones(FmuModelChange):
-    def __init__(self, aps_model, project, **kwargs):
-        self.aps_model = aps_model
+class UpdateFieldNamesInZones(UpdateModel):
+    def __init__(self, project, **kwargs):
+        super().__init__(**kwargs)
         self.project = project
-        self._original_names = self._get_field_names(aps_model)
+        self._original_names = self._get_field_names(self.aps_model)
 
     @staticmethod
     def _get_field_names(aps_model):
@@ -176,12 +258,119 @@ class UpdateFieldNamesInZones(FmuModelChange):
             rule.names_of_gaussian_fields = [mapping[name] for name in rule.names_of_gaussian_fields]
 
 
+class UpdateSimBoxThicknessInZones(SimBoxDependentUpdate):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self._original = {
+            zone_model.zone_number: zone_model.sim_box_thickness
+            for zone_model in self.zone_models
+        }
+
+    def before(self):
+        for zone_model in self.zone_models:
+            nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+            zone_model.sim_box_thickness = zone_model.sim_box_thickness * self.nz_fmu_box / nz_geo_grid
+
+    def after(self):
+        for zone_model in self.zone_models:
+            zone_model.sim_box_thickness = self._original[zone_model.zone_number]
+
+
+class UpdateRelativeSizeForEllipticConeTrend(TrendUpdate):
+    def update_trend(self, zone_model, field_model):
+        nz_fmu_box = self.nz_fmu_box
+        nz_geo_grid = self.layers_in_geo_model_zones[zone_model.zone_number - 1]
+        original_relative_size = self.get_original_value(zone_model, field_model)
+        if zone_model.grid_layout in [Conform.Proportional, Conform.TopConform]:
+            fmu_relative_size = original_relative_size / (
+                1 + (nz_fmu_box - nz_geo_grid) * (1 - original_relative_size) / nz_geo_grid
+            )
+        elif zone_model.grid_layout in [Conform.BaseConform]:
+            if original_relative_size >= 1 - nz_geo_grid / nz_fmu_box:
+                fmu_relative_size = 1 - nz_fmu_box * (1 - original_relative_size) / nz_geo_grid
+            else:
+                fmu_relative_size = 0.001
+        else:
+            raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
+        field_model.trend.model.relative_size_of_ellipse = fmu_relative_size
+
+    def restore_trend(self, zone_model, field_model):
+        field_model.trend.model.relative_size_of_ellipse = self.get_original_value(zone_model, field_model)
+
+    def get_original_values(self, aps_model):
+        relative_sizes: Dict[int, Dict[str, float]] = defaultdict(dict)
+        for zone_model in aps_model.zone_models:
+            for field in zone_model.gaussian_fields:
+                trend = field.trend
+                if self.has_appropriate_trend(field):
+                    relative_sizes[zone_model.zone_number][field.name] = trend.model.relative_size_of_ellipse.value
+        return relative_sizes
+
+    def has_appropriate_trend(self, field):
+        return (
+            field.trend.use_trend
+            and isinstance(field.trend.model, Trend3D_elliptic_cone)
+        )
+
+
+class UpdateRelativePositionOfTrends(TrendUpdate):
+    def update_trend(self, zone_model, field_model):
+        nz_fmu = self.nz_fmu_box
+        indexer = get_grid(self.project, self.aps_model.grid_model_name).simbox_indexer
+
+        zonation, *_reverse = indexer.zonation[zone_model.zone_number - 1]
+        nz_zone = zonation.stop - zonation.start
+
+        trend = field_model.trend.model
+        if self.has_appropriate_trend(field_model):
+            z_original = float(trend.origin.z)
+            # Update trend
+            if zone_model.grid_layout is None:
+                raise MissingConformityException(zone_model)
+            if zone_model.grid_layout in [Conform.TopConform, Conform.Proportional]:
+                trend.origin.z = z_original * nz_zone / nz_fmu
+            elif zone_model.grid_layout in [Conform.BaseConform]:
+                trend.origin.z = 1 - (nz_zone * (1 - z_original) / nz_fmu)
+            else:
+                raise NotImplementedError('{} is not supported'.format(zone_model.grid_layout))
+
+    @property
+    def update_message(self):
+        return 'Updating the location of relative trends'
+
+    def restore_trend(self, zone_model, field_model):
+        field_model.trend.model.origin.z = self.get_original_value(zone_model, field_model)
+
+    def has_appropriate_trend(self, field):
+        trend = field.trend.model
+        return isinstance(trend, ConicTrend) and trend.origin_type == OriginType.RELATIVE
+
+    def get_original_values(self, aps_model):
+        relative_depths = defaultdict(dict)
+        for zone_model in aps_model.zone_models:
+            for field in zone_model.gaussian_fields:
+                if self.has_appropriate_trend(field):
+                    relative_depths[zone_model.zone_number][field.name] = field.trend.model.origin.z
+        return relative_depths
+
+
+class UpdateTrends(FmuModelChanges):
+    def __init__(self, **kwargs):
+        super(FmuModelChanges, self).__init__([
+            UpdateRelativeSizeForEllipticConeTrend(**kwargs),
+            UpdateRelativePositionOfTrends(**kwargs),
+        ])
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
     aps_model = kwargs['aps_model']
     model_file = kwargs['model_file']
     changes = FmuModelChanges([
+        UpdateTrends(**kwargs),
+        UpdateSimBoxThicknessInZones(**kwargs),
         UpdateFieldNamesInZones(**kwargs),
         UpdateGridModelName(**kwargs),
     ])

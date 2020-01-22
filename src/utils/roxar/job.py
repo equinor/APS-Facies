@@ -3,7 +3,7 @@ from typing import Dict
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
-from src.utils.fmu import get_grid, get_export_location
+from src.utils.fmu import get_export_location
 
 
 class JobConfig:
@@ -21,7 +21,6 @@ class JobConfig:
             'output_model_file': model_file,
             'global_variables': self.global_variables_file,
             'max_fmu_grid_depth': self.max_fmu_grid_depth,
-            'layers_per_zone': self._get_layers_per_zone(aps_model),
             'fmu_mode': self.run_fmu_workflows,
             'fmu_simulation_grid_name': self.fmu_grid_name,
             'rms_grid_name': aps_model.grid_model_name,
@@ -32,17 +31,8 @@ class JobConfig:
             'seed_log_file': None,
             'write_rms_parameters_for_qc_purpose': self.write_rms_parameters_for_qc_purpose,
             'debug_level': self.debug_level,
+            'max_allowed_fraction_of_values_outside_tolerance': self._max_allowed_fraction_of_values_outside_tolerance,
         }
-
-    def _get_layers_per_zone(self, aps_model):
-        if not self.run_fmu_workflows:
-            return None
-
-        grid = get_grid(self.project, aps_model)
-        layers = []
-        for zonation, *reverse in grid.grid_indexer.zonation.values():
-            layers.append(zonation.stop - zonation.start)
-        return layers
 
     @property
     def error_message(self):
@@ -90,6 +80,10 @@ class JobConfig:
     @property
     def max_fmu_grid_depth(self):
         return self._config['fmu']['maxDepth']['value']
+
+    @property
+    def _max_allowed_fraction_of_values_outside_tolerance(self):
+        return self._config['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected']
 
     @property
     def debug_level(self):
