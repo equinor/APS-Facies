@@ -17,6 +17,7 @@ from src.utils.constants.simple import (
     Debug, VariogramType, CrossSectionType, MinimumValues, MaximumValues, TrendType,
     Direction, OriginType,
 )
+from src.utils.numeric import flip_if_necessary
 from src.utils.simGauss2D_nrlib import simGaussField
 from src.utils.xmlUtils import (
     getIntCommand, getKeyword, isFMUUpdatable, createFMUvariableNameForResidual,
@@ -176,7 +177,9 @@ class GaussianFieldSimulation:
         return self._settings.simulation_box_size
 
     def field_as_matrix(self, grid_index_order='F'):
-        return np.reshape(self.field, self.settings.dimensions, grid_index_order).transpose()
+        data = np.reshape(self.field, self.settings.dimensions, grid_index_order).transpose()
+        data = flip_if_necessary(data, self.cross_section)
+        return data
 
 
 class GaussianField:

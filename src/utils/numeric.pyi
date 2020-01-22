@@ -1,2 +1,6 @@
 # -*- coding: utf-8 -*-
+import numpy as np
+from src.utils.constants.simple import CrossSectionType
+
 def isNumber(s: str) -> bool: ...
+def flip_if_necessary(data: np.ndarray, cross_section: CrossSectionType) -> np.ndarray: ...

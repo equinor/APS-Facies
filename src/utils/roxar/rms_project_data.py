@@ -25,6 +25,7 @@ from src.utils.constants.simple import (
     ProbabilityTolerances,
 )
 from src.utils.exceptions.xml import ApsXmlError
+from src.utils.numeric import flip_if_necessary
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 from src.utils.roxar.grid_model import (
     get_simulation_box_thickness,
@@ -277,6 +278,7 @@ class RMSData:
         facies, _ = create_facies_map(simulations, truncation_rule, use_code=True)
 
         data = np.reshape(facies, simulations[0].settings.dimensions, grid_index_order).transpose()
+        data = flip_if_necessary(data, simulations[0].cross_section)
         return {
             'faciesMap': data.tolist(),
             'fields': [
