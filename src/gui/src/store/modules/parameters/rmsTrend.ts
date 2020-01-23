@@ -11,8 +11,11 @@ const module: Module<StaticChoices<string>, RootState> = {
   },
 
   actions: {
-    async fetch ({ commit, rootGetters }): Promise<void> {
+    async fetch ({ dispatch }): Promise<void> {
       // TODO: Use 'fetchParameterHelper' to automatically chose the parameter?
+      await dispatch('refresh')
+    },
+    refresh: async ({ commit, rootGetters }): Promise<void> => {
       const params = await rms.trendParameters(rootGetters.gridModel)
       commit('AVAILABLE', params)
     },

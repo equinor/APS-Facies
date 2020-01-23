@@ -90,6 +90,15 @@ const store: Store<RootState> = new Vuex.Store({
         commit('FINISHED')
       }
     },
+    async refresh ({ commit, dispatch, getters }, message): Promise<void> {
+      if (!getters.loading) {
+        commit('LOADING', { message })
+        await Promise.all([
+          dispatch('gridModels/refresh'),
+        ])
+        commit('LOADING', { loading: false })
+      }
+    },
     async populate ({ dispatch, state }, data): Promise<void> {
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       resetState()
@@ -153,6 +162,8 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Reopen the different panels
         await dispatch('panels/populate', data.panels)
+        // Make sure the available data is up to date
+        await dispatch('refresh')
       } finally {
         await dispatch('finnishLoading')
       }
@@ -176,7 +187,7 @@ const store: Store<RootState> = new Vuex.Store({
     LOADING_PARAMETERS: (state): void => {
       state._loaded.loading = true
     },
-    LOADING: (state, { loading, message = '' }): void => {
+    LOADING: (state, { loading = true, message = '' }: { loading?: boolean, message?: string } = {}): void => {
       state._loading.value = loading
       state._loading.message = message
     }

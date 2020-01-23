@@ -1,8 +1,9 @@
 import { OptionState } from '@/store/modules/options/typing'
+import { SelectableChoice } from '@/store/modules/parameters/typing/helpers'
 import { Context, RootState } from '@/store/typing'
-import { Commit, Dispatch, Module, Store } from 'vuex'
+import { Dispatch, Module, Store } from 'vuex'
 
-async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result: string[]): Promise<void> {
+async function selectOnlyParameter<S, G> ({ dispatch }: Context<S, G>, result: string[]): Promise<void> {
   if (result.length === 1) {
     await dispatch('select', result[0])
   } else if (result.length === 0) {
@@ -10,10 +11,11 @@ async function selectOnlyParameter ({ dispatch }: { dispatch: Dispatch }, result
   }
 }
 
-async function fetchParameterHelper ({ commit, dispatch }: { commit: Commit, dispatch: Dispatch }, promise: Promise<string[]>): Promise<void> {
-  const result = await promise
-  commit('AVAILABLE', result)
-  await selectOnlyParameter({ dispatch }, result)
+async function fetchParameterHelper<S extends SelectableChoice, G> (context: Context<S, G>): Promise<void> {
+  const { commit, dispatch, state } = context
+  commit('CURRENT', null)
+  await dispatch('refresh')
+  await selectOnlyParameter(context, state.available)
 }
 
 function makeOption<T> (def: T, legal: T[]): Module<OptionState<T>, RootState> {

@@ -19,9 +19,11 @@ const module: Module<SelectableChoice<string>, RootState> = {
       await dispatch('parameters/blockedWellLog/select', null, { root: true })
       await dispatch('parameters/blockedWellLog/fetch', null, { root: true })
     },
-    fetch: async ({ commit, dispatch, rootGetters }): Promise<void> => {
-      commit('CURRENT', null)
-      await fetchParameterHelper({ commit, dispatch }, rms.blockedWellParameters(rootGetters.gridModel))
+    fetch: async (context): Promise<void> => {
+      await fetchParameterHelper(context)
+    },
+    refresh: async ({ commit, rootGetters }): Promise<void> => {
+      commit('AVAILABLE', await rms.blockedWellParameters(rootGetters.gridModel))
     },
   },
 
@@ -33,8 +35,6 @@ const module: Module<SelectableChoice<string>, RootState> = {
       state.selected = blockedWell
     },
   },
-
-  getters: {},
 }
 
 export default module

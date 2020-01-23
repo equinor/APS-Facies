@@ -11,7 +11,10 @@ const module: Module<StaticChoices<string>, RootState> = {
   },
 
   actions: {
-    fetch: async ({ commit, rootGetters }): Promise<void> => {
+    fetch: async ({ dispatch }): Promise<void> => {
+      await dispatch('refresh')
+    },
+    refresh: async ({ commit, rootGetters }): Promise<void> => {
       const cubes = await rms.probabilityCubeParameters(rootGetters.gridModel)
       commit('AVAILABLE', cubes)
     }
@@ -22,8 +25,6 @@ const module: Module<StaticChoices<string>, RootState> = {
       state.available = cubes
     },
   },
-
-  getters: {},
 }
 
 export default module
