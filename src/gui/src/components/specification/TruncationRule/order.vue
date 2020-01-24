@@ -45,27 +45,35 @@ export default class PolygonOrder<
   @Prop({ default: 0 })
   readonly minPolygons: number
 
-  get max (): number {
-    return (this.rule.polygons as Polygon[])
+  get hasMultiplePolygons (): boolean { return this.polygons.length > 1 }
+
+  get orders (): number[] { return this.polygons.map(({ order }) => order) }
+
+  get polygons (): Polygon[] {
+    return this.rule.polygons
       .filter(polygon => polygon.overlay === this.overlay)
-      .map(polygon => polygon.order)
-      .reduce((max, order) => order > max ? order : max, 0)
+  }
+
+  get max (): number {
+    return Math.max(...this.orders)
   }
 
   get min (): number {
-    return Math.min(
-      ...this.rule.polygons
-        .filter(polygon => polygon.overlay === this.overlay)
-        .map(({ order }) => order)
-    )
+    return Math.min(...this.orders)
   }
 
   get canIncrease (): boolean {
-    return this.value.order < this.max
+    return (
+      this.hasMultiplePolygons
+      && this.value.order < this.max
+    )
   }
 
   get canDecrease (): boolean {
-    return this.value.order > this.min
+    return (
+      this.hasMultiplePolygons
+      && this.value.order > this.min
+    )
   }
 
   get canRemove (): boolean {
