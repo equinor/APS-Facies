@@ -10,6 +10,7 @@ PROJECT_NAME ?= aps-gui
 SHELL := /bin/bash
 OS ?= $(shell uname -s)
 EMPTY :=
+
 ifeq ($(OS),Linux)
 NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
@@ -21,6 +22,7 @@ TAR := gtar
 SED := gsed
 MATPLOTLIB_BACKEND ?= Agg
 endif
+
 ifneq ("$(wildcard /.dockerenv)","")
 MATPLOTLIB_BACKEND ?= Agg
 endif
@@ -138,7 +140,7 @@ MAIN.PY := $(PYTHON_API_DIR)/main.py
 INFO.XML := $(WEB_DIR)/static/info.xml
 
 MKDIR := mkdir -p
-REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^(\# *)?( *from )src/\2aps/g'
+REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^( *from )src/\1aps/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI/releases
@@ -150,16 +152,16 @@ REMOTE_RGS_MASTER := /project/res/APSGUI/MasterBranch
 RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
 RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | $(SED) -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
 RGS_UPDATE_APS := git pull \
-&& rm -rf workflow \
-&& mkdir -p workflow/pythoncomp/ \
-&& touch workflow/.master \
-&& USE_TEMORARY_DIR=no \
-APS_PROJECT_DIR=`pwd` \
-./bin/initialize-project.sh workflow/ \
-&& mv workflow/pythoncomp/* workflow \
-&& rm -rf workflow/pythoncomp \
-          workflow/.master \
-          aps_workflows
+ && rm -rf workflow \
+ && mkdir -p workflow/pythoncomp/ \
+ && touch workflow/.master \
+ && USE_TEMORARY_DIR=no \
+ APS_PROJECT_DIR=$(pwd) \
+ ./bin/initialize-project.sh workflow/ \
+ && mv workflow/pythoncomp/* workflow \
+ && rm -rf workflow/pythoncomp \
+           workflow/.master \
+           aps_workflows
 
 
 # NRlib
