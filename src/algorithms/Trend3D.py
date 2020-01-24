@@ -1352,7 +1352,7 @@ class Trend3D_elliptic_cone(Trend3D_conic):
 
     @classmethod
     def from_xml(cls, trend_rule_xml, model_file_name=None, debug_level=Debug.OFF, **kwargs):
-        conic_trunc = super().from_xml(trend_rule_xml, model_file_name, debug_level, get_origin_z=False)
+        conic_trunc = super().from_xml(trend_rule_xml, model_file_name, debug_level, get_origin_z=True)
         # Relative size
         relative_size_of_ellipse, is_relative_size_fmu_updatable = get_fmu_value_from_xml(
             trend_rule_xml, 'relativeSize', modelFile=model_file_name, required=False, defaultValue=1.0
@@ -1386,6 +1386,7 @@ class Trend3D_elliptic_cone(Trend3D_conic):
             ('relativeSize', self.relative_size_of_ellipse),
             ('origin_x', self.origin.x),
             ('origin_y', self.origin.y),
+            ('origin_z_simbox', self.origin.z),  # Only necessary when running in ERT / FMU / AHM mode
         ]
 
         for tag, prop in tags:
