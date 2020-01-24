@@ -8,7 +8,13 @@ def get_zone_number(project, grid):
     return [key + 1 for key in zonations.keys()]
 
 
-def run(roxar, project, aps_model: APSModel, debug_level, **kwargs):
+def get_codes(grid, zone_parameter):
+    zone = grid.properties[zone_parameter]
+    codes = zone.code_names.keys()
+    return list(codes)
+
+
+def run(project, aps_model: APSModel, debug_level, **kwargs):
     grid = project.grid_models[aps_model.grid_model_name]
     zone_parameter = GridModelConstants.ZONE_NAME
     if debug_level >= Debug.ON:
@@ -16,11 +22,11 @@ def run(roxar, project, aps_model: APSModel, debug_level, **kwargs):
 
     if zone_parameter in grid.properties:
         zone_numbers = get_zone_number(project, grid)
-        zone = grid.properties[zone_parameter]
-        if set(zone_numbers) != set(zone.code_names.keys()):
+        codes = get_codes(grid, zone_parameter)
+        if set(zone_numbers) != set(codes):
             raise ValueError(
                 f'There is a mismatch between the zone numbers as defined in {zone_parameter} '
-                f'({zone.code_names.keys()}), and in the grids\' zonation ({zone_numbers}).\n'
+                f'({codes}), and in the grids\' zonation ({zone_numbers}).\n'
                 f'A solution to this, is to delete the {zone_parameter} property from {aps_model.grid_model_name}.'
             )
     else:

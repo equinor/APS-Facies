@@ -5,7 +5,7 @@ from src.utils.fmu import create_get_property, get_export_location, find_zone_ra
 from src.utils.methods import get_specification_file
 
 
-def run(roxar=None, project=None, **kwargs):
+def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
     aps_model = APSModel(model_file)
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
@@ -39,15 +39,7 @@ def run(roxar=None, project=None, **kwargs):
                 name=field_name,
             )
             fmu_field_model.to_file(
-                str(field_location / (field_name + '.grdecl')),  #get_exported_field_name(field, zone, aps_model, project)),
+                str(field_location / (field_name + '.grdecl')),
                 fformat='grdecl',
                 name=field_name,
             )
-
-
-if __name__ == '__main__':
-    import roxar
-
-    run(
-        roxar, project,
-    )

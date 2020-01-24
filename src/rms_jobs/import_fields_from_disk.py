@@ -1,5 +1,4 @@
 from collections import defaultdict
-from warnings import warn
 
 import numpy as np
 import xtgeo
@@ -8,8 +7,6 @@ from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import Conform
 from src.utils.exceptions.zone import MissingConformityException
 from src.utils.fmu import create_get_property, find_zone_range, get_ert_location
-from src.utils.methods import get_specification_file
-from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 
 
 def extract_values(field_values, defined, zone):
@@ -69,34 +66,33 @@ def get_field_name(field_name, zone):
     return 'aps_{}_{}'.format(zone, field_name)
 
 
-def run(roxar=None, project=None, **kwargs):
-    model_file = get_specification_file(**kwargs)
+def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
     aps_model = APSModel(model_file)
-    grid_model_name = kwargs.get('grid_name', aps_model.grid_model_name)
+    if grid_name is None:
+        grid_name = aps_model.grid_model_name
     get_property = create_get_property(project, aps_model)
 
-    field_location = kwargs.get('load_dir', None)
-    if field_location is None:
-        field_location = get_ert_location() / '..' / '..'
+    if load_dir is None:
+        load_dir = get_ert_location() / '..' / '..'
 
-    rms_grid = xtgeo.grid_from_roxar(project, grid_model_name)
+    rms_grid = xtgeo.grid_from_roxar(project, grid_name)
     fmu_grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name)
-    zone_model = get_property(aps_model.zone_parameter, grid_model_name)
+    zone_model = get_property(aps_model.zone_parameter, grid_name)
 
     for field_name, zones in get_field_names(aps_model, zone_model).items():
         field_values = np.zeros(rms_grid.dimensions)
         for zone_name, zone in zones:
             defined = zone_model.values == zone.zone_number
             full_field_name = get_field_name(field_name, zone_name)
-            path = field_location / (full_field_name + '.grdecl')
-            if path.exists():
-                field = load_field_values(full_field_name, fmu_grid, path)
+            field_location = load_dir / (full_field_name + '.grdecl')
+            if field_location.exists():
+                field = load_field_values(full_field_name, fmu_grid, field_location)
                 field_values += extract_values(field, defined, zone)
             else:
                 if full_field_name not in zone.gaussian_fields_in_truncation_rule:
                     # This is OK, as we don't need this field
                     continue
-                raise FileNotFoundError('The file {} could not be found.'.format(path))
+                raise FileNotFoundError('The file {} could not be found.'.format(field_location))
         nx, ny, nz = rms_grid.dimensions
         field_model = xtgeo.GridProperty(
             ncol=nx, nrow=ny, nlay=nz,
@@ -106,7 +102,7 @@ def run(roxar=None, project=None, **kwargs):
         )
         field_model.to_roxar(
             project,
-            grid_model_name,
+            grid_name,
             field_name,
             realisation=project.current_realisation,
         )
@@ -136,11 +132,3 @@ def load_field_values(field_name, grid, path):
     #     grid=grid,
     # ).values
     return field
-
-
-if __name__ == '__main__':
-    import roxar
-
-    run(
-        roxar, project,
-    )

@@ -9,13 +9,13 @@ from src.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_mark
 
 
 @pytest.fixture(scope='module')
-def parsed_inputFile():
+def parsed_input_file():
     return ET.parse('testData_models/APS.xml')
 
 
 @pytest.fixture(scope='module')
-def original_values(parsed_inputFile):
-    return read_values_from_xml_tree(parsed_inputFile)
+def original_values(parsed_input_file):
+    return read_values_from_xml_tree(parsed_input_file)
 
 
 @pytest.fixture(scope='module')
@@ -61,7 +61,7 @@ def test_case_with_no_fmu_markers_set():
     out_file = 'aps_model_with_no_fmu_markers.xml'
     attributes_file = 'fmu_attributes.txt'
 
-    aps_model.writeModel(out_file, attributes_file, debug_level=Debug.OFF)
+    aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
 
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
 
@@ -74,7 +74,7 @@ def test_case_with_all_fmu_markers_set():
     attributes_file = 'fmu_attributes.txt'
     expected_key_value_set_file = 'testData_FMU/expected_key_value_set.txt'
 
-    aps_model.writeModel(out_file, attributes_file, debug_level=Debug.OFF)
+    aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
 
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
     check_expected_key_value_set_correlates_to_xml_output(out_file, expected_key_value_set_file)
@@ -96,19 +96,25 @@ def check_expected_key_value_set_correlates_to_xml_output(out_file, expected_key
 
 def test_global_include_file_has_all_necessary_update_values(original_values, update_values):
 
-    # This is testing that all fmu attributes that we expect to test in this test is actually also represented in the test_global_include.ipl file
+    # This is testing that all fmu attributes that we expect
+    # to test in this test is actually also represented in the test_global_include.ipl file
     assert set(original_values.keys()).issubset(set(update_values.keys()))
 
 
 def test_all_element_values_are_correctly_updated(original_values, update_values):
 
-    update_aps_model_from_fmu('testData_FMU/test_global_include.ipl', 'testData_models/APS.xml',
-                          'testData_models/APS_FMUupdated.xml', Debug.VERBOSE)
+    update_aps_model_from_fmu(
+        'testData_FMU/test_global_include.ipl',
+        'testData_models/APS.xml',
+        'testData_models/APS_FMUupdated.xml',
+        Debug.VERBOSE,
+    )
 
     parsed_output_file = ET.parse('testData_models/APS_FMUupdated.xml')
     new_values = read_values_from_xml_tree(parsed_output_file)
 
-    filtered_keys = original_values.keys() & update_values.keys()  # Filtering out keys not related to updatable FMU values in the model file
+    # Filtering out keys not related to updatable FMU values in the model file
+    filtered_keys = original_values.keys() & update_values.keys()
     for key in filtered_keys:
         original_value = original_values[key]
         expected_value = update_values[key]

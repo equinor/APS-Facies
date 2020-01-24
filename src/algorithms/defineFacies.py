@@ -69,7 +69,7 @@ class BaseDefineFacies:
     @staticmethod
     def get_root(model_file_name, main_keyword, debug_level=Debug.OFF):
         if debug_level >= Debug.ON:
-            print('Read model file: ' + model_file_name)
+            print(f'Read model file: {model_file_name}')
         tree = ET.parse(model_file_name).getroot()
         root = tree.find(main_keyword)
         if root is None:

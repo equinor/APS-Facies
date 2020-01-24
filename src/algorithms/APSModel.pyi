@@ -5,8 +5,9 @@ from src.algorithms.properties import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.utils.constants.simple import Debug, CrossSectionType
-from typing import Any, List, Optional, Tuple, Dict, Type
+from typing import Any, List, Optional, Tuple, Dict, Type, Union
 from xml.etree.ElementTree import Element, ElementTree
+from src.utils.types import FilePath
 
 from roxar import Project
 
@@ -44,6 +45,7 @@ class APSModel:
     preview_cross_section_relative_position: float
     __preview_cross_section: CrossSection
     preview_cross_section: CrossSection
+    preview_resolution: str
     sorted_zone_models: OrderedDict[Tuple[int, int], APSZoneModel]
     zone_models: List[APSZoneModel]
     use_constant_probability: bool
@@ -52,7 +54,7 @@ class APSModel:
     region_parameter: str
     use_regions: bool
     gaussian_field_names: List[str]
-    def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
+    def __parse_model_file(self, model_file_name: FilePath, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(
             cls,
@@ -63,12 +65,12 @@ class APSModel:
             self,
             root:                       Element,
             debug_level:                Optional[Debug]     = Debug.OFF,
-            modelFileName:              Optional[str]       = None
+            model_file_name:            Optional[str]       = None
     ) -> None: ...
-    def updateXMLModelFile(
+    def update_model_file(
             self,
-            model_file_name:            Optional[str]       = None,
-            parameter_file_name:        Optional[str]       = None,
+            model_file_name:            Optional[FilePath]  = None,
+            parameter_file_name:        Optional[FilePath]  = None,
             project:                    Optional[Project]   = None,
             workflow_name:              Optional[str]       = None,
             uncertainty_variable_names: Optional[List[str]] = None,
@@ -84,7 +86,6 @@ class APSModel:
     def getAllZoneModels(self): ...
     def getMainFaciesTable(self) -> APSMainFaciesTable: ...
     def getRMSProjectName(self) -> str: ...
-    def getGridModelName(self) -> str: ...
     def getRegionNumberListForSpecifiedZoneNumber(self, zoneNumber: int) -> List[int]: ...
     def getPreviewRegionNumber(self) -> int: ...
     def getPreviewZoneNumber(self) -> int: ...
@@ -110,27 +111,32 @@ class APSModel:
     def setSelectedZoneAndRegionNumber(self, selectedZoneNumber: int, selectedRegionNumber: int = 0) -> None: ...
     def dump(
             self,
-            name:                       str,
-            attributes_file_name:       Optional[str]       = None,
+            name:                       FilePath,
+            attributes_file_name:       Optional[FilePath]  = None,
             debug_level:                Debug               = Debug.OFF,
     ) -> None: ...
-    def writeModel(
+    def write_model(
             self,
-            modelFileName:              str,
-            attributesFileName:         Optional[str]       = None,
+            model_file_name:            FilePath,
+            attributes_file_name:       Optional[FilePath]  = None,
             debug_level:                Debug               = Debug.OFF,
     ) -> None: ...
     @staticmethod
-    def __readParamFromFile(global_variables_file: str, debug_level: Debug = Debug.OFF): ...
+    def __parse_global_variables(
+            global_variables_file:      FilePath,
+            debug_level:                Debug               = Debug.OFF,
+    ) -> List[Tuple[str, Union[str, float]]]: ...
     @staticmethod
     def __getParamFromRMSTable(
             project:                    Project,
             workflow_name: str,
             uncertainty_variable_names,
             realisation_number:         int,
-            debug_level:                Debug               = Debug.OFF,
     ) -> List[Tuple[str, str]]: ...
     @staticmethod
-    def writeModelFromXMLRoot(inputETree, outputModelFileName): ...
+    def write_model_from_xml_root(
+            input_tree,
+            output_model_file_name:     FilePath,
+    ): ...
 
 ApsModel: Type[APSModel]

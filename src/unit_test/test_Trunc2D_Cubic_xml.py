@@ -58,7 +58,7 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
     fmu_attributes = []
     truncRuleInput.XMLAddElement(top, 1, 1, fmu_attributes)
     rootReformatted = prettify(top)
-    print('Write file: ' + outputModelFileName)
+    print(f'Write file: {outputModelFileName}')
     with open(outputModelFileName, 'w') as file:
         file.write(rootReformatted)
 
@@ -102,7 +102,7 @@ def initialize_write_read(
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = filecmp.cmp(file1, file2)
-    print('Compare file: ' + file1 + ' and file: ' + file2)
+    print(f'Compare file: {file1} and file: {file2}')
     assert check is True
     if check is False:
         raise ValueError('Error: Files are different')

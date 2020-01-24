@@ -14,7 +14,6 @@ from src.algorithms.Trend3D import Trend3D_elliptic_cone, ConicTrend
 from src.utils.constants.simple import OriginType
 from src.utils.decorators import cached
 from src.utils.exceptions.zone import MissingConformityException
-from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
 
 
 def get_exported_field_name(field, zone, aps_model=None, project=None):

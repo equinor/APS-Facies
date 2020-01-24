@@ -467,10 +467,9 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
 
         facies_table = APSMainFaciesTable(facies_table=facies_code_names)
         facies_table.XMLAddElement(topElement)
-    # print('Write file: ' + outputRMSDataFile)
     with open(outputRMSDataFile, 'w') as file:
         if debug_level > Debug.SOMEWHAT_VERBOSE:
-            print('Write file: ' + outputRMSDataFile)
+            print(f'Write file: {outputRMSDataFile}')
         root = prettify(topElement)
         file.write(root)
 
@@ -518,7 +517,7 @@ def run(roxar=None, project=None, **kwargs):
     # Create 2D maps which can be used in RMS petrosim jobs for variogram azimuth angle
     if debug_level >= Debug.ON:
         print('Start running APS workflow preparation script')
-        print('Read file: ' + inputFile)
+        print('Read file: {}'.format(inputFile))
     create2DMapsForVariogramAzimuthAngle(project, inputFile, debug_level)
     if debug_level >= Debug.ON:
         print('Read RMS project and save some data to be read by the APS GUI script')

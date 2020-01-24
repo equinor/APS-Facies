@@ -24,24 +24,24 @@ def run_main(
     realization_number = project.current_realisation
 
     # Read APS model
-    print('- Read file: ' + str(model_file))
+    print(f'- Read file: {model_file}')
     apsModel = APSModel(model_file)
     debug_level = apsModel.debug_level
 
     # Get grid dimensions
-    gridModelName = apsModel.getGridModelName()
+    gridModelName = apsModel.grid_model_name
 
     if debug_level >= Debug.VERBOSE:
         print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
     rmsData = APSDataFromRMS(debug_level=debug_level)
 
     rmsData.readRMSDataFromXMLFile(rms_data_file_name)
-    gridModelNameFromRMSData = rmsData.getGridModelName()
+    gridModelNameFromRMSData = rmsData.grid_model_name()
     if gridModelName != gridModelNameFromRMSData:
         raise IOError(
-            'The specified grid model in model file: {} and in RMS data file: {} are different.\n'
-            'You may have to fix the model file or extract data from RMS for correct grid model again'.format(
-                gridModelName, gridModelNameFromRMSData)
+            f'The specified grid model in model file: {gridModelName} and '
+            f'in RMS data file: {gridModelNameFromRMSData} are different.\n'
+            'You may have to fix the model file or extract data from RMS for correct grid model again'
         )
     [nx, ny, _, _, _, _, _, _, _] = rmsData.getGridSize()
 
@@ -56,13 +56,12 @@ def run_main(
         gaussFieldNames = zoneModel.getGaussFieldsInTruncationRule()
         nLayers = rmsData.getNumberOfLayersInZone(zoneNumber)
         gaussResultListForZone = []
-        for i in range(len(gaussFieldNames)):
-            gaussFieldName = gaussFieldNames[i]
-            fileName = inputDir + '/' + gaussFieldName + '_' + str(zoneNumber) + '_' + str(regionNumber) + '.npy'
+        for gaussFieldName in gaussFieldNames:
+            fileName = f'{inputDir}/{gaussFieldName}_{zoneNumber}_{regionNumber}.npy'
             gaussVector = np.load(fileName)
             gaussResult = np.reshape(gaussVector, (nx, ny, nLayers), order='F')
             if debug_level >= Debug.ON:
-                print('-- Update RMS parameter: {} for zone: {}'.format(gaussFieldName, str(zoneNumber)))
+                print(f'-- Update RMS parameter: {gaussFieldName} for zone: {zoneNumber}')
             gaussResultListForZone.append(gaussResult)
         setContinuous3DParameterValuesInZone(
             gridModel, gaussFieldNames, gaussResultListForZone, zoneNumber - 1,

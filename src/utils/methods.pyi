@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
-from typing import Dict, TypeVar, Optional, Set, List, Type, overload, Tuple, NewType, NamedTuple
+from typing import Dict, TypeVar, Optional, Set, List, Type, overload, NewType, NamedTuple
 from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
+from src.utils.types import FilePath
 
 T = TypeVar('T')
 U = TypeVar('U')
 
 ModelFile = NewType('ModelFile', str)
 ProbabilityLogSpecificationFile = NewType('ProbabilityLogSpecificationFile', str)
-OutputModelFile = NewType('OutputModelFile', str)
-GlobalVariablesFile = NewType('GlobalVariablesFile', str)
-RmsProjectDataFile = NewType('RmsProjectDataFile', str)
+OutputModelFile = NewType('OutputModelFile', FilePath)
+GlobalVariablesFile = NewType('GlobalVariablesFile', FilePath)
+RmsProjectDataFile = NewType('RmsProjectDataFile', FilePath)
 TemporaryGaussianSimulation = NewType('TemporaryGaussianSimulation', str)
 FmuVariablesFile = NewType('FmuVariablesFile', str)
 TaggedVariableFile = NewType('TaggedVariableFile', str)
@@ -20,7 +21,7 @@ GridModelName = NewType('GridModelName', str)
 BlockedWellSetName = NewType('BlockedWellSetName', str)
 FaciesLogName = NewType('FaciesLogName', str)
 WorkflowName = NewType('WorkflowName', str)
-SeedLogFile = NamedTuple('SeedLogFile', str)
+SeedLogFile = NewType('SeedLogFile', FilePath)
 
 
 class RunParameters(NamedTuple):
@@ -85,7 +86,7 @@ def get_debug_level(**kwargs) -> Debug: ...
 def get_global_variables_file(**kwargs) -> GlobalVariablesFile: ...
 def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile: ...
 def _get_value(kwargs: Dict[str, T], legal_kwargs: List[str], default_value: T) -> T: ...
-def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str) -> str: ...
+def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str) -> Optional[FilePath]: ...
 def get_prefix(**kwargs) -> str: ...
 def calc_average(cell_index_defined: List[int], values: List[float]) -> float: ...
 def get_workflow_name() -> WorkflowName: ...

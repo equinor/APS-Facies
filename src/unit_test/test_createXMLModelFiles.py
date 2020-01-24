@@ -21,8 +21,18 @@ import pytest
 
 
 def defineCommonModelParam(
-        apsmodel, rmsProject, rmsWorkflow,  gridModelName,
-        zoneParamName, regionParamName, faciesRealParamNameResult, seedFileName, fTable, fTable_blockedWell, fTable_blockedWellLog, debug_level=VERY_VERBOSE_DEBUG
+        apsmodel,
+        rmsProject,
+        rmsWorkflow,
+        gridModelName,
+        zoneParamName,
+        regionParamName,
+        faciesRealParamNameResult,
+        seedFileName,
+        fTable,
+        fTable_blockedWell,
+        fTable_blockedWellLog,
+        debug_level=VERY_VERBOSE_DEBUG,
 ):
     # The input data are global variables
 
@@ -40,7 +50,11 @@ def defineCommonModelParam(
     print('Debug level: {}'.format(apsmodel.debug_level))
 
     # Define main facies table
-    main_facies_table = APSMainFaciesTable(facies_table=fTable, blocked_well=fTable_blockedWell, blocked_well_log=fTable_blockedWellLog)
+    main_facies_table = APSMainFaciesTable(
+        facies_table=fTable,
+        blocked_well=fTable_blockedWell,
+        blocked_well_log=fTable_blockedWellLog,
+    )
     apsmodel.setMainFaciesTable(main_facies_table)
 
 
@@ -112,8 +126,12 @@ def addZoneParam(
     # Define facies probabilities
     facies_probabilities = APSFaciesProb()
     facies_probabilities.initialize(
-        faciesList=faciesInZone, faciesProbList=faciesProbList, mainFaciesTable=main_facies_table,
-        useConstProb=useConstProb, zoneNumber=zoneNumber, debug_level=debug_level
+        faciesList=faciesInZone,
+        faciesProbList=faciesProbList,
+        mainFaciesTable=main_facies_table,
+        useConstProb=useConstProb,
+        zoneNumber=zoneNumber,
+        debug_level=debug_level,
     )
 
     # Define gauss field models
@@ -200,8 +218,11 @@ def addZoneParam(
     gauss_model = APSGaussModel()
     gauss_model.initialize(
         main_facies_table=main_facies_table,
-        gauss_model_list=gaussModelList, trend_model_list=trendModelList, sim_box_thickness=simBoxThickness,
-        preview_seed_list=seedPreviewList, debug_level=debug_level
+        gauss_model_list=gaussModelList,
+        trend_model_list=trendModelList,
+        sim_box_thickness=simBoxThickness,
+        preview_seed_list=seedPreviewList,
+        debug_level=debug_level,
     )
 
     # Define truncation rule model
@@ -281,14 +302,14 @@ def addZoneParam(
 def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
     attributesFile = 'fmu_attributes.txt'
-    apsmodel.writeModel(outfile1, attributesFile, debug_level=debug_level)
+    apsmodel.write_model(outfile1, attributesFile, debug_level=debug_level)
 
     # Read the xml file into an new APSModel object
     apsmodel2 = APSModel(outfile1, debug_level=debug_level)
     outfile2 = 'testOut2.xml'
     attributesFile = "fmu_attributes.txt"
-    apsmodel2.writeModel(outfile2, attributesFile, debug_level=debug_level)
-    print('Compare file: ' + outfile1 + ' and ' + outfile2)
+    apsmodel2.write_model(outfile2, attributesFile, debug_level=debug_level)
+    print(f'Compare file: {outfile1} and {outfile2}')
     check = compare(outfile1, outfile2)
 
     assert check is True
@@ -301,8 +322,8 @@ def read_write_model_update(debug_level=Debug.OFF):
     apsmodel2 = APSModel(outfile1)
     outfile2 = 'testOut2.xml'
     attributes_file = 'fmu_attributes.txt'
-    apsmodel2.writeModel(outfile2, attributes_file, debug_level)
-    print('Compare file: ' + outfile1 + ' and ' + outfile2)
+    apsmodel2.write_model(outfile2, attributes_file, debug_level)
+    print(f'Compare file: {outfile1} and {outfile2}')
     check = compare(outfile1, outfile2)
 
     assert check is True
@@ -318,7 +339,7 @@ def test_should_not_be_able_to_add_zones_with_region_to_apsmodel_when_regionpara
     create_apsmodel_with_and_without_regions_and_regionparam(False, False)
 
 
-def test_should_not_be_able_to_remove_regionparamname_when_at_least_one_zone_has_regionnumber():
+def test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zone_has_region_number():
 
     aps_model = create_apsmodel_with_and_without_regions_and_regionparam(True, True)
     with pytest.raises(ValueError):
@@ -328,7 +349,7 @@ def test_should_not_be_able_to_remove_regionparamname_when_at_least_one_zone_has
         aps_model.setRmsRegionParamName('')
 
 
-def test_read_and_write_modelfiles_without_projectName_wordFlowName_and_regionParamName(debug_level=Debug.OFF):
+def test_read_and_write_modelfiles_without_project_name_word_flow_name_and_region_parameter_name(debug_level=Debug.OFF):
 
     attributes_file = 'fmu_attributes.txt'
 
@@ -338,12 +359,12 @@ def test_read_and_write_modelfiles_without_projectName_wordFlowName_and_regionPa
     aps_model.setRmsRegionParamName(None)
 
     outfile1 = 'testOut4.xml'
-    aps_model.writeModel(outfile1, attributes_file, debug_level=debug_level)
+    aps_model.write_model(outfile1, attributes_file, debug_level=debug_level)
 
     aps_model_2 = APSModel(outfile1, debug_level=debug_level)
 
     outfile2 = 'testOut5.xml'
-    aps_model_2.writeModel(outfile2, attributes_file, debug_level=debug_level)
+    aps_model_2.write_model(outfile2, attributes_file, debug_level=debug_level)
 
     assert (compare(outfile1, outfile2))
 
@@ -367,8 +388,13 @@ def test_variogram_generation():
     dipVariogramAnglesFmuUpdatable = True
     powerFmuUpdatable = True
     gfName = 'GRF1'
-    gaussModelList = [['GRF1', 'SPHERICAL', mainRange, perpRange, vertRange, azimuth, dip, 1.0, range1FmuUpdatable,
-                       range2FmuUpdatable, range3FmuUpdatable, azimuthVariogramAnglesFmuUpdatable, dipVariogramAnglesFmuUpdatable, powerFmuUpdatable]]
+    gaussModelList = [
+        [
+            'GRF1', 'SPHERICAL', mainRange, perpRange, vertRange, azimuth, dip, 1.0, range1FmuUpdatable,
+            range2FmuUpdatable, range3FmuUpdatable, azimuthVariogramAnglesFmuUpdatable, dipVariogramAnglesFmuUpdatable,
+            powerFmuUpdatable,
+        ],
+    ]
     useTrend = 0
     relStdDev = 0.05
     relStdDevFmuUpdatable = True
@@ -402,9 +428,9 @@ def test_read_and_write_APSModel():
     apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
     outfile3 = 'testOut3.xml'
     attributes_file = 'fmu_attributes.txt'
-    apsmodel.writeModel(outfile3, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile3, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_sorted.xml'
-    print('Compare file: ' + outfile3 + ' and ' + reference_file)
+    print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)
     assert check is True
 
@@ -482,9 +508,9 @@ def test_updating_model1():
 
     outfile2 = 'testOut1_updated.xml'
     attributes_file = 'fmu_attributes.txt'
-    apsmodel.writeModel(outfile2, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile2, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated1.xml'
-    print('Compare file: ' + outfile2 + ' and ' + reference_file)
+    print(f'Compare file: {outfile2} and {reference_file}')
     check = compare(outfile2, reference_file)
     assert check is True
 
@@ -513,9 +539,9 @@ def test_updating_model2():
     for i in range(nGaussFields):
         gfName = gaussFieldNames[i]
         if regionNumber > 0:
-            print('Update (zone,region):  ({},{})  Gauss field: {}'.format(str(zoneNumber), str(regionNumber), gfName))
+            print(f'Update (zone, region): ({zoneNumber}, {regionNumber})  Gauss field: {gfName}')
         else:
-            print('Update zone:  {}  Gauss field: {}'.format(str(zoneNumber), gfName))
+            print(f'Update zone: {zoneNumber} Gauss field: {gfName}')
 
         variogramType = variogramTypeList[i]
         assertPropertyGetterSetter(gfName, variogramType, zone, 'VariogramType')
@@ -540,9 +566,9 @@ def test_updating_model2():
             assertPropertyGetterSetter(gfName, power, zone, 'Power')
     outfile2 = 'testOut2_updated.xml'
     attributes_file = 'fmu_attributes.txt'
-    apsmodel.writeModel(outfile2, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile2, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated2.xml'
-    print('Compare file: ' + outfile2 + ' and ' + reference_file)
+    print(f'Compare file: {outfile2} and {reference_file}')
     check = compare(outfile2, reference_file)
     assert check is True
 
@@ -652,9 +678,9 @@ def test_updating_model3():
 
     outfile3 = 'testOut3_updated.xml'
     attributes_file = 'fmu_attributes.txt'
-    apsmodel.writeModel(outfile3, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile3, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated3.xml'
-    print('Compare file: ' + outfile3 + ' and ' + reference_file)
+    print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)
     assert check is True
 
@@ -723,10 +749,17 @@ def get_case_1_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.VERY_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable, fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.VERY_VERBOSE,
     )
     # Only one zone
     print('Zone: 1')
@@ -743,10 +776,17 @@ def get_case_1_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable, fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.SOMEWHAT_VERBOSE,
     )
     # Two zones
     print('Zone: 1')
@@ -769,10 +809,17 @@ def get_case_2_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable, fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.SOMEWHAT_VERBOSE,
     )
 
     # Only one zone
@@ -790,10 +837,17 @@ def get_case_2_zone_2():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable, fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.SOMEWHAT_VERBOSE,
     )
     # Two zones
     print('Zone: 1')
@@ -816,10 +870,18 @@ def get_case_3_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable,
+        fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.SOMEWHAT_VERBOSE,
     )
     # Only one zone
     print('Zone: 1')
@@ -836,10 +898,18 @@ def get_case_4_zone_1():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5', 6: 'F6', 7: 'F7'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.SOMEWHAT_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable,
+        fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.SOMEWHAT_VERBOSE,
     )
     # Only one zone
     print('Zone: 1')
@@ -855,10 +925,18 @@ def get_apsmodel_with_no_fmu_markers():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.VERY_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable,
+        fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.VERY_VERBOSE,
     )
     # Only one zone
     print('Zone: 1')
@@ -875,10 +953,18 @@ def get_apsmodel_with_all_fmu_markers():
     fTable = {2: 'F2', 1: 'F1', 3: 'F3', 4: 'F4', 5: 'F5'}
     apsmodel = APSModel()
     defineCommonModelParam(
-        apsmodel=apsmodel, rmsProject=RMS_PROJECT, rmsWorkflow=RMS_WORKFLOW,
-        gridModelName=GRID_MODEL_NAME, zoneParamName=ZONE_PARAM_NAME, regionParamName=REGION_PARAM_NAME,
-        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT, seedFileName=SEED_FILE_NAME,
-        fTable=fTable, fTable_blockedWell='BW', fTable_blockedWellLog='facies', debug_level=Debug.VERY_VERBOSE
+        apsmodel=apsmodel,
+        rmsProject=RMS_PROJECT,
+        rmsWorkflow=RMS_WORKFLOW,
+        gridModelName=GRID_MODEL_NAME,
+        zoneParamName=ZONE_PARAM_NAME,
+        regionParamName=REGION_PARAM_NAME,
+        faciesRealParamNameResult=FACIES_REAL_PARAM_NAME_RESULT,
+        seedFileName=SEED_FILE_NAME,
+        fTable=fTable,
+        fTable_blockedWell='BW',
+        fTable_blockedWellLog='facies',
+        debug_level=Debug.VERY_VERBOSE,
     )
     # Only one zone
     print('Zone: 1')
@@ -1611,8 +1697,8 @@ def run():
     test_updating_model3()
 
     test_should_not_be_able_to_add_zones_with_region_to_apsmodel_when_regionparamname_is_empty()
-    test_should_not_be_able_to_remove_regionparamname_when_at_least_one_zone_has_regionnumber()
-    test_read_and_write_modelfiles_without_projectName_wordFlowName_and_regionParamName()
+    test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zone_has_region_number()
+    test_read_and_write_modelfiles_without_project_name_word_flow_name_and_region_parameter_name()
 
     test_variogram_generation()
     print('Finished')

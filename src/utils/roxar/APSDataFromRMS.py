@@ -22,7 +22,6 @@ class APSDataFromRMS:
                                                  scanRMSProjectAndWriteXMLFile.
                                                  This function is to be used e.g in the GUI script.
         getFaciesTable()   - Get facies table which is defined in the RMS project by a selected facies log.
-        getGridModelName() - Get name of grid model to use.
         getHorizonNames()  - Get list of all horizon names in the RMS project.
         getGridSize()      - Get grid size and dimension for the 3D grid in the grid model.
         getSurfaceSize()   - Get dimension and size of the 2D horizon maps.
@@ -111,7 +110,9 @@ class APSDataFromRMS:
     def getProjectRealNumber(self):
         return self.__data['Project realization number']
 
-    def getGridModelName(self):
+    @property
+    def grid_model_name(self):
+        """Get name of grid model to use."""
         return copy.copy(self.__data['Grid model name'])
 
     def getHorizonNames(self):
@@ -146,7 +147,7 @@ class APSDataFromRMS:
                 number_of_layer = item[2]
                 break
         if number_of_layer == 0:
-            raise ValueError('Zone number {} does not exist in grid model {}'.format(str(zoneNumber), self.getGridModelName()))
+            raise ValueError(f'Zone number {zoneNumber} does not exist in grid model {self.grid_model_name()}')
         return number_of_layer
 
     def getStartAndEndLayerInZone(self, zoneNumber):

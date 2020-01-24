@@ -352,7 +352,7 @@ class RMSData:
         except (ValueError, ApsXmlError) as e:
             valid = False
             error = str(e)
-        except (Exception) as e:
+        except Exception as e:
             valid = False
             error = str(e)
         return {'valid': valid, 'error': error}

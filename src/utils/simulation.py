@@ -50,7 +50,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
     Returns dictionaries with numpy arrays containing the gauss field values, trend values,
     transformed gauss field values for each gauss field name. The key is gauss field name.
     '''
-    grid_model_name = aps_model.getGridModelName()
+    grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]
     number_of_active_cells = grid_model.get_grid(realization_number).defined_cell_count

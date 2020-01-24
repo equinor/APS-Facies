@@ -124,7 +124,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         if trRuleXML is not None:
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Read data from model file for: ' + self._className)
+                print(f'Debug output: Read data from model file for: {self._className}')
 
             # Read truncation rule for background facies from xml tree.
             # Here the hierarchy of polygons in the 2D truncation map defined by the two
@@ -156,12 +156,12 @@ class Trunc2D_Angle(Trunc2D_Base):
                 print('Debug output: Gauss fields for each alpha coordinate:')
                 for i in range(len(self._alphaIndxList)):
                     j = self._alphaIndxList[i]
-                    gfName = self._gaussFieldsInZone[j]
-                    print(' {} {}'.format(str(i + 1), gfName))
+                    field_name = self._gaussFieldsInZone[j]
+                    print(f' {i + 1} {field_name}')
 
         else:
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Create empty object for: ' + self._className)
+                print(f'Debug output: Create empty object for: {self._className}')
                 #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
@@ -182,24 +182,19 @@ class Trunc2D_Angle(Trunc2D_Base):
             self.__useConstTruncModelParam = True
         else:
             text = useParamObj.text
-            val = int(text.strip())
-            if val == 0:
-                self.__useConstTruncModelParam = False
-            else:
-                self.__useConstTruncModelParam = True
+            val = bool(int(text.strip()))
+            self.__useConstTruncModelParam = val
 
         kw = 'Facies'
-        nPolygons = 0
         probFracPerPolygon = []
         sumProbFrac = []
         # Keyword Facies
         for faciesObj in bgmObj.findall(kw):
             if faciesObj is None:
                 raise IOError(
-                    'Error when reading model file: {}\n'
-                    'Error: Read truncation rule: {}\n'
-                    'Error: Missing keyword {} under keyword BackGroundModel under keyword TruncationRule'
-                    ''.format(modelFileName, self._className, kw, )
+                    f'Error when reading model file: {modelFileName}\n'
+                    f'Error: Read truncation rule: {self._className}\n'
+                    f'Error: Missing keyword {kw} under keyword BackGroundModel under keyword TruncationRule'
                 )
             fName = faciesObj.get('name')
             nFacies, indx, fIndx, isNewFacies = self._addFaciesToTruncRule(fName)
@@ -214,12 +209,11 @@ class Trunc2D_Angle(Trunc2D_Base):
                     self.__faciesBoundaryOrientation.append(value)
                 else:
                     raise ValueError(
-                        'Error: when reading model file: {}\n'
-                        'Error: Read truncation rule: {}\n'
-                        'Error: Expecting a floating point number, but got {} in keyword {} under keyword Facies '
-                        'under keyword TruncationRule\n'
+                        f'Error: when reading model file: {modelFileName}\n'
+                        f'Error: Read truncation rule: {self._className}\n'
+                        f'Error: Expecting a floating point number, but got {text} in keyword {kw2} under keyword Facies'
+                        ' under keyword TruncationRule\n'
                         'Change keyword UseConstTruncParam to 0'
-                        ''.format(modelFileName, self._className, text, kw2)
                     )
             else:
                 paramNameAlpha = copy.copy(text.strip())
@@ -233,17 +227,15 @@ class Trunc2D_Angle(Trunc2D_Base):
             probFrac = getFloatCommand(faciesObj, kw3, 'Facies', modelFile=modelFileName, required=True)
             if probFrac < 0.0 or probFrac > 1.0:
                 raise IOError(
-                    'Error when reading model file: {}\n'
-                    'Error: Read truncation rule: {}\n'
-                    'Error: Probability fraction specified for {} in keyword {}\n'
-                    ' under keyword Facies under keyword TruncationRule is: {} which is outside [0,1]'
-                    ''.format(modelFileName, self._className, fName, kw3, probFrac)
+                    f'Error when reading model file: {modelFileName}\n'
+                    f'Error: Read truncation rule: {self._className}\n'
+                    f'Error: Probability fraction specified for {fName} in keyword {kw3}\n'
+                    f' under keyword Facies under keyword TruncationRule is: {probFrac} which is outside [0,1]'
                 )
 
             item = [indx, probFrac]
 
             probFracPerPolygon.append(item)
-            nPolygons += 1
             if isNewFacies == 0:
                 sumProbFrac[indx] += probFrac
             else:
@@ -259,15 +251,14 @@ class Trunc2D_Angle(Trunc2D_Base):
         for i in range(self._nBackGroundFacies):
             if self._debug_level >= Debug.VERY_VERBOSE:
                 fName = self._faciesInTruncRule[i]
-                print('Debug output: Sum prob frac for facies {0} is: {1}'.format(fName, str(sumProbFrac[i])))
+                print(f'Debug output: Sum prob frac for facies {fName} is: {sumProbFrac[i]}')
 
             if abs(sumProbFrac[i] - 1.0) > 0.001:
                 fName = self._faciesInTruncRule[i]
                 raise ValueError(
-                    'Error in: {0}\n'
-                    '         Sum of probability fractions over all polygons for facies {1} is not 1.0\n'
-                    '         The sum is: {2}'
-                    ''.format(self._className, fName, str(sumProbFrac[i]))
+                    f'Error in: {self._className}\n'
+                    f'         Sum of probability fractions over all polygons for facies {fName} is not 1.0\n'
+                    f'         The sum is: {sumProbFrac[i]}'
                 )
 
     def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
@@ -1012,11 +1003,11 @@ class Trunc2D_Angle(Trunc2D_Base):
             tag = 'Angle'
             angleElement = Element(tag)
             if self.__useConstTruncModelParam:
-                angleElement.text = ' ' + str(self.__faciesBoundaryOrientation[k]) + ' '
+                angleElement.text = f' {self.__faciesBoundaryOrientation[k]} '
             else:
                 item = self.__faciesBoundaryOrientationName[k]
-                angleParamName = copy.copy(item[1])
-                angleElement.text = ' ' + angleParamName + ' '
+                angleParamName = item[1]
+                angleElement.text = f' {angleParamName} '
             if is_fmu_updatable:
                 assert not any([parameter is None for parameter in [zone_number, region_number, fmu_attributes]])
                 fmu_attribute = createFMUvariableNameForNonCubicTruncation(k + 1, zone_number, region_number)
@@ -1026,7 +1017,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
             tag = 'ProbFrac'
             probFracElement = Element(tag)
-            probFracElement.text = ' ' + str(probFrac) + ' '
+            probFracElement.text = f' {probFrac} '
             fElement.append(probFracElement)
 
             bgModelElement.append(fElement)

@@ -24,14 +24,14 @@ def run(roxar=None, project=None, **kwargs):
 
     if writeSeedFile:
         if debug_level >= Debug.ON:
-            print('Random seeds for this realisation is written to: ' + seedFileNameNew)
+            print(f'Random seeds for this realisation is written to: {seedFileNameNew}')
     else:
         # Check that the file can be opened for reading
         seedFile = Path(seedFileNameNew)
         if not seedFile.is_file():
-            raise IOError('Can not open and read seed file: {}'.format(seedFileNameNew))
+            raise IOError(f'Can not open and read seed file: {seedFileNameNew}')
         if debug_level >= Debug.ON:
-            print('Random seeds for this realisation read from: ' + seedFileNameNew)
+            print(f'Random seeds for this realisation read from: {seedFileNameNew}')
 
 
 if __name__ == '__main__':

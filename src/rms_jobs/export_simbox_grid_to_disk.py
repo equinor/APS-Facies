@@ -5,7 +5,7 @@ from src.utils.fmu import get_export_location
 from src.utils.methods import get_specification_file
 
 
-def run(roxar=None, project=None, **kwargs):
+def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
     aps_model = APSModel(model_file)
     aps_grid_name = aps_model.grid_model_name
@@ -18,12 +18,4 @@ def run(roxar=None, project=None, **kwargs):
     aps_grid.to_file(
         str(field_location / '{}.EGRID'.format(aps_grid_name)),
         fformat='egrid',
-    )
-
-
-if __name__ == '__main__':
-    import roxar
-
-    run(
-        roxar, project,
     )

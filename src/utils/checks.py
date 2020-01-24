@@ -21,7 +21,7 @@ def isVariogramTypeOK(_type, debug_level=Debug.OFF):
         # even though they are
         return True
     elif debug_level >= Debug.VERY_VERBOSE:
-        print('''Error: Specified variogram : {variogram_type} is not implemented
+        print(f'''Error: Specified variogram : {_type.name} is not implemented
 Error: Allowed variograms are:
        SPHERICAL
        EXPONENTIAL
@@ -31,7 +31,7 @@ Error: Allowed variograms are:
        MATERN52
        MATERN72
        CONSTANT
-'''.format(variogram_type=_type.name))
+''')
     return False
 
 
@@ -40,11 +40,11 @@ def check_probability_values(
         tolerance_of_probability_normalisation,
         facies_name=" ",
         parameter_name=" ",
-        max_allowed_fraction_of_values_outside_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
+        max_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
 ):
-    ''' The input numpy array prob_values is checked that the values are legal probabilities. A tolerance is accepted.
+    """ The input numpy array prob_values is checked that the values are legal probabilities. A tolerance is accepted.
         Returns prob_values in [0,1] and raise error if illegal probability values (outside tolerance)
-    '''
+    """
     num_defined_cells = len(prob_values)
     if num_defined_cells == 0:
         return prob_values
@@ -57,21 +57,17 @@ def check_probability_values(
     check_value = (prob_values > 1.0 + tolerance_of_probability_normalisation)
     num_above_one = check_value.sum()
 
-    num_defined_cells = len(prob_values)
-
     negative_fraction = num_negative / num_defined_cells
-    if negative_fraction > max_allowed_fraction_of_values_outside_tolerance:
+    if negative_fraction > max_tolerance:
         raise ValueError(
-            'Probability for facies {} in {} has {} negative values.'
-            ''.format(facies_name, parameter_name, num_negative)
-            )
+            f'Probability for facies {facies_name} in {parameter_name} has {num_negative} negative values.'
+        )
 
     above_one_fraction = num_above_one / num_defined_cells
-    if above_one_fraction > max_allowed_fraction_of_values_outside_tolerance:
+    if above_one_fraction > max_tolerance:
         raise ValueError(
-            'Probability for facies {} in {} has {} values above 1.0'
-            ''.format(facies_name, parameter_name, num_above_one)
-            )
+            f'Probability for facies {facies_name} in {parameter_name} has {num_above_one} values above 1.0'
+        )
 
     prob_values[prob_values < 0.0] = 0.0
     prob_values[prob_values > 1.0] = 1.0
@@ -81,7 +77,7 @@ def check_probability_values(
 def check_probability_normalisation(
         sum_probability_values,
         eps, tolerance_of_probability_normalisation,
-        max_allowed_fraction_of_values_outside_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
+        max_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
 ):
     num_defined_cells = len(sum_probability_values)
     ones = np.ones(num_defined_cells, np.float32)
@@ -91,11 +87,14 @@ def check_probability_normalisation(
         min_acceptable_prob_sum = 1.0 - tolerance_of_probability_normalisation
         max_acceptable_prob_sum = 1.0 + tolerance_of_probability_normalisation
 
-        check_sum_prob = (sum_probability_values < min_acceptable_prob_sum) | (sum_probability_values > max_acceptable_prob_sum)
+        check_sum_prob = (
+                (sum_probability_values < min_acceptable_prob_sum)
+                | (sum_probability_values > max_acceptable_prob_sum)
+        )
         unacceptable_prob_normalisation = check_sum_prob.sum()
         unacceptable_prob_normalisation_fraction = unacceptable_prob_normalisation / num_defined_cells
 
-        if unacceptable_prob_normalisation_fraction > max_allowed_fraction_of_values_outside_tolerance:
+        if unacceptable_prob_normalisation_fraction > max_tolerance:
             largest_prob_sum = sum_probability_values.max()
             smallest_prob_sum = sum_probability_values.min()
             raise ValueError(
@@ -116,7 +115,7 @@ def check_probability_normalisation(
                     min_prob=smallest_prob_sum,
                     max_prob=largest_prob_sum,
                     frac=unacceptable_prob_normalisation_fraction * 100,
-                    max_frac=max_allowed_fraction_of_values_outside_tolerance * 100,
+                    max_frac=max_tolerance * 100,
                 )
             )
     return normalise_is_necessary

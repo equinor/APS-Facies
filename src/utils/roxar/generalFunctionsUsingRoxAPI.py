@@ -8,7 +8,7 @@ from warnings import warn
 
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information, print_error
-from src.utils.roxar.grid_model import get3DParameter, modifySelectedGridCells, update_code_names
+from src.utils.roxar.grid_model import get3DParameter, modify_selected_grid_cells, update_code_names
 
 from src.utils.constants.simple import Debug
 
@@ -41,11 +41,14 @@ def get_project_realization_seed(project=None):
         seed = int(content.split()[-1])
         return seed
     if project is None:
-        raise TypeError("'project' is required when {} does not exist".format(external_seed))
+        raise TypeError(f"'project' is required when {external_seed} does not exist")
     return project.seed + project.current_realisation + 1
 
 
 def get_project_dir(project):
+    import sys
+    if sys.platform == 'darwin':
+        return Path('/Users/snis/Projects/APS/GUI/fmu.model/rms/model')
     return Path(project.filename).parent.absolute()
 
 
@@ -75,57 +78,41 @@ def setContinuous3DParameterValues(
     functionName = setContinuous3DParameterValues.__name__
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
-        text = 'Specified grid model: ' + gridModel.name + ' is empty.'
+        text = f'Specified grid model: {gridModel.name} is empty.'
         print_error(functionName, text)
         return False
 
-    if zoneNumberList is None:
-        zoneNumberList = []
     # Check if specified parameter name exists and create new parameter if it does not exist.
-    found = 0
-    for p in gridModel.properties:
-        if p.name == parameterName:
-            found = 1
-            break
 
-    if found == 0:
+    if parameterName not in gridModel.properties:
         if debug_level >= Debug.VERY_VERBOSE:
-            text = 'Create specified parameter: ' + parameterName
-            print_debug_information(functionName, text)
+            print_debug_information(functionName, f'Create specified parameter: {parameterName}')
             if isShared:
-                text = 'Set parameter to shared.'
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, 'Set parameter to shared.')
             else:
-                text = 'Set parameter to non-shared.'
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, 'Set parameter to non-shared.')
 
-        p = gridModel.properties.create(parameterName, roxar.GridPropertyType.continuous, np.float32)
-        currentValues = np.zeros(len(inputValues), np.float32)
-        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
-        p.set_values(currentValues, realNumber)
-        p.set_shared(isShared, realNumber)
+        _create_property(gridModel, inputValues, parameterName, zoneNumberList, isShared, realNumber)
     else:
 
         if debug_level >= Debug.VERY_VERBOSE:
-            text = 'Update specified parameter: ' + parameterName
-            print_debug_information(functionName, text)
+            print_debug_information(functionName, f'Update specified parameter: {parameterName}')
 
         # Parameter exist, but check if it is empty or not
         p = gridModel.properties[parameterName]
         if p.is_empty(realNumber):
             # Create parameter values (which are initialized to 0)
-            grid3D = gridModel.get_grid(realNumber)
-            v = np.zeros(grid3D.defined_cell_count, np.float32)
+            grid = gridModel.get_grid(realNumber)
+            v = np.zeros(grid.defined_cell_count, np.float32)
             p.set_values(v, realNumber)
 
         # Get all active cell values
         p = get3DParameter(gridModel, parameterName)
         if p.is_empty(realNumber):
-            text = ' Specified parameter: ' + parameterName + ' is empty for realisation ' + str(realNumber)
-            raise_error(functionName, text)
+            raise_error(functionName, f' Specified parameter: {parameterName} is empty for realisation {realNumber}')
 
         currentValues = p.get_values(realNumber)
-        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        currentValues = modify_selected_grid_cells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
         p.set_values(currentValues, realNumber)
         p.set_shared(isShared, realNumber)
     return True
@@ -184,16 +171,16 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
     end = (nx, ny, end_layer)
     zone_cell_numbers = indexer.get_cell_numbers_in_range(start,end)
 
-    nLayers = end_layer-start_layer
+    num_layers = end_layer - start_layer
     # All input data vectors are from the same zone and has the same size
-    inputArrayShape = inputValuesForZoneList[0].shape
-    if nx != inputArrayShape[0] or ny != inputArrayShape[1] or nLayers != inputArrayShape[2]:
-        raise IOError('Input array with values has different dimensions than the grid model:\n'
-                      'Grid model nx: {}  Input array nx: {}\n'
-                      'Grid model ny: {}  Input array ny: {}\n'
-                      'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-                      ''.format(nx, inputArrayShape[0], ny, inputArrayShape[1], zoneNumber, nLayers, inputArrayShape[2])
-                      )
+    [nx_in, ny_in, nz_in] = inputValuesForZoneList[0].shape
+    if nx != nz_in or ny != ny_in or num_layers != nz_in:
+        raise IOError(
+            'Input array with values has different dimensions than the grid model:\n'
+            f'Grid model nx: {nx}  Input array nx: {nx_in}\n'
+            f'Grid model ny: {ny}  Input array ny: {ny_in}\n'
+            f'Grid model nLayers for zone {zoneNumber} is: {num_layers}    Input array nz: {nz_in}'
+      )
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
@@ -217,14 +204,11 @@ def setContinuous3DParameterValuesInZone(gridModel, parameterNameList, inputValu
             propertyParam = gridModel.properties.create(paramName, roxar.GridPropertyType.continuous, np.float32)
             propertyParam.set_shared(isShared, realNumber)
             if debug_level >= Debug.VERY_VERBOSE:
-                text = 'Create specified parameter: ' + paramName
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, f'Create specified parameter: {paramName}')
                 if isShared:
-                    text = 'Set parameter to shared.'
-                    print_debug_information(functionName, text)
+                    print_debug_information(functionName, 'Set parameter to shared.')
                 else:
-                    text = 'Set parameter to non-shared.'
-                    print_debug_information(functionName, text)
+                    print_debug_information(functionName, 'Set parameter to non-shared.')
 
         assert propertyParam is not None
         if propertyParam.is_empty(realNumber):
@@ -307,10 +291,9 @@ def setContinuous3DParameterValuesInZoneRegion(
     if nx != nx_in or ny != ny_in or num_layers > nz_in:
         raise IOError(
             'Input array with values has different dimensions than the grid model:\n'
-            'Grid model nx: {}  Input array nx: {}\n'
-            'Grid model ny: {}  Input array ny: {}\n'
-            'Grid model nLayers for zone {} is: {}    Input array nz: {}'
-            ''.format(nx, nx_in, ny, ny_in, zoneNumber, num_layers, nz_in)
+            f'Grid model nx: {nx}  Input array nx: {nx_in}\n'
+            f'Grid model ny: {ny}  Input array ny: {ny_in}\n'
+            f'Grid model nLayers for zone {zoneNumber} is: {num_layers}    Input array nz: {nz_in}'
         )
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
@@ -449,35 +432,26 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cel
     grid3D = gridModel.get_grid(realNumber)
     nActiveCells = grid3D.defined_cell_count
     if nActiveCells != len(inputValues):
-        raise ValueError('Mismatch in number of active cells={} and length of input array with values = {}'
-                         ''.format(nActiveCells, len(inputValues))
-                         )
+        raise ValueError(
+            f'Mismatch in number of active cells={nActiveCells} '
+            f'and length of input array with values = {len(inputValues)}'
+         )
 
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         raise ValueError(
-            'Specified grid model: {} is empty.'
-            'Cannot create parameter: {} '
-            ''.format(gridModel.name, parameterName)
+            f'Specified grid model: {gridModel.name} is empty.'
+            f'Cannot create parameter: {parameterName} '
         )
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
-    found = False
-    for p in gridModel.properties:
-        if p.name == parameterName:
-            found = True
-            break
-
-    if not found:
+    if parameterName not in gridModel.properties:
         if debug_level >= Debug.VERY_VERBOSE:
-            text = ' Create specified parameter: ' + parameterName + ' in ' + gridModel.name
-            print_debug_information(functionName, text)
+            print_debug_information(functionName, f' Create specified parameter: {parameterName} in {gridModel.name}')
             if isShared:
-                text = 'Set parameter to shared.'
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, 'Set parameter to shared.')
             else:
-                text = 'Set parameter to non-shared.'
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, 'Set parameter to non-shared.')
 
         # Create a new 3D parameter with the specified name of type float32
         p = gridModel.properties.create(parameterName, roxar.GridPropertyType.continuous, np.float32)
@@ -518,7 +492,7 @@ def updateContinuous3DParameterValues(gridModel, parameterName, inputValues, cel
         p.set_shared(isShared, realNumber)
 
 
-def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumberList, codeNames,
+def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, codeNames, zoneNumberList=None,
                                  realNumber=0, isShared=True, debug_level=Debug.OFF):
     """Set discrete 3D parameter with values for specified grid model.
     Input:
@@ -547,55 +521,41 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         raise ValueError(
-            'Specified grid model: {} is empty.'
-            'Cannot create parameter: {} '
-            ''.format(gridModel.name, parameterName)
+            f'Specified grid model: {gridModel.name} is empty.'
+            f'Cannot create parameter: {parameterName} '
         )
+    elif inputValues.dtype == np.float32:
+        raise ValueError('A discrete property cannot be of type float32')
     # Check if specified parameter name exists and create new parameter if it does not exist.
-    found = 0
-    for p in gridModel.properties:
-        if p.name == parameterName:
-            found = 1
-            break
-
-    if found == 0:
+    if parameterName not in gridModel.properties:
         if debug_level >= Debug.VERY_VERBOSE:
-            text = ' Create specified parameter: ' + parameterName + ' in ' + gridModel.name
-            print_debug_information(functionName, text)
+            print_debug_information(functionName, f' Create specified parameter: {parameterName} in {gridModel.name}')
             if isShared:
-                text = ' Set parameter to shared.'
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, ' Set parameter to shared.')
             else:
-                text = ' Set parameter to non-shared.'
-                print_debug_information(functionName, text)
+                print_debug_information(functionName, ' Set parameter to non-shared.')
 
-        p = gridModel.properties.create(parameterName, roxar.GridPropertyType.discrete, np.uint16)
-        currentValues = np.zeros(len(inputValues), np.uint16)
-        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
-        p.set_values(currentValues, realNumber)
-        p.set_shared(isShared, realNumber)
-        p.code_names = codeNames
+        _create_property(
+            gridModel, inputValues, parameterName, zoneNumberList, isShared, realNumber, codeNames,
+            dtype=np.uint16,
+        )
     else:
         if debug_level >= Debug.VERY_VERBOSE:
-            text = ' Update specified parameter: ' + parameterName + ' in ' + gridModel.name
-            print_debug_information(functionName, text)
+            print_debug_information(functionName, f' Update specified parameter: {parameterName} in {gridModel.name}')
 
         p = gridModel.properties[parameterName]
         if p.is_empty(realNumber):
             # Create parameter values (which are initialized to 0)
-            grid3D = gridModel.get_grid(realNumber)
-            v = np.zeros(grid3D.defined_cell_count, np.uint16)
+            grid = gridModel.get_grid(realNumber)
+            v = np.zeros(grid.defined_cell_count, np.uint16)
             p.set_values(v, realNumber)
 
         # Get all active cell values
         p = get3DParameter(gridModel, parameterName)
         if p.is_empty(realNumber):
-            raise ValueError(
-                'In function {0}.  Some inconsistency in program.'
-                ''.format(functionName)
-            )
+            raise ValueError(f'In function {functionName}.  Some inconsistency in program.')
         currentValues = p.get_values(realNumber)
-        currentValues = modifySelectedGridCells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
+        currentValues = modify_selected_grid_cells(gridModel, zoneNumberList, realNumber, currentValues, inputValues)
         p.set_values(currentValues, realNumber)
 
         p.set_shared(isShared, realNumber)
@@ -616,9 +576,24 @@ def setDiscrete3DParameterValues(gridModel, parameterName, inputValues, zoneNumb
         update_code_names(p, codeNames)
 
         if debug_level >= Debug.VERY_VERBOSE:
-            text = 'Updated facies table: '
-            print_debug_information(functionName, text)
+            print_debug_information(functionName, 'Updated facies table: ')
             print(p.code_names)
+
+
+def _create_property(
+        grid_model, values, parameter_name, zone_numbers, is_shared, realisation_number,
+        code_names=None, dtype=np.float32,
+):
+    property_type = roxar.GridPropertyType.discrete
+    if dtype == np.float32:
+        property_type = roxar.GridPropertyType.continuous
+    p = grid_model.properties.create(parameter_name, property_type, dtype)
+    current_values = np.zeros(len(values), dtype)
+    current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, values)
+    p.set_values(current_values, realisation_number)
+    p.set_shared(is_shared, realisation_number)
+    if code_names is not None:
+        p.code_names = code_names
 
 
 def updateDiscrete3DParameterValues(
@@ -671,18 +646,11 @@ def updateDiscrete3DParameterValues(
     # Check if specified grid model exists and is not empty
     if gridModel.is_empty():
         raise ValueError(
-            'Specified grid model: {} is empty.'
-            'Cannot create parameter: {} '
-            ''.format(gridModel.name, parameterName)
+            f'Specified grid model: {gridModel.name} is empty.'
+            f'Cannot create parameter: {parameterName} '
         )
     # Check if specified parameter name exists and create new parameter if it does not exist.
-    found = 0
-    for p in gridModel.properties:
-        if p.name == parameterName:
-            found = 1
-            break
-
-    if found == 0:
+    if parameterName not in gridModel.properties:
         if debug_level >= Debug.VERY_VERBOSE:
             text = ' Create specified parameter: ' + parameterName + ' in ' + gridModel.name
             print_debug_information(functionName, text)
@@ -751,7 +719,7 @@ def updateDiscrete3DParameterValues(
             codeValList = code_names.keys()
             for code in codeValList:
                 if code_names[code] == '':
-                    print('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
+                    warn('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
                     code_names[code] = str(code)
 
         if debug_level >= Debug.VERY_VERBOSE:
@@ -827,16 +795,17 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
     ymax = coordinates[:, :, 1].max()
     rotation = grid.rotation
     if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output:  For 2D map')
-        print('  Map xmin: ' + str(xmin))
-        print('  Map xmax: ' + str(xmax))
-        print('  Map ymin: ' + str(ymin))
-        print('  Map ymax: ' + str(ymax))
-        print('  Map xinc: ' + str(xinc))
-        print('  Map yinc: ' + str(yinc))
-        print('  Map nx:   ' + str(nx))
-        print('  Map ny:   ' + str(ny))
-        print('  Map rotation:   ' + str(rotation))
+        print(f'''\
+Debug output:  For 2D map
+  Map xmin: {xmin}
+  Map xmax: {xmax}
+  Map ymin: {ymin}
+  Map ymax: {ymax}
+  Map xinc: {xinc}
+  Map yinc: {yinc}
+  Map nx:   {nx}
+  Map ny:   {ny}
+  Map rotation:   {rotation}''')
     return [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation]
 
 
@@ -858,27 +827,27 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
         )
 
     # Find the correct representation. Must exist.
-    reprObj = None
-    for representation in horizons.representations:
-        if representation.name == reprName:
-            reprObj = representation
+    representation = None
+    for _representation in horizons.representations:
+        if _representation.name == reprName:
+            representation = _representation
             break
-    if reprObj is None:
+    if representation is None:
         raise ValueError(
-            'Error in updateHorizonObject\n'
-            'Error: Horizons data type: ' + reprName + ' does not exist'
+            f'Error in updateHorizonObject\n'
+            f'Error: Horizons data type: {reprName} does not exist'
         )
 
     surfaceObj = horizons[horizonName][reprName]
     if isinstance(surfaceObj, roxar.Surface):
-        emptyGrid = 0
+        empty_grid = False
         try:
             grid = surfaceObj.get_grid()
         except RuntimeError:
             # Create surface
-            emptyGrid = 1
+            empty_grid = True
             if nx == 0 or ny == 0:
-                print('Error in  setConstantValueInHorizon:  Grid dimensions are not specified')
+                print('Error in setConstantValueInHorizon: Grid dimensions are not specified')
                 sys.exit()
             grid = roxar.RegularGrid2D.create(xmin, ymin, xinc, yinc, nx, ny, rotation)
             values = grid.get_values()
@@ -886,19 +855,19 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
             grid.set_values(values)
             surfaceObj.set_grid(grid)
             if debug_level >= Debug.VERY_VERBOSE:
-                text = 'Debug output: ' + 'Create trend surface ' + reprName
-                text += ' for variogram azimuth in ' + horizonName
-                text += ' Value: ' + str(inputValue)
-                print(text)
+                print(
+                    f'Debug output: Create trend surface {reprName} for variogram azimuth in {horizonName}'
+                    f' Value: {inputValue}'
+                )
 
-        if emptyGrid == 0:
+        if not empty_grid:
             # Modify grid values
             values = grid.get_values()
             values[:] = inputValue
             grid.set_values(values)
             surfaceObj.set_grid(grid)
             if debug_level >= Debug.VERY_VERBOSE:
-                text = 'Debug output: ' + 'Update trend surface ' + reprName
-                text = text + ' for variogram azimuth in ' + horizonName
-                text = text + ' Value: ' + str(inputValue)
-                print(text)
+                print(
+                    f'Debug output: Update trend surface {reprName} for variogram azimuth in {horizonName}'
+                    f' Value: {inputValue}'
+                )

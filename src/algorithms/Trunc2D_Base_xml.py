@@ -275,7 +275,7 @@ class Trunc2D_Base:
             self._faciesIsDetermined = np.zeros(self.num_facies_in_zone, dtype=int)
         else:
             raise ValueError(
-                'Error in ' + self._className + '\n'
+                f'Error in {self._className}\n'
                 'Error: Inconsistency'
             )
 
@@ -570,7 +570,7 @@ class Trunc2D_Base:
                modelFileName - Only used as a text string when printing error messages in order to make them more informative.
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: -- Start read overlay facies model in ' + self._className + ' from model file')
+            print(f'Debug output: -- Start read overlay facies model in {self._className} from model file')
 
         # Number of background facies is the facies in truncation rule before overlay facies is added
         self._nBackGroundFacies = self.num_facies_in_truncation_rule
@@ -592,8 +592,10 @@ class Trunc2D_Base:
             checkBGFaciesList = []
             for overLayGroupObj in overLayModelObj.findall(kw1):
                 if overLayGroupObj is None:
-                    raise ValueError('Missing keyword {} in keyword {} in zone {} in truncation rule in model file {}'
-                                     ''.format(kw1, kw, str(zoneNumber), modelFileName))
+                    raise ValueError(
+                        f'Missing keyword {kw1} in keyword {kw} in zone {zoneNumber},'
+                        f' in truncation rule in model file {modelFileName}'
+                    )
                 alphaList = []
                 centerList = []
                 probFracList = []
@@ -604,8 +606,8 @@ class Trunc2D_Base:
 
                     if alphaObj is None:
                         raise ValueError(
-                            'Missing keyword {} in keyword {} in zone {} in truncation rule in model file {}'
-                            ''.format(kw2, kw1, str(zoneNumber), modelFileName)
+                            f'Missing keyword {kw2} in keyword {kw1} in zone {zoneNumber},'
+                            f' in truncation rule in model file {modelFileName}'
                         )
                     text = alphaObj.get('name')
                     alphaName = text.strip()
@@ -623,8 +625,8 @@ class Trunc2D_Base:
                     else:
                         raise ValueError(
                             'Cannot have two different overlay facies in same group with the same alpha field.'
-                            'Alpha field name: {} is specified multiple times for group number {} in zone {}'
-                            ''.format(alphaName, str(groupIndx + 1), str(zoneNumber))
+                            f'Alpha field name: {alphaName} is specified multiple times for'
+                            f' group number {groupIndx + 1} in zone {zoneNumber}'
                         )
 
                     kw3 = 'TruncIntervalCenter'
@@ -638,14 +640,10 @@ class Trunc2D_Base:
                     fName = text.strip()
                     # Check that facies name is not a background facies and that it is defined for the zone
                     if fName not in self._faciesInZone:
-                        raise ValueError(
-                            'Specified overlay facies {} is not defined for zone {}'
-                            ''.format(fName, str(zoneNumber))
-                        )
+                        raise ValueError(f'Specified overlay facies {fName} is not defined for zone {zoneNumber}')
                     indx = self.getBackgroundFaciesInTruncRuleIndex(fName)
                     if indx >= 0:
-                        raise ValueError('Specified overlay facies {} is already defined as background facies.'
-                                         ''.format(fName))
+                        raise ValueError(f'Specified overlay facies {fName} is already defined as background facies.')
 
                     # Add the overlay facies to the list of facies for the truncation rule if not already added
                     nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(fName)
@@ -659,8 +657,8 @@ class Trunc2D_Base:
 
                 if len(alphaList) == 0:
                     raise ValueError(
-                        'Missing keyword {} in keyword {} in zone {} in truncation rule in model file {}'
-                        ''.format(kw2, kw1, str(zoneNumber), modelFileName)
+                        f'Missing keyword {kw2} in keyword {kw1} in zone {zoneNumber},'
+                        f' in truncation rule in model file {modelFileName}'
                     )
 
                 self._alphaInGroup.append(alphaList)
@@ -719,8 +717,8 @@ class Trunc2D_Base:
                 # Define group index for each background facies where facies is specified as index in faciesInTruncRule
                 if len(bgFaciesIndxList) == 0:
                     raise ValueError(
-                        'Missing keyword {} in keyword {} in zone {} in truncation rule in model file {}'
-                        ''.format(kw2, kw1, str(zoneNumber), modelFileName)
+                        f'Missing keyword {kw2} in keyword {kw1} in zone {zoneNumber},'
+                        f' in truncation rule in model file {modelFileName}'
                     )
 
                 for indx in bgFaciesIndxList:
@@ -730,8 +728,10 @@ class Trunc2D_Base:
 
                 groupIndx += 1
             if groupIndx == 0:
-                raise ValueError('Missing keyword {} in keyword {} for zone {} in truncation rule in model file {}'
-                                 ''.format(kw1, kw, str(zoneNumber), modelFileName))
+                raise ValueError(
+                    f'Missing keyword {kw1} in keyword {kw} for zone {zoneNumber},'
+                    f' in truncation rule in model file {modelFileName}'
+                )
 
             self._nGroups = groupIndx
 
@@ -741,7 +741,6 @@ class Trunc2D_Base:
                 nAlpha = len(self._alphaInGroup[groupIndx])
                 for alphaInGroupIndx in range(nAlpha):
                     indx = self._overlayFaciesIndxInGroup[groupIndx][alphaInGroupIndx]
-                    fName = self._faciesInTruncRule[indx]
                     probFrac = self._probFracOverlayFaciesInGroup[groupIndx][alphaInGroupIndx]
                     sumProbFrac[indx] += probFrac
 
@@ -753,9 +752,8 @@ class Trunc2D_Base:
                     # This facies is overlay facies
                     if abs(sumPF - 1.0) > self._epsFaciesProb:
                         raise ValueError(
-                            'Error in model file {} for zone {}\n'
-                            ' Sum of probability fraction specified for overlay facies {} is {} and not 1.0'
-                            ''.format(modelFileName, str(zoneNumber), fName, str(sumPF))
+                            f'Error in model file {modelFileName} for zone {zoneNumber}\n'
+                            f' Sum of probability fraction specified for overlay facies {fName} is {sumPF} and not 1.0'
                         )
 
             nOverLayFacies = 0
@@ -777,8 +775,7 @@ class Trunc2D_Base:
                     'Number of facies in background model is: {}\n'
                     'Number of overlay facies is: {}\n'
                     'The sum of number of background facies and overlay facies must match the number of facies for the zone'
-                    ''.format(str(zoneNumber), str(self.num_facies_in_zone), str(self._nOverLayFacies),
-                              str(self._nBackGroundFacies))
+                    ''.format(zoneNumber, self.num_facies_in_zone, self._nOverLayFacies, self._nBackGroundFacies)
                 )
 
             if self._debug_level >= Debug.VERY_VERBOSE:
@@ -788,29 +785,23 @@ class Trunc2D_Base:
                 for i in range(len(self._alphaIndxList)):
                     indx = self._alphaIndxList[i]
                     alphaName = self._gaussFieldsInZone[indx]
-                    print(
-                        'Debug output:  Alpha coordinate {}  corresponds to gauss field {}'.format(str(i + 1),
-                                                                                                   alphaName)
-                    )
-                print('Debug output: Dimension of Alpha space is: ' + str(len(self._alphaIndxList)))
+                    print(f'Debug output:  Alpha coordinate {i + 1} corresponds to gauss field {alphaName}')
+                print(f'Debug output: Dimension of Alpha space is: {len(self._alphaIndxList)}')
                 print('')
-                print('Debug output:   Number of overlay facies: ' + str(self._nOverLayFacies))
+                print(f'Debug output:   Number of overlay facies: {self._nOverLayFacies}')
                 print('Debug output: Group index for each background facies')
                 for i in range(self._nBackGroundFacies):
                     fName = self._faciesInTruncRule[i]
                     groupIndx = self._groupIndxForBackGroundFaciesIndx[i]
                     if groupIndx >= 0:
-                        print('Debug output:  {}  belongs to groupIndx= {}'.format(fName, str(groupIndx)))
+                        print(f'Debug output:  {fName}  belongs to groupIndx= {groupIndx}')
                     else:
-                        print('Debug output:  {} does not belong to any defined group'.format(fName))
+                        print(f'Debug output:  {fName} does not belong to any defined group')
                 print('')
                 print('Debug output: Alpha fields per group and overlay facies defined.')
                 for groupIndx in range(self._nGroups):
                     nAlpha = len(self._alphaInGroup[groupIndx])
-                    print(
-                        'Debug output: For group with index: ' + str(groupIndx) + '  Number of alpha fields: ' + str(
-                            nAlpha)
-                    )
+                    print(f'Debug output: For group with index: {groupIndx}  Number of alpha fields: {nAlpha}')
                     print('Debug output: Alpha    Facies   TruncIntervalCenter     ProbFrac:')
                     for alphaInGroupIndx in range(nAlpha):
                         alphaIndx = self._alphaInGroup[groupIndx][alphaInGroupIndx]
@@ -819,13 +810,10 @@ class Trunc2D_Base:
                         fName = self._faciesInTruncRule[indx]
                         centerVal = self._centerTruncIntervalInGroup[groupIndx][alphaInGroupIndx]
                         probFrac = self._probFracOverlayFaciesInGroup[groupIndx][alphaInGroupIndx]
-                        print(
-                            'Debug output:   ' + gfname + '     ' + fName + '      ' + str(centerVal) + '     ' + str(
-                                probFrac)
-                        )
+                        print(f'Debug output:   {gfname}     {fName}      {centerVal}     {probFrac}')
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: -- End read overlay facies model in ' + self._className + ' from model file')
+            print(f'Debug output: -- End read overlay facies model in {self._className} from model file')
 
             # End read overlay facies
 
@@ -848,26 +836,24 @@ class Trunc2D_Base:
         """
         if self.num_facies_in_truncation_rule != self.num_facies_in_zone:
             raise ValueError(
-                'Error: In truncation rule: {} Number of facies specified in truncation rule '
-                'is {} which is different from number of facies specified for zone which is {}'
-                ''.format(self._className, self.num_facies_in_truncation_rule, self.num_facies_in_zone)
+                f'Error: In truncation rule: {self._className} Number of facies specified in truncation rule '
+                f'is {self.num_facies_in_truncation_rule} which is different from number'
+                f' of facies specified for zone which is {self.num_facies_in_zone}'
             )
         for fName in self._faciesInTruncRule:
             # print('fName in checkFaciesForZone:')
             # print(fName)
             if fName not in self._faciesInZone:
                 raise ValueError(
-                    'Error: In truncation rule: {0} Facies name {1} is not defined for the current zone.\n'
-                    '       No probability is defined for this facies for the current zone.'
-                    ''.format(self._className, fName)
+                    f'Error: In truncation rule: {self._className} Facies name {fName} is not defined for the current zone.\n'
+                    f'       No probability is defined for this facies for the current zone.'
                 )
         for fName in self._faciesInZone:
             if fName not in self._faciesInTruncRule:
                 raise ValueError(
-                    'Error: In truncation rule: {0} Facies name {1} which is defined for the current zone '
+                    f'Error: In truncation rule: {self._className} Facies name {fName} which is defined for the current zone '
                     'is not defined in the truncation rule. Cannot have facies with specified '
                     'probability that is not used in the truncation rule.'
-                    ''.format(self._className, fName)
                 )
 
     def _addFaciesToTruncRule(self, facies_name):
@@ -888,7 +874,7 @@ class Trunc2D_Base:
         fIndx = self.getFaciesInZoneIndex(facies_name)
         if fIndx < 0:
             raise ValueError(
-                'Error in {0}. Specified facies name {1} is not defined for this zone.'.format(self._className, facies_name)
+                f'Error in {self._className}. Specified facies name {facies_name} is not defined for this zone.'
              )
         self._nFaciesInTruncRule = nFaciesInTruncRule
         return nFaciesInTruncRule, index, fIndx, isNew
@@ -900,42 +886,35 @@ class Trunc2D_Base:
         print(self.__repr__())
 
     def __repr__(self):
-        representation = """
+        representation = f"""
 ************  Contents of the data structure common to several truncation algorithms  ***************
-Eps for facies prob: {eps_facies_probability}
+Eps for facies prob: {self._epsFaciesProb}
 Main facies table:
-{main_facies_table}
-Number of facies in main facies table: {num_facies_main}
+{self._mainFaciesTable!r}
+Number of facies in main facies table: {self.num_global_facies}
 Facies to be modelled:
-{facies_in_zone}
+{self._faciesInZone!r}
 Facies code per facies to be modelled:
-{facies_code}
+{self._faciesCode!r}
 Facies in truncation rule:
-{facies_in_truncation_rule}
-Number of facies to be modelled: {num_facies}'
+{self._faciesInTruncRule!r}
+Number of facies to be modelled: {self.num_facies_in_zone}'
 Index array orderIndex:
-{order_index}
+{self._orderIndex}
 Logical array with 0 for facies which is has probability 100% and 0 for facies with probability less than 100%
-{is_facies_determined}
-Print info level: {debug_level}'
+{self._faciesIsDetermined}
+Print info level: {self._debug_level}'
 Is function setTruncRule called?
-{truncation_rule_called}
+{self._setTruncRuleIsCalled}
 Background facies:
-""".format(
-            eps_facies_probability=self._epsFaciesProb, main_facies_table=repr(self._mainFaciesTable),
-            num_facies_main=self.num_global_facies, facies_in_zone=repr(self._faciesInZone),
-            facies_code=repr(self._faciesCode), num_facies=self.num_facies_in_zone, debug_level=self._debug_level,
-            truncation_rule_called=self._setTruncRuleIsCalled, facies_in_truncation_rule=repr(self._faciesInTruncRule),
-            order_index=self._orderIndex, is_facies_determined=self._faciesIsDetermined
-        )
+"""
         for i in range(self._nBackGroundFacies):
             bgFaciesName = self._faciesInTruncRule[i]
             representation += '   {}'.format(bgFaciesName)
         representation += '\n'
         for i in range(self._nGroups):
             num_alpha = len(self._alphaInGroup[i])
-            representation += '\nNumber of facies polygons in group number {i}  is {num_alpha}'.format(i=i,
-                                                                                                       num_alpha=num_alpha)
+            representation += f'\nNumber of facies polygons in group number {i}  is {num_alpha}'
             for j in range(num_alpha):
                 alphaIndx = self._alphaInGroup[i][j]
                 gfName = self._gaussFieldsInZone[alphaIndx]
@@ -945,26 +924,21 @@ Background facies:
                 low = self._lowAlphaInGroup[i][j]
                 high = self._highAlphaInGroup[i][j]
                 representation += (
-                    'Overlay facies polygon number {j} in group {i} belongs to facies {facies_name}'
-                    ' with prob fraction {probability_fraction} and defined by truncation of {gf_name}\n'
-                    'Overlay facies polygon number {j} in group {i} belongs to facies {facies_name}'
-                    ' and is truncated between {low} and {high}'.format(
-                        j=j, i=i, facies_name=fName, probability_fraction=probFraction,
-                        gf_name=gfName, low=low, high=high
-                    )
+                    f'Overlay facies polygon number {j} in group {i} belongs to facies {fName}'
+                    f' with prob fraction {probFraction} and defined by truncation of {gfName}\n'
+                    f'Overlay facies polygon number {j} in group {i} belongs to facies {fName}'
+                    f' and is truncated between {low} and {high}'
                 )
 
             for j in range(len(self._backgroundFaciesInGroup[i])):
                 indx = self._backgroundFaciesInGroup[i][j]
                 fName = self._faciesInTruncRule[indx]
-                representation += 'Group number: {i}  Background facies: {facies_name}'.format(i=i, facies_name=fName)
-        representation += '\nNumber of alpha variables (gauss fields) used in the truncation rule: {}'.format(
-            self.getNGaussFieldsInModel()
-        )
+                representation += f'Group number: {i}  Background facies: {fName}'
+        representation += f'\nNumber of alpha variables (gauss fields) used in the truncation rule: {self.getNGaussFieldsInModel()}'
         for i in range(self.getNGaussFieldsInModel()):
             alphaIndx = self._alphaIndxList[i]
             gfName = self._gaussFieldsInZone[alphaIndx]
-            representation += '\nAlpha coordinate number {} corresponds to gauss field {}'.format(i + 1, gfName)
+            representation += f'\nAlpha coordinate number {i + 1} corresponds to gauss field {gfName}'
         return representation
 
     @property

@@ -1316,9 +1316,6 @@ class DefineTruncationRule:
         self._create_overview_plot(plotName, self.__tableNonCubic)
 
     def createOverviewPlotNonCubicWithOverlay(self, plotName):
-        self._create_overview_plot(plotName, self.__tableNonCubicAndOverlay)
-
-    def createOverviewPlotNonCubicWithOverlay(self, plotName):
         ''' Create plots of all specified NonCubic settings with overlay facies in one common plot'''
         self._create_overview_plot(plotName, self.__tableNonCubicAndOverlay)
 
