@@ -1,9 +1,10 @@
 <template>
   <base-dropdown
+    v-model="gridModel"
     :items="available"
-    :model-getter="getter"
-    :model-setter="setter"
     label="Grid model"
+    warn
+    warn-message="This will remove all model specifications, including truncation rules, and Gaussian Random Fields for all zones, and regions."
     :no-data-text="'No grids available'"
   />
 </template>
@@ -33,13 +34,13 @@ export default class ChooseGridModel extends Vue {
       })
   }
 
-  getter (): GridModel | undefined {
+  get gridModel (): GridModel | undefined {
     const id = (this.$store as Store).state.gridModels.current
     return (this.$store as Store).state.gridModels.available[`${id}`]
   }
 
-  async setter (value: GridModel): Promise<void> {
-    await this.$store.dispatch('gridModels/select', value)
+  set gridModel (value: GridModel | undefined) {
+    this.$store.dispatch('gridModels/select', value)
   }
 }
 </script>

@@ -1,18 +1,14 @@
 <template>
-  <div>
-    <confirmation-dialog
-      v-if="warn"
-      ref="confirm"
-    />
-    <v-select
-      v-if="isShown"
-      ref="selection"
-      v-model.lazy="selected"
-      :items="available"
-      :disabled="isDisabled"
-      :label="label"
-    />
-  </div>
+  <base-dropdown
+    v-if="isShown"
+    v-model="selected"
+    :items="available"
+    :label="label"
+    :disabled="isDisabled"
+    :warn="warn"
+    :warn-even-when-empty="warnEvenWhenEmpty"
+    :warn-message="warnMessage"
+  />
 </template>
 
 <script lang="ts">
@@ -60,23 +56,6 @@ export default class ChooseParameter<T> extends Vue {
   get isShown (): boolean { return !(this.hideIfDisabled && this.isDisabled) }
 
   get selected (): T { return (this.$store as Store).state.parameters[this.parameterType].selected }
-  set selected (value: T) {
-    const changeValue = (): Promise<void> => this.$store.dispatch(`parameters/${this.parameterType}/select`, value)
-
-    if (this.warn && (!!this.selected || this.warnEvenWhenEmpty)) {
-      // @ts-ignore
-      (this.$refs.confirm as ConfirmationDialog).open('Are you sure?', this.warnMessage)
-        .then((confirmed: boolean) => {
-          if (confirmed) changeValue()
-          else {
-            // The component must be made aware that its value was not updated
-            // @ts-ignore
-            this.$refs.selection.lazyValue = this.selected
-          }
-        })
-    } else {
-      changeValue()
-    }
-  }
+  set selected (value: T) { this.$store.dispatch(`parameters/${this.parameterType}/select`, value) }
 }
 </script>
