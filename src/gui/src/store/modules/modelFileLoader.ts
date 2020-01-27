@@ -412,7 +412,7 @@ function getTrend (gaussFieldFromFile: XMLElement): Optional<Trend> {
     options.originY = getMandatoryNumericValue(trendContainer, 'origin_y')
     options.originYUpdatable = isFMUUpdatable(trendContainer, 'origin_y')
   }
-  if ([ELLIPTIC, HYPERBOLIC].includes(type)) {
+  if ([ELLIPTIC, HYPERBOLIC, ELLIPTIC_CONE].includes(type)) {
     options.originZ = getMandatoryNumericValue(trendContainer, 'origin_z_simbox')
     options.originZUpdatable = isFMUUpdatable(trendContainer, 'origin_z_simbox')
   }

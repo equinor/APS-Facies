@@ -143,6 +143,7 @@ export default class Trend {
     this.parameter = parameter
     if (this.type === 'HYPERBOLIC' && curvature <= 1) curvature = 1.01
     this.curvature = new FmuUpdatableValue(curvature, !!curvatureUpdatable)
+    if (this.type === 'ELLIPTIC_CONE') originZ = 0
     this.origin = {
       x: new FmuUpdatableValue(originX, !!originXUpdatable),
       y: new FmuUpdatableValue(originY, !!originYUpdatable),
