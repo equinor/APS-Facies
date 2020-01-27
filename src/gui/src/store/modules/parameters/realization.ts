@@ -19,11 +19,13 @@ const module: Module<SelectableChoice<string>, RootState> = {
     select: async ({ commit }, parameter): Promise<void> => {
       commit('CURRENT', parameter)
     },
-    fetch: async ({ commit, rootGetters }): Promise<string[]> => {
+    fetch: async ({ commit, dispatch }): Promise<void> => {
       commit('CURRENT', DEFAULT_FACIES_REALIZATION_PARAMETER_NAME)
+      await dispatch('refresh')
+    },
+    refresh: async ({ commit, rootGetters }): Promise<void> => {
       const discreteParameters = await rms.realizationParameters(rootGetters.gridModel)
       commit('AVAILABLE', discreteParameters)
-      return discreteParameters
     },
   },
 

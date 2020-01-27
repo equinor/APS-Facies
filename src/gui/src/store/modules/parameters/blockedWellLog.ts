@@ -21,9 +21,11 @@ const module: Module<SelectableChoice<string>, RootState> = {
       await removeFaciesDependent(context)
       await dispatch('facies/global/fetch', null, { root: true })
     },
-    fetch: async ({ commit, dispatch, rootGetters }): Promise<void> => {
-      commit('CURRENT', null)
-      await fetchParameterHelper({ commit, dispatch }, rms.blockedWellLogParameters(rootGetters.gridModel, rootGetters.blockedWellParameter))
+    fetch: async (context): Promise<void> => {
+      await fetchParameterHelper(context)
+    },
+    refresh: async ({ commit, rootGetters }): Promise<void> => {
+      commit('AVAILABLE', await rms.blockedWellLogParameters(rootGetters.gridModel, rootGetters.blockedWellParameter))
     },
   },
 

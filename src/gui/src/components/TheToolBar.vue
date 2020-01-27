@@ -83,6 +83,12 @@
     >
       {{ `${versionInformation}` }}
     </span>
+    <icon-button
+      v-tooltip.bottom="'Refreshes the data gathered from RMS'"
+      icon="refresh"
+      :waiting="refreshing"
+      @click="refresh"
+    />
   </v-toolbar>
 </template>
 
@@ -169,6 +175,8 @@ function fileHandler (store: Store, fileName: string): (e: any) => void {
   },
 })
 export default class TheToolBar extends Vue {
+  refreshing = false
+
   get betaBuild (): boolean { return process.env.VUE_APP_BUILD_MODE !== 'stable' }
 
   get versionNumber (): Optional<string> { return process.env.VUE_APP_APS_VERSION || null }
@@ -200,6 +208,12 @@ export default class TheToolBar extends Vue {
       reader.readAsText(file);
       (this.$refs.uploadButton as UploadButton).clear()
     }
+  }
+
+  async refresh (): Promise<void> {
+    this.refreshing = true
+    await this.$store.dispatch('refresh', 'Fetching data from RMS')
+    this.refreshing = false
   }
 
   async exportModelFile (): Promise<void> {

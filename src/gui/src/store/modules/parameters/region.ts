@@ -31,8 +31,11 @@ Tip: RegionParamName in the APS model File must be one of { ${state.available.jo
         }
       })
     },
-    fetch: async ({ commit, rootGetters }): Promise<void> => {
+    fetch: async ({ commit, dispatch }): Promise<void> => {
       commit('CURRENT', null)
+      await dispatch('refresh')
+    },
+    refresh: async ({ commit, rootGetters }): Promise<void> => {
       commit('AVAILABLE', await rms.regionParameters(rootGetters.gridModel))
     },
   },
@@ -45,8 +48,6 @@ Tip: RegionParamName in the APS model File must be one of { ${state.available.jo
       state.selected = regionParameter
     },
   },
-
-  getters: {},
 }
 
 export default module

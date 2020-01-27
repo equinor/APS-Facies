@@ -19,6 +19,18 @@ const parametersDependentOnGrid = [
   'realization',
 ]
 
+async function fetchGridModels (): Promise<GridModelConfiguration[]> {
+  return Promise.all((await rms.gridModels())
+    .map(async (conf, index): Promise<GridModelConfiguration> => {
+      const [x, y, z] = await rms.gridSize(conf.name)
+      return {
+        ...conf,
+        order: index,
+        dimension: { x, y, z },
+      }
+    }))
+}
+
 const gridModels: Module<GridModelsState, RootState> = {
   namespaced: true,
 
@@ -56,16 +68,26 @@ Tip: GridModelName in the APS model file must be one of { ${gridModels.join()} }
       commit('AVAILABLE', identify(gridModels.map(conf => new GridModel(conf))))
     },
     fetch: async ({ dispatch }): Promise<void> => {
-      const gridModels = await Promise.all((await rms.gridModels())
-        .map(async (conf, index): Promise<GridModelConfiguration> => {
-          const [x, y, z] = await rms.gridSize(conf.name)
+      await dispatch('populate', await fetchGridModels())
+    },
+    refresh: async ({ dispatch, state }): Promise<void> => {
+      const existingIds = Object.values(state.available)
+        .reduce((collection, grid) => {
+          collection[grid.name] = grid
+          return collection
+        }, ({} as {[name: string]: GridModel}))
+
+      const gridModels = (await fetchGridModels())
+        .map(grid => {
+          const existing: GridModel | undefined = existingIds[grid.name]
           return {
-            ...conf,
-            order: index,
-            dimension: { x, y, z },
+            ...grid,
+            id: existing ? existing.id : undefined,
           }
-        }))
+        })
+
       await dispatch('populate', gridModels)
+      await Promise.all(parametersDependentOnGrid.map(param => dispatch(`parameters/${param}/refresh`, undefined, { root: true })))
     }
   },
 
