@@ -109,6 +109,17 @@ const module: Module<ZoneState, RootState> = {
         zone,
         region,
       }
+    },
+    byParent: (state) => (parent: { zone: ID, region?: ID }): Optional<Zone | Region> => {
+      const zone = state.available[parent.zone]
+      if (zone) {
+        if (parent.region) {
+          const region = zone.regions.find(region => region.id === parent.region)
+          return region || null
+        }
+        return zone
+      }
+      return null
     }
   },
 }

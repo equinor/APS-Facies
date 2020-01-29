@@ -89,6 +89,8 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { GaussianRandomField } from '@/utils/domain'
 import Trend, { TrendType } from '@/utils/domain/gaussianRandomField/trend'
+import { Store } from '@/store/typing'
+import { ListItem } from '@/utils/typing'
 
 import { notEmpty } from '@/utils'
 
@@ -144,7 +146,15 @@ export default class TrendSpecification extends Vue {
   }
 
   get availableRmsTrendParameters (): string[] { return this.$store.state.parameters.rmsTrend.available }
-  get availableTrends (): string[] { return this.$store.state.constants.options.trends.available }
+  get availableTrends (): ListItem<string>[] {
+    return (this.$store as Store).state.constants.options.trends.available
+      .map(name => {
+        return {
+          text: name,
+          disabled: name === 'RMS_PARAM' && (this.$store as Store).getters.fmuMode,
+        }
+      })
+  }
 
   get trend (): Trend { return this.value.trend }
 
