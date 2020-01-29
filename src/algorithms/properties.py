@@ -136,7 +136,7 @@ class FmuProperty:
         return self.value + other
 
     def __sub__(self, other):
-        return other - self.value
+        return self.value - other
 
     def __abs__(self):
         return abs(self.value)
