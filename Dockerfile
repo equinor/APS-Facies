@@ -171,10 +171,10 @@ RUN yum update -y \
  && mkdir -p \
     nrlib-${NRLIB_VERSION} \
     # Extract all downloaded archives
- && tar -xvf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
- && tar -xJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
- && tar -xzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
- && tar -xvf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
+ && tar -xvzf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
+ && tar -xvJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
+ && tar -xvzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
+ && tar -xvzf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
  # Remove downloaded archives
  && rm -f ${SOURCE_DIR}/*.txt* \
  && rm -f ${SOURCE_DIR}/*.tar.* \
