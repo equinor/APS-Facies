@@ -1,8 +1,11 @@
+from base64 import b64decode
+
 from pathlib import Path
 from typing import Dict
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
+from src.utils.decorators import cached
 from src.utils.fmu import get_export_location, get_ert_location
 
 
@@ -35,12 +38,25 @@ class JobConfig:
         }
 
     @property
+    @cached
     def error_message(self):
-        return self._config['errorMessage']
+        export_error = self._config['errorMessage']
+        if export_error:
+            return export_error
+        if self.fmu_mode:
+            aps_model = APSModel.from_string(self.model, debug_level=None)
+            for zone_model in aps_model.zone_models:
+                if not zone_model.grid_layout:
+                    return (
+                           f'The zone with code {zone_model.zone_number} does not have any conformity specified. '
+                           f'This is required, when running in ERT / AHM.'
+                    )
+        return None
 
     @property
+    @cached
     def model(self):
-        return self._config['model']
+        return b64decode(self._config['model']).decode('UTF-8')
 
     @property
     def create_fmu_grid(self):

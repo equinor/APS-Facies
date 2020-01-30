@@ -54,11 +54,15 @@ class APSModel:
     gaussian_field_names: List[str]
     def __interpretXMLModelFile(self, modelFileName: str, debug_level=Debug.OFF): ...
     @classmethod
-    def from_string(cls, xml_content: str) -> APSModel: ...
+    def from_string(
+            cls,
+            xml_content:                str,
+            debug_level:                Optional[Debug]     = Debug.OFF,
+    ) -> APSModel: ...
     def __interpretTree(
             self,
             root:                       Element,
-            debug_level:                Debug               = Debug.OFF,
+            debug_level:                Optional[Debug]     = Debug.OFF,
             modelFileName:              Optional[str]       = None
     ) -> None: ...
     def updateXMLModelFile(
