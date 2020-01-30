@@ -38,8 +38,20 @@ class JobConfig:
         }
 
     @property
+    @cached
     def error_message(self):
-        return self._config['errorMessage']
+        export_error = self._config['errorMessage']
+        if export_error:
+            return export_error
+        if self.fmu_mode:
+            aps_model = APSModel.from_string(self.model, debug_level=None)
+            for zone_model in aps_model.zone_models:
+                if not zone_model.grid_layout:
+                    return (
+                           f'The zone with code {zone_model.zone_number} does not have any conformity specified. '
+                           f'This is required, when running in ERT / AHM.'
+                    )
+        return None
 
     @property
     @cached

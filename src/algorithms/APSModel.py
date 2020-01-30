@@ -217,9 +217,9 @@ class APSModel:
         self.__interpretTree(root, debug_level, modelFileName)
 
     @classmethod
-    def from_string(cls, xml_content):
+    def from_string(cls, xml_content, debug_level=Debug.OFF):
         root = ET.fromstring(xml_content)
-        return cls().__interpretTree(root, Debug.VERY_VERBOSE)
+        return cls().__interpretTree(root, debug_level)
 
     def __interpretTree(self, root, debug_level=Debug.OFF, modelFileName=None):
         self.__ET_Tree = ET.ElementTree(root)
@@ -246,6 +246,8 @@ class APSModel:
         else:
             text = obj.text
             self.debug_level = text
+        if debug_level is None:
+            self.debug_level = Debug.OFF
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
