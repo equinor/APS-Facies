@@ -4,6 +4,10 @@
       no-gutters
     >
       <v-col class="dense">
+        <warning-dialog
+          ref="confirm"
+          html
+        />
         <v-checkbox
           v-model="_runFmuWorkflows"
           label="Run APS facies update in AHM/ERT"
@@ -117,6 +121,7 @@ import rms from '@/api/rms'
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
+import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
 
 import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
@@ -129,6 +134,7 @@ type FieldUsage = 'generate' | 'import'
 
 @Component({
   components: {
+    WarningDialog,
     SettingsPanel,
     NumericField,
     BoldButton,
@@ -188,6 +194,23 @@ export default class FmuSettings extends Vue {
 
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
   set _runFmuWorkflows (toggled: boolean) {
+    const affectedFields = Object.values((this.$store as Store).state.gaussianRandomFields.available)
+      .filter(field => field.trend.type === 'RMS_PARAM')
+    if (toggled && affectedFields.length > 0) {
+      (this.$refs.confirm as WarningDialog).open(
+        'Be aware',
+        `
+<p>Some Gaussian Random Fields are using a custom Trend ('RMS_PARAM'), which is not supported in ERT-mode.</p>
+<p>More specifically, these fields uses custom trends
+<ul>
+  ${affectedFields.map(({ name, parent }) => `<li>${name} in ${this.$store.getters['zones/byParent'](parent)}</li>`)}
+<ul>
+</p>
+`,
+        {
+          width: 450,
+        })
+    }
     this.$emit('update:runFmuWorkflows', toggled)
     if (toggled) {
       this._onlyUpdateFromFmu = false

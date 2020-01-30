@@ -180,6 +180,7 @@ interface RootGetters {
 
   simulationSettings: ({ field, zone }: { field?: GaussianRandomField, zone?: Zone }) => SimulationSettings
   'zones/byCode': (zoneNumber: number, regionNumber?: Optional<number>) => Parent
+  'zones/byParent': (parent: { zone: ID, region?: ID}) => Optional<Zone | Region>
 }
 
 export {
