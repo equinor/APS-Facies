@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
-import { debounce } from 'lodash'
 import store from '@/store'
 
 import { dumpState } from '@/utils/helpers/processing/export'
@@ -46,30 +45,4 @@ if (typeof rms !== 'undefined') {
       }
     }
   })
-
-  const changes: { name: string, action: () => Promise<void> }[] = [
-    {
-      name: 'Grid models',
-      action: (): Promise<void> => store.dispatch(
-        'refresh',
-        'Detected one, or more changes in RMS\' grid models, or their parameters.\nThe GUI refreshes.',
-      ),
-    },
-  ]
-
-  const onProjectChanged = debounce(
-    async (what: string[]): Promise<void> => {
-      await Promise.all(changes
-        .filter(({ name }) => what.includes(name))
-        .map(({ action }) => action())
-      )
-    },
-    2000,
-    {
-      trailing: true,
-    }
-  )
-
-  // @ts-ignore
-  rms.onProjectChanged(onProjectChanged)
 }
