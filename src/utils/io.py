@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from base64 import b64decode
 from os.path import exists
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -131,7 +130,7 @@ def create_temporary_model_file(model):
         delete=False,
     )
     try:
-        file.write(b64decode(model))
+        file.write(model.encode('ascii'))
         file.seek(0)
     finally:
         file.close()

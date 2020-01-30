@@ -1,8 +1,11 @@
+from base64 import b64decode
+
 from pathlib import Path
 from typing import Dict
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
+from src.utils.decorators import cached
 from src.utils.fmu import get_export_location, get_ert_location
 
 
@@ -39,8 +42,9 @@ class JobConfig:
         return self._config['errorMessage']
 
     @property
+    @cached
     def model(self):
-        return self._config['model']
+        return b64decode(self._config['model']).decode('UTF-8')
 
     @property
     def create_fmu_grid(self):
