@@ -11,7 +11,7 @@ U = TypeVar('U')
 ModelFile = NewType('ModelFile', str)
 ProbabilityLogSpecificationFile = NewType('ProbabilityLogSpecificationFile', str)
 OutputModelFile = NewType('OutputModelFile', str)
-GlobalIplFile = NewType('GlobalIplFile', str)
+GlobalVariablesFile = NewType('GlobalVariablesFile', str)
 RmsProjectDataFile = NewType('RmsProjectDataFile', str)
 TemporaryGaussianSimulation = NewType('TemporaryGaussianSimulation', str)
 FmuVariablesFile = NewType('FmuVariablesFile', str)
@@ -27,7 +27,7 @@ class RunParameters(NamedTuple):
     model_file: ModelFile
     output_model_file: OutputModelFile
     rms_data_file: RmsProjectDataFile
-    global_variables_file: GlobalIplFile
+    global_variables_file: GlobalVariablesFile
     tagged_variables_file: TaggedVariableFile
     tag_all_variables: bool
     fmu_variables_file: FmuVariablesFile
@@ -82,7 +82,7 @@ def get_model_file_name(
 def get_output_model_file(**kwargs) -> OutputModelFile: ...
 def get_seed_log_file(**kwargs) -> SeedLogFile: ...
 def get_debug_level(**kwargs) -> Debug: ...
-def get_global_ipl_file(**kwargs) -> GlobalIplFile: ...
+def get_global_variables_file(**kwargs) -> GlobalVariablesFile: ...
 def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile: ...
 def _get_value(kwargs: Dict[str, T], legal_kwargs: List[str], default_value: T) -> T: ...
 def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str) -> str: ...

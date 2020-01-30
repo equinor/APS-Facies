@@ -371,8 +371,9 @@ class UpdateTrends(FmuModelChanges):
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
-    aps_model = kwargs['aps_model']
     model_file = kwargs['model_file']
+    # Instantiate the APS model anew, as it may have been modified by `global_variables`
+    aps_model = kwargs['aps_model'] = APSModel(model_file)
     changes = FmuModelChanges([
         UpdateTrends(**kwargs),
         UpdateSimBoxThicknessInZones(**kwargs),

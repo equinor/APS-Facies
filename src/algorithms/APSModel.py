@@ -11,6 +11,7 @@ from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.numeric import isNumber
 from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
+from src.utils.io import GlobalVariables
 
 
 class APSModel:
@@ -532,7 +533,7 @@ class APSModel:
                 kw, value = keywords_read[j]
                 if kw == keyword:
                     # set new value
-                    item[1] = ' ' + value.strip() + ' '
+                    item[1] = value
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output:  Keywords and values that is updated in xml tree:')
 
@@ -547,7 +548,9 @@ class APSModel:
                 val = item[1]
                 if kw == key_word:
                     # Update value in XML tree for this keyword
-                    obj.text = val
+                    if isinstance(val, str):
+                        val = val.strip()
+                    obj.text = str(val)
                     found = True
                     break
             if found:
@@ -588,43 +591,23 @@ class APSModel:
                 zoneNumbers.append(zNumber)
 
     @staticmethod
-    def __readParamFromFile(inputFile, debug_level=Debug.OFF):
+    def __readParamFromFile(global_variables_file, debug_level=Debug.OFF):
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('- Read file: ' + inputFile)
-        nKeywords = 0
-        keywordsFMU = []
-        with open(inputFile, 'r') as file:
-            lines = file.readlines()
-
-            for line in lines:
-                words = line.split()
-                nWords = len(words)
-                if nWords < 3:
-                    # Skip line (searching for an assignment like keyword = value with at least 3 words
-                    continue
-                if words[0] == '//':
-                    # Skip line
-                    continue
-
-                if words[1] == '=':
-                    # This is assumed to be an assignment
-                    nKeywords += 1
-                    value = copy.copy(words[2])
-                    keyword = copy.copy(words[0])
-                    keywordsFMU.append([keyword, value])
+            print('- Read file: ' + global_variables_file)
+        keywords = GlobalVariables.parse(global_variables_file)
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Keywords and values found in parameter file:  ' + inputFile)
-            for item in keywordsFMU:
+            print('Debug output: Keywords and values found in parameter file:  ' + global_variables_file)
+            for item in keywords:
                 kw = item[0]
                 val = item[1]
                 print('  {0:30} {1:20}'.format(kw, val))
             print('')
         # End read file
 
-        return keywordsFMU
+        return keywords
 
     # ----- Properties ----
     @property
@@ -704,7 +687,7 @@ class APSModel:
                 uncertainty_name=name,
                 realisation=realisation_number
             )
-            item = (name, str(value))
+            item = (name, value)
             parametersUncertainty.append(item)
         return parametersUncertainty
 

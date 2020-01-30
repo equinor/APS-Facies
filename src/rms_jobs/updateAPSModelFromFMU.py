@@ -8,7 +8,7 @@ from src.utils.methods import get_run_parameters
 
 
 def update_aps_model_from_fmu(
-        global_ipl_file, input_aps_model_file, output_aps_model_file, debug_level=Debug.OFF,
+        global_variables_file, input_aps_model_file, output_aps_model_file, debug_level=Debug.OFF,
         project=None, workflow_name=None,
   ):
     # Create empty APSModel object
@@ -18,7 +18,7 @@ def update_aps_model_from_fmu(
     # is put into APSModel data structure but instead an updated XML data tree is returned.
     tree = aps_model.updateXMLModelFile(
         model_file_name=input_aps_model_file,
-        parameter_file_name=global_ipl_file,
+        parameter_file_name=global_variables_file,
         project=project,
         workflow_name=workflow_name,
         debug_level=debug_level,
@@ -32,7 +32,7 @@ def update_aps_model_from_fmu(
 def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     input_aps_model_file = params['model_file']
-    global_ipl_file = params['global_variables_file']
+    global_variables_file = params['global_variables_file']
     debug_level = params['debug_level']
     output_aps_model_file = params['output_model_file']
     workflow_name = params['workflow_name']
@@ -40,11 +40,13 @@ def run(roxar=None, project=None, **kwargs):
     print(
         'Updating {model_file} with the FMU parameters from {include_file}'.format(
             model_file=input_aps_model_file,
-            include_file=global_ipl_file,
+            include_file=global_variables_file,
         )
     )
     update_aps_model_from_fmu(
-        global_ipl_file, input_aps_model_file, output_aps_model_file,
+        global_variables_file,
+        input_aps_model_file,
+        output_aps_model_file,
         debug_level=debug_level,
         project=project,
         workflow_name=workflow_name,

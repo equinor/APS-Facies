@@ -18,6 +18,7 @@
     </v-row>
     <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
       <v-row
+        v-if="_onlyUpdateFromFmu"
         no-gutters
       >
         <v-col

@@ -88,7 +88,8 @@ class RMSData:
         return Path(self.project.filename).parent
 
     def get_fmu_parameter_list_dir(self):
-        return str((self._get_project_location()).absolute())
+        default_location = self._get_project_location() / '..' / '..' / 'fmuconfig' / 'output'
+        return str(default_location.absolute())
 
     def get_current_workflow_name(self):
         return self.roxar.rms.get_running_workflow_name()

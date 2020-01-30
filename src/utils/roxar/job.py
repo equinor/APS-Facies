@@ -3,7 +3,7 @@ from typing import Dict
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
-from src.utils.fmu import get_export_location
+from src.utils.fmu import get_export_location, get_ert_location
 
 
 class JobConfig:
@@ -90,9 +90,14 @@ class JobConfig:
         return Debug(self._config['parameters']['debugLevel']['selected'])
 
     @property
+    def _config_location(self):
+        if self.fmu_mode:
+            return get_ert_location() / '..' / '..' / 'fmuconfig' / 'output'
+        return Path(self._config['parameters']['path']['fmuParameterListLocation']['selected'])
+
+    @property
     def global_variables_file(self):
-        project_location = Path(self._config['parameters']['path']['project']['selected'])
-        config_location = project_location / '../input/config/aps_gui'
+        config_location = self._config_location
         file_priority = [
             'global_variables.yml',
             'global_variables.yaml',

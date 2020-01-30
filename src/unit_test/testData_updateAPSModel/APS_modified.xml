@@ -77,34 +77,34 @@
 
       <GaussField name="GF1">
         <Vario name="GAUSSIAN">
-          <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAINRANGE"> 750.0 </MainRange>
-          <PerpRange kw="APS_1_0_GF_GF1_RESIDUAL_PERPRANGE"> 650.0 </PerpRange>
-          <VertRange kw="APS_1_0_GF_GF1_RESIDUAL_VERTRANGE"> 4.5 </VertRange>
+          <MainRange kw="APS_1_0_GF_GF1_RESIDUAL_MAINRANGE">750.0</MainRange>
+          <PerpRange kw="APS_1_0_GF_GF1_RESIDUAL_PERPRANGE">650.0</PerpRange>
+          <VertRange kw="APS_1_0_GF_GF1_RESIDUAL_VERTRANGE">4.5</VertRange>
           <AzimuthAngle kw="APS_1_0_GF_GF1_RESIDUAL_AZIMUTHANGLE">0.0</AzimuthAngle>
-          <DipAngle kw="APS_1_0_GF_GF1_RESIDUAL_DIPANGLE"> 0.0 </DipAngle>
+          <DipAngle kw="APS_1_0_GF_GF1_RESIDUAL_DIPANGLE">0.0</DipAngle>
         </Vario>
         <Trend>
           <Elliptic3D>
-            <azimuth kw="APS_1_0_GF_GF1_TREND_AZIMUTH"> 325.0 </azimuth>
+            <azimuth kw="APS_1_0_GF_GF1_TREND_AZIMUTH">325.0</azimuth>
             <directionStacking>1</directionStacking>
-            <stackAngle kw="APS_1_0_GF_GF1_TREND_STACKANGLE"> 0.30 </stackAngle>
-            <curvature kw="APS_1_0_GF_GF1_TREND_CURVATURE"> 1.7 </curvature>
-            <origin_x kw="APS_1_0_GF_GF1_TREND_ORIGIN_X"> 0.6 </origin_x>
-            <origin_y kw="APS_1_0_GF_GF1_TREND_ORIGIN_Y"> 0.1 </origin_y>
-            <origin_z_simbox kw="APS_1_0_GF_GF1_TREND_ORIGIN_Z_SIMBOX"> 0.4 </origin_z_simbox>
+            <stackAngle kw="APS_1_0_GF_GF1_TREND_STACKANGLE">0.30</stackAngle>
+            <curvature kw="APS_1_0_GF_GF1_TREND_CURVATURE">1.7</curvature>
+            <origin_x kw="APS_1_0_GF_GF1_TREND_ORIGIN_X">0.6</origin_x>
+            <origin_y kw="APS_1_0_GF_GF1_TREND_ORIGIN_Y">0.1</origin_y>
+            <origin_z_simbox kw="APS_1_0_GF_GF1_TREND_ORIGIN_Z_SIMBOX">0.4</origin_z_simbox>
             <origintype>'Relative'</origintype>
           </Elliptic3D>
         </Trend>
-        <RelStdDev kw="APS_1_0_GF_GF1_TREND_RELSTDDEV"> 0.03 </RelStdDev>
+        <RelStdDev kw="APS_1_0_GF_GF1_TREND_RELSTDDEV">0.03</RelStdDev>
         <SeedForPreview>276787</SeedForPreview>
       </GaussField>
 
       <GaussField name="GF2">
         <Vario name="MATERN32">
-          <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE"> 800.0 </MainRange>
+          <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE">800.0</MainRange>
           <PerpRange>750.0</PerpRange>
           <VertRange>5.0</VertRange>
-          <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE"> 320.0 </AzimuthAngle>
+          <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">320.0</AzimuthAngle>
           <DipAngle>0.0</DipAngle>
         </Vario>
         <SeedForPreview>75151556</SeedForPreview>
@@ -131,9 +131,9 @@
             <WBF>F3</WBF>
             <BHD>F4</BHD>
             <Lagoon>F5</Lagoon>
-            <SF kw="APS_1_0_TRUNC_BAYFILL_SF"> 0.6 </SF>
-            <YSF kw="APS_1_0_TRUNC_BAYFILL_YSF"> 0.6 </YSF>
-            <SBHD kw="APS_1_0_TRUNC_BAYFILL_SBHD"> 0.2 </SBHD>
+            <SF kw="APS_1_0_TRUNC_BAYFILL_SF">0.6</SF>
+            <YSF kw="APS_1_0_TRUNC_BAYFILL_YSF">0.6</YSF>
+            <SBHD kw="APS_1_0_TRUNC_BAYFILL_SBHD">0.2</SBHD>
           </BackGroundModel>
         </Trunc3D_Bayfill>
       </TruncationRule>
@@ -221,19 +221,19 @@
             <AlphaFields>GF1 GF2</AlphaFields>
             <UseConstTruncParam>1</UseConstTruncParam>
             <Facies name="F1">
-              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_1_ANGLE"> 45.0 </Angle>
+              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_1_ANGLE">45.0</Angle>
               <ProbFrac>1.0</ProbFrac>
             </Facies>
             <Facies name="F2">
-              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_2_ANGLE"> 35.0 </Angle>
+              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_2_ANGLE">35.0</Angle>
               <ProbFrac>1.0</ProbFrac>
             </Facies>
             <Facies name="F5">
-              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_3_ANGLE"> 165.0 </Angle>
+              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_3_ANGLE">165.0</Angle>
               <ProbFrac>1.0</ProbFrac>
             </Facies>
             <Facies name="F4">
-              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_4_ANGLE"> 65.0 </Angle>
+              <Angle kw="APS_2_0_TRUNC_NONCUBIC_POLYNUMBER_4_ANGLE">65.0</Angle>
               <ProbFrac>1.0</ProbFrac>
             </Facies>
             <Facies name="F3">
