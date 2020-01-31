@@ -104,10 +104,13 @@ def check_and_normalise_probability(
 
     if (sum_probabilities_selected_cells == 0).any():
         name = 'APS_problematic_cells_in_probability_cubes'
+        grid = grid_model.get_grid(realization_number)
+        values = grid.generate_values(np.float32)
+        values[cell_index_defined] = sum_probabilities_selected_cells == 0
         set_continuous_3d_parameter_values(
             grid_model,
             name,
-            input_values=sum_probabilities_selected_cells == 0,
+            input_values=values,
             realisation_number=realization_number,
             debug_level=debug_level,
         )
