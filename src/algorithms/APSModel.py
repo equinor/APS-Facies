@@ -598,10 +598,10 @@ class APSModel:
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('- Read file: ' + global_variables_file)
+            print('- Read file: ' + str(global_variables_file))
         keywords = GlobalVariables.parse(global_variables_file)
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Keywords and values found in parameter file:  ' + global_variables_file)
+            print('Debug output: Keywords and values found in parameter file:  ' + str(global_variables_file))
             for item in keywords:
                 kw = item[0]
                 val = item[1]
@@ -1041,7 +1041,7 @@ class APSModel:
         with open(modelFileName, 'w') as file:
             file.write(root_updated)
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Write file: ' + modelFileName)
+            print('Write file: ' + str(modelFileName))
         if attributesFileName is not None:
             with open(attributesFileName, 'w') as attributes_file:
                 for fmu_attribute in fmu_attributes:
@@ -1051,7 +1051,7 @@ class APSModel:
 
     @staticmethod
     def writeModelFromXMLRoot(inputETree, outputModelFileName):
-        print('Write file: ' + outputModelFileName)
+        print('Write file: ' + str(outputModelFileName))
         root = inputETree.getroot()
         rootReformatted = minify(root)
         with open(outputModelFileName, 'w', encoding='utf-8') as file:

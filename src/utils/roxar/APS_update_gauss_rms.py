@@ -24,7 +24,7 @@ def run_main(
     realization_number = project.current_realisation
 
     # Read APS model
-    print('- Read file: ' + model_file)
+    print('- Read file: ' + str(model_file))
     apsModel = APSModel(model_file)
     debug_level = apsModel.debug_level
 
