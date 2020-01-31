@@ -219,7 +219,9 @@ class APSModel:
     @classmethod
     def from_string(cls, xml_content, debug_level=Debug.OFF):
         root = ET.fromstring(xml_content)
-        return cls().__interpretTree(root, debug_level)
+        model = cls()
+        model.__interpretTree(root, debug_level)
+        return model
 
     def __interpretTree(self, root, debug_level=Debug.OFF, modelFileName=None):
         self.__ET_Tree = ET.ElementTree(root)
