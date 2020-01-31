@@ -52,7 +52,6 @@ import BaseTable from '@/components/baseComponents/BaseTable.vue'
 import Facies, { ProbabilityCube } from '@/utils/domain/facies/local'
 import { Store } from '@/store/typing'
 import { HeaderItems, ListItem } from '@/utils/typing'
-import { ID } from '@/utils/domain/types'
 
 import { hasCurrentParents } from '@/utils'
 
@@ -87,15 +86,9 @@ export default class FaciesProbabilityCubeTable extends Vue {
     return !(this.$store as Store).getters['facies/constantProbability']()
   }
 
-  get items (): {id: ID, name: string }[] {
+  get items (): Facies[] {
     return this.facies
-      .map(item => {
-        return {
-          id: item.id,
-          name: item.name,
-          ...item,
-        }
-      })
+      .sort((a, b) => a.code - b.code)
   }
 
   get noDataText (): string {
