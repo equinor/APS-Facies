@@ -97,7 +97,7 @@ def check_and_normalise_probability(
         setContinuous3DParameterValues(
             grid_model,
             name,
-            inputValues=all_values == 0,
+            inputValues=sum_probabilities_selected_cells == 0,
             realNumber=realization_number,
             debug_level=debug_level,
         )
