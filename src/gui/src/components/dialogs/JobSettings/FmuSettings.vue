@@ -200,7 +200,7 @@ export default class FmuSettings extends Vue {
       (this.$refs.confirm as WarningDialog).open(
         'Be aware',
         `
-<p>Some Gaussian Random Fields are using a custom Trend ('RMS_PARAM'), which is not supported in ERT-mode.</p>
+<p>Some Gaussian Random Fields are using a custom Trend ('RMS_PARAM'), which is not supported in AHM-mode.</p>
 <p>More specifically, these fields uses custom trends
 <ul>
   ${affectedFields.map(({ name, parent }) => `<li>${name} in ${this.$store.getters['zones/byParent'](parent)}</li>`)}
