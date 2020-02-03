@@ -1,3 +1,4 @@
+import { Zone } from '@/utils/domain'
 import GridModel from '@/utils/domain/gridModel'
 import { FmuLayersState } from './typing'
 import { Maybe, Optional } from '@/utils/typing'
@@ -9,16 +10,24 @@ const module: Module<FmuLayersState, RootState> = {
 
   state: {
     value: null,
+    minimum: 0,
   },
 
   actions: {
-    async fetch ({ dispatch, rootGetters }, value: Maybe<number> = undefined): Promise<void> {
+    async fetch ({ dispatch, commit, rootGetters }, value: Maybe<number> = undefined): Promise<void> {
       if (value && value !== 0) {
         await dispatch('set', value)
       } else {
-        const grid: Optional<GridModel> = rootGetters['gridModels/current']
-        if (grid) {
-          await dispatch('set', grid.dimension.z)
+        const zones: Zone[] = rootGetters.zones
+        if (zones.length > 0) {
+          const minimum = zones.reduce((max, { thickness }) => thickness > max ? thickness : max, -Infinity)
+          await dispatch('set', minimum)
+          commit('MINIMUM', minimum)
+        } else {
+          const grid: Optional<GridModel> = rootGetters['gridModels/current']
+          if (grid) {
+            await dispatch('set', grid.dimension.z)
+          }
         }
       }
     },
@@ -35,6 +44,9 @@ const module: Module<FmuLayersState, RootState> = {
   mutations: {
     SET (state, value): void {
       state.value = value
+    },
+    MINIMUM (state, value): void {
+      state.minimum = value
     },
   },
 }

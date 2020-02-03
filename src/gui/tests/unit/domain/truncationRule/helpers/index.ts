@@ -9,8 +9,16 @@ export function generateFields (num: number, zone: Zone): GaussianRandomField[] 
     .map((_, index) => new GaussianRandomField({ name: `GRF${index + 1}`, channel: index, zone }))
 }
 
-export function selectedZone ({ code = 0, name = 'Upper' }: { code?: CODE, name?: string} = {}): Zone {
-  return new Zone({ code, name })
+export function selectedZone ({
+  thickness = 0,
+  code = 0,
+  name = 'Upper',
+}: {
+  code?: CODE
+  name?: string
+  thickness?: number
+} = {}): Zone {
+  return new Zone({ code, name, thickness })
 }
 
 export function createFacies (num: number): GlobalFacies[] {

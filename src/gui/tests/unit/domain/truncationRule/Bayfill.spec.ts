@@ -6,7 +6,7 @@ import Bayfill from '@/utils/domain/truncationRule/bayfill'
 import { identify } from '@/utils/helpers'
 import { createFacies, generateFields, selectedZone } from './helpers'
 
-const zone = selectedZone({ code: 0, name: 'Upper' })
+const zone = selectedZone({ code: 0, name: 'Upper', thickness: 12 })
 
 const facies = createFacies(5)
 

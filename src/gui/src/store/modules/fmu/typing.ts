@@ -3,6 +3,7 @@ import { Optional } from '@/utils/typing'
 
 export interface FmuLayersState {
   value: Optional<number>
+  minimum: number
 }
 
 export interface SimulationGridModelsState {

@@ -98,7 +98,7 @@
             <v-col cols="6">
               <numeric-field
                 v-model="_maxLayersInFmu"
-                :ranges="{ min: 0, max: Number.POSITIVE_INFINITY }"
+                :ranges="{ min: minimumErtLayers, max: Number.POSITIVE_INFINITY }"
                 :disabled="!createFmuGrid"
                 :required="createFmuGrid"
                 label="Number of layers in FMU simulation box grid"
@@ -220,6 +220,8 @@ export default class FmuSettings extends Vue {
   get _maxLayersInFmu (): number { return this.maxLayersInFmu }
   set _maxLayersInFmu (value: number) { this.$emit('update:maxLayersInFmu', value) }
 
+  get minimumErtLayers (): number { return (this.$store as Store).state.fmu.maxDepth.minimum }
+
   get _importFields (): FieldUsage {
     if (this.importFields) return 'import'
     else return 'generate'
@@ -259,7 +261,7 @@ export default class FmuSettings extends Vue {
   get availableGridModels (): GridModel[] { return Object.values((this.$store as Store).state.gridModels.available) }
 
   get fmuGrids (): ListItem<string>[] {
-    const selectedGrid = this.$store.getters['gridModels/current']
+    const selectedGrid = (this.$store as Store).getters['gridModels/current']
     if (!selectedGrid) return []
 
     const dimension = selectedGrid.dimension
@@ -271,6 +273,9 @@ export default class FmuSettings extends Vue {
           disabled: !(
             grid.dimension.x === dimension.x
             && grid.dimension.y === dimension.y
+            && grid.dimension.z >= this.minimumErtLayers
+            && grid.name !== selectedGrid.name
+            && grid.zones === 1
           ),
         }
       })

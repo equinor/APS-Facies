@@ -29,10 +29,9 @@ const module: Module<GridParameterState, RootState> = {
       commit('_WAITING', true)
       const grid: Optional<GridModel> = rootGetters['gridModels/current']
       if (grid) {
-        const { x, y, z } = grid.dimension
-        await dispatch('fmu/maxDepth/fetch', z, { root: true })
+        await dispatch('fmu/maxDepth/fetch', undefined, { root: true })
         const azimuth = await dispatch('simBox/fetch', rough)
-        await dispatch('populate', { azimuth, size: { x, y, z } })
+        await dispatch('populate', { azimuth, size: grid.dimension })
       }
       commit('_WAITING', false)
     },

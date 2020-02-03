@@ -113,7 +113,11 @@ class RMSData:
         models = []
         for grid_model in grid_models:
             name = grid_model.name
-            models.append({'name': name, 'exists': self.grid_exists(name)})
+            models.append({
+                'name': name,
+                'exists': self.grid_exists(name),
+                'zones': len(grid_model.get_grid(self.project.current_realisation).zone_names),
+            })
         return models
 
     def get_realization_parameters(self, grid_model_name):
@@ -162,12 +166,15 @@ class RMSData:
 
     def get_zones(self, grid_model_name):
         grid = self.get_grid(grid_model_name)
-        return [
-            {
+        zones = []
+        for key, zonations in grid.simbox_indexer.zonation.items():
+            zonation, *_reverse = zonations
+            zones.append({
                 'code': key + 1,
-                'name': grid.zone_names[key]
-            } for key in grid.simbox_indexer.zonation
-        ]
+                'name': grid.zone_names[key],
+                'thickness': zonation.stop - zonation.start,
+            })
+        return zones
 
     def get_regions(self, grid_model_name, zone_name, region_parameter):
         # TODO: Ensure that available regions depends on zone
