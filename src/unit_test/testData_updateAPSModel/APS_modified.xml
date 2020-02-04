@@ -15,13 +15,13 @@
 
   <RMSProjectName>testAPSWorkflow.rms10.1.3</RMSProjectName>
   <RMSWorkflowName>Example_APS_gridmodel2_unconditioned</RMSWorkflowName>
-  <GridModelName>GridModel2</GridModelName>
+  <GridModelName>GridModelCoarse</GridModelName>
   <ZoneParamName>Zone</ZoneParamName>
   <ResultFaciesParamName>FaciesReal_unconditioned</ResultFaciesParamName>
   <PrintInfo>3</PrintInfo>
   <SeedFile>seed.dat</SeedFile>
   <WriteSeeds>yes</WriteSeeds>
-  <MainFaciesTable blockedWell="BW" blockedWellLog="facies">
+  <MainFaciesTable blockedWell="BW" blockedWellLog="Facies">
     <Facies name="F1">
       <Code>1</Code>
     </Facies>
