@@ -5,7 +5,10 @@ import numpy as np
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.methods import get_specification_file
-from src.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values
+from src.utils.roxar.generalFunctionsUsingRoxAPI import (
+    set_continuous_3d_parameter_values,
+    set_discrete_3d_parameter_values,
+)
 from src.utils.roxar.grid_model import (
     getContinuous3DParameterValues,
     getDiscrete3DParameterValues,
@@ -105,12 +108,16 @@ def check_and_normalise_probability(
     if (sum_probabilities_selected_cells == 0).any():
         name = 'APS_problematic_cells_in_probability_cubes'
         grid = grid_model.get_grid(realization_number)
-        values = grid.generate_values(np.float32)
+        values = grid.generate_values(np.uint8)
         values[cell_index_defined] = sum_probabilities_selected_cells == 0
-        set_continuous_3d_parameter_values(
+        set_discrete_3d_parameter_values(
             grid_model,
             name,
             input_values=values,
+            code_names={
+                0: 'OK',
+                1: 'Problematic',
+            },
             realisation_number=realization_number,
             debug_level=debug_level,
         )
