@@ -20,7 +20,7 @@ from src.utils.grid import update_rms_parameter
 from src.utils.methods import calc_average, get_specification_file
 from src.utils.records import Probability
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
-    updateDiscrete3DParameterValues,
+    update_discrete_3d_parameter_values,
 )
 from src.utils.roxar.grid_model import (
     get3DParameter, getContinuous3DParameterValues,
@@ -607,9 +607,9 @@ def run(
     # Overwrite the existing facies realization, but note that now the facies_real should contain values
     # equal to the original facies realization for all cells that is not updated
     #  (not belonging to (zones, regions) that is updated)
-    updateDiscrete3DParameterValues(
-        grid_model, result_param_name, facies_real, faciesTable=code_names,
-        realNumber=realization_number, isShared=False, setInitialValues=False,
+    update_discrete_3d_parameter_values(
+        grid_model, result_param_name, facies_real, facies_table=code_names,
+        realisation_number=realization_number, is_shared=False, set_initial_values=False,
         debug_level=debug_level,
     )
     if debug_level >= Debug.SOMEWHAT_VERBOSE:

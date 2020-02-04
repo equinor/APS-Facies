@@ -11,7 +11,7 @@ from src.utils.constants.simple import Debug
 from src.utils.io import ensure_folder_exists
 from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
-    setContinuous3DParameterValuesInZoneRegion,
+    set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
 )
 from src.utils.roxar.grid_model import GridAttributes
@@ -153,15 +153,15 @@ def run_simulations(
                     f'({zone_number}, {region_number})\n'
                 )
 
-        setContinuous3DParameterValuesInZoneRegion(
+        set_continuous_3d_parameter_values_in_zone_region(
             grid_model,
             gauss_field_names,
             gauss_result_list_for_zone,
             zone_number,
-            regionNumber=region_number,
-            regionParamName=aps_model.region_parameter,
-            realNumber=realisation,
-            isShared=is_shared,
+            region_number=region_number,
+            region_parameter_name=aps_model.region_parameter,
+            realisation_number=realisation,
+            is_shared=is_shared,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
         )

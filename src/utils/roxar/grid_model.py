@@ -181,7 +181,7 @@ def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realizati
     """
     Input:
            grid_model     - Grid model object
-           parameterName - Name of 3D parameter to get.
+           parameter_name - Name of 3D parameter to get.
 
            zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
                             included in the list, then grid cells in all zones are updated.
@@ -219,7 +219,7 @@ def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realiz
     """
     Input:
            grid_model     - Grid model object
-           parameterName - Name of 3D parameter to get.
+           parameter_name - Name of 3D parameter to get.
 
            zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
                             included in the list, then grid cells in all zones are updated.

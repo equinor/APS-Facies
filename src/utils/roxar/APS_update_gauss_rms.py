@@ -6,7 +6,7 @@ import numpy as np
 from src.algorithms.APSModel import APSModel
 from src.utils.methods import get_run_parameters
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValuesInZone
+from src.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values_in_zone
 from src.utils.constants.simple import Debug
 
 
@@ -63,9 +63,9 @@ def run_main(
             if debug_level >= Debug.ON:
                 print(f'-- Update RMS parameter: {gaussFieldName} for zone: {zoneNumber}')
             gaussResultListForZone.append(gaussResult)
-        setContinuous3DParameterValuesInZone(
+        set_continuous_3d_parameter_values_in_zone(
             gridModel, gaussFieldNames, gaussResultListForZone, zoneNumber - 1,
-            realNumber=realization_number, isShared=isShared, debug_level=debug_level
+            realisation_number=realization_number, is_shared=isShared, debug_level=debug_level
         )
         # End loop over gauss fields for one zone
     # End loop over all active zones in the model

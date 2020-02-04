@@ -5,7 +5,7 @@ import numpy as np
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.methods import get_specification_file
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
+from src.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values
 from src.utils.roxar.grid_model import (
     getContinuous3DParameterValues,
     getDiscrete3DParameterValues,
@@ -104,11 +104,11 @@ def check_and_normalise_probability(
 
     if (sum_probabilities_selected_cells == 0).any():
         name = 'APS_problematic_cells_in_probability_cubes'
-        setContinuous3DParameterValues(
+        set_continuous_3d_parameter_values(
             grid_model,
             name,
-            inputValues=sum_probabilities_selected_cells == 0,
-            realNumber=realization_number,
+            input_values=sum_probabilities_selected_cells == 0,
+            realisation_number=realization_number,
             debug_level=debug_level,
         )
         parameter_names = format_names(probability_parameter_per_facies.values())
@@ -257,7 +257,7 @@ def check_and_normalize_probabilities_for_APS(
         if not overwrite:
             parameter_name = parameter_name + '_norm'
         zone_number_list = []
-        if not setContinuous3DParameterValues(grid_model, parameter_name, parameter_values, zone_number_list, realization_number, isShared=True):
+        if not set_continuous_3d_parameter_values(grid_model, parameter_name, parameter_values, zone_number_list, realization_number, is_shared=True):
             raise IOError(f'Can not update parameter {parameter_name}')
         else:
             if debug_level >= Debug.ON:
