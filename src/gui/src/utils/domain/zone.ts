@@ -14,6 +14,7 @@ export type ZoneConformOption = 'top' | 'bottom' | 'proportional' | null
 export interface ZoneSerialization extends SelectableSerialization {
   regions: RegionSerialization[] | null
   conformity: ZoneConformOption
+  thickness: number
 }
 
 export interface RegionSerialization extends SelectableSerialization {
@@ -41,16 +42,24 @@ export class Region extends SelectableItem {
 }
 
 export interface ZoneConfiguration extends SelectableItemConfiguration {
+  thickness: number
   regions?: Region[] | null
   conformity?: ZoneConformOption
 }
 
 export default class Zone extends SelectableItem {
   private _regions: Regions
+  public readonly thickness: number
   public conformity: ZoneConformOption
 
-  public constructor ({ regions = null, conformity = null, ...rest }: ZoneConfiguration) {
+  public constructor ({
+    thickness,
+    regions = null,
+    conformity = null,
+    ...rest
+  }: ZoneConfiguration) {
     super(rest)
+    this.thickness = thickness
     this._regions = regions ? identify(regions) : {}
     this.conformity = conformity
   }
@@ -90,6 +99,7 @@ export default class Zone extends SelectableItem {
       ...super.toJSON(),
       regions: this.regions.length > 0 ? this.regions.map((region): RegionSerialization => region.toJSON()) : null,
       conformity: this.conformity,
+      thickness: this.thickness,
     }
   }
 }

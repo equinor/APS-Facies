@@ -19,6 +19,39 @@ const migrations: Migration[] = [
       state.parameters.maxAllowedFractionOfValuesOutsideTolerance.selected = tolerance
       return state
     },
+  },
+  {
+    from: '1.1.0',
+    to: '1.2.0',
+    up: async (state) => {
+      async function addZoneThicknesses (): Promise<void> {
+        const gridModelId = state.gridModels.current
+        if (!gridModelId) return state
+        const gridModel = state.gridModels.available[gridModelId]
+        const zones = (await rms.zones(gridModel.name)).reduce((mapping, zone) => {
+          mapping[zone.code] = zone.thickness
+          return mapping
+        }, ({} as { [code: number]: number }))
+        Object.values(state.zones.available).forEach((zone: any) => {
+          zone.thickness = zones[zone.code]
+        })
+      }
+      // Add number of zones to gird models
+      async function addNumberOfZonesToGrids (): Promise<void> {
+        const mapping = (await rms.gridModels()).reduce((mapping, gridModel) => {
+          mapping[gridModel.name] = gridModel.zones
+          return mapping
+        }, ({} as { [name: string]: number }))
+        Object.values(state.gridModels.available).forEach((gridModel: any) => {
+          gridModel.zones = mapping[gridModel.name]
+        })
+      }
+      await Promise.all([
+        addZoneThicknesses(),
+        addNumberOfZonesToGrids(),
+      ])
+      return state
+    },
   }
 ]
 
