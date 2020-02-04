@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from typing import Optional, List
+
+
 def running_in_batch_mode():
     try:
         import roxar.rms
@@ -74,3 +77,26 @@ def get_common_python_packages_path():
             python_version=python_version,
         )
     )
+
+
+def import_module(name: str, dependencies: Optional[List[str]] = None) -> None:
+    from src.utils.roxar import get_common_python_packages_path
+    path = get_common_python_packages_path()
+    if path is None:
+        raise ImportError
+
+    import sys
+    import importlib.machinery
+    if dependencies is None:
+        dependencies = []
+
+    for name in [*reversed(dependencies), name]:
+        try:
+            del sys.modules[name]
+        except KeyError:
+            pass
+
+        spec = importlib.util.spec_from_file_location(name, f'{path}/{name}/__init__.py')
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
