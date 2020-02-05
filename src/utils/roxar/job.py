@@ -1,4 +1,6 @@
+import json
 from base64 import b64decode
+from functools import wraps
 
 from pathlib import Path
 from typing import Dict
@@ -133,3 +135,16 @@ class JobConfig:
                 not self.run_fmu_workflows
                 or self.debug_level >= Debug.ON
         )
+
+    def to_json(self):
+        return json.dumps(self._config)
+
+
+def classify_job_configuration(roxar, project):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(config: dict):
+            config = JobConfig(roxar, project, config)
+            func(config)
+        return wrapper
+    return decorator

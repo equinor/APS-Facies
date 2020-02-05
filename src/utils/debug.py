@@ -1,9 +1,7 @@
-import json
 import random
 import string
 import time
 import traceback
-from base64 import b64decode
 from pathlib import Path
 from typing import Union
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -21,7 +19,6 @@ def dump_debug_information(config):
         second=when.tm_sec,
         random=''.join(random.choices(string.ascii_letters) + random.choices(string.digits, k=5)),
     )
-    model = config['model']
     with ZipFile(prefix + '.zip', mode='x', compression=ZIP_DEFLATED) as zipfile:
         def dump(file_name: str, data: Union[str, bytes], encoding: str = 'UTF-8') -> None:
             path = Path(prefix) / file_name
@@ -32,6 +29,6 @@ def dump_debug_information(config):
                     data += b'\n'
                 f.write(data)
 
-        dump('model.xml', b64decode(model))
-        dump('state.json', json.dumps(config))
+        dump('model.xml', config.model)
+        dump('state.json', config.to_json())
         dump('traceback.txt', traceback.format_exc())

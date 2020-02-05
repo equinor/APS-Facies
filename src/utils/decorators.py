@@ -19,12 +19,12 @@ def cached(func):
 def loggable(func):
     @wraps(func)
     def wrapper(config):
-        if config['errorMessage']:
+        if config.error_message:
             return func(config)
         try:
             return func(config)
         except Exception as e:
-            if config['parameters']['debugLevel']['selected'] >= Debug.ON:
+            if config.debug_level >= Debug.ON:
                 dump_debug_information(config)
             raise e
 
