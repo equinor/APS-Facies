@@ -7,7 +7,7 @@ def run(roxar=None, project=None, **kwargs):
     file_name1 = kwargs.get('file_name1', 'examples/reference_uncertainty_parameter_list.dat')
     file_name2 = kwargs.get('file_name2', 'tmp_Test_APS_uncertainty_workflow.dat')
 
-    print('Compare file: ' + file_name1 + ' and ' + file_name2)
+    print(f'Compare file: {file_name1} and {file_name2}')
     check = compare(file_name1, file_name2)
 
     write_status_file(check)

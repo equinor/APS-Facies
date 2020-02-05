@@ -29,24 +29,11 @@ class APSModel:
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
             previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF):
 
-
-      def updateXMLModelFile(self, modelFileName, parameter_file_name, debug_level=Debug.OFF)
-                - Read xml model file and IPL parameter file and write
-                  updated xml model file without putting any data into the data structure.
-
-
       def createSimGaussFieldIPL()
                 - Write IPL file to simulate gaussian fields
 
       def XMLAddElement(self,root)
                 - Add data to xml tree
-
-      def writeModel(self,modelFileName, debug_level=Debug.OFF)
-                - Create xml tree with model specification by calling XMLAddElement
-                - Write xml tree with model specification to file
-
-      def writeModelFromXMLRoot(self,inputETree,outputModelFileName)
-                - Write specified xml tree to file
 
       Properties:
         debug_level
@@ -68,7 +55,7 @@ class APSModel:
        def getZoneModel(self,zoneNumber,regionNumber=0)
        def getAllZoneModels(self)
        def sorted_zone_models(self)
-       def getGridModelName(self)
+       def grid_model_name(self)
        def getResultFaciesParamName(self)
        def getZoneNumberList(self)
        def getRegionNumberListForSpecifiedZoneNumber(self,zoneNumber)
@@ -89,7 +76,7 @@ class APSModel:
        def setRmsGridModelName(self,name)
        def setRmsZoneParamName(self,name)
        def setRmsResultFaciesParamName(self,name)
-       def setSelectedZoneAndRegionNumber(self, selectedZoneNumber,selectedRegionNumber=0)
+       def setSelectedZoneAndRegionNumber(self, zone_number,region_number=0)
        def setPreviewZoneAndRegionNumber(self, zoneNumber,regionNumber=0)
        def addNewZone(self,zoneObject)
        def deleteZone(self,zoneNumber)
@@ -97,8 +84,6 @@ class APSModel:
 
 
     Private member functions:
-     def __interpretXMLModelFile(self,modelFileName, debug_level)
-                 - Read xml file and put the data into data structure
      def __checkZoneModels(self)
                  - Check that an APSModel does not have specifications of zone models for (zone,region) pairs that are overlapping.
                    Hence, it is not allowed to specify (zone=1, region=0) and (zone=1, region=0).
@@ -106,9 +91,6 @@ class APSModel:
                    The second (zone=1, region=1) means that the zone model is defined for those grid cells belonging to zone=1
                    and at the same time to region=1. It follows that all grid cells belonging to zone=1 and region=1
                    have two different models which is not unique and not allowed.
-
-     def __readParamFromFile(self,inputFile,debug_level)
-                 - Read IPL include file to get updated model parameters from FMU
 
     -----------------------------------------------------------------------------
     """
@@ -137,7 +119,7 @@ class APSModel:
     ):
         """
          The following parameters are necessary to define a model:
-         If a model is created from a model file, the only necessary input is modelFileName
+         If a model is created from a model file, the only necessary input is model_file_name
 
          If the model is created from e.g APSGUI, these parameters must be specified:
          rmsProjectName - Name of RMS project which will run a workflow using the APS method (Now Optional)
@@ -206,15 +188,16 @@ class APSModel:
 
         # Read model if it is defined
         if model_file_name is not None:
-            self.__interpretXMLModelFile(model_file_name, debug_level=debug_level)
+            self.__parse_model_file(model_file_name, debug_level=debug_level)
 
     @property
     def use_constant_probability(self):
         return all([model.useConstProb() for model in self.__zoneModelTable.values()])
 
-    def __interpretXMLModelFile(self, modelFileName, debug_level=Debug.OFF):
-        root = ET.parse(modelFileName).getroot()
-        self.__interpretTree(root, debug_level, modelFileName)
+    def __parse_model_file(self, model_file_name, debug_level=Debug.OFF):
+        """ Read xml file and put the data into data structure """
+        root = ET.parse(model_file_name).getroot()
+        self.__interpretTree(root, debug_level, model_file_name)
 
     @classmethod
     def from_string(cls, xml_content, debug_level=Debug.OFF):
@@ -223,19 +206,16 @@ class APSModel:
         model.__interpretTree(root, debug_level)
         return model
 
-    def __interpretTree(self, root, debug_level=Debug.OFF, modelFileName=None):
+    def __interpretTree(self, root, debug_level=Debug.OFF, model_file_name=None):
         self.__ET_Tree = ET.ElementTree(root)
         if root.tag != 'APSModel':
-            raise ValueError(
-                'The root element must be APSModel'
-            )
+            raise ValueError('The root element must be APSModel')
         apsmodel_version = root.get('version')
         if apsmodel_version is None:
             raise ValueError('attribute version is not defined in root element')
         elif apsmodel_version != "1.0":
             raise ValueError(
-                'Illegal value ( {} ) specified for apsmodelversion (only 1.0 is supported)'
-                ''.format(apsmodel_version)
+                f'Illegal value ( {apsmodel_version} ) specified for apsmodelversion (only 1.0 is supported)'
             )
         self.__aps_model_version = apsmodel_version
 
@@ -302,7 +282,7 @@ class APSModel:
         ]
         for keyword, variable, required in placement:
             prefix = '_' + self.__class__.__name__
-            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=modelFileName, required=required)
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=model_file_name, required=required)
             setattr(self, prefix + variable, value)
 
         # Read keyword for region parameter
@@ -314,7 +294,7 @@ class APSModel:
             root, keyword,
             parentKeyword='APSModel',
             defaultText=None,
-            modelFile=modelFileName,
+            modelFile=model_file_name,
             required=len(zones_with_region_attr) > 0
         )
         if value is not None:
@@ -322,32 +302,28 @@ class APSModel:
 
         # Read optional keyword to specify name of seed file
         keyword = 'SeedFile'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat', modelFile=modelFileName, required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat', modelFile=model_file_name, required=False)
         self.__seed_file_name = value
 
         # Read optional keyword to specify the boolean variable write_seeds
         keyword = 'WriteSeeds'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=modelFileName, required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=model_file_name, required=False)
         if value.upper() == 'YES':
             self.write_seeds = True
         else:
             self.write_seeds = False
 
         # Read all facies names available
-        self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=modelFileName)
+        self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=model_file_name)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print(
-                'Debug output: RMSGridModel:                       {}\n'
-                'Debug output: RMSZoneParamName:                   {}\n'
-                'Debug output: RMSFaciesParamName:                 {}\n'
-                'Debug output: RMSRegionParamName:                 {}\n'
-                'Debug output: Name of RMS project read:           {}\n'
-                'Debug output: Name of RMS workflow read:          {}'
-                ''.format(
-                    self.__rmsGridModelName, self.__rmsZoneParamName, self.__rmsFaciesParamName,
-                    self.__rmsRegionParamName, self.__rmsProjectName, self.__rmsWorkflowName
-                )
+                f'Debug output: RMSGridModel:                       {self.__rmsGridModelName}\n'
+                f'Debug output: RMSZoneParamName:                   {self.__rmsZoneParamName}\n'
+                f'Debug output: RMSFaciesParamName:                 {self.__rmsFaciesParamName}\n'
+                f'Debug output: RMSRegionParamName:                 {self.__rmsRegionParamName}\n'
+                f'Debug output: Name of RMS project read:           {self.__rmsProjectName}\n'
+                f'Debug output: Name of RMS workflow read:          {self.__rmsWorkflowName}'
             )
 
         # Read all zones for models specifying main level facies
@@ -355,29 +331,25 @@ class APSModel:
         zModels = root.find('ZoneModels')
         if zModels is None:
             raise IOError(
-                'Error when reading model file: {}\n'
+                f'Error when reading model file: {model_file_name}\n'
                 'Error: Missing keyword ZoneModels'
-                ''.format(modelFileName)
             )
 
         # --- Zone ---
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('')
-            print('--- Number of specified zone models: {}'.format(len(zModels.findall('Zone'))))
-            print('')
+            print(f"\n--- Number of specified zone models: {len(zModels.findall('Zone'))}\n")
 
         for zone in zModels.findall('Zone'):
             if zone is None:
                 raise IOError(
-                    'Error when reading model file: {}\n'
+                    f'Error when reading model file: {model_file_name}\n'
                     'Error: Missing keyword Zone in keyword ZoneModels'
-                    ''.format(modelFileName)
                 )
             zone_number = int(zone.get('number'))
             if zone_number <= 0:
                 raise ValueError(
                     'Zone number must be a positive integer. '
-                    'Can not have zone number: {}'.format(zone_number)
+                    f'Can not have zone number: {zone_number}'
                 )
             region_number = get_region_number(zone)
 
@@ -389,33 +361,32 @@ class APSModel:
                     print('')
                     print('')
                     if region_number <= 0:
-                        print('Debug output: ---- Read zone model for zone number: {}'.format(zone_number))
+                        print(f'Debug output: ---- Read zone model for zone number: {zone_number}')
                     else:
                         print(
-                            'Debug output: ---- Read zone model for (zone,region) number: ({},{})'
-                            ''.format(zone_number, region_number)
+                            f'Debug output: ---- Read zone model for (zone, region) number: '
+                            f'({zone_number}, {region_number})'
                         )
 
                 zone_model = APSZoneModel(
                     ET_Tree=self.__ET_Tree,
                     zoneNumber=zone_number,
                     regionNumber=region_number,
-                    modelFileName=modelFileName
+                    modelFileName=model_file_name
                 )
                 # This zoneNumber, regionNumber combination is not defined previously
                 # and must be added to the dictionary
                 self.__zoneModelTable[zoneModelKey] = zone_model
             else:
                 raise ValueError(
-                    'Can not have two or more entries of  keyword Zone with the same '
-                    'zoneNumber and regionNumber.\n'
-                    'Can not have multiple specification of (zoneNumber, regionNumber) = ({},{})'
-                    ''.format(zone_number, region_number)
+                    'Can not have two or more entries of keyword Zone with the same zoneNumber and regionNumber.\n'
+                    f'Can not have multiple specification of '
+                    f'(zoneNumber, regionNumber) = ({zone_number}, {region_number})'
                 )
 
         # --- SelectedZones ---
         kw = 'SelectedZonesAndRegions'
-        obj = getKeyword(root, kw, modelFile=modelFileName, required=False)
+        obj = getKeyword(root, kw, modelFile=model_file_name, required=False)
         if obj is not None:
             # The keyword is specified. This means that in general a subset of
             # all zones and region combinations are selected.
@@ -434,9 +405,9 @@ class APSModel:
                     zone_model = self.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
                     if zone_model is None:
                         raise ValueError(
-                            'Can not select to use zone model with zone number: {} and region number: {} '
+                            f'Can not select to use zone model with zone number: {zone_number} '
+                            f'and region number: {region_number} '
                             'This zone model is not defined'
-                            ''.format(zone_number, region_number)
                         )
                     # A model for (zoneNumber,regionNumber=0) is defined
                     selected_key = (zone_number, region_number)
@@ -450,9 +421,9 @@ class APSModel:
                             zone_model = self.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
                             if zone_model is None:
                                 raise ValueError(
-                                    'Can not select to use zone model with zone number: {} and region number: {} '
+                                    'Can not select to use zone model with '
+                                    f'zone number: {zone_number} and region number: {region_number} '
                                     'This zone model is not defined'
-                                    ''.format(str(zone_number), str(region_number))
                                 )
                             # A model for this (zoneNumber,regionNumber) pair is defined
                             selected_key = (zone_number, region_number)
@@ -478,14 +449,12 @@ class APSModel:
                     zone_number = key[0]
                     region_number = key[1]
                     if region_number == 0:
-                        print('    Zone: {}'.format(zone_number))
+                        print(f'    Zone: {zone_number}')
                     else:
-                        print('    Zone: {}  Region: {}'.format(zone_number, region_number))
-            print('')
-            print('------------ End reading model file in APSModel ------------------')
-            print('')
+                        print(f'    Zone: {zone_number}  Region: {region_number}')
+            print('\n------------ End reading model file in APSModel ------------------\n')
 
-    def updateXMLModelFile(
+    def update_model_file(
             self,
             model_file_name=None,
             parameter_file_name=None,
@@ -495,6 +464,10 @@ class APSModel:
             realisation_number=0,
             debug_level=Debug.OFF,
     ):
+        """
+        Read xml model file and IPL parameter file and write updated xml model file
+        without putting any data into the data structure.
+        """
         # Read XML model file
         tree = ET.parse(model_file_name)
         root = tree.getroot()
@@ -518,7 +491,7 @@ class APSModel:
 
         # Read keywords from parameter_file_name (Global IPL include file with variables updated by FMU/ERT)
         if parameter_file_name is not None:
-            keywords_read = self.__readParamFromFile(parameter_file_name, debug_level)
+            keywords_read = self.__parse_global_variables(parameter_file_name, debug_level)
         else:
             assert project
             assert workflow_name
@@ -529,27 +502,21 @@ class APSModel:
         # keywordsRead = [name,value]
 
         # Set new values
-        for i in range(len(keywords_defined_for_updating)):
-            item = keywords_defined_for_updating[i]
+        for item in keywords_defined_for_updating:
             keyword = item[0]
-            old_value = item[1]
-            for j in range(len(keywords_read)):
-                kw, value = keywords_read[j]
+            for kw, value in keywords_read:
                 if kw == keyword:
                     # set new value
                     item[1] = value
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output:  Keywords and values that is updated in xml tree:')
+            print('Debug output: Keywords and values that is updated in xml tree:')
 
         for obj in root.findall(".//*[@kw]"):
             key_word = obj.get('kw')
             old_value = obj.text
 
             found = False
-            for i in range(len(keywords_defined_for_updating)):
-                item = keywords_defined_for_updating[i]
-                kw = item[0]
-                val = item[1]
+            for kw, val in keywords_defined_for_updating:
                 if kw == key_word:
                     # Update value in XML tree for this keyword
                     if isinstance(val, str):
@@ -559,10 +526,10 @@ class APSModel:
                     break
             if found:
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print('{0:30} {1:20}  {2:10}'.format(key_word, old_value, obj.text))
+                    print(f'{key_word:30} {old_value:20}  {obj.text:10}')
             else:
                 raise ValueError(
-                    'Error: Inconsistency. Programming error in function updateXMLModelFile in class APSModel'
+                    'Error: Inconsistency. Programming error in function update_model_file in class APSModel'
                 )
 
         if debug_level >= Debug.VERY_VERBOSE:
@@ -580,34 +547,31 @@ class APSModel:
         """
         zoneNumbers = []
         for key, zoneModel in self.__zoneModelTable.items():
-            zNumber = key[0]
-            rNumber = key[1]
-            if zNumber in zoneNumbers:
-                if rNumber == 0:
-                    raise ValueError(
-                        'There exists more than one zone model for zone: {}'.format(str(zNumber))
-                    )
+            zone_number, region_number = key
+            if zone_number in zoneNumbers:
+                if region_number == 0:
+                    raise ValueError(f'There exists more than one zone model for zone: {zone_number}')
                 else:
                     # This is a model for a new region for an existing zone number that has several regions
-                    zoneNumbers.append(zNumber)
+                    zoneNumbers.append(zone_number)
             else:
                 # This is a model for a new (zone,region) combination for a new zone number
-                zoneNumbers.append(zNumber)
+                zoneNumbers.append(zone_number)
 
     @staticmethod
-    def __readParamFromFile(global_variables_file, debug_level=Debug.OFF):
+    def __parse_global_variables(global_variables_file, debug_level=Debug.OFF):
+        """ Read the global variables file (IPL, or YAML) to get updated model parameters from FMU """
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
         if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print('- Read file: ' + str(global_variables_file))
+            print(f'- Read file: {global_variables_file}')
         keywords = GlobalVariables.parse(global_variables_file)
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Keywords and values found in parameter file:  ' + str(global_variables_file))
+            print(f'Debug output: Keywords and values found in parameter file:  {global_variables_file}')
             for item in keywords:
-                kw = item[0]
-                val = item[1]
-                print('  {0:30} {1:20}'.format(kw, val))
+                kw, val = item
+                print(f'  {kw:30} {val:20}')
             print('')
         # End read file
 
@@ -649,6 +613,7 @@ class APSModel:
             )
         else:
             self.__previewScale = scale
+
     @property
     def preview_resolution(self):
         return self.__previewResolution
@@ -680,7 +645,7 @@ class APSModel:
         self.__preview_cross_section.relative_position = relative_position
 
     @staticmethod
-    def __getParamFromRMSTable(project, workflow_name, uncertainty_variable_names, realisation_number, debug_level=Debug.OFF):
+    def __getParamFromRMSTable(project, workflow_name, uncertainty_variable_names, realisation_number):
         """ Get values from RMS uncertainty table"""
         wf = project.workflows[workflow_name]
         rms_table_name = wf.report_table_name
@@ -768,9 +733,6 @@ class APSModel:
     def grid_model_name(self, name):
         self.__rmsGridModelName = name
 
-    def getGridModelName(self):
-        return copy.copy(self.__rmsGridModelName)
-
     def getResultFaciesParamName(self):
         return copy.copy(self.__rmsFaciesParamName)
 
@@ -849,26 +811,26 @@ class APSModel:
         return copy.copy(self.__rmsWorkflowName)
 
     def getAllProbParam(self):
-        allProbList = []
+        all_probabilities = []
         for key, zoneModel in self.__zoneModelTable.items():
-            probParamList = zoneModel.getAllProbParamForZone()
-            for pName in probParamList:
-                if pName not in allProbList:
-                    allProbList.append(pName)
-        return allProbList
+            probability_parameters = zoneModel.getAllProbParamForZone()
+            for name in probability_parameters:
+                if name not in all_probabilities:
+                    all_probabilities.append(name)
+        return all_probabilities
 
     # ----- Set functions -----
     def setRmsProjectName(self, name):
-        self.__rmsProjectName = copy.copy(name)
+        self.__rmsProjectName = name
 
     def setRmsWorkflowName(self, name):
-        self.__rmsWorkflowName = copy.copy(name)
+        self.__rmsWorkflowName = name
 
     def setRmsGridModelName(self, name):
-        self.__rmsGridModelName = copy.copy(name)
+        self.__rmsGridModelName = name
 
     def setRmsZoneParamName(self, name):
-        self.__rmsZoneParamName = copy.copy(name)
+        self.__rmsZoneParamName = name
 
     def setRmsRegionParamName(self, name):
         if not name:
@@ -884,56 +846,54 @@ class APSModel:
     def setRmsResultFaciesParamName(self, name):
         self.__rmsFaciesParamName = copy.copy(name)
 
-    def setSelectedZoneAndRegionNumber(self, selectedZoneNumber, selectedRegionNumber=0):
+    def setSelectedZoneAndRegionNumber(self, zone_number, region_number=0):
         """
         Description: Select a new pair of (zoneNumber, regionNumber) which has not been already selected.
         """
-        # Check that the specified pair (selectedZoneNumber, selectedRegionNumber) is an existing zone model
-        key = (selectedZoneNumber, selectedRegionNumber)
+        # Check that the specified pair (zone_number, region_number) is an existing zone model
+        key = (zone_number, region_number)
         if key in self.__zoneModelTable:
             if key not in self.__selectedZoneAndRegionNumberTable:
                 self.__selectedZoneAndRegionNumberTable[key] = 1
         else:
             raise ValueError(
-                'Can not select (zoneNumber, regionNumber) = ({},{}) since the zone model does not exist'
-                ''.format(str(selectedZoneNumber), str(selectedRegionNumber))
+                f'Can not select (zoneNumber, regionNumber) = ({zone_number}, {region_number}) '
+                'since the zone model does not exist'
             )
 
-    def setPreviewZoneAndRegionNumber(self, zoneNumber, regionNumber=0):
-        key = (zoneNumber, regionNumber)
+    def setPreviewZoneAndRegionNumber(self, zone_number, region_number=0):
+        key = (zone_number, region_number)
         if key in self.__zoneModelTable:
-            self.__previewZoneNumber = zoneNumber
-            self.__previewRegionNumber = regionNumber
+            self.__previewZoneNumber = zone_number
+            self.__previewRegionNumber = region_number
         else:
             raise ValueError(
-                'Error in {} in setPreviewZoneNumber\n'
-                'Error:  (zoneNumber, regionNumber) = ({},{}) is not defined in the model'
-                ''.format(self.__class_name, str(zoneNumber), str(regionNumber))
+                f'Error in {self.__class_name} in setPreviewZoneNumber\n'
+                f'Error:  (zoneNumber, regionNumber) = ({zone_number}, {region_number}) is not defined in the model'
             )
 
     def addNewZone(self, zoneObject):
-        zoneNumber = zoneObject.zone_number
-        regionNumber = zoneObject.region_number
-        if regionNumber > 0 and not self.__rmsRegionParamName:
+        zone_number = zoneObject.zone_number
+        region_number = zoneObject.region_number
+        if region_number > 0 and not self.__rmsRegionParamName:
             raise ValueError('Cannot add zone with region number into a model where regionParamName is not specified')
         if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call addNewZone')
-            print('Debug output: From addNewZone: (ZoneNumber, regionNumber)=({},{})'.format(zoneNumber, regionNumber))
-        key = (zoneNumber, regionNumber)
+            print(f'Debug output: From addNewZone: (Zone number, Region number)=({zone_number}, {region_number})')
+        key = (zone_number, region_number)
         if key not in self.__zoneModelTable:
             self.__zoneModelTable[key] = zoneObject
         else:
             raise ValueError(
-                'Can not add zone with (zoneNumber,regionNumber)=({},{})to the APSModel\n'
+                f'Can not add zone with (Zone number, Region number)=({zone_number}, {region_number})to the APSModel\n'
                 'A zone with this zone and region number already exist.'
-                ''.format(zoneNumber, regionNumber)
             )
 
-    def deleteZone(self, zoneNumber, regionNumber=0):
-        key = (zoneNumber, regionNumber)
+    def deleteZone(self, zone_number, region_number=0):
+        key = (zone_number, region_number)
         if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call deleteZone')
-            print('Debug output: From deleteZone: (ZoneNumber, regionNumber)=({},{})'.format(zoneNumber, regionNumber))
+            print(f'Debug output: From deleteZone: (ZoneNumber, regionNumber)=({zone_number}, {region_number})')
 
         if key in self.__zoneModelTable:
             del self.__zoneModelTable[key]
@@ -972,32 +932,29 @@ class APSModel:
             root.append(elem)
 
         # If selected zone list is defined (has elements) write them to a keyword
-        selectedZoneNumberList = self.getSelectedZoneNumberList()
-        if len(selectedZoneNumberList) > 0:
-            sortedSelectedZoneAndRegionNumberTable = collections.OrderedDict(sorted(self.__selectedZoneAndRegionNumberTable.items()))
+        selected_zone_numbers = self.getSelectedZoneNumberList()
+        if len(selected_zone_numbers) > 0:
+            selected_zone_numbers = collections.OrderedDict(sorted(self.__selectedZoneAndRegionNumberTable.items()))
             tag = 'SelectedZonesAndRegions'
-            elemSelectedZoneAndRegion = ET.Element(tag)
-            root.append(elemSelectedZoneAndRegion)
-            for key, selected in sortedSelectedZoneAndRegionNumberTable.items():
-                zNumber = key[0]
-                rNumber = key[1]
+            selected_zone_and_region_element = ET.Element(tag)
+            root.append(selected_zone_and_region_element)
+            for key, selected in selected_zone_numbers.items():
+                zone_number, region_number = key
                 tag = 'SelectedZoneWithRegions'
-                attributes = {'zone': str(zNumber)}
-                text = ''
-                elemZoneRegion = ET.Element(tag, attributes)
+                attributes = {'zone': str(zone_number)}
+                element_zone_region = ET.Element(tag, attributes)
 
-                rList = self.getSelectedRegionNumberListForSpecifiedZoneNumber(zNumber)
+                regions = self.getSelectedRegionNumberListForSpecifiedZoneNumber(zone_number)
                 text = ''
-                useRegion = True
-                if len(rList) == 1 and rList[0] == 0:
-                    useRegion = False
-                    text += ' ' + str(0) + ' '
-                if useRegion:
-                    for j in range(len(rList)):
-                        rNumber = rList[j]
-                        text += ' ' + str(rNumber) + ' '
-                elemZoneRegion.text = text
-                elemSelectedZoneAndRegion.append(elemZoneRegion)
+                use_region = True
+                if len(regions) == 1 and regions[0] == 0:
+                    use_region = False
+                    text += ' 0 '
+                if use_region:
+                    for region_number in regions:
+                        text += f' {region_number} '
+                element_zone_region.text = text
+                selected_zone_and_region_element.append(element_zone_region)
 
         # Add all main commands to the root APSModel
         tags = [
@@ -1023,41 +980,44 @@ class APSModel:
 
         # Add command ZoneModels
         tag = 'ZoneModels'
-        zoneListElement = ET.Element(tag)
+        zone_elements = ET.Element(tag)
 
         for key, zoneModel in self.sorted_zone_models.items():
             # Add command Zone
-            zoneModel.XMLAddElement(zoneListElement, fmu_attributes)
-        root.append(zoneListElement)
-        rootReformatted = prettify(root)
-        return rootReformatted
+            zoneModel.XMLAddElement(zone_elements, fmu_attributes)
+        root.append(zone_elements)
+        root_reformatted = prettify(root)
+        return root_reformatted
 
     def dump(self, name, attributes_file_name=None, debug_level=Debug.OFF):
         """Writes the representation of this APS model to a model file"""
-        self.writeModel(name, attributes_file_name, debug_level)
+        self.write_model(name, attributes_file_name, debug_level)
 
-    def writeModel(self, modelFileName, attributesFileName=None, debug_level=Debug.OFF):
+    def write_model(self, model_file_name, attributes_file_name=None, debug_level=Debug.OFF):
+        """ - Create xml tree with model specification by calling XMLAddElement
+            - Write xml tree with model specification to file
+        """
         fmu_attributes = list()
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
-        with open(modelFileName, 'w') as file:
+        with open(model_file_name, 'w') as file:
             file.write(root_updated)
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Write file: ' + str(modelFileName))
-        if attributesFileName is not None:
-            with open(attributesFileName, 'w') as attributes_file:
+            print(f'Write file: {model_file_name}')
+        if attributes_file_name is not None:
+            with open(attributes_file_name, 'w') as attributes_file:
                 for fmu_attribute in fmu_attributes:
                     attributes_file.write("%s\n" % fmu_attribute)
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print('Write file: ' + attributesFileName)
+                    print(f'Write file: {attributes_file_name}')
 
     @staticmethod
-    def writeModelFromXMLRoot(inputETree, outputModelFileName):
-        print('Write file: ' + str(outputModelFileName))
-        root = inputETree.getroot()
-        rootReformatted = minify(root)
-        with open(outputModelFileName, 'w', encoding='utf-8') as file:
-            file.write(rootReformatted)
+    def write_model_from_xml_root(input_tree, output_model_file_name):
+        print(f'Write file: {output_model_file_name}')
+        root = input_tree.getroot()
+        root = minify(root)
+        with open(output_model_file_name, 'w', encoding='utf-8') as file:
+            file.write(root)
             file.write('\n')
 
 

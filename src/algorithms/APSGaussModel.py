@@ -313,7 +313,7 @@ class GaussianField:
                 )
             )
         residual_field = simGaussField(
-            seed_value, grid_dimensions[0], grid_dimensions[1], sizes[0], sizes[1], variogram_type,
+            seed_value, *grid_dimensions, *sizes, variogram_type,
             range1, range2, azimuth_variogram, power, debug_level
         )
         # Calculate trend
@@ -580,7 +580,7 @@ class Variogram:
         if isinstance(value, str):
             value = value.upper()
         if not isVariogramTypeOK(value):
-            raise ValueError('The given variogram is not valid ({})'.format(value))
+            raise ValueError(f'The given variogram is not valid ({value})')
         elif (
                 value == VariogramType.GENERAL_EXPONENTIAL
                 and not (MinimumValues['power'] <= self.power.value <= MaximumValues['power'])
@@ -869,7 +869,7 @@ class APSGaussModel:
         if ET_Tree_zone is not None:
             # Get data from xml tree
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Call init ' + self.__class_name + ' and read from xml file')
+                print(f'Debug output: Call init {self.__class_name} and read from xml file')
 
             assert mainFaciesTable is not None
             assert simBoxThickness is not None
@@ -1011,9 +1011,9 @@ class APSGaussModel:
         variogram_type = self.get_variogram_type(variogram)
         if not isVariogramTypeOK(variogram_type):
             raise ValueError(
-                'In model file {0} in zone number: {1} in command Vario for gauss field {2}.\n'
+                f'In model file {self.__model_file_name} in zone number: {zone_number}'
+                f' in command Vario for gauss field {gf_name}.\n'
                 'Specified variogram type is not defined.'
-                ''.format(self.__model_file_name, zone_number, gf_name)
             )
         return variogram, variogram_type
 
@@ -1026,12 +1026,12 @@ class APSGaussModel:
         elif isinstance(variogram, VariogramType):
             return variogram
         else:
-            raise ValueError('Unknown type: {}'.format(str(variogram)))
+            raise ValueError(f'Unknown type: {variogram}')
         name = name.upper()
         try:
             return VariogramType[name]
         except KeyError:
-            raise ValueError('Error: Unknown variogram type {}'.format(name))
+            raise ValueError(f'Error: Unknown variogram type {name}')
 
     def initialize(
             self, main_facies_table, gauss_model_list, trend_model_list,
@@ -1170,6 +1170,12 @@ class APSGaussModel:
         else:
             return item.model
 
+    def get_model(self, name):
+        try:
+            return self._gaussian_models[name]
+        except KeyError:
+            return None
+
     def get_variogram_model(self, name):
         try:
             return self._gaussian_models[name].variogram
@@ -1264,24 +1270,23 @@ class APSGaussModel:
         # Update or create new gauss field parameter object (with trend)
         if not isVariogramTypeOK(variogram_type):
             raise ValueError(
-                'Error in {class_name} in updateGaussFieldParam\n'
-                'Undefined variogram type specified.'.format(class_name=self.__class_name)
+                f'Error in {self.__class_name} in updateGaussFieldParam\n'
+                'Undefined variogram type specified.'
             )
         if any([range < 0 for range in [range1, range2, range3]]):
             raise ValueError(
-                'Error in {class_name} in updateGaussFieldParam\n'
-                'Correlation range < 0.0'.format(class_name=self.__class_name)
+                f'Error in {self.__class_name} in updateGaussFieldParam\n'
+                'Correlation range < 0.0'
             )
         if variogram_type == VariogramType.GENERAL_EXPONENTIAL and not (1.0 <= power <= 2.0):
             raise ValueError(
-                'Error in {class_name} in updateGaussFieldParam\n'
-                'Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0, 2.0]'.format(class_name=self.__class_name)
+                f'Error in {self.__class_name} in updateGaussFieldParam\n'
+                'Exponent in GENERAL_EXPONENTIAL variogram is outside [1.0, 2.0]'
             )
         if rel_std_dev < 0.0:
             raise ValueError(
-                'Error in {class_name} in updateGaussFieldParam\n'
+                f'Error in {self.__class_name} in updateGaussFieldParam\n'
                 'Relative standard deviation used when trends are specified is negative.'
-                ''.format(class_name=self.__class_name)
             )
 
         # Check if gauss field is already defined, then update parameters or create new
@@ -1419,23 +1424,32 @@ class APSGaussModel:
     def simGaussFieldWithTrendAndTransform(
             self, simulation_box_size, grid_size, grid_azimuth, cross_section, simulation_box_origin
     ):
-        """ This function is used to create 2D simulation of horizontal or vertical cross sections. The gauss simulation is 2D
-            and the correlation ellipsoid for the 3D variogram is projected into the specified cross section in 2D.
-            The 3D trend definition is used to calculate an 2D cross section of the trend in the specified horizontal or vertical cross section grid plane
-            specified by cross_section.relative_position which is a number between 0 and 1.
-            Here 0 means smallest grid index and 1 means largest grid index for the specified cross section direction (IJ plane, IK, plane or JK plane).
-            The trend and residual gauss field is added using the specified relative standard deviation and the resulting gaussian field with trend is
-            transformed by empiric transformation such that the histogram over all simulated values in the 2D grid become uniform between 0 and 1."""
+        """
+        This function is used to create 2D simulation of horizontal or vertical cross sections.
+        The gauss simulation is 2D and the correlation ellipsoid for the 3D variogram is projected into the
+        specified cross section in 2D. The 3D trend definition is used to calculate an 2D cross section of the trend
+        in the specified horizontal or vertical cross section grid plane specified by cross_section.relative_position,
+        which is a number between 0 and 1. Here 0 means 'smallest' grid index, and 1 means 'largest' grid index for
+        the specified cross section direction (IJ plane, IK, plane or JK plane).
+        The trend and residual gauss field is added using the specified relative standard deviation and the resulting
+        gaussian field with trend is transformed by empiric transformation such that the histogram over
+        all simulated values in the 2D grid become uniform between 0 and 1.
+        """
 
         gauss_field_items = []
         for grf in self._gaussian_models.values():
             gauss_field_items.append(
-                grf.simulate(cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, self.debug_level),
+                grf.simulate(
+                    cross_section, grid_azimuth, grid_size, simulation_box_size,
+                    simulation_box_origin, self.debug_level,
+                ),
             )
         return gauss_field_items
 
     def calc2DVariogramFrom3DVariogram(self, name, grid_azimuth, projection):
-        return self._gaussian_models[name].variogram.calc_2d_variogram_from_3d_variogram(grid_azimuth, projection, self.debug_level)
+        return self._gaussian_models[name].variogram.calc_2d_variogram_from_3d_variogram(
+            grid_azimuth, projection, self.debug_level,
+        )
 
 
 def _get_projection_parameters(cross_section_type, grid_size, simulation_box_size):
@@ -1471,12 +1485,12 @@ def _add_trend(residual_field, trend_field, rel_sigma, trend_max_min_difference,
     else:
         sigma = rel_sigma * trend_max_min_difference
     if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output:  Relative standard deviation = ' + str(rel_sigma))
-        print('Debug output:  Difference between max value and min value of trend = ' + str(trend_max_min_difference))
-        print('Debug output:  Calculated standard deviation = ' + str(sigma))
+        print(f'Debug output:  Relative standard deviation = {rel_sigma}')
+        print(f'Debug output:  Difference between max value and min value of trend = {trend_max_min_difference}')
+        print(f'Debug output:  Calculated standard deviation = {sigma}')
         print('')
     n = len(trend_field)
-    if len(trend_field) != len(residual_field):
+    if n != len(residual_field):
         raise IOError('Internal error: Mismatch between size of trend field and residual field in _addTrend')
 
     gauss_field_with_trend = np.zeros(n, np.float32)
@@ -1533,8 +1547,7 @@ def _calculate_projection(U, debug_level=Debug.OFF):
     angle1 = angle
     range1 = np.sqrt(1.0 / w[0])
     if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
-              ''.format(funcName=func_name, angle=angle1, range=range1))
+        print(f'Debug output: Function: {func_name} Direction (angle): {angle1} for range: {range1}')
 
     # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction
     if v[1, 1] != 0.0:
@@ -1548,8 +1561,7 @@ def _calculate_projection(U, debug_level=Debug.OFF):
     angle2 = angle
     range2 = np.sqrt(1.0 / w[1])
     if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print('Debug output: Function: {funcName} Direction (angle): {angle} for range: {range}'
-              ''.format(funcName=func_name, angle=angle2, range=range2))
+        print(f'Debug output: Function: {func_name} Direction (angle): {angle2} for range: {range2}')
 
     # Angles are azimuth angles
     return angle1, range1, angle2, range2

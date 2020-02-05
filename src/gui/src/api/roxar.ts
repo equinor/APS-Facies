@@ -20,8 +20,7 @@ function callPythonFunction (code: string): Promise<JSON> {
 }
 
 // utilities
-// eslint-disable-next-line camelcase, @typescript-eslint/camelcase
-const uipy_handler = {
+const uipyHandler = {
   get (target: unknown, propKey: string): (...args: any[]) => Promise<JSON> {
     return function (...args: any[]): Promise<JSON> {
       let argstr = ''
@@ -29,10 +28,10 @@ const uipy_handler = {
         if (i > 0) argstr += ', '
         argstr += JSON.stringify(args[i])
       }
-      return callPythonFunction('ui.' + propKey + '(' + argstr + ')')
+      return callPythonFunction(`ui.${propKey}(${argstr})`)
     }
   }
 }
 export const rms = {
-  uipy: new Proxy({}, uipy_handler)
+  uipy: new Proxy({}, uipyHandler)
 }

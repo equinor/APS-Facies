@@ -168,7 +168,7 @@ def run(roxar=None, project=None, **kwargs):
 
 
 def read_model_file(model_file_name):
-    print('Read model file: ' + model_file_name)
+    print(f'Read model file: {model_file_name}')
     root = ET.parse(model_file_name).getroot()
     main_keyword = 'ProbLogs'
     if root is None:

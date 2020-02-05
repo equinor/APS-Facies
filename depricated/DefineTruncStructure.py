@@ -473,7 +473,7 @@ class DefineTruncStructure:
             )
 
         else:
-            print('Truncation rule: ' + name + ' is not implemented.')
+            print(f'Truncation rule: {name} is not implemented.')
             return None
         return trRuleObj
 

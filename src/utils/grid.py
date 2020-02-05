@@ -1,5 +1,5 @@
 from src.utils.constants.simple import Debug
-from src.utils.roxar.generalFunctionsUsingRoxAPI import updateContinuous3DParameterValues
+from src.utils.roxar.generalFunctionsUsingRoxAPI import update_continuous_3d_parameter_values
 
 
 def update_rms_parameter(
@@ -20,13 +20,13 @@ def update_rms_parameter(
     else:
         rms_variable_name = gauss_field_name + '_' + variable_name_extension
 
-    updateContinuous3DParameterValues(
+    update_continuous_3d_parameter_values(
         grid_model,
         rms_variable_name,
         values,
         cell_index_defined,
         realization_number,
-        isShared=False, setInitialValues=False,
+        is_shared=False, set_initial_values=False,
         debug_level=debug_level
     )
     if debug_level >= Debug.VERBOSE:

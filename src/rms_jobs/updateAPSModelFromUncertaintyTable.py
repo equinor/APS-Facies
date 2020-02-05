@@ -73,7 +73,7 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
     # Read the values of the tagged variables from RMS table corresponding to the specified workflow
     # Use the tagged model file and update this file with new values and write it out again,
     # now with updated values for the tagged parameters
-    eTree = apsModel.updateXMLModelFile(
+    eTree = apsModel.update_model_file(
         model_file_name=output_aps_model_file,
         parameter_file_name=None,
         project=project,
@@ -84,7 +84,7 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
     )
 
     # Write the updated XML tree for the model parameters to a new file
-    apsModel.writeModelFromXMLRoot(eTree, output_aps_model_file)
+    apsModel.write_model_from_xml_root(eTree, output_aps_model_file)
 
 
 # -------  Main ----------------

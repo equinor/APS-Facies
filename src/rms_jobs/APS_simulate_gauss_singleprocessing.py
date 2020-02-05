@@ -11,12 +11,29 @@ from src.utils.constants.simple import Debug
 from src.utils.io import ensure_folder_exists
 from src.utils.methods import get_specification_file
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
-    setContinuous3DParameterValuesInZoneRegion,
+    set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
 )
 from src.utils.roxar.grid_model import GridAttributes
 from src.utils.methods import get_seed_log_file
 from src.utils.trend import add_trends
+
+
+def define_variogram(variogram, azimuth_value_sim_box):
+    variogram_name = variogram.type.name.lower()
+    # Note: Since RMS is a left-handed coordinate system and NrLib treat the coordinate system as right-handed
+    # we have to transform the azimuth angle to 90-azimuth to get it correct in RMS
+    azimuth_in_nrlib = 90.0 - azimuth_value_sim_box
+    args = [
+        variogram.ranges.main, variogram.ranges.perpendicular, variogram.ranges.vertical,
+        azimuth_in_nrlib, variogram.angles.dip,
+    ]
+    if variogram_name == 'general_exponential':
+        args.append(variogram.power)
+    args = [float(arg) for arg in args]
+
+    sim_variogram = nrlib.variogram(variogram_name, *args)
+    return sim_variogram
 
 
 def run_simulations(
@@ -30,7 +47,7 @@ def run_simulations(
     """
 
     # Read APS model
-    print('- Read file: ' + model_file)
+    print(f'- Read file: {model_file}')
     aps_model = APSModel(model_file)
     debug_level = aps_model.debug_level
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization
@@ -86,83 +103,65 @@ def run_simulations(
 
         gauss_result_list_for_zone = []
         for gauss_field_name in gauss_field_names:
-            azimuth = zone_model.getAzimuthAngle(gauss_field_name)
-            dip = zone_model.getDipAngle(gauss_field_name)
-            power = zone_model.getPower(gauss_field_name)
-            variogram_type = zone_model.getVariogramType(gauss_field_name)
-            v_name = variogram_type.name
-            main_range = zone_model.getMainRange(gauss_field_name)
-            perpendicular_range = zone_model.getPerpRange(gauss_field_name)
-            vertical_range = zone_model.getVertRange(gauss_field_name)
+            field = zone_model.get_gaussian_field(gauss_field_name)
+            if field is None:
+                raise KeyError(
+                    f'No Gaussian Random Field named {gauss_field_name} is defined in zone {zone_number}'
+                    f'{f", {region_number}" if region_number else "."}'
+                )
+            variogram = field.variogram
 
-            azimuth_value_sim_box = azimuth - grid_attributes.sim_box_size.azimuth_angle
+            azimuth_value_sim_box = variogram.angles.azimuth - grid_attributes.sim_box_size.azimuth_angle
 
             if debug_level >= Debug.VERBOSE:
-                print(
-                    '---  Simulate: {}  for zone: {}  for region: {}'
-                    ''.format(gauss_field_name, zone_number, region_number)
-                )
+                print(f'---  Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
-                    '     Zone,region             : ({},{})\n'
-                    '     Gauss field name        : {}\n'
-                    '     Variogram type          : {}\n'
-                    '     Main range              : {}\n'
-                    '     Perpendicular range     : {}\n'
-                    '     Vertical range          : {}\n'
-                    '     Azimuth angle in sim box: {}\n'
-                    '     Dip angle               : {}\n'
-                    '     NX                      : {}\n'
-                    '     NY                      : {}\n'
-                    '     NZ for this zone        : {}\n'
-                    '     DX                      : {}\n'
-                    '     DY                      : {}\n'
-                    '     DZ for this zone        : {}'
-                    ''.format(
-                        zone_number, region_number, gauss_field_name, v_name,
-                        main_range, perpendicular_range, vertical_range, azimuth_value_sim_box,
-                        dip, nx, ny, nz, dx, dy, dz)
+                    f'     Zone,region             : ({zone_number}, {region_number})\n'
+                    f'     Gauss field name        : {gauss_field_name}\n'
+                    f'     Variogram type          : {variogram.name}\n'
+                    f'     Main range              : {variogram.ranges.main}\n'
+                    f'     Perpendicular range     : {variogram.ranges.perpendicular}\n'
+                    f'     Vertical range          : {variogram.ranges.vertical}\n'
+                    f'     Azimuth angle in sim box: {azimuth_value_sim_box}\n'
+                    f'     Dip angle               : {variogram.angles.dip}\n'
+                    f'     NX                      : {nx}\n'
+                    f'     NY                      : {ny}\n'
+                    f'     NZ for this zone        : {nz}\n'
+                    f'     DX                      : {dx}\n'
+                    f'     DY                      : {dy}\n'
+                    f'     DZ for this zone        : {dz}'
                 )
 
             # Define variogram
-            variogram_name = v_name.lower()
-            # Note: Since RMS is a left-handed coordinate system and NrLib treat the coordinate system as right-handed
-            # we have to transform the azimuth angle to 90-azimuth to get it correct in RMS
-            azimuth_in_nrlib = 90.0 - azimuth_value_sim_box
-            if variogram_name == 'general_exponential':
-                sim_variogram = nrlib.variogram(
-                    variogram_name, main_range, perpendicular_range, vertical_range, azimuth_in_nrlib, dip, power
-                )
-            else:
-                sim_variogram = nrlib.variogram(
-                    variogram_name, main_range, perpendicular_range, vertical_range, azimuth_in_nrlib, dip
-                )
+            sim_variogram = define_variogram(variogram, azimuth_value_sim_box)
 
             if debug_level >= Debug.VERY_VERBOSE:
-                [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
+                nx_padding, ny_padding, nz_padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
                 print('Debug output: Grid dimensions with padding for simulation:')
-                print('     nx: {}   nx with padding: {}'.format(nx, nx_padding))
-                print('     ny: {}   ny with padding: {}'.format(ny, ny_padding))
-                print('     nz: {}   nz with padding: {}'.format(nz, nz_padding))
+                print(f'     nx: {nx}   nx with padding: {nx_padding}')
+                print(f'     ny: {ny}   ny with padding: {ny_padding}')
+                print(f'     nz: {nz}   nz with padding: {nz_padding}')
 
             # Simulate gauss field. Return numpy 1D vector in F order
             gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
             gauss_result = np.reshape(gauss_vector, (nx, ny, nz), order='F')
             gauss_result_list_for_zone.append(gauss_result)
             if debug_level >= Debug.VERBOSE:
-                print('--- Finished running simulation of {} for zone,region: ({},{})'
-                      ''.format(gauss_field_name, zone_number, region_number))
-                print('')
+                print(
+                    f'--- Finished running simulation of {gauss_field_name} for zone,region: '
+                    f'({zone_number}, {region_number})\n'
+                )
 
-        setContinuous3DParameterValuesInZoneRegion(
+        set_continuous_3d_parameter_values_in_zone_region(
             grid_model,
             gauss_field_names,
             gauss_result_list_for_zone,
             zone_number,
-            regionNumber=region_number,
-            regionParamName=aps_model.region_parameter,
-            realNumber=realisation,
-            isShared=is_shared,
+            region_number=region_number,
+            region_parameter_name=aps_model.region_parameter,
+            realisation_number=realisation,
+            is_shared=is_shared,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
         )
@@ -184,13 +183,11 @@ def run_simulations(
         if seed_file_log.is_dir():
             seed_file_log = seed_file_log / 'seedLogFile.dat'
         with open(seed_file_log, 'a+') as file:
-            file.write(
-                'RealNumber: {}  StartSeed for this realization: {}\n'.format(realisation + 1, nrlib.seed())
-            )
+            file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + nrlib.seed()}\n')
     print('')
 
 
-def run(roxar=None, project=None, **kwargs):
+def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
     fmu_mode = kwargs.get('fmu_mode', False)
@@ -208,9 +205,3 @@ def run(roxar=None, project=None, **kwargs):
         fmu_mode=fmu_mode,
     )
     print('Finished simulation of gaussian fields for APS')
-
-
-if __name__ == '__main__':
-    import roxar
-
-    run(roxar, project)

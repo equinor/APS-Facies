@@ -212,7 +212,7 @@ def run_previewer(
     zoneModel = apsModel.getZoneModel(zoneNumber, regionNumber)
     if zoneModel is None:
         raise UndefinedZoneError(zoneNumber)
-    simBoxZsize = zoneModel.getSimBoxThickness()
+    simBoxZsize = zoneModel.sim_box_thickness
 
     # The lengths of the simulation box taken from the RMS grid model
     original_simulation_box_size = (simBoxXsize, simBoxYsize, simBoxZsize)
@@ -243,7 +243,7 @@ def run_previewer(
         debug_level=debug_level
     )
     truncObject = zoneModel.truncation_rule
-    faciesNames = zoneModel.getFaciesInZoneModel()
+    faciesNames = zoneModel.facies_in_zone_model
     gaussFieldNamesInModel = zoneModel.used_gaussian_field_names
     gaussFieldIndxList = zoneModel.getGaussFieldIndexListInZone()
     nGaussFieldsInTruncRule = len(gaussFieldIndxList)
@@ -251,8 +251,7 @@ def run_previewer(
         print('Gauss fields in truncation rule:')
         for i in range(len(gaussFieldIndxList)):
             index = gaussFieldIndxList[i]
-            print('Gauss field number {}:  {}'
-                  ''.format(str(i + 1), gaussFieldNamesInModel[index]))
+            print(f'Gauss field number {i + 1}:  {gaussFieldNamesInModel[index]}')
 
     assert len(gaussFieldNamesInModel) >= 2
     nFacies = len(faciesNames)
@@ -263,10 +262,9 @@ def run_previewer(
         print('Warning: Preview plots require constant facies probabilities')
         print('       Use arbitrary constant values')
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
-        print('\n ---------  Zone number : ' + str(zoneNumber) + ' -----------------')
-    faciesProb = np.zeros(len(faciesNames), np.float32)
-    for i in range(len(faciesNames)):
-        fName = faciesNames[i]
+        print(f'\n ---------  Zone number : {zoneNumber} -----------------')
+    faciesProb = np.zeros(nFacies, np.float32)
+    for fName in faciesNames:
         pName = zoneModel.getProbParamName(fName)
         if useConstProb:
             v = float(pName)
@@ -275,11 +273,11 @@ def run_previewer(
             if debug_level >= Debug.SOMEWHAT_VERBOSE:
                 print('Zone: ' + str(zoneNumber) + ' Facies: ' + fName + ' Prob: ' + str(w))
         else:
-            v = 1.0 / float(len(faciesNames))
+            v = 1.0 / float(nFacies)
             p = int(v * 1000 + 0.5)
             w = float(p) / 1000.0
             if debug_level >= Debug.SOMEWHAT_VERBOSE:
-                print('Zone: ' + str(zoneNumber) + ' Facies: ' + fName + ' Prob: ' + str(w))
+                print(f'Zone: {zoneNumber} Facies: {fName} Prob: {w}')
         faciesProb[i] = v
 
     # Calculate truncation map for given facies probabilities

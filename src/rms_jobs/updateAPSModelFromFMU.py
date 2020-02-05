@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 # Python3 script to update APS model file from global IPL include file
+from pathlib import Path
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
@@ -16,20 +17,20 @@ def update_aps_model_from_fmu(
 
     # Read model file and parameter file and update values in xml tree but no data
     # is put into APSModel data structure but instead an updated XML data tree is returned.
-    tree = aps_model.updateXMLModelFile(
-        model_file_name=input_aps_model_file,
-        parameter_file_name=global_variables_file,
+    tree = aps_model.update_model_file(
+        model_file_name=Path(input_aps_model_file),
+        parameter_file_name=Path(global_variables_file),
         project=project,
         workflow_name=workflow_name,
         debug_level=debug_level,
     )
 
     # Write the updated XML tree for the model parameters to a new file
-    aps_model.writeModelFromXMLRoot(tree, output_aps_model_file)
+    aps_model.write_model_from_xml_root(tree, output_aps_model_file)
 
 
 # ------- Main ----------------
-def run(roxar=None, project=None, **kwargs):
+def run(project, **kwargs):
     params = get_run_parameters(**kwargs)
     input_aps_model_file = params['model_file']
     global_variables_file = params['global_variables_file']
@@ -37,12 +38,7 @@ def run(roxar=None, project=None, **kwargs):
     output_aps_model_file = params['output_model_file']
     workflow_name = params['workflow_name']
 
-    print(
-        'Updating {model_file} with the FMU parameters from {include_file}'.format(
-            model_file=input_aps_model_file,
-            include_file=global_variables_file,
-        )
-    )
+    print(f'Updating {input_aps_model_file} with the FMU parameters from {global_variables_file}')
     update_aps_model_from_fmu(
         global_variables_file,
         input_aps_model_file,
@@ -50,10 +46,4 @@ def run(roxar=None, project=None, **kwargs):
         debug_level=debug_level,
         project=project,
         workflow_name=workflow_name,
-    )
-
-
-if __name__ == '__main__':
-    run(
-        output_model_file='APS_modified.xml',
     )

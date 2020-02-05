@@ -65,7 +65,7 @@ def apply_truncations(
 
     # Compare the generated facies realization with the reference for this case
     check = compare(faciesOutputFile, faciesReferenceFile)
-    print('Compare file: ' + faciesReferenceFile + ' and file: ' + faciesOutputFile)
+    print(f'Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
     if check is False:
         fileName = faciesReferenceFile + '_' + faciesOutputFile + '.tmp'
         os.rename(faciesOutputFile, fileName)
@@ -114,11 +114,11 @@ def apply_truncations_vectorized(
 
     # Compare the generated facies realization with the reference for this case
     check = compare(faciesOutputFile, faciesReferenceFile)
-    print('Compare file: ' + faciesReferenceFile + ' and file: ' + faciesOutputFile)
+    print(f'Compare file: {faciesReferenceFile} and file: {faciesOutputFile}')
     if check is False:
-        fileName = faciesReferenceFile + '_' + faciesOutputFile + '.tmp'
+        fileName = f'{faciesReferenceFile}_{faciesOutputFile}.tmp'
         os.rename(faciesOutputFile, fileName)
-        print('Write file: {}'.format(fileName))
+        print(f'Write file: {fileName}')
         raise ValueError('Error: Files are different')
     elif debug_level >= Debug.ON:
         print('Files are equal: OK')
@@ -141,7 +141,7 @@ def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFil
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = compare(outPolyFile1, outPolyFile2)
-    print('Compare file: ' + outPolyFile1 + ' and file: ' + outPolyFile2)
+    print(f'Compare file: {outPolyFile1} and file: {outPolyFile2}')
     assert check is True
     if check is False:
         raise ValueError('Error: Files are different')
@@ -151,7 +151,7 @@ def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFil
 
 def writePolygons(fileName, polygons, debug_level=Debug.OFF):
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
-        print('Write file: ' + fileName)
+        print(f'Write file: {fileName}')
     with open(fileName, 'w') as file:
         for n in range(len(polygons)):
             poly = polygons[n]
@@ -196,7 +196,7 @@ def compare_image(source, reference):
 
 
 def _assert_compare_files(source, reference, func):
-    print('Compare file: ' + source + ' and ' + reference)
+    print(f'Compare file: {source} and {reference}')
     check = func(source, reference)
     if check:
         print('Files are equal. OK')

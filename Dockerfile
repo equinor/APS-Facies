@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:7
-LABEL version="4.0.1" \
+LABEL version="4.1.0" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -87,10 +87,8 @@ RUN yum update -y \
  && yum groupinstall -y "Development Tools" \
  && yum install -y \
     git \
-    graphviz \
     # Install software needed during build of python and pip install
     freetype-devel \
-    libpng-devel \
     libxml2-devel \
     libxslt-devel \
     libX11-devel \
@@ -173,10 +171,10 @@ RUN yum update -y \
  && mkdir -p \
     nrlib-${NRLIB_VERSION} \
     # Extract all downloaded archives
- && tar -xvf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
- && tar -xJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
- && tar -xzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
- && tar -xvf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
+ && tar -xvzf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
+ && tar -xvJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
+ && tar -xvzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
+ && tar -xvzf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
  # Remove downloaded archives
  && rm -f ${SOURCE_DIR}/*.txt* \
  && rm -f ${SOURCE_DIR}/*.tar.* \

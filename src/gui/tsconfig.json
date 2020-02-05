@@ -18,6 +18,7 @@
     "removeComments": true,
     "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true, // TODO: Remove this once v-tooltip's compilation does not fail
     "resolveJsonModule": true,
     "sourceMap": true,
     "baseUrl": ".",

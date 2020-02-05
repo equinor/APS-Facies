@@ -18,13 +18,13 @@ def simulateGauss(
         writeSeedFile=True, debug_level=Debug.OFF
 ):
     import nrlib
-    zoneNumber = simParamObject['zoneNumber']
-    regionNumber = simParamObject['regionNumber']
-    gaussFieldName = simParamObject['gaussFieldName']
-    variogramType = simParamObject['variogramType']
-    mainRange = simParamObject['mainRange']
-    perpRange = simParamObject['perpRange']
-    vertRange = simParamObject['vertRange']
+    zone_number = simParamObject['zoneNumber']
+    region_number = simParamObject['regionNumber']
+    gauss_field_name = simParamObject['gaussFieldName']
+    variogram_type = simParamObject['variogramType']
+    main_range = simParamObject['mainRange']
+    perpendicular_range = simParamObject['perpRange']
+    vertical_range = simParamObject['vertRange']
     azimuth = simParamObject['azimuth']
     dip = simParamObject['dip']
     power = simParamObject['power']
@@ -34,44 +34,34 @@ def simulateGauss(
     dx = simParamObject['dx']
     dy = simParamObject['dy']
     dz = simParamObject['dz']
+
+    description = f'''
+    Zone,region             : ({zone_number}, {region_number})
+    Gauss field name        : {gauss_field_name}
+    Variogram type          : {variogram_type.name}
+    Main range              : {main_range}
+    Perpendicular range     : {perpendicular_range}
+    Vertical range          : {vertical_range}
+    Azimuth angle in sim box: {azimuth}
+    Dip angle               : {dip}
+    NX                      : {nx}
+    NY                      : {ny}
+    NZ for this zone        : {nz}
+    DX                      : {dx}
+    DY                      : {dy}
+    DZ for this zone        : {dz}
+'''
     if logFileName is not None:
         file = open(logFileName, 'w')
-        file.write('\n')
-        file.write('    Zone,region             : ({},{})'.format(zoneNumber, regionNumber))
-        file.write('    Gauss field name        : {}\n'.format(gaussFieldName))
-        file.write('    Variogram type          : {}\n'.format(variogramType.name))
-        file.write('    Main range              : {}\n'.format(mainRange))
-        file.write('    Perpendicular range     : {}\n'.format(perpRange))
-        file.write('    Vertical range          : {}\n'.format(vertRange))
-        file.write('    Azimuth angle in sim box: {}\n'.format(azimuth))
-        file.write('    Dip angle               : {}\n'.format(dip))
-        file.write('    NX                      : {}\n'.format(nx))
-        file.write('    NY                      : {}\n'.format(ny))
-        file.write('    NZ for this zone        : {}\n'.format(nz))
-        file.write('    DX                      : {}\n'.format(dx))
-        file.write('    DY                      : {}\n'.format(dy))
-        file.write('    DZ for this zone        : {}\n'.format(dz))
+        file.write(description)
 
     if debug_level >= Debug.VERBOSE:
         print('')
-        print('    Call simulateGauss for (zone,region): ({},{}) for field: {}'.format(zoneNumber, regionNumber, gaussFieldName))
+        print(f'    Call simulateGauss for (zone,region): ({zone_number}, {region_number}) for field: {gauss_field_name}')
     if debug_level >= Debug.VERY_VERBOSE:
-        print('    Zone,region             : ({},{})'.format(zoneNumber, regionNumber))
-        print('    Gauss field name        : {}'.format(gaussFieldName))
-        print('    Variogram type          : {}'.format(variogramType.name))
-        print('    Main range              : {}'.format(mainRange))
-        print('    Perpendicular range     : {}'.format(perpRange))
-        print('    Vertical range          : {}'.format(vertRange))
-        print('    Azimuth angle in sim box: {}'.format(azimuth))
-        print('    Dip angle               : {}'.format(dip))
-        print('    NX                      : {}'.format(nx))
-        print('    NY                      : {}'.format(ny))
-        print('    NZ for this zone        : {}'.format(nz))
-        print('    DX                      : {}'.format(dx))
-        print('    DY                      : {}'.format(dy))
-        print('    DZ for this zone        : {}'.format(dz))
+        print(description)
 
-    variogramMapping = {
+    variogram_mapping = {
         'EXPONENTIAL': 'exponential',
         'SPHERICAL': 'spherical',
         'GAUSSIAN': 'gaussian',
@@ -92,44 +82,43 @@ def simulateGauss(
                 startSeed = -1
                 for i in range(len(words)):
                     w = words[i]
-                    if w == gaussFieldName:
-                        zNr = int(words[i+1])
-                        rNr = int(words[i+2])
-                        if zNr == zoneNumber and rNr == regionNumber:
+                    if w == gauss_field_name:
+                        zNr = int(words[i + 1])
+                        rNr = int(words[i + 2])
+                        if zNr == zone_number and rNr == region_number:
                             # Found the correct line for the seed
-                            startSeed = int(words[i+3])
+                            startSeed = int(words[i + 3])
                             if debug_level >= Debug.VERY_VERBOSE:
                                 print('  Read seed: {} from seed file: {}'.format(startSeed, seedFileName))
                             break
                 if startSeed == -1:
                     raise IOError(
-                        'The seed file: {} does not contain seed value for '
-                        'gauss field name: {}   zone number: {}    and region number: {}'.format(
-                            seedFileName, gaussFieldName, zoneNumber, regionNumber
-                        )
+                        f'The seed file: {seedFileName} does not contain seed value for '
+                        f'gauss field name: {gauss_field_name}'
+                        f'   zone number: {zone_number}    and region number: {region_number}'
                     )
-        except:
-            raise IOError('Can not open and read seed file: {}'.format(seedFileName))
+        except Exception:
+            raise IOError(f'Can not open and read seed file: {seedFileName}')
 
         if debug_level >= Debug.ON:
-            print('-  Start seed: ' + str(startSeed))
+            print(f'-  Start seed: {startSeed}')
         startSeed = nrlib.seed(startSeed)
 
     # Define variogram
-    variogramName = variogramMapping[variogramType.name]
+    variogramName = variogram_mapping[variogram_type.name]
 
     #  Note that since RMS uses left-handed coordinate system while nrlib uses right-handed coordinate system, we have to use
     #  azimuth for nrlib simulation equal to: ( 90 - specified azimuth in simulation box).
     if variogramName == 'general_exponential':
-        simVariogram = nrlib.variogram(variogramName, mainRange, perpRange, vertRange, 90.0 - azimuth, dip, power)
+        simVariogram = nrlib.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip, power)
     else:
-        simVariogram = nrlib.variogram(variogramName, mainRange, perpRange, vertRange, 90.0 - azimuth, dip)
+        simVariogram = nrlib.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip)
 
     # Simulate gauss field. Return numpy 1D vector in F order. Get padding + grid size as information
     [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
     if logFileName is not None:
         file.write('    Simulation grid size with padding due to correlation lengths for gauss field {} for zone,region: ({},{})\n'
-                   ''.format(gaussFieldName, zoneNumber, regionNumber))
+                   ''.format(gauss_field_name, zone_number, region_number))
         file.write('      nx with padding: {}\n'.format(nx_padding))
         file.write('      ny with padding: {}\n'.format(ny_padding))
         file.write('      nz with padding: {}\n'.format(nz_padding))
@@ -138,149 +127,148 @@ def simulateGauss(
     # Get the start seed
     startSeed = nrlib.seed()
     if debug_level >= Debug.VERBOSE:
-        print('    Start seed: {}'.format(startSeed))
+        print(f'    Start seed: {startSeed}')
 
     # write result to binary file using numpy binary file format
-    fileName = outputDir + '/' + gaussFieldName + '_' + str(zoneNumber) + '_' + str(regionNumber)
+    fileName = outputDir + '/' + gauss_field_name + '_' + str(zone_number) + '_' + str(region_number)
     np.save(fileName,gaussVector)
 
     if logFileName is not None:
-        file.write('    Start seed: {}\n'.format(str(startSeed)))
-        file.write('    Write file: {}\n'.format(fileName))
-        file.write('    Finished running simulation of {} for zone,region: ({},{})\n'.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
+        file.write(f'    Start seed: {startSeed}\n')
+        file.write(f'    Write file: {fileName}\n')
+        file.write(f'    Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})\n')
         file.write('')
         file.close()
         if debug_level >= Debug.VERBOSE:
-            print('    Write file: {}'.format(logFileName))
+            print(f'    Write file: {logFileName}')
 
     if writeSeedFile:
         # Save start seed if writeSeedFile is True and seedFileName is defined
         if seedFileName is not None:
-            file = open(seedFileName,'w')
-            file.write(' {}  {}  {}  {}\n'
-                       ''.format(gaussFieldName, str(zoneNumber), str(regionNumber), str(startSeed))
-                       )
+            file = open(seedFileName, 'w')
+            file.write(f' {gauss_field_name}  {zone_number}  {region_number}  {startSeed}\n')
             file.close()
             if debug_level >= Debug.VERBOSE:
                 print('    Write file: {}'.format(seedFileName))
 
     if debug_level >= Debug.VERBOSE:
-        print('    Write file: {}'.format(fileName))
-        print('    Finished running simulation of {} for zone,region: ({},{})'.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
+        print(f'    Write file: {fileName}')
+        print(f'    Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})')
         print('')
 
 
 def run_simulations(
-    modelFile='APS.xml',
+    model_file='APS.xml',
     rms_data_file_name='rms_project_data_for_APS_gui.xml',
-    outputDir='./tmp_gauss_sim',
-    writeLogFile=True):
+    output_dir='./tmp_gauss_sim',
+    write_log_file=True,
+):
     """
     Description: Run gauss simulations for the APS model
 
     """
 
     # Read APS model
-    print('- Read file: ' + modelFile)
-    apsModel = APSModel(modelFile)
-    debug_level = apsModel.debug_level
-    seedFileName = apsModel.seed_file_name
-    writeSeedFile = apsModel.write_seeds
-    if writeSeedFile:
+    print(f'- Read file: {model_file}')
+    aps_model = APSModel(model_file)
+    debug_level = aps_model.debug_level
+    seed_file_name = aps_model.seed_file_name
+    write_seed_file = aps_model.write_seeds
+    if write_seed_file:
         if debug_level >= Debug.ON:
-            print('Write seed file: ' + str(seedFileName))
+            print(f'Write seed file: {seed_file_name}')
     else:
         if debug_level >= Debug.ON:
-            print('Read seed file: ' + str(seedFileName))
+            print(f'Read seed file: {seed_file_name}')
 
     # Get grid dimensions
 
-    gridModelName = apsModel.getGridModelName()
+    grid_model_name = aps_model.grid_model_name
 
     if debug_level >= Debug.VERBOSE:
-        print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
-    rmsData = APSDataFromRMS(debug_level=debug_level)
+        print(f'- Read file: {rms_data_file_name}')
+    rms_data = APSDataFromRMS(debug_level=debug_level)
 
-    rmsData.readRMSDataFromXMLFile(rms_data_file_name)
-    gridModelNameFromRMSData = rmsData.getGridModelName()
-    if gridModelName != gridModelNameFromRMSData:
+    rms_data.readRMSDataFromXMLFile(rms_data_file_name)
+    grid_model_name_from_rms_data = rms_data.grid_model_name
+    if grid_model_name != grid_model_name_from_rms_data:
         raise IOError(
-            'The specified grid model in model file: {} and in RMS data file: {} are different.\n'
-            'You may have to fix the model file or extract data from RMS for correct grid model again'.format(gridModelName, gridModelNameFromRMSData)
-            )
-    [nx, ny, _, _, simBoxXLength, simBoxYLength, _, _, azimuthAngleGrid] = rmsData.getGridSize()
+            f'The specified grid model in model file: {grid_model_name} and '
+            f'in RMS data file: {grid_model_name_from_rms_data} are different.\n'
+            'You may have to fix the model file or extract data from RMS for correct grid model again'
+        )
+    nx, ny, _, _, sim_box_x_length, sim_box_y_length, _, _, azimuth_angle_grid = rms_data.getGridSize()
 
     # Calculate grid cell size
-    dx = simBoxXLength/nx
-    dy = simBoxYLength/ny
+    dx = sim_box_x_length/nx
+    dy = sim_box_y_length/ny
 
     # Loop over all zones and simulate gauss fields
-    allZoneModels = apsModel.sorted_zone_models
-    for key, zoneModel in allZoneModels.items():
-        zoneNumber = key[0]
-        regionNumber = key[1]
-        if not apsModel.isSelected(zoneNumber, regionNumber):
+    all_zone_models = aps_model.sorted_zone_models
+    for key, zone_model in all_zone_models.items():
+        zone_number, region_number = key
+        if not aps_model.isSelected(zone_number, region_number):
             continue
-        gaussFieldNames = zoneModel.getGaussFieldsInTruncationRule()
-        [start, end] = rmsData.getStartAndEndLayerInZone(zoneNumber)
-        nLayers = rmsData.getNumberOfLayersInZone(zoneNumber)
+        gauss_field_names = zone_model.getGaussFieldsInTruncationRule()
+        [start, end] = rms_data.getStartAndEndLayerInZone(zone_number)
+        num_layers = rms_data.getNumberOfLayersInZone(zone_number)
 
         processes = []
-        for i in range(len(gaussFieldNames)):
-            gaussFieldName = gaussFieldNames[i]
-            azimuthValue = zoneModel.getAzimuthAngle(gaussFieldName)
-            dipValue     = zoneModel.getDipAngle(gaussFieldName)
-            power = zoneModel.getPower(gaussFieldName)
-            variogramType = zoneModel.getVariogramType(gaussFieldName)
-            mainRange = zoneModel.getMainRange(gaussFieldName)
-            perpRange = zoneModel.getPerpRange(gaussFieldName)
-            vertRange = zoneModel.getVertRange(gaussFieldName)
+        for gauss_field_name in gauss_field_names:
+            azimuth = zone_model.getAzimuthAngle(gauss_field_name)
+            dip     = zone_model.getDipAngle(gauss_field_name)
+            power = zone_model.getPower(gauss_field_name)
+            variogram_type = zone_model.getVariogramType(gauss_field_name)
+            main_range = zone_model.getMainRange(gauss_field_name)
+            perpendicular_range = zone_model.getPerpRange(gauss_field_name)
+            vertical_range = zone_model.getVertRange(gauss_field_name)
 
-            azimuthValueSimBox = azimuthValue - azimuthAngleGrid
-            simBoxThickness = zoneModel.getSimBoxThickness()
+            azimuth_value_sim_box = azimuth - azimuth_angle_grid
+            sim_box_thickness = zone_model.sim_box_thickness
 
             # Calculate grid cell size in z direction
-            nz = nLayers
-            dz = simBoxThickness/nz
+            nz = num_layers
+            dz = sim_box_thickness / nz
 
             # Define data set for simulation
-            simParam = {
-                'zoneNumber': zoneNumber,
-                'regionNumber': regionNumber,
-                'gaussFieldName': gaussFieldName,
-                'variogramType': variogramType,
-                'mainRange': mainRange,
-                'perpRange': perpRange,
-                'vertRange': vertRange,
-                'azimuth': azimuthValueSimBox,
-                'dip': dipValue,
+            sim_param = {
+                'zoneNumber': zone_number,
+                'regionNumber': region_number,
+                'gaussFieldName': gauss_field_name,
+                'variogramType': variogram_type,
+                'mainRange': main_range,
+                'perpRange': perpendicular_range,
+                'vertRange': vertical_range,
+                'azimuth': azimuth_value_sim_box,
+                'dip': dip,
                 'nx': nx, 'ny': ny, 'nz': nz,
                 'dx': dx, 'dy': dy, 'dz': dz,
                 'power': power,
             }
 
             # Add process to simulate gauss field
-            logFileName=None
-            if writeLogFile:
-                logFileName = outputDir + '/' + gaussFieldName + '_' + str(zoneNumber) + '_' + str(regionNumber) + '.log'
-            #debug_level = Debug.OFF
-            if writeSeedFile:
-                seedFileNameForThisProcess = outputDir + '/' + 'seed_' + gaussFieldName + '_' + str(zoneNumber) + '_' + str(regionNumber)
+            log_file_name = None
+            if write_log_file:
+                log_file_name = f'{output_dir}/{gauss_field_name}_{zone_number}_{region_number}.log'
+            if write_seed_file:
+                seed_file_name_for_this_process = f'{output_dir}/seed_{gauss_field_name}_{zone_number}_{region_number}'
             else:
-                seedFileNameForThisProcess = seedFileName
-            simGaussProcess = mp.Process(
+                seed_file_name_for_this_process = seed_file_name
+            sim_gauss_process = mp.Process(
                 target=simulateGauss,
-                args=(simParam, outputDir, logFileName, seedFileNameForThisProcess, writeSeedFile, debug_level)
+                args=(
+                    sim_param, output_dir, log_file_name, seed_file_name_for_this_process, write_seed_file, debug_level,
+                )
             )
-            processes.append(simGaussProcess)
+            processes.append(sim_gauss_process)
         # End loop over gauss fields for one zone
 
-        # Submit simulations of all gauss fields for current zone,region model and wait for the result
+        # Submit simulations of all gauss fields for the current zone/region model and wait for the result
         # 'Run processes'
         for i in range(len(processes)):
             p = processes[i]
-            gaussFieldName = gaussFieldNames[i]
-            print('- Start simulate: {} for zone: {} for region: {}'.format(gaussFieldName, str(zoneNumber), str(regionNumber)))
+            gauss_field_name = gauss_field_names[i]
+            print(f'- Start simulate: {gauss_field_name} for zone: {zone_number} for region: {region_number}')
             p.start()
             # Wait at least one second before continuing to ensure that automatically generated start seed values are different
             # since seed values are generated automatically based on clock time.
@@ -291,12 +279,12 @@ def run_simulations(
             p.join()
     # End loop over all active zones in the model
 
-    if writeSeedFile:
+    if write_seed_file:
         # Make one seed file for all gauss simulations which can be used to reproduce the realizations
-        command = 'cat ' + outputDir + '/' + 'seed_* > ' + seedFileName
+        command = f'cat {output_dir}/seed_* > {seed_file_name}'
         os.system(command)
         if debug_level >= Debug.ON:
-            print('- Write seed file: {}'.format(seedFileName))
+            print(f'- Write seed file: {seed_file_name}')
     print('')
     print('- Finished simulating all gaussian fields')
     print('')
@@ -309,10 +297,10 @@ def run(roxar=None, project=None, **kwargs):
     output_dir = params['input_directory']
     write_log_file = params['write_log_file']
     run_simulations(
-        modelFile=model_file,
+        model_file=model_file,
         rms_data_file_name=rms_data_file_name,
-        outputDir=output_dir,
-        writeLogFile=write_log_file
+        output_dir=output_dir,
+        write_log_file=write_log_file
     )
 
 

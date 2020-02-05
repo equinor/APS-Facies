@@ -232,7 +232,7 @@ export default class TheToolBar extends Vue {
               resultPromise.then(async (success: boolean): Promise<void> => {
                 if (success) {
                   await displaySuccess(`The model file was saved to ${path}`)
-                  // TODO: Use the APSModel.writeModel method in stead
+                  // TODO: Use the APSModel.write_model method in stead
                   const exportedGlobalVariablesString = extractFmuVariables(exportedXMLString)
                   if (exportedGlobalVariablesString) {
                     const fileName = (path.split('/').pop() || '').replace(/(\.xml)$/, '_FMU_tagged_parameters.dat')

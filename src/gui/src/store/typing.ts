@@ -163,6 +163,8 @@ interface RootGetters {
 
   'fields': GaussianRandomField[]
 
+  id: (type: string, name: string) => Optional<ID>
+
   'truncationRule': TruncationRule
   'truncationRules/typeById': (id: ID) => string | null
   'truncationRules/ruleTypes': { text: string, disabled: boolean, order: number }[]

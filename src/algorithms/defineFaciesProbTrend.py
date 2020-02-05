@@ -3,7 +3,7 @@
 import copy
 import numpy as np
 
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
+from src.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values
 from src.utils.roxar.grid_model import getCellValuesFilteredOnDiscreteParam, getDiscrete3DParameterValues
 from src.algorithms.defineFacies import BaseDefineFacies
 from src.utils.constants.simple import Debug
@@ -154,7 +154,7 @@ class DefineFaciesProb(BaseDefineFacies):
             # Write the calculated probabilities for the selected zones to 3D parameter
             # If the 3D parameter exist in advance, only the specified zones will be altered
             # while grid cell values for other zones are unchanged.
-            success = setContinuous3DParameterValues(
+            success = set_continuous_3d_parameter_values(
                 grid_model, parameter_name, probability_values,
                 self.selected_zone_numbers, real_number, debug_level=self.debug_level
             )

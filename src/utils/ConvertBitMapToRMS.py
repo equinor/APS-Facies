@@ -162,7 +162,7 @@ class ConvertBitMapToRMS:
         self.__crop = False
 
         if debug_level >= Debug.ON:
-            print('Read file: ' + model_file_name)
+            print(f'Read file: {model_file_name}')
 
         tree = ET.parse(model_file_name)
         self.__ET_Tree = tree
@@ -358,7 +358,7 @@ class ConvertBitMapToRMS:
     def convert(self):
         self.__fmapFacies = []
         for fileName in self.__inputFileList:
-            print('Read file: ' + fileName)
+            print(f'Read file: {fileName}')
             ncolSpecified = self.__nx
             nrowSpecified = self.__ny
             path = Path(fileName)
@@ -464,7 +464,7 @@ class ConvertBitMapToRMS:
 
         n = 0
         for fileName in self.__outputFileList:
-            print('Write file: ' + fileName)
+            print(f'Write file: {fileName}')
             angleInDegrees = 0.0
             if self.nFacies == 0:
                 angleInDegrees = 0.0

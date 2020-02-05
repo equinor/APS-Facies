@@ -63,17 +63,17 @@
       </FaciesProbForModel>
       <GaussField name="GRF6">
         <Vario name="SPHERICAL">
-          <MainRange kw="APS_5_0_GF_GRF6_RESIDUAL_MAINRANGE"> 4000.0 </MainRange>
-          <PerpRange kw="APS_5_0_GF_GRF6_RESIDUAL_PERPRANGE"> 3000.0 </PerpRange>
-          <VertRange kw="APS_5_0_GF_GRF6_RESIDUAL_VERTRANGE"> 6.0 </VertRange>
-          <AzimuthAngle kw="APS_5_0_GF_GRF6_RESIDUAL_AZIMUTHANGLE"> 36.0 </AzimuthAngle>
-          <DipAngle kw="APS_5_0_GF_GRF6_RESIDUAL_DIPANGLE"> 0.04 </DipAngle>
+          <MainRange kw="APS_5_0_GF_GRF6_RESIDUAL_MAINRANGE">4000.0</MainRange>
+          <PerpRange kw="APS_5_0_GF_GRF6_RESIDUAL_PERPRANGE">3000.0</PerpRange>
+          <VertRange kw="APS_5_0_GF_GRF6_RESIDUAL_VERTRANGE">6.0</VertRange>
+          <AzimuthAngle kw="APS_5_0_GF_GRF6_RESIDUAL_AZIMUTHANGLE">36.0</AzimuthAngle>
+          <DipAngle kw="APS_5_0_GF_GRF6_RESIDUAL_DIPANGLE">0.04</DipAngle>
         </Vario>
         <Trend>
           <Linear3D>
-          <azimuth kw="APS_5_0_GF_GRF6_TREND_AZIMUTH"> 130.0 </azimuth>
+          <azimuth kw="APS_5_0_GF_GRF6_TREND_AZIMUTH">130.0</azimuth>
           <directionStacking> 1 </directionStacking>
-          <stackAngle kw="APS_5_0_GF_GRF6_TREND_STACKANGLE"> 0.16 </stackAngle>
+          <stackAngle kw="APS_5_0_GF_GRF6_TREND_STACKANGLE">0.16</stackAngle>
           </Linear3D>
         </Trend>
         <RelStdDev> 0.06 </RelStdDev>
@@ -226,10 +226,10 @@
           <azimuth> 125.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 0.1 </stackAngle>
-          <curvature kw="APS_2_3_GF_GRF7_TREND_CURVATURE"> 6 </curvature>
-          <origin_x kw="APS_2_3_GF_GRF7_TREND_ORIGIN_X"> 0.8 </origin_x>
-          <origin_y kw="APS_2_3_GF_GRF7_TREND_ORIGIN_Y"> 0.8 </origin_y>
-          <origin_z_simbox kw="APS_2_3_GF_GRF7_TREND_ORIGIN_Z_SIMBOX"> 0.8 </origin_z_simbox>
+          <curvature kw="APS_2_3_GF_GRF7_TREND_CURVATURE">6</curvature>
+          <origin_x kw="APS_2_3_GF_GRF7_TREND_ORIGIN_X">0.8</origin_x>
+          <origin_y kw="APS_2_3_GF_GRF7_TREND_ORIGIN_Y">0.8</origin_y>
+          <origin_z_simbox kw="APS_2_3_GF_GRF7_TREND_ORIGIN_Z_SIMBOX">0.8</origin_z_simbox>
           <origintype> Relative </origintype>
           </Elliptic3D>
         </Trend>
@@ -249,11 +249,11 @@
           <azimuth> 35.0 </azimuth>
           <directionStacking> 1 </directionStacking>
           <stackAngle> 90 </stackAngle>
-          <curvature kw="APS_2_3_GF_GRF8_TREND_CURVATURE"> 10.6 </curvature>
-          <migrationAngle kw="APS_2_3_GF_GRF8_TREND_MIGRATIONANGLE"> 89.8 </migrationAngle>
-          <origin_x kw="APS_2_3_GF_GRF8_TREND_ORIGIN_X"> 0.6 </origin_x>
-          <origin_y kw="APS_2_3_GF_GRF8_TREND_ORIGIN_Y"> 0.1 </origin_y>
-          <origin_z_simbox kw="APS_2_3_GF_GRF8_TREND_ORIGIN_Z_SIMBOX"> 0.1 </origin_z_simbox>
+          <curvature kw="APS_2_3_GF_GRF8_TREND_CURVATURE">10.6</curvature>
+          <migrationAngle kw="APS_2_3_GF_GRF8_TREND_MIGRATIONANGLE">89.8</migrationAngle>
+          <origin_x kw="APS_2_3_GF_GRF8_TREND_ORIGIN_X">0.6</origin_x>
+          <origin_y kw="APS_2_3_GF_GRF8_TREND_ORIGIN_Y">0.1</origin_y>
+          <origin_z_simbox kw="APS_2_3_GF_GRF8_TREND_ORIGIN_Z_SIMBOX">0.1</origin_z_simbox>
           <origintype> Relative </origintype>
           </Hyperbolic3D>
         </Trend>

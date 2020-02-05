@@ -71,7 +71,6 @@ class APSFaciesProb:
         def initialize(self, faciesList, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, debug_level=Debug.OFF)
         def getAllProbParamForZone(self)
         def getConstProbValue(self,fName)
-        def getFaciesInZoneModel(self)
         def findFaciesItem(self, faciesName)
         def updateFaciesWithProbForZone(self,faciesList,faciesProbList)
         def updateSingleFaciesWithProbForZone(self, faciesName, faciesProbCubeName)
@@ -105,7 +104,7 @@ class APSFaciesProb:
 
             # Get data from xml tree
             if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Call init ' + self.__class_name + ' and read from xml file')
+                print(f'Debug output: Call init {self.__class_name} and read from xml file')
             self.__interpretXMLTree(ET_Tree_zone, modelFileName)
 
             # End __init__

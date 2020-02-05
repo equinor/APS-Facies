@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import List, Tuple, NewType
 
-MethodName = NewType('MethodType', str)
+MethodName = NewType('MethodName', str)
 Arguments = NewType('Arguments', List[str])
 
 

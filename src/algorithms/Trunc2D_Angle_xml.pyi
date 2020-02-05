@@ -21,6 +21,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         zoneNumber: Optional[int] = None
     ): ...
     num_polygons: int
+    def __interpretXMLTree(self, trRuleXML, modelFileName) -> None: ...
     def XMLAddElement(
         self,
         parent: Element,

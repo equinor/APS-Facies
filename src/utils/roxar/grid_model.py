@@ -7,8 +7,6 @@ from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
 from src.utils.methods import calc_average
 
-from roxar import GridPropertyType
-
 
 def find_defined_cells(zone_values, zone_number, region_values=None, region_number=0, debug_level=Debug.OFF):
     """
@@ -33,10 +31,9 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
     if region_number is not None and region_number > 0:
         if num_cells_total != len(region_values):
             raise ValueError(
-                'Zone number: {}  Region number: {}.\n'
-                'Number of grid cells with this zone number: {}\n'
-                'Number of grid cells with this region number: {}'
-                ''.format(zone_number, region_number, num_cells_total, len(region_values))
+                f'Zone number: {zone_number}  Region number: {region_number}.\n'
+                f'Number of grid cells with this zone number: {num_cells_total}\n'
+                f'Number of grid cells with this region number: {len(region_values)}'
             )
 
         # Use both zone number and region number to define selected cells
@@ -49,9 +46,8 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
         cell_index_defined = index_array[(zone_values == zone_number) & (region_values == region_number)]
         if debug_level >= Debug.VERY_VERBOSE:
             print(
-                'Debug output: In find_defined_cells: Number of active cells for current '
-                '(zone_number, region_number)=({},{}): {}'
-                ''.format(zone_number, region_number, len(cell_index_defined))
+                f'Debug output: In find_defined_cells: Number of active cells for current '
+                f'(zone_number, region_number)=({zone_number} ,{region_number}): {len(cell_index_defined)}'
             )
     else:
         # Only zone number is used to define selected cells
@@ -149,15 +145,14 @@ def get3DParameter(grid_model, parameter_name):
     """
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty():
-        raise ValueError("Expected non-empty grid model, but was empty. (Grid Model: '{}')".format(grid_model.name))
+        raise ValueError(f"Expected non-empty grid model, but was empty. (Grid Model: '{grid_model.name}')")
 
     # Check if specified parameter name exists.
     try:
         return grid_model.properties[parameter_name]
     except KeyError:
         raise ValueError(
-            "The parameter '{}' was expected in grid model '{}', but does not exist."
-            "".format(parameter_name, grid_model.name)
+            f"The parameter '{parameter_name}' was expected in grid model '{grid_model.name}', but does not exist."
         )
 
 
@@ -186,7 +181,7 @@ def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realizati
     """
     Input:
            grid_model     - Grid model object
-           parameterName - Name of 3D parameter to get.
+           parameter_name - Name of 3D parameter to get.
 
            zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
                             included in the list, then grid cells in all zones are updated.
@@ -224,7 +219,7 @@ def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realiz
     """
     Input:
            grid_model     - Grid model object
-           parameterName - Name of 3D parameter to get.
+           parameter_name - Name of 3D parameter to get.
 
            zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
                             included in the list, then grid cells in all zones are updated.
@@ -243,7 +238,7 @@ def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realiz
         index_array = np.arange(len(zone_values), dtype=np.uint64)
         first = True
         for i in range(len(zone_number_list)):
-            zone_number = zone_number_list[i] + 1 # Input zone numbering start at 0, but zone  values start at 1
+            zone_number = zone_number_list[i] + 1  # Input zone numbering start at 0, but zone  values start at 1
             cell_index_one_zone = index_array[(zone_values == zone_number)]
             if first:
                 cell_index_defined = cell_index_one_zone
@@ -322,6 +317,7 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
             and a dictionary object with code_names and values. If dictionary for code and facies names
             has empty facies names, the facies name is set to the code value to avoid empty facies names.
     """
+    from roxar import GridPropertyType
     function_name = getDiscrete3DParameterValues.__name__
     param = get3DParameter(grid_model, parameter_name)
     # Check that parameter is defined and not empty
@@ -342,7 +338,7 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
     return active_cell_values, code_names
 
 
-def modifySelectedGridCells(grid_model, zone_number_list, realization_number, old_values, new_values):
+def modify_selected_grid_cells(grid_model, zone_numbers, realization_number, old_values, new_values):
     """ Updates an input numpy array old_values with values from the input numpy array new_values for those indices
         that corresponds to grid cells in the zones defined in the zone_number_list.
         If the list of zone numbers is empty, this means that ALL zones are updated,
@@ -351,9 +347,11 @@ def modifySelectedGridCells(grid_model, zone_number_list, realization_number, ol
     grid = grid_model.get_grid(realization_number)
     indexer = grid.simbox_indexer
     dim_i, dim_j, dim_k = indexer.dimensions
-    if len(zone_number_list) > 0:
+    if zone_numbers is None:
+        zone_numbers = []
+    if len(zone_numbers) > 0:
         for zone_index in indexer.zonation:
-            if zone_index in zone_number_list:
+            if zone_index in zone_numbers:
                 layer_ranges = indexer.zonation[zone_index]
                 for lr in layer_ranges:
                     # Get all the cell numbers for the layer range
@@ -375,7 +373,7 @@ def update_code_names(property, new_code_names):
                 v = old_code_names.get(k)
                 if u == v:
                     # The facies name for this code already exist
-                    raise ValueError('The facies name "{}" already exists for facies code{}'.format(u, code))
+                    raise ValueError(f'The facies name "{u}" already exists for facies code{code}')
 
             item = {code: u}
             old_code_names.update(item)
@@ -512,7 +510,7 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
             average_thickness_selected_cells = sum_thickness_for_selected_cells / n_cells_selected
             thickness_per_zone[zone_index + 1] = average_thickness_selected_cells
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Zone number: {}   Estimated sim box thickness {}'.format(zone_index + 1, average_thickness_selected_cells))
+                print(f'Zone number: {zone_index + 1}   Estimated sim box thickness {average_thickness_selected_cells}')
     return thickness_per_zone
 
 
@@ -642,23 +640,7 @@ def getNumberOfLayers(grid):
 
 def getZoneLayerNumbering(grid_model, realization_number=0):
     grid = grid_model.get_grid(realization_number)
-    indexer = grid.simbox_indexer
-    number_layers_per_zone = []
-    start_layers_per_zone = []
-    end_layers_per_zone = []
-    for key in indexer.zonation:
-        layer_ranges = indexer.zonation[key]
-        number_layers = 0
-        # sim box indexer should not have repeated layer numbering
-        assert(len(layer_ranges) == 1)
-        layer_range = layer_ranges[0]
-        start = layer_range[0]
-        end = layer_range[-1]
-        number_layers += (end + 1 - start)
-        number_layers_per_zone.append(number_layers)
-        start_layers_per_zone.append(start)
-        end_layers_per_zone.append(end)
-    return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
+    return get_zone_layer_numbering(grid)
 
 
 class GridAttributes:
@@ -691,7 +673,7 @@ class GridAttributes:
             print('Number of columns:', nx)
             print('Number of rows:', ny)
             print('Number of layers:', nz)
-            print('No. of zones:', len(self.num_zones))
+            print('No. of zones:', self.num_zones)
             print('------------------------------------------------')
 
             for i, zone_index in enumerate(self.indexer.zonation.keys(), start=1):

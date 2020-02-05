@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { ERROR_TOLERENCE, isDevelopmentBuild } from '@/config'
+import { ERROR_TOLERANCE, isDevelopmentBuild } from '@/config'
 
 export function isEmpty<T> (property: T): boolean { return _.isEmpty(property) && !_.isNumber(property) }
 export function notEmpty<T> (property: T): boolean { return !isEmpty(property) }
@@ -22,7 +22,7 @@ export function allSet<T> (items: T[], prop: string): boolean {
 export function isCloseTo (val: number, target: number): boolean {
   // Since JavaScript uses floats, there are times when comparing against 1 (or another number) will fail
   // because of a rounding error
-  return Math.abs(val - target) <= ERROR_TOLERENCE
+  return Math.abs(val - target) <= ERROR_TOLERANCE
 }
 
 export function isCloseToUnity (val: number): boolean {

@@ -49,7 +49,6 @@ class APSZoneModel:
 
      --- Get functions ---
        def useConstProb(self)
-       def getFaciesInZoneModel(self)
        def getVariogramType(self,gaussFieldName)
        def getVariogramTypeNumber(self,gaussFieldName)
        def getMainRange(self,gaussFieldName)
@@ -61,7 +60,6 @@ class APSZoneModel:
        def getTruncRule(self)
        def getTrendModel(self,gfName
        def getTrendModelObject(self, gfName)
-       def getSimBoxThickness(self)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
        def getConstProbValue(self,fName)
@@ -131,7 +129,7 @@ class APSZoneModel:
         """
         self.__className = self.__class__.__name__
         # Local variables
-        self.__trunc_rule = None
+        self.__trunc_rule = truncRuleObject
         self.__zoneNumber = zoneNumber
         self.__regionNumber = regionNumber
         self.__useConstProb = bool(useConstProb)
@@ -140,7 +138,6 @@ class APSZoneModel:
         self.__faciesProbObject = faciesProbObject
         self.__gaussModelObject = gaussModelObject
 
-        self.truncation_rule = truncRuleObject
         self.__keyResolution = keyResolution
         self.__debug_level = debug_level
         self.grid_layout = grid_layout
@@ -158,8 +155,7 @@ class APSZoneModel:
         self.__debug_level = getIntCommand(root, kw, defaultValue=1, required=False)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('')
-            print('Debug output: Call init ' + self.__className)
+            print('\nDebug output: Call init {self.__className}')
 
         # Optimization parameters
         obj = getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
@@ -188,10 +184,10 @@ class APSZoneModel:
 
             region_number = get_region_number(zone)
             if self.__debug_level == Debug.VERY_VERBOSE:
-                print('Debug output: Zone number: {}  Region number: {}'.format(zone_number, region_number))
+                print(f'Debug output: Zone number: {zone_number}  Region number: {region_number}')
             else:
                 if self.__debug_level == Debug.VERY_VERBOSE:
-                    print('Debug output: Zone number: {}'.format(str(zone_number)))
+                    print(f'Debug output: Zone number: {zone_number}')
 
             grid_layout = getTextCommand(zone, 'GridLayout', 'Zone', modelFile=modelFileName, required=False)
             self.grid_layout = grid_layout
@@ -206,10 +202,12 @@ class APSZoneModel:
                 self.__simBoxThickness = simBoxThickness
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: From APSZoneModel: ZoneNumber:      ' + str(zone_number))
-                    print('Debug output: From APSZoneModel: RegionNumber:    ' + str(region_number))
-                    print('Debug output: From APSZoneModel: useConstProb:    ' + str(self.__useConstProb))
-                    print('Debug output: From APSZoneModel: simBoxThickness: ' + str(self.__simBoxThickness))
+                    print(f'''\
+Debug output: From APSZoneModel: ZoneNumber:       {zone_number}'
+Debug output: From APSZoneModel: RegionNumber:     {region_number}'
+Debug output: From APSZoneModel: useConstProb:     {self.__useConstProb}'
+Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
+''')
 
                 # Read facies probabilities
                 self.__faciesProbObject = APSFaciesProb(
@@ -226,26 +224,20 @@ class APSZoneModel:
                 trRule = zone.find('TruncationRule')
                 if trRule is None:
                     raise NameError(
-                        'Error when reading model file: {modelName}\n'
+                        f'Error when reading model file: {modelFileName}\n'
                         'Error: Missing keyword TruncationRule '
                         'under keyword Zone'
-                        ''.format(modelName=modelFileName)
                     )
                 truncRuleName = trRule[0].tag
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: TruncRuleName: ' + truncRuleName)
+                    print(f'Debug output: TruncRuleName: {truncRuleName}')
 
                 nGaussFieldInModel = int(trRule[0].get('nGFields'))
                 if nGaussFieldInModel > self.__gaussModelObject.num_gaussian_fields:
                     raise ValueError(
-                        'Error: In {className}\n'
-                        'Error: Number of specified RMS gaussian field 3D parameters in truncation rule {nGFTruncRule}\n'
-                        '       is larger than number of gauss fields {nGFModel} specified for the zone'
-                        ''.format(
-                            className=self.__className,
-                            nGFTruncRule=nGaussFieldInModel,
-                            nGFModel=truncRuleName
-                        )
+                        f'Error: In {self.__className}\n'
+                        f'Error: Number of specified RMS gaussian field 3D parameters in truncation rule {nGaussFieldInModel}\n'
+                        f'       is larger than number of gauss fields {truncRuleName} specified for the zone'
                     )
                 else:
                     faciesInZone = self.__faciesProbObject.facies_in_zone_model
@@ -270,16 +262,16 @@ class APSZoneModel:
                         )
                     else:
                         raise NameError(
-                            'Error in {className}\n'
-                            'Error: Specified truncation rule name: {truncationRule}\n'
+                            f'Error in {self.__className}\n'
+                            f'Error: Specified truncation rule name: {truncRuleName}\n'
                             '       is not implemented.'
-                            ''.format(className=self.__className, truncationRule=truncRuleName)
                         )
 
                     if self.__debug_level >= Debug.VERY_VERBOSE:
-                        text = 'Debug output: APSZoneModel: Truncation rule for current zone: '
-                        text += self.truncation_rule.getClassName()
-                        print(text)
+                        print(
+                            f'Debug output: APSZoneModel: '
+                            f'Truncation rule for current zone: {self.truncation_rule.getClassName()}'
+                        )
                         print('Debug output: APSZoneModel: Facies in truncation rule:')
                         print(repr(self.truncation_rule.getFaciesInTruncRule()))
                 break
@@ -322,7 +314,8 @@ class APSZoneModel:
     def useConstProb(self):
         return self.__useConstProb
 
-    def getFaciesInZoneModel(self):
+    @property
+    def facies_in_zone_model(self):
         return self.__faciesProbObject.facies_in_zone_model
 
     @property
@@ -397,14 +390,14 @@ class APSZoneModel:
     def sim_box_thickness(self, thickness):
         self.__simBoxThickness = thickness
 
+    def get_gaussian_field(self, name):
+        return self.__gaussModelObject.get_model(name)
+
     def getTrendModel(self, gfName):
         return self.__gaussModelObject.getTrendModel(gfName)
 
     def getTrendModelObject(self, gfName):
         return self.__gaussModelObject.getTrendModelObject(gfName)
-
-    def getSimBoxThickness(self):
-        return self.__simBoxThickness
 
     def hasTrendModel(self, gfName):
         return self.__gaussModelObject.hasTrendModel(gfName)
@@ -528,7 +521,7 @@ class APSZoneModel:
 
         nDefinedCells = len(cellIndexDefined)
         debug_level = self.__debug_level
-        faciesNames = self.getFaciesInZoneModel()
+        faciesNames = self.facies_in_zone_model
         nFacies = len(faciesNames)
         classNameTrunc = self.truncation_rule.getClassName()
         if len(probDefined) != nFacies:
@@ -670,23 +663,18 @@ class APSZoneModel:
         ''' This function calculate the truncations. It calculates facies realization for all grid cells that are defined in cellIndexDefined.
             The input facies probabilities and transformed gauss fields are used together with the truncation rule.'''
 
-        nDefinedCells = len(cellIndexDefined)
         debug_level = self.__debug_level
         order_index = self.truncation_rule.getOrderIndex()
-        faciesNames = self.getFaciesInZoneModel()
+        faciesNames = self.facies_in_zone_model
         nFacies = len(faciesNames)
         if len(probDefined) != nFacies:
-            raise ValueError(
-                'Error: In class: {}. Mismatch in input to applyTruncations '
-                ''.format(self.__className)
-            )
+            raise ValueError(f'Error: In class: {self.__className}. Mismatch in input to applyTruncations ')
 
         useConstTruncParam = self.truncation_rule.useConstTruncModelParam()
         if not useConstTruncParam:
             raise IOError(
-                'Cannot use optimization if the truncation parameters  (angles) are not constant in non-cubic rule')
-
-        nGaussFields = len(alpha_fields)
+                'Cannot use optimization if the truncation parameters  (angles) are not constant in non-cubic rule'
+            )
 
         volFrac = np.zeros(nFacies, dtype=np.float32)
 
@@ -694,6 +682,8 @@ class APSZoneModel:
             print('--- Truncation rule: ' + self.truncation_rule.getClassName())
             for gfName, alphaDataArray in alpha_fields.items():
                 print('--- Use gauss fields: ' + gfName)
+
+        nGaussFields, nDefinedCells = len(alpha_fields), len(cellIndexDefined)
 
         if self.__useConstProb:
             # Constant probability
@@ -731,7 +721,6 @@ class APSZoneModel:
             faciesReal[cellIndexDefined] = fCode_vector
 
             # Volume fraction of the different facies
-            sumfIndx = 0
             for i in range(nFacies):
                 fIndx = order_index[i]
                 # Number of grid cells having the specified facies
@@ -787,7 +776,6 @@ class APSZoneModel:
 
                         nCells += len(cell_indices_trunc_rule)
                         # Volume fraction of the different facies
-                        sumfIndx = 0
                         for i in range(nFacies):
                             fIndx = order_index[i]
                             # Number of grid cells having the specified facies
@@ -827,7 +815,6 @@ class APSZoneModel:
                 # Don't use vectorization and look up facies for all cells one by one.
                 if debug_level >= Debug.VERBOSE:
                     print('--- No vectorization optimization')
-                count_single_cell_truncation_cubes = 0
                 count_unique_truncation_cubes = 0
                 nCells = 0
                 for key, item in memo.items():
@@ -837,9 +824,8 @@ class APSZoneModel:
                     count_unique_truncation_cubes += 1
                     # Lookup facies
                     cell_indices_trunc_rule = item.get_cell_indices()
-                    for i in range(len(cell_indices_trunc_rule)):
+                    for index in cell_indices_trunc_rule:
                         nCells += 1
-                        index = cell_indices_trunc_rule[i]
                         alpha_coord = alpha_coord_vectors[index, :]
                         faciesCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alpha_coord)
                         faciesReal[cellIndexDefined[index]] = faciesCode
@@ -876,7 +862,7 @@ class APSZoneModel:
     def XMLAddElement(self, parent, fmu_attributes):
         ''' Add command Zone and all its children to the XML tree'''
         if self.debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self.__className)
+            print(f'Debug output: call XMLADDElement from {self.__className}')
 
         tag = 'Zone'
         if self.region_number <= 0:
@@ -896,13 +882,13 @@ class APSZoneModel:
         # Add child command UseConstProb
         tag = 'UseConstProb'
         elem = Element(tag)
-        elem.text = ' ' + str(int(self.__useConstProb)) + ' '
+        elem.text = f' {int(self.__useConstProb)} '
         zoneElement.append(elem)
 
         # Add child command SimBoxThickness
         tag = 'SimBoxThickness'
         elem = Element(tag)
-        elem.text = ' ' + str(self.__simBoxThickness) + ' '
+        elem.text = f' {self.__simBoxThickness} '
         zoneElement.append(elem)
 
         # Add child command FaciesProbForModel

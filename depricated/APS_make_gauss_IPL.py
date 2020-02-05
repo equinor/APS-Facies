@@ -12,7 +12,7 @@ def run(roxar=None, project=None, **kwargs):
     print('Run: APS_make_gauss_IPL')
     model_file_name = get_specification_file(**kwargs)
 
-    print('- Read file: ' + model_file_name)
+    print('- Read file: {}'.format(model_file_name))
     aps_model = APSModel(model_file_name)
 
     aps_model.createSimGaussFieldIPL()

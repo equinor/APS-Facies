@@ -25,10 +25,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
             found = True
             break
     if not found:
-        raise ValueError(
-            'Could not find grid model with name: {} in RMS project'
-            ''.format(gridModelName)
-        )
+        raise ValueError(f'Could not find grid model with name: {gridModelName} in RMS project')
     # Get the grid
     grid = gridModel.get_grid()
 
@@ -76,7 +73,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
         gmElement.append(element)
 
     with open(outputFile, 'w') as file:
-        print('- Write file: ' + outputFile)
+        print(f'- Write file: {outputFile}')
         root = prettify(topElement)
         file.write(root)
 
@@ -88,10 +85,10 @@ def run(roxar=None, project=None, **kwargs):
     output_rms_data_file = params['rms_data_file']
 
     # Read APS model
-    print('- Read file: ' + model_file)
+    print(f'- Read file: {model_file}')
     aps_model = APSModel(model_file)
     debug_level = aps_model.debug_level
-    grid_model_name = aps_model.getGridModelName()
+    grid_model_name = aps_model.grid_model_name
 
     writeXMLFileGridDimensions(project, grid_model_name, output_rms_data_file, debug_level)
     print('')

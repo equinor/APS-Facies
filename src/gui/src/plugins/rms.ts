@@ -22,12 +22,12 @@ if (typeof rms !== 'undefined') {
   })
 
   // @ts-ignore
-  rms.onPluginLoaded((data: RmsJob): void => {
+  rms.onPluginLoaded(async (data: RmsJob): Promise<void> => {
     // NOTE: an 'empty' data object from RMS, looks like this:
     // { _treeorigin: "", _version: "1.2" }
     // TODO: Handle different versions, (and merge?)
     if (Object.keys(data).length > 2) {
-      store.dispatch('populate', data)
+      await store.dispatch('populate', data)
     } else {
       const match = /^Grid models\/(.*)$/g.exec(data._treeorigin)
       if (match) {
@@ -40,7 +40,7 @@ if (typeof rms !== 'undefined') {
           }
         }
         if (gridModel) {
-          store.dispatch('gridModels/select', gridModel)
+          await store.dispatch('gridModels/select', gridModel)
         }
       }
     }

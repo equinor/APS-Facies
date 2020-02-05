@@ -3,7 +3,7 @@ from collections import OrderedDict
 import numpy as np
 
 from src.utils.constants.simple import Debug
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setContinuous3DParameterValues
+from src.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values
 from src.utils.roxar.grid_model import getContinuous3DParameterValues
 
 
@@ -50,7 +50,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
     Returns dictionaries with numpy arrays containing the gauss field values, trend values,
     transformed gauss field values for each gauss field name. The key is gauss field name.
     '''
-    grid_model_name = aps_model.getGridModelName()
+    grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]
     number_of_active_cells = grid_model.get_grid(realization_number).defined_cell_count
@@ -92,7 +92,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
             values = _get_field(name)
             gf_all_values[name] = values
         except ValueError:
-            setContinuous3DParameterValues(
+            set_continuous_3d_parameter_values(
                 grid_model, name, gf_all_values[name], [], realization_number
             )
 
@@ -103,7 +103,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
         for name in gauss_field_names_used:
             parameter_name = name + '_transf'
             input_values = gf_all_alpha[name]
-            setContinuous3DParameterValues(
+            set_continuous_3d_parameter_values(
                 grid_model, parameter_name, input_values,
                 zone_number_list, realization_number
             )
@@ -114,13 +114,13 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
             for name in gauss_field_names_with_trend:
                 gf_all_trend_values[name] = np.zeros(number_of_active_cells, np.float32)
                 if debug_level >= Debug.VERBOSE:
-                    print('---    {}'.format(name))
+                    print(f'---    {name}')
 
             # Write initial values to trend gauss parameters
             for name in gauss_field_names_with_trend:
                 parameter_name = name + '_trend'
                 input_values = gf_all_trend_values[name]
-                setContinuous3DParameterValues(
+                set_continuous_3d_parameter_values(
                     grid_model, parameter_name, input_values,
                     zone_number_list, realization_number
                 )

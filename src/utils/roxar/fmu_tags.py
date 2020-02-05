@@ -104,7 +104,7 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
                 trunc_rule.setYSFParamFmuUpdatable(value)
                 trunc_rule.setSBHDParamFmuUpdatable(value)
 
-    aps_model.writeModel(output_model_file, attributesFileName=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
+    aps_model.write_model(output_model_file, attributes_file_name=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
 
 
 def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_variables, tagged_variable_file=None):
@@ -213,4 +213,4 @@ def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_
                     elif var_name == 'SBHD':
                         trunc_rule.setSBHDParamFmuUpdatable(updatable)
 
-    aps_model.writeModel(output_model_file, attributesFileName=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
+    aps_model.write_model(output_model_file, attributes_file_name=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)

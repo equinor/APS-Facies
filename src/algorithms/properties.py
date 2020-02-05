@@ -127,7 +127,7 @@ class FmuProperty:
         return str(self.value)
 
     def __repr__(self):
-        return '(' + str(self.value) + ', ' + str(self.updatable) + ')'
+        return f'{self.__class__.__name__}({self.value}, {self.updatable})'
 
     def __mul__(self, other):
         return self.value * other

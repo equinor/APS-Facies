@@ -6,35 +6,35 @@
     elevation="0"
   >
     <template
-      v-slot:item="{ item }"
+      v-slot:item="{ item : facies }"
     >
       <tr>
         <td>
-          {{ item.name }}
+          {{ facies.name }}
         </td>
         <td
           v-if="useProbabilityCubes"
         >
           <v-autocomplete
-            :value="item.probabilityCube"
+            :value="facies.probabilityCube"
             :items="probabilityCubes"
             clearable
-            @input="cube => changeProbabilityCube(item, cube)"
+            @input="cube => changeProbabilityCube(facies, cube)"
           />
         </td>
         <td
           v-if="useProbabilityCubes"
         >
-          {{ item.previewProbability }}
+          {{ facies.previewProbability }}
         </td>
         <td
           v-else
         >
           <fraction-field
-            :value="item.previewProbability"
+            :value="facies.previewProbability"
             label=""
             dense
-            @input="prob => changeProbability(item, prob)"
+            @input="probability => changeProbability(facies, probability)"
           />
         </td>
       </tr>
@@ -121,8 +121,8 @@ export default class FaciesProbabilityCubeTable extends Vue {
     this.$store.dispatch('facies/changeProbabilityCube', { facies, probabilityCube })
   }
 
-  changeProbability (facies: Facies, prob: number): void {
-    this.$store.dispatch('facies/changePreviewProbability', { facies, previewProbability: prob })
+  changeProbability (facies: Facies, previewProbability: number): void {
+    this.$store.dispatch('facies/changePreviewProbability', { facies, previewProbability })
   }
 }
 </script>

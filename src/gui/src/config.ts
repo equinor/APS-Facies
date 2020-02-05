@@ -60,7 +60,7 @@ export const DEFAULT_FACIES_AUTOFILL = isDevelopmentBuild()
 
 export const DEFAULT_TIME_UNTIL_MESSAGE_DISMISSAL = 10000
 
-export const ERROR_TOLERENCE = 0.0001
+export const ERROR_TOLERANCE = 0.0001
 
 export const DEFAULT_TRUNCATION_RULE_TEMPLATE_PREVIEW_SIZE = {
   width: 100,

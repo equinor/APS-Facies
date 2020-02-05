@@ -20,7 +20,7 @@ def add_trend_to_gauss_field(
     Returns also trend values in a separate array, but this array has length equal to cell_index_defined and does only contain the values for the grid cells
     that are selected by cell_index_defined.
     '''
-    grid_model_name = aps_model.getGridModelName()
+    grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]
     debug_level = aps_model.debug_level
@@ -34,18 +34,16 @@ def add_trend_to_gauss_field(
         trend_type = trend_model.type.name
         if use_regions:
             print(
-                '--- Calculate trend for: {} for (zone,region)=({},{})\n'
-                '--- Trend type: {}'
-                ''.format(gauss_field_name, zone_number, region_number, trend_type)
+                f'--- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})\n'
+                f'--- Trend type: {trend_type}'
             )
         else:
             print(
-                '--- Calculate trend for: {} for zone: {}\n'
-                '--- Trend type: {}'
-                ''.format(gauss_field_name, zone_number, trend_type)
+                f'--- Calculate trend for: {gauss_field_name} for zone: {zone_number}\n'
+                f'--- Trend type: {trend_type}'
             )
 
-    sim_box_thickness = zone_model.getSimBoxThickness()
+    sim_box_thickness = zone_model.sim_box_thickness
     # trend_values contain trend values for the cells belonging to the set defined by cell_index_defined
     minmax_difference, trend_values = trend_model.createTrend(
         grid_model,
@@ -83,7 +81,7 @@ def add_trends(
         debug_level=Debug.OFF,
         fmu_mode=False,
 ):
-    grid_model = project.grid_models[aps_model.getGridModelName()]
+    grid_model = project.grid_models[aps_model.grid_model_name]
     zone_model = aps_model.getZoneModel(zone_number, region_number)
     gf_names_for_zone = zone_model.used_gaussian_field_names
     gf_names_for_truncation_rule = zone_model.getGaussFieldsInTruncationRule()

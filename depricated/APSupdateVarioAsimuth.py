@@ -15,7 +15,7 @@ from src.algorithms.APSModel import APSModel
 def run():
     warn("deprecated", DeprecationWarning)
     modelFileName = 'APS.xml'
-    print('- Read file: ' + modelFileName)
+    print(f'- Read file: {modelFileName}')
     apsModel = APSModel(modelFileName)
     debug_level = apsModel.debug_level
     horizons = project.horizons

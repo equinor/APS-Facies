@@ -65,8 +65,8 @@ class _OS:
     def _exec(
             path: Path,
             fun: Callable,
-            args,
-            kwargs,
+            args: Tuple = (),
+            kwargs: Dict = None,
     ) -> Optional[Any]: ...
 
     @staticmethod

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import NamedTuple, Union, Optional
 
-from src.algorithms import Trend3D
+from src.algorithms.Trend3D import Trend3D
 from src.algorithms.APSGaussModel import GaussianFieldName
 from src.utils.constants.simple import VariogramType
 

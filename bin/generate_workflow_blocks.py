@@ -476,7 +476,9 @@ class _OS:
         _OS._exec(path, os.makedirs, kwargs={'exist_ok': True})
 
     @staticmethod
-    def _exec(path, fun, args=(), kwargs={}):
+    def _exec(path, fun, args=(), kwargs=None):
+        if kwargs is None:
+            kwargs = {}
         return fun(_OS._get_absolute_path(path), *args, **kwargs)
 
     @staticmethod
