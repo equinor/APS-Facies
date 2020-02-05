@@ -1,6 +1,5 @@
 from functools import wraps
 
-from src.utils.constants.simple import Debug
 from src.utils.debug import dump_debug_information
 
 
@@ -24,8 +23,7 @@ def loggable(func):
         try:
             return func(config)
         except Exception as e:
-            if config.debug_level >= Debug.ON:
-                dump_debug_information(config)
+            dump_debug_information(config)
             raise e
 
     return wrapper
