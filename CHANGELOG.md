@@ -2,6 +2,82 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.0.0
+Now that TDG4 is approved, the APS GUI is ready for general usage.
+
+There are no mayor new features in this release, compared to 0.13.0, but rather much polish, and quality of life improvements.
+
+The biggest change, is that jobs save with version 1.0.0 of the GUI will be able to be loaded in newer versions of the GUI.
+**NOTE**: If there is a problem, please contact us, and **DO NOT** save the job, nor the RMS project, as this is likely to currupt the job.
+
+If you are using the "stubs", these should be updated, as they have been slight tweaked.
+
+### What's new
+* Do not require BW in order to add Facies. Closes #251
+* Checks that zones have conformity set, when required before executing the APS workflow
+* More warnings are presented, when the change will _irreversibly_ (when saving) remove model parameters
+  * Warns user if they add Facies, then chooses a blocked well
+
+* Warn the user when they use custom trends in ERT-mode, as this is not yet supported
+* A warning is given the user if they select a new grid model
+* A new ERT grid ("ERTBOX") is created, if none is given
+* Added support for running jobs in FMU / ERT / AHM
+  * Parameters are adjusted to fit inside the ERT-simulation box
+    * Trend location
+    * Simulation box thickness
+    * and more
+* May read `global_varialbes.yml`
+* The user may refresh the data in the GUI, if the data from RMS is changed
+* May change facies code iff no blocked well log is given
+* Allow the user to override the factor of "unsuitable" cells in probability cubes
+* The selection criteria for the ERT grid has been restricted
+  * While the default size was made as small as possible
+
+### Deprecations
+* Remove unnecessary dependencies, and code
+  * Removed all references, and usage of `libdraw2D`
+* RMS10 is no longer supported, and the individual jobs / stubs, are likely to fail due to the usage of Python 3.6 syntax (RMS 10 uses Python 3.4, which was [End of Life as of Math 18th, 2019](https://www.python.org/downloads/release/python-3410/))
+
+### Fixes
+* Consistent usage of `model_file` in workflow jobs
+* Ensure deterministic dependencies, and builds
+* Only set uncertainty mode (i.e. not ERT-mode) when importing a model file with FMU
+* Uses the location of global variables-folder specified by user (only when in FMU-update mode; not in ERT-mode)
+* Changing order of overlay facies is now always possible
+* The Gaussian Random Fields, and Facies realisations in the previewer now has the same orientation as in RMS
+* Ensure that the zone parameter exists
+* The `MAKE` environment varariable was used by node-pyg, causing compilation error
+* `roxar`, and `project` **MUST** be imported in `main.py`, and then passed along
+* Some logical errors where resolved
+* Only one FMU setting may be selected at the time
+* Remove directory tree, instead of just attempt to remove folder
+* Do not fetch data while a job loads
+* Do not save the RMS project when running a job
+
+### Restructure
+* Improvements to the code base
+  * More [PEP](https://www.python.org/dev/peps/pep-0008/) compliant
+  * Greatly improved type annotations
+  * Removed old, unused code
+  * Made the code base [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)er
+  * Separated logic for reading, and parsing the global variables files
+  * Consistent usage of global variables
+  * Moved the mock to be (somewhat) self contained
+    * This, in preperation for the mock to become a separate PyPi package
+  * Improved code style, to be more consistent, and compliant with ESLint
+* feat: Ensure all arguments to `run` are given as keyword arguments
+* Project settings was renamed to Job settings, as these settings may vary between jobs
+* Specify that the preview GRFs are transformed
+* Collect debug files in a zip file
+* Raise an exception in stead of warning when fields are missing in the import
+  * Accept missing fields that are NOT used in the zone's truncation rule
+
+
+### Miscellaneous
+* The dependencies where updated
+* The step for making documentation, in the CI/CD was removed
+
+
 ## 0.13.0
 The main new feature of this release, is the integration with FMU / AHM / ERT.
 
