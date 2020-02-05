@@ -1,10 +1,17 @@
 import random
+import socket
 import string
 import time
 import traceback
 from pathlib import Path
 from typing import Union
 from zipfile import ZipFile, ZIP_DEFLATED
+
+
+def get_rms_information(config):
+    location = Path(config.project.filename).absolute()
+    machine = socket.getfqdn()
+    return f'{machine}:{location}'
 
 
 def dump_debug_information(config):
@@ -32,3 +39,4 @@ def dump_debug_information(config):
         dump('model.xml', config.model)
         dump('state.json', config.to_json())
         dump('traceback.txt', traceback.format_exc())
+        dump('where.txt', get_rms_information(config))
