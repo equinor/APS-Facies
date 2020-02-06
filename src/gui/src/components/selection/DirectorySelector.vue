@@ -6,11 +6,14 @@
       class="pa-2"
       cols="12"
     >
-      <v-text-field
+      <v-textarea
         v-model="directory"
+        auto-grow
+        rows="1"
         :label="label"
         :append-outer-icon="icon"
         :error-messages="errors"
+        @keydown.enter.prevent="() => {/* Intentionally ignore 'newline'*/}"
         @click:append-outer="chooseDirectory"
         @input="touch()"
         @blur="touch()"
