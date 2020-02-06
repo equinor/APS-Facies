@@ -397,3 +397,9 @@ class RMSData:
     def open_wiki_help():
         import webbrowser
         webbrowser.open('https://wiki.equinor.com/wiki/index.php/Res:APS_Adaptive_Plurigaussian_Simulation')
+
+    @staticmethod
+    def exists(path):
+        if not path:
+            return False
+        return Path(path).exists()
