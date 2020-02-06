@@ -37,6 +37,7 @@ function makeCustomIcons (): Icons {
     search: 'fas fa-search',
     help: 'fas fa-question-circle',
     changelog: 'far fa-newspaper',
+    folderOpen: 'far fa-folder-open',
   }
   Object.keys(icons).forEach((key: string): void => {
     if (notEmpty(icons[`${key}`])) {

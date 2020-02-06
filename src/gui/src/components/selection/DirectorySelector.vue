@@ -4,27 +4,13 @@
   >
     <v-col
       class="pa-2"
-      cols="3"
-    >
-      {{ label }}
-    </v-col>
-    <v-col
-      class="pa-2"
-      cols="5"
+      cols="12"
     >
       <v-text-field
         v-model="directory"
-        single-line
-        solo
-      />
-    </v-col>
-    <v-col
-      class="pa-2"
-      cols="4"
-    >
-      <bold-button
-        :title="buttonLabel"
-        @click="chooseDirectory"
+        :label="label"
+        :append-outer-icon="icon"
+        @click:append-outer="chooseDirectory"
       />
     </v-col>
   </v-row>
@@ -33,27 +19,25 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import rms from '@/api/rms'
+import { VuetifyIcon } from 'vuetify/types/services/icons'
 
-import BoldButton from '@/components/baseComponents/BoldButton.vue'
+import rms from '@/api/rms'
 
 @Component({
   components: {
-    BoldButton,
   }
 })
 export default class DirectorySelector extends Vue {
   @Prop({ required: true })
   readonly label!: string
 
-  @Prop({ default: 'Select Directory' })
-  readonly buttonLabel!: string
-
   @Prop({ required: true })
   readonly value!: string
 
   get directory (): string { return this.value }
   set directory (path: string) { this.$emit('input', path) }
+
+  get icon (): VuetifyIcon { return this.$vuetify.icons.values.folderOpen }
 
   async chooseDirectory (): Promise<void> {
     const path = await rms.chooseDir('load')

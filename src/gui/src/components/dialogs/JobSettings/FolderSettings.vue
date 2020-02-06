@@ -2,7 +2,7 @@
   <settings-panel title="Folder Settings">
     <directory-selector
       v-model="_apsModelFileLocation"
-      label="APS Model File Location:"
+      label="APS Model File Location"
     />
   </settings-panel>
 </template>
