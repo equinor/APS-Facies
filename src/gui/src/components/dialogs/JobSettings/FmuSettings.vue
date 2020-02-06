@@ -21,36 +21,11 @@
       </v-col>
     </v-row>
     <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
-      <v-row
+      <directory-selector
         v-if="_onlyUpdateFromFmu"
-        no-gutters
-      >
-        <v-col
-          class="pa-2"
-          cols="3"
-        >
-          FMU Parameters List Location
-        </v-col>
-        <v-col
-          class="pa-2"
-          cols="5"
-        >
-          <v-text-field
-            v-model="_fmuParameterListLocation"
-            single-line
-            solo
-          />
-        </v-col>
-        <v-col
-          class="pa-2"
-          cols="4"
-        >
-          <bold-button
-            title="Select Directory"
-            @click="chooseFmuParametersFileLocation"
-          />
-        </v-col>
-      </v-row>
+        v-model="_fmuParameterListLocation"
+        label="FMU Parameters List Location"
+      />
       <v-row
         v-if="!_onlyUpdateFromFmu"
       >
@@ -116,12 +91,11 @@
 <script lang="ts">
 import GridModel from '@/utils/domain/gridModel'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
-import rms from '@/api/rms'
 
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
-import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
+import DirectorySelector from '@/components/selection/DirectorySelector.vue'
 
 import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
@@ -134,10 +108,10 @@ type FieldUsage = 'generate' | 'import'
 
 @Component({
   components: {
+    DirectorySelector,
     WarningDialog,
     SettingsPanel,
     NumericField,
-    BoldButton,
   },
 })
 export default class FmuSettings extends Vue {
@@ -231,14 +205,6 @@ export default class FmuSettings extends Vue {
     if (value === 'generate') this.$emit('update:importFields', false)
     else if (value === 'import') this.$emit('update:importFields', true)
     else throw Error(`Invalid value, '${value}'`)
-  }
-
-  chooseFmuParametersFileLocation (): void {
-    rms.chooseDir('load').then((path: string): void => {
-      if (path) {
-        this._fmuParameterListLocation = path
-      }
-    })
   }
 
   update (type: string, value: boolean): void {
