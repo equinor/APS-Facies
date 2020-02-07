@@ -227,7 +227,7 @@ def check_and_normalize_probabilities_for_APS(
         if not aps_model.isSelected(zone_number, region_number):
             continue
 
-        if zone_model.useConstProb():
+        if zone_model.use_constant_probabilities:
             # No probability cubes for this (zone, region)
             continue
 

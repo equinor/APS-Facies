@@ -48,7 +48,6 @@ class APSZoneModel:
        used_gaussian_field_names
 
      --- Get functions ---
-       def useConstProb(self)
        def getVariogramType(self,gaussFieldName)
        def getVariogramTypeNumber(self,gaussFieldName)
        def getMainRange(self,gaussFieldName)
@@ -311,7 +310,9 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
     def key_resolution(self):
         return self.__keyResolution
 
-    def useConstProb(self):
+    @property
+    def use_constant_probabilities(self):
+        """Info about whether constant probabilities, or probability cubes are used."""
         return self.__useConstProb
 
     @property

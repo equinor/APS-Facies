@@ -327,9 +327,6 @@ def run(
         # Read trend parameters for truncation rule parameters
         zone_model.getTruncationParam(grid_model, realization_number)
 
-        # Info about whether constant probabilities or probability cubes are used.
-        use_constant_probability = zone_model.useConstProb()
-
         # Number of gauss fields defined for the zone in model file
         gf_names_for_zone = zone_model.used_gaussian_field_names
 
@@ -412,7 +409,7 @@ def run(
                     f'Probability: {probability_parameter}'
                 )
             values = []
-            if use_constant_probability:
+            if zone_model.use_constant_probabilities:
                 values.append(float(probability_parameter))
                 # Add the probability values to a common list containing probabilities for
                 # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
@@ -471,8 +468,8 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print('--- Check normalisation of probability fields.')
         probability_defined, num_cells_modified_probability = check_and_normalise_probability(
-            num_facies, probability_parameter_values_for_facies, use_constant_probability, cell_index_defined,
-            eps, tolerance_of_probability_normalisation, debug_level
+            num_facies, probability_parameter_values_for_facies, zone_model.use_constant_probabilities,
+            cell_index_defined, eps, tolerance_of_probability_normalisation, debug_level
         )
         if debug_level >= Debug.VERBOSE:
             print(f'--- Number of cells that are normalised: {num_cells_modified_probability}')
@@ -497,7 +494,7 @@ def run(
         if debug_level >= Debug.ON:
             print('')
             main_facies_table = aps_model.getMainFaciesTable()
-            if use_constant_probability:
+            if zone_model.use_constant_probabilities:
                 if use_regions:
                     print(
                         '--- Zone_number:  Region_number:    Facies_code:   Facies_name:'

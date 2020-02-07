@@ -190,7 +190,7 @@ class APSModel:
 
     @property
     def use_constant_probability(self):
-        return all([model.useConstProb() for model in self.__zoneModelTable.values()])
+        return all([model.use_constant_probabilities for model in self.__zoneModelTable.values()])
 
     def __parse_model_file(self, model_file_name, debug_level=Debug.OFF):
         """ Read xml file and put the data into data structure """
