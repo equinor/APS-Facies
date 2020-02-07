@@ -192,7 +192,7 @@ class APSZoneModel:
             grid_layout = getTextCommand(zone, 'GridLayout', 'Zone', modelFile=modelFileName, required=False)
             self.grid_layout = grid_layout
 
-            if zone_number == self.zone_number and region_number == self.__regionNumber:
+            if zone_number == self.zone_number and region_number == self.region_number:
 
                 useConstProb = getBoolCommand(zone, 'UseConstProb', 'Zone', model_file_name=modelFileName)
                 self.__useConstProb = useConstProb
@@ -245,19 +245,19 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                     if truncRuleName == 'Trunc3D_Bayfill':
                         self.truncation_rule = Trunc3D_bayfill(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                            self.__debug_level, modelFileName
+                            self.debug_level, modelFileName
                         )
 
                     elif truncRuleName == 'Trunc2D_Angle':
                         self.truncation_rule = Trunc2D_Angle(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                            self.__keyResolution,
-                            self.__debug_level, modelFileName, self.zone_number
+                            self.key_resolution,
+                            self.debug_level, modelFileName, self.zone_number
                         )
                     elif truncRuleName == 'Trunc2D_Cubic':
                         self.truncation_rule = Trunc2D_Cubic(
                             trRule, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                            self.__keyResolution,
+                            self.key_resolution,
                             self.debug_level, modelFileName, self.zone_number
                         )
                     else:
@@ -267,7 +267,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                             '       is not implemented.'
                         )
 
-                    if self.__debug_level >= Debug.VERY_VERBOSE:
+                    if self.debug_level >= Debug.VERY_VERBOSE:
                         print(
                             f'Debug output: APSZoneModel: '
                             f'Truncation rule for current zone: {self.truncation_rule.getClassName()}'
