@@ -18,6 +18,7 @@
           <facies-specification
             :value="polygon"
             :rule="value"
+            :disable="isFaciesUsed(polygon)"
             clearable
           />
         </td>
@@ -43,7 +44,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
-import { Bayfill, BayfillPolygon } from '@/utils/domain'
+import { Bayfill, BayfillPolygon, Facies } from '@/utils/domain'
 import { HeaderItems } from '@/utils/typing'
 
 @Component({
@@ -79,6 +80,14 @@ export default class BayfillPolygonTable extends Vue {
         value: 'factor',
       }
     ]
+  }
+
+  isFaciesUsed (polygon: BayfillPolygon): (facies: Facies) => boolean {
+    const otherPolygons = this.value.backgroundPolygons
+      .filter(({ name }): boolean => name !== polygon.name)
+    return (facies: Facies): boolean => otherPolygons
+      .filter((polygon) => facies === polygon.facies)
+      .length > 0
   }
 
   async updateFactor (item: BayfillPolygon, value: number): Promise<void> {
