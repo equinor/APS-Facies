@@ -18,6 +18,7 @@
           <facies-specification
             :value="polygon"
             :rule="value"
+            clearable
           />
         </td>
         <td>

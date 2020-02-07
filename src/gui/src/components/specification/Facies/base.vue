@@ -2,6 +2,7 @@
   <v-select
     :items="faciesOptions"
     :value="selected"
+    :clearable="clearable"
     @input.capture="facies => $emit('input', facies)"
   />
 </template>
@@ -22,6 +23,9 @@ export default class FaciesSpecificationBase extends Vue {
 
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly clearable!: boolean
 
   get selectedFacies (): Facies[] {
     return (this.$store as Store).getters['facies/selected']

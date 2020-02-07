@@ -267,7 +267,7 @@ export default {
       if (facies instanceof String) facies = rootState.facies.available[`${facies}`]
       commit('CHANGE_FACIES', { rule, polygon, facies })
 
-      if (!rootState.facies.available[`${facies.id}`].previewProbability) {
+      if (facies && !rootState.facies.available[`${facies.id}`].previewProbability) {
         const probability = rule._polygons[`${polygon.id}`].fraction
         await dispatch('facies/updateProbability', { facies, probability }, { root: true })
       }

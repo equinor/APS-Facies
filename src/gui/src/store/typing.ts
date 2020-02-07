@@ -152,7 +152,7 @@ interface RootGetters {
   'facies': GlobalFacies
   'faciesTable': Facies[]
 
-  'facies/byId': (faciesId: ID) => Facies | null
+  'facies/byId': (faciesId: ID | undefined) => Facies | null
   'facies/selected': Facies[]
   'facies/constantProbability': (parent?: Parent) => boolean
   'facies/availableForBackgroundFacies': (rule: TruncationRuleBase<Polygon, PolygonSerialization>, facies: Facies) => boolean

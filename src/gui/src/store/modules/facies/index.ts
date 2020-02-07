@@ -223,7 +223,7 @@ const module: Module<FaciesState, RootState> = {
       }
       return facies.name || getters.byId(facies.facies).name
     },
-    byId: (state, getters): (id: ID) => Facies | Facies[] | null => (id: ID): Facies | Facies[] | null => {
+    byId: (state, getters): (id: ID | undefined) => Facies | Facies[] | null => (id: ID | undefined): Facies | Facies[] | null => {
       id = getId(id)
       const facies = state.available[`${id}`] || state.global.available[`${id}`]
       if (!facies) {
