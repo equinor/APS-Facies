@@ -17,10 +17,7 @@ _ignored = [
 
 
 def is_ignored(file):
-    for exp in _ignored:
-        if re.findall(exp, file):
-            return True
-    return False
+    return any(re.findall(exp, file) for exp in _ignored)
 
 
 def gather_files(source_dir, file_ending):

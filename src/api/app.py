@@ -35,7 +35,7 @@ app = Flask(__name__)
 app.secret_key = urandom(64)
 app.debug = _get_environ('FLASK_DEBUG', False)
 
-cors = CORS(app)  #, origins=_get_client_url())
+cors = CORS(app)
 
 
 @app.route('/<path:signature>', methods=['GET'])

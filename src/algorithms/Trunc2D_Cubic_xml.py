@@ -54,7 +54,7 @@ Description: This class is derived from Trunc2D_Base which contain common data s
 
 
   Private functions:
-    def __setEmpty(self)
+    def _setEmpty(self)
     def __interpretXMLTree(self, trRuleXML, modelFileName):
     def __calcProbForEachNode(self, faciesProb)
     def __calcThresholdValues(self)
@@ -78,7 +78,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
     This class implements adaptive plurigaussian field truncation using two simulated gaussian fields (with trend).
     """
 
-    def __setEmpty(self):
+    def _setEmpty(self):
+        super()._setEmpty()
 
         # Specific variables for class Trunc2D_Cubic
         self._className = self.__class__.__name__
@@ -168,7 +169,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         nGaussFieldsInBackGroundModel = 2
         super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                          debug_level, modelFileName, nGaussFieldsInBackGroundModel, keyResolution)
-        self.__setEmpty()
+        self._setEmpty()
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
@@ -1095,12 +1096,11 @@ class Trunc2D_Cubic(Trunc2D_Base):
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'Debug output: Call the initialize function in {self._className}')
 
-        # Initialize base class variables
-        super()._setEmpty()
+        # Initialize (base) class variables
         self._keyResolution = keyResolution
 
         # Initialize this class variables
-        self.__setEmpty()
+        self._setEmpty()
         self._debug_level = debug_level
 
         # Call base class method to set modelled facies

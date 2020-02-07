@@ -3,10 +3,10 @@ from pathlib import Path
 import numpy as np
 from enum import Enum
 from typing import List, Dict, Union, Callable, NamedTuple, NewType, Type, Optional
-from types import ModuleType
 
 from src.algorithms.APSGaussModel import GaussianFieldName, SimulationBoxOrigin, GridSize, GaussianFieldSimulation
 
+from _roxar import Roxar
 from roxar import Project, GridPropertyType
 from roxar.grids import (
     Grid3D,
@@ -18,7 +18,7 @@ from roxar.grids import (
     BlockedWellsSet,
 )
 
-RoxarModule = ModuleType
+RoxarModule = Roxar
 
 class CodeName(NamedTuple):
     code: int

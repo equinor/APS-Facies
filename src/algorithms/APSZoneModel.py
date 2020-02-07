@@ -538,6 +538,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
         if debug_level >= Debug.VERBOSE:
             print('--- Truncation rule: ' + classNameTrunc)
 
+        alphaList = []
         if self.__useConstProb and useConstTruncParam:
             # Constant probability
             if debug_level >= Debug.VERY_VERBOSE:
@@ -546,11 +547,10 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
-            if self.__debug_level >= Debug.VERY_VERBOSE:
+            if self.debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: faciesProb:')
                 print(repr(faciesProb))
 
-            alphaList = []
             for gfName, alphaDataArray in alpha_fields.items():
                 alphaList.append(alphaDataArray)
                 if debug_level >= Debug.VERY_VERBOSE:
@@ -566,13 +566,13 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                         if i == 0:
                             print('--- Calculate facies')
                         else:
-                            print('--- Calculate facies for cell number: {}'.format(str(i)))
+                            print(f'--- Calculate facies for cell number: {i}')
                 elif debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
                         if i == 0:
                             print('--- Calculate facies')
                         else:
-                            print('--- Calculate facies for cell number: {}'.format(str(i)))
+                            print(f'--- Calculate facies for cell number: {i}')
 
                 cellIndx = cellIndexDefined[i]
                 # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
@@ -580,11 +580,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 alphaCoord = []
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
-                    if alphaDataArray is not None:
-                        alphaValue = alphaDataArray[cellIndx]
-                    else:
-                        # This value is not used, but the lenght of alphaCoord must be equal to nGaussFields
-                        alphaValue = -1.0
+                    alphaValue = alphaDataArray[cellIndx] if alphaDataArray is not None else -1.0
                     alphaCoord.append(alphaValue)
 
                 # Calculate facies realization by applying truncation rules
@@ -593,55 +589,32 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 volFrac[fIndx] += 1
 
         else:
-            # Varying probability from cell to cell and / or
-            # varying truncation parameter from cell to cell
             if debug_level >= Debug.VERY_VERBOSE:
                 text = 'Debug output: Using spatially varying probabilities and/or '
-                text = text + 'truncation parameters for facies.'
+                text += 'truncation parameters for facies.'
                 print(text)
 
-            alphaList = []
             for gfName, alphaDataArray in alpha_fields.items():
                 alphaList.append(alphaDataArray)
                 if debug_level >= Debug.VERY_VERBOSE:
                     print('Debug output: Use gauss fields: ' + gfName)
 
             for i in range(nDefinedCells):
-                if debug_level >= Debug.VERY_VERBOSE:
-                    if np.mod(i, 50000) == 0:
-                        if i == 0:
-                            print('--- Calculate facies')
-                        else:
-                            print('--- Calculate facies for cell number: {}'.format(str(i)))
-                elif debug_level == Debug.VERBOSE:
-                    if np.mod(i, 500000) == 0:
-                        if i == 0:
-                            print('--- Calculate facies')
-                        else:
-                            print('--- Calculate facies for cell number: {}'.format(str(i)))
-
-                if self.__useConstProb:
-                    for f in range(nFacies):
-                        faciesProb[f] = probDefined[f]
-                else:
-                    for f in range(nFacies):
-                        faciesProb[f] = probDefined[f][i]
-
+                if debug_level >= Debug.VERY_VERBOSE and np.mod(i, 50000) == 0 and i == 0 or debug_level < Debug.VERY_VERBOSE and debug_level == Debug.VERBOSE and np.mod(i, 500000) == 0 and i == 0:
+                    print('--- Calculate facies')
+                elif debug_level >= Debug.VERY_VERBOSE and np.mod(i, 50000) == 0 or debug_level < Debug.VERY_VERBOSE and debug_level == Debug.VERBOSE and np.mod(i, 500000) == 0:
+                    print('--- Calculate facies for cell number: {}'.format(str(i)))
+                for f in range(nFacies):
+                    faciesProb[f] = probDefined[f] if self.__useConstProb else probDefined[f][i]
                 # Calculate truncation rules
                 # The truncation map/cube vary from cell to cell.
                 cellIndx = cellIndexDefined[i]
                 self.truncation_rule.setTruncRule(faciesProb, cellIndx)
 
                 alphaCoord = []
-                # alphaCoord is the list (alpha1,alpha2,alpha3,..) of coordinate values in alpha space
-                # The sequence is defined by the sequence they are specified in the model file.
                 for gaussFieldIndx in range(nGaussFields):
                     alphaDataArray = alphaList[gaussFieldIndx]
-                    if alphaDataArray is not None:
-                        alphaValue = alphaDataArray[cellIndx]
-                    else:
-                        # This value is not used, but the lenght of alphaCoord must be equal to nGaussFields
-                        alphaValue = -1.0
+                    alphaValue = alphaDataArray[cellIndx] if alphaDataArray is not None else -1.0
                     alphaCoord.append(alphaValue)
                 # Calculate facies realization by applying truncation rules
                 fCode, fIndx = self.truncation_rule.defineFaciesByTruncRule(alphaCoord)
@@ -686,6 +659,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
 
         nGaussFields, nDefinedCells = len(alpha_fields), len(cellIndexDefined)
 
+        gaussFieldIndx = 0
         if self.__useConstProb:
             # Constant probability
             if debug_level >= Debug.VERBOSE:
@@ -698,16 +672,13 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
             if debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: faciesProb:')
                 print(repr(faciesProb))
-
+                print('Debug output:  Calculate truncation map/cube')
             # Calculate truncation rules
             # The truncation map/cube is constant and does not vary from cell to cell
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output:  Calculate truncation map/cube')
             self.truncation_rule.setTruncRule(faciesProb)
 
             # Alpha vectors for the selected cells for current zone or (zone,region) combination
             alpha_coord_vectors = np.zeros((nDefinedCells, nGaussFields), dtype=np.float64)
-            gaussFieldIndx = 0
             for gfName, alphaDataArray in alpha_fields.items():
                 if alphaDataArray is None:
                     # This gauss field is not used for this zone, but numpy vector operations require that the vector exists
@@ -739,7 +710,6 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
 
             # Alpha vectors for the selected cells for current zone or (zone,region) combination
             alpha_coord_vectors = np.zeros((nDefinedCells, nGaussFields), dtype=np.float32)
-            gaussFieldIndx = 0
             for gfName, alphaDataArray in alpha_fields.items():
                 if alphaDataArray is None:
                     # This gauss field is not used for this zone, but numpy vector operations require that the vector exists
@@ -751,14 +721,13 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
             # Calculate how many different truncation maps are necessary and add a set of grid cell indices to each item
             memo, num_maps = self.findDistinctTruncationCubes(faciesProb, nDefinedCells, nFacies)
 
-            # Check if optimization using vectorization is to be used
+            nCells = 0
+            count_unique_truncation_cubes = 0
             if num_maps < 0.2 * nDefinedCells:
                 # Use vectorization and look up facies for all cells having the same truncation cube at once
                 if debug_level >= Debug.VERBOSE:
                     print('--- Using vectorization optimization')
                 count_single_cell_truncation_cubes = 0
-                count_unique_truncation_cubes = 0
-                nCells = 0
                 for key, item in memo.items():
                     # Calculate truncation map
                     faciesProb = np.array(key)
@@ -796,13 +765,13 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                             if nCells == 0:
                                 print('--- Calculate facies')
                             else:
-                                print('--- Calculate facies for cell number: {}'.format(nCells))
+                                print(f'--- Calculate facies for cell number: {nCells}')
                     elif debug_level == Debug.VERBOSE:
                         if np.mod(nCells, 500000) == 0:
                             if nCells == 0:
                                 print('--- Calculate facies')
                             else:
-                                print('--- Calculate facies for cell number: {}'.format(nCells))
+                                print(f'--- Calculate facies for cell number: {nCells}')
 
                 if debug_level >= Debug.VERBOSE:
                     print(
@@ -816,8 +785,6 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 # Don't use vectorization and look up facies for all cells one by one.
                 if debug_level >= Debug.VERBOSE:
                     print('--- No vectorization optimization')
-                count_unique_truncation_cubes = 0
-                nCells = 0
                 for key, item in memo.items():
                     # Calculate truncation map
                     faciesProb = np.array(key)
@@ -837,13 +804,13 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                                 if nCells == 0:
                                     print('--- Calculate facies')
                                 else:
-                                    print('--- Calculate facies for cell number: {}'.format(nCells))
+                                    print(f'--- Calculate facies for cell number: {nCells}')
                         elif debug_level == Debug.VERBOSE:
                             if np.mod(nCells, 500000) == 0:
                                 if nCells == 0:
                                     print('--- Calculate facies')
                                 else:
-                                    print('--- Calculate facies for cell number: {}'.format(nCells))
+                                    print(f'--- Calculate facies for cell number: {nCells}')
 
                 assert nCells == nDefinedCells
 
@@ -944,8 +911,8 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
 
         # Create dictionary to keep data for all distinct truncation maps/cubes for Trunc2D_Angle type rules
         # The round-off probabilities are used as key.
-        # For each unique round-off probability or key, initialize an empty datastructure to keep truncation map/cube and
-        # a data set with all grid cell indices for grid cells having the same round-off probabilities.
+        # For each unique round-off probability or key, initialize an empty datastructure to keep truncation map/cube
+        # and a data set with all grid cell indices for grid cells having the same round-off probabilities.
         # All these grid cells will then share the same truncation map/cube.
         memo = {}
         for i in range(num_cells):

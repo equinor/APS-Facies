@@ -165,9 +165,7 @@ class Parser:
             _mapping = {
                 'NonCubicAndOverlay': 'NonCubicAndOverlay',
             }
-            content = re.match(r"(?P<type>\w+) +(?P<name>\w+) +(?P<rule>\w+) +(?P<overlay>\w+)", line).groupdict()
-            # content['type'] = _mapping[content['type']]
-            return content
+            return re.match(r"(?P<type>\w+) +(?P<name>\w+) +(?P<rule>\w+) +(?P<overlay>\w+)", line).groupdict()
 
     class Cubic:
         min_fields = 2
@@ -189,14 +187,11 @@ class Parser:
         @staticmethod
         def polygons(content):
             items = get_array(content, 'rule')[1:]
-            polygons = []
-            for i, item in enumerate(items):
-                polygons.append({
-                    'name': i + 1,
-                    'facies': item[0],
-                    'proportion': 1 / len(items)
-                })
-            return polygons
+            return [{
+                'name': i + 1,
+                'facies': item[0],
+                'proportion': 1 / len(items)
+            } for i, item in enumerate(items)]
 
         @staticmethod
         def settings(content, polygons):
@@ -257,16 +252,13 @@ class Parser:
 
         @staticmethod
         def polygons(content):
-            polygons = []
             items = get_array(content, 'settings')
-            for i, item in enumerate(items):
-                polygons.append({
-                    # Polygons are 1 indexed
-                    'name': i + 1,
-                    'facies': item[0],
-                    'proportion': 1 / len(items)
-                })
-            return polygons
+            return [{
+                # Polygons are 1 indexed
+                'name': i + 1,
+                'facies': item[0],
+                'proportion': 1 / len(items)
+            } for i, item in enumerate(items)]
 
     class Overlay:
         @classmethod
@@ -301,10 +293,7 @@ class Parser:
 
 
 def _make_indices(items):
-    indices = {}
-    for i in range(len(items)):
-        indices[items[i]] = i
-    return indices
+    return {items[i]: i for i in range(len(items))}
 
 
 def _sorted_list(items):
@@ -318,9 +307,7 @@ def _indices(items):
 
 
 def _get_all_fields_indices(rule):
-    fields = set()
-    for item in rule['fields']:
-        fields.add(item['field']['name'])
+    fields = {item['field']['name'] for item in rule['fields']}
     if 'overlay' in rule:
         for item in rule['overlay']['items']:
             for polygon in item['polygons']:
@@ -329,9 +316,7 @@ def _get_all_fields_indices(rule):
 
 
 def _get_all_facies_indices(rule):
-    facies = set()
-    for polygon in rule['polygons']:
-        facies.add(polygon['facies'])
+    facies = {polygon['facies'] for polygon in rule['polygons']}
     if 'overlay' in rule:
         for item in rule['overlay']['items']:
             for polygon in item['polygons']:

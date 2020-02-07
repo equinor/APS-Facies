@@ -190,7 +190,7 @@ class APSModel:
 
     @property
     def use_constant_probability(self):
-        return all([model.use_constant_probabilities for model in self.__zoneModelTable.values()])
+        return all(model.use_constant_probabilities for model in self.__zoneModelTable.values())
 
     def __parse_model_file(self, model_file_name, debug_level=Debug.OFF):
         """ Read xml file and put the data into data structure """
@@ -267,7 +267,7 @@ class APSModel:
                 self.__previewResolution = "Normal"
             else:
                 self.__previewResolution = text.strip()
-                if not (self.__previewResolution == "Normal" or self.__previewResolution == "High"):
+                if self.__previewResolution not in ["Normal", "High"]:
                     raise ValueError('Preview resolution must be specified to be either Normal orr High\n'
                                      'Default value is Normal if resolution is not specified')
 
@@ -306,11 +306,7 @@ class APSModel:
         # Read optional keyword to specify the boolean variable write_seeds
         keyword = 'WriteSeeds'
         value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=model_file_name, required=False)
-        if value.upper() == 'YES':
-            self.write_seeds = True
-        else:
-            self.write_seeds = False
-
+        self.write_seeds = True if value.upper() == 'YES' else False
         # Read all facies names available
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=model_file_name)
 
@@ -400,7 +396,7 @@ class APSModel:
                 if len(text.strip()) == 0:
                     region_number = 0
                     # Empty list of region numbers
-                    zone_model = self.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
+                    zone_model = self.getZoneModel(zone_number=zone_number, region_number=region_number)
                     if zone_model is None:
                         raise ValueError(
                             f'Can not select to use zone model with zone number: {zone_number} '
@@ -416,7 +412,7 @@ class APSModel:
                         w2 = w.strip()
                         if isNumber(w2):
                             region_number = int(w2)
-                            zone_model = self.getZoneModel(zoneNumber=zone_number, regionNumber=region_number)
+                            zone_model = self.getZoneModel(zone_number=zone_number, region_number=region_number)
                             if zone_model is None:
                                 raise ValueError(
                                     'Can not select to use zone model with '
@@ -440,16 +436,15 @@ class APSModel:
         self.__checkZoneModels()
 
         if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
-            if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
-                print('- Zone models are defined for the following combination '
-                      'of zone and region numbers:')
-                for key, value in self.sorted_zone_models.items():
-                    zone_number = key[0]
-                    region_number = key[1]
-                    if region_number == 0:
-                        print(f'    Zone: {zone_number}')
-                    else:
-                        print(f'    Zone: {zone_number}  Region: {region_number}')
+            print('- Zone models are defined for the following combination '
+                  'of zone and region numbers:')
+            for key, value in self.sorted_zone_models.items():
+                zone_number = key[0]
+                region_number = key[1]
+                if region_number == 0:
+                    print(f'    Zone: {zone_number}')
+                else:
+                    print(f'    Zone: {zone_number}  Region: {region_number}')
             print('\n------------ End reading model file in APSModel ------------------\n')
 
     def update_model_file(
@@ -546,14 +541,10 @@ class APSModel:
         zoneNumbers = []
         for key, zoneModel in self.__zoneModelTable.items():
             zone_number, region_number = key
-            if zone_number in zoneNumbers:
-                if region_number == 0:
-                    raise ValueError(f'There exists more than one zone model for zone: {zone_number}')
-                else:
-                    # This is a model for a new region for an existing zone number that has several regions
-                    zoneNumbers.append(zone_number)
+            if zone_number in zoneNumbers and region_number == 0:
+                raise ValueError(f'There exists more than one zone model for zone: {zone_number}')
             else:
-                # This is a model for a new (zone,region) combination for a new zone number
+                # This is a model for a new region for an existing zone number that has several regions
                 zoneNumbers.append(zone_number)
 
     @staticmethod
@@ -660,13 +651,11 @@ class APSModel:
 
     #  ---- Get functions -----
     def getXmlTree(self):
-        tree = self.__ET_Tree
-        return tree
+        return self.__ET_Tree
 
     def getRoot(self):
         tree = self.getXmlTree()
-        root = tree.getroot()
-        return root
+        return tree.getroot()
 
     def isAllZoneRegionModelsSelected(self):
         return self.__selectAllZonesAndRegions
@@ -675,8 +664,7 @@ class APSModel:
     def getSelectedZoneNumberList(self):
         selectedZoneNumberList = []
         keyList = list(self.__selectedZoneAndRegionNumberTable.keys())
-        for i in range(len(keyList)):
-            item = keyList[i]
+        for item in keyList:
             zNumber = item[0]
             if zNumber not in selectedZoneNumberList:
                 selectedZoneNumberList.append(zNumber)
@@ -685,29 +673,22 @@ class APSModel:
     def getSelectedRegionNumberListForSpecifiedZoneNumber(self, zoneNumber):
         selectedRegionNumberList = []
         keyList = sorted(list(self.__selectedZoneAndRegionNumberTable.keys()))
-        for i in range(len(keyList)):
-            item = keyList[i]
-            zNumber = item[0]
-            rNumber = item[1]
-            if zNumber == zoneNumber:
-                if rNumber not in selectedRegionNumberList:
-                    selectedRegionNumberList.append(rNumber)
+        for item in keyList:
+            zNumber, rNumber = item
+            if zNumber == zoneNumber and rNumber not in selectedRegionNumberList:
+                selectedRegionNumberList.append(rNumber)
         return selectedRegionNumberList
 
-    def isSelected(self, zoneNumber, regionNumber):
+    def isSelected(self, zone_number, region_number):
         if self.isAllZoneRegionModelsSelected():
             return True
-        key = (zoneNumber, regionNumber)
-        if key in self.__selectedZoneAndRegionNumberTable:
-            return True
-        else:
-            return False
+        key = (zone_number, region_number)
+        return key in self.__selectedZoneAndRegionNumberTable
 
-    def getZoneModel(self, zoneNumber, regionNumber=0):
-        key = (zoneNumber, regionNumber)
+    def getZoneModel(self, zone_number, region_number=0):
+        key = (zone_number, region_number)
         try:
-            foundZoneModel = self.__zoneModelTable[key]
-            return foundZoneModel
+            return self.__zoneModelTable[key]
         except KeyError:
             return None
 
@@ -737,8 +718,7 @@ class APSModel:
     def getZoneNumberList(self):
         zoneNumberList = []
         keyList = list(self.__zoneModelTable.keys())
-        for i in range(len(keyList)):
-            item = keyList[i]
+        for item in keyList:
             zNumber = item[0]
             if zNumber not in zoneNumberList:
                 zoneNumberList.append(zNumber)
@@ -747,13 +727,9 @@ class APSModel:
     def getRegionNumberListForSpecifiedZoneNumber(self, zoneNumber):
         regionNumberList = []
         keyList = list(self.__zoneModelTable.keys())
-        for i in range(len(keyList)):
-            item = keyList[i]
-            zNumber = item[0]
-            rNumber = item[1]
-            if zNumber == zoneNumber:
-                if rNumber not in regionNumberList:
-                    regionNumberList.append(rNumber)
+        for zNumber, rNumber in keyList:
+            if zNumber == zoneNumber and rNumber not in regionNumberList:
+                regionNumberList.append(rNumber)
         return regionNumberList
 
     def getPreviewZoneNumber(self):
@@ -836,7 +812,7 @@ class APSModel:
         if not name:
             for key, zoneModel in self.__zoneModelTable.items():
                 region_number = key[1]
-                current_zone_has_at_least_one_region = 0 < region_number
+                current_zone_has_at_least_one_region = region_number > 0
                 if current_zone_has_at_least_one_region:
                     raise ValueError(
                         'RegionParamName must be given when there is at least one zone in the model with region Number)'
@@ -986,8 +962,7 @@ class APSModel:
             # Add command Zone
             zoneModel.XMLAddElement(zone_elements, fmu_attributes)
         root.append(zone_elements)
-        root_reformatted = prettify(root)
-        return root_reformatted
+        return prettify(root)
 
     def dump(self, name, attributes_file_name=None, debug_level=Debug.OFF):
         """Writes the representation of this APS model to a model file"""
@@ -997,7 +972,7 @@ class APSModel:
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
-        fmu_attributes = list()
+        fmu_attributes = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
         with open(model_file_name, 'w') as file:

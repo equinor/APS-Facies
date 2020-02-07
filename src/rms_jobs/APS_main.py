@@ -133,18 +133,35 @@ def check_and_normalise_probability(
     # The list prob_parameter_values_for_facies has items =[name,values]
     # Define index names for this item
 
-    num_defined_cells = len(cell_index_defined)
-
-    # Check that probabilities sum to 1
     if debug_level >= Debug.VERY_VERBOSE:
-        if not use_const_probability:
-            print('Debug output: Check normalisation of probability cubes.')
-        else:
+        if use_const_probability:
             print('Debug output: Check normalisation of probabilities.')
+        else:
+            print('Debug output: Check normalisation of probability cubes.')
 
     probability_defined = []
     num_cell_with_modified_probability = 0
-    if not use_const_probability:
+    if use_const_probability:
+        for f in range(num_facies):
+            item = prob_parameter_values_for_facies[f]
+            facies_name = item.name
+            values = item.value
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Facies: {} with constant probability: '.format(facies_name, values[0]))
+            probability_defined.append(values[0])
+
+        # Check that probabilities sum to 1
+        psum = probability_defined[0]
+        for f in range(1, num_facies):
+            psum = psum + probability_defined[f]
+        if abs(psum - 1.0) > eps:
+            raise ValueError(
+                f'Probabilities for facies are not normalized for this zone (Total: {psum})'
+            )
+
+    else:
+        num_defined_cells = len(cell_index_defined)
+
         # Allocate space for probability per facies per defined cell
         for f in range(num_facies):
             probability_defined.append(np.zeros(num_defined_cells, np.float32))
@@ -190,24 +207,6 @@ def check_and_normalise_probability(
                     f'Debug output: Number of grid cells in zone is:                           {num_defined_cells}\n'
                     f'Debug output: Number of grid cells which is recalculated and normalized: {num_cell_with_modified_probability}'
                 )
-    else:
-        for f in range(num_facies):
-            item = prob_parameter_values_for_facies[f]
-            facies_name = item.name
-            values = item.value
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies: {} with constant probability: '.format(facies_name, values[0]))
-            probability_defined.append(values[0])
-
-        # Check that probabilities sum to 1
-        psum = probability_defined[0]
-        for f in range(1, num_facies):
-            psum = psum + probability_defined[f]
-        if abs(psum - 1.0) > eps:
-            raise ValueError(
-                f'Probabilities for facies are not normalized for this zone (Total: {psum})'
-            )
-
     return probability_defined, num_cell_with_modified_probability
 
 

@@ -82,7 +82,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
     truncation for the Bayfill model. (Three transformed gaussian fields)
     """
 
-    def __setEmpty(self):
+    def _setEmpty(self):
+        super()._setEmpty()
 
         # Specific variables for class Trunc3D_bayfill
         self._className = self.__class__.__name__
@@ -138,7 +139,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         nGaussFieldsInBackGroundModel = 3
         super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
                          debug_level, modelFileName, nGaussFieldsInBackGroundModel)
-        self.__setEmpty()
+        self._setEmpty()
 
         if trRuleXML is not None:
             # Require exactly 3 transformed gauss fields
@@ -187,19 +188,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
             self.__useConstTruncModelParam = True
         else:
             text = useParamObj.text
-            val = int(text.strip())
-            if val == 0:
-                self.__useConstTruncModelParam = False
-            else:
-                self.__useConstTruncModelParam = True
-
+            self.__useConstTruncModelParam = bool(text.strip())
         kw = 'Floodplain'
         fpObj = bgmObj.find(kw)
         if fpObj is None:
             raise ValueError(
-                'Error in {}\n'
-                'Error: Floodplain facies is not specified.'
-                ''.format(self._className)
+                f'Error in {self._className}\n'
+                f'Error: Floodplain facies is not specified.'
             )
         else:
             text = fpObj.text
@@ -209,9 +204,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         sbObj = bgmObj.find(kw)
         if sbObj is None:
             raise ValueError(
-                'Error in {}\n'
-                'Error: Subbay facies is not specified.'
-                ''.format(self._className)
+                f'Error in {self._className}\n'
+                f'Error: Subbay facies is not specified.'
             )
         else:
             text = sbObj.text
@@ -221,9 +215,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         wbfObj = bgmObj.find(kw)
         if wbfObj is None:
             raise ValueError(
-                'Error in {}\n'
-                'Error: Wave influenced bayfill facies (WBF) is not specified.'
-                ''.format(self._className)
+                f'Error in {self._className}\n'
+                f'Error: Wave influenced bayfill facies (WBF) is not specified.'
             )
         else:
             text = wbfObj.text
@@ -233,9 +226,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         bhdObj = bgmObj.find(kw)
         if bhdObj is None:
             raise ValueError(
-                'Error in {}\n'
-                'Error: Bayhead delta facies (BHD) is not specified.'
-                ''.format(self._className)
+                f'Error in {self._className}\n'
+                f'Error: Bayhead delta facies (BHD) is not specified.'
             )
         else:
             text = bhdObj.text
@@ -245,9 +237,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         lgObj = bgmObj.find(kw)
         if lgObj is None:
             raise ValueError(
-                'Error in {}\n'
-                'Error: Lagoon facies is not specified.'
-                ''.format(self._className)
+                f'Error in {self._className}\n'
+                f'Error: Lagoon facies is not specified.'
             )
         else:
             text = lgObj.text
@@ -258,9 +249,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         if SFObj is None:
             self.__param_sf = 0.0
             print(
-                'Warning in {}\n'
-                'Warning: Truncation parameter SF is not specified. Using default = {}'
-                ''.format(self._className, self.__param_sf)
+                f'Warning in {self._className}\n'
+                f'Warning: Truncation parameter SF is not specified. Using default = {self.__param_sf}'
             )
         else:
             text = SFObj.text
@@ -268,16 +258,15 @@ class Trunc3D_bayfill(Trunc2D_Base):
                 self.__param_sf = float(text.strip())
                 self._is_param_sf_fmuupdatable = isFMUUpdatable(bgmObj, kw)
             else:
-                self.__param_sf_name = copy.copy(text.strip())
+                self.__param_sf_name = text.strip()
 
         kw = 'YSF'
         YSFObj = bgmObj.find(kw)
         if YSFObj is None:
             self.__param_ysf = 1.0
-            print(
-                'Warning in {}\n'
-                'Warning: Truncation parameter YSF is not specified. Using default = {}'
-                ''.format(self._className, self.__param_ysf)
+            warn(
+                f'Warning in {self._className}\n'
+                f'Warning: Truncation parameter YSF is not specified. Using default = {self.__param_ysf}'
             )
         else:
             text = YSFObj.text
@@ -288,10 +277,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         SBHDObj = bgmObj.find(kw)
         if SBHDObj is None:
             self.__param_sbhd = 0.0
-            print(
-                'Warning in {}\n'
-                'Warning: Truncation parameter SBHD is not specified. Use default = {}'
-                ''.format(self._className, self.__param_sbhd)
+            warn(
+                f'Warning in {self._className}\n'
+                f'Warning: Truncation parameter SBHD is not specified. Use default = {self.__param_sbhd}'
             )
         else:
             text = SBHDObj.text
@@ -301,17 +289,16 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # Check that 5 facies is defined and find the orderIndex
         if self.num_facies_in_zone != 5:
             raise ValueError(
-                'Error when reading model file: {}\n'
-                'Error: Read truncation rule: {}\n'
-                'Error: Different number of facies in truncation rule and in zone.'
-                ''.format(modelFileName, self._className)
+                f'Error when reading model file: {modelFileName}\n'
+                f'Error: Read truncation rule: {self._className}\n'
+                f'Error: Different number of facies in truncation rule and in zone.'
             )
 
         # Check that specified facies is defined for the zone
         self._checkFaciesForZone()
 
-        for j in range(len(self._faciesInTruncRule)):
-            fName = self._faciesInTruncRule[j]
+        for item in self._faciesInTruncRule:
+            fName = item
             fIndx = -1
             for k in range(len(self._faciesInZone)):
                 fN = self._faciesInZone[k]
@@ -341,13 +328,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
         """
         # Initialize data structure
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call the initialize function in ' + self._className)
-
-        # Initialize base class variables
-        super()._setEmpty()
+            print(f'Debug output: Call the initialize function in {self._className}')
 
         # Initialize this class variables
-        self.__setEmpty()
+        self._setEmpty()
         self._debug_level = debug_level
 
         # Call base class method to set modelled facies
@@ -378,8 +362,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self._checkFaciesForZone()
 
         # Set orderIndex
-        for j in range(len(self._faciesInTruncRule)):
-            fName = self._faciesInTruncRule[j]
+        for fName in self._faciesInTruncRule:
             fIndx = -1
             for k in range(len(self._faciesInZone)):
                 fN = self._faciesInZone[k]
@@ -429,7 +412,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         print(repr(self.__fIndxPerPolygon))
 
     def getClassName(self):
-        return copy.copy(self._className)
+        return self._className
 
     def getFaciesOrderIndexList(self):
         return copy.copy(self._orderIndex)
@@ -451,24 +434,20 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
     def truncMapPolygons(self):
         assert self._setTruncRuleIsCalled
-        isDetermined = False
-        for indx in range(self.num_facies_in_truncation_rule):
-            fIndx = self._orderIndex[indx]
-            if self._faciesIsDetermined[fIndx] == 1:
-                isDetermined = True
-                break
+        isDetermined = any(
+            self._faciesIsDetermined[self._orderIndex[index]]
+            for index in range(self.num_facies_in_truncation_rule)
+        )
         if isDetermined:
             self.__polygons = []
             for indx in range(self.num_facies_in_truncation_rule):
                 fIndx = self._orderIndex[indx]
                 if self._faciesIsDetermined[fIndx] == 1:
                     poly = self.__unitSquarePolygon()
-                    self.__polygons.append(poly)
                 else:
                     poly = self.__zeroPolygon()
-                    self.__polygons.append(poly)
-        polygons = copy.copy(self.__polygons)
-        return polygons
+                self.__polygons.append(poly)
+        return copy.copy(self.__polygons)
 
     def getTruncationParam(self, gridModel, realNumber):
         # Read truncation parameters
@@ -482,8 +461,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__param_sf = values
 
     def faciesIndxPerPolygon(self):
-        fIndxList = copy.copy(self.__fIndxPerPolygon)
-        return fIndxList
+        return copy.copy(self.__fIndxPerPolygon)
 
     def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
         if self._debug_level >= Debug.VERY_VERBOSE:
@@ -521,10 +499,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
 
         tag = 'UseConstTruncParam'
         useConstElement = Element(tag)
-        if self.__useConstTruncModelParam:
-            useConstElement.text = ' 1 '
-        else:
-            useConstElement.text = ' 0 '
+        useConstElement.text = ' 1 ' if self.__useConstTruncModelParam else ' 0 '
         bgModelElement.append(useConstElement)
 
         tag = 'Floodplain'
@@ -604,15 +579,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def __unitSquarePolygon():
         """  Create a polygon for the unit square
         """
-        poly = [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
-        return poly
+        return [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
 
     @staticmethod
     def __zeroPolygon():
         """ Create a small polygon
         """
-        poly = [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
-        return poly
+        return [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
 
     def setSFParam(self, sfValue):
         if 0 <= sfValue <= 1.0:
@@ -741,11 +714,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
             raise ValueError('Error: All input probabilities are <= 0.0')
 
         if not (1.0 + 2.0 * eps) >= sumProb >= (1.0 - 2.0 * eps):
-            print(' Warning: In truncation rule type: bayfill.\n'
-                  '          Sum of input probabilities is {} and not within 1.0 +/- {}'
-                  ''.format(sumProb, 2.0 * eps)
-                  )
-            print('          Adjust all probabilities by normalizing the probabilities.')
+            print(
+                f' Warning: In truncation rule type: bayfill.\n'
+                f'          Sum of input probabilities is {sumProb} and not within 1.0 +/- {2.0 * eps}\n'
+                f'          Adjust all probabilities by normalizing the probabilities.'
+            )
 
         # Very small adjustments if abs(sumProb) < eps
         P1 = P1 / sumProb
@@ -1971,7 +1944,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             if inside == 0:
                 continue
             else:
-                if i == 0 or i == 1 or i == 4:
+                if i in [0, 1, 4]:
                     # Facies is Floodplain, Subbay or Lagoon
                     indx = i
                 elif i == 3:
@@ -2002,8 +1975,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         return indx
 
     def get_background_index_in_truncaction_rule(self):
-        bg_index_in_trunc_rule = self.__fIndxPerPolygon
-        return bg_index_in_trunc_rule
+        return self.__fIndxPerPolygon
 
     def setParamSFConst(self, value):
         if not (0 <= value <= 1):

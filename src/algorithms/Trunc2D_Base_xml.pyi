@@ -18,6 +18,19 @@ from src.utils.constants.simple import Debug
 
 class Trunc2D_Base:
     _faciesInTruncRule: List
+    _debug_level: Debug
+    _faciesInZone: List[int]
+    _faciesIsDetermined: ndarray[bool]
+    _className: str
+    _nGroups: int
+    _nGaussFieldsInBackGroundModel: int
+    _orderIndex: List[int]
+    _backgroundFaciesInGroup: List[int]
+    _overlayFaciesIndxInGroup: List[List[int]]
+    _probFracOverlayFaciesInGroup: List[List[int]]
+    _backgroundFaciesInGroup: List[int]
+    _alphaInGroup: List[List[int]]
+    _centerTruncIntervalInGroup: List[List[float]]
 
     num_facies_in_zone: int
     num_global_facies: int
@@ -36,7 +49,7 @@ class Trunc2D_Base:
         nGaussFieldsInBackGroundModel: int = 2
     ) -> None: ...
     def __repr__(self) -> str: ...
-    def _setEmpty(self): ...
+    def _setEmpty(self) -> None: ...
     def _XMLAddElement(self, parent: Element) -> None: ...
     def _addFaciesToTruncRule(self, facies_name: str) -> Tuple[int, int, int, int]: ...
     def _checkFaciesForZone(self) -> None: ...

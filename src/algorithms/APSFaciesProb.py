@@ -199,37 +199,39 @@ class APSFaciesProb:
 
     def __checkConstProbValuesAndNormalize(self, zoneNumber):
         ''' Normalize probabilities for the case that constant probabilities is specified.'''
-        if self.__useConstProb:
-            sumProb = 0.0
+        if not self.__useConstProb:
+            return
+        sumProb = 0.0
+        for item in self.__faciesProbForZoneModel:
+            prob = item.probability
+            sumProb += prob
+        if abs(sumProb - 1.0) > 0.001:
+            warn(f'Specified constant probabilities sum up to: {sumProb} and not 1.0 in zone {zoneNumber}')
+            warn('The specified probabilities will be normalized.')
             for item in self.__faciesProbForZoneModel:
                 prob = item.probability
-                sumProb += prob
-            if abs(sumProb - 1.0) > 0.001:
-                warn('Specified constant probabilities sum up to: {} and not 1.0 in zone {}'.format(sumProb, zoneNumber))
-                warn('The specified probabilities will be normalized.')
-                for item in self.__faciesProbForZoneModel:
-                    prob = item.probability
-                    normalized_prob = prob / sumProb
-                    item.probability = str(normalized_prob)
+                normalized_prob = prob / sumProb
+                item.probability = str(normalized_prob)
 
     def getAllProbParamForZone(self):
         """ Return list of name of all specified RMS probability parameter names"""
         allProbParamList = []
         for item in self.__faciesProbForZoneModel:
-            probParamName = item.probability
             if not self.__useConstProb:
+                probParamName = item.probability
                 if probParamName not in allProbParamList:
                     allProbParamList.append(probParamName)
         return allProbParamList
 
     def getConstProbValue(self, facies_name):
-        ''' Return probability (a number) for specified facies name. This is done when the specified probabilities are constants (numbers)'''
+        ''' Return probability (a number) for specified facies name. This is done when the specified probabilities
+        are constants (numbers) '''
         if self.__useConstProb:
             for item in self.__faciesProbForZoneModel:
                 fN = item.name
                 if fN == facies_name:
                     return float(item.probability)
-            raise ValueError('Probability for facies {} is not found'.format(facies_name))
+            raise ValueError(f'Probability for facies {facies_name} is not found')
         raise ValueError('Can not call getConstProbValue when useConstProb = 0')
 
     @property

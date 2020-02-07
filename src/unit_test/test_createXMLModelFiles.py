@@ -225,21 +225,7 @@ def addZoneParam(
         debug_level=debug_level,
     )
 
-    # Define truncation rule model
-
-    if truncType == 'Cubic':
-        truncRuleObj = Trunc2D_Cubic()
-        truncRuleObj.initialize(
-            mainFaciesTable=main_facies_table,
-            faciesInZone=faciesInZone,
-            gaussFieldsInZone=gaussFieldsInZone,
-            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
-            truncStructureList=truncStructureList,
-            overlayGroups=overlayGroups,
-            debug_level=debug_level
-
-        )
-    elif truncType == 'Angle':
+    if truncType == 'Angle':
         truncRuleObj = Trunc2D_Angle()
         truncRuleObj.initialize(
             mainFaciesTable=main_facies_table,
@@ -269,9 +255,20 @@ def addZoneParam(
             useConstTruncParam=useConstTruncParam,
             debug_level=debug_level
         )
+    elif truncType == 'Cubic':
+        truncRuleObj = Trunc2D_Cubic()
+        truncRuleObj.initialize(
+            mainFaciesTable=main_facies_table,
+            faciesInZone=faciesInZone,
+            gaussFieldsInZone=gaussFieldsInZone,
+            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
+            truncStructureList=truncStructureList,
+            overlayGroups=overlayGroups,
+            debug_level=debug_level
+
+        )
     else:
         raise ValueError("Invalid truncation type")
-
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
         zoneNumber=zoneNumber,

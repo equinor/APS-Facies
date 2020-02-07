@@ -54,11 +54,10 @@ def test_mainFaciesTable():
     faciesList = ['F3', 'F1', 'F4', 'S3', 'F2', 'F5', 'F6']
     for i in range(len(faciesList)):
         fName = faciesList[i]
+        check = mainFaciesTable1.has_facies_int_facies_table(fName)
         if i != 3:
-            check = mainFaciesTable1.has_facies_int_facies_table(fName)
             assert check is True
         else:
-            check = mainFaciesTable1.has_facies_int_facies_table(fName)
             assert check is False
 
 

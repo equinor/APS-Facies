@@ -21,7 +21,7 @@ def must_run_in_rms(func):
                 if roxar.__mock__:
                     return None
             except AttributeError:
-                pass
+                return None
         except ImportError:
             return None
 
@@ -58,8 +58,7 @@ def get_redhat_version():
     import platform
 
     description = platform.platform()
-    redhat_version = re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
-    return redhat_version
+    return re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
 
 
 @must_run_in_rms
@@ -67,7 +66,7 @@ def get_common_python_packages_path():
     import sys
 
     python_version = sys.version_info
-    python_version = '{}.{}'.format(python_version.major, python_version.minor)
+    python_version = f'{python_version.major}.{python_version.minor}'
 
     return (
         '/project/res/roxapi/x86_64_RH_{redhat_version}/{rms_version}/lib/python{python_version}/site-packages'

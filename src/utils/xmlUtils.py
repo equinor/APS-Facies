@@ -66,10 +66,9 @@ def getTextCommand(parent, keyword, parentKeyword='', defaultText=None, modelFil
     obj = parent.find(keyword)
     if required and obj is None:
         raise ReadingXmlError(keyword, parentKeyword, modelFile)
+    text = defaultText
     if obj is not None:
         text = obj.text.strip()
-    else:
-        text = defaultText
 
     return text
 
@@ -154,7 +153,7 @@ def isFMUUpdatable(parent, keyword):
 
 def fmu_xml_element(tag, value, updatable, zone_number, region_number, gf_name, fmu_creator, fmu_attributes):
     obj = Element(tag)
-    obj.text = ' ' + str(value) + ' '
+    obj.text = f' {value} '
     if updatable:
         fmu_attribute = fmu_creator(tag, gf_name, zone_number, region_number)
         fmu_attributes.append(fmu_attribute)
@@ -168,9 +167,9 @@ def get_region_number(zone):
         region_number = int(region_number)
         if region_number < 0:
             raise ValueError(
-                'Region number must be positive integer if region is used.\n'
-                'Zero as region number means that regions is not used for the zone.\n'
-                'Can not have negative region number: {}'.format(region_number)
+                f'Region number must be positive integer if region is used.\n'
+                f'Zero as region number means that regions is not used for the zone.\n'
+                f'Can not have negative region number: {region_number}'
             )
     else:
         region_number = 0
@@ -187,19 +186,19 @@ def _coerce_none_to_integers(func):
 
 @_coerce_none_to_integers
 def createFMUvariableNameForTrend(keyword, grf_name, zone_number, region_number=None):
-    return 'APS_{}_{}_GF_{}_TREND_{}'.format(zone_number, region_number, grf_name, keyword.upper())
+    return f'APS_{zone_number}_{region_number}_GF_{grf_name}_TREND_{keyword.upper()}'
 
 
 @_coerce_none_to_integers
 def createFMUvariableNameForResidual(keyword, grf_name, zone_number, region_number=None):
-    return 'APS_{}_{}_GF_{}_RESIDUAL_{}'.format(zone_number, region_number, grf_name, keyword.upper())
+    return f'APS_{zone_number}_{region_number}_GF_{grf_name}_RESIDUAL_{keyword.upper()}'
 
 
 @_coerce_none_to_integers
 def createFMUvariableNameForBayfillTruncation(keyword, zone_number, region_number=None):
-    return 'APS_{}_{}_TRUNC_BAYFILL_{}'.format(zone_number, region_number, keyword.upper())
+    return f'APS_{zone_number}_{region_number}_TRUNC_BAYFILL_{keyword.upper()}'
 
 
 @_coerce_none_to_integers
 def createFMUvariableNameForNonCubicTruncation(index, zone_number, region_number=None):
-    return 'APS_{}_{}_TRUNC_NONCUBIC_POLYNUMBER_{}_ANGLE'.format(zone_number, region_number, index)
+    return f'APS_{zone_number}_{region_number}_TRUNC_NONCUBIC_POLYNUMBER_{index}_ANGLE'

@@ -236,7 +236,7 @@ def check_and_normalize_probabilities_for_APS(
         if len(cell_index_defined) == 0:
             print(
                 f'Warning: No active grid cells for (zone,region)=({zone_number}, {region_number})\n'
-                '         Skip this zone, region combination'
+                f'         Skip this zone, region combination'
             )
             continue
 

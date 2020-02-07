@@ -6,13 +6,12 @@ import re
 def _sanitize_for_json(raw_parameters):
     if 'undefined' in raw_parameters:
         raw_parameters = raw_parameters.replace('undefined', 'null')
-    return '[' + raw_parameters + ']'
+    return f'[{raw_parameters}]'
 
 
 def _get_arguments(raw):
     raw = _sanitize_for_json(raw)
-    arguments = loads(raw)
-    return arguments
+    return loads(raw)
 
 
 def parse_signature(signature):

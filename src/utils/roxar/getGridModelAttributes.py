@@ -91,10 +91,9 @@ def run(roxar=None, project=None, **kwargs):
     grid_model_name = aps_model.grid_model_name
 
     writeXMLFileGridDimensions(project, grid_model_name, output_rms_data_file, debug_level)
-    print('')
-    print('Finished running: ' + __file__)
+    print(f'\nFinished running: {__file__}')
 
 
 if __name__ == '__main__':
     import roxar
-    run(roxar, project)
+    run(roxar, project)  # noqa

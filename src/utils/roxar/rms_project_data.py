@@ -179,8 +179,7 @@ class RMSData:
     def get_regions(self, grid_model_name, zone_name, region_parameter):
         # TODO: Ensure that available regions depends on zone
         grid_model = self.get_grid_model(grid_model_name)
-        regions = self.get_code_names(grid_model.properties[region_parameter])
-        return regions
+        return self.get_code_names(grid_model.properties[region_parameter])
 
     def grid_exists(self, name):
         exists = True
@@ -375,23 +374,22 @@ class RMSData:
             )
         else:
             settings = GaussianFieldSimulationSettings.from_dict(**settings)
-        simulation = GaussianField(
-            name=name,
-            variogram=Variogram(
+        return GaussianField(
                 name=name,
-                type=variogram['type'],
-                ranges=Ranges(
-                    **variogram['range']
+                variogram=Variogram(
+                    name=name,
+                    type=variogram['type'],
+                    ranges=Ranges(
+                        **variogram['range']
+                    ),
+                    angles=Angles(
+                        **variogram['angle']
+                    ),
+                    power=variogram['power'],
                 ),
-                angles=Angles(
-                    **variogram['angle']
-                ),
-                power=variogram['power'],
-            ),
-            trend=Trend.from_dict(name, **trend),
-            settings=settings,
-        ).simulate()
-        return simulation
+                trend=Trend.from_dict(name, **trend),
+                settings=settings,
+            ).simulate()
 
     @staticmethod
     def open_wiki_help():

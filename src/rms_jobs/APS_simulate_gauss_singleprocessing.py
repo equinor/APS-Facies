@@ -32,8 +32,7 @@ def define_variogram(variogram, azimuth_value_sim_box):
         args.append(variogram.power)
     args = [float(arg) for arg in args]
 
-    sim_variogram = nrlib.variogram(variogram_name, *args)
-    return sim_variogram
+    return nrlib.variogram(variogram_name, *args)
 
 
 def run_simulations(

@@ -52,14 +52,11 @@ def make_ranged_property(name, error_template, minimum=None, maximum=None, addit
 
 
 def is_between(value, _min, _max, strictly_less=False, strictly_greater=False):
-    if (
+    return (
             _min < value < _max
             or _min == value and not strictly_greater
             or _max == value and not strictly_less
-    ):
-        return True
-    else:
-        return False
+    )
 
 
 def _make_simple_property(name, check, error_message):
@@ -87,7 +84,10 @@ def make_trend_property(name):
             return self.model is not None and self.relative_std_dev is not None
         return True
 
-    return _make_simple_property(name, is_model_and_rel_std_dev_set, 'While trend is used, a trend model MUST be given, and the relative std.dev. must be given')
+    return _make_simple_property(
+        name, is_model_and_rel_std_dev_set,
+        'While trend is used, a trend model MUST be given, and the relative std.dev. must be given',
+    )
 
 
 def make_angle_property(name, full_name=None, strictly_less=False, strictly_greater=False):

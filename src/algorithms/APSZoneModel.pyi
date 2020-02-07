@@ -28,6 +28,7 @@ class APSZoneModel:
     grid_layout: Optional[Conform]
     uses_region: bool
     debug_level: Debug
+    __debug_level: Debug
     used_gaussian_field_names: List[GaussianFieldName]
     gaussian_fields_in_truncation_rule: List[str]
     gaussian_fields: List[GaussianField]
@@ -38,6 +39,8 @@ class APSZoneModel:
     __gaussModelObject: APSGaussModel
     _grid_layout: Optional[Conform]
     __simBoxThickness: float
+    __useConstProb: bool
+    __keyResolution: int
 
     def __init__(
         self,

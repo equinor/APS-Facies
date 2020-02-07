@@ -275,8 +275,7 @@ def test_case_5():
 
 
 def get_facies_reference_file_path(testCase):
-    faciesReferenceFile = 'testData_Bayfill/test_case_' + str(testCase) + '.dat'
-    return faciesReferenceFile
+    return f'testData_Bayfill/test_case_{testCase}.dat'
 
 
 def run(

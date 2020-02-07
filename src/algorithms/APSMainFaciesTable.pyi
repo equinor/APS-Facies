@@ -38,6 +38,8 @@ class APSMainFaciesTable:
     __facies_table: FaciesTable
     __class_name: str
     __model_file_name: str
+    __blocked_well: str
+    __blocked_well_log: str
     def __init__(
         self,
         ET_Tree: Optional[ElementTree] = None,
