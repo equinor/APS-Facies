@@ -66,12 +66,10 @@ class APSModel:
        def getRegionParamName(self)
        def getSeedFileName(self)
        def getMainFaciesTable(self)
-       def getRMSProjectName(self)
        def getAllProbParam(self)
 
       Set data and update data structure:
 
-       def setRmsProjectName(self,name)
        def setRmsWorkflowName(self,name)
        def setRmsGridModelName(self,name)
        def setRmsZoneParamName(self,name)
@@ -792,6 +790,14 @@ class APSModel:
     def use_regions(self):
         return bool(self.region_parameter)
 
+    @property
+    def rms_project_name(self):
+        return self.__rmsProjectName
+
+    @rms_project_name.setter
+    def rms_project_name(self, name):
+        self.__rmsProjectName = name
+
     def getZoneParamName(self):
         return self.__rmsZoneParamName
 
@@ -803,9 +809,6 @@ class APSModel:
 
     def getMainFaciesTable(self):
         return self.__faciesTable
-
-    def getRMSProjectName(self):
-        return copy.copy(self.__rmsProjectName)
 
     def getRMSWorkflowName(self):
         return copy.copy(self.__rmsWorkflowName)
@@ -820,9 +823,6 @@ class APSModel:
         return all_probabilities
 
     # ----- Set functions -----
-    def setRmsProjectName(self, name):
-        self.__rmsProjectName = name
-
     def setRmsWorkflowName(self, name):
         self.__rmsWorkflowName = name
 

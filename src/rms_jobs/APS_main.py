@@ -241,7 +241,6 @@ def run(
     print(f'- Read file: {model_file_name}')
     aps_model = APSModel(model_file_name)
     debug_level = aps_model.debug_level
-    rms_project_name = aps_model.getRMSProjectName()
     grid_model_name = aps_model.grid_model_name
     grid_model = project.grid_models[grid_model_name]
     if grid_model.is_empty():
@@ -255,7 +254,7 @@ def run(
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
-        print(f'--- Get RMS zone parameter: {zone_param_name} from RMS project {rms_project_name}')
+        print(f'--- Get RMS zone parameter: {zone_param_name} from RMS project {aps_model.rms_project_name}')
     zone_param = create_zone_parameter(
         grid_model,
         name=zone_param_name,
@@ -268,7 +267,7 @@ def run(
     region_values = None
     if use_regions:
         if debug_level >= Debug.VERBOSE:
-            print(f'--- Get RMS region parameter: {region_param_name} from RMS project {rms_project_name}')
+            print(f'--- Get RMS region parameter: {region_param_name} from RMS project {aps_model.rms_project_name}')
         region_values, _ = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number, debug_level)
 
     # Get or initialize array for facies realisation
@@ -280,7 +279,7 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print(
                 f'--- Get RMS facies parameter which will be updated: '
-                f'{result_param_name} from RMS project: {rms_project_name}'
+                f'{result_param_name} from RMS project: {aps_model.rms_project_name}'
             )
         facies_real, code_names_for_input = getDiscrete3DParameterValues(
             grid_model, result_param_name, realization_number, debug_level
@@ -289,7 +288,7 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print(
                 f'--- Facies parameter: {result_param_name} for the result will be created '
-                f'in the RMS project: {rms_project_name}'
+                f'in the RMS project: {aps_model.rms_project_name}'
             )
 
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
