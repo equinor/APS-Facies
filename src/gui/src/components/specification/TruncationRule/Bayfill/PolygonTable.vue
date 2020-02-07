@@ -5,27 +5,29 @@
     @input.stop
   >
     <template
-      v-slot:item="{ item }"
+      v-slot:item="{ item : polygon }"
     >
       <tr>
         <td class="text-left">
           <optional-help-item
-            :value="item.name"
+            :value="polygon.name"
           />
         </td>
         <td class="text-left">
           <!--TODO: Figure out why input happens twice-->
           <facies-specification
-            :value="item"
+            :value="polygon"
             :rule="value"
+            :disable="isFaciesUsed(polygon)"
+            clearable
           />
         </td>
         <td>
           <fraction-field
-            v-if="!!item.slantFactor"
-            :value="item.slantFactor"
+            v-if="!!polygon.slantFactor"
+            :value="polygon.slantFactor"
             fmu-updatable
-            @input="factor => updateFactor(item, factor)"
+            @input="factor => updateFactor(polygon, factor)"
           />
           <slot v-else />
         </td>
@@ -42,7 +44,7 @@ import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import FaciesSpecification from '@/components/specification/Facies/index.vue'
 import BaseTable from '@/components/baseComponents/BaseTable.vue'
 
-import { Bayfill, BayfillPolygon } from '@/utils/domain'
+import { Bayfill, BayfillPolygon, Facies } from '@/utils/domain'
 import { HeaderItems } from '@/utils/typing'
 
 @Component({
@@ -78,6 +80,14 @@ export default class BayfillPolygonTable extends Vue {
         value: 'factor',
       }
     ]
+  }
+
+  isFaciesUsed (polygon: BayfillPolygon): (facies: Facies) => boolean {
+    const otherPolygons = this.value.backgroundPolygons
+      .filter(({ name }): boolean => name !== polygon.name)
+    return (facies: Facies): boolean => otherPolygons
+      .filter((polygon) => facies === polygon.facies)
+      .length > 0
   }
 
   async updateFactor (item: BayfillPolygon, value: number): Promise<void> {

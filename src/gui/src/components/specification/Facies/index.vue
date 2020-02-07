@@ -2,6 +2,7 @@
   <facies-specification-base
     :value="value.facies"
     :disable="disable"
+    :clearable="clearable"
     @input.capture="facies => updateFacies(facies)"
   />
 </template>
@@ -33,18 +34,19 @@ export default class FaciesSpecification<
   @Prop({ required: true })
   readonly rule: TruncationRule<T, S, P>
 
+  @Prop({ default: false, type: Boolean })
+  readonly clearable!: boolean
+
   @Prop({ default: false })
   readonly disable: ((facies: Facies) => boolean) | boolean
 
-  async updateFacies (faciesId: ID): Promise<void> {
+  async updateFacies (faciesId: ID | undefined): Promise<void> {
     const facies = (this.$store as Store).getters['facies/byId'](faciesId)
-    if (facies) {
-      await this.$store.dispatch('truncationRules/updateFacies', {
-        rule: this.rule,
-        polygon: this.value,
-        facies,
-      })
-    }
+    await this.$store.dispatch('truncationRules/updateFacies', {
+      rule: this.rule,
+      polygon: this.value,
+      facies,
+    })
   }
 }
 </script>
