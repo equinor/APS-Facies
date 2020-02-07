@@ -10,7 +10,7 @@ import { Optional } from '@/utils/typing'
 import { rms as mock } from './roxar'
 /* eslint-disable @typescript-eslint/ban-ts-ignore */
 // @ts-ignore
-const api = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
+const api: { call: <T>(name: string, ...args: any[]) => Promise<T> } = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 
 export default {
   projectName: (): Promise<string> => api.call('get_project_name'),
