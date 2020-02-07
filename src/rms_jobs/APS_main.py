@@ -241,8 +241,7 @@ def run(
     print(f'- Read file: {model_file_name}')
     aps_model = APSModel(model_file_name)
     debug_level = aps_model.debug_level
-    grid_model_name = aps_model.grid_model_name
-    grid_model = project.grid_models[grid_model_name]
+    grid_model = project.grid_models[aps_model.grid_model_name]
     if grid_model.is_empty():
         raise ValueError(f'Specified grid model: {grid_model.name} is empty.')
 
