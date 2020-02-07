@@ -5,27 +5,27 @@
     @input.stop
   >
     <template
-      v-slot:item="{ item }"
+      v-slot:item="{ item : polygon }"
     >
       <tr>
         <td class="text-left">
           <optional-help-item
-            :value="item.name"
+            :value="polygon.name"
           />
         </td>
         <td class="text-left">
           <!--TODO: Figure out why input happens twice-->
           <facies-specification
-            :value="item"
+            :value="polygon"
             :rule="value"
           />
         </td>
         <td>
           <fraction-field
-            v-if="!!item.slantFactor"
-            :value="item.slantFactor"
+            v-if="!!polygon.slantFactor"
+            :value="polygon.slantFactor"
             fmu-updatable
-            @input="factor => updateFactor(item, factor)"
+            @input="factor => updateFactor(polygon, factor)"
           />
           <slot v-else />
         </td>
