@@ -10,6 +10,10 @@ from xml.etree.ElementTree import Element
 
 class Trunc3D_bayfill(Trunc2D_Base):
     _setTruncRuleIsCalled: bool
+    __eps: float
+    _alphaIndxList: List[int]
+    __useConstTruncModelParam: bool
+    __param_sf_name: str
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,

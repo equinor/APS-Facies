@@ -230,10 +230,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
         directionL1 = L1Obj.get('direction').strip()
         if directionL1 not in ['H', 'V']:
             raise ValueError(
-                'Error when reading model file: {}\n'
-                'Error: Read truncation rule: {}\n'
+                f'Error when reading model file: {modelFileName}\n'
+                f'Error: Read truncation rule: {self._className}\n'
                 'Error: Specified attribute "direction" must be H or V.'
-                ''.format(modelFileName, self._className)
             )
 
         nodeList = []
@@ -257,17 +256,15 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 probFrac = float(text.strip())
                 if facies_name not in self._faciesInZone:
                     raise ValueError(
-                        'Error when reading model file: {0}\n'
-                        'Error: Read truncation rule: {1}\n'
-                        'Error: Specified facies name in truncation rule: {2} is not defined for this zone.'
-                        ''.format(modelFileName, self._className, facies_name)
+                        f'Error when reading model file: {modelFileName}\n'
+                        f'Error: Read truncation rule: {self._className}\n'
+                        f'Error: Specified facies name in truncation rule: {facies_name} is not defined for this zone.'
                     )
                 if probFrac < 0.0 or probFrac > 1.0:
                     raise ValueError(
-                        'Error when reading model file: {}\n'
-                        'Error: Read truncation rule: {}\n'
+                        f'Error when reading model file: {modelFileName}\n'
+                        f'Error: Read truncation rule: {self._className}\n'
                         'Error: Specified probability fraction in truncation rule is outside [0,1].'
-                        ''.format(modelFileName, self._className)
                     )
 
                 nFacies, indx, fIndx, isNew = self._addFaciesToTruncRule(facies_name)

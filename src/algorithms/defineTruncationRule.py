@@ -589,9 +589,11 @@ class DefineTruncationRule:
                 truncObj.initialize(mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
                                     truncStructureList, overlayGroups=overlayGroups, debug_level=self.debug_level)
             else:
-                raise IOError('Inconsistent facies specification for truncation rulw with overlay facies.'
-                              'Either: specified background facies for overlay facies groups is not defined in background facies truncation rule.'
-                              'Or: specified overlay facies is equal to background facies')
+                raise IOError(
+                    'Inconsistent facies specification for truncation rule with overlay facies.'
+                    'Either: specified background facies for overlay facies groups is not defined '
+                    'in background facies truncation rule.'
+                    'Or: specified overlay facies is equal to background facies')
 
         return truncObj
 
@@ -831,7 +833,7 @@ class DefineTruncationRule:
         except KeyError:
             raise KeyError('Overlay facies truncation rule setting: {} is not defined'.format(nameOL))
 
-        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
+        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting
         if not self.__checkConsistencyBetweenBackGroundNonCubicAndOverlay(truncStructBG, overlayGroups):
             raise ValueError(
                 'Specified background facies truncation setting {} '
@@ -848,7 +850,7 @@ class DefineTruncationRule:
                 self.__tableNonCubicAndOverlay[name] = truncStructNonCubicWithOverlay
 
     def __checkConsistencyBetweenBackGroundCubicAndOverlay(self, truncStructBG, overlayGroups):
-        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
+        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting
         bgFacies = []
         FACIES_NAME_INDX_BG = CubicPolygonIndices.FACIES_NAME_INDX
         ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
@@ -879,7 +881,7 @@ class DefineTruncationRule:
         return True
 
     def __checkConsistencyBetweenBackGroundCubicAndOverlayOld(self, nameBG, nameOL, truncStructBG, overlayGroups):
-        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
+        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting
         bgFacies = []
         FACIES_NAME_INDX_BG = CubicPolygonIndices.FACIES_NAME_INDX
         ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
@@ -898,25 +900,27 @@ class DefineTruncationRule:
             backgroundListForGroup = groupItem[BACKGROUND_LIST_INDX]
             for fName in backgroundListForGroup:
                 if fName not in bgFacies:
-                    raise ValueError('Specified background facies name {} in overlay facies rule {} '
-                                     'does not exist as facies in Cubic rule with name {} '
-                                     ''.format(fName, nameOL, nameBG))
+                    raise ValueError(
+                        f'Specified background facies name {fName} in overlay facies rule {nameOL} '
+                        f'does not exist as facies in Cubic rule with name {nameBG} '
+                    )
             for i in range(len(alphaList)):
                 alphaItem = alphaList[i]
                 alphaName = alphaItem[ALPHA_NAME_INDX]
                 fName = alphaItem[FACIES_NAME_INDX_OL]
                 if fName in bgFacies:
-                    raise ValueError('Specified overlay facies name {} in overlay facies rule {} '
-                                     'is already defined as background facies in Cubic rule with name {} '
-                                     ''.format(fName, nameOL, nameBG))
+                    raise ValueError(
+                        f'Specified overlay facies name {fName} in overlay facies rule {nameOL} '
+                        f'is already defined as background facies in Cubic rule with name {nameBG} '
+                    )
                 if alphaName == 'GRF01' or alphaName == 'GRF02':
                     raise ValueError(
-                        'Alpha field names can not be the same in overlay facies truncation settings in {} '
-                        'as for background facies truncation settings in {} '
-                        ''.format(nameOL, nameBG))
+                        f'Alpha field names can not be the same in overlay facies truncation settings in {nameOL} '
+                        f'as for background facies truncation settings in {nameBG} '
+                    )
 
     def __checkConsistencyBetweenBackGroundNonCubicAndOverlay(self, truncStructBG, overlayGroups):
-        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting.
+        # Check consistency between chosen background truncation rule setting and overlay facies truncation rule setting
         bgFacies = []
         FACIES_NAME_INDX_BG = NonCubicPolygonIndices.FACIES_NAME_INDX
         ALPHA_LIST_INDX = OverlayGroupIndices.ALPHA_LIST_INDX
@@ -947,8 +951,9 @@ class DefineTruncationRule:
         return True
 
     def removeTruncationRuleSettings(self, name, removeDependentBG=False, removeDependentOL=False):
-        ''' Remove a truncation setting from dictionary. If a truncation rule using overlay facies is removed, it will not remove
-            the background settings which still will be available for truncation rule settings without overlay. '''
+        """ Remove a truncation setting from the dictionary. If a truncation rule using overlay facies is removed,
+        it will not remove the background settings which still will be available for truncation rule settings
+        without overlay. """
 
         if name in self.__tableBayfill:
             print('Remove: {}'.format(name))
@@ -964,7 +969,7 @@ class DefineTruncationRule:
                     isUsed = True
                     break
             if not isUsed:
-                print('Remove: {}'.format(name))
+                print(f'Remove: {name}')
                 del self.__tableCubic[name]
 
         if name in self.__tableNonCubic:
@@ -977,7 +982,7 @@ class DefineTruncationRule:
                     isUsed = True
                     break
             if not isUsed:
-                print('Remove: {}'.format(name))
+                print(f'Remove: {name}')
                 del self.__tableNonCubic[name]
 
         if name in self.__tableNonCubicAndOverlay:
@@ -998,14 +1003,14 @@ class DefineTruncationRule:
                     if nameOL2 == nameOL:
                         isUsedOL = True
 
-            print('Remove: {}'.format(name))
+            print(f'Remove: {name}')
             del self.__tableNonCubicAndOverlay[name]
             if removeDependentBG and not isUsedBG:
                 print('  Remove: {}'.format(nameBG))
                 del self.__tableNonCubic[nameBG]
 
             if removeDependentOL and not isUsedOL:
-                print('  Remove: {}'.format(nameOL))
+                print(f'  Remove: {nameOL}')
                 del self.__tableOverlay[nameOL]
 
         if name in self.__tableCubicAndOverlay:
@@ -1026,14 +1031,14 @@ class DefineTruncationRule:
                     if nameOL2 == nameOL:
                         isUsedOL = True
 
-            print('Remove: {}'.format(name))
+            print(f'Remove: {name}')
             del self.__tableCubicAndOverlay[name]
             if removeDependentBG and not isUsedBG:
-                print('  Remove: {}'.format(nameBG))
+                print(f'  Remove: {nameBG}')
                 del self.__tableCubic[nameBG]
 
             if removeDependentOL and not isUsedOL:
-                print('  Remove: {}'.format(nameOL))
+                print(f'  Remove: {nameOL}')
                 del self.__tableOverlay[nameOL]
 
     def __appendToList(self, dictionary, truncType, nBackgroundFacies, nOverlayFacies):
@@ -1068,7 +1073,7 @@ class DefineTruncationRule:
                 settingsList.append([key, item, ''])
         else:
             raise ValueError(
-                'Truncation type {} is not defined.'.format(truncType))
+                f'Truncation type {truncType} is not defined.')
 
         return settingsList
 
@@ -1140,7 +1145,8 @@ class DefineTruncationRule:
         return nOverlayFacies
 
     def getListOfOverlaySettings(self, name):
-        """ Find truncation settings for background facies. Specified name is name of truncation setting of either type Cubic or NonCubic"""
+        """ Find truncation settings for background facies.
+         Specified name is name of truncation setting of either type Cubic or NonCubic"""
         itemCubic = None
         itemNonCubic = None
         itemBayfill = None
@@ -1154,8 +1160,7 @@ class DefineTruncationRule:
                 try:
                     itemBayfill = self.__tableBayfill[name]
                 except KeyError:
-                    raise KeyError('Truncation setting with name {} is not defined.'
-                                   ''.format(name))
+                    raise KeyError(f'Truncation setting with name {name} is not defined.')
 
         if itemCubic is not None:
             # Search for all overlay settings that are consistent with background model
@@ -1173,9 +1178,7 @@ class DefineTruncationRule:
             for key, item in sortedDictionary.items():
                 overlay_setting_list.append(key)
         else:
-            raise ValueError(
-                'Specified truncation setting {} is not defined.'
-                ''.format(name))
+            raise ValueError(f'Specified truncation setting {name} is not defined.')
 
         return overlay_setting_list
 

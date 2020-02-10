@@ -219,8 +219,13 @@ class Trunc2D_Base:
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Read data from model file in: ' + self._className)
+                print(f'Debug output: Read data from model file in: {self._className}')
 
+            if any(arg is None for arg in [mainFaciesTable, faciesInZone, gaussFieldsInZone, modelFileName]):
+                raise ValueError(
+                    f'Insufficient arguments; when a truncation rule is given ({trRuleXML}), these arguments are '
+                    f'mandatory: "mainFaciesTable", "faciesInZone", "gaussFieldsInZone", and "modelFileName"'
+                )
             # Initialize common data for facies to be modelled (specified for the zone) and the
             # ordering of the facies in the truncation rule.
             self._setModelledFacies(mainFaciesTable, faciesInZone)
@@ -230,8 +235,12 @@ class Trunc2D_Base:
             self.__interpretXMLTree_read_gauss_field_names(trRuleXML, gaussFieldsInZone, modelFileName)
         else:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Create empty object for: ' + self._className)
+                print(f'Debug output: Create empty object for: {self._className}')
                 #  End of __init__
+
+    @property
+    def __eps(self):
+        return self._epsFaciesProb
 
     @property
     def num_facies_in_zone(self):
@@ -383,8 +392,7 @@ class Trunc2D_Base:
                 if indx in checkIndx:
                     fName = self._faciesInTruncRule[indx]
                     raise ValueError(
-                        'Background facies {} is specified multiple times for the same group'
-                        ''.format(fName)
+                        f'Background facies {fName} is specified multiple times for the same group'
                     )
                 checkIndx.append(indx)
 
@@ -392,8 +400,7 @@ class Trunc2D_Base:
                 if indx in checkOverlapForBackGroundFacies:
                     fName = self._faciesInTruncRule[indx]
                     raise ValueError(
-                        'Background facies {} is specified for more than one group'
-                        ''.format(fName)
+                        f'Background facies {fName} is specified for more than one group'
                     )
                 checkOverlapForBackGroundFacies.append(indx)
 
@@ -404,10 +411,7 @@ class Trunc2D_Base:
                 # Check that overlay facies index is legal
                 if indx < self._nBackGroundFacies or indx >= self.num_facies_in_zone:
                     fName = self._faciesInTruncRule[indx]
-                    raise ValueError(
-                        'Overlay facies {} is not a valid facies name'
-                        ''.format(fName)
-                    )
+                    raise ValueError(f'Overlay facies {fName} is not a valid facies name')
 
     def __checkAlphaIndx(self):
         nGaussField = 2
@@ -509,21 +513,19 @@ class Trunc2D_Base:
         alphaFieldNames = alphaFieldsObj.text.split()
         if len(alphaFieldNames) != self._nGaussFieldsInBackGroundModel:
             raise ValueError(
-                'Error when reading model file: {}\n'
-                'Error: Read truncation rule: {}\n'
-                'Error: Number of specified gauss field names must be {} under keyword AlphaFields\n'
-                ''.format(modelFileName, self._className, self._nGaussFieldsInBackGroundModel)
+                f'Error when reading model file: {modelFileName}\n'
+                f'Error: Read truncation rule: {self._className}\n'
+                f'Error: Number of specified gauss field names must be '
+                f'{self._nGaussFieldsInBackGroundModel} under keyword AlphaFields\n'
             )
         for i in range(self._nGaussFieldsInBackGroundModel):
             # Add gauss field
-            indx = self.__addAlpha(alphaFieldNames[i], True)
+            self.__addAlpha(alphaFieldNames[i], True)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Background facies truncation rule use:')
             for i in range(self._nGaussFieldsInBackGroundModel):
-                print('Alpha({}): {}'
-                      ''.format(str(i), alphaFieldNames[i])
-                      )
+                print(f'Alpha({i}): {alphaFieldNames[i]}')
 
         assert self.getNGaussFieldsInModel() == self._nGaussFieldsInBackGroundModel
 
@@ -956,7 +958,7 @@ Background facies:
         # Loop over all facies defined in the list faciesInZone
         try:
             return self._faciesInZone.index(facies_name)
-        except IndexError:
+        except ValueError:
             return -1
 
     def getNGaussFieldsInModel(self):
@@ -971,14 +973,13 @@ Background facies:
             self._epsFaciesProb = eps
         else:
             raise ValueError(
-                'Try to set tolerance for facies probabilities to {}.\n'
-                'Can not set tolerance for facies probability greater than 0.01 or less than equal 0.0'
-                ''.format(str(eps))
+                f'Try to set tolerance for facies probabilities to {eps}.\n'
+                f'Can not set tolerance for facies probability greater than 0.01 or less than equal 0.0'
             )
 
     def _setMinimumFaciesProb(self, faciesProb):
         sumProb = 0.0
-        eps = self._epsFaciesProb * 0.1
+        eps = self.__eps * 0.1
         for i in range(len(faciesProb)):
             p = faciesProb[i]
             if p < eps:

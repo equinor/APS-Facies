@@ -97,7 +97,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         # each element in the list is a 3D parameter with values.
         self.__faciesBoundaryOrientation = []
 
-        #List of booleans indicating wether or not Angle (Faciesboundaryorientation) is fmu_updatable
+        # List of booleans indicating wether or not Angle (Faciesboundaryorientation) is fmu_updatable
         self.__faciesBoundaryOrientation_is_fmu_updatable = []
 
         self.__probFracPerPolygon = []
@@ -211,7 +211,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             else:
                 paramNameAlpha = copy.copy(text.strip())
                 self.__faciesBoundaryOrientationName.append([fName, paramNameAlpha])
-            #checking if the current angle is fmu_updatable.
+            # checking if the current angle is fmu_updatable.
             self.__faciesBoundaryOrientation_is_fmu_updatable.append(isFMUUpdatable(faciesObj, kw2))
 
             kw3 = 'ProbFrac'

@@ -17,6 +17,8 @@ from src.utils.constants.simple import Debug
 
 
 class Trunc2D_Base:
+    __eps: float
+    _epsFaciesProb: float
     _faciesInTruncRule: List
     _debug_level: Debug
     _faciesInZone: List[int]
@@ -46,7 +48,8 @@ class Trunc2D_Base:
         gaussFieldsInZone: Optional[List[str]] = None,
         debug_level: Debug = Debug.OFF,
         modelFileName: Optional[str] = None,
-        nGaussFieldsInBackGroundModel: int = 2
+        nGaussFieldsInBackGroundModel: int = 2,
+        keyResolution:                  int = 100,
     ) -> None: ...
     def __repr__(self) -> str: ...
     def _XMLAddElement(self, parent: Element) -> None: ...

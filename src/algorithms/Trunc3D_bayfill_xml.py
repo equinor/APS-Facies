@@ -128,9 +128,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__useZ = False
         self.__Zm = 0
 
-        # Tolerance used for probabilities
-        self.__eps = 0.5 * self._epsFaciesProb
-
         # Define if truncation parameters are constant for all grid cells or
         # vary from cell to cell.
         self.__useConstTruncModelParam = True
@@ -431,9 +428,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         )
         if isDetermined:
             self.__polygons = []
-            for indx in range(self.num_facies_in_truncation_rule):
-                fIndx = self._orderIndex[indx]
-                if self._faciesIsDetermined[fIndx] == 1:
+            for index in range(self.num_facies_in_truncation_rule):
+                facies_index = self._orderIndex[index]
+                if self._faciesIsDetermined[facies_index]:
                     poly = self.__unitSquarePolygon()
                 else:
                     poly = self.__zeroPolygon()
@@ -445,8 +442,8 @@ class Trunc3D_bayfill(Trunc2D_Base):
         from src.utils.roxar.grid_model import getContinuous3DParameterValues
         paramName = self.__param_sf_name
         if self._debug_level >= Debug.VERBOSE:
-            print('--- Use spatially varying truncation rule parameter SF for truncation rule: ' + self._className)
-            print('--- Read RMS parameter: ' + paramName)
+            print(f'--- Use spatially varying truncation rule parameter SF for truncation rule: {self._className}')
+            print(f'--- Read RMS parameter: {paramName}')
 
         values = getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
         self.__param_sf = values
@@ -548,23 +545,10 @@ class Trunc3D_bayfill(Trunc2D_Base):
             obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
 
-    def __setMinimumFaciesProb(self, faciesProb):
-        sumProb = 0.0
-        eps = self.__eps * 0.1
-        for i in range(len(faciesProb)):
-            p = faciesProb[i]
-            if p < eps:
-                p = eps
-                faciesProb[i] = p
-            if p >= 1.0:
-                p = 1.0 - eps
-                faciesProb[i] = p
-            sumProb += p
-
-        for i in range(len(faciesProb)):
-            p = faciesProb[i]
-            faciesProb[i] = p / sumProb
-        return
+    @property
+    def __eps(self):
+        """ Tolerance used for probabilities """
+        return 0.5 * self._epsFaciesProb
 
     @staticmethod
     def __unitSquarePolygon():
@@ -626,7 +610,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         #  Lagoon     is 5 with probability P5
 
         self._setTruncRuleIsCalled = True
-        self.__setMinimumFaciesProb(faciesProb)
+        self._setMinimumFaciesProb(faciesProb)
         isDetermined = False
         for indx in range(self.num_facies_in_truncation_rule):
             fIndx = self._orderIndex[indx]
@@ -660,7 +644,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         fIndx = self._orderIndex[4]
         P5 = faciesProb[fIndx]
         if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
-            print('Debug output: P1,P2,P3,P4,P5: {} {} {} {} {}'.format(P1, P2, P3, P4, P5))
+            print(f'Debug output: P1,P2,P3,P4,P5: {P1} {P2} {P3} {P4} {P5}')
         if sbhd > 0.999:
             sbhd = 0.999
         elif sbhd < 0.001:
@@ -676,7 +660,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         Xm = 0.0
         Xm2 = 0.0
 
-        if P1 < 0.0 or P2 < 0.0 or P3 < 0.0 or P4 < 0.0 or P5 < 0.0:
+        if any(prob < 0 for prob in [P1, P2, P3, P4, P5]):
             warn(' Warning: Negative probabilities as input. Is set to 0.')
             if P1 < 0.0:
                 P1 = 0.0
@@ -1006,8 +990,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
                     (0.5 / c) * (XL - X4) * (XL - X4)
                     - 0.5 * (X2 - X4) * YS + (XL - X4) * (1.0 - (XL - X4) / c)
                 ):
-                    Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 *
-                           (XL - X4) * (XL - X4) / c) / (XL - X4)
+                    Ym2 = (AmP4sqrt + 0.5 * (X2 - X4) * YS - 0.5 * (XL - X4) * (XL - X4) / c) / (XL - X4)
                     Ym = Ym2 + (XL - X4) / c
                     Xm = XL
                     Xm2 = X4
