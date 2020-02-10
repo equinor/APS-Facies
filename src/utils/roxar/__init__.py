@@ -21,7 +21,8 @@ def must_run_in_rms(func):
                 if roxar.__mock__:
                     return None
             except AttributeError:
-                return None
+                # This should mean, that we are running inside RMS
+                return func(*args, **kwargs)
         except ImportError:
             return None
 
