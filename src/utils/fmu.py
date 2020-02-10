@@ -367,6 +367,23 @@ class UpdateTrends(FmuModelChanges):
         ])
 
 
+class UpdateGridOrientation(FmuModelChange):
+    def __init__(self, *, project, aps_model, **kwargs):
+        self._grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
+        self._original = self._grid.ijk_handedness
+
+    def turn_grid(self, handedness):
+        if self._grid.ijk_handedness != handedness:
+            self._grid.reverse_row_axis()
+
+    def before(self):
+        # nrlib uses a right-handed coordinate system
+        self.turn_grid('right')
+
+    def after(self):
+        self.turn_grid(self._original)
+
+
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
@@ -378,6 +395,7 @@ def fmu_aware_model_file(*, fmu_mode, **kwargs):
         UpdateSimBoxThicknessInZones(**kwargs),
         UpdateFieldNamesInZones(**kwargs),
         UpdateGridModelName(**kwargs),
+        UpdateGridOrientation(**kwargs),
     ])
     if fmu_mode:
         changes.before()
