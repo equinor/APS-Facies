@@ -3,11 +3,14 @@ from numpy import float64, ndarray
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.utils.constants.simple import Debug
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union, Dict
 from xml.etree.ElementTree import Element
 
 
 class Trunc2D_Cubic(Trunc2D_Base):
+    __node_index: Dict[str, int]
+    __truncStructure: List
+
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,
@@ -33,6 +36,9 @@ class Trunc2D_Cubic(Trunc2D_Base):
         debug_level: Debug = Debug.OFF
     ) -> None: ...
     def setTruncRule(self, faciesProb: List[float], cellIndx: int = 0) -> None: ...
+    def __interpretXMLTree(self, trRuleXML, modelFileName) -> None: ...
+    def __calcProbForEachNode(self, faciesProb): ...
+    def __setTruncStructure(self, truncStructureList): ...
     def truncMapPolygons(
         self
     ) -> Union[List[List[List[float]]], List[Union[List[List[float]], List[Union[List[float], List[float64]]], List[List[float64]]]], List[Union[List[Union[List[float], List[float64]]], List[List[float]]]]]: ...

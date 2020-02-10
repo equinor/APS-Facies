@@ -72,7 +72,7 @@ def simulateGauss(
         'CONSTANT': 'constant'
         }
 
-    if not writeSeedFile and seedFileName is not None:
+    if not (writeSeedFile or seedFileName is None):
         # Read start seed from seed file for current gauss field, zone and region
         # Initialize start seed
         try:
@@ -102,7 +102,7 @@ def simulateGauss(
 
         if debug_level >= Debug.ON:
             print(f'-  Start seed: {startSeed}')
-        startSeed = nrlib.seed(startSeed)
+        nrlib.seed(startSeed)
 
     # Define variogram
     variogramName = variogram_mapping[variogram_type.name]
@@ -117,11 +117,12 @@ def simulateGauss(
     # Simulate gauss field. Return numpy 1D vector in F order. Get padding + grid size as information
     [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
     if logFileName is not None:
-        file.write('    Simulation grid size with padding due to correlation lengths for gauss field {} for zone,region: ({},{})\n'
-                   ''.format(gauss_field_name, zone_number, region_number))
-        file.write('      nx with padding: {}\n'.format(nx_padding))
-        file.write('      ny with padding: {}\n'.format(ny_padding))
-        file.write('      nz with padding: {}\n'.format(nz_padding))
+        file.write(f'''
+    Simulation grid size with padding due to correlation lengths for gauss field {gauss_field_name} for zone,region: ({zone_number}, {region_number})
+      nx with padding: {nx_padding}
+      ny with padding: {ny_padding}
+      nz with padding: {nz_padding}
+''')
     gaussVector = nrlib.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
 
     # Get the start seed
@@ -130,26 +131,26 @@ def simulateGauss(
         print(f'    Start seed: {startSeed}')
 
     # write result to binary file using numpy binary file format
-    fileName = outputDir + '/' + gauss_field_name + '_' + str(zone_number) + '_' + str(region_number)
-    np.save(fileName,gaussVector)
+    fileName = f'{outputDir}/{gauss_field_name}_{zone_number}_{region_number}'
+    np.save(fileName, gaussVector)
 
     if logFileName is not None:
-        file.write(f'    Start seed: {startSeed}\n')
-        file.write(f'    Write file: {fileName}\n')
-        file.write(f'    Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})\n')
-        file.write('')
+        file.write(f'''\
+    Start seed: {startSeed}
+    Write file: {fileName}
+    Finished running simulation of {gauss_field_name} for zone,region: ({zone_number}, {region_number})
+
+''')
         file.close()
         if debug_level >= Debug.VERBOSE:
             print(f'    Write file: {logFileName}')
 
-    if writeSeedFile:
-        # Save start seed if writeSeedFile is True and seedFileName is defined
-        if seedFileName is not None:
-            file = open(seedFileName, 'w')
-            file.write(f' {gauss_field_name}  {zone_number}  {region_number}  {startSeed}\n')
-            file.close()
-            if debug_level >= Debug.VERBOSE:
-                print('    Write file: {}'.format(seedFileName))
+    if writeSeedFile and seedFileName is not None:
+        file = open(seedFileName, 'w')
+        file.write(f' {gauss_field_name}  {zone_number}  {region_number}  {startSeed}\n')
+        file.close()
+        if debug_level >= Debug.VERBOSE:
+            print(f'    Write file: {seedFileName}')
 
     if debug_level >= Debug.VERBOSE:
         print(f'    Write file: {fileName}')
@@ -174,11 +175,10 @@ def run_simulations(
     debug_level = aps_model.debug_level
     seed_file_name = aps_model.seed_file_name
     write_seed_file = aps_model.write_seeds
-    if write_seed_file:
-        if debug_level >= Debug.ON:
+    if debug_level >= Debug.ON:
+        if write_seed_file:
             print(f'Write seed file: {seed_file_name}')
-    else:
-        if debug_level >= Debug.ON:
+        else:
             print(f'Read seed file: {seed_file_name}')
 
     # Get grid dimensions
@@ -270,8 +270,8 @@ def run_simulations(
             gauss_field_name = gauss_field_names[i]
             print(f'- Start simulate: {gauss_field_name} for zone: {zone_number} for region: {region_number}')
             p.start()
-            # Wait at least one second before continuing to ensure that automatically generated start seed values are different
-            # since seed values are generated automatically based on clock time.
+            # Wait at least one second before continuing to ensure that automatically generated start seed values are
+            # different since seed values are generated automatically based on clock time.
             time.sleep(1.05)
 
         # Exit processes

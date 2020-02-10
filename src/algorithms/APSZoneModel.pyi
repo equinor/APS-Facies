@@ -28,15 +28,19 @@ class APSZoneModel:
     grid_layout: Optional[Conform]
     uses_region: bool
     debug_level: Debug
+    __debug_level: Debug
     used_gaussian_field_names: List[GaussianFieldName]
     gaussian_fields_in_truncation_rule: List[str]
     gaussian_fields: List[GaussianField]
     key_resolution: int
+    use_constant_probabilities: bool
     facies_in_zone_model: List[str]
     __faciesProbObject: APSFaciesProb
     __gaussModelObject: APSGaussModel
     _grid_layout: Optional[Conform]
     __simBoxThickness: float
+    __useConstProb: bool
+    __keyResolution: int
 
     def __init__(
         self,
@@ -64,7 +68,6 @@ class APSZoneModel:
     sim_box_thickness: float
     def hasTrendModel(self, gfName: GaussianFieldName) -> bool: ...
     def getTruncationParam(self, gridModel: str, realNumber: int): ...
-    def useConstProb(self) -> bool: ...
     def getAzimuthAngle(self, gaussFieldName: GaussianFieldName) -> float: ...
     def getAzimuthAngleFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool: ...
     def getDipAngle(self, gaussFieldName: GaussianFieldName) -> float: ...

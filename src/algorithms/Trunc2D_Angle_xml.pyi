@@ -9,6 +9,14 @@ from xml.etree.ElementTree import Element
 
 
 class Trunc2D_Angle(Trunc2D_Base):
+    __faciesBoundaryOrientation: List[float]
+    __faciesBoundaryOrientationName: List[str]
+    __faciesBoundaryOrientation_is_fmu_updatable: List[bool]
+    __faciesIndxPerPolygon: List[int]
+    __useConstTruncModelParam: bool
+    _keyResolution: int
+    _faciesCode: ...
+    _alphaIndxList: ...
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,
@@ -18,7 +26,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         keyResolution: int = 100,
         debug_level: int = Debug.OFF,
         modelFileName: Optional[str] = None,
-        zoneNumber: Optional[int] = None
+        zoneNumber: Optional[int] = None,
     ): ...
     num_polygons: int
     def __interpretXMLTree(self, trRuleXML, modelFileName) -> None: ...

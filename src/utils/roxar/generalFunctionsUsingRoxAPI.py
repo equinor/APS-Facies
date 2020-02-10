@@ -285,10 +285,9 @@ def set_continuous_3d_parameter_values_in_zone_region(
 
     # Get region parameter values
     region_param_values = None
-    if region_parameter_name is not None:
-        if len(region_parameter_name) > 0:
-            p = grid_model.properties[region_parameter_name]
-            region_param_values = p.get_values(realisation_number)
+    if region_parameter_name is not None and len(region_parameter_name) > 0:
+        p = grid_model.properties[region_parameter_name]
+        region_param_values = p.get_values(realisation_number)
 
     # Loop over all parameter names
     for param_index in range(len(parameter_names)):
@@ -305,11 +304,10 @@ def set_continuous_3d_parameter_values_in_zone_region(
                 print_debug_information(function_name, text)
                 if is_shared:
                     text = 'Set parameter to shared.'
-                    print_debug_information(function_name, text)
                 else:
                     text = 'Set parameter to non-shared.'
-                    print_debug_information(function_name, text)
 
+                print_debug_information(function_name, text)
         assert property_param is not None
         if property_param.is_empty(realisation_number):
             # Initialize to 0 if empty
@@ -333,9 +331,8 @@ def set_continuous_3d_parameter_values_in_zone_region(
                 # print('(i,j,k)=({},{},{})'.format(str(i), str(j), str(k)))
                 cell_index = (i, j, k)
                 cell_number = indexer.get_cell_numbers(cell_index)
-                if start_layer <= k < end_layer:
-                    if region_param_values[cell_number] == region_number:
-                        current_values[cell_number] = input_values_for_zone[i, j, k - start_layer]
+                if start_layer <= k < end_layer and region_param_values[cell_number] == region_number:
+                    current_values[cell_number] = input_values_for_zone[i, j, k - start_layer]
         else:
             # Create a 3D array for all cells in the grid including inactive cells
             new_values = np.zeros((nx, ny, nz), dtype=float, order='F')
@@ -436,15 +433,6 @@ def update_continuous_3d_parameter_values(
         # Initialize the values to 0 for this new 3D parameter
         current_values = np.zeros(num_active_cells, np.float32)
 
-        # Assign values to the defined cells as specified in cell_index_defined index vector
-        # Using vector operations for numpy vector:
-        if len(cell_index_defined) > 0:
-            current_values[cell_index_defined] = input_values[cell_index_defined]
-        else:
-            current_values = input_values
-
-        p.set_values(current_values, realisation_number)
-        p.set_shared(is_shared, realisation_number)
     else:
         if debug_level >= Debug.VERY_VERBOSE:
             text = ' Update specified parameter: ' + parameter_name + ' in ' + grid_model.name
@@ -453,20 +441,19 @@ def update_continuous_3d_parameter_values(
         # Parameter exist, but check if it is empty or not
         current_values = np.zeros(num_active_cells, np.float32)
         p = grid_model.properties[parameter_name]
-        if not p.is_empty(realisation_number) and not set_initial_values:
+        if not (p.is_empty(realisation_number) or set_initial_values):
             # Check if the parameter is to updated instead of being initialized to 0
             current_values = p.get_values(realisation_number)
 
-        # Assign values to the defined cells as specified in cell_index_defined index vector
-        # Using vector operations for numpy vector:
-        if len(cell_index_defined) > 0:
-            current_values[cell_index_defined] = input_values[cell_index_defined]
-        else:
-            current_values = input_values
+    # Assign values to the defined cells as specified in cell_index_defined index vector
+    # Using vector operations for numpy vector:
+    if len(cell_index_defined) > 0:
+        current_values[cell_index_defined] = input_values[cell_index_defined]
+    else:
+        current_values = input_values
 
-        p.set_values(current_values, realisation_number)
-        # TODO: Is set_shared REALLY necessary?
-        p.set_shared(is_shared, realisation_number)
+    p.set_values(current_values, realisation_number)
+    p.set_shared(is_shared, realisation_number)
 
 
 def set_discrete_3d_parameter_values(
@@ -660,20 +647,19 @@ def update_discrete_3d_parameter_values(
         p.code_names = facies_table
     else:
         if debug_level >= Debug.VERY_VERBOSE:
-            text = ' Update specified parameter: ' + parameter_name + ' in ' + grid_model.name
+            text = f' Update specified parameter: {parameter_name} in {grid_model.name}'
             print_debug_information(function_name, text)
 
         # Parameter exist, but check if it is empty or not
         # Initialize the values to 0
         current_values = np.zeros(num_active_cells, np.uint16)
         p = grid_model.properties[parameter_name]
-        if not p.is_empty(realisation_number):
-            # Check if the parameter is to updated instead of being initialized to 0
-            if not set_initial_values:
-                # Keep the existing values for cells that is not updated
-                current_values = p.get_values(realisation_number)
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: Get values from existing 3D parameter: {}'.format(parameter_name))
+        # Check if the parameter is to updated instead of being initialized to 0
+        if not (p.is_empty(realisation_number) or set_initial_values):
+            # Keep the existing values for cells that is not updated
+            current_values = p.get_values(realisation_number)
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'Debug output: Get values from existing 3D parameter: {parameter_name}')
 
         # Assign values to the defined cells as specified in cell_index_defined index vector
         if num_defined_cells > 0:
@@ -735,8 +721,8 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
             break
     if horizonObj is None:
         raise ValueError(
-            'Error in  get2DMapInfo\n'
-            'Error: Horizon name: ' + horizonName + ' does not exist'
+            f'Error in  get2DMapInfo\n'
+            f'Error: Horizon name: {horizonName} does not exist'
         )
 
     reprObj = None
@@ -746,8 +732,8 @@ def get2DMapDimensions(horizons, horizonName, representationName, debug_level=De
             break
     if reprObj is None:
         raise ValueError(
-            'Error in  get2DMapInfo\n'
-            'Error: Horizons data type: ' + representationName + ' does not exist'
+            f'Error in  get2DMapInfo\n'
+            f'Error: Horizons data type: {representationName} does not exist'
         )
 
     surface = horizons[horizonName][representationName]
@@ -785,8 +771,10 @@ Debug output:  For 2D map
     return [nx, ny, xinc, yinc, xmin, ymin, xmax, ymax, rotation]
 
 
-def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
-                              debug_level=Debug.OFF, xmin=0, ymin=0, xinc=0, yinc=0, nx=0, ny=0, rotation=0):
+def setConstantValueInHorizon(
+        horizons, horizonName, reprName, inputValue,
+        debug_level=Debug.OFF, xmin=0, ymin=0, xinc=0, yinc=0, nx=0, ny=0, rotation=0,
+):
     # This function will replace a horizon with specified name and type with a new one with value equal
     # to the constant value specified in variable inputValue. The 2D grid dimensions can also specified if new maps
     # must created.
@@ -798,8 +786,8 @@ def setConstantValueInHorizon(horizons, horizonName, reprName, inputValue,
             break
     if horizonObj is None:
         raise ValueError(
-            'Error in updateHorizonObject\n'
-            'Error: Horizon name: ' + horizonName + ' does not exist'
+            f'Error in updateHorizonObject\n'
+            f'Error: Horizon name: {horizonName} does not exist'
         )
 
     # Find the correct representation. Must exist.

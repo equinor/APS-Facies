@@ -133,18 +133,35 @@ def check_and_normalise_probability(
     # The list prob_parameter_values_for_facies has items =[name,values]
     # Define index names for this item
 
-    num_defined_cells = len(cell_index_defined)
-
-    # Check that probabilities sum to 1
     if debug_level >= Debug.VERY_VERBOSE:
-        if not use_const_probability:
-            print('Debug output: Check normalisation of probability cubes.')
-        else:
+        if use_const_probability:
             print('Debug output: Check normalisation of probabilities.')
+        else:
+            print('Debug output: Check normalisation of probability cubes.')
 
     probability_defined = []
     num_cell_with_modified_probability = 0
-    if not use_const_probability:
+    if use_const_probability:
+        for f in range(num_facies):
+            item = prob_parameter_values_for_facies[f]
+            facies_name = item.name
+            values = item.value
+            if debug_level >= Debug.VERY_VERBOSE:
+                print('Debug output: Facies: {} with constant probability: '.format(facies_name, values[0]))
+            probability_defined.append(values[0])
+
+        # Check that probabilities sum to 1
+        psum = probability_defined[0]
+        for f in range(1, num_facies):
+            psum = psum + probability_defined[f]
+        if abs(psum - 1.0) > eps:
+            raise ValueError(
+                f'Probabilities for facies are not normalized for this zone (Total: {psum})'
+            )
+
+    else:
+        num_defined_cells = len(cell_index_defined)
+
         # Allocate space for probability per facies per defined cell
         for f in range(num_facies):
             probability_defined.append(np.zeros(num_defined_cells, np.float32))
@@ -190,24 +207,6 @@ def check_and_normalise_probability(
                     f'Debug output: Number of grid cells in zone is:                           {num_defined_cells}\n'
                     f'Debug output: Number of grid cells which is recalculated and normalized: {num_cell_with_modified_probability}'
                 )
-    else:
-        for f in range(num_facies):
-            item = prob_parameter_values_for_facies[f]
-            facies_name = item.name
-            values = item.value
-            if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies: {} with constant probability: '.format(facies_name, values[0]))
-            probability_defined.append(values[0])
-
-        # Check that probabilities sum to 1
-        psum = probability_defined[0]
-        for f in range(1, num_facies):
-            psum = psum + probability_defined[f]
-        if abs(psum - 1.0) > eps:
-            raise ValueError(
-                f'Probabilities for facies are not normalized for this zone (Total: {psum})'
-            )
-
     return probability_defined, num_cell_with_modified_probability
 
 
@@ -241,9 +240,7 @@ def run(
     print(f'- Read file: {model_file_name}')
     aps_model = APSModel(model_file_name)
     debug_level = aps_model.debug_level
-    rms_project_name = aps_model.getRMSProjectName()
-    grid_model_name = aps_model.grid_model_name
-    grid_model = project.grid_models[grid_model_name]
+    grid_model = project.grid_models[aps_model.grid_model_name]
     if grid_model.is_empty():
         raise ValueError(f'Specified grid model: {grid_model.name} is empty.')
 
@@ -255,7 +252,7 @@ def run(
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
-        print(f'--- Get RMS zone parameter: {zone_param_name} from RMS project {rms_project_name}')
+        print(f'--- Get RMS zone parameter: {zone_param_name} from RMS project {aps_model.rms_project_name}')
     zone_param = create_zone_parameter(
         grid_model,
         name=zone_param_name,
@@ -268,7 +265,7 @@ def run(
     region_values = None
     if use_regions:
         if debug_level >= Debug.VERBOSE:
-            print(f'--- Get RMS region parameter: {region_param_name} from RMS project {rms_project_name}')
+            print(f'--- Get RMS region parameter: {region_param_name} from RMS project {aps_model.rms_project_name}')
         region_values, _ = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number, debug_level)
 
     # Get or initialize array for facies realisation
@@ -280,7 +277,7 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print(
                 f'--- Get RMS facies parameter which will be updated: '
-                f'{result_param_name} from RMS project: {rms_project_name}'
+                f'{result_param_name} from RMS project: {aps_model.rms_project_name}'
             )
         facies_real, code_names_for_input = getDiscrete3DParameterValues(
             grid_model, result_param_name, realization_number, debug_level
@@ -289,7 +286,7 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print(
                 f'--- Facies parameter: {result_param_name} for the result will be created '
-                f'in the RMS project: {rms_project_name}'
+                f'in the RMS project: {aps_model.rms_project_name}'
             )
 
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
@@ -328,9 +325,6 @@ def run(
 
         # Read trend parameters for truncation rule parameters
         zone_model.getTruncationParam(grid_model, realization_number)
-
-        # Info about whether constant probabilities or probability cubes are used.
-        use_constant_probability = zone_model.useConstProb()
 
         # Number of gauss fields defined for the zone in model file
         gf_names_for_zone = zone_model.used_gaussian_field_names
@@ -414,7 +408,7 @@ def run(
                     f'Probability: {probability_parameter}'
                 )
             values = []
-            if use_constant_probability:
+            if zone_model.use_constant_probabilities:
                 values.append(float(probability_parameter))
                 # Add the probability values to a common list containing probabilities for
                 # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
@@ -473,8 +467,8 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print('--- Check normalisation of probability fields.')
         probability_defined, num_cells_modified_probability = check_and_normalise_probability(
-            num_facies, probability_parameter_values_for_facies, use_constant_probability, cell_index_defined,
-            eps, tolerance_of_probability_normalisation, debug_level
+            num_facies, probability_parameter_values_for_facies, zone_model.use_constant_probabilities,
+            cell_index_defined, eps, tolerance_of_probability_normalisation, debug_level
         )
         if debug_level >= Debug.VERBOSE:
             print(f'--- Number of cells that are normalised: {num_cells_modified_probability}')
@@ -499,7 +493,7 @@ def run(
         if debug_level >= Debug.ON:
             print('')
             main_facies_table = aps_model.getMainFaciesTable()
-            if use_constant_probability:
+            if zone_model.use_constant_probabilities:
                 if use_regions:
                     print(
                         '--- Zone_number:  Region_number:    Facies_code:   Facies_name:'

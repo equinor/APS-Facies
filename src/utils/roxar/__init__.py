@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import Optional, List
+from warnings import warn
 
 
 def running_in_batch_mode():
@@ -19,10 +20,13 @@ def must_run_in_rms(func):
             import roxar.rms
             try:
                 if roxar.__mock__:
+                    warn(f'{func.__name__} must be run in RMS, but the usage of a mock was detected.')
                     return None
             except AttributeError:
-                pass
+                # This should mean, that we are running inside RMS
+                return func(*args, **kwargs)
         except ImportError:
+            warn(f'{func.__name__} must be run in RMS, but no \'roxar\' module was found.')
             return None
 
         return func(*args, **kwargs)
@@ -58,8 +62,7 @@ def get_redhat_version():
     import platform
 
     description = platform.platform()
-    redhat_version = re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
-    return redhat_version
+    return re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
 
 
 @must_run_in_rms
@@ -67,7 +70,7 @@ def get_common_python_packages_path():
     import sys
 
     python_version = sys.version_info
-    python_version = '{}.{}'.format(python_version.major, python_version.minor)
+    python_version = f'{python_version.major}.{python_version.minor}'
 
     return (
         '/project/res/roxapi/x86_64_RH_{redhat_version}/{rms_version}/lib/python{python_version}/site-packages'

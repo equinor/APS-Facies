@@ -7,7 +7,4 @@ class ZoneException(ApsException):
 
 class MissingConformityException(ZoneException):
     def __init__(self, zone):
-        super().__init__(
-            'The zone, with code {}, has not been assigned a value for its conformity'
-            ''.format(zone.zone_number)
-        )
+        super().__init__(f'The zone, with code {zone.zone_number}, has not been assigned a value for its conformity')

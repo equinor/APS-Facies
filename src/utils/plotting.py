@@ -52,17 +52,13 @@ def resize_data_to_grid(alpha_realization, grid_dimensions, grid_index_order):
 
 
 def _get_grid_kwargs(cross_section_type):
+    kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0}
     if cross_section_type == CrossSectionType.IJ:
-        # IJ
-        kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'lower'}
-    elif cross_section_type == CrossSectionType.IK:
-        # IK
-        kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'upper'}
-    elif cross_section_type == CrossSectionType.JK:
-        # JK
-        kwargs = {'interpolation': 'none', 'aspect': 'equal', 'vmin': 0.0, 'vmax': 1.0, 'origin': 'upper'}
+        kwargs['origin'] = 'lower'
+    elif cross_section_type in [CrossSectionType.IK, CrossSectionType.JK]:
+        kwargs['origin'] = 'upper'
     else:
-        raise ValueError('The cross section type, {}, does not exist'.format(cross_section_type))
+        raise ValueError(f'The cross section type, {cross_section_type}, does not exist')
     return kwargs
 
 
@@ -92,8 +88,10 @@ def cross_plot(ax, gaussian_field, other):
     return ax
 
 
-def plot_facies(ax, fmap, nFacies, cmap, previewCrossSectionType,
-                lengths, plot_ticks=False, rotate_plot=False, azimuth_grid_orientation=None, vertical_scale=1.0):
+def plot_facies(
+        ax, fmap, nFacies, cmap, previewCrossSectionType,
+        lengths, plot_ticks=False, rotate_plot=False, azimuth_grid_orientation=None, vertical_scale=1.0,
+):
     facies_map = fmap
     if rotate_plot:
         assert azimuth_grid_orientation is not None
@@ -149,7 +147,7 @@ def get_plot_sizing_facies(cross_section_type, lengths, vertical_scale=1.0):
 
 
 def create_facies_map(gauss_fields, truncation_rule, use_code=False):
-    grid_sizes = set([gf.field.size for gf in gauss_fields])
+    grid_sizes = set(gf.field.size for gf in gauss_fields)
     assert len(grid_sizes) == 1
     num_grid_cells = grid_sizes.pop()
     facies = np.zeros(num_grid_cells, int)
@@ -171,7 +169,7 @@ def create_facies_map(gauss_fields, truncation_rule, use_code=False):
 
 
 def create_facies_map_vectorized(gauss_fields, truncation_rule, use_code=False):
-    grid_sizes = set([gf.field.size for gf in gauss_fields])
+    grid_sizes = set(gf.field.size for gf in gauss_fields)
     assert len(grid_sizes) == 1
     num_grid_cells = grid_sizes.pop()
     facies_fraction = {}

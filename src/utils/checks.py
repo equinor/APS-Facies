@@ -126,7 +126,7 @@ def compare(source, reference, verbose=True):
     if not exists(reference):
         prefix = 'src/unit_test/'
         if not exists(prefix + reference):
-            prefix = prefix + 'integration/'
+            prefix += 'integration/'
     check = cmp(prefix + reference, source)
 
     if verbose:

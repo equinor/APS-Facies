@@ -256,9 +256,7 @@ def run_previewer(
     assert len(gaussFieldNamesInModel) >= 2
     nFacies = len(faciesNames)
 
-    useConstProb = zoneModel.useConstProb()
-
-    if not useConstProb:
+    if not zoneModel.use_constant_probabilities:
         print('Warning: Preview plots require constant facies probabilities')
         print('       Use arbitrary constant values')
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
@@ -266,7 +264,7 @@ def run_previewer(
     faciesProb = np.zeros(nFacies, np.float32)
     for fName in faciesNames:
         pName = zoneModel.getProbParamName(fName)
-        if useConstProb:
+        if zoneModel.use_constant_probabilities:
             v = float(pName)
             p = int(v * 1000 + 0.5)
             w = float(p) / 1000.0

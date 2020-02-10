@@ -11,8 +11,8 @@ def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     model_file = params['model_file']
     input_selected_fmu_variable_file = params['fmu_variables_file']
-#    output_model_file = params['output_model_file']
-#    output_tagged_variables_file = params['output_tagged_variables_file']
+    # output_model_file = params['output_model_file']
+    # output_tagged_variables_file = params['output_tagged_variables_file']
     output_tagged_variables_file = 'output_list_of_FMU_tagged_variables.dat'
     output_model_file = 'APS_modified.xml'
     tag_all_variables = True

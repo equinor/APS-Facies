@@ -19,8 +19,7 @@ def get_all_gauss_field_names_in_model(aps_model):
     gauss_field_names_used = []
     gauss_field_names_with_trend = []
     for key, zone_model in all_zone_models.items():
-        zone_number = key[0]
-        region_number = key[1]
+        zone_number, region_number = key
         if not aps_model.isSelected(zone_number, region_number):
             continue
 
@@ -38,9 +37,8 @@ def get_all_gauss_field_names_in_model(aps_model):
             if name in gf_names_for_truncation_rule:
                 if name not in gauss_field_names_used:
                     gauss_field_names_used.append(name)
-                if zone_model.hasTrendModel(name):
-                    if name not in gauss_field_names_with_trend:
-                        gauss_field_names_with_trend.append(name)
+                if zone_model.hasTrendModel(name) and name not in gauss_field_names_with_trend:
+                    gauss_field_names_with_trend.append(name)
 
     return gauss_field_names_specified, gauss_field_names_used, gauss_field_names_with_trend
 

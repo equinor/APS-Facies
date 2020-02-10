@@ -510,5 +510,6 @@ def run(
         faciesOutputFile=FACIES_OUTPUT_FILE_VECTORIZED
     )
 
+
 if __name__ == '__main__':
     pytest.main([__file__])

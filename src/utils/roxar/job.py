@@ -116,17 +116,16 @@ class JobConfig:
     @property
     def global_variables_file(self):
         config_location = self._config_location
-        file_priority = [
-            'global_variables.yml',
-            'global_variables.yaml',
-            'global_variables.ipl',
-        ]
-        if config_location.exists():
-            if config_location.is_dir():
-                for file_name in file_priority:
-                    location = config_location / file_name
-                    if location.exists():
-                        return str(location.absolute())
+        if config_location.exists() and config_location.is_dir():
+            file_priority = [
+                'global_variables.yml',
+                'global_variables.yaml',
+                'global_variables.ipl',
+            ]
+            for file_name in file_priority:
+                location = config_location / file_name
+                if location.exists():
+                    return str(location.absolute())
         return None
 
     @property

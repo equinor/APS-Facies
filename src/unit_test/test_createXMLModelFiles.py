@@ -37,7 +37,7 @@ def defineCommonModelParam(
     # The input data are global variables
 
     if rmsProject is not None:
-        apsmodel.setRmsProjectName(rmsProject)
+        apsmodel.rms_project_name = rmsProject
     if rmsWorkflow is not None:
         apsmodel.setRmsWorkflowName(rmsWorkflow)
     apsmodel.setRmsGridModelName(gridModelName)
@@ -225,21 +225,7 @@ def addZoneParam(
         debug_level=debug_level,
     )
 
-    # Define truncation rule model
-
-    if truncType == 'Cubic':
-        truncRuleObj = Trunc2D_Cubic()
-        truncRuleObj.initialize(
-            mainFaciesTable=main_facies_table,
-            faciesInZone=faciesInZone,
-            gaussFieldsInZone=gaussFieldsInZone,
-            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
-            truncStructureList=truncStructureList,
-            overlayGroups=overlayGroups,
-            debug_level=debug_level
-
-        )
-    elif truncType == 'Angle':
+    if truncType == 'Angle':
         truncRuleObj = Trunc2D_Angle()
         truncRuleObj.initialize(
             mainFaciesTable=main_facies_table,
@@ -269,9 +255,20 @@ def addZoneParam(
             useConstTruncParam=useConstTruncParam,
             debug_level=debug_level
         )
+    elif truncType == 'Cubic':
+        truncRuleObj = Trunc2D_Cubic()
+        truncRuleObj.initialize(
+            mainFaciesTable=main_facies_table,
+            faciesInZone=faciesInZone,
+            gaussFieldsInZone=gaussFieldsInZone,
+            alphaFieldNameForBackGroundFacies=alphaFieldNameForBackGroundFacies,
+            truncStructureList=truncStructureList,
+            overlayGroups=overlayGroups,
+            debug_level=debug_level
+
+        )
     else:
         raise ValueError("Invalid truncation type")
-
     # Initialize data for this zone
     apsZoneModel = APSZoneModel(
         zoneNumber=zoneNumber,
@@ -354,7 +351,7 @@ def test_read_and_write_modelfiles_without_project_name_word_flow_name_and_regio
     attributes_file = 'fmu_attributes.txt'
 
     aps_model = create_apsmodel_with_and_without_regions_and_regionparam(False, True)
-    aps_model.setRmsProjectName(None)
+    aps_model.rms_project_name = None
     aps_model.setRmsWorkflowName(None)
     aps_model.setRmsRegionParamName(None)
 

@@ -435,8 +435,7 @@ def test_case_9():
 
 
 def get_facies_reference_file_path(testCase):
-    faciesReferenceFile = 'testData_Angle/test_case_' + str(testCase) + '.dat'
-    return faciesReferenceFile
+    return f'testData_Angle/test_case_{testCase}.dat'
 
 
 def run(

@@ -64,10 +64,7 @@ class FaciesTable(list):
         raise IndexError('The facies with index/name "{}" does not exist'.format(item))
 
     def __contains__(self, item):
-        for facies in self:
-            if item == facies:
-                return True
-        return False
+        return any(item == facies for facies in self)
 
     @property
     def names(self):

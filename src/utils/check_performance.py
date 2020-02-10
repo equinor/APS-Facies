@@ -16,9 +16,10 @@ def do_cprofile(func):
             profile.print_stats(sort='time')
     return profiled_func
 
+
 def get_number():
-    for x in range(5000000):
-        yield x
+    yield from range(5000000)
+
 
 @do_cprofile
 def function_to_profile():
@@ -27,6 +28,7 @@ def function_to_profile():
         y= math.sqrt(x)
         sum_of_y += y
     return sum_of_y
+
 
 # --------------- Test script ------------------------------------------
 if __name__ == '__main__':

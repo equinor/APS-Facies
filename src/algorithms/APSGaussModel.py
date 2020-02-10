@@ -48,9 +48,9 @@ class GaussianFieldSimulationSettings:
 
     def __init__(self, cross_section, grid_azimuth, grid_size, simulation_box_size, simulation_box_origin, seed):
         assert isinstance(cross_section, CrossSection)
-        assert all([isinstance(coor, int) for coor in grid_size]) and len(grid_size) == 3
-        assert all([isinstance(coor, (float, int)) for coor in simulation_box_size]) and len(simulation_box_size) == 3
-        assert all([isinstance(coor, (float, int)) for coor in simulation_box_origin]) and len(simulation_box_origin) == 2
+        assert all(isinstance(coor, int) for coor in grid_size) and len(grid_size) == 3
+        assert all(isinstance(coor, (float, int)) for coor in simulation_box_size) and len(simulation_box_size) == 3
+        assert all(isinstance(coor, (float, int)) for coor in simulation_box_origin) and len(simulation_box_origin) == 2
         assert isinstance(seed, int)
         grid_azimuth %= 360
 
@@ -187,9 +187,9 @@ class GaussianField:
         # TODO: Make sane default values for variogram and trend
         if trend is None:
             trend = Trend(name, use_trend=False)
-        if all([_ is None for _ in [seed, settings]]):
+        if all(_ is None for _ in [seed, settings]):
             seed = 0
-        if all([_ is not None for _ in [seed, settings]]):
+        if all(_ is not None for _ in [seed, settings]):
             settings = settings.merge(seed=seed)
         self._name = name
         self._variogram = variogram
@@ -330,8 +330,7 @@ class GaussianField:
             )
         else:
             gauss_field_with_trend = residual_field
-        trans_field = _transform_empiric_distribution_to_uniform(gauss_field_with_trend, debug_level)
-        return trans_field
+        return _transform_empiric_distribution_to_uniform(gauss_field_with_trend, debug_level)
 
     def simulate(
             self,
@@ -460,10 +459,7 @@ class Trend:
             relative_std_dev = kwargs.pop('relativeStdDev')
         except KeyError:
             relative_std_dev = None
-        if use:
-            model = cls.get_model(**kwargs)
-        else:
-            model = None
+        model = cls.get_model(**kwargs) if use else None
         return cls(
             name=name,
             use_trend=use,
@@ -475,17 +471,17 @@ class Trend:
     def get_model(**kwargs):
         kwargs = _map_js_to_py(**kwargs)
         _type = kwargs['type']
-        trend_models = {
-            TrendType.RMS_PARAM: Trend3D_rms_param,
-            TrendType.LINEAR: Trend3D_linear,
-            TrendType.ELLIPTIC: Trend3D_elliptic,
-            TrendType.ELLIPTIC_CONE: Trend3D_elliptic_cone,
-            TrendType.HYPERBOLIC: Trend3D_hyperbolic,
-        }
         if _type == TrendType.NONE:
             # TODO: Refactor Trend3D, so as to return an empty Trend3D object?
             return None
         else:
+            trend_models = {
+                TrendType.RMS_PARAM: Trend3D_rms_param,
+                TrendType.LINEAR: Trend3D_linear,
+                TrendType.ELLIPTIC: Trend3D_elliptic,
+                TrendType.ELLIPTIC_CONE: Trend3D_elliptic_cone,
+                TrendType.HYPERBOLIC: Trend3D_hyperbolic,
+            }
             return trend_models[_type](**kwargs)
 
 
@@ -695,7 +691,7 @@ class Variogram:
         ry = self.ranges.main.value
         rx = self.ranges.perpendicular.value
         rz = self.ranges.vertical.value
-        assert all([r > 0 for r in [rx, ry, rz]])
+        assert all(r > 0 for r in [rx, ry, rz])
 
         # Azimuth relative to global x,y,z coordinates
         azimuth = self.angles.azimuth.value
@@ -1273,7 +1269,7 @@ class APSGaussModel:
                 f'Error in {self.__class_name} in updateGaussFieldParam\n'
                 'Undefined variogram type specified.'
             )
-        if any([range < 0 for range in [range1, range2, range3]]):
+        if any(range < 0 for range in [range1, range2, range3]):
             raise ValueError(
                 f'Error in {self.__class_name} in updateGaussFieldParam\n'
                 'Correlation range < 0.0'
@@ -1335,20 +1331,16 @@ class APSGaussModel:
         # Update trend parameters for existing trend for gauss field model
         # But it does not create new trend object.
         err = 0
-        if trend_model_obj is None:
-            err = 1
+        if trend_model_obj is not None and gf_name in self._gaussian_models:
+            self._gaussian_models[gf_name].trend = Trend(
+                name=gf_name,
+                use_trend=use_trend,
+                model=trend_model_obj,
+                relative_std_dev=FmuProperty(rel_std_dev, rel_std_dev_fmu_updatable)
+            )
         else:
-            # Check if gauss field is already defined, then update parameters
-            if gf_name in self._gaussian_models:
-                self._gaussian_models[gf_name].trend = Trend(
-                    name=gf_name,
-                    use_trend=use_trend,
-                    model=trend_model_obj,
-                    relative_std_dev=FmuProperty(rel_std_dev, rel_std_dev_fmu_updatable)
-                )
-            else:
-                # This gauss field was not found.
-                err = 1
+            # This gauss field was not found.
+            err = 1
         return err
 
     @staticmethod
@@ -1436,15 +1428,12 @@ class APSGaussModel:
         all simulated values in the 2D grid become uniform between 0 and 1.
         """
 
-        gauss_field_items = []
-        for grf in self._gaussian_models.values():
-            gauss_field_items.append(
-                grf.simulate(
-                    cross_section, grid_azimuth, grid_size, simulation_box_size,
-                    simulation_box_origin, self.debug_level,
-                ),
-            )
-        return gauss_field_items
+        return [
+            grf.simulate(
+                cross_section, grid_azimuth, grid_size, simulation_box_size,
+                simulation_box_origin, self.debug_level,
+            ) for grf in self._gaussian_models.values()
+        ]
 
     def calc2DVariogramFrom3DVariogram(self, name, grid_azimuth, projection):
         return self._gaussian_models[name].variogram.calc_2d_variogram_from_3d_variogram(

@@ -40,20 +40,16 @@ def get_item_from_model_file(tree, keyword, model_file_name=None):
 
 
 def get_selected_zones(tree, keyword='SelectedZones', model_file=None):
-    selected_zone_numbers = []
-    zones = []
     obj = tree.find(keyword)
-    if obj is not None:
-        texts = obj.text.split()
-        for s in texts:
-            zones.append(int(s.strip()))
-        for i in range(len(zones)):
-            zone_number = zones[i]
-            # Zone numbers are specified from 1, but need them numbered from 0
-            selected_zone_numbers.append(zone_number - 1)
-        return selected_zone_numbers
-    else:
+    if obj is None:
         raise MissingKeyword(keyword, model_file)
+
+    texts = obj.text.split()
+    zone_numbers = [int(s.strip()) for s in texts]
+    return [
+        zone_number - 1  # Zone numbers are specified from 1, but need them numbered from 0
+        for zone_number in zone_numbers
+    ]
 
 
 def get_colors(n, min_colors=2):
