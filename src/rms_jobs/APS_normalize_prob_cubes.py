@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+import roxar
+from roxar.grids import GridModel
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.methods import get_specification_file
@@ -107,6 +109,9 @@ def check_and_normalise_probability(
 
     if (sum_probabilities_selected_cells == 0).any():
         name = 'APS_problematic_cells_in_probability_cubes'
+        # The property MAY have been created with a previous version as a continuous property.
+        # In that case, writing code names to that property will cause a runtime error in RMS.
+        remove_existing_if_necessary(grid_model, name, desired_type=roxar.GridPropertyType.discrete)
         grid = grid_model.get_grid(realization_number)
         values = grid.generate_values(np.uint8)
         values[cell_index_defined] = sum_probabilities_selected_cells == 0
@@ -154,6 +159,13 @@ def check_and_normalise_probability(
             probability_values_per_rms_param[parameter_name] = all_values
 
     return num_cell_with_modified_probability, probability_values_per_rms_param
+
+
+def remove_existing_if_necessary(grid_model: GridModel, name: str, desired_type: roxar.GridPropertyType):
+    if name in grid_model.properties:
+        prop = grid_model.properties[name]
+        if prop.type != desired_type:
+            del grid_model.properties[name]
 
 
 def format_names(names):
