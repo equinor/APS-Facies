@@ -406,7 +406,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         print('Number of facies to be modelled:' + str(self.num_facies_in_zone))
         print('Index array orderIndex:')
         print(repr(self._orderIndex))
-        print('Facies index for facies which has 100% probability')
+        print('Index in faciesInZone for facies which has 100% probability')
         print(repr(self._faciesIsDetermined))
         print('Print info level: ' + str(self._debug_level))
         print('Is function setTruncRule called?')
@@ -453,19 +453,20 @@ class Trunc3D_bayfill(Trunc2D_Base):
         assert self._setTruncRuleIsCalled
         isDetermined = False
         for indx in range(self.num_facies_in_truncation_rule):
-            if self._faciesIsDetermined[indx] == 1:
+            fIndx = self._orderIndex[indx]
+            if self._faciesIsDetermined[fIndx] == 1:
                 isDetermined = True
                 break
         if isDetermined:
             self.__polygons = []
             for indx in range(self.num_facies_in_truncation_rule):
-                if self._faciesIsDetermined[indx] == 1:
+                fIndx = self._orderIndex[indx]
+                if self._faciesIsDetermined[fIndx] == 1:
                     poly = self.__unitSquarePolygon()
                     self.__polygons.append(poly)
                 else:
                     poly = self.__zeroPolygon()
                     self.__polygons.append(poly)
-
         polygons = copy.copy(self.__polygons)
         return polygons
 
@@ -663,11 +664,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self._setTruncRuleIsCalled = True
         self.__setMinimumFaciesProb(faciesProb)
         isDetermined = False
-        for indx in range(len(faciesProb)):
+        for indx in range(self.num_facies_in_truncation_rule):
             fIndx = self._orderIndex[indx]
-            self._faciesIsDetermined[indx] = 0
+            self._faciesIsDetermined[fIndx] = 0
             if faciesProb[fIndx] > (1.0 - self.__eps):
-                self._faciesIsDetermined[indx] = 1
+                self._faciesIsDetermined[fIndx] = 1
                 isDetermined = True
         if isDetermined:
             return
@@ -1956,9 +1957,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         x = alphaCoord[self._alphaIndxList[0]]
         y = alphaCoord[self._alphaIndxList[1]]
         z = alphaCoord[self._alphaIndxList[2]]
-        for indx in range(len(self._faciesInTruncRule)):
-            if self._faciesIsDetermined[indx] == 1:
-                fIndx = self._orderIndex[indx]
+        for indx in range(self.num_facies_in_truncation_rule):
+            fIndx = self._orderIndex[indx]
+            if self._faciesIsDetermined[fIndx] == 1:
                 faciesCode = self._faciesCode[fIndx]
                 return faciesCode, fIndx
 
