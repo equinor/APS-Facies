@@ -221,10 +221,10 @@ class Trunc2D_Base:
             if self._debug_level >= Debug.VERY_VERBOSE:
                 print(f'Debug output: Read data from model file in: {self._className}')
 
-            if any(arg is None for arg in [mainFaciesTable, faciesInZone, gaussFieldsInZone, modelFileName]):
+            if any(arg is None for arg in [mainFaciesTable, faciesInZone, gaussFieldsInZone]):
                 raise ValueError(
                     f'Insufficient arguments; when a truncation rule is given ({trRuleXML}), these arguments are '
-                    f'mandatory: "mainFaciesTable", "faciesInZone", "gaussFieldsInZone", and "modelFileName"'
+                    f'mandatory: "mainFaciesTable", "faciesInZone", and "gaussFieldsInZone"'
                 )
             # Initialize common data for facies to be modelled (specified for the zone) and the
             # ordering of the facies in the truncation rule.
