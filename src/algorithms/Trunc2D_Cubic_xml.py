@@ -54,7 +54,6 @@ Description: This class is derived from Trunc2D_Base which contain common data s
 
 
   Private functions:
-    def _setEmpty(self)
     def __interpretXMLTree(self, trRuleXML, modelFileName):
     def __calcProbForEachNode(self, faciesProb)
     def __calcThresholdValues(self)
@@ -77,45 +76,6 @@ class Trunc2D_Cubic(Trunc2D_Base):
     """
     This class implements adaptive plurigaussian field truncation using two simulated gaussian fields (with trend).
     """
-
-    def _setEmpty(self):
-        super()._setEmpty()
-
-        # Specific variables for class Trunc2D_Cubic
-        self._className = self.__class__.__name__
-
-        # Variables containing truncations for the 2D truncation map
-        self.__truncStructure = []
-        self.__useLevel2 = 0
-        self.__useLevel3 = 0
-        # The trunc structure contain a tree structure of data for the hierarchy of
-        # how the truncation map is split into rectangular polygons. In this data structure the nodes in the tree
-        # is of two types. Either the node data is of form:
-        #     ['N',direction,nodeList,prob,polygon,xmin,xmax,ymin.ymax]  or the form
-        #     ['F',indx,     probFrac,prob,polygon,xmin,xmax,ymin,ymax]
-
-        # The _node_index dictionary give name to each index in nodeData list
-        self.__node_index = {
-            'type': 0,
-            'direction': 1,
-            'list of nodes': 2,
-            'probability': 3,
-            'polygon': 4,
-            'index': 1,
-            'probability fraction': 2,
-            'x min': 5,
-            'x max': 6,
-            'y min': 7,
-            'y max': 8
-        }
-
-        # List of polygons the truncation map is split into
-        self.__polygons = []
-
-        # List of facies index ( index in faciesInZone) for each polygon
-        self.__fIndxPerPolygon = []
-
-        self.__nCountShiftBoundary = 0
 
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
@@ -166,10 +126,42 @@ class Trunc2D_Cubic(Trunc2D_Base):
         """
         # Initialize data structure to empty if trRule is None and call up the base class function setEmpty as well.
         # If the trRule is not none, the base class data structure is initialized.
-        nGaussFieldsInBackGroundModel = 2
-        super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                         debug_level, modelFileName, nGaussFieldsInBackGroundModel, keyResolution)
-        self._setEmpty()
+        super().__init__(
+            trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level, modelFileName,
+            nGaussFieldsInBackGroundModel=2, keyResolution=keyResolution,
+        )
+        # Variables containing truncations for the 2D truncation map
+        self.__truncStructure = []
+        self.__useLevel2 = 0
+        self.__useLevel3 = 0
+        # The trunc structure contain a tree structure of data for the hierarchy of
+        # how the truncation map is split into rectangular polygons. In this data structure the nodes in the tree
+        # is of two types. Either the node data is of form:
+        #     ['N',direction,nodeList,prob,polygon,xmin,xmax,ymin.ymax]  or the form
+        #     ['F',indx,     probFrac,prob,polygon,xmin,xmax,ymin,ymax]
+
+        # The _node_index dictionary give name to each index in nodeData list
+        self.__node_index = {
+            'type': 0,
+            'direction': 1,
+            'list of nodes': 2,
+            'probability': 3,
+            'polygon': 4,
+            'index': 1,
+            'probability fraction': 2,
+            'x min': 5,
+            'x max': 6,
+            'y min': 7,
+            'y max': 8
+        }
+
+        # List of polygons the truncation map is split into
+        self.__polygons = []
+
+        # List of facies index ( index in faciesInZone) for each polygon
+        self.__fIndxPerPolygon = []
+
+        self.__nCountShiftBoundary = 0
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
@@ -1092,16 +1084,11 @@ class Trunc2D_Cubic(Trunc2D_Base):
                                        described for function __setTruncStructure.
                   overlayGroups - List of overlay facies with associated alphaFields and probability fractions.
         """
-        # Initialize data structure
-        if debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: Call the initialize function in {self._className}')
-
         # Initialize (base) class variables
-        self._keyResolution = keyResolution
+        self.__init__(keyResolution=keyResolution, debug_level=debug_level)
 
-        # Initialize this class variables
-        self._setEmpty()
-        self._debug_level = debug_level
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print(f'Debug output: Call the initialize function in {self._className}')
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)

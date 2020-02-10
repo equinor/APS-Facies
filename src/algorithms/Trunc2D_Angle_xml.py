@@ -59,7 +59,6 @@ class Trunc2D_Angle(Trunc2D_Base):
      def getNLookupTruncMap(self)
 
      Private member functions:
-     def _setEmpty(self)
      def __interpretXMLTree(self, trRuleXML, modelFileName)
      def __setUnitSquarePolygon(self)
      def __setZeroPolygon(self)
@@ -72,13 +71,23 @@ class Trunc2D_Angle(Trunc2D_Base):
      def __calculateFaciesPolygons(self,cellIndx,area)
     """
 
-    def _setEmpty(self):
-        """Initialize values for empty data structure"""
-        super()._setEmpty()
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
+                 keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
+        """
+        This constructor can either create a new object by reading the information
+        from an XML tree or it can create an empty data structure for such an object.
+        If an empty data structure is created, the initialize function must be used.
 
-        # Specific variables for class Trunc2D_Angle
-        self._className = 'Trunc2D_Angle'
-
+        About data structure:
+        All information related to common data which is used by more than one truncation algorithm
+        is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables
+        and data structure for modelling of overlya facies.
+        """
+        super().__init__(
+            trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level, modelFileName,
+            nGaussFieldsInBackGroundModel=2,
+            keyResolution=keyResolution,
+        )
         # Variables containing truncations for the 2D truncation map
         # The input direction angles can be file names in case trend parameters for these are specified
         self.__faciesBoundaryOrientationName = []
@@ -106,25 +115,8 @@ class Trunc2D_Angle(Trunc2D_Base):
         # vary from cell to cell.
         self.__useConstTruncModelParam = True
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
-        """
-        This constructor can either create a new object by reading the information
-        from an XML tree or it can create an empty data structure for such an object.
-        If an empty data structure is created, the initialize function must be used.
-
-        About data structure:
-        All information related to common data which is used by more than one truncation algorithm
-        is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables
-        and data structure for modelling of overlya facies.
-        """
-        nGaussFieldsInBackGroundModel = 2
-        super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                         debug_level, modelFileName, nGaussFieldsInBackGroundModel, keyResolution)
-        self._setEmpty()
-
         if trRuleXML is not None:
-            if debug_level >= Debug.VERY_VERBOSE:
+            if self._debug_level >= Debug.VERY_VERBOSE:
                 print(f'Debug output: Read data from model file for: {self._className}')
 
             # Read truncation rule for background facies from xml tree.
@@ -292,13 +284,10 @@ class Trunc2D_Angle(Trunc2D_Base):
         :return:
         """
         # Initialize data structure
-        if debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: Call the initialize function in {self._className}')
+        self.__init__(keyResolution=keyResolution, debug_level=debug_level)
 
-        # Initialize (base) class variables
-        self._setEmpty()
-        self.keyResolution = keyResolution
-        self._debug_level = debug_level
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print(f'Debug output: Call the initialize function in {self._className}')
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)

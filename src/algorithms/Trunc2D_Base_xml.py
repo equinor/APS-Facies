@@ -31,7 +31,6 @@ Description: This class is used as a base class for class Trunc2D_Cubic_Multi_Ov
    def __isFaciesInZone(self, fName)
 
  Protected functions (To be called from derived classes only, not public functions):
-   def _setEmpty()
    def _setModelledFacies(mainFaciesTable, faciesInZone)
    def _setGaussFieldForEachAlphaDimension(gaussFieldsInZone, gaussFieldsInTruncRule)
    def _setOverlayFaciesDataStructure(overlayGroups)
@@ -89,7 +88,8 @@ class Trunc2D_Base:
     and j is gauss field number.
     """
 
-    def _setEmpty(self):
+    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
+                 debug_level=Debug.OFF, modelFileName=None, nGaussFieldsInBackGroundModel=2, keyResolution=100):
         """
         Initialize the data structure for empty object.
         Need to be called by initialization functions in derived classes.
@@ -153,12 +153,13 @@ class Trunc2D_Base:
         self._groupIndxForBackGroundFaciesIndx = []
 
         # A 2D list where first index is group index (groupIndx) from 0 to self._nGroups
-        # and second index i run from 0 to self._nAlphaPerGroup[groupIndx]. The value alphaIndx = alphaInGroup[groupIndx][i]
+        # and second index i run from 0 to self._nAlphaPerGroup[groupIndx].
+        # The value alphaIndx = alphaInGroup[groupIndx][i]
         # is an index in the list self._gaussFieldsInZone.
         self._alphaInGroup = []
 
-        # A 2D list of center point for truncation intervals for the overlay facies defined in all groups for all alpha fields.
-        # center = self._centerAlpha[groupIndx][i] where groupIndx refer to the overlay group and i refer to
+        # A 2D list of center point for truncation intervals for the overlay facies defined in all groups for all alpha
+        # fields. center = self._centerAlpha[groupIndx][i] where groupIndx refer to the overlay group and i refer to
         # the alpha field in the group.
         self._centerTruncIntervalInGroup = []
 
@@ -195,29 +196,21 @@ class Trunc2D_Base:
         # A 2D list with background facies indices for a given overlay facies group
         self._backgroundFaciesInGroup = []
 
-        # Truncation map polygons calculated by sub classes. The polygons subdivide the unit square into non-overlapping areas.
-        # They are used in the algorithm that look up which facies that is associated with a point in the truncation map/cube.
-        # They are also used for the purpose to plot/visualize the truncation map.
+        # Truncation map polygons calculated by sub classes. The polygons subdivide the unit square into non-overlapping
+        # areas. They are used in the algorithm that look up which facies that is associated with a point in the
+        # truncation map/cube. They are also used for the purpose to plot/visualize the truncation map.
         self._faciesPolygons = []
 
-        # Counter for how many lookup of facies in truncation maps had to be modified by slightly shifting the alpha coordinates.
-        # This happens if the alpha coordinate for the lookup point is located exactly on the boundary between two polygons and the algorithm
-        # is not able to define in which polygon the point is located.
+        # Counter for how many lookup of facies in truncation maps had to be modified by slightly shifting the alpha
+        # coordinates. This happens if the alpha coordinate for the lookup point is located exactly on the boundary
+        # between two polygons and the algorithm is not able to define in which polygon the point is located.
         self._nCountShiftBoundary = 0
 
         # The key resolution is a resolution of how to round off facies probability.
-        # The facies probability rounded off is used as key to classify which grid cells have the same facies probability
-        # and can be treated simultaneously when looking up facies in the truncation cubes.
+        # The facies probability rounded off is used as key to classify which grid cells have the same facies
+        # probability and can be treated simultaneously when looking up facies in the truncation cubes.
         self._keyResolution = 100
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 debug_level=Debug.OFF, modelFileName=None, nGaussFieldsInBackGroundModel=2, keyResolution=100):
-        """
-        Base class constructor.
-        """
-        # Initialize data structure
-
-        self._setEmpty()
         self._className = self.__class__.__name__
         self._gaussFieldsInZone = []
         self._debug_level = debug_level

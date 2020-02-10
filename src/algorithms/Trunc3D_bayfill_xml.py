@@ -82,34 +82,6 @@ class Trunc3D_bayfill(Trunc2D_Base):
     truncation for the Bayfill model. (Three transformed gaussian fields)
     """
 
-    def _setEmpty(self):
-        super()._setEmpty()
-
-        # Specific variables for class Trunc3D_bayfill
-        self._className = self.__class__.__name__
-
-        self.__fIndxPerPolygon = np.arange(5, dtype=np.int32)
-
-        # Internal data structure
-        self.__param_sf = []
-        self._is_param_sf_fmuupdatable = False
-        self.__param_ysf = 0
-        self._is_param_ysf_fmuupdatable = False
-        self.__param_sbhd = 0
-        self._is_param_sbhd_fmuupdatable = False
-        self.__param_sf_name = ''
-
-        self.__polygons = []
-        self.__useZ = False
-        self.__Zm = 0
-
-        # Tolerance used for probabilities
-        self.__eps = 0.5 * self._epsFaciesProb
-
-        # Define if truncation parameters are constant for all grid cells or
-        # vary from cell to cell.
-        self.__useConstTruncModelParam = True
-
     def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
                  debug_level=Debug.OFF, modelFileName=None):
         """
@@ -136,10 +108,32 @@ class Trunc3D_bayfill(Trunc2D_Base):
         """
         # Initialize data structure to empty if trRule is None and call up the base class function setEmpty as well.
         # If the trRule is not none, the base class data structure is initialized.
-        nGaussFieldsInBackGroundModel = 3
-        super().__init__(trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone,
-                         debug_level, modelFileName, nGaussFieldsInBackGroundModel)
-        self._setEmpty()
+        super().__init__(
+            trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level, modelFileName,
+            nGaussFieldsInBackGroundModel=3,
+        )
+        # Specific variables for class Trunc3D_bayfill
+        self.__fIndxPerPolygon = np.arange(5, dtype=np.int32)
+
+        # Internal data structure
+        self.__param_sf = []
+        self._is_param_sf_fmuupdatable = False
+        self.__param_ysf = 0
+        self._is_param_ysf_fmuupdatable = False
+        self.__param_sbhd = 0
+        self._is_param_sbhd_fmuupdatable = False
+        self.__param_sf_name = ''
+
+        self.__polygons = []
+        self.__useZ = False
+        self.__Zm = 0
+
+        # Tolerance used for probabilities
+        self.__eps = 0.5 * self._epsFaciesProb
+
+        # Define if truncation parameters are constant for all grid cells or
+        # vary from cell to cell.
+        self.__useConstTruncModelParam = True
 
         if trRuleXML is not None:
             # Require exactly 3 transformed gauss fields
@@ -327,12 +321,9 @@ class Trunc3D_bayfill(Trunc2D_Base):
         Initialize the truncation object from input variables.
         """
         # Initialize data structure
-        if debug_level >= Debug.VERY_VERBOSE:
+        self.__init__(debug_level=debug_level)
+        if self._debug_level >= Debug.VERY_VERBOSE:
             print(f'Debug output: Call the initialize function in {self._className}')
-
-        # Initialize this class variables
-        self._setEmpty()
-        self._debug_level = debug_level
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
