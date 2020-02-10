@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import Optional, List
+from warnings import warn
 
 
 def running_in_batch_mode():
@@ -19,11 +20,13 @@ def must_run_in_rms(func):
             import roxar.rms
             try:
                 if roxar.__mock__:
+                    warn(f'{func.__name__} must be run in RMS, but the usage of a mock was detected.')
                     return None
             except AttributeError:
                 # This should mean, that we are running inside RMS
                 return func(*args, **kwargs)
         except ImportError:
+            warn(f'{func.__name__} must be run in RMS, but no \'roxar\' module was found.')
             return None
 
         return func(*args, **kwargs)
