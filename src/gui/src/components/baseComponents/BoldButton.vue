@@ -2,8 +2,9 @@
   <wait-btn
     :title="title"
     :outline="outline"
+    :disabled="disabled"
+    :tooltip-text="tooltipText"
     color="primary"
-    dark
     @click="e => $emit('click', e)"
   />
 </template>
@@ -22,7 +23,13 @@ export default class BoldButton extends Vue {
   @Prop({ required: true })
   readonly title!: string
 
-  @Prop({ default: false })
+  @Prop({ default: false, type: Boolean })
   readonly outline!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly disabled!: boolean
+
+  @Prop({ default: '' })
+  readonly tooltipText!: string
 }
 </script>
