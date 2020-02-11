@@ -282,19 +282,21 @@
         },
         "xtgeo": {
             "hashes": [
-                "sha256:0caaa19e0cbaa44fcb3b0faa9c0b34306edf6553dff2e96c52fc1ffac004f942",
-                "sha256:3e20c4727acf59bf3163c10f7a2d245b85ba39307c5d26f26222611b9491d568",
-                "sha256:40c49cece496a86174978dac26b5179c62430b9cfc7bced1c663d95198e126db",
-                "sha256:5dab72bd93304b6c250805516e3b8af3ad84add463c5931cdd3afaddaa1f5167",
-                "sha256:8e270df37ce641f3c6a38e3285f3241540db36d347556d26cd6644a2662f7875",
-                "sha256:a43380e7cc610672fc515f27948d2ba6da8f3b5222e66a98688022028eeb1447",
-                "sha256:aa3440134c1c92e00bc1f14ac6849cedc61a315eee0dac71e4fe1b982942333d",
-                "sha256:b5c36162ff0b45d0d64717dc0ac771334c836437de3607e2951e8634db35e588",
-                "sha256:ee8c91816f6bf3c10dbef8840d1e3dff3a63d753924f75cd1db32e25ebb2934e",
-                "sha256:f46f60c0892c18beb605b92e431de95d95f328c0f020bdd3035e309b4fa8c86b"
+                "sha256:33451b66e24d613214399c17891b31988c696d3d510d47af7822bbff67fc8f29",
+                "sha256:7e6958d0e1f7dd7fbac08c12fe2b070046f616c758544bc77769996d0d57fd18",
+                "sha256:8a5950a8eacf54ee92bdac1b4dfa771f261c04dbdcdc42289ac3f6605d9470bc",
+                "sha256:9babce6795b36e9b714cb0c97a7fccef4763a7525aa9692991c30a32c3aaed4b",
+                "sha256:ac2e8bdd5c18c0b1a4702202ba46086d7342b609eb3a930928c1d930a74c459a",
+                "sha256:bac5ade08682527a6e13c37f0328d3ec288cc4c9dbbacec534116a9f2cc10b18",
+                "sha256:d1df72a044ff72d1690ee67033b128d856632805b9991e835a0ff066a3528427",
+                "sha256:d69a34560a92b88878d0cb4b1a0d9ee677cf01c27d3e4cbca8ad6d48d349f259",
+                "sha256:e826707b4475ed9188969a669f822e5cd9282ce96893eba34fb004f5c7f66068",
+                "sha256:ed5f1e3b35dd5c29df3e4931b330211bf615d1888648ce5fe846e4d8eb240ae8",
+                "sha256:f87384e5b62ba51f126d7eb363948a9fcc208e3479d0e12fb4bdbf8a75842459",
+                "sha256:fee44bb01d3476c20f55073a1e82bfaefaeba942999110eabd2a9852acbb7f95"
             ],
             "index": "pypi",
-            "version": "==2.4.3"
+            "version": "==2.5.0"
         }
     },
     "develop": {

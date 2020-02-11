@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABCMeta
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Union, overload, Callable, Optional, Generator, List, Tuple, Dict, Iterable
+from typing import Union, overload, Callable, Optional, Generator, List, Tuple, Dict, Iterable, Literal
 
 import numpy as np
 import xtgeo
@@ -159,6 +159,19 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
 
 class UpdateTrends(FmuModelChanges):
     def __init__(self, **kwargs): ...
+
+
+Handedness = Literal["left", "right"]
+
+
+class UpdateGridOrientation(FmuModelChange):
+    _grid: xtgeo.Grid
+    _original: Handedness
+
+    def __init__(self, *, project: Project, aps_model: APSModel, **kwargs): ...
+    def turn_grid(self, handedness: Handedness) -> None: ...
+    def before(self) -> None: ...
+    def after(self) -> None: ...
 
 
 @contextmanager
