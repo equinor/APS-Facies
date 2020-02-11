@@ -4,6 +4,8 @@
     persistent
     max-width="800"
     scrollable
+    @keydown.esc="cancel"
+    @keydown.enter="() => {if (!hasErrors) ok}"
   >
     <template v-slot:activator="{ on }">
       <v-btn

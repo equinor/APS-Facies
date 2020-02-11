@@ -44,6 +44,8 @@
               label="ERT/FMU simulation box grid"
               :disabled="!hasGrid"
               :items="fmuGrids"
+              @keydown.enter.stop="() => {/* Intentionally left blank, to stop event propagating to parent
+               and closing the dialog, when enter is used to confirm the selected grid name */}"
             />
             <span slot="popover">No grid model has been selected</span>
           </v-popover>
