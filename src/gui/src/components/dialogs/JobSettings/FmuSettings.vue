@@ -82,9 +82,9 @@
                 v-model="_maxLayersInFmu"
                 :ranges="{ min: minimumErtLayers, max: Number.POSITIVE_INFINITY }"
                 :disabled="!createFmuGrid"
+                :ignore-errors="!createFmuGrid"
                 :required="createFmuGrid"
                 label="Number of layers in FMU simulation box grid"
-                enforce-ranges
                 @update:error="e => update('fmuGridDepth', e)"
               />
             </v-col>
@@ -218,7 +218,7 @@ export default class FmuSettings extends Vue {
 
   update (type: string, value: boolean): void {
     if (type === 'fmuGridDepth') {
-      value = value && !this.createFmuGrid
+      value = value && this.createFmuGrid
     }
     Vue.set(this.invalid, type, value)
   }

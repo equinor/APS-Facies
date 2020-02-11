@@ -34,6 +34,7 @@
           :import-fields.sync="importFields"
           :fmu-grid.sync="fmuGrid"
           :create-fmu-grid.sync="createFmuGrid"
+          @update:error="e => update('fmu', e)"
         />
         <br>
         <logging-settings
@@ -273,6 +274,8 @@
         />
         <bold-button
           title="Ok"
+          :disabled="hasErrors"
+          :tooltip-text="hasErrors && 'Some value(s) are invalid'"
           @click="ok"
         />
       </v-card-actions>
@@ -295,6 +298,10 @@ import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
 import { Coordinate3D, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
+interface Invalid {
+  fmu: boolean
+}
+
 @Component({
   components: {
     RunSettings,
@@ -307,6 +314,10 @@ import { Coordinate3D, SimulationSettings } from '@/utils/domain/bases/interface
   },
 })
 export default class JobSettings extends Vue {
+  invalid: Invalid = {
+    fmu: false,
+  }
+
   dialog = false
   apsModelFileLocation = ''
   fmuParameterListLocation = ''
@@ -390,6 +401,12 @@ export default class JobSettings extends Vue {
     ])
     this.dialog = false
   }
+
+  update (type: string, value: boolean): void {
+    Vue.set(this.invalid, type, value)
+  }
+
+  get hasErrors (): boolean { return Object.values(this.invalid).some(invalid => invalid) }
 }
 
 </script>

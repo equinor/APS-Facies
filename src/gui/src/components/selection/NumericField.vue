@@ -26,7 +26,7 @@
         @keydown.up="increase"
         @keydown.down="decrease"
         @click:append="e => $emit('click:append', e)"
-        @update:error="e => propagateEvent('update:error', e)"
+        @update:error="e => propagateError(e)"
       />
     </v-col>
     <v-col
@@ -148,6 +148,9 @@ export default class NumericField extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly enforceRanges!: boolean
 
+  @Prop({ default: false, type: Boolean })
+  readonly ignoreErrors!: boolean
+
   @Prop({ default: null })
   readonly ranges!: Optional<MinMax>
 
@@ -205,7 +208,7 @@ export default class NumericField extends Vue {
   }
 
   get errors (): string[] {
-    if (!this.$v.fieldValue) return []
+    if (!this.$v.fieldValue || this.ignoreErrors) return []
     const errors: string[] = []
     if (!this.$v.fieldValue.$dirty) return errors
     !this.$v.fieldValue.required && errors.push('Is required')
@@ -246,11 +249,11 @@ export default class NumericField extends Vue {
     this.fieldValue = this.getValue(this.value)
   }
 
-  hasChanged (value: BigNumber | FmuUpdatableValue) {
+  hasChanged (value: BigNumber | FmuUpdatableValue): boolean {
     // Helper method to deal with letting the '.' appear in the textfield
     // Returns this.fieldValue != value, in the proper types
     try {
-      return math.unequal(math.bignumber(this.fieldValue), (this.getValue(value) || 0))
+      return (math.unequal(math.bignumber(this.fieldValue), (this.getValue(value) || 0)) as boolean)
     } catch (e) {
       return false
     }
@@ -352,8 +355,18 @@ export default class NumericField extends Vue {
     this.updateValue((math.subtract(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)) as BigNumber))
   }
 
-  propagateEvent (type: string, value: boolean): void {
-    this.$emit(type, value)
+  propagateError (error: boolean): void {
+    if (this.ignoreErrors) {
+      error = false
+    }
+    this.$emit('update:error', error)
+  }
+
+  @Watch('ignoreErrors')
+  onIgnoreErrorChange (ignoreErrors: boolean): void {
+    if (!ignoreErrors) {
+      this.$v.$touch()
+    }
   }
 }
 </script>
