@@ -8,10 +8,15 @@
           ref="confirm"
           html
         />
-        <v-checkbox
-          v-model="_runFmuWorkflows"
-          label="Run APS facies update in AHM/ERT"
-        />
+        <base-tooltip
+          :message="reasonForDisabling"
+        >
+          <v-checkbox
+            v-model="_runFmuWorkflows"
+            label="Run APS facies update in AHM/ERT"
+            :disabled="useRegions"
+          />
+        </base-tooltip>
       </v-col>
       <v-col>
         <v-checkbox
@@ -96,6 +101,7 @@ import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
 import DirectorySelector from '@/components/selection/DirectorySelector.vue'
+import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 
 import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
@@ -108,6 +114,7 @@ type FieldUsage = 'generate' | 'import'
 
 @Component({
   components: {
+    BaseTooltip,
     DirectorySelector,
     WarningDialog,
     SettingsPanel,
@@ -251,5 +258,16 @@ export default class FmuSettings extends Vue {
   isInvalid (valid: boolean): void {
     this.$emit('update:error', valid)
   }
+
+  // Settings for handling regions, and ERT-mode
+  // These should not be needed when regions are supported in ERT-mode
+  get reasonForDisabling (): string | undefined {
+    if (this.useRegions) {
+      return 'Regions are not supported in ERT/AHM mode. Please deselct regions if you want to run APS with ERT/AHM'
+    }
+    return undefined
+  }
+
+  get useRegions (): boolean { return (this.$store as Store).state.regions.use }
 }
 </script>
