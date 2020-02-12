@@ -1,7 +1,7 @@
 <template>
   <v-toolbar
     flat
-    color="#fafafa"
+    :color="'#ffffff'"
   >
     <!--
       NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly

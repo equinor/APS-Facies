@@ -3,7 +3,7 @@
     <v-app-bar
       app
       flat
-      color="#fafafa"
+      :color="'#ffffff'"
     >
       <v-col class="column">
         <tool-bar />
