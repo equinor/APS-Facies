@@ -28,15 +28,21 @@
       no-gutters
     >
       <v-col cols="4">
-        <selection />
+        <scrollable-area>
+          <selection />
+        </scrollable-area>
       </v-col>
       <v-col cols="4">
-        <preview v-if="hasSimulations" />
+        <scrollable-area>
+          <preview v-if="hasSimulations" />
+        </scrollable-area>
       </v-col>
       <v-col cols="4">
-        <settings
-          v-if="canSpecifyModelSettings"
-        />
+        <scrollable-area>
+          <settings
+            v-if="canSpecifyModelSettings"
+          />
+        </scrollable-area>
       </v-col>
     </v-row>
   </v-container>
@@ -48,11 +54,13 @@ import { Component, Vue } from 'vue-property-decorator'
 import Selection from '@/components/ElementSelection.vue'
 import Settings from '@/components/ElementSettings.vue'
 import Preview from '@/components/ElementPreview.vue'
+import ScrollableArea from '@/components/baseComponents/ScrollableArea.vue'
 
 import { GaussianRandomField } from '@/utils/domain'
 
 @Component({
   components: {
+    ScrollableArea,
     Selection,
     Settings,
     Preview,
