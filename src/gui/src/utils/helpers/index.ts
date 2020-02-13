@@ -41,8 +41,8 @@ function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<Ma
   }, ({} as Identified<HasIdentity<T>>))
 }
 
-function includes<T extends Identifiable> (items: T[], item: T): boolean {
-  return items.map(getId).includes(item.id)
+function includes<T extends Identifiable> (items: T[], item: T | ID): boolean {
+  return items.map(getId).includes(getId(item))
 }
 
 function hasOwnProperty<T> (obj: T, val: string): boolean {

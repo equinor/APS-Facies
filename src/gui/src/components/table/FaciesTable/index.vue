@@ -31,7 +31,7 @@
             :current="current"
             field="name"
           />
-          <span slot="popover">{{ 'From RMS' }}</span>
+          <span slot="popover">{{ `From RMS${isObserved(facies) ? ' (observed in well log)' : ''}` }}</span>
         </v-popover>
       </td>
       <td
@@ -96,7 +96,7 @@ import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 
 import { Facies, GlobalFacies, Parent } from '@/utils/domain'
-import { RootGetters, RootState } from '@/store/typing'
+import { RootGetters, RootState, Store } from '@/store/typing'
 import { Color } from '@/utils/domain/facies/helpers/colors'
 import { HeaderItems } from '@/utils/typing'
 
@@ -130,14 +130,10 @@ export default class FaciesTable extends Vue {
       : 'There are no facies for the selected well logs. You may still add new facies.'
   }
 
-  get facies (): Facies[] { return this.$store.getters.faciesTable }
+  get facies (): GlobalFacies[] { return this.$store.getters.faciesTable }
 
   get parent (): Parent {
-    const state = this.$store.state
-    return {
-      zone: state.zones.current,
-      region: state.regions.current
-    }
+    return (this.$store as Store).getters.parent
   }
 
   get headers (): HeaderItems {
@@ -224,6 +220,13 @@ export default class FaciesTable extends Vue {
     } else {
       this.expanded = [facies]
     }
+  }
+
+  isObserved (facies: GlobalFacies): boolean {
+    return facies.isObserved({
+      zone: this.$store.getters.zone,
+      region: this.$store.getters.region,
+    })
   }
 }
 </script>

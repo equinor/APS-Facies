@@ -136,6 +136,12 @@
               </v-col>
               <v-col class="dense">
                 <v-checkbox
+                  v-model="automaticObservedFaciesSelection"
+                  label="Automatically select facies observed in well logs"
+                />
+              </v-col>
+              <v-col class="dense">
+                <v-checkbox
                   v-model="automaticFaciesFill"
                   label="Automatically assign facies to templates"
                 />
@@ -296,6 +302,7 @@ import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
+import { Store } from '@/store/typing'
 import { Coordinate3D, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
 interface Invalid {
@@ -323,8 +330,9 @@ export default class JobSettings extends Vue {
   fmuParameterListLocation = ''
   showZoneNameNumber = ''
   showRegionNameNumber = ''
-  automaticAlphaFieldSelection = ''
-  automaticFaciesFill = ''
+  automaticAlphaFieldSelection = false
+  automaticFaciesFill = false
+  automaticObservedFaciesSelection = false
   filterZeroProbability = false
   runFmuWorkflows = false
   colorScale = ''
@@ -344,7 +352,7 @@ export default class JobSettings extends Vue {
   @Watch('dialog')
   onActivation (value: boolean): void {
     if (value) {
-      const options = this.$store.state.options
+      const options = (this.$store as Store).state.options
       const parameters = this.$store.state.parameters
       const fmu = this.$store.state.fmu
       const path = parameters.path
@@ -363,6 +371,7 @@ export default class JobSettings extends Vue {
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value
+      this.automaticObservedFaciesSelection = options.automaticObservedFaciesSelection.value
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.importFields = options.importFields.value
@@ -392,6 +401,7 @@ export default class JobSettings extends Vue {
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
       dispatch('options/automaticAlphaFieldSelection/set', this.automaticAlphaFieldSelection),
+      dispatch('options/automaticObservedFaciesSelection/set', this.automaticObservedFaciesSelection),
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
       dispatch('options/importFields/set', this.importFields),

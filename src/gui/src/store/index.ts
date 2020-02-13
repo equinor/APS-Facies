@@ -23,7 +23,7 @@ import { Optional } from '@/utils/typing'
 import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
 import Zone, { Region } from '@/utils/domain/zone'
-import { GaussianRandomField } from '@/utils/domain'
+import { GaussianRandomField, Parent } from '@/utils/domain'
 import GlobalFacies from '@/utils/domain/facies/global'
 import Facies from '@/utils/domain/facies/local'
 import BaseItem from '@/utils/domain/bases/baseItem'
@@ -45,7 +45,7 @@ const store: Store<RootState> = new Vuex.Store({
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   state: {
-    version: '1.2.0',
+    version: '1.3.0',
     _loaded: {
       value: false,
       loading: false,
@@ -90,11 +90,19 @@ const store: Store<RootState> = new Vuex.Store({
         commit('FINISHED')
       }
     },
-    async refresh ({ commit, dispatch, getters }, message): Promise<void> {
-      if (!getters.loading) {
+    async refresh ({ commit, dispatch, getters }, payload: string | { message?: string, force?: boolean}): Promise<void> {
+      const {
+        message,
+        force = false,
+      } = typeof payload !== 'string' ? payload : {
+        message: payload,
+        force: false,
+      }
+      if (!getters.loading || force) {
         commit('LOADING', { message })
         await Promise.all([
           dispatch('gridModels/refresh'),
+          dispatch('facies/global/refresh'),
         ])
         commit('LOADING', { loading: false })
       }
@@ -115,7 +123,7 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Parameters
         for (const parameter of getParameters(data.parameters)) {
-          const { selected }: { selected?: string} = resolve(parameter, data.parameters)
+          const { selected }: { selected?: string } = resolve(parameter, data.parameters)
           if (selected) {
             await dispatch(`parameters/${parameter.replace('.', '/')}/select`, selected)
           } else if (parameter === 'grid') {
@@ -163,7 +171,10 @@ const store: Store<RootState> = new Vuex.Store({
         // Reopen the different panels
         await dispatch('panels/populate', data.panels)
         // Make sure the available data is up to date
-        await dispatch('refresh')
+        await dispatch('refresh', {
+          message: 'Refreshing data from RMS',
+          force: true,
+        })
       } finally {
         await dispatch('finnishLoading')
       }
@@ -221,6 +232,12 @@ const store: Store<RootState> = new Vuex.Store({
     region: (state, getters): Optional<Region> => {
       return state.regions.use && getters.zone ? getters.zone._regions[`${state.regions.current}`] : null
     },
+    parent: (state, getters): Parent => {
+      return {
+        zone: getters.zone,
+        region: getters.region,
+      }
+    },
     facies: (state, getters): Optional<Facies> => {
       return getters['facies/byId'](state.facies.global.current)
     },
@@ -259,6 +276,9 @@ const store: Store<RootState> = new Vuex.Store({
     },
     regions: (state, getters): Region[] => {
       return getters.zone ? getters.zone.regions : []
+    },
+    useRegions: (state): boolean => {
+      return state.regions.use
     },
     faciesTable: (state): GlobalFacies[] => {
       return Object.values(state.facies.global.available)

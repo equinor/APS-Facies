@@ -5,6 +5,13 @@ export interface CodeName {
   name: string
 }
 
+export interface RmsFacies extends CodeName {
+  observed: null | {
+    zones: number[]
+    regions: number[]
+  }
+}
+
 export interface MinMax {
   min: number
   max: number

@@ -1,7 +1,7 @@
 /**
  * Mock of the rms.uipy object available in RMS 11
  */
-import { AverageParameterProbabilities, CodeName, Constants, PolygonDescription, SimulationBoxSize } from '@/api/types'
+import { AverageParameterProbabilities, CodeName, RmsFacies, Constants, PolygonDescription, SimulationBoxSize } from '@/api/types'
 import { TruncationRuleDescription } from '@/utils'
 import { GaussianRandomFieldSpecification } from '@/utils/domain/gaussianRandomField'
 import { ZoneConfiguration } from '@/utils/domain/zone'
@@ -24,7 +24,7 @@ export default {
   blockedWellParameters: (gridName: string): Promise<string[]> => api.call('get_blocked_well_set_names', gridName),
   realizationParameters: (gridName: string): Promise<string[]> => api.call('get_realization_parameters', gridName),
   blockedWellLogParameters: (gridName: string, blockedWellName: string): Promise<string[]> => api.call('get_blocked_well_logs', gridName, blockedWellName),
-  facies: (gridName: string, blockedWellName: string, blockedWellLogName: string): Promise<CodeName[]> => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName),
+  facies: (gridName: string, blockedWellName: string, blockedWellLogName: string, regionParameter: Optional<string>): Promise<RmsFacies[]> => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName, regionParameter),
   truncationPolygons: <T extends TruncationRuleDescription>(specification: T): Promise<PolygonDescription[]> => api.call('get_truncation_map_polygons', specification),
   trendParameters: (gridName: string): Promise<string[]> => api.call('get_rms_trend_parameters', gridName),
   probabilityCubeParameters: (gridName: string): Promise<string[]> => api.call('get_probability_cube_parameters', gridName),

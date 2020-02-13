@@ -23,6 +23,7 @@ import { makePolygonsFromSpecification, normalizeOrder } from '@/utils/helpers/p
 import { Cubic, CubicPolygon, Direction } from '@/utils/domain'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { isReady } from '@/store/utils/helpers'
+import { resolveParentReference } from '@/store/utils'
 
 const setPolygonValue = (state, rule, polygon, property, value) => {
   Vue.set(state.available[`${rule.id}`]._polygons[`${polygon.id}`], property, value)
@@ -72,7 +73,8 @@ export default {
     async fetch ({ dispatch }) {
       await dispatch('templates/fetch')
     },
-    async add ({ commit, rootGetters }, rule) {
+    async add (context, rule) {
+      const { commit, rootGetters } = context
       if (!(rule instanceof TruncationRule)) {
         rule.backgroundFields = rule.backgroundFields.map(field => rootGetters['gaussianRandomFields/byId'](field))
         rule.polygons.forEach(polygon => {
@@ -83,6 +85,7 @@ export default {
           }
         })
         rule.polygons = makePolygonsFromSpecification(rule.polygons)
+        rule.parent = resolveParentReference(context, rule.parent)
         rule = makeRule(rule)
       }
       commit('ADD', rule)

@@ -13,23 +13,17 @@ const module: Module<SelectableChoice<string>, RootState> = {
   },
 
   actions: {
-    select: ({ state, commit, dispatch }, regionParameter): Promise<string> => {
-      return new Promise((resolve, reject) => {
-        if (state.available.includes(regionParameter)) {
-          commit('CURRENT', regionParameter)
-          dispatch('regions/use', { use: !!regionParameter }, { root: true })
-            .then(() => {
-              resolve(regionParameter)
-            })
-            .catch(error => {
-              reject(error)
-            })
-        } else {
-          reject(new Error(`Selected regionParam ( ${regionParameter} ) is not present int the current project
+    select: async ({ state, commit, dispatch }, regionParameter): Promise<void> => {
+      if (state.available.includes(regionParameter)) {
+        commit('CURRENT', regionParameter)
+        await dispatch('regions/use', { use: !!regionParameter }, { root: true })
 
-Tip: RegionParamName in the APS model File must be one of { ${state.available.join()} }`))
-        }
-      })
+        await dispatch('facies/global/refresh', undefined, { root: true })
+      } else {
+        throw new Error(`Selected regionParam ( ${regionParameter} ) is not present int the current project
+
+Tip: RegionParamName in the APS model File must be one of { ${state.available.join()} }`)
+      }
     },
     fetch: async ({ commit, dispatch }): Promise<void> => {
       commit('CURRENT', null)

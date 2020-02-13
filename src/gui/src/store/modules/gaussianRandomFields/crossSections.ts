@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import { Module } from 'vuex'
 import { Context as RootContext, RootState } from '@/store/typing'
-import { Parent } from '@/utils/domain/bases/interfaces'
+import { Parent } from '@/utils/domain'
 import { ID } from '@/utils/domain/types'
 import { CrossSectionsState } from '@/store/modules/gaussianRandomFields/typing'
 import { Optional } from '@/utils/typing'
@@ -12,6 +12,7 @@ import CrossSection, {
 } from '@/utils/domain/gaussianRandomField/crossSection'
 import { DEFAULT_CROSS_SECTION } from '@/config'
 import { getId } from '@/utils'
+import { resolveParentReference } from '@/store/utils'
 import { APSError } from '@/utils/domain/errors'
 
 type Context = RootContext<CrossSectionsState, RootState>
@@ -33,7 +34,7 @@ const module: Module<CrossSectionsState, RootState> = {
 
   actions: {
     async fetch ({ state, dispatch, rootGetters }, { zone = null, region = null } = {}): Promise<CrossSection | undefined> {
-      const parent = {
+      const parent: Parent = {
         zone: zone || rootGetters.zone,
         region: region || rootGetters.region,
       }
@@ -56,10 +57,14 @@ const module: Module<CrossSectionsState, RootState> = {
         await dispatch('add', crossSection)
       }
     },
-    add ({ commit, getters }, crossSection): void {
+    add (context, crossSection: CrossSection | CrossSectionSerialization): void {
+      const { commit, getters } = context
       const existing = getters.byParent(crossSection)
       if (!existing) {
-        commit('ADD', new CrossSection({ ...crossSection }))
+        commit('ADD', new CrossSection({
+          ...crossSection,
+          parent: resolveParentReference(context, crossSection.parent),
+        }))
       }
     },
     async remove ({ commit, dispatch, rootState }, crossSection): Promise<void> {

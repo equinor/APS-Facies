@@ -202,8 +202,9 @@ class RMSData:
     def get_facies_table_from_blocked_well_log(
             self,
             grid_model_name:             GridModel,
-            bw_name:                     str,
-            facies_log_name:             str
+            blocked_well_name:           str,
+            facies_log_name:             str,
+            region_parameter_name:       str,
     ) -> Dict[str, int]: ...
     @staticmethod
     def save_model(

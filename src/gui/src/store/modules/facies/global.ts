@@ -4,7 +4,7 @@ import { GlobalFaciesState } from '@/store/modules/facies/typing'
 import { Context, RootState } from '@/store/typing'
 import { GlobalFacies } from '@/utils/domain'
 import { Color } from '@/utils/domain/facies/helpers/colors'
-import { CodeName } from '@/api/types'
+import { RmsFacies } from '@/api/types'
 import { Identified } from '@/utils/domain/bases/interfaces'
 import { APSTypeError } from '@/utils/domain/errors'
 import { Module } from 'vuex'
@@ -16,15 +16,23 @@ function getColor ({ rootGetters }: Context<GlobalFaciesState, RootState>, code:
   return rootGetters['constants/faciesColors/byCode'](code)
 }
 
-async function getFaciesFromRMS ({ rootGetters }: Context<GlobalFaciesState, RootState>): Promise<CodeName[]> {
-  // eslint-disable-next-line no-return-await
-  return await rms.facies(rootGetters.gridModel, rootGetters.blockedWellParameter, rootGetters.blockedWellLogParameter)
+async function getFaciesFromRMS ({ rootGetters, rootState }: Context<GlobalFaciesState, RootState>): Promise<RmsFacies[]> {
+  return rms.facies(
+    rootGetters.gridModel,
+    rootGetters.blockedWellParameter,
+    rootGetters.blockedWellLogParameter,
+    rootState.regions.use ? rootGetters.regionParameter : '__REGIONS_NOT_IN_USE__',
+  )
 }
 
 function findExisting (items: Identified<GlobalFacies> | GlobalFacies[], { code, name }: { code: number, name: string }): GlobalFacies | undefined {
   items = Array.isArray(items) ? items : Object.values(items)
   return items
     .find((facies): boolean => facies.code === code || facies.name === name)
+}
+
+interface FaciesSpecification extends RmsFacies {
+  color?: Color
 }
 
 const module: Module<GlobalFaciesState, RootState> = {
@@ -49,7 +57,7 @@ const module: Module<GlobalFaciesState, RootState> = {
       await dispatch('populate', facies)
       commit('IN_RMS', facies)
     },
-    populate: async (context, facies: { code: number, name: string, color?: Color }[]): Promise<void> => {
+    populate: async (context, facies: FaciesSpecification[]): Promise<void> => {
       const { commit, state } = context
 
       const minFaciesCode = facies
@@ -63,7 +71,21 @@ const module: Module<GlobalFaciesState, RootState> = {
       const data = makeData(facies, GlobalFacies, state.available)
       commit('AVAILABLE', data)
     },
-    new: async (context, { code, name, color }): Promise<GlobalFacies> => {
+    refresh: async (context): Promise<void> => {
+      const { state, commit, dispatch } = context
+      const existingFacies = Object.values(state.available)
+        .reduce((mapping, facies) => {
+          mapping[facies.code] = facies
+          return mapping
+        }, ({} as {[code: number]: GlobalFacies}))
+      const faciesConfigurations = (await getFaciesFromRMS(context))
+      await Promise.all(faciesConfigurations
+        .filter(({ code }): boolean => !existingFacies[`${code}`])
+        .map(config => dispatch('new', config))
+      )
+      commit('REFRESH', faciesConfigurations)
+    },
+    new: async (context, { code, name, color, observed }): Promise<GlobalFacies> => {
       const { commit, state } = context
       if (isEmpty(code) || code < 0) {
         code = 1 + Object.values(state.available)
@@ -80,7 +102,7 @@ const module: Module<GlobalFaciesState, RootState> = {
       if (findExisting(state._inRms, { code, name })) {
         throw new APSTypeError(`There already exists a facies with code = ${code}, or name = ${name} in RMS`)
       }
-      const facies = new GlobalFacies({ code, name, color })
+      const facies = new GlobalFacies({ code, name, color, observed })
       commit('ADD', facies)
       return facies
     },
@@ -132,6 +154,15 @@ const module: Module<GlobalFaciesState, RootState> = {
     },
     IN_RMS: (state, facies): void => {
       Vue.set(state, '_inRms', facies)
+    },
+    REFRESH: (state, faciesConfigurations: RmsFacies[]): void => {
+      // Update global facies in place, to preserve references, and thus comparison between GlobalFacies
+      // and anything else, that might reference one (such as Facies, FaciesGroup, and truncation rules, though polygons)
+      // PS: Doing this functionally, i.e. creating new objects, quickly became complex, once the truncation rules
+      //     had to be created anew as well
+      Object.values(state.available).forEach(facies => {
+        Object.assign(facies, faciesConfigurations.find(({ code }) => facies.code === code) || {})
+      })
     },
   },
 

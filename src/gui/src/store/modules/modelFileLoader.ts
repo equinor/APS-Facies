@@ -655,9 +655,11 @@ const module: Module<{}, RootState> = {
       // if we get here, the data is ok, we have identified what to select and can make the selection
       await dispatch('zones/current', zoneToSetAsCurrent, { root: true })
       await dispatch('zones/select', zonesToSelect, { root: true })
+      await Promise.all(zonesToSelect.map(zone => dispatch('zones/touch', { zone }, { root: true })))
       if (regionToSetAsCurrent) {
         await dispatch('regions/current', regionToSetAsCurrent, { root: true })
         await dispatch('regions/select', regionsToSelect, { root: true })
+        await Promise.all(regionsToSelect.map(region => dispatch('regions/touch', region, { root: true })))
       }
     },
 

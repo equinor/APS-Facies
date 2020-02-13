@@ -43,6 +43,10 @@ export default class Facies extends ZoneRegionDependent {
   public get alias (): string { return this.facies.alias }
   public get code (): number { return this.facies.code }
 
+  public get observed (): boolean {
+    return this.facies.isObserved(this.parent)
+  }
+
   public toJSON (): FaciesSerialization {
     return {
       ...super.toJSON(),

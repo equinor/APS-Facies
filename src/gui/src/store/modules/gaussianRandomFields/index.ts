@@ -10,7 +10,7 @@ import { getId, hasParents, newSeed } from '@/utils'
 import GaussianRandomField, {
   Trend,
   Variogram,
-  GaussianRandomFieldSerialization
+  GaussianRandomFieldSerialization,
 } from '@/utils/domain/gaussianRandomField'
 
 import crossSections from '@/store/modules/gaussianRandomFields/crossSections'
@@ -18,6 +18,7 @@ import rms from '@/api/rms'
 import FmuUpdatableValue from '@/utils/domain/bases/fmuUpdatable'
 import { unpackVariogram } from '@/utils/domain/gaussianRandomField/variogram'
 import { unpackTrend } from '@/utils/domain/gaussianRandomField/trend'
+import { resolveParentReference } from '@/store/utils'
 import { Module } from 'vuex'
 
 type Context = RootContext<GaussianRandomFieldState, RootState>
@@ -98,13 +99,15 @@ const module: Module<GaussianRandomFieldState, RootState> = {
       await dispatch('add', field)
       return field
     },
-    add ({ commit, getters }, field): void {
+    add (context, field): void {
+      const { commit, getters } = context
       if (!(field instanceof GaussianRandomField)) {
         field = new GaussianRandomField({
           ...field,
           variogram: new Variogram(unpackVariogram(field.variogram)),
           trend: new Trend(unpackTrend(field.trend)),
           crossSection: getters['crossSections/byId'](field.settings.crossSection),
+          parent: resolveParentReference(context, field.parent),
         })
       }
       commit('ADD', field)

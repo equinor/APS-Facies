@@ -13,17 +13,16 @@ import BayfillPolygon from '@/utils/domain/polygon/bayfill'
 import NonCubicPolygon from '@/utils/domain/polygon/nonCubic'
 import CubicPolygon from '@/utils/domain/polygon/cubic'
 import OverlayPolygon from '@/utils/domain/polygon/overlay'
+import { ParentReference } from '@/utils/domain/bases/interfaces'
+import { Parent, Dependent } from '@/utils/domain/bases/zoneRegionDependent'
 
 type TruncationRule = Bayfill | NonCubic | Cubic
 
-interface Parent {
-  zone: Zone
-  region: Region | null
-}
-
 export {
   Direction,
+  Dependent,
   Parent,
+  ParentReference,
   Polygon,
   BayfillPolygon,
   CubicPolygon,

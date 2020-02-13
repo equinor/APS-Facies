@@ -23,6 +23,7 @@ from src.utils.constants.simple import (
     Direction,
     OriginType,
     ProbabilityTolerances,
+    GridModelConstants,
 )
 from src.utils.exceptions.xml import ApsXmlError
 from src.utils.numeric import flip_if_necessary
@@ -40,12 +41,12 @@ from src.utils.xmlUtils import prettify
 
 
 def empty_if_none(func):
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         # TODO: Generalize?
-        if any([arg is None for arg in args]):
+        if any(arg is None for arg in args):
             return []
         else:
-            return func(*args)
+            return func(*args, **kwargs)
     return wrapper
 
 
@@ -245,7 +246,7 @@ class RMSData:
         return [property_log.name for property_log in blocked_wells.properties if self.is_discrete(property_log)]
 
     @empty_if_none
-    def get_facies_table_from_blocked_well_log(self, grid_model_name, blocked_well_name, facies_log_name):
+    def get_facies_table_from_blocked_well_log(self, grid_model_name, blocked_well_name, facies_log_name, region_parameter_name):
         """ Use Roxar API to get table of discrete codes and associated names for a discrete log"""
 
         # Get blocked wells
@@ -255,7 +256,30 @@ class RMSData:
 
         # Get facies property
         facies_property = blocked_wells.properties[facies_log_name]
-        return self.get_code_names(facies_property)
+
+        # Determine which facies appear in which zone, if any
+        observed_facies = facies_property.get_values(self.project.current_realisation)
+        observed_indices = blocked_wells.get_cell_numbers(self.project.current_realisation)
+        zones = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(self.project.current_realisation)
+        regions = np.zeros(zones.shape, zones.dtype)
+        if region_parameter_name != '__REGIONS_NOT_IN_USE__':  # Hack to avoid incompatibility with decorator
+            regions = grid_model.properties[region_parameter_name].get_values(self.project.current_realisation)
+
+        def find_defined(property, facies_code):
+            return [int(_code) for _code in set(property[observed_indices[observed_facies == facies_code]])]
+
+        facies = []
+        for code, name in facies_property.code_names.items():
+            where = {
+                'zones': find_defined(zones, code),
+                'regions': find_defined(regions, code),
+            }
+            facies.append({
+                'code': code,
+                'name': name,
+                'observed': where,
+            })
+        return facies
 
     @staticmethod
     def save_model(path, content):

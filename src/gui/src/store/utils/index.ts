@@ -1,6 +1,8 @@
 import { OptionState } from '@/store/modules/options/typing'
 import { SelectableChoice } from '@/store/modules/parameters/typing/helpers'
-import { Context, RootState } from '@/store/typing'
+import { Context, RootGetters, RootState } from '@/store/typing'
+import { getId } from '@/utils'
+import { Parent, ParentReference } from '@/utils/domain'
 import { Dispatch, Module, Store } from 'vuex'
 
 async function selectOnlyParameter<S, G> ({ dispatch }: Context<S, G>, result: string[]): Promise<void> {
@@ -74,10 +76,21 @@ async function populateState<G, S> ({ dispatch }: Context<G, S>, options: {[_: s
   )
 }
 
+function resolveParentReference<S> ({ rootState }: Context<S, RootGetters>, parent: ParentReference | Parent): Parent {
+  const zone = rootState.zones.available[getId(parent.zone)]
+  if (!zone) throw new Error(`The zone with reference '${parent.zone}' is missing`)
+  const region = zone.regions.find(region => region.id === getId(parent.region)) || null
+  return {
+    zone,
+    region,
+  }
+}
+
 export {
   fetchParameterHelper,
   makeOption,
   selectOnlyParameter,
   displayMessage,
   populateState,
+  resolveParentReference,
 }

@@ -3,13 +3,13 @@ import Vue from 'vue'
 import { Module } from 'vuex'
 import { RootState } from '@/store/typing'
 import { FaciesGroupState } from '@/store/modules/facies/typing'
-import { FaciesGroupConfiguration } from '@/utils/domain/facies/group'
+import { FaciesGroupSerialization } from '@/utils/domain/facies/group'
 import { Identifiable } from '@/utils/domain/bases/interfaces'
 import { ID } from '@/utils/domain/types'
 
 import { Facies, FaciesGroup, GlobalFacies, Parent } from '@/utils/domain'
-import { getId } from '@/utils/helpers'
-import { toIdentifiedObject } from '@/utils'
+import { getId, identify } from '@/utils/helpers'
+import { resolveParentReference } from '@/store/utils'
 
 const module: Module<FaciesGroupState, RootState> = {
   namespaced: true,
@@ -19,17 +19,19 @@ const module: Module<FaciesGroupState, RootState> = {
   },
 
   actions: {
-    async populate ({ commit, rootGetters }, groups: FaciesGroupConfiguration[]): Promise<void> {
-      groups.forEach((group): void => {
-        group.facies = group.facies.map((facies): Facies => rootGetters['facies/byId'](getId(facies)))
-      })
-      groups = groups.map((group): FaciesGroup => new FaciesGroup(group))
-      groups.forEach((group): void => {
+    async populate (context, groups: FaciesGroupSerialization[]): Promise<void> {
+      const { commit, rootGetters } = context
+      const instances = groups.map(config => new FaciesGroup({
+        ...config,
+        facies: config.facies.map((facies): Facies => rootGetters['facies/byId'](getId(facies))),
+        parent: resolveParentReference(context, config.parent),
+      }))
+      instances.forEach((group): void => {
         if (group.facies.some((facies): boolean => !rootGetters['facies/byId'](facies))) {
           throw new Error('The group reference a facies that does not exist')
         }
       })
-      commit('AVAILABLE', toIdentifiedObject(groups))
+      commit('AVAILABLE', identify(instances))
     },
     async get ({ getters, dispatch }, { facies, parent }): Promise<FaciesGroup> {
       let group = getters.byFacies(facies, parent)
