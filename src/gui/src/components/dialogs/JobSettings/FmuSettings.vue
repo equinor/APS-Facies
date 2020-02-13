@@ -44,6 +44,8 @@
               label="ERT/FMU simulation box grid"
               :disabled="!hasGrid"
               :items="fmuGrids"
+              @keydown.enter.stop="() => {/* Intentionally left blank, to stop event propagating to parent
+               and closing the dialog, when enter is used to confirm the selected grid name */}"
             />
             <span slot="popover">No grid model has been selected</span>
           </v-popover>
@@ -80,9 +82,9 @@
                 v-model="_maxLayersInFmu"
                 :ranges="{ min: minimumErtLayers, max: Number.POSITIVE_INFINITY }"
                 :disabled="!createFmuGrid"
+                :ignore-errors="!createFmuGrid"
                 :required="createFmuGrid"
                 label="Number of layers in FMU simulation box grid"
-                enforce-ranges
                 @update:error="e => update('fmuGridDepth', e)"
               />
             </v-col>
@@ -216,7 +218,7 @@ export default class FmuSettings extends Vue {
 
   update (type: string, value: boolean): void {
     if (type === 'fmuGridDepth') {
-      value = value && !this.createFmuGrid
+      value = value && this.createFmuGrid
     }
     Vue.set(this.invalid, type, value)
   }
