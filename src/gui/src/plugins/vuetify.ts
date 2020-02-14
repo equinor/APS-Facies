@@ -38,6 +38,9 @@ function makeCustomIcons (): Icons {
     help: 'fas fa-question-circle',
     changelog: 'far fa-newspaper',
     folderOpen: 'far fa-folder-open',
+    observed: 'far fa-eye',
+    observedNegated: 'far fa-eye-slash',
+    fromRoxar: 'fas fa-desktop',
   }
   Object.keys(icons).forEach((key: string): void => {
     if (notEmpty(icons[`${key}`])) {

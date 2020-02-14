@@ -14,6 +14,12 @@
     <template
       v-slot:item="{ item : facies }"
     >
+      <td class="dense">
+        <informational-icons
+          :value="facies"
+          :current="current"
+        />
+      </td>
       <td class="text-left">
         <editable-cell
           v-if="!isFaciesFromRms(facies)"
@@ -22,17 +28,12 @@
           field="name"
           @submit="changeName"
         />
-        <v-popover
+        <highlight-current-item
           v-else
-          trigger="hover"
-        >
-          <highlight-current-item
-            :value="facies"
-            :current="current"
-            field="name"
-          />
-          <span slot="popover">{{ `From RMS${isObserved(facies) ? ' (observed in well log)' : ''}` }}</span>
-        </v-popover>
+          :value="facies"
+          :current="current"
+          field="name"
+        />
       </td>
       <td
         v-if="!hideAlias"
@@ -94,6 +95,7 @@ import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentIt
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
+import InformationalIcons from '@/components/table/FaciesTable/InformationalIcons.vue'
 
 import { Facies, GlobalFacies, Parent } from '@/utils/domain'
 import { RootGetters, RootState, Store } from '@/store/typing'
@@ -109,6 +111,7 @@ import { hasCurrentParents } from '@/utils'
     HighlightCurrentItem,
     Swatches,
     EditableCell,
+    InformationalIcons,
   }
 })
 export default class FaciesTable extends Vue {
@@ -141,6 +144,10 @@ export default class FaciesTable extends Vue {
       {
         text: 'Use',
         value: 'selected',
+      },
+      {
+        text: 'Notes',
+        value: '',
       },
       {
         text: 'Facies',
@@ -220,13 +227,6 @@ export default class FaciesTable extends Vue {
     } else {
       this.expanded = [facies]
     }
-  }
-
-  isObserved (facies: GlobalFacies): boolean {
-    return facies.isObserved({
-      zone: this.$store.getters.zone,
-      region: this.$store.getters.region,
-    })
   }
 }
 </script>
