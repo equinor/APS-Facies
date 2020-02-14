@@ -38,6 +38,7 @@ import {
   sortAlphabetically,
 } from '@/utils'
 import { hasOwnProperty } from '@/utils/helpers'
+import { displayError } from '@/utils/helpers/storeInteraction'
 
 Vue.use(Vuex)
 
@@ -175,6 +176,8 @@ const store: Store<RootState> = new Vuex.Store({
           message: 'Refreshing data from RMS',
           force: true,
         })
+      } catch (e) {
+        displayError(e)
       } finally {
         await dispatch('finnishLoading')
       }
