@@ -27,6 +27,7 @@
               :input-value="!_isIndeterminate(item) && isSelected"
               :indeterminate="_isIndeterminate(item)"
               :disabled="selectDisabled"
+              :color="isCurrent(item) ? 'white' : undefined"
               primary
               hide-details
               @change="e => updateSelection(item, e)"
