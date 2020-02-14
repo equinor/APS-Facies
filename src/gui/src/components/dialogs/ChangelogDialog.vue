@@ -22,8 +22,26 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
-import axios from 'axios'
 import md from '@/plugins/markdown'
+
+// 'axios' does not work as expected in RMS 11
+// when moving 'axios' from devDependencies
+const axios: { get: (url: string) => Promise<{data: string}> } = {
+  get (url: string): Promise<{ data: string }> {
+    return new Promise(resolve => {
+      const client = new XMLHttpRequest()
+      client.open('GET', url)
+      client.onreadystatechange = (): void => {
+        if (client.readyState === XMLHttpRequest.DONE) {
+          resolve({
+            data: client.responseText,
+          })
+        }
+      }
+      client.send()
+    })
+  }
+}
 
 @Component({})
 export default class ChangelogDialog extends Vue {
