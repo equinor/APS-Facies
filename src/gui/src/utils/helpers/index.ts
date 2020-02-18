@@ -10,10 +10,8 @@ import {
 } from '@/utils/helpers/simple'
 import { NoCache } from '@/utils/helpers/decorators'
 
-const hex = '[0-9a-f]'
-
 function isUUID (value: string): boolean {
-  const uuid = `${hex}{8}(-${hex}{4}){3}-${hex}{8}`
+  const uuid = /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/
 
   return RegExp(uuid).test(value)
 }
@@ -43,8 +41,8 @@ function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<Ma
   }, ({} as Identified<HasIdentity<T>>))
 }
 
-function includes<T extends Identifiable> (items: T[], item: T): boolean {
-  return items.map(getId).includes(item.id)
+function includes<T extends Identifiable> (items: T[], item: T | ID): boolean {
+  return items.map(getId).includes(getId(item))
 }
 
 function hasOwnProperty<T> (obj: T, val: string): boolean {
@@ -52,7 +50,6 @@ function hasOwnProperty<T> (obj: T, val: string): boolean {
 }
 
 export {
-  hex,
   isUUID,
   getId,
   identify,

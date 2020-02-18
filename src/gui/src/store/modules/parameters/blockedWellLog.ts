@@ -20,6 +20,7 @@ const module: Module<SelectableChoice<string>, RootState> = {
       commit('CURRENT', blockedWellLog)
       await removeFaciesDependent(context)
       await dispatch('facies/global/fetch', null, { root: true })
+      await dispatch('facies/selectObserved', undefined, { root: true })
     },
     fetch: async (context): Promise<void> => {
       await fetchParameterHelper(context)

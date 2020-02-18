@@ -1,12 +1,13 @@
 import { Context as RootContext, RootGetters, RootState } from '@/store/typing'
-import { Identified, Parent } from '@/utils/domain/bases/interfaces'
+import { Parent } from '@/utils/domain'
+import { Identified, ParentReference } from '@/utils/domain/bases/interfaces'
 import ZoneRegionDependent from '@/utils/domain/bases/zoneRegionDependent'
 import Polygon, { PolygonSerialization, PolygonSpecification } from '@/utils/domain/polygon/base'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { Dispatch } from 'vuex'
 
-type Context = RootContext<{}, RootGetters>
+type Context<S = {}> = RootContext<S, RootGetters>
 
 export function usesAllFacies<
   T extends Polygon = Polygon,
@@ -54,7 +55,7 @@ function listify (obj: Identified<ZoneRegionDependent>): ZoneRegionDependent[] {
   return Object.values(obj)
 }
 
-export async function removeOld ({ dispatch }: { dispatch: Dispatch }, elements: Element[], target: Parent): Promise<void> {
+export async function removeOld ({ dispatch }: { dispatch: Dispatch }, elements: Element[], target: Parent | ParentReference): Promise<void> {
   for (const element of elements) {
     for (const item of element.items.filter((item): boolean => item.isChildOf(target))) {
       await dispatch(`${element.name}/remove`, item, { root: true })
@@ -84,10 +85,10 @@ export async function removeFaciesDependent (context: Context): Promise<void> {
   for (const zone of Object.values(rootState.zones.available)) {
     if (zone.hasRegions) {
       for (const region of zone.regions) {
-        parents.push({ zone: zone.id, region: region.id })
+        parents.push({ zone, region })
       }
     } else {
-      parents.push({ zone: zone.id, region: null })
+      parents.push({ zone, region: null })
     }
   }
 

@@ -4,8 +4,12 @@ export interface OptionState<T> {
 }
 
 export default interface OptionsState {
-  showNameOrNumber: OptionState<string>
+  showNameOrNumber: {
+    zone: OptionState<string>
+    region: OptionState<string>
+  }
   automaticAlphaFieldSelection: OptionState<boolean>
+  automaticObservedFaciesSelection: OptionState<boolean>
   filterZeroProbability: OptionState<boolean>
   automaticFaciesFill: OptionState<boolean>
   automaticFaciesSelection: OptionState<boolean>

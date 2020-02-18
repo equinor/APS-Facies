@@ -33,6 +33,11 @@ export class Region extends SelectableItem {
     this.zone = zone
   }
 
+  public touch (): void {
+    super.touch()
+    this.zone.touch()
+  }
+
   public toJSON (): RegionSerialization {
     return {
       ...super.toJSON(),

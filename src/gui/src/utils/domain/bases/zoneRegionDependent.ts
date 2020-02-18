@@ -1,10 +1,11 @@
 import uuidv5 from 'uuid/v5'
-import { isEmpty, getId } from '@/utils/helpers'
+import { getId } from '@/utils/helpers'
 import Region from '@/utils/domain/region'
 import { ID } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
 import BaseItem, { BaseItemConfiguration, BaseItemSerialization } from './baseItem'
-import { Dependent, Parent } from './interfaces'
+import { ParentReference } from './interfaces'
+import { Optional } from '@/utils/typing'
 
 interface ParentConfiguration extends BaseItemConfiguration {
   zone?: null
@@ -13,26 +14,33 @@ interface ParentConfiguration extends BaseItemConfiguration {
 }
 
 interface ZoneRegionConfiguration extends BaseItemConfiguration {
-  zone: Zone | ID
-  region?: Region | ID | null
+  zone: Zone
+  region?: Optional<Region>
   parent?: { zone: null, region: null }
 }
 
 export type DependentConfiguration = ParentConfiguration | ZoneRegionConfiguration
 
 export interface DependentSerialization extends BaseItemSerialization {
-  parent: {
-    zone: ID
-    region: ID | null
-  }
+  parent: ParentReference
+}
+
+export interface Parent {
+  zone: Zone
+  region: Optional<Region>
+}
+
+export interface Dependent {
+  readonly parent: Parent
+  isChildOf (parent: Parent | ParentReference): boolean
 }
 
 export function hasParents<T extends Dependent> (item: T, zone: Zone | ID, region: Region | ID | null): boolean {
-  if (item.parent.zone === getId(zone)) {
+  if (getId(item.parent.zone) === getId(zone)) {
     // The Zone ID is consistent
     if (region) {
       // We are dealing with a 'thing', that is SUPPOSED to have a region
-      return item.parent.region === getId(region)
+      return getId(item.parent.region) === getId(region)
     } else {
       // The 'thing' should NOT have a region
       return !item.parent.region
@@ -42,7 +50,7 @@ export function hasParents<T extends Dependent> (item: T, zone: Zone | ID, regio
   }
 }
 
-export function getParentId (parent: Parent): ID {
+export function getParentId (parent: Parent | ParentReference): ID {
   return uuidv5(getId(parent.region), getId(parent.zone))
 }
 
@@ -58,17 +66,21 @@ export default abstract class ZoneRegionDependent extends BaseItem implements De
     super({ id })
     zone = zone || parent.zone
     region = region || parent.region
-    zone = getId(zone)
     if (!zone) throw new Error('Missing \'zone\', or \'parent.zone\'')
     this.parent = {
       zone,
-      region: isEmpty(region)
-        ? null
-        : (region instanceof Region) ? region.id : region,
+      region,
     }
   }
 
-  public isChildOf ({ zone, region = null }: Parent | { zone: Zone, region: Region | null }): boolean {
+  public get parentReference (): ParentReference {
+    return {
+      zone: getId(this.parent.zone),
+      region: getId(this.parent.region) || null,
+    }
+  }
+
+  public isChildOf ({ zone, region = null }: Parent | ParentReference): boolean {
     return hasParents(this, zone, region)
   }
 
@@ -83,7 +95,7 @@ export default abstract class ZoneRegionDependent extends BaseItem implements De
   protected toJSON (): DependentSerialization {
     return {
       ...super.toJSON(),
-      parent: this.parent,
+      parent: this.parentReference,
     }
   }
 }

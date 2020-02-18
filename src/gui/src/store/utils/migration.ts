@@ -13,7 +13,7 @@ const migrations: Migration[] = [
   {
     from: '1.0.0',
     to: '1.1.0',
-    up: async (state) => {
+    up: async (state): Promise<any> => {
       const { tolerance } = await rms.constants('max_allowed_fraction_of_values_outside_tolerance', 'tolerance')
       state.parameters.maxAllowedFractionOfValuesOutsideTolerance = {}
       state.parameters.maxAllowedFractionOfValuesOutsideTolerance.selected = tolerance
@@ -23,7 +23,7 @@ const migrations: Migration[] = [
   {
     from: '1.1.0',
     to: '1.2.0',
-    up: async (state) => {
+    up: async (state): Promise<any> => {
       async function addZoneThicknesses (): Promise<void> {
         const gridModelId = state.gridModels.current
         if (!gridModelId) return state
@@ -50,6 +50,28 @@ const migrations: Migration[] = [
         addZoneThicknesses(),
         addNumberOfZonesToGrids(),
       ])
+      return state
+    },
+  },
+  {
+    from: '1.2.0',
+    to: '1.3.0',
+    up: async (state): Promise<any> => {
+      // Add 'observed' to (global) Facies
+      Object.values(state.facies.global.available)
+        .forEach((facies: any): void => {
+          facies.observed = null
+        })
+      // Add 'touched' to zones, and regions
+      // Other entities have this property as well, but it is not used, and will be added where needed by the state
+      Object.values(state.zones.available)
+        .forEach((zone: any): void => {
+          zone.touched = true
+          Object.values(zone.regions || []) // May be null
+            .forEach((region: any): void => {
+              region.touched = true
+            })
+        })
       return state
     },
   }

@@ -9,7 +9,7 @@ import { APSTypeError } from '@/utils/domain/errors'
 import { ID } from '@/utils/domain/types'
 import { Module } from 'vuex'
 import { Region, Zone } from '@/utils/domain'
-import { Parent } from '@/utils/domain/bases/interfaces'
+import { ParentReference } from '@/utils/domain/bases/interfaces'
 
 import { RootState } from '@/store/typing'
 import CopyPasteState from '@/store/modules/copyPaste/typing'
@@ -17,7 +17,7 @@ import CopyPasteState from '@/store/modules/copyPaste/typing'
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
 type IDMapping = Map<ID, ID>
 
-function getParent (item: Zone | Region): Parent {
+function getParent (item: Zone | Region): ParentReference {
   if (item instanceof Zone) {
     return {
       zone: item.id,
@@ -33,7 +33,7 @@ function getParent (item: Zone | Region): Parent {
   }
 }
 
-function copyItems (element: Element, parent: Parent, idMapping: IDMapping): void {
+function copyItems (element: Element, parent: ParentReference, idMapping: IDMapping): void {
   const items = Object.values(element.items)
     .filter((item): boolean => item.isChildOf(parent))
   items
@@ -43,13 +43,13 @@ function copyItems (element: Element, parent: Parent, idMapping: IDMapping): voi
   element.serialization = JSON.stringify(items)
 }
 
-function getIDMapping (source: Parent, target: Parent): IDMapping {
+function getIDMapping (source: ParentReference, target: ParentReference): IDMapping {
   const idMapping: IDMapping = new Map<ID, ID>()
   idMapping.set(JSON.stringify(source), JSON.stringify(target))
   return idMapping
 }
 
-function giveNewIds (elements: Element[], source: Parent, target: Parent): string {
+function giveNewIds (elements: Element[], source: ParentReference, target: ParentReference): string {
   const idMapping = getIDMapping(source, target)
   const _serialization = {}
   for (const element of elements) {
@@ -106,18 +106,18 @@ const module: Module<CopyPasteState, RootState> = {
     SOURCE: (state, source): void => {
       state.source = source
     },
-    PASTING: (state, { source, toggle }: { source: Parent, toggle: boolean }): void => {
+    PASTING: (state, { source, toggle }: { source: ParentReference, toggle: boolean }): void => {
       Vue.set(state._pasting, getParentId(source), toggle)
     },
   },
 
   getters: {
-    parent (state): Parent | null {
+    parent (state): ParentReference | null {
       return state.source
         ? getParent(state.source)
         : null
     },
-    isPasting (state): (parent: Zone | Region | Parent) => boolean {
+    isPasting (state): (parent: Zone | Region | ParentReference) => boolean {
       return (parent): boolean => {
         if (parent instanceof Zone || parent instanceof Region) {
           parent = getParent(parent)

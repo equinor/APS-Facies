@@ -1,6 +1,8 @@
 import { FaciesState } from '@/store/modules/facies/typing'
 import { RootState } from '@/store/typing'
-import { Identifiable, Parent } from '@/utils/domain/bases/interfaces'
+import { resolveParentReference } from '@/store/utils'
+import { Region, Parent } from '@/utils/domain'
+import { Identifiable } from '@/utils/domain/bases/interfaces'
 import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { Optional } from '@/utils/typing'
@@ -20,13 +22,12 @@ import {
   hasCurrentParents,
   hasParents,
   parentId,
-  makeData,
 } from '@/utils'
 
 import { Dispatch, Module } from 'vuex'
 import global from './global'
 import groups from './groups'
-import { getId, isUUID } from '@/utils/helpers'
+import { getId, identify, isUUID } from '@/utils/helpers'
 
 function updateFaciesProbability (dispatch: Dispatch, facies: Facies, probability: number): Promise<void> {
   return dispatch('changePreviewProbability', { facies, previewProbability: probability })
@@ -62,7 +63,7 @@ const module: Module<FaciesState, RootState> = {
     remove: ({ commit }, facies): void => {
       commit('REMOVE', { facies })
     },
-    select: async ({ commit, dispatch, state }, { items, parent }: { items: Identifiable[], parent: Parent}): Promise<void> => {
+    select: async ({ commit, dispatch, state }, { items, parent }: { items: Identifiable[], parent: Parent }): Promise<void> => {
       const getRelevantFacies = (): Facies[] => Object.values(state.available)
         .filter((facies): boolean => hasParents(facies, parent.zone, parent.region))
 
@@ -82,12 +83,37 @@ const module: Module<FaciesState, RootState> = {
       if (removed) {
         await dispatch('normalize', { selected: getRelevantFacies() })
       }
+      await dispatch('zones/touch', parent, { root: true })
     },
-    populate: ({ commit, state, getters }, facies: FaciesSerialization[]): void => {
-      facies.forEach((facies): void => {
-        facies.facies = getters.byId(getId(facies.facies))
-      })
-      commit('AVAILABLE', makeData(facies, Facies, state.available))
+    selectObserved: async ({ dispatch, state, getters, rootGetters, rootState }): Promise<void> => {
+      if (rootGetters.loading) return undefined
+      if (!rootState.options.automaticObservedFaciesSelection.value) return undefined
+
+      const { zone, region }: Parent = rootGetters
+      const parentDefined: boolean = rootGetters.useRegions ? !!region : !!zone
+      if (parentDefined && getters.isFaciesFetchedFromRMS) {
+        const parent = { zone, region }
+        const touched: boolean = rootGetters.useRegions ? (region as Region).touched : zone.touched
+        if (!touched) {
+          const observedFacies = Object.values(state.global.available)
+            .filter((facies): boolean => facies.isObserved(parent) && getters.isFromRMS(facies))
+          if (observedFacies.length > 0) {
+            await dispatch('select', {
+              items: observedFacies,
+              parent,
+            })
+          }
+        }
+      }
+    },
+    populate: (context, facies: FaciesSerialization[]): void => {
+      const { commit, getters } = context
+      const instances = facies.map(config => new Facies({
+        ...config,
+        facies: getters.byId(getId(config.facies)),
+        parent: resolveParentReference(context, config.parent),
+      }))
+      commit('AVAILABLE', identify(instances))
     },
     updateProbabilities: async ({ dispatch, state }, { probabilityCubes, parent }): Promise<void> => {
       if (notEmpty(probabilityCubes)) {
@@ -265,6 +291,9 @@ const module: Module<FaciesState, RootState> = {
       return facies
         ? !!state.global._inRms.find(({ code, name }): boolean => facies.code === code && facies.name === name)
         : false
+    },
+    isFaciesFetchedFromRMS: (state, getters, rootState, rootGetters): boolean => {
+      return !!rootGetters.blockedWellParameter && !!rootGetters.blockedWellLogParameter
     }
   },
 }

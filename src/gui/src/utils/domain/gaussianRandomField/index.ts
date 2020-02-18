@@ -4,7 +4,8 @@ import CrossSection, {
 import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
-import { Named, Parent } from '@/utils/domain/bases/interfaces'
+import { Named } from '@/utils/domain/bases/interfaces'
+import { Parent } from '@/utils/domain'
 import Simulation, {
   SimulationConfiguration,
   SimulationSerialization,

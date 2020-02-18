@@ -58,6 +58,8 @@ export const DEFAULT_FACIES_REALIZATION_PARAMETER_NAME = 'aps'
 
 export const DEFAULT_FACIES_AUTOFILL = isDevelopmentBuild()
 
+export const DEFAULT_AUTOFILL_OBSERVED_FACIES = true
+
 export const DEFAULT_TIME_UNTIL_MESSAGE_DISMISSAL = 10000
 
 export const ERROR_TOLERANCE = 0.0001

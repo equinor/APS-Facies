@@ -177,8 +177,10 @@ interface RootGetters {
   options: {
     filterZeroProbability: boolean
   }
+  'useRegions': boolean
   'region': Region
   'zone': Zone
+  'parent': Parent
 
   simulationSettings: ({ field, zone }: { field?: GaussianRandomField, zone?: Zone }) => SimulationSettings
   'zones/byCode': (zoneNumber: number, regionNumber?: Optional<number>) => Parent

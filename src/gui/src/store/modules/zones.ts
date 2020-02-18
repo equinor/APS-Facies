@@ -1,5 +1,4 @@
 import { getId } from '@/utils'
-import { Dependent } from '@/utils/domain/bases/interfaces'
 import Vue from 'vue'
 
 import { Module } from 'vuex'
@@ -11,7 +10,7 @@ import { ZoneConfiguration } from '@/utils/domain/zone'
 import { Optional } from '@/utils/typing'
 
 import rms from '@/api/rms'
-import { Parent, Zone, Region, TruncationRule } from '@/utils/domain'
+import { Parent, Zone, Region, TruncationRule, Dependent } from '@/utils/domain'
 import { identify, includes } from '@/utils/helpers'
 
 const module: Module<ZoneState, RootState> = {
@@ -30,10 +29,13 @@ const module: Module<ZoneState, RootState> = {
         commit('SELECTED', { zone, toggled })
       }
     },
-    current: async ({ commit, dispatch, state }, { id }): Promise<void> => {
-      await dispatch('gaussianRandomFields/crossSections/fetch', { zone: id }, { root: true })
+    current: async ({ commit, dispatch, state }, { id }: { id: ID }): Promise<void> => {
+      await dispatch('gaussianRandomFields/crossSections/fetch', { zone: state.available[`${id}`] }, { root: true })
       commit('CURRENT', { id })
       await dispatch('truncationRules/preset/fetch', undefined, { root: true })
+
+      // Select the observed facies
+      await dispatch('facies/selectObserved', undefined, { root: true })
     },
     fetch: async ({ commit, dispatch, rootGetters }): Promise<void> => {
       commit('LOADING', true)
@@ -65,6 +67,13 @@ const module: Module<ZoneState, RootState> = {
     conformity: async ({ commit }, { zone, value }): Promise<void> => {
       commit('CONFORMITY', { zone, value })
     },
+    touch: async ({ commit, dispatch }, { zone, region }: Parent): Promise<void> => {
+      if (region) {
+        await dispatch('regions/touch', region, { root: true })
+      } else {
+        commit('TOUCH', zone)
+      }
+    },
   },
 
   mutations: {
@@ -83,6 +92,9 @@ const module: Module<ZoneState, RootState> = {
     CONFORMITY: (state, { zone, value }): void => {
       Vue.set(state.available[`${zone.id}`], 'conformity', value)
     },
+    TOUCH: (state, zone: Zone): void => {
+      zone.touch()
+    },
   },
 
   getters: {
@@ -90,7 +102,7 @@ const module: Module<ZoneState, RootState> = {
       return Object.keys(state.available).filter((id): boolean => !!state.available[`${id}`].selected)
     },
     isFmuUpdatable: (state, getters, rootState): (zone: Zone) => boolean => (zone: Zone): boolean => {
-      const belongsToZone = (item: Dependent): boolean => item.parent.zone === getId(zone) /* Ignore regions */
+      const belongsToZone = (item: Dependent): boolean => getId(item.parent.zone) === getId(zone) /* Ignore regions */
 
       const truncationRules = Object.values(rootState.truncationRules.available)
         .filter(rule => belongsToZone(rule))
@@ -110,11 +122,11 @@ const module: Module<ZoneState, RootState> = {
         region,
       }
     },
-    byParent: (state) => (parent: { zone: ID, region?: ID }): Optional<Zone | Region> => {
-      const zone = state.available[parent.zone]
+    byParent: (state) => (parent: { zone: Zone | ID, region?: Region | ID }): Optional<Zone | Region> => {
+      const zone = state.available[getId(parent.zone)]
       if (zone) {
         if (parent.region) {
-          const region = zone.regions.find(region => region.id === parent.region)
+          const region = zone.regions.find(region => region.id === getId(parent.region))
           return region || null
         }
         return zone

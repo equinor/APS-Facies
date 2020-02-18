@@ -1,5 +1,6 @@
 import {
   COLOR_SCALES,
+  DEFAULT_AUTOFILL_OBSERVED_FACIES,
   DEFAULT_COLOR_SCALE,
   DEFAULT_FACIES_AUTOFILL,
   DEFAULT_IMPORT_FIELDS_IN_FMU,
@@ -23,6 +24,7 @@ const module: Module<OptionsState, RootState> = {
     automaticAlphaFieldSelection,
     filterZeroProbability,
     automaticFaciesFill: makeOption(DEFAULT_FACIES_AUTOFILL, [true, false]),
+    automaticObservedFaciesSelection: makeOption(DEFAULT_AUTOFILL_OBSERVED_FACIES, [true, false]),
     colorScale: makeOption(DEFAULT_COLOR_SCALE, COLOR_SCALES),
     importFields: makeOption(DEFAULT_IMPORT_FIELDS_IN_FMU, [true, false]),
   },

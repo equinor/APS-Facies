@@ -143,7 +143,6 @@ export default abstract class TruncationRule<
       ...super.toJSON(),
       type: this.type,
       name: this.name,
-      parent: this.parent,
       polygons: Object.values(this._polygons).map((polygon): S => (polygon.toJSON() as S)),
       backgroundFields: this.backgroundFields.map((field): ID => getId(field)),
     }

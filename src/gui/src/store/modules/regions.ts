@@ -51,12 +51,18 @@ const module: Module<RegionState, RootState> = {
         commit('zones/SELECTED', { toggled: false, zone: rootGetters.zone }, { root: true })
       }
     },
-    current: async ({ commit, dispatch, rootState }, { id }): Promise<void> => {
+    current: async ({ commit, dispatch, rootState }, { id }: { id: ID }): Promise<void> => {
       const zone = Object.values(rootState.zones.available)
         .find((zone): boolean => Object.values(zone.regions).map((region): ID => region.id).includes(id))
-      await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region: id }, { root: true })
+      if (!zone) throw new Error(`There are no zones corresponding with the region with ID '${id}'`)
+      const region = zone.regions.find(region => region.id === id)
+      if (!region) throw new Error(`The region with ID ${id} was not found in its respective zone (${zone})`)
+      await dispatch('gaussianRandomFields/crossSections/fetch', { zone, region }, { root: true })
       commit('CURRENT', { id })
       await dispatch('truncationRules/preset/fetch', undefined, { root: true })
+
+      // Select the observed facies
+      await dispatch('facies/selectObserved', undefined, { root: true })
     },
     fetch: async (context, zone): Promise<void> => {
       const { commit, rootState, rootGetters, state } = context
@@ -86,6 +92,9 @@ const module: Module<RegionState, RootState> = {
       commit('AVAILABLE', { regions })
       await dispatch('select', { regions: Object.values(regions).filter(({ selected }): boolean => !!selected) })
     },
+    touch: async ({ commit }, region: Region): Promise<void> => {
+      commit('TOUCH', region)
+    },
   },
 
   mutations: {
@@ -109,6 +118,9 @@ const module: Module<RegionState, RootState> = {
     },
     LOADING: (state, toggle): void => {
       Vue.set(state, '_loading', toggle)
+    },
+    TOUCH: (state, region: Region): void => {
+      region.touch()
     },
   },
 }

@@ -6,7 +6,6 @@ import {
   Identifiable,
   Named,
   Ordered,
-  Parent,
   SimulationSettings,
   Newable,
   Identified,
@@ -16,7 +15,7 @@ import { RootGetters } from '@/store/typing'
 import { PolygonSpecification } from '@/utils/domain/polygon/base'
 import { TruncationRule } from '@/utils/domain/truncationRule'
 import { TruncationRuleSpecification, TruncationRuleType } from '@/utils/domain/truncationRule/base'
-import { Polygon } from '@/utils/domain'
+import { Parent, Polygon } from '@/utils/domain'
 import { ID } from '@/utils/domain/types'
 
 import { hasParents } from '@/utils/domain/bases/zoneRegionDependent'
@@ -33,6 +32,7 @@ import {
   isUUID,
   newSeed,
   notEmpty,
+  identify,
 } from '@/utils/helpers'
 
 function makeData<C extends Identifiable, T> (
@@ -286,14 +286,6 @@ function sortByOrder<T extends Ordered> (items: T[], index: number, isDescending
   return sortByProperty<T>('order')(items)
 }
 
-function toIdentifiedObject<T> (items: T[]): Identified<T> {
-  items = Object.values(items)
-  return items.reduce((obj, item): Identified<T> => {
-    obj[getId(item)] = item
-    return obj
-  }, {})
-}
-
 function getParameters (collection: object, delimiter = '.'): string[] {
   const parameters = new Set(Object.keys(collection))
   const selectable = Object.keys(flatten(collection, { delimiter }))
@@ -329,7 +321,7 @@ export {
   isEmpty,
   notEmpty,
   sortAlphabetically,
-  toIdentifiedObject,
   getParameters,
   includes,
+  identify,
 }

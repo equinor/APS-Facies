@@ -14,6 +14,12 @@
     <template
       v-slot:item="{ item : facies }"
     >
+      <td class="dense">
+        <informational-icons
+          :value="facies"
+          :current="current"
+        />
+      </td>
       <td class="text-left">
         <editable-cell
           v-if="!isFaciesFromRms(facies)"
@@ -22,17 +28,12 @@
           field="name"
           @submit="changeName"
         />
-        <v-popover
+        <highlight-current-item
           v-else
-          trigger="hover"
-        >
-          <highlight-current-item
-            :value="facies"
-            :current="current"
-            field="name"
-          />
-          <span slot="popover">{{ 'From RMS' }}</span>
-        </v-popover>
+          :value="facies"
+          :current="current"
+          field="name"
+        />
       </td>
       <td
         v-if="!hideAlias"
@@ -94,9 +95,10 @@ import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentIt
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
+import InformationalIcons from '@/components/table/FaciesTable/InformationalIcons.vue'
 
 import { Facies, GlobalFacies, Parent } from '@/utils/domain'
-import { RootGetters, RootState } from '@/store/typing'
+import { RootGetters, RootState, Store } from '@/store/typing'
 import { Color } from '@/utils/domain/facies/helpers/colors'
 import { HeaderItems } from '@/utils/typing'
 
@@ -109,6 +111,7 @@ import { hasCurrentParents } from '@/utils'
     HighlightCurrentItem,
     Swatches,
     EditableCell,
+    InformationalIcons,
   }
 })
 export default class FaciesTable extends Vue {
@@ -130,14 +133,10 @@ export default class FaciesTable extends Vue {
       : 'There are no facies for the selected well logs. You may still add new facies.'
   }
 
-  get facies (): Facies[] { return this.$store.getters.faciesTable }
+  get facies (): GlobalFacies[] { return this.$store.getters.faciesTable }
 
   get parent (): Parent {
-    const state = this.$store.state
-    return {
-      zone: state.zones.current,
-      region: state.regions.current
-    }
+    return (this.$store as Store).getters.parent
   }
 
   get headers (): HeaderItems {
@@ -145,6 +144,10 @@ export default class FaciesTable extends Vue {
       {
         text: 'Use',
         value: 'selected',
+      },
+      {
+        text: 'Notes',
+        value: '',
       },
       {
         text: 'Facies',

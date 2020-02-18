@@ -26,14 +26,9 @@ export interface Coded {
 export interface Discrete extends Named, Coded {
 }
 
-export interface Parent {
+export interface ParentReference {
   readonly zone: ID
   readonly region: ID | null
-}
-
-export interface Dependent {
-  readonly parent: Parent
-  isChildOf (parent: Parent): boolean
 }
 
 interface Coordinate2D {
