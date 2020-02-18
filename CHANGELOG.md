@@ -8,9 +8,9 @@ Now that TDG4 is approved, the APS GUI is ready for general usage.
 There are no mayor new features in this release, compared to 0.13.0, but rather much polish, and quality of life improvements.
 
 The biggest change, is that jobs save with version 1.0.0 of the GUI will be able to be loaded in newer versions of the GUI.
-**NOTE**: If there is a problem, please contact us, and **DO NOT** save the job, nor the RMS project, as this is likely to currupt the job.
+**NOTE**: If there is a problem, please contact us, and **DO NOT** save the job, nor the RMS project, as this is likely to corrupt the job.
 
-If you are using the "stubs", these should be updated, as they have been slight tweaked.
+If you are using the APS scripts in a RMS workflow, these should be updated, as they have been slight tweaked.
 
 ### What's new
 * Do not require BW in order to add Facies. Closes #251
@@ -26,7 +26,7 @@ If you are using the "stubs", these should be updated, as they have been slight 
     * Trend location
     * Simulation box thickness
     * and more
-* May read `global_varialbes.yml`
+* May read `global_variables.yml`
 * The user may refresh the data in the GUI, if the data from RMS is changed
 * May change facies code iff no blocked well log is given
 * Allow the user to override the factor of "unsuitable" cells in probability cubes
@@ -462,7 +462,7 @@ These bugs concerns opening the GUI, Overlay Facies, Background Facies, and Expo
 
 ### Restructure
 * The default values for trends are updated to be more usable
-* `matplotlibrc` is automatically generated, with a different backend depending an platform and usage 
+* `matplotlibrc` is automatically generated, with a different backend depending an platform and usage
 * The `<MainFaciesTable>` tag in the model file has gotten two new attributes
   * `blockedWellSet`
   * `blockedWellLog`
@@ -484,7 +484,7 @@ These bugs concerns opening the GUI, Overlay Facies, Background Facies, and Expo
 * Plots in the GUI are now consistent with plots from `testPreviewer`
 * Curvature _must_ be greater than `1` for `HYPERBOLIC` trends
 * The order of Gaussian Random Fields has been made consistent
-* The probabilities in the exported model file is now consistent with what is shown in the GUI 
+* The probabilities in the exported model file is now consistent with what is shown in the GUI
 
 
 ### Miscellaneous
@@ -512,7 +512,7 @@ The user may now specify a complete non-cubic truncation rule with an arbitrary 
 ### Restructure
 * The need for `seed.dat` has been removed from APS modeling (single processing)
 * `matplotlibrc` should now be read appropriately
-  * **Note**: This may cause the test previewer to fail on some systems 
+  * **Note**: This may cause the test previewer to fail on some systems
 * The mock now uses HDF5 instead of a `tar.gz` archive
   * Various edge cases, and issues with the mock has been resolved
 * The custom buttons are now easier to use
