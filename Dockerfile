@@ -1,5 +1,5 @@
 FROM git.equinor.com:4567/sdp/sdpsoft/centos:7
-LABEL version="4.1.0" \
+LABEL version="4.1.1" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -25,6 +25,7 @@ ENV NODE_ARCH='x64' \
 # Prefixes
 ENV RMS_PREFIX="/prog/roxar/rms/versions/${RMS_VERSION}" \
     DEPENDENCIES_PREFIX="/dependencies" \
+    NRLIB_PREFIX="${BUILD_DIR}/nrlib-${NRLIB_VERSION}" \
     INTEL_PREFIX="${SOURCE_DIR}/${INTEL_MKL}" \
     INTEL_MKL_PREFIX="/opt/intel" \
     NODE_PREFIX="${INSTALL_DIR}/node-${NODE_VERSION}"
@@ -80,6 +81,7 @@ ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
 # Add external resources
 ADD .rms/bundle.rms-${RMS_VERSION}.tar.gz /
 ADD .rms/APS-workflows.rms11.tar.gz /
+ADD libraries/sources/nrlib ${NRLIB_PREFIX}
 
 # Misc. software
 RUN yum update -y \
@@ -147,7 +149,6 @@ RUN yum update -y \
              $NODE_PREFIX \
              $INSTALL_DIR \
              $DEPENDENCIES_PREFIX \
-             $NRLIB_PREFIX \
              $INTEL_PREFIX \
  && cd ${SOURCE_DIR} \
     # Intel MKL
@@ -156,8 +157,6 @@ RUN yum update -y \
  && wget https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz \
     # Yarn
  && wget https://yarnpkg.com/downloads/${YARN_VERSION}/yarn-v${YARN_VERSION}.tar.gz \
-    # NRlib
- && wget https://git.equinor.com/sdp/nrlib/repository/v${NRLIB_VERSION}/archive.tar.gz --output-document=${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz \
     ## Verify Downloads
     # Node JS
  && wget https://nodejs.org/dist/v${NODE_VERSION}/SHASUMS256.txt.asc --output-document=${SOURCE_DIR}/NODE_SHASUMS256.txt.asc \
@@ -168,13 +167,10 @@ RUN yum update -y \
  && gpg --batch --verify yarn-v${YARN_VERSION}.tar.gz.asc yarn-v${YARN_VERSION}.tar.gz \
     # Create all build directories
  && cd ${BUILD_DIR} \
- && mkdir -p \
-    nrlib-${NRLIB_VERSION} \
     # Extract all downloaded archives
  && tar -xvzf  ${SOURCE_DIR}/${INTEL_MKL}.tgz -C ${INTEL_PREFIX} --strip-components=1 \
  && tar -xvJf  ${SOURCE_DIR}/node-v${NODE_VERSION}-linux-${NODE_ARCH}.tar.xz -C ${NODE_PREFIX} --strip-components=1 --no-same-owner \
  && tar -xvzf  ${SOURCE_DIR}/yarn-v${YARN_VERSION}.tar.gz -C ${NODE_PREFIX} --strip-components=1 \
- && tar -xvzf  ${SOURCE_DIR}/nrlib-${NRLIB_VERSION}.tar.gz -C nrlib-${NRLIB_VERSION} --strip-components=1 \
  # Remove downloaded archives
  && rm -f ${SOURCE_DIR}/*.txt* \
  && rm -f ${SOURCE_DIR}/*.tar.* \

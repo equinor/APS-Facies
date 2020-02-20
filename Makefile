@@ -350,7 +350,8 @@ nrlib: $(NRLIB)
 
 install-nrlib: build-nrlib
 	cd $(CODE_DIR) && \
-	$(PIPENV) install $(NRLIB_PATH)
+	$(PIPENV) install $(NRLIB_PATH) && \
+	git checkout -- $(CODE_DIR)/Pipfile $(CODE_DIR)/Pipfile.lock
 
 build-nrlib: get-nrlib
 	cd $(NRLIB_PATH) && \
@@ -362,11 +363,17 @@ test-nrlib:
 
 get-nrlib:
 	$(MKDIR) $(NRLIB_PATH)
-	curl https://git.equinor.com/sdp/nrlib/repository/v$(NRLIB_VERSION)/archive.tar.gz \
-	     --output nrlib-$(NRLIB_VERSION).tar.gz \
-	     --silent
-	$(TAR_EXCRACT) nrlib-$(NRLIB_VERSION).tar.gz -C $(NRLIB_PATH) --strip-components=1
-	rm nrlib-$(NRLIB_VERSION).tar.gz
+	[ -d $(NRLIB_PATH) ] && { \
+	    echo "NRlib has been downloaded. Updating" ; \
+	    cd $(NRLIB_PATH) ; \
+	    git fetch ; \
+	    git checkout v$(NRLIB_VERSION) ; \
+	} || { \
+	    echo "Fetching NRlib" ;\
+	    git clone git@git.equinor.com:/sdp/nrlib.git \
+	        $(NRLIB_PATH) ; \
+	    git checkout v$(NRLIB_VERSION) ; \
+	}
 
 initialize-python-environment: install-pipenv
 	cd $(CODE_DIR) && \
@@ -420,7 +427,7 @@ clean-__pycache__:
 clean-pyc:
 	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
-docker-image: $(GET_RMS_RESOURCES)
+docker-image: $(GET_RMS_RESOURCES) get-nrlib
 	docker build --rm --pull --tag $(DOCKER_IMAGE) --file $(DOCKERFILE) $(CODE_DIR)
 
 docker-login:
