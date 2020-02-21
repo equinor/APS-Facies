@@ -146,14 +146,15 @@ const module: Module<FaciesState, RootState> = {
         probabilityCubes = null,
         gridModel = null,
         zoneNumber = null,
-        useRegions = false,
+        useRegions = null,
         regionParameter = null,
         regionNumber = null,
       } = {}
     ): Promise<void> => {
       if (!gridModel) gridModel = rootGetters.gridModel
       if (!zoneNumber && zoneNumber !== 0) zoneNumber = rootGetters.zone.code
-      if (useRegions || rootGetters.useRegions) {
+      if (!useRegions && useRegions !== false) useRegions = rootGetters.useRegions
+      if (useRegions) {
         if (!regionParameter) regionParameter = rootGetters.regionParameter
         const region = rootGetters.region
         if (region && !regionNumber && regionNumber !== 0) regionNumber = region.code
