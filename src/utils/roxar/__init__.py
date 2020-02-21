@@ -42,7 +42,7 @@ def get_nrlib_path():
         # Assuming we are on RGS
         redhat_version = get_redhat_version()
         rms_version = get_rms_version()[0]
-        return '/project/res/nrlib/nrlib-dist-RHEL{}-RMS{}'.format(redhat_version, rms_version)
+        return f'/project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
 
 
 def get_rms_version():
