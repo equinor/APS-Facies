@@ -112,10 +112,9 @@ const module: Module<ZoneState, RootState> = {
     byCode: (state): (zoneNumber: number, regionNumber: Optional<number>) => Parent => (zoneNumber: number, regionNumber: Optional<number> = null): Parent => {
       const zone = Object.values(state.available).find((zone): boolean => zone.code === zoneNumber)
       if (!zone) throw new APSError(`There are not Zones with code ${zoneNumber}`)
-      let region = null
-      if (regionNumber && regionNumber !== 0) {
-        region = zone.regions.find((region): boolean => region.code === regionNumber)
-        if (!region) throw new APSError(`The Zone with code ${zoneNumber}, does not have a region with code ${regionNumber}`)
+      const region = zone.regions.find((region): boolean => region.code === regionNumber) || null
+      if ((regionNumber || regionNumber === 0) && !region) {
+        throw new APSError(`The Zone with code ${zoneNumber}, does not have a region with code ${regionNumber}`)
       }
       return {
         zone,
