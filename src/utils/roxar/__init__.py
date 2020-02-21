@@ -66,13 +66,13 @@ def get_redhat_version():
 
 
 @must_run_in_rms
-def get_common_python_packages_path():
+def get_rgs_specific_python_package_paths() -> Optional[List[str]]:
     import sys
 
     python_version = sys.version_info
     python_version = f'{python_version.major}.{python_version.minor}'
 
-    return (
+    common_equinor_path = (
         '/project/res/roxapi/x86_64_RH_{redhat_version}/{rms_version}/lib/python{python_version}/site-packages'
         ''.format(
             redhat_version=get_redhat_version(),
@@ -81,15 +81,24 @@ def get_common_python_packages_path():
         )
     )
 
+    return [common_equinor_path]
 
-def import_module(name: str, dependencies: Optional[List[str]] = None) -> None:
-    from src.utils.roxar import get_common_python_packages_path
-    path = get_common_python_packages_path()
-    if path is None:
-        raise ImportError
+
+def get_common_python_packages_paths() -> List[str]:
+    import sys
+
+    rgs_paths = get_rgs_specific_python_package_paths() or []
+
+    return rgs_paths + [path for path in sys.path if path.endswith('site-packages')]
+
+
+def import_module(name: str, dependencies: Optional[List[str]] = None, min_version: Optional[str] = None) -> None:
+    from src.utils.roxar import get_common_python_packages_paths
+    paths = get_common_python_packages_paths()
 
     import sys
-    import importlib.machinery
+    import importlib.util
+    from pathlib import Path
     if dependencies is None:
         dependencies = []
 
@@ -99,7 +108,14 @@ def import_module(name: str, dependencies: Optional[List[str]] = None) -> None:
         except KeyError:
             pass
 
-        spec = importlib.util.spec_from_file_location(name, f'{path}/{name}/__init__.py')
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
+        imported = False
+        for path in paths:
+            package_path = Path(f'{path}/{name}/__init__.py')
+            if not imported and package_path.exists():
+                spec = importlib.util.spec_from_file_location(name, str(package_path))
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[name] = module
+                spec.loader.exec_module(module)
+                imported = True
+    if not imported:
+        raise ModuleNotFoundError(f"No module named '{name}'")
