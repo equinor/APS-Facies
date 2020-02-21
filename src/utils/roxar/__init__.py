@@ -119,3 +119,18 @@ def import_module(name: str, dependencies: Optional[List[str]] = None, min_versi
                 imported = True
     if not imported:
         raise ModuleNotFoundError(f"No module named '{name}'")
+
+    if min_version is not None:
+        from packaging.version import parse
+        module = sys.modules[name]
+        try:
+            module_version = module.__version__
+            if parse(module_version) < parse(min_version):
+                raise ImportError(
+                    f"APS requires version {min_version}, or higher of '{name}', but {module_version} was installed."
+                )
+        except AttributeError:
+            warn(
+                f"APS requires {min_version}, or higher of '{name}', but not version information could be gathered.\n"
+                f"This may be OK, but if you encounter errors related to '{name}', consider updating it."
+            )
