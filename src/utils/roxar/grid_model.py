@@ -525,13 +525,13 @@ class GridSimBoxSize:
     @property
     @cached
     def nx(self):
-        nx, *_ = self.grid.grid_indexer.dimensions
+        nx, *_ = self.dimensions
         return nx
 
     @property
     @cached
     def ny(self):
-        _, ny, _ = self.grid.grid_indexer.dimensions
+        _, ny, _ = self.dimensions
         return ny
 
     @property
