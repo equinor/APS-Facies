@@ -42,3 +42,9 @@ export interface PolygonDescription {
   name: ID
   polygon: [number, number][]
 }
+
+export interface RmsGridModel {
+  name: string
+  exists: boolean
+  zones: number
+}

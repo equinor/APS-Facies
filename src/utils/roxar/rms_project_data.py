@@ -101,7 +101,7 @@ class RMSData:
     def get_grid_model(self, name):
         if not isinstance(name, str):
             raise ValueError('The name of a grid model must be a string')
-        grid_models = self.get_grid_models()
+        grid_models = self.project.grid_models
         return grid_models[name]
 
     def get_grid(self, name, realization=None):
@@ -109,15 +109,16 @@ class RMSData:
             realization = self.project.current_realisation
         return self.get_grid_model(name).get_grid(realization)
 
-    def get_grid_model_names(self):
-        grid_models = self.get_grid_models()
+    def get_grid_models(self):
+        grid_models = self.project.grid_models
         models = []
         for grid_model in grid_models:
             name = grid_model.name
+            grid = grid_model.get_grid(realisation=self.project.current_realisation)
             models.append({
                 'name': name,
                 'exists': self.grid_exists(name),
-                'zones': len(grid_model.get_grid(self.project.current_realisation).zone_names),
+                'zones': len(grid.zone_names),
             })
         return models
 
