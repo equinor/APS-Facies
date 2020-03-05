@@ -11,7 +11,6 @@ interface SerializedState {
 interface RmsJob extends SerializedState {
   _treeorigin: string
   _version: string
-  [_: string]: any
 }
 
 // @ts-ignore
