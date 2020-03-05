@@ -96,7 +96,6 @@
 </template>
 
 <script lang="ts">
-import GridModel from '@/utils/domain/gridModel'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
@@ -108,6 +107,7 @@ import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
 import { DialogOptions } from '@/utils/domain/bases/interfaces'
+import GridModel from '@/utils/domain/gridModel'
 
 interface Invalid {
   fmuGridDepth: boolean
