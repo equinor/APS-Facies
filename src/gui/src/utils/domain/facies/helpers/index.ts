@@ -1,4 +1,4 @@
-import { Facies } from '@/utils/domain'
+import Facies from '@/utils/domain/facies/local'
 import { ID } from '@/utils/domain/types'
 import { getId } from '@/utils/helpers'
 

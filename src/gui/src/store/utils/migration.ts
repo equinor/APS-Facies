@@ -1,6 +1,8 @@
 import cmp from 'semver-compare'
 import rms from '@/api/rms'
-import { displayWarning } from '@/utils/helpers/storeInteraction'
+import { displayMessage } from '@/store/utils'
+
+import { Store } from '@/store/typing'
 
 interface Migration {
   from: string
@@ -96,13 +98,18 @@ function canMigrate (fromVersion: string, toVersion: string): boolean {
   return version === toVersion
 }
 
-export default async function migrate (state: any, toVersion: string): Promise<any> {
+export default async function migrate (context: Store, state: any, toVersion: string): Promise<any> {
   /* Inspired by: https://typeofnan.dev/an-approach-to-js-object-schema-migration/ */
   const fromVersion = state.version
   if (fromVersion === toVersion) return state
 
   if (!canMigrate(fromVersion, toVersion)) {
-    displayWarning(`The stored job could not be migrated, its version (${fromVersion}) might incompatible with the current version (${toVersion}).`)
+    // Uses "base method" to avoid circular dependencies
+    displayMessage(
+      context,
+      `The stored job could not be migrated, its version (${fromVersion}) might incompatible with the current version (${toVersion}).`,
+      'warning',
+    )
     return state
   }
 

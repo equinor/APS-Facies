@@ -5,7 +5,7 @@ import cloneDeep from 'lodash/cloneDeep'
 
 import { newSeed } from '@/utils/helpers'
 import { Named } from '@/utils/domain/bases/interfaces'
-import { Parent } from '@/utils/domain'
+import { Parent } from '@/utils/domain/bases/zoneRegionDependent'
 import Simulation, {
   SimulationConfiguration,
   SimulationSerialization,

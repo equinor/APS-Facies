@@ -1,4 +1,4 @@
-import { Parent } from '@/utils/domain'
+import { Parent } from '@/utils/domain/bases/zoneRegionDependent'
 import Discrete, { DiscreteConfiguration, DiscreteSerialization } from '@/utils/domain/bases/discrete'
 import { Color } from '@/utils/domain/facies/helpers/colors'
 import { Optional } from '@/utils/typing'
