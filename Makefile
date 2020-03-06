@@ -98,7 +98,7 @@ TEST_FOLDER := $(SOURCE_DIR)/unit_test
 INTEGRATION_TESTS := $(TEST_FOLDER)/integration
 AUXILLARY := $(CODE_DIR)/auxillary
 DOCKERFILE := $(CODE_DIR)/Dockerfile
-DOCKER_REGISTRY_SERVER := git.equinor.com:4567
+DOCKER_REGISTRY_SERVER := registry.git.equinor.com
 DOCKER_REGISTRY := $(DOCKER_REGISTRY_SERVER)/aps/gui
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)

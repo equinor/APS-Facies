@@ -1,5 +1,5 @@
-FROM git.equinor.com:4567/sdp/sdpsoft/centos:7
-LABEL version="4.1.1" \
+FROM registry.git.equinor.com/sdp/sdpsoft/centos:7
+LABEL version="4.1.2" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"

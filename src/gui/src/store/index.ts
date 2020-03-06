@@ -38,7 +38,7 @@ import {
   sortAlphabetically,
 } from '@/utils'
 import { hasOwnProperty } from '@/utils/helpers'
-import { displayError } from '@/utils/helpers/storeInteraction'
+import { displayMessage } from '@/store/utils'
 
 Vue.use(Vuex)
 
@@ -108,11 +108,12 @@ const store: Store<RootState> = new Vuex.Store({
         commit('LOADING', { loading: false })
       }
     },
-    async populate ({ dispatch, state }, data): Promise<void> {
+    async populate (context, data): Promise<void> {
+      const { dispatch, state } = context
       // eslint-disable-next-line @typescript-eslint/no-use-before-define
       resetState()
       await dispatch('startLoading')
-      data = await migrate(data, state.version)
+      data = await migrate(context, data, state.version)
       try {
         await dispatch('fetch')
 
@@ -177,7 +178,7 @@ const store: Store<RootState> = new Vuex.Store({
           force: true,
         })
       } catch (e) {
-        displayError(e)
+        displayMessage(context, e, 'error')
       } finally {
         await dispatch('finnishLoading')
       }
