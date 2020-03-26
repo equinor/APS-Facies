@@ -12,6 +12,7 @@ interface ListItem<T> {
   value?: T
   text: string
   disabled?: boolean
+  help?: string
 }
 
 type HeaderItems = HeaderItem[]

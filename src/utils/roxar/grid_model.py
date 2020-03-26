@@ -520,7 +520,7 @@ class GridSimBoxSize:
     @property
     @cached
     def dimensions(self):
-        return self.grid.grid_indexer.dimensions
+        return self.grid.simbox_indexer.dimensions
 
     @property
     @cached
@@ -534,20 +534,26 @@ class GridSimBoxSize:
         _, ny, _ = self.dimensions
         return ny
 
+    def _get_cell_corners_by_index(self, cell_indices):
+        if self.grid.has_dual_index_system:
+            cell_numbers = self.grid.simbox_indexer.get_cell_numbers(cell_indices)
+            return self.grid.get_cell_corners(cell_numbers)
+        return self.grid.get_cell_corners_by_index(cell_indices)
+
     @property
     @cached
     def cell_00(self):
-        return self.grid.get_cell_corners_by_index((0, 0, 0))
+        return self._get_cell_corners_by_index((0, 0, 0))
 
     @property
     @cached
     def cell_10(self):
-        return self.grid.get_cell_corners_by_index((self.nx - 1, 0, 0))
+        return self._get_cell_corners_by_index((self.nx - 1, 0, 0))
 
     @property
     @cached
     def cell_01(self):
-        return self.grid.get_cell_corners_by_index((0, self.ny - 1, 0))
+        return self._get_cell_corners_by_index((0, self.ny - 1, 0))
 
     @property
     @cached

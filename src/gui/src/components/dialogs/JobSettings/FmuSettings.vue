@@ -14,7 +14,7 @@
           <v-checkbox
             v-model="_runFmuWorkflows"
             label="Run APS facies update in AHM/ERT"
-            :disabled="useRegions"
+            :disabled="disableErtMode"
           />
         </base-tooltip>
       </v-col>
@@ -282,10 +282,19 @@ export default class FmuSettings extends Vue {
   get reasonForDisabling (): string | undefined {
     if (this.useRegions) {
       return 'Regions are not supported in ERT/AHM mode. Please deselect regions if you want to run APS with ERT/AHM'
+    } else if (this.gridHasReverseFaults) {
+      return 'Grids with reverse faults, are not supported in ERT mode'
     }
     return undefined
   }
 
   get useRegions (): boolean { return (this.$store as Store).state.regions.use }
+
+  get gridHasReverseFaults (): boolean {
+    const grid = (this.$store as Store).getters['gridModels/current']
+    return !!grid && grid.hasDualIndexSystem
+  }
+
+  get disableErtMode (): boolean { return !!this.reasonForDisabling }
 }
 </script>

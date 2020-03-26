@@ -165,6 +165,7 @@ Handedness = Literal["left", "right"]
 
 
 class UpdateGridOrientation(FmuModelChange):
+    skip: bool
     _grid: xtgeo.Grid
     _original: Handedness
 

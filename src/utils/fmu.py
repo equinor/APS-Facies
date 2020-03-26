@@ -2,6 +2,7 @@ import os
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from collections import defaultdict
+from warnings import warn
 from typing import Dict
 from pathlib import Path
 
@@ -369,8 +370,13 @@ class UpdateTrends(FmuModelChanges):
 
 class UpdateGridOrientation(FmuModelChange):
     def __init__(self, *, project, aps_model, **kwargs):
-        self._grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
-        self._original = self._grid.ijk_handedness
+        grid = get_grid(project, aps_model)
+        self.skip = grid.has_dual_index_system
+        if self.skip:
+            warn(f'Ensuring correct rotation of the grid, is not supported for grids with reverse faults, yet')
+        else:
+            self._grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
+            self._original = self._grid.ijk_handedness
 
     def turn_grid(self, handedness):
         if self._grid.ijk_handedness != handedness:
@@ -378,10 +384,12 @@ class UpdateGridOrientation(FmuModelChange):
 
     def before(self):
         # nrlib uses a right-handed coordinate system
-        self.turn_grid('right')
+        if not self.skip:
+            self.turn_grid('right')
 
     def after(self):
-        self.turn_grid(self._original)
+        if not self.skip:
+            self.turn_grid(self._original)
 
 
 @contextmanager
