@@ -17,6 +17,7 @@ const module: Module<SelectableChoice<string>, RootState> = {
   actions: {
     select: async (context, blockedWellLog): Promise<void> => {
       const { commit, dispatch } = context
+      blockedWellLog = blockedWellLog || null
       commit('CURRENT', blockedWellLog)
       await removeFaciesDependent(context)
       await dispatch('facies/global/fetch', null, { root: true })
