@@ -1,7 +1,15 @@
 /**
  * Mock of the rms.uipy object available in RMS 11
  */
-import { AverageParameterProbabilities, CodeName, RmsFacies, Constants, PolygonDescription, SimulationBoxSize } from '@/api/types'
+import {
+  AverageParameterProbabilities,
+  CodeName,
+  RmsFacies,
+  Constants,
+  PolygonDescription,
+  SimulationBoxSize,
+  RmsGridModel
+} from '@/api/types'
 import { TruncationRuleDescription } from '@/utils'
 import { GaussianRandomFieldSpecification } from '@/utils/domain/gaussianRandomField'
 import { ZoneConfiguration } from '@/utils/domain/zone'
@@ -17,7 +25,7 @@ export default {
   projectDirectory: (): Promise<string> => api.call('get_project_dir'),
   fmuParameterList: (): Promise<string> => api.call('get_fmu_parameter_list_dir'),
   currentWorkflowName: (): Promise<string> => api.call('get_current_workflow_name'),
-  gridModels: (): Promise<{ name: string, exists: boolean, zones: number }[]> => api.call('get_grid_model_names'),
+  gridModels: (): Promise<RmsGridModel[]> => api.call('get_grid_models'),
   zones: (gridName: string): Promise<ZoneConfiguration[]> => api.call('get_zones', gridName),
   regionParameters: (gridName: string): Promise<string[]> => api.call('get_region_parameters', gridName),
   regions: (gridName: string, zoneName: string, regionParameter: string): Promise<CodeName[]> => api.call('get_regions', gridName, zoneName, regionParameter),

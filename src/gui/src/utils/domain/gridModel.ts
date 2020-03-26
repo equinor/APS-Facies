@@ -12,6 +12,7 @@ export interface GridModelConfiguration extends BaseItemConfiguration {
   exists: boolean
   dimension: Dimension
   zones: number
+  hasDualIndexSystem: boolean
 }
 
 export interface GridModelSerialization extends BaseItemSerialization {
@@ -20,6 +21,7 @@ export interface GridModelSerialization extends BaseItemSerialization {
   exists: boolean
   dimension: Dimension
   zones: number
+  hasDualIndexSystem: boolean
 }
 
 export default class GridModel extends BaseItem {
@@ -28,14 +30,16 @@ export default class GridModel extends BaseItem {
   public readonly exists: boolean
   public readonly dimension: Dimension
   public readonly zones: number
+  public readonly hasDualIndexSystem: boolean
 
-  public constructor ({ name, order, dimension, zones, exists = true, ...rest }: GridModelConfiguration) {
+  public constructor ({ name, order, dimension, zones, hasDualIndexSystem, exists = true, ...rest }: GridModelConfiguration) {
     super(rest)
     this.name = name
     this.exists = exists
     this.order = order
     this.dimension = dimension
     this.zones = zones
+    this.hasDualIndexSystem = hasDualIndexSystem
   }
 
   public toJSON (): GridModelSerialization {
@@ -46,6 +50,7 @@ export default class GridModel extends BaseItem {
       exists: this.exists,
       dimension: this.dimension,
       zones: this.zones,
+      hasDualIndexSystem: this.hasDualIndexSystem,
     }
   }
 }

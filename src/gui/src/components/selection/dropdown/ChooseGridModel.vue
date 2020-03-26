@@ -30,6 +30,7 @@ export default class ChooseGridModel extends Vue {
           text: grid.name,
           value: grid,
           disabled: !grid.exists,
+          help: grid.hasDualIndexSystem ? 'Grid models with reverse staircase faults, <br/> are not yet supported in ERT mode' : '',
         }
       })
   }

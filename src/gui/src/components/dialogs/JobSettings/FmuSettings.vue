@@ -14,7 +14,7 @@
           <v-checkbox
             v-model="_runFmuWorkflows"
             label="Run APS facies update in AHM/ERT"
-            :disabled="useRegions"
+            :disabled="disableErtMode"
           />
         </base-tooltip>
       </v-col>
@@ -96,7 +96,6 @@
 </template>
 
 <script lang="ts">
-import GridModel from '@/utils/domain/gridModel'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
@@ -107,12 +106,44 @@ import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 
 import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
+import { DialogOptions } from '@/utils/domain/bases/interfaces'
+import GridModel from '@/utils/domain/gridModel'
 
 interface Invalid {
   fmuGridDepth: boolean
 }
 
 type FieldUsage = 'generate' | 'import'
+
+interface WarningParameters {
+  toggled: boolean
+  store: Store
+  dialog: WarningDialog
+}
+
+function warn (dialog: WarningDialog, message: string, options: DialogOptions = { width: 450 }): void {
+  dialog.open(
+    'Be aware',
+    message,
+    options,
+  )
+}
+
+function warnIfUsingCustomTrends ({ toggled, store, dialog }: WarningParameters): void {
+  const affectedFields = Object.values(store.state.gaussianRandomFields.available)
+    .filter(field => field.trend.type === 'RMS_PARAM')
+  if (toggled && affectedFields.length > 0) {
+    warn(dialog,
+      `
+<p>Some Gaussian Random Fields are using a custom Trend ('RMS_PARAM'), which is not supported in AHM-mode.</p>
+<p>More specifically, these fields uses custom trends
+<ul>
+  ${affectedFields.map(({ name, parent }) => `<li>${name} in ${store.getters['zones/byParent'](parent)}</li>`)}
+<ul>
+</p>
+`)
+  }
+}
 
 @Component({
   components: {
@@ -177,23 +208,8 @@ export default class FmuSettings extends Vue {
 
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
   set _runFmuWorkflows (toggled: boolean) {
-    const affectedFields = Object.values((this.$store as Store).state.gaussianRandomFields.available)
-      .filter(field => field.trend.type === 'RMS_PARAM')
-    if (toggled && affectedFields.length > 0) {
-      (this.$refs.confirm as WarningDialog).open(
-        'Be aware',
-        `
-<p>Some Gaussian Random Fields are using a custom Trend ('RMS_PARAM'), which is not supported in AHM-mode.</p>
-<p>More specifically, these fields uses custom trends
-<ul>
-  ${affectedFields.map(({ name, parent }) => `<li>${name} in ${this.$store.getters['zones/byParent'](parent)}</li>`)}
-<ul>
-</p>
-`,
-        {
-          width: 450,
-        })
-    }
+    const params = { toggled, store: this.$store, dialog: (this.$refs.confirm as WarningDialog) }
+    warnIfUsingCustomTrends(params)
     this.$emit('update:runFmuWorkflows', toggled)
     if (toggled) {
       this._onlyUpdateFromFmu = false
@@ -265,11 +281,20 @@ export default class FmuSettings extends Vue {
   // These should not be needed when regions are supported in ERT-mode
   get reasonForDisabling (): string | undefined {
     if (this.useRegions) {
-      return 'Regions are not supported in ERT/AHM mode. Please deselct regions if you want to run APS with ERT/AHM'
+      return 'Regions are not supported in ERT/AHM mode. Please deselect regions if you want to run APS with ERT/AHM'
+    } else if (this.gridHasReverseFaults) {
+      return 'Grids with reverse faults, are not supported in ERT mode'
     }
     return undefined
   }
 
   get useRegions (): boolean { return (this.$store as Store).state.regions.use }
+
+  get gridHasReverseFaults (): boolean {
+    const grid = (this.$store as Store).getters['gridModels/current']
+    return !!grid && grid.hasDualIndexSystem
+  }
+
+  get disableErtMode (): boolean { return !!this.reasonForDisabling }
 }
 </script>

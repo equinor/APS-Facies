@@ -51,6 +51,13 @@ RegionNumber = NewType('RegionNumber', int)
 Average = NewType('Average', float)
 
 
+class Grid(NamedTuple):
+    name: GridName
+    exists: bool
+    zones: int
+    hasDualIndexSystem: bool
+
+
 def empty_if_none(
         func:                           Callable
 ) -> Callable: ...
@@ -98,9 +105,6 @@ class RMSData:
     def get_current_workflow_name(
             self
     ) -> WorkflowName: ...
-    def get_grid_models(
-            self
-    ) -> GridModels: ...
     def get_grid_model(
             self,
             name:                        str
@@ -110,9 +114,9 @@ class RMSData:
             name:                        GridName,
             realization:                 Optional[int]                   = None
     ) -> Grid3D: ...
-    def get_grid_model_names(
+    def get_grid_models(
             self
-    ) -> List[GridName]: ...
+    ) -> List[Grid]: ...
     def get_realization_parameters(
             self,
             grid_model_name:            GridName

@@ -10,7 +10,31 @@
       :items="items"
       :disabled="disabled"
       :label="label"
-    />
+    >
+      <template v-slot:item="{ item, on }">
+        <v-list-item
+          v-on="on"
+        >
+          <v-hover
+            v-slot:default="{ hover }"
+            class="pa-0 ma-0"
+          >
+            <base-tooltip
+              :message="item.help"
+              :open="hover"
+              :disabled="!item.disabled && !item.help"
+              trigger="manual"
+            >
+              <span
+                :style="itemStyle(item)"
+              >
+                {{ item.text }}
+              </span>
+            </base-tooltip>
+          </v-hover>
+        </v-list-item>
+      </template>
+    </v-select>
   </div>
 </template>
 
@@ -19,11 +43,13 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import ConfirmationDialog from '@/components/specification/GaussianRandomField/ConfirmationDialog.vue'
+import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 
 import { ListItem } from '@/utils/typing'
 
 @Component({
   components: {
+    BaseTooltip,
     ConfirmationDialog,
   },
 })
@@ -67,6 +93,15 @@ export default class BaseDropdown<T> extends Vue {
     } else {
       changeValue()
     }
+  }
+
+  itemStyle (item: ListItem<T>): Partial<CSSStyleDeclaration> {
+    if (item.disabled) {
+      return {
+        color: 'rgba(0, 0, 0, 0.38)',
+      }
+    }
+    return {}
   }
 }
 </script>
