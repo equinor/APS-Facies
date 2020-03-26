@@ -5,7 +5,10 @@
     :open="_open"
   >
     <slot />
-    <span slot="popover">{{ _message }}</span>
+    <span
+      slot="popover"
+      v-html="_message"
+    />
   </v-popover>
 </template>
 
