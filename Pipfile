@@ -9,7 +9,7 @@ numpy = "*"
 pillow = "*"
 scipy = "*"
 xtgeo = ">=2.5.0"
-pyyaml = "*"
+pyyaml = ">=2.3.1"
 
 [dev-packages]
 pipenv = "*"
