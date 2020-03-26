@@ -119,6 +119,7 @@ class RMSData:
                 'name': name,
                 'exists': self.grid_exists(name),
                 'zones': len(grid.zone_names),
+                'hasDualIndexSystem': grid.has_dual_index_system,
             })
         return models
 

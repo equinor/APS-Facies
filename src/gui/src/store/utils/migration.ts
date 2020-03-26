@@ -76,6 +76,20 @@ const migrations: Migration[] = [
         })
       return state
     },
+  },
+  {
+    from: '1.3.0',
+    to: '1.4.0',
+    up: async (state): Promise<any> => {
+      const mapping = (await rms.gridModels()).reduce((mapping, gridModel) => {
+        mapping[gridModel.name] = gridModel.hasDualIndexSystem
+        return mapping
+      }, ({} as { [name: string]: boolean }))
+      Object.values(state.gridModels.available).forEach((gridModel: any): void => {
+        gridModel.hasDualIndexSystem = mapping[gridModel.name]
+      })
+      return state
+    },
   }
 ]
 

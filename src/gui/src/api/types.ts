@@ -47,4 +47,5 @@ export interface RmsGridModel {
   name: string
   exists: boolean
   zones: number
+  hasDualIndexSystem: boolean
 }

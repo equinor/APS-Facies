@@ -55,6 +55,7 @@ class Grid(NamedTuple):
     name: GridName
     exists: bool
     zones: int
+    hasDualIndexSystem: bool
 
 
 def empty_if_none(
