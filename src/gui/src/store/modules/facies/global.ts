@@ -48,8 +48,7 @@ const module: Module<GlobalFaciesState, RootState> = {
   actions: {
     fetch: async (context): Promise<void> => {
       const { commit, dispatch } = context
-      commit('AVAILABLE', {})
-      commit('IN_RMS', [])
+      await dispatch('reset')
 
       commit('LOADING', true)
       const facies = await getFaciesFromRMS(context)
@@ -70,6 +69,10 @@ const module: Module<GlobalFaciesState, RootState> = {
       })
       const data = makeData(facies, GlobalFacies, state.available)
       commit('AVAILABLE', data)
+    },
+    reset: async ({ commit }): Promise<void> => {
+      commit('AVAILABLE', {})
+      commit('IN_RMS', [])
     },
     refresh: async (context): Promise<void> => {
       const { state, commit, dispatch } = context
