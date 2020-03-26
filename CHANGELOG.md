@@ -2,6 +2,77 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.1.0
+
+This release includes many bug fixes, and quality of life improvements.
+
+### What's new?
+* The 'has dual index system' property is now available in the client
+* Popover / tooltip for dropdown menu
+  * Allow simple(?) HTML in tooltip
+* Facies observed in wells are automatically selected when choosing a zone /region
+  * This behaviour may be turned off in job settings
+* The user may now select values for the ERTBOX thickness that are less than the largest zone
+  * The reason for this, is to be able to write in values in a sensible maner (e.g. without _having_ to use the arrow keys)
+  * In order to prevent invalid values in the simulation, the user is not allowed to save the job settings if the thickness is too small
+* All three main components of the GUI may now be _individually_ scrolled.
+* The grid's handedness is adjusted to work well with nrlib, whenever necessary, and then reversed after the simulation is done
+  * Except when the grid has reverse / staircase faults
+* The user may clear the selected facies in a Bayfill truncation rule
+* The requirement that each facies in a Bayfill truncation rule must be _unique_ was enforced in the GUI
+* The selected paths in Job Settings, are shown in their entirety
+  * If the path is too big to fit on a single line, the field expands
+  * If the path does not exist on disk (due to misspelling, moving the project to a different RGS node, or other) a warning / error is shown
+  * _**Note**: The reason for expanding the field, rather than shown the end of the field is that the latter turned out to be rather difficult, and non-trivial._
+
+
+### Fixes
+* Ensure blocked well (log) is not an empty string
+  * This caused the API to look for blocked well (log)s that did not exist, and failed
+* Grids with reverse faults / staircase faults works (with some exceptions:)
+  * ERT mode is disabled, and a tooltip notifies the user beforehand.
+  * The grid is NOT rotated to align with NRlib's coordinate system
+  * The user sees a warning in a popover, informing them of incompatibility with ERT
+* More accurate type annotation
+* hotfix: Updated vulnerable package (pyyaml 2.3.0 -> 2.3.1) to mitigate security vulnerability
+* Uses RMS' site packages in addition to "hard coded" RGS specific path(s)
+  * This resolves an issue, running the plugin on RHEL 7
+* Attempt to remove module, ignoring its possible non-existence
+* Support enforcing minimum version of a package
+  * In particular, `xtgeo` _must_ be of version 2.5.0, or higher
+* The normalisation of probability cubes used in regions now works as expected
+  * Updated documentation / descriptions in accordance with suggestions from Oddvar Lia
+* Some type annotations where incorrect, and thus lead to possible errors
+* Since there are issues with using regions in the context of ERT / AHM, these two options are now mutually exclusive.
+  * The user is presented with a warning, when selecting regions, and messages are shown explaining why elements are disabled.
+* Fixed index error in Bayfill truncation rule algorithm
+
+
+### Restructure
+* Removed extraneous code
+* Changed the import order in `ChooseGridModel.vue` to be more consistent
+* Made code [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)-er
+* `get_grid_model_names` -> `get_grid_models`
+  * Made name consistent with the method's behaviour
+  * The previous `get_grid_models` was removed, and type annotations where improved
+* The warning in `FmuSettings.vue` are now a self-contained function
+* f-string is used in the import module
+* Previously, there where two definitions of `Parent`, one containing the full objects, while the other contains the IDs. The latter was renamed to `ParentReference`
+* Entities dependent on zone / region, now uses the respective instances instead of ID references
+  * The `populate` actions where updated accordingly (i.e. to fetch the instances from the references)
+* More accurate type annotations
+* Removed (almost) duplicate implementation of the `identify` function
+* Moved some definitions to avoid circular imports
+* Makes the code base a little more [PEP-8](https://www.python.org/dev/peps/pep-0008/) compliant.
+* Made the component for polygon table for Bayfill truncation rules easier to understand
+* The path selection in Job Settings was reused as a separate component
+  * The text area was expanded, and the button for selecting a directory was replaced with an icon
+
+### Miscellaneous
+* Corrected spelling of `deselect`
+* Avoid API calls when blocked well (log) is set to be empty
+
+
 ## 1.0.0
 Now that TDG4 is approved, the APS GUI is ready for general usage.
 
