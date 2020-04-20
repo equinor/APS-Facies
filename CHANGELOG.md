@@ -2,6 +2,13 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.1.1
+
+A minor bug fix release
+
+### Fixes
+* Include new package in XTgeo's dependencies ([packaging](https://pypi.org/project/packaging/))
+
 ## 1.1.0
 
 This release includes many bug fixes, and quality of life improvements.
