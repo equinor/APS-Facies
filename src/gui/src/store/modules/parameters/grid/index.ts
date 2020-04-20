@@ -35,7 +35,9 @@ const module: Module<GridParameterState, RootState> = {
       }
       commit('_WAITING', false)
     },
-    async refresh (): Promise<void> { /* Stub */ },
+    async refresh ({ dispatch }): Promise<void> {
+      await dispatch('fetch')
+    },
     populate ({ commit }, { azimuth, size }): void {
       commit('SIZE', size)
       commit('AZIMUTH', azimuth)
