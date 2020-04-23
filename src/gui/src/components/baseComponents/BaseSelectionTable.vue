@@ -12,6 +12,7 @@
       v-slot:item="{ item, isSelected, on }"
     >
       <tr
+        :class="isCurrent(item) ? 'font-weight-bold' : ''"
         :style="isCurrent(item) ? selectedStyle : ''"
         @click="() => propagateCurrent(item)"
         v-on="on"

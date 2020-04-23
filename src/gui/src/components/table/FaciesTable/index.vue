@@ -24,16 +24,14 @@
         <editable-cell
           v-if="!isFaciesFromRms(facies)"
           :value="facies"
-          :current="current"
           field="name"
           @submit="changeName"
         />
-        <highlight-current-item
+        <span
           v-else
-          :value="facies"
-          :current="current"
-          field="name"
-        />
+        >
+          {{ facies.name }}
+        </span>
       </td>
       <td
         v-if="!hideAlias"
@@ -41,22 +39,19 @@
       >
         <editable-cell
           :value="facies"
-          :current="current"
           field="alias"
           @submit="changeAlias"
         />
       </td>
       <td class="text-left">
-        <highlight-current-item
+        <span
           v-if="blockedWellLogParameter"
-          :value="facies"
-          :current="current"
-          field="code"
-        />
+        >
+          {{ facies.code }}
+        </span>
         <editable-cell
           v-else
           :value="facies"
-          :current="current"
           field="code"
           numeric
           @submit="changeCode"
@@ -91,7 +86,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 import VSwatches from 'vue-swatches'
-import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import EditableCell from '@/components/table/EditableCell.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
@@ -108,7 +102,6 @@ import { hasCurrentParents } from '@/utils'
   components: {
     BaseSelectionTable,
     OptionalHelpItem,
-    HighlightCurrentItem,
     VSwatches,
     EditableCell,
     InformationalIcons,
