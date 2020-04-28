@@ -1,7 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from warnings import warn
 import numpy as np
-from src.utils.constants.simple import Debug, GridModelConstants
+from src.utils.constants.simple import Debug, GridModelConstants, SimBoxThicknessConstants
 from src.utils.decorators import cached
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
@@ -514,7 +515,7 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                     average_thickness_in_cell = sum_thickness_in_cell / 4
                     if debug_level >= Debug.VERY_VERY_VERBOSE:
                         print(f'IJK_index top: {ijk_index_top}   IJK_index bottom: {ijk_index_bottom}'
-                              f'   Average cell thickness; {average_thickness_in_cell}'
+                              f'   Average cell thickness: {average_thickness_in_cell}'
                               )
                     if indexer.is_defined(ijk_index_bottom):
                         # Base layer grid cell is active
@@ -539,8 +540,8 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
 
         if has_no_active_cells_in_zone:
             # There are no active cells in this zone
-            thickness_per_zone[zone_index + 1] = default_sim_box_thickness
-            print(f'Warning: Zone {zone_name}   No active grid cells. Use default zone thickness: {default_sim_box_thickness}')
+            thickness_per_zone[zone_index + 1] = SimBoxThicknessConstants.DEFAULT_VALUE
+            warn(f'Zone {zone_name}   No active grid cells. Use default zone thickness: {SimBoxThicknessConstants.DEFAULT_VALUE}')
         else:
             if n_cell_columns_active_selected > 3:
                 average_thickness = sum_thickness_for_selected_active_cell_columns / n_cell_columns_active_selected
