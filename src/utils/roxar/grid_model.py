@@ -1,7 +1,5 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from warnings import warn
-
 import numpy as np
 from src.utils.constants.simple import Debug, GridModelConstants
 from src.utils.decorators import cached
@@ -398,7 +396,7 @@ def get_zone_layer_numbering(grid):
         layer_ranges = indexer.zonation[key]
         number_layers = 0
         # sim box indexer should not have repeated layer numbering
-        assert(len(layer_ranges) == 1)
+        assert len(layer_ranges) == 1
         layer_range = layer_ranges[0]
         start = layer_range[0]
         end = layer_range[-1]
@@ -446,8 +444,6 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
             k_base = -1
             n_cells_active_in_zone_top = 0
             n_cells_active_in_zone_base = 0
-            n_cell_columns_active_this_layer_range = 0
-            n_cell_columns_inactive_this_layer_range = 0
             for k in range(kmin,kmax+1):
                 # Check if there are any active grid cells in this layer. If so use grid cells from this layer as top
                 if debug_level >= Debug.VERY_VERY_VERBOSE:
@@ -499,7 +495,7 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
             # For this layer range, pick arbitrarily max_number_of_selected_cells among the defined grid cells
             # (from the zone_cell_numbers)
             if n_cells_active_in_zone_top > 0:
-                assert(n_cells_active_in_zone_base > 0)
+                assert n_cells_active_in_zone_base > 0
                 has_no_active_cells_in_zone = False
                 # Select only a subset of all cell columns for thickness calculation
                 if n_cells_active_in_zone_top < max_number_of_selected_cells:
@@ -507,6 +503,8 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                 else:
                     step_top = int(n_cells_active_in_zone_top / max_number_of_selected_cells + 1) + 1
 
+                n_cell_columns_active_this_layer_range = 0
+                n_cell_columns_inactive_this_layer_range = 0
                 for j in range(0, n_cells_active_in_zone_top, step_top):
                     cell_number = zone_cell_numbers_top_layer[j]
                     ijk_index_top = indexer.get_indices(cell_number)
@@ -547,8 +545,6 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                     print(f'Zone {zone_name}  layer range {lr}  has no active cells')
         # End loop over all layer_ranges
 
-
-
         if has_no_active_cells_in_zone:
             # There are no active cells in this zone
             thickness_per_zone[zone_index + 1] = default_sim_box_thickness
@@ -559,9 +555,10 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                 if debug_level >= Debug.VERY_VERBOSE:
                     print(f'Zone name: {zone_name}   Estimated sim box thickness {average_thickness}')
             else:
-                average_thickness = \
-                (sum_thickness_for_selected_active_cell_columns + sum_thickness_for_selected_inactive_cell_columns) / \
-                (n_cell_columns_active_selected + n_cell_columns_inactive_selected)
+                average_thickness = (
+                        (sum_thickness_for_selected_active_cell_columns + sum_thickness_for_selected_inactive_cell_columns)
+                        / (n_cell_columns_active_selected + n_cell_columns_inactive_selected)
+                )
                 if debug_level >= Debug.VERY_VERBOSE:
                     print(f'Zone name: {zone_name}   When estimating sim box thickness, '
                           'use also cell columns where either top or base grid cell is inactive')
@@ -854,7 +851,13 @@ class GridAttributes:
         return self.indexer.dimensions
 
 
-def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realization_number=0, set_shared=False, debug_level=Debug.OFF):
+def create_zone_parameter(
+        grid_model,
+        name=GridModelConstants.ZONE_NAME,
+        realization_number=0,
+        set_shared=False,
+        debug_level=Debug.OFF,
+):
     """ Description:
      Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
      If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
@@ -872,7 +875,7 @@ def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realiz
 
         if zone_parameter.is_empty(realisation=realization_number):
             if debug_level >= Debug.VERBOSE:
-                print('  The zone parameter was empty. Assign values to zone parameter with name: {}'.format(zone_parameter.name))
+                print(f'  The zone parameter was empty. Assign values to zone parameter with name: {zone_parameter.name}')
             # Fill the parameter with zone values
             values, code_names = zone_parameter_values(grid3d)
             zone_parameter.code_names = code_names.copy()
