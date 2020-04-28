@@ -436,6 +436,26 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
         sum_thickness_for_selected_active_cell_columns = 0.0
         sum_thickness_for_selected_inactive_cell_columns = 0.0
         has_no_active_cells_in_zone = True
+
+        def num_active_grid_cells(index):
+            # Check if there are any active grid cells in this layer. If so use grid cells from this layer.
+            if debug_level >= Debug.VERY_VERY_VERBOSE:
+                print(f'Zone, layer_ranges, layer:  {zone_name}  {layer_ranges}   {index}')
+
+            # Get all the cell numbers for the layer range
+            zone_cell_numbers_layer = indexer.get_cell_numbers_in_range(
+                (0, 0, index),
+                (dim_i, dim_j, index + 1),
+            )
+            n_cells_active_in_zone = len(zone_cell_numbers_layer)
+            if debug_level >= Debug.VERY_VERY_VERBOSE:
+                if n_cells_active_in_zone == 0:
+                    print(f'No active cells in layer: {index}')
+                else:
+                    print(f'Number of active cells in layer {index} : {n_cells_active_in_zone} ')
+
+            return n_cells_active_in_zone, zone_cell_numbers_layer
+
         for lr in layer_ranges:
 
             kmin = min(lr)
@@ -444,46 +464,18 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
             k_base = -1
             n_cells_active_in_zone_top = 0
             n_cells_active_in_zone_base = 0
-            for k in range(kmin,kmax+1):
-                # Check if there are any active grid cells in this layer. If so use grid cells from this layer as top
-                if debug_level >= Debug.VERY_VERY_VERBOSE:
-                    print(f'Zone, layer_ranges, layer:  {zone_name}  {layer_ranges}   {k}')
 
-                # Get all the cell numbers for the layer range
-                zone_cell_numbers_top_layer = indexer.get_cell_numbers_in_range(
-                    (0, 0, k),
-                    (dim_i, dim_j, k + 1),
-                )
-                n_cells_active_in_zone_top = len(zone_cell_numbers_top_layer)
-                if debug_level >= Debug.VERY_VERY_VERBOSE:
-                    if n_cells_active_in_zone_top == 0:
-                        print(f'No active cells in layer: {k}')
-                    else:
-                        print(f'Number of active cells in layer {k} : {n_cells_active_in_zone_top} ')
-
+            for k in range(kmin, kmax + 1):
+                n_cells_active_in_zone_top, zone_cell_numbers_top_layer = num_active_grid_cells(k)
                 if n_cells_active_in_zone_top > 0:
                     k_top = k
                     break
+
             if debug_level >= Debug.VERY_VERBOSE:
                 print(f'\nZone, layer_ranges, top layer for thickness calculation:  {zone_name}  {layer_ranges}   {k_top}')
 
-            for k in range(kmax, kmin-1, -1):
-                # Check if there are any active grid cells in this layer. If so use grid cells from this layer as base
-                if debug_level >= Debug.VERY_VERY_VERBOSE:
-                    print(f'Zone, layer_ranges, layer:  {zone_name}  {layer_ranges}   {k}')
-
-                # Get all the cell numbers for the layer range
-                zone_cell_numbers_base_layer = indexer.get_cell_numbers_in_range(
-                    (0, 0, k),
-                    (dim_i, dim_j, k + 1),
-                )
-                n_cells_active_in_zone_base = len(zone_cell_numbers_base_layer)
-                if debug_level >= Debug.VERY_VERY_VERBOSE:
-                    if n_cells_active_in_zone_base == 0:
-                        print(f'No active cells in layer: {k}')
-                    else:
-                        print(f'Number of active cells in layer {k} : {n_cells_active_in_zone_base} ')
-
+            for k in range(kmax, kmin - 1, -1):
+                n_cells_active_in_zone_base, zone_cell_numbers_base_layer = num_active_grid_cells(k)
                 if n_cells_active_in_zone_base > 0:
                     k_base = k
                     break
