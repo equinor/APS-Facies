@@ -1,7 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from warnings import warn
 import numpy as np
-from src.utils.constants.simple import Debug, GridModelConstants
+from src.utils.constants.simple import Debug, GridModelConstants, SimBoxThicknessConstants
 from src.utils.decorators import cached
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
@@ -396,7 +397,7 @@ def get_zone_layer_numbering(grid):
         layer_ranges = indexer.zonation[key]
         number_layers = 0
         # sim box indexer should not have repeated layer numbering
-        assert(len(layer_ranges) == 1)
+        assert len(layer_ranges) == 1
         layer_range = layer_ranges[0]
         start = layer_range[0]
         end = layer_range[-1]
@@ -429,62 +430,80 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
         zone_name = grid.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
         code_names[zone_index + 1] = zone_name
-        for lr in layer_ranges:
+        zone_cell_numbers_top_layer = None
+        zone_cell_numbers_base_layer = None
+        n_cell_columns_active_selected = 0
+        n_cell_columns_inactive_selected = 0
+        sum_thickness_for_selected_active_cell_columns = 0.0
+        sum_thickness_for_selected_inactive_cell_columns = 0.0
+        has_no_active_cells_in_zone = True
+
+        def num_active_grid_cells(index):
+            # Check if there are any active grid cells in this layer. If so use grid cells from this layer.
+            if debug_level >= Debug.VERY_VERY_VERBOSE:
+                print(f'Zone, layer_ranges, layer:  {zone_name}  {layer_ranges}   {index}')
+
             # Get all the cell numbers for the layer range
-            if debug_level >= Debug.VERBOSE:
-                zone_number = zone_index + 1
-                print(
-                    f'Zone number: {zone_number} Zone name: {code_names[zone_number]}'
-                    f'  Layer range: {lr.start + 1} - {lr.stop}'
-                )
-            zone_cell_numbers_top_layer = indexer.get_cell_numbers_in_range(
-                (0, 0, lr.start),
-                (dim_i, dim_j, lr.start + 1),
+            zone_cell_numbers_layer = indexer.get_cell_numbers_in_range(
+                (0, 0, index),
+                (dim_i, dim_j, index + 1),
             )
+            n_cells_active_in_zone = len(zone_cell_numbers_layer)
+            if debug_level >= Debug.VERY_VERY_VERBOSE:
+                if n_cells_active_in_zone == 0:
+                    print(f'No active cells in layer: {index}')
+                else:
+                    print(f'Number of active cells in layer {index} : {n_cells_active_in_zone} ')
 
-            # Pick max_number_of_selected_cells arbitrary grid cells among the defined grid cells (from the zone_cell_numbers)
-            n_cells_active_in_zone_top = len(zone_cell_numbers_top_layer)
-            if n_cells_active_in_zone_top < max_number_of_selected_cells:
-                step_top = 1
-            else:
-                step_top = int(n_cells_active_in_zone_top / max_number_of_selected_cells + 1) + 1
+            return n_cells_active_in_zone, zone_cell_numbers_layer
 
-            sum_thickness_for_selected_cells = 0.0
-            n_cells_selected = 0
-            for j in range(0, n_cells_active_in_zone_top, step_top):
-                cell_number = zone_cell_numbers_top_layer[j]
-                ijk_index_top = indexer.get_indices(cell_number)
-                ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], lr.stop)
-                if indexer.is_defined(ijk_index_bottom):
-                    # Both the grid cell at top and bottom of the zone are defined.
-                    # Get z coordinates and find thickness (approximately)
-                    # print(ijk_index_top)
-                    # print(ijk_index_bottom)
-                    corner_top = grid.get_cell_corners_by_index(ijk_index_top)
-                    corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
-                    sum_thickness_in_cell = 0.0
-                    for n in range(4):
-                        z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
-                        z_bottom = corner_bottom[n + 4, 2]  # Bottom nodes of grid cell at bottom layer of zone
-                        sum_thickness_in_cell += (z_bottom - z_top)
-                    average_thickness_in_cell = sum_thickness_in_cell / 4
-                    # if debug_level >= Debug.VERY_VERBOSE:
-                    #     print('IJK_index top: {}   IJK_index bottom: {}   Average cell thickness; {}'.format(ijk_index_top, ijk_index_bottom, average_thickness_in_cell))
-                    sum_thickness_for_selected_cells += average_thickness_in_cell
-                    n_cells_selected += 1
+        for lr in layer_ranges:
 
-            if n_cells_selected == 0:
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print('\n'
-                          'When estimating simbox thickness:  Have to use also inactive cells since there are 0 pairs of cells\n'
-                          '                                   where both are active and one is at top zone layer\n'
-                          '                                   and one at bottom zone layer')
+            kmin = min(lr)
+            kmax = max(lr)
+            k_top = -1
+            k_base = -1
+            n_cells_active_in_zone_top = 0
+            n_cells_active_in_zone_base = 0
+
+            for k in range(kmin, kmax + 1):
+                n_cells_active_in_zone_top, zone_cell_numbers_top_layer = num_active_grid_cells(k)
+                if n_cells_active_in_zone_top > 0:
+                    k_top = k
+                    break
+
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'\nZone, layer_ranges, top layer for thickness calculation:  {zone_name}  {layer_ranges}   {k_top}')
+
+            for k in range(kmax, kmin - 1, -1):
+                n_cells_active_in_zone_base, zone_cell_numbers_base_layer = num_active_grid_cells(k)
+                if n_cells_active_in_zone_base > 0:
+                    k_base = k
+                    break
+
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'Zone, layer_ranges, base layer for thickness calculation:  {zone_name}  {layer_ranges}   {k_base}')
+
+
+            # For this layer range, pick arbitrarily max_number_of_selected_cells among the defined grid cells
+            # (from the zone_cell_numbers)
+            if n_cells_active_in_zone_top > 0:
+                assert n_cells_active_in_zone_base > 0
+                has_no_active_cells_in_zone = False
+                # Select only a subset of all cell columns for thickness calculation
+                if n_cells_active_in_zone_top < max_number_of_selected_cells:
+                    step_top = 1
+                else:
+                    step_top = int(n_cells_active_in_zone_top / max_number_of_selected_cells + 1) + 1
+
+                n_cell_columns_active_this_layer_range = 0
+                n_cell_columns_inactive_this_layer_range = 0
                 for j in range(0, n_cells_active_in_zone_top, step_top):
                     cell_number = zone_cell_numbers_top_layer[j]
                     ijk_index_top = indexer.get_indices(cell_number)
-                    ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], lr.stop - 1)
+                    ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], k_base)
 
-                    # Use bottom cell even though it is inactive
+                    # Calculate thickness
                     # Get z coordinates and find thickness (approximately)
                     corner_top = grid.get_cell_corners_by_index(ijk_index_top)
                     corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
@@ -494,14 +513,52 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                         z_bottom = corner_bottom[n + 4, 2]  # Bottom nodes of grid cell at bottom layer of zone
                         sum_thickness_in_cell += (z_bottom - z_top)
                     average_thickness_in_cell = sum_thickness_in_cell / 4
-                    sum_thickness_for_selected_cells += average_thickness_in_cell
-                    n_cells_selected += 1
+                    if debug_level >= Debug.VERY_VERY_VERBOSE:
+                        print(f'IJK_index top: {ijk_index_top}   IJK_index bottom: {ijk_index_bottom}'
+                              f'   Average cell thickness: {average_thickness_in_cell}'
+                              )
+                    if indexer.is_defined(ijk_index_bottom):
+                        # Base layer grid cell is active
+                        sum_thickness_for_selected_active_cell_columns += average_thickness_in_cell
+                        n_cell_columns_active_selected += 1
+                        n_cell_columns_active_this_layer_range += 1
+                    else:
+                        # Base layer grid cell is not active
+                        sum_thickness_for_selected_inactive_cell_columns += average_thickness_in_cell
+                        n_cell_columns_inactive_selected += 1
+                        n_cell_columns_inactive_this_layer_range += 1
 
-            assert n_cells_selected > 0
-            average_thickness_selected_cells = sum_thickness_for_selected_cells / n_cells_selected
-            thickness_per_zone[zone_index + 1] = average_thickness_selected_cells
-            if debug_level >= Debug.VERY_VERBOSE:
-                print(f'Zone number: {zone_index + 1}   Estimated sim box thickness {average_thickness_selected_cells}')
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(f'Zone {zone_name}  layer range {lr}: \n'
+                          f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}'
+                          f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}'
+                          )
+            else:
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(f'Zone {zone_name}  layer range {lr}  has no active cells')
+        # End loop over all layer_ranges
+
+        if has_no_active_cells_in_zone:
+            # There are no active cells in this zone
+            thickness_per_zone[zone_index + 1] = SimBoxThicknessConstants.DEFAULT_VALUE
+            warn(f'Zone {zone_name}   No active grid cells. Use default zone thickness: {SimBoxThicknessConstants.DEFAULT_VALUE}')
+        else:
+            if n_cell_columns_active_selected > 3:
+                average_thickness = sum_thickness_for_selected_active_cell_columns / n_cell_columns_active_selected
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(f'Zone name: {zone_name}   Estimated sim box thickness {average_thickness}')
+            else:
+                average_thickness = (
+                        (sum_thickness_for_selected_active_cell_columns + sum_thickness_for_selected_inactive_cell_columns)
+                        / (n_cell_columns_active_selected + n_cell_columns_inactive_selected)
+                )
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(f'Zone name: {zone_name}   When estimating sim box thickness, '
+                          'use also cell columns where either top or base grid cell is inactive')
+                    print(f'Zone name: {zone_name}   Estimated sim box thickness {average_thickness}')
+
+            thickness_per_zone[zone_index + 1] = average_thickness
+
     return thickness_per_zone
 
 
@@ -787,7 +844,13 @@ class GridAttributes:
         return self.indexer.dimensions
 
 
-def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realization_number=0, set_shared=False, debug_level=Debug.OFF):
+def create_zone_parameter(
+        grid_model,
+        name=GridModelConstants.ZONE_NAME,
+        realization_number=0,
+        set_shared=False,
+        debug_level=Debug.OFF,
+):
     """ Description:
      Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
      If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
@@ -805,7 +868,7 @@ def create_zone_parameter(grid_model,  name=GridModelConstants.ZONE_NAME, realiz
 
         if zone_parameter.is_empty(realisation=realization_number):
             if debug_level >= Debug.VERBOSE:
-                print('  The zone parameter was empty. Assign values to zone parameter with name: {}'.format(zone_parameter.name))
+                print(f'  The zone parameter was empty. Assign values to zone parameter with name: {zone_parameter.name}')
             # Fill the parameter with zone values
             values, code_names = zone_parameter_values(grid3d)
             zone_parameter.code_names = code_names.copy()
@@ -842,4 +905,3 @@ def zone_parameter_values(grid3d, debug_level=Debug.OFF):
             cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
             values[cell_numbers] = zone_number
     return values, code_names
-

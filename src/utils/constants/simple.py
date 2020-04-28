@@ -176,3 +176,7 @@ class ProbabilityTolerances(Values):
 
 class GridModelConstants:
     ZONE_NAME = 'Zone'
+
+
+class SimBoxThicknessConstants:
+    DEFAULT_VALUE = 30
