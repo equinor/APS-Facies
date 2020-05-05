@@ -1,5 +1,5 @@
 FROM registry.git.equinor.com/sdp/sdpsoft/centos:7
-LABEL version="4.1.2" \
+LABEL version="4.1.3" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -213,7 +213,7 @@ RUN yum update -y \
     #                 #
     ###################
     # Install pipenv
- && $PIP install --user pipenv \
+ && $PIP install --user pipenv --pre \
     # FIXME: Backup distutils/__init__.py, as the compilation of nrlib changes it for some reason
   && cp "${RMS_PREFIX}/linux-amd64-gcc_4_4-release/lib/python${PYTHON_VERSION}/distutils/__init__.py" /distutils.py.bak \
     # Install NRlib to dependencies collection

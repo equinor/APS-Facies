@@ -1,5 +1,5 @@
 image:
-  name: "registry.git.equinor.com/aps/gui/aps-gui:4.1.2"
+  name: "registry.git.equinor.com/aps/gui/aps-gui:4.1.3"
 
 variables:
   GIT_STRATEGY:           "fetch"
