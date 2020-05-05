@@ -2,6 +2,26 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.1.2
+
+A minor bug fix release, which addresses some issues discovered on the Peregrino project.
+
+### Fixes
+
+* The calculation of the simbox thickness is now more robust agains zones with inactive cells in their top, and bottom layer
+
+  * If the thickness cannot be calculated, a default of 30 is used
+
+### Restructure
+* Reused som common code
+* Improved formatting of code base
+
+
+### Miscellaneous
+* Updated dependencies; there was a [security vulnerability](https://github.com/pyupio/safety-db/blob/9cb84541a691044512dab8422dc2a36383e0fff3/data/insecure_full.json#L10825) in [pylint](https://www.pylint.org)
+* chore: Update dependencies
+
+
 ## 1.1.1
 
 A minor bug fix release
