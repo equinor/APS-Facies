@@ -1,5 +1,5 @@
 FROM registry.git.equinor.com/sdp/sdpsoft/centos:7
-LABEL version="4.1.3" \
+LABEL version="4.1.4" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
@@ -10,9 +10,9 @@ ENV RMS_VERSION=11.0.1 \
     TCL_VERSION=8.6 \
     INTEL_MKL_VERSION=2019.5.281 \
     INTEL_MKL_SEED=15816 \
-    NODE_VERSION=12.14.1 \
+    NODE_VERSION=12.16.3 \
     NRLIB_VERSION=1.1-r7 \
-    YARN_VERSION=1.21.1
+    YARN_VERSION=1.22.4
 ENV TK_VERSION=${TCL_VERSION}
 
 # Auxillary (version) information
