@@ -55,6 +55,7 @@ initialize:
 vulnerabilities:
   stage: check dependencies
   script:
+    - 'eval $PYTHON -m pip install --upgrade --pre pipenv'
     - 'eval $MAKE safety-check'
 
 outdated (Python) dependencies:
