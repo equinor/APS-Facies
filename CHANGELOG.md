@@ -2,6 +2,20 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.1.3
+
+### Fixes
+
+* Ensure that checking vulnerable Python packages can be done again
+  * Done by updating `pipenv` to a newer (pre-release) version
+
+
+### Miscellaneous
+* The packets sent between RMS, and the license server is logged
+  * Necessary to open which ports for the build server
+* Update Node.js, and Yarn to latest stable (12.16.3/1.22.4)
+
+
 ## 1.1.2
 
 A minor bug fix release, which addresses some issues discovered on the Peregrino project.
