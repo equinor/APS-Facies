@@ -55,6 +55,7 @@ initialize:
 vulnerabilities:
   stage: check dependencies
   script:
+    - 'eval $PYTHON -m pip install --upgrade --pre pipenv'
     - 'eval $MAKE safety-check'
 
 outdated (Python) dependencies:
@@ -99,6 +100,10 @@ integration testing (RMS 11):
     RMS_PROJECT:                     "/testAPSWorkflow_new.rms11.0.0"
     APS_DEBUG_LEVEL:                 "4"
   script:
+    # tcpdump is useful to see which ports, and servers the firewall must be opened in order for RMS to talk with the
+    # license server. Previously (in AWS), this information was available directly from DRM, but is no longer available.
+    - yum install -y tcpdump  # TODO: Move to Docker image?
+    - tcpdump -l -s 65535 > src/unit_test/integration/data.pcap &
     - 'eval $MAKE integration-tests'
   dependencies:
     - initialize
@@ -109,6 +114,7 @@ integration testing (RMS 11):
       - 'src/unit_test/integration/*.log'
       - 'src/unit_test/integration/*.xml'
       - 'src/unit_test/integration/*.dat'
+      - 'src/unit_test/integration/data.pcap'
     expire_in: 5 days
 
 build GUI:
