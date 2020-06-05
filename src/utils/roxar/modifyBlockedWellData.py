@@ -155,10 +155,18 @@ def createProbabilityLogs(
             is_modelling_facies[zone_number, code_for_facies] = 1
 
     if len(modelled_facies_not_observed) > 0 and conditional_prob_facies is None:
-        print('Warning: The following facies is specified to be modelled, but is not observed in facies log')
+        print('Warning: The following facies is specified to be modelled, but is not found in facies log')
         print('These facies will get probability 0 in probability logs:')
         for name in modelled_facies_not_observed:
             print('  {}'.format(name))
+        print('Information about this warning:\n'
+              '  Check spelling of facies names in model file if you know these facies are observed\n'
+              '  but reported as not found in facies log. Errors in normalization of facies probabilities\n'
+              '  will occur later in the workflow in this case.\n'
+              '  If it is correct that the listed facies is not observed in the wells, but should be modelled\n'
+              '  be sure to define a trend for these facies that are not 0 everywhere later in the\n'
+              '  APS preparation workflow for facies probabilities.\n'
+              )
 
     use_mask_facies = False
     use_mask_zone = False
