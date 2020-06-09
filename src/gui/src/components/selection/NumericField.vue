@@ -74,14 +74,14 @@ type InternalValue = BigNumber | number | string | null
   // @ts-ignore
   validations () {
     const fieldValue = {
-      required: this.optional ? true : requiredField,
-      between: between(this.min, this.max),
-      discrete: this.discrete ? numeric : true,
-      strictlyGreater: this.strictlyGreater ? (value: number): boolean => value > this.min : true,
-      strictlySmaller: this.strictlySmaller ? (value: number): boolean => value < this.max : true,
+      required: (this as NumericField).optional ? true : requiredField,
+      between: between((this as NumericField).min, (this as NumericField).max),
+      discrete: (this as NumericField).discrete ? numeric : true,
+      strictlyGreater: (this as NumericField).strictlyGreater ? (value: number): boolean => value > (this as NumericField).min : true,
+      strictlySmaller: (this as NumericField).strictlySmaller ? (value: number): boolean => value < (this as NumericField).max : true,
       // TODO: Add option to add more validations
     }
-    this.additionalRules.forEach((rule: AdditionalRule) => {
+    ;(this as NumericField).additionalRules.forEach((rule: AdditionalRule) => {
       fieldValue[`${rule.name}`] = (value: number): boolean => rule.check(value)
     })
     return {
