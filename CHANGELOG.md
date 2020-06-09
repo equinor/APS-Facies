@@ -2,6 +2,25 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.1.4
+
+### What's new?
+* Added more detailed warning in `createProbabilityLogs`
+
+### Fixes
+* Add necessary type annotations
+* Remove vuetify's explicit type decelerations
+  * This caused the entire build to fail, as there where two type errors in Vuetify
+
+
+### Miscellaneous
+* More detailed warning for when facies where not observed
+* Updated dependencies, to patch a security vulnerability
+  * Along with other dependencies
+* (**TEMPORARY**) Allow safety check to fail
+  * The reason for this, is that the docker image has a very old version of sphinx installed (1.4), but the fix for the vulnerability is for 3.0.4.
+
+
 ## 1.1.3
 
 ### Fixes
