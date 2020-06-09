@@ -20,6 +20,7 @@
             class="pa-0 ma-0"
           >
             <base-tooltip
+              v-if="item.help"
               :message="item.help"
               :open="hover"
               :disabled="!item.disabled && !item.help"
@@ -31,6 +32,12 @@
                 {{ item.text }}
               </span>
             </base-tooltip>
+            <span
+              v-else
+              :style="itemStyle(item)"
+            >
+              {{ item.text }}
+            </span>
           </v-hover>
         </v-list-item>
       </template>
@@ -61,7 +68,7 @@ export default class BaseDropdown<T> extends Vue {
   readonly label!: string
 
   @Prop({ required: true })
-  readonly items!: ListItem<T>[] | T[]
+  readonly items!: ListItem<T>[]
 
   @Prop({ default: false })
   readonly disabled!: boolean
