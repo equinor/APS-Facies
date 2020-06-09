@@ -1,4 +1,4 @@
-import uuidv4 from 'uuid/v4'
+import { v4 as uuidv4 } from 'uuid'
 import { ID } from '@/utils/domain/types'
 import { Identifiable, Identified } from '@/utils/domain/bases/interfaces'
 import {

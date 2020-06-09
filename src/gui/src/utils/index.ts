@@ -1,6 +1,6 @@
 import { Vue } from 'vue/types/vue'
 import flatten from 'flat'
-import uuidv5 from 'uuid/v5'
+import { v5 as uuidv5 } from 'uuid'
 
 import {
   Identifiable,

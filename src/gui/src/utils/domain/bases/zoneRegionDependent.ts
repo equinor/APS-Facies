@@ -1,4 +1,4 @@
-import uuidv5 from 'uuid/v5'
+import { v5 as uuidv5 } from 'uuid'
 import { getId } from '@/utils/helpers'
 import Region from '@/utils/domain/region'
 import { ID } from '@/utils/domain/types'
