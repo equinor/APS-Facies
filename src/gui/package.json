@@ -31,7 +31,7 @@
     "v-tooltip": "^2.0.0-rc.33",
     "vue": "^2.6.2",
     "vue-async-computed": "^3.4.1",
-    "vue-swatches": "^1.0.1",
+    "vue-swatches": "^2.1.0",
     "vuelidate": "^0.7.4",
     "vuetify": "^2.0.3",
     "vuetify-upload-button": "^2.0.0",
