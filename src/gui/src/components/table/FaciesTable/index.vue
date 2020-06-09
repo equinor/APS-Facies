@@ -73,9 +73,9 @@
       <td
         :colspan="headers.length"
       >
-        <swatches
+        <v-swatches
           :value="item.color"
-          :colors="availableColors"
+          :swatches="availableColors"
           inline
           swatches-size="30"
           @input="color => changeColor(item, color)"
@@ -90,7 +90,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
-import Swatches from 'vue-swatches'
+import VSwatches from 'vue-swatches'
 import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
 import EditableCell from '@/components/table/EditableCell.vue'
@@ -109,7 +109,7 @@ import { hasCurrentParents } from '@/utils'
     BaseSelectionTable,
     OptionalHelpItem,
     HighlightCurrentItem,
-    Swatches,
+    VSwatches,
     EditableCell,
     InformationalIcons,
   }

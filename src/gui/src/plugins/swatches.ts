@@ -1,1 +1,1 @@
-import 'vue-swatches/dist/vue-swatches.min.css'
+import 'vue-swatches/dist/vue-swatches.css'

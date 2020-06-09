@@ -57,6 +57,7 @@ vulnerabilities:
   script:
     - 'eval $PYTHON -m pip install --upgrade --pre pipenv'
     - 'eval $MAKE safety-check'
+  allow_failure: true
 
 outdated (Python) dependencies:
   stage: check dependencies

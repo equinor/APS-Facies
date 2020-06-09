@@ -1,4 +1,4 @@
-import uuidv4 from 'uuid/v4'
+import { v4 as uuidv4 } from 'uuid'
 
 function addItem ({ commit }: { commit: (name: string, value: any) => void}, { item }: { item: any}): Promise<any> {
   // TODO: Checks field is valid / migrate to typescript
