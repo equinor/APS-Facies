@@ -15,11 +15,7 @@
         v-if="showName"
         class="text-start"
       >
-        <highlight-current-item
-          :value="item"
-          :current="current"
-          field="name"
-        />
+        {{ item.name }}
       </td>
       <td
         v-if="showCode"
@@ -62,7 +58,6 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
 import BaseSelectionTable from '@/components/baseComponents/BaseSelectionTable.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ConformSelection from '@/components/selection/dropdown/ConformSelection.vue'
@@ -78,7 +73,6 @@ import { HeaderItems } from '@/utils/typing'
     ConformSelection,
     BaseSelectionTable,
     IconButton,
-    HighlightCurrentItem,
   },
 })
 export default class SelectionTable<T extends SelectableItem> extends Vue {

@@ -487,55 +487,60 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
 
             # For this layer range, pick arbitrarily max_number_of_selected_cells among the defined grid cells
             # (from the zone_cell_numbers)
-            if n_cells_active_in_zone_top > 0:
-                assert n_cells_active_in_zone_base > 0
-                has_no_active_cells_in_zone = False
-                # Select only a subset of all cell columns for thickness calculation
-                if n_cells_active_in_zone_top < max_number_of_selected_cells:
-                    step_top = 1
-                else:
-                    step_top = int(n_cells_active_in_zone_top / max_number_of_selected_cells + 1) + 1
-
-                n_cell_columns_active_this_layer_range = 0
-                n_cell_columns_inactive_this_layer_range = 0
-                for j in range(0, n_cells_active_in_zone_top, step_top):
-                    cell_number = zone_cell_numbers_top_layer[j]
-                    ijk_index_top = indexer.get_indices(cell_number)
-                    ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], k_base)
-
-                    # Calculate thickness
-                    # Get z coordinates and find thickness (approximately)
-                    corner_top = grid.get_cell_corners_by_index(ijk_index_top)
-                    corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
-                    sum_thickness_in_cell = 0.0
-                    for n in range(4):
-                        z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
-                        z_bottom = corner_bottom[n + 4, 2]  # Bottom nodes of grid cell at bottom layer of zone
-                        sum_thickness_in_cell += (z_bottom - z_top)
-                    average_thickness_in_cell = sum_thickness_in_cell / 4
-                    if debug_level >= Debug.VERY_VERY_VERBOSE:
-                        print(f'IJK_index top: {ijk_index_top}   IJK_index bottom: {ijk_index_bottom}'
-                              f'   Average cell thickness: {average_thickness_in_cell}'
-                              )
-                    if indexer.is_defined(ijk_index_bottom):
-                        # Base layer grid cell is active
-                        sum_thickness_for_selected_active_cell_columns += average_thickness_in_cell
-                        n_cell_columns_active_selected += 1
-                        n_cell_columns_active_this_layer_range += 1
-                    else:
-                        # Base layer grid cell is not active
-                        sum_thickness_for_selected_inactive_cell_columns += average_thickness_in_cell
-                        n_cell_columns_inactive_selected += 1
-                        n_cell_columns_inactive_this_layer_range += 1
-
+            if n_cells_active_in_zone_top <= 0:
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'Zone {zone_name}  layer range {lr}: \n'
-                          f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}'
-                          f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}'
-                          )
+                    warn(f'Zone {zone_name}  layer range {lr}  has no active cells')
+                    warn(
+                        f'Skipping the ranges {lr.start} - {lr.stop}, for the zone "{zone_name}".'
+                        f' They are not defined'
+                    )
+                continue
+
+            assert n_cells_active_in_zone_base > 0
+            has_no_active_cells_in_zone = False
+            # Select only a subset of all cell columns for thickness calculation
+            if n_cells_active_in_zone_top < max_number_of_selected_cells:
+                step_top = 1
             else:
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'Zone {zone_name}  layer range {lr}  has no active cells')
+                step_top = int(n_cells_active_in_zone_top / max_number_of_selected_cells + 1) + 1
+
+            n_cell_columns_active_this_layer_range = 0
+            n_cell_columns_inactive_this_layer_range = 0
+            for j in range(0, n_cells_active_in_zone_top, step_top):
+                cell_number = zone_cell_numbers_top_layer[j]
+                ijk_index_top = indexer.get_indices(cell_number)
+                ijk_index_bottom = (ijk_index_top[0], ijk_index_top[1], k_base)
+
+                # Calculate thickness
+                # Get z coordinates and find thickness (approximately)
+                corner_top = grid.get_cell_corners_by_index(ijk_index_top)
+                corner_bottom = grid.get_cell_corners_by_index(ijk_index_bottom)
+                sum_thickness_in_cell = 0.0
+                for n in range(4):
+                    z_top = corner_top[n, 2]  # Top nodes of grid cell at top layer of zone
+                    z_bottom = corner_bottom[n + 4, 2]  # Bottom nodes of grid cell at bottom layer of zone
+                    sum_thickness_in_cell += (z_bottom - z_top)
+                average_thickness_in_cell = sum_thickness_in_cell / 4
+                if debug_level >= Debug.VERY_VERY_VERBOSE:
+                    print(f'IJK_index top: {ijk_index_top}   IJK_index bottom: {ijk_index_bottom}'
+                          f'   Average cell thickness: {average_thickness_in_cell}'
+                          )
+                if indexer.is_defined(ijk_index_bottom):
+                    # Base layer grid cell is active
+                    sum_thickness_for_selected_active_cell_columns += average_thickness_in_cell
+                    n_cell_columns_active_selected += 1
+                    n_cell_columns_active_this_layer_range += 1
+                else:
+                    # Base layer grid cell is not active
+                    sum_thickness_for_selected_inactive_cell_columns += average_thickness_in_cell
+                    n_cell_columns_inactive_selected += 1
+                    n_cell_columns_inactive_this_layer_range += 1
+
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'Zone {zone_name}  layer range {lr}: \n'
+                      f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}'
+                      f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}'
+                      )
         # End loop over all layer_ranges
 
         if has_no_active_cells_in_zone:

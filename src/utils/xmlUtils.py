@@ -5,7 +5,7 @@ from xml.dom import minidom
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected
+from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected, MissingRequiredValue
 from src.utils.constants.simple import OriginType
 
 
@@ -92,6 +92,10 @@ def getFloatCommand(
         raise ReadingXmlError(keyword, parentKeyword, modelFile)
     if obj is not None:
         text = obj.text
+        if text is None:
+            if required:
+                raise MissingRequiredValue(keyword, parentKeyword, modelFile)
+            return None
         value = float(text.strip())
         if minValue is not None and value < minValue:
             raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)

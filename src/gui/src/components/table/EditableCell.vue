@@ -3,11 +3,7 @@
     lazy
     @open="reset"
   >
-    <highlight-current-item
-      :value="value"
-      :current="current"
-      :field="field"
-    />
+    {{ value.field }}
     <v-text-field
       slot="input"
       v-model="$data._fieldValue"
@@ -22,14 +18,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-import HighlightCurrentItem from '@/components/baseComponents/HighlightCurrentItem.vue'
-
-import { ID } from '@/utils/domain/types'
-
 @Component({
-  components: {
-    HighlightCurrentItem,
-  }
 })
 export default class EditableCell<T> extends Vue {
   _fieldValue: string = this.fieldValue
@@ -42,9 +31,6 @@ export default class EditableCell<T> extends Vue {
 
   @Prop({ required: false, default: 'Edit' })
   readonly label: string
-
-  @Prop({ required: true })
-  readonly current: ID
 
   @Prop({ default: false, type: Boolean })
   readonly numeric: boolean

@@ -24,6 +24,21 @@ class ReadingXmlError(ApsXmlError, IOError):
         return message
 
 
+class MissingRequiredValue(ReadingXmlError):
+    @staticmethod
+    def get_keyword_error_message(keyword, parent_keyword=None, model_file_name=None):
+        if model_file_name:
+            message = f"The model file, '{model_file_name}', has no value for the keyword '{keyword}'"
+        else:
+            message = f"No value for keyword '{keyword}'"
+        if parent_keyword:
+            message += f" underneath the parent keyword '{parent_keyword}'."
+        else:
+            message += '.'
+        return message
+
+
+
 class ValueOutsideExpectedRange(ApsXmlError):
     def __init__(self, message, errors=None):
         super().__init__(message=message, errors=errors)

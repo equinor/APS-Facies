@@ -129,7 +129,7 @@ export default async function migrate (context: Store, state: any, toVersion: st
 
   for (const migration of getMigrations(fromVersion, toVersion)) {
     state = await migration.up(state)
-    state.from = migration.to
+    state.version = migration.to
   }
   return state
 }
