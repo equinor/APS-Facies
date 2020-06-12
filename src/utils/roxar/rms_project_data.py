@@ -262,6 +262,12 @@ class RMSData:
         # Determine which facies appear in which zone, if any
         observed_facies = facies_property.get_values(self.project.current_realisation)
         observed_indices = blocked_wells.get_cell_numbers(self.project.current_realisation)
+        if GridModelConstants.ZONE_NAME not in grid_model.properties:
+            create_zone_parameter(
+                grid_model,
+                name=GridModelConstants.ZONE_NAME,
+                realization_number=self.project.current_realisation,
+            )
         zones = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(self.project.current_realisation)
         regions = np.zeros(zones.shape, zones.dtype)
         if region_parameter_name != '__REGIONS_NOT_IN_USE__':  # Hack to avoid incompatibility with decorator
