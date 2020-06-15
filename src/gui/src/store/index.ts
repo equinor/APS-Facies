@@ -46,7 +46,7 @@ const store: Store<RootState> = new Vuex.Store({
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   state: {
-    version: '1.4.0',
+    version: '1.4.1',
     _loaded: {
       value: false,
       loading: false,
@@ -144,7 +144,7 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
-        if (data.zones.current) {
+        if (data.zones.current && data.zones.available[data.zones.current]) {
           await dispatch('zones/current', { id: data.zones.current })
         }
 

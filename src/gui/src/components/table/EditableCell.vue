@@ -3,7 +3,7 @@
     lazy
     @open="reset"
   >
-    {{ value.field }}
+    {{ value[field] }}
     <v-text-field
       slot="input"
       v-model="$data._fieldValue"
@@ -38,9 +38,10 @@ export default class EditableCell<T> extends Vue {
   get fieldValue (): string { return this.value[this.field] }
 
   submit (): void {
+    const value = this.$data._fieldValue
     this.$emit('submit', {
       ...this.value,
-      [this.field]: this.$data._fieldValue
+      [this.field]: this.numeric ? Number(value) : value,
     })
   }
 
