@@ -144,7 +144,7 @@ const store: Store<RootState> = new Vuex.Store({
 
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })
-        if (data.zones.current) {
+        if (data.zones.current && data.zones.available[data.zones.current]) {
           await dispatch('zones/current', { id: data.zones.current })
         }
 
