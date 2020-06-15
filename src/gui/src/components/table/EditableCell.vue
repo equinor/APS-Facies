@@ -3,7 +3,7 @@
     lazy
     @open="reset"
   >
-    {{ value.field }}
+    {{ value[field] }}
     <v-text-field
       slot="input"
       v-model="$data._fieldValue"
