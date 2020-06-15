@@ -7,7 +7,7 @@ import { Store } from '@/store/typing'
 interface Migration {
   from: string
   to: string
-  up: (state: any) => Promise<any>
+  up: (state: any, context: Store) => Promise<any>
   down?: (state: any) => Promise<any>
 }
 
@@ -90,6 +90,29 @@ const migrations: Migration[] = [
       })
       return state
     },
+  },
+  {
+    from: '1.4.0',
+    to: '1.4.1',
+    up: async (state, context): Promise<any> => {
+      const ensureNumericCodes = (item: any): void => {
+        let code = item.code
+        if (typeof code === 'string') {
+          try {
+            code = Number.parseInt(code, 10)
+          } catch (e) {
+            displayMessage(context, `The given code, "${code}" could not be parsed as an integer.`, 'warn')
+          }
+        }
+        item.code = code
+      }
+      Object.values(state.facies.global.available).forEach(ensureNumericCodes)
+      Object.values(state.zones.available).forEach((zone: any) => {
+        ensureNumericCodes(zone)
+        zone.regions && Object.values(zone.regions).forEach(ensureNumericCodes)
+      })
+      return state
+    },
   }
 ]
 
@@ -128,7 +151,7 @@ export default async function migrate (context: Store, state: any, toVersion: st
   }
 
   for (const migration of getMigrations(fromVersion, toVersion)) {
-    state = await migration.up(state)
+    state = await migration.up(state, context)
     state.version = migration.to
   }
   return state
