@@ -34,5 +34,6 @@ def run(
         dimension,
         origin=get_origin(geometry),
         rotation=get_grid_rotation(geometry),
+        flip=reference_grid.estimate_flip(),
     )
     simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)
