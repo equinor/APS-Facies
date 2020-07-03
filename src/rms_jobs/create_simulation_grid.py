@@ -13,6 +13,10 @@ def get_origin(geometry):
     return tuple(geometry[key] for key in keys)
 
 
+def get_increments(geometry):
+    return tuple(geometry[f'avg_d{axis}'] for axis in ('x', 'y', 'z'))
+
+
 def run(
         *,
         project,
@@ -34,6 +38,7 @@ def run(
         dimension,
         origin=get_origin(geometry),
         rotation=get_grid_rotation(geometry),
+        increment=get_increments(geometry),
         flip=reference_grid.estimate_flip(),
     )
     simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)
