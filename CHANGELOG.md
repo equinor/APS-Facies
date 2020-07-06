@@ -2,6 +2,37 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.1.5
+
+
+### Fixes
+
+* Makes `ERTBOX` the same _physical_ size as the simulation box
+
+* Ensure `ERTBOX` has the same handedness as simulation grid
+
+* Facies may now have a code of `0`
+
+* Ensure current zone exists before selecting it as current
+
+* Ensure a discrete item's code is an integer
+
+* Ensure that the "Zone" parameter exist
+
+* Fixed a bug that caused parameters to not be shown
+
+* Non-required keywords may be empty
+
+* Update version, when migrating older versions of the state
+
+* Skip non-defined zonations
+
+### Restructure
+
+* The component `HighlightCurrentItem.vue` is no longer needed
+
+
+
 ## 1.1.4
 
 ### What's new?
