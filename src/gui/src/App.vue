@@ -10,9 +10,9 @@
         <information-bar />
       </v-col>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <main-page />
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
