@@ -52,7 +52,7 @@ def get_rms_version():
         return None
 
     rms_version = roxar.rms.get_version().split('.')
-    if len(rms_version) == 2:
+    while len(rms_version) < 3:
         rms_version.append('0')
     return rms_version
 
