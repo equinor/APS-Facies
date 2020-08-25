@@ -55,37 +55,51 @@ initialize:
 vulnerabilities:
   stage: check dependencies
   script:
-    - 'eval $PYTHON -m pip install --upgrade --pre pipenv'
+    - 'export PYTHON="$RMS_PYTHON"'
+    - 'eval $MAKE initialize-python-environment'
     - 'eval $MAKE safety-check'
   allow_failure: true
+  needs: []
 
 outdated (Python) dependencies:
   stage: check dependencies
   script:
     - 'eval $MAKE check-requirements'
   allow_failure: true
+  needs:
+    - job: initialize
+      artifacts: true
 
 outdated (Node) dependencies:
   stage: check dependencies
   script:
     - 'eval $MAKE check-node-dependencies'
   allow_failure: true
+  needs: []
 
 circular dependencies:
   stage: check dependencies
   script:
     - 'eval $MAKE find-circular-dependencies'
+  needs: []
 
 linting (Python):
   stage: testing
   script:
     - 'eval $MAKE python-linting'
   allow_failure: true
+  needs:
+    - job: initialize
+      artifacts: true
 
 linting (JavaScript):
   stage: testing
   script:
+    - 'eval $MAKE package.json'
     - 'eval $MAKE javascript-linting'
+  needs:
+    - job: initialize
+      artifacts: true
 
 unit testing:
   stage: testing  # https://github.com/ksator/continuous-integration-with-python
@@ -93,6 +107,9 @@ unit testing:
     - 'eval $MAKE unit-tests'
   dependencies:
     - initialize
+  needs:
+    - job: initialize
+      artifacts: true
 
 integration testing (RMS 11):
   stage: testing
@@ -101,13 +118,12 @@ integration testing (RMS 11):
     RMS_PROJECT:                     "/testAPSWorkflow_new.rms11.0.0"
     APS_DEBUG_LEVEL:                 "4"
   script:
+    - export PYTHON="$RMS_PYTHON"
     # tcpdump is useful to see which ports, and servers the firewall must be opened in order for RMS to talk with the
     # license server. Previously (in AWS), this information was available directly from DRM, but is no longer available.
     - yum install -y tcpdump  # TODO: Move to Docker image?
     - tcpdump -l -s 65535 > src/unit_test/integration/data.pcap &
     - 'eval $MAKE integration-tests'
-  dependencies:
-    - initialize
   artifacts:
     when: always
     name: logs
@@ -117,6 +133,7 @@ integration testing (RMS 11):
       - 'src/unit_test/integration/*.dat'
       - 'src/unit_test/integration/data.pcap'
     expire_in: 5 days
+  needs: []
 
 build GUI:
   stage: build gui
@@ -126,6 +143,9 @@ build GUI:
     expire_in: 1 month
     paths:
       - '*.plugin'
+  needs:
+    - job: initialize
+      artifacts: true
 
 .setup ssh keys:
   before_script:
