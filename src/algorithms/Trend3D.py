@@ -26,6 +26,7 @@ from src.algorithms.properties import (
     make_ranged_property,
 )
 from src.utils.constants.simple import Debug, OriginType, TrendType, CrossSectionType, Direction, TrendParameter
+from src.utils.containers import FmuAttribute
 from src.utils.xmlUtils import (
     getIntCommand, getTextCommand,
     createFMUvariableNameForTrend, fmu_xml_element,
@@ -139,7 +140,7 @@ Debug output:   Stacking type:  {stacking_direction}''')
             obj.text = f' {value} '
             if isinstance(value, FmuProperty) and value.updatable:
                 fmu_attribute = createFMUvariableNameForTrend(tag, gf_name, zone_number, region_number)
-                fmu_attributes.append(fmu_attribute)
+                fmu_attributes.append(FmuAttribute(fmu_attribute, value.value))
                 obj.attrib = dict(kw=fmu_attribute)
             trend_element.append(obj)
 

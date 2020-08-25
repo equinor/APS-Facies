@@ -7,6 +7,7 @@ from xml.etree.ElementTree import Element
 
 from src.utils.exceptions.xml import ReadingXmlError, LessThanExpected, MoreThanExpected, MissingRequiredValue
 from src.utils.constants.simple import OriginType
+from src.utils.containers import FmuAttribute
 
 
 def prettify(elem, indent="  ", new_line="\n"):
@@ -160,7 +161,7 @@ def fmu_xml_element(tag, value, updatable, zone_number, region_number, gf_name, 
     obj.text = f' {value} '
     if updatable:
         fmu_attribute = fmu_creator(tag, gf_name, zone_number, region_number)
-        fmu_attributes.append(fmu_attribute)
+        fmu_attributes.append(FmuAttribute(fmu_attribute, value))
         obj.attrib = dict(kw=fmu_attribute)
     return obj
 

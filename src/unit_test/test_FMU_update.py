@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import xml.etree.ElementTree as ET
+from typing import Dict
+
 import pytest
 from src.utils.constants.simple import Debug
 from src.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
@@ -47,11 +49,28 @@ def read_values_from_xml_tree(tree):
     return values
 
 
-def read_fmu_attributes_file(file):
+def read_fmu_attributes_file(file) -> Dict[str, str]:
+    """The file has format;
+    rms:
+        FMU_KEY: value ~ <FMU_KEY>
+        ...
+    """
+    fmu_attributes = {}
     with open(file, 'r') as f:
-        content = f.readlines()
-        content = [x.strip() for x in content]
-        return set(content)
+        for line in f:
+            line = line.strip()  # type: str
+            if line == 'rms:':
+                # Ignore YAML compatibility
+                continue
+            elif line.startswith('#'):
+                # Ignore comments
+                continue
+
+            key, *value = line.split(':')
+            value, *_ = ':'.join(value).split('~')
+
+            fmu_attributes[key] = value.strip()
+    return fmu_attributes
 
 
 def test_case_with_no_fmu_markers_set():
@@ -59,7 +78,7 @@ def test_case_with_no_fmu_markers_set():
     aps_model = get_apsmodel_with_no_fmu_markers()
 
     out_file = 'aps_model_with_no_fmu_markers.xml'
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
 
     aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
 
@@ -71,8 +90,8 @@ def test_case_with_all_fmu_markers_set():
     aps_model = get_apsmodel_with_all_fmu_markers()
 
     out_file = 'aps_model_with_all_fmu_markers.xml'
-    attributes_file = 'fmu_attributes.txt'
-    expected_key_value_set_file = 'testData_FMU/expected_key_value_set.txt'
+    attributes_file = 'fmu_attributes.yaml'
+    expected_key_value_set_file = 'testData_FMU/expected_key_value_set.yaml'
 
     aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
 
@@ -83,14 +102,14 @@ def test_case_with_all_fmu_markers_set():
 def check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file):
 
     values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
-    values_from_generated_attributes_file = read_fmu_attributes_file(attributes_file)
+    values_from_generated_attributes_file = set(read_fmu_attributes_file(attributes_file).keys())
     key_set_from_xml = set(values_from_generated_xml.keys())
     assert len(key_set_from_xml.symmetric_difference(values_from_generated_attributes_file)) == 0
 
 
 def check_expected_key_value_set_correlates_to_xml_output(out_file, expected_key_value_set_file):
     values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
-    fasit_key_values = read_key_values_from_file_as_dict(expected_key_value_set_file)
+    fasit_key_values = read_fmu_attributes_file(expected_key_value_set_file)
     assert values_from_generated_xml == fasit_key_values
 
 

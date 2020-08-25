@@ -463,6 +463,7 @@ prog/
 
 # Unit testing
 src/unit_test/fmu_attributes.txt
+src/unit_test/fmu_attributes.yaml
 src/unit_test/Created_truncation_maps_cubic.png
 src/unit_test/Created_truncation_maps_cubic_overlay.png
 src/unit_test/Overview_truncation_maps.png

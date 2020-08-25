@@ -298,13 +298,13 @@ def addZoneParam(
 
 def read_write_model(apsmodel, debug_level=Debug.OFF):
     outfile1 = 'testOut1.xml'
-    attributesFile = 'fmu_attributes.txt'
+    attributesFile = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile1, attributesFile, debug_level=debug_level)
 
     # Read the xml file into an new APSModel object
     apsmodel2 = APSModel(outfile1, debug_level=debug_level)
     outfile2 = 'testOut2.xml'
-    attributesFile = "fmu_attributes.txt"
+    attributesFile = "fmu_attributes.yaml"
     apsmodel2.write_model(outfile2, attributesFile, debug_level=debug_level)
     print(f'Compare file: {outfile1} and {outfile2}')
     check = compare(outfile1, outfile2)
@@ -318,7 +318,7 @@ def read_write_model_update(debug_level=Debug.OFF):
     # Read the xml file into an new APSModel object
     apsmodel2 = APSModel(outfile1)
     outfile2 = 'testOut2.xml'
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
     apsmodel2.write_model(outfile2, attributes_file, debug_level)
     print(f'Compare file: {outfile1} and {outfile2}')
     check = compare(outfile1, outfile2)
@@ -348,7 +348,7 @@ def test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zo
 
 def test_read_and_write_modelfiles_without_project_name_word_flow_name_and_region_parameter_name(debug_level=Debug.OFF):
 
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
 
     aps_model = create_apsmodel_with_and_without_regions_and_regionparam(False, True)
     aps_model.rms_project_name = None
@@ -424,7 +424,7 @@ def test_read_and_write_APSModel():
     modelFile = get_model_file_path('testData_models/APS.xml')
     apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
     outfile3 = 'testOut3.xml'
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_sorted.xml'
     print(f'Compare file: {outfile3} and {reference_file}')
@@ -504,7 +504,7 @@ def test_updating_model1():
             assertPropertyGetterSetter(gfName, powerFmuUpdatable, zone, 'PowerFmuUpdatable')
 
     outfile2 = 'testOut1_updated.xml'
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile2, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated1.xml'
     print(f'Compare file: {outfile2} and {reference_file}')
@@ -562,7 +562,7 @@ def test_updating_model2():
             power = powerList[i]
             assertPropertyGetterSetter(gfName, power, zone, 'Power')
     outfile2 = 'testOut2_updated.xml'
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile2, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated2.xml'
     print(f'Compare file: {outfile2} and {reference_file}')
@@ -674,7 +674,7 @@ def test_updating_model3():
                 getSetTrendParameters(trendParamName, trendModelObj, 'trend_parameter_name')
 
     outfile3 = 'testOut3_updated.xml'
-    attributes_file = 'fmu_attributes.txt'
+    attributes_file = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file, Debug.OFF)
     reference_file = 'testData_models/APS_updated3.xml'
     print(f'Compare file: {outfile3} and {reference_file}')

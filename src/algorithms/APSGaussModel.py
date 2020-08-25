@@ -17,6 +17,7 @@ from src.utils.constants.simple import (
     Debug, VariogramType, CrossSectionType, MinimumValues, MaximumValues, TrendType,
     Direction, OriginType,
 )
+from src.utils.containers import FmuAttribute
 from src.utils.numeric import flip_if_necessary
 from src.utils.simGauss2D_nrlib import simGaussField
 from src.utils.xmlUtils import (
@@ -1407,9 +1408,9 @@ class APSGaussModel:
         value = grf[property_name]
         elem = Element(tag)
         elem.text = ' ' + str(value) + ' '
-        if value.updatable:
+        if isinstance(value, FmuProperty) and value.updatable:
             fmu_attribute = create_fmu_variable(tag, grf.name, zone_number, region_number)
-            fmu_attributes.append(fmu_attribute)
+            fmu_attributes.append(FmuAttribute(fmu_attribute, value.value))
             elem.attrib = dict(kw=fmu_attribute)
         xml_element.append(elem)
 

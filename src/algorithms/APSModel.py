@@ -3,12 +3,14 @@
 import collections
 import copy
 import xml.etree.ElementTree as ET
+from typing import List
 
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.algorithms.properties import CrossSection
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import MissingAttributeInKeyword
+from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
 from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
 from src.utils.io import GlobalVariables
@@ -972,7 +974,7 @@ class APSModel:
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
-        fmu_attributes = []
+        fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
         with open(model_file_name, 'w') as file:
@@ -980,9 +982,11 @@ class APSModel:
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'Write file: {model_file_name}')
         if attributes_file_name is not None:
+            content = 'rms:\n'
+            for fmu_attribute in fmu_attributes:
+                content += f'  {fmu_attribute.name}: {fmu_attribute.value} ~ <{fmu_attribute.name}>\n'
             with open(attributes_file_name, 'w') as attributes_file:
-                for fmu_attribute in fmu_attributes:
-                    attributes_file.write("%s\n" % fmu_attribute)
+                attributes_file.write(content)
                 if debug_level >= Debug.VERY_VERBOSE:
                     print(f'Write file: {attributes_file_name}')
 

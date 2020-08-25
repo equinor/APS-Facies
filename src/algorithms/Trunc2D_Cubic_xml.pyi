@@ -6,6 +6,8 @@ from src.utils.constants.simple import Debug
 from typing import List, Optional, Tuple, Union, Dict
 from xml.etree.ElementTree import Element
 
+from src.utils.containers import FmuAttribute
+
 
 class Trunc2D_Cubic(Trunc2D_Base):
     __node_index: Dict[str, int]
@@ -22,7 +24,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         modelFileName: Optional[str] = None,
         zoneNumber: Optional[int] = None
     ): ...
-    def XMLAddElement(self, parent: Element, zone_number:str, region_number:str, fmu_attributes:List[str]) -> None: ...
+    def XMLAddElement(self, parent: Element, zone_number:str, region_number:str, fmu_attributes: List[FmuAttribute]) -> None: ...
     def defineFaciesByTruncRule(self, alphaCoord: ndarray) -> Tuple[int, int]: ...
     def getClassName(self) -> str: ...
     def initialize(

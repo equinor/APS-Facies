@@ -4,6 +4,7 @@ from xml.etree.ElementTree import Element
 
 from src.algorithms.APSGaussModel import GaussianFieldName
 from src.utils.constants.simple import OriginType
+from src.utils.containers import FmuAttribute
 
 
 def getBoolCommand(
@@ -86,8 +87,8 @@ def fmu_xml_element(
         zone_number: int,
         region_number: int,
         gf_name: GaussianFieldName,
-        fmu_creator: Callable[[str, str, int, int], Any],
-        fmu_attributes: List
+        fmu_creator: Callable[[str, str, int, int], str],
+        fmu_attributes: List[FmuAttribute],
 ): ...
 
 
