@@ -42,6 +42,7 @@
         <slot
           :item="item"
           :isSelected="isSelected"
+          :isCurrent="isCurrent(item)"
           :on="on"
           name="item"
         />
