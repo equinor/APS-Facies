@@ -41,11 +41,22 @@ def get_nrlib_path():
     if 'redhat' in description:
         # Assuming we are on RGS
         redhat_version = get_redhat_version()
-        rms_version = get_rms_version()[0]
+        rms_version = get_rms_version().major
         return f'/project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
 
 
-def get_rms_version():
+class Version:
+    def __init__(self, version: List[str]):
+        major, minor, patch = version
+        self.major = major
+        self.minor = minor
+        self.patch = patch
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+
+def get_rms_version() -> Optional[Version]:
     try:
         import roxar.rms
     except ImportError:
@@ -54,7 +65,7 @@ def get_rms_version():
     rms_version = roxar.rms.get_version().split('.')
     while len(rms_version) < 3:
         rms_version.append('0')
-    return rms_version
+    return Version(rms_version)
 
 
 def get_redhat_version():
@@ -76,7 +87,7 @@ def get_rgs_specific_python_package_paths() -> Optional[List[str]]:
         '/project/res/roxapi/x86_64_RH_{redhat_version}/{rms_version}/lib/python{python_version}/site-packages'
         ''.format(
             redhat_version=get_redhat_version(),
-            rms_version='.'.join(get_rms_version()),
+            rms_version=get_rms_version(),
             python_version=python_version,
         )
     )
