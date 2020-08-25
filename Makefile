@@ -495,7 +495,7 @@ run-tests: init-mock-project python-unit-tests javascript-unit-tests
 python-unit-tests:
 	cd $(TEST_FOLDER) && \
 	PYTHONPATH=$(PYTHONPATH) \
-	$(PY.TEST)
+	$(PY.TEST) --import-mode=importlib
 
 javascript-unit-tests:
 	$(YARN) test:unit
