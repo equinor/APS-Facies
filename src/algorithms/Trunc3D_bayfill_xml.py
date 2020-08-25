@@ -8,6 +8,7 @@ from xml.etree.ElementTree import Element
 
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
+from src.utils.containers import FmuAttribute
 from src.utils.xmlUtils import getKeyword, isFMUUpdatable, createFMUvariableNameForBayfillTruncation
 
 """
@@ -116,7 +117,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         self.__fIndxPerPolygon = np.arange(5, dtype=np.int32)
 
         # Internal data structure
-        self.__param_sf = []
+        self.__param_sf = 0
         self._is_param_sf_fmuupdatable = False
         self.__param_ysf = 0
         self._is_param_ysf_fmuupdatable = False
@@ -519,7 +520,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         obj = Element(tag)
         if self._is_param_sf_fmuupdatable:
             fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
-            fmu_attributes.append(fmu_attribute)
+            fmu_attributes.append(FmuAttribute(fmu_attribute, self.__param_sf))
             obj.attrib = dict(kw=fmu_attribute)
         if self.__useConstTruncModelParam:
             obj.text = ' ' + str(self.__param_sf) + ' '
@@ -532,7 +533,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         obj.text = ' ' + ' ' + str(self.__param_ysf) + ' '
         if self._is_param_ysf_fmuupdatable:
             fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
-            fmu_attributes.append(fmu_attribute)
+            fmu_attributes.append(FmuAttribute(fmu_attribute, self.__param_ysf))
             obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
 
@@ -541,7 +542,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         obj.text = ' ' + ' ' + str(self.__param_sbhd) + ' '
         if self._is_param_sbhd_fmuupdatable:
             fmu_attribute = createFMUvariableNameForBayfillTruncation(tag, zone_number, region_number)
-            fmu_attributes.append(fmu_attribute)
+            fmu_attributes.append(FmuAttribute(fmu_attribute, self.__param_sbhd))
             obj.attrib = dict(kw=fmu_attribute)
         bgModelElement.append(obj)
 

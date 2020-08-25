@@ -7,13 +7,25 @@ from src.utils.constants.simple import Debug
 from typing import List, Optional, Tuple, Union
 from xml.etree.ElementTree import Element
 
+from src.utils.containers import FmuAttribute
+
 
 class Trunc3D_bayfill(Trunc2D_Base):
     _setTruncRuleIsCalled: bool
     __eps: float
     _alphaIndxList: List[int]
     __useConstTruncModelParam: bool
+
     __param_sf_name: str
+    __param_sf: float
+    _is_param_sf_fmuupdatable: bool
+
+    __param_ysf: float
+    _is_param_ysf_fmuupdatable: bool
+
+    __param_sbhd: float
+    _is_param_sbhd_fmuupdatable: bool
+
     def __init__(
         self,
         trRuleXML: Optional[Element] = None,
@@ -24,7 +36,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         modelFileName: Optional[str] = None
     ) -> None: ...
     def __interpretXMLTree(self, trRuleXML, modelFileName): ...
-    def XMLAddElement(self, parent: Element, zone_number:str, region_number:str, fmu_attributes:List[str]) -> None: ...
+    def XMLAddElement(self, parent: Element, zone_number:str, region_number:str, fmu_attributes: List[FmuAttribute]) -> None: ...
     def defineFaciesByTruncRule(self, alphaCoord: Union[ndarray, List[float]]) -> Tuple[int, int]: ...
     def getClassName(self) -> str: ...
     def getFaciesInTruncRule(self) -> List[str]: ...

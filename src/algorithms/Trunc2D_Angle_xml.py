@@ -8,6 +8,7 @@ import numpy as np
 
 from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
+from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
 from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand, isFMUUpdatable, createFMUvariableNameForNonCubicTruncation
 from src.algorithms.Memoization import RoundOffConstant
@@ -982,7 +983,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             if is_fmu_updatable:
                 assert all(parameter is not None for parameter in [zone_number, region_number, fmu_attributes])
                 fmu_attribute = createFMUvariableNameForNonCubicTruncation(k + 1, zone_number, region_number)
-                fmu_attributes.append(fmu_attribute)
+                fmu_attributes.append(FmuAttribute(fmu_attribute, probFrac))
                 angleElement.attrib = dict(kw=fmu_attribute)
             fElement.append(angleElement)
 

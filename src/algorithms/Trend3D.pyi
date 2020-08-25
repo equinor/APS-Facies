@@ -7,6 +7,7 @@ from src.utils.constants.simple import Debug, OriginType, TrendType, Direction, 
 from typing import List, Optional, Union, Tuple, Dict, Any, Type
 from xml.etree.ElementTree import Element
 
+from src.utils.containers import FmuAttribute
 
 Point3D = Tuple[float, float, float]
 
@@ -61,7 +62,7 @@ class Trend3D:
         zone_number:    Union[int, str],
         region_number:  Optional[Union[str, int]],
         gf_name:        str,
-        fmu_attributes: List[str]
+        fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     def __init__(
             self,
@@ -130,7 +131,7 @@ class Trend3D:
             zone_number: int,
             region_number: int,
             gf_name: str,
-            fmu_attributes: List[str]
+            fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     def setStackingDirection(self, direction: int) -> None: ...
 
@@ -145,7 +146,7 @@ class Trend3D_linear(Trend3D):
             zone_number:    int,
             region_number:  int,
             gf_name:        GaussianFieldName,
-            fmu_attributes: List[str]
+            fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     def __init__(
             self,
@@ -259,7 +260,7 @@ class Trend3D_elliptic(Trend3D_conic):
             zone_number: int,
             region_number: int,
             gf_name: GaussianFieldName,
-            fmu_attributes: List[str]
+            fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     @classmethod
     def from_xml(
@@ -323,7 +324,7 @@ class Trend3D_hyperbolic(Trend3D_conic):
             zone_number: int,
             region_number: int,
             gf_name: GaussianFieldName,
-            fmu_attributes: List[str]
+            fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     def _calculateTrendModelParam(self, use_relative_azimuth: bool = False) -> HyperbolicTrendParameters: ...
     def _hyperbolicTrendFunction(
@@ -389,7 +390,7 @@ class Trend3D_rms_param(Trend3D):
             zone_number:    int,
             region_number:  int,
             gf_name:        str,
-            fmu_attributes: List[str]
+            fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     def _writeTrendSpecificParam(self) -> None: ...
 
@@ -429,7 +430,7 @@ class Trend3D_elliptic_cone(Trend3D_conic):
             zone_number:    int,
             region_number:  int,
             gf_name:        str,
-            fmu_attributes: List[str]
+            fmu_attributes: List[FmuAttribute]
     ) -> None: ...
     def _trendValueCalculation(self, parameters_for_trend_calc, x, y, k, zinc): ...
     def _trendValueCalculationSimBox(

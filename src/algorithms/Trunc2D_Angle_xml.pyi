@@ -7,6 +7,8 @@ from src.utils.constants.simple import Debug
 from typing import List, Optional, Tuple, Union, Dict
 from xml.etree.ElementTree import Element
 
+from src.utils.containers import FmuAttribute
+
 
 class Trunc2D_Angle(Trunc2D_Base):
     __faciesBoundaryOrientation: List[float]
@@ -35,7 +37,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         parent: Element,
         zone_number: Optional[int],
         region_number: Optional[int],
-        fmu_attributes: Optional[List[str]],
+        fmu_attributes: Optional[List[FmuAttribute]],
     ) -> None: ...
     def defineFaciesByTruncRule(self, alphaCoord: ndarray) -> Tuple[int, int]: ...
     def faciesIndxPerPolygon(self) -> List[int]: ...

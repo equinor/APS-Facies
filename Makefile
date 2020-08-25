@@ -506,6 +506,7 @@ clean-tests: clean-integration
 	rm -f  *.dat \
 	       *.xml \
 	       *.png \
+	       fmu_attributes.yaml \
 	       fmu_attributes.txt
 
 find-circular-dependencies:
