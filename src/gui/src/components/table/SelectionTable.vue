@@ -9,7 +9,7 @@
     :current.sync="current"
   >
     <template
-      v-slot:item="{ item }"
+      v-slot:item="{ item, isCurrent }"
     >
       <td
         v-if="showName"
@@ -29,6 +29,7 @@
       >
         <conform-selection
           :value="item"
+          :dark="isCurrent"
         />
       </td>
       <td>
@@ -38,7 +39,7 @@
         >
           <icon-button
             icon="copy"
-            :color="getColor(item)"
+            :color="isCurrent ? 'white' : undefined"
             @click="() => copy(item)"
           />
           <icon-button

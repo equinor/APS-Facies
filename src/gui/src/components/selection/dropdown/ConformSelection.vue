@@ -2,6 +2,7 @@
   <v-select
     v-model="conformity"
     :items="options"
+    :dark="dark"
   />
 </template>
 
@@ -17,6 +18,9 @@ import { ListItem } from '@/utils/typing'
 export default class ConformSelection extends Vue {
   @Prop({ required: true })
   readonly value: Zone
+
+  @Prop({ default: false, type: Boolean })
+  readonly dark: boolean
 
   get conformity (): ZoneConformOption { return this.value.conformity }
   set conformity (value: ZoneConformOption) {
