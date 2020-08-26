@@ -974,21 +974,19 @@ class APSModel:
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
+        def write(file_name: str, content: str) -> None:
+            with open(file_name, 'w') as file:
+                file.write(content)
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'Write file: {file_name}')
+
         fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
-        with open(model_file_name, 'w') as file:
-            file.write(root_updated)
-        if debug_level >= Debug.VERY_VERBOSE:
-            print(f'Write file: {model_file_name}')
+        write(model_file_name, root_updated)
+
         if attributes_file_name is not None:
-            content = 'rms:\n'
-            for fmu_attribute in fmu_attributes:
-                content += f'  {fmu_attribute.name}: {fmu_attribute.value} ~ <{fmu_attribute.name}>\n'
-            with open(attributes_file_name, 'w') as attributes_file:
-                attributes_file.write(content)
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'Write file: {attributes_file_name}')
+            write(attributes_file_name, fmu_configuration(fmu_attributes))
 
     @staticmethod
     def write_model_from_xml_root(input_tree, output_model_file_name):
@@ -998,6 +996,13 @@ class APSModel:
         with open(output_model_file_name, 'w', encoding='utf-8') as file:
             file.write(root)
             file.write('\n')
+
+
+def fmu_configuration(fmu_attributes):
+    content = 'rms:\n'
+    for fmu_attribute in fmu_attributes:
+        content += f'  {fmu_attribute.name}: {fmu_attribute.value} ~ <{fmu_attribute.name}>\n'
+    return content
 
 
 ApsModel = APSModel
