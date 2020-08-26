@@ -280,7 +280,7 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
 	printf "r\n$(EXAMPLES_FOLDER)/truncation_settings.dat\nm\na\nq\nq\n" | \
 	HIDE_TITLE='yes' \
-	DONT_RITE_OVERVIEW='yes' \
+	DONT_WRITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
 	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
 	$(PYTHON) $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
