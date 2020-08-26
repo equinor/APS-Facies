@@ -14,6 +14,7 @@ import path from '@/store/modules/parameters/path'
 import names from '@/store/modules/parameters/names'
 import debugLevel from '@/store/modules/parameters/debugLevel'
 import maxAllowedFractionOfValuesOutsideTolerance from '@/store/modules/parameters/maxAllowedFractionOfValuesOutsideTolerance'
+import toleranceOfProbabilityNormalisation from '@/store/modules/parameters/toleranceOfProbabilityNormalisation'
 
 const module: Module<ParametersState, RootState> = {
   namespaced: true,
@@ -31,6 +32,7 @@ const module: Module<ParametersState, RootState> = {
     names,
     debugLevel,
     maxAllowedFractionOfValuesOutsideTolerance,
+    toleranceOfProbabilityNormalisation,
   },
 
   actions: {
@@ -40,6 +42,7 @@ const module: Module<ParametersState, RootState> = {
         dispatch('names/workflow/fetch'),
         dispatch('names/project/fetch'),
         dispatch('maxAllowedFractionOfValuesOutsideTolerance/fetch'),
+        dispatch('toleranceOfProbabilityNormalisation/fetch'),
       ])
     }
   },

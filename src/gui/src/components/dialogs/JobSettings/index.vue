@@ -43,6 +43,7 @@
         <br>
         <run-settings
           :max-allowed-fraction-of-values-outside-tolerance.sync="maxAllowedFractionOfValuesOutsideTolerance"
+          :tolerance-of-probability-normalisation="toleranceOfProbabilityNormalisation"
         />
         <br>
         <settings-panel title="Display Settings">
@@ -344,6 +345,7 @@ export default class JobSettings extends Vue {
   createFmuGrid = false
   onlyUpdateFromFmu = false
   maxAllowedFractionOfValuesOutsideTolerance = 0
+  toleranceOfProbabilityNormalisation = 0
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
@@ -368,6 +370,7 @@ export default class JobSettings extends Vue {
 
       this.debugLevel = parameters.debugLevel.selected
       this.maxAllowedFractionOfValuesOutsideTolerance = parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
+      this.toleranceOfProbabilityNormalisation = parameters.toleranceOfProbabilityNormalisation.selected
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
       this.showRegionNameNumber = options.showNameOrNumber.region.value
       this.automaticAlphaFieldSelection = options.automaticAlphaFieldSelection.value

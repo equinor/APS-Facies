@@ -1,3 +1,4 @@
+import rms from '@/api/rms'
 import { Selectable } from '@/store/modules/parameters/typing/helpers'
 import { RootState } from '@/store/typing'
 import { ActionContext, Module } from 'vuex'
@@ -20,6 +21,33 @@ export function makeSelectionModule (fetch: () => Promise<string>): Module<Selec
       CURRENT: (state: Selectable, path: string): void => {
         state.selected = path
       }
+    },
+  }
+}
+
+export function makeToleranceModule (name: string): Module<Selectable<number>, RootState> {
+  return {
+    namespaced: true,
+
+    state: {
+      selected: 0,
+    },
+
+    actions: {
+      async fetch ({ dispatch }): Promise<void> {
+        const { tolerance } = await rms.constants(name, 'tolerance')
+        await dispatch('select', tolerance)
+      },
+
+      async select ({ commit }, value: number): Promise<void> {
+        commit('SET', value)
+      }
+    },
+
+    mutations: {
+      SET (state, value: number): void {
+        state.selected = value
+      },
     },
   }
 }

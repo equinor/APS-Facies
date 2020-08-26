@@ -17,4 +17,5 @@ export default interface ParametersState {
   }
   debugLevel: Selectable<number>
   maxAllowedFractionOfValuesOutsideToleranceState: Selectable<number>
+  toleranceOfProbabilityNormalisation: Selectable<number>
 }
