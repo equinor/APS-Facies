@@ -34,9 +34,6 @@ def get_project_realization_seed(project=None):
 
 
 def get_project_dir(project):
-    import sys
-    if sys.platform == 'darwin':
-        return Path('/Users/snis/Projects/APS/GUI/fmu.model/rms/model')
     return Path(project.filename).parent.absolute()
 
 
