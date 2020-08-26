@@ -100,6 +100,7 @@ class Parser:
             return None
         _type = line.split(' ')[0]
         parsers = {
+            'Bayfill': Parser.Bayfill,
             'Cubic': Parser.Cubic,
             'NonCubic': Parser.NonCubic,
             'Overlay': Parser.Overlay,
@@ -120,12 +121,13 @@ class Parser:
                 'facies': _get_all_facies_indices(rule),
                 'field': _get_all_fields_indices(rule),
             }
-            for polygon in rule['polygons']:
-                facies_name = polygon['facies']
-                polygon['facies'] = {
-                    'name': facies_name,
-                    'index': indices['facies'][facies_name]
-                }
+            if not all(_is_indexed(polygon['facies']) for polygon in rule['polygons']):
+                for polygon in rule['polygons']:
+                    facies_name = polygon['facies']
+                    polygon['facies'] = {
+                        'name': facies_name,
+                        'index': indices['facies'][facies_name]
+                    }
             for item in rule['fields']:
                 field_name = item['field']['name']
                 item['field']['index'] = indices['field'][field_name]
@@ -158,6 +160,67 @@ class Parser:
         # for rule in rules:
         #     _get_overlays(rule, content)
         # return rules
+
+    class Bayfill:
+        min_fields = 3
+
+        @classmethod
+        def parse(cls, line):
+            match = re.match(r"Bayfill +(?P<name>\w+) +(?P<num_facies>\d+) +(?P<rule>\[.*\])", line).groupdict()
+            rule = json.loads(match['rule'].replace("'", '"'))
+            polygons = cls.polygons(rule)
+            return {
+                'name': match['name'],
+                'type': 'bayfill',
+                'minFields': cls.min_fields,
+                'polygons': polygons,
+                'settings': cls.settings(rule, polygons),
+                'fields': make_empty_fields(cls.min_fields),
+            }
+
+        names = (
+            'Floodplain',
+            'Subbay',
+            'Wave influenced Bayfill',
+            'Bayhead Delta',
+            'Lagoon',
+        )
+
+        @classmethod
+        def polygons(cls, rule):
+            if len(rule) != len(cls.names):
+                raise ValueError(f'Incorrect number of polygons. Expected {len(cls.names)}, but got {len(rule)}.')
+            return [
+                {
+                    'name': cls.names[index],
+                    'facies': {
+                        'name': polygon[0],
+                        'index': index,
+                    },
+                    'proportions': 1 / len(rule),
+                }
+                for index, polygon in enumerate(rule)
+            ]
+
+        @classmethod
+        def settings(cls, rule, polygons):
+            mapping = {
+                polygon['facies']['name']: polygon['name']
+                for polygon in polygons
+            }
+            settings = []
+            for polygon in rule:
+                if len(polygon) == 3:
+                    facies_name, slant_factor, value = polygon
+                    settings.append({
+                        'name': slant_factor,
+                        'polygon': mapping[facies_name],
+                        'slantFactor': {
+                            'value': value,
+                            'updatable': False,
+                        },
+                    })
+            return settings
 
     class Combination:
         @staticmethod
@@ -315,7 +378,19 @@ def _get_all_fields_indices(rule):
     return _indices(fields)
 
 
+def _is_indexed(facies):
+    return (
+            isinstance(facies, dict)
+            and set(facies.keys()) == {'name', 'index'}
+    )
+
+
 def _get_all_facies_indices(rule):
+    if all(_is_indexed(polygon['facies']) for polygon in rule['polygons']):
+        return {
+            polygon['facies']['name']: polygon['facies']['index']
+            for polygon in rule['polygons']
+        }
     facies = {polygon['facies'] for polygon in rule['polygons']}
     if 'overlay' in rule:
         for item in rule['overlay']['items']:
@@ -331,7 +406,26 @@ def parse(data: str):
 
 
 def run(data):
-    rules = parse(data)
+    rules = {
+        "types": [
+            {
+                "name": "Bayfill",
+                "type": "bayfill",
+                "order": 1
+            },
+            {
+                "name": "Non-Cubic",
+                "type": "non-cubic",
+                "order": 2
+            },
+            {
+                "name": "Cubic",
+                "type": "cubic",
+                "order": 3
+            }
+        ],
+        "templates": parse(data),
+    }
     print(json.dumps(rules))
 
 

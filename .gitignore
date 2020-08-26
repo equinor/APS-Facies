@@ -497,6 +497,7 @@ doc/~$*.docx
 truncation-rules
 aps_workflows
 src/gui/public/truncation-rules
+src/gui/src/store/templates/truncationRules.json
 
 # Track build number
 src/utils/track-build-number

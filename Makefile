@@ -253,7 +253,7 @@ clean-plugin:
 	       $(PLUGIN_DIR).plugin \
 	       $(PLUGIN_DIR).*.plugin
 
-build-front-end: $(PACKAGE.JSON) build-dir generate-truncation-rule-images _build-front-end copy-changelog.md
+build-front-end: $(PACKAGE.JSON) build-dir generate-truncation-rules _build-front-end copy-changelog.md
 
 _build-front-end:
 	VUE_APP_APS_VERSION="$(APS_VERSION)" \
@@ -271,6 +271,10 @@ truncation-rule-vislualization-dir: relink-matplotlibrc
 
 clean-generated-truncation-rules:
 	rm -rf $(TRUNCATION_RULE_VISUALIZATIONS)
+	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
+
+generate-truncation-rules: generate-truncation-rule-images
+	$(PYTHON) $(CODE_DIR)/bin/parse-truncation-rule-templates.py > $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
@@ -293,7 +297,7 @@ VERSION:
 COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
 
-init: initialize-python-environment dependencies init-workflow package.json dotenv generate-truncation-rule-images
+init: initialize-python-environment dependencies init-workflow package.json dotenv generate-truncation-rules
 
 init-workflow: links generate-workflow-files
 
