@@ -966,11 +966,11 @@ class APSModel:
         root.append(zone_elements)
         return prettify(root)
 
-    def dump(self, name, attributes_file_name=None, debug_level=Debug.OFF):
+    def dump(self, name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
         """Writes the representation of this APS model to a model file"""
-        self.write_model(name, attributes_file_name, debug_level)
+        self.write_model(name, attributes_file_name, probability_distribution_file_name, debug_level)
 
-    def write_model(self, model_file_name, attributes_file_name=None, debug_level=Debug.OFF):
+    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
@@ -988,6 +988,9 @@ class APSModel:
         if attributes_file_name is not None:
             write(attributes_file_name, fmu_configuration(fmu_attributes))
 
+        if probability_distribution_file_name is not None:
+            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes))
+
     @staticmethod
     def write_model_from_xml_root(input_tree, output_model_file_name):
         print(f'Write file: {output_model_file_name}')
@@ -998,7 +1001,27 @@ class APSModel:
             file.write('\n')
 
 
+def _max_name_length(fmu_attributes):
+    return max(len(fmu_attribute.name) for fmu_attribute in fmu_attributes)
+
+
+def _max_value_length(fmu_attributes):
+    return max(len(str(fmu_attribute.value)) for fmu_attribute in fmu_attributes)
+
+
+def probability_distribution_configuration(fmu_attributes):
+    if not fmu_attributes:
+        return ''
+    content = ''
+    max_length = _max_name_length(fmu_attributes)
+    for fmu_attribute in fmu_attributes:
+        content += f'{fmu_attribute.name:<{max_length}} <prob_dist>\n'
+    return content
+
+
 def fmu_configuration(fmu_attributes):
+    if not fmu_attributes:
+        return ''
     content = 'rms:\n'
     for fmu_attribute in fmu_attributes:
         content += f'  {fmu_attribute.name}: {fmu_attribute.value} ~ <{fmu_attribute.name}>\n'

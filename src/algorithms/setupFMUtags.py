@@ -28,7 +28,12 @@ def run(roxar=None, project=None, **kwargs):
         # Read selected FMU variables
         fmu_variables = read_selected_fmu_variables(input_selected_fmu_variable_file)
         print(fmu_variables)
-        set_selected_as_fmu_updatable(model_file, output_model_file, fmu_variables, output_tagged_variables_file)
+        set_selected_as_fmu_updatable(
+            input_model_file=model_file,
+            output_model_file=output_model_file,
+            selected_variables=fmu_variables,
+            tagged_variable_file=output_tagged_variables_file,
+        )
 
     write_status_file(True, 'Test_Update_FMU_parameters')
 

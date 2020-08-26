@@ -319,7 +319,7 @@ def read_write_model_update(debug_level=Debug.OFF):
     apsmodel2 = APSModel(outfile1)
     outfile2 = 'testOut2.xml'
     attributes_file = 'fmu_attributes.yaml'
-    apsmodel2.write_model(outfile2, attributes_file, debug_level)
+    apsmodel2.write_model(outfile2, attributes_file, debug_level=debug_level)
     print(f'Compare file: {outfile1} and {outfile2}')
     check = compare(outfile1, outfile2)
 
@@ -425,7 +425,7 @@ def test_read_and_write_APSModel():
     apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
     outfile3 = 'testOut3.xml'
     attributes_file = 'fmu_attributes.yaml'
-    apsmodel.write_model(outfile3, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile3, attributes_file, debug_level=Debug.OFF)
     reference_file = 'testData_models/APS_sorted.xml'
     print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)
@@ -505,7 +505,7 @@ def test_updating_model1():
 
     outfile2 = 'testOut1_updated.xml'
     attributes_file = 'fmu_attributes.yaml'
-    apsmodel.write_model(outfile2, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile2, attributes_file, debug_level=Debug.OFF)
     reference_file = 'testData_models/APS_updated1.xml'
     print(f'Compare file: {outfile2} and {reference_file}')
     check = compare(outfile2, reference_file)
@@ -563,7 +563,7 @@ def test_updating_model2():
             assertPropertyGetterSetter(gfName, power, zone, 'Power')
     outfile2 = 'testOut2_updated.xml'
     attributes_file = 'fmu_attributes.yaml'
-    apsmodel.write_model(outfile2, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile2, attributes_file, debug_level=Debug.OFF)
     reference_file = 'testData_models/APS_updated2.xml'
     print(f'Compare file: {outfile2} and {reference_file}')
     check = compare(outfile2, reference_file)
@@ -675,7 +675,7 @@ def test_updating_model3():
 
     outfile3 = 'testOut3_updated.xml'
     attributes_file = 'fmu_attributes.yaml'
-    apsmodel.write_model(outfile3, attributes_file, Debug.OFF)
+    apsmodel.write_model(outfile3, attributes_file, debug_level=Debug.OFF)
     reference_file = 'testData_models/APS_updated3.xml'
     print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)

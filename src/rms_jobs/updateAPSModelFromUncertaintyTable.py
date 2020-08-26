@@ -31,8 +31,14 @@ Example:
 """
 
 
-def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_model_file, workflow_name=None,
-                                      write_output_file_with_parameter_names=False, debug_level=Debug.OFF):
+def update_aps_model_from_uncertainty(
+        project,
+        input_aps_model_file,
+        output_aps_model_file,
+        workflow_name=None,
+        write_output_file_with_parameter_names=False,
+        debug_level=Debug.OFF,
+):
     """ Script that get values for specified parameter names from a RMS uncertainty table with parameters and updates an APS model file.
         Input: project - The global variable project from Roxar API.
                rms_table_name - Name of RMS table containing values for the specified model parameters to be updated in APS model file.
@@ -66,8 +72,10 @@ def update_aps_model_from_uncertainty(project, input_aps_model_file, output_aps_
         print('')
     # Tag all relevant parameters as FMU updatable and write out a new model file containing the tags
     set_selected_as_fmu_updatable(
-        input_aps_model_file, output_aps_model_file,
-        uncertainty_variable_names, output_file_with_parameter_names
+        input_model_file=input_aps_model_file,
+        output_model_file=output_aps_model_file,
+        selected_variables=uncertainty_variable_names,
+        tagged_variable_file=output_file_with_parameter_names,
     )
 
     # Read the values of the tagged variables from RMS table corresponding to the specified workflow
