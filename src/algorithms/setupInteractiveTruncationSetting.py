@@ -426,7 +426,7 @@ def removeCommand(rules):
 def run():
     show_title = not is_affirmative('HIDE_TITLE')
     write_overlay = not is_affirmative('DONT_WRITE_OVERLAY')
-    write_overview = not is_affirmative('DONT_RITE_OVERVIEW')
+    write_overview = not is_affirmative('DONT_WRITE_OVERVIEW')
     write_to_directories = is_affirmative('WRITE_TO_DIRECTORIES')
 
     rules = DefineTruncationRule(

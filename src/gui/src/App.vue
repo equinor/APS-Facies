@@ -31,7 +31,7 @@ import MainPage from '@/pages/MainPage.vue'
   },
 })
 export default class App extends Vue {
-  beforeMount () {
+  beforeMount (): void {
     if (
       !this.$store.getters.loaded
       && !this.$store.getters.loading
