@@ -8,7 +8,8 @@
       <v-col cols="6">
         <numeric-field
           v-model="_maxAllowedFractionOfValuesOutsideTolerance"
-          label="Max allowed fraction of grid cell values in probability cubes without proper normalization"
+          v-tooltip="'Max allowed fraction of grid cell values in probability cubes without proper normalization. <br> Default value is 10%'"
+          label="Max allowed fraction of non-normalized grid cells"
           :ranges="{ min: 0, max: 100 }"
           unit="%"
         />
