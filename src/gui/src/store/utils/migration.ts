@@ -113,6 +113,17 @@ const migrations: Migration[] = [
       })
       return state
     },
+  },
+  {
+    from: '1.4.1',
+    to: '1.5.0',
+    up: async (state): Promise<any> => {
+      const { tolerance } = await rms.constants('max_allowed_deviation_before_error', 'tolerance')
+      state.parameters.toleranceOfProbabilityNormalisation = {
+        selected: tolerance,
+      }
+      return state
+    }
   }
 ]
 

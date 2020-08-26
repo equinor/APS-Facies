@@ -37,6 +37,7 @@ class JobConfig:
             'write_rms_parameters_for_qc_purpose': self.write_rms_parameters_for_qc_purpose,
             'debug_level': self.debug_level,
             'max_allowed_fraction_of_values_outside_tolerance': self._max_allowed_fraction_of_values_outside_tolerance,
+            'tolerance_of_probability_normalisation': self._tolerance_of_probability_normalisation,
         }
 
     @property
@@ -102,6 +103,10 @@ class JobConfig:
     @property
     def _max_allowed_fraction_of_values_outside_tolerance(self):
         return self._config['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected']
+
+    @property
+    def _tolerance_of_probability_normalisation(self):
+        return self._config['parameters']['toleranceOfProbabilityNormalisation']['selected']
 
     @property
     def debug_level(self):
