@@ -18,6 +18,7 @@
         :label="label"
         :suffix="_unit"
         :disabled="disabled"
+        :readonly="readonly"
         :hint="hint"
         :persistent-hint="persistentHint"
         :append-icon="appendIcon"
@@ -150,6 +151,9 @@ export default class NumericField extends Vue {
 
   @Prop({ default: false, type: Boolean })
   readonly ignoreErrors!: boolean
+
+  @Prop({ default: false, type: Boolean })
+  readonly readonly!: boolean
 
   @Prop({ default: null })
   readonly ranges!: Optional<MinMax>
@@ -348,10 +352,12 @@ export default class NumericField extends Vue {
   }
 
   increase (): void {
+    if (this.readonly) return
     this.updateValue((math.add(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep))) as BigNumber)
   }
 
   decrease (): void {
+    if (this.readonly) return
     this.updateValue((math.subtract(math.bignumber(this.fieldValue), math.bignumber(this.arrowStep)) as BigNumber))
   }
 
