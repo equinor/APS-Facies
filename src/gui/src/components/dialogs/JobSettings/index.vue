@@ -157,120 +157,10 @@
           </v-row>
         </settings-panel>
         <br>
-        <settings-panel
-          v-if="!!$store.getters.gridModel"
-          title="Preview settings"
-        >
-          <v-container
-            v-if="!$store.getters['parameters/grid/waiting']"
-            class="text-center"
-          >
-            <v-row
-              class="fill"
-              justify="space-around"
-            >
-              <v-col cols="4">
-                <numeric-field
-                  v-model="gridSize.x"
-                  discrete
-                  unit="cell"
-                  label="X"
-                  hint="The size of the grid"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  v-model="gridSize.y"
-                  discrete
-                  unit="cell"
-                  label="Y"
-                  hint="The size of the grid"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  v-model="gridSize.z"
-                  discrete
-                  unit="cell"
-                  label="Z"
-                  hint="The size of the grid"
-                  persistent-hint
-                />
-              </v-col>
-              <v-spacer />
-              <v-col cols="4">
-                <numeric-field
-                  :value="simulationSettings.simulationBox.x"
-                  label="X"
-                  unit="m"
-                  hint="The size of the simulation box"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  :value="simulationSettings.simulationBox.y"
-                  label="Y"
-                  unit="m"
-                  hint="The size of the simulation box"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  :value="simulationSettings.simulationBox.z"
-                  label="Z"
-                  unit="m"
-                  hint="The size of the simulation box"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  :value="simulationSettings.gridAzimuth"
-                  :ranges="{min: -360, max: 360}"
-                  label="Grid azimuth"
-                  unit="°"
-                  hint="The angle between the grid, and UTM"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  :value="simulationSettings.simulationBoxOrigin.x"
-                  label="X"
-                  unit="m"
-                  hint="Origin of simulation box"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4">
-                <numeric-field
-                  :value="simulationSettings.simulationBoxOrigin.y"
-                  label="Y"
-                  unit="m"
-                  hint="Origin of simulation box"
-                  persistent-hint
-                />
-              </v-col>
-            </v-row>
-          </v-container>
-          <v-container
-            v-else
-          >
-            <v-row
-              justify="center"
-              align="center"
-            >
-              <v-icon
-                x-large
-                v-text="$vuetify.icons.values.refreshSpinner"
-              />
-            </v-row>
-          </v-container>
-        </settings-panel>
+        <preview-settings
+          :grid-size="gridSize"
+          :simulation-settings="simulationSettings"
+        />
       </v-card-text>
       <v-card-actions>
         {{ version && `Version: ${version}` }}
@@ -300,6 +190,7 @@ import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import FmuSettings from '@/components/dialogs/JobSettings/FmuSettings.vue'
 import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
+import PreviewSettings from '@/components/dialogs/JobSettings/PreviewSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -319,6 +210,7 @@ interface Invalid {
     FmuSettings,
     NumericField,
     BoldButton,
+    PreviewSettings,
   },
 })
 export default class JobSettings extends Vue {
