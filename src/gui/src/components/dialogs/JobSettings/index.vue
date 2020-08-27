@@ -43,7 +43,7 @@
         <br>
         <run-settings
           :max-allowed-fraction-of-values-outside-tolerance.sync="maxAllowedFractionOfValuesOutsideTolerance"
-          :tolerance-of-probability-normalisation="toleranceOfProbabilityNormalisation"
+          :tolerance-of-probability-normalisation.sync="toleranceOfProbabilityNormalisation"
         />
         <br>
         <settings-panel title="Display Settings">
