@@ -157,7 +157,7 @@
           </v-row>
         </settings-panel>
         <br>
-        <preview-settings
+        <grid-information
           :grid-size="gridSize"
           :simulation-settings="simulationSettings"
         />
@@ -190,7 +190,7 @@ import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import FmuSettings from '@/components/dialogs/JobSettings/FmuSettings.vue'
 import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
-import PreviewSettings from '@/components/dialogs/JobSettings/PreviewSettings.vue'
+import GridInformation from '@/components/dialogs/JobSettings/GridInformation.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -210,7 +210,7 @@ interface Invalid {
     FmuSettings,
     NumericField,
     BoldButton,
-    PreviewSettings,
+    GridInformation,
   },
 })
 export default class JobSettings extends Vue {

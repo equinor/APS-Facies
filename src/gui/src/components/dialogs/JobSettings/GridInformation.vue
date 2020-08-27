@@ -1,7 +1,7 @@
 <template>
   <settings-panel
     v-if="!!$store.getters.gridModel"
-    title="Preview settings"
+    title="Grid information"
   >
     <v-container
       v-if="!$store.getters['parameters/grid/waiting']"
@@ -14,6 +14,7 @@
         <v-col cols="4">
           <numeric-field
             :value="gridSize.x"
+            readonly
             discrete
             unit="cell"
             label="X"
@@ -24,6 +25,7 @@
         <v-col cols="4">
           <numeric-field
             :value="gridSize.y"
+            readonly
             discrete
             unit="cell"
             label="Y"
@@ -34,6 +36,7 @@
         <v-col cols="4">
           <numeric-field
             :value="gridSize.z"
+            readonly
             discrete
             unit="cell"
             label="Z"
@@ -45,6 +48,7 @@
         <v-col cols="4">
           <numeric-field
             :value="simulationSettings.simulationBox.x"
+            readonly
             label="X"
             unit="m"
             hint="The size of the simulation box"
@@ -54,6 +58,7 @@
         <v-col cols="4">
           <numeric-field
             :value="simulationSettings.simulationBox.y"
+            readonly
             label="Y"
             unit="m"
             hint="The size of the simulation box"
@@ -63,6 +68,7 @@
         <v-col cols="4">
           <numeric-field
             :value="simulationSettings.simulationBox.z"
+            readonly
             label="Z"
             unit="m"
             hint="The size of the simulation box"
@@ -73,6 +79,7 @@
           <numeric-field
             :value="simulationSettings.gridAzimuth"
             :ranges="{min: -360, max: 360}"
+            readonly
             label="Grid azimuth"
             unit="°"
             hint="The angle between the grid, and UTM"
@@ -82,6 +89,7 @@
         <v-col cols="4">
           <numeric-field
             :value="simulationSettings.simulationBoxOrigin.x"
+            readonly
             label="X"
             unit="m"
             hint="Origin of simulation box"
@@ -91,6 +99,7 @@
         <v-col cols="4">
           <numeric-field
             :value="simulationSettings.simulationBoxOrigin.y"
+            readonly
             label="Y"
             unit="m"
             hint="Origin of simulation box"
