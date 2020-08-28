@@ -13,32 +13,10 @@
         </span>
       </v-card-title>
       <v-card-text>
-        <fieldset>
-          <legend>
-            Select File to save to
-          </legend>
-          <v-row>
-            <v-col
-              class="pa-2"
-              cols="5"
-            >
-              <v-text-field
-                v-model="path"
-                single-line
-                solo
-              />
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="4"
-            >
-              <bold-button
-                title="Select File"
-                @click="chooseAPSModelFile"
-              />
-            </v-col>
-          </v-row>
-        </fieldset>
+        <file-selection
+          v-model="path"
+          label="Select file to save to"
+        />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -64,14 +42,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
-import BoldButton from '@/components/baseComponents/BoldButton.vue'
+import FileSelection from '@/components/selection/FileSelection.vue'
 
 import { APSError } from '@/utils/domain/errors'
-import rms from '@/api/rms'
 
 @Component({
   components: {
-    BoldButton,
+    FileSelection,
   },
 })
 export default class ExportDialog extends Vue {
@@ -79,14 +56,6 @@ export default class ExportDialog extends Vue {
   resolve: ((value: { save: boolean, path: string }) => void) | null = null
   reject: ((reason: string) => void) | null = null
   path: string | null = null
-
-  chooseAPSModelFile (): void {
-    rms.chooseFile('save', '', '').then((result: string | null): void => { // setting parameters filter and suggestion does not seem to work...
-      if (result) {
-        this.path = result
-      }
-    })
-  }
 
   open (defaultPath: string): Promise<{save: boolean, path: string }> {
     this.dialog = true
