@@ -17,6 +17,7 @@
           <file-selection
             v-model="paths.model"
             label="Model file"
+            @update:error="err => setInvalid('model', err)"
           />
         </v-row>
         <div v-if="fmuMode">
@@ -24,12 +25,14 @@
             <optional-file-selection
               v-model="paths.fmuConfig"
               label="FMU configuration"
+              @update:error="err => setInvalid('fmuConfig', err)"
             />
           </v-row>
           <v-row>
             <optional-file-selection
               v-model="paths.probabilityDistribution"
               label="Probability distribution template"
+              @update:error="err => setInvalid('probabilityDistribution', err)"
             />
           </v-row>
         </div>
@@ -39,6 +42,7 @@
         <v-btn
           color="blue darken-1"
           text
+          :disabled="hasErrors"
           @click="choose"
         >
           Save
@@ -82,6 +86,12 @@ interface PathsState {
   probabilityDistribution: State
 }
 
+interface Invalid {
+  model: boolean
+  fmuConfig: boolean
+  probabilityDistribution: boolean
+}
+
 @Component({
   components: {
     FileSelection,
@@ -99,9 +109,25 @@ export default class ExportDialog extends Vue {
     probabilityDistribution: { path: '', disabled: true },
   }
 
+  invalid: Invalid = {
+    model: false,
+    fmuConfig: false,
+    probabilityDistribution: false,
+  }
+
+  setInvalid (name: string, error: boolean): void {
+    this.invalid[`${name}`] = error
+  }
+
   mounted (): void { this.paths = this.defaultPaths }
 
   get fmuMode (): boolean { return this.$store.getters.fmuMode }
+
+  get hasErrors (): boolean {
+    return Object.keys(this.invalid)
+      .filter(key => !this.paths[`${key}`].disabled)
+      .some(key => this.invalid[`${key}`])
+  }
 
   get defaultPaths (): PathsState {
     const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES

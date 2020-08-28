@@ -45,7 +45,7 @@ export default {
   averageProbabilityCubes: (gridName: string, probabilityCubeParameters: string, zoneNumber: number, regionParameter: Optional<string> = null, regionNumber: Optional<number> = null): Promise<AverageParameterProbabilities> => api.call('calculate_average_of_probability_cube', gridName, probabilityCubeParameters, zoneNumber, regionParameter, regionNumber),
   openWikiHelp: (): Promise<void> => api.call('open_wiki_help'),
   isApsModelValid: (fileContent: string): Promise<{ valid: boolean, error: string }> => api.call('is_aps_model_valid', fileContent),
-  exists: (path: string): Promise<boolean> => api.call('exists', path),
+  exists: (path: string, hasParent = false): Promise<boolean> => api.call('exists', path, hasParent),
   save: (path: string, content: string, prettify = true): Promise<boolean> => api.call(prettify ? 'save_model' : 'save_file', path, content),
   // @ts-ignore
   chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve) => resolve(null)),

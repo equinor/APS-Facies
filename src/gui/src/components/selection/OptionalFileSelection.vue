@@ -10,6 +10,7 @@
         v-model="path"
         :label="label"
         :disabled="!enabled"
+        @update:error="e => propagateError(e)"
       />
     </v-col>
   </v-row>
@@ -50,6 +51,10 @@ export default class OptionalFileSelection extends Vue {
 
   set enabled (enabled: boolean) {
     this.$emit('input', { ...this.value, disabled: !enabled })
+  }
+
+  propagateError (error: boolean): void {
+    this.$emit('update:error', error)
   }
 }
 </script>

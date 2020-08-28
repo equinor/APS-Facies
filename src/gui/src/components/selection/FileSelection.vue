@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { required } from 'vuelidate/lib/validators'
 
@@ -32,11 +32,12 @@ import rms from '@/api/rms'
 
 @Component({
   validations () {
+    const checkFileDirectory = (this as FileSelection).file
     return {
       path: {
         required,
         async exists (path: string): Promise<boolean> {
-          return rms.exists(path)
+          return rms.exists(path, checkFileDirectory)
         },
       },
     }
@@ -74,6 +75,8 @@ export default class FileSelection extends Vue {
 
   get icon (): string { return `$vuetify.icons.values.${this.open ? 'openFolder' : 'folder'}` }
 
+  get file (): boolean { return !this.directory }
+
   async choosePath (): Promise<void> {
     this.open = true
     let path = this.path
@@ -92,7 +95,13 @@ export default class FileSelection extends Vue {
   mounted (): void {
     if (this.path) {
       this.touch()
+      this.$emit('update:error', this.$v.$invalid)
     }
+  }
+
+  @Watch('$v.$invalid')
+  onInvalidChanged (invalid: boolean): void {
+    this.$emit('update:error', invalid)
   }
 }
 

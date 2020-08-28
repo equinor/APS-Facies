@@ -429,7 +429,9 @@ class RMSData:
         webbrowser.open('https://wiki.equinor.com/wiki/index.php/Res:APS_Adaptive_Plurigaussian_Simulation')
 
     @staticmethod
-    def exists(path):
+    def exists(path, has_parent=False):
         if not path:
             return False
+        if has_parent:
+            return Path(path).parent.exists()
         return Path(path).exists()

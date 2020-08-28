@@ -266,5 +266,8 @@ class RMSData:
     @staticmethod
     def open_wiki_help() -> None: ...
     @staticmethod
-    def exists(path: str) -> bool: ...
+    def exists(
+            path:                        str,
+            has_parent:                  bool,
+    ) -> bool: ...
 
