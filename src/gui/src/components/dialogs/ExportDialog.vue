@@ -9,14 +9,30 @@
     <v-card>
       <v-card-title>
         <span class="headline">
-          save export dialog.
+          {{ `Export the APS model${fmuMode ? ', and FMU settings': ''}` }}
         </span>
       </v-card-title>
       <v-card-text>
-        <file-selection
-          v-model="path"
-          label="Select file to save to"
-        />
+        <v-row>
+          <file-selection
+            v-model="paths.model"
+            label="Model file"
+          />
+        </v-row>
+        <div v-if="fmuMode">
+          <v-row>
+            <optional-file-selection
+              v-model="paths.fmuConfig"
+              label="FMU configuration"
+            />
+          </v-row>
+          <v-row>
+            <optional-file-selection
+              v-model="paths.probabilityDistribution"
+              label="Probability distribution template"
+            />
+          </v-row>
+        </div>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -41,25 +57,71 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import normalize from 'path-normalize'
 
 import FileSelection from '@/components/selection/FileSelection.vue'
+import OptionalFileSelection from '@/components/selection/OptionalFileSelection.vue'
 
 import { APSError } from '@/utils/domain/errors'
+
+interface Paths {
+  model: string
+  fmuConfig: string | null
+  probabilityDistribution: string | null
+}
+
+interface State {
+  path: string
+  disabled: boolean
+}
+
+interface PathsState {
+  model: string
+  fmuConfig: State
+  probabilityDistribution: State
+}
 
 @Component({
   components: {
     FileSelection,
+    OptionalFileSelection,
   },
 })
 export default class ExportDialog extends Vue {
   dialog = false
-  resolve: ((value: { save: boolean, path: string }) => void) | null = null
+  resolve: ((value: { paths: Paths | null }) => void) | null = null
   reject: ((reason: string) => void) | null = null
-  path: string | null = null
+  disabled = false
+  paths: PathsState = {
+    model: '',
+    fmuConfig: { path: '', disabled: true },
+    probabilityDistribution: { path: '', disabled: true },
+  }
 
-  open (defaultPath: string): Promise<{save: boolean, path: string }> {
+  mounted (): void { this.paths = this.defaultPaths }
+
+  get fmuMode (): boolean { return this.$store.getters.fmuMode }
+
+  get defaultPaths (): PathsState {
+    const path = this.$store.state.parameters.path
+    const projectLocation = path.project.selected
+    const fmuConfigLocation = path.fmuParameterListLocation.selected
+    const fmuBaseLocation = `${projectLocation}/../..`
+    return {
+      model: normalize(`${projectLocation}/myApsExport.xml`),
+      fmuConfig: {
+        path: normalize(`${fmuConfigLocation}/aps.yaml`),
+        disabled: false,
+      },
+      probabilityDistribution: {
+        path: normalize(`${fmuBaseLocation}/ert/input/distributions/aps.dist`),
+        disabled: false,
+      },
+    }
+  }
+
+  open (): Promise<{ paths: Paths | null }> {
     this.dialog = true
-    this.path = defaultPath
     return new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
@@ -68,16 +130,23 @@ export default class ExportDialog extends Vue {
 
   choose (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
-    if (!this.path) throw new APSError('path has not been set')
+    if (!this.paths.model) throw new APSError('path has not been set')
 
-    this.resolve({ save: true, path: this.path })
+    const get = (item: State): string | null => item.disabled ? null : item.path
+
+    const paths: Paths = {
+      model: this.paths.model,
+      fmuConfig: get(this.paths.fmuConfig),
+      probabilityDistribution: get(this.paths.probabilityDistribution),
+    }
+    this.resolve({ paths })
     this.dialog = false
   }
 
   abort (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
 
-    this.resolve({ save: false, path: '' })
+    this.resolve({ paths: null })
     this.dialog = false
   }
 }
