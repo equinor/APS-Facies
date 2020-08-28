@@ -2,15 +2,27 @@
   <v-dialog
     v-model="dialog"
     persistent
-    max-width="500px"
+    max-width="550px"
     @keydown.esc="abort"
     @keydown.enter="choose"
   >
     <v-card>
       <v-card-title>
-        <span class="headline">
-          {{ `Export the APS model${fmuMode ? ', and FMU settings': ''}` }}
-        </span>
+        <v-row>
+          <v-col>
+            <span class="headline">
+              {{ `Export the APS model${fmuMode ? ', and FMU settings': ''}` }}
+            </span>
+          </v-col>
+          <v-col cols="1">
+            <icon-button
+              v-tooltip="'Use defaults'"
+              icon="refresh"
+              color="primary"
+              @click="() => restoreDefaults()"
+            />
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-card-text>
         <v-row>
@@ -66,6 +78,7 @@ import { DEFAULT_MODEL_FILE_NAMES } from '@/config'
 
 import FileSelection from '@/components/selection/FileSelection.vue'
 import OptionalFileSelection from '@/components/selection/OptionalFileSelection.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
 import { APSError } from '@/utils/domain/errors'
 import { Paths } from '@/api/types'
@@ -89,6 +102,7 @@ interface Invalid {
 
 @Component({
   components: {
+    IconButton,
     FileSelection,
     OptionalFileSelection,
   },
@@ -114,7 +128,7 @@ export default class ExportDialog extends Vue {
     this.invalid[`${name}`] = error
   }
 
-  mounted (): void { this.paths = this.defaultPaths }
+  mounted (): void { this.paths = this.defaultPaths() }
 
   get fmuMode (): boolean { return this.$store.getters.fmuMode }
 
@@ -124,7 +138,7 @@ export default class ExportDialog extends Vue {
       .some(key => this.invalid[`${key}`])
   }
 
-  get defaultPaths (): PathsState {
+  defaultPaths (): PathsState {
     const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
 
     return {
@@ -168,6 +182,10 @@ export default class ExportDialog extends Vue {
 
     this.resolve({ paths: null })
     this.dialog = false
+  }
+
+  restoreDefaults (): void {
+    this.paths = this.defaultPaths()
   }
 }
 </script>
