@@ -5,6 +5,12 @@ export interface CodeName {
   name: string
 }
 
+export interface Paths {
+  model: string
+  fmuConfig: string | null
+  probabilityDistribution: string | null
+}
+
 export interface RmsFacies extends CodeName {
   observed: null | {
     zones: number[]

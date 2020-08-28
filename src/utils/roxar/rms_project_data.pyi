@@ -222,6 +222,13 @@ class RMSData:
             prettifier:                  Optional[Callable[[str], str]]  = None,
     ) -> bool: ...
     @staticmethod
+    def dump_aps_model(
+            encoded_xml:                 str,
+            model_path:                  str,
+            fmu_configuration_path:      Optional[str]                   = None,
+            prop_dist_path:              Optional[str]                   = None,
+    ) -> bool: ...
+    @staticmethod
     def get_constant(
             _property:                   str,
             _type:                       str

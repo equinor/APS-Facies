@@ -68,12 +68,7 @@ import FileSelection from '@/components/selection/FileSelection.vue'
 import OptionalFileSelection from '@/components/selection/OptionalFileSelection.vue'
 
 import { APSError } from '@/utils/domain/errors'
-
-interface Paths {
-  model: string
-  fmuConfig: string | null
-  probabilityDistribution: string | null
-}
+import { Paths } from '@/api/types'
 
 interface State {
   path: string

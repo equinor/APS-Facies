@@ -114,7 +114,6 @@ import { Optional } from '@/utils/typing'
 import rms from '@/api/rms'
 import { resetState } from '@/store'
 import { isDevelopmentBuild } from '@/utils/helpers/simple'
-import { extractFmuVariables } from '@/utils/helpers/processing/export'
 
 function parse (xmlString: string): Document {
   const parser = new DOMParser()
@@ -227,20 +226,10 @@ export default class TheToolBar extends Vue {
         (this.$refs.exportDialog as ExportDialog).open()
           .then(({ paths }) => {
             if (paths) {
-              const resultPromise = rms.save(paths.model, btoa(exportedXMLString))
+              const resultPromise = rms.saveModel(btoa(exportedXMLString), paths)
               resultPromise.then(async (success: boolean): Promise<void> => {
                 if (success) {
                   await displaySuccess(`The model file was saved to ${paths.model}`)
-                  // TODO: Use the APSModel.write_model method in stead
-                  const exportedGlobalVariablesString = extractFmuVariables(exportedXMLString)
-                  if (exportedGlobalVariablesString) {
-                    const fileName = (paths.model.split('/').pop() || '').replace(/(\.xml)$/, '_FMU_tagged_parameters.dat')
-                    const fmuLocation = this.$store.state.parameters.path.fmuParameterListLocation.selected.replace(/\/+$/, '')
-                    await rms.save(`${fmuLocation}/${fileName}`, btoa(exportedGlobalVariablesString), false)
-                  }
-                }
-                if (!success) {
-                  await displayError('Saving failed. Did you choose a path that does not exist?')
                 }
               })
             }
