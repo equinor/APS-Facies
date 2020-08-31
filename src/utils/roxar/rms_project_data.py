@@ -299,7 +299,7 @@ class RMSData:
             prettifier = lambda _: _
         try:
             with open(Path(path), 'w') as f:
-                f.write(prettifier(b64decode(content).decode()))
+                f.write(prettifier(_decode(content)))
             return True
         except FileNotFoundError:
             return False
@@ -307,7 +307,7 @@ class RMSData:
     @staticmethod
     def dump_aps_model(encoded_xml, model_path, fmu_configuration_path=None, prop_dist_path=None):
         try:
-            model = APSModel.from_string(b64decode(encoded_xml).decode())
+            model = decode_model(encoded_xml)
         except Exception as e:
             return False
         model.dump(
@@ -392,7 +392,7 @@ class RMSData:
         valid = True
         error = ''
         try:
-            APSModel.from_string(b64decode(encoded_xml).decode())
+            decode_model(encoded_xml)
         except (ValueError, ApsXmlError) as e:
             valid = False
             error = str(e)
@@ -448,3 +448,11 @@ class RMSData:
         if has_parent:
             return Path(path).parent.exists()
         return Path(path).exists()
+
+
+def _decode(base64_encoded):
+    return b64decode(base64_encoded).decode()
+
+
+def decode_model(encoded_xml):
+    return APSModel.from_string(_decode(encoded_xml))

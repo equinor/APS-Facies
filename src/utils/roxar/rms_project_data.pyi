@@ -17,6 +17,7 @@ from roxar.grids import (
     BlockedWell,
     BlockedWellsSet,
 )
+from src.algorithms.APSModel import APSModel
 
 RoxarModule = Roxar
 
@@ -278,3 +279,9 @@ class RMSData:
             has_parent:                  bool,
     ) -> bool: ...
 
+def _decode(
+        base64_encoded:                  str,
+) -> str: ...
+def decode_model(
+        encoded_xml:                     str,
+) -> APSModel: ...
