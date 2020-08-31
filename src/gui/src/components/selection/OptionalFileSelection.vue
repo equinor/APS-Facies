@@ -3,13 +3,14 @@
     <v-col cols="1">
       <v-checkbox
         v-model="enabled"
+        :disabled="disabled"
       />
     </v-col>
     <v-col>
       <file-selection
         v-model="path"
         :label="label"
-        :disabled="!enabled"
+        :disabled="!enabled || disabled"
         @update:error="e => propagateError(e)"
       />
     </v-col>
@@ -36,6 +37,9 @@ export default class OptionalFileSelection extends Vue {
 
   @Prop({ required: true })
   readonly label!: string
+
+  @Prop({ default: false, type: Boolean })
+  readonly disabled: boolean
 
   get path (): string {
     return this.value.path

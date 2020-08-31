@@ -70,6 +70,8 @@ class APSModel:
     use_regions: bool
     rms_project_name: Optional[str]
     gaussian_field_names: List[str]
+    has_fmu_updatable_values: bool
+
     def __parse_model_file(self, model_file_name: FilePath, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(

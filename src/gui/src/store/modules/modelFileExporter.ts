@@ -16,6 +16,15 @@ const module: Module<{}, RootState> = {
         }
       })
     },
+  },
+  getters: {
+    model: (state, getters, rootState, rootGetters): string => {
+      try {
+        return btoa(createModel({ rootState, rootGetters }))
+      } catch (e) {
+      }
+      return ''
+    },
   }
 }
 

@@ -318,6 +318,14 @@ class RMSData:
         return True
 
     @staticmethod
+    def has_fmu_updatable_values(encoded_xml):
+        try:
+            model = decode_model(encoded_xml)
+        except Exception as e:
+            return False
+        return model.has_fmu_updatable_values
+
+    @staticmethod
     def simulate_gaussian_field(field, grid_index_order='F'):
         simulation = RMSData._simulate_gaussian_field(field)
         data = simulation.field_as_matrix(grid_index_order)

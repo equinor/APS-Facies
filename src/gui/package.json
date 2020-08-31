@@ -93,6 +93,7 @@
     "ts-jest": "^24.0.0",
     "typescript": "^3.2.1",
     "url-loader": "^3.0.0",
+    "vue-async-computed-decorator": "^0.0.5",
     "vue-axios": "^2.1.1",
     "vue-class-component": "^7.0.1",
     "vue-cli-plugin-vuetify": "^2.0.3",

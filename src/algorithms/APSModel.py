@@ -991,6 +991,13 @@ class APSModel:
         if probability_distribution_file_name is not None:
             write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes))
 
+    @property
+    def has_fmu_updatable_values(self):
+        fmu_attributes: List[FmuAttribute] = []
+        top = ET.Element('APSModel', {'version': self.__aps_model_version})
+        self.XMLAddElement(top, fmu_attributes)
+        return len(fmu_attributes) > 0
+
     @staticmethod
     def write_model_from_xml_root(input_tree, output_model_file_name):
         print(f'Write file: {output_model_file_name}')

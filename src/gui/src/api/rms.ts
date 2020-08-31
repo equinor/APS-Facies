@@ -49,6 +49,7 @@ export default {
   exists: (path: string, hasParent = false): Promise<boolean> => api.call('exists', path, hasParent),
   save: (path: string, content: string, prettify = true): Promise<boolean> => api.call(prettify ? 'save_model' : 'save_file', path, content),
   saveModel: (model: string, paths: Paths): Promise<boolean> => api.call('dump_aps_model', model, paths.model, paths.fmuConfig, paths.probabilityDistribution),
+  hasFmuUpdatableValues: (model: string): Promise<boolean> => api.call('has_fmu_updatable_values', model),
   // @ts-ignore
   chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve) => resolve(null)),
   // @ts-ignore

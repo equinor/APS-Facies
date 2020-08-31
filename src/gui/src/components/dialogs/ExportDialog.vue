@@ -36,14 +36,18 @@
           <v-row>
             <optional-file-selection
               v-model="paths.fmuConfig"
+              v-tooltip="disabledMessage"
               label="FMU configuration"
+              :disabled="!hasFmuUpdatableValues"
               @update:error="err => setInvalid('fmuConfig', err)"
             />
           </v-row>
           <v-row>
             <optional-file-selection
               v-model="paths.probabilityDistribution"
+              v-tooltip="disabledMessage"
               label="Probability distribution template"
+              :disabled="!hasFmuUpdatableValues"
               @update:error="err => setInvalid('probabilityDistribution', err)"
             />
           </v-row>
@@ -73,8 +77,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import AsyncComputed from 'vue-async-computed-decorator'
 
 import { DEFAULT_MODEL_FILE_NAMES } from '@/config'
+
+import rms from '@/api/rms'
 
 import FileSelection from '@/components/selection/FileSelection.vue'
 import OptionalFileSelection from '@/components/selection/OptionalFileSelection.vue'
@@ -130,12 +137,29 @@ export default class ExportDialog extends Vue {
 
   mounted (): void { this.paths = this.defaultPaths() }
 
+  @AsyncComputed({
+    default: true,
+  })
+  async hasFmuUpdatableValues (): Promise<boolean> {
+    const model = (this as ExportDialog).$store.getters['modelFileExporter/model']
+    if (!model) return new Promise(resolve => resolve(false))
+    return rms.hasFmuUpdatableValues(model)
+  }
+
   get fmuMode (): boolean { return this.$store.getters.fmuMode }
 
   get hasErrors (): boolean {
+    if (!this.hasFmuUpdatableValues) return this.invalid.model
+
     return Object.keys(this.invalid)
       .filter(key => !this.paths[`${key}`].disabled)
       .some(key => this.invalid[`${key}`])
+  }
+
+  get disabledMessage (): string | undefined {
+    if (!this.hasFmuUpdatableValues) {
+      return 'No variables are marked as FMU updatable'
+    } else return undefined
   }
 
   defaultPaths (): PathsState {
@@ -156,6 +180,7 @@ export default class ExportDialog extends Vue {
 
   open (): Promise<{ paths: Paths | null }> {
     this.dialog = true
+    this.$asyncComputed.hasFmuUpdatableValues.update()
     return new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
@@ -168,11 +193,17 @@ export default class ExportDialog extends Vue {
 
     const get = (item: State): string | null => item.disabled ? null : item.path
 
-    const paths: Paths = {
-      model: this.paths.model,
-      fmuConfig: get(this.paths.fmuConfig),
-      probabilityDistribution: get(this.paths.probabilityDistribution),
-    }
+    const paths: Paths = !this.hasFmuUpdatableValues
+      ? {
+        model: this.paths.model,
+        fmuConfig: null,
+        probabilityDistribution: null,
+      }
+      : {
+        model: this.paths.model,
+        fmuConfig: get(this.paths.fmuConfig),
+        probabilityDistribution: get(this.paths.probabilityDistribution),
+      }
     this.resolve({ paths })
     this.dialog = false
   }
