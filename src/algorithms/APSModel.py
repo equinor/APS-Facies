@@ -1023,8 +1023,12 @@ def fmu_configuration(fmu_attributes):
     if not fmu_attributes:
         return ''
     content = 'rms:\n'
+    max_length = _max_name_length(fmu_attributes)
+    max_number_length = _max_value_length(fmu_attributes)
     for fmu_attribute in fmu_attributes:
-        content += f'  {fmu_attribute.name}: {fmu_attribute.value} ~ <{fmu_attribute.name}>\n'
+        key_word_spacing = max_length - len(fmu_attribute.name) + 1
+        formatted_value = f'{fmu_attribute.value:{max_number_length}.10{"g" if isinstance(fmu_attribute.value, int) else ""}}'
+        content += f'  {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{fmu_attribute.name}>\n'
     return content
 
 
