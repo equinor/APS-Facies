@@ -37,7 +37,7 @@ import rms from '@/api/rms'
       path: {
         required,
         async exists (path: string): Promise<boolean> {
-          return rms.exists(path, checkFileDirectory)
+          return rms.exists(btoa(path), checkFileDirectory)
         },
       },
     }

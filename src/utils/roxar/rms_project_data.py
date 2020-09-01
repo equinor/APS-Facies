@@ -453,6 +453,7 @@ class RMSData:
     def exists(path, has_parent=False):
         if not path:
             return False
+        path = _decode(path)
         if has_parent:
             return Path(path).parent.exists()
         return Path(path).exists()
