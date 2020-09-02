@@ -29,6 +29,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { required } from 'vuelidate/lib/validators'
 
 import rms from '@/api/rms'
+import { relativeTo } from '@/utils/queries'
 
 @Component({
   validations () {
@@ -60,8 +61,20 @@ export default class FileSelection extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly directory!: boolean
 
-  get path (): string | null { return this.value }
-  set path (value: string | null) { this.$emit('input', value) }
+  @Prop({ default: undefined })
+  readonly relativeTo!: string | undefined
+
+  get path (): string | null {
+    if (this.relativeTo && this.value) return relativeTo(this.relativeTo, this.value)
+    return this.value
+  }
+
+  set path (value: string | null) {
+    if (this.relativeTo && !value?.startsWith('/')) {
+      value = `${this.relativeTo}/${value}`
+    }
+    this.$emit('input', value)
+  }
 
   get errors (): string[] {
     if (!this.$v.path) return []

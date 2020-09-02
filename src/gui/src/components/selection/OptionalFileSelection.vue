@@ -11,6 +11,7 @@
         v-model="path"
         :label="label"
         :disabled="!enabled || disabled"
+        :relative-to="relativeTo"
         @update:error="e => propagateError(e)"
       />
     </v-col>
@@ -40,6 +41,9 @@ export default class OptionalFileSelection extends Vue {
 
   @Prop({ default: false, type: Boolean })
   readonly disabled: boolean
+
+  @Prop({ default: undefined })
+  readonly relativeTo!: string | undefined
 
   get path (): string {
     return this.value.path

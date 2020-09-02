@@ -6,7 +6,9 @@
     @keydown.esc="abort"
     @keydown.enter="choose"
   >
-    <v-card>
+    <v-card
+      v-if="fetched"
+    >
       <v-card-title>
         <v-row>
           <v-col>
@@ -26,9 +28,13 @@
       </v-card-title>
       <v-card-text>
         <v-row>
+          Paths are relative to the RMS project, which is currently located at {{ projectPath }}.
+        </v-row>
+        <v-row>
           <file-selection
             v-model="paths.model"
             label="Model file"
+            :relative-to="projectPath"
             @update:error="err => setInvalid('model', err)"
           />
         </v-row>
@@ -39,6 +45,7 @@
               v-tooltip="disabledMessage"
               label="FMU configuration"
               :disabled="!hasFmuUpdatableValues"
+              :relative-to="projectPath"
               @update:error="err => setInvalid('fmuConfig', err)"
             />
           </v-row>
@@ -48,6 +55,7 @@
               v-tooltip="disabledMessage"
               label="Probability distribution template"
               :disabled="!hasFmuUpdatableValues"
+              :relative-to="projectPath"
               @update:error="err => setInvalid('probabilityDistribution', err)"
             />
           </v-row>
@@ -118,7 +126,9 @@ export default class ExportDialog extends Vue {
   dialog = false
   resolve: ((value: { paths: Paths | null }) => void) | null = null
   reject: ((reason: string) => void) | null = null
+  fetched = false
   disabled = false
+  projectPath = ''
   paths: PathsState = {
     model: '',
     fmuConfig: { path: '', disabled: true },
@@ -135,7 +145,11 @@ export default class ExportDialog extends Vue {
     this.invalid[`${name}`] = error
   }
 
-  mounted (): void { this.paths = this.defaultPaths() }
+  async mounted (): Promise<void> {
+    await this.updateProjectPath()
+    await this.restoreDefaults()
+    this.fetched = true
+  }
 
   @AsyncComputed({
     default: true,
@@ -166,21 +180,23 @@ export default class ExportDialog extends Vue {
     const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
 
     return {
-      model: `../input/config/apsgui/${model}`,
+      model: `${this.projectPath}/../input/config/apsgui/${model}`,
       fmuConfig: {
-        path: `../../fmuconfig/input/${fmuConfig}`,
+        path: `${this.projectPath}/../../fmuconfig/input/${fmuConfig}`,
         disabled: false,
       },
       probabilityDistribution: {
-        path: `../../ert/input/distributions/${probabilityDistribution}`,
+        path: `${this.projectPath}/../../ert/input/distributions/${probabilityDistribution}`,
         disabled: false,
       },
     }
   }
 
-  open (): Promise<{ paths: Paths | null }> {
+  async open (): Promise<{ paths: Paths | null }> {
     this.dialog = true
     this.$asyncComputed.hasFmuUpdatableValues.update()
+    await this.updateProjectPath()
+
     return new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
@@ -217,6 +233,10 @@ export default class ExportDialog extends Vue {
 
   restoreDefaults (): void {
     this.paths = this.defaultPaths()
+  }
+
+  async updateProjectPath (): Promise<void> {
+    this.projectPath = await rms.projectDirectory()
   }
 }
 </script>
