@@ -57,7 +57,8 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import normalize from 'path-normalize'
+
+import { DEFAULT_MODEL_FILE_NAMES } from '@/config'
 
 import FileSelection from '@/components/selection/FileSelection.vue'
 import OptionalFileSelection from '@/components/selection/OptionalFileSelection.vue'
@@ -103,18 +104,16 @@ export default class ExportDialog extends Vue {
   get fmuMode (): boolean { return this.$store.getters.fmuMode }
 
   get defaultPaths (): PathsState {
-    const path = this.$store.state.parameters.path
-    const projectLocation = path.project.selected
-    const fmuConfigLocation = path.fmuParameterListLocation.selected
-    const fmuBaseLocation = `${projectLocation}/../..`
+    const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
+
     return {
-      model: normalize(`${projectLocation}/myApsExport.xml`),
+      model: `../input/config/apsgui/${model}`,
       fmuConfig: {
-        path: normalize(`${fmuConfigLocation}/aps.yaml`),
+        path: `../../fmuconfig/input/${fmuConfig}`,
         disabled: false,
       },
       probabilityDistribution: {
-        path: normalize(`${fmuBaseLocation}/ert/input/distributions/aps.dist`),
+        path: `../../ert/input/distributions/${probabilityDistribution}`,
         disabled: false,
       },
     }
