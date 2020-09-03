@@ -9,8 +9,10 @@
       v-model="$data._fieldValue"
       :label="label"
       :type="numeric ? 'number' : 'text'"
+      :error-messages="errorMessages"
       single-line
       @keydown.enter="submit"
+      @update:error="err => propagateError(err)"
     />
   </v-edit-dialog>
 </template>
@@ -35,9 +37,20 @@ export default class EditableCell<T> extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly numeric: boolean
 
+  @Prop({ default: () => [] })
+  readonly restrictions!: ((value: string) => string)[]
+
   get fieldValue (): string { return this.value[this.field] }
 
+  get errorMessages (): string[] {
+    return this.restrictions
+      .map(restriction => restriction(this.$data._fieldValue))
+      .filter(errorMessage => !!errorMessage)
+  }
+
   submit (): void {
+    if (this.errorMessages.length > 0) return
+
     const value = this.$data._fieldValue
     this.$emit('submit', {
       ...this.value,
@@ -47,6 +60,10 @@ export default class EditableCell<T> extends Vue {
 
   reset (): void {
     this.$data._fieldValue = this.fieldValue
+  }
+
+  propagateError (error: boolean): void {
+    this.$emit('update:error', error)
   }
 }
 </script>
