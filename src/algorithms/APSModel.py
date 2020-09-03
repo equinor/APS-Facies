@@ -966,29 +966,37 @@ class APSModel:
         root.append(zone_elements)
         return prettify(root)
 
-    def dump(self, name, attributes_file_name=None, debug_level=Debug.OFF):
+    def dump(self, name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
         """Writes the representation of this APS model to a model file"""
-        self.write_model(name, attributes_file_name, debug_level)
+        self.write_model(name, attributes_file_name, probability_distribution_file_name, debug_level)
 
-    def write_model(self, model_file_name, attributes_file_name=None, debug_level=Debug.OFF):
+    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
+        def write(file_name: str, content: str) -> None:
+            with open(file_name, 'w') as file:
+                file.write(content)
+            if debug_level >= Debug.VERY_VERBOSE:
+                print(f'Write file: {file_name}')
+
         fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
-        with open(model_file_name, 'w') as file:
-            file.write(root_updated)
-        if debug_level >= Debug.VERY_VERBOSE:
-            print(f'Write file: {model_file_name}')
+        write(model_file_name, root_updated)
+
         if attributes_file_name is not None:
-            content = 'rms:\n'
-            for fmu_attribute in fmu_attributes:
-                content += f'  {fmu_attribute.name}: {fmu_attribute.value} ~ <{fmu_attribute.name}>\n'
-            with open(attributes_file_name, 'w') as attributes_file:
-                attributes_file.write(content)
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'Write file: {attributes_file_name}')
+            write(attributes_file_name, fmu_configuration(fmu_attributes))
+
+        if probability_distribution_file_name is not None:
+            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes))
+
+    @property
+    def has_fmu_updatable_values(self):
+        fmu_attributes: List[FmuAttribute] = []
+        top = ET.Element('APSModel', {'version': self.__aps_model_version})
+        self.XMLAddElement(top, fmu_attributes)
+        return len(fmu_attributes) > 0
 
     @staticmethod
     def write_model_from_xml_root(input_tree, output_model_file_name):
@@ -998,6 +1006,37 @@ class APSModel:
         with open(output_model_file_name, 'w', encoding='utf-8') as file:
             file.write(root)
             file.write('\n')
+
+
+def _max_name_length(fmu_attributes):
+    return max(len(fmu_attribute.name) for fmu_attribute in fmu_attributes)
+
+
+def _max_value_length(fmu_attributes):
+    return max(len(str(fmu_attribute.value)) for fmu_attribute in fmu_attributes)
+
+
+def probability_distribution_configuration(fmu_attributes):
+    if not fmu_attributes:
+        return ''
+    content = ''
+    max_length = _max_name_length(fmu_attributes)
+    for fmu_attribute in fmu_attributes:
+        content += f'{fmu_attribute.name:<{max_length}} <prob_dist>\n'
+    return content
+
+
+def fmu_configuration(fmu_attributes):
+    if not fmu_attributes:
+        return ''
+    content = 'rms:\n'
+    max_length = _max_name_length(fmu_attributes)
+    max_number_length = _max_value_length(fmu_attributes)
+    for fmu_attribute in fmu_attributes:
+        key_word_spacing = max_length - len(fmu_attribute.name) + 1
+        formatted_value = f'{fmu_attribute.value:{max_number_length}.10{"g" if isinstance(fmu_attribute.value, int) else ""}}'
+        content += f'  {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{fmu_attribute.name}>\n'
+    return content
 
 
 ApsModel = APSModel

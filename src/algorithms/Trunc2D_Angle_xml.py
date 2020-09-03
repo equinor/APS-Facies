@@ -974,8 +974,9 @@ class Trunc2D_Angle(Trunc2D_Base):
 
             tag = 'Angle'
             angleElement = Element(tag)
+            angle = self.__faciesBoundaryOrientation[k]
             if self.__useConstTruncModelParam:
-                angleElement.text = f' {self.__faciesBoundaryOrientation[k]} '
+                angleElement.text = f' {angle} '
             else:
                 item = self.__faciesBoundaryOrientationName[k]
                 angleParamName = item[1]
@@ -983,7 +984,7 @@ class Trunc2D_Angle(Trunc2D_Base):
             if is_fmu_updatable:
                 assert all(parameter is not None for parameter in [zone_number, region_number, fmu_attributes])
                 fmu_attribute = createFMUvariableNameForNonCubicTruncation(k + 1, zone_number, region_number)
-                fmu_attributes.append(FmuAttribute(fmu_attribute, probFrac))
+                fmu_attributes.append(FmuAttribute(fmu_attribute, angle))
                 angleElement.attrib = dict(kw=fmu_attribute)
             fElement.append(angleElement)
 

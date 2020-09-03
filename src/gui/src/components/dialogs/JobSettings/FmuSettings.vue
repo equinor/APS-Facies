@@ -26,10 +26,11 @@
       </v-col>
     </v-row>
     <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
-      <directory-selector
+      <file-selection
         v-if="_onlyUpdateFromFmu"
         v-model="_fmuParameterListLocation"
         label="FMU Parameters List Location"
+        directory
       />
       <v-row
         v-if="!_onlyUpdateFromFmu"
@@ -101,7 +102,7 @@ import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import NumericField from '@/components/selection/NumericField.vue'
 import WarningDialog from '@/components/dialogs/JobSettings/WarningDialog.vue'
-import DirectorySelector from '@/components/selection/DirectorySelector.vue'
+import FileSelection from '@/components/selection/FileSelection.vue'
 import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 
 import { Store } from '@/store/typing'
@@ -148,7 +149,7 @@ function warnIfUsingCustomTrends ({ toggled, store, dialog }: WarningParameters)
 @Component({
   components: {
     BaseTooltip,
-    DirectorySelector,
+    FileSelection,
     WarningDialog,
     SettingsPanel,
     NumericField,

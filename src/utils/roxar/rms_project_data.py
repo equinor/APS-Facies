@@ -299,10 +299,31 @@ class RMSData:
             prettifier = lambda _: _
         try:
             with open(Path(path), 'w') as f:
-                f.write(prettifier(b64decode(content).decode()))
+                f.write(prettifier(_decode(content)))
             return True
         except FileNotFoundError:
             return False
+
+    @staticmethod
+    def dump_aps_model(encoded_xml, model_path, fmu_configuration_path=None, prop_dist_path=None):
+        try:
+            model = decode_model(encoded_xml)
+        except Exception as e:
+            return False
+        model.dump(
+            name=model_path,
+            attributes_file_name=fmu_configuration_path,
+            probability_distribution_file_name=prop_dist_path,
+        )
+        return True
+
+    @staticmethod
+    def has_fmu_updatable_values(encoded_xml):
+        try:
+            model = decode_model(encoded_xml)
+        except Exception as e:
+            return False
+        return model.has_fmu_updatable_values
 
     @staticmethod
     def simulate_gaussian_field(field, grid_index_order='F'):
@@ -379,7 +400,7 @@ class RMSData:
         valid = True
         error = ''
         try:
-            APSModel.from_string(b64decode(encoded_xml).decode())
+            decode_model(encoded_xml)
         except (ValueError, ApsXmlError) as e:
             valid = False
             error = str(e)
@@ -429,7 +450,18 @@ class RMSData:
         webbrowser.open('https://wiki.equinor.com/wiki/index.php/Res:APS_Adaptive_Plurigaussian_Simulation')
 
     @staticmethod
-    def exists(path):
+    def exists(path, has_parent=False):
         if not path:
             return False
+        path = _decode(path)
+        if has_parent:
+            return Path(path).parent.exists()
         return Path(path).exists()
+
+
+def _decode(base64_encoded):
+    return b64decode(base64_encoded).decode()
+
+
+def decode_model(encoded_xml):
+    return APSModel.from_string(_decode(encoded_xml))

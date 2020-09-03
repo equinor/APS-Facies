@@ -55,7 +55,7 @@ def read_selected_fmu_variables(input_selected_fmu_variable_file):
     return fmu_variables
 
 
-def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variable_file=None):
+def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variable_file=None, distribution_file_name=None):
     aps_model = APSModel(input_model_file)
     value = True
     all_zone_models = aps_model.sorted_zone_models
@@ -101,10 +101,15 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
                 trunc_rule.setYSFParamFmuUpdatable(value)
                 trunc_rule.setSBHDParamFmuUpdatable(value)
 
-    aps_model.write_model(output_model_file, attributes_file_name=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
+    aps_model.write_model(
+        output_model_file,
+        attributes_file_name=tagged_variable_file,
+        probability_distribution_file_name=distribution_file_name,
+        debug_level=Debug.VERY_VERBOSE,
+    )
 
 
-def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_variables, tagged_variable_file=None):
+def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_variables, tagged_variable_file=None, distribution_file_name=None):
     aps_model = APSModel(input_model_file)
     updatable = True
     for words in selected_variables:
@@ -208,4 +213,9 @@ def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_
                 elif trunc_name == 'NONCUBIC':
                     # setAnglwFMUUpdatable take polygon_number counting from 0
                     trunc_rule.setAngleFmuUpdatable(poly_number - 1, updatable)
-    aps_model.write_model(output_model_file, attributes_file_name=tagged_variable_file, debug_level=Debug.VERY_VERBOSE)
+    aps_model.write_model(
+        output_model_file,
+        attributes_file_name=tagged_variable_file,
+        probability_distribution_file_name=distribution_file_name,
+        debug_level=Debug.VERY_VERBOSE,
+    )

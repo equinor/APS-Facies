@@ -1,8 +1,9 @@
 <template>
   <settings-panel title="Folder Settings">
-    <directory-selector
+    <file-selection
       v-model="_apsModelFileLocation"
       label="APS Model File Location"
+      directory
     />
   </settings-panel>
 </template>
@@ -11,11 +12,11 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
-import DirectorySelector from '@/components/selection/DirectorySelector.vue'
+import FileSelection from '@/components/selection/FileSelection.vue'
 
 @Component({
   components: {
-    DirectorySelector,
+    FileSelection,
     SettingsPanel,
   }
 })

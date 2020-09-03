@@ -73,3 +73,9 @@ export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION: ('RMS_PARAM' | 'NONE' 
   'RMS_PARAM',
   'NONE',
 ]
+
+export const DEFAULT_MODEL_FILE_NAMES = {
+  model: 'myApsExport.xml',
+  fmuConfig: 'aps.yaml',
+  probabilityDistribution: 'aps_param_dist.txt',
+}

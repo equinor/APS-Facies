@@ -17,6 +17,7 @@ from roxar.grids import (
     BlockedWell,
     BlockedWellsSet,
 )
+from src.algorithms.APSModel import APSModel
 
 RoxarModule = Roxar
 
@@ -222,6 +223,13 @@ class RMSData:
             prettifier:                  Optional[Callable[[str], str]]  = None,
     ) -> bool: ...
     @staticmethod
+    def dump_aps_model(
+            encoded_xml:                 str,
+            model_path:                  str,
+            fmu_configuration_path:      Optional[str]                   = None,
+            prop_dist_path:              Optional[str]                   = None,
+    ) -> bool: ...
+    @staticmethod
     def get_constant(
             _property:                   str,
             _type:                       str
@@ -266,5 +274,14 @@ class RMSData:
     @staticmethod
     def open_wiki_help() -> None: ...
     @staticmethod
-    def exists(path: str) -> bool: ...
+    def exists(
+            path:                        str,
+            has_parent:                  bool,
+    ) -> bool: ...
 
+def _decode(
+        base64_encoded:                  str,
+) -> str: ...
+def decode_model(
+        encoded_xml:                     str,
+) -> APSModel: ...

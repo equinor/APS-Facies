@@ -70,6 +70,8 @@ class APSModel:
     use_regions: bool
     rms_project_name: Optional[str]
     gaussian_field_names: List[str]
+    has_fmu_updatable_values: bool
+
     def __parse_model_file(self, model_file_name: FilePath, debug_level=Debug.OFF): ...
     @classmethod
     def from_string(
@@ -125,15 +127,17 @@ class APSModel:
     def setSelectedZoneAndRegionNumber(self, selectedZoneNumber: int, selectedRegionNumber: int = 0) -> None: ...
     def dump(
             self,
-            name:                       FilePath,
-            attributes_file_name:       Optional[FilePath]  = None,
-            debug_level:                Debug               = Debug.OFF,
+            name:                               FilePath,
+            attributes_file_name:               Optional[FilePath]  = None,
+            probability_distribution_file_name: Optional[FilePath]  = None,
+            debug_level:                        Debug               = Debug.OFF,
     ) -> None: ...
     def write_model(
             self,
-            model_file_name:            FilePath,
-            attributes_file_name:       Optional[FilePath]  = None,
-            debug_level:                Debug               = Debug.OFF,
+            model_file_name:                    FilePath,
+            attributes_file_name:               Optional[FilePath]  = None,
+            probability_distribution_file_name: Optional[FilePath]  = None,
+            debug_level:                        Debug               = Debug.OFF,
     ) -> None: ...
     @staticmethod
     def __parse_global_variables(
@@ -152,5 +156,11 @@ class APSModel:
             input_tree,
             output_model_file_name:     FilePath,
     ): ...
+
+def _max_name_length(fmu_attributes: List[FmuAttribute]) -> int: ...
+def _max_value_length(fmu_attributes: List[FmuAttribute]) -> int: ...
+def probability_distribution_configuration(fmu_attributes: List[FmuAttribute]) -> str: ...
+def fmu_configuration(fmu_attributes: List[FmuAttribute]) -> str: ...
+
 
 ApsModel: Type[APSModel]

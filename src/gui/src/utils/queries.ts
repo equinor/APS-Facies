@@ -31,3 +31,30 @@ export function hasFaciesSpecifiedForMultiplePolygons (
 export {
   getFaciesName,
 }
+
+export const relativeTo = (base: string, path: string): string => {
+  // Assumed to be UNIX paths
+  if (!path.startsWith('/')) {
+    // The path we compare to, is already relative
+    return path
+  }
+  const parents = {
+    base: base.split('/'),
+    path: path.split('/'),
+  }
+  const commonParentIndex = parents.base
+    .reduce(
+      (commonIndex, directory, index) => index < parents.path.length && directory === parents.path[index]
+        ? index
+        : commonIndex,
+      0
+    )
+  const remaining = {
+    base: parents.base.slice(commonParentIndex + 1),
+    path: parents.path.slice(commonParentIndex + 1),
+  }
+  return [
+    ...remaining.base.map(() => '..'),
+    ...remaining.path,
+  ].join('/')
+}

@@ -41,6 +41,8 @@ function makeCustomIcons (): Icons {
     observed: 'far fa-eye',
     observedNegated: 'far fa-eye-slash',
     fromRoxar: 'fas fa-desktop',
+    folder: 'far fa-folder',
+    openFolder: 'far fa-folder-open',
   }
   Object.keys(icons).forEach((key: string): void => {
     if (notEmpty(icons[`${key}`])) {

@@ -15,11 +15,13 @@ def read_selected_fmu_variables(
 def set_all_as_fmu_updatable(
         input_model_file:                 str,
         output_model_file:                str,
-        tagged_variable_file:             Optional[str]       = None
+        tagged_variable_file:             Optional[str]       = None,
+        distribution_file_name:           Optional[str]       = None,
 ) -> None: ...
 def set_selected_as_fmu_updatable(
         input_model_file:                 str,
         output_model_file:                str,
         selected_variables:               List[FmuParameter],
         tagged_variable_file:             Optional[str]       = None,
+        distribution_file_name:           Optional[str]       = None,
 ) -> None: ...

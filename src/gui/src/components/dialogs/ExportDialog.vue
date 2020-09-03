@@ -2,49 +2,71 @@
   <v-dialog
     v-model="dialog"
     persistent
-    max-width="500px"
+    max-width="550px"
     @keydown.esc="abort"
     @keydown.enter="choose"
   >
-    <v-card>
+    <v-card
+      v-if="fetched"
+    >
       <v-card-title>
-        <span class="headline">
-          save export dialog.
-        </span>
+        <v-row>
+          <v-col>
+            <span class="headline">
+              {{ `Export the APS model${fmuMode ? ', and FMU settings': ''}` }}
+            </span>
+          </v-col>
+          <v-col cols="1">
+            <icon-button
+              v-tooltip="'Use defaults'"
+              icon="refresh"
+              color="primary"
+              @click="() => restoreDefaults()"
+            />
+          </v-col>
+        </v-row>
       </v-card-title>
       <v-card-text>
-        <fieldset>
-          <legend>
-            Select File to save to
-          </legend>
+        <v-row>
+          Paths are relative to the RMS project, which is currently located at {{ projectPath }}.
+        </v-row>
+        <v-row>
+          <file-selection
+            v-model="paths.model"
+            label="Model file"
+            :relative-to="projectPath"
+            @update:error="err => setInvalid('model', err)"
+          />
+        </v-row>
+        <div v-if="fmuMode">
           <v-row>
-            <v-col
-              class="pa-2"
-              cols="5"
-            >
-              <v-text-field
-                v-model="path"
-                single-line
-                solo
-              />
-            </v-col>
-            <v-col
-              class="pa-2"
-              cols="4"
-            >
-              <bold-button
-                title="Select File"
-                @click="chooseAPSModelFile"
-              />
-            </v-col>
+            <optional-file-selection
+              v-model="paths.fmuConfig"
+              v-tooltip="disabledMessage"
+              label="FMU configuration"
+              :disabled="!hasFmuUpdatableValues"
+              :relative-to="projectPath"
+              @update:error="err => setInvalid('fmuConfig', err)"
+            />
           </v-row>
-        </fieldset>
+          <v-row>
+            <optional-file-selection
+              v-model="paths.probabilityDistribution"
+              v-tooltip="disabledMessage"
+              label="Probability distribution template"
+              :disabled="!hasFmuUpdatableValues"
+              :relative-to="projectPath"
+              @update:error="err => setInvalid('probabilityDistribution', err)"
+            />
+          </v-row>
+        </div>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
         <v-btn
           color="blue darken-1"
           text
+          :disabled="hasErrors"
           @click="choose"
         >
           Save
@@ -63,34 +85,118 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import AsyncComputed from 'vue-async-computed-decorator'
 
-import BoldButton from '@/components/baseComponents/BoldButton.vue'
+import { DEFAULT_MODEL_FILE_NAMES } from '@/config'
+
+import rms from '@/api/rms'
+
+import FileSelection from '@/components/selection/FileSelection.vue'
+import OptionalFileSelection from '@/components/selection/OptionalFileSelection.vue'
+import IconButton from '@/components/selection/IconButton.vue'
 
 import { APSError } from '@/utils/domain/errors'
-import rms from '@/api/rms'
+import { Paths } from '@/api/types'
+
+interface State {
+  path: string
+  disabled: boolean
+}
+
+interface PathsState {
+  model: string
+  fmuConfig: State
+  probabilityDistribution: State
+}
+
+interface Invalid {
+  model: boolean
+  fmuConfig: boolean
+  probabilityDistribution: boolean
+}
 
 @Component({
   components: {
-    BoldButton,
+    IconButton,
+    FileSelection,
+    OptionalFileSelection,
   },
 })
 export default class ExportDialog extends Vue {
   dialog = false
-  resolve: ((value: { save: boolean, path: string }) => void) | null = null
+  resolve: ((value: { paths: Paths | null }) => void) | null = null
   reject: ((reason: string) => void) | null = null
-  path: string | null = null
-
-  chooseAPSModelFile (): void {
-    rms.chooseFile('save', '', '').then((result: string | null): void => { // setting parameters filter and suggestion does not seem to work...
-      if (result) {
-        this.path = result
-      }
-    })
+  fetched = false
+  disabled = false
+  projectPath = ''
+  paths: PathsState = {
+    model: '',
+    fmuConfig: { path: '', disabled: true },
+    probabilityDistribution: { path: '', disabled: true },
   }
 
-  open (defaultPath: string): Promise<{save: boolean, path: string }> {
+  invalid: Invalid = {
+    model: false,
+    fmuConfig: false,
+    probabilityDistribution: false,
+  }
+
+  setInvalid (name: string, error: boolean): void {
+    this.invalid[`${name}`] = error
+  }
+
+  async mounted (): Promise<void> {
+    await this.updateProjectPath()
+    await this.restoreDefaults()
+    this.fetched = true
+  }
+
+  @AsyncComputed({
+    default: true,
+  })
+  async hasFmuUpdatableValues (): Promise<boolean> {
+    const model = (this as ExportDialog).$store.getters['modelFileExporter/model']
+    if (!model) return new Promise(resolve => resolve(false))
+    return rms.hasFmuUpdatableValues(model)
+  }
+
+  get fmuMode (): boolean { return this.$store.getters.fmuMode }
+
+  get hasErrors (): boolean {
+    if (!this.hasFmuUpdatableValues) return this.invalid.model
+
+    return Object.keys(this.invalid)
+      .filter(key => !this.paths[`${key}`].disabled)
+      .some(key => this.invalid[`${key}`])
+  }
+
+  get disabledMessage (): string | undefined {
+    if (!this.hasFmuUpdatableValues) {
+      return 'No variables are marked as FMU updatable'
+    } else return undefined
+  }
+
+  defaultPaths (): PathsState {
+    const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
+
+    return {
+      model: `${this.projectPath}/../input/config/apsgui/${model}`,
+      fmuConfig: {
+        path: `${this.projectPath}/../../fmuconfig/input/${fmuConfig}`,
+        disabled: false,
+      },
+      probabilityDistribution: {
+        path: `${this.projectPath}/../../ert/input/distributions/${probabilityDistribution}`,
+        disabled: false,
+      },
+    }
+  }
+
+  async open (): Promise<{ paths: Paths | null }> {
     this.dialog = true
-    this.path = defaultPath
+    this.$asyncComputed.hasFmuUpdatableValues.update()
+    await this.updateProjectPath()
+
     return new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
@@ -99,17 +205,38 @@ export default class ExportDialog extends Vue {
 
   choose (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
-    if (!this.path) throw new APSError('path has not been set')
+    if (!this.paths.model) throw new APSError('path has not been set')
 
-    this.resolve({ save: true, path: this.path })
+    const get = (item: State): string | null => item.disabled ? null : item.path
+
+    const paths: Paths = !this.hasFmuUpdatableValues
+      ? {
+        model: this.paths.model,
+        fmuConfig: null,
+        probabilityDistribution: null,
+      }
+      : {
+        model: this.paths.model,
+        fmuConfig: get(this.paths.fmuConfig),
+        probabilityDistribution: get(this.paths.probabilityDistribution),
+      }
+    this.resolve({ paths })
     this.dialog = false
   }
 
   abort (): void {
     if (!this.resolve) throw new APSError('resolve has not been set')
 
-    this.resolve({ save: false, path: '' })
+    this.resolve({ paths: null })
     this.dialog = false
+  }
+
+  restoreDefaults (): void {
+    this.paths = this.defaultPaths()
+  }
+
+  async updateProjectPath (): Promise<void> {
+    this.projectPath = await rms.projectDirectory()
   }
 }
 </script>
