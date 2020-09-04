@@ -45,13 +45,14 @@
       </td>
       <td class="text-left">
         <span
-          v-if="blockedWellLogParameter"
+          v-if="isFaciesFromRms(facies)"
         >
           {{ facies.code }}
         </span>
         <editable-cell
           v-else
           :value="facies"
+          :restrictions="faciesCodeRestrictions(facies)"
           field="code"
           numeric
           @submit="changeCode"
@@ -192,6 +193,25 @@ export default class FaciesTable extends Vue {
 
   isFaciesFromRms (facies: GlobalFacies): boolean {
     return this.$store.getters['facies/isFromRMS'](facies)
+  }
+
+  faciesCodeRestrictions (facies: GlobalFacies): ((code: string) => string)[] {
+    return [
+      (code: string): string => !code ? 'A code cannot be empty' : '',
+      (code): string => {
+        try {
+          Number.parseInt(code, 10)
+          return ''
+        } catch {
+          return 'Code must be an integer'
+        }
+      },
+      (code: string): string => Number.parseInt(code, 10) < 0 ? 'Code must be non-negative' : '',
+      (code: string): string => this.facies
+        .filter(({ id }) => facies.id !== id)
+        .map(({ code }) => code.toString(10))
+        .includes(code) ? 'Code is used by a different Facies' : '',
+    ]
   }
 
   async changeColor (facies: GlobalFacies, color: string): Promise<void> {
