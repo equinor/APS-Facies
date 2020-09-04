@@ -2,6 +2,46 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.2.0
+
+The GUI now works as expected in RMS 12.
+
+### What's new?
+* The output to FMU / ERT, is now compatible with `global_master_config.yml`
+  * The GUI may write the ERT probability distribution configuration file
+
+* The non-cubic templates where simplified
+* Allow user to adjust `max_allowed_fraction_of_values_outside_tolerance`
+* Overhauled how the model file, and FMU files can be exported
+  * The paths are shown as relative (to the RMS project location)
+  * The user may select FMU configuration paths for export
+  * If some files / directories does not exist, export is disabled
+  * There is a button to restore default paths
+  * May not export FMU data, when no variables are updatable
+* The user may change facies code of user defined facies
+
+### Fixes
+* Unit tests work as expected
+* Highlight all component, when current
+* Ensure `get_rms_version` gives major.minor.patch
+* Ensure path is passed correctly
+* Improved the documentation to make intentions more explicit
+
+### Restructure
+* Truncation rules are generated automatically fromthe specification file
+* Unify selection of files, and directories
+* Use dump method for exporting model file, and FMU configuration files
+* Separate methods for decoding BASE64 encoded strings
+
+### Miscellaneous
+* Update dependencies
+  * axios 0.19.2 -> 0.20.0
+  * and others
+* Remove unused images, these are generated automatically
+* Improved the documentation for how to start the GUI locally
+* Defined a DAG in CI/CD
+
+
 ## 1.1.5
 
 
