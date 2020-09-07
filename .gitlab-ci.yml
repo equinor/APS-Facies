@@ -65,7 +65,9 @@ JavaScript vulnerabilities:
   stage: check dependencies
   script:
     - 'eval $MAKE check-node-dependencies-for-vulnerabilities'
-  needs: []
+  needs:
+    - job: initialize
+      artifacts: true
 
 outdated (Python) dependencies:
   stage: check dependencies

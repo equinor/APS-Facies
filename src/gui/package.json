@@ -79,6 +79,7 @@
     "fibers": "^4.0.2",
     "file-loader": "^5.0.2",
     "ify-loader": "^1.1.0",
+    "improved-yarn-audit": "^2.3.1",
     "jest": "^24.5.0",
     "jest-webpack-resolver": "^0.3.0",
     "lint-staged": "^9.2.0",

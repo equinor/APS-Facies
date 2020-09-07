@@ -459,7 +459,7 @@ safety-check:
 	$(PIPENV) check
 
 check-node-dependencies-for-vulnerabilities:
-	$(YARN) audit
+	$(YARN) run improved-yarn-audit --fail-on-missing-exclutions
 
 update-dependencies: update-node-dependencies update-python-dependencies
 
