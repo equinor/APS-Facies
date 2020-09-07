@@ -66,7 +66,7 @@ function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpe
   return {
     ...specification,
     polygons: specification.polygons
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       .filter((polygon: P): boolean => polygon.overlay ? includeOverlay : true)
       .map((polygon: P): P => {
@@ -76,7 +76,7 @@ function simplify<P extends PolygonSpecification, Spec extends TruncationRuleSpe
           fraction: 1,
         }
       }),
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     overlay: includeOverlay ? specification.overlay : null
   }
@@ -141,10 +141,10 @@ function makeGlobalFaciesTableSpecification ({ rootGetters }: { rootGetters: Roo
   return facies
     .map(({ facies: globalFacies, previewProbability, id }): GlobalFaciesSpecification => {
       let polygon = (rule.polygons as Polygon[]).find((polygon): boolean => getId(polygon.facies) === id)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       if (isEmpty(polygon) && rule.overlay) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         polygon = Object.values(rule.overlay).find((polygon): boolean => polygon.facies.id === id)
       }
@@ -184,7 +184,7 @@ function goTroughChildren (component: Vue, onFound: (child: Vue) => any, breakEa
   let children = component.$children.slice()
   while (children.length > 0) {
     const child = children.shift()
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (typeof child !== 'undefined' && child.dialog !== false) {
       if (child.$v && child.$v.$invalid) {
@@ -259,7 +259,7 @@ function hasEnoughFacies (rule: TruncationRule, getters: RootGetters): boolean {
   return numFacies >= minFacies(rule, getters)
 }
 
-const resolve = (path: string | string[], obj: object = self, separator = '.'): object => {
+const resolve = (path: string | string[], obj: any = self, separator = '.'): Record<string, unknown> => {
   const properties = Array.isArray(path) ? path : path.split(separator)
   return properties.reduce((prev, curr) => prev && prev[`${curr}`], obj)
 }
@@ -269,7 +269,7 @@ function sortAlphabetically<T extends Named> (arr: T[]): T[] {
     .sort((a, b): number => a.name.localeCompare(b.name))
 }
 
-function sortByProperty<T extends object> (prop: string): (items: T[]) => T[] {
+function sortByProperty<T> (prop: string): (items: T[]) => T[] {
   return function (items: T[]): T[] {
     if (items instanceof Object) items = Object.values(items)
     items.forEach((item: T): void => {
@@ -277,7 +277,7 @@ function sortByProperty<T extends object> (prop: string): (items: T[]) => T[] {
         throw new Error(`The item (${item}) does not have the required property on which to sort (${prop})`)
       }
     })
-    return items.slice().sort((polygon, other): number => polygon[`${prop}`] - other[`${prop}`])
+    return items.slice().sort((polygon, other): number => (polygon[`${prop}`] as number) - (other[`${prop}`] as number))
   }
 }
 
@@ -286,7 +286,7 @@ function sortByOrder<T extends Ordered> (items: T[], index: number, isDescending
   return sortByProperty<T>('order')(items)
 }
 
-function getParameters (collection: object, delimiter = '.'): string[] {
+function getParameters (collection: Record<string, unknown>, delimiter = '.'): string[] {
   const parameters = new Set(Object.keys(collection))
   const selectable = Object.keys(flatten(collection, { delimiter }))
     .filter((param): boolean => param.endsWith('selected'))

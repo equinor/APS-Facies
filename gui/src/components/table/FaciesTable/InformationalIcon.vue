@@ -42,6 +42,7 @@ export default class InformationalIcon extends Vue {
   @Prop({ default: undefined })
   readonly inactiveMessage?: string
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __icon (): VuetifyIcon | undefined {
     const icons = this.$vuetify.icons.values
     const iconName = `${this.icon}${!this.active ? 'Negated' : ''}`

@@ -30,7 +30,7 @@ export default class BaseItem implements Identifiable {
     }
   }
 
-  protected _hashify (): object { return this.toJSON() }
+  protected _hashify (): any { return this.toJSON() }
 
   protected get hash (): string {
     return hash(this._hashify(), {

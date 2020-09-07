@@ -4,7 +4,9 @@ import { removeFaciesDependent } from '@/store/utils/helpers'
 
 import { Module } from 'vuex'
 import { SelectableChoice } from '@/store/modules/parameters/typing/helpers'
-import { RootState } from '@/store/typing'
+import { Context as RootContext, RootState } from '@/store/typing'
+
+type Context = RootContext<SelectableChoice, any>
 
 const module: Module<SelectableChoice<string>, RootState> = {
   namespaced: true,
@@ -15,7 +17,7 @@ const module: Module<SelectableChoice<string>, RootState> = {
   },
 
   actions: {
-    select: async (context, blockedWellLog): Promise<void> => {
+    select: async (context: Context, blockedWellLog): Promise<void> => {
       const { commit, dispatch } = context
       blockedWellLog = blockedWellLog || null
       commit('CURRENT', blockedWellLog)
@@ -27,10 +29,10 @@ const module: Module<SelectableChoice<string>, RootState> = {
         await dispatch('facies/global/reset', undefined, { root: true })
       }
     },
-    fetch: async (context): Promise<void> => {
+    fetch: async (context: Context): Promise<void> => {
       await fetchParameterHelper(context)
     },
-    refresh: async ({ commit, rootGetters }): Promise<void> => {
+    refresh: async ({ commit, rootGetters }: Context): Promise<void> => {
       const { gridModel, blockedWellParameter } = rootGetters
       commit('AVAILABLE', gridModel && blockedWellParameter
         ? await rms.blockedWellLogParameters(gridModel, blockedWellParameter)

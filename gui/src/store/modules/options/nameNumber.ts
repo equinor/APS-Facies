@@ -4,7 +4,7 @@ import { makeOption, populateState } from '@/store/utils'
 
 const item = makeOption('number', ['number', 'name'])
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
   modules: {
     zone: item,

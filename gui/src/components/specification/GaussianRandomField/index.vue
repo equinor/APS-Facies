@@ -182,7 +182,7 @@ export default class GaussianRandomField extends Vue {
   }
 
   async openVisualizationSettings (): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     const { save, settings } = await (this.$refs.visualisationSettings as VisualizationSettingsDialog).open(cloneDeep(this.value.settings))

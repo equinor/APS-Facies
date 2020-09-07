@@ -7,6 +7,11 @@ import BaseItem, { BaseItemConfiguration, BaseItemSerialization } from './baseIt
 import { ParentReference } from './interfaces'
 import { Optional } from '@/utils/typing'
 
+export interface Parent {
+  zone: Zone
+  region: Optional<Region>
+}
+
 interface ParentConfiguration extends BaseItemConfiguration {
   zone?: null
   region?: null
@@ -23,11 +28,6 @@ export type DependentConfiguration = ParentConfiguration | ZoneRegionConfigurati
 
 export interface DependentSerialization extends BaseItemSerialization {
   parent: ParentReference
-}
-
-export interface Parent {
-  zone: Zone
-  region: Optional<Region>
 }
 
 export interface Dependent {

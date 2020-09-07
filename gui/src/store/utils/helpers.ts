@@ -7,7 +7,7 @@ import TruncationRule from '@/utils/domain/truncationRule/base'
 import { ID } from '@/utils/domain/types'
 import { Dispatch } from 'vuex'
 
-type Context<S = {}> = RootContext<S, RootGetters>
+type Context<S = Record<string, unknown>> = RootContext<S, RootGetters>
 
 export function usesAllFacies<
   T extends Polygon = Polygon,
@@ -78,7 +78,7 @@ export function getElements ({ rootState }: { rootState: RootState }, exclude: s
     .filter(({ name }): boolean => !exclude.includes(name))
 }
 
-export async function removeFaciesDependent (context: Context): Promise<void> {
+export async function removeFaciesDependent (context: { rootState: RootState, dispatch: Dispatch }): Promise<void> {
   const { rootState } = context
   const parents: Parent[] = []
 

@@ -10,7 +10,7 @@ import { RootState } from '@/store/typing'
 const module: Module<GridParameterState, RootState> = {
   namespaced: true,
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   state: {
     _waiting: false,

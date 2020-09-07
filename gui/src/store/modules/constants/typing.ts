@@ -5,7 +5,7 @@ import { ID } from '@/utils/domain/types'
 import { Optional } from '@/utils/typing'
 
 export interface ConstantsState {
-  numberOf: {}
+  numberOf: Record<string, number>
   faciesColors: StaticChoices<string>
   options: {
     variograms: StaticChoices<string>

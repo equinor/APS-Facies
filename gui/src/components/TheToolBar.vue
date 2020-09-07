@@ -105,7 +105,7 @@ import { displayError, displaySuccess } from '@/utils/helpers/storeInteraction'
 
 import { xml2json } from 'xml-js'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import UploadButton from 'vuetify-upload-button'
 

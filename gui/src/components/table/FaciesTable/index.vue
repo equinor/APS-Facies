@@ -84,7 +84,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import VSwatches from 'vue-swatches'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'

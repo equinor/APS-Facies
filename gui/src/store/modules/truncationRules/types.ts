@@ -13,7 +13,7 @@ function isEqual (values: (TruncationRuleTemplateType | any)[], others: Identifi
   const _values = Object.values(values)
   const _others = Object.values(others)
   return _values.length === _others.length
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     && _values.every((value): boolean => _others.indexOf(({ name, type }) => value.name === name && type === value.type))
 }

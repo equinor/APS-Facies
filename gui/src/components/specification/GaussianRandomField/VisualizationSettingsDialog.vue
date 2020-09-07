@@ -128,7 +128,7 @@ interface Settings {
 
 interface ReturnValue {
   save: boolean
-  settings: Settings | {}
+  settings: Settings | Record<string, undefined>
 }
 
 @Component({

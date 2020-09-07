@@ -55,7 +55,7 @@ const module: Module<ZoneState, RootState> = {
       instances.forEach((zone): void => {
         if (zone.regions) {
           zone.regions.forEach((region): void => {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             region.zone = zone
           })

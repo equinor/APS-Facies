@@ -27,22 +27,6 @@ import Region from '@/utils/domain/region'
 import { ID } from '@/utils/domain/types'
 import Zone from '@/utils/domain/zone'
 
-interface Context<S, G> {
-  state: S
-  getters: G
-  commit: Commit
-  dispatch: Dispatch
-  rootState: RootState
-  rootGetters: RootGetters
-}
-
-interface Store {
-  state: RootState
-  getters: RootGetters
-  dispatch: Dispatch
-  commit: Commit
-}
-
 interface RootState {
   version: string
   _loaded: {
@@ -102,7 +86,7 @@ interface RootState {
           }
           proportion: number
         }[]
-        settings: object
+        settings: Record<string, unknown>
         fields: {
           channel: number
           field: {
@@ -185,6 +169,22 @@ interface RootGetters {
   simulationSettings: ({ field, zone }: { field?: GaussianRandomField, zone?: Zone }) => SimulationSettings
   'zones/byCode': (zoneNumber: number, regionNumber?: Optional<number>) => Parent
   'zones/byParent': (parent: { zone: Zone | ID, region?: Region | ID | null }) => Optional<Zone | Region>
+}
+
+interface Context<S, G> {
+  state: S
+  getters: G
+  commit: Commit
+  dispatch: Dispatch
+  rootState: RootState
+  rootGetters: RootGetters
+}
+
+interface Store {
+  state: RootState
+  getters: RootGetters
+  dispatch: Dispatch
+  commit: Commit
 }
 
 export {

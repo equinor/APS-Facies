@@ -27,7 +27,7 @@ export const selectable: Module<StaticChoices<string>, RootState> = {
   },
 }
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
   modules: {

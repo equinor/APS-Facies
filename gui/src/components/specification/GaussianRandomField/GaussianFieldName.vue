@@ -20,10 +20,10 @@ import { Optional } from '@/utils/typing'
       fieldName: {
         required,
         isUnique (value): boolean {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           const current = this.value.id
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           return !this.fields.some(({ name, id }: GaussianRandomField) => name === value && id !== current)
         },

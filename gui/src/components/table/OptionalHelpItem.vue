@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
 import { notEmpty } from '@/utils'

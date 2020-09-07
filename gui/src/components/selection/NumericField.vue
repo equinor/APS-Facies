@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { BigNumber } from 'mathjs'
@@ -192,6 +192,7 @@ export default class NumericField extends Vue {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __class (): string[] {
     const classes: string[] = []
     if (this.dense) classes.push('dense')

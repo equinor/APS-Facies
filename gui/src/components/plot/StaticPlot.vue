@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { getDisabledOpacity } from '@/utils/helpers/simple'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
@@ -34,7 +34,7 @@ export default class StaticPlot extends Vue {
   readonly dataDefinition!: Partial<PlotData | Shape>[]
 
   @Prop({ default: () => [] })
-  readonly annotations!: object[]
+  readonly annotations!: Record<string, unknown>[]
 
   @Prop({ default: DEFAULT_SIZE.width })
   readonly width!: number
@@ -68,6 +68,7 @@ export default class StaticPlot extends Vue {
     width: 0,
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __content (): Partial<PlotData>[] {
     if (!this.svg) {
       return (this.dataDefinition as Partial<PlotData>[])
@@ -85,6 +86,7 @@ export default class StaticPlot extends Vue {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __layout (): Partial<Layout> {
     const scaleRatio = notEmpty(this.__content) && this.__content.length > 0
       // @ts-ignore
@@ -122,15 +124,16 @@ export default class StaticPlot extends Vue {
       },
       xaxis,
       yaxis,
-      /* eslint-disable-next-line @typescript-eslint/camelcase */
+      /* eslint-disable-next-line @typescript-eslint/naming-convention */
       paper_bgcolor: 'rgba(0,0,0,0)',
-      /* eslint-disable-next-line @typescript-eslint/camelcase */
+      /* eslint-disable-next-line @typescript-eslint/naming-convention */
       plot_bgcolor: 'rgba(0,0,0,0)',
       ...(this.svg && { shapes: (this.dataDefinition as Partial<Shape>[]) }),
       ...(this.annotations && { annotations: this.annotations }),
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __options (): Partial<Config> {
     return {
       staticPlot: true,

@@ -30,7 +30,7 @@ type HasIdentity<T> = T & {
   id: ID
 }
 
-function identify<T extends object> (items: MaybeIdentified<T>[] | Identified<MaybeIdentified<T>>): Identified<HasIdentity<T>> {
+function identify<T> (items: MaybeIdentified<T>[] | Identified<MaybeIdentified<T>>): Identified<HasIdentity<T>> {
   return Object.values(items).reduce((obj, item): Identified<HasIdentity<T>> => {
     const _id = item.id || uuidv4()
     if (!('id' in item) || item.id !== _id) {

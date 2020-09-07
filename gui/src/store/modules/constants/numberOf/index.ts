@@ -3,7 +3,7 @@ import { RootState } from '@/store/typing'
 
 import gaussianRandomFields from './gaussianRandomFields'
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
   modules: {

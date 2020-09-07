@@ -195,10 +195,10 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true, type: Boolean })
   readonly exportFmuConfigFiles: boolean
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   set _fmuGrid (value: string | { value: string }) {
     if (typeof (value) !== 'string') {
