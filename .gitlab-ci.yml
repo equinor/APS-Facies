@@ -61,6 +61,12 @@ vulnerabilities:
   allow_failure: true
   needs: []
 
+JavaScript vulnerabilities:
+  stage: check dependencies
+  script:
+    - 'eval $MAKE check-node-dependencies-for-vulnerabilities'
+  needs: []
+
 outdated (Python) dependencies:
   stage: check dependencies
   script:

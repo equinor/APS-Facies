@@ -458,6 +458,9 @@ check-node-dependencies:
 safety-check:
 	$(PIPENV) check
 
+check-node-dependencies-for-vulnerabilities:
+	$(YARN) audit
+
 update-dependencies: update-node-dependencies update-python-dependencies
 
 update-node-dependencies:
