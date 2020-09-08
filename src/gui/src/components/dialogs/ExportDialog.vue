@@ -160,7 +160,7 @@ export default class ExportDialog extends Vue {
     return rms.hasFmuUpdatableValues(model)
   }
 
-  get fmuMode (): boolean { return this.$store.getters.fmuMode }
+  get fmuMode (): boolean { return this.$store.getters.fmuUpdatable }
 
   get hasErrors (): boolean {
     if (!this.hasFmuUpdatableValues) return this.invalid.model
