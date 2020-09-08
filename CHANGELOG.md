@@ -2,6 +2,13 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.2.1
+
+### Fixes
+* Show export options in all FMU modes
+* Do not set path to `null` when user cancels file, or directory selection
+
+
 ## 1.2.0
 
 The GUI now works as expected in RMS 12.
