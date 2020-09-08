@@ -92,14 +92,16 @@ export default class FileSelection extends Vue {
 
   async choosePath (): Promise<void> {
     this.open = true
-    let path = this.path
+    let path = null
     try {
       path = this.directory
         ? await rms.chooseDir('load')
         // setting parameters filter and suggestion does not seem to work...
         : await rms.chooseFile('save', '', '')
     } catch {}
-    this.path = path
+    if (path) {
+      this.path = path
+    }
     this.open = false
   }
 
