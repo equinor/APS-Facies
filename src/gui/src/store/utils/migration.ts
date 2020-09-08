@@ -124,6 +124,14 @@ const migrations: Migration[] = [
       }
       return state
     }
+  },
+  {
+    from: '1.5.0',
+    to: '1.6.0',
+    up: async (state): Promise<any> => {
+      delete state.parameters.path.project
+      return new Promise(resolve => resolve(state))
+    },
   }
 ]
 
