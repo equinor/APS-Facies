@@ -116,12 +116,12 @@ class JobConfig:
     def _config_location(self):
         if self.fmu_mode:
             return get_ert_location() / '..' / '..' / 'fmuconfig' / 'output'
-        return Path(self._config['parameters']['path']['fmuParameterListLocation']['selected'])
+        return None
 
     @property
     def global_variables_file(self):
         config_location = self._config_location
-        if config_location.exists() and config_location.is_dir():
+        if config_location and config_location.exists() and config_location.is_dir():
             file_priority = [
                 'global_variables.yml',
                 'global_variables.yaml',

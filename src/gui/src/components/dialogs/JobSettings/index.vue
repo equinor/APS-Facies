@@ -22,12 +22,7 @@
         class="headline"
       />
       <v-card-text>
-        <folder-settings
-          :aps-model-file-location.sync="apsModelFileLocation"
-        />
-        <br>
         <fmu-settings
-          :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
           :only-update-from-fmu.sync="onlyUpdateFromFmu"
           :max-layers-in-fmu.sync="maxLayersInFmu"
@@ -184,7 +179,6 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 
 import LoggingSettings from '@/components/dialogs/JobSettings/LoggingSettings.vue'
-import FolderSettings from '@/components/dialogs/JobSettings/FolderSettings.vue'
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
 import NumericField from '@/components/selection/NumericField.vue'
@@ -205,7 +199,6 @@ interface Invalid {
   components: {
     RunSettings,
     LoggingSettings,
-    FolderSettings,
     SettingsPanel,
     FmuSettings,
     NumericField,
@@ -219,8 +212,6 @@ export default class JobSettings extends Vue {
   }
 
   dialog = false
-  apsModelFileLocation = ''
-  fmuParameterListLocation = ''
   showZoneNameNumber = ''
   showRegionNameNumber = ''
   automaticAlphaFieldSelection = false
@@ -249,10 +240,6 @@ export default class JobSettings extends Vue {
       const options = (this.$store as Store).state.options
       const parameters = this.$store.state.parameters
       const fmu = this.$store.state.fmu
-      const path = parameters.path
-
-      this.apsModelFileLocation = path.project.selected
-      this.fmuParameterListLocation = path.fmuParameterListLocation.selected
 
       this.maxLayersInFmu = fmu.maxDepth.value
       this.runFmuWorkflows = fmu.runFmuWorkflows.value
@@ -282,8 +269,6 @@ export default class JobSettings extends Vue {
   async ok (): Promise<void> {
     const dispatch = this.$store.dispatch
     await Promise.all([
-      dispatch('parameters/path/project/select', this.apsModelFileLocation),
-      dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
       dispatch('parameters/debugLevel/select', this.debugLevel),
       dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
 

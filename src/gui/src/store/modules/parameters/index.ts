@@ -10,7 +10,6 @@ import rmsTrend from '@/store/modules/parameters/rmsTrend'
 import probabilityCube from '@/store/modules/parameters/probabilityCube'
 import grid from '@/store/modules/parameters/grid'
 import realization from '@/store/modules/parameters/realization'
-import path from '@/store/modules/parameters/path'
 import names from '@/store/modules/parameters/names'
 import debugLevel from '@/store/modules/parameters/debugLevel'
 import maxAllowedFractionOfValuesOutsideTolerance from '@/store/modules/parameters/maxAllowedFractionOfValuesOutsideTolerance'
@@ -28,7 +27,6 @@ const module: Module<ParametersState, RootState> = {
     probabilityCube,
     grid,
     realization,
-    path,
     names,
     debugLevel,
     maxAllowedFractionOfValuesOutsideTolerance,
