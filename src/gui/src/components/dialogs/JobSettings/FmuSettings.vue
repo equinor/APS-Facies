@@ -26,12 +26,6 @@
       </v-col>
     </v-row>
     <div v-if="_runFmuWorkflows || _onlyUpdateFromFmu">
-      <file-selection
-        v-if="_onlyUpdateFromFmu"
-        v-model="_fmuParameterListLocation"
-        label="FMU Parameters List Location"
-        directory
-      />
       <v-row
         v-if="!_onlyUpdateFromFmu"
       >
@@ -163,9 +157,6 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true, type: Boolean })
   readonly importFields: boolean
 
-  @Prop({ required: true })
-  readonly fmuParameterListLocation: string
-
   @Prop({ required: true, type: Boolean })
   readonly runFmuWorkflows: boolean
 
@@ -203,9 +194,6 @@ export default class FmuSettings extends Vue {
 
   get _createFmuGrid (): boolean { return this.createFmuGrid }
   set _createFmuGrid (value: boolean) { this.$emit('update:createFmuGrid', value) }
-
-  get _fmuParameterListLocation (): string { return this.fmuParameterListLocation }
-  set _fmuParameterListLocation (path: string) { this.$emit('update:fmuParameterListLocation', path) }
 
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
   set _runFmuWorkflows (toggled: boolean) {

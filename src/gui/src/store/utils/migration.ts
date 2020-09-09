@@ -129,7 +129,7 @@ const migrations: Migration[] = [
     from: '1.5.0',
     to: '1.6.0',
     up: async (state): Promise<any> => {
-      delete state.parameters.path.project
+      delete state.parameters.path
       return new Promise(resolve => resolve(state))
     },
   }

@@ -23,7 +23,6 @@
       />
       <v-card-text>
         <fmu-settings
-          :fmu-parameter-list-location.sync="fmuParameterListLocation"
           :run-fmu-workflows.sync="runFmuWorkflows"
           :only-update-from-fmu.sync="onlyUpdateFromFmu"
           :max-layers-in-fmu.sync="maxLayersInFmu"
@@ -213,7 +212,6 @@ export default class JobSettings extends Vue {
   }
 
   dialog = false
-  fmuParameterListLocation = ''
   showZoneNameNumber = ''
   showRegionNameNumber = ''
   automaticAlphaFieldSelection = false
@@ -243,8 +241,6 @@ export default class JobSettings extends Vue {
       const parameters = this.$store.state.parameters
       const fmu = this.$store.state.fmu
 
-      this.fmuParameterListLocation = parameters.path.fmuParameterListLocation.selected
-
       this.maxLayersInFmu = fmu.maxDepth.value
       this.runFmuWorkflows = fmu.runFmuWorkflows.value
       this.onlyUpdateFromFmu = fmu.onlyUpdateFromFmu.value
@@ -273,7 +269,6 @@ export default class JobSettings extends Vue {
   async ok (): Promise<void> {
     const dispatch = this.$store.dispatch
     await Promise.all([
-      dispatch('parameters/path/fmuParameterListLocation/select', this.fmuParameterListLocation),
       dispatch('parameters/debugLevel/select', this.debugLevel),
       dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
 
