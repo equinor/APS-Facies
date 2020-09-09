@@ -39,9 +39,13 @@
 
     <v-spacer />
 
-    <export-state
+    <v-row
       v-if="isDevelop"
-    />
+    >
+      <load-job />
+
+      <export-state />
+    </v-row>
 
     <job-settings />
 
@@ -108,6 +112,7 @@ import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
 import JobSettings from '@/components/dialogs/JobSettings/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
+import LoadJob from '@/components/debugging/LoadJob.vue'
 
 import { Optional } from '@/utils/typing'
 
@@ -171,6 +176,7 @@ function fileHandler (store: Store, fileName: string): (e: any) => void {
     IconButton,
     UploadButton,
     ChangelogDialog,
+    LoadJob,
   },
 })
 export default class TheToolBar extends Vue {

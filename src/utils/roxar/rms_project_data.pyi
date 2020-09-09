@@ -211,6 +211,9 @@ class RMSData:
             facies_log_name:             str,
             region_parameter_name:       str,
     ) -> Dict[str, int]: ...
+    def load_dot_master(
+            self,
+    ) -> dict: ...
     @staticmethod
     def save_model(
             path:                        str,

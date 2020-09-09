@@ -55,3 +55,23 @@ export interface RmsGridModel {
   zones: number
   hasDualIndexSystem: boolean
 }
+
+export interface Job {
+  id: string
+  instance_name: string
+  'uncertain.size': number
+  elapsedrealtime: number
+  elapsedcputime: number
+  tableoffset: number
+  surfreprfloat: boolean
+  'description.size': number
+  opentime: Date
+  identifier: number
+  changeuser: string
+  changetime: Date
+  jobinputjson: string
+  pluginname: string
+  plugindescription: string
+  pluginauthor: string
+  treeorigin: string
+}

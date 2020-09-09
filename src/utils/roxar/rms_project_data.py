@@ -1,5 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import json
 from pathlib import Path
 
 import numpy as np
@@ -25,6 +26,7 @@ from src.utils.constants.simple import (
     ProbabilityTolerances,
     GridModelConstants,
 )
+from src.utils.debug import parse_dot_master
 from src.utils.exceptions.xml import ApsXmlError
 from src.utils.numeric import flip_if_necessary
 from src.utils.roxar.generalFunctionsUsingRoxAPI import get_project_dir
@@ -288,6 +290,16 @@ class RMSData:
                 'observed': where,
             })
         return facies
+
+    def load_dot_master(self):
+        try:
+            project_root = Path(__file__).parent.parent.parent.parent
+            with open(project_root / 'local.settings.json') as f:
+                debug_settings = json.load(f)
+                project_location = debug_settings['projectLocation']
+        except Exception:
+            project_location = self.project.filename
+        return parse_dot_master(Path(project_location) / 'pythoncomp/apsgui/.master')
 
     @staticmethod
     def save_model(path, content):
