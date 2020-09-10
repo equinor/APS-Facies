@@ -31,7 +31,7 @@ class DefineFaciesProb(BaseDefineFacies):
                         facies_name_in_real = copy.copy(text2.strip())
                         prob = float(text3.strip())
                         if self.debug_level >= Debug.VERBOSE:
-                            print('fname, fnameInReal,prob: ' + facies_name + ' ' + facies_name_in_real + ' ' + str(prob))
+                            print(f'fname, fnameInReal ,prob: {facies_name} {facies_name_in_real} {prob}')
                         line = [facies_name, facies_name_in_real, prob]
                         self.__probability_matrix.append(line)
                     else:
@@ -46,10 +46,15 @@ class DefineFaciesProb(BaseDefineFacies):
         use_const_prob_trend = int(self.use_const_prob_from_vol_fraction)
         if self.debug_level >= Debug.ON:
             if not use_const_prob_trend:
-                print('Calculate probability cubes having trends in each zone defined by the RMS discrete 3D parameter input')
+                print(
+                    'Calculate probability cubes having trends in each zone '
+                    'defined by the RMS discrete 3D parameter input'
+                )
             else:
-                print('Calculate probability cubes which have constant values in each zone as average probability (volume fraction)')
-        eps = 0.00001
+                print(
+                    'Calculate probability cubes which have constant values in '
+                    'each zone as average probability (volume fraction)'
+                )
         real_number = 0
         grid_model = self.project.grid_models[self.grid_model_name]
         [zone_values, _] = getDiscrete3DParameterValues(
@@ -84,7 +89,7 @@ class DefineFaciesProb(BaseDefineFacies):
 
                 print('Interpreted facies from input facies parameter:')
                 for name in facies_names_in_real:
-                    print('   {}'.format(name))
+                    print(f'   {name}')
 
                 print('Facies codes in input facies parameter:')
                 print(repr(code_names_facies))
@@ -96,28 +101,27 @@ class DefineFaciesProb(BaseDefineFacies):
             num_facies = len(facies_names)
             num_facies_in_real = len(facies_names_in_real)
 
+            eps = 0.00001
             # Check that probabilities specified are normalized
             for j in range(num_facies_in_real):
-                sum_prob = sum([probabilities[i, j] for i in range(num_facies)])
+                sum_prob = sum(probabilities[i, j] for i in range(num_facies))
                 if abs(sum_prob - 1.0) > eps:
                     raise ValueError(
-                        'Error: Specified probabilities for facies in regions with name: {} does not sum up to 1.0'
-                        ''.format(facies_names_in_real[j])
+                        f'Error: Specified probabilities for facies in regions '
+                        f'with name: {facies_names_in_real[j]} does not sum up to 1.0'
                     )
             if self.debug_level >= Debug.VERBOSE:
                 print('Probability matrix')
                 print(repr(probabilities))
             if self.debug_level >= Debug.ON:
                 print('Start calculate new probabilities for selected zones for each specified facies to be modelled')
-            sum_probability_values = np.zeros(len(zone_values), np.float32)
 
             for f in range(num_facies):
                 facies_name = facies_names[f]
                 if self.debug_level >= Debug.ON:
                     print('Facies name: ' + facies_name)
 
-
-                # Create new array with 0 probabilities for this facies
+                # Create a new array with 0 probabilities for this facies
                 probability_values = np.zeros(len(zone_values), np.float32)
                 for zone_number in self.selected_zone_numbers:
                     # Filter out cells with selected zone numbers
@@ -125,16 +129,15 @@ class DefineFaciesProb(BaseDefineFacies):
 
                     # Calculate probability values for each cell that belongs to the zone
                     # The code using numpy below is equivalent to the following:
-                    #                    for i in range(num_defined_cells):
-                    #                        index = cell_index[i]
-                    #                        code = facies_real_values[index]
-                    #                        p_index = prob_index[code]
-                    #                        probability_values[index] = probabilities[f, p_index]
+                    #    for i in range(num_defined_cells):
+                    #        index = cell_index[i]
+                    #        code = facies_real_values[index]
+                    #        p_index = prob_index[code]
+                    #        probability_values[index] = probabilities[f, p_index]
 
                     code_array = facies_real_values[cell_index]
-                    p_index_array  = prob_index[code_array]
+                    p_index_array = prob_index[code_array]
                     probability_values[cell_index] = probabilities[f, p_index_array]
-
 
                 parameter_name = self.probability_parameter_name_prefix + '_' + facies_name
 
@@ -142,10 +145,10 @@ class DefineFaciesProb(BaseDefineFacies):
                 # If the 3D parameter exist in advance, only the specified zones will be altered
                 # while grid cell values for other zones are unchanged.
                 if self.debug_level >= Debug.ON:
-                    text = ' '
-                    for zone_number in self.selected_zone_numbers:
-                        text = text + ' ' + str(zone_number+1)
-                    print('Update parameter: {} for zones {}:'.format(parameter_name, text))
+                    print(
+                        f'Update parameter: {parameter_name} for zones '
+                        f'{" ".join(str(zone_number + 1) for zone_number in self.selected_zone_numbers)}:'
+                    )
 
                 success = set_continuous_3d_parameter_values(
                     grid_model, parameter_name, probability_values,
@@ -153,28 +156,30 @@ class DefineFaciesProb(BaseDefineFacies):
                 )
                 if not success:
                     raise ValueError('Error: Grid model is empty or can not be updated.')
-            # End loop over facies
+                # End loop over facies
         else:
-            # Calculate average volume fraction of each facies in the zone and set the probability 
+            # Calculate average volume fraction of each facies in the zone and set the probability
             # cubes for these facies equal to the average volume fraction
             # Note that in this case no name of modelled facies is written and the facies names used in
             # input (intepreted) facies realization is used as facies names for the probability cubes.
 
-            # Create new array with 0 probabilities for this facies
+            # Create a new array with 0 probabilities for this facies
             probability_values = np.zeros(len(zone_values), np.float32)
 
             for code, facies_name in code_names_facies.items():
                 for zone_number in self.selected_zone_numbers:
-                    zone_num = zone_number+1
-                    # Filter out cells with selected zone numbers
+                    zone_num = zone_number + 1
+                    # Filter out cells with the selected zone numbers
                     num_defined_cells, cell_index = getCellValuesFilteredOnDiscreteParam(zone_num, zone_values)
-                    selected_cells_facies_for_zone = facies_real_values[(facies_real_values == code) & (zone_values == zone_num)]
+                    selected_cells_facies_for_zone = facies_real_values[
+                        (facies_real_values == code) & (zone_values == zone_num)]
                     num_facies_cells = len(selected_cells_facies_for_zone)
-                    fraction = float(num_facies_cells)/float(num_defined_cells)
+                    fraction = num_facies_cells / num_defined_cells
 
                     if self.debug_level >= Debug.ON:
-                        print('Average probability (volume fraction) for facies {} zone {}  is: {}'
-                              ''.format(facies_name, zone_num, fraction))
+                        print(
+                            f'Average probability (volume fraction) for facies {facies_name} zone {zone_num}  is: {fraction}'
+                        )
                     # For all grid cells in zone, assign the fraction
                     probability_values[cell_index] = fraction
 
@@ -184,10 +189,10 @@ class DefineFaciesProb(BaseDefineFacies):
                 # If the 3D parameter exist in advance, only the specified zones will be altered
                 # while grid cell values for other zones are unchanged.
                 if self.debug_level >= Debug.ON:
-                    text = ' '
-                    for zone_number in self.selected_zone_numbers:
-                        text = text + ' ' + str(zone_number+1)
-                    print('Update parameter: {} for zones {}:'.format(parameter_name, text))
+                    print(
+                        f'Update parameter: {parameter_name} for '
+                        f'zones {" ".join(str(zone_number + 1) for zone_number in self.selected_zone_numbers)}:'
+                    )
 
                 success = set_continuous_3d_parameter_values(
                     grid_model, parameter_name, probability_values,
@@ -196,11 +201,7 @@ class DefineFaciesProb(BaseDefineFacies):
                 if not success:
                     raise ValueError('Error: Grid model is empty or can not be updated.')
 
-
-
     # End of calculate_facies_probability_parameter
-
-
 
     @staticmethod
     def calculate_probability_indices(code_names_facies, facies_names_in_real, facies_real_values):
@@ -232,4 +233,3 @@ class DefineFaciesProb(BaseDefineFacies):
 
             probabilities[index1, index2] = prob
         return probabilities
-
