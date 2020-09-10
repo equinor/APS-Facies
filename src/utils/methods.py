@@ -185,7 +185,7 @@ def get_specification_file(_type=SpecificationType.APS_MODEL, **kwargs):
         SpecificationType.PROBABILITY_TREND: 'defineProbTrend.xml',
     }
     if _type in mapping:
-        file = get_model_file_name(default_name=mapping[_type], **kwargs)
+        file = get_model_file_name(_default_name=mapping[_type], **kwargs)
         if not file:
             file = mapping[_type]
         return str(file)
