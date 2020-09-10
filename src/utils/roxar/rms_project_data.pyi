@@ -215,6 +215,10 @@ class RMSData:
             self,
     ) -> dict: ...
     @staticmethod
+    def run_aps_workflow(
+            state:                       str,
+    ) -> None: ...
+    @staticmethod
     def save_model(
             path:                        str,
             content:                     XML,

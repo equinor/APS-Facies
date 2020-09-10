@@ -302,6 +302,12 @@ class RMSData:
         return parse_dot_master(Path(project_location) / 'pythoncomp/apsgui/.master')
 
     @staticmethod
+    def run_aps_workflow(state):
+        from src.api.main import run
+
+        run(json.loads(_decode(state)))
+
+    @staticmethod
     def save_model(path, content):
         return RMSData.save_file(path, content, prettify)
 

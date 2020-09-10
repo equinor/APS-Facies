@@ -44,6 +44,8 @@
     >
       <load-job />
 
+      <run-job />
+
       <export-state />
     </v-row>
 
@@ -113,6 +115,7 @@ import JobSettings from '@/components/dialogs/JobSettings/index.vue'
 import IconButton from '@/components/selection/IconButton.vue'
 import ExportState from '@/components/debugging/exportState.vue'
 import LoadJob from '@/components/debugging/LoadJob.vue'
+import RunJob from '@/components/debugging/RunJob.vue'
 
 import { Optional } from '@/utils/typing'
 
@@ -177,6 +180,7 @@ function fileHandler (store: Store, fileName: string): (e: any) => void {
     UploadButton,
     ChangelogDialog,
     LoadJob,
+    RunJob,
   },
 })
 export default class TheToolBar extends Vue {

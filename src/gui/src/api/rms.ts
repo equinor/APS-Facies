@@ -58,4 +58,5 @@ export default {
 
   // Methods that are ONLY intended to be available in development mode, or when running the plugin locally
   loadPluginDotMaster: (): Promise<{ parameters: Job[] }> => api.call('load_dot_master'),
+  runAPSWorkflow: (state: string): Promise<void> => api.call('run_aps_workflow', state),
 }
