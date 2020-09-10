@@ -151,6 +151,13 @@ RGS_UPDATE_APS := git pull \
            workflow/.master \
            aps_workflows
 
+DUMMY_FMU_PROJECT_LOCATION ?= $(CODE_DIR)/fmu.model
+define LOCAL_SETTINGS_JSON
+{
+  "projectLocation": "$(DUMMY_FMU_PROJECT_LOCATION)"
+}
+endef
+export LOCAL_SETTINGS_JSON
 
 # NRlib
 BUILD_NRLIB ?= no
@@ -297,9 +304,15 @@ VERSION:
 COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
 
-init: initialize-python-environment dependencies init-workflow package.json dotenv generate-truncation-rules
+init: initialize-python-environment dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 
 init-workflow: links generate-workflow-files
+
+local.settings.json: dummy-fmu-location
+	echo "$$LOCAL_SETTINGS_JSON" > $(CODE_DIR)/local.settings.json
+
+dummy-fmu-location:
+	mkdir -p $(DUMMY_FMU_PROJECT_LOCATION)
 
 dotenv:
 	[ -f "$(CODE_DIR)/.env" ] \

@@ -3,6 +3,8 @@ import socket
 import string
 import time
 import traceback
+from datetime import datetime
+from enum import Enum, auto
 from pathlib import Path
 from typing import Union
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -40,3 +42,66 @@ def dump_debug_information(config):
         dump('state.json', config.to_json())
         dump('traceback.txt', traceback.format_exc())
         dump('where.txt', get_rms_information(config))
+
+
+class State(Enum):
+    READ = auto()
+    HEADER = auto()
+    PARAMETER = auto()
+
+
+def parse_dot_master(path):
+    header = {}
+    parameters = []
+    state = None
+    with open(path) as file:
+        parameter_index = 0
+        for line in file:
+            line = line.strip()
+            if line == 'Begin GEOMATIC file header':
+                state = State.HEADER
+                continue
+            elif line == 'End GEOMATIC file header':
+                state = State.READ
+
+            elif line == 'Begin parameter':
+                state = State.PARAMETER
+                if len(parameters) == parameter_index:
+                    parameters.append({})
+                continue
+            elif line == 'End parameter':
+                state = State.READ
+                parameter_index += 1
+
+            if state == State.READ:
+                continue
+            elif state == State.HEADER:
+                key, value = _split(line)
+                header[key] = value
+            elif state == State.PARAMETER:
+                name, value = _split(line)
+                parameters[parameter_index][name] = _parse(value)
+    return {
+        'header': header,
+        'parameters': parameters,
+    }
+
+
+def _split(line: str, sep: str = '='):
+    return tuple(item.strip() for item in line.split(sep))
+
+
+def _parse(value: str):
+    try:
+        return datetime.strptime(value, '%Y-%m-%d %H:%M:%S:%f')
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            try:
+                return int(value)
+            except ValueError:
+                if value.upper() in ['FALSE', 'TRUE']:
+                    return value.upper() == 'TRUE'
+                else:
+                    return value

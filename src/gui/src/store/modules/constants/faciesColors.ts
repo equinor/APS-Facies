@@ -17,6 +17,32 @@ function makeMapping (from: ColorLibrary, to: ColorLibrary): Map<Color, Color> {
     }, new Map())
 }
 
+type AvailableState = Record<string, ColorLibrary>
+
+const makeSet = <T, P> (obj: Record<string, T>, prop: string): Set<P> => new Set(Object.values(obj).map(item => item[prop]))
+
+const hasSameValues = (values: string[], other: string[]): boolean => values.every(value => other.includes(value))
+const extract = <T>(obj: AvailableState, prop: string, process = (arr: any): T => arr): T[] => Object.values(obj).map(item => process(item[prop]))
+function hasDifferentColors (available: AvailableState, other: AvailableState): boolean {
+  return (
+    !hasSameValues(extract(available, 'name'), extract(other, 'name'))
+  )
+}
+
+function merge (available: AvailableState, other: AvailableState): AvailableState {
+  const existingNames = makeSet(available, 'name')
+  other = Object.keys(other)
+    .filter(key => !existingNames.has(other[key].name))
+    .reduce((items, key) => {
+      items[key] = other[key]
+      return items
+    }, ({} as AvailableState))
+  return {
+    ...available,
+    ...other,
+  }
+}
+
 const module: Module<FaciesColorsState, RootState> = {
   namespaced: true,
 
@@ -42,6 +68,8 @@ const module: Module<FaciesColorsState, RootState> = {
         : DEFAULT_COLOR_LIBRARY
       if (Object.values(state.available).length === 0) {
         await dispatch('fetch')
+      } else if (hasDifferentColors(state.available, available)) {
+        commit('AVAILABLE', merge(state.available, available))
       }
       const library = Object.values(state.available)
         .find(library => library.name === name)

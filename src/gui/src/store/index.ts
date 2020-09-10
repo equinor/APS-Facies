@@ -140,7 +140,10 @@ const store: Store<RootState> = new Vuex.Store({
         await dispatch('options/populate', data.options)
 
         // FMU settings
-        await dispatch('fmu/populate', data.fmu)
+        if (data.fmu) {
+          // Support loading some states before 1.0.0
+          await dispatch('fmu/populate', data.fmu)
+        }
 
         // Zones
         await dispatch('zones/populate', { zones: Object.values(data.zones.available) })

@@ -39,7 +39,10 @@ const module: Module<GridParameterState, RootState> = {
       await dispatch('fetch')
     },
     populate ({ commit }, { azimuth, size }): void {
-      commit('SIZE', size)
+      if (size) {
+        // Support legacy state (i.e. states without a `version` property)
+        commit('SIZE', size)
+      }
       commit('AZIMUTH', azimuth)
     },
   },
