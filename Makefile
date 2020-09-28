@@ -154,7 +154,7 @@ RGS_UPDATE_APS := git pull \
 DUMMY_FMU_PROJECT_LOCATION ?= $(CODE_DIR)/fmu.model
 define LOCAL_SETTINGS_JSON
 {
-  "projectLocation": "$(DUMMY_FMU_PROJECT_LOCATION)"
+  "projectRootLocation": "$(DUMMY_FMU_PROJECT_LOCATION)"
 }
 endef
 export LOCAL_SETTINGS_JSON

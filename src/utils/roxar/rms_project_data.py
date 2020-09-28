@@ -296,10 +296,10 @@ class RMSData:
             project_root = Path(__file__).parent.parent.parent.parent
             with open(project_root / 'local.settings.json') as f:
                 debug_settings = json.load(f)
-                project_location = debug_settings['projectLocation']
+                project_location = Path(debug_settings['projectRootLocation']) / self.project.filename
         except Exception:
-            project_location = self.project.filename
-        return parse_dot_master(Path(project_location) / 'pythoncomp/apsgui/.master')
+            project_location = Path(self.project.filename)
+        return parse_dot_master(project_location / 'pythoncomp/apsgui/.master')
 
     @staticmethod
     def run_aps_workflow(state):
