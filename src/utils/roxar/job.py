@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict
 
 from src.algorithms.APSModel import APSModel
-from src.utils.constants.simple import Debug
+from src.utils.constants.simple import Debug, ProbabilityTolerances
 from src.utils.decorators import cached
 from src.utils.fmu import get_export_location, get_ert_location
 
@@ -106,7 +106,12 @@ class JobConfig:
 
     @property
     def _tolerance_of_probability_normalisation(self):
-        return self._config['parameters']['toleranceOfProbabilityNormalisation']['selected']
+        try:
+            return self._config['parameters']['toleranceOfProbabilityNormalisation']['selected']
+        except KeyError:
+            # Some, older jobs may not be updated, and this "config.parameters.toleranceOfProbabilityNormalisation"
+            # does not exist.
+            return ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR
 
     @property
     def debug_level(self):
