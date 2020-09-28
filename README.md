@@ -1,4 +1,4 @@
-see [wiki](https://git.statoil.no/APS/GUI/wikis/)
+see [wiki](https://git.equinor.com/APS/GUI/wikis/)
 
 ### Getting started
 
