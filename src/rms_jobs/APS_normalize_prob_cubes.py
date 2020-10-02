@@ -28,12 +28,12 @@ def check_and_normalise_probability(
         probability_values_per_rms_param,
         zone_model,
         cell_index_defined,
-        tolerance_of_probability_normalisation=0.1,
-        eps=0.001,
-        debug_level=Debug.OFF,
-        max_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
-        grid_model=None,
-        realization_number=0,
+        tolerance_of_probability_normalisation,
+        eps,
+        debug_level,
+        max_allowed_fraction_with_mismatch,
+        grid_model,
+        realization_number
 ):
     """
     Check that probability values are valid probabilities.
@@ -69,7 +69,7 @@ def check_and_normalise_probability(
     :param eps: float variable which define maximum difference between sum of input probabilities and 1.0 that is accepted
                 without having to do any normalisation.
     :param debug_level: Define output print level from the function.
-    :param max_tolerance: float
+    :param max_allowed_fraction_with_mismatch: float
     :return: integer with number of grid cells for which the probabilities are re-calculated to be normalised.
     """
     # RMS probability parameter names for each facies
@@ -95,11 +95,16 @@ def check_and_normalise_probability(
         probabilities_selected_cells = all_values[cell_index_defined]
 
         # Check probability values, ensure that they are in the interval [0,1]. If outside this interval,
-        # they are set to 0 if negative or 1 if above 1, but error message if too large fraction of grid cells have
-        # value outside the tolerance specified.
+        # probabilities < 0 is set to 0 and probabilities > 1 is set to 1. 
+        # If the fraction of grid cells with probabilities outside the tolerance interval 
+        # [1-tolerance_of_probability_normalisation, 1+tolerance_of_probability_normalisation] is 
+        # larger than max_allowed_fraction_with_mismatch, errors are reported.
         probabilities_selected_cells = check_probability_values(
-            probabilities_selected_cells, tolerance_of_probability_normalisation,
-            facies_name, parameter_name
+            probabilities_selected_cells, 
+            tolerance_of_probability_normalisation,
+            facies_name, 
+            parameter_name, 
+            max_allowed_fraction_with_mismatch
         )
 
         # Sum up probability over all facies per selected cell
@@ -135,8 +140,9 @@ def check_and_normalise_probability(
 
     # Check normalisation and report error if input probabilities are too far from 1.0
     normalise_is_necessary = check_probability_normalisation(
-        sum_probabilities_selected_cells, eps, tolerance_of_probability_normalisation,
-        max_tolerance,
+        sum_probabilities_selected_cells, 
+        eps, tolerance_of_probability_normalisation,
+        max_allowed_fraction_with_mismatch,
     )
     if normalise_is_necessary:
         # Normalize
@@ -190,7 +196,7 @@ def check_and_normalize_probabilities_for_APS(
         tolerance_of_probability_normalisation,
         eps,
         overwrite,
-        max_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
+        max_allowed_fraction_with_mismatch
 ):
     # Read APS model
     print(f'- Read file: {model_file}')
@@ -260,9 +266,9 @@ def check_and_normalize_probabilities_for_APS(
             tolerance_of_probability_normalisation,
             eps,
             debug_level,
-            max_tolerance,
+            max_allowed_fraction_with_mismatch,
             grid_model,
-            realization_number,
+            realization_number
         )
         # Write back to RMS project updated probabilities if necessary
         if debug_level >= Debug.ON:
@@ -304,6 +310,6 @@ def run(
         tolerance_of_probability_normalisation,
         eps,
         overwrite,
-        max_allowed_fraction_of_values_outside_tolerance,
+        max_allowed_fraction_of_values_outside_tolerance
     )
     print('Finished APS_normalize_prob_cubes')
