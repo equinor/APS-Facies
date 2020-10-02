@@ -38,9 +38,9 @@ Error: Allowed variograms are:
 def check_probability_values(
         prob_values,
         tolerance_of_probability_normalisation,
+        max_allowed_fraction_with_mismatch,
         facies_name=" ",
-        parameter_name=" ",
-        max_allowed_fraction_with_mismatch=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
+        parameter_name=" "
 ):
     """ The input numpy array prob_values is checked that the values are legal probabilities. A tolerance is accepted.
         Returns prob_values in [0,1] and raise error if illegal probability values (outside tolerance)
@@ -76,7 +76,8 @@ def check_probability_values(
 
 def check_probability_normalisation(
         sum_probability_values,
-        eps, tolerance_of_probability_normalisation,
+        eps, 
+        tolerance_of_probability_normalisation,
         max_allowed_fraction_with_mismatch
 ):
     num_defined_cells = len(sum_probability_values)

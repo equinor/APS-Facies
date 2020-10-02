@@ -102,9 +102,9 @@ def check_and_normalise_probability(
         probabilities_selected_cells = check_probability_values(
             probabilities_selected_cells, 
             tolerance_of_probability_normalisation,
+            max_allowed_fraction_with_mismatch,
             facies_name, 
-            parameter_name, 
-            max_allowed_fraction_with_mismatch
+            parameter_name
         )
 
         # Sum up probability over all facies per selected cell
@@ -141,7 +141,8 @@ def check_and_normalise_probability(
     # Check normalisation and report error if input probabilities are too far from 1.0
     normalise_is_necessary = check_probability_normalisation(
         sum_probabilities_selected_cells, 
-        eps, tolerance_of_probability_normalisation,
+        eps, 
+        tolerance_of_probability_normalisation,
         max_allowed_fraction_with_mismatch,
     )
     if normalise_is_necessary:
