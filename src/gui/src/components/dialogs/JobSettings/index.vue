@@ -271,6 +271,7 @@ export default class JobSettings extends Vue {
     await Promise.all([
       dispatch('parameters/debugLevel/select', this.debugLevel),
       dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
+      dispatch('parameters/toleranceOfProbabilityNormalisation/select', this.toleranceOfProbabilityNormalisation),
 
       dispatch('fmu/maxDepth/set', this.maxLayersInFmu),
       dispatch('fmu/runFmuWorkflows/set', this.runFmuWorkflows),
