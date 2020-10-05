@@ -81,9 +81,14 @@ def transform_empiric(cell_index_defined, gauss_values, alpha_values):
 
 
 def check_and_normalise_probability(
-        num_facies, prob_parameter_values_for_facies, use_const_probability, cell_index_defined,
-        eps=0.0000001, tolerance_of_probability_normalisation=0.01,
-        debug_level=Debug.SOMEWHAT_VERBOSE
+        num_facies, 
+        prob_parameter_values_for_facies, 
+        use_const_probability, 
+        cell_index_defined,
+        eps,
+        tolerance_of_probability_normalisation,
+        max_allowed_fraction_with_mismatch,
+        debug_level
 ):
     """
     Check that probability cubes or probabilities in input prob_parameter_values_for_facies is
@@ -175,7 +180,10 @@ def check_and_normalise_probability(
             # Check that probabilities are in interval [0,1]. If not, set to 0 if negative and 1 if larger than 1.
             # Error message if too large fraction of input values are outside interval [0,1] also when using tolerance.
             probability_defined[f] = check_probability_values(
-                defined_values, tolerance_of_probability_normalisation, facies_name
+                defined_values, 
+                tolerance_of_probability_normalisation,
+                max_allowed_fraction_with_mismatch, 
+                facies_name
             )
 
         # Sum up probability over all facies per defined cell
@@ -185,7 +193,11 @@ def check_and_normalise_probability(
             # sum of np arrays (cell by cell sum)
             psum += probability_defined[f]
 
-        normalise_is_necessary = check_probability_normalisation(psum, eps, tolerance_of_probability_normalisation)
+        normalise_is_necessary = check_probability_normalisation(psum, 
+                                                                 eps, 
+                                                                 tolerance_of_probability_normalisation,
+                                                                 max_allowed_fraction_with_mismatch
+        )
         if normalise_is_necessary:
             if debug_level >= Debug.VERBOSE:
                 print('--- Normalise probability cubes.')
@@ -229,6 +241,7 @@ def run(
         project,
         eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
         tolerance_of_probability_normalisation=ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
+        max_allowed_fraction_with_mismatch=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
         write_rms_parameters_for_qc_purpose=True,
         **kwargs
 ):
@@ -467,8 +480,14 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print('--- Check normalisation of probability fields.')
         probability_defined, num_cells_modified_probability = check_and_normalise_probability(
-            num_facies, probability_parameter_values_for_facies, zone_model.use_constant_probabilities,
-            cell_index_defined, eps, tolerance_of_probability_normalisation, debug_level
+            num_facies, 
+            probability_parameter_values_for_facies, 
+            zone_model.use_constant_probabilities,
+            cell_index_defined, 
+            eps, 
+            tolerance_of_probability_normalisation,
+            max_allowed_fraction_with_mismatch,
+            debug_level
         )
         if debug_level >= Debug.VERBOSE:
             print(f'--- Number of cells that are normalised: {num_cells_modified_probability}')

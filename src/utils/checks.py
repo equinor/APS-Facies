@@ -38,9 +38,9 @@ Error: Allowed variograms are:
 def check_probability_values(
         prob_values,
         tolerance_of_probability_normalisation,
+        max_allowed_fraction_with_mismatch,
         facies_name=" ",
-        parameter_name=" ",
-        max_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
+        parameter_name=" "
 ):
     """ The input numpy array prob_values is checked that the values are legal probabilities. A tolerance is accepted.
         Returns prob_values in [0,1] and raise error if illegal probability values (outside tolerance)
@@ -58,15 +58,15 @@ def check_probability_values(
     num_above_one = check_value.sum()
 
     negative_fraction = num_negative / num_defined_cells
-    if negative_fraction > max_tolerance:
+    if negative_fraction > max_allowed_fraction_with_mismatch:
         raise ValueError(
-            f'Probability for facies {facies_name} in {parameter_name} has {num_negative} negative values.'
+            f'Probability for facies {facies_name} in {parameter_name} has {num_negative} negative values in current zone.'
         )
 
     above_one_fraction = num_above_one / num_defined_cells
-    if above_one_fraction > max_tolerance:
+    if above_one_fraction > max_allowed_fraction_with_mismatch:
         raise ValueError(
-            f'Probability for facies {facies_name} in {parameter_name} has {num_above_one} values above 1.0'
+            f'Probability for facies {facies_name} in {parameter_name} has {num_above_one} values above 1.0 in current zone'
         )
 
     prob_values[prob_values < 0.0] = 0.0
@@ -76,8 +76,9 @@ def check_probability_values(
 
 def check_probability_normalisation(
         sum_probability_values,
-        eps, tolerance_of_probability_normalisation,
-        max_tolerance=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
+        eps, 
+        tolerance_of_probability_normalisation,
+        max_allowed_fraction_with_mismatch
 ):
     num_defined_cells = len(sum_probability_values)
     ones = np.ones(num_defined_cells, np.float32)
@@ -94,19 +95,19 @@ def check_probability_normalisation(
         unacceptable_prob_normalisation = check_sum_prob.sum()
         unacceptable_prob_normalisation_fraction = unacceptable_prob_normalisation / num_defined_cells
 
-        if unacceptable_prob_normalisation_fraction > max_tolerance:
+        if unacceptable_prob_normalisation_fraction > max_allowed_fraction_with_mismatch:
             largest_prob_sum = sum_probability_values.max()
             smallest_prob_sum = sum_probability_values.min()
             raise ValueError(
                 'Sum of input facies probabilities is either less than: {min} or larger than: {max} in: {num} cells.\n'
-                'Input probabilities should be normalised, and the sum close to 1.0, '
+                'Input probabilities should be normalised, and the sum close to 1.0,\n'
                 'but found a minimum value of: {min_prob} and a maximum value of: {max_prob}\n'
                 'Check input probabilities!'
                 '\n'
                 'The portion of values that are unacceptable is {frac:.2f}%, '
                 'while the maximum allowed is {max_frac:.2f}%'
                 '\n'
-                'If the probability cubes are sensible, you may increase the maximum fraction, in project settings, to '
+                'If you think the probability cubes are OK anyway, you may increase the maximum fraction, in project settings, to '
                 'at least {frac:.2f}%.'
                 ''.format(
                     min=min_acceptable_prob_sum,
@@ -115,7 +116,7 @@ def check_probability_normalisation(
                     min_prob=smallest_prob_sum,
                     max_prob=largest_prob_sum,
                     frac=unacceptable_prob_normalisation_fraction * 100,
-                    max_frac=max_tolerance * 100,
+                    max_frac=max_allowed_fraction_with_mismatch * 100,
                 )
             )
     return normalise_is_necessary
