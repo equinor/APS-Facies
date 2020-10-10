@@ -8,7 +8,7 @@ from typing import List
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.algorithms.properties import CrossSection
-from src.utils.constants.simple import Debug
+from src.utils.constants.simple import Debug, TransformType
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
@@ -29,7 +29,7 @@ class APSModel:
             rmsFaciesParameterName='', seedFileName='seed.dat', write_seeds=True,
             mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
-            previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF):
+            previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF, transform_type=TransformType.EMPIRIC'):
 
       def createSimGaussFieldIPL()
                 - Write IPL file to simulate gaussian fields
@@ -115,7 +115,8 @@ class APSModel:
             preview_cross_section_relative_pos=0.5,
             preview_scale=1.0,
             preview_resolution='Normal',
-            debug_level=Debug.OFF
+            debug_level=Debug.OFF,
+            transform_type=TransformType.EMPIRIC,
     ):
         """
          The following parameters are necessary to define a model:
@@ -155,6 +156,9 @@ class APSModel:
          previewResolution - Define  whether the testPreview program should use higher resolution or not compared with
                              default resolution taken from the grid model.
          debugLevel - Define amount of output to the screen during runs
+         transform_type - Define whether Empiric transformation based on GRF (with trend) values within the (zone,region)
+                          is used or the cumulative normal distribution is to be used to transform GRF
+                          to a uniform distribution (alpha field)
 
         """
         # Local variables
@@ -185,6 +189,7 @@ class APSModel:
         self.__previewScale = preview_scale
         self.__previewResolution = preview_resolution
         self.__debug_level = debug_level
+        self.__transform_type = transform_type
 
         # Read model if it is defined
         if model_file_name is not None:
@@ -320,6 +325,19 @@ class APSModel:
                 f'Debug output: RMSRegionParamName:                 {self.__rmsRegionParamName}\n'
                 f'Debug output: Name of RMS project read:           {self.__rmsProjectName}\n'
                 f'Debug output: Name of RMS workflow read:          {self.__rmsWorkflowName}'
+            )
+
+        # Read optional keyword to specify which transformation to use for Gaussian Fields
+        keyword = 'TransformationType'
+        text = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='Empiric', modelFile=model_file_name, required=False)
+        if text.upper() == 'EMPIRIC' or text.upper() == '0':
+            self.__transform_type = TransformType.EMPIRIC
+        elif text.upper() == 'CDF' or text.upper() == '1':
+            self.__transform_type = TransformType.CUMNORM
+        else:
+            raise ValueError(
+                f'Illegal value ( {text} ) specified for keyword {keyword}.\n'
+                'Legal values are either  Empiric (or alternatively 0)  or CDF (or alternatively 1)'
             )
 
         # Read all zones for models specifying main level facies
@@ -805,6 +823,23 @@ class APSModel:
                 if name not in all_probabilities:
                     all_probabilities.append(name)
         return all_probabilities
+
+    @property
+    def transform_type(self):
+        return self.__transform_type
+
+    @transform_type.setter
+    def transform_type(self, name):
+        if isinstance(name, str):
+            if name.strip() == 'EMPIRIC' or name.strip() == 'Empiric':
+                transf_number = TransformType.EMPIRIC
+            elif name.strip() == 'CDF' or name.strip() == 'cdf':
+                transf_number = TransformType.CUMNORM
+        if isinstance(name, int):
+            transf_number = TransformType(name)
+        if name not in TransformType:
+            transf_number = TransformType.EMPIRIC
+        self.__transform_type =  transf_number
 
     # ----- Set functions -----
     def setRmsWorkflowName(self, name):

@@ -4,7 +4,7 @@ from collections import OrderedDict
 from src.algorithms.properties import CrossSection
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
-from src.utils.constants.simple import Debug, CrossSectionType
+from src.utils.constants.simple import Debug, CrossSectionType, TransformType
 from typing import Any, List, Optional, Tuple, Dict, Type, Union
 from xml.etree.ElementTree import Element, ElementTree
 
@@ -71,6 +71,7 @@ class APSModel:
     rms_project_name: Optional[str]
     gaussian_field_names: List[str]
     has_fmu_updatable_values: bool
+    transform_type: TransformType
 
     def __parse_model_file(self, model_file_name: FilePath, debug_level=Debug.OFF): ...
     @classmethod

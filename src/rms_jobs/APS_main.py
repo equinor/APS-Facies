@@ -12,10 +12,11 @@ Output:
 from collections import OrderedDict
 
 import numpy as np
+from scipy.stats import norm
 
 from src.algorithms.APSModel import APSModel
 from src.utils.checks import check_probability_values, check_probability_normalisation
-from src.utils.constants.simple import Debug, ProbabilityTolerances
+from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.grid import update_rms_parameter
 from src.utils.methods import calc_average, get_specification_file
 from src.utils.records import Probability
@@ -80,10 +81,24 @@ def transform_empiric(cell_index_defined, gauss_values, alpha_values):
     return alpha_values
 
 
+def transform_CDF(cell_index_defined, gauss_values, alpha_values):
+    """
+    Transform Gaussian values (with expectation = 0 and variance = 1) by cumulative normal distribution into values in [0,1].
+    Only selected set of values defined by cell_index_defined is transformed.
+    """
+    if gauss_values is None:
+        return None
+
+    # Numpy vector operation to select subset of values corresponding to the defined grid cells
+    gauss_values_selected = gauss_values[cell_index_defined]
+    alpha_values[cell_index_defined] = norm.cdf(gauss_values_selected,loc=0,scale=1)
+    return alpha_values
+
+
 def check_and_normalise_probability(
-        num_facies, 
-        prob_parameter_values_for_facies, 
-        use_const_probability, 
+        num_facies,
+        prob_parameter_values_for_facies,
+        use_const_probability,
         cell_index_defined,
         eps,
         tolerance_of_probability_normalisation,
@@ -180,9 +195,9 @@ def check_and_normalise_probability(
             # Check that probabilities are in interval [0,1]. If not, set to 0 if negative and 1 if larger than 1.
             # Error message if too large fraction of input values are outside interval [0,1] also when using tolerance.
             probability_defined[f] = check_probability_values(
-                defined_values, 
+                defined_values,
                 tolerance_of_probability_normalisation,
-                max_allowed_fraction_with_mismatch, 
+                max_allowed_fraction_with_mismatch,
                 facies_name
             )
 
@@ -193,8 +208,8 @@ def check_and_normalise_probability(
             # sum of np arrays (cell by cell sum)
             psum += probability_defined[f]
 
-        normalise_is_necessary = check_probability_normalisation(psum, 
-                                                                 eps, 
+        normalise_is_necessary = check_probability_normalisation(psum,
+                                                                 eps,
                                                                  tolerance_of_probability_normalisation,
                                                                  max_allowed_fraction_with_mismatch
         )
@@ -262,6 +277,9 @@ def run(
     region_param_name = aps_model.getRegionParamName()
     use_regions = bool(region_param_name)
     result_param_name = aps_model.getResultFaciesParamName()
+    use_CDF_transform = False
+    if aps_model.transform_type == TransformType.CUMNORM:
+        use_CDF_transform = True
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
@@ -381,15 +399,31 @@ def run(
         for gf_name in gf_names_for_zone:
             if gf_name in gf_names_for_truncation_rule:
                 gauss_field_values_all = gf_all_values[gf_name]
+                has_trend_in_gauss_field = zone_model.hasTrendModel(gf_name)
 
                 if debug_level >= Debug.VERBOSE:
                     if use_regions:
-                        print(f'--- Transform: {gf_name} for zone: {zone_number}')
-                    else:
                         print(f'--- Transform: {gf_name} for (zone, region)=({zone_number}, {region_number})')
+                    else:
+                        print(f'--- Transform: {gf_name} for zone: {zone_number}')
                 # Update alpha for current zone
                 alpha_all = gf_all_alpha[gf_name]
-                alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
+                if not use_CDF_transform:
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'--- Transformation type:  Empiric')
+
+                    alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
+                elif has_trend_in_gauss_field:
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'--- Transformation type:  Empiric since GRF has trend')
+
+                    alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
+                else:
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'--- Transformation type:  Cumulative normal distribution')
+
+                    alpha_all = transform_CDF(cell_index_defined, gauss_field_values_all, alpha_all)
+
                 gf_all_alpha[gf_name] = alpha_all
 
                 # Dictionary of transformed values for gauss field for current (zone,region)
@@ -480,11 +514,11 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print('--- Check normalisation of probability fields.')
         probability_defined, num_cells_modified_probability = check_and_normalise_probability(
-            num_facies, 
-            probability_parameter_values_for_facies, 
+            num_facies,
+            probability_parameter_values_for_facies,
             zone_model.use_constant_probabilities,
-            cell_index_defined, 
-            eps, 
+            cell_index_defined,
+            eps,
             tolerance_of_probability_normalisation,
             max_allowed_fraction_with_mismatch,
             debug_level
