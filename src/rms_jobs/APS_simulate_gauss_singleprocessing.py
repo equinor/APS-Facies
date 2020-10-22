@@ -163,6 +163,7 @@ def run_simulations(
             is_shared=is_shared,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
+            use_left_handed_grid_indexing=True,
         )
 
         add_trends(
