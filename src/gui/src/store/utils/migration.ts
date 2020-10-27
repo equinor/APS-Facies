@@ -1,5 +1,6 @@
 import cmp from 'semver-compare'
 import rms from '@/api/rms'
+import { DEFAULT_FIELD_FORMAT } from '@/config'
 import { displayMessage } from '@/store/utils'
 
 import { Store } from '@/store/typing'
@@ -132,6 +133,16 @@ const migrations: Migration[] = [
       delete state.parameters.path
       return new Promise(resolve => resolve(state))
     },
+  },
+  {
+    from: '1.6.0',
+    to: '1.7.0',
+    up: async (state): Promise<any> => {
+      state.fmu.fieldFileFormat = {
+        value: DEFAULT_FIELD_FORMAT,
+      }
+      return new Promise(resolve => resolve(state))
+    }
   }
 ]
 

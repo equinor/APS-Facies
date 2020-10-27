@@ -82,7 +82,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.9.1"
+__version__ = "0.10.0"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -96,6 +96,7 @@ APS_RMS_DATA_FILE         = 'APS_RMS_DATA_FILE'
 APS_GLOBAL_VARIABLES_FILE = 'APS_GLOBAL_VARIABLES_FILE'
 APS_FMU_VARIABLES_FILE    = 'APS_FMU_VARIABLES_FILE'
 APS_FMU_TAGS_FILE         = 'APS_FMU_TAGS_FILE'
+APS_FMU_FILE_FORMAT       = 'APS_FMU_FILE_FORMAT'
 APS_TAG_ALL_VARIABLES     = 'APS_TAG_ALL_VARIABLES'
 APS_OUTPUT_FMU_MODEL_FILE = 'APS_OUTPUT_FMU_MODEL_FILE'
 APS_WRITE_LOG_FILE        = 'APS_WRITE_LOG_FILE'
@@ -282,6 +283,10 @@ def prepend_absolute_path(file):
     return start_path / file
 
 
+def get_fmu_file_format():
+    return _get_file(APS_FMU_FILE_FORMAT, 'grdecl')
+
+
 # Keywords to pass along to the various modules
 kwargs = {{
     'roxar': roxar,
@@ -303,6 +308,7 @@ kwargs = {{
     'tag_all_variables': get_tag_all_variables(),
     'fmu_variables_file': get_fmu_variables_file(),
     'input_directory': get_input_directory(),
+    'field_file_format': get_fmu_file_format(),
 }}
 
 # Stringify Paths

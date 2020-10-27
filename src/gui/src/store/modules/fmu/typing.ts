@@ -16,4 +16,5 @@ export interface FmuState {
   onlyUpdateFromFmu: OptionState<boolean>
   create: OptionState<boolean>
   simulationGrid: SimulationGridModelsState
+  fieldFileFormat: OptionState<string>
 }

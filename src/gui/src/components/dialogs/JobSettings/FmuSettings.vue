@@ -60,6 +60,13 @@
               value="import"
             />
           </v-radio-group>
+          <v-row no-gutters>
+            <v-select
+              v-model="_fieldFileFormat"
+              :items="fieldFileFormats"
+              label="File format for export of Gaussian Random Fields"
+            />
+          </v-row>
         </v-col>
         <v-col cols="12">
           <v-row
@@ -172,6 +179,9 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true })
   readonly maxLayersInFmu: number
 
+  @Prop({ required: true })
+  readonly fieldFileFormat: string
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
@@ -220,6 +230,11 @@ export default class FmuSettings extends Vue {
     else if (value === 'import') this.$emit('update:importFields', true)
     else throw Error(`Invalid value, '${value}'`)
   }
+
+  get _fieldFileFormat (): string { return this.fieldFileFormat }
+  set _fieldFileFormat (format: string) { this.$emit('update:fieldFileFormat', format) }
+
+  get fieldFileFormats (): string[] { return this.$store.state.fmu.fieldFileFormat.legal }
 
   update (type: string, value: boolean): void {
     if (type === 'fmuGridDepth') {

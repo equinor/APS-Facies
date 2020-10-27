@@ -29,6 +29,7 @@
           :import-fields.sync="importFields"
           :fmu-grid.sync="fmuGrid"
           :create-fmu-grid.sync="createFmuGrid"
+          :field-file-format.sync="fieldFileFormat"
           @update:error="e => update('fmu', e)"
         />
         <br>
@@ -229,6 +230,7 @@ export default class JobSettings extends Vue {
   onlyUpdateFromFmu = false
   maxAllowedFractionOfValuesOutsideTolerance = 0
   toleranceOfProbabilityNormalisation = 0
+  fieldFileFormat = ''
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
@@ -246,6 +248,7 @@ export default class JobSettings extends Vue {
       this.onlyUpdateFromFmu = fmu.onlyUpdateFromFmu.value
       this.fmuGrid = fmu.simulationGrid.current
       this.createFmuGrid = fmu.create.value
+      this.fieldFileFormat = fmu.fieldFileFormat.value
 
       this.debugLevel = parameters.debugLevel.selected
       this.maxAllowedFractionOfValuesOutsideTolerance = parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
@@ -278,6 +281,7 @@ export default class JobSettings extends Vue {
       dispatch('fmu/onlyUpdateFromFmu/set', this.onlyUpdateFromFmu),
       dispatch('fmu/simulationGrid/set', this.fmuGrid),
       dispatch('fmu/create/set', this.createFmuGrid),
+      dispatch('fmu/fieldFileFormat/set', this.fieldFileFormat),
 
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),

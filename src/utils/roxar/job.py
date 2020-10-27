@@ -38,6 +38,7 @@ class JobConfig:
             'debug_level': self.debug_level,
             'max_allowed_fraction_of_values_outside_tolerance': self._max_allowed_fraction_of_values_outside_tolerance,
             'tolerance_of_probability_normalisation': self._tolerance_of_probability_normalisation,
+            'field_file_format': self.field_file_format,
         }
 
     @property
@@ -83,6 +84,10 @@ class JobConfig:
     @property
     def _only_run_fmu_variables_update(self):
         return self._config['fmu']['onlyUpdateFromFmu']['value']
+
+    @property
+    def field_file_format(self):
+        return self._config['fmu']['fieldFileFormat']['value']
 
     @property
     def update_model_with_fmu_variables(self):
