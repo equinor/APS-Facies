@@ -1,3 +1,4 @@
+from typing import Optional
 from warnings import warn
 
 
@@ -160,19 +161,24 @@ class Migration:
             },
         ]
 
-    def get_migrations(self, from_version: str, to_version: str):
+    def get_migrations(self, from_version: str, to_version: Optional[str] = None):
         _migrations = [
             migration for migration in self.migrations
             if (
-                    to_version.split('.') > migration['from'].split('.')
+                    (
+                            to_version is None
+                            or to_version.split('.') > migration['from'].split('.')
+                    )
                     and from_version.split('.') < migration['to'].split('.')
             )
         ]
         return _migrations
 
-    def migrate(self, state: dict, from_version: str, to_version: str):
+    def migrate(self, state: dict, from_version: Optional[str] = None, to_version: Optional[str] = None):
         errors = None
 
+        if from_version is None:
+            from_version = state['version']
         try:
             for migration in self.get_migrations(from_version, to_version):
                 state = migration['up'](state)
