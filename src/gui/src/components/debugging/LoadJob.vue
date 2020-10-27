@@ -4,9 +4,16 @@
     :value="selectedJob"
     :items="jobs"
     :append-outer-icon="clearIcon"
+    :disabled="loading"
+    :loading="loading"
     @change="job => selectJob(job)"
     @click:append-outer="clear"
-  />
+  >
+    <v-progress-linear
+      v-slot:progress
+      indeterminate
+    />
+  </v-select>
 </template>
 
 <script lang="ts">
@@ -18,6 +25,10 @@ import { getJobs } from '@/components/debugging/utils'
 export default class LoadJob extends Vue {
   private jobMapping: Record<string, JSON> = {}
   private selectedJob: string | null = null
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  private loading = false // TypeScript complains it is not read, even though it is used in the template
 
   get jobs (): string[] {
     return Object.keys(this.jobMapping)
@@ -37,6 +48,7 @@ export default class LoadJob extends Vue {
   }
 
   mounted (): void {
+    this.loading = true
     getJobs()
       .then(jobs => {
         this.jobMapping = jobs
@@ -44,6 +56,9 @@ export default class LoadJob extends Vue {
             jobs[job.instance_name] = JSON.parse(job.jobinputjson)
             return jobs
           }, ({} as Record<string, JSON>))
+      })
+      .finally(() => {
+        this.loading = false
       })
   }
 }
