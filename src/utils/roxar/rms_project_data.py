@@ -313,7 +313,7 @@ class RMSData:
     def run_aps_workflow(state):
         from src.api.main import run
 
-        run(json.loads(_decode(state)))
+        run(_decode_state(state))
 
     @staticmethod
     def save_model(path, content):
@@ -487,6 +487,10 @@ class RMSData:
 
 def _decode(base64_encoded):
     return b64decode(base64_encoded).decode()
+
+
+def _decode_state(encoded: str) -> dict:
+    return json.loads(_decode(encoded))
 
 
 def decode_model(encoded_xml):
