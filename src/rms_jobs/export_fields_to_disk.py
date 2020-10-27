@@ -1,3 +1,5 @@
+#!/bin/env python
+# -*- coding: utf-8 -*-
 import xtgeo
 
 from src.algorithms.APSModel import APSModel
@@ -9,6 +11,7 @@ def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
     aps_model = APSModel(model_file)
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
+    file_format = kwargs.get('field_file_format')
     fmu_grid = xtgeo.grid_from_roxar(
         project,
         fmu_grid_name,
@@ -39,7 +42,7 @@ def run(project, **kwargs):
                 name=field_name,
             )
             fmu_field_model.to_file(
-                str(field_location / (field_name + '.grdecl')),
-                fformat='grdecl',
+                str(field_location / f'{field_name}.{file_format}'),
+                fformat=file_format,
                 name=field_name,
             )

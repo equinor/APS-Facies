@@ -17,36 +17,6 @@ from src.utils.decorators import cached
 from src.utils.exceptions.zone import MissingConformityException
 
 
-def get_exported_field_name(field, zone, aps_model=None, project=None):
-    if isinstance(zone, str):
-        zone_name = zone
-    else:
-        required = {
-            'aps_model': aps_model,
-            'project': project
-        }
-        if any(arg is None for arg in required.values()):
-            missing = [arg for arg, value in required.items() if value is None]
-            raise TypeError(
-                '{func_name}() missing, {num_args} required positional argument{plural}: {arguments}'.format(
-                    func_name=get_exported_field_name.__name__,
-                    num_args=len(missing),
-                    plural='s' if len(missing) > 1 else '',
-                    arguments=' and '.join("'{}'".format(arg) for arg in missing)
-                )
-            )
-        grid = get_grid(project, aps_model)
-        zone_name = grid.zone_names[zone.zone_number - 1]  # Zones are 1-indexed
-    if isinstance(field, str):
-        name = field
-    else:
-        name = field.name
-    return 'aps_{zone_name}_{field_name}.grdecl'.format(
-        zone_name=zone_name,
-        field_name=name,
-    )
-
-
 def create_get_property(project, aps_model=None):
     def get_property(name, grid_name=None):
         if grid_name is None:

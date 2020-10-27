@@ -21,6 +21,8 @@ export const DEFAULT_RUN_ONLY_FMU_UPDATE = false
 
 export const DEFAULT_CREATE_FMU_GRID = isDevelopmentBuild()
 
+export const DEFAULT_FIELD_FORMAT = 'grdecl'
+
 export const DEFAULT_FMU_SIMULATION_GRID_NAME = 'ERTBOX'
 
 export const DEFAULT_COLOR_SCALE = 'Rainbow'

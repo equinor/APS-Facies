@@ -14,19 +14,6 @@ from roxar import Project
 from roxar.grids import Grid3D, GridModel
 
 
-@overload
-def get_exported_field_name(
-        field:      Union[xtgeo.GridProperty, str],
-        zone:       APSZoneModel,
-        aps_model:  APSModel,
-        project:    Project,
-) -> str: ...
-@overload
-def get_exported_field_name(
-        field:      Union[xtgeo.GridProperty, str],
-        zone:       str,
-) -> str: ...
-
 def create_get_property(
         project:    Project,
         aps_model:  Optional[Union[APSModel, str]],

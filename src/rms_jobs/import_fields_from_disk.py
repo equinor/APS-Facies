@@ -1,4 +1,7 @@
+#!/bin/env python
+# -*- coding: utf-8 -*-
 from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
 import xtgeo
@@ -68,6 +71,7 @@ def get_field_name(field_name, zone):
 
 def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
     aps_model = APSModel(model_file)
+    file_format = kwargs.get('field_file_format')
     if grid_name is None:
         grid_name = aps_model.grid_model_name
     get_property = create_get_property(project, aps_model)
@@ -84,7 +88,7 @@ def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
         for zone_name, zone in zones:
             defined = zone_model.values == zone.zone_number
             full_field_name = get_field_name(field_name, zone_name)
-            field_location = load_dir / (full_field_name + '.grdecl')
+            field_location = load_dir / f'{full_field_name}.{file_format}'
             if field_location.exists():
                 field = load_field_values(full_field_name, fmu_grid, field_location)
                 field_values += extract_values(field, defined, zone)
@@ -108,7 +112,7 @@ def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
         )
 
 
-def load_field_values(field_name, grid, path):
+def _load_field_values_grdecl(field_name, grid, path):
     with open(path) as f:
         content = f.read()
     # Assuming there is only ONE field per file
@@ -132,3 +136,18 @@ def load_field_values(field_name, grid, path):
     #     grid=grid,
     # ).values
     return field
+
+
+def _load_field_values_roff(field_name, grid, path):
+    property = xtgeo.grid3d.GridProperty()
+    property.from_file(path, fformat='roff', name=field_name)
+    return property.values
+
+
+def load_field_values(field_name: str, grid: xtgeo.Grid, path: Path):
+    if path.suffix == '.grdecl':
+        return _load_field_values_grdecl(field_name, grid, path)
+    elif path.suffix == '.roff':
+        return _load_field_values_roff(field_name, grid, path)
+    else:
+        raise ValueError(f'Invalid file format, {path.suffix}')

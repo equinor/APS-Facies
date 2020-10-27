@@ -1,4 +1,9 @@
-import { DEFAULT_CREATE_FMU_GRID, DEFAULT_RUN_FMU_MODE, DEFAULT_RUN_ONLY_FMU_UPDATE } from '@/config'
+import {
+  DEFAULT_CREATE_FMU_GRID,
+  DEFAULT_FIELD_FORMAT,
+  DEFAULT_RUN_FMU_MODE,
+  DEFAULT_RUN_ONLY_FMU_UPDATE
+} from '@/config'
 import { makeOption, populateState } from '@/store/utils'
 import { Module } from 'vuex'
 
@@ -15,6 +20,7 @@ const module: Module<FmuState, RootState> = {
     runFmuWorkflows: makeOption(DEFAULT_RUN_FMU_MODE, [true, false]),
     onlyUpdateFromFmu: makeOption(DEFAULT_RUN_ONLY_FMU_UPDATE, [true, false]),
     create: makeOption(DEFAULT_CREATE_FMU_GRID, [true, false]),
+    fieldFileFormat: makeOption(DEFAULT_FIELD_FORMAT, ['grdecl', 'roff']),
     simulationGrid,
   },
 
