@@ -55,6 +55,9 @@ export default {
   chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve) => resolve(null)),
   // @ts-ignore
   chooseFile: (mode: string, filter: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseFile(mode, filter, suggestion) : new Promise((resolve) => resolve(null)),
+  // Methods related to state migration
+  canMigrate: (fromVersion: string | undefined, toVersion: string): Promise<boolean> => api.call('can_migrate_state', fromVersion, toVersion),
+  migrate: (state: string, fromVersion: string, toVersion: string | null): Promise<{ state: any, errors: string }> => api.call('migrate_state', state, fromVersion, toVersion),
 
   // Methods that are ONLY intended to be available in development mode, or when running the plugin locally
   loadPluginDotMaster: (): Promise<{ parameters: Job[] }> => api.call('load_dot_master'),

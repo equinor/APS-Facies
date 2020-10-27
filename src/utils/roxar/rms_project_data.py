@@ -38,6 +38,7 @@ from src.utils.roxar.grid_model import (
     GridSimBoxSize,
 )
 from src.utils.plotting import create_facies_map
+from src.utils.roxar.migrations import Migration
 from src.utils.truncation_rules import make_truncation_rule
 from src.utils.xmlUtils import prettify
 from src.utils.constants.simple import Debug
@@ -308,6 +309,14 @@ class RMSData:
         except Exception:
             project_location = Path(self.project.filename)
         return parse_dot_master(project_location / 'pythoncomp/apsgui/.master')
+
+    def migrate_state(self, state: str, from_version: str, to_version: str):
+        migration = Migration(self)
+        return migration.migrate(_decode_state(state), from_version, to_version)
+
+    def can_migrate_state(self, from_version: str, to_version: str) -> bool:
+        migration = Migration(self)
+        return migration.can_migrate(from_version, to_version)
 
     @staticmethod
     def run_aps_workflow(state):

@@ -149,7 +149,6 @@ class RMSData:
     def get_zones(
             self,
             grid_model_name:             GridName,
-            zone_parameter:              ZoneParameter
     ) -> List[Dict]: ...
     def get_regions(
             self,

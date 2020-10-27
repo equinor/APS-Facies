@@ -90,12 +90,7 @@ class JobConfig:
 
     @property
     def field_file_format(self):
-        try:
-            return self._config['fmu']['fieldFileFormat']['value']
-        except KeyError:
-            raise ValueError(
-                'Version migration error: Please open this job interactively and save it again before running it.'
-            )
+        return self._config['fmu']['fieldFileFormat']['value']
 
     @property
     def update_model_with_fmu_variables(self):
