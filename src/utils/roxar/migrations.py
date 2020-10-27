@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Optional, List
+from uuid import uuid4
 from warnings import warn
 
 
@@ -111,9 +112,17 @@ class Migration:
         }
         return state
 
+    def attempt_upgrading_legacy_state(self, state: dict):
+        return _attempt_upgrading_legacy_state(self, state)
+
     @property
     def migrations(self):
         return [
+            {
+                'from': '0.0.0',
+                'to': '1.0.0',
+                'up': self.attempt_upgrading_legacy_state
+            },
             {
                 'from': '1.0.0',
                 'to': '1.1.0',
@@ -178,7 +187,10 @@ class Migration:
         errors = None
 
         if from_version is None:
-            from_version = state['version']
+            try:
+                from_version = state['version']
+            except KeyError:
+                from_version = '0.0.0'
         try:
             for migration in self.get_migrations(from_version, to_version):
                 state = migration['up'](state)
@@ -199,3 +211,46 @@ class Migration:
             if version == migration['from']:
                 version = migration['to']
         return version == to_version
+
+
+def _attempt_upgrading_legacy_state(self: Migration, state: dict):
+    # Missing state version
+    state['version'] = '0.0.0'
+
+    if isinstance(state['gridModels']['available'], list):
+        _migrate_list_of_grids_to_identified_grids(self, state)
+
+    _ensure_state_has_key(state, 'debugLevel')
+
+    _ensure_state_has_key(state, 'fmu')
+
+    _ensure_has_available(state, 'gaussianRandomFields', 'fields')
+
+    _ensure_has_available(state, 'truncationRules', 'rules')
+
+    _ensure_state_has_key(state, 'panels')
+    return state
+
+
+def _ensure_state_has_key(state: dict, key: str):
+    if key not in state:
+        state[key] = {}
+
+
+def _ensure_has_available(state: dict, item_key: str, old_available_key: str):
+    if old_available_key in state[item_key]:
+        state[item_key]['available'] = state[item_key][old_available_key]
+        del state[item_key][old_available_key]
+
+
+def _migrate_list_of_grids_to_identified_grids(self: Migration, state: dict):
+    current = state['gridModels']['current']
+    grid_models: List[dict] = self.rms_data.get_grid_models()
+    for grid_model in grid_models:
+        grid_model['id'] = str(uuid4())
+        if current == grid_model['name']:
+            current = grid_model['id']
+    state['gridModels']['available'] = {
+        grid_model['id']: grid_model for grid_model in grid_models
+    }
+    state['gridModels']['current'] = current

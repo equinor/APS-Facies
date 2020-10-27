@@ -14,11 +14,10 @@ export default async function migrate (context: Store, state: any, toVersion: st
     // Uses "base method" to avoid circular dependencies
     displayMessage(
       context,
-      `The stored job could not be migrated, its version (${fromVersion}) might incompatible with the current version (${toVersion}).`,
+      `The stored job uses a format that is no longer supported. We attempt to update it to the current version (${toVersion}).
+The migration might not be completely successful. If you experience any issues, consider exporting the model, and then importing the model file into a new job.`,
       'warning',
     )
-    await context.dispatch('startLoading')
-    return state
   }
 
   try {
