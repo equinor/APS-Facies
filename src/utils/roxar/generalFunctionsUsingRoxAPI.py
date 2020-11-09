@@ -258,9 +258,9 @@ def set_continuous_3d_parameter_values_in_zone_region(
 
     # Find grid layers for the zone
     indexer = grid.simbox_indexer
-    if roxar.rms.get_version() > '11.0.1':
+    try:
         ijk_handedness = indexer.ijk_handedness
-    else:
+    except AttributeError:
         ijk_handedness = indexer.handedness
 
     nx, ny, nz = indexer.dimensions
@@ -337,7 +337,6 @@ def set_continuous_3d_parameter_values_in_zone_region(
                 i = i_indices[index]
                 j = j_indices[index]
                 k = k_indices[index]
-                # print('(i,j,k)=({},{},{})'.format(str(i), str(j), str(k)))
                 cell_index = (i, j, k)
                 cell_number = indexer.get_cell_numbers(cell_index)
                 if start_layer <= k < end_layer and region_param_values[cell_number] == region_number:
