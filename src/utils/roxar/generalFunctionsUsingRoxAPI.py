@@ -13,6 +13,7 @@ from src.utils.roxar.grid_model import get3DParameter, modify_selected_grid_cell
 from src.utils.constants.simple import Debug
 
 import roxar
+from roxar import Direction
 
 
 def get_grid_dimension(project, name):
@@ -222,7 +223,7 @@ def set_continuous_3d_parameter_values_in_zone(
 def set_continuous_3d_parameter_values_in_zone_region(
         grid_model, parameter_names, input_values_for_zones, zone_number,
         region_number=0, region_parameter_name=None, realisation_number=0, is_shared=False,
-        debug_level=Debug.OFF, fmu_mode=False,
+        debug_level=Debug.OFF, fmu_mode=False, use_left_handed_grid_indexing=False,
 ):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
@@ -257,6 +258,11 @@ def set_continuous_3d_parameter_values_in_zone_region(
 
     # Find grid layers for the zone
     indexer = grid.simbox_indexer
+    try:
+        ijk_handedness = indexer.ijk_handedness
+    except AttributeError:
+        ijk_handedness = indexer.handedness
+
     nx, ny, nz = indexer.dimensions
     end_layer, start_layer = get_layer_range(indexer, zone_number, fmu_mode)
     start = (0, 0, start_layer)
@@ -276,8 +282,14 @@ def set_continuous_3d_parameter_values_in_zone_region(
 
     # print('start_layer: {}   end_layer: {}'.format(str(start_layer),str(end_layer-1)))
     defined_cell_indices = indexer.get_indices(zone_cell_numbers)
-    i_indices = defined_cell_indices[:, 0]
-    j_indices = defined_cell_indices[:, 1]
+    if (ijk_handedness == Direction.right) and use_left_handed_grid_indexing:
+        if debug_level >= Debug.VERBOSE:
+            print(f'-- Modelling grid {grid_model.name}  is right-handed (Eclipse grid index ordering)')
+        i_indices = defined_cell_indices[:, 0]
+        j_indices = -defined_cell_indices[:, 1] + ny -1
+    else:
+        i_indices = defined_cell_indices[:, 0]
+        j_indices = defined_cell_indices[:, 1]
     k_indices = defined_cell_indices[:, 2]
 
     # Get region parameter values
@@ -325,7 +337,6 @@ def set_continuous_3d_parameter_values_in_zone_region(
                 i = i_indices[index]
                 j = j_indices[index]
                 k = k_indices[index]
-                # print('(i,j,k)=({},{},{})'.format(str(i), str(j), str(k)))
                 cell_index = (i, j, k)
                 cell_number = indexer.get_cell_numbers(cell_index)
                 if start_layer <= k < end_layer and region_param_values[cell_number] == region_number:
