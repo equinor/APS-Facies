@@ -449,6 +449,7 @@ libraries/nrlib
 .tool-versions
 *.plugin
 *.plugin.gpg
+DEPLOY_VERSION.txt
 
 !examples/*
 !src/gui/build/*
@@ -460,6 +461,7 @@ aps_gui/
 prog/
 *state.json
 *.zip
+*.bak
 
 # Unit testing
 src/unit_test/fmu_attributes.txt
