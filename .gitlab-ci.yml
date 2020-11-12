@@ -151,6 +151,7 @@ build GUI:
     expire_in: 1 month
     paths:
       - '*.plugin'
+      - 'DEPLOY_VERSION.txt'
   needs:
     - job: initialize
       artifacts: true

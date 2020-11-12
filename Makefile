@@ -89,6 +89,7 @@ LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
 PLUGIN_NAME := aps_gui
 PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
 PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
+DEPLOY_VERSION_PATH := $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(SOURCE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 LIB_PREFIX := $(CODE_DIR)/libraries
@@ -215,6 +216,7 @@ build-gui: clean-build increase-build-number build-front-end compile-files-for-p
 	cd $(BUILD_DIR) && \
 	$(ZIP) $(PLUGIN_BIN) $(PLUGIN_NAME)
 	mv $(BUILD_DIR)/$(PLUGIN_BIN) $(CODE_DIR) 2>/dev/null || mv $(BUILD_DIR)/zip.zip $(CODE_DIR)/$(PLUGIN_BIN)
+	echo "$(PLUGIN_BIN)" > $(DEPLOY_VERSION_PATH)
 
 compile-files-for-plugin: gather-python-scripts auxillary-files compile-python-files
 
@@ -589,10 +591,11 @@ run-rms.uipy-mock: matplotlibrc
 
 # TODO: Add versioning to the plugin file
 deploy:
+	$(eval $@_PLUGIN := $(shell cat $(DEPLOY_VERSION_PATH) || echo $(PLUGIN_BIN)))
 	cd $(CODE_DIR) && \
 	rsync -avz \
 	      --rsh=ssh \
-	      $(PLUGIN_BIN) $(DEPLOYMENT_USER)@$(DEPLOY_SERVER):$(DEPLOYMENT_PATH)/$(PLUGIN_BIN)
+	      $($@_PLUGIN) $(DEPLOYMENT_USER)@$(DEPLOY_SERVER):$(DEPLOYMENT_PATH)/$($@_PLUGIN)
 
 update-remote-develop:
 	$(RGS_EXEC) 'cd $(REMOTE_RGS_DEVELOP) && $(RGS_UPDATE_APS)'
