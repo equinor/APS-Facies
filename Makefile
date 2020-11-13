@@ -306,6 +306,12 @@ VERSION:
 COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
 
+mock-VERSION:
+	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION
+
+mock-COMMIT:
+	echo $(LATEST_COMMIT_HASH_LONG) > $(SOURCE_DIR)/api/COMMIT
+
 init: initialize-python-environment dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 
 init-workflow: links generate-workflow-files
