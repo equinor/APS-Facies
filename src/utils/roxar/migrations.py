@@ -2,6 +2,9 @@ from typing import Optional, List
 from uuid import uuid4
 from warnings import warn
 
+from src.utils.constants.simple import Debug
+from src.utils.roxar._config_getters import get_debug_level
+
 
 class Migration:
     def __init__(self, rms_data: 'RMSData'):
@@ -191,8 +194,19 @@ class Migration:
                 from_version = state['version']
             except KeyError:
                 from_version = '0.0.0'
+
+        migrations = self.get_migrations(from_version, to_version)
+
+        if get_debug_level(state) >= Debug.VERBOSE:
+            if len(migrations) == 0:
+                print(f'State at latest version ({from_version}). No migration needed.')
+            else:
+                if to_version is None:
+                    to_version = self.migrations[-1]['to']
+                print(f"Migrating state from {from_version} to {to_version}")
+
         try:
-            for migration in self.get_migrations(from_version, to_version):
+            for migration in migrations:
                 state = migration['up'](state)
                 state['version'] = migration['to']
         except Exception as e:

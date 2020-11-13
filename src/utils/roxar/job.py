@@ -9,6 +9,7 @@ from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.decorators import cached
 from src.utils.fmu import get_export_location, get_ert_location, is_initial_iteration
+from src.utils.roxar._config_getters import get_debug_level
 from src.utils.roxar.migrations import Migration
 from src.utils.roxar.rms_project_data import RMSData
 
@@ -187,7 +188,7 @@ class JobConfig:
 
     @property
     def debug_level(self):
-        return Debug(self._config['parameters']['debugLevel']['selected'])
+        return get_debug_level(self._config)
 
     @property
     def _config_location(self):
