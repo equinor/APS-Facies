@@ -7,7 +7,7 @@ from src.utils.decorators import cached
 from src.utils.exceptions.general import raise_error
 from src.utils.io import print_debug_information
 from src.utils.methods import calc_average
-
+from roxar import Direction
 
 def find_defined_cells(zone_values, zone_number, region_values=None, region_number=0, debug_level=Debug.OFF):
     """
@@ -571,6 +571,10 @@ class GridSimBoxSize:
     def __init__(self, grid, debug_level=Debug.OFF):
         self.grid = grid
         self.debug_level = debug_level
+        try:
+            self.ijk_handedness = grid.simbox_indexer.ijk_handedness
+        except AttributeError:
+            self.ijk_handedness = grid.simbox_indexer.handedness
 
         if self.debug_level >= Debug.VERY_VERBOSE:
             print(
@@ -578,7 +582,8 @@ class GridSimBoxSize:
                 f'Debug output: Length in y direction:  {self.y_length}\n'
                 f'Debug output: Sim box rotation angle: {self.azimuth_angle}'
             )
-
+            if self.ijk_handedness == Direction.right:
+                print(f'Debug output: Sim box has right-handed coordinate system')
     @property
     @cached
     def dimensions(self):
@@ -619,33 +624,139 @@ class GridSimBoxSize:
 
     @property
     @cached
-    def x0(self):
+    def cell_11(self):
+        return self._get_cell_corners_by_index((self.nx - 1, self.ny - 1, 0))
+
+    @property
+    @cached
+    def x0_original(self):
+        #Cell corner point 0 and first coordinate x of cell with index (0,0,0)
         return self.cell_00[0][0]
 
     @property
     @cached
-    def y0(self):
+    def y0_original(self):
+        #Cell corner point 0 and second coordinate y of cell with index (0,0,0)
         return self.cell_00[0][1]
 
     @property
     @cached
-    def x1(self):
+    def x1_original(self):
+        #Cell corner point 1 and first coordinate x of cell with index (nx-1,0,0)
         return self.cell_10[1][0]
 
     @property
     @cached
-    def y1(self):
+    def y1_original(self):
+        #Cell corner point 1 and second coordinate y of cell with index (nx-1,0,0)
         return self.cell_10[1][1]
+
 
     @property
     @cached
-    def x2(self):
+    def x2_original(self):
+        #Cell corner point 2 and first coordinate x of cell with index (0, ny-1,0)
         return self.cell_01[2][0]
 
     @property
     @cached
-    def y2(self):
+    def y2_original(self):
+        #Cell corner point 2 and second coordinate y of cell with index (0, ny-1,0)
         return self.cell_01[2][1]
+
+    @property
+    @cached
+    def x3_original(self):
+        #Cell corner point 3 and first coordinate x of cell with index (nx-1, ny-1,0)
+        return self.cell_11[3][0]
+
+    @property
+    @cached
+    def y3_original(self):
+        #Cell corner point 3 and second coordinate y of cell with index (nx-1, ny-1,0)
+        return self.cell_11[3][1]
+
+
+    @property
+    @cached
+    def x0(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.x0_original
+        else:
+            return self.x2_original
+
+    @property
+    @cached
+    def y0(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.y0_original
+        else:
+            return self.y2_original
+
+    @property
+    @cached
+    def x1(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.x1_original
+        else:
+            return self.x3_original
+
+    @property
+    @cached
+    def y1(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.y1_original
+        else:
+            return self.y3_original
+
+
+    @property
+    @cached
+    def x2(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.x2_original
+        else:
+            return self.x0_original
+
+    @property
+    @cached
+    def y2(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.y2_original
+        else:
+            return self.y0_original
+
+    @property
+    @cached
+    def x3(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.x3_original
+        else:
+            return self.x1_original
+
+    @property
+    @cached
+    def y3(self):
+        # Choose standard left handed simbox origin used by RMS (lower left corner)
+        # if right handed simbox grid (Eclipse type grid coordinate)
+        if self.ijk_handedness == Direction.left:
+            return self.y3_original
+        else:
+            return self.y1_original
 
     @property
     @cached
@@ -672,7 +783,6 @@ class GridSimBoxSize:
         azimuth_angle = np.arctan(sin_theta / cos_theta)
         azimuth_angle *= 180.0 / np.pi
         return azimuth_angle
-
 
 def getNumberOfLayersPerZone(grid, zone_number):
     indexer = grid.grid_indexer
