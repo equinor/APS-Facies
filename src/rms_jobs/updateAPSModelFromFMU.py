@@ -38,7 +38,8 @@ def run(project, **kwargs):
     output_aps_model_file = params['output_model_file']
     workflow_name = params['workflow_name']
 
-    print(f'Updating {input_aps_model_file} with the FMU parameters from {global_variables_file}')
+    print(f'Run: Update APS model parameters from FMU parameters')
+    print(f'- Read file {global_variables_file}')
     update_aps_model_from_fmu(
         global_variables_file,
         input_aps_model_file,

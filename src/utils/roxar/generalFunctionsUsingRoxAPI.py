@@ -690,7 +690,8 @@ def update_discrete_3d_parameter_values(
         if set_default_facies_name_when_undefined:
             for code in code_names.keys():
                 if code_names[code] == '':
-                    warn('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
+                    if debug_level >= Debug.ON:
+                        print('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
                     code_names[code] = str(code)
 
         if debug_level >= Debug.VERY_VERBOSE:

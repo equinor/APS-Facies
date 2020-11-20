@@ -47,7 +47,8 @@ class JobConfig:
         export_error = self._config['errorMessage']
         if export_error:
             return export_error
-        if self.fmu_mode:
+
+        if self.run_fmu_workflows:
             aps_model = APSModel.from_string(self.model, debug_level=None)
             for zone_model in aps_model.zone_models:
                 if not zone_model.grid_layout:
@@ -93,7 +94,7 @@ class JobConfig:
     def update_model_with_fmu_variables(self):
         return (
                 self._only_run_fmu_variables_update
-                or self.fmu_mode
+                or self.run_fmu_workflows
         ) and self.global_variables_file
 
     @property
@@ -124,7 +125,7 @@ class JobConfig:
 
     @property
     def _config_location(self):
-        if self.fmu_mode:
+        if self.run_fmu_workflows or self._only_run_fmu_variables_update:
             return get_ert_location() / '..' / '..' / 'fmuconfig' / 'output'
         return None
 
