@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from warnings import warn
 import numpy as np
+import copy
 from src.utils.constants.simple import Debug, GridModelConstants, SimBoxThicknessConstants
 from src.utils.decorators import cached
 from src.utils.exceptions.general import raise_error
@@ -354,11 +355,22 @@ def modify_selected_grid_cells(grid_model, zone_numbers, realization_number, old
 
 def update_code_names(property, new_code_names):
     old_code_names = property.code_names
+    # Check old and new code names if there are empty codenames and 
+    # set to a default name which is the same as the code
+    for code, name in old_code_names.items():
+        if name == '':
+            name = str(code)
+            old_code_names[code] = copy.copy(name)
+    for code, name in new_code_names.items():
+        if name == '':
+            name = str(code)
+            new_code_names[code] = copy.copy(name)
+
     for code in new_code_names.keys():
-        if code not in old_code_names:
+        if code not in old_code_names.keys():
             # New code
             u = new_code_names.get(code)
-            for k in old_code_names:
+            for k in old_code_names.keys():
                 v = old_code_names.get(k)
                 if u == v:
                     # The facies name for this code already exist
@@ -375,7 +387,7 @@ def update_code_names(property, new_code_names):
                     # Check if the facies name is equal to the code
                     # then it can be overwritten by the new one.
                     if v == str(code):
-                        old_code_names[code] = u
+                        old_code_names[code] = copy.copy(u)
                     else:
                         # The code has different names in the existing original and the new code_names dictionary
                         raise ValueError(
@@ -385,8 +397,8 @@ def update_code_names(property, new_code_names):
                         )
                 else:
                     # The facies name is empty string, assign a name from the new to it
-                    old_code_names[code] = u
-
+                    old_code_names[code] = copy.copy(u)
+    property.code_names = old_code_names
 
 def get_zone_layer_numbering(grid):
     indexer = grid.simbox_indexer
