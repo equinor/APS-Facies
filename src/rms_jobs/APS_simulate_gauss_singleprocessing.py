@@ -46,6 +46,7 @@ def run_simulations(
     """
 
     # Read APS model
+    print(f'Run: Simulation of gaussian fields')
     print(f'- Read file: {model_file}')
     aps_model = APSModel(model_file)
     debug_level = aps_model.debug_level
@@ -184,7 +185,7 @@ def run_simulations(
             seed_file_log = seed_file_log / 'seedLogFile.dat'
         with open(seed_file_log, 'a+') as file:
             file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + nrlib.seed()}\n')
-    print('')
+
 
 
 def run(project, **kwargs):

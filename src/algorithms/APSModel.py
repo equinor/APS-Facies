@@ -437,7 +437,7 @@ class APSModel:
 
         self.__checkZoneModels()
 
-        if self.__debug_level >= Debug.SOMEWHAT_VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             print('- Zone models are defined for the following combination '
                   'of zone and region numbers:')
             for key, value in self.sorted_zone_models.items():
@@ -471,7 +471,7 @@ class APSModel:
         # These variables belongs to xml keywords with attribute 'kw'.
         # So search for attribute 'kw' to find all these variables. The attribute value is a keyword
         # name that will be used as identifier.
-        if debug_level > Debug.SOMEWHAT_VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('-- Model parameters marked as possible to update when running in batch mode')
             print('Keyword:                        Tag:                Value:')
@@ -481,7 +481,7 @@ class APSModel:
             tag = obj.tag
             value = obj.text
             keywords_defined_for_updating.append([key_word.strip(), value.strip()])
-            if debug_level > Debug.SOMEWHAT_VERBOSE:
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('{0:30} {1:20}  {2:10}'.format(key_word, tag, value))
 
         # Read keywords from parameter_file_name (Global IPL include file with variables updated by FMU/ERT)
@@ -503,8 +503,9 @@ class APSModel:
                 if kw == keyword:
                     # set new value
                     item[1] = value
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Keywords and values that is updated in xml tree:')
+        if debug_level >= Debug.ON:
+            print('-- Updating the following APS model parameters:')
+            print('   Parameter name                  Original value   New value   ')
 
         for obj in root.findall(".//*[@kw]"):
             key_word = obj.get('kw')
@@ -520,14 +521,14 @@ class APSModel:
                     found = True
                     break
             if found:
-                if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'{key_word:30} {old_value:20}  {obj.text:10}')
+                if debug_level >= Debug.ON:
+                    print(f'   {key_word:30}    {old_value:15}  {obj.text:10}')
             else:
                 raise ValueError(
                     'Error: Inconsistency. Programming error in function update_model_file in class APSModel'
                 )
 
-        if debug_level >= Debug.VERY_VERBOSE:
+        if debug_level >= Debug.ON:
             print('')
 
         return tree
@@ -555,8 +556,6 @@ class APSModel:
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
-            print(f'- Read file: {global_variables_file}')
         keywords = GlobalVariables.parse(global_variables_file)
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'Debug output: Keywords and values found in parameter file:  {global_variables_file}')
@@ -747,11 +746,18 @@ class APSModel:
     def getAllGaussFieldNamesUsed(self):
         gfAllZones = []
         for key, zoneModel in self.__zoneModelTable.items():
-            print('In getAllGaussFieldNamesUsed: key=({},{})'.format(key[0], key[1]))
+            if self.__debug_level >= Debug.ON:
+                region_number = key[1]
+                zone_number   = key[0]
+                if region_number == 0:
+                    print(f'- Gaussian field names used for zone {zone_number}:')
+                else:
+                    print(f'-- Gaussian field names used for zone {zone_number} and region {region_number}:')
             gfNames = zoneModel.used_gaussian_field_names
             for gf in gfNames:
                 # Add the gauss field name to the list if it not already is in the list
-                print('Gauss field name: {}'.format(gf))
+                if self.__debug_level >= Debug.ON:
+                    print('   Gauss field name: {}'.format(gf))
                 if gf not in gfAllZones:
                     gfAllZones.append(gf)
         return copy.copy(gfAllZones)

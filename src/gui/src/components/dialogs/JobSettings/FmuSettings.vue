@@ -49,14 +49,14 @@
           <v-radio-group
             v-model="_importFields"
             row
-            label="How are the Gaussian Random Fields calculated?"
+            label="Initialize or update Gaussian Fields"
           >
             <v-radio
-              label="Simulated"
+              label="Simulate GRF and export to FMU"
               value="generate"
             />
             <v-radio
-              label="Imported"
+              label="Import GRF from FMU"
               value="import"
             />
           </v-radio-group>

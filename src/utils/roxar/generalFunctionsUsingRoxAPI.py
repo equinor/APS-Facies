@@ -535,7 +535,7 @@ def set_discrete_3d_parameter_values(
         p.set_values(current_values, realisation_number)
 
         p.set_shared(is_shared, realisation_number)
-        code_names = p.code_names
+        code_names = p.code_names.copy()
 
         for code in code_names.keys():
             if code_names[code] == '':
@@ -569,7 +569,7 @@ def _create_property(
     p.set_values(current_values, realisation_number)
     p.set_shared(is_shared, realisation_number)
     if code_names is not None:
-        p.code_names = code_names
+        p.code_names = code_names.copy()
 
 
 def update_discrete_3d_parameter_values(
@@ -652,7 +652,7 @@ def update_discrete_3d_parameter_values(
 
         p.set_values(current_values, realisation_number)
         p.set_shared(is_shared, realisation_number)
-        p.code_names = facies_table
+        p.code_names = facies_table.copy()
     else:
         if debug_level >= Debug.VERY_VERBOSE:
             text = f' Update specified parameter: {parameter_name} in {grid_model.name}'
@@ -686,11 +686,12 @@ def update_discrete_3d_parameter_values(
         # Update the facies table in the discrete 3D parameter
         update_code_names(p, facies_table)
 
-        code_names = p.code_names
+        code_names = p.code_names.copy()
         if set_default_facies_name_when_undefined:
             for code in code_names.keys():
                 if code_names[code] == '':
-                    warn('Warning: There exists facies codes without facies names. Set facies name equal to facies code')
+                    if debug_level >= Debug.ON:
+                        warn('There exists facies codes without facies names. Set facies name equal to facies code')
                     code_names[code] = str(code)
 
         if debug_level >= Debug.VERY_VERBOSE:

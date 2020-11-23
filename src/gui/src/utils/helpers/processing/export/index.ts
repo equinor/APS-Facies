@@ -306,7 +306,7 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
     if (trendType === 'EllipticCone3D') {
       // relativeSize is specific to EllipticCone3D
       trendTypeElement.append(createElement(doc, 'relativeSize', relativeSize.value,
-        relativeSize.updatable ? [{ name: 'kw', value: baseKw + '_RELATIVE_SIZE' }] : null))
+        relativeSize.updatable ? [{ name: 'kw', value: baseKw + '_TREND_RELATIVESIZE' }] : null))
     }
 
     if (trendType !== 'Linear3D') {
@@ -341,7 +341,7 @@ function addGaussianRandomField (doc: Document, field: GaussianRandomField, pare
   if (field.trend.use && field.trend.type !== 'NONE') {
     addTrend(doc, field, parent, baseKw, fieldElement)
     fieldElement.append(createElement(doc, 'RelStdDev',
-      field.trend.relativeStdDev.value, field.trend.relativeStdDev.updatable ? [{ name: 'kw', value: baseKw + '_RELSTDDEV' }] : null))
+      field.trend.relativeStdDev.value, field.trend.relativeStdDev.updatable ? [{ name: 'kw', value: baseKw + '_TREND_RELSTDDEV' }] : null))
   }
   fieldElement.append(createElement(doc, 'SeedForPreview', field.settings.seed))
 }
