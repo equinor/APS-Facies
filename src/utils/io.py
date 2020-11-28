@@ -138,6 +138,17 @@ def ensure_folder_exists(seed_file_log):
 
 class GlobalVariables:
     @classmethod
+    def check_file_format(cls, global_variables_file):
+        global_variables_file = Path(global_variables_file)
+        suffix = global_variables_file.suffix.lower().strip('.')
+        if suffix == 'ipl':
+            return 'ipl'
+        elif suffix in ['yaml', 'yml']:
+            return 'yml'
+        else:
+            raise NotImplementedError('{} is an unknown suffix, which cannot be read'.format(suffix))
+
+    @classmethod
     def parse(cls, global_variables_file):
         global_variables_file = Path(global_variables_file)
         suffix = global_variables_file.suffix.lower().strip('.')
@@ -150,6 +161,12 @@ class GlobalVariables:
 
     @staticmethod
     def _read_ipl(global_variables_file):
+        ''' Read global variables for APS from global IPL file.
+            Returns a list of aps parameter names and values.
+            IPL format does only support RMS project with one grid model (multizone grid)
+            with only one APS job.
+        '''
+
         keywords = []
         with open(global_variables_file, 'r') as file:
             lines = file.readlines()
@@ -171,18 +188,52 @@ class GlobalVariables:
 
     @classmethod
     def _read_yaml(cls, global_variables_file):
+        ''' YAML format for global variables support RMS project with multiple grid models
+            where the grid models can be single-zone grid models or multi-zone grid models
+            and where each grid model may have multiple APS jobs where each job can have
+            their own set of APS model parameters to be updated by FMU.
+            Returns a dictionary of model parameter specification for each grid model
+            and each job for each grid model.
+            Example structure of the YAMLS file:
+            global:
+              APS:
+                Geogrid_single_zone_grid:
+                  APS_job_1:
+                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 100.0
+                   APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
+                  APS_job_2:
+                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 200.0
+                   APS_1_0_GF_GRF2_TREND_AZIMUTH: 80.0
+                Geogrid_multizone_grid:
+                  APS_job_3:
+                   APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
+                   APS_2_0_GF_GRF1_TREND_AZIMUTH: 0.0
+                   APS_3_0_GF_GRF1_RESIDUAL_MAINRANGE: 2000.0
+                  APS_job_3:
+                   APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
+                   APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
+                   APS_2_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 135.0
+       '''
         try:
             import yaml
         except ImportError:
             raise NotImplementedError('PyYaml is required')
         with open(global_variables_file, 'r') as file:
-            global_variables = yaml.safe_load(file)
+            all_variables = yaml.safe_load(file)
 
-        global_variables = list(global_variables.get('rms', {}).items())
-        return [
-            (key, val) for key, val in global_variables
-            if cls.is_numeric(val)
-        ]
+        global_variables = all_variables['global']
+        key = 'APS'
+        aps_variables = None
+        if key in global_variables.keys():
+            aps_variables = global_variables[key]
+        else:
+            key = 'aps'
+            if key in global_variables.keys():
+                aps_variables = global_variables[key]
+
+        # Returns a list of dictionaries for each specified grid model
+        # with aps parameters for each specified job-id for each grid model
+        return aps_variables
 
     @staticmethod
     def is_numeric(val):

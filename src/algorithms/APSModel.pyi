@@ -94,7 +94,9 @@ class APSModel:
             workflow_name:              Optional[str]       = None,
             uncertainty_variable_names: Optional[List[str]] = None,
             realisation_number:         int                 = 0,
-            debug_level:                Debug               = Debug.OFF
+            debug_level:                Debug               = Debug.OFF,
+            current_job_name:           Optional[str]       = None,
+            use_rms_uncertainty_table:  bool                = False,
     ) -> ElementTree: ...
     def __checkZoneModels(self) -> None: ...
     def getXmlTree(self): ...
@@ -138,11 +140,14 @@ class APSModel:
             model_file_name:                    FilePath,
             attributes_file_name:               Optional[FilePath]  = None,
             probability_distribution_file_name: Optional[FilePath]  = None,
+            current_job_name:                   Optional[str]       = None,
             debug_level:                        Debug               = Debug.OFF,
     ) -> None: ...
-    @staticmethod
     def __parse_global_variables(
+            self,
+            model_file_name:            str,
             global_variables_file:      FilePath,
+            current_job_name:           Optional[str]       = None,
             debug_level:                Debug               = Debug.OFF,
     ) -> List[Tuple[str, Union[str, float]]]: ...
     @staticmethod
@@ -161,7 +166,11 @@ class APSModel:
 def _max_name_length(fmu_attributes: List[FmuAttribute]) -> int: ...
 def _max_value_length(fmu_attributes: List[FmuAttribute]) -> int: ...
 def probability_distribution_configuration(fmu_attributes: List[FmuAttribute]) -> str: ...
-def fmu_configuration(fmu_attributes: List[FmuAttribute]) -> str: ...
+def fmu_configuration(
+        fmu_attributes:                 List[FmuAttribute],
+        grid_model_name:                str,
+        current_job_name:               str,
+) -> str: ...
 
 
 ApsModel: Type[APSModel]

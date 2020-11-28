@@ -51,15 +51,18 @@ def read_values_from_xml_tree(tree):
 
 def read_fmu_attributes_file(file) -> Dict[str, str]:
     """The file has format;
-    rms:
-        FMU_KEY: value ~ <FMU_KEY>
+    APS:
+       APS_NESLEN_ODM:
+         Replace_this_line_with_an_APSGUI_job_name:
+           FMU_KEY: value ~ <FMU_KEY>
         ...
     """
     fmu_attributes = {}
+    job_name = 'Replace_this_line_with_an_APSGUI_job_name' +':'
     with open(file, 'r') as f:
         for line in f:
             line = line.strip()  # type: str
-            if line == 'rms:':
+            if line == 'APS:' or line == 'APS_NESLEN_ODM:' or line == job_name:
                 # Ignore YAML compatibility
                 continue
             elif line.startswith('#'):

@@ -40,6 +40,7 @@ class JobConfig:
             'tolerance_of_probability_normalisation': self._tolerance_of_probability_normalisation,
             'field_file_format': self.field_file_format,
             'transform_type_grf': self._transformation_type_for_grf,
+            'current_job_name': self.roxar.rms.get_running_job_name(),
         }
 
     @property

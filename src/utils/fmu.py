@@ -367,7 +367,8 @@ def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
     model_file = kwargs['model_file']
     # Instantiate the APS model anew, as it may have been modified by `global_variables`
-    aps_model = kwargs['aps_model'] = APSModel(model_file)
+    aps_model = kwargs['aps_model'] = APSModel(model_file, debug_level=None)
+
     changes = FmuModelChanges([
         UpdateTrends(**kwargs),
         UpdateSimBoxThicknessInZones(**kwargs),
@@ -376,6 +377,7 @@ def fmu_aware_model_file(*, fmu_mode, **kwargs):
         UpdateGridOrientation(**kwargs),
     ])
     if fmu_mode:
+        print('- Prepare simulation using ERTBOX')
         changes.before()
     try:
         aps_model.dump(model_file)

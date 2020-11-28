@@ -91,7 +91,7 @@ def transform_CDF(cell_index_defined, gauss_values, alpha_values):
 
     # Numpy vector operation to select subset of values corresponding to the defined grid cells
     gauss_values_selected = gauss_values[cell_index_defined]
-    alpha_values[cell_index_defined] = norm.cdf(gauss_values_selected,loc=0,scale=1)
+    alpha_values[cell_index_defined] = norm.cdf(gauss_values_selected, loc=0, scale=1)
     return alpha_values
 
 
@@ -208,10 +208,11 @@ def check_and_normalise_probability(
             # sum of np arrays (cell by cell sum)
             psum += probability_defined[f]
 
-        normalise_is_necessary = check_probability_normalisation(psum,
-                                                                 eps,
-                                                                 tolerance_of_probability_normalisation,
-                                                                 max_allowed_fraction_with_mismatch
+        normalise_is_necessary = check_probability_normalisation(
+            psum,
+            eps,
+            tolerance_of_probability_normalisation,
+            max_allowed_fraction_with_mismatch
         )
         if normalise_is_necessary:
             if debug_level >= Debug.VERBOSE:
@@ -473,7 +474,9 @@ def run(
                             f'for facies: {facies_name} for zone: {zone_number}'
                         )
 
-                    values = getContinuous3DParameterValues(grid_model, probability_parameter, realization_number, debug_level)
+                    values = getContinuous3DParameterValues(
+                        grid_model, probability_parameter, realization_number, debug_level,
+                    )
 
                     # Add the probability values to a common list containing probabilities for
                     # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
