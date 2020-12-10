@@ -49,15 +49,15 @@
           <v-radio-group
             v-model="_importFields"
             row
-            label="Initialize or update Gaussian Fields"
+            label="Exchange of Gaussian Fields with FMU"
           >
             <v-radio
-              label="Simulate GRF and export to FMU"
+              label="Simulate and export to FMU"
               value="generate"
             />
             <v-radio
-              label="Import GRF from FMU"
-              value="import"
+              label="Automatic select between Simulate/Export and Import"
+              value="automatic_detect"
             />
           </v-radio-group>
           <v-row no-gutters>
@@ -115,7 +115,7 @@ interface Invalid {
   fmuGridDepth: boolean
 }
 
-type FieldUsage = 'generate' | 'import'
+type FieldUsage = 'generate' | 'automatic_detect'
 
 interface WarningParameters {
   toggled: boolean
@@ -221,13 +221,13 @@ export default class FmuSettings extends Vue {
   get minimumErtLayers (): number { return (this.$store as Store).state.fmu.maxDepth.minimum }
 
   get _importFields (): FieldUsage {
-    if (this.importFields) return 'import'
+    if (this.importFields) return 'automatic_detect'
     else return 'generate'
   }
 
   set _importFields (value: FieldUsage) {
     if (value === 'generate') this.$emit('update:importFields', false)
-    else if (value === 'import') this.$emit('update:importFields', true)
+    else if (value === 'automatic_detect') this.$emit('update:importFields', true)
     else throw Error(`Invalid value, '${value}'`)
   }
 

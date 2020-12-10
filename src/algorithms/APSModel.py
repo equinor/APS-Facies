@@ -518,7 +518,7 @@ class APSModel:
                                                               debug_level)
 
                 if current_job_name is None:
-                    print(f'-- The APS parameters are not updated when running interactively')
+                    print(f'- The APS parameters are not updated when running interactively')
                 else:
                     if len(keywords_defined_for_updating) > 0:
                         if keywords_read is None:

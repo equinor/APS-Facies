@@ -12,7 +12,7 @@ import xtgeo
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import Conform
 from src.algorithms.Trend3D import Trend3D_elliptic_cone, ConicTrend
-from src.utils.constants.simple import OriginType
+from src.utils.constants.simple import OriginType, Debug
 from src.utils.decorators import cached
 from src.utils.exceptions.zone import MissingConformityException
 
@@ -30,6 +30,19 @@ def create_get_property(project, aps_model=None):
 def get_ert_location():
     return Path(os.getcwd())
 
+def get_top_location():
+    top_location = get_ert_location() / '..' / '..'
+    return Path(top_location)
+
+def is_initial_iteration(debug_level=Debug.ON):
+    iteration_dir_name = get_top_location() /'0'
+    if iteration_dir_name.exists():
+        if debug_level >= Debug.ON:
+            print('- APS is running in FMU mode for AHM:  Simulate GRF files and export to FMU')  
+    else:
+        if debug_level >= Debug.ON:
+            print('- APS is running in FMU mode for AHM:  Importing updated GRF from FMU')
+    return iteration_dir_name.exists()
 
 def get_export_location(create=True):
     field_location = get_ert_location() / '..' / 'output' / 'aps'
@@ -312,7 +325,7 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
 
     @property
     def update_message(self):
-        return 'Updating the location of relative trends'
+        return '- Updating the location of relative trends for ERTBOX simulation'
 
     def restore_trend(self, zone_model, field_model):
         field_model.trend.model.origin.z = self.get_original_value(zone_model, field_model)
