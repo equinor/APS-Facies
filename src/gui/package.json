@@ -105,6 +105,9 @@
     "vuetify-loader": "^1.0.5",
     "webpack": "^4.12.1"
   },
+  "resolutions": {
+    "@vue/cli-plugin-unit-jest/ts-jest/yargs-parser": "^13.1.2"
+  },
   "postcss": {
     "plugins": {
       "autoprefixer": {}
