@@ -12,6 +12,7 @@ import grid from '@/store/modules/parameters/grid'
 import realization from '@/store/modules/parameters/realization'
 import names from '@/store/modules/parameters/names'
 import debugLevel from '@/store/modules/parameters/debugLevel'
+import transformType from '@/store/modules/parameters/transformType'
 import maxAllowedFractionOfValuesOutsideTolerance from '@/store/modules/parameters/maxAllowedFractionOfValuesOutsideTolerance'
 import toleranceOfProbabilityNormalisation from '@/store/modules/parameters/toleranceOfProbabilityNormalisation'
 
@@ -31,6 +32,7 @@ const module: Module<ParametersState, RootState> = {
     debugLevel,
     maxAllowedFractionOfValuesOutsideTolerance,
     toleranceOfProbabilityNormalisation,
+    transformType,
   },
 
   actions: {

@@ -37,6 +37,10 @@
           :debug-level.sync="debugLevel"
         />
         <br>
+        <transformtype-settings
+          :transform-type.sync="transformType"
+        />
+        <br>
         <run-settings
           :max-allowed-fraction-of-values-outside-tolerance.sync="maxAllowedFractionOfValuesOutsideTolerance"
           :tolerance-of-probability-normalisation.sync="toleranceOfProbabilityNormalisation"
@@ -128,7 +132,7 @@
               <v-col class="dense">
                 <v-checkbox
                   v-model="automaticAlphaFieldSelection"
-                  label="Automatically assign fields to alpha channels"
+                  label="Automatic assign GRF to each Alpha coordinate"
                 />
               </v-col>
               <v-col class="dense">
@@ -186,6 +190,7 @@ import NumericField from '@/components/selection/NumericField.vue'
 import FmuSettings from '@/components/dialogs/JobSettings/FmuSettings.vue'
 import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 import GridInformation from '@/components/dialogs/JobSettings/GridInformation.vue'
+import TransformtypeSettings from '@/components/dialogs/JobSettings/TransformtypeSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -205,6 +210,7 @@ interface Invalid {
     NumericField,
     BoldButton,
     GridInformation,
+    TransformtypeSettings,
   },
 })
 export default class JobSettings extends Vue {
@@ -224,6 +230,7 @@ export default class JobSettings extends Vue {
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
   debugLevel = 0
+  transformType = 0
   importFields = false
   fmuGrid = ''
   createFmuGrid = false
@@ -251,6 +258,7 @@ export default class JobSettings extends Vue {
       this.fieldFileFormat = fmu.fieldFileFormat.value
 
       this.debugLevel = parameters.debugLevel.selected
+      this.transformType = parameters.transformType.selected
       this.maxAllowedFractionOfValuesOutsideTolerance = parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
       this.toleranceOfProbabilityNormalisation = parameters.toleranceOfProbabilityNormalisation.selected
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
@@ -273,6 +281,7 @@ export default class JobSettings extends Vue {
     const dispatch = this.$store.dispatch
     await Promise.all([
       dispatch('parameters/debugLevel/select', this.debugLevel),
+      dispatch('parameters/transformType/select', this.transformType),
       dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
       dispatch('parameters/toleranceOfProbabilityNormalisation/select', this.toleranceOfProbabilityNormalisation),
 

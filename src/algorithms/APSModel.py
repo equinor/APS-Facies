@@ -985,6 +985,7 @@ class APSModel:
             ('ResultFaciesParamName', self.__rmsFaciesParamName),
             ('PrintInfo', str(self.debug_level.value)),
             ('SeedFile', self.seed_file_name),
+            ('TransformationType', str(self.transform_type.value)),
             ('WriteSeeds', 'yes' if self.write_seeds else 'no'),
         ]
 

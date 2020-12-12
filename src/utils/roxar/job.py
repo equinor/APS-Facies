@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict
 
 from src.algorithms.APSModel import APSModel
-from src.utils.constants.simple import Debug, ProbabilityTolerances
+from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.decorators import cached
 from src.utils.fmu import get_export_location, get_ert_location
 
@@ -39,6 +39,7 @@ class JobConfig:
             'max_allowed_fraction_of_values_outside_tolerance': self._max_allowed_fraction_of_values_outside_tolerance,
             'tolerance_of_probability_normalisation': self._tolerance_of_probability_normalisation,
             'field_file_format': self.field_file_format,
+            'transform_type_grf': self._transformation_type_for_grf,
         }
 
     @property
@@ -118,6 +119,15 @@ class JobConfig:
             # Some, older jobs may not be updated, and this "config.parameters.toleranceOfProbabilityNormalisation"
             # does not exist.
             return ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR
+
+    @property
+    def _transformation_type_for_grf(self):
+        try:
+            return self._config['parameters']['transformType']['selected']
+        except KeyError:
+            # Some, older jobs may not be updated, and this "config.parameters.transformType"
+            # does not exist.
+            return TransformType.EMPIRIC
 
     @property
     def debug_level(self):
