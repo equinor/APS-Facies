@@ -53,20 +53,21 @@ def read_fmu_attributes_file(file) -> Dict[str, str]:
     """The file has format;
     APS:
        APS_NESLEN_ODM:
-         Replace_this_line_with_an_APSGUI_job_name:
-           FMU_KEY: value ~ <FMU_KEY>
+         apsgui_job_name:
+           FMU_KEY: value ~ 'apsgui_job_name' + '_' + <FMU_KEY>
         ...
     """
     fmu_attributes = {}
-    job_name = 'Replace_this_line_with_an_APSGUI_job_name' +':'
     with open(file, 'r') as f:
         for line in f:
             line = line.strip()  # type: str
-            if line == 'APS:' or line == 'APS_NESLEN_ODM:' or line == job_name:
+            if line == 'APS:' or line == 'APS_NESLEN_ODM:' or line == 'apsgui_job_name:':
                 # Ignore YAML compatibility
+                print(f'Skip line: {line}')
                 continue
             elif line.startswith('#'):
                 # Ignore comments
+                print(f'Skip line: {line}')
                 continue
 
             key, *value = line.split(':')
@@ -107,6 +108,8 @@ def check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_fi
     values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
     values_from_generated_attributes_file = set(read_fmu_attributes_file(attributes_file).keys())
     key_set_from_xml = set(values_from_generated_xml.keys())
+    print('Not in both:')
+    print(key_set_from_xml^values_from_generated_attributes_file)
     assert len(key_set_from_xml.symmetric_difference(values_from_generated_attributes_file)) == 0
 
 

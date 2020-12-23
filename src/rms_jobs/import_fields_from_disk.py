@@ -70,7 +70,7 @@ def get_field_name(field_name, zone):
 
 
 def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
-    aps_model = APSModel(model_file)
+    aps_model = APSModel(model_file,debug_level=None)
     file_format = kwargs.get('field_file_format')
     if grid_name is None:
         grid_name = aps_model.grid_model_name

@@ -18,7 +18,7 @@ from src.algorithms.APSModel import APSModel
 from src.utils.checks import check_probability_values, check_probability_normalisation
 from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.grid import update_rms_parameter
-from src.utils.methods import calc_average, get_specification_file
+from src.utils.methods import calc_average, get_specification_file, get_debug_level
 from src.utils.records import Probability
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     update_discrete_3d_parameter_values,
@@ -262,13 +262,14 @@ def run(
         **kwargs
 ):
     realization_number = project.current_realisation
+    debug_level = get_debug_level(**kwargs)
     print(f'Run: APS_trunc on realisation {realization_number + 1}')
 
     model_file_name = get_specification_file(**kwargs)
 
     print(f'- Read file: {model_file_name}')
     aps_model = APSModel(model_file_name)
-    debug_level = aps_model.debug_level
+
     grid_model = project.grid_models[aps_model.grid_model_name]
     if grid_model.is_empty():
         raise ValueError(f'Specified grid model: {grid_model.name} is empty.')
@@ -281,6 +282,15 @@ def run(
     use_CDF_transform = False
     if aps_model.transform_type == TransformType.CUMNORM:
         use_CDF_transform = True
+
+    if debug_level >= Debug.VERBOSE:
+        transf_type = None
+        if use_CDF_transform:
+            transf_type = 'Cumulative Normal Distribution Function'
+        else:
+            transf_type = 'Empiric Cumulative Distribution Function'
+        print(f'--- Transformation type for GRF: {transf_type}')
+
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
@@ -335,7 +345,7 @@ def run(
     all_facies_names_modelled = []
     if debug_level >= Debug.VERY_VERBOSE:
         if aps_model.isAllZoneRegionModelsSelected():
-            print('Debug output: All combinations of zone and region is selected to be run')
+            print('Debug output: All combinations of zone and region in model file is selected to be run')
         else:
             print('Debug output: Selected (zone,region) pairs to simulate:')
             print_zones_and_regions(all_zone_models, aps_model, use_regions)
@@ -347,7 +357,7 @@ def run(
         if not aps_model.isSelected(zone_number, region_number):
             continue
 
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
+        if debug_level >= Debug.ON:
             if use_regions:
                 print(f'\n- Run model for (zone_number, region_number) = ({zone_number}, {region_number})\n')
             else:
@@ -662,7 +672,7 @@ def run(
         realisation_number=realization_number, is_shared=False, set_initial_values=False,
         debug_level=debug_level,
     )
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'- Create or update parameter: {result_param_name}')
 
     print('')

@@ -7,7 +7,7 @@ from src.utils.methods import get_specification_file
 
 def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
-    aps_model = APSModel(model_file)
+    aps_model = APSModel(model_file, debug_level=None)
     aps_grid_name = aps_model.grid_model_name
 
     field_location = get_export_location()

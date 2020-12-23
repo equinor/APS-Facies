@@ -222,14 +222,15 @@ class GlobalVariables:
             all_variables = yaml.safe_load(file)
 
         global_variables = all_variables['global']
-        key = 'APS'
         aps_variables = None
-        if key in global_variables.keys():
-            aps_variables = global_variables[key]
-        else:
-            key = 'aps'
+        if global_variables is not None:
+            key = 'APS'
             if key in global_variables.keys():
                 aps_variables = global_variables[key]
+            else:
+                key = 'aps'
+                if key in global_variables.keys():
+                    aps_variables = global_variables[key]
 
         # Returns a list of dictionaries for each specified grid model
         # with aps parameters for each specified job-id for each grid model

@@ -1111,9 +1111,14 @@ class APSModel:
 
     def dump(self, name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
         """Writes the representation of this APS model to a model file"""
-        self.write_model(name, attributes_file_name, probability_distribution_file_name, debug_level)
+        self.write_model(name,
+                         attributes_file_name=attributes_file_name,
+                         probability_distribution_file_name=probability_distribution_file_name,
+                         current_job_name=None,
+                         debug_level=debug_level)
 
-    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
+    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None,
+                    current_job_name=None, debug_level=Debug.OFF):
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
@@ -1130,11 +1135,15 @@ class APSModel:
         if attributes_file_name is not None:
             aps_model = APSModel(model_file_name, debug_level=Debug.OFF)
             grid_model_name = aps_model.grid_model_name
-            current_job_name = 'Replace_this_line_with_an_APSGUI_job_name'
+
+            if current_job_name is None:
+                current_job_name = 'apsgui_job_name'
             write(attributes_file_name, fmu_configuration(fmu_attributes, grid_model_name, current_job_name))
 
         if probability_distribution_file_name is not None:
-            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes))
+            if current_job_name is None:
+                current_job_name = 'apsgui_job_name'
+            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes, current_job_name))
 
     @property
     def has_fmu_updatable_values(self):
@@ -1161,13 +1170,14 @@ def _max_value_length(fmu_attributes):
     return max(len(str(fmu_attribute.value)) for fmu_attribute in fmu_attributes)
 
 
-def probability_distribution_configuration(fmu_attributes):
+def probability_distribution_configuration(fmu_attributes, current_job_name):
     if not fmu_attributes:
         return ''
     content = ''
-    max_length = _max_name_length(fmu_attributes)
+    max_length = _max_name_length(fmu_attributes)+len(current_job_name)
     for fmu_attribute in fmu_attributes:
-        content += f'{fmu_attribute.name:<{max_length}} <prob_dist>\n'
+        symbolic_name = current_job_name + '_' + fmu_attribute.name
+        content += f'{symbolic_name:<{max_length}} <prob_dist>\n'
     return content
 
 
@@ -1182,8 +1192,9 @@ def fmu_configuration(fmu_attributes, grid_model_name, current_job_name):
     max_number_length = _max_value_length(fmu_attributes)
     for fmu_attribute in fmu_attributes:
         key_word_spacing = max_length - len(fmu_attribute.name) + 1
+        symbolic_name = current_job_name + '_' + fmu_attribute.name
         formatted_value = f'{fmu_attribute.value:{max_number_length}.10{"g" if isinstance(fmu_attribute.value, int) else ""}}'
-        content +=f'        {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{fmu_attribute.name}>\n'
+        content +=f'        {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{symbolic_name}>\n'
     return content
 
 
