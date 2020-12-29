@@ -6,6 +6,8 @@ from typing import Union, overload, Callable, Optional, Generator, List, Tuple, 
 import numpy as np
 import xtgeo
 
+from src.utils.constants.simple import Debug
+
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSGaussModel import GaussianField
 from src.algorithms.APSZoneModel import APSZoneModel
@@ -20,6 +22,10 @@ def create_get_property(
 ) -> Callable[[str, Optional[str]], xtgeo.GridProperty]:...
 
 def get_ert_location() -> Path: ...
+def get_top_location() -> Path: ...
+def is_initial_iteration(
+        debug_level: Debug = Debug.OFF,
+) -> bool: ...
 def get_export_location(
         create:     bool    = True,
 ) -> Path: ...

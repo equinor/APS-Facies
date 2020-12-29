@@ -1,6 +1,6 @@
 import cmp from 'semver-compare'
 import rms from '@/api/rms'
-import { DEFAULT_FIELD_FORMAT, DEFAULT_TRANSFORM_TYPE } from '@/config'
+import { DEFAULT_FIELD_FORMAT, DEFAULT_TRANSFORM_TYPE, DEFAULT_EXPORT_FMU_CONFIG_FILES } from '@/config'
 import { displayMessage } from '@/store/utils'
 
 import { Store } from '@/store/typing'
@@ -150,6 +150,9 @@ const migrations: Migration[] = [
     up: async (state): Promise<any> => {
       state.parameters.transformType = {
         selected: DEFAULT_TRANSFORM_TYPE,
+      }
+      state.options.exportFmuConfigFiles = {
+        value: DEFAULT_EXPORT_FMU_CONFIG_FILES,
       }
       return new Promise(resolve => resolve(state))
     }

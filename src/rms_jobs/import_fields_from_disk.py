@@ -10,6 +10,8 @@ from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import Conform
 from src.utils.exceptions.zone import MissingConformityException
 from src.utils.fmu import create_get_property, find_zone_range, get_ert_location
+from src.utils.constants.simple import Debug
+from src.utils.methods import get_debug_level
 
 
 def extract_values(field_values, defined, zone):
@@ -70,11 +72,12 @@ def get_field_name(field_name, zone):
 
 
 def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
-    aps_model = APSModel(model_file,debug_level=None)
+    aps_model = APSModel(model_file)
     file_format = kwargs.get('field_file_format')
     if grid_name is None:
         grid_name = aps_model.grid_model_name
     get_property = create_get_property(project, aps_model)
+    debug_level = get_debug_level(**kwargs)
 
     if load_dir is None:
         load_dir = get_ert_location() / '..' / '..'
@@ -90,7 +93,7 @@ def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
             full_field_name = get_field_name(field_name, zone_name)
             field_location = load_dir / f'{full_field_name}.{file_format}'
             if field_location.exists():
-                field = load_field_values(full_field_name, fmu_grid, field_location)
+                field = load_field_values(full_field_name, fmu_grid, field_location, debug_level=debug_level)
                 field_values += extract_values(field, defined, zone)
             else:
                 if full_field_name not in zone.gaussian_fields_in_truncation_rule:
@@ -144,7 +147,9 @@ def _load_field_values_roff(field_name, grid, path):
     return property.values
 
 
-def load_field_values(field_name: str, grid: xtgeo.Grid, path: Path):
+def load_field_values(field_name: str, grid: xtgeo.Grid, path: Path, debug_level=Debug.OFF):
+    if debug_level >= Debug.VERBOSE:
+        print(f'-- Read file: {path}')
     if path.suffix == '.grdecl':
         return _load_field_values_grdecl(field_name, grid, path)
     elif path.suffix == '.roff':

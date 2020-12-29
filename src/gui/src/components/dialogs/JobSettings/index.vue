@@ -30,6 +30,7 @@
           :fmu-grid.sync="fmuGrid"
           :create-fmu-grid.sync="createFmuGrid"
           :field-file-format.sync="fieldFileFormat"
+          :export-fmu-config-files.sync="exportFmuConfigFiles"
           @update:error="e => update('fmu', e)"
         />
         <br>
@@ -238,6 +239,7 @@ export default class JobSettings extends Vue {
   maxAllowedFractionOfValuesOutsideTolerance = 0
   toleranceOfProbabilityNormalisation = 0
   fieldFileFormat = ''
+  exportFmuConfigFiles = false
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
@@ -268,6 +270,7 @@ export default class JobSettings extends Vue {
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.importFields = options.importFields.value
+      this.exportFmuConfigFiles = options.exportFmuConfigFiles.value  
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }
@@ -299,6 +302,7 @@ export default class JobSettings extends Vue {
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
       dispatch('options/importFields/set', this.importFields),
+      dispatch('options/exportFmuConfigFiles/set', this.exportFmuConfigFiles),
       dispatch('options/colorScale/set', this.colorScale),
 
       dispatch('constants/faciesColors/set', this.faciesColorLibrary),

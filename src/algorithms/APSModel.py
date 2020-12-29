@@ -1114,7 +1114,6 @@ class APSModel:
         self.write_model(name,
                          attributes_file_name=attributes_file_name,
                          probability_distribution_file_name=probability_distribution_file_name,
-                         current_job_name=None,
                          debug_level=debug_level)
 
     def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None,

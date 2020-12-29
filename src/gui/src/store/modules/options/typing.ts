@@ -15,5 +15,6 @@ export default interface OptionsState {
   automaticFaciesSelection: OptionState<boolean>
   runFmuWorkflows: OptionState<boolean>
   importFields: OptionState<boolean>
+  exportFmuConfigFiles: OptionState<boolean>
   colorScale: OptionState<string>
 }

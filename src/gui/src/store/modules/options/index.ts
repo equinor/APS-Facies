@@ -4,6 +4,7 @@ import {
   DEFAULT_COLOR_SCALE,
   DEFAULT_FACIES_AUTOFILL,
   DEFAULT_IMPORT_FIELDS_IN_FMU,
+  DEFAULT_EXPORT_FMU_CONFIG_FILES,
 } from '@/config'
 import { makeOption, populateState } from '@/store/utils'
 
@@ -27,6 +28,7 @@ const module: Module<OptionsState, RootState> = {
     automaticObservedFaciesSelection: makeOption(DEFAULT_AUTOFILL_OBSERVED_FACIES, [true, false]),
     colorScale: makeOption(DEFAULT_COLOR_SCALE, COLOR_SCALES),
     importFields: makeOption(DEFAULT_IMPORT_FIELDS_IN_FMU, [true, false]),
+    exportFmuConfigFiles: makeOption(DEFAULT_EXPORT_FMU_CONFIG_FILES, [true, false]),
   },
 
   actions: {

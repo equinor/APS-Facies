@@ -34,13 +34,13 @@ def get_top_location():
     top_location = get_ert_location() / '..' / '..'
     return Path(top_location)
 
-def is_initial_iteration(debug_level=Debug.ON):
-    iteration_dir_name = get_top_location() /'0'
+def is_initial_iteration(debug_level=Debug.OFF):
+    iteration_dir_name = get_top_location() / '0'
     if iteration_dir_name.exists():
-        if debug_level >= Debug.ON:
-            print('- APS is running in FMU mode for AHM:  Simulate GRF files and export to FMU')  
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('- APS is running in FMU mode for AHM:  Simulate GRF files and export to FMU')
     else:
-        if debug_level >= Debug.ON:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('- APS is running in FMU mode for AHM:  Importing updated GRF from FMU')
     return iteration_dir_name.exists()
 
