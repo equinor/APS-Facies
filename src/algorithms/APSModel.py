@@ -664,23 +664,16 @@ class APSModel:
             apsmodel = APSModel(model_file_name)
             aps_dict = GlobalVariables.parse(global_variables_file)
 
-            # Find the current grid model parameters
+            # Find the model parameters for the current aps job
             try:
-                job_dict = aps_dict[apsmodel.grid_model_name]
-                try:
+                param_dict = aps_dict[current_job_name]
+                for key, value in param_dict.items():
+                    item = [key, value]
+                    keywords.append(item)
+                return keywords
 
-                    param_dict = job_dict[current_job_name]
-                    for key, value in param_dict.items():
-                        item = [key, value]
-                        keywords.append(item)
-                    return keywords
-
-
-                except:
-                    # No parameter specified to be updated for the current APS job
-                    return None
             except:
-                # No APS parameter specified for current grid model
+                # No parameter specified to be updated for the current APS job
                 return None
 
         # End read file
@@ -1114,6 +1107,7 @@ class APSModel:
         self.write_model(name,
                          attributes_file_name=attributes_file_name,
                          probability_distribution_file_name=probability_distribution_file_name,
+                         current_job_name=None,
                          debug_level=debug_level)
 
     def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None,
@@ -1175,7 +1169,7 @@ def probability_distribution_configuration(fmu_attributes, current_job_name):
     content = ''
     max_length = _max_name_length(fmu_attributes)+len(current_job_name)
     for fmu_attribute in fmu_attributes:
-        symbolic_name = current_job_name + '_' + fmu_attribute.name
+        symbolic_name = current_job_name.upper() + '_' + fmu_attribute.name
         content += f'{symbolic_name:<{max_length}} <prob_dist>\n'
     return content
 
@@ -1185,13 +1179,12 @@ def fmu_configuration(fmu_attributes, grid_model_name, current_job_name):
         return ''
 
     content  =  '  APS:\n'
-    content += f'    {grid_model_name}:\n'
-    content += f'      {current_job_name}:\n'
+    content += f'    {current_job_name}:\n'
     max_length = _max_name_length(fmu_attributes)
     max_number_length = _max_value_length(fmu_attributes)
     for fmu_attribute in fmu_attributes:
         key_word_spacing = max_length - len(fmu_attribute.name) + 1
-        symbolic_name = current_job_name + '_' + fmu_attribute.name
+        symbolic_name = current_job_name.upper() + '_' + fmu_attribute.name
         formatted_value = f'{fmu_attribute.value:{max_number_length}.10{"g" if isinstance(fmu_attribute.value, int) else ""}}'
         content +=f'        {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{symbolic_name}>\n'
     return content

@@ -197,14 +197,13 @@ class GlobalVariables:
             Example structure of the YAMLS file:
             global:
               APS:
-                Geogrid_single_zone_grid:
                   APS_job_1:
                    APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 100.0
                    APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
                   APS_job_2:
                    APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 200.0
                    APS_1_0_GF_GRF2_TREND_AZIMUTH: 80.0
-                Geogrid_multizone_grid:
+
                   APS_job_3:
                    APS_1_0_GF_GRF1_TREND_RELSTDDEV: 0.1
                    APS_2_0_GF_GRF1_TREND_AZIMUTH: 0.0
