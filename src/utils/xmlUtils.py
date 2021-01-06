@@ -76,7 +76,7 @@ def getTextCommand(parent, keyword, parentKeyword='', defaultText=None, modelFil
 
 def getFloatCommand(
         parent, keyword, parentKeyword='', minValue=None, maxValue=None,
-        defaultValue=None, modelFile=None, required=True
+        defaultValue=None, modelFile=None, required=True,  moduloAngle=None
 ):
     """
     Return the float value specified in the keyword. If the keyword is required,
@@ -84,6 +84,8 @@ def getFloatCommand(
     If the keyword is not required and the keyword is not found, the default value is returned.
     If minValue and/or maxValue is specified, the value read is checked against these.
     Error message is called if the value <= minValue or value >= maxValue.
+    If moduloAngle is defined (and a postive number is required), the input value is regarded 
+    as an angle taking values in interval 0 to moduloAngle degrees.
     Ensure that default value is set if the command is not required.
     """
 
@@ -98,16 +100,23 @@ def getFloatCommand(
                 raise MissingRequiredValue(keyword, parentKeyword, modelFile)
             return None
         value = float(text.strip())
-        if minValue is not None and value < minValue:
+        if minValue is not None and minValue != NotImplemented and value < minValue:
             raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
-        if maxValue is not None and value > maxValue:
+        if maxValue is not None and maxValue != NotImplemented and value > maxValue:
             raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
+        if moduloAngle is not None and moduloAngle != NotImplemented:
+            if moduloAngle > 0:
+                value = value % moduloAngle
+                if value < 0.0:
+                    value = value + moduloAngle
+            else:
+                raise ValueError('Modulo angle must be positive')
     return value
 
 
 def getIntCommand(
         parent, keyword, parentKeyword='', minValue=None,
-        maxValue=None, defaultValue=None, modelFile=None, required=True
+        maxValue=None, defaultValue=None, modelFile=None, required=True, moduloAngle=None,
 ):
     """
     Return the int value specified in the keyword. If the keyword is required,
@@ -115,6 +124,8 @@ def getIntCommand(
     If the keyword is not required and the keyword is not found, the default value is returned.
     If minValue and/or maxValue is specified, the value read is checked against these.
     Error message is called if the value <= minValue or value >= maxValue.
+    If moduloAngle is defined (and a postive number is required), the input value is regarded 
+    as an angle taking values in interval 0 to moduloAngle degrees.
     Ensure that default value is set if the command is not required.
     """
     obj = parent.find(keyword)
@@ -124,10 +135,17 @@ def getIntCommand(
     if obj is not None:
         text = obj.text
         value = int(text.strip())
-        if minValue is not None and value < minValue:
+        if minValue is not None and minValue != NotImplemented and value < minValue:
             raise LessThanExpected(keyword, value, minValue, parentKeyword, modelFile)
-        if maxValue is not None and value > maxValue:
+        if maxValue is not None and maxValue != NotImplemented and value > maxValue:
             raise MoreThanExpected(keyword, value, maxValue, parentKeyword, modelFile)
+        if moduloAngle is not None and moduloAngle != NotImplemented:
+            if moduloAngle > 0:
+                value = value % moduloAngle
+                if value < 0.0:
+                    value = value + moduloAngle
+            else:
+                raise ValueError('Modulo angle must be positive')
     return value
 
 

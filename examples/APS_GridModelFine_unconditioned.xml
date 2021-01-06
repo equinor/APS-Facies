@@ -92,7 +92,8 @@
                     <MainRange>12340.0</MainRange>
                     <PerpRange>987.0</PerpRange>
                     <VertRange>5.0</VertRange>
-                    <AzimuthAngle>270.0</AzimuthAngle>
+<!--                     <AzimuthAngle>270.0</AzimuthAngle> -->
+                    <AzimuthAngle>-90.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
                 <SeedForPreview>75151556</SeedForPreview>
@@ -103,7 +104,8 @@
                     <MainRange kw="APS_1_0_GF_GF2_RESIDUAL_MAINRANGE">1000.0</MainRange>
                     <PerpRange>1000.0</PerpRange>
                     <VertRange>5.0</VertRange>
-                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">305.0</AzimuthAngle>
+<!--                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">305.0</AzimuthAngle> -->
+                    <AzimuthAngle kw="APS_1_0_GF_GF2_RESIDUAL_AZIMUTHANGLE">-55.0</AzimuthAngle>
                     <DipAngle>0.0</DipAngle>
                 </Vario>
                 <SeedForPreview>75151556</SeedForPreview>
@@ -119,7 +121,8 @@
                 </Vario>
                 <Trend>
                     <Elliptic3D>
-                        <azimuth>35.0</azimuth>
+<!--                        <azimuth>35.0</azimuth> -->
+                        <azimuth>-325.0</azimuth>
                         <directionStacking>1</directionStacking>
                         <stackAngle>0.25</stackAngle>
                         <curvature kw="APS_1_0_GF_GF2_TREND_CURVATURE">1.5</curvature>
