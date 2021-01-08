@@ -10,8 +10,9 @@ from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import Conform
 from src.utils.exceptions.zone import MissingConformityException
 from src.utils.fmu import create_get_property, find_zone_range, get_ert_location
-from src.utils.constants.simple import Debug
+from src.utils.constants.simple import Debug, GridModelConstants
 from src.utils.methods import get_debug_level
+from src.utils.roxar.grid_model import create_zone_parameter
 
 
 def extract_values(field_values, defined, zone):
@@ -84,7 +85,17 @@ def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
 
     rms_grid = xtgeo.grid_from_roxar(project, grid_name)
     fmu_grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name)
-    zone_model = get_property(aps_model.zone_parameter, grid_name)
+    try:
+        zone_model = get_property(aps_model.zone_parameter, grid_name)
+    except:
+        grid_model = project.grid_models[grid_name]
+        zone_model = create_zone_parameter(
+            grid_model,
+            name=GridModelConstants.ZONE_NAME,
+            realization_number=project.current_realisation,
+            set_shared=True,
+            debug_level=Debug.VERBOSE
+        )
 
     for field_name, zones in get_field_names(aps_model, zone_model).items():
         field_values = np.zeros(rms_grid.dimensions)

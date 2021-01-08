@@ -1,3 +1,5 @@
+#!/bin/env python
+# -*- coding: utf-8 -*-
 import os
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
@@ -23,6 +25,12 @@ def create_get_property(project, aps_model=None):
             if aps_model is None:
                 raise ValueError("'aps_model' must be given, if 'grid_name' is not given")
             grid_name = _get_grid_name(aps_model)
+        properties = project.grid_models[grid_name].properties
+        if name in properties:
+            if properties[name].is_empty(project.current_realisation):
+                raise ValueError(f'The parameter {name} is empty in grid model {grid_name}')
+        else:
+            raise ValueError(f'The parameter  {name} does not exist in grid model {grid_name}')
         return xtgeo.gridproperty_from_roxar(project, grid_name, name, project.current_realisation)
     return get_property
 
