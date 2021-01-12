@@ -38,7 +38,6 @@ const module: Module<ParametersState, RootState> = {
   actions: {
     async fetch ({ dispatch }): Promise<void> {
       await Promise.all([
-        dispatch('path/fetch'),
         dispatch('names/workflow/fetch'),
         dispatch('names/project/fetch'),
         dispatch('maxAllowedFractionOfValuesOutsideTolerance/fetch'),
