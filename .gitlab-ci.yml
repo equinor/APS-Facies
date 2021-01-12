@@ -1,5 +1,5 @@
 image:
-  name: "registry.git.equinor.com/aps/gui/aps-gui:4.1.4"
+  name: "registry.git.equinor.com/aps/gui/aps-gui:5.0.0"
 
 variables:
   GIT_STRATEGY:           "fetch"
@@ -16,9 +16,7 @@ variables:
   PIPENV_VENV_IN_PROJECT: "1"
   DEPLOY_SERVER:          "tr-linrgsn001.tr.statoil.no"
   SYSTEM_INSTALL_PIPENV:  "yes"
-  RMS_VERSION:            "11.0.1"
   GIT_LFS_SKIP_SMUDGE:    "1"
-  RMS_PYTHON:             "/prog/roxar/rms/versions/${RMS_VERSION}/bin/LINUX_64/python"
   MATPLOTLIB_BACKEND:     "Agg"
 
 stages:
@@ -33,12 +31,12 @@ stages:
 
 before_script:
   - 'export PYTHONPATH="${CODE_DIR}:${PYTHONPATH}"'
+  - 'export RMS_PYTHON="${RMS_PREFIX}/bin/LINUX_64/python"'
 
 initialize:
   stage: init
-  variables:
-    PYTHON:      "${RMS_PYTHON}"
   script:
+    - 'export PYTHON="${RMS_PYTHON}"'
     - 'unset MAKE'
     - 'eval make --directory=${CODE_DIR} init'
     - 'eval rm -rf ${WORKON_HOME}/nrlib-*'
@@ -123,7 +121,7 @@ integration testing (RMS 11):
   stage: testing
   variables:
     WRITE_WORKFLOW_FILES_TO_PROJECT: "yes"
-    RMS_PROJECT:                     "/testAPSWorkflow_new.rms11.0.0"
+    RMS_PROJECT:                     "/integration_test/rms/model/testAPSWorkflow_new.rms11.1.2"
     APS_DEBUG_LEVEL:                 "4"
   script:
     - export PYTHON="$RMS_PYTHON"
