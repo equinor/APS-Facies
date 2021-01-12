@@ -296,7 +296,10 @@ class RMSData:
             project_root = Path(__file__).parent.parent.parent.parent
             with open(project_root / 'local.settings.json') as f:
                 debug_settings = json.load(f)
-                project_location = Path(debug_settings['projectRootLocation']) / self.project.filename
+                filename = self.project.filename
+                if filename.startswith('/'):
+                    filename = filename[1:]
+                project_location = Path(debug_settings['projectRootLocation']) / filename
         except Exception:
             project_location = Path(self.project.filename)
         return parse_dot_master(project_location / 'pythoncomp/apsgui/.master')
