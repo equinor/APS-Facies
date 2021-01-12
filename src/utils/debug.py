@@ -79,7 +79,12 @@ def parse_dot_master(path):
                 key, value = _split(line)
                 header[key] = value
             elif state == State.PARAMETER:
-                name, value = _split(line)
+                try:
+                    name, value = _split(line)
+                except ValueError:
+                    # The (presumable) JSON contains '='. Likely as part of a base64 encoded value
+                    name, *value = _split(line)
+                    value = '='.join(value)
                 parameters[parameter_index][name] = _parse(value)
     return {
         'header': header,

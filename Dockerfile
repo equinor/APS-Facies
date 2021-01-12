@@ -1,12 +1,40 @@
-FROM registry.git.equinor.com/sdp/sdpsoft/centos:7
-LABEL version="4.1.4" \
+FROM registry.git.equinor.com/sdp/docker/rms:11.1.2
+LABEL version="5.0.0" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
 
+# This is an image of CentOS configured to be used inside the firewall of Statoil
+
+    # Proxy settings
+ENV PROXY_SCHEME=http \
+    PROXY_HOST=www-proxy.statoil.no \
+    PROXY_PORT=80
+ENV HTTP_PROXY="${PROXY_SCHEME}://${PROXY_HOST}:${PROXY_PORT}" \
+    HTTPS_PROXY="${PROXY_SCHEME}://${PROXY_HOST}:${PROXY_PORT}" \
+    FTP_PROXY="${PROXY_SCHEME}://${PROXY_HOST}:${PROXY_PORT}" \
+    NO_PROXY="*.statoil.no,*.equinor.com,localhost,127.0.0.1"
+ENV http_proxy="$HTTP_PROXY" \
+    https_proxy="$HTTPS_PROXY" \
+    ftp_proxy="$FTP_PROXY"\
+    no_proxy="$NO_PROXY" \
+    # Statoil's certificates
+    STATOIL_CERT="statoil-ca-certificates-1.0-8.el7.noarch.rpm" \
+    # Define where all building / compiling should take place
+    ROOT_DIR=/software \
+    # Misc. environment variables
+    # Language settings
+    ENCODING="en_US.UTF-8"
+ENV LC_ALL=$ENCODING \
+    LANG=$ENCODING \
+    SHELL=/bin/bash \
+    # Build details
+    BUILD_DIR=$ROOT_DIR/build \
+    SOURCE_DIR=$ROOT_DIR/source \
+    INSTALL_DIR=/prog/sdpsoft
+
 # Versions
-ENV RMS_VERSION=11.0.1 \
-    PYTHON_VERSION=3.6 \
+ENV PYTHON_VERSION=3.6 \
     TCL_VERSION=8.6 \
     INTEL_MKL_VERSION=2019.5.281 \
     INTEL_MKL_SEED=15816 \
@@ -37,9 +65,6 @@ ENV PYTHON_LIB_PREFIX=$RMS_LIB_PREFIX/python$PYTHON_VERSION \
     PYTHONPATH=$DEPENDENCIES_PREFIX \
     MKL_ROOT="${INTEL_MKL_PREFIX}/mkl" \
     INTEL_CONFIGURATION="${INTEL_PREFIX}/config.txt"
-
-# RMS License
-ENV LM_LICENSE_FILE="/prog/roxar/licensing/geomaticLM.lic"
 
 # Paths for executables, and libraries
 
@@ -79,9 +104,28 @@ ENV PIP="$PYTHON -m pip --proxy $HTTP_PROXY --cert ${CA_FILE}" \
     SSL_CERT_FILE="${CA_FILE}"
 
 # Add external resources
-ADD .rms/bundle.rms-${RMS_VERSION}.tar.gz /
 ADD .rms/APS-workflows.rms11.tar.gz /
 ADD libraries/sources/nrlib ${NRLIB_PREFIX}
+
+# Tell yum to use the proxy as well
+RUN echo "proxy=${HTTP_PROXY}" >> /etc/yum.conf \
+    # Upgrade everything!
+ && yum update -y \
+   # Install wget and tell wget to use the proxy too
+&& yum install -y \
+                wget \
+    # Set proxy for wget
+ && echo "https_proxy = $HTTP_PROXY" >> /etc/wgetrc \
+ && echo "http_proxy = $HTTPS_PROXY" >> /etc/wgetrc \
+ && echo "ftp_proxy = $FTP_PROXY" >> /etc/wgetrc \
+ && echo "no_proxy = $NO_PROXY" >> /etc/wgetrc \
+ && echo "use_proxy = on" >> /etc/wgetrc \
+ && echo "ca-directory = /etc/pki/ca-trust/source/anchors" >> /etc/wgetrc \
+    # Download, and install Statoil's Certificates
+ && wget http://st-linrhn01.st.statoil.no/pub/$STATOIL_CERT \
+ && yum install -y $STATOIL_CERT \
+ && rm -f $STATOIL_CERT \
+ && yum clean all
 
 # Misc. software
 RUN yum update -y \
@@ -89,6 +133,7 @@ RUN yum update -y \
  && yum groupinstall -y "Development Tools" \
  && yum install -y \
     git \
+    wget \
     # Install software needed during build of python and pip install
     freetype-devel \
     libxml2-devel \
@@ -100,25 +145,8 @@ RUN yum update -y \
     libpcap-devel \
     xz-devel \
     expat-devel \
-    mesa-libGL-devel \
     libstdc++-static \
     which \
-    # RMS dependencies
-    mesa-libEGL \
-    mesa-libGLU \
-    libXi \
-    libSM \
-    libXrender \
-    libXrandr \
-    libXcomposite \
-    libXcursor \
-    libXt \
-    libXtst \
-    libXScrnSaver \
-    glibc.i686 \
-    fontconfig \
-    alsa-lib \
-    libgomp \
  && yum clean all \
     # Get GPG keys
  && for key in \
