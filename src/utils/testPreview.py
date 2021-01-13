@@ -15,9 +15,9 @@ from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, CrossSectionType
 from src.utils.exceptions.xml import UndefinedZoneError
 from src.utils.io import writeFileRTF
-from src.utils.methods import get_colors, get_run_parameters
+from src.utils.methods import get_colors, get_run_parameters, get_debug_level
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from src.utils.plotting import plot_gaussian_field, cross_plot, plot_facies, create_facies_map, create_facies_map_vectorized
+from src.utils.plotting import plot_gaussian_field, cross_plot, plot_facies, create_facies_map
 
 
 def high_resolution_2D_grids(
@@ -500,9 +500,8 @@ def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     model = params['model_file']
     rms_data_file_name = params['rms_data_file']
-    debug_level = params['debug_level']
+    debug_level = get_debug_level(**kwargs)
     [kwargs.pop(item, None) for item in ['model', 'rms_data_file_name', 'debug_level']]
-    debug_level=Debug.VERY_VERBOSE
     plot_to_file = False
     run_previewer(model=model, rms_data_file_name=rms_data_file_name, plot_to_file=plot_to_file, debug_level=debug_level, **kwargs)
 
