@@ -156,7 +156,6 @@ build GUI:
 
 .setup ssh keys:
   before_script:
-    - 'eval export PYTHON=${RMS_PYTHON}'
     # Add the SSH key for cicd_aps
     # From https://docs.gitlab.com/ee/ci/ssh_keys/
     - 'eval $(ssh-agent -s)'
@@ -164,7 +163,7 @@ build GUI:
     - chmod 700 ~/.ssh
     - touch ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - $PYTHON -c 'import base64; import os; print(base64.b16decode(os.environ["CICD_APS_PRIVATE_KEY_HEX"]).decode("UTF-8"))' > ~/.ssh/id_rsa
+    - python -c 'import base64; import os; print(base64.b16decode(os.environ["CICD_APS_PRIVATE_KEY_HEX"]).decode("UTF-8"))' > ~/.ssh/id_rsa
     - ssh-add
     - ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
   after_script:
