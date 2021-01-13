@@ -4,11 +4,12 @@ import collections
 import copy
 import xml.etree.ElementTree as ET
 from typing import List
+from warnings import warn
 
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.algorithms.properties import CrossSection
-from src.utils.constants.simple import Debug
+from src.utils.constants.simple import Debug, TransformType
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
@@ -29,7 +30,7 @@ class APSModel:
             rmsFaciesParameterName='', seedFileName='seed.dat', write_seeds=True,
             mainFaciesTable=None, zoneModelTable=None,
             previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
-            previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF):
+            previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF, transform_type=TransformType.EMPIRIC'):
 
       def createSimGaussFieldIPL()
                 - Write IPL file to simulate gaussian fields
@@ -115,7 +116,8 @@ class APSModel:
             preview_cross_section_relative_pos=0.5,
             preview_scale=1.0,
             preview_resolution='Normal',
-            debug_level=Debug.OFF
+            debug_level=Debug.OFF,
+            transform_type=TransformType.EMPIRIC,
     ):
         """
          The following parameters are necessary to define a model:
@@ -155,6 +157,9 @@ class APSModel:
          previewResolution - Define  whether the testPreview program should use higher resolution or not compared with
                              default resolution taken from the grid model.
          debugLevel - Define amount of output to the screen during runs
+         transform_type - Define whether Empiric transformation based on GRF (with trend) values within the (zone,region)
+                          is used or the cumulative normal distribution is to be used to transform GRF
+                          to a uniform distribution (alpha field)
 
         """
         # Local variables
@@ -185,6 +190,7 @@ class APSModel:
         self.__previewScale = preview_scale
         self.__previewResolution = preview_resolution
         self.__debug_level = debug_level
+        self.__transform_type = transform_type
 
         # Read model if it is defined
         if model_file_name is not None:
@@ -222,14 +228,16 @@ class APSModel:
         # --- PrintInfo ---
         kw = 'PrintInfo'
         obj = root.find(kw)
-        if obj is None:
-            # Default value is set
-            self.__debug_level = debug_level
-        else:
-            text = obj.text
-            self.debug_level = text
         if debug_level is None:
-            self.debug_level = Debug.OFF
+            self.__debug_level= Debug.OFF
+        else:
+            if obj is None:
+                # Default value is set
+                self.__debug_level = debug_level
+            else:
+                text = obj.text
+                self.debug_level = text
+
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')
@@ -320,6 +328,19 @@ class APSModel:
                 f'Debug output: RMSRegionParamName:                 {self.__rmsRegionParamName}\n'
                 f'Debug output: Name of RMS project read:           {self.__rmsProjectName}\n'
                 f'Debug output: Name of RMS workflow read:          {self.__rmsWorkflowName}'
+            )
+
+        # Read optional keyword to specify which transformation to use for Gaussian Fields
+        keyword = 'TransformationType'
+        text = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='Empiric', modelFile=model_file_name, required=False)
+        if text.upper() == 'EMPIRIC' or text.upper() == '0':
+            self.__transform_type = TransformType.EMPIRIC
+        elif text.upper() == 'CDF' or text.upper() == '1':
+            self.__transform_type = TransformType.CUMNORM
+        else:
+            raise ValueError(
+                f'Illegal value ( {text} ) specified for keyword {keyword}.\n'
+                'Legal values are either  Empiric (or alternatively 0)  or CDF (or alternatively 1)'
             )
 
         # Read all zones for models specifying main level facies
@@ -457,7 +478,9 @@ class APSModel:
             workflow_name=None,
             uncertainty_variable_names=None,
             realisation_number=0,
-            debug_level=Debug.OFF,
+            debug_level=Debug.ON,
+            current_job_name=None,
+            use_rms_uncertainty_table=False
     ):
         """
         Read xml model file and IPL parameter file and write updated xml model file
@@ -473,8 +496,8 @@ class APSModel:
         # name that will be used as identifier.
         if debug_level >= Debug.VERY_VERBOSE:
             print('')
-            print('-- Model parameters marked as possible to update when running in batch mode')
-            print('Keyword:                        Tag:                Value:')
+            print(f'-- Model parameters marked as possible to update in model file {model_file_name}')
+            print('Keyword:                                           Value:')
         keywords_defined_for_updating = []
         for obj in root.findall(".//*[@kw]"):
             key_word = obj.get('kw')
@@ -482,11 +505,61 @@ class APSModel:
             value = obj.text
             keywords_defined_for_updating.append([key_word.strip(), value.strip()])
             if debug_level >= Debug.VERY_VERBOSE:
-                print('{0:30} {1:20}  {2:10}'.format(key_word, tag, value))
+                print('{0:30} {1:10}'.format(key_word,  value))
 
-        # Read keywords from parameter_file_name (Global IPL include file with variables updated by FMU/ERT)
-        if parameter_file_name is not None:
-            keywords_read = self.__parse_global_variables(parameter_file_name, debug_level)
+        # Read keywords from parameter_file_name (global_variables.yml with variables updated by FMU/ERT)
+        keywords_read = None
+        if not use_rms_uncertainty_table:
+            if parameter_file_name is not None:
+                # keywords_read is a list of items where each item is [name, value]
+                keywords_read = self.__parse_global_variables(model_file_name,
+                                                              parameter_file_name,
+                                                              current_job_name,
+                                                              debug_level)
+
+                if current_job_name is None:
+                    print(f'- The APS parameters are not updated when running interactively')
+                else:
+                    if len(keywords_defined_for_updating) > 0:
+                        if keywords_read is None:
+                            print(' ')
+                            text  =  '\nWARNING:\n'
+                            text += f'-- The APS parameters selected to be updated by FMU in APS job: {current_job_name}\n'
+                            text += f'   will not be updated since no APS parameters are specified in \n'
+                            text += f'   {parameter_file_name} for the current job.\n'
+                            text += f'   Ensure that APS parameters to be updated are specified both in \n'
+                            text += f'   the APS job and the FMU global_variables file.\n'
+                            warn(text)
+                            print(' ')
+                    else:
+                        if keywords_read is not None:
+                            print(' ')
+                            text  =  '\nWARNING:\n'
+                            text += f'-- No APS parameters are selected to be updated by FMU in APS job: {current_job_name}\n'
+                            text += f'   There are defined APS parameters for this APS job in: {parameter_file_name}\n'
+                            text += f'   Ensure that APS parameters to be updated are specified both in \n'
+                            text += f'   the APS job and the FMU global_variables file.\n'
+                            warn(text)
+                            print(' ')
+                        else:
+                            print(' ')
+                            text  =  '\nWARNING:\n'
+                            text += f'-- No FMU parameters are updated for APS job: {current_job_name}\n'
+                            text += f'   Ensure that APS parameters to be updated are specified both in \n'
+                            text += f'   the APS job and the FMU global_variables file:\n'
+                            text += f'   {parameter_file_name}\n'
+                            warn(text)
+                            print(' ')
+
+
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(' ')
+                    print(f'  Keyword read from {parameter_file_name}:')
+                    if keywords_read is not None:
+                        for item in keywords_read:
+                            name = item[0]
+                            value = item[1]
+                            print(f' {name}     {value}')
         else:
             assert project
             assert workflow_name
@@ -494,42 +567,58 @@ class APSModel:
             keywords_read = self.__getParamFromRMSTable(
                 project, workflow_name, uncertainty_variable_names, realisation_number,
             )
-        # keywordsRead = [name,value]
 
-        # Set new values
-        for item in keywords_defined_for_updating:
-            keyword = item[0]
-            for kw, value in keywords_read:
-                if kw == keyword:
-                    # set new value
-                    item[1] = value
-        if debug_level >= Debug.ON:
-            print('-- Updating the following APS model parameters:')
-            print('   Parameter name                  Original value   New value   ')
 
-        for obj in root.findall(".//*[@kw]"):
-            key_word = obj.get('kw')
-            old_value = obj.text
 
-            found = False
-            for kw, val in keywords_defined_for_updating:
-                if kw == key_word:
-                    # Update value in XML tree for this keyword
-                    if isinstance(val, str):
-                        val = val.strip()
-                    obj.text = str(val)
-                    found = True
-                    break
-            if found:
-                if debug_level >= Debug.ON:
-                    print(f'   {key_word:30}    {old_value:15}  {obj.text:10}')
+        # Set new values if keyword in global_variables file and in fmu tag in model file match
+        if ( len(keywords_defined_for_updating) > 0 ) and ( keywords_read != None):
+            # Update the list of keywords in the model file with new values from FMU global_variables
+            found_an_update = False
+            for item in keywords_defined_for_updating:
+                keyword = item[0]
+                for item_from_fmu in keywords_read:
+                    kw, value = item_from_fmu
+                    if kw == keyword:
+                        # update the keywords_defined_for_updating list
+                        found_an_update = True
+                        item[1] = value
+                        break
+
+            if found_an_update:
+                print(f'-- The APS parameters are updated for the job: {current_job_name}')
+                print(f'   Parameter name                                   Original value   New value')
             else:
-                raise ValueError(
-                    'Error: Inconsistency. Programming error in function update_model_file in class APSModel'
-                )
+                if debug_level >= Debug.ON:
+                    printf(f'-- APS parameters selected to be updated by FMU does not match parameters \n')
+                    printf(f'   specified in {parameter_file_name}')
 
-        if debug_level >= Debug.ON:
-            print('')
+
+
+            # Update the model file fmu tags with updated values
+            for obj in root.findall(".//*[@kw]"):
+                key_word_from_model = obj.get('kw')
+                old_value = obj.text
+
+                found = False
+                for kw, val in keywords_defined_for_updating:
+                    if kw == key_word_from_model:
+                        # Found the correct item in the list and correct value to use
+                        for item_from_fmu in keywords_read:
+                            kw_from_fmu, value = item_from_fmu
+                            if kw == kw_from_fmu:
+                                # Found the keyword also in the FMU parameter list from global_variables
+
+                                # Update value in XML tree for this keyword
+                                if isinstance(val, str):
+                                    val = val.strip()
+                                obj.text = str(val)
+                                found = True
+                                break
+                        if found:
+                            break
+                if found:
+                    print(f'   {key_word_from_model:42}    {old_value:12}  {obj.text:12}')
+
 
         return tree
 
@@ -550,21 +639,44 @@ class APSModel:
                 # This is a model for a new region for an existing zone number that has several regions
                 zoneNumbers.append(zone_number)
 
-    @staticmethod
-    def __parse_global_variables(global_variables_file, debug_level=Debug.OFF):
+    def __parse_global_variables(
+            self,
+            model_file_name,
+            global_variables_file,
+            current_job_name=None,
+            debug_level=Debug.OFF,
+    ):
         """ Read the global variables file (IPL, or YAML) to get updated model parameters from FMU """
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
         # like e.g VARIABLE_NAME = 10
-        keywords = GlobalVariables.parse(global_variables_file)
-        if debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: Keywords and values found in parameter file:  {global_variables_file}')
-            for item in keywords:
-                kw, val = item
-                print(f'  {kw:30} {val:20}')
-            print('')
-        # End read file
+        keywords = []
+        if GlobalVariables.check_file_format(global_variables_file) == 'ipl':
+            keywords = GlobalVariables.parse(global_variables_file)
+            if debug_level >= Debug.ON:
+                print(f'Debug output: Keywords and values found in parameter file:  {global_variables_file}')
+                for item in keywords:
+                    kw, val = item
+                    print(f'  {kw:30} {val:20}')
+                print('')
+        else:
+            # YAML file with more general possibility for parameter specification
+            apsmodel = APSModel(model_file_name)
+            aps_dict = GlobalVariables.parse(global_variables_file)
 
+            # Find the model parameters for the current aps job
+            try:
+                param_dict = aps_dict[current_job_name]
+                for key, value in param_dict.items():
+                    item = [key, value]
+                    keywords.append(item)
+                return keywords
+
+            except:
+                # No parameter specified to be updated for the current APS job
+                return None
+
+        # End read file
         return keywords
 
     # ----- Properties ----
@@ -806,6 +918,23 @@ class APSModel:
                     all_probabilities.append(name)
         return all_probabilities
 
+    @property
+    def transform_type(self):
+        return self.__transform_type
+
+    @transform_type.setter
+    def transform_type(self, name):
+        if isinstance(name, str):
+            if name.strip() == 'EMPIRIC' or name.strip() == 'Empiric':
+                transf_number = TransformType.EMPIRIC
+            elif name.strip() == 'CDF' or name.strip() == 'cdf':
+                transf_number = TransformType.CUMNORM
+        if isinstance(name, int):
+            transf_number = TransformType(name)
+        if name not in TransformType:
+            transf_number = TransformType.EMPIRIC
+        self.__transform_type =  transf_number
+
     # ----- Set functions -----
     def setRmsWorkflowName(self, name):
         self.__rmsWorkflowName = name
@@ -950,6 +1079,7 @@ class APSModel:
             ('ResultFaciesParamName', self.__rmsFaciesParamName),
             ('PrintInfo', str(self.debug_level.value)),
             ('SeedFile', self.seed_file_name),
+            ('TransformationType', str(self.transform_type.value)),
             ('WriteSeeds', 'yes' if self.write_seeds else 'no'),
         ]
 
@@ -974,17 +1104,21 @@ class APSModel:
 
     def dump(self, name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
         """Writes the representation of this APS model to a model file"""
-        self.write_model(name, attributes_file_name, probability_distribution_file_name, debug_level)
+        self.write_model(name,
+                         attributes_file_name=attributes_file_name,
+                         probability_distribution_file_name=probability_distribution_file_name,
+                         current_job_name=None,
+                         debug_level=debug_level)
 
-    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
+    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None,
+                    current_job_name=None, debug_level=Debug.OFF):
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
         def write(file_name: str, content: str) -> None:
             with open(file_name, 'w') as file:
                 file.write(content)
-            if debug_level >= Debug.VERY_VERBOSE:
-                print(f'Write file: {file_name}')
+            print(f'- Write file: {file_name}')
 
         fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
@@ -992,10 +1126,17 @@ class APSModel:
         write(model_file_name, root_updated)
 
         if attributes_file_name is not None:
-            write(attributes_file_name, fmu_configuration(fmu_attributes))
+            aps_model = APSModel(model_file_name, debug_level=Debug.OFF)
+            grid_model_name = aps_model.grid_model_name
+
+            if current_job_name is None:
+                current_job_name = 'apsgui_job_name'
+            write(attributes_file_name, fmu_configuration(fmu_attributes, grid_model_name, current_job_name))
 
         if probability_distribution_file_name is not None:
-            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes))
+            if current_job_name is None:
+                current_job_name = 'apsgui_job_name'
+            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes, current_job_name))
 
     @property
     def has_fmu_updatable_values(self):
@@ -1022,26 +1163,30 @@ def _max_value_length(fmu_attributes):
     return max(len(str(fmu_attribute.value)) for fmu_attribute in fmu_attributes)
 
 
-def probability_distribution_configuration(fmu_attributes):
+def probability_distribution_configuration(fmu_attributes, current_job_name):
     if not fmu_attributes:
         return ''
     content = ''
-    max_length = _max_name_length(fmu_attributes)
+    max_length = _max_name_length(fmu_attributes)+len(current_job_name)
     for fmu_attribute in fmu_attributes:
-        content += f'{fmu_attribute.name:<{max_length}} <prob_dist>\n'
+        symbolic_name = current_job_name.upper() + '_' + fmu_attribute.name
+        content += f'{symbolic_name:<{max_length}} <prob_dist>\n'
     return content
 
 
-def fmu_configuration(fmu_attributes):
+def fmu_configuration(fmu_attributes, grid_model_name, current_job_name):
     if not fmu_attributes:
         return ''
-    content = 'rms:\n'
+
+    content  =  '  APS:\n'
+    content += f'    {current_job_name}:\n'
     max_length = _max_name_length(fmu_attributes)
     max_number_length = _max_value_length(fmu_attributes)
     for fmu_attribute in fmu_attributes:
         key_word_spacing = max_length - len(fmu_attribute.name) + 1
+        symbolic_name = current_job_name.upper() + '_' + fmu_attribute.name
         formatted_value = f'{fmu_attribute.value:{max_number_length}.10{"g" if isinstance(fmu_attribute.value, int) else ""}}'
-        content += f'  {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{fmu_attribute.name}>\n'
+        content +=f'        {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{symbolic_name}>\n'
     return content
 
 

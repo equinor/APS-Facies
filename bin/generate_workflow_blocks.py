@@ -82,7 +82,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -102,6 +102,7 @@ APS_OUTPUT_FMU_MODEL_FILE = 'APS_OUTPUT_FMU_MODEL_FILE'
 APS_WRITE_LOG_FILE        = 'APS_WRITE_LOG_FILE'
 APS_INPUT_DIRECTORY       = 'APS_INPUT_DIRECTORY'
 APS_DEBUG_LEVEL           = 'APS_DEBUG_LEVEL'
+APS_GRF_TRANSFORM         = 'APS_GRF_TRANSFORM'
 
 
 # Utils
@@ -278,6 +279,10 @@ def get_debug_level():
     # How verbose it should be
     return _get_value(APS_DEBUG_LEVEL, 0)
 
+def get_transform_type():
+    # Which type of transformation to use for GRF's 
+    # (Default = EMPIRIC, Cumulative normal distribution function = CUMNORM)
+    return _get_value(APS_GRF_TRANSFORM, 0)
 
 def prepend_absolute_path(file):
     return start_path / file
@@ -309,6 +314,8 @@ kwargs = {{
     'fmu_variables_file': get_fmu_variables_file(),
     'input_directory': get_input_directory(),
     'field_file_format': get_fmu_file_format(),
+    # GRF transformation
+    'transformation_type': get_transform_type(),
 }}
 
 # Stringify Paths

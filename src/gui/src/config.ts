@@ -81,3 +81,6 @@ export const DEFAULT_MODEL_FILE_NAMES = {
   fmuConfig: 'aps.yaml',
   probabilityDistribution: 'aps_param_dist.txt',
 }
+
+export const DEFAULT_TRANSFORM_TYPE = 0
+export const DEFAULT_EXPORT_FMU_CONFIG_FILES = false

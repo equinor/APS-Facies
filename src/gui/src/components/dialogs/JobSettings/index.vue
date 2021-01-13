@@ -30,11 +30,16 @@
           :fmu-grid.sync="fmuGrid"
           :create-fmu-grid.sync="createFmuGrid"
           :field-file-format.sync="fieldFileFormat"
+          :export-fmu-config-files.sync="exportFmuConfigFiles"
           @update:error="e => update('fmu', e)"
         />
         <br>
         <logging-settings
           :debug-level.sync="debugLevel"
+        />
+        <br>
+        <transformtype-settings
+          :transform-type.sync="transformType"
         />
         <br>
         <run-settings
@@ -128,7 +133,7 @@
               <v-col class="dense">
                 <v-checkbox
                   v-model="automaticAlphaFieldSelection"
-                  label="Automatically assign fields to alpha channels"
+                  label="Automatic assign GRF to each Alpha coordinate"
                 />
               </v-col>
               <v-col class="dense">
@@ -186,6 +191,7 @@ import NumericField from '@/components/selection/NumericField.vue'
 import FmuSettings from '@/components/dialogs/JobSettings/FmuSettings.vue'
 import RunSettings from '@/components/dialogs/JobSettings/RunSettings.vue'
 import GridInformation from '@/components/dialogs/JobSettings/GridInformation.vue'
+import TransformtypeSettings from '@/components/dialogs/JobSettings/TransformtypeSettings.vue'
 
 import ColorLibrary from '@/utils/domain/colorLibrary'
 import { Optional } from '@/utils/typing'
@@ -205,6 +211,7 @@ interface Invalid {
     NumericField,
     BoldButton,
     GridInformation,
+    TransformtypeSettings,
   },
 })
 export default class JobSettings extends Vue {
@@ -224,6 +231,7 @@ export default class JobSettings extends Vue {
   faciesColorLibrary: Optional<ColorLibrary> = null
   maxLayersInFmu: Optional<number> = null
   debugLevel = 0
+  transformType = 0
   importFields = false
   fmuGrid = ''
   createFmuGrid = false
@@ -231,6 +239,7 @@ export default class JobSettings extends Vue {
   maxAllowedFractionOfValuesOutsideTolerance = 0
   toleranceOfProbabilityNormalisation = 0
   fieldFileFormat = ''
+  exportFmuConfigFiles = false
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
@@ -251,6 +260,7 @@ export default class JobSettings extends Vue {
       this.fieldFileFormat = fmu.fieldFileFormat.value
 
       this.debugLevel = parameters.debugLevel.selected
+      this.transformType = parameters.transformType.selected
       this.maxAllowedFractionOfValuesOutsideTolerance = parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
       this.toleranceOfProbabilityNormalisation = parameters.toleranceOfProbabilityNormalisation.selected
       this.showZoneNameNumber = options.showNameOrNumber.zone.value
@@ -260,6 +270,7 @@ export default class JobSettings extends Vue {
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.importFields = options.importFields.value
+      this.exportFmuConfigFiles = options.exportFmuConfigFiles.value  
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }
@@ -273,6 +284,7 @@ export default class JobSettings extends Vue {
     const dispatch = this.$store.dispatch
     await Promise.all([
       dispatch('parameters/debugLevel/select', this.debugLevel),
+      dispatch('parameters/transformType/select', this.transformType),
       dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
       dispatch('parameters/toleranceOfProbabilityNormalisation/select', this.toleranceOfProbabilityNormalisation),
 
@@ -290,6 +302,7 @@ export default class JobSettings extends Vue {
       dispatch('options/automaticFaciesFill/set', this.automaticFaciesFill),
       dispatch('options/filterZeroProbability/set', this.filterZeroProbability),
       dispatch('options/importFields/set', this.importFields),
+      dispatch('options/exportFmuConfigFiles/set', this.exportFmuConfigFiles),
       dispatch('options/colorScale/set', this.colorScale),
 
       dispatch('constants/faciesColors/set', this.faciesColorLibrary),

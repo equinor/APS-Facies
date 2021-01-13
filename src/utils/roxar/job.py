@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import Dict
 
 from src.algorithms.APSModel import APSModel
-from src.utils.constants.simple import Debug, ProbabilityTolerances
+from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.decorators import cached
-from src.utils.fmu import get_export_location, get_ert_location
+from src.utils.fmu import get_export_location, get_ert_location, is_initial_iteration
 
 
 class JobConfig:
@@ -39,6 +39,9 @@ class JobConfig:
             'max_allowed_fraction_of_values_outside_tolerance': self._max_allowed_fraction_of_values_outside_tolerance,
             'tolerance_of_probability_normalisation': self._tolerance_of_probability_normalisation,
             'field_file_format': self.field_file_format,
+            'transform_type_grf': self._transformation_type_for_grf,
+            'current_job_name': self.roxar.rms.get_running_job_name(),
+            'export_fmu_config_files': self.export_fmu_config_files,
         }
 
     @property
@@ -88,7 +91,12 @@ class JobConfig:
 
     @property
     def field_file_format(self):
-        return self._config['fmu']['fieldFileFormat']['value']
+        try:
+            return self._config['fmu']['fieldFileFormat']['value']
+        except KeyError:
+            raise ValueError(
+                'Version migration error: Please open this job interactively and save it again before running it.'
+            )
 
     @property
     def update_model_with_fmu_variables(self):
@@ -99,8 +107,47 @@ class JobConfig:
 
     @property
     def simulate_fields(self):
-        # The stored value is whether to import the fields, or not
-        return not self._config['options']['importFields']['value']
+        # The stored value has two values: True or False
+        # If this is True and also in FMU mode to update GRF fields:
+        #  It means that it should be checked whether a directory with name 0
+        #  exist or not at the top level of the FMU directory structure
+        #  (same level as the directory fmuconfig, ert and rms directories).
+        #  If the directory with name 0 exists, it means that the fields should be simulated and exported to FMU
+        #  since 0 is the iteration number in the Ensemble Smoother algorithm and corresponds to
+        #  creating initial ensemble. If directory with name 1 or 2 or 3 ... exists instead of directory with name 0,
+        #  it means that the iteration number is > 0 which means that the smoother algorithm has updated the GRF's
+        #  In this case the GRF's should be imported into APS instead.
+        # If this is False:
+        #  It means that the fields should be simulated and exported regardless
+        #  of whether the directory with name 0 exist or not at the top level of the FMU directory structure.
+
+        if self.fmu_mode:
+            # Check if simulate/export  or import
+            if self._config['options']['importFields']['value']:
+                # Automatic detect
+                if is_initial_iteration(self.debug_level):
+                    # Simulate and export
+                    if self.debug_level >= Debug.ON:
+                        print(
+                            '- APS is running in FMU mode for AHM and automatic selected: '
+                            'Simulate GRF files and export to FMU'
+                        )
+                    return True
+                else:
+                    # Import GRF from file when running in FMU workflow
+                    if self.debug_level >= Debug.ON:
+                        print(
+                            '- APS is running in FMU mode for AHM and automatic selected: '
+                            'Import updated GRF files from FMU'
+                        )
+                    return False
+            else:
+                if self.debug_level >= Debug.ON:
+                    print('- APS is running in FMU mode for AHM and simulate GRF files and export to FMU')
+                return True
+        else:
+            # Simulate and export since not in FMU mode to update GRF's
+            return True
 
     @property
     def max_fmu_grid_depth(self):
@@ -118,6 +165,25 @@ class JobConfig:
             # Some, older jobs may not be updated, and this "config.parameters.toleranceOfProbabilityNormalisation"
             # does not exist.
             return ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR
+
+    @property
+    def _transformation_type_for_grf(self):
+        try:
+            return self._config['parameters']['transformType']['selected']
+        except KeyError:
+            # Some, older jobs may not be updated, and this "config.parameters.transformType"
+            # does not exist.
+            return TransformType.EMPIRIC
+
+    @property
+    def export_fmu_config_files(self):
+        try:
+            export_fmu = self._config['options']['exportFmuConfigFiles']['value']
+            return export_fmu
+        except KeyError:
+            # Some, older jobs may not be updated, and this "config.options.exportFmuConfigFiles"
+            # does not exist.
+            return False
 
     @property
     def debug_level(self):

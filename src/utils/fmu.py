@@ -1,3 +1,5 @@
+#!/bin/env python
+# -*- coding: utf-8 -*-
 import os
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
@@ -12,7 +14,7 @@ import xtgeo
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import Conform
 from src.algorithms.Trend3D import Trend3D_elliptic_cone, ConicTrend
-from src.utils.constants.simple import OriginType
+from src.utils.constants.simple import OriginType, Debug
 from src.utils.decorators import cached
 from src.utils.exceptions.zone import MissingConformityException
 
@@ -23,6 +25,12 @@ def create_get_property(project, aps_model=None):
             if aps_model is None:
                 raise ValueError("'aps_model' must be given, if 'grid_name' is not given")
             grid_name = _get_grid_name(aps_model)
+        properties = project.grid_models[grid_name].properties
+        if name in properties:
+            if properties[name].is_empty(project.current_realisation):
+                raise ValueError(f'The parameter {name} is empty in grid model {grid_name}')
+        else:
+            raise ValueError(f'The parameter  {name} does not exist in grid model {grid_name}')
         return xtgeo.gridproperty_from_roxar(project, grid_name, name, project.current_realisation)
     return get_property
 
@@ -30,6 +38,19 @@ def create_get_property(project, aps_model=None):
 def get_ert_location():
     return Path(os.getcwd())
 
+def get_top_location():
+    top_location = get_ert_location() / '..' / '..'
+    return Path(top_location)
+
+def is_initial_iteration(debug_level=Debug.OFF):
+    iteration_dir_name = get_top_location() / '0'
+    if iteration_dir_name.exists():
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('- APS is running in FMU mode for AHM:  Simulate GRF files and export to FMU')
+    else:
+        if debug_level >= Debug.VERY_VERBOSE:
+            print('- APS is running in FMU mode for AHM:  Importing updated GRF from FMU')
+    return iteration_dir_name.exists()
 
 def get_export_location(create=True):
     field_location = get_ert_location() / '..' / 'output' / 'aps'
@@ -312,7 +333,7 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
 
     @property
     def update_message(self):
-        return 'Updating the location of relative trends'
+        return '- Updating the location of relative trends for ERTBOX simulation'
 
     def restore_trend(self, zone_model, field_model):
         field_model.trend.model.origin.z = self.get_original_value(zone_model, field_model)
@@ -367,7 +388,8 @@ def fmu_aware_model_file(*, fmu_mode, **kwargs):
     """Updates the name of the grid, if necessary"""
     model_file = kwargs['model_file']
     # Instantiate the APS model anew, as it may have been modified by `global_variables`
-    aps_model = kwargs['aps_model'] = APSModel(model_file)
+    aps_model = kwargs['aps_model'] = APSModel(model_file, debug_level=None)
+
     changes = FmuModelChanges([
         UpdateTrends(**kwargs),
         UpdateSimBoxThicknessInZones(**kwargs),
@@ -376,6 +398,7 @@ def fmu_aware_model_file(*, fmu_mode, **kwargs):
         UpdateGridOrientation(**kwargs),
     ])
     if fmu_mode:
+        print('- Prepare simulation using ERTBOX')
         changes.before()
     try:
         aps_model.dump(model_file)

@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from src.utils.ConvertBitMapToRMS import ConvertBitMapToRMS
 from src.utils.constants.simple import Debug
-from src.utils.methods import get_run_parameters, get_specification_file, SpecificationType
+from src.utils.methods import get_run_parameters, get_specification_file, SpecificationType, get_debug_level
 
 long_help = """-------------------------------------------------------------------------------------
 python3 script which can be run as a python job in RMS10
@@ -101,7 +101,7 @@ def run(roxar=None, project=None, **kwargs):
     params = get_run_parameters(**kwargs)
     model_file = get_specification_file(_type=SpecificationType.CONVERT_BITMAP, **kwargs)
     print('Model file: {}'.format(model_file))
-    debug_level = params['debug_level']
+    debug_level = get_debug_level(**kwargs)
     run_test_script = False
     bitmap_converter = ConvertBitMapToRMS(model_file)
     if debug_level >= Debug.ON:

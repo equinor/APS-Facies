@@ -4,8 +4,7 @@
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.roxar.fmu_tags import get_list_of_aps_uncertainty_parameters, set_selected_as_fmu_updatable
-from src.utils.methods import get_run_parameters
-from src.utils.methods import get_workflow_name
+from src.utils.methods import get_run_parameters, get_workflow_name, get_debug_level
 
 """
 Description:
@@ -38,6 +37,7 @@ def update_aps_model_from_uncertainty(
         workflow_name=None,
         write_output_file_with_parameter_names=False,
         debug_level=Debug.OFF,
+        current_job_name=None,
 ):
     """ Script that get values for specified parameter names from a RMS uncertainty table with parameters and updates an APS model file.
         Input: project - The global variable project from Roxar API.
@@ -88,7 +88,9 @@ def update_aps_model_from_uncertainty(
         workflow_name=workflow_name,
         uncertainty_variable_names=uncertainty_variable_names,
         realisation_number=realisation_number,
-        debug_level=debug_level
+        debug_level=debug_level,
+        use_rms_uncertainty_table=True,
+        current_job_name=current_job_name
     )
 
     # Write the updated XML tree for the model parameters to a new file
@@ -97,19 +99,22 @@ def update_aps_model_from_uncertainty(
 
 # -------  Main ----------------
 def run(roxar=None, project=None, **kwargs):
+    import roxar.rms
     params = get_run_parameters(**kwargs)
     input_aps_model_file = params['model_file']
-    debug_level = APSModel(input_aps_model_file).debug_level
-    workflow_name = get_workflow_name()
+    debug_level = get_debug_level(**kwargs)
+    # workflow_name = get_workflow_name()
+    workflow_name = params['workflow_name']
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
     write_output_file_with_parameter_names = False
+    current_job_name = roxar.rms.get_running_job_name()
     if debug_level >= Debug.ON:
         print('Update model file {} from RMS uncertainty table {}'.format(input_aps_model_file, workflow_name))
         write_output_file_with_parameter_names = True
 
     update_aps_model_from_uncertainty(
-        project, input_aps_model_file,  output_aps_model_file, workflow_name,
-        write_output_file_with_parameter_names, debug_level=debug_level
+        project, input_aps_model_file, output_aps_model_file, workflow_name,
+        write_output_file_with_parameter_names, debug_level=debug_level, current_job_name=current_job_name
     )
 
 

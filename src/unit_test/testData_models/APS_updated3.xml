@@ -16,6 +16,7 @@
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
   <PrintInfo> 2 </PrintInfo>
   <SeedFile> seed.dat </SeedFile>
+  <TransformationType> 0 </TransformationType>
   <WriteSeeds> yes </WriteSeeds>
   <MainFaciesTable blockedWell="BW" blockedWellLog="facies">
     <Facies name="F1">

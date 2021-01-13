@@ -9,7 +9,7 @@ from src.utils.methods import get_specification_file
 
 def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
-    aps_model = APSModel(model_file)
+    aps_model = APSModel(model_file, debug_level=None)
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
     file_format = kwargs.get('field_file_format')
     fmu_grid = xtgeo.grid_from_roxar(

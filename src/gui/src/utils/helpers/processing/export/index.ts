@@ -123,6 +123,10 @@ function addPrintInfo ({ rootState }: Context, doc: Document, parentElement: HTM
   }
 }
 
+function addTransformTypeGRF ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
+   parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
+}
+
 function addSeedFile ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here??? Seed.dat is said to be default value?'
   if (value) {
@@ -634,6 +638,7 @@ function addContent (context: Context, doc: Document, rootElem: HTMLElement): vo
   addResultFaciesParamName(context, doc, rootElem)
   addPrintInfo(context, doc, rootElem)
   addSeedFile(context, doc, rootElem)
+  addTransformTypeGRF(context, doc, rootElem)
   addWriteSeeds(context, doc, rootElem)
   addMainFaciesTable(context, doc, rootElem)
   addZoneModels(context, doc, rootElem)

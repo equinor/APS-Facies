@@ -16,7 +16,7 @@ from src.unit_test.constants import (
 )
 from src.unit_test.helpers import get_model_file_path
 from src.utils.checks import compare
-from src.utils.constants.simple import Debug, OriginType, TrendType, VariogramType
+from src.utils.constants.simple import Debug, OriginType, TrendType, VariogramType, TransformType
 import pytest
 
 
@@ -48,6 +48,7 @@ def defineCommonModelParam(
     apsmodel.seed_file_name = seedFileName
     apsmodel.debug_level = debug_level
     print('Debug level: {}'.format(apsmodel.debug_level))
+    apsmodel.transform_type = TransformType.EMPIRIC
 
     # Define main facies table
     main_facies_table = APSMainFaciesTable(

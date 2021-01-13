@@ -17,8 +17,8 @@ def get_codes(grid, zone_parameter):
 def run(project, aps_model: APSModel, debug_level, **kwargs):
     grid = project.grid_models[aps_model.grid_model_name]
     zone_parameter = GridModelConstants.ZONE_NAME
-    if debug_level >= Debug.ON:
-        print(f'Checking to see whether {zone_parameter} must be created')
+    if debug_level >= Debug.VERBOSE:
+        print(f'-- Checking to see whether {zone_parameter} must be created')
 
     if zone_parameter in grid.properties:
         zone_numbers = get_zone_number(project, grid)

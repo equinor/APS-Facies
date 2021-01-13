@@ -12,12 +12,13 @@ Output:
 from collections import OrderedDict
 
 import numpy as np
+from scipy.stats import norm
 
 from src.algorithms.APSModel import APSModel
 from src.utils.checks import check_probability_values, check_probability_normalisation
-from src.utils.constants.simple import Debug, ProbabilityTolerances
+from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.grid import update_rms_parameter
-from src.utils.methods import calc_average, get_specification_file
+from src.utils.methods import calc_average, get_specification_file, get_debug_level
 from src.utils.records import Probability
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     update_discrete_3d_parameter_values,
@@ -80,10 +81,24 @@ def transform_empiric(cell_index_defined, gauss_values, alpha_values):
     return alpha_values
 
 
+def transform_CDF(cell_index_defined, gauss_values, alpha_values):
+    """
+    Transform Gaussian values (with expectation = 0 and variance = 1) by cumulative normal distribution into values in [0,1].
+    Only selected set of values defined by cell_index_defined is transformed.
+    """
+    if gauss_values is None:
+        return None
+
+    # Numpy vector operation to select subset of values corresponding to the defined grid cells
+    gauss_values_selected = gauss_values[cell_index_defined]
+    alpha_values[cell_index_defined] = norm.cdf(gauss_values_selected, loc=0, scale=1)
+    return alpha_values
+
+
 def check_and_normalise_probability(
-        num_facies, 
-        prob_parameter_values_for_facies, 
-        use_const_probability, 
+        num_facies,
+        prob_parameter_values_for_facies,
+        use_const_probability,
         cell_index_defined,
         eps,
         tolerance_of_probability_normalisation,
@@ -180,9 +195,9 @@ def check_and_normalise_probability(
             # Check that probabilities are in interval [0,1]. If not, set to 0 if negative and 1 if larger than 1.
             # Error message if too large fraction of input values are outside interval [0,1] also when using tolerance.
             probability_defined[f] = check_probability_values(
-                defined_values, 
+                defined_values,
                 tolerance_of_probability_normalisation,
-                max_allowed_fraction_with_mismatch, 
+                max_allowed_fraction_with_mismatch,
                 facies_name
             )
 
@@ -193,10 +208,11 @@ def check_and_normalise_probability(
             # sum of np arrays (cell by cell sum)
             psum += probability_defined[f]
 
-        normalise_is_necessary = check_probability_normalisation(psum, 
-                                                                 eps, 
-                                                                 tolerance_of_probability_normalisation,
-                                                                 max_allowed_fraction_with_mismatch
+        normalise_is_necessary = check_probability_normalisation(
+            psum,
+            eps,
+            tolerance_of_probability_normalisation,
+            max_allowed_fraction_with_mismatch
         )
         if normalise_is_necessary:
             if debug_level >= Debug.VERBOSE:
@@ -246,13 +262,14 @@ def run(
         **kwargs
 ):
     realization_number = project.current_realisation
+    debug_level = get_debug_level(**kwargs)
     print(f'Run: APS_trunc on realisation {realization_number + 1}')
 
     model_file_name = get_specification_file(**kwargs)
 
     print(f'- Read file: {model_file_name}')
     aps_model = APSModel(model_file_name)
-    debug_level = aps_model.debug_level
+
     grid_model = project.grid_models[aps_model.grid_model_name]
     if grid_model.is_empty():
         raise ValueError(f'Specified grid model: {grid_model.name} is empty.')
@@ -262,6 +279,18 @@ def run(
     region_param_name = aps_model.getRegionParamName()
     use_regions = bool(region_param_name)
     result_param_name = aps_model.getResultFaciesParamName()
+    use_CDF_transform = False
+    if aps_model.transform_type == TransformType.CUMNORM:
+        use_CDF_transform = True
+
+    if debug_level >= Debug.VERBOSE:
+        transf_type = None
+        if use_CDF_transform:
+            transf_type = 'Cumulative Normal Distribution Function'
+        else:
+            transf_type = 'Empiric Cumulative Distribution Function'
+        print(f'--- Transformation type for GRF: {transf_type}')
+
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
@@ -316,7 +345,7 @@ def run(
     all_facies_names_modelled = []
     if debug_level >= Debug.VERY_VERBOSE:
         if aps_model.isAllZoneRegionModelsSelected():
-            print('Debug output: All combinations of zone and region is selected to be run')
+            print('Debug output: All combinations of zone and region in model file is selected to be run')
         else:
             print('Debug output: Selected (zone,region) pairs to simulate:')
             print_zones_and_regions(all_zone_models, aps_model, use_regions)
@@ -328,7 +357,7 @@ def run(
         if not aps_model.isSelected(zone_number, region_number):
             continue
 
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
+        if debug_level >= Debug.ON:
             if use_regions:
                 print(f'\n- Run model for (zone_number, region_number) = ({zone_number}, {region_number})\n')
             else:
@@ -381,15 +410,31 @@ def run(
         for gf_name in gf_names_for_zone:
             if gf_name in gf_names_for_truncation_rule:
                 gauss_field_values_all = gf_all_values[gf_name]
+                has_trend_in_gauss_field = zone_model.hasTrendModel(gf_name)
 
                 if debug_level >= Debug.VERBOSE:
                     if use_regions:
-                        print(f'--- Transform: {gf_name} for zone: {zone_number}')
-                    else:
                         print(f'--- Transform: {gf_name} for (zone, region)=({zone_number}, {region_number})')
+                    else:
+                        print(f'--- Transform: {gf_name} for zone: {zone_number}')
                 # Update alpha for current zone
                 alpha_all = gf_all_alpha[gf_name]
-                alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
+                if not use_CDF_transform:
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'--- Transformation type:  Empiric')
+
+                    alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
+                elif has_trend_in_gauss_field:
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'--- Transformation type:  Empiric since GRF has trend')
+
+                    alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
+                else:
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'--- Transformation type:  Cumulative normal distribution')
+
+                    alpha_all = transform_CDF(cell_index_defined, gauss_field_values_all, alpha_all)
+
                 gf_all_alpha[gf_name] = alpha_all
 
                 # Dictionary of transformed values for gauss field for current (zone,region)
@@ -439,7 +484,9 @@ def run(
                             f'for facies: {facies_name} for zone: {zone_number}'
                         )
 
-                    values = getContinuous3DParameterValues(grid_model, probability_parameter, realization_number, debug_level)
+                    values = getContinuous3DParameterValues(
+                        grid_model, probability_parameter, realization_number, debug_level,
+                    )
 
                     # Add the probability values to a common list containing probabilities for
                     # all facies used in the whole model (all zones) to avoid loading the same data multiple times.
@@ -480,11 +527,11 @@ def run(
         if debug_level >= Debug.VERBOSE:
             print('--- Check normalisation of probability fields.')
         probability_defined, num_cells_modified_probability = check_and_normalise_probability(
-            num_facies, 
-            probability_parameter_values_for_facies, 
+            num_facies,
+            probability_parameter_values_for_facies,
             zone_model.use_constant_probabilities,
-            cell_index_defined, 
-            eps, 
+            cell_index_defined,
+            eps,
             tolerance_of_probability_normalisation,
             max_allowed_fraction_with_mismatch,
             debug_level
@@ -625,7 +672,7 @@ def run(
         realisation_number=realization_number, is_shared=False, set_initial_values=False,
         debug_level=debug_level,
     )
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'- Create or update parameter: {result_param_name}')
 
     print('')

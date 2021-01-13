@@ -991,11 +991,11 @@ def create_zone_parameter(
     if name in properties:
         zone_parameter = properties[name]
         if debug_level >= Debug.VERBOSE:
-            print('Found existing zone parameter with name {}'.format(zone_parameter.name))
+            print(f'--- Found existing zone parameter with name {zone_parameter.name}')
 
         if zone_parameter.is_empty(realisation=realization_number):
             if debug_level >= Debug.VERBOSE:
-                print(f'  The zone parameter was empty. Assign values to zone parameter with name: {zone_parameter.name}')
+                print(f'--- The zone parameter was empty. Assign values to zone parameter with name: {zone_parameter.name}')
             # Fill the parameter with zone values
             values, code_names = zone_parameter_values(grid3d)
             zone_parameter.code_names = code_names.copy()

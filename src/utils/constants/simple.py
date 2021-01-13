@@ -142,11 +142,11 @@ class MinimumValues(Values):
     MAIN_RANGE = 0.0
     PERPENDICULAR_RANGE = 0.0
     VERTICAL_RANGE = 0.0
-    AZIMUTH_ANGLE_ANISOTROPY = 0.0
+    AZIMUTH_ANGLE_ANISOTROPY = -720
     DIP_ANGLE = 0.0
     POWER = 1.0
     RELATIVE_STD_DEV = 0.0
-    AZIMUTH_ANGLE_DEPOSITIONAL = 0.0
+    AZIMUTH_ANGLE_DEPOSITIONAL = -720
     STACKING_ANGLE = 0.0
     CURVATURE = 0.0
     MIGRATION_ANGLE = -90.0
@@ -157,15 +157,20 @@ class MaximumValues(Values):
     MAIN_RANGE = float('inf')
     PERPENDICULAR_RANGE = float('inf')
     VERTICAL_RANGE = float('inf')
-    AZIMUTH_ANGLE_ANISOTROPY = 360.0
+    AZIMUTH_ANGLE_ANISOTROPY = 720
     DIP_ANGLE = 90.0
     POWER = 2.0
     RELATIVE_STD_DEV = float('inf')
-    AZIMUTH_ANGLE_DEPOSITIONAL = 360.0
+    AZIMUTH_ANGLE_DEPOSITIONAL = 720
     STACKING_ANGLE = 90.0
     CURVATURE = float('inf')
     MIGRATION_ANGLE = 90.0
     RELATIVE_ELLIPSE_SIZE = float('inf')
+
+
+class ModuloValues(Values):
+    AZIMUTH_ANGLE_ANISOTROPY = 360.0
+    AZIMUTH_ANGLE_DEPOSITIONAL = 360.0
 
 
 class ProbabilityTolerances(Values):
@@ -180,3 +185,8 @@ class GridModelConstants:
 
 class SimBoxThicknessConstants:
     DEFAULT_VALUE = 30
+
+
+class TransformType(IntEnum):
+    EMPIRIC = 0
+    CUMNORM = 1

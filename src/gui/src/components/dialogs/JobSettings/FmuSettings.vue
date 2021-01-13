@@ -13,6 +13,7 @@
         >
           <v-checkbox
             v-model="_runFmuWorkflows"
+            v-tooltip="'Enable updating of model parameters and Gaussian fields by FMU.'"
             label="Run APS facies update in AHM/ERT"
             :disabled="disableErtMode"
           />
@@ -21,6 +22,7 @@
       <v-col>
         <v-checkbox
           v-model="_onlyUpdateFromFmu"
+          v-tooltip="'Enable updating of model parameters by FMU but not Gaussian fields.'"
           label="Only run uncertainty update"
         />
       </v-col>
@@ -49,15 +51,15 @@
           <v-radio-group
             v-model="_importFields"
             row
-            label="Initialize or update Gaussian Fields"
+            label="Exchange of Gaussian Fields with FMU"
           >
             <v-radio
-              label="Simulate GRF and export to FMU"
+              label="Simulate and export to FMU"
               value="generate"
             />
             <v-radio
-              label="Import GRF from FMU"
-              value="import"
+              label="Automatic select between Simulate/Export and Import"
+              value="automatic_detect"
             />
           </v-radio-group>
           <v-row no-gutters>
@@ -94,6 +96,14 @@
         </v-col>
       </v-row>
     </div>
+    <v-row no-gutters>
+      <v-checkbox
+       v-model="_exportFmuConfigFiles"
+       v-tooltip="'When running this job from RMS workflow, APS model file and FMU config files are exported automatically.'"
+       label="Export model file and FMU config files for current job."
+       :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
+      />
+    </v-row>  
   </settings-panel>
 </template>
 
@@ -115,7 +125,7 @@ interface Invalid {
   fmuGridDepth: boolean
 }
 
-type FieldUsage = 'generate' | 'import'
+type FieldUsage = 'generate' | 'automatic_detect'
 
 interface WarningParameters {
   toggled: boolean
@@ -182,6 +192,9 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true })
   readonly fieldFileFormat: string
 
+  @Prop({ required: true, type: Boolean })
+  readonly exportFmuConfigFiles: boolean
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
@@ -221,13 +234,13 @@ export default class FmuSettings extends Vue {
   get minimumErtLayers (): number { return (this.$store as Store).state.fmu.maxDepth.minimum }
 
   get _importFields (): FieldUsage {
-    if (this.importFields) return 'import'
+    if (this.importFields) return 'automatic_detect'
     else return 'generate'
   }
 
   set _importFields (value: FieldUsage) {
     if (value === 'generate') this.$emit('update:importFields', false)
-    else if (value === 'import') this.$emit('update:importFields', true)
+    else if (value === 'automatic_detect') this.$emit('update:importFields', true)
     else throw Error(`Invalid value, '${value}'`)
   }
 
@@ -235,6 +248,11 @@ export default class FmuSettings extends Vue {
   set _fieldFileFormat (format: string) { this.$emit('update:fieldFileFormat', format) }
 
   get fieldFileFormats (): string[] { return this.$store.state.fmu.fieldFileFormat.legal }
+
+  get _exportFmuConfigFiles (): boolean { return this.exportFmuConfigFiles }
+  set _exportFmuConfigFiles (toggle: boolean) {
+    this.$emit('update:exportFmuConfigFiles', toggle)
+  }
 
   update (type: string, value: boolean): void {
     if (type === 'fmuGridDepth') {

@@ -14,7 +14,7 @@ from src.algorithms.Trend3D import (
 )
 from src.utils.checks import isVariogramTypeOK
 from src.utils.constants.simple import (
-    Debug, VariogramType, CrossSectionType, MinimumValues, MaximumValues, TrendType,
+    Debug, VariogramType, CrossSectionType, MinimumValues, MaximumValues, ModuloValues, TrendType,
     Direction, OriginType,
 )
 from src.utils.containers import FmuAttribute
@@ -995,10 +995,13 @@ class APSGaussModel:
 
     def _get_value_from_xml(self, property_name, xml_tree):
         kwargs = {'parentKeyword': 'Vario', 'modelFile': self.__model_file_name}
+
         if property_name in MaximumValues:
             kwargs['maxValue'] = MaximumValues[property_name]
         if property_name in MinimumValues:
             kwargs['minValue'] = MinimumValues[property_name]
+        if property_name in ModuloValues:
+            kwargs['moduloAngle'] = ModuloValues[property_name]
 
         keyword = self.__xml_keyword[property_name]
         return get_fmu_value_from_xml(xml_tree, keyword, **kwargs)

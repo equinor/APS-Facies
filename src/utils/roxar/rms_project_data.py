@@ -40,7 +40,7 @@ from src.utils.roxar.grid_model import (
 from src.utils.plotting import create_facies_map
 from src.utils.truncation_rules import make_truncation_rule
 from src.utils.xmlUtils import prettify
-
+from src.utils.constants.simple import Debug
 
 def empty_if_none(func):
     def wrapper(*args, **kwargs):
@@ -264,14 +264,19 @@ class RMSData:
         # Determine which facies appear in which zone, if any
         observed_facies = facies_property.get_values(self.project.current_realisation)
         observed_indices = blocked_wells.get_cell_numbers(self.project.current_realisation)
-        if GridModelConstants.ZONE_NAME not in grid_model.properties:
-            create_zone_parameter(
+        try:
+            zone_values = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(self.project.current_realisation)
+        except:
+            # The Zone parameter is empty or non-existing, create it
+            zone_parameter = create_zone_parameter(
                 grid_model,
                 name=GridModelConstants.ZONE_NAME,
                 realization_number=self.project.current_realisation,
+                debug_level=Debug.VERBOSE
             )
-        zones = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(self.project.current_realisation)
-        regions = np.zeros(zones.shape, zones.dtype)
+            zone_values = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(self.project.current_realisation)
+
+        regions = np.zeros(zone_values.shape, zone_values.dtype)
         if region_parameter_name != '__REGIONS_NOT_IN_USE__':  # Hack to avoid incompatibility with decorator
             regions = grid_model.properties[region_parameter_name].get_values(self.project.current_realisation)
 
@@ -281,7 +286,7 @@ class RMSData:
         facies = []
         for code, name in facies_property.code_names.items():
             where = {
-                'zones': find_defined(zones, code),
+                'zones': find_defined(zone_values, code),
                 'regions': find_defined(regions, code),
             }
             facies.append({

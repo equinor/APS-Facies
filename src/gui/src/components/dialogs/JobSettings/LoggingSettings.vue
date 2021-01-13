@@ -2,6 +2,7 @@
   <settings-panel title="Logging settings">
     <v-select
       v-model="_debugLevel"
+      v-tooltip="'The level of of output to the log window can be specified.<br>For FMU setup use at least log level ON to check that model parameters are correctly updated.'"
       label="Debug level"
       :items="debugLevels"
     />

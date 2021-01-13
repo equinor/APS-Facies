@@ -43,7 +43,7 @@
             <optional-file-selection
               v-model="paths.fmuConfig"
               v-tooltip="disabledMessage"
-              label="FMU configuration"
+              label="FMU configuration file for APS model parameters"
               :disabled="!hasFmuUpdatableValues"
               :relative-to="projectPath"
               @update:error="err => setInvalid('fmuConfig', err)"
@@ -53,7 +53,7 @@
             <optional-file-selection
               v-model="paths.probabilityDistribution"
               v-tooltip="disabledMessage"
-              label="Probability distribution template"
+              label="FMU configuration template for probability distributions"
               :disabled="!hasFmuUpdatableValues"
               :relative-to="projectPath"
               @update:error="err => setInvalid('probabilityDistribution', err)"

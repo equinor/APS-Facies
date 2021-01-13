@@ -6,7 +6,7 @@ import roxar
 from roxar.grids import GridModel
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances
-from src.utils.methods import get_specification_file
+from src.utils.methods import get_specification_file, get_debug_level
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values,
     set_discrete_3d_parameter_values,
@@ -95,15 +95,15 @@ def check_and_normalise_probability(
         probabilities_selected_cells = all_values[cell_index_defined]
 
         # Check probability values, ensure that they are in the interval [0,1]. If outside this interval,
-        # probabilities < 0 is set to 0 and probabilities > 1 is set to 1. 
-        # If the fraction of grid cells with probabilities outside the tolerance interval 
-        # [1-tolerance_of_probability_normalisation, 1+tolerance_of_probability_normalisation] is 
+        # probabilities < 0 is set to 0 and probabilities > 1 is set to 1.
+        # If the fraction of grid cells with probabilities outside the tolerance interval
+        # [1-tolerance_of_probability_normalisation, 1+tolerance_of_probability_normalisation] is
         # larger than max_allowed_fraction_with_mismatch, errors are reported.
         probabilities_selected_cells = check_probability_values(
-            probabilities_selected_cells, 
+            probabilities_selected_cells,
             tolerance_of_probability_normalisation,
             max_allowed_fraction_with_mismatch,
-            facies_name, 
+            facies_name,
             parameter_name
         )
 
@@ -140,8 +140,8 @@ def check_and_normalise_probability(
 
     # Check normalisation and report error if input probabilities are too far from 1.0
     normalise_is_necessary = check_probability_normalisation(
-        sum_probabilities_selected_cells, 
-        eps, 
+        sum_probabilities_selected_cells,
+        eps,
         tolerance_of_probability_normalisation,
         max_allowed_fraction_with_mismatch,
     )
@@ -197,12 +197,13 @@ def check_and_normalize_probabilities_for_APS(
         tolerance_of_probability_normalisation,
         eps,
         overwrite,
-        max_allowed_fraction_with_mismatch
+        max_allowed_fraction_with_mismatch,
+        debug_level=Debug.OFF
 ):
     # Read APS model
     print(f'- Read file: {model_file}')
     aps_model = APSModel(model_file)
-    debug_level = aps_model.debug_level
+
     grid_model_name = aps_model.grid_model_name
     grid_model = project.grid_models[grid_model_name]
 
@@ -253,10 +254,17 @@ def check_and_normalize_probabilities_for_APS(
         # For current (zone,region) find the active cells
         cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
         if len(cell_index_defined) == 0:
-            print(
-                f'Warning: No active grid cells for (zone,region)=({zone_number}, {region_number})\n'
-                f'         Skip this zone, region combination'
-            )
+            if region_number > 0:
+                print(
+                    f'Warning: No active grid cells for (zone,region)=({zone_number}, {region_number})\n'
+                    f'         Skip this zone, region combination'
+                )
+            else:
+                print(
+                    f'Warning: No active grid cells for zone: {zone_number}\n'
+                    f'         Skip this zone'
+                )
+
             continue
 
         # Update contents in probability_values_per_rms_param
@@ -273,10 +281,17 @@ def check_and_normalize_probabilities_for_APS(
         )
         # Write back to RMS project updated probabilities if necessary
         if debug_level >= Debug.ON:
-            print(
-                f'--- Number of cells that are normalised for (zone,region)=({zone_number}, {region_number}) '
-                f'are {num_cells_modified_probability} of {len(cell_index_defined)} cells.'
-            )
+            if region_number > 0:
+                print(
+                    f'--- Number of cells that are normalised for (zone,region)=({zone_number}, {region_number}) '
+                    f'are {num_cells_modified_probability} of {len(cell_index_defined)} cells.'
+                )
+            else:
+                print(
+                    f'--- Number of cells that are normalised for zone: {zone_number} '
+                    f'are {num_cells_modified_probability} of {len(cell_index_defined)} cells.'
+                )
+
 
     # End loop over zones
 
@@ -304,13 +319,14 @@ def run(
     real_number = project.current_realisation
     print(f'Run: APS_normalize_prob_cubes on realisation {real_number + 1}')
     model_file = get_specification_file(**kwargs)
-
+    debug_level = get_debug_level(**kwargs)
     check_and_normalize_probabilities_for_APS(
         project,
         model_file,
         tolerance_of_probability_normalisation,
         eps,
         overwrite,
-        max_allowed_fraction_of_values_outside_tolerance
+        max_allowed_fraction_of_values_outside_tolerance,
+        debug_level=debug_level
     )
     print('Finished APS_normalize_prob_cubes')

@@ -9,7 +9,7 @@ import numpy as np
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug
 from src.utils.io import ensure_folder_exists
-from src.utils.methods import get_specification_file
+from src.utils.methods import get_specification_file, get_debug_level
 from src.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
@@ -38,7 +38,7 @@ def define_variogram(variogram, azimuth_value_sim_box):
 def run_simulations(
         project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
         write_rms_parameters_for_qc_purpose=True,
-        fmu_mode=False,
+        fmu_mode=False, debug_level=Debug.OFF,
 ):
     """
     Description: Run gauss simulations for the APS model i sequence
@@ -49,7 +49,7 @@ def run_simulations(
     print(f'Run: Simulation of gaussian fields')
     print(f'- Read file: {model_file}')
     aps_model = APSModel(model_file)
-    debug_level = aps_model.debug_level
+
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization
     # workflow loop because the start random seed is created once per process,
     # and the process is the same for all realizations in the loop.
@@ -114,7 +114,10 @@ def run_simulations(
             azimuth_value_sim_box = variogram.angles.azimuth - grid_attributes.sim_box_size.azimuth_angle
 
             if debug_level >= Debug.VERBOSE:
-                print(f'---  Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
+                if region_number > 0:
+                    print(f'---  Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
+                else:
+                    print(f'---  Simulate: {gauss_field_name}  for zone: {zone_number}')
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
                     f'     Zone,region             : ({zone_number}, {region_number})\n'
@@ -148,10 +151,15 @@ def run_simulations(
             gauss_result = np.reshape(gauss_vector, (nx, ny, nz), order='F')
             gauss_result_list_for_zone.append(gauss_result)
             if debug_level >= Debug.VERBOSE:
-                print(
-                    f'--- Finished running simulation of {gauss_field_name} for zone,region: '
-                    f'({zone_number}, {region_number})\n'
-                )
+                if region_number > 0:
+                    print(
+                        f'--- Finished running simulation of {gauss_field_name} for zone,region: '
+                        f'({zone_number}, {region_number})\n'
+                    )
+                else:
+                    print(
+                        f'--- Finished running simulation of {gauss_field_name} for zone: {zone_number}\n'
+                    )
 
         set_continuous_3d_parameter_values_in_zone_region(
             grid_model,
@@ -187,7 +195,6 @@ def run_simulations(
             file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + nrlib.seed()}\n')
 
 
-
 def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
@@ -195,6 +202,7 @@ def run(project, **kwargs):
     write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose', True)
     real_number = project.current_realisation
     is_shared = False
+    debug_level = get_debug_level(**kwargs)
 
     run_simulations(
         project,
@@ -204,5 +212,6 @@ def run(project, **kwargs):
         seed_file_log,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
         fmu_mode=fmu_mode,
+        debug_level=debug_level,
     )
     print('Finished simulation of gaussian fields for APS')
