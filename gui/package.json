@@ -83,7 +83,6 @@
     "ts-custom-error": "^3.0.0",
     "typescript": "^3.2.1",
     "vue-async-computed-decorator": "^0.0.5",
-    "vue-axios": "^2.1.1",
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-meta": "^2.3.1",
     "vue-property-decorator": "^8.1.0",

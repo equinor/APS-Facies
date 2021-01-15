@@ -1,7 +1,6 @@
 import './rms'
 import './swatches'
 import './vuetify'
-import './axios'
 import './validation'
 import './asyncCumputed'
 import './tooltip'
