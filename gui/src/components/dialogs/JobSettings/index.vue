@@ -270,7 +270,7 @@ export default class JobSettings extends Vue {
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.importFields = options.importFields.value
-      this.exportFmuConfigFiles = options.exportFmuConfigFiles.value  
+      this.exportFmuConfigFiles = options.exportFmuConfigFiles.value
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }

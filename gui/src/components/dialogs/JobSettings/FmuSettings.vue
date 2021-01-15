@@ -98,12 +98,12 @@
     </div>
     <v-row no-gutters>
       <v-checkbox
-       v-model="_exportFmuConfigFiles"
-       v-tooltip="'When running this job from RMS workflow, APS model file and FMU config files are exported automatically.'"
-       label="Export model file and FMU config files for current job."
-       :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
+        v-model="_exportFmuConfigFiles"
+        v-tooltip="'When running this job from RMS workflow, APS model file and FMU config files are exported automatically.'"
+        label="Export model file and FMU config files for current job."
+        :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
       />
-    </v-row>  
+    </v-row>
   </settings-panel>
 </template>
 

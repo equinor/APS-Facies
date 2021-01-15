@@ -26,7 +26,7 @@ export default class LoadJob extends Vue {
   private jobMapping: Record<string, JSON> = {}
   private selectedJob: string | null = null
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   private loading = false // TypeScript complains it is not read, even though it is used in the template
 

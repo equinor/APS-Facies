@@ -124,7 +124,7 @@ function addPrintInfo ({ rootState }: Context, doc: Document, parentElement: HTM
 }
 
 function addTransformTypeGRF ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-   parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
+  parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
 }
 
 function addSeedFile ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
@@ -426,6 +426,7 @@ function addTruncationRuleBayFill (context: Context, doc: Document, parent: Pare
 }
 
 function addTruncationRuleOverlay<
+  // eslint-disable-next-line no-use-before-define
   T extends OverlayTruncationRule<P, S, Sp>,
   P extends Polygon = Polygon,
   S extends PolygonSerialization = PolygonSerialization,

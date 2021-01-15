@@ -99,13 +99,15 @@ export default class NonCubicTable extends Vue {
         text: 'Facies',
         value: 'facies',
       },
-      ...(this.hasMultipleFaciesSpecified ? [
-        {
-          text: 'Probability Fraction',
-          value: 'fraction',
-          help: 'The fraction of the facies probability assigned to the individual polygon',
-        },
-      ] : []),
+      ...(this.hasMultipleFaciesSpecified
+        ? [
+          {
+            text: 'Probability Fraction',
+            value: 'fraction',
+            help: 'The fraction of the facies probability assigned to the individual polygon',
+          },
+        ]
+        : []),
       {
         text: 'Order',
         value: 'order',

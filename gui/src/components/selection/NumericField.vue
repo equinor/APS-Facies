@@ -47,6 +47,7 @@
 
 <script lang="ts">
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable no-use-before-define */
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { BigNumber } from 'mathjs'

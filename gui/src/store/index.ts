@@ -96,10 +96,12 @@ const store: Store<RootState> = new Vuex.Store({
       const {
         message,
         force = false,
-      } = typeof payload !== 'string' ? payload : {
-        message: payload,
-        force: false,
-      }
+      } = typeof payload !== 'string'
+        ? payload
+        : {
+          message: payload,
+          force: false,
+        }
       if (!getters.loading || force) {
         commit('LOADING', { message })
         await Promise.all([

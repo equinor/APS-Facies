@@ -17,6 +17,7 @@ export default class BaseItem implements Identifiable {
   public readonly id: ID
   protected readonly _excludeFromHash: string[]
 
+  // eslint-disable-next-line no-use-before-define
   public constructor ({ id }: BaseItemConfiguration = { id: undefined }) {
     if (!id) id = uuid()
     if (!isUUID(id)) throw TypeError('An item must have a valid UUID, as id')

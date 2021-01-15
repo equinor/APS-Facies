@@ -1,5 +1,5 @@
 <template>
-  <settings-panel 
+  <settings-panel
     title="Gaussian field transformation settings"
   >
     <v-select

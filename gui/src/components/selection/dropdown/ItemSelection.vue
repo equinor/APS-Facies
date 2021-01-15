@@ -10,6 +10,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable no-use-before-define */
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { required } from 'vuelidate/lib/validators'
 

@@ -124,7 +124,7 @@ function addPrintInfo ({ rootState }: Context, doc: Document, parentElement: HTM
 }
 
 function addTransformTypeGRF ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-   parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
+  parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
 }
 
 function addSeedFile (context: Context, doc: Document, parentElement: HTMLElement): void {
