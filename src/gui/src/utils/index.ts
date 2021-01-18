@@ -10,7 +10,7 @@ import {
   Newable,
   Identified,
 } from '@/utils/domain/bases/interfaces'
-import { RootGetters } from '@/store/typing'
+import { RootGetters, RootState } from '@/store/typing'
 
 import { PolygonSpecification } from '@/utils/domain/polygon/base'
 import { TruncationRule } from '@/utils/domain/truncationRule'
@@ -300,6 +300,8 @@ function getParameters (collection: object, delimiter = '.'): string[] {
   ]
 }
 
+const encodeState = (state: RootState): string => btoa(JSON.stringify(state))
+
 export {
   getId,
   sortByProperty,
@@ -324,4 +326,5 @@ export {
   getParameters,
   includes,
   identify,
+  encodeState,
 }

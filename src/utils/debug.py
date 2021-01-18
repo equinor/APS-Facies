@@ -92,7 +92,7 @@ def parse_dot_master(path):
     }
 
 
-def _split(line: str, sep: str = '='):
+def _split(line: str, sep: str = ' ='):
     return tuple(item.strip() for item in line.split(sep))
 
 

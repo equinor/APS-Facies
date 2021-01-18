@@ -4,14 +4,17 @@ const API_PROTOCOL = process.env.VUE_APP_APS_PROTOCOL || 'http'
 const API_SERVER = process.env.VUE_APP_APS_SERVER || '127.0.0.1'
 const API_PORT = process.env.VUE_APP_APS_API_PORT || 5000
 
-function callPythonFunction (code: string): Promise<JSON> {
+function callPythonFunction (method: string, parameters: string): Promise<JSON> {
   return new Promise((resolve, reject) => {
     // execute code, if successful call resolve with the result, otherwise reject
 
     // simple:
-    axios.get(`${API_PROTOCOL}://${API_SERVER}:${API_PORT}/${code}`, {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' }
-    })
+    axios.post(
+      `${API_PROTOCOL}://${API_SERVER}:${API_PORT}/${method}`,
+      parameters,
+      {
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      })
       .then(response => {
         resolve(response.data)
       })
@@ -28,7 +31,7 @@ const uipyHandler = {
         if (i > 0) argstr += ', '
         argstr += JSON.stringify(args[i])
       }
-      return callPythonFunction(`ui.${propKey}(${argstr})`)
+      return callPythonFunction(`ui.${propKey}`, argstr)
     }
   }
 }

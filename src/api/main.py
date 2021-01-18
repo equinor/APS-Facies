@@ -10,7 +10,7 @@ from src.rms_jobs.create_zone_parameter import run as run_create_zone_parameter
 from src.rms_jobs.check_grid_index_origin import run as run_check_grid_index_origin
 from src.rms_jobs.export_fmu_config_files import run as run_export_fmu_config_files
 
-from src.utils.decorators import loggable
+from src.utils.decorators import loggable, output_version_information
 from src.utils.fmu import fmu_aware_model_file
 from src.utils.io import create_temporary_model_file
 from src.utils.roxar.job import JobConfig, classify_job_configuration
@@ -27,6 +27,7 @@ def run(config):
 
     @classify_job_configuration(roxar, project)  # noqa
     @loggable
+    @output_version_information
     def execute(job: JobConfig):
         if job.error_message:
             raise ValueError(job.error_message)

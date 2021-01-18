@@ -217,7 +217,7 @@ def get_run_parameters(**kwargs):
         'facies_code': get_facies_code(**kwargs),
         'run_test_script': get_run_test_script(**kwargs),
         'workflow_name': get_workflow_name(),
-        'current_job_name' : get_job_name(),
+        'current_job_name': get_job_name(),
         'debug_level': get_debug_level(**kwargs),
     }
 
@@ -242,6 +242,7 @@ def get_workflow_name():
     except ImportError:
         name = None
     return name
+
 
 def get_job_name():
     try:

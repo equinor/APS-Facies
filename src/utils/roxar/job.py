@@ -1,21 +1,27 @@
 import json
 from base64 import b64decode
 from functools import wraps
+from warnings import warn
 
-from pathlib import Path
 from typing import Dict
 
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
 from src.utils.decorators import cached
 from src.utils.fmu import get_export_location, get_ert_location, is_initial_iteration
+from src.utils.roxar._config_getters import get_debug_level
+from src.utils.roxar.migrations import Migration
+from src.utils.roxar.rms_project_data import RMSData
 
 
 class JobConfig:
     def __init__(self, roxar, project, config: Dict):
         self.roxar = roxar
         self.project = project
-        self._config = config
+        migrated = self._migrate_state(config)
+        if migrated['errors']:
+            warn(f"There was a problem migrating the state; {migrated['errors']}")
+        self._config = migrated['state']
 
     def get_parameters(self, model_file):
         aps_model = APSModel(model_file)  # Represents the ORIGINAL APS model
@@ -91,12 +97,7 @@ class JobConfig:
 
     @property
     def field_file_format(self):
-        try:
-            return self._config['fmu']['fieldFileFormat']['value']
-        except KeyError:
-            raise ValueError(
-                'Version migration error: Please open this job interactively and save it again before running it.'
-            )
+        return self._config['fmu']['fieldFileFormat']['value']
 
     @property
     def update_model_with_fmu_variables(self):
@@ -187,7 +188,7 @@ class JobConfig:
 
     @property
     def debug_level(self):
-        return Debug(self._config['parameters']['debugLevel']['selected'])
+        return get_debug_level(self._config)
 
     @property
     def _config_location(self):
@@ -219,6 +220,10 @@ class JobConfig:
 
     def to_json(self):
         return json.dumps(self._config)
+
+    def _migrate_state(self, state: dict) -> dict:
+        migration = Migration(RMSData(self.roxar, self.project))
+        return migration.migrate(state)
 
 
 def classify_job_configuration(roxar, project):

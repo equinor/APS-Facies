@@ -462,6 +462,8 @@ prog/
 *state.json
 *.zip
 *.bak
+src/api/VERSION
+src/api/COMMIT
 
 # Unit testing
 src/unit_test/fmu_attributes.txt
@@ -504,3 +506,4 @@ src/gui/src/store/templates/truncationRules.json
 # Track build number
 src/utils/track-build-number
 local.settings.json
+/integration_test/
