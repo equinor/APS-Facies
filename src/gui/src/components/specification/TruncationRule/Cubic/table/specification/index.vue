@@ -57,7 +57,7 @@
       no-gutters
     >
       <cubic-topology-specification
-        v-if="value.root"
+        v-if="value.backgroundPolygons.length > 0"
         v-model="selected"
         :rule="value"
       />
@@ -100,7 +100,10 @@ export default class CubicTruncationRuleSpecification extends Vue {
   split (): void {
     const polygon = (this.selected.length > 0)
       ? this.selected.pop()
-      : this.value.root || new CubicPolygon({ order: -1 })
+      : this.value.root
+    if (!polygon) {
+      throw new Error('The truncation rule has no root')
+    }
     this.$store.dispatch('truncationRules/split', { rule: this.value, polygon, value: this.splitInto })
   }
 
