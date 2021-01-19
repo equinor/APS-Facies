@@ -2,6 +2,56 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.0
+
+### What's new?
+* The user may choose the transformation type
+  * In both GUI, and in the model file
+* A job no longer needs to be opened in order to be migrated to the newest version
+  * APS jobs can now be run in batch mode, without needing to be opened first
+* Modified FMU config yml format for APS parameters
+  * add gui for checkbox for auto export of FMU files
+* Changed print info Modified attribute and probability distribution files for FMU
+* If using an APS stub in a RMS workflow, and no plugin path is given, the stable releases is used
+* Option to automatically detect whether FMU is used
+* Add `ROFF` format as an optional choice as exchange format for GRF field parameters between APS and ERT
+* Remove FMU parameter list location
+* Remove project selection
+
+### Fixes
+* Fix bug that make APS fail when running or open an existing job if Zone parameter is empty or removed
+* Check azimuth angle
+* Update vulnerable dependency
+* Fix updating of `code_names`
+* Fixed error in name of FMU tag for `RelStdDev` parameter and `RelativeSize`
+* Fixed a bug when running in FMU mode with only parameter updates
+* Fix leading text for some input in Job settings
+* Change order of grid index origo check and ertbox grid creation
+* Ensure that lower left corner is used for simbox
+* Write down the name of the built plugin, and deploy it specifically
+* Grid ijk-handedness is handled for both RMS standard and Eclipse standard grid index origin
+* Fixed a bug in normalization. A default value was used instead of user defined value for tolerance
+* Extend the script used to create probability logs so that it can handle multiple zones in general
+* Add support for migrating from some legacy jobs
+* Modified script `defineProbTrend`, so it works properly both when using and not using conditional probability matrix
+
+### Restructure
+* Reuse code, and make code more Pythonic
+
+### Miscellaneous
+* Give understandably error message when mismatch between old APS job and the APS plugin lead to error when running
+* Consistently use helper method `get_debug_level`
+* Use RMS 11.1.2, and updated test project
+  * Including the provided mock data
+* Add missing exports in mock
+* Set the normalization parameter defaults in the run job
+* Specify a new root for project files, when using a mock
+* Update link to point the Equinor, instead of Statoil
+* May click the "run" button locally, when developing outside of RMS
+* May load jobs from GUI locally, when developing outside of RMS
+* Looks for known vulnerabilities in Node.js dependencies
+
+
 ## 1.2.1
 
 ### Fixes
