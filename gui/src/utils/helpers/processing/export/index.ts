@@ -90,7 +90,7 @@ function addZoneParamName ({ rootState }: Context, doc: Document, parentElement:
    * Default er Zone som navn på soneparameteren i jobben i RMS som heter 'Create Grid Index Parameters ' og
    * som kan brukes til å lage soneparameter m.m
    *
-   * Den jobben jeg laga ligger under grid_model.py under src/utils/roxar og heter createZoneParameter.
+   * Den jobben jeg laga ligger under grid_model.py under aps/utils/roxar og heter createZoneParameter.
    * Den har pr i dag ikke blitt brukt til noe og jeg må endre default navnet til Zone for den RMS parameteren den lager.
    */
   const value = rootState.parameters.zone.selected || 'Zone'

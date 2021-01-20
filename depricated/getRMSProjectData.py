@@ -49,14 +49,14 @@ from xml.etree.ElementTree import Element, parse
 
 import numpy as np
 
-from src.utils.roxar.generalFunctionsUsingRoxAPI import (
+from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     get2DMapDimensions, setConstantValueInHorizon, createHorizonDataTypeObject
 )
-from src.utils.roxar.grid_model import getDiscrete3DParameterValues, GridAttributes
-from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
-from src.utils.constants.simple import Debug
-from src.utils.methods import get_prefix
-from src.utils.xmlUtils import getKeyword, getTextCommand, prettify
+from aps.utils.roxar.grid_model import getDiscrete3DParameterValues, GridAttributes
+from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from aps.utils.constants.simple import Debug
+from aps.utils.methods import get_prefix
+from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify
 
 
 def readInputXMLFile(modelFileName, debug_level=Debug.OFF):

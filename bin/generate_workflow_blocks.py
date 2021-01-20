@@ -25,7 +25,7 @@ from tempfile import gettempdir
 import os
 from typing import Dict, List, Optional, Tuple, Iterator, Iterable, Callable, Any
 
-from src.utils.roxar import get_nrlib_path
+from aps.utils.roxar import get_nrlib_path
 
 
 def run() -> None:
@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.12.0"
+__version__ = "0.13.0"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -207,10 +207,7 @@ else:
 # Generating necessary paths
 def _load_module():
     module_path = relative_path.replace('/', '.') + '.' + file_name
-    try:
-        return import_module(module_path)
-    except ModuleNotFoundError:
-        return import_module(module_path.replace('src', 'aps'))
+    return import_module(module_path)
 
 
 # Getting the location of the necessary files
@@ -348,7 +345,7 @@ def get_workflows() -> Dict[str, List[str]]:
         ],
         'depricated': [
         ],
-        'src/rms_jobs': [
+        'aps/rms_jobs': [
             'APS_main',
             'APS_simulate_gauss_multiprocessing',
             'APS_simulate_gauss_singleprocessing',
@@ -363,13 +360,13 @@ def get_workflows() -> Dict[str, List[str]]:
             'createProbabilityLogs',
             'createRedefinedBlockedFaciesLog',
         ],
-        'src/algorithms': [
+        'aps/algorithms': [
             'setupFMUtags',
         ],
-        'src/utils': [
+        'aps/utils': [
             'testPreview',
         ],
-        'src/utils/roxar': [
+        'aps/utils/roxar': [
             'APS_update_gauss_rms',
             'getGridModelAttributes',
             'compare_files',
@@ -452,7 +449,7 @@ def create_workflow_block_file(
 
 
 def get_ipl_scripts(root_path: Path) -> List[Path]:
-    ipl_dir = root_path / 'src/IPL'
+    ipl_dir = root_path / 'aps/IPL'
     return [ipl_dir / ipl_script for ipl_script in _OS.listdir(ipl_dir)]
 
 

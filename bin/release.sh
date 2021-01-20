@@ -105,13 +105,13 @@ if ! git diff-index --cached --exit-code -r --ignore-submodules HEAD -- >&2; the
 fi
 
 # Update version in package.json
-sed -i.bak 's|"version": ".*",|"version": "$new_version",|g' src/gui/package.json
-rm src/gui/package.json.bak
+sed -i.bak 's|"version": ".*",|"version": "$new_version",|g' gui/package.json
+rm gui/package.json.bak
 
 echo "INFO: Committing and tagging new version"
 
 # Commit the changed files before tagging the new release
-git add src/gui/package.json
+git add gui/package.json
 git commit -m "Update version to ${new_version}. See CHANGELOG.md for details"
 
 git tag -a "$new_tag_name" -m "Version ${new_version}"

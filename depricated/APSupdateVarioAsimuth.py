@@ -8,8 +8,8 @@ Dependency: ROXAPI
 from warnings import warn
 import roxar
 
-from src.utils.roxar.generalFunctionsUsingRoxAPI import setConstantValueInHorizon
-from src.algorithms.APSModel import APSModel
+from aps.utils.roxar.generalFunctionsUsingRoxAPI import setConstantValueInHorizon
+from aps.algorithms.APSModel import APSModel
 
 
 def run():

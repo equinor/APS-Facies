@@ -11,7 +11,7 @@ APS_PATH=/project/idi/personlig/olia/APSGUI
 NRLIB_PATH=/project/multiscale/APSGUI/nrlib/nrlib-dist
 RMS_VERSION=10.1.1
 
-APS_SRC_PATH=$APS_PATH/src
+APS_SRC_PATH=$APS_PATH/aps
 ROXAR_RMS_ROOT=/prog/roxar/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release
 PYTHONHOME=/prog/roxar/rms/versions/${RMS_VERSION}/linux-amd64-gcc_4_4-release
 PYTHONUSERBASE=/private/${USER}/.roxar/rms-10.1/python

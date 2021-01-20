@@ -47,7 +47,7 @@ initialize:
       - 'Pipfile.lock'
       - '.venv/'
       - 'workflow/'
-      - 'src/gui/node_modules'
+      - 'gui/node_modules'
     expire_in: 24 hours
 
 vulnerabilities:
@@ -128,16 +128,16 @@ integration testing (RMS 11):
     # tcpdump is useful to see which ports, and servers the firewall must be opened in order for RMS to talk with the
     # license server. Previously (in AWS), this information was available directly from DRM, but is no longer available.
     - yum install -y tcpdump  # TODO: Move to Docker image?
-    - tcpdump -l -s 65535 > src/unit_test/integration/data.pcap &
+    - tcpdump -l -s 65535 > aps/unit_test/integration/data.pcap &
     - 'eval $MAKE integration-tests'
   artifacts:
     when: always
     name: logs
     paths:
-      - 'src/unit_test/integration/*.log'
-      - 'src/unit_test/integration/*.xml'
-      - 'src/unit_test/integration/*.dat'
-      - 'src/unit_test/integration/data.pcap'
+      - 'aps/unit_test/integration/*.log'
+      - 'aps/unit_test/integration/*.xml'
+      - 'aps/unit_test/integration/*.dat'
+      - 'aps/unit_test/integration/data.pcap'
     expire_in: 5 days
   needs: []
 
