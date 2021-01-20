@@ -254,7 +254,7 @@ class Migration:
                 state = migration['up'](state)
                 state['version'] = migration['to']
         except Exception as e:
-            errors = e.args[0]
+            errors = e.__repr__()
             warn(errors)
         return {
             'state': state,
