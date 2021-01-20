@@ -338,14 +338,17 @@ f'Debug output:  z_center (sim box): {self._z_center}''')
 
         if isinstance(self, Trend3D_rms_param):
             from src.utils.roxar.grid_model import getContinuous3DParameterValues
-            print(self.type)
+            print(f'-- Use customized trend function. No preview is implemented for this yet.')
             # Values for all active cells
             values_in_active_cells = getContinuous3DParameterValues(
                 grid_model, self.trend_parameter_name,  realization_number, debug_level=self._debug_level
             )
             # Values for selected cells (using numpy vectors)
             values_in_selected_cells = values_in_active_cells[cell_index_defined]
-
+            # If the user defined trend is constant, change one grid cell value to ensure it is not
+            # constant to avoid errors later.
+            if np.ptp(values_in_selected_cells) < 0.000001:
+                values_in_selected_cells[0] += 1.0
         else:
             num_defined_cells = len(cell_index_defined)
             values_in_selected_cells = np.zeros(num_defined_cells, np.float32)
@@ -1191,7 +1194,7 @@ class Trend3D_rms_param(Trend3D):
         Description: Create a trend 3D object using a specified RMS 3D continuous parameter
         Input is model parameters.
     """
-    def __init__(self, rms_parameter_name, debug_level=Debug.OFF):
+    def __init__(self, rms_parameter_name, debug_level=Debug.OFF, **kwargs):
         self._rms_param_name = rms_parameter_name
         self._debug_level = debug_level
 
