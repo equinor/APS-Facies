@@ -141,7 +141,9 @@ class Migration:
                     polygons.append(new_root())
                 else:
                     polygon_lookup = {polygon['id']: polygon for polygon in polygons}
-                    polygon = sample(polygons, 1)[0]
+                    background_polygons = [polygon for polygon in polygons if not polygon['overlay']]
+                    polygon = sample(background_polygons, 1)[0]
+
                     while polygon['parent'] is not None and polygon['parent'] in polygon_lookup:
                         polygon = polygon_lookup[polygon['parent']]
                     parent = polygon['parent']
@@ -151,7 +153,7 @@ class Migration:
                         # the root was not added
                         polygons.append(new_root(
                             id=parent,
-                            children=[child['id'] for child in polygons if child['parent'] == parent],
+                            children=[child['id'] for child in background_polygons if child['parent'] == parent],
                         ))
         return state
 
