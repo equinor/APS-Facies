@@ -27,6 +27,10 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
   public constructor ({ direction, ...rest }: CubicTruncationRuleArgs) {
     super(rest)
     this.direction = new Direction(direction)
+    if (!this.root) {
+      const root = new CubicPolygon({ order: -1 })
+      this._polygons[root.id] = root
+    }
   }
 
   public get type (): 'cubic' {
@@ -35,7 +39,13 @@ export default class Cubic extends OverlayTruncationRule<CubicPolygon, CubicPoly
 
   public get root (): CubicPolygon | null {
     let polygon = sample(this.backgroundPolygons)
-    if (!polygon) return null
+    if (!polygon) {
+      if (this.polygons.length === 0) {
+        const polygons = Object.values(this._polygons)
+        if (polygons.length === 1 && polygons[0] instanceof CubicPolygon) return polygons[0]
+      }
+      return null
+    }
     while (polygon.parent) {
       polygon = polygon.parent
     }

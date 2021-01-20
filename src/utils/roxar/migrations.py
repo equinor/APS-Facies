@@ -1,3 +1,4 @@
+from random import sample
 from typing import Optional, List
 from uuid import uuid4
 from warnings import warn
@@ -118,6 +119,42 @@ class Migration:
     def attempt_upgrading_legacy_state(self, state: dict):
         return _attempt_upgrading_legacy_state(self, state)
 
+    @staticmethod
+    def add_possibly_missing_root_polygon_to_cubic_truncation_rules(state: dict):
+
+        def new_root(id: Optional[str] = None, children: List[str] = None) -> dict:
+            return {
+                'id': id or str(uuid4()),
+                'facies': None,
+                'fraction': 1,
+                'order': -1,
+                'overlay': False,
+                'parent': None,
+                'children': children or [],
+            }
+
+        for truncation_rule in state['truncationRules']['available'].values():
+            if truncation_rule['type'] == 'cubic':
+                polygons = truncation_rule['polygons']
+                if not polygons:
+                    # All cubic truncation rules should have at least one polygon; its root
+                    polygons.append(new_root())
+                else:
+                    polygon_lookup = {polygon['id']: polygon for polygon in polygons}
+                    polygon = sample(polygons, 1)[0]
+                    while polygon['parent'] is not None and polygon['parent'] in polygon_lookup:
+                        polygon = polygon_lookup[polygon['parent']]
+                    parent = polygon['parent']
+                    if parent is not None:
+                        # That is, there are references to a root that does not exist
+                        # This was caused by a bug in the "simple" cubic truncation rule, where
+                        # the root was not added
+                        polygons.append(new_root(
+                            id=parent,
+                            children=[child['id'] for child in polygons if child['parent'] == parent],
+                        ))
+        return state
+
     @property
     def migrations(self):
         return [
@@ -170,6 +207,11 @@ class Migration:
                 'from': '1.7.0',
                 'to': '1.8.0',
                 'up': lambda state: self.add_transform_type(self.add_export_fmu_config_file(state)),
+            },
+            {
+                'from': '1.8.0',
+                'to': '1.8.1',
+                'up': self.add_possibly_missing_root_polygon_to_cubic_truncation_rules,
             },
         ]
 
