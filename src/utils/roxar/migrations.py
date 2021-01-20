@@ -1,3 +1,4 @@
+import functools
 from random import sample
 from typing import Optional, List
 from uuid import uuid4
@@ -5,6 +6,39 @@ from warnings import warn
 
 from src.utils.constants.simple import Debug
 from src.utils.roxar._config_getters import get_debug_level
+
+
+@functools.total_ordering
+class _Version:
+    __slots__ = 'major', 'minor', 'patch'
+
+    def __init__(self, version: str):
+        version = [int(part) for part in version.split('.')]
+
+        self.patch = 0
+        self.minor = 0
+        self.major = 0
+
+        if not 1 <= len(version) <= 3:
+            raise ValueError(f'Not a valid semantic version ({version}). Should be major[.minor[.patch]]')
+
+        if len(version) >= 3:
+            self.patch = version[2]
+        if len(version) >= 2:
+            self.minor = version[1]
+        self.major = version[0]
+
+    def __str__(self):
+        return f"{self.major}.{self.minor}.{self.patch}"
+
+    def as_tuple(self):
+        return self.major, self.minor, self.patch
+
+    def __lt__(self, other):
+        return self.as_tuple() < other.as_tuple()
+
+    def __eq__(self, other):
+        return self.as_tuple() == other.as_tuple()
 
 
 class Migration:
@@ -223,9 +257,9 @@ class Migration:
             if (
                     (
                             to_version is None
-                            or to_version.split('.') > migration['from'].split('.')
+                            or _Version(to_version) > _Version(migration['from'])
                     )
-                    and from_version.split('.') < migration['to'].split('.')
+                    and _Version(from_version) < _Version(migration['to'])
             )
         ]
         return _migrations
