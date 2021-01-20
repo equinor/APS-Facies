@@ -6,7 +6,9 @@ import store from './store'
 import './plugins'
 import vuetify from './plugins/vuetify'
 
-Vue.config.productionTip = process.env.NODE_ENV !== 'production'
+import { isDevelopmentBuild } from '@/config'
+
+Vue.config.productionTip = isDevelopmentBuild()
 
 /* eslint-disable no-new */
 new Vue({

@@ -12,6 +12,7 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
+import { isDevelopmentBuild } from '@/config'
 
 import { delay } from 'lodash'
 
@@ -35,7 +36,7 @@ export default class InformationBar extends Vue {
   get message (): Optional<string> {
     let message = this._message.value
     if (message instanceof Error) {
-      if (process.env.NODE_ENV === 'develop') {
+      if (isDevelopmentBuild()) {
         throw message
       } else {
         message = message.message

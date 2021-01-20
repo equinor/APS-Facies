@@ -39,6 +39,7 @@ import {
 } from '@/utils'
 import { hasOwnProperty } from '@/utils/helpers'
 import { displayMessage } from '@/store/utils'
+import { isDevelopmentBuild } from '@/config'
 
 Vue.use(Vuex)
 
@@ -57,7 +58,7 @@ const store: Store<RootState> = new Vuex.Store({
     },
   },
 
-  strict: process.env.NODE_ENV !== 'production',
+  strict: !isDevelopmentBuild(),
 
   modules: {
     copyPaste,

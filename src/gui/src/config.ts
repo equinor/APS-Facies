@@ -1,5 +1,5 @@
 export function isDevelopmentBuild (): boolean {
-  return process.env.NODE_ENV === 'develop'
+  return process.env.NODE_ENV === 'development'
 }
 
 export const DEFAULT_SIZE = {
