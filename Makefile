@@ -90,7 +90,7 @@ PLUGIN_NAME := aps_gui
 PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
 PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
 DEPLOY_VERSION_PATH := $(CODE_DIR)/DEPLOY_VERSION.txt
-WEB_DIR := $(SOURCE_DIR)/gui
+WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 LIB_PREFIX := $(CODE_DIR)/libraries
 LIB_SOURCE := $(LIB_PREFIX)/sources
@@ -246,11 +246,7 @@ copy-python-files:
 move-pydist:
 	mv $(PLUGIN_DIR)/src/pydist $(PLUGIN_DIR)
 
-remove-extraneous-files: remove-node_modules-stubs
-
-remove-node_modules-stubs:
-	rm -rf $(PLUGIN_DIR)/pydist/aps/gui/node_modules
-	rmdir $(PLUGIN_DIR)/pydist/aps/gui
+remove-extraneous-files:
 
 clean-build: clean-plugin clean-links clean-build-dir
 
