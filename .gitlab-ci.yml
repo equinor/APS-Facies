@@ -13,9 +13,7 @@ variables:
   MKL_ROOT:               "/opt/intel/mkl"
   PYTHON:                 "${CODE_DIR}/.venv/bin/python"
   SHELL:                  "/bin/bash"
-  PIPENV_VENV_IN_PROJECT: "1"
   DEPLOY_SERVER:          "tr-linrgsn001.tr.statoil.no"
-  SYSTEM_INSTALL_PIPENV:  "yes"
   GIT_LFS_SKIP_SMUDGE:    "1"
   MATPLOTLIB_BACKEND:     "Agg"
 
@@ -38,6 +36,7 @@ initialize:
   script:
     - 'export PYTHON="${RMS_PYTHON}"'
     - 'unset MAKE'
+    - 'eval $PYTHON -m venv .venv && $PYTHON -m pip install poetry'
     - 'eval make --directory=${CODE_DIR} init'
     - 'eval rm -rf ${WORKON_HOME}/nrlib-*'
   artifacts:

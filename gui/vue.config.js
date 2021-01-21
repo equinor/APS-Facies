@@ -4,14 +4,19 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin')
 // Vue configurations
 const isProduction = process.env.NODE_ENV === 'production'
 const canParallelize = require('os').cpus().length > 1
+const isDocker = require('fs').existsSync('/.dockerenv')
 
 const assetsDir = 'static'
 
 const { CODESPACE_NAME } = process.env
+const API_PROTOCOL = process.env.VUE_APP_APS_PROTOCOL || 'http'
+const API_SERVER = process.env.VUE_APP_APS_SERVER || '127.0.0.1'
+const API_PORT = process.env.VUE_APP_APS_API_PORT || 5000
 
 /**
  * @type {import('@vue/cli-service').ProjectOptions}
  */
+
 module.exports = {
   assetsDir: assetsDir,
   runtimeCompiler: !isProduction,
@@ -40,12 +45,15 @@ module.exports = {
   },
   devServer: {
     proxy: /* CODESPACE_NAME
-      ? */({
-      '^/api': {
-        target: 'http://localhost:5000/api',
-        changeOrigin: true,
-      }
-    }),
+      ? */
+      isDocker
+        ? `${API_PROTOCOL}://${API_SERVER}:${API_PORT}`
+        : ({
+          '^/api': {
+            target: 'http://localhost:5000/api',
+            changeOrigin: true,
+          }
+        }),
     // The port in Codespaces is the one used by NginX, and not the dev server
     // The reason, is that it is that URL that the browser sees.
     host: CODESPACE_NAME ? `${CODESPACE_NAME}-8888.preview.app.github.dev` : 'localhost:8080',

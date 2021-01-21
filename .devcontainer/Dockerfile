@@ -5,7 +5,7 @@ ARG VARIANT="3.8-bullseye"
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
-ARG NODE_VERSION="14"
+ARG NODE_VERSION="16"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
 RUN apt-get update \
@@ -22,7 +22,7 @@ RUN apt-get update \
 
 USER vscode
 ENV PATH="/home/vscode/.local/bin:$PATH"
-ARG POETRY_VERSION="1.1.15"
+ARG POETRY_VERSION="1.6.1"
 # Install poetry
 RUN pip install --upgrade pip \
   && curl -sSL https://install.python-poetry.org | python3 - --version="$POETRY_VERSION"

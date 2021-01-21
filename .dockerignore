@@ -9,3 +9,27 @@
 
 # Initialization
 !Makefile
+
+# For the containers
+!bin/parse-truncation-rule-templates.py
+!examples/truncation_settings.dat
+
+!aps/*.py
+!aps/api/**/*.py
+!aps/utils/**/*.py
+!aps/rms_jobs/**/*.py
+!aps/algorithms/**/*.py
+!libraries/rms-mock/roxar/**/*.py
+!libraries/rms-mock/_roxar/**/*.py
+
+!gui/tsconfig.json
+!gui/.eslintrc.js
+!gui/.postcssrc.js
+!gui/babel.config.js
+!gui/vue.config.js
+!gui/public/CHANGELOG.md
+!gui/public/favicon.ico
+!gui/public/index.html
+!gui/src
+
+!nginx/local.nginx

@@ -5,12 +5,31 @@ see [gitlab wiki](https://git.equinor.com/APS/GUI/wikis/)
 ## Getting started
 
 
+Install [asdf](https://asdf-vm.com/guide/getting-started.html#_3-install-asdf), if not already installed.
+
+On macOS, you may have to set
+```bash
+export PYTHON_CONFIGURE_OPTS="--enable-framework"
+export SYSTEM_VERSION_COMPAT=1 
+```
+first, in order to make user Python is compiled / installed as a Framework, which is highly recommended to make matplotlib behave.
+
+```bash
+asdf install
+poetry install  # Installed via asdf
+```
+
 ```bash
 make init
 ```
 
 ### Starting
 
+```bash
+docker-compose up -d --build
+```
+
+##### API
 In one terminal execute
 
 ```bash
@@ -46,13 +65,13 @@ The GUI will automatically get these rules, when it is built.
 ## Releasing a new version
 1. Create a new branch (e.g. `git switch -c release/v<new version>`)
 2. Update the `"version"` field in `gui/package.json` 
-3. Add a new entry in `CHANGELOG.md` for this particular version
+3. Add a new entry in `gui/public/CHANGELOG.md` for this particular version
     *  To get a list of all commits since last, execute
        ```bash
        last_version="$(git describe --abbrev=0 --tags)"
        git log "$last_version"..HEAD --pretty=format:'* %s' > commits.log
        ```
-    * From these, copy relevant (user-facing) changes into `CHANGELOG.md` under appropriate headings
+    * From these, copy relevant (user-facing) changes into `gui/public/CHANGELOG.md` under appropriate headings
 
        ```markdown
        ## <version>

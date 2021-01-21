@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aps-gui"
-version = "0.1.0"
+version = "1.3.6"
 description = ""
 authors = [
     "Oddvar Lia <olia@equinor.com>",
@@ -11,23 +11,24 @@ authors = [
 [tool.poetry.dependencies]
 python = "^3.8"
 matplotlib = "^3.6.0"
-numpy = "*"
-pillow = "*"
-scipy = "*"
-xtgeo = ">=2.5.0"
-pyyaml = ">=2.3.1"
+numpy = "^1.19.5"
+Pillow = "^9.0.0"
+scipy = "^1.5.4"
+xtgeo = "^2.5.0"
+PyYAML = "^6.0"
 gaussianfft = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "*"
-pylint = "*"
-graphviz = "*"
-piprot = "*"
-mypy = "*"
-flask = "*"
-flask-cors = "*"
-gunicorn = "*"
-python-dotenv = "*"
+pytest = "^6.2.5"
+pylint = "^2.11.0"
+graphviz = "^0.19.1"
+piprot = "^0.9.11"
+mypy = "^0.931"
+Flask = "^3.0.0"
+Flask-Cors = "^3.0.10"
+gunicorn = "^20.1.0"
+python-dotenv = "^0.19.2"
+safety = "^1.10.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

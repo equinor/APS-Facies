@@ -8,7 +8,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "serve:api": "make -C ../.. run-rms.uipy-mock",
-    "serve:gui": "vue-cli-service serve --host=localhost --inspect",
+    "serve:gui": "vue-cli-service serve --host=${HOST:-localhost} --inspect",
     "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
   },
