@@ -37,11 +37,12 @@ from src.utils.roxar.grid_model import (
     create_zone_parameter,
     GridSimBoxSize,
 )
-from src.utils.plotting import create_facies_map
+from src.utils.facies_map import create_facies_map
 from src.utils.roxar.migrations import Migration
 from src.utils.truncation_rules import make_truncation_rule
 from src.utils.xmlUtils import prettify
 from src.utils.constants.simple import Debug
+
 
 def empty_if_none(func):
     def wrapper(*args, **kwargs):

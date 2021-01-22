@@ -17,7 +17,8 @@ from src.utils.exceptions.xml import UndefinedZoneError
 from src.utils.io import writeFileRTF
 from src.utils.methods import get_colors, get_run_parameters, get_debug_level
 from src.utils.roxar.APSDataFromRMS import APSDataFromRMS
-from src.utils.plotting import plot_gaussian_field, cross_plot, plot_facies, create_facies_map
+from src.utils.plotting import plot_gaussian_field, cross_plot, plot_facies
+from src.utils.facies_map import create_facies_map
 
 
 def high_resolution_2D_grids(
