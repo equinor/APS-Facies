@@ -1,12 +1,14 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 # Python3 script to update APS model file from global IPL include file
+from typing import List, Optional, Union, Tuple
 
+from roxar import Project
 from src.algorithms.APSModel import APSModel
 from src.utils.constants.simple import Debug, VariogramType, TrendType
 
 
-def get_list_of_aps_uncertainty_parameters(project, workflow_name):
+def get_list_of_aps_uncertainty_parameters(project: Project, workflow_name: str) -> List[str]:
     wf = project.workflows[workflow_name]
     param_list = []
     for param in wf.uncertainty_parameters:
@@ -17,7 +19,12 @@ def get_list_of_aps_uncertainty_parameters(project, workflow_name):
     return param_list
 
 
-def read_selected_fmu_variables(input_selected_fmu_variable_file):
+def read_selected_fmu_variables(
+        input_selected_fmu_variable_file: str,
+) -> List[Union[
+    Tuple[str, int, int, str, str],
+    Tuple[str, int, int, str, int],
+]]:
     fmu_variables = []
     with open(input_selected_fmu_variable_file, 'r') as file:
         finished = False
@@ -55,7 +62,12 @@ def read_selected_fmu_variables(input_selected_fmu_variable_file):
     return fmu_variables
 
 
-def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variable_file=None, distribution_file_name=None):
+def set_all_as_fmu_updatable(
+        input_model_file: str,
+        output_model_file: str,
+        tagged_variable_file: Optional[str] = None,
+        distribution_file_name: Optional[str] = None,
+) -> None:
     aps_model = APSModel(input_model_file)
     value = True
     all_zone_models = aps_model.sorted_zone_models
@@ -109,7 +121,13 @@ def set_all_as_fmu_updatable(input_model_file, output_model_file, tagged_variabl
     )
 
 
-def set_selected_as_fmu_updatable(input_model_file, output_model_file, selected_variables, tagged_variable_file=None, distribution_file_name=None):
+def set_selected_as_fmu_updatable(
+        input_model_file: str,
+        output_model_file: str,
+        selected_variables: List[Union[str, List[str]]],
+        tagged_variable_file: Optional[str] = None,
+        distribution_file_name: Optional[str] = None,
+) -> None:
     aps_model = APSModel(input_model_file)
     updatable = True
     for words in selected_variables:

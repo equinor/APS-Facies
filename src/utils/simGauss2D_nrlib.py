@@ -1,5 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from typing import Optional
 
 import nrlib
 import numpy as np
@@ -7,10 +8,19 @@ import numpy as np
 from src.utils.constants.simple import Debug, VariogramType
 
 
-def simGaussField(iseed, nx, ny, xsize, ysize, variogram_type,
-                  range_major_axis, range_minor_axis, azimuth_angle, power=None,
-                  debug_level=Debug.OFF
-                  ):
+def simGaussField(
+        iseed: int,
+        nx: int,
+        ny: int,
+        xsize: float,
+        ysize: float,
+        variogram_type: VariogramType,
+        range_major_axis: float,
+        range_minor_axis: float,
+        azimuth_angle: float,
+        power: Optional[float] = None,
+        debug_level: Debug = Debug.OFF
+) -> np.ndarray:
     """
     Simulation of 2D Gaussian field for a grid with (nx,ny) grid cells and length and width (xsize, ysize).
     Correlation lengths are range1 in main direction and range2 in orthogonal direction.

@@ -9,14 +9,20 @@ from pathlib import Path
 from typing import Union
 from zipfile import ZipFile, ZIP_DEFLATED
 
+from typing import TYPE_CHECKING
 
-def get_rms_information(config):
+if TYPE_CHECKING:
+    # This is a circular import
+    from src.utils.roxar.job import JobConfig
+
+
+def get_rms_information(config: 'JobConfig') -> str:
     location = Path(config.project.filename).absolute()
     machine = socket.getfqdn()
     return f'{machine}:{location}'
 
 
-def dump_debug_information(config):
+def dump_debug_information(config: 'JobConfig') -> None:
     print('The workflow failed. The job and the model will be written to disk')
     when = time.localtime()
     prefix = '{year}{month:02}{day:02}-{hour:02}{minute:02}{second:02}-{random}-APS'.format(
@@ -50,7 +56,7 @@ class State(Enum):
     PARAMETER = auto()
 
 
-def parse_dot_master(path):
+def parse_dot_master(path: Path) -> dict:
     header = {}
     parameters = []
     state = None

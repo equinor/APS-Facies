@@ -1,9 +1,26 @@
 # -*- coding: utf-8 -*-
-from src.utils.constants.simple import MinimumValues, MaximumValues
-from src.utils.constants.simple import CrossSectionType
+from functools import total_ordering
+from typing import Union, Dict, Generic, TypeVar, Optional, Callable, Any
+
+from src.utils.constants.simple import MinimumValues, MaximumValues, CrossSectionType
+from src.utils.types import Number
+
+T = TypeVar('T')
+
+Validator = Callable[[Any, float], bool]
 
 
-def make_ranged_property(name, error_template, minimum=None, maximum=None, additional_validator=None, show_given_value=True, full_name=None, strictly_less=False, strictly_greater=False):
+def make_ranged_property(
+        name: str,
+        error_template: str,
+        minimum: Optional[Number] = None,
+        maximum: Optional[Number] = None,
+        additional_validator: Optional[Validator] = None,
+        show_given_value: bool = True,
+        full_name: Optional[str] = None,
+        strictly_less: bool = False,
+        strictly_greater: bool = False,
+) -> property:
     if additional_validator is None:
         def additional_validator(self, value):
             return True
@@ -51,7 +68,13 @@ def make_ranged_property(name, error_template, minimum=None, maximum=None, addit
     return property(fget=Property.get, fset=Property.set)
 
 
-def is_between(value, _min, _max, strictly_less=False, strictly_greater=False):
+def is_between(
+        value: Number,
+        _min: Number,
+        _max: Number,
+        strictly_less: bool = False,
+        strictly_greater: bool = False
+) -> bool:
     return (
             _min < value < _max
             or _min == value and not strictly_greater
@@ -59,7 +82,11 @@ def is_between(value, _min, _max, strictly_less=False, strictly_greater=False):
     )
 
 
-def _make_simple_property(name, check, error_message):
+def _make_simple_property(
+        name: str,
+        check: Callable[[Any, Any], bool],
+        error_message: str
+) -> property:
     class Property:
         __slots__ = '_' + name
 
@@ -78,7 +105,7 @@ def _make_simple_property(name, check, error_message):
     return property(fget=Property.get, fset=Property.set)
 
 
-def make_trend_property(name):
+def make_trend_property(name: str) -> property:
     def is_model_and_rel_std_dev_set(self, value):
         if value:
             return self.model is not None and self.relative_std_dev is not None
@@ -90,7 +117,12 @@ def make_trend_property(name):
     )
 
 
-def make_angle_property(name, full_name=None, strictly_less=False, strictly_greater=False):
+def make_angle_property(
+        name: str,
+        full_name: Optional[str] = None,
+        strictly_less: bool = False,
+        strictly_greater: bool = False,
+) -> property:
     if full_name is None:
         full_name = name
     return make_ranged_property(
@@ -102,7 +134,12 @@ def make_angle_property(name, full_name=None, strictly_less=False, strictly_grea
     )
 
 
-def make_lower_bounded_property(name, additional_validator=None, full_name=None, strictly_greater=False):
+def make_lower_bounded_property(
+        name: str,
+        additional_validator: Optional[Validator] = None,
+        full_name: Optional[str] = None,
+        strictly_greater: bool = False,
+) -> property:
     if strictly_greater:
         error_template = '{name} MUST be strictly greater than 0'
     else:
@@ -113,48 +150,48 @@ def make_lower_bounded_property(name, additional_validator=None, full_name=None,
     )
 
 
-# TODO: Inherit from float / int ?
-class FmuProperty:
+@total_ordering
+class FmuProperty(Generic[T]):
     __slots__ = 'value', 'updatable'
 
-    def __init__(self, value, updatable=False):
+    def __init__(self, value: T, updatable: bool = False):
         assert isinstance(value, (int, float)) or value is None
         assert isinstance(updatable, bool)
         self.value = value
         self.updatable = updatable
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.__class__.__name__}({self.value}, {self.updatable})'
 
-    def __mul__(self, other):
+    def __mul__(self, other: T) -> T:
         return self.value * other
 
-    def __add__(self, other):
+    def __add__(self, other: T) -> T:
         return self.value + other
 
-    def __sub__(self, other):
+    def __sub__(self, other: T) -> T:
         return self.value - other
 
-    def __abs__(self):
+    def __abs__(self) -> T:
         return abs(self.value)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Union['FmuProperty', Number]) -> bool:
         if isinstance(other, FmuProperty):
             return self.value == other.value and self.updatable == other.updatable
         return self.value == other
 
-    def __lt__(self, other):
+    def __lt__(self, other: Union['FmuProperty', Number]) -> bool:
         if isinstance(other, FmuProperty):
             other = other.value
         return self.value < other
 
-    def __float__(self):
+    def __float__(self) -> float:
         return float(self.value)
 
-    def __int__(self):
+    def __int__(self) -> int:
         return int(self.value)
 
 
@@ -163,7 +200,11 @@ class CrossSection:
 
     types = CrossSectionType
 
-    def __init__(self, type, relative_position):
+    def __init__(
+            self,
+            type: Union[CrossSectionType, str],
+            relative_position: float
+    ) -> None:
         self._type = None
         self._relative_position = None
         if type not in CrossSectionType:
@@ -172,21 +213,28 @@ class CrossSection:
         self.relative_position = relative_position
 
     @property
-    def type(self):
+    def type(self) -> CrossSectionType:
         return self._type
 
     @type.setter
-    def type(self, value):
-        if not (value == CrossSectionType.IJ or value == CrossSectionType.IK or value == CrossSectionType.JK):
-            raise ValueError(f'Invalid CrossSectionType ({type}')
+    def type(self, value: Union[str, CrossSectionType]) -> None:
+        if isinstance(value, str):
+            try:
+                value = CrossSectionType[value]
+            except KeyError:
+                raise ValueError(f'Invalid CrossSectionType ({value}')
+        elif not isinstance(value, CrossSectionType):
+            raise TypeError(
+                f'Invalid argument {value}. Must be of type \'str\', or \'CrossSectionType\', not {type(value)}'
+            )
         self._type = value
 
     @property
-    def relative_position(self):
+    def relative_position(self) -> float:
         return self._relative_position
 
     @relative_position.setter
-    def relative_position(self, value):
+    def relative_position(self, value: float):
         if not is_between(value, 0, 1):
             raise ValueError(
                 'The specified value must be in the interval [0.0, 1.0]'
@@ -194,7 +242,7 @@ class CrossSection:
         self._relative_position = value
 
     @classmethod
-    def from_dict(cls, **kwargs):
+    def from_dict(cls, **kwargs: Dict[str, Union[str, float]]) -> 'CrossSection':
         type_ = kwargs['type']
         if isinstance(type_, str):
             type_ = CrossSectionType[type_]

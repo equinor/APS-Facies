@@ -3,7 +3,7 @@
 import collections
 import copy
 import xml.etree.ElementTree as ET
-from typing import List
+from typing import List, Optional, Tuple, Union, Dict, TYPE_CHECKING
 from warnings import warn
 
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
@@ -13,8 +13,12 @@ from src.utils.constants.simple import Debug, TransformType, CrossSectionType
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
+from src.utils.types import FilePath
 from src.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
 from src.utils.io import GlobalVariables
+
+if TYPE_CHECKING:
+    from roxar import Project
 
 
 class APSModel:
@@ -98,26 +102,26 @@ class APSModel:
 
     def __init__(
             self,
-            model_file_name=None,
-            aps_model_version='1.0',
-            rms_project_name=None,
-            rms_workflow_name=None,
-            rms_grid_model_name=None,
-            rms_zone_parameter_name=None,
-            rms_region_parameter_name=None,
-            rms_facies_parameter_name=None,
-            seed_file_name='seed.dat',
-            write_seeds=True,
-            main_facies_table=None,
-            zone_model_table=None,
-            preview_zone=0,
-            preview_region=0,
-            preview_cross_section_type=CrossSectionType.IJ,
-            preview_cross_section_relative_pos=0.5,
-            preview_scale=1.0,
-            preview_resolution='Normal',
-            debug_level=Debug.OFF,
-            transform_type=TransformType.EMPIRIC,
+            model_file_name: Optional[str] = None,
+            aps_model_version: str = '1.0',
+            rms_project_name: Optional[str] = None,
+            rms_workflow_name: Optional[str] = None,
+            rms_grid_model_name: Optional[str] = None,
+            rms_zone_parameter_name: Optional[str] = None,
+            rms_region_parameter_name: Optional[str] = None,
+            rms_facies_parameter_name: Optional[str] = None,
+            seed_file_name: str = 'seed.dat',
+            write_seeds: bool = True,
+            main_facies_table: Optional[APSMainFaciesTable] = None,
+            zone_model_table: Optional[APSZoneModel] = None,
+            preview_zone: int = 0,
+            preview_region: int = 0,
+            preview_cross_section_type: CrossSectionType = CrossSectionType.IJ,
+            preview_cross_section_relative_pos: float = 0.5,
+            preview_scale: float = 1.0,
+            preview_resolution: str = 'Normal',
+            debug_level: Optional[Debug] = Debug.OFF,
+            transform_type: TransformType = TransformType.EMPIRIC,
     ):
         """
          The following parameters are necessary to define a model:
@@ -163,6 +167,9 @@ class APSModel:
 
         """
         # Local variables
+        if debug_level is None:
+            debug_level = Debug.OFF
+
         self.__class_name = self.__class__.__name__
 
         self.__aps_model_version = aps_model_version
@@ -197,22 +204,27 @@ class APSModel:
             self.__parse_model_file(model_file_name, debug_level=debug_level)
 
     @property
-    def use_constant_probability(self):
+    def use_constant_probability(self) -> bool:
         return all(model.use_constant_probabilities for model in self.__zoneModelTable.values())
 
-    def __parse_model_file(self, model_file_name, debug_level=Debug.OFF):
+    def __parse_model_file(self, model_file_name: FilePath, debug_level: Debug = Debug.OFF) -> None:
         """ Read xml file and put the data into data structure """
         root = ET.parse(model_file_name).getroot()
         self.__interpretTree(root, debug_level, model_file_name)
 
     @classmethod
-    def from_string(cls, xml_content, debug_level=Debug.OFF):
+    def from_string(cls, xml_content: str, debug_level: Debug = Debug.OFF) -> 'APSModel':
         root = ET.fromstring(xml_content)
         model = cls()
         model.__interpretTree(root, debug_level)
         return model
 
-    def __interpretTree(self, root, debug_level=Debug.OFF, model_file_name=None):
+    def __interpretTree(
+            self,
+            root: ET.Element,
+            debug_level: Debug = Debug.OFF,
+            model_file_name: Optional[str] = None,
+    ) -> None:
         self.__ET_Tree = ET.ElementTree(root)
         if root.tag != 'APSModel':
             raise ValueError('The root element must be APSModel')
@@ -229,7 +241,7 @@ class APSModel:
         kw = 'PrintInfo'
         obj = root.find(kw)
         if debug_level is None:
-            self.__debug_level= Debug.OFF
+            self.__debug_level = Debug.OFF
         else:
             if obj is None:
                 # Default value is set
@@ -293,7 +305,8 @@ class APSModel:
         ]
         for keyword, variable, required in placement:
             prefix = '_' + self.__class__.__name__
-            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=model_file_name, required=required)
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', modelFile=model_file_name,
+                                   required=required)
             setattr(self, prefix + variable, value)
 
         # Read keyword for region parameter
@@ -313,12 +326,14 @@ class APSModel:
 
         # Read optional keyword to specify name of seed file
         keyword = 'SeedFile'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat', modelFile=model_file_name, required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat',
+                               modelFile=model_file_name, required=False)
         self.__seed_file_name = value
 
         # Read optional keyword to specify the boolean variable write_seeds
         keyword = 'WriteSeeds'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=model_file_name, required=False)
+        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=model_file_name,
+                               required=False)
         self.write_seeds = True if value.upper() == 'YES' else False
         # Read all facies names available
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=model_file_name)
@@ -335,7 +350,8 @@ class APSModel:
 
         # Read optional keyword to specify which transformation to use for Gaussian Fields
         keyword = 'TransformationType'
-        text = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='Empiric', modelFile=model_file_name, required=False)
+        text = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='Empiric', modelFile=model_file_name,
+                              required=False)
         if text.upper() == 'EMPIRIC' or text.upper() == '0':
             self.__transform_type = TransformType.EMPIRIC
         elif text.upper() == 'CDF' or text.upper() == '1':
@@ -475,16 +491,16 @@ class APSModel:
 
     def update_model_file(
             self,
-            model_file_name=None,
-            parameter_file_name=None,
-            project=None,
-            workflow_name=None,
-            uncertainty_variable_names=None,
-            realisation_number=0,
-            debug_level=Debug.ON,
-            current_job_name=None,
-            use_rms_uncertainty_table=False
-    ):
+            model_file_name: Optional[FilePath] = None,
+            parameter_file_name: Optional[FilePath] = None,
+            project: 'Optional[Project]' = None,
+            workflow_name: Optional[str] = None,
+            uncertainty_variable_names: Optional[List[str]] = None,
+            realisation_number: int = 0,
+            debug_level: Debug = Debug.OFF,
+            current_job_name: Optional[str] = None,
+            use_rms_uncertainty_table: bool = False,
+    ) -> ET.ElementTree:
         """
         Read xml model file and IPL parameter file and write updated xml model file
         without putting any data into the data structure.
@@ -508,7 +524,7 @@ class APSModel:
             value = obj.text
             keywords_defined_for_updating.append([key_word.strip(), value.strip()])
             if debug_level >= Debug.VERY_VERBOSE:
-                print('{0:30} {1:10}'.format(key_word,  value))
+                print('{0:30} {1:10}'.format(key_word, value))
 
         # Read keywords from parameter_file_name (global_variables.yml with variables updated by FMU/ERT)
         keywords_read = None
@@ -526,7 +542,7 @@ class APSModel:
                     if len(keywords_defined_for_updating) > 0:
                         if keywords_read is None:
                             print(' ')
-                            text  =  '\nWARNING:\n'
+                            text = '\nWARNING:\n'
                             text += f'-- The APS parameters selected to be updated by FMU in APS job: {current_job_name}\n'
                             text += f'   will not be updated since no APS parameters are specified in \n'
                             text += f'   {parameter_file_name} for the current job.\n'
@@ -537,7 +553,7 @@ class APSModel:
                     else:
                         if keywords_read is not None:
                             print(' ')
-                            text  =  '\nWARNING:\n'
+                            text = '\nWARNING:\n'
                             text += f'-- No APS parameters are selected to be updated by FMU in APS job: {current_job_name}\n'
                             text += f'   There are defined APS parameters for this APS job in: {parameter_file_name}\n'
                             text += f'   Ensure that APS parameters to be updated are specified both in \n'
@@ -546,14 +562,13 @@ class APSModel:
                             print(' ')
                         else:
                             print(' ')
-                            text  =  '\nWARNING:\n'
+                            text = '\nWARNING:\n'
                             text += f'-- No FMU parameters are updated for APS job: {current_job_name}\n'
                             text += f'   Ensure that APS parameters to be updated are specified both in \n'
                             text += f'   the APS job and the FMU global_variables file:\n'
                             text += f'   {parameter_file_name}\n'
                             warn(text)
                             print(' ')
-
 
                 if debug_level >= Debug.VERY_VERBOSE:
                     print(' ')
@@ -571,10 +586,8 @@ class APSModel:
                 project, workflow_name, uncertainty_variable_names, realisation_number,
             )
 
-
-
         # Set new values if keyword in global_variables file and in fmu tag in model file match
-        if ( len(keywords_defined_for_updating) > 0 ) and ( keywords_read != None):
+        if (len(keywords_defined_for_updating) > 0) and (keywords_read != None):
             # Update the list of keywords in the model file with new values from FMU global_variables
             found_an_update = False
             for item in keywords_defined_for_updating:
@@ -592,10 +605,8 @@ class APSModel:
                 print(f'   Parameter name                                   Original value   New value')
             else:
                 if debug_level >= Debug.ON:
-                    printf(f'-- APS parameters selected to be updated by FMU does not match parameters \n')
-                    printf(f'   specified in {parameter_file_name}')
-
-
+                    print(f'-- APS parameters selected to be updated by FMU does not match parameters \n')
+                    print(f'   specified in {parameter_file_name}')
 
             # Update the model file fmu tags with updated values
             for obj in root.findall(".//*[@kw]"):
@@ -622,10 +633,9 @@ class APSModel:
                 if found:
                     print(f'   {key_word_from_model:42}    {old_value:12}  {obj.text:12}')
 
-
         return tree
 
-    def __checkZoneModels(self):
+    def __checkZoneModels(self) -> None:
         """
         Description: Run through all zone models and check that:
            If a zone model is specified with region number 0, it is not allowed to specify zone models for the same
@@ -644,11 +654,11 @@ class APSModel:
 
     def __parse_global_variables(
             self,
-            model_file_name,
-            global_variables_file,
-            current_job_name=None,
-            debug_level=Debug.OFF,
-    ):
+            model_file_name: str,
+            global_variables_file: FilePath,
+            current_job_name: Optional[str] = None,
+            debug_level: Debug = Debug.OFF,
+    ) -> List[Tuple[str, Union[str, float]]]:
         """ Read the global variables file (IPL, or YAML) to get updated model parameters from FMU """
         # Search through the file line for line and skip lines commented out with '//'
         # Collect all variables that are assigned value as the three first words on a line
@@ -684,7 +694,7 @@ class APSModel:
 
     # ----- Properties ----
     @property
-    def debug_level(self):
+    def debug_level(self) -> Debug:
         return self.__debug_level
 
     @debug_level.setter
@@ -698,7 +708,7 @@ class APSModel:
         self.__debug_level = debug_level
 
     @property
-    def seed_file_name(self):
+    def seed_file_name(self) -> str:
         return self.__seed_file_name
 
     @seed_file_name.setter
@@ -706,11 +716,11 @@ class APSModel:
         self.__seed_file_name = copy.copy(name)
 
     @property
-    def preview_scale(self):
+    def preview_scale(self) -> float:
         return self.__previewScale
 
     @preview_scale.setter
-    def preview_scale(self, scale):
+    def preview_scale(self, scale: float):
         if not (scale > 0.0):
             raise ValueError(
                 'Error in {} in setPreviewScale\n'
@@ -720,15 +730,15 @@ class APSModel:
             self.__previewScale = scale
 
     @property
-    def preview_resolution(self):
+    def preview_resolution(self) -> str:
         return self.__previewResolution
 
     @property
-    def preview_cross_section(self):
+    def preview_cross_section(self) -> CrossSection:
         return self.__preview_cross_section
 
     @property
-    def preview_cross_section_type(self):
+    def preview_cross_section_type(self) -> CrossSectionType:
         return self.__preview_cross_section.type
 
     @preview_cross_section_type.setter
@@ -745,7 +755,7 @@ class APSModel:
                 )
 
     @property
-    def preview_cross_section_relative_position(self):
+    def preview_cross_section_relative_position(self) -> float:
         return self.__preview_cross_section.relative_position
 
     @preview_cross_section_relative_position.setter
@@ -753,7 +763,12 @@ class APSModel:
         self.__preview_cross_section.relative_position = relative_position
 
     @staticmethod
-    def __getParamFromRMSTable(project, workflow_name, uncertainty_variable_names, realisation_number):
+    def __getParamFromRMSTable(
+            project: 'Project',
+            workflow_name: str,
+            uncertainty_variable_names,
+            realisation_number: int,
+    ) -> List[Tuple[str, str]]:
         """ Get values from RMS uncertainty table"""
         wf = project.workflows[workflow_name]
         rms_table_name = wf.report_table_name
@@ -778,9 +793,10 @@ class APSModel:
 
     def isAllZoneRegionModelsSelected(self):
         return self.__selectAllZonesAndRegions
+
     # Get pointer to zone model object
 
-    def getSelectedZoneNumberList(self):
+    def getSelectedZoneNumberList(self) -> List[int]:
         selectedZoneNumberList = []
         keyList = list(self.__selectedZoneAndRegionNumberTable.keys())
         for item in keyList:
@@ -789,7 +805,7 @@ class APSModel:
                 selectedZoneNumberList.append(zNumber)
         return copy.copy(selectedZoneNumberList)
 
-    def getSelectedRegionNumberListForSpecifiedZoneNumber(self, zoneNumber):
+    def getSelectedRegionNumberListForSpecifiedZoneNumber(self, zoneNumber: int) -> List[int]:
         selectedRegionNumberList = []
         keyList = sorted(list(self.__selectedZoneAndRegionNumberTable.keys()))
         for item in keyList:
@@ -798,13 +814,13 @@ class APSModel:
                 selectedRegionNumberList.append(rNumber)
         return selectedRegionNumberList
 
-    def isSelected(self, zone_number, region_number):
+    def isSelected(self, zone_number: int, region_number: int) -> bool:
         if self.isAllZoneRegionModelsSelected():
             return True
         key = (zone_number, region_number)
         return key in self.__selectedZoneAndRegionNumberTable
 
-    def getZoneModel(self, zone_number, region_number=0):
+    def getZoneModel(self, zone_number: int, region_number: int = 0) -> APSZoneModel:
         key = (zone_number, region_number)
         try:
             return self.__zoneModelTable[key]
@@ -815,16 +831,16 @@ class APSModel:
         return self.__zoneModelTable
 
     @property
-    def sorted_zone_models(self):
+    def sorted_zone_models(self) -> Dict[Tuple[int, int], APSZoneModel]:
         # Define sorted sequence of the zone models
         return collections.OrderedDict(sorted(self.__zoneModelTable.items()))
 
     @property
-    def zone_models(self):
+    def zone_models(self) -> List[APSZoneModel]:
         return self.sorted_zone_models.values()
 
     @property
-    def grid_model_name(self):
+    def grid_model_name(self) -> str:
         return self.__rmsGridModelName
 
     @grid_model_name.setter
@@ -834,7 +850,7 @@ class APSModel:
     def getResultFaciesParamName(self):
         return copy.copy(self.__rmsFaciesParamName)
 
-    def getZoneNumberList(self):
+    def getZoneNumberList(self) -> List[int]:
         zoneNumberList = []
         keyList = list(self.__zoneModelTable.keys())
         for item in keyList:
@@ -843,7 +859,7 @@ class APSModel:
                 zoneNumberList.append(zNumber)
         return zoneNumberList
 
-    def getRegionNumberListForSpecifiedZoneNumber(self, zoneNumber):
+    def getRegionNumberListForSpecifiedZoneNumber(self, zoneNumber: int) -> List[int]:
         regionNumberList = []
         keyList = list(self.__zoneModelTable.keys())
         for zNumber, rNumber in keyList:
@@ -851,22 +867,22 @@ class APSModel:
                 regionNumberList.append(rNumber)
         return regionNumberList
 
-    def getPreviewZoneNumber(self):
+    def getPreviewZoneNumber(self) -> int:
         return self.__previewZone
 
-    def getPreviewRegionNumber(self):
+    def getPreviewRegionNumber(self) -> int:
         return self.__previewRegion
 
     @property
-    def gaussian_field_names(self):
+    def gaussian_field_names(self) -> List[str]:
         return self.getAllGaussFieldNamesUsed()
 
-    def getAllGaussFieldNamesUsed(self):
+    def getAllGaussFieldNamesUsed(self) -> List[str]:
         gfAllZones = []
         for key, zoneModel in self.__zoneModelTable.items():
             if self.__debug_level >= Debug.ON:
                 region_number = key[1]
-                zone_number   = key[0]
+                zone_number = key[0]
                 if region_number == 0:
                     print(f'- Gaussian field names used for zone {zone_number}:')
                 else:
@@ -881,35 +897,35 @@ class APSModel:
         return copy.copy(gfAllZones)
 
     @property
-    def zone_parameter(self):
+    def zone_parameter(self) -> str:
         return self.getZoneParamName()
 
     @property
-    def region_parameter(self):
+    def region_parameter(self) -> str:
         return self.getRegionParamName()
 
     @property
-    def use_regions(self):
+    def use_regions(self) -> bool:
         return bool(self.region_parameter)
 
     @property
-    def rms_project_name(self):
+    def rms_project_name(self) -> Optional[str]:
         return self.__rmsProjectName
 
     @rms_project_name.setter
     def rms_project_name(self, name):
         self.__rmsProjectName = name
 
-    def getZoneParamName(self):
+    def getZoneParamName(self) -> str:
         return self.__rmsZoneParamName
 
-    def getRegionParamName(self):
+    def getRegionParamName(self) -> str:
         if self.__rmsRegionParamName:
             return self.__rmsRegionParamName
         else:
             return ''
 
-    def getMainFaciesTable(self):
+    def getMainFaciesTable(self) -> APSMainFaciesTable:
         return self.__faciesTable
 
     def getRMSWorkflowName(self):
@@ -925,11 +941,11 @@ class APSModel:
         return all_probabilities
 
     @property
-    def transform_type(self):
+    def transform_type(self) -> TransformType:
         return self.__transform_type
 
     @transform_type.setter
-    def transform_type(self, name):
+    def transform_type(self, name: Union[str, int]):
         if isinstance(name, str):
             if name.strip() == 'EMPIRIC' or name.strip() == 'Empiric':
                 transf_number = TransformType.EMPIRIC
@@ -939,19 +955,19 @@ class APSModel:
             transf_number = TransformType(name)
         if name not in TransformType:
             transf_number = TransformType.EMPIRIC
-        self.__transform_type =  transf_number
+        self.__transform_type = transf_number
 
     # ----- Set functions -----
-    def setRmsWorkflowName(self, name):
+    def setRmsWorkflowName(self, name: str) -> None:
         self.__rmsWorkflowName = name
 
-    def setRmsGridModelName(self, name):
+    def setRmsGridModelName(self, name: str) -> None:
         self.__rmsGridModelName = name
 
-    def setRmsZoneParamName(self, name):
+    def setRmsZoneParamName(self, name: str) -> None:
         self.__rmsZoneParamName = name
 
-    def setRmsRegionParamName(self, name):
+    def setRmsRegionParamName(self, name: str) -> None:
         if not name:
             for key, zoneModel in self.__zoneModelTable.items():
                 region_number = key[1]
@@ -962,10 +978,10 @@ class APSModel:
                     )
         self.__rmsRegionParamName = copy.copy(name)
 
-    def setRmsResultFaciesParamName(self, name):
+    def setRmsResultFaciesParamName(self, name: str) -> None:
         self.__rmsFaciesParamName = copy.copy(name)
 
-    def setSelectedZoneAndRegionNumber(self, zone_number, region_number=0):
+    def setSelectedZoneAndRegionNumber(self, zone_number: int, region_number: int = 0) -> None:
         """
         Description: Select a new pair of (zoneNumber, regionNumber) which has not been already selected.
         """
@@ -980,7 +996,7 @@ class APSModel:
                 'since the zone model does not exist'
             )
 
-    def setPreviewZoneAndRegionNumber(self, zone_number, region_number=0):
+    def setPreviewZoneAndRegionNumber(self, zone_number: int, region_number: int = 0) -> None:
         key = (zone_number, region_number)
         if key in self.__zoneModelTable:
             self.__previewZoneNumber = zone_number
@@ -991,7 +1007,7 @@ class APSModel:
                 f'Error:  (zoneNumber, regionNumber) = ({zone_number}, {region_number}) is not defined in the model'
             )
 
-    def addNewZone(self, zoneObject):
+    def addNewZone(self, zoneObject: APSZoneModel) -> None:
         zone_number = zoneObject.zone_number
         region_number = zoneObject.region_number
         if region_number > 0 and not self.__rmsRegionParamName:
@@ -1008,7 +1024,7 @@ class APSModel:
                 'A zone with this zone and region number already exist.'
             )
 
-    def deleteZone(self, zone_number, region_number=0):
+    def deleteZone(self, zone_number: int, region_number: int = 0) -> None:
         key = (zone_number, region_number)
         if self.debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call deleteZone')
@@ -1022,10 +1038,10 @@ class APSModel:
             del self.__selectedZoneAndRegionNumberTable[key]
 
     # Set facies table to refer to the input facies table object
-    def setMainFaciesTable(self, faciesTableObj):
+    def setMainFaciesTable(self, faciesTableObj: APSMainFaciesTable) -> None:
         self.__faciesTable = faciesTableObj
 
-    def XMLAddElement(self, root, fmu_attributes):
+    def XMLAddElement(self, root: ET.Element, fmu_attributes: List[FmuAttribute]) -> str:
         """
         Add a command specifying which zone to use in for preview
         :param root:
@@ -1108,7 +1124,13 @@ class APSModel:
         root.append(zone_elements)
         return prettify(root)
 
-    def dump(self, name, attributes_file_name=None, probability_distribution_file_name=None, debug_level=Debug.OFF):
+    def dump(
+            self,
+            name: FilePath,
+            attributes_file_name: Optional[FilePath] = None,
+            probability_distribution_file_name: Optional[FilePath] = None,
+            debug_level: Debug = Debug.OFF,
+    ) -> None:
         """Writes the representation of this APS model to a model file"""
         self.write_model(name,
                          attributes_file_name=attributes_file_name,
@@ -1116,11 +1138,18 @@ class APSModel:
                          current_job_name=None,
                          debug_level=debug_level)
 
-    def write_model(self, model_file_name, attributes_file_name=None, probability_distribution_file_name=None,
-                    current_job_name=None, debug_level=Debug.OFF):
+    def write_model(
+            self,
+            model_file_name: FilePath,
+            attributes_file_name: Optional[FilePath] = None,
+            probability_distribution_file_name: Optional[FilePath] = None,
+            current_job_name: Optional[str] = None,
+            debug_level: Debug = Debug.OFF,
+    ) -> None:
         """ - Create xml tree with model specification by calling XMLAddElement
             - Write xml tree with model specification to file
         """
+
         def write(file_name: str, content: str) -> None:
             with open(file_name, 'w') as file:
                 file.write(content)
@@ -1142,17 +1171,18 @@ class APSModel:
         if probability_distribution_file_name is not None:
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
-            write(probability_distribution_file_name, probability_distribution_configuration(fmu_attributes, current_job_name))
+            write(probability_distribution_file_name,
+                  probability_distribution_configuration(fmu_attributes, current_job_name))
 
     @property
-    def has_fmu_updatable_values(self):
+    def has_fmu_updatable_values(self) -> bool:
         fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         self.XMLAddElement(top, fmu_attributes)
         return len(fmu_attributes) > 0
 
     @staticmethod
-    def write_model_from_xml_root(input_tree, output_model_file_name):
+    def write_model_from_xml_root(input_tree: ET.Element, output_model_file_name: FilePath) -> None:
         print(f'Write file: {output_model_file_name}')
         root = input_tree.getroot()
         root = minify(root)
@@ -1161,30 +1191,30 @@ class APSModel:
             file.write('\n')
 
 
-def _max_name_length(fmu_attributes):
+def _max_name_length(fmu_attributes: List[FmuAttribute]) -> int:
     return max(len(fmu_attribute.name) for fmu_attribute in fmu_attributes)
 
 
-def _max_value_length(fmu_attributes):
+def _max_value_length(fmu_attributes: List[FmuAttribute]) -> int:
     return max(len(str(fmu_attribute.value)) for fmu_attribute in fmu_attributes)
 
 
-def probability_distribution_configuration(fmu_attributes, current_job_name):
+def probability_distribution_configuration(fmu_attributes: List[FmuAttribute], current_job_name: str) -> str:
     if not fmu_attributes:
         return ''
     content = ''
-    max_length = _max_name_length(fmu_attributes)+len(current_job_name)
+    max_length = _max_name_length(fmu_attributes) + len(current_job_name)
     for fmu_attribute in fmu_attributes:
         symbolic_name = current_job_name.upper() + '_' + fmu_attribute.name
         content += f'{symbolic_name:<{max_length}} <prob_dist>\n'
     return content
 
 
-def fmu_configuration(fmu_attributes, grid_model_name, current_job_name):
+def fmu_configuration(fmu_attributes: List[FmuAttribute], grid_model_name: str, current_job_name: str) -> str:
     if not fmu_attributes:
         return ''
 
-    content  =  '  APS:\n'
+    content = '  APS:\n'
     content += f'    {current_job_name}:\n'
     max_length = _max_name_length(fmu_attributes)
     max_number_length = _max_value_length(fmu_attributes)
@@ -1192,7 +1222,7 @@ def fmu_configuration(fmu_attributes, grid_model_name, current_job_name):
         key_word_spacing = max_length - len(fmu_attribute.name) + 1
         symbolic_name = current_job_name.upper() + '_' + fmu_attribute.name
         formatted_value = f'{fmu_attribute.value:{max_number_length}.10{"g" if isinstance(fmu_attribute.value, int) else ""}}'
-        content +=f'        {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{symbolic_name}>\n'
+        content += f'        {fmu_attribute.name}:{" ":<{key_word_spacing}}{formatted_value} ~ <{symbolic_name}>\n'
     return content
 
 

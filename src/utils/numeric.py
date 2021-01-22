@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+from src.algorithms.properties import CrossSection
 from src.utils.constants.simple import CrossSectionType
 
 
-def isNumber(s):
+def isNumber(s: str) -> bool:
     try:
         float(s)
         return True
@@ -12,7 +13,7 @@ def isNumber(s):
         return False
 
 
-def flip_if_necessary(data, cross_section):
+def flip_if_necessary(data: np.ndarray, cross_section: CrossSection) -> np.ndarray:
     if cross_section.type in [CrossSectionType.IK, CrossSectionType.JK]:
         data = np.flip(data, 0)
     return data

@@ -34,7 +34,7 @@ Example of model file:
     zone number is specified in keyword SelectedZones, then the same angle is used for all these zones.
 """
 from src.algorithms.defineFaciesProbMapDepTrend import DefineFaciesProbMapDep
-from src.utils.methods import get_debug_level, get_prefix, get_specification_file
+from src.utils.methods import get_debug_level, get_specification_file
 
 
 def run(roxar=None, project=None, **kwargs):

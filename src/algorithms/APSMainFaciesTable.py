@@ -1,25 +1,27 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from xml.etree.ElementTree import Element
+from typing import NewType, Union, Tuple, List, Optional, Dict
+from xml.etree.ElementTree import Element, ElementTree
 
 import copy
 
 from src.utils.constants.simple import Debug
 from src.utils.exceptions.xml import ReadingXmlError
 from src.utils.records import FaciesRecord
+from src.utils.types import FaciesName, FaciesCode
 
 
 class Facies:
     __slots__ = '_name', '_code'
 
-    def __init__(self, name, code):
+    def __init__(self, name: FaciesName, code: FaciesCode):
         self._name = name
         self._code = code
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Facies') -> bool:
         return self.name == other.name or self.code == other.code
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int) -> Union[int, str]:
         if item == 0:
             return self.name
         elif item == 1:
@@ -31,30 +33,34 @@ class Facies:
         return 'Facies({name}, {code})'.format(name=self.name, code=self.code)
 
     @property
-    def name(self):
+    def name(self) -> FaciesName:
         return self._name
 
     @property
-    def code(self):
+    def code(self) -> FaciesCode:
         return self._code
 
     @classmethod
-    def from_definition(cls, definition):
+    def from_definition(cls, definition: Union[
+        FaciesRecord,
+        Tuple[str, int],
+        List[Union[str, int]],
+    ]) -> 'Facies':
         definition = FaciesRecord._make(definition)
         return cls(
             name=definition.Name,
             code=definition.Code,
         )
 
-    def to_list(self):
+    def to_list(self) -> Tuple[FaciesName, FaciesCode]:
         return self.name, self.code
 
 
 class FaciesTable(list):
-    def __init__(self, facies=None):
+    def __init__(self, facies: Optional[List[Facies]] = None):
         super().__init__(facies or [])
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[int, FaciesName]) -> Facies:
         if isinstance(item, int) or isinstance(item, slice):
             return super().__getitem__(item)
         elif isinstance(item, str):
@@ -63,19 +69,19 @@ class FaciesTable(list):
                     return facies
         raise IndexError('The facies with index/name "{}" does not exist'.format(item))
 
-    def __contains__(self, item):
+    def __contains__(self, item: Union[FaciesName, Facies]) -> bool:
         return any(item == facies for facies in self)
 
     @property
-    def names(self):
+    def names(self) -> List[FaciesName]:
         return [facies.name for facies in self]
 
-    def append(self, facies):
+    def append(self, facies: Facies) -> None:
         if facies in self:
             raise ValueError('Facies names, and codes MUST be unique')
         super().append(facies)
 
-    def pop(self, facies=None):
+    def pop(self, facies: Optional[Union[int, FaciesName, Facies]] = None) -> Facies:
         if isinstance(facies, int):
             return super().pop(facies)
         elif isinstance(facies, str):
@@ -122,7 +128,15 @@ class APSMainFaciesTable:
        def __checkUniqueFaciesNamesAndCodes(self)
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, facies_table=None, blocked_well=None, blocked_well_log=None, debug_level=Debug.OFF):
+    def __init__(
+        self,
+        ET_Tree: Optional[ElementTree] = None,
+        modelFileName: Optional[str] = None,
+        facies_table: Optional[Dict[int, str]] = None,
+        blocked_well=None,
+        blocked_well_log=None,
+        debug_level: Debug = Debug.OFF
+    ) -> None:
         self.__debug_level = debug_level
         self.__class_name = self.__class__.__name__
         self.__model_file_name = modelFileName
@@ -142,7 +156,7 @@ class APSMainFaciesTable:
             if self.__debug_level >= Debug.VERY_VERBOSE:
                 print('Debug output: Call APSMainFaciesTable init')
 
-    def __interpretXMLTree(self, ET_Tree):
+    def __interpretXMLTree(self, ET_Tree: ElementTree) -> None:
         root = ET_Tree.getroot()
 
         # Read main facies table for the model
@@ -179,28 +193,28 @@ class APSMainFaciesTable:
             raise ValueError('The facies table has two or more facies with the same code and/or name.')
         return
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__facies_table)
 
-    def getClassName(self):
+    def getClassName(self) -> str:
         return copy.copy(self.__class_name)
 
-    def getFaciesTable(self):
+    def getFaciesTable(self) -> FaciesTable:
         return copy.copy(self.__facies_table)
 
-    def getFaciesName(self, index):
+    def getFaciesName(self, index: int) -> FaciesName:
         return self.__facies_table[index].name
 
-    def getFaciesCode(self, index):
+    def getFaciesCode(self, index: int) -> FaciesCode:
         return int(self.__facies_table[index].code)
 
-    def getFaciesCodeForFaciesName(self, facies_name):
+    def getFaciesCodeForFaciesName(self, facies_name: FaciesName) -> int:
         for facies in self.__facies_table:
             if facies.name == facies_name:
                 return facies.code
         return -1
 
-    def getFaciesIndx(self, facies_name):
+    def getFaciesIndx(self, facies_name: FaciesName) -> int:
         for i in range(len(self)):
             facies = self.__facies_table[i]
             name = facies.name
@@ -211,19 +225,19 @@ class APSMainFaciesTable:
             ''.format(facies_name)
         )
 
-    def add_facies(self, name, code):
+    def add_facies(self, name: FaciesName, code: FaciesCode) -> None:
         self.__facies_table.append(Facies(name, code))
 
-    def remove_facies(self, facies_name):
+    def remove_facies(self, facies_name: FaciesName) -> None:
         self.__facies_table.pop(facies_name)
 
-    def __contains__(self, item):
+    def __contains__(self, item: Facies) -> bool:
         return item in self.__facies_table
 
-    def has_facies_int_facies_table(self, facies_name):
+    def has_facies_int_facies_table(self, facies_name: FaciesName) -> bool:
         return facies_name in [facies.name for facies in self.__facies_table]
 
-    def XMLAddElement(self, root):
+    def XMLAddElement(self, root: Element) -> None:
         facies_table = Element('MainFaciesTable')
         facies_table.attrib = {"blockedWell": self.__blocked_well, "blockedWellLog": self.__blocked_well_log}
         root.append(facies_table)
@@ -234,7 +248,7 @@ class APSMainFaciesTable:
             code.text = ' ' + str(facies.code) + ' '
             facies_element.append(code)
 
-    def __checkUniqueFaciesNamesAndCodes(self):
+    def __checkUniqueFaciesNamesAndCodes(self) -> bool:
         for i in range(len(self)):
             f1 = self.__facies_table[i].name
             for j in range(i + 1, len(self)):

@@ -2,12 +2,16 @@
 import difflib
 from filecmp import cmp
 from os.path import exists
+from typing import Union
 
 import numpy as np
-from src.utils.constants.simple import VariogramType, Debug, ProbabilityTolerances
+from src.utils.constants.simple import VariogramType, Debug
 
 
-def isVariogramTypeOK(_type, debug_level=Debug.OFF):
+def isVariogramTypeOK(
+        _type: Union[VariogramType, str],
+        debug_level: Debug = Debug.OFF
+) -> bool:
     if isinstance(_type, str):
         try:
             VariogramType[_type]
@@ -36,11 +40,11 @@ Error: Allowed variograms are:
 
 
 def check_probability_values(
-        prob_values,
-        tolerance_of_probability_normalisation,
-        max_allowed_fraction_with_mismatch,
-        facies_name=" ",
-        parameter_name=" "
+        prob_values: np.ndarray,
+        tolerance_of_probability_normalisation: float,
+        max_allowed_fraction_with_mismatch: float,
+        facies_name: str = " ",
+        parameter_name: str = " ",
 ):
     """ The input numpy array prob_values is checked that the values are legal probabilities. A tolerance is accepted.
         Returns prob_values in [0,1] and raise error if illegal probability values (outside tolerance)
@@ -76,7 +80,7 @@ def check_probability_values(
 
 def check_probability_normalisation(
         sum_probability_values,
-        eps, 
+        eps,
         tolerance_of_probability_normalisation,
         max_allowed_fraction_with_mismatch
 ):
@@ -122,7 +126,11 @@ def check_probability_normalisation(
     return normalise_is_necessary
 
 
-def compare(source, reference, verbose=True):
+def compare(
+        source: str,
+        reference: str,
+        verbose: bool = True,
+) -> bool:
     prefix = ''
     if not exists(reference):
         prefix = 'src/unit_test/'

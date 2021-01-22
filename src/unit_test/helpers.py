@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from genericpath import exists
+from typing import List, Union, Callable, Any
 
 from PIL import ImageChops, Image
 
@@ -9,9 +10,14 @@ import os
 from src.utils.checks import compare
 from src.utils.constants.simple import Debug
 from src.utils.io import writeFile, readFile
+from src.algorithms.truncation_rules.types import TruncationRule
 
 
-def getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule):
+def getFaciesInTruncRule(
+        truncRule: TruncationRule,
+        truncRule2: TruncationRule,
+        faciesInTruncRule: List[str]
+) -> None:
     # Global variable truncRule
     assert truncRule is not None
     facies_list = truncRule.getFaciesInTruncRule()
@@ -29,8 +35,13 @@ def getFaciesInTruncRule(truncRule, truncRule2, faciesInTruncRule):
 
 
 def apply_truncations(
-        truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, debug_level=Debug.OFF
-):
+        truncRule: TruncationRule,
+        faciesReferenceFile: str,
+        nGaussFields: int,
+        gaussFieldFiles: List[str],
+        faciesOutputFile: str,
+        debug_level: Debug = Debug.OFF
+) -> None:
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
@@ -76,8 +87,13 @@ def apply_truncations(
 
 
 def apply_truncations_vectorized(
-        truncRule, faciesReferenceFile, nGaussFields, gaussFieldFiles, faciesOutputFile, debug_level=Debug.OFF
-):
+        truncRule: TruncationRule,
+        faciesReferenceFile: str,
+        nGaussFields: int,
+        gaussFieldFiles: List[str],
+        faciesOutputFile: str,
+        debug_level: Debug = Debug.OFF
+) -> None:
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
@@ -101,7 +117,7 @@ def apply_truncations_vectorized(
     # Loop through the Gaussian field array in c-index ordering
     for n in range(nGaussFields):
         alpha_vector = np.asarray(alphaFields[n])
-        alphaCoord_vectors[:,n] = alpha_vector
+        alphaCoord_vectors[:, n] = alpha_vector
     faciesCode_vector, fIndx_vector = truncRule.defineFaciesByTruncRule_vectorized(alphaCoord_vectors)
 
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
@@ -124,11 +140,17 @@ def apply_truncations_vectorized(
         print('Files are equal: OK')
 
 
-def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFile2):
+def truncMapPolygons(
+        truncRule: TruncationRule,
+        truncRule2: TruncationRule,
+        faciesProb: List[float],
+        outPolyFile1: str,
+        outPolyFile2: str
+) -> None:
     assert faciesProb is not None
     assert truncRule is not None
     assert truncRule2 is not None
-    faciesProbArray = np.asarray(faciesProb,dtype=np.float32)
+    faciesProbArray = np.asarray(faciesProb, dtype=np.float32)
     truncRule.setTruncRule(faciesProbArray)
     polygons = truncRule.truncMapPolygons()
     # Write polygons to file
@@ -149,7 +171,7 @@ def truncMapPolygons(truncRule, truncRule2, faciesProb, outPolyFile1, outPolyFil
         print('Files are equal: OK')
 
 
-def writePolygons(fileName, polygons, debug_level=Debug.OFF):
+def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) -> None:
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print(f'Write file: {fileName}')
     with open(fileName, 'w') as file:
@@ -168,26 +190,26 @@ def writePolygons(fileName, polygons, debug_level=Debug.OFF):
                 file.write('\n')
 
 
-def get_cubic_facies_reference_file_path(testCase):
+def get_cubic_facies_reference_file_path(testCase: int) -> str:
     faciesReferenceFile = 'testData_Cubic/test_case_' + str(testCase) + '.dat'
     return faciesReferenceFile
 
 
-def get_model_file_path(modelFile):
+def get_model_file_path(modelFile: str) -> str:
     if not exists(modelFile):
         modelFile = 'src/unit_test/' + modelFile
     return modelFile
 
 
-def assert_identical_files(source, reference):
+def assert_identical_files(source: str, reference: str) -> None:
     _assert_compare_files(source, reference, compare)
 
 
-def assert_equal_image_content_files(source, reference):
+def assert_equal_image_content_files(source: str, reference: str) -> None:
     _assert_compare_files(source, reference, compare_image)
 
 
-def compare_image(source, reference):
+def compare_image(source: Union[str, Image.Image], reference: Union[str, Image.Image]) -> bool:
     if isinstance(source, str):
         source = Image.open(source)
     if isinstance(reference, str):
@@ -195,7 +217,7 @@ def compare_image(source, reference):
     return ImageChops.difference(source, reference).getbbox() is None
 
 
-def _assert_compare_files(source, reference, func):
+def _assert_compare_files(source: str, reference: str, func: Callable[[str, str], bool]) -> None:
     print(f'Compare file: {source} and {reference}')
     check = func(source, reference)
     if check:

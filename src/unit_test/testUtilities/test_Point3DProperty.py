@@ -2,7 +2,7 @@
 import pytest
 
 from src.algorithms.properties import FmuProperty
-from src.algorithms.Trend3D import Point3DProperty
+from src.algorithms.trend import Point3DProperty
 
 
 test_data = [

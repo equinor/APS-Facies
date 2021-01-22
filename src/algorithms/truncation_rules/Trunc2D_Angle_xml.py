@@ -1,17 +1,20 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from typing import Optional, List, Union
 from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
 
-from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.truncation_rules.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
-from src.utils.xmlUtils import getFloatCommand, getKeyword, getTextCommand, isFMUUpdatable, createFMUvariableNameForNonCubicTruncation
-from src.algorithms.Memoization import RoundOffConstant
+from src.utils.xmlUtils import (
+    getFloatCommand, getKeyword, getTextCommand, isFMUUpdatable, createFMUvariableNameForNonCubicTruncation,
+)
 
 
 class Trunc2D_Angle(Trunc2D_Base):
@@ -45,7 +48,6 @@ class Trunc2D_Angle(Trunc2D_Base):
                     useConstTruncParam, debug_level)
      def getTruncationParam(self, get3DParamFunction, gridModel, realNumber)
      def setTruncRule(self, faciesProb, cellIndx=0)
-     def defineFaciesByTruncRule(self, alphaCoord)
      def getClassName(self)
      def useConstTruncModelParam(self)
      def getNCountShiftAlpha(self)
@@ -72,8 +74,17 @@ class Trunc2D_Angle(Trunc2D_Base):
      def __calculateFaciesPolygons(self,cellIndx,area)
     """
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
+    def __init__(
+            self,
+            trRuleXML: Optional[Element] = None,
+            mainFaciesTable: Optional[APSMainFaciesTable] = None,
+            faciesInZone: Optional[List[str]] = None,
+            gaussFieldsInZone: Optional[List[str]] = None,
+            keyResolution: int = 100,
+            debug_level: Debug = Debug.OFF,
+            modelFileName: Optional[str] = None,
+            zoneNumber: Optional[int] = None,
+    ):
         """
         This constructor can either create a new object by reading the information
         from an XML tree or it can create an empty data structure for such an object.
@@ -82,7 +93,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         About data structure:
         All information related to common data which is used by more than one truncation algorithm
         is saved in the base class Trunc2D_Base. This includes lists and data related to facies tables
-        and data structure for modelling of overlya facies.
+        and data structure for modelling of overlay facies.
         """
         super().__init__(
             trRuleXML, mainFaciesTable, faciesInZone, gaussFieldsInZone, debug_level, modelFileName,
@@ -158,7 +169,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 print(f'Debug output: Create empty object for: {self._className}')
                 #  End of __init__
 
-    def __interpretXMLTree(self, trRuleXML, modelFileName):
+    def __interpretXMLTree(self, trRuleXML, modelFileName) -> None:
         """
         Initialize object from xml tree object trRuleXML.
         This function read Angle truncation rules.
@@ -255,8 +266,18 @@ class Trunc2D_Angle(Trunc2D_Base):
                     f'         The sum is: {sumProbFrac[i]}'
                 )
 
-    def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-                   truncStructure, overlayGroups=None, useConstTruncParam=True, keyResolution=100, debug_level=Debug.OFF):
+    def initialize(
+            self,
+            mainFaciesTable: APSMainFaciesTable,
+            faciesInZone: List[str],
+            gaussFieldsInZone: List[str],
+            alphaFieldNameForBackGroundFacies: List[str],
+            truncStructure: List[List[Union[str, float, bool]]],
+            overlayGroups: Optional[List[List[Union[List[List[Union[str, float]]], List[str]]]]] = None,
+            useConstTruncParam: int = True,
+            keyResolution: int = 100,
+            debug_level: Debug = Debug.OFF
+    ) -> None:
         """
         Initialize the truncation object from input variables.
                   debug_level - an integer number from 0 to 3 defining how much to be printed to screen during runs.
@@ -331,7 +352,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         self._checkFaciesForZone()
 
     @property
-    def num_polygons(self):
+    def num_polygons(self) -> int:
         return len(self.__probFracPerPolygon)
 
     def getTruncationParam(self, gridModel, realNumber):
@@ -720,7 +741,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 converged = True
                 break
         # End for
-        if self._debug_level >= Debug.VERY_VERBOSE and not converged  and np.abs(area - faciesProb) > tolerance:
+        if self._debug_level >= Debug.VERY_VERBOSE and not converged and np.abs(area - faciesProb) > tolerance:
             warn(
                 f'Calculating truncation map for Non-cubic is not converged with tolerance {tolerance}\n'
                 f'Calculated area of one polygon: {area}\n. Specified probability for the polygon: {faciesProb}.'
@@ -728,7 +749,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         return outputPolyA, outputPolyB, closestPolygon
 
-    def setTruncRule(self, faciesProb, cellIndx=0):
+    def setTruncRule(self, faciesProb: List[float], cellIndx: int = 0) -> None:
         """
         Description:
         Input: Facies names, direction angles for facies boundary lines and facies probabilities.
@@ -789,7 +810,8 @@ class Trunc2D_Angle(Trunc2D_Base):
                 if i == nPolygons - 2:
                     faciesPolygons.append(polygon)
             else:
-                outPolyA, outPolyB, closestPolygon = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N, y0N, fProb)
+                outPolyA, outPolyB, closestPolygon = self.__defineIntersectionFromProb(polygon, vx, vy, vxN, vyN, x0N,
+                                                                                       y0N, fProb)
                 # Save facies polygons that are complete
                 if closestPolygon == 1:
                     faciesPolygons.append(outPolyA)
@@ -824,17 +846,31 @@ class Trunc2D_Angle(Trunc2D_Base):
             bg_index_in_trunc_rule[i] = indx
         return bg_index_in_trunc_rule
 
-
-    def getClassName(self):
+    def getClassName(self) -> str:
         return copy.copy(self._className)
 
     def useConstTruncModelParam(self):
         return self.__useConstTruncModelParam
 
-    def getNCountShiftAlpha(self):
+    def getNCountShiftAlpha(self) -> int:
         return self._nCountShiftBoundary
 
-    def truncMapPolygons(self):
+    def truncMapPolygons(
+            self
+    ) -> Union[
+        List[List[Union[List[int], List[np.float64]]]],
+        List[Union[
+            List[Union[List[int], List[np.float64]]],
+            List[List[float]],
+            List[List[np.float64]]
+        ]],
+        List[Union[
+            List[Union[
+                List[int], List[np.float64]]
+            ],
+            List[List[np.float64]]]
+        ]
+    ]:
         """
         Description: Return a lost of the polygons the truncation maps is divided into.
         """
@@ -858,7 +894,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 self._faciesPolygons.append(poly)
         return copy.copy(self._faciesPolygons)
 
-    def faciesIndxPerPolygon(self):
+    def faciesIndxPerPolygon(self) -> List[int]:
         return copy.copy(self.__faciesIndxPerPolygon)
 
     def getNumberOfPolygonsInTruncationMap(self):
@@ -918,7 +954,13 @@ class Trunc2D_Angle(Trunc2D_Base):
         if self.__useConstTruncModelParam:
             self.__faciesBoundaryOrientation_is_fmu_updatable[polygonNumber] = value
 
-    def XMLAddElement(self, parent, zone_number=None, region_number=None, fmu_attributes=None):
+    def XMLAddElement(
+            self,
+            parent: Element,
+            zone_number: Optional[int],
+            region_number: Optional[int],
+            fmu_attributes: Optional[List[FmuAttribute]],
+    ) -> None:
         """
         Description:
          Add to the parent element a new element with specified tag and attributes.

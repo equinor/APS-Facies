@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
+from typing import Dict, TypeVar, Set, Type, List, Optional, Union
+from xml.etree.ElementTree import Element
 
 import numpy as np
 from enum import Enum
@@ -10,27 +12,42 @@ from src.utils.exceptions.xml import MissingKeyword
 
 from copy import copy
 
+from src.utils.types import (
+    ModelFile,
+    SeedLogFile,
+    OutputModelFile,
+    GlobalVariablesFile,
+    RmsProjectDataFile,
+    FilePath,
+    WorkflowName,
+    ProbabilityLogSpecificationFile,
+    JobName,
+)
 
-def invert_dict(to_be_inverted):
+T = TypeVar('T')
+U = TypeVar('U')
+
+
+def invert_dict(to_be_inverted: Dict[T, U]) -> Dict[U, T]:
     return {
         to_be_inverted[key]: key for key in to_be_inverted.keys()
     }
 
 
-def get_legal_values_of_enum(enum):
+def get_legal_values_of_enum(enum: Union[Enum, Type[Enum]]) -> Set[int]:
     if isinstance(enum, Enum) or issubclass(enum, Enum):
         return {v.value for v in enum.__members__.values()}
     return set([])
 
 
-def get_printable_legal_values_of_enum(enum):
+def get_printable_legal_values_of_enum(enum: Union[Enum, Type[Enum]]) -> List[str]:
     legal_values = get_legal_values_of_enum(enum)
     if legal_values:
         return [str(values) for values in legal_values]
     return ['']
 
 
-def get_item_from_model_file(tree, keyword, model_file_name=None):
+def get_item_from_model_file(tree: Element, keyword: str, model_file_name: Optional[str] = None) -> str:
     item = tree.find(keyword)
     if item is not None:
         text = item.text.strip()
@@ -39,7 +56,7 @@ def get_item_from_model_file(tree, keyword, model_file_name=None):
         raise MissingKeyword(keyword, model_file_name)
 
 
-def get_selected_zones(tree, keyword='SelectedZones', model_file=None):
+def get_selected_zones(tree: Element, keyword: str = 'SelectedZones', model_file: Optional[str] = None) -> List[int]:
     obj = tree.find(keyword)
     if obj is None:
         raise MissingKeyword(keyword, model_file)
@@ -52,7 +69,7 @@ def get_selected_zones(tree, keyword='SelectedZones', model_file=None):
     ]
 
 
-def get_colors(n, min_colors=2):
+def get_colors(n: int, min_colors: int = 2) -> List[str]:
     """
     :param n: The number of colors / facies
     :type n: int
@@ -71,19 +88,19 @@ def get_colors(n, min_colors=2):
         return []
 
 
-def get_model_file_name(_default_name='APS.xml', **kwargs):
+def get_model_file_name(_default_name: str = 'APS.xml', **kwargs) -> ModelFile:
     return _get_file_name(
         kwargs, legal_kwargs=['modelFileName', 'model_file_name', 'model_file', 'model'], default_name=_default_name,
     )
 
 
-def get_rms_project_data_file(**kwargs):
+def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile:
     return _get_file_name(
         kwargs, legal_kwargs=['output_rms_data_file'], default_name='rms_project_data_for_APS_gui.xml',
     )
 
 
-def get_global_variables_file(**kwargs):
+def get_global_variables_file(**kwargs) -> GlobalVariablesFile:
     return _get_file_name(
         kwargs,
         legal_kwargs=[
@@ -93,7 +110,7 @@ def get_global_variables_file(**kwargs):
     )
 
 
-def get_debug_level(**kwargs):
+def get_debug_level(**kwargs) -> Debug:
     debug_level = _get_value(kwargs, legal_kwargs=['debugInfo', 'debug_level'], default_value=Debug.OFF)
     if isinstance(debug_level, str):
         try:
@@ -119,7 +136,7 @@ def get_fmu_variables_file(**kwargs):
     )
 
 
-def get_output_model_file(**kwargs):
+def get_output_model_file(**kwargs) -> OutputModelFile:
     return _get_file_name(kwargs, legal_kwargs=['output_model_file'], default_name='APS_updated.xml')
 
 
@@ -137,11 +154,11 @@ def get_write_log_file(**kwargs):
     return _get_value(kwargs, legal_kwargs=['write_log_file'], default_value=True)
 
 
-def get_seed_log_file(**kwargs):
+def get_seed_log_file(**kwargs) -> SeedLogFile:
     return _get_file_name(kwargs, legal_kwargs=['seed_log_file'], default_name='seedLogFile.dat')
 
 
-def _get_file_name(kwargs, legal_kwargs, default_name):
+def _get_file_name(kwargs: Dict[str, str], legal_kwargs: List[str], default_name: str) -> Optional[FilePath]:
     use_prefix_as_fallback = kwargs.get('use_prefix_as_fallback', False)
     file_name = _get_value(kwargs, legal_kwargs, default_name)
     if file_name == default_name and use_prefix_as_fallback:
@@ -153,7 +170,7 @@ def _get_file_name(kwargs, legal_kwargs, default_name):
     return None
 
 
-def _get_value(kwargs, legal_kwargs, default_value):
+def _get_value(kwargs: Dict[str, T], legal_kwargs: List[str], default_value: T) -> T:
     value = default_value
     for keyword in legal_kwargs:
         if keyword in kwargs:
@@ -161,7 +178,7 @@ def _get_value(kwargs, legal_kwargs, default_value):
     return value
 
 
-def get_prefix(**kwargs):
+def get_prefix(**kwargs) -> str:
     base_path = kwargs.get('prefix', '.')
     if base_path.endswith('/'):
         base_path = base_path[:-1]
@@ -176,7 +193,7 @@ class SpecificationType(Enum):
     PROBABILITY_TREND = 4
 
 
-def get_specification_file(_type=SpecificationType.APS_MODEL, **kwargs):
+def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL, **kwargs) -> Optional[ProbabilityLogSpecificationFile]:
     mapping = {
         SpecificationType.APS_MODEL: 'APS.xml',
         SpecificationType.PROBABILITY_LOG: 'Create_prob_logs.xml',
@@ -201,7 +218,7 @@ def get_run_test_script(**kwargs):
     return _get_value(kwargs, legal_kwargs=['run_test_script'], default_value=False)
 
 
-def get_run_parameters(**kwargs):
+def get_run_parameters(**kwargs) -> dict:
     return {
         'model_file': get_specification_file(**kwargs),
         'output_model_file': get_output_model_file(**kwargs),
@@ -222,7 +239,7 @@ def get_run_parameters(**kwargs):
     }
 
 
-def calc_average(cell_index_defined, values):
+def calc_average(cell_index_defined: List[int], values: List[float]) -> float:
     """
     Calculates average of the values array.
     Input:
@@ -235,7 +252,7 @@ def calc_average(cell_index_defined, values):
     return np.average(values[cell_index_defined])
 
 
-def get_workflow_name():
+def get_workflow_name() -> WorkflowName:
     try:
         import roxar.rms
         name = roxar.rms.get_running_workflow_name()
@@ -244,7 +261,7 @@ def get_workflow_name():
     return name
 
 
-def get_job_name():
+def get_job_name() -> JobName:
     try:
         import roxar.rms
         name = roxar.rms.get_running_job_name()
