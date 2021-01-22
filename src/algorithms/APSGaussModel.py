@@ -258,7 +258,7 @@ class GaussianField:
                 try:
                     return getattr(self.trend, item)
                 except AttributeError:
-                    raise AttributeError("The Gaussian Field ('{}') has no attribute {}".format(self.name, item))
+                    raise AttributeError(f"The Gaussian Field ('{self.name}') has no attribute {item}")
 
     def _simulate(
             self,
