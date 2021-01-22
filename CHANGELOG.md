@@ -2,6 +2,16 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.1
+
+### Fixes
+
+* Fixed an issue that caused an error from TKinter
+* Fixed an issue related to customized trend
+* Fixed an issue that would cause future migrations to fail
+* Show the representation of the error message
+* Ensure that the "simple" truncation rule may be imported / loaded from a job
+
 ## 1.3.0
 
 ### What's new?
