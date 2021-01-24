@@ -9,7 +9,7 @@ from warnings import warn
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSZoneModel import APSZoneModel
 from src.algorithms.properties import CrossSection
-from src.utils.constants.simple import Debug, TransformType
+from src.utils.constants.simple import Debug, TransformType, CrossSectionType
 from src.utils.exceptions.xml import MissingAttributeInKeyword
 from src.utils.containers import FmuAttribute
 from src.utils.numeric import isNumber
@@ -112,7 +112,7 @@ class APSModel:
             zone_model_table=None,
             preview_zone=0,
             preview_region=0,
-            preview_cross_section_type='IJ',
+            preview_cross_section_type=CrossSectionType.IJ,
             preview_cross_section_relative_pos=0.5,
             preview_scale=1.0,
             preview_resolution='Normal',
@@ -260,7 +260,10 @@ class APSModel:
             text = obj.get('crossSectionType')
             if text is None:
                 raise MissingAttributeInKeyword(kw, 'crossSectionType')
-            self.__preview_cross_section.type = text
+            try:
+                self.__preview_cross_section.type = CrossSectionType[text.strip()]
+            except KeyError:
+                raise ValueError('Wrong specification of preview cross section')
 
             text = obj.get('crossSectionRelativePos')
             if text is None:
@@ -730,13 +733,16 @@ class APSModel:
 
     @preview_cross_section_type.setter
     def preview_cross_section_type(self, type):
-        if not (type in ['IJ', 'IK', 'JK']):
-            raise ValueError(
-                'Error in preview_cross_section_type\n'
-                'Error:  Cross section is not IJ, IK or JK.'
-            )
-        else:
+        if isinstance(type, CrossSectionType):
             self.__preview_cross_section.type = type
+        else:
+            try:
+                self.__preview_cross_section.type = CrossSectionType[type]
+            except KeyError:
+                raise ValueError(
+                    'Error in preview_cross_section_type\n'
+                    'Error:  Cross section is not IJ, IK or JK.'
+                )
 
     @property
     def preview_cross_section_relative_position(self):

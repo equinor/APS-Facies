@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from typing import Optional, List
 from warnings import warn
+from src.utils.constants.simple import Debug
 
 
 def running_in_batch_mode():
@@ -34,14 +35,31 @@ def must_run_in_rms(func):
 
 
 @must_run_in_rms
-def get_nrlib_path():
+def get_nrlib_path(debug_level=Debug.VERBOSE):
     import platform
 
+
     description = platform.platform()
-    if 'redhat' in description:
+    if ( 'el7' in description ) or ( 'el6' in description ):
         # Assuming we are on RGS
         redhat_version = get_redhat_version()
-        rms_version = get_rms_version().major
+        rms_version_major = get_rms_version().major
+        rms_version_minor = get_rms_version().minor
+        if rms_version_major == '11':
+            rms_version = rms_version_major
+        elif rms_version_major == '12':
+            if rms_version_minor == '1':
+                rms_version = rms_version_major + '.' + rms_version_minor  
+            else:
+                rms_version = rms_version_major
+        else:
+            ValueError(f'nrlib is not installed for APS plugin in RMS version: {rms_version_major}.{rms_version_minor}')
+
+        if debug_level >= Debug.VERBOSE:
+            print(f'-- RMS version: {rms_version}')
+            print(f'-- Using nrlib path:\n'
+                  f'   /project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
+              )
         return f'/project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
 
 
@@ -69,11 +87,13 @@ def get_rms_version() -> Optional[Version]:
 
 
 def get_redhat_version():
-    import re
     import platform
 
     description = platform.platform()
-    return re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
+    if 'el7' in description:
+        return '7'
+    elif 'el6' in description:
+        return '6'
 
 
 @must_run_in_rms
