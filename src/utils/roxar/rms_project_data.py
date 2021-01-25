@@ -13,7 +13,7 @@ from roxar.grids import (
     Grid3D,
     GridModel,
     Property,
-    BlockedWell,
+    BlockedWells,
     BlockedWellsSet,
 )
 from src.algorithms.APSGaussModel import (
@@ -244,7 +244,7 @@ class RMSData:
     def get_blocked_well_set_names(self, grid_model_name: GridName) -> List[str]:
         return [blocked_well.name for blocked_well in self._get_blocked_well_set(grid_model_name)]
 
-    def get_blocked_well(self, grid_model_name: GridName, blocked_well_name: str) -> BlockedWell:
+    def get_blocked_well(self, grid_model_name: GridName, blocked_well_name: str) -> BlockedWells:
         block_wells = self._get_blocked_well_set(grid_model_name)
         return block_wells[blocked_well_name]
 
