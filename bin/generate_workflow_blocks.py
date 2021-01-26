@@ -23,11 +23,12 @@ from sys import argv
 from tempfile import gettempdir
 
 import os
+from typing import Dict, List, Optional, Tuple, Iterator, Iterable, Callable, Any
 
 from src.utils.roxar import get_nrlib_path
 
 
-def run():
+def run() -> None:
     root_path = get_root_path()
     workflows = get_workflows()
     use_temporary = '--use-temporary-workflow-dir' in argv
@@ -56,7 +57,7 @@ def run():
                     _OS.copy(workflow_dir / rms_name, project_location / 'pythoncomp' / rms_name)
 
 
-def get_workflow_block(file_name, relative_path):
+def get_workflow_block(file_name: str, relative_path: str) -> str:
     template = '''#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -334,14 +335,14 @@ module.run(**kwargs)
     )
 
 
-def get_root_path():
+def get_root_path() -> Path:
     if len(argv) == 1 or argv[1] in ['--read-only', '--copy-to-rms-project', '--use-temporary-workflow-dir']:
         return Path('.').absolute()
     else:
         return Path(argv[1])
 
 
-def get_workflows():
+def get_workflows() -> Dict[str, List[str]]:
     return {
         'bin': [
         ],
@@ -376,7 +377,7 @@ def get_workflows():
     }
 
 
-def get_rms_mapping(suffix=''):
+def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
     return {
         rms_name + suffix: stub
         for rms_name, stub in [
@@ -413,11 +414,15 @@ def get_random_name(length=5):
     return ''.join([random.choice(characters) for _ in range(length)])
 
 
-def get_file_mapping(suffix=''):
+def get_file_mapping(suffix: str = '') -> Dict[str, str]:
     return {file: rms_name for rms_name, file in get_rms_mapping(suffix).items() if file}
 
 
-def get_workflow_dir(root_path, use_temporary=False, salt=None):
+def get_workflow_dir(
+        root_path: Path,
+        use_temporary: Optional[bool] = False,
+        salt: Optional[str] = None,
+) -> Path:
     if use_temporary:
         root_path = Path(gettempdir())
     workflow_dir = root_path / 'aps_workflows'
@@ -428,7 +433,14 @@ def get_workflow_dir(root_path, use_temporary=False, salt=None):
     return workflow_dir
 
 
-def create_workflow_block_file(file_name, root_path, relative_path, use_temporary=False, salt=None, suffix=''):
+def create_workflow_block_file(
+        file_name: str,
+        root_path: Path,
+        relative_path: str,
+        use_temporary: Optional[bool] = False,
+        salt: Optional[str] = None,
+        suffix: str = '',
+) -> None:
     script_name = file_name + '.py'
     script_path = root_path / relative_path / script_name
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
@@ -439,24 +451,24 @@ def create_workflow_block_file(file_name, root_path, relative_path, use_temporar
         f.write(workflow_block)
 
 
-def get_ipl_scripts(root_path):
+def get_ipl_scripts(root_path: Path) -> List[Path]:
     ipl_dir = root_path / 'src/IPL'
     return [ipl_dir / ipl_script for ipl_script in _OS.listdir(ipl_dir)]
 
 
-def add_ipl_scripts(root_path, project_location):
+def add_ipl_scripts(root_path: Path, project_location: Path) -> None:
     ipl_scripts = get_ipl_scripts(root_path)
     ipl_dir = project_location / 'commandscomp'
     for ipl_script in ipl_scripts:
         _OS.copy(ipl_script.absolute(), ipl_dir.absolute())
 
 
-def set_file_attributes(root_path):
+def set_file_attributes(root_path: Path) -> None:
     workflow_path = get_workflow_dir(root_path).absolute()
     _set_read_only(workflow_path)
 
 
-def _set_read_only(workflow_path):
+def _set_read_only(workflow_path: Path) -> None:
     _OS.chmod(workflow_path)
     for _, _, files in _OS.walk(workflow_path):
         for file in files:
@@ -465,37 +477,42 @@ def _set_read_only(workflow_path):
 
 class _OS:
     @staticmethod
-    def walk(path):
+    def walk(path: Path) -> Iterator[Tuple[str, List[str], List[str]]]:
         return os.walk(_OS._get_absolute_path(path))
 
     @staticmethod
-    def copy(source, target):
+    def copy(source: Path, target: Path) -> None:
         copy(_OS._get_absolute_path(source), _OS._get_absolute_path(target))
 
     @staticmethod
-    def exists(path):
+    def exists(path: Path) -> bool:
         return _OS._exec(path, os.path.exists)
 
     @staticmethod
-    def listdir(path):
+    def listdir(path: Path) -> Iterable:
         return _OS._exec(path, os.listdir)
 
     @staticmethod
-    def chmod(path):
+    def chmod(path: Path) -> None:
         _OS._exec(path, lambda p: os.chmod(p, 0o555))
 
     @staticmethod
-    def makedirs(path):
+    def makedirs(path: Path) -> None:
         _OS._exec(path, os.makedirs, kwargs={'exist_ok': True})
 
     @staticmethod
-    def _exec(path, fun, args=(), kwargs=None):
+    def _exec(
+            path: Path,
+            fun: Callable,
+            args: tuple = (),
+            kwargs: Optional[dict] = None,
+    ) -> Optional[Any]:
         if kwargs is None:
             kwargs = {}
         return fun(_OS._get_absolute_path(path), *args, **kwargs)
 
     @staticmethod
-    def _get_absolute_path(path):
+    def _get_absolute_path(path: Path) -> str:
         return str(path.absolute())
 
 

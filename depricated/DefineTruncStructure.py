@@ -3,7 +3,7 @@
 import copy
 from warnings import warn
 
-from src.algorithms import Trunc2D_Angle_Overlay_xml, Trunc2D_Cubic_Overlay_xml, Trunc3D_bayfill_xml
+from src.algorithms.truncation_rules import Trunc2D_Angle_Overlay_xml, Trunc2D_Cubic_Overlay_xml, Trunc3D_bayfill_xml
 # TODO: Deprecate?
 
 

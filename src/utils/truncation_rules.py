@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
+from typing import List, Union, Dict, Any
+
 import numpy as np
 from enum import Enum
 
-from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.algorithms.truncation_rules import Trunc2D_Cubic, Trunc3D_bayfill, Trunc2D_Angle
 from src.algorithms.properties import FmuProperty
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable, Facies
-from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
-from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
 from src.utils.constants.simple import Debug
+from src.utils.types import FaciesName
 
 
 class TruncationType(Enum):
@@ -28,7 +29,15 @@ def ordered(func):
 class TruncationSpecification:
     __slots__ = '_type', '_facies_table', '_gaussian_fields', '_values', '_probabilities', '_use_constant_parameters'
 
-    def __init__(self, _type, facies_table, gaussian_fields, values, probabilities, use_constant_parameters):
+    def __init__(
+            self,
+            _type:                   Union[str, TruncationType],
+            facies_table:            Dict[str, List[Facies]],
+            gaussian_fields:         Dict[str, Any],
+            values:                  Dict[str, Any],
+            probabilities:           Dict[str, float],
+            use_constant_parameters: bool,
+    ):
         self._type = TruncationType(_type)
         self._facies_table = facies_table
         self._gaussian_fields = gaussian_fields
@@ -37,42 +46,42 @@ class TruncationSpecification:
         self._use_constant_parameters = use_constant_parameters
 
     @property
-    def type(self):
+    def type(self) -> TruncationType:
         return self._type
 
     @property
-    def global_facies_table(self):
+    def global_facies_table(self) -> List[Facies]:
         return self._facies_table['global']
 
     @property
-    def facies_in_zone(self):
+    def facies_in_zone(self) -> List[Facies]:
         return self._facies_table['zone']
 
     @property
     @ordered
-    def facies_in_rule(self):
+    def facies_in_rule(self) -> List[Facies]:
         return self._facies_table['rule']
 
     @property
-    def fields_in_zone(self):
+    def fields_in_zone(self) -> List[str]:
         return self._gaussian_fields['zone']
 
     @property
     @ordered
-    def fields_in_rule(self):
+    def fields_in_rule(self) -> List[str]:
         return self._gaussian_fields['rule']
 
     @property
     @ordered
-    def fields_in_background(self):
+    def fields_in_background(self) -> List[List[List[str]]]:
         return self._gaussian_fields['background']
 
     @property
-    def use_constant_parameters(self):
+    def use_constant_parameters(self) -> bool:
         return self._use_constant_parameters
 
     @property
-    def values(self):
+    def values(self) -> dict:
         if self.type == TruncationType.BAYFILL:
             values = {
                 item['name'].lower(): FmuProperty(item['factor']['value'], item['factor']['updatable'])
@@ -116,11 +125,14 @@ class TruncationSpecification:
             return self._values[_type]
 
     @property
-    def probabilities(self):
+    def probabilities(self) -> List[float]:
         return [self._probabilities[facies.name] for facies in self.facies_in_zone]
 
     @classmethod
-    def from_dict(cls, specification):
+    def from_dict(
+            cls,
+            specification:           dict
+    ) -> 'TruncationSpecification':
         facies_tables = cls._get_facies_table(specification)
         fields = cls._get_gaussian_fields(specification)
         probabilities = cls._get_facies_probabilities(specification)
@@ -151,7 +163,7 @@ class TruncationSpecification:
         return tuple(over)
 
     @staticmethod
-    def _get_facies_table(specification):
+    def _get_facies_table(specification: dict) -> dict:
         facies_tables = {
             'global': [],
             'zone': [],
@@ -168,14 +180,14 @@ class TruncationSpecification:
         return facies_tables
 
     @staticmethod
-    def _get_facies_probabilities(specification):
+    def _get_facies_probabilities(specification: dict) -> Dict[FaciesName, float]:
         return {
             facies['name']: facies['probability']
             for facies in specification['globalFaciesTable']
         }
 
     @staticmethod
-    def _get_gaussian_fields(specification):
+    def _get_gaussian_fields(specification: dict) -> dict:
         fields = {
             'zone': [],
             'rule': [],
@@ -193,7 +205,7 @@ class TruncationSpecification:
         return fields
 
 
-def make_truncation_rule(specification):
+def make_truncation_rule(specification: Union[TruncationSpecification, dict]) -> Union[Trunc2D_Angle, Trunc3D_bayfill]:
     specification = TruncationSpecification.from_dict(specification)
 
     facies_table = APSMainFaciesTable(

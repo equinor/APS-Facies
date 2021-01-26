@@ -2,11 +2,14 @@
 # -*- coding: utf-8 -*-
 import copy
 import math
+from typing import Optional, List, Union
+
 import numpy as np
 from warnings import warn
 from xml.etree.ElementTree import Element
 
-from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.truncation_rules.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
 from src.utils.containers import FmuAttribute
 from src.utils.xmlUtils import getKeyword, isFMUUpdatable, createFMUvariableNameForBayfillTruncation
@@ -83,8 +86,15 @@ class Trunc3D_bayfill(Trunc2D_Base):
     truncation for the Bayfill model. (Three transformed gaussian fields)
     """
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 debug_level=Debug.OFF, modelFileName=None):
+    def __init__(
+            self,
+            trRuleXML: Optional[Element] = None,
+            mainFaciesTable: Optional[APSMainFaciesTable] = None,
+            faciesInZone: Optional[List[str]] = None,
+            gaussFieldsInZone: Optional[List[str]] = None,
+            debug_level: Debug = Debug.OFF,
+            modelFileName: Optional[str] = None
+    ) -> None:
         """
         Create either an empty object which have to be initialized
         later using the initialize function or create a full object
@@ -310,11 +320,22 @@ class Trunc3D_bayfill(Trunc2D_Base):
             print(repr(self._faciesCode))
 
     def initialize(
-        self, mainFaciesTable, faciesInZone, faciesInTruncRule,
-        gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-        sf_value, sf_name, sf_fmu_updatable, ysf, ysf_fmu_updatable, sbhd, sbhd_fmu_updatable,
-        useConstTruncParam, debug_level=Debug.OFF
-    ):
+        self,
+        mainFaciesTable: APSMainFaciesTable,
+        faciesInZone: List[str],
+        faciesInTruncRule: List[str],
+        gaussFieldsInZone: List[str],
+        alphaFieldNameForBackGroundFacies: List[str],
+        sf_value: float,
+        sf_name: Optional[str],
+        sf_fmu_updatable: bool,
+        ysf: float,
+        ysf_fmu_updatable: bool,
+        sbhd: float,
+        sbhd_fmu_updatable: bool,
+        useConstTruncParam: int,
+        debug_level: Debug = Debug.OFF
+    ) -> None:
         """
         Initialize the truncation object from input variables.
         """
@@ -400,28 +421,39 @@ class Trunc3D_bayfill(Trunc2D_Base):
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
 
-    def getClassName(self):
+    def getClassName(self) -> str:
         return self._className
 
     def getFaciesOrderIndexList(self):
         return copy.copy(self._orderIndex)
 
-    def getFaciesInTruncRule(self):
+    def getFaciesInTruncRule(self) -> List[str]:
         return copy.copy(self._faciesInTruncRule)
 
-    def getNGaussFieldsInModel(self):
+    def getNGaussFieldsInModel(self) -> int:
         return 3
 
-    def getUseZ(self):
+    def getUseZ(self) -> bool:
         return self.__useZ
 
     def getZTruncationValue(self):
         return self.__Zm
 
-    def useConstTruncModelParam(self):
+    def useConstTruncModelParam(self) -> bool:
         return self.__useConstTruncModelParam
 
-    def truncMapPolygons(self):
+    def truncMapPolygons(
+        self
+    ) -> Union[
+        List[Union[
+            List[Union[
+                List[float],
+                List[Union[float, int]]]
+            ],
+            List[List[float]]]
+        ],
+        List[List[List[float]]]
+    ]:
         assert self._setTruncRuleIsCalled
         isDetermined = any(
             self._faciesIsDetermined[self._orderIndex[index]]
@@ -452,7 +484,13 @@ class Trunc3D_bayfill(Trunc2D_Base):
     def faciesIndxPerPolygon(self):
         return copy.copy(self.__fIndxPerPolygon)
 
-    def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
+    def XMLAddElement(
+            self,
+            parent: Element,
+            zone_number: int,
+            region_number: int,
+            fmu_attributes: List[FmuAttribute],
+    ) -> None:
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
 
@@ -547,50 +585,50 @@ class Trunc3D_bayfill(Trunc2D_Base):
         bgModelElement.append(obj)
 
     @property
-    def __eps(self):
+    def __eps(self) -> float:
         """ Tolerance used for probabilities """
         return 0.5 * self._epsFaciesProb
 
     @staticmethod
-    def __unitSquarePolygon():
+    def __unitSquarePolygon() -> List[List[float]]:
         """  Create a polygon for the unit square
         """
         return [[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]
 
     @staticmethod
-    def __zeroPolygon():
+    def __zeroPolygon() -> List[List[float]]:
         """ Create a small polygon
         """
         return [[0, 0], [0, 0.0001], [0.0001, 0.0001], [0, 0.0001], [0, 0]]
 
-    def setSFParam(self, sfValue):
+    def setSFParam(self, sfValue: float) -> None:
         if 0 <= sfValue <= 1.0:
             self.__param_sf = sfValue
         else:
             raise ValueError('SF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
 
-    def setSFParamFmuUpdatable(self, value):
+    def setSFParamFmuUpdatable(self, value: bool) -> None:
         self._is_param_sf_fmuupdatable = value
 
-    def setYSFParam(self, ysfValue):
+    def setYSFParam(self, ysfValue: float) -> None:
         if 0 <= ysfValue <= 1.0:
             self.__param_ysf = ysfValue
         else:
             raise ValueError('YSF parameter for Bayfill truncation rule must be between 0.0 and 1.0')
 
-    def setYSFParamFmuUpdatable(self, value):
+    def setYSFParamFmuUpdatable(self, value: bool) -> None:
         self._is_param_ysf_fmuupdatable = value
 
-    def setSBHDParam(self, sbhdValue):
+    def setSBHDParam(self, sbhdValue: float) -> None:
         if 0 <= sbhdValue <= 1.0:
             self.__param_sbhd = sbhdValue
         else:
             raise ValueError('SBHD parameter for Bayfill truncation rule must be between 0.0 and 1.0')
 
-    def setSBHDParamFmuUpdatable(self, value):
+    def setSBHDParamFmuUpdatable(self, value: bool) -> None:
         self._is_param_sbhd_fmuupdatable = value
 
-    def setTruncRule(self, faciesProb, cellIndx=0):
+    def setTruncRule(self, faciesProb: Union[np.ndarray, List[float]], cellIndx: int = 0) -> None:
         """setTruncRule: Calculate internal parameters and polygons that define the truncation rule.
            Input:  faciesProb - Probability for each facies.
            Model parameters:

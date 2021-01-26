@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import NamedTuple, Union, Optional
 
-from src.algorithms.Trend3D import Trend3D
+from src.algorithms.trend import Trend3D
 from src.algorithms.APSGaussModel import GaussianFieldName
 from src.utils.constants.simple import VariogramType
+from src.utils.types import FaciesName, FaciesCode
 
 
 class VariogramRecord(NamedTuple):
@@ -36,8 +37,8 @@ class SeedRecord(NamedTuple):
 
 
 class FaciesRecord(NamedTuple):
-    Name: str
-    Code: int
+    Name: FaciesName
+    Code: FaciesCode
 
 
 class FaciesProbabilityRecord(NamedTuple):

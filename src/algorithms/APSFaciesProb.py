@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from warnings import warn
+
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from typing import List, Optional, Union, Tuple
 from xml.etree.ElementTree import Element
 
 from src.utils.constants.simple import Debug
 from src.utils.numeric import isNumber
+from src.utils.types import Probability, FaciesName, ErrorCode, Index, ZoneNumber
 from src.utils.xmlUtils import getKeyword, getTextCommand
 from src.utils.records import FaciesProbabilityRecord
 
@@ -11,7 +15,7 @@ from src.utils.records import FaciesProbabilityRecord
 class FaciesProbability:
     __slots__ = '_name', '_probability'
 
-    def __init__(self, name, probability):
+    def __init__(self, name: FaciesName, probability: Probability):
         self._name = name
         self._probability = probability
 
@@ -19,7 +23,7 @@ class FaciesProbability:
         return '{}("{}", {})'.format(self.__class__.__name__, self.name, self.probability)
 
     @property
-    def name(self):
+    def name(self) -> FaciesName:
         return self._name
 
     @name.setter
@@ -27,7 +31,7 @@ class FaciesProbability:
         self._name = value
 
     @property
-    def probability(self):
+    def probability(self) -> Probability:
         probability = self._probability
         try:
             return float(probability)
@@ -47,7 +51,14 @@ class FaciesProbability:
             raise IndexError('list index out of range')
 
     @classmethod
-    def from_definition(cls, definition):
+    def from_definition(
+            cls,
+            definition: Union[
+                FaciesProbabilityRecord,
+                Tuple[str, Probability],
+                List[Probability]
+            ]
+    ) -> 'FaciesProbability':
         definition = FaciesProbabilityRecord._make(definition)
         return cls(
             name=definition.Name,
@@ -86,14 +97,21 @@ class APSFaciesProb:
         def __roundOffProb(self, resolutionRoundOff=100)
     """
 
-    def __init__(self, ET_Tree_zone=None, mainFaciesTable=None, modelFileName=None,
-                 debug_level=Debug.OFF, useConstProb=False, zoneNumber=0):
+    def __init__(
+            self,
+            ET_Tree_zone: Optional[Element] = None,
+            mainFaciesTable: Optional[APSMainFaciesTable] = None,
+            modelFileName: Optional[str] = None,
+            debug_level: int = Debug.OFF,
+            useConstProb: bool = False,
+            zoneNumber: int = 0
+    ):
 
-        self.__class_name = self.__class__.__name__
-        self.__faciesProbForZoneModel = []
-        self.__useConstProb = 0
+        self.__class_name: str = self.__class__.__name__
+        self.__faciesProbForZoneModel: List[FaciesProbability] = []
+        self.__useConstProb: bool = 0
         self.__debug_level = Debug.OFF
-        self.__mainFaciesTable = None
+        self.__mainFaciesTable: APSMainFaciesTable = None
         self.__zoneNumber = 0
 
         if ET_Tree_zone is not None:
@@ -110,7 +128,7 @@ class APSFaciesProb:
             # End __init__
 
     @property
-    def facies_in_zone_model(self):
+    def facies_in_zone_model(self) -> List[FaciesName]:
         return [facies.name for facies in self.__faciesProbForZoneModel]
 
     def __interpretXMLTree(self, ET_Tree_zone, modelFileName):
@@ -177,7 +195,15 @@ class APSFaciesProb:
             print('Debug output: From ' + self.__class_name + ': Facies prob for current zone model:')
             print(repr(self.__faciesProbForZoneModel))
 
-    def initialize(self, faciesList, faciesProbList, mainFaciesTable, useConstProb, zoneNumber, debug_level=Debug.OFF):
+    def initialize(
+        self,
+        faciesList:             List[str],
+        faciesProbList:         Union[List[str], List[float]],
+        mainFaciesTable:        APSMainFaciesTable,
+        useConstProb:           int,
+        zoneNumber:             int,
+        debug_level:            Debug                           = Debug.OFF
+    ) -> None:
         ''' Initialize an APSFaciesProb object. '''
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__class_name)
@@ -188,7 +214,7 @@ class APSFaciesProb:
         self.__mainFaciesTable = mainFaciesTable
         self.updateFaciesWithProbForZone(faciesList, faciesProbList)
 
-    def __roundOffProb(self, resolutionRoundOff=100):
+    def __roundOffProb(self, resolutionRoundOff: int = 100) -> None:
         ''' Round off the probability value to nearest value which is a multiple of resolutionRoundOff
             if it is specified as a constant value'''
         if self.__useConstProb:
@@ -197,7 +223,7 @@ class APSFaciesProb:
                 probNew = int(prob * resolutionRoundOff + 0.5) / resolutionRoundOff
                 item.probability = probNew
 
-    def __checkConstProbValuesAndNormalize(self, zoneNumber):
+    def __checkConstProbValuesAndNormalize(self, zoneNumber: ZoneNumber) -> None:
         ''' Normalize probabilities for the case that constant probabilities is specified.'''
         if not self.__useConstProb:
             return
@@ -213,7 +239,7 @@ class APSFaciesProb:
                 normalized_prob = prob / sumProb
                 item.probability = str(normalized_prob)
 
-    def getAllProbParamForZone(self):
+    def getAllProbParamForZone(self) -> List[str]:
         """ Return list of name of all specified RMS probability parameter names"""
         allProbParamList = []
         for item in self.__faciesProbForZoneModel:
@@ -223,7 +249,7 @@ class APSFaciesProb:
                     allProbParamList.append(probParamName)
         return allProbParamList
 
-    def getConstProbValue(self, facies_name):
+    def getConstProbValue(self, facies_name: FaciesName) -> float:
         ''' Return probability (a number) for specified facies name. This is done when the specified probabilities
         are constants (numbers) '''
         if self.__useConstProb:
@@ -235,10 +261,10 @@ class APSFaciesProb:
         raise ValueError('Can not call getConstProbValue when useConstProb = 0')
 
     @property
-    def zone_number(self):
+    def zone_number(self) -> int:
         return self.__zoneNumber
 
-    def findFaciesItem(self, facies_name):
+    def findFaciesItem(self, facies_name: FaciesName) -> Optional[FaciesProbability]:
         # Check that facies is defined
         itemWithFacies = None
         if self.__mainFaciesTable.has_facies_int_facies_table(facies_name):
@@ -249,7 +275,11 @@ class APSFaciesProb:
                     break
         return itemWithFacies
 
-    def updateFaciesWithProbForZone(self, faciesList, faciesProbList):
+    def updateFaciesWithProbForZone(
+            self,
+            faciesList:         List[str],
+            faciesProbList:     Union[List[str], List[float]],
+    ) -> ErrorCode:
         ''' Update existing facies with new facies probability/probability parameter name.
             For new facies, add facies and corresponding probability/probability parameter name'''
         err = 0
@@ -273,7 +303,11 @@ class APSFaciesProb:
                 item.probability = fProbName
         return err
 
-    def updateSingleFaciesWithProbForZone(self, faciesName, faciesProbCubeName):
+    def updateSingleFaciesWithProbForZone(
+            self,
+            faciesName:         FaciesName,
+            faciesProbCubeName: str
+    ) -> ErrorCode:
         ''' Update specified facies with new facies probability parameter name.
             If the facies does not exist, add it '''
         # Check that facies is defined
@@ -290,7 +324,7 @@ class APSFaciesProb:
                 itemWithFacies.probability = faciesProbCubeName
         return err
 
-    def removeFaciesWithProbForZone(self, fName):
+    def removeFaciesWithProbForZone(self, fName: FaciesName) -> Index:
         ''' Remove a specified facies and its probability'''
         indx = -999
         for i in range(len(self.__faciesProbForZoneModel)):
@@ -303,7 +337,7 @@ class APSFaciesProb:
             # Remove data for this facies
             self.__faciesProbForZoneModel.pop(indx)
 
-    def hasFacies(self, facies_name):
+    def hasFacies(self, facies_name: FaciesName) -> bool:
         ''' Check that facies with specified name exist'''
         for item in self.__faciesProbForZoneModel:
             _facies_name = item.name
@@ -311,14 +345,14 @@ class APSFaciesProb:
                 return True
         return False
 
-    def getProbParamName(self, fName):
+    def getProbParamName(self, fName: FaciesName) -> Optional[str]:
         ''' Get probability parameter name for given facies name'''
         for item in self.__faciesProbForZoneModel:
             if item.name == fName:
                 return item.probability
         return None
 
-    def XMLAddElement(self, parent):
+    def XMLAddElement(self, parent: Element) -> None:
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__class_name)
 

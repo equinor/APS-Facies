@@ -2,18 +2,19 @@
 # -*- coding: utf-8 -*-
 import filecmp
 import xml.etree.ElementTree as ET
+from typing import List, Dict, Union, Tuple
 from xml.etree.ElementTree import Element
 
 import pytest
 
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
-from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
+from src.algorithms.truncation_rules import Trunc2D_Cubic
 from src.unit_test.constants import (
     CUBIC_GAUSS_FIELD_FILES, FACIES_OUTPUT_FILE, OUTPUT_MODEL_FILE_NAME1,
     OUTPUT_MODEL_FILE_NAME2, OUT_POLY_FILE1, OUT_POLY_FILE2, KEYRESOLUTION, FACIES_OUTPUT_FILE_VECTORIZED
 )
 from src.unit_test.helpers import (
-    apply_truncations,  apply_truncations_vectorized, getFaciesInTruncRule, get_cubic_facies_reference_file_path,
+    apply_truncations, apply_truncations_vectorized, getFaciesInTruncRule, get_cubic_facies_reference_file_path,
     truncMapPolygons,
 )
 from src.utils.constants.simple import Debug
@@ -21,8 +22,14 @@ from src.utils.xmlUtils import prettify
 
 
 def interpretXMLModelFileAndWrite(
-        modelFileName, outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, keyResolution, debug_level=Debug.OFF
-):
+        modelFileName: str,
+        outputModelFileName: str,
+        fTable: Dict[int, str],
+        faciesInZone: List[str],
+        gaussFieldsInZone: List[str],
+        keyResolution: int,
+        debug_level: Debug = Debug.OFF
+) -> Trunc2D_Cubic:
     # Read test model file with truncation rule into xml tree
     ET_Tree = ET.parse(modelFileName)
     root = ET_Tree.getroot()
@@ -50,7 +57,7 @@ def interpretXMLModelFileAndWrite(
     return truncRuleOut
 
 
-def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
+def createXMLTreeAndWriteFile(truncRuleInput: Trunc2D_Cubic, outputModelFileName: str) -> None:
     # Build an XML tree with top as root
     # from truncation object and write it
     assert truncRuleInput is not None
@@ -64,9 +71,16 @@ def createXMLTreeAndWriteFile(truncRuleInput, outputModelFileName):
 
 
 def createTrunc(
-        outputModelFileName, fTable, faciesInZone, gaussFieldsInZone, gaussFieldsForBGFacies,
-        truncStructure, overlayGroups, keyResolution, debug_level=Debug.OFF
-):
+        outputModelFileName: str,
+        fTable: Dict[int, str],
+        faciesInZone: List[str],
+        gaussFieldsInZone: List[str],
+        gaussFieldsForBGFacies: List[str],
+        truncStructure: List[Union[str, List[Union[str, float, int]]]],
+        overlayGroups: List[List[Union[List[List[Union[str, float]]], List[str]]]],
+        keyResolution: int,
+        debug_level: Debug = Debug.OFF
+) -> Trunc2D_Cubic:
     mainFaciesTable = APSMainFaciesTable(facies_table=fTable)
 
     # Create an object and initialize it
@@ -82,9 +96,17 @@ def createTrunc(
 
 
 def initialize_write_read(
-        outputModelFileName1, outputModelFileName2, fTable, faciesInZone, gaussFieldsInZone,
-        gaussFieldsForBGFacies, truncStructure, overlayGroups, keyResolution, debug_level=Debug.OFF
-):
+        outputModelFileName1: str,
+        outputModelFileName2: str,
+        fTable: Dict[int, str],
+        faciesInZone: List[str],
+        gaussFieldsInZone: List[str],
+        gaussFieldsForBGFacies: List[str],
+        truncStructure: List[Union[str, List[Union[str, float, int]]]],
+        overlayGroups: List[List[Union[List[List[Union[str, float]]], List[str]]]],
+        keyResolution: int,
+        debug_level: Debug = Debug.OFF
+) -> Tuple[Trunc2D_Cubic, Trunc2D_Cubic]:
     file1 = outputModelFileName1
     file2 = outputModelFileName2
     # Create an object for truncation rule and write to file
@@ -98,7 +120,8 @@ def initialize_write_read(
     # Write data structure:
     # Read the previously written file as and XML file and write it out again to a new file
     # Global variable truncRule2
-    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, gaussFieldsInZone, keyResolution, debug_level)
+    truncRuleB = interpretXMLModelFileAndWrite(inputFile, file2, fTable, faciesInZone, gaussFieldsInZone, keyResolution,
+                                               debug_level)
 
     # Compare the original xml file created in createTrunc and the xml file written by interpretXMLModelFileAndWrite
     check = filecmp.cmp(file1, file2)
@@ -111,7 +134,7 @@ def initialize_write_read(
     return truncRuleA, truncRuleB
 
 
-def getClassName(truncRule):
+def getClassName(truncRule: Trunc2D_Cubic) -> None:
     assert truncRule is not None
     name = truncRule.getClassName()
     assert name == 'Trunc2D_Cubic'
@@ -339,7 +362,8 @@ def getClassName(truncRule):
     }), (17, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5', 6: 'F6'},
         'faciesInZone': ['F2', 'F1', 'F4', 'F3', 'F6', 'F5'],
-        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0], ['F3', 1.0, 3, 0, 0], ['F4', 1.0, 4, 0, 0], ['F5', 1.0, 5, 0, 0]],
+        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0], ['F3', 1.0, 3, 0, 0], ['F4', 1.0, 4, 0, 0],
+                           ['F5', 1.0, 5, 0, 0]],
         'faciesInTruncRule': ['F1', 'F2', 'F3', 'F4', 'F5', 'F6'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -353,7 +377,8 @@ def getClassName(truncRule):
     }), (18, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5', 6: 'F6', 7: 'F7'},
         'faciesInZone': ['F2', 'F1', 'F4', 'F3', 'F6', 'F5', 'F7'],
-        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0], ['F3', 1.0, 3, 0, 0], ['F4', 1.0, 4, 0, 0], ['F5', 1.0, 5, 0, 0]],
+        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 0, 0], ['F3', 1.0, 3, 0, 0], ['F4', 1.0, 4, 0, 0],
+                           ['F5', 1.0, 5, 0, 0]],
         'faciesInTruncRule': ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -370,7 +395,8 @@ def getClassName(truncRule):
     }), (19, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5', 6: 'F6', 7: 'F7'},
         'faciesInZone': ['F2', 'F1', 'F4', 'F3', 'F6', 'F5', 'F7'],
-        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 1, 1], ['F3', 1.0, 2, 1, 2], ['F4', 1.0, 2, 2, 1], ['F5', 1.0, 2, 2, 2]],
+        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 1, 1], ['F3', 1.0, 2, 1, 2], ['F4', 1.0, 2, 2, 1],
+                           ['F5', 1.0, 2, 2, 2]],
         'faciesInTruncRule': ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -387,7 +413,8 @@ def getClassName(truncRule):
     }), (20, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5', 6: 'F6'},
         'faciesInZone': ['F2', 'F1', 'F4', 'F3', 'F6', 'F5'],
-        'truncStructure': ['V', ['F4', 0.4, 1, 0, 0], ['F2', 1.0, 2, 1, 0], ['F3', 1.0, 2, 2, 1], ['F4', 0.3, 2, 2, 2], ['F4', 0.3, 2, 3, 0]],
+        'truncStructure': ['V', ['F4', 0.4, 1, 0, 0], ['F2', 1.0, 2, 1, 0], ['F3', 1.0, 2, 2, 1], ['F4', 0.3, 2, 2, 2],
+                           ['F4', 0.3, 2, 3, 0]],
         'faciesInTruncRule': ['F4', 'F2', 'F3', 'F1', 'F5', 'F6'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4', 'GF5'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -407,7 +434,8 @@ def getClassName(truncRule):
     }), (21, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4'},
         'faciesInZone': ['F1', 'F4', 'F3'],
-        'truncStructure': ['V', ['F4', 0.2, 1, 0, 0], ['F4', 0.2, 2, 1, 0], ['F3', 1.0, 2, 2, 1], ['F4', 0.3, 2, 2, 2], ['F4', 0.3, 2, 3, 0]],
+        'truncStructure': ['V', ['F4', 0.2, 1, 0, 0], ['F4', 0.2, 2, 1, 0], ['F3', 1.0, 2, 2, 1], ['F4', 0.3, 2, 2, 2],
+                           ['F4', 0.3, 2, 3, 0]],
         'faciesInTruncRule': ['F4', 'F3', 'F1'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -421,7 +449,8 @@ def getClassName(truncRule):
     }), (22, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5'},
         'faciesInZone': ['F1', 'F4', 'F3', 'F5', 'F2'],
-        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 1, 0], ['F3', 0.5, 2, 2, 1], ['F4', 1.0, 2, 2, 2], ['F3', 0.5, 2, 3, 1], ['F5', 1.0, 2, 3, 2]],
+        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F2', 1.0, 2, 1, 0], ['F3', 0.5, 2, 2, 1], ['F4', 1.0, 2, 2, 2],
+                           ['F3', 0.5, 2, 3, 1], ['F5', 1.0, 2, 3, 2]],
         'faciesInTruncRule': ['F1', 'F2', 'F3', 'F4', 'F5'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -430,7 +459,8 @@ def getClassName(truncRule):
     }), (23, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5'},
         'faciesInZone': ['F1', 'F4', 'F3', 'F5', 'F2'],
-        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F5', 0.5, 2, 1, 0], ['F3', 0.5, 2, 2, 1], ['F4', 1.0, 2, 2, 2], ['F3', 0.5, 2, 3, 1], ['F5', 0.5, 2, 3, 2]],
+        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F5', 0.5, 2, 1, 0], ['F3', 0.5, 2, 2, 1], ['F4', 1.0, 2, 2, 2],
+                           ['F3', 0.5, 2, 3, 1], ['F5', 0.5, 2, 3, 2]],
         'faciesInTruncRule': ['F1', 'F5', 'F3', 'F4', 'F2'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -444,7 +474,8 @@ def getClassName(truncRule):
     }), (24, {
         'fTable': {3: 'F1', 2: 'F3', 1: 'F4', 4: 'F2', 5: 'F5'},
         'faciesInZone': ['F1', 'F4', 'F3', 'F5', 'F2'],
-        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F5', 0.5, 2, 1, 0], ['F3', 0.5, 2, 2, 1], ['F4', 1.0, 2, 2, 2], ['F3', 0.5, 2, 3, 1], ['F5', 0.5, 2, 3, 2]],
+        'truncStructure': ['H', ['F1', 1.0, 1, 0, 0], ['F5', 0.5, 2, 1, 0], ['F3', 0.5, 2, 2, 1], ['F4', 1.0, 2, 2, 2],
+                           ['F3', 0.5, 2, 3, 1], ['F5', 0.5, 2, 3, 2]],
         'faciesInTruncRule': ['F1', 'F5', 'F3', 'F4', 'F2'],
         'gaussFieldsInZone': ['GF1', 'GF2', 'GF3', 'GF4', 'GF5'],
         'gaussFieldsForBGFacies': ['GF1', 'GF2'],
@@ -462,16 +493,38 @@ def getClassName(truncRule):
     })
 
 ])
-def test_Trunc2DCubic(case_number, data):
+def test_Trunc2DCubic(
+    case_number: int,
+    data: Dict[str, Union[
+        Dict[int, str],
+        List[str],
+        List[Union[
+            str,
+            List[Union[str, float, int]]]
+        ],
+        List[List[Union[
+            List[List[Union[str, float]]],
+            List[str]]]
+        ],
+        List[float]]
+    ]
+) -> None:
     print('')
     print('******** Case number: ' + str(case_number) + ' *********')
     run(faciesReferenceFile=get_cubic_facies_reference_file_path(case_number), **data)
 
 
 def run(
-        fTable, faciesInTruncRule, faciesInZone, faciesProb, faciesReferenceFile,
-        gaussFieldsInZone, gaussFieldsForBGFacies, overlayGroups, truncStructure
-):
+        fTable: Dict[int, str],
+        faciesInTruncRule: List[str],
+        faciesInZone: List[str],
+        faciesProb: List[float],
+        faciesReferenceFile: str,
+        gaussFieldsInZone: List[str],
+        gaussFieldsForBGFacies: List[str],
+        overlayGroups: List[List[Union[List[List[Union[str, float]]], List[str]]]],
+        truncStructure: List[Union[str, List[Union[str, float, int]]]]
+) -> None:
     truncRule, truncRule2 = initialize_write_read(
         outputModelFileName1=OUTPUT_MODEL_FILE_NAME1,
         outputModelFileName2=OUTPUT_MODEL_FILE_NAME2,

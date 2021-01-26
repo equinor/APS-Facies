@@ -2,19 +2,23 @@
 # -*- coding: utf-8 -*-
 import copy
 from enum import Enum
+from typing import List, Optional, Union, Tuple
 from warnings import warn
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, ElementTree
 
 import numpy as np
 
 from src.algorithms.APSFaciesProb import APSFaciesProb
-from src.algorithms.APSGaussModel import APSGaussModel
+from src.algorithms.APSGaussModel import APSGaussModel, GaussianFieldName, GaussianField, Trend
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.Memoization import MemoizationItem, RoundOffConstant
-from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
-from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
-from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
-from src.utils.constants.simple import Debug
+from src.algorithms.trend import Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param
+from src.algorithms.truncation_rules import Trunc2D_Angle, Trunc2D_Cubic, Trunc3D_bayfill
+from src.algorithms.properties import CrossSection
+from src.utils.constants.simple import Debug, VariogramType
+from src.utils.containers import FmuAttribute
+from src.utils.types import FaciesName
+from src.algorithms.truncation_rules.types import TruncationRule
 from src.utils.xmlUtils import (
     getFloatCommand,
     getIntCommand,
@@ -109,11 +113,20 @@ class APSZoneModel:
     """
 
     def __init__(
-            self, ET_Tree=None, zoneNumber=0, regionNumber=0, modelFileName=None,
-            useConstProb=False, simBoxThickness=10.0,
-            faciesProbObject=None, gaussModelObject=None, truncRuleObject=None,
-            debug_level=Debug.OFF, keyResolution=100, grid_layout=None,
-    ):
+        self,
+        ET_Tree: Optional[ElementTree] = None,
+        zoneNumber: int = 0,
+        regionNumber: int = 0,
+        modelFileName: Optional[str] = None,
+        useConstProb: bool = False,
+        simBoxThickness: float = 10.0,
+        faciesProbObject: Optional[APSFaciesProb] = None,
+        gaussModelObject: Optional[APSGaussModel] = None,
+        truncRuleObject: Optional[TruncationRule] = None,
+        debug_level: Debug = Debug.OFF,
+        keyResolution: int = 100,
+        grid_layout: Optional[Union[str, Conform]] = None,
+    ) -> None:
         """
          If the object is created by reading the xml tree for model parameters, it is required that
          zoneNumber is set to a value > 0 and optionally that regionNumber is set to a value > 0.
@@ -277,145 +290,148 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 # End if zone number
         # End for zone
 
-    def hasFacies(self, fName):
+    def hasFacies(self, fName: FaciesName) -> bool:
         return self.__faciesProbObject.hasFacies(fName)
 
     @property
-    def uses_region(self):
+    def uses_region(self) -> bool:
         return self.region_number > 0
 
     @property
-    def grid_layout(self):
+    def grid_layout(self) -> Optional[Conform]:
         return self._grid_layout
 
     @grid_layout.setter
-    def grid_layout(self, value):
+    def grid_layout(self, value: Optional[Conform]):
         if value is not None:
             value = Conform(value)
         self._grid_layout = value
 
     @property
-    def zone_number(self):
+    def zone_number(self) -> int:
         return self.__zoneNumber
 
     @zone_number.setter
-    def zone_number(self, value):
+    def zone_number(self, value: int):
         self.__zoneNumber = value
 
     @property
-    def region_number(self):
+    def region_number(self) -> int:
         return self.__regionNumber
 
     @property
-    def key_resolution(self):
+    def key_resolution(self) -> int:
         return self.__keyResolution
 
     @property
-    def use_constant_probabilities(self):
+    def use_constant_probabilities(self) -> bool:
         """Info about whether constant probabilities, or probability cubes are used."""
         return self.__useConstProb
 
     @property
-    def facies_in_zone_model(self):
+    def facies_in_zone_model(self) -> List[str]:
         return self.__faciesProbObject.facies_in_zone_model
 
     @property
-    def used_gaussian_field_names(self):
+    def used_gaussian_field_names(self) -> List[GaussianFieldName]:
         if self.__gaussModelObject:
             return self.__gaussModelObject.used_gaussian_field_names
         return []
 
-    def getVariogramType(self, gaussFieldName):
+    def getVariogramType(self, gaussFieldName: GaussianFieldName) -> VariogramType:
         return copy.copy(self.__gaussModelObject.getVariogramType(gaussFieldName))
 
-    def getVariogramTypeNumber(self, gaussFieldName):
+    def getVariogramTypeNumber(self, gaussFieldName: GaussianFieldName) -> int:
         return self.__gaussModelObject.getVariogramTypeNumber(gaussFieldName)
 
-    def getMainRange(self, gaussFieldName):
+    def getMainRange(self, gaussFieldName: GaussianFieldName) -> float:
         return self.__gaussModelObject.getMainRange(gaussFieldName)
 
-    def getMainRangeFmuUpdatable(self, gaussFieldName):
+    def getMainRangeFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.getMainRangeFmuUpdatable(gaussFieldName)
 
-    def getPerpRange(self, gaussFieldName):
+    def getPerpRange(self, gaussFieldName: GaussianFieldName) -> float:
         return self.__gaussModelObject.getPerpRange(gaussFieldName)
 
-    def getPerpRangeFmuUpdatable(self, gaussFieldName):
+    def getPerpRangeFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.getPerpRangeFmuUpdatable(gaussFieldName)
 
-    def getVertRange(self, gaussFieldName):
+    def getVertRange(self, gaussFieldName: GaussianFieldName) -> float:
         return self.__gaussModelObject.getVertRange(gaussFieldName)
 
-    def getVertRangeFmuUpdatable(self, gaussFieldName):
+    def getVertRangeFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.getVertRangeFmuUpdatable(gaussFieldName)
 
-    def getAzimuthAngle(self, gaussFieldName):
+    def getAzimuthAngle(self, gaussFieldName: GaussianFieldName) -> float:
         return self.__gaussModelObject.getAzimuthAngle(gaussFieldName)
 
-    def getAzimuthAngleFmuUpdatable(self, gaussFieldName):
+    def getAzimuthAngleFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.getAzimuthAngleFmuUpdatable(gaussFieldName)
 
-    def getDipAngle(self, gaussFieldName):
+    def getDipAngle(self, gaussFieldName: GaussianFieldName) -> float:
         return self.__gaussModelObject.getDipAngle(gaussFieldName)
 
-    def getDipAngleFmuUpdatable(self, gaussFieldName):
+    def getDipAngleFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.getDipAngleFmuUpdatable(gaussFieldName)
 
-    def getPower(self, gaussFieldName):
+    def getPower(self, gaussFieldName: GaussianFieldName) -> float:
         return self.__gaussModelObject.getPower(gaussFieldName)
 
-    def getPowerFmuUpdatable(self, gaussFieldName):
+    def getPowerFmuUpdatable(self, gaussFieldName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.getPowerFmuUpdatable(gaussFieldName)
 
     @property
-    def truncation_rule(self):
+    def truncation_rule(self) -> TruncationRule:
         return self.__trunc_rule
 
-    @property
-    def gaussian_fields(self):
-        if self.__gaussModelObject:
-            return self.__gaussModelObject.fields
-        return []
-
     @truncation_rule.setter
-    def truncation_rule(self, value):
+    def truncation_rule(self, value: Optional[TruncationRule]):
         if value is None:
             warn('The truncation rule cannot be None for a zone model')
         self.__trunc_rule = value
 
     @property
-    def sim_box_thickness(self):
+    def gaussian_fields(self) -> List[GaussianField]:
+        if self.__gaussModelObject:
+            return self.__gaussModelObject.fields
+        return []
+
+    @property
+    def sim_box_thickness(self) -> float:
         return self.__simBoxThickness
 
     @sim_box_thickness.setter
-    def sim_box_thickness(self, thickness):
+    def sim_box_thickness(self, thickness: float):
         self.__simBoxThickness = thickness
 
-    def get_gaussian_field(self, name):
+    def get_gaussian_field(self, name: GaussianFieldName) -> Optional[GaussianField]:
         return self.__gaussModelObject.get_model(name)
 
-    def getTrendModel(self, gfName):
+    def getTrendModel(self, gfName: GaussianFieldName) -> Union[
+            Tuple[None, None, None, None],
+            Tuple[bool, Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param], float, bool],
+        ]:
         return self.__gaussModelObject.getTrendModel(gfName)
 
-    def getTrendModelObject(self, gfName):
+    def getTrendModelObject(self, gfName: GaussianFieldName) -> Optional[Trend]:
         return self.__gaussModelObject.getTrendModelObject(gfName)
 
-    def hasTrendModel(self, gfName):
+    def hasTrendModel(self, gfName: GaussianFieldName) -> bool:
         return self.__gaussModelObject.hasTrendModel(gfName)
 
-    def getTruncationParam(self, gridModel, realNumber):
+    def getTruncationParam(self, gridModel: str, realNumber: int):
         if not self.truncation_rule.useConstTruncModelParam():
             self.truncation_rule.getTruncationParam(gridModel, realNumber)
 
     @property
-    def debug_level(self):
+    def debug_level(self) -> Debug:
         return self.__debug_level
 
     @debug_level.setter
-    def debug_level(self, value):
+    def debug_level(self, value: Debug):
         self.__debug_level = value
 
-    def getProbParamName(self, fName):
+    def getProbParamName(self, fName: str) -> str:
         return self.__faciesProbObject.getProbParamName(fName)
 
     def getAllProbParamForZone(self):
@@ -425,52 +441,52 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
         return self.__faciesProbObject.getConstProbValue(fName)
 
     @property
-    def gaussian_fields_in_truncation_rule(self):
+    def gaussian_fields_in_truncation_rule(self) -> List[str]:
         return self.truncation_rule.getGaussFieldsInTruncationRule()
 
-    def getGaussFieldsInTruncationRule(self):
+    def getGaussFieldsInTruncationRule(self) -> List[str]:
         return self.truncation_rule.getGaussFieldsInTruncationRule()
 
-    def getGaussFieldIndexListInZone(self):
+    def getGaussFieldIndexListInZone(self) -> List[int]:
         return self.truncation_rule.getGaussFieldIndexListInZone()
 
-    def setVariogramType(self, gaussFieldName, variogramType):
+    def setVariogramType(self, gaussFieldName: GaussianFieldName, variogramType: VariogramType) -> None:
         return self.__gaussModelObject.setVariogramType(gaussFieldName, variogramType)
 
-    def setMainRange(self, gaussFieldName, range1):
+    def setMainRange(self, gaussFieldName: GaussianFieldName, range1: float) -> None:
         return self.__gaussModelObject.setMainRange(gaussFieldName, range1)
 
-    def setMainRangeFmuUpdatable(self, gaussFieldName, value):
+    def setMainRangeFmuUpdatable(self, gaussFieldName: GaussianFieldName, value: bool) -> None:
         return self.__gaussModelObject.setMainRangeFmuUpdatable(gaussFieldName, value)
 
-    def setPerpRange(self, gaussFieldName, range2):
+    def setPerpRange(self, gaussFieldName: GaussianFieldName, range2: float) -> None:
         return self.__gaussModelObject.setPerpRange(gaussFieldName, range2)
 
-    def setPerpRangeFmuUpdatable(self, gaussFieldName, value):
+    def setPerpRangeFmuUpdatable(self, gaussFieldName: GaussianFieldName, value: bool) -> None:
         return self.__gaussModelObject.setPerpRangeFmuUpdatable(gaussFieldName, value)
 
-    def setVertRange(self, gaussFieldName, range3):
+    def setVertRange(self, gaussFieldName: GaussianFieldName, range3: float) -> None:
         return self.__gaussModelObject.setVertRange(gaussFieldName, range3)
 
-    def setVertRangeFmuUpdatable(self, gaussFieldName, value):
+    def setVertRangeFmuUpdatable(self, gaussFieldName: GaussianFieldName, value: bool) -> None:
         return self.__gaussModelObject.setVertRangeFmuUpdatable(gaussFieldName, value)
 
-    def setAzimuthAngle(self, gaussFieldName, angle):
+    def setAzimuthAngle(self, gaussFieldName: GaussianFieldName, angle: float) -> None:
         return self.__gaussModelObject.setAzimuthAngle(gaussFieldName, angle)
 
-    def setAzimuthAngleFmuUpdatable(self, gaussFieldName, value):
+    def setAzimuthAngleFmuUpdatable(self, gaussFieldName: GaussianFieldName, value: bool) -> None:
         return self.__gaussModelObject.setAzimuthAngleFmuUpdatable(gaussFieldName, value)
 
-    def setDipAngle(self, gaussFieldName, angle):
+    def setDipAngle(self, gaussFieldName: GaussianFieldName, angle: float) -> None:
         return self.__gaussModelObject.setDipAngle(gaussFieldName, angle)
 
-    def setDipAngleFmuUpdatable(self, gaussFieldName, value):
+    def setDipAngleFmuUpdatable(self, gaussFieldName: GaussianFieldName, value: bool) -> None:
         return self.__gaussModelObject.setDipAngleFmuUpdatable(gaussFieldName, value)
 
-    def setPower(self, gaussFieldName, power):
+    def setPower(self, gaussFieldName: GaussianFieldName, power: float) -> None:
         return self.__gaussModelObject.setPower(gaussFieldName, power)
 
-    def setPowerFmuUpdatable(self, gaussFieldName, value):
+    def setPowerFmuUpdatable(self, gaussFieldName: GaussianFieldName, value: bool) -> None:
         return self.__gaussModelObject.setPowerFmuUpdatable(gaussFieldName, value)
 
     def setRelStdDev(self, gaussFieldName, relStdDev):
@@ -827,7 +843,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
             volFrac[f] = volFrac[f] / float(nDefinedCells)
         return faciesReal, volFrac
 
-    def XMLAddElement(self, parent, fmu_attributes):
+    def XMLAddElement(self, parent: Element, fmu_attributes: List[FmuAttribute]) -> None:
         ''' Add command Zone and all its children to the XML tree'''
         if self.debug_level >= Debug.VERY_VERBOSE:
             print(f'Debug output: call XMLADDElement from {self.__className}')
@@ -867,7 +883,13 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
         self.truncation_rule.XMLAddElement(zoneElement, self.zone_number, self.region_number, fmu_attributes)
 
     def simGaussFieldWithTrendAndTransform(
-            self, simulation_box_size, grid_size, gridAzimuthAngle, crossSection, simulation_box_origin):
+        self,
+        simulation_box_size: Tuple[float, float, float],
+        grid_size: Tuple[int, int, int],
+        gridAzimuthAngle: float,
+        crossSection: CrossSection,
+        simulation_box_origin,
+    ) -> List[GaussianField]:
         """ Simulate 2D gauss field using specified trend"""
         return self.__gaussModelObject.simGaussFieldWithTrendAndTransform(
             simulation_box_size, grid_size, gridAzimuthAngle, crossSection, simulation_box_origin

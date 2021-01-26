@@ -1,15 +1,18 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from typing import Optional, List, Union
 from warnings import warn
 from xml.etree.ElementTree import Element
 
 import numpy as np
 
-from src.algorithms.Trunc2D_Base_xml import Trunc2D_Base
+from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
+from src.algorithms.truncation_rules.Trunc2D_Base_xml import Trunc2D_Base
 from src.utils.constants.simple import Debug
+from src.utils.containers import FmuAttribute
 from src.utils.xmlUtils import getKeyword
-from src.algorithms.Memoization import RoundOffConstant
+
 """
 -----------------------------------------------------------------------
 class Trunc2D_Cubic
@@ -77,8 +80,17 @@ class Trunc2D_Cubic(Trunc2D_Base):
     This class implements adaptive plurigaussian field truncation using two simulated gaussian fields (with trend).
     """
 
-    def __init__(self, trRuleXML=None, mainFaciesTable=None, faciesInZone=None, gaussFieldsInZone=None,
-                 keyResolution=100, debug_level=Debug.OFF, modelFileName=None, zoneNumber=None):
+    def __init__(
+            self,
+            trRuleXML: Optional[Element] = None,
+            mainFaciesTable: Optional[APSMainFaciesTable] = None,
+            faciesInZone: Optional[List[str]] = None,
+            gaussFieldsInZone: Optional[List[str]] = None,
+            keyResolution: int = 100,
+            debug_level: Debug = Debug.OFF,
+            modelFileName: Optional[str] = None,
+            zoneNumber: Optional[int] = None
+    ):
         """
         This constructor can either create a new object by reading the information
         from an XML tree or it can create an empty data structure for such an object.
@@ -205,7 +217,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 print('Debug output: Create empty object for: ' + self._className)
                 #  End of __init__
 
-    def __interpretXMLTree(self, trRuleXML, modelFileName):
+    def __interpretXMLTree(self, trRuleXML, modelFileName) -> None:
         """
         Initialize object from xml tree object trRuleXML.
         This function read Cubic truncation rules.
@@ -429,7 +441,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         print('Facies index for polygons:')
         print(repr(self.__fIndxPerPolygon))
 
-    def getClassName(self):
+    def getClassName(self) -> str:
         return copy.copy(self._className)
 
     def useConstTruncModelParam(self):
@@ -438,7 +450,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         # there are no model parameters for the truncation model (except facies probability)
         return True
 
-    def setTruncRule(self, faciesProb, cellIndx=0):
+    def setTruncRule(self, faciesProb: List[float], cellIndx: int = 0) -> None:
         """
         Calculate how truncation map is to be divided into polygons or threshold values.
         This function must be called each time the facies probability changes, so it must
@@ -1029,7 +1041,20 @@ class Trunc2D_Cubic(Trunc2D_Base):
         """
         return len(self.__polygons)
 
-    def truncMapPolygons(self):
+    def truncMapPolygons(
+        self
+    ) -> Union[
+        List[List[List[float]]],
+        List[Union[
+            List[List[float]],
+            List[Union[List[float], List[np.float64]]],
+            List[List[np.float64]]]
+        ],
+        List[Union[
+            List[Union[List[float], List[np.float64]]],
+            List[List[float]]]
+        ]
+    ]:
         assert self._setTruncRuleIsCalled is True
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']
@@ -1063,8 +1088,17 @@ class Trunc2D_Cubic(Trunc2D_Base):
         fIndxList = copy.copy(self.__fIndxPerPolygon)
         return fIndxList
 
-    def initialize(self, mainFaciesTable, faciesInZone, gaussFieldsInZone, alphaFieldNameForBackGroundFacies,
-                   truncStructureList, overlayGroups=None, keyResolution=100, debug_level=Debug.OFF):
+    def initialize(
+            self,
+            mainFaciesTable: APSMainFaciesTable,
+            faciesInZone: List[str],
+            gaussFieldsInZone: List[str],
+            alphaFieldNameForBackGroundFacies: List[str],
+            truncStructureList: List[Union[str, List[Union[str, float, int]]]],
+            overlayGroups: Optional[List[List[Union[List[List[Union[str, float]]], List[str]]]]] = None,
+            keyResolution: int = 100,
+            debug_level: Debug = Debug.OFF
+    ) -> None:
         """
         TODO: Update documentation
 
@@ -1298,7 +1332,8 @@ class Trunc2D_Cubic(Trunc2D_Base):
             L3Prev = L3
         self.__truncStructure = truncStructure
 
-    def XMLAddElement(self, parent, zone_number, region_number, fmu_attributes):
+    def XMLAddElement(self, parent: Element, zone_number: str, region_number: str,
+                      fmu_attributes: List[FmuAttribute]) -> None:
         if self._debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self._className)
         TYPE = self.__node_index['type']

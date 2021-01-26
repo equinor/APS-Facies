@@ -3,6 +3,7 @@ import os
 from os.path import exists
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Tuple, Union, List
 
 import numpy as np
 
@@ -11,14 +12,20 @@ from src.utils.roxar import running_in_batch_mode
 from src.utils.methods import get_workflow_name
 
 
-def write_status_file(status, always=False):
+def write_status_file(status: bool, always: bool = False) -> None:
     if running_in_batch_mode() or always:
         file_name = f'statusfile_{get_workflow_name()}.dat'
         with open(file_name, 'w') as f:
             f.write(f'{status}\n')
 
 
-def writeFile(file_name, a, nx, ny, debug_level=Debug.SOMEWHAT_VERBOSE):
+def writeFile(
+        file_name: str,
+        a: Union[List[int], np.ndarray],
+        nx: int,
+        ny: int,
+        debug_level: Debug = Debug.SOMEWHAT_VERBOSE,
+):
     print(f'Write file: {file_name}')
     # Choose an arbitrary heading
     heading = f'''-996  {ny}  50.000000     50.000000
@@ -29,7 +36,10 @@ def writeFile(file_name, a, nx, ny, debug_level=Debug.SOMEWHAT_VERBOSE):
     _write_file(file_name, a, heading, debug_level)
 
 
-def readFile(fileName, debug_level=Debug.OFF):
+def readFile(
+        fileName: str,
+        debug_level: Debug = Debug.OFF
+) -> Tuple[np.ndarray, int, int]:
     if debug_level >= Debug.SOMEWHAT_VERBOSE:
         print(f'Read file: {fileName}')
     if not exists(fileName):
@@ -52,7 +62,15 @@ def readFile(fileName, debug_level=Debug.OFF):
     return a, nx, ny
 
 
-def writeFileRTF(file_name, data, dimensions, increments, x0, y0, debug_level=Debug.OFF):
+def writeFileRTF(
+        file_name: str,
+        data: Union[List[int], np.ndarray],
+        dimensions: Tuple[int, int],
+        increments: Tuple[float, float],
+        x0: float,
+        y0: float,
+        debug_level=Debug.OFF
+) -> None:
     nx, ny = dimensions
     dx, dy = increments
     # Write in Roxar text format
@@ -87,35 +105,35 @@ def _write_file(file_name, data, heading, debug_level):
         print(f'Write file: {file_name}')
 
 
-def print_debug_information(function_name, text):
+def print_debug_information(function_name: str, text: str) -> None:
     if function_name in [' ', '']:
         print(f'Debug output: {text}\n')
     else:
         print(f'Debug output in {function_name}: {text}\n')
 
 
-def print_error(function_name, text):
+def print_error(function_name: str, text: str) -> None:
     print(f'Error in {function_name}: {text}')
 
 
 class TemporaryFile:
-    def __init__(self, file):
-        self._file = file
+    def __init__(self, file: NamedTemporaryFile):
+        self._file: NamedTemporaryFile = file
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'{self.__class__.__name__}(name="{self!s}")'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._file.name
 
-    def __enter__(self):
+    def __enter__(self) -> str:
         return str(Path(self._file.name).absolute())
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         os.unlink(str(self._file.name))
 
 
-def create_temporary_model_file(model):
+def create_temporary_model_file(model: str) -> TemporaryFile:
     file = NamedTemporaryFile(
         suffix='.xml',
         delete=False,
@@ -128,7 +146,7 @@ def create_temporary_model_file(model):
     return TemporaryFile(file)
 
 
-def ensure_folder_exists(seed_file_log):
+def ensure_folder_exists(seed_file_log: Path) -> None:
     if not seed_file_log.is_dir():
         seed_file_log = seed_file_log.parent
     if not seed_file_log.exists():
@@ -136,9 +154,12 @@ def ensure_folder_exists(seed_file_log):
         makedirs(seed_file_log)
 
 
+_GlobalVariables = List[Tuple[str, float]]
+
+
 class GlobalVariables:
     @classmethod
-    def check_file_format(cls, global_variables_file):
+    def check_file_format(cls, global_variables_file: Union[str, Path]) -> str:
         global_variables_file = Path(global_variables_file)
         suffix = global_variables_file.suffix.lower().strip('.')
         if suffix == 'ipl':
@@ -149,7 +170,7 @@ class GlobalVariables:
             raise NotImplementedError('{} is an unknown suffix, which cannot be read'.format(suffix))
 
     @classmethod
-    def parse(cls, global_variables_file):
+    def parse(cls, global_variables_file: Path) -> _GlobalVariables:
         global_variables_file = Path(global_variables_file)
         suffix = global_variables_file.suffix.lower().strip('.')
         if suffix == 'ipl':
@@ -160,7 +181,7 @@ class GlobalVariables:
             raise NotImplementedError('{} is an unknown suffix, which cannot be read'.format(suffix))
 
     @staticmethod
-    def _read_ipl(global_variables_file):
+    def _read_ipl(global_variables_file: Path) -> _GlobalVariables:
         ''' Read global variables for APS from global IPL file.
             Returns a list of aps parameter names and values.
             IPL format does only support RMS project with one grid model (multizone grid)
@@ -187,7 +208,7 @@ class GlobalVariables:
         return keywords
 
     @classmethod
-    def _read_yaml(cls, global_variables_file):
+    def _read_yaml(cls, global_variables_file: Path) -> _GlobalVariables:
         ''' YAML format for global variables support RMS project with multiple grid models
             where the grid models can be single-zone grid models or multi-zone grid models
             and where each grid model may have multiple APS jobs where each job can have
@@ -236,7 +257,7 @@ class GlobalVariables:
         return aps_variables
 
     @staticmethod
-    def is_numeric(val):
+    def is_numeric(val) -> bool:
         try:
             float(val)
         except (ValueError, TypeError):

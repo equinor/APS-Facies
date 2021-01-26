@@ -15,10 +15,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 
-from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.algorithms.truncation_rules import Trunc3D_bayfill, Trunc2D_Angle, Trunc2D_Cubic
 from src.utils.constants.simple import Debug
-from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
-from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.constants_truncation_rules import (
     OverlayGroupIndices, OverlayPolygonIndices, CubicPolygonIndices,

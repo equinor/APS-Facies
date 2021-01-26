@@ -6,12 +6,10 @@ from src.algorithms.APSGaussModel import APSGaussModel
 from src.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from src.algorithms.APSModel import APSModel
 from src.algorithms.APSZoneModel import APSZoneModel
-from src.algorithms.Trend3D import Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear
-from src.algorithms.Trunc2D_Angle_xml import Trunc2D_Angle
-from src.algorithms.Trunc2D_Cubic_xml import Trunc2D_Cubic
-from src.algorithms.Trunc3D_bayfill_xml import Trunc3D_bayfill
+from src.algorithms.trend import Trend3D_elliptic, Trend3D_elliptic_cone, Trend3D_hyperbolic, Trend3D_linear
+from src.algorithms.truncation_rules import Trunc2D_Angle, Trunc2D_Cubic, Trunc3D_bayfill
 from src.unit_test.constants import (
-    FACIES_REAL_PARAM_NAME_RESULT, GAUSS_FIELD_SIM_SCRIPT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
+    FACIES_REAL_PARAM_NAME_RESULT, GRID_MODEL_NAME, RMS_PROJECT, RMS_WORKFLOW, ZONE_PARAM_NAME,
     REGION_PARAM_NAME, NO_VERBOSE_DEBUG, VERY_VERBOSE_DEBUG, SEED_FILE_NAME,
 )
 from src.unit_test.helpers import get_model_file_path

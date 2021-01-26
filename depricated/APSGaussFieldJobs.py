@@ -1,8 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import copy
+from typing import Optional, List
 from warnings import warn
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, ElementTree
 
 from src.utils.constants.simple import Debug
 from src.utils.xmlUtils import getIntCommand, getKeyword
@@ -43,7 +44,12 @@ class APSGaussFieldJobs:
     -----------------------------------------------------------------------------------
     """
 
-    def __init__(self, ET_Tree=None, modelFileName=None, debug_level=Debug.OFF):
+    def __init__(
+        self,
+        ET_Tree: Optional[ElementTree] = None,
+        modelFileName: Optional[str] = None,
+        debug_level: Debug = Debug.OFF
+    ) -> None:
         warn("deprecated", DeprecationWarning)
         self.__modelFileName = modelFileName
         self.__className = 'APSGaussFieldJobs'
@@ -141,7 +147,12 @@ class APSGaussFieldJobs:
             print('Debug output: Gauss field names per job:')
             print(repr(self.__gaussFieldNamesPerJob))
 
-    def initialize(self, gfJobNames, gfNamesPerJob, debug_level=Debug.OFF):
+    def initialize(
+        self,
+        gfJobNames: List[str],
+        gfNamesPerJob: List[List[str]],
+        debug_level: Debug = Debug.OFF
+    ) -> None:
         if debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: Call the initialize function in ' + self.__className)
 
@@ -160,7 +171,7 @@ class APSGaussFieldJobs:
         self.__nGFNames = len(self.__gaussFieldNames)
         self.__nJobs = len(self.__jobNames)
 
-    def getNumberOfGFJobs(self):
+    def getNumberOfGFJobs(self) -> int:
         return len(self.__jobNames)
 
     def getNumberOfGFNames(self):
@@ -195,7 +206,7 @@ class APSGaussFieldJobs:
         else:
             return False
 
-    def checkGaussFieldName(self, gfName):
+    def checkGaussFieldName(self, gfName: str) -> bool:
         text = gfName.strip()
         if len(self.__gaussFieldNames) > 0:
             if text in self.__gaussFieldNames:
@@ -272,7 +283,7 @@ class APSGaussFieldJobs:
                 break
         return
 
-    def XMLAddElement(self, root):
+    def XMLAddElement(self, root: Element) -> None:
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('Debug output: call XMLADDElement from ' + self.__className)
 
