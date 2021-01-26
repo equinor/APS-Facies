@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 from typing import Optional, List
 from warnings import warn
 from src.utils.constants.simple import Debug
@@ -35,32 +36,33 @@ def must_run_in_rms(func):
 
 
 @must_run_in_rms
-def get_nrlib_path(debug_level=Debug.VERBOSE):
-    import platform
+def get_nrlib_path(debug_level=Debug.VERBOSE) -> Path:
 
-
-    description = platform.platform()
-    if ( 'el7' in description ) or ( 'el6' in description ):
+    redhat_version = get_redhat_version()
+    if redhat_version is not None:
         # Assuming we are on RGS
         redhat_version = get_redhat_version()
-        rms_version_major = get_rms_version().major
-        rms_version_minor = get_rms_version().minor
-        if rms_version_major == '11':
-            rms_version = rms_version_major
-        elif rms_version_major == '12':
-            if rms_version_minor == '1':
-                rms_version = rms_version_major + '.' + rms_version_minor  
-            else:
-                rms_version = rms_version_major
-        else:
-            ValueError(f'nrlib is not installed for APS plugin in RMS version: {rms_version_major}.{rms_version_minor}')
+        rms_version = get_rms_version()
+
+        found = False
+        nrlib_path = Path('/project/res/nrlib')
+        major, minor, patch = rms_version.as_tuple()
+        for version in [f'{major}.{minor}.{patch}', f'{major}.{minor}', f'{major}']:
+            folder = f'nrlib-dist-RHEL{redhat_version}-RMS{version}'
+            if (nrlib_path / folder).exists():
+                found = True
+                nrlib_path = nrlib_path / folder
+
+        if not found:
+            ValueError(f'nrlib is not installed for APS plugin in RMS version: {rms_version}')
 
         if debug_level >= Debug.VERBOSE:
             print(f'-- RMS version: {rms_version}')
-            print(f'-- Using nrlib path:\n'
-                  f'   /project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
-              )
-        return f'/project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
+            print(
+                f'-- Using nrlib path:\n'
+                f'   {nrlib_path}'
+            )
+        return nrlib_path.absolute()
 
 
 class Version:
@@ -86,14 +88,15 @@ def get_rms_version() -> Optional[Version]:
     return Version(rms_version)
 
 
-def get_redhat_version():
+def get_redhat_version() -> Optional[int]:
     import platform
 
     description = platform.platform()
     if 'el7' in description:
-        return '7'
+        return 7
     elif 'el6' in description:
-        return '6'
+        return 6
+    return None
 
 
 @must_run_in_rms
