@@ -25,6 +25,7 @@ from src.utils.constants.simple import (
     OriginType,
     ProbabilityTolerances,
     GridModelConstants,
+    CrossSectionType,
 )
 from src.utils.debug import parse_dot_master
 from src.utils.exceptions.xml import ApsXmlError
@@ -455,7 +456,7 @@ class RMSData:
             trend = {}
         if settings is None:
             settings = GaussianFieldSimulationSettings(
-                cross_section=CrossSection('IJ', 0.5),
+                cross_section=CrossSection(CrossSectionType.IJ, 0.5),
                 grid_azimuth=0,
                 grid_size=(100, 100, 1),
                 simulation_box_size=(100, 100, 1),

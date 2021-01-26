@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 from typing import Optional, List
 from warnings import warn
+from src.utils.constants.simple import Debug
+from src.utils.version import Version
 
 
 def running_in_batch_mode():
@@ -34,26 +37,33 @@ def must_run_in_rms(func):
 
 
 @must_run_in_rms
-def get_nrlib_path():
-    import platform
+def get_nrlib_path(debug_level=Debug.VERBOSE) -> Path:
 
-    description = platform.platform()
-    if 'redhat' in description:
+    redhat_version = get_redhat_version()
+    if redhat_version is not None:
         # Assuming we are on RGS
         redhat_version = get_redhat_version()
-        rms_version = get_rms_version().major
-        return f'/project/res/nrlib/nrlib-dist-RHEL{redhat_version}-RMS{rms_version}'
+        rms_version = get_rms_version()
 
+        found = False
+        nrlib_path = Path('/project/res/nrlib')
+        major, minor, patch = rms_version.as_tuple()
+        for version in [f'{major}.{minor}.{patch}', f'{major}.{minor}', f'{major}']:
+            folder = f'nrlib-dist-RHEL{redhat_version}-RMS{version}'
+            if (nrlib_path / folder).exists():
+                found = True
+                nrlib_path = nrlib_path / folder
 
-class Version:
-    def __init__(self, version: List[str]):
-        major, minor, patch = version
-        self.major = major
-        self.minor = minor
-        self.patch = patch
+        if not found:
+            ValueError(f'nrlib is not installed for APS plugin in RMS version: {rms_version}')
 
-    def __str__(self):
-        return f"{self.major}.{self.minor}.{self.patch}"
+        if debug_level >= Debug.VERBOSE:
+            print(f'-- RMS version: {rms_version}')
+            print(
+                f'-- Using nrlib path:\n'
+                f'   {nrlib_path}'
+            )
+        return nrlib_path.absolute()
 
 
 def get_rms_version() -> Optional[Version]:
@@ -62,18 +72,18 @@ def get_rms_version() -> Optional[Version]:
     except ImportError:
         return None
 
-    rms_version = roxar.rms.get_version().split('.')
-    while len(rms_version) < 3:
-        rms_version.append('0')
-    return Version(rms_version)
+    return Version(roxar.rms.get_version())
 
 
-def get_redhat_version():
-    import re
+def get_redhat_version() -> Optional[int]:
     import platform
 
     description = platform.platform()
-    return re.match(r'.*redhat-(?P<major>[0-9]+).*', description).groupdict()['major']
+    if 'el7' in description:
+        return 7
+    elif 'el6' in description:
+        return 6
+    return None
 
 
 @must_run_in_rms
@@ -132,16 +142,15 @@ def import_module(name: str, dependencies: Optional[List[str]] = None, min_versi
         raise ModuleNotFoundError(f"No module named '{name}'")
 
     if min_version is not None:
-        from packaging.version import parse
         module = sys.modules[name]
         try:
             module_version = module.__version__
-            if parse(module_version) < parse(min_version):
+            if Version(module_version) < Version(min_version):
                 raise ImportError(
                     f"APS requires version {min_version}, or higher of '{name}', but {module_version} was installed."
                 )
         except AttributeError:
             warn(
-                f"APS requires {min_version}, or higher of '{name}', but not version information could be gathered.\n"
+                f"APS requires {min_version}, or higher of '{name}', but no version information could be gathered.\n"
                 f"This may be OK, but if you encounter errors related to '{name}', consider updating it."
             )

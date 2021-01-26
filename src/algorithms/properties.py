@@ -166,8 +166,9 @@ class CrossSection:
     def __init__(self, type, relative_position):
         self._type = None
         self._relative_position = None
-
-        self.type = type
+        if type not in CrossSectionType:
+            raise ValueError(f'Invalid cross section: {type}')
+        self._type = type
         self.relative_position = relative_position
 
     @property
@@ -176,8 +177,8 @@ class CrossSection:
 
     @type.setter
     def type(self, value):
-        if value not in CrossSectionType:
-            value = CrossSectionType[value]
+        if not (value == CrossSectionType.IJ or value == CrossSectionType.IK or value == CrossSectionType.JK):
+            raise ValueError(f'Invalid CrossSectionType ({type}')
         self._type = value
 
     @property
@@ -194,7 +195,12 @@ class CrossSection:
 
     @classmethod
     def from_dict(cls, **kwargs):
+        type_ = kwargs['type']
+        if isinstance(type_, str):
+            type_ = CrossSectionType[type_]
+        elif not (isinstance(type_, CrossSectionType)):
+            ValueError(f'Unknown cross section type {type_}')
         return cls(
-            type=kwargs['type'],
+            type=type_,
             relative_position=kwargs.get('relativePosition', 0.5)
         )

@@ -23,8 +23,9 @@ def __bootstrap__():
     except KeyError:
         pass
 
-    spec = importlib.util.spec_from_file_location(name, path + '/nrlib.so')
+    spec = importlib.util.spec_from_file_location(name, path / 'nrlib.so')
     sys.modules[name] = importlib.util.module_from_spec(spec)
 
 
 __bootstrap__()
+del __bootstrap__
