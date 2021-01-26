@@ -28,3 +28,4 @@ def __bootstrap__():
 
 
 __bootstrap__()
+del __bootstrap__
