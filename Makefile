@@ -11,6 +11,9 @@ SHELL := /bin/bash
 OS ?= $(shell uname -s)
 EMPTY :=
 
+ifneq ("$(wildcard /.dockerenv)","")
+MATPLOTLIB_BACKEND ?= Agg
+endif
 ifeq ($(OS),Linux)
 NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
@@ -23,9 +26,6 @@ SED := gsed
 MATPLOTLIB_BACKEND ?= Agg
 endif
 
-ifneq ("$(wildcard /.dockerenv)","")
-MATPLOTLIB_BACKEND ?= Agg
-endif
 TAR_EXCRACT := $(TAR) -xf
 # Mode may be 'production', or 'development'
 MODE ?= production
