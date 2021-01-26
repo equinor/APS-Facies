@@ -8,7 +8,7 @@ This is done, so that there is only need for ONE plugin for different versions o
 
 def __bootstrap__():
     from src.utils.roxar import import_module
-    import_module('xtgeo', dependencies=['shapely', 'segyio', 'packaging'], min_version='2.5.0')
+    import_module('xtgeo', dependencies=['shapely', 'segyio'], min_version='2.5.0')
 
 
 __bootstrap__()

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, List
 from warnings import warn
 from src.utils.constants.simple import Debug
+from src.utils.version import Version
 
 
 def running_in_batch_mode():
@@ -65,27 +66,13 @@ def get_nrlib_path(debug_level=Debug.VERBOSE) -> Path:
         return nrlib_path.absolute()
 
 
-class Version:
-    def __init__(self, version: List[str]):
-        major, minor, patch = version
-        self.major = major
-        self.minor = minor
-        self.patch = patch
-
-    def __str__(self):
-        return f"{self.major}.{self.minor}.{self.patch}"
-
-
 def get_rms_version() -> Optional[Version]:
     try:
         import roxar.rms
     except ImportError:
         return None
 
-    rms_version = roxar.rms.get_version().split('.')
-    while len(rms_version) < 3:
-        rms_version.append('0')
-    return Version(rms_version)
+    return Version(roxar.rms.get_version())
 
 
 def get_redhat_version() -> Optional[int]:
@@ -155,16 +142,15 @@ def import_module(name: str, dependencies: Optional[List[str]] = None, min_versi
         raise ModuleNotFoundError(f"No module named '{name}'")
 
     if min_version is not None:
-        from packaging.version import parse
         module = sys.modules[name]
         try:
             module_version = module.__version__
-            if parse(module_version) < parse(min_version):
+            if Version(module_version) < Version(min_version):
                 raise ImportError(
                     f"APS requires version {min_version}, or higher of '{name}', but {module_version} was installed."
                 )
         except AttributeError:
             warn(
-                f"APS requires {min_version}, or higher of '{name}', but not version information could be gathered.\n"
+                f"APS requires {min_version}, or higher of '{name}', but no version information could be gathered.\n"
                 f"This may be OK, but if you encounter errors related to '{name}', consider updating it."
             )
