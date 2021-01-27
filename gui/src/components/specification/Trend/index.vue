@@ -1,6 +1,6 @@
 <template>
   <v-col cols="12">
-    Trend
+    <h4>Trend</h4>
     <v-row>
       <v-col cols="6">
         <v-checkbox
