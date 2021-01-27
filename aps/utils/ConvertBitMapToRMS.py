@@ -71,11 +71,8 @@ import copy
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
-from matplotlib.colors import LinearSegmentedColormap
 
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_colors
@@ -476,6 +473,9 @@ class ConvertBitMapToRMS:
             n += 1
 
     def testPlot(self):
+        import matplotlib.colors
+        import matplotlib.pyplot as plt
+
         nFacies = self.nFacies
         if nFacies == 0:
             return
