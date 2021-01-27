@@ -7,7 +7,7 @@
     :class="__class"
   >
     <v-col
-      :cols="fmuUpdatable ? 10 : 12"
+      :cols="12 - (isFmuUpdatable ? (checkboxSize + 1) : 0)"
       :class="__class"
     >
       <v-text-field
@@ -235,12 +235,16 @@ export default class NumericField extends Vue {
     return errors
   }
 
+  get checkboxSize (): number {
+    // FIXME: Hack to adjust the checkboxes for Origin coordinates
+    return (['X', 'Y', 'Z'].indexOf(this.label) !== -1)
+      ? 2
+      : 1
+  }
+
   get binding (): { [_: string]: string } {
     const binding: { [_: string]: string } = {}
-    // FIXME: Hack to adjust the checkboxes for Origin coordinates
-    binding.cols = (['X', 'Y', 'Z'].indexOf(this.label) !== -1)
-      ? '2'
-      : '1'
+    binding.cols = this.checkboxSize.toString(10)
     return binding
   }
 

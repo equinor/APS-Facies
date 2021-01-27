@@ -1,5 +1,6 @@
 <template>
   <v-container
+    class="fill-height"
     fluid
   >
     <v-row
@@ -25,7 +26,6 @@
     </v-row>
     <v-row
       v-else
-      no-gutters
     >
       <v-col cols="4">
         <scrollable-area>

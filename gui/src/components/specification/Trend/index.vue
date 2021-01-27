@@ -24,6 +24,7 @@
         class="fill-height"
         align="center"
         justify="center"
+        no-gutters
       >
         <v-col cols="6">
           <item-selection

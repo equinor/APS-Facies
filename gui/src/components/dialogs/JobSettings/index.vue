@@ -114,8 +114,10 @@
                       <v-col
                         align-self="space-between"
                       >
-                        {{ item.text }}
                         <v-row>
+                          <v-col cols="12">
+                            {{ item.text }}
+                          </v-col>
                           <v-col
                             v-for="color in item.value.colors"
                             :key="color"
