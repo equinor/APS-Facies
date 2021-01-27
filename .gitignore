@@ -227,8 +227,8 @@ bower_components
 build/Release
 
 # Dependency directories
-src/gui/node_modules/
-src/gui/jspm_packages/
+node_modules/
+jspm_packages/
 
 # Typescript v1 declaration files
 typings/
@@ -326,8 +326,8 @@ __pycache__/
 *$py.class
 
 # Additional compiled libraries, not maintained within Statoil / this project
-libraries/source
-libraries/xtgeo*
+aps/libraries/source
+aps/libraries/xtgeo*
 
 # C extensions
 
@@ -427,7 +427,7 @@ venv.bak/
 # mkdocs documentation
 /site
 
-libraries/sources/
+aps/libraries/sources/
 auxillary/
 # Misc
 *.tar.*
@@ -445,16 +445,15 @@ Thumbs.db
 *.py~
 state.db
 *cache/
-libraries/nrlib
 .tool-versions
 *.plugin
 *.plugin.gpg
 DEPLOY_VERSION.txt
 
 !examples/*
-!src/gui/build/*
+!gui/build/*
 !info.xml
-!src/gui/build/
+!gui/build/
 workflow/
 aps_gui/
 .rms/
@@ -462,35 +461,35 @@ prog/
 *state.json
 *.zip
 *.bak
-src/api/VERSION
-src/api/COMMIT
+aps/api/VERSION
+aps/api/COMMIT
 
 # Unit testing
-src/unit_test/fmu_attributes.txt
-src/unit_test/fmu_attributes.yaml
-src/unit_test/Created_truncation_maps_cubic.png
-src/unit_test/Created_truncation_maps_cubic_overlay.png
-src/unit_test/Overview_truncation_maps.png
-!src/unit_test/testData_models/*.xml
-!src/unit_test/testData_*/*.dat
-!src/unit_test/testData_updateAPSModel/APS*.xml
-src/unit_test/matplotlibrc
-src/unit_test/integration/matplotlibrc
-src/unit_test/testData_trunc_settings/trunc_rules_out.dat
+aps/unit_test/fmu_attributes.txt
+aps/unit_test/fmu_attributes.yaml
+aps/unit_test/Created_truncation_maps_cubic.png
+aps/unit_test/Created_truncation_maps_cubic_overlay.png
+aps/unit_test/Overview_truncation_maps.png
+!aps/unit_test/testData_models/*.xml
+!aps/unit_test/testData_*/*.dat
+!aps/unit_test/testData_updateAPSModel/APS*.xml
+aps/unit_test/matplotlibrc
+aps/unit_test/integration/matplotlibrc
+aps/unit_test/testData_trunc_settings/trunc_rules_out.dat
 
 # Symbolic links
 bin/APS_make_gauss_IPL.py
 bin/APS_simulate_gauss_multiprocessing.py
 bin/APS_simulate_gauss_singleprocessing.py
 bin/bitmap2rms_xml.py
-src/algorithms/APSGaussFieldJobs.py
-src/utils/APSupdateVarioAsimuth.py
-src/utils/roxar/getRMSProjectData.py
+aps/algorithms/APSGaussFieldJobs.py
+aps/utils/APSupdateVarioAsimuth.py
+aps/utils/roxar/getRMSProjectData.py
 examples/DefineTruncStructure.py
 workflow/Cleanup_tmpdir.ipl
 workflow/APS_simulate_gauss_multiprocessing.ipl
-src/unit_test/integration/examples
-src/gui/public/CHANGELOG.md
+aps/unit_test/integration/examples
+gui/public/CHANGELOG.md
 
 # Data stores
 monkeytype.sqlite3
@@ -500,10 +499,10 @@ doc/~$*.docx
 
 truncation-rules
 aps_workflows
-src/gui/public/truncation-rules
-src/gui/src/store/templates/truncationRules.json
+gui/public/truncation-rules
+gui/src/store/templates/truncationRules.json
 
 # Track build number
-src/utils/track-build-number
+aps/utils/track-build-number
 local.settings.json
 /integration_test/

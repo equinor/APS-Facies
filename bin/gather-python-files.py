@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Usage ./gather-python-files.py CODE_DIR APS_DIR
-# Finds all Python files in CODE_DIR/src and adds them to APS_DIR/src with the same hierarchy
+# Finds all Python files in CODE_DIR/aps and adds them to APS_DIR/aps with the same hierarchy
 
 import re
 from os import walk, makedirs
@@ -47,7 +47,7 @@ def copy_files(files, source_dir, target_dir):
 def run():
     assert len(argv) == 3
     code_dir = Path(argv[1]).absolute()
-    source_dir = str(code_dir / 'src')
+    source_dir = str(code_dir / 'aps')
     target_dir = Path(argv[2]).absolute()
 
     files = gather_files(source_dir, file_ending='py')

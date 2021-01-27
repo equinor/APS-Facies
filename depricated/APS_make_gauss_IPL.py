@@ -3,8 +3,8 @@
 # Python 3 script to make IPL script for simulation of Gauss fields.
 from warnings import warn
 
-from src.algorithms.APSModel import APSModel
-from src.utils.methods import get_specification_file
+from aps.algorithms.APSModel import APSModel
+from aps.utils.methods import get_specification_file
 
 
 def run(roxar=None, project=None, **kwargs):

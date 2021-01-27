@@ -1,4 +1,4 @@
-from src.algorithms.defineTruncationRule import DefineTruncationRule
+from aps.algorithms.defineTruncationRule import DefineTruncationRule
 
 rules = DefineTruncationRule(show_title=True)
 

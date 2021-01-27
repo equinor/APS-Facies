@@ -44,7 +44,7 @@ else
 fi
 
 
-python src/rms_jobs/APS_simulate_gauss_multiprocessing.py
+python aps/rms_jobs/APS_simulate_gauss_multiprocessing.py
 
 
 echo 'Finished running Gauss field simulations'

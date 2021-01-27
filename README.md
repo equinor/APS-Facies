@@ -12,13 +12,13 @@ make init
 ```bash
 make run-rms.uipy-mock
 ```
-or, from `src/gui`
+or, from `gui`
 ```bash
 yarn serve:api
 ```
 
 ##### Web
-From `src/gui`
+From `gui`
 ```bash
 yarn serve:gui
 ```

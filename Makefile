@@ -32,7 +32,7 @@ MODE ?= production
 CODE_DIR ?= $(shell pwd)
 BIN_DIR := $(CODE_DIR)/bin
 PYTHONPATH := $(CODE_DIR):$(PYTHONPATH)
-SOURCE_DIR := $(CODE_DIR)/src
+SOURCE_DIR := $(CODE_DIR)/aps
 BUILD_DIR := $(CODE_DIR)/build
 PYTHON_API_DIR := $(SOURCE_DIR)/api
 REMOVE_APS_GUI_TEMP_FOLDER := $(EMPTY)
@@ -90,7 +90,7 @@ PLUGIN_NAME := aps_gui
 PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
 PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
 DEPLOY_VERSION_PATH := $(CODE_DIR)/DEPLOY_VERSION.txt
-WEB_DIR := $(SOURCE_DIR)/gui
+WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 LIB_PREFIX := $(CODE_DIR)/libraries
 LIB_SOURCE := $(LIB_PREFIX)/sources
@@ -129,7 +129,6 @@ MAIN.PY := $(PYTHON_API_DIR)/main.py
 INFO.XML := $(WEB_DIR)/static/info.xml
 
 MKDIR := mkdir -p
-REPLACE_SRC_BY_PYTHON_LOCATION := $(SED) -i -E 's/^( *from )src/\1aps/g'
 
 DEPLOYMENT_USER := cicd_aps
 DEPLOYMENT_PATH := /project/res/APSGUI/releases
@@ -223,8 +222,8 @@ compile-files-for-plugin: gather-python-scripts auxillary-files compile-python-f
 gather-python-scripts: copy-python-files __init__.py
 	cp $(UI.PY) $(PLUGIN_DIR)
 	cp $(MAIN.PY) $(PLUGIN_DIR)
-	rm -rf $(PLUGIN_DIR)/src/unit_test \
-	       $(PLUGIN_DIR)/src/api
+	rm -rf $(PLUGIN_DIR)/aps/unit_test \
+	       $(PLUGIN_DIR)/aps/api
 
 __init__.py:
 	touch $(PLUGIN_DIR)/__init__.py
@@ -235,22 +234,17 @@ increase-build-number:
 	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
 
 compile-pydist: move-pydist move-python-files-to-pydist
-	$(REPLACE_SRC_BY_PYTHON_LOCATION) $(shell find $(PLUGIN_DIR) -name '*.py')
 
 move-python-files-to-pydist:
-	mv $(PLUGIN_DIR)/src $(PLUGIN_DIR)/pydist/aps
+	mv $(PLUGIN_DIR)/aps $(PLUGIN_DIR)/pydist/aps
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
 
 move-pydist:
-	mv $(PLUGIN_DIR)/src/pydist $(PLUGIN_DIR)
+	mv $(PLUGIN_DIR)/aps/pydist $(PLUGIN_DIR)
 
-remove-extraneous-files: remove-node_modules-stubs
-
-remove-node_modules-stubs:
-	rm -rf $(PLUGIN_DIR)/pydist/aps/gui/node_modules
-	rmdir $(PLUGIN_DIR)/pydist/aps/gui
+remove-extraneous-files:
 
 clean-build: clean-plugin clean-links clean-build-dir
 
@@ -340,8 +334,8 @@ links: clean-links create-workflow-dir matplotlibrc-links changelog-link
 	ln -sf $(CODE_DIR)/depricated/to_be_deleted/Cleanup_tmpdir.ipl $(CODE_DIR)/workflow
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_multiprocessing.py $(BIN_DIR)
 	ln -sf $(CODE_DIR)/workflow/APS_simulate_gauss_singleprocessing.py $(BIN_DIR)
-	ln -sf $(CODE_DIR)/src/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
-	ln -sf $(CODE_DIR)/src/rms_jobs/bitmap2rms.py $(BIN_DIR)/bitmap2rms_xml.py
+	ln -sf $(CODE_DIR)/aps/utils/ConvertBitMapToRMS.py $(CODE_DIR)/workflow
+	ln -sf $(CODE_DIR)/aps/rms_jobs/bitmap2rms.py $(BIN_DIR)/bitmap2rms_xml.py
 	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
 
 changelog-link:
@@ -581,7 +575,7 @@ package.json:
 
 run-api-gunicorn:
 	gunicorn --workers 8 \
-	         --chdir $(CODE_DIR)/src/api \
+	         --chdir $(CODE_DIR)/aps/api \
 	         --bind $(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT) \
 	         --timeout 1200 \
 	         --graceful-timeout 1200 \

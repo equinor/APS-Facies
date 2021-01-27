@@ -5,8 +5,8 @@ from typing import Optional, List
 from warnings import warn
 from xml.etree.ElementTree import Element, ElementTree
 
-from src.utils.constants.simple import Debug
-from src.utils.xmlUtils import getIntCommand, getKeyword
+from aps.utils.constants.simple import Debug
+from aps.utils.xmlUtils import getIntCommand, getKeyword
 
 
 class APSGaussFieldJobs:
