@@ -12,7 +12,6 @@
       {{ value }}
     </v-col>
     <v-col
-      class="ma-0"
       cols="12"
     >
       <v-row

@@ -10,7 +10,7 @@
     </v-col>
     <v-col cols="1" />
     <v-col cols="5">
-      <span>Variogram selection</span>
+      <h4>Variogram selection</h4>
       <item-selection
         v-model="variogramType"
         :items="availableVariograms"
@@ -42,7 +42,7 @@
       align-self="start"
       cols="6"
     >
-      <span>Anisotropy direction</span>
+      <h4>Anisotropy direction</h4>
       <anisotropy-direction
         :value="value"
         @update:error="e => update('anisotropyDirection', e)"
@@ -55,7 +55,7 @@
     </v-col>
     <v-col cols="1" />
     <v-col cols="5">
-      Ranges
+      <h4>Ranges</h4>
       <range-specification
         :value="value"
         @update:error="e => update('range', e)"
@@ -182,7 +182,7 @@ export default class GaussianRandomField extends Vue {
   }
 
   async openVisualizationSettings (): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     const { save, settings } = await (this.$refs.visualisationSettings as VisualizationSettingsDialog).open(cloneDeep(this.value.settings))

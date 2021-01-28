@@ -9,16 +9,17 @@ enum SlantFactorFacies {
   BayheadDelta = 'Bayhead Delta',
 }
 
-export interface BayfillPolygonArgs extends PolygonArgs {
-  name: BayfillFacies | string
-  slantFactor: FmuUpdatable | number | null
-}
-
 const enum NonSlantFactorFacies {
   WaveInfluencedBayfill = 'Wave influenced Bayfill',
   Lagoon = 'Lagoon',
 }
+
 type BayfillFacies = SlantFactorFacies | NonSlantFactorFacies
+
+export interface BayfillPolygonArgs extends PolygonArgs {
+  name: BayfillFacies | string
+  slantFactor: FmuUpdatable | number | null
+}
 
 export interface BayfillPolygonSpecification extends PolygonSpecification {
   name: string
@@ -38,7 +39,7 @@ export default class BayfillPolygon extends Polygon {
   public constructor ({ name, slantFactor = null, ...rest }: BayfillPolygonArgs) {
     super(rest)
     this.name = name
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (Object.values(SlantFactorFacies).includes(name)) {
       if (slantFactor) {
@@ -54,7 +55,7 @@ export default class BayfillPolygon extends Polygon {
   }
 
   public get specification (): BayfillPolygonSpecification {
-    const _mapping: {[_: string]: string} = {
+    const _mapping: Record<string, string> = {
       'Bayhead Delta': 'SBHD',
       Floodplain: 'SF',
       Subbay: 'YSF',

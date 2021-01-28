@@ -14,7 +14,6 @@ import { ParentReference } from '@/utils/domain/bases/interfaces'
 import { RootState } from '@/store/typing'
 import CopyPasteState from '@/store/modules/copyPaste/typing'
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 type IDMapping = Map<ID, ID>
 
 function getParent (item: Zone | Region): ParentReference {
@@ -93,7 +92,7 @@ const module: Module<CopyPasteState, RootState> = {
         await removeOld({ dispatch }, elements.concat().reverse(), parent)
         const serialization = giveNewIds(elements, source, parent)
         for (const [key, items] of Object.entries(JSON.parse(serialization))) {
-          await Promise.all((items as object[])
+          await Promise.all((items as Record<string, unknown>[])
             .map((item): Promise<void> => dispatch(`${key}/add`, item, { root: true }))
           )
         }

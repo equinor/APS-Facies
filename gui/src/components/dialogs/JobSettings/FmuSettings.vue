@@ -98,12 +98,12 @@
     </div>
     <v-row no-gutters>
       <v-checkbox
-       v-model="_exportFmuConfigFiles"
-       v-tooltip="'When running this job from RMS workflow, APS model file and FMU config files are exported automatically.'"
-       label="Export model file and FMU config files for current job."
-       :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
+        v-model="_exportFmuConfigFiles"
+        v-tooltip="'When running this job from RMS workflow, APS model file and FMU config files are exported automatically.'"
+        label="Export model file and FMU config files for current job."
+        :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
       />
-    </v-row>  
+    </v-row>
   </settings-panel>
 </template>
 
@@ -195,10 +195,10 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true, type: Boolean })
   readonly exportFmuConfigFiles: boolean
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   set _fmuGrid (value: string | { value: string }) {
     if (typeof (value) !== 'string') {

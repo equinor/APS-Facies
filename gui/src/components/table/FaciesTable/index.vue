@@ -84,7 +84,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import VSwatches from 'vue-swatches'
 import OptionalHelpItem from '@/components/table/OptionalHelpItem.vue'
@@ -147,12 +147,14 @@ export default class FaciesTable extends Vue {
         text: 'Facies',
         value: 'name',
       },
-      ...(this.hideAlias ? [] : [
-        {
-          text: 'Alias',
-          value: 'alias'
-        },
-      ]),
+      ...(this.hideAlias
+        ? []
+        : [
+          {
+            text: 'Alias',
+            value: 'alias'
+          },
+        ]),
       {
         text: 'Code',
         sortable: true,
@@ -210,7 +212,9 @@ export default class FaciesTable extends Vue {
       (code: string): string => this.facies
         .filter(({ id }) => facies.id !== id)
         .map(({ code }) => code.toString(10))
-        .includes(code) ? 'Code is used by a different Facies' : '',
+        .includes(code)
+        ? 'Code is used by a different Facies'
+        : '',
     ]
   }
 

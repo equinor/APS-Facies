@@ -111,14 +111,14 @@ function hasPanel (type: string, panel: string | undefined = undefined): boolean
   }
 }
 
+type Section = 'selection' | 'preview' | 'settings'
+
 function getIndices (state: PanelsState, type: Section): number[] {
   return PANELS[type]
     .map((panel, index): [boolean, number] => [state[`${type}`][`${panel}`], index])
     .filter(([toggled, _]): boolean => toggled || isNumber(toggled))
     .map(([_, index]): number => index)
 }
-
-type Section = 'selection' | 'preview' | 'settings'
 
 interface Specification<T=string> {
   type: Section

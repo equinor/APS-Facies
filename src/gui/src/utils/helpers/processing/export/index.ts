@@ -90,7 +90,7 @@ function addZoneParamName ({ rootState }: Context, doc: Document, parentElement:
    * Default er Zone som navn på soneparameteren i jobben i RMS som heter 'Create Grid Index Parameters ' og
    * som kan brukes til å lage soneparameter m.m
    *
-   * Den jobben jeg laga ligger under grid_model.py under aps/utils/roxar og heter createZoneParameter.
+   * Den jobben jeg laga ligger under grid_model.py under src/utils/roxar og heter createZoneParameter.
    * Den har pr i dag ikke blitt brukt til noe og jeg må endre default navnet til Zone for den RMS parameteren den lager.
    */
   const value = rootState.parameters.zone.selected || 'Zone'
@@ -127,7 +127,7 @@ function addTransformTypeGRF ({ rootState }: Context, doc: Document, parentEleme
   parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
 }
 
-function addSeedFile ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
+function addSeedFile (context: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'DummyValue: What goes here??? Seed.dat is said to be default value?'
   if (value) {
     // hard coded to seed.dat
@@ -135,7 +135,7 @@ function addSeedFile ({ rootState }: Context, doc: Document, parentElement: HTML
   }
 }
 
-function addWriteSeeds ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
+function addWriteSeeds (context: Context, doc: Document, parentElement: HTMLElement): void {
   const value = 'No'
   if (value) {
     parentElement.appendChild(createElement(doc, 'WriteSeeds', value))

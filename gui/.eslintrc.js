@@ -40,6 +40,11 @@ module.exports = {
 
   // add your custom rules here
   rules: {
+    // There is [an issue](https://github.com/vuejs/eslint-plugin-vue/issues/1000), that causes the @Component
+    // to complain that the _keys_ on an object is not defined.
+    // Once resolved, no-undef can be turned on again.
+    'no-undef': 'off',
+    indent: 'off',
     'operator-linebreak': ['error', 'before'],
     '@typescript-eslint/indent': ['error', 2],
     // allow paren-less arrow functions
@@ -60,6 +65,19 @@ module.exports = {
     // To be added when the documentation for v-col / v-row has been improved (made available)
     'vuetify/grid-unknown-attributes': 'error',
     'vuetify/no-legacy-grid': 'error',
+    '@typescript-eslint/naming-convention': [
+      'error',
+      {
+        selector: 'variableLike',
+        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+        leadingUnderscore: 'allow',
+      },
+      {
+        selector: 'memberLike',
+        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+        leadingUnderscore: 'allow',
+      }
+    ],
   },
   overrides: [
     {
@@ -90,7 +108,7 @@ module.exports = {
   parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
-    ecmaVersion: 2019,
+    ecmaVersion: 2020,
     sourceType: 'module',
     ecmaFeatures: { // See https://github.com/babel/babel-eslint/issues/662
       legacyDecorators: true,

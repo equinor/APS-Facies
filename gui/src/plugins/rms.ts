@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import store from '@/store'
 
 import { dumpState } from '@/utils/helpers/processing/export'

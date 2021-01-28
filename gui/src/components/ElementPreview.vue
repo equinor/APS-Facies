@@ -1,6 +1,5 @@
 <template>
   <v-container
-    class="align justify"
     fluid
   >
     <v-row
@@ -12,67 +11,69 @@
         :value="rule"
       />
     </v-row>
-    <v-expansion-panels
-      v-model="expanded"
-      accordion
-      multiple
-    >
-      <v-expansion-panel
-        v-tooltip.bottom="truncationRuleError"
-        :disabled="!hasTruncationRule"
+    <v-row>
+      <v-expansion-panels
+        v-model="expanded"
+        accordion
+        multiple
       >
-        <v-expansion-panel-header>
-          <h3>Truncation rule</h3>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <v-col
-            class="justify-center align-center"
-          >
-            <truncation-map
-              v-if="!!rule"
+        <v-expansion-panel
+          v-tooltip.bottom="truncationRuleError"
+          :disabled="!hasTruncationRule"
+        >
+          <v-expansion-panel-header>
+            <h3>Truncation rule</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-col
+              class="justify-center align-center"
+            >
+              <truncation-map
+                v-if="!!rule"
+                :value="rule"
+              />
+            </v-col>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel
+          v-tooltip.bottom="realizationError"
+          :disabled="!hasRealization"
+        >
+          <v-expansion-panel-header>
+            <h3>Realization</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <facies-realization
+              v-if="rule"
               :value="rule"
             />
-          </v-col>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel
-        v-tooltip.bottom="realizationError"
-        :disabled="!hasRealization"
-      >
-        <v-expansion-panel-header>
-          <h3>Realization</h3>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <facies-realization
-            v-if="rule"
-            :value="rule"
-          />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <v-expansion-panel-header>
-          <h3>Transformed Gaussian Random Fields</h3>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <gaussian-plots
-            :value="fields"
-          />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-      <v-expansion-panel
-        v-tooltip.bottom="crossPlotErrors"
-        :disabled="!hasEnoughFieldsForCrossPlot"
-      >
-        <v-expansion-panel-header>
-          <h3>Cross plots</h3>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <cross-plots
-            :value="fields"
-          />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            <h3>Transformed Gaussian Random Fields</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <gaussian-plots
+              :value="fields"
+            />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+        <v-expansion-panel
+          v-tooltip.bottom="crossPlotErrors"
+          :disabled="!hasEnoughFieldsForCrossPlot"
+        >
+          <v-expansion-panel-header>
+            <h3>Cross plots</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <cross-plots
+              :value="fields"
+            />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-row>
   </v-container>
 </template>
 

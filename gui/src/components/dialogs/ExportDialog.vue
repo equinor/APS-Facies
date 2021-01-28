@@ -13,7 +13,7 @@
         <v-row>
           <v-col>
             <span class="headline">
-              {{ `Export the APS model${fmuMode ? ', and FMU settings': ''}` }}
+              {{ `Export the APS model${ fmuMode ? ', and FMU settings' : '' }` }}
             </span>
           </v-col>
           <v-col cols="1">

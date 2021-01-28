@@ -36,7 +36,7 @@ function updateFaciesProbability (dispatch: Dispatch, facies: Facies, probabilit
 const module: Module<FaciesState, RootState> = {
   namespaced: true,
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   state: {
     available: {},
@@ -60,7 +60,7 @@ const module: Module<FaciesState, RootState> = {
       commit('ADD', { facies: localFacies })
       return localFacies
     },
-    remove: ({ commit }, facies): void => {
+    remove: ({ commit }, facies: Facies): void => {
       commit('REMOVE', { facies })
     },
     select: async ({ commit, dispatch, state }, { items, parent }: { items: Identifiable[], parent: Parent }): Promise<void> => {
@@ -241,7 +241,7 @@ const module: Module<FaciesState, RootState> = {
 
   getters: {
     name: (state, getters): (id: ID | Identifiable) => string | string[] => (id: ID | Identifiable): string | string[] => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       id = isUUID(id) ? id : id.id
       const facies: Facies | Facies[] = getters.byId(id)

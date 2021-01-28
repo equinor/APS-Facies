@@ -51,7 +51,7 @@ export default class GaussianPlot extends Vue {
       type: 'heatmap',
       hoverinfo: 'none',
       colorscale: this.colorMapping,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore -> Type annotations are incorrect
       showscale: this.showScale,
     }]

@@ -32,7 +32,7 @@ export const ranged: Module<MinMaxState, RootState> = {
   },
 }
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
   modules: {

@@ -7,8 +7,7 @@
       justify="center"
     >
       <v-col
-        md="11"
-        lg="3"
+        :class="coordinateClass"
       >
         <origin-x
           :value="value"
@@ -17,10 +16,8 @@
           @update:error="e => update('x', e)"
         />
       </v-col>
-      <v-col cols="1" />
       <v-col
-        md="11"
-        lg="3"
+        :class="coordinateClass"
       >
         <origin-y
           :value="value"
@@ -29,11 +26,9 @@
           @update:error="e => update('y', e)"
         />
       </v-col>
-      <v-col cols="1" />
       <v-col
         v-if="!isEllipticCone"
-        md="11"
-        lg="3"
+        :class="coordinateClass"
       >
         <origin-z
           :value="value"
@@ -88,6 +83,10 @@ export default class OriginSpecification extends Vue {
 
   get originType (): OriginType { return this.trend.origin.type }
   set originType (value) { this.$store.dispatch('gaussianRandomFields/originType', { field: this.value, value }) }
+
+  get coordinateClass (): string {
+    return 'pa-1 pt-2'
+  }
 
   @Watch('invalid', { deep: true })
   propagateError ({ x, y, z }: Invalid): void {

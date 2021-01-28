@@ -115,7 +115,7 @@ export default class GaussianRandomField extends Simulation implements Named {
     return this.variogram.isFmuUpdatable || (this.trend.use && this.trend.isFmuUpdatable)
   }
 
-  public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => object } } = {}): GaussianRandomFieldSpecification {
+  public specification ({ rootGetters }: { rootGetters?: { simulationSettings: () => Record<string, unknown> } } = {}): GaussianRandomFieldSpecification {
     return {
       name: this.name,
       variogram: this.variogram,

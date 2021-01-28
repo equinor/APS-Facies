@@ -2,7 +2,7 @@ import { RootState } from '@/store/typing'
 import { createModel } from '@/utils/helpers/processing/export'
 import { Module } from 'vuex'
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
   actions: {

@@ -7,7 +7,7 @@
     :class="__class"
   >
     <v-col
-      :cols="fmuUpdatable ? 10 : 12"
+      :cols="12 - (isFmuUpdatable ? (checkboxSize + 1) : 0)"
       :class="__class"
     >
       <v-text-field
@@ -46,7 +46,8 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable no-use-before-define */
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { BigNumber } from 'mathjs'
@@ -192,6 +193,7 @@ export default class NumericField extends Vue {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __class (): string[] {
     const classes: string[] = []
     if (this.dense) classes.push('dense')
@@ -233,12 +235,16 @@ export default class NumericField extends Vue {
     return errors
   }
 
+  get checkboxSize (): number {
+    // FIXME: Hack to adjust the checkboxes for Origin coordinates
+    return (['X', 'Y', 'Z'].indexOf(this.label) !== -1)
+      ? 2
+      : 1
+  }
+
   get binding (): { [_: string]: string } {
     const binding: { [_: string]: string } = {}
-    // FIXME: Hack to adjust the checkboxes for Origin coordinates
-    binding.cols = (['X', 'Y', 'Z'].indexOf(this.label) !== -1)
-      ? '2'
-      : '1'
+    binding.cols = this.checkboxSize.toString(10)
     return binding
   }
 

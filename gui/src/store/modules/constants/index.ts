@@ -6,7 +6,7 @@ import options from './options'
 import faciesColors from './faciesColors'
 import numberOf from './numberOf'
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
   modules: {

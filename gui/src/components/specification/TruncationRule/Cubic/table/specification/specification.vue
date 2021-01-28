@@ -55,6 +55,7 @@ export default class CubicTopologySpecification extends Vue {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get __data (): PlotSpecification {
     return plotify(
       this.polygons

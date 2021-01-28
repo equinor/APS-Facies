@@ -16,10 +16,10 @@ export default class FmuUpdatableValue implements FmuUpdatable {
     updatable = false,
   ) {
     if (value instanceof Object) {
-      if ('updatable' in (value as object)) {
+      if ('updatable' in value) {
         updatable = (value as { updatable: boolean}).updatable
       }
-      if (!('value' in (value as object))) {
+      if (!('value' in value)) {
         throw new APSTypeError('An object was passed, but does not contain \'value\'')
       } else {
         value = (value as { value: number }).value

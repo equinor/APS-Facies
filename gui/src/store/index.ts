@@ -20,7 +20,7 @@ import fmu from '@/store/modules/fmu'
 import { RootState } from '@/store/typing'
 import { ID } from '@/utils/domain/types'
 import { Optional } from '@/utils/typing'
-import { Identified, SimulationSettings } from '@/utils/domain/bases/interfaces'
+import { Identifiable, Identified, Named, SimulationSettings } from '@/utils/domain/bases/interfaces'
 
 import Zone, { Region } from '@/utils/domain/zone'
 import { GaussianRandomField, Parent } from '@/utils/domain'
@@ -44,7 +44,7 @@ import { isDevelopmentBuild } from '@/config'
 Vue.use(Vuex)
 
 const store: Store<RootState> = new Vuex.Store({
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   state: {
     version: '1.8.1',
@@ -96,10 +96,12 @@ const store: Store<RootState> = new Vuex.Store({
       const {
         message,
         force = false,
-      } = typeof payload !== 'string' ? payload : {
-        message: payload,
-        force: false,
-      }
+      } = typeof payload !== 'string'
+        ? payload
+        : {
+          message: payload,
+          force: false,
+        }
       if (!getters.loading || force) {
         commit('LOADING', { message })
         await Promise.all([
@@ -295,9 +297,9 @@ const store: Store<RootState> = new Vuex.Store({
     fmuMode: (state, getters): boolean => getters.fmuUpdatable && !state.fmu.onlyUpdateFromFmu.value,
     fmuUpdatable: (state): boolean => state.fmu.runFmuWorkflows.value || state.fmu.onlyUpdateFromFmu.value,
     // User options
-    options: (state): object => {
+    options: (state): Record<string, unknown> => {
       return Object.keys(state.options)
-        .reduce((obj, key): object => {
+        .reduce((obj, key): Record<string, unknown> => {
           obj[`${key}`] = state.options[`${key}`].value
           return obj
         }, {})
@@ -327,7 +329,7 @@ const store: Store<RootState> = new Vuex.Store({
             // TODO: Add quality
             ...grid.simBox.size,
             z: zone
-              // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               ? grid.simBox.size.z instanceof Object
                 ? grid.simBox.size.z[zone.code]
@@ -350,7 +352,7 @@ const store: Store<RootState> = new Vuex.Store({
         gaussianRandomField: 'gaussianRandomFields.available',
         facies: 'facies.global.available',
       }
-      const items = resolve(mapping[`${type}`], state)
+      const items = (resolve(mapping[`${type}`], state) as Record<string, Named & Identifiable>)
       if (items) {
         const item = Object.values(items).find((item): boolean => item.name === name)
         if (item) {

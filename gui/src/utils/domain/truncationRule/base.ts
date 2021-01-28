@@ -148,7 +148,7 @@ export default abstract class TruncationRule<
     }
   }
 
-  protected _hashify (): object {
+  protected _hashify (): any {
     const spec: TruncationRuleSerialization<S> & { fields?: GaussianRandomFieldSerialization[] } = this.toJSON()
     spec.fields = this.fields.map(field => field.toJSON())
     return spec

@@ -30,7 +30,9 @@ export default class BaseTooltip extends Vue {
   @Prop({ default: false, type: Boolean })
   readonly open!: boolean
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get _open (): boolean | undefined { return this.trigger === 'manual' ? this.open : undefined }
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   get _message (): string | undefined { return this.message || undefined }
 }
 </script>

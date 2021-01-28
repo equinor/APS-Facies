@@ -33,6 +33,7 @@ import { relativeTo } from '@/utils/queries'
 
 @Component({
   validations () {
+    // eslint-disable-next-line no-use-before-define
     const checkFileDirectory = (this as FileSelection).file
     return {
       path: {

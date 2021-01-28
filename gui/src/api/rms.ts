@@ -18,7 +18,7 @@ import { ZoneConfiguration } from '@/utils/domain/zone'
 import { Optional } from '@/utils/typing'
 
 import { rms as mock } from './roxar'
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore
 const api: { call: <T>(name: string, ...args: any[]) => Promise<T> } = typeof rms !== 'undefined' ? rms.uipy : mock.uipy
 

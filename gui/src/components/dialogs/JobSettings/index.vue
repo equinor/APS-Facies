@@ -114,8 +114,10 @@
                       <v-col
                         align-self="space-between"
                       >
-                        {{ item.text }}
                         <v-row>
+                          <v-col cols="12">
+                            {{ item.text }}
+                          </v-col>
                           <v-col
                             v-for="color in item.value.colors"
                             :key="color"
@@ -270,7 +272,7 @@ export default class JobSettings extends Vue {
       this.automaticFaciesFill = options.automaticFaciesFill.value
       this.filterZeroProbability = options.filterZeroProbability.value
       this.importFields = options.importFields.value
-      this.exportFmuConfigFiles = options.exportFmuConfigFiles.value  
+      this.exportFmuConfigFiles = options.exportFmuConfigFiles.value
       this.colorScale = options.colorScale.value
       this.faciesColorLibrary = this.$store.getters['constants/faciesColors/current']
     }

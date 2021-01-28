@@ -1,6 +1,6 @@
 <template>
   <v-col cols="12">
-    Trend
+    <h4>Trend</h4>
     <v-row>
       <v-col cols="6">
         <v-checkbox
@@ -24,6 +24,7 @@
         class="fill-height"
         align="center"
         justify="center"
+        no-gutters
       >
         <v-col cols="6">
           <item-selection

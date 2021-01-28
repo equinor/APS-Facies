@@ -31,7 +31,7 @@ interface XMLElement {
   [_: string]: any
 }
 
-type Context = BaseContext<{}, {}>
+type Context = BaseContext<Record<string, unknown>, Record<string, unknown>>
 
 class KeywordError extends APSError {
   public constructor (keyword: string) {
@@ -465,7 +465,7 @@ function getZoneNumber (zoneModel: XMLElement): number {
   return zoneNumber
 }
 
-const module: Module<{}, RootState> = {
+const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
   actions: {

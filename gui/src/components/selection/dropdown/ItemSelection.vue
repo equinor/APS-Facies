@@ -10,13 +10,14 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable no-use-before-define */
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { required } from 'vuelidate/lib/validators'
 
 /* TODO: Remove // @ts-ignore when vuelidate OFFICIALLY  supports TypeScript */
 
 @Component({
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   validations<T> () {
     return {
