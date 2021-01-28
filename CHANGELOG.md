@@ -2,6 +2,32 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.2
+Adds full support for RMS 12.1 (beta 2)
+
+### Fixes
+* The plugin now works with RMS 12.1 (Python 3.8)
+* Importing model files in RMS 11.1 now works as expected
+* Certain included workflows would cause RMS to crash, of jobs to fail, due to TK inter not being configured
+  * This was caused by importing `matplotlib` in a batch job
+* Ensure that the Agg backend of matplotlib is ued, when running the APS tests in headless mode (e.g. when building, and testing the plugin as part of the build pipeline)
+* Do not depend on `packaging.version`, this package was included in RMS 11, but not in 12.1, which caused some issues
+
+### Restructure
+* All APS Python code moved under the `aps` namespace
+  * This was already done when building the plugin, but not in the source control
+* Move code for GUI outside the source folder for APS
+* Move all type annotations from stubs
+  * Also fixed a typo in mock's class name (roxar.grid.BlockedWell)
+
+
+### Miscellaneous
+* Some GUI elements are more compact
+* All dependencies are updated to their latest version
+* Removed unused, and unnecessary (JavaScript) dependencies
+* Improved discovery of NRlib on RGS
+  * Added debug output for which nrlib version is used Modify test for redhat version
+
 ## 1.3.1
 
 ### Fixes
