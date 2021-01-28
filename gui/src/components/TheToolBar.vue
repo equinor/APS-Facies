@@ -7,25 +7,13 @@
       NOTE: the attribute 'flat' has been replaced with 'color=""', as to avoid  mutating a prop directly
       This is *exactly* the same as what's done in the source code for the upload button
     -->
-    <upload-button
+    <icon-button
       ref="uploadButton"
       v-tooltip.bottom="'Import an existing model file'"
-      color=""
-      icon
-      @file-update="importModelFile"
-    >
-      <template slot="icon">
-        <!--
-          NOTE: If the color is not given, the button will look gray, even when it is not disabled.
-          Must be set to 'black' in order to look clickable
-        -->
-        <v-icon
-          color="black"
-        >
-          {{ $vuetify.icons.values.import }}
-        </v-icon>
-      </template>
-    </upload-button>
+      color="black"
+      icon="import"
+      @click="importModelFile"
+    />
 
     <icon-button
       v-tooltip.bottom="'Export the current specification as a model file'"
@@ -105,10 +93,6 @@ import { displayError, displaySuccess } from '@/utils/helpers/storeInteraction'
 
 import { xml2json } from 'xml-js'
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import UploadButton from 'vuetify-upload-button'
-
 import ExportDialog from '@/components/dialogs/ExportDialog.vue'
 import ChangelogDialog from '@/components/dialogs/ChangelogDialog.vue'
 import JobSettings from '@/components/dialogs/JobSettings/index.vue'
@@ -123,52 +107,42 @@ import rms from '@/api/rms'
 import { resetState } from '@/store'
 import { isDevelopmentBuild } from '@/utils/helpers/simple'
 
-function parse (xmlString: string): Document {
-  const parser = new DOMParser()
-  const parsererrorNS = parser.parseFromString('INVALID', 'text/xml').getElementsByTagName('parsererror')[0].namespaceURI || ''
-  const dom = parser.parseFromString(xmlString, 'text/xml')
-  return dom.getElementsByTagNameNS(parsererrorNS, 'parsererror').length > 0
-    ? new Document() // Should be equivalent to null, or an empty string
-    : dom
-}
+async function loadModelFile (store: Store, fileName: string, fileContent: string | null = null): Promise<void> {
+  let json: string | null = null
 
-function fileHandler (store: Store, fileName: string): (e: any) => void {
-  return (e: any): void => {
-    const fileContent = e.target.result
-    let json: string | null = null
+  store.commit('LOADING', { loading: true, message: `Checking the model file, "${fileName}", for consistency` }, { root: true })
+  if (!fileContent) fileContent = await rms.loadFile(fileName)
 
-    store.commit('LOADING', { loading: true, message: `Checking the model file, "${fileName}", for consistency` }, { root: true })
+  if (!fileContent) {
+    await displayError('The file is empty, or it does not exist')
+  } else {
     try {
       json = xml2json(fileContent, { compact: false, ignoreComment: true })
     } catch (err) {
-      displayError(
+      await displayError(
         'The file you tried to open is not valid XML and cannot be used\n'
         + 'Fix the following error before opening again:\n\n'
         + err.message
       )
     }
     if (json) {
-      const dom = parse(fileContent)
-      rms.isApsModelValid(btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(dom)))))
-        .then((result: { valid: boolean, error: string }) => {
-          if (result.valid) {
-            resetState()
-            store.commit('LOADING', { loading: true, message: 'Resetting the state...' }, { root: true })
-            store.dispatch('fetch')
-              .then(() => {
-                store.dispatch('modelFileLoader/populateGUI', { json, fileName })
-              })
-          } else {
-            displayError(
-              'The file you tried to open is not a valid APS model file and cannot be used\n'
-              + 'Fix the following error before opening again:\n\n'
-              + result.error
-            )
-          }
-        })
+      const { valid, error } = await rms.isApsModelValid(btoa(fileContent))
+      if (valid) {
+        resetState()
+        store.commit('LOADING', { loading: true, message: 'Resetting the state...' }, { root: true })
+        await store.dispatch('fetch')
+        await store.dispatch('modelFileLoader/populateGUI', { json, fileName })
+      } else {
+        await displayError(
+          'The file you tried to open is not a valid APS model file and cannot be used\n'
+          + 'Fix the following error before opening again:\n\n'
+          + error
+        )
+      }
     }
-    store.commit('LOADING', { loading: false }, { root: true })
   }
+
+  store.commit('LOADING', { loading: false }, { root: true })
 }
 
 @Component({
@@ -177,7 +151,6 @@ function fileHandler (store: Store, fileName: string): (e: any) => void {
     ExportDialog,
     JobSettings,
     IconButton,
-    UploadButton,
     ChangelogDialog,
     LoadJob,
     RunJob,
@@ -185,6 +158,8 @@ function fileHandler (store: Store, fileName: string): (e: any) => void {
 })
 export default class TheToolBar extends Vue {
   refreshing = false
+
+  lastMSelectedModelFile = ''
 
   get betaBuild (): boolean { return process.env.VUE_APP_BUILD_MODE !== 'stable' }
 
@@ -210,12 +185,25 @@ export default class TheToolBar extends Vue {
     (this.$refs.changelogDialog as ChangelogDialog).open()
   }
 
-  importModelFile (file: File | null): void {
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = fileHandler(this.$store, file.name)
-      reader.readAsText(file);
-      (this.$refs.uploadButton as UploadButton).clear()
+  async importModelFile (): Promise<void> {
+    if (isDevelopmentBuild()) {
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.onchange = (event: Event): void => {
+        const { files } = (event.target as HTMLInputElement)
+        if (files) {
+          const file = files[0]
+          file.text().then(content => loadModelFile(this.$store, file.name, content))
+        }
+      }
+      input.click()
+      document.removeChild(input)
+    } else {
+      const fileName = await rms.chooseFile('load', 'APS model files (*.xml)', this.lastMSelectedModelFile)
+      if (fileName) {
+        this.lastMSelectedModelFile = fileName
+        await loadModelFile(this.$store, fileName)
+      }
     }
   }
 

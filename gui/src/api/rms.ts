@@ -51,10 +51,11 @@ export default {
   save: (path: string, content: string, prettify = true): Promise<boolean> => api.call(prettify ? 'save_model' : 'save_file', path, content),
   saveModel: (model: string, paths: Paths): Promise<boolean> => api.call('dump_aps_model', model, paths.model, paths.fmuConfig, paths.probabilityDistribution),
   hasFmuUpdatableValues: (model: string): Promise<boolean> => api.call('has_fmu_updatable_values', model),
+  loadFile: (path: string): Promise<string | null> => api.call('load_file', path),
   // @ts-ignore
   chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve) => resolve(null)),
   // @ts-ignore
-  chooseFile: (mode: string, filter: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseFile(mode, filter, suggestion) : new Promise((resolve) => resolve(null)),
+  chooseFile: (mode: string, filter: string, suggestion = ''): Promise<string | null> => typeof rms !== 'undefined' ? rms.chooseFile(mode, filter, suggestion) : new Promise((resolve) => resolve(null)),
   // Methods related to state migration
   canMigrate: (fromVersion: string | undefined, toVersion: string): Promise<boolean> => api.call('can_migrate_state', fromVersion, toVersion),
   migrate: (state: string, fromVersion: string, toVersion: string | null): Promise<{ state: any, errors: string }> => api.call('migrate_state', state, fromVersion, toVersion),
