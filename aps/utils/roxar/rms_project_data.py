@@ -547,6 +547,15 @@ class RMSData:
             return Path(path).parent.exists()
         return Path(path).exists()
 
+    @staticmethod
+    def load_file(path: str) -> Optional[str]:
+        try:
+            with open(path, 'r') as f:
+                content = f.read()
+            return content
+        except FileNotFoundError:
+            return None
+
 
 def _decode(base64_encoded: str) -> str:
     return b64decode(base64_encoded).decode()

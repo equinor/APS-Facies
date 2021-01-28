@@ -14249,11 +14249,6 @@ vuetify-loader@^1.0.5:
     file-loader "^6.2.0"
     loader-utils "^2.0.0"
 
-vuetify-upload-button@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/vuetify-upload-button/-/vuetify-upload-button-2.0.2.tgz#9b4e75069cd6225e5871b79d845e6b733bb9c2fa"
-  integrity sha512-i4rd+XBFjhesm1GyuwgeSP5moKfBMFOmhkoPRru+DxkVSyD1fAn1W+zko5XyLRAAfIunR3WsFRYWTvZoCwVI9g==
-
 vuetify@^2.0.3:
   version "2.4.3"
   resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.4.3.tgz#8d6f15dde396e81f64e130d8ac0bc272e030879c"
