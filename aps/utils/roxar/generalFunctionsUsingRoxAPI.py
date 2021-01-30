@@ -40,7 +40,7 @@ def get_project_dir(project):
 
 def set_continuous_3d_parameter_values(
         grid_model, parameter_name, input_values, zone_numbers=None,
-        realisation_number=0, is_shared=True, debug_level=Debug.OFF,
+        realisation_number=0, is_shared=False, debug_level=Debug.OFF,
 ):
     """Set 3D parameter with values for specified grid model.
     Input:
@@ -63,9 +63,8 @@ def set_continuous_3d_parameter_values(
 
     function_name = set_continuous_3d_parameter_values.__name__
     # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
-        text = f'Specified grid model: {grid_model.name} is empty.'
-        print_error(function_name, text)
+    if grid_model.is_empty(realisation_number):
+        text = f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.'
         return False
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
@@ -93,14 +92,14 @@ def set_continuous_3d_parameter_values(
             p.set_values(v, realisation_number)
 
         # Get all active cell values
-        p = get3DParameter(grid_model, parameter_name)
+        p = get3DParameter(grid_model, parameter_name, realisation_number)
         if p.is_empty(realisation_number):
-            raise_error(function_name, f' Specified parameter: {parameter_name} is empty for realisation {realisation_number}')
+            raise_error(function_name, f' Specified parameter: {parameter_name} is empty for realisation {realisation_number+1}')
 
         current_values = p.get_values(realisation_number)
         current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, input_values)
         p.set_values(current_values, realisation_number)
-        p.set_shared(is_shared, realisation_number)
+
     return True
 
 
@@ -130,8 +129,8 @@ def set_continuous_3d_parameter_values_in_zone(
 
     function_name = set_continuous_3d_parameter_values_in_zone.__name__
     # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
-        print_error(function_name, f'Specified grid model: {grid_model.name} is empty.')
+    if grid_model.is_empty(realisation_number):
+        print_error(function_name, f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.')
         return False
 
     # Check if the parameter is defined and create new if not existing
@@ -249,8 +248,8 @@ def set_continuous_3d_parameter_values_in_zone_region(
 
     function_name = set_continuous_3d_parameter_values_in_zone_region.__name__
     # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
-        print_error(function_name, f'Specified grid model: {grid_model.name} is empty.')
+    if grid_model.is_empty(realisation_number):
+        print_error(function_name, f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}')
         return False
 
     # Check if the parameter is defined and create new if not existing
@@ -377,7 +376,7 @@ def get_layer_range(indexer, zone_number, fmu_mode=False):
 
 def update_continuous_3d_parameter_values(
         grid_model, parameter_name, input_values, cell_index_defined=None,
-        realisation_number=0, is_shared=True, set_initial_values=False, debug_level=Debug.OFF,
+        realisation_number=0, is_shared=False, set_initial_values=False, debug_level=Debug.OFF,
 ):
     """
     Description:
@@ -410,6 +409,12 @@ def update_continuous_3d_parameter_values(
         return
 
     function_name = update_continuous_3d_parameter_values.__name__
+    # Check if specified grid model exists and is not empty
+    if grid_model.is_empty(realisation_number):
+        raise ValueError(
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.\n'
+            f'Cannot create parameter: {parameter_name} '
+        )
 
     grid = grid_model.get_grid(realisation_number)
     num_active_cells = grid.defined_cell_count
@@ -419,12 +424,6 @@ def update_continuous_3d_parameter_values(
             f'and length of input array with values = {len(input_values)}'
          )
 
-    # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
-        raise ValueError(
-            f'Specified grid model: {grid_model.name} is empty.'
-            f'Cannot create parameter: {parameter_name} '
-        )
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
     if parameter_name not in grid_model.properties:
@@ -437,7 +436,7 @@ def update_continuous_3d_parameter_values(
 
         # Create a new 3D parameter with the specified name of type float32
         p = grid_model.properties.create(parameter_name, roxar.GridPropertyType.continuous, np.float32)
-
+        p.set_shared(is_shared, realisation_number)
         # Initialize the values to 0 for this new 3D parameter
         current_values = np.zeros(num_active_cells, np.float32)
 
@@ -461,12 +460,12 @@ def update_continuous_3d_parameter_values(
         current_values = input_values
 
     p.set_values(current_values, realisation_number)
-    p.set_shared(is_shared, realisation_number)
+
 
 
 def set_discrete_3d_parameter_values(
         grid_model, parameter_name, input_values, code_names, zone_numbers=None,
-        realisation_number=0, is_shared=True, debug_level=Debug.OFF,
+        realisation_number=0, is_shared=False, debug_level=Debug.OFF,
 ):
     """Set discrete 3D parameter with values for specified grid model.
     Input:
@@ -495,9 +494,9 @@ def set_discrete_3d_parameter_values(
     """
     function_name = set_discrete_3d_parameter_values.__name__
     # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
+    if grid_model.is_empty(realisation_number):
         raise ValueError(
-            f'Specified grid model: {grid_model.name} is empty.'
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.\n'
             f'Cannot create parameter: {parameter_name} '
         )
     elif input_values.dtype == np.float32:
@@ -513,7 +512,7 @@ def set_discrete_3d_parameter_values(
 
         _create_property(
             grid_model, input_values, parameter_name, zone_numbers, is_shared, realisation_number, code_names,
-            dtype=np.uint16,
+            dtype=np.uint8,
         )
     else:
         if debug_level >= Debug.VERY_VERBOSE:
@@ -523,20 +522,18 @@ def set_discrete_3d_parameter_values(
         if p.is_empty(realisation_number):
             # Create parameter values (which are initialized to 0)
             grid = grid_model.get_grid(realisation_number)
-            v = np.zeros(grid.defined_cell_count, np.uint16)
+            v = np.zeros(grid.defined_cell_count, np.uint8)
             p.set_values(v, realisation_number)
 
         # Get all active cell values
-        p = get3DParameter(grid_model, parameter_name)
+        p = get3DParameter(grid_model, parameter_name, realisation_number)
         if p.is_empty(realisation_number):
             raise ValueError(f'In function {function_name}.  Some inconsistency in program.')
         current_values = p.get_values(realisation_number)
         current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, input_values)
         p.set_values(current_values, realisation_number)
 
-        p.set_shared(is_shared, realisation_number)
         code_names = p.code_names.copy()
-
         for code in code_names.keys():
             if code_names[code] == '':
                 warn('There exists facies codes without facies names. Set facies name equal to facies code')
@@ -544,10 +541,6 @@ def set_discrete_3d_parameter_values(
 
         # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones
-        print('originalCodeNames:')
-        print(code_names)
-        print('code_names:')
-        print(code_names)
         # Update the facies table in the discrete 3D parameter
         update_code_names(p, code_names)
 
@@ -596,7 +589,7 @@ def update_discrete_3d_parameter_values(
     :param input_values:  A numpy array of length equal to nActiveCells where nActiveCells is the number of all grid cells in the
                          grid model that is not inactive and will therefore usually be a much longer vector than num_defined_cells.
                          Only the values in this vector corresponding to the selected cells defined by cell_index_defined will be used.
-                         The values are of type discrete.
+                         The values are of type discrete np.uint8.
 
     :param num_defined_cells: Length of the list cell_index_defined
     :param cell_index_defined: A list with cell indices in the array of all active cells for the grid model. The subset of cells
@@ -613,18 +606,19 @@ def update_discrete_3d_parameter_values(
 
     """
     function_name = update_discrete_3d_parameter_values.__name__
+    # Check if specified grid model exists and is not empty
+    if grid_model.is_empty(realisation_number):
+        raise ValueError(
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.\n'
+            f'Cannot create parameter: {parameter_name} '
+        )
+
     if cell_index_defined is not None:
         assert num_defined_cells == len(cell_index_defined)
     grid = grid_model.get_grid(realisation_number)
     num_active_cells = grid.defined_cell_count
     assert num_active_cells == len(input_values)
 
-    # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
-        raise ValueError(
-            f'Specified grid model: {grid_model.name} is empty.'
-            f'Cannot create parameter: {parameter_name} '
-        )
     # Check if specified parameter name exists and create new parameter if it does not exist.
     if parameter_name not in grid_model.properties:
         if debug_level >= Debug.VERY_VERBOSE:
@@ -635,20 +629,14 @@ def update_discrete_3d_parameter_values(
                 print_debug_information(function_name, ' Set parameter to non-shared.')
 
         # Create a new 3D parameter with the specified name
-        p = grid_model.properties.create(parameter_name, roxar.GridPropertyType.discrete, np.uint16)
+        p = grid_model.properties.create(parameter_name, roxar.GridPropertyType.discrete, np.uint8)
 
         # Initialize the values to 0 for this new 3D parameter
-        current_values = np.zeros(num_active_cells, np.uint16)
+        current_values = np.zeros(num_active_cells, np.uint8)
 
         # Assign values to the defined cells as specified in cell_index_defined index vector
         # Using vector operations for numpy vector:
-        if num_defined_cells > 0:
-            for i in range(num_defined_cells):
-                indx = cell_index_defined[i]
-                current_values[indx] = int(input_values[indx])
-        else:
-            for i in range(len(input_values)):
-                current_values[i] = int(input_values[i])
+        current_values[cell_index_defined] = input_values[cell_index_defined]
 
         p.set_values(current_values, realisation_number)
         p.set_shared(is_shared, realisation_number)
@@ -660,8 +648,9 @@ def update_discrete_3d_parameter_values(
 
         # Parameter exist, but check if it is empty or not
         # Initialize the values to 0
-        current_values = np.zeros(num_active_cells, np.uint16)
+        current_values = np.zeros(num_active_cells, np.uint8)
         p = grid_model.properties[parameter_name]
+
         # Check if the parameter is to updated instead of being initialized to 0
         if not (p.is_empty(realisation_number) or set_initial_values):
             # Keep the existing values for cells that is not updated
@@ -671,15 +660,11 @@ def update_discrete_3d_parameter_values(
 
         # Assign values to the defined cells as specified in cell_index_defined index vector
         if num_defined_cells > 0:
-            for i in range(num_defined_cells):
-                indx = cell_index_defined[i]
-                current_values[indx] = int(input_values[indx])
+            current_values[cell_index_defined] = input_values[cell_index_defined]
         else:
-            for i in range(len(input_values)):
-                current_values[i] = int(input_values[i])
+            current_values = input_values
 
         p.set_values(current_values, realisation_number)
-        p.set_shared(is_shared, realisation_number)
 
         # Calculate updated facies table by combining the existing facies table for the 3D parameter
         # with facies table for the facies that are modelled for the updated zones

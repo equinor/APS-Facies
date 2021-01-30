@@ -55,8 +55,9 @@ class DefineFaciesProb(BaseDefineFacies):
                     'Calculate probability cubes which have constant values in '
                     'each zone as average probability (volume fraction)'
                 )
-        real_number = 0
+        real_number = self.project.current_realisation
         grid_model = self.project.grid_models[self.grid_model_name]
+        is_shared = grid_model.shared
         [zone_values, _] = getDiscrete3DParameterValues(
             grid_model, self.zone_parameter_name, real_number, debug_level
         )
@@ -152,7 +153,7 @@ class DefineFaciesProb(BaseDefineFacies):
 
                 success = set_continuous_3d_parameter_values(
                     grid_model, parameter_name, probability_values,
-                    self.selected_zone_numbers, real_number, debug_level=self.debug_level
+                    self.selected_zone_numbers, real_number, is_shared=is_shared, debug_level=self.debug_level
                 )
                 if not success:
                     raise ValueError('Error: Grid model is empty or can not be updated.')
@@ -196,7 +197,7 @@ class DefineFaciesProb(BaseDefineFacies):
 
                 success = set_continuous_3d_parameter_values(
                     grid_model, parameter_name, probability_values,
-                    self.selected_zone_numbers, real_number, debug_level=self.debug_level
+                    self.selected_zone_numbers, real_number, is_shared=is_shared, debug_level=self.debug_level
                 )
                 if not success:
                     raise ValueError('Error: Grid model is empty or can not be updated.')

@@ -242,13 +242,19 @@ class APSModel:
         obj = root.find(kw)
         if debug_level is None:
             self.__debug_level = Debug.OFF
-        else:
+        elif debug_level == Debug.OFF:
+            # This is the default value. Now check if it should be overridden by
+            # debug_level in model file
             if obj is None:
-                # Default value is set
+                # Not specified in model file and use input debug_level value
                 self.__debug_level = debug_level
             else:
+                # Overridden by model file setting for debug_level
                 text = obj.text
                 self.debug_level = text
+        else:
+            # Input debug level is not Debug.OFF and use this value instead of model file specification 
+            self.__debug_level = debug_level
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')

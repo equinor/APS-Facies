@@ -1,5 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+# This module is used in FMU workflows to import gaussian field values from disk into APS. 
+# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one 
+# realization in the RMS project and should have shared grid and shared parameters only.
 from collections import defaultdict
 from pathlib import Path
 
@@ -73,6 +76,10 @@ def get_field_name(field_name, zone):
 
 
 def run(project, model_file, grid_name=None, load_dir=None, **kwargs):
+    if project.current_realisation > 0:
+        raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
+                          'the grid and parameters should be shared and realisation = 1'
+        )
     aps_model = APSModel(model_file)
     file_format = kwargs.get('field_file_format')
     if grid_name is None:

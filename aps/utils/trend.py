@@ -69,7 +69,7 @@ def add_trend_to_gauss_field(
         print('Debug output: Residual min,max        : ' + str(sigma * residual_values.min()) + ' ' + str(sigma * residual_values.max()))
         print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
 
-    return gauss_field_values, trend_values
+    return gauss_field_values
 
 
 def add_trends(
@@ -80,6 +80,7 @@ def add_trends(
         write_rms_parameters_for_qc_purpose=False,
         debug_level=Debug.OFF,
         fmu_mode=False,
+        is_shared=False,
 ):
     grid_model = project.grid_models[aps_model.grid_model_name]
     zone_model = aps_model.getZoneModel(zone_number, region_number)
@@ -89,8 +90,9 @@ def add_trends(
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
     if fmu_mode:
         write_rms_parameters_for_qc_purpose = False
-    gf_all_values, gf_all_alpha, gf_all_trend_values = initialize_rms_parameters(
-        project, aps_model, write_rms_parameters_for_qc_purpose
+
+    gf_all_values, gf_all_alpha = initialize_rms_parameters(
+        project, aps_model, write_rms_parameters_for_qc_purpose, is_shared=is_shared
     )
     cell_index_defined = get_defined_cells(
         project, aps_model, grid_model, region_number, zone_number, debug_level, fmu_mode,
@@ -106,7 +108,6 @@ def add_trends(
                     grid_model,
                     cell_index_defined,
                     gauss_field_values_all,
-                    gf_all_trend_values,
                     gf_name,
                     realization_number,
                     region_number,
@@ -114,6 +115,7 @@ def add_trends(
                     write_rms_parameters_for_qc_purpose,
                     debug_level,
                     fmu_mode=fmu_mode,
+                    is_shared=is_shared,
                 )
 
 
@@ -151,7 +153,6 @@ def add_trends_to_field(
         grid_model,
         cell_index_defined,
         gauss_field_values_all,
-        gf_all_trend_values,
         gf_name,
         realization_number,
         region_number,
@@ -159,9 +160,10 @@ def add_trends_to_field(
         write_rms_parameters_for_qc_purpose=False,
         debug_level=Debug.OFF,
         fmu_mode=False,
+        is_shared=False,
 ):
     use_regions = aps_model.use_regions
-    gauss_field_values_all, trend_values_for_zone = add_trend_to_gauss_field(
+    gauss_field_values_all = add_trend_to_gauss_field(
         project, aps_model, zone_number, region_number,
         use_regions, gf_name, gauss_field_values_all, cell_index_defined,
         fmu_mode,
@@ -178,27 +180,7 @@ def add_trends_to_field(
         zone_number=zone_number,
         region_number=region_number,
         debug_level=debug_level,
+        is_shared=is_shared,
     )
-    if write_rms_parameters_for_qc_purpose:
-        # Update array trend for the selected grid cells
-        # Note that the numpy vector trend contains values for all active grid cells
-        # while trend_values_for_zone contain values calculated for the current zone and current parameter
-        trend_values_all = gf_all_trend_values[gf_name]
-        trend_values_all[cell_index_defined] = trend_values_for_zone
-        gf_all_trend_values[gf_name] = trend_values_all
-
-        # Write back to RMS project the trend values for the zone
-        update_rms_parameter(
-            grid_model,
-            gf_name,
-            trend_values_all,
-            cell_index_defined,
-            realization_number,
-            variable_name_extension='trend',
-            use_regions=use_regions,
-            zone_number=zone_number,
-            region_number=region_number,
-            debug_level=debug_level,
-        )
 
     return gauss_field_values_all

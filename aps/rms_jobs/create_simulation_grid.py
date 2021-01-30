@@ -1,3 +1,7 @@
+# This module is used in FMU workflows to import gaussian field values from disk into APS. 
+# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one 
+# realization in the RMS project and should have shared grid and shared parameters only.
+
 import xtgeo
 
 from aps.algorithms.APSModel import APSModel
@@ -26,8 +30,16 @@ def run(
         debug_level:              Debug,
         **kwargs,
 ):
+    if project.current_realisation > 0:
+        raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
+                         'the grid and parameters should be shared and realisation = 1'
+        )
+
     if debug_level >= Debug.ON:
-        print(f'Creating ERT simulation box; {fmu_simulation_grid_name}')
+        print(f'-- Creating ERT simulation box: {fmu_simulation_grid_name}')
+    if debug_level >= Debug.VERBOSE:
+        print(f'-- Using grid model: {aps_model.grid_model_name} as reference grid')
+        print(f'-- Using realization number: {project.current_realisation} for reference grid') 
     reference_grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
     nx, ny, _ = reference_grid.dimensions
     dimension = nx, ny, max_fmu_grid_depth

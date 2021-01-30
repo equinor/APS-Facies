@@ -17,8 +17,9 @@ def get_facies_code(code_names, facies_name):
 def getBlockedWells(project, grid_model_name, bw_name):
     """ Get blocked wells """
     grid_model = project.grid_models[grid_model_name]
-    if grid_model.is_empty():
-        print('Error: Empty grid model {}'.format(grid_model_name))
+    realisation_number = project.current_realisation
+    if grid_model.is_empty(realisation_number):
+        print(f'Error: Empty grid model {grid_model_name} for realisation {realisation_number}')
         return None
     blocked_wells_set = grid_model.blocked_wells_set
     blocked_wells = blocked_wells_set[bw_name]
@@ -45,9 +46,13 @@ def getFaciesTableFromBlockedWells(project, grid_model_name, blocked_wells_set_n
         return None
 
 
-def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked_wells_set_name, facies_log_name, realization_number=0):
-    """ Get blocked well of type discrete and return dictionary with facies codes and names and facies log values in numpy array
-        Note that the returned facies log values can be a masked numpy array (to represent inactive or undefined values)
+def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, 
+                                               blocked_wells_set_name, 
+                                               facies_log_name, realization_number=0):
+    """ Get blocked well of type discrete and return dictionary with facies codes and names 
+        and facies log values in numpy array.
+        Note that the returned facies log values can be a masked numpy array 
+        (to represent inactive or undefined values)
         so the output must be checked if it is a masked array.
     """
 
@@ -55,8 +60,8 @@ def getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, blocked
     if blocked_wells is None:
         return None, None
     if blocked_wells.is_empty(realization_number):
-        print('Error: Specified blocked wells {} in grid model {} for realization {} is empty'
-              ''.format(blocked_wells_set_name, grid_model_name, realization_number + 1))
+        print(f'Error: Specified blocked wells {blocked_wells_set_name} in grid model {grid_model_name}'
+              f'for realization {realization_number + 1} is empty')
         return None, None
     # Get facies property
     facies_property = blocked_wells.properties[facies_log_name]
@@ -147,8 +152,8 @@ def createProbabilityLogs(
                 prob_log = blocked_wells.properties.create(prob_log_name, roxar.GridPropertyType.continuous, np.float32)
 
                 # Initialize to impossible value and define all values as undefined by mask = 1
-                prob_values = blocked_wells.generate_values(discrete=False, fill_value=-1.0)
-                mask_values = blocked_wells.generate_values(discrete=True, fill_value=1)
+                prob_values = blocked_wells.generate_values(discrete=False, fill_value=-1.0, realisation=realization_number)
+                mask_values = blocked_wells.generate_values(discrete=True, fill_value=1, realisation=realization_number)
                 # Set first entry to defined initially as a workaround to make masked logs in prob_log
                 # It is necessary to have at least one point in the log that is not undefined to get log as a masked array.
                 # This value is reset to undefined before any updating of the initial empty logs with data
@@ -243,10 +248,10 @@ def createProbabilityLogs(
                             mask_values[i] = 0
             if use_mask_prob:
                 prob_values_with_mask = np.ma.array(prob_values, mask=mask_values)
-                prob_log.set_values(prob_values_with_mask)
+                prob_log.set_values(prob_values_with_mask, realization_number)
             else:
-                prob_log.set_values(prob_values)
-            print('Probability log defined:  {}'.format(prob_log.name))
+                prob_log.set_values(prob_values, realization_number)
+            print(f'Probability log defined:  {prob_log.name}')
     else:
 
         # Check input consistency
@@ -324,8 +329,8 @@ def createProbabilityLogs(
                         
 
             prob_values_with_mask = np.ma.array(prob_values, mask=mask_values)
-            prob_log.set_values(prob_values_with_mask)
-            print('Probability log defined:  {}'.format(prob_log.name))
+            prob_log.set_values(prob_values_with_mask, realization_number)
+            print(f'Probability log defined:  {prob_log.name}')
 
     # Verify that the created probability logs are consistent (sum up to 1) for each grid cell in blocked wells 
     check_probability_logs(probability_log_names, 
@@ -456,7 +461,7 @@ def check_probability_logs(probability_log_names,
 
 def createCombinedFaciesLogForBlockedWells(
         project, grid_model_name, bw_name, original_facies_log_name,
-        new_facies_log_name, new_code_names, mapping_between_original_and_new
+        new_facies_log_name, new_code_names, mapping_between_original_and_new, realization_number
 ):
     # Original facies log code and name table and log values
     original_code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, original_facies_log_name)
@@ -466,8 +471,8 @@ def createCombinedFaciesLogForBlockedWells(
     blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
     new_facies_log = blocked_wells.properties.create(new_facies_log_name, roxar.GridPropertyType.discrete, np.int32)
     # Initialize all values to undefined by masking them
-    values = blocked_wells.generate_values(discrete=True, fill_value=0)
-    mask_values = blocked_wells.generate_values(discrete=True, fill_value=1)
+    values = blocked_wells.generate_values(discrete=True, fill_value=0, realisation=realization_number)
+    mask_values = blocked_wells.generate_values(discrete=True, fill_value=1, realisation=realization_number)
 
     max_code = -1
     for code, name in original_code_names.items():
@@ -515,13 +520,13 @@ def createCombinedFaciesLogForBlockedWells(
 
         # Define a facies value array with mask to be set as result facies log in RMS
         values_with_mask = np.ma.array(values, mask=mask_values)
-        new_facies_log.set_values(values_with_mask)
+        new_facies_log.set_values(values_with_mask, realization_number)
     else:
         for i in range(len(facies_log_values)):
             code = facies_log_values[i]
             new_code = new_code_for_old_code[code]
             values[i] = int(new_code)
-        new_facies_log.set_values(values)
+        new_facies_log.set_values(values, realization_number)
 
     new_facies_log.code_names = new_code_names
     print('Blocked well log {} created/updated'.format(new_facies_log_name))
@@ -529,7 +534,7 @@ def createCombinedFaciesLogForBlockedWells(
 
 def cell_numbers_for_blocked_wells(project, grid_model_name, bw_name):
     blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
-    blocked_wells_cell_numbers = blocked_wells.get_cell_numbers()
+    blocked_wells_cell_numbers = blocked_wells.get_cell_numbers(project.current_realisation)
     return blocked_wells_cell_numbers
 
 

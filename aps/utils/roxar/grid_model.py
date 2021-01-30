@@ -132,7 +132,7 @@ def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, r
     return minimum, maximum, average
 
 
-def get3DParameter(grid_model, parameter_name):
+def get3DParameter(grid_model, parameter_name, realization_number=0):
     """Get 3D parameter from grid model.
     Input:
            grid_model     - Grid model object
@@ -142,8 +142,8 @@ def get3DParameter(grid_model, parameter_name):
     Output: parameter object
     """
     # Check if specified grid model exists and is not empty
-    if grid_model.is_empty():
-        raise ValueError(f"Expected non-empty grid model, but was empty. (Grid Model: '{grid_model.name}')")
+    if grid_model.is_empty(realization_number):
+        raise ValueError(f"Empty grid model {grid_model.name} for realisation {realization_number}")
 
     # Check if specified parameter name exists.
     try:
@@ -166,7 +166,7 @@ def getContinuous3DParameterValues(grid_model, parameter_name, realization_numbe
     Output: numpy array with values for each active grid cell for specified 3D parameter.
     """
     function_name = getContinuous3DParameterValues.__name__
-    param = get3DParameter(grid_model, parameter_name)
+    param = get3DParameter(grid_model, parameter_name, realization_number)
     if param.is_empty(realization_number):
         text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number + 1)
         raise_error(function_name, text)
@@ -309,7 +309,7 @@ def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=
     """
     from roxar import GridPropertyType
     function_name = getDiscrete3DParameterValues.__name__
-    param = get3DParameter(grid_model, parameter_name)
+    param = get3DParameter(grid_model, parameter_name, realization_number)
     # Check that parameter is defined and not empty
     if param.is_empty(realization_number):
         text = ' Specified parameter: ' + parameter_name + ' is empty for realisation ' + str(realization_number)

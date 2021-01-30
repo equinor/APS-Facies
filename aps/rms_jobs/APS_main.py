@@ -263,16 +263,24 @@ def run(
 ):
     realization_number = project.current_realisation
     debug_level = get_debug_level(**kwargs)
-    print(f'Run: APS_trunc on realisation {realization_number + 1}')
 
+    print(f'Run: APS_trunc on realisation {realization_number + 1}')
     model_file_name = get_specification_file(**kwargs)
 
     print(f'- Read file: {model_file_name}')
-    aps_model = APSModel(model_file_name)
-
+    aps_model = APSModel(model_file_name, debug_level=debug_level)
+    if debug_level == Debug.OFF:
+        debug_level = aps_model.debug_level
     grid_model = project.grid_models[aps_model.grid_model_name]
-    if grid_model.is_empty():
-        raise ValueError(f'Specified grid model: {grid_model.name} is empty.')
+    if grid_model.is_empty(realization_number):
+        raise ValueError(f'Specified grid model: {grid_model.name} is empty for realization {realization_number}.')
+
+    fmu_mode = kwargs.get('fmu_mode', False)
+    fmu_mode_only_param = kwargs.get('fmu_mode_only_param', False)
+    is_shared = False
+    if fmu_mode or fmu_mode_only_param:
+        is_shared = True
+        write_rms_parameters_for_qc_purpose = False
 
     all_zone_models = aps_model.sorted_zone_models
     zone_param_name = aps_model.getZoneParamName()
@@ -312,7 +320,7 @@ def run(
 
     # Get or initialize array for facies realisation
     num_cells_total = len(zone_values)
-    facies_real = np.zeros(num_cells_total, np.uint16)
+    facies_real = np.zeros(num_cells_total, np.uint8)
     code_names_for_input = {}
     # Check if specified facies realization exists and get it if so.
     if isParameterDefinedWithValuesInRMS(grid_model, result_param_name, realization_number):
@@ -332,8 +340,9 @@ def run(
             )
 
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
-    gf_all_values, gf_all_alpha, gf_all_trend_values = initialize_rms_parameters(
-        project, aps_model, write_rms_parameters_for_qc_purpose
+
+    gf_all_values, gf_all_alpha = initialize_rms_parameters(
+        project, aps_model, write_rms_parameters_for_qc_purpose, is_shared=is_shared, debug_level=debug_level,
     )
     # Probability related lists
     probability_parameter_names_already_read = []
@@ -669,7 +678,7 @@ def run(
     #  (not belonging to (zones, regions) that is updated)
     update_discrete_3d_parameter_values(
         grid_model, result_param_name, facies_real, facies_table=code_names,
-        realisation_number=realization_number, is_shared=False, set_initial_values=False,
+        realisation_number=realization_number, is_shared=is_shared, set_initial_values=False,
         debug_level=debug_level,
     )
     if debug_level >= Debug.ON:
@@ -678,7 +687,7 @@ def run(
     print('')
     if debug_level >= Debug.ON:
         print('- Updated facies table:')
-        p = get3DParameter(grid_model, result_param_name)
+        p = get3DParameter(grid_model, result_param_name, realization_number)
         print('- Facies_name   Facies_code')
         for key in p.code_names:
             u = p.code_names.get(key)

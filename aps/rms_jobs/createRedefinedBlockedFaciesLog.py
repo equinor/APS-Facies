@@ -71,6 +71,7 @@ def run(roxar=None, project=None, **kwargs):
         _file.new_facies_log_name,
         _file.new_code_names,
         _file.mapping,
+        realization_number,
     )
 
 
