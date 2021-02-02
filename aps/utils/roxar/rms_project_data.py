@@ -141,11 +141,12 @@ class RMSData:
         for grid_model in grid_models:
             name = grid_model.name
             grid = grid_model.get_grid(realisation=self.project.current_realisation)
+            exists = self.grid_exists(name)
             models.append({
                 'name': name,
-                'exists': self.grid_exists(name),
-                'zones': len(grid.zone_names),
-                'hasDualIndexSystem': grid.has_dual_index_system,
+                'exists': exists,
+                'zones': len(grid.zone_names) if exists else 0,
+                'hasDualIndexSystem': grid.has_dual_index_system if exists else False,
             })
         return models
 
@@ -187,7 +188,11 @@ class RMSData:
     def get_grid_size(self, grid_model_name: GridName) -> GridSize:
         # TODO: Add option to get zone thickness
         grid = self.get_grid(grid_model_name)
-        return grid.grid_indexer.dimensions
+        try:
+            return grid.grid_indexer.dimensions
+        except RuntimeError:
+            # RMS 12 compatibility
+            return 0, 0, 0
 
     def _get_parameter_names(self, grid_model_name: GridName, check: Callable) -> List[str]:
         grid_model = self.get_grid_model(grid_model_name)
@@ -216,12 +221,18 @@ class RMSData:
         return self.get_code_names(grid_model.properties[region_parameter])
 
     def grid_exists(self, name: GridName) -> bool:
-        exists = True
         try:
-            self.get_grid(name)
+            grid = self.get_grid(name)
+
+            try:
+                # That is, the grid exists, but is empty
+                grid.zone_names
+            except RuntimeError:
+                return False
+
         except (KeyError, ValueError):
-            exists = False
-        return exists
+            return False
+        return True
 
     def is_region_parameter(self, param: Property) -> bool:
         # TODO: Implement properly
