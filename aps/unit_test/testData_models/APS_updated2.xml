@@ -14,7 +14,7 @@
   <ZoneParamName> Zone </ZoneParamName>
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
-  <PrintInfo> 2 </PrintInfo>
+  <PrintInfo> 3 </PrintInfo>
   <SeedFile> seed.dat </SeedFile>
   <TransformationType> 0 </TransformationType>
   <WriteSeeds> yes </WriteSeeds>
