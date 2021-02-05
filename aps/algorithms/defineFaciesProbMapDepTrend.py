@@ -67,7 +67,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         for idx in range(len(self.selected_zone_numbers)):
             zone_index = self.selected_zone_numbers[idx]
             if self.debug_level >= Debug.ON:
-                print("Zone: ", zone_index+1)
+                print("Zone: ", zone_index + 1)
             if zone_index in indexer.zonation:
                 layer_ranges = indexer.zonation[zone_index]
                 lr = layer_ranges[0]

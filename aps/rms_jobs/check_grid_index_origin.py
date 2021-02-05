@@ -69,8 +69,7 @@ FMU mode requires that grid model {fmu_simulation_grid_name} is a shared grid in
                     # Introduced in version 12.1.
                     roxar.rms.error('APS workflows require same grid index origin for both modelling grid and ERTBOX grid')
                 except AttributeError:
-                    pass
-                raise ValueError(f'''\
+                    raise ValueError(f'''\
 Error using grid model: {rms_grid_name} and ERTBOX grid model:{fmu_simulation_grid_name}
 APS workflows require that both the modelling grid and the help grid for ERT
 uses the same grid index origin.

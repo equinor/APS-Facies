@@ -64,7 +64,7 @@ def set_continuous_3d_parameter_values(
     function_name = set_continuous_3d_parameter_values.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
-        text = f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.'
+        print(f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.')
         return False
 
     # Check if specified parameter name exists and create new parameter if it does not exist.
@@ -94,7 +94,7 @@ def set_continuous_3d_parameter_values(
         # Get all active cell values
         p = get3DParameter(grid_model, parameter_name, realisation_number)
         if p.is_empty(realisation_number):
-            raise_error(function_name, f' Specified parameter: {parameter_name} is empty for realisation {realisation_number+1}')
+            raise_error(function_name, f' Specified parameter: {parameter_name} is empty for realisation {realisation_number + 1}')
 
         current_values = p.get_values(realisation_number)
         current_values = modify_selected_grid_cells(grid_model, zone_numbers, realisation_number, current_values, input_values)
@@ -130,7 +130,7 @@ def set_continuous_3d_parameter_values_in_zone(
     function_name = set_continuous_3d_parameter_values_in_zone.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
-        print_error(function_name, f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.')
+        print_error(function_name, f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.')
         return False
 
     # Check if the parameter is defined and create new if not existing
@@ -249,7 +249,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
     function_name = set_continuous_3d_parameter_values_in_zone_region.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
-        print_error(function_name, f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}')
+        print_error(function_name, f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}')
         return False
 
     # Check if the parameter is defined and create new if not existing
@@ -412,7 +412,7 @@ def update_continuous_3d_parameter_values(
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         raise ValueError(
-            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.\n'
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.\n'
             f'Cannot create parameter: {parameter_name} '
         )
 
@@ -496,7 +496,7 @@ def set_discrete_3d_parameter_values(
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         raise ValueError(
-            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number+1}.\n'
+            f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.\n'
             f'Cannot create parameter: {parameter_name} '
         )
     elif input_values.dtype == np.float32:

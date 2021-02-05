@@ -217,9 +217,7 @@ def run(project, **kwargs):
     if debug_level>= Debug.VERBOSE:
         print(f'-- Realisation number: {real_number+1}')
 
-    is_shared = False
-    if fmu_mode or fmu_mode_only_param:
-        is_shared = True
+    is_shared = fmu_mode or fmu_mode_only_param
 
     run_simulations(
         project,

@@ -76,7 +76,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
 
     # Initialize all values to 0
     if debug_level >= Debug.VERBOSE:
-        print(f'--- Initialize values for realisation {realization_number+1}:')
+        print(f'--- Initialize values for realisation {realization_number + 1}:')
     for name in gauss_field_names_used:
         gf_all_values[name] = np.zeros(number_of_active_cells, np.float32)
         gf_all_alpha[name] = np.zeros(number_of_active_cells, np.float32)
