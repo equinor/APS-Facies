@@ -38,11 +38,12 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
 
     def calculate_facies_probability_parameter(self, debug_level=Debug.OFF):
         # Get facies map grid model and compute statistics per zone
-        real_number = 0
+        real_number = self.project.current_realisation
         num_stripes = 100
 
         # Modelling Grid
         grid_model = self.project.grid_models[self.grid_model_name]
+        is_shared = grid_model.shared
         grid_3d = grid_model.get_grid(real_number)
         indexer = grid_3d.simbox_indexer
         dim_i, dim_j, dim_k = indexer.dimensions
@@ -66,7 +67,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         for idx in range(len(self.selected_zone_numbers)):
             zone_index = self.selected_zone_numbers[idx]
             if self.debug_level >= Debug.ON:
-                print("Zone: ", zone_index)
+                print("Zone: ", zone_index + 1)
             if zone_index in indexer.zonation:
                 layer_ranges = indexer.zonation[zone_index]
                 lr = layer_ranges[0]
@@ -126,7 +127,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         # If the 3D parameter exist in advance, only the specified zones will be altered
         # while grid cell values for other zones are unchanged.
         set_continuous_3d_parameter_values(
-            grid_model, "stripeNumber", stripe_number, self.selected_zone_numbers, real_number, debug_level=debug_level
+            grid_model, "stripeNumber", stripe_number, self.selected_zone_numbers, real_number, is_shared=is_shared, debug_level=debug_level
         )
         for facies_idx in range(len(facies_values)):
             facies = facies_values[facies_idx]
@@ -137,7 +138,7 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
                     print(parameter_name, facies)
                 success = set_continuous_3d_parameter_values(
                     grid_model, parameter_name, probabilities[:, facies_idx],
-                    self.selected_zone_numbers, real_number, debug_level=debug_level
+                    self.selected_zone_numbers, real_number, is_shared=is_shared, debug_level=debug_level
                 )
                 if not success:
                     raise ValueError('Error: Grid model is empty or can not be updated.')

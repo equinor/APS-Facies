@@ -202,7 +202,7 @@ def check_and_normalize_probabilities_for_APS(
 ):
     # Read APS model
     print(f'- Read file: {model_file}')
-    aps_model = APSModel(model_file)
+    aps_model = APSModel(model_file, debug_level=None)
 
     grid_model_name = aps_model.grid_model_name
     grid_model = project.grid_models[grid_model_name]
@@ -301,7 +301,10 @@ def check_and_normalize_probabilities_for_APS(
         if not overwrite:
             parameter_name = parameter_name + '_norm'
         zone_number_list = []
-        if not set_continuous_3d_parameter_values(grid_model, parameter_name, parameter_values, zone_number_list, realization_number, is_shared=True):
+        is_shared = grid_model.shared
+        if not set_continuous_3d_parameter_values(grid_model, parameter_name, 
+                                                  parameter_values, zone_number_list, 
+                                                  realization_number, is_shared=is_shared):
             raise IOError(f'Can not update parameter {parameter_name}')
         else:
             if debug_level >= Debug.ON:

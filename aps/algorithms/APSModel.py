@@ -241,15 +241,17 @@ class APSModel:
         kw = 'PrintInfo'
         obj = root.find(kw)
         if debug_level is None:
-            self.__debug_level = Debug.OFF
+            debug_level = Debug.OFF
+        elif debug_level == Debug.OFF:
+            # This is the default value. Now check if it should be overridden by
+            # debug_level in model file
+            if obj is not None:
+                # Overridden by model file setting for debug_level
+                debug_level = obj.text
         else:
-            if obj is None:
-                # Default value is set
-                self.__debug_level = debug_level
-            else:
-                text = obj.text
-                self.debug_level = text
-
+            # Input debug level is not Debug.OFF and use this value instead of model file specification
+            pass
+        self.debug_level = debug_level
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('Debug output: ------------ Start reading model file in APSModel ------------------')

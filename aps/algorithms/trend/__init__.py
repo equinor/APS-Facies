@@ -307,8 +307,8 @@ Debug output:   Stacking type:  {stacking_direction}''')
         """
         from aps.utils.roxar.grid_model import GridSimBoxSize
         # Check if specified grid model exists and is not empty
-        if grid_model.is_empty():
-            raise ValueError('Error: Specified grid model: ' + grid_model.name + ' is empty.')
+        if grid_model.is_empty(realization_number):
+            raise ValueError(f'Error: Specified grid model: {grid_model.name} is empty for realization {realization_number}.')
         grid_3d = grid_model.get_grid(realization_number)
         grid_indexer = grid_3d.simbox_indexer
         (nx, ny, nz) = grid_indexer.dimensions
@@ -359,11 +359,11 @@ Debug output:  Trend type: {self.type.name}''')
             if self.type != TrendType.RMS_PARAM:
                 print(f'''\
 Debug output:  Trend azimuth: {self.azimuth.value}
-f'Debug output:  StackingAngle: {self.stacking_angle.value}
-f'Debug output:  Direction: {self.stacking_direction.value}
-f'Debug output:  x_center: {self._x_center}
-f'Debug output:  y_center: {self._y_center}
-f'Debug output:  z_center (sim box): {self._z_center}''')
+Debug output:  StackingAngle: {self.stacking_angle.value}
+Debug output:  Direction: {self.stacking_direction.value}
+Debug output:  x_center: {self._x_center}
+Debug output:  y_center: {self._y_center}
+Debug output:  z_center (sim box): {self._z_center}''')
             self._writeTrendSpecificParam()
 
             # Create an empty array with 0 values with correct length

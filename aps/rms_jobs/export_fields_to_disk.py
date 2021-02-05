@@ -1,5 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+# This module is used in FMU workflows to import gaussian field values from disk into APS. 
+# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one 
+# realization in the RMS project and should have shared grid and shared parameters only.
+
 import xtgeo
 
 from aps.algorithms.APSModel import APSModel
@@ -8,6 +12,11 @@ from aps.utils.methods import get_specification_file
 
 
 def run(project, **kwargs):
+    if project.current_realisation > 0:
+        raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
+                         'the grid and parameters should be shared and realisation = 1'
+        )
+
     model_file = get_specification_file(**kwargs)
     aps_model = APSModel(model_file, debug_level=None)
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')

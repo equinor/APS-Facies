@@ -20,7 +20,7 @@
         <SelectedZoneWithRegions zone="4">0</SelectedZoneWithRegions>
     </SelectedZonesAndRegions>
 
-    <RMSProjectName>testAPSWorkflow.rms10.1.3</RMSProjectName>
+    <RMSProjectName>testAPSWorkflow_new.rms12.0.1</RMSProjectName>
     <RMSWorkflowName>Example_APS_gridmodelCoarse_conditioned</RMSWorkflowName>
     <GridModelName>GridModelCoarse</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>

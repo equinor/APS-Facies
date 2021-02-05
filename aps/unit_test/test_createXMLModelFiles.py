@@ -421,7 +421,7 @@ def test_variogram_generation():
 def test_read_and_write_APSModel():
     print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
+    apsmodel = APSModel(model_file_name=modelFile)
     outfile3 = 'testOut3.xml'
     attributes_file = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file, debug_level=Debug.OFF)
@@ -435,7 +435,7 @@ def test_updating_model1():
     print('***** Case: Update parameters case 1 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
+    apsmodel = APSModel(model_file_name=modelFile)
     # Do some updates of the model
     zoneNumber = 1
     zone = apsmodel.getZoneModel(zoneNumber)
@@ -515,7 +515,7 @@ def test_updating_model2():
     print('***** Case: Update parameters case 2 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
+    apsmodel = APSModel(model_file_name=modelFile)
     # Do some updates of the model
     zoneNumber = 2
     regionNumber = 4
@@ -573,7 +573,7 @@ def test_updating_model3():
     print('***** Case: Update parameters case 3 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE)
+    apsmodel = APSModel(model_file_name=modelFile)
     # Do some updates of the model
     zoneNumber = 2
     regionNumber = 3

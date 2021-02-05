@@ -37,7 +37,7 @@ def define_variogram(variogram, azimuth_value_sim_box):
 
 def run_simulations(
         project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
-        write_rms_parameters_for_qc_purpose=True,
+        write_rms_parameters_for_qc_purpose=False,
         fmu_mode=False, debug_level=Debug.OFF,
 ):
     """
@@ -48,7 +48,7 @@ def run_simulations(
     # Read APS model
     print(f'Run: Simulation of gaussian fields')
     print(f'- Read file: {model_file}')
-    aps_model = APSModel(model_file)
+    aps_model = APSModel(model_file, debug_level=None)
 
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization
     # workflow loop because the start random seed is created once per process,
@@ -57,12 +57,22 @@ def run_simulations(
     # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file
     # before calling the current script.
 
-    # Get grid dimensions
     grid_model = project.grid_models[aps_model.grid_model_name]
-    grid = grid_model.get_grid()
-    grid_attributes = GridAttributes(grid)
-
-    num_layers_per_zone = grid_attributes.num_layers_per_zone
+    if fmu_mode:
+        #Ensure that the grid is shared and the realisation number is 1 adn that there are only one zone
+        if realisation > 1:
+            raise ValueError('The realisation number must be 1 in FMU mode.')
+        grid = grid_model.get_grid(realisation)
+        # Get grid dimensions
+        grid_attributes = GridAttributes(grid, debug_level=debug_level)
+        num_layers_per_zone = grid_attributes.num_layers_per_zone
+        if len(num_layers_per_zone) != 1:
+            raise ValueError('The ERTBOX grid can only have 1 zone')
+    else:
+        grid = grid_model.get_grid(realisation)
+        # Get grid dimensions
+        grid_attributes = GridAttributes(grid, debug_level=debug_level)
+        num_layers_per_zone = grid_attributes.num_layers_per_zone
 
     nx, ny, nz = grid_attributes.sim_box_size.dimensions
 
@@ -94,7 +104,7 @@ def run_simulations(
         nz = num_layers
         dz = zone_model.sim_box_thickness / nz
 
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
+        if debug_level >= Debug.ON:
             print('-- Zone: {}'.format(zone_number))
         if debug_level >= Debug.VERBOSE:
             start = grid_attributes.start_layers_per_zone[zone_index]
@@ -180,6 +190,7 @@ def run_simulations(
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
+            is_shared=is_shared,
         )
         # End loop over gauss fields for one zone
 
@@ -199,10 +210,14 @@ def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
     seed_file_log = get_seed_log_file(**kwargs)
     fmu_mode = kwargs.get('fmu_mode', False)
-    write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose', True)
+    fmu_mode_only_param = kwargs.get('fmu_mode_only_param', False)
+    write_rms_parameters_for_qc_purpose = False
     real_number = project.current_realisation
-    is_shared = False
     debug_level = get_debug_level(**kwargs)
+    if debug_level>= Debug.VERBOSE:
+        print(f'-- Realisation number: {real_number+1}')
+
+    is_shared = fmu_mode or fmu_mode_only_param
 
     run_simulations(
         project,

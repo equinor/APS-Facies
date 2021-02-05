@@ -33,6 +33,7 @@ class JobConfig:
             'global_variables': self.global_variables_file,
             'max_fmu_grid_depth': self.max_fmu_grid_depth,
             'fmu_mode': self.run_fmu_workflows,
+            'fmu_mode_only_param': self._only_run_fmu_variables_update,
             'fmu_simulation_grid_name': self.fmu_grid_name,
             'rms_grid_name': aps_model.grid_model_name,
             'fmu_export_location': get_export_location(),

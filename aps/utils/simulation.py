@@ -43,7 +43,7 @@ def get_all_gauss_field_names_in_model(aps_model):
     return gauss_field_names_specified, gauss_field_names_used, gauss_field_names_with_trend
 
 
-def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_purpose=False):
+def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_purpose=False, is_shared=True, debug_level=Debug.OFF):
     '''
     Returns dictionaries with numpy arrays containing the gauss field values, trend values,
     transformed gauss field values for each gauss field name. The key is gauss field name.
@@ -52,7 +52,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]
     number_of_active_cells = grid_model.get_grid(realization_number).defined_cell_count
-    debug_level = aps_model.debug_level
+
 
     def _get_field(name_):
         return getContinuous3DParameterValues(grid_model, name_, realization_number)
@@ -76,7 +76,7 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
 
     # Initialize all values to 0
     if debug_level >= Debug.VERBOSE:
-        print('--- Initialize values for:')
+        print(f'--- Initialize values for realisation {realization_number + 1}:')
     for name in gauss_field_names_used:
         gf_all_values[name] = np.zeros(number_of_active_cells, np.float32)
         gf_all_alpha[name] = np.zeros(number_of_active_cells, np.float32)
@@ -87,40 +87,26 @@ def initialize_rms_parameters(project, aps_model, write_rms_parameters_for_qc_pu
     # They are required and must exist.
     for name in gauss_field_names_used:
         try:
+            # Check if simulated values exists and get it, otherwise use the initial values
             values = _get_field(name)
             gf_all_values[name] = values
         except ValueError:
+            # Set initial values for parameters that are not simulated
             set_continuous_3d_parameter_values(
-                grid_model, name, gf_all_values[name], [], realization_number
+                grid_model, name, gf_all_values[name], [], 
+                realization_number, is_shared=is_shared,
             )
 
     # Initialize the RMS 3D parameters for QC with extension _trend, _transf, _untransf
     if write_rms_parameters_for_qc_purpose:
         # Write initial values to transformed gauss parameters
-        zone_number_list = []
         for name in gauss_field_names_used:
             parameter_name = name + '_transf'
             input_values = gf_all_alpha[name]
             set_continuous_3d_parameter_values(
-                grid_model, parameter_name, input_values,
-                zone_number_list, realization_number
+                grid_model, parameter_name, input_values, [],
+                realization_number, is_shared=is_shared,
             )
 
-        if len(gauss_field_names_with_trend) > 0:
-            if debug_level >= Debug.VERBOSE:
-                print('--- Initialize trend values for:')
-            for name in gauss_field_names_with_trend:
-                gf_all_trend_values[name] = np.zeros(number_of_active_cells, np.float32)
-                if debug_level >= Debug.VERBOSE:
-                    print(f'---    {name}')
 
-            # Write initial values to trend gauss parameters
-            for name in gauss_field_names_with_trend:
-                parameter_name = name + '_trend'
-                input_values = gf_all_trend_values[name]
-                set_continuous_3d_parameter_values(
-                    grid_model, parameter_name, input_values,
-                    zone_number_list, realization_number
-                )
-
-    return gf_all_values, gf_all_alpha, gf_all_trend_values
+    return gf_all_values, gf_all_alpha

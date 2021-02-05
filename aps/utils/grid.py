@@ -13,6 +13,7 @@ def update_rms_parameter(
         zone_number=0,
         region_number=0,
         debug_level=Debug.OFF,
+        is_shared=False,
 ):
     # Write back to RMS project the updated rms 3D parameter
     if variable_name_extension is None:
@@ -26,7 +27,8 @@ def update_rms_parameter(
         values,
         cell_index_defined,
         realization_number,
-        is_shared=False, set_initial_values=False,
+        is_shared=is_shared,
+        set_initial_values=False,
         debug_level=debug_level
     )
     if debug_level >= Debug.VERBOSE:
