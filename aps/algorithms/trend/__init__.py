@@ -386,14 +386,23 @@ Debug output:  z_center (sim box): {self._z_center}''')
             num_defined_cells = len(cell_index_defined)
             values_in_selected_cells = np.zeros(num_defined_cells, np.float32)
             parameters_for_trend_calc = self._calculateTrendModelParam()
-            for indx in range(num_defined_cells):
-                x = cell_center_points[indx, 0]
-                y = cell_center_points[indx, 1]
+            vectorized_trend_calc = True
+            if not vectorized_trend_calc:
+                for indx in range(num_defined_cells):
+                    x = cell_center_points[indx, 0]
+                    y = cell_center_points[indx, 1]
 
-                k = cell_indices[indx, 2]
+                    k = cell_indices[indx, 2]
 
-                trend_value = self._trendValueCalculation(parameters_for_trend_calc, x, y, k, zinc)
-                values_in_selected_cells[indx] = trend_value
+                    trend_value = self._trendValueCalculation(parameters_for_trend_calc, x, y, k, zinc)
+                    values_in_selected_cells[indx] = trend_value
+            else:
+                index_vector = np.arange(num_defined_cells)
+                x_vec = cell_center_points[index_vector, 0]
+                y_vec = cell_center_points[index_vector, 1]
+                k_vec = cell_indices[index_vector, 2]
+                values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc, 
+                                                                                  x_vec, y_vec, k_vec, zinc)
 
         min_value = values_in_selected_cells.min()
         max_value = values_in_selected_cells.max()
@@ -662,6 +671,14 @@ class Trend3D_linear(Trend3D):
         yRel = y - self._y_center
         return self._linearTrendFunction(parameters_for_trend_calc, xRel, yRel, zRel)
 
+    def _trendValueCalculation_vectorized(self, parameters_for_trend_calc, x_vec, y_vec, k_vec, zinc):
+        # Calculate trend value for point(x,y,z) relative to origin defined by (xCenter, yCenter,zCenter)
+        # Here only a shift in the global x,y coordinates are done. The z coordinate is relative to simulation box.
+        zRel_vec = (k_vec - self._start_layer + 0.5) * zinc - self._z_center
+        xRel_vec = x_vec - self._x_center
+        yRel_vec = y_vec - self._y_center
+        return self._linearTrendFunction_vectorized(parameters_for_trend_calc, xRel_vec, yRel_vec, zRel_vec)
+
     def _trendValueCalculationSimBox(
             self,
             parameters_for_trend_calc: Tuple[float, float, float],
@@ -691,6 +708,20 @@ class Trend3D_linear(Trend3D):
                 x_component * x_rel
                 + y_component * y_rel
                 + z_component * z_rel
+        )
+
+    def _linearTrendFunction_vectorized(
+            self,
+            parameters_for_trend_calc: Tuple[float, float, float],
+            x_rel_vec,
+            y_rel_vec,
+            z_rel_vec,
+    ):
+        x_component, y_component, z_component = parameters_for_trend_calc
+        return (
+                x_component * x_rel_vec
+                + y_component * y_rel_vec
+                + z_component * z_rel_vec
         )
 
 
@@ -1069,6 +1100,17 @@ class Trend3D_elliptic(Trend3D_conic):
         # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
         return self._ellipticTrendFunction(parameters_for_trend_calc, x1, y1, z1)
 
+    def _trendValueCalculation_vectorized(self, parameters_for_trend_calc, x_vec, y_vec, k_vec, zinc):
+        # Elliptic
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z1_vec = (k_vec - self._start_layer + 0.5) * zinc - self._z_center
+        x1_vec = x_vec - self._x_center
+        y1_vec = y_vec - self._y_center
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        return self._ellipticTrendFunction_vectorized(parameters_for_trend_calc, x1_vec, y1_vec, z1_vec)
+
     def _trendValueCalculationSimBox(
             self,
             parameters_for_trend_calc: Tuple[float, float, float, float, float],
@@ -1109,6 +1151,31 @@ class Trend3D_elliptic(Trend3D_conic):
 
         x_rel = x - x_center
         y_rel = y - y_center
+        x_rotated = x_rel * cos_theta - y_rel * sin_theta
+        y_rotated = x_rel * sin_theta + y_rel * cos_theta
+        return np.sqrt(np.square(x_rotated / a) + np.square(y_rotated / b))
+
+    def _ellipticTrendFunction_vectorized(
+            self,
+            parameters_for_trend_calc: Tuple[float, float, float, float, float],
+            x_vec,
+            y_vec,
+            z_vec,
+    ):
+        # Input(x,y,z) must be relative to reference point(xCenter, yCenter, zCenter)
+        sin_theta, cos_theta, tan_alpha, a, b = parameters_for_trend_calc
+        index_vec = np.arange(len(z_vec))
+        selected= index_vec[z_vec!=0]
+        L = np.zeros(len(z_vec), np.float32)
+        x_center = np.zeros(len(z_vec), np.float32)
+        y_center = np.zeros(len(z_vec), np.float32)
+
+        L[selected] = z_vec[selected] * tan_alpha
+        x_center[selected] = -L[selected] * sin_theta
+        y_center[selected] = -L[selected] * cos_theta
+
+        x_rel = x_vec - x_center
+        y_rel = y_vec - y_center
         x_rotated = x_rel * cos_theta - y_rel * sin_theta
         y_rotated = x_rel * sin_theta + y_rel * cos_theta
         return np.sqrt(np.square(x_rotated / a) + np.square(y_rotated / b))
@@ -1225,6 +1292,17 @@ class Trend3D_hyperbolic(Trend3D_conic):
         # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
         return self._hyperbolicTrendFunction(parameters_for_trend_calc, x1, y1, z1)
 
+    def _trendValueCalculation_vectorized(self, parameters_for_trend_calc, x_vec, y_vec, k_vec, zinc):
+        # Hyperbolic
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z1_vec = (k_vec - self._start_layer + 0.5) * zinc - self._z_center
+        x1_vec = x_vec - self._x_center
+        y1_vec = y_vec - self._y_center
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        return self._hyperbolicTrendFunction_vectorized(parameters_for_trend_calc, x1_vec, y1_vec, z1_vec)
+
     def _trendValueCalculationSimBox(
             self,
             parameters_for_trend_calc: HyperbolicTrendParameters,
@@ -1279,6 +1357,45 @@ class Trend3D_hyperbolic(Trend3D_conic):
             zero_point = -a * np.sqrt(1 + np.square(y_rotated_by_theta / b))
 
         return 1.0 - abs(x_rotated_by_theta / zero_point)
+
+    def _hyperbolicTrendFunction_vectorized(
+            self,
+            parameters_for_trend_calc: HyperbolicTrendParameters,
+            x_vec,
+            y_vec,
+            z_vec
+    ):
+        # Hyperbolic
+        sin_theta, cos_theta, tan_alpha, tan_beta, a, b = parameters_for_trend_calc
+
+        # The center point is changed by depth. There are two angles that can specify this
+        # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
+        # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
+        # First shift the center point in azimuth direction
+        L = -z_vec * tan_alpha
+        x_center = L * sin_theta
+        y_center = L * cos_theta
+
+        # Secondly, shift the center point further, but now orthogonal to azimuth direction.
+        L = -z_vec * tan_beta
+        x_center = L * cos_theta + x_center
+        y_center = -L * sin_theta + y_center
+
+        x_rel = x_vec - x_center
+        y_rel = y_vec - y_center
+        x_rotated_by_theta = x_rel * cos_theta - y_rel * sin_theta
+        y_rotated_by_theta = x_rel * sin_theta + y_rel * cos_theta
+
+        zero_point = np.zeros(len(x_rotated_by_theta), np.float32)
+        index_vec = np.arange(len(x_rotated_by_theta))
+
+        selected= index_vec[x_rotated_by_theta > 0]
+        zero_point[selected] = a * np.sqrt(1 + np.square(y_rotated_by_theta[selected] / b))
+
+        selected= index_vec[x_rotated_by_theta <= 0]
+        zero_point[selected] = -a * np.sqrt(1 + np.square(y_rotated_by_theta[selected] / b))
+
+        return 1.0 - np.abs(x_rotated_by_theta / zero_point)
 
     def _calculateTrendModelParam(self, use_relative_azimuth: bool = False) -> HyperbolicTrendParameters:
         # Calculate the 3D trend values for Hyperbolic
@@ -1607,6 +1724,17 @@ class Trend3D_elliptic_cone(Trend3D_conic):
         # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
         return self._ellipticConeTrendFunction(parameters_for_trend_calc, x1, y1, z1, zinc)
 
+    def _trendValueCalculation_vectorized(self, parameters_for_trend_calc, x_vec, y_vec, k_vec, zinc):
+        # Elliptic cone
+
+        # Calculate x,y,z in sim box coordinates with origin in reference point
+        z1 = (k_vec - self._start_layer + 0.5) * zinc - self._z_center
+        x1 = x_vec - self._x_center
+        y1 = y_vec - self._y_center
+
+        # Calculate trend value for point(x,y,z) relative to reference point (xCenter, yCenter, zCenter)
+        return self._ellipticConeTrendFunction_vectorized(parameters_for_trend_calc, x1, y1, z1, zinc)
+
     def _trendValueCalculationSimBox(
             self,
             parameters_for_trend_calc: HyperbolicTrendParameters,
@@ -1662,6 +1790,46 @@ class Trend3D_elliptic_cone(Trend3D_conic):
 
         x_rel = x - x_center
         y_rel = y - y_center
+        x_rotated_by_theta = x_rel * cos_theta - y_rel * sin_theta
+        y_rotated_by_theta = x_rel * sin_theta + y_rel * cos_theta
+
+        return np.sqrt(np.square(x_rotated_by_theta / a) + np.square(y_rotated_by_theta / b))
+
+    def _ellipticConeTrendFunction_vectorized(
+            self,
+            parameters_for_trend_calc: HyperbolicTrendParameters,
+            x_vec,
+            y_vec,
+            z_vec,
+            zinc: Union[int, float],
+    ):
+        # Elliptic cone
+        sin_theta, cos_theta, tan_alpha, tan_beta, a, _ = parameters_for_trend_calc
+
+        z_top = 0.0
+        z_thickness = (self._end_layer - self._start_layer + 1) * zinc
+
+        a_base = a
+        a_top = a * self.relative_size_of_ellipse.value
+        da = a_base - a_top
+        a = a_top + da * (z_vec - z_top) / z_thickness
+        b = a * self.curvature.value
+
+        # The center point is changed by depth. There are two angles that can specify this
+        # The angle alpha (which is 90 -stacking angle) will shift the center point along azimuth direction.
+        # The angle beta (migration angle) will shift the center point orthogonal to azimuth direction.
+        # First shift the center point in azimuth direction
+        L = -z_vec * tan_alpha
+        x_center = L * sin_theta
+        y_center = L * cos_theta
+
+        # Secondly, shift the center point further, but now orthogonal to azimuth direction.
+        L = z_vec * tan_beta
+        x_center = L * cos_theta + x_center
+        y_center = -L * sin_theta + y_center
+
+        x_rel = x_vec - x_center
+        y_rel = y_vec - y_center
         x_rotated_by_theta = x_rel * cos_theta - y_rel * sin_theta
         y_rotated_by_theta = x_rel * sin_theta + y_rel * cos_theta
 
