@@ -386,22 +386,11 @@ Debug output:  z_center (sim box): {self._z_center}''')
             num_defined_cells = len(cell_index_defined)
             values_in_selected_cells = np.zeros(num_defined_cells, np.float32)
             parameters_for_trend_calc = self._calculateTrendModelParam()
-            vectorized_trend_calc = True
-            if not vectorized_trend_calc:
-                for indx in range(num_defined_cells):
-                    x = cell_center_points[indx, 0]
-                    y = cell_center_points[indx, 1]
-
-                    k = cell_indices[indx, 2]
-
-                    trend_value = self._trendValueCalculation(parameters_for_trend_calc, x, y, k, zinc)
-                    values_in_selected_cells[indx] = trend_value
-            else:
-                index_vector = np.arange(num_defined_cells)
-                x_vec = cell_center_points[index_vector, 0]
-                y_vec = cell_center_points[index_vector, 1]
-                k_vec = cell_indices[index_vector, 2]
-                values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc, 
+            index_vector = np.arange(num_defined_cells)
+            x_vec = cell_center_points[index_vector, 0]
+            y_vec = cell_center_points[index_vector, 1]
+            k_vec = cell_indices[index_vector, 2]
+            values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc, 
                                                                                   x_vec, y_vec, k_vec, zinc)
 
         min_value = values_in_selected_cells.min()
@@ -709,9 +698,8 @@ class Trend3D_linear(Trend3D):
                 + y_component * y_rel
                 + z_component * z_rel
         )
-
+    @staticmethod
     def _linearTrendFunction_vectorized(
-            self,
             parameters_for_trend_calc: Tuple[float, float, float],
             x_rel_vec,
             y_rel_vec,
@@ -1155,8 +1143,8 @@ class Trend3D_elliptic(Trend3D_conic):
         y_rotated = x_rel * sin_theta + y_rel * cos_theta
         return np.sqrt(np.square(x_rotated / a) + np.square(y_rotated / b))
 
+    @staticmethod
     def _ellipticTrendFunction_vectorized(
-            self,
             parameters_for_trend_calc: Tuple[float, float, float, float, float],
             x_vec,
             y_vec,
@@ -1358,8 +1346,8 @@ class Trend3D_hyperbolic(Trend3D_conic):
 
         return 1.0 - abs(x_rotated_by_theta / zero_point)
 
+    @staticmethod
     def _hyperbolicTrendFunction_vectorized(
-            self,
             parameters_for_trend_calc: HyperbolicTrendParameters,
             x_vec,
             y_vec,
