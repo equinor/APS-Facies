@@ -1,5 +1,5 @@
 FROM registry.git.equinor.com/sdp/docker/rms:11.1.2
-LABEL version="5.0.0" \
+LABEL version="5.1.0" \
       maintainer="snis@equinor.com" \
       description="This is the Docker image for building, and testing the APS-GUI." \
       "com.statoil.vendor"="Equinor ASA"
