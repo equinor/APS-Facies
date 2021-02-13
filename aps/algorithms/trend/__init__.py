@@ -304,11 +304,15 @@ Debug output:   Stacking type:  {stacking_direction}''')
     ):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
+                     The trend is calculated in simulation box.
         """
         from aps.utils.roxar.grid_model import GridSimBoxSize
         # Check if specified grid model exists and is not empty
         if grid_model.is_empty(realization_number):
-            raise ValueError(f'Error: Specified grid model: {grid_model.name} is empty for realization {realization_number}.')
+            raise ValueError(f'Error: Specified grid model: {grid_model.name} is empty'
+                             f'       for realization {realization_number}.')
+
+        # Using simbox indexer
         grid_3d = grid_model.get_grid(realization_number)
         grid_indexer = grid_3d.simbox_indexer
         (nx, ny, nz) = grid_indexer.dimensions
@@ -325,13 +329,29 @@ Debug output:   Stacking type:  {stacking_direction}''')
             sim_box_attributes.y_length,
             sim_box_thickness,
         )
+        # For the selected and active cell numbers defined by cell_index_defined
+        # get the cell center points and the ijk indices in simbox indexing system.
+        # Cell center points are in real coordinates, not simbox coordinates.
+        # This is OK in FMU mode since the ERTBOX is used, and is OK for grid
+        # that does not have dual grid indexing. The only case where grid cell position
+        # is calculated explicitly in simbox is when running without FMU AHM mode
+        # and the grid has reverse staircase faults (dual index system).
+        cell_center_points = None
+        ijk_cell_indices = grid_indexer.get_indices(cell_index_defined)
+        if grid_3d.has_dual_index_system:
+            # Do not use cell center points (since they come from the real grid)
+            # but use x,y coordinates from simulation box coordinate system
+            cell_center_points = sim_box_attributes.calculate_cell_center_points(ijk_cell_indices)
+        else:
+            cell_center_points = grid_3d.get_cell_centers(cell_index_defined)
 
-        cell_center_points = grid_3d.get_cell_centers(cell_index_defined)
-        cell_indices = grid_indexer.get_indices(cell_index_defined)
+
 
         zonation = grid_indexer.zonation
         layer_ranges = zonation[zone_number - 1]
 
+        # In simbox there is only one interval of layers per zone and they 
+        # come after each other and layer numbering increases downwards
         start_layer = np.infty
         end_layer = -np.infty
         for layer in layer_ranges:
@@ -352,9 +372,9 @@ Debug output:  In {self._class_name}
 Debug output:  Zone name: {zone_name}
 Debug output:  SimboxThickness: {sim_box_thickness}
 Debug output:  Zinc: {zinc}
-Debug output:  nx,ny,nz: {nx}, {ny}, {nz}
-Debug output:  Start layer in zone: {start_layer + 1}
-Debug output:  End layer in zone: {end_layer + 1}
+Debug output:  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}
+Debug output:  Start simbox layer in zone: {start_layer + 1}
+Debug output:  End   simbox layer in zone: {end_layer + 1}
 Debug output:  Trend type: {self.type.name}''')
             if self.type != TrendType.RMS_PARAM:
                 print(f'''\
@@ -389,7 +409,7 @@ Debug output:  z_center (sim box): {self._z_center}''')
             index_vector = np.arange(num_defined_cells)
             x_vec = cell_center_points[index_vector, 0]
             y_vec = cell_center_points[index_vector, 1]
-            k_vec = cell_indices[index_vector, 2]
+            k_vec = ijk_cell_indices[index_vector, 2]
             values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc, 
                                                                                   x_vec, y_vec, k_vec, zinc)
 

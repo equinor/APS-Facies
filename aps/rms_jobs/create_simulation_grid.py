@@ -1,11 +1,21 @@
-# This module is used in FMU workflows to import gaussian field values from disk into APS. 
-# Here we can assume that the project.current_realisation = 0 always since FMU ONLY run with one 
-# realization in the RMS project and should have shared grid and shared parameters only.
+''' This module is used in FMU workflows to import gaussian field values from 
+    disk into APS. Here we can assume that the project.current_realisation = 0 
+    always since FMU ONLY run with one realization in the RMS project and 
+    should have shared grid and shared parameters only. The grid model to be
+    created here should have same lateral grid size and grid increments and
+    same rotation. The number of layers is use defined, and the vertical
+    z increment can be arbitary. The purpose of the grid is to be a 3D array
+    to save the GRF values to be exchanged between ERT and APS.
+'''
 
 import xtgeo
 
+from numpy import pi
+from roxar import Direction
+
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
+from aps.utils.roxar.grid_model import GridSimBoxSize
 
 
 def get_grid_rotation(geometry):
@@ -26,7 +36,7 @@ def run(
         project,
         aps_model:                APSModel,
         fmu_simulation_grid_name: str,
-        max_fmu_grid_depth:       int,
+        max_fmu_grid_layers:       int,
         debug_level:              Debug,
         **kwargs,
 ):
@@ -39,18 +49,63 @@ def run(
         print(f'-- Creating ERT simulation box: {fmu_simulation_grid_name}')
     if debug_level >= Debug.VERBOSE:
         print(f'-- Using grid model: {aps_model.grid_model_name} as reference grid')
-        print(f'-- Using realization number: {project.current_realisation} for reference grid') 
-    reference_grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
-    nx, ny, _ = reference_grid.dimensions
-    dimension = nx, ny, max_fmu_grid_depth
-    geometry = reference_grid.get_geometrics(return_dict=True)
 
+    grid_model = project.grid_models[aps_model.grid_model_name]
+    grid = grid_model.get_grid(project.current_realisation)
+
+    attributes = GridSimBoxSize(grid, debug_level=debug_level)
+    # The number of cells is defined by the simbox grid dimensions.
+    # The physical size of the simulation box grid defined below is defined such that
+    # the grid increments match the average grid increments of the physical 3D grid.
+    # The thickness and depth of the grid are arbitrarily choosen.
+
+    simbox_nx = attributes.simbox_nx
+    simbox_ny = attributes.simbox_ny
+    xinc = attributes.x_length / attributes.nx
+    yinc = attributes.y_length / attributes.ny
+    x_length = xinc * simbox_nx
+    y_length = yinc * simbox_ny
+    z_length = 100.0
+    simbox_nz = max_fmu_grid_layers
+    zinc = z_length / simbox_nz
+
+    # The origo for simbox grid is defined from the 3D grid with real geometry.
+    # It is not identical since the sim box may have larger number of grid cells
+    # than the geo grid due to reverse stair step faults.
+    # The origo is calculated by first calculating the midpoint of the four
+    # corner points of the geogrid and use that as origo for a rotation
+    # of a rectangle with length and width estimated from the geogrid and with
+    # the centerpoint of the rectangle in the same location as the centerpoint
+    # from the geo grid. The orientation will be the same as the orientation
+    # estimated from the geo grid. There are no practical consequences that
+    # there are small differences in xy layout of the simbox grid and the
+    # geo grid since the simbox grids main purpose is to be a 3D array keeping
+    # property values to be exchanged with ERT. Since it simplifies correct
+    # handling of variogram parameters and anisotropy directions the orientation
+    # should be as close to the geo grid as possible and the grid increments
+    # should also be as close as possible with the geo grid.
+
+    rotation_anticlockwise_degrees = -attributes.azimuth_angle
+    x0, y0 = attributes.estimated_origo()
+    z0 = 0.0
+
+    dimension = (simbox_nx, simbox_ny, simbox_nz)
+    origin =(x0, y0, z0)
+
+    increment = (xinc, yinc, zinc)
+    # Left handed for flip = 1
+    # Right handed for flip = -1
+    flip = 1
+    if attributes.handedness == Direction.right:
+        flip = -1
+
+    # xtgeo create_box assume counter clockwise rotation in contrast to RMS
     simulation_grid = xtgeo.Grid()
     simulation_grid.create_box(
         dimension,
-        origin=get_origin(geometry),
-        rotation=get_grid_rotation(geometry),
-        increment=get_increments(geometry),
-        flip=reference_grid.estimate_flip(),
+        origin=origin,
+        rotation=rotation_anticlockwise_degrees,
+        increment=increment,
+        flip=flip,
     )
     simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)

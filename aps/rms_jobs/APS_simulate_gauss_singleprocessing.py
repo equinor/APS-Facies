@@ -74,7 +74,7 @@ def run_simulations(
         grid_attributes = GridAttributes(grid, debug_level=debug_level)
         num_layers_per_zone = grid_attributes.num_layers_per_zone
 
-    nx, ny, nz = grid_attributes.sim_box_size.dimensions
+    nx, ny, nz = grid_attributes.simbox_dimensions
 
     # Calculate grid cell size
     dx = grid_attributes.sim_box_size.x_length / nx
@@ -106,7 +106,7 @@ def run_simulations(
 
         if debug_level >= Debug.ON:
             print('-- Zone: {}'.format(zone_number))
-        if debug_level >= Debug.VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             start = grid_attributes.start_layers_per_zone[zone_index]
             end = grid_attributes.end_layers_per_zone[zone_index]
             print('--   Grid layers: {}     Start layer: {}     End layer: {}'.format(num_layers, start + 1, end))
@@ -143,7 +143,7 @@ def run_simulations(
                     f'     NZ for this zone        : {nz}\n'
                     f'     DX                      : {dx}\n'
                     f'     DY                      : {dy}\n'
-                    f'     DZ for this zone        : {dz}'
+                    f'     DZ for this zone        : {dz}\n'
                 )
 
             # Define variogram
@@ -151,7 +151,7 @@ def run_simulations(
 
             if debug_level >= Debug.VERY_VERBOSE:
                 nx_padding, ny_padding, nz_padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
-                print('Debug output: Grid dimensions with padding for simulation:')
+                print( '---  Grid dimensions with padding for simulation:')
                 print(f'     nx: {nx}   nx with padding: {nx_padding}')
                 print(f'     ny: {ny}   ny with padding: {ny_padding}')
                 print(f'     nz: {nz}   nz with padding: {nz_padding}')
@@ -163,12 +163,12 @@ def run_simulations(
             if debug_level >= Debug.VERBOSE:
                 if region_number > 0:
                     print(
-                        f'--- Finished running simulation of {gauss_field_name} for zone,region: '
+                        f'-- Finished running simulation of {gauss_field_name} for zone,region: '
                         f'({zone_number}, {region_number})\n'
                     )
                 else:
                     print(
-                        f'--- Finished running simulation of {gauss_field_name} for zone: {zone_number}\n'
+                        f'-- Finished running simulation of {gauss_field_name} for zone: {zone_number}\n'
                     )
 
         set_continuous_3d_parameter_values_in_zone_region(

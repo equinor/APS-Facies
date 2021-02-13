@@ -10,6 +10,7 @@ from pathlib import Path
 
 import numpy as np
 import xtgeo
+from xtgeo.grid3d import GridProperty
 
 from roxar import Project
 from roxar.grids import Grid3D, GridModel
@@ -31,7 +32,7 @@ if TYPE_CHECKING:
 def create_get_property(
         project: Project,
         aps_model: Optional[Union[APSModel, str]],
-) -> Callable[[str, Optional[str]], xtgeo.GridProperty]:
+) -> Callable[[str, Optional[str]], GridProperty]:
     def get_property(name, grid_name=None):
         if grid_name is None:
             if aps_model is None:
@@ -422,7 +423,6 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
         UpdateSimBoxThicknessInZones(**kwargs),
         UpdateFieldNamesInZones(**kwargs),
         UpdateGridModelName(**kwargs),
-        UpdateGridOrientation(**kwargs),
     ])
     if fmu_mode:
         print('- Prepare simulation using ERTBOX')

@@ -31,7 +31,7 @@ class JobConfig:
             'model_file': model_file,
             'output_model_file': model_file,
             'global_variables': self.global_variables_file,
-            'max_fmu_grid_depth': self.max_fmu_grid_depth,
+            'max_fmu_grid_layers': self.max_fmu_grid_layers,
             'fmu_mode': self.run_fmu_workflows,
             'fmu_mode_only_param': self._only_run_fmu_variables_update,
             'fmu_simulation_grid_name': self.fmu_grid_name,
@@ -151,7 +151,7 @@ class JobConfig:
             return True
 
     @property
-    def max_fmu_grid_depth(self):
+    def max_fmu_grid_layers(self):
         return self._config['fmu']['maxDepth']['value']
 
     @property

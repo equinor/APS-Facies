@@ -583,10 +583,11 @@ class GridSimBoxSize:
     def __init__(self, grid, debug_level=Debug.OFF):
         self.grid = grid
         self.debug_level = debug_level
+        self.ijk_handedness = Direction.right
         try:
-            self.ijk_handedness = grid.simbox_indexer.ijk_handedness
+            self.ijk_handedness = grid.grid_indexer.ijk_handedness
         except AttributeError:
-            self.ijk_handedness = grid.simbox_indexer.handedness
+            self.ijk_handedness = grid.grid_indexer.handedness
 
         if self.debug_level >= Debug.VERY_VERBOSE:
             print(
@@ -596,10 +597,24 @@ class GridSimBoxSize:
             )
             if self.ijk_handedness == Direction.right:
                 print(f'Debug output: Sim box has right-handed coordinate system')
+            else:
+                print(f'Debug output: Sim box has left-handed coordinate system')
+
+    @property
+    @cached
+    def handedness(self):
+        return self.ijk_handedness
+
+
+    @property
+    @cached
+    def simbox_dimensions(self):
+        return self.grid.simbox_indexer.dimensions
+
     @property
     @cached
     def dimensions(self):
-        return self.grid.simbox_indexer.dimensions
+        return self.grid.grid_indexer.dimensions
 
     @property
     @cached
@@ -613,31 +628,45 @@ class GridSimBoxSize:
         _, ny, _ = self.dimensions
         return ny
 
-    def _get_cell_corners_by_index(self, cell_indices):
-        if self.grid.has_dual_index_system:
-            cell_numbers = self.grid.simbox_indexer.get_cell_numbers(cell_indices)
-            return self.grid.get_cell_corners(cell_numbers)
+    @property
+    @cached
+    def simbox_nx(self):
+        nx, *_ = self.simbox_dimensions
+        return nx
+
+    @property
+    @cached
+    def simbox_ny(self):
+        _, ny, _ = self.simbox_dimensions
+        return ny
+
+    def _get_cell_corners_by_grid_index(self, cell_indices):
+        # To get cell corners, a cell index from the grid_indexer system must be used
+        # and not simbox_indexer system
+        if self.debug_level >= Debug.VERY_VERY_VERBOSE:
+            print(f'Debug output: Cell_index: {cell_indices}')
+            print(f'Debug output: Cell corners: {self.grid.get_cell_corners_by_index(cell_indices)}')
         return self.grid.get_cell_corners_by_index(cell_indices)
 
     @property
     @cached
     def cell_00(self):
-        return self._get_cell_corners_by_index((0, 0, 0))
+        return self._get_cell_corners_by_grid_index((0, 0, 0))
 
     @property
     @cached
     def cell_10(self):
-        return self._get_cell_corners_by_index((self.nx - 1, 0, 0))
+        return self._get_cell_corners_by_grid_index((self.nx - 1, 0, 0))
 
     @property
     @cached
     def cell_01(self):
-        return self._get_cell_corners_by_index((0, self.ny - 1, 0))
+        return self._get_cell_corners_by_grid_index((0, self.ny - 1, 0))
 
     @property
     @cached
     def cell_11(self):
-        return self._get_cell_corners_by_index((self.nx - 1, self.ny - 1, 0))
+        return self._get_cell_corners_by_grid_index((self.nx - 1, self.ny - 1, 0))
 
     @property
     @cached
@@ -786,15 +815,71 @@ class GridSimBoxSize:
             + (self.y1 - self.y0) * (self.y1 - self.y0)
         )
 
+    def center(self):
+        x_center = (self.x0 + self.x1 + self.x2 +self.x3)/4
+        y_center = (self.y0 + self.y1 + self.y2 +self.y3)/4
+        return x_center, y_center
+
+    def estimated_origo(self, angle_clockwise_degrees=None):
+        # Calculate an origo by rotating the rectangle 
+        # defining simbox around its center point
+        if angle_clockwise_degrees is None:
+            angle_clockwise_degrees = self.azimuth_angle
+
+        xc, yc = self.center()
+        cos_theta = np.cos(angle_clockwise_degrees * np.pi/180)
+        sin_theta = np.sin(angle_clockwise_degrees * np.pi/180)
+        x0_unrotated =  - 0.5 * self.x_length
+        y0_unrotated =  - 0.5 * self.y_length
+        x0_rotated = x0_unrotated * cos_theta + y0_unrotated * sin_theta + xc
+        y0_rotated = -x0_unrotated * sin_theta + y0_unrotated * cos_theta + yc
+        return x0_rotated, y0_rotated
+
     @property
     @cached
     def azimuth_angle(self):
+        ''' Return angle in interval [0, 360] '''
         cos_theta = (self.y2 - self.y0) / self.y_length
         sin_theta = (self.x2 - self.x0) / self.y_length
 
-        azimuth_angle = np.arctan(sin_theta / cos_theta)
+        if np.abs(cos_theta) < 0.00001:
+            if sin_theta * cos_theta > 0:
+                azimuth_angle = np.pi/2
+            else:
+                azimuth_angle = 3*np.pi/2
+        elif cos_theta  > 0:
+            # Between -pi/2 and pi/2
+            azimuth_angle = np.arctan(sin_theta / cos_theta)
+            if azimuth_angle < 0:
+                azimuth_angle = 2*np.pi + azimuth_angle
+        elif cos_theta < 0:
+            # Between pi/2 and 3*pi/2
+            azimuth_angle = np.pi + np.arctan(sin_theta / cos_theta)
         azimuth_angle *= 180.0 / np.pi
         return azimuth_angle
+
+    def calculate_cell_center_points(self, ijk_cell_indices):
+        # Get x,y for specified ijk indices from simulation box coordinate system
+        # Increments are calculated using the grid_index dimension and real lengths of the grid
+        xinc = self.x_length/self.nx
+        yinc = self.y_length/self.ny
+        ncells, _ = ijk_cell_indices.shape
+        angle = self.azimuth_angle * np.pi/180.0
+        cos_theta = np.cos(angle)
+        sin_theta = np.sin(angle)
+        x0, y0 = self.estimated_origo()
+        cell_center_xyz = np.zeros((ncells,3), dtype=np.float32)
+        if self.ijk_handedness == Direction.right:
+            # j_index = ny - 1 - j
+            y = (-ijk_cell_indices[:,1] + self.simbox_ny -1 + 0.5) * yinc
+        else:
+            y = (ijk_cell_indices[:,1] + 0.5) * yinc
+        x = (ijk_cell_indices[:,0] + 0.5) * xinc
+
+        cell_center_xyz[:,0] = x * cos_theta + y * sin_theta + x0
+        cell_center_xyz[:,1] = -x * sin_theta + y * cos_theta + y0
+        cell_center_xyz[:,2] = 0.0
+        return cell_center_xyz
 
 def getNumberOfLayersPerZone(grid, zone_number):
     indexer = grid.grid_indexer
@@ -839,11 +924,12 @@ class GridAttributes:
 
             # Get number of cells
             nx, ny, nz = self.dimensions
+            nx_simbox, ny_simbox, nz_simbox = self.simbox_dimensions
             total_cells = nx * ny * nz
 
             # Get Zone names
             zone_names = []
-            for i, zone_index in enumerate(self.indexer.zonation.keys(), start=1):
+            for i, zone_index in enumerate(self.simbox_indexer.zonation.keys(), start=1):
                 zone_name = self.grid.zone_names[zone_index]
                 zone_names.append(zone_name)
 
@@ -853,17 +939,24 @@ class GridAttributes:
             print('------------------------------------------------')
 
             # Get dimensions
-            print('Number of columns:', nx)
-            print('Number of rows:', ny)
-            print('Number of layers:', nz)
+            print('Grid dimensions:')
+            print(f'Number of columns: {nx}')
+            print(f'Number of rows:    {ny}')
+            print(f'Number of layers:  {nz}')
+            print('\n')
+            print('Simbox grid dimensions:')
+            print(f'Number of columns: {nx_simbox}')
+            print(f'Number of rows:    {ny_simbox}')
+            print(f'Number of layers:  {nz_simbox}')
+            print('\n')
             print('No. of zones:', self.num_zones)
             print('------------------------------------------------')
 
-            for i, zone_index in enumerate(self.indexer.zonation.keys(), start=1):
+            for i, zone_index in enumerate(self.simbox_indexer.zonation.keys(), start=1):
                 zone_name = grid.zone_names[zone_index]
                 # Only one interval of layers per zone for grid layers in sim box
-                assert len(self.indexer.zonation[zone_index]) == 1
-                layer_range = self.indexer.zonation[zone_index]
+                assert len(self.simbox_indexer.zonation[zone_index]) == 1
+                layer_range = self.simbox_indexer.zonation[zone_index]
                 start, *_, end = layer_range[0]
                 num_layers_in_zone = (end + 1 - start)
                 # Indexes start with 0, so add 1 to give user-friendly output
@@ -873,7 +966,7 @@ class GridAttributes:
     @property
     @cached
     def num_zones(self):
-        return len(self.indexer.zonation)
+        return len(self.simbox_indexer.zonation)
 
     @property
     @cached
@@ -883,7 +976,7 @@ class GridAttributes:
     @property
     @cached
     def cell_corners(self):
-        # Get Max and Min coordinates
+        # Get Max and Min coordinates using grid_indexer (not simbox_indexer)
         cell_numbers = self.indexer.get_cell_numbers_in_range((0, 0, 0), self.dimensions)
         return self.grid.get_cell_corners(cell_numbers)
 
@@ -921,7 +1014,7 @@ class GridAttributes:
     @cached
     def zone_names(self):
         zone_names = []
-        for zone_index in self.indexer.zonation.keys():
+        for zone_index in self.simbox_indexer.zonation.keys():
             zone_name = self.grid.zone_names[zone_index]
             zone_names.append(zone_name)
         return zone_names
@@ -930,10 +1023,10 @@ class GridAttributes:
     @cached
     def start_layers_per_zone(self):
         start_layer_per_zone = []
-        for zone_index in self.indexer.zonation.keys():
+        for zone_index in self.simbox_indexer.zonation.keys():
             # Only one interval of layers per zone for grid layers in sim box
-            assert len(self.indexer.zonation[zone_index]) == 1
-            layer_range, *_reverse = self.indexer.zonation[zone_index]
+            assert len(self.simbox_indexer.zonation[zone_index]) == 1
+            layer_range, *_reverse = self.simbox_indexer.zonation[zone_index]
             start_layer_per_zone.append(layer_range.start)
         return start_layer_per_zone
 
@@ -941,10 +1034,10 @@ class GridAttributes:
     @cached
     def end_layers_per_zone(self):
         end_layer_per_zone = []
-        for zone_index in self.indexer.zonation.keys():
+        for zone_index in self.simbox_indexer.zonation.keys():
             # Only one interval of layers per zone for grid layers in sim box
-            assert len(self.indexer.zonation[zone_index]) == 1
-            layer_range, *_reverse = self.indexer.zonation[zone_index]
+            assert len(self.simbox_indexer.zonation[zone_index]) == 1
+            layer_range, *_reverse = self.simbox_indexer.zonation[zone_index]
             end_layer_per_zone.append(layer_range.stop)
         return end_layer_per_zone
 
@@ -952,10 +1045,10 @@ class GridAttributes:
     @cached
     def num_layers_per_zone(self):
         num_layers_per_zone = []
-        for zone_index in self.indexer.zonation.keys():
+        for zone_index in self.simbox_indexer.zonation.keys():
             # Only one interval of layers per zone for grid layers in sim box
-            assert len(self.indexer.zonation[zone_index]) == 1
-            layer_range, *_reverse = self.indexer.zonation[zone_index]
+            assert len(self.simbox_indexer.zonation[zone_index]) == 1
+            layer_range, *_reverse = self.simbox_indexer.zonation[zone_index]
             num_layers_in_zone = (layer_range.stop - layer_range.start)
             num_layers_per_zone.append(num_layers_in_zone)
         return num_layers_per_zone
@@ -963,12 +1056,22 @@ class GridAttributes:
     @property
     @cached
     def indexer(self):
+        return self.grid.grid_indexer
+
+    @property
+    @cached
+    def simbox_indexer(self):
         return self.grid.simbox_indexer
 
     @property
     @cached
     def dimensions(self):
         return self.indexer.dimensions
+
+    @property
+    @cached
+    def simbox_dimensions(self):
+        return self.simbox_indexer.dimensions
 
 
 def create_zone_parameter(
@@ -987,6 +1090,7 @@ def create_zone_parameter(
     import roxar
 
     grid3d = grid_model.get_grid(realization_number)
+    set_shared = grid_model.shared
     properties = grid_model.properties
     if name in properties:
         zone_parameter = properties[name]
@@ -1003,7 +1107,7 @@ def create_zone_parameter(
     else:
 
         if debug_level >= Debug.VERBOSE:
-            print('Create zone parameter with name {} as non-shared'.format(name))
+            print(f'-- Create zone parameter with name {name}')
         # Create zone parameter connected to the grid model
         zone_parameter = properties.create(name, property_type=roxar.GridPropertyType.discrete, data_type=np.uint16)
         # Fill the parameter with zone values
