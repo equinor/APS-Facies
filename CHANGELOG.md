@@ -2,6 +2,30 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.3
+
+Includes some bug fixes for RMS 12, and 12.1, along with some optimizations.
+
+### Fixes
+* Support empty 3D grids in RMS 12
+* The plugin now handle realisation numbers greater than 1
+* Ensure that facies realizations is of type `numpy.uint8`
+* Set QA RMS parameters to non-shared if not FMU mode and shared if FMU mode
+* Remove generating empty RMS parameters for trend
+* Check whether unshared grid are empty
+* Fixed an error in `grid_model` for multi-realisation runs for grid
+* Add check to ensure that FMU mode should always use shared grid and shared 3D RMS parameters
+
+
+### Optimizations
+* Vectorisation of linear, elliptic, hyperbolic, and elliptic cone trend calculation outside FMU mode
+* Optimize numpy use when updating facies realization
+
+
+### Restructure
+* Remove unused initialisation of rms parameter.
+
+
 ## 1.3.2
 Adds full support for RMS 12.1 (beta 2)
 
