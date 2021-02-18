@@ -58,6 +58,7 @@
               value="generate"
             />
             <v-radio
+              v-tooltip="'Use this option in assisted history matching with ERT.'"
               label="Automatic select between Simulate/Export and Import"
               value="automatic_detect"
             />
