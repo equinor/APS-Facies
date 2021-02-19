@@ -71,12 +71,9 @@ def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
     iterfolder = -1
     for folder in range(MAXITER):
         if (toplevel / str(folder)).exists():
-            iterfolder = str(folder)
+            iterfolder = folder
             break
-    if int(iterfolder) <= 0:
-        return True
-    else:
-        return False
+    return iterfolder <= 0
 
 def get_export_location(create: bool = True) -> Path:
     field_location = get_ert_location() / '..' / 'output' / 'aps'
