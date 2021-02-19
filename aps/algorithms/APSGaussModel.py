@@ -1716,10 +1716,9 @@ def _transform_empiric_distribution_to_uniform(values, debug_level=Debug.OFF):
     n = len(values)
     transformed = np.zeros(n, np.float32)
     sort_index = np.argsort(values)
-    for i in range(n):
-        index = sort_index[i]
-        u = float(i) / float(n)
-        transformed[index] = u
+
+    u_vec = np.arange(0, n, 1, dtype=np.float32)/n
+    transformed[sort_index] = u_vec
 
     return transformed
 

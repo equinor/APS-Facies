@@ -58,15 +58,22 @@ def get_top_location() -> Path:
 
 
 def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
-    iteration_dir_name = get_top_location() / '0'
-    if iteration_dir_name.exists():
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('- APS is running in FMU mode for AHM:  Simulate GRF files and export to FMU')
-    else:
-        if debug_level >= Debug.VERY_VERBOSE:
-            print('- APS is running in FMU mode for AHM:  Importing updated GRF from FMU')
-    return iteration_dir_name.exists()
-
+    '''
+    Check if folder with name equal to a non-negative integer exists.
+    If a folder with name 0 is found or no folder with integer exists,
+    the APS mode is to simulate and export GRF files to be used in ERT
+    and this function return True.
+    If a folder with name 1 or 2 or 3 or ... MAXITER is found,
+    the APS mode is import updated GRF from ERT and this function return False
+    '''
+    MAXITER = 100
+    toplevel = Path("../..").absolute()
+    iterfolder = -1
+    for folder in range(MAXITER):
+        if (toplevel / str(folder)).exists():
+            iterfolder = folder
+            break
+    return iterfolder <= 0
 
 def get_export_location(create: bool = True) -> Path:
     field_location = get_ert_location() / '..' / 'output' / 'aps'

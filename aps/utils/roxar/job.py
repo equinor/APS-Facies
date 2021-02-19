@@ -111,17 +111,16 @@ class JobConfig:
     def simulate_fields(self):
         # The stored value has two values: True or False
         # If this is True and also in FMU mode to update GRF fields:
-        #  It means that it should be checked whether a directory with name 0
-        #  exist or not at the top level of the FMU directory structure
-        #  (same level as the directory fmuconfig, ert and rms directories).
-        #  If the directory with name 0 exists, it means that the fields should be simulated and exported to FMU
-        #  since 0 is the iteration number in the Ensemble Smoother algorithm and corresponds to
-        #  creating initial ensemble. If directory with name 1 or 2 or 3 ... exists instead of directory with name 0,
-        #  it means that the iteration number is > 0 which means that the smoother algorithm has updated the GRF's
+        #  It means that it should be checked if the ERT iteration is 0 or not.
+        #  If no folder with iteration exists, the default is to return True which means to simulate and export GRF files.
+        #  If folder with name 0 exist, also in this case return True.
+        #  If there exist a folder with name equal to an integer > 0, the return is False 
+        #  since in this case ERT iteration is > 0 and APS must use the updated GRF coming from ERT.
         #  In this case the GRF's should be imported into APS instead.
         # If this is False:
         #  It means that the fields should be simulated and exported regardless
-        #  of whether the directory with name 0 exist or not at the top level of the FMU directory structure.
+        #  of whether there exist any directory with positive integer number as name or not at
+        #  the top level of the FMU directory structure.
 
         if self.fmu_mode:
             # Check if simulate/export  or import
