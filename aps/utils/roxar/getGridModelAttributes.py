@@ -33,6 +33,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
     grid_attributes = GridAttributes(grid)
 
     nx, ny, nz = grid_attributes.dimensions
+    nx_simbox, ny_simbox, nz_simbox = grid_attributes.sim_box_size.simbox_dimensions
     xinc = grid_attributes.sim_box_size.x_length / nx
     yinc = grid_attributes.sim_box_size.y_length / ny
 
@@ -63,6 +64,8 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
         ('OrigoY', grid_attributes.sim_box_size.y0),
         ('NX', nx),
         ('NY', ny),
+        ('NX_simbox', nx_simbox),
+        ('NY_simbox', ny_simbox),
         ('Xinc', xinc),
         ('Yinc', yinc),
     ]

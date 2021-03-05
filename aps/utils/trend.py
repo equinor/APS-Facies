@@ -13,12 +13,15 @@ def add_trend_to_gauss_field(
         fmu_mode=False,
 ):
     '''
-    Calculate trend and add trend to simulated gaussian residual field to get the gaussian field with trend.
-    Standard deviation for residual field is calculated by using the specified relative standard deviation and the trend max minus min of trend function.
-    Returns gauss field where the grid cells defined by cell_index_defined are updated. All other grid cell values are not modified.
-    The lenght of this array is equal to the length of all active grid cells in the grid model.
-    Returns also trend values in a separate array, but this array has length equal to cell_index_defined and does only contain the values for the grid cells
-    that are selected by cell_index_defined.
+    Calculate trend and add trend to simulated gaussian residual field to get the
+    gaussian field with trend. Standard deviation for residual field is calculated
+    by using the specified relative standard deviation and the
+    trend max minus min of trend function. Returns gauss field where the grid
+    cells defined by cell_index_defined are updated. All other grid cell values
+    are not modified. The lenght of this array is equal to the length of all
+    active grid cells in the grid model. Returns also trend values in a separate
+    array, but this array has length equal to cell_index_defined and does only
+    contain the values for the grid cells that are selected by cell_index_defined.
     '''
     grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
@@ -61,13 +64,13 @@ def add_trend_to_gauss_field(
     # updates array values for the selected grid cells
     gauss_field_values[cell_index_defined] = val
     if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: Trend minmax_difference = ' + str(minmax_difference))
-        print('Debug output: SimBoxThickness = ' + str(sim_box_thickness))
-        print('Debug output: RelStdDev = ' + str(rel_std_dev))
-        print('Debug output: Sigma = ' + str(sigma))
-        print('Debug output: Min trend, max trend    : ' + str(trend_values.min()) + ' ' + str(trend_values.max()))
-        print('Debug output: Residual min,max        : ' + str(sigma * residual_values.min()) + ' ' + str(sigma * residual_values.max()))
-        print('Debug output: trend + residual min,max: ' + str(val.min()) + ' ' + str(val.max()))
+        print(f'Debug output: Trend minmax_difference = {minmax_difference}')
+        print(f'Debug output: SimBoxThickness = {sim_box_thickness}')
+        print(f'Debug output: RelStdDev = {rel_std_dev}')
+        print(f'Debug output: Sigma = {sigma}')
+        print(f'Debug output: Min trend, max trend    :  {trend_values.min()}  {trend_values.max()}')
+        print(f'Debug output: Residual min,max        :  {sigma * residual_values.min()}  {sigma * residual_values.max()}')
+        print(f'Debug output: trend + residual min,max:  {val.min()}  {val.max()}')
 
     return gauss_field_values
 
@@ -170,6 +173,8 @@ def add_trends_to_field(
     )
 
     # Write back to RMS project the untransformed gaussian values with trend for the zone
+    if debug_level >= Debug.VERBOSE:
+        print(f'-- Add trend to: {gf_name}')
     update_rms_parameter(
         grid_model,
         gf_name,

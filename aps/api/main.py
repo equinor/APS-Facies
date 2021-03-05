@@ -53,12 +53,12 @@ def run(config):
 
                         run_import_fields(
                             load_dir=kwargs['fmu_export_location'],
-                            grid_name=kwargs['rms_grid_name'],
+                            geo_grid_name=kwargs['rms_grid_name'],
                             **kwargs
                         )
                 else:
                     run_import_fields(
-                        grid_name=kwargs['rms_grid_name'],
+                        geo_grid_name=kwargs['rms_grid_name'],
                         **kwargs
                     )
 

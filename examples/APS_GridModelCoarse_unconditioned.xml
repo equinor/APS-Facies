@@ -25,7 +25,7 @@
     <GridModelName>GridModelCoarse</GridModelName>
     <ZoneParamName>Zone</ZoneParamName>
     <ResultFaciesParamName>FaciesReal_unconditioned</ResultFaciesParamName>
-    <PrintInfo>2</PrintInfo>
+    <PrintInfo>3</PrintInfo>
     <SeedFile>seed.dat</SeedFile>
     <WriteSeeds>yes</WriteSeeds>
     <MainFaciesTable blockedWell="BW" blockedWellLog="Facies">

@@ -305,9 +305,7 @@ export default class FmuSettings extends Vue {
   get reasonForDisabling (): string | undefined {
     if (this.useRegions) {
       return 'Regions are not supported in ERT/AHM mode. Please deselect regions if you want to run APS with ERT/AHM'
-    } else if (this.gridHasReverseFaults) {
-      return 'Grids with reverse faults, are not supported in ERT mode'
-    }
+    } 
     return undefined
   }
 
