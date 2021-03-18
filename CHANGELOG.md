@@ -2,6 +2,20 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.4
+
+### What's new
+* Enable use of stair case reverse faults (dual indexing system)
+* Default for auto-detect which fmu mode is simulated and export
+
+### Fixes
+* Better and more robust handling of rotated grid
+* Use functionality internal to APS code for part of the export/import to avoid `xtgeo` limitations
+* Updated dependencies to mitigate known vulnerabilities in some of them
+
+### Performance
+* Optimize Gaussian Random Field transformations in `numpy`
+
 ## 1.3.3
 
 Includes some bug fixes for RMS 12, and 12.1, along with some optimizations.
