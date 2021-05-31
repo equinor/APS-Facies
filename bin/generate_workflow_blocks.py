@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.13.0"
+__version__ = "0.14.0"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -104,17 +104,21 @@ APS_WRITE_LOG_FILE        = 'APS_WRITE_LOG_FILE'
 APS_INPUT_DIRECTORY       = 'APS_INPUT_DIRECTORY'
 APS_DEBUG_LEVEL           = 'APS_DEBUG_LEVEL'
 APS_GRF_TRANSFORM         = 'APS_GRF_TRANSFORM'
+RMS_PLUGINS_LIBRARY       = 'RMS_PLUGINS_LIBRARY'
 
 
 # Utils
 def _get_path_from_environment(environment_name, default_name):
-    return Path(os.environ.get(environment_name, default_name))
+    paths = os.environ.get(environment_name, default_name)
+    if isinstance(paths, str):
+        return Path(paths.split(':')[0])
+    return paths
 
 
 # The path to the repository's root folder
 temp_dir = Path(roxar.rms.get_tmp_dir())
 root_path = _get_path_from_environment(APS_ROOT, temp_dir / 'aps_gui' / 'pydist')
-release_location = Path('/project/res/APSGUI/releases/stable')
+release_location = _get_path_from_environment(RMS_PLUGINS_LIBRARY, '/project/res/APSGUI/releases/stable')
 
 # Path to where the file below is located within the repository
 relative_path = '{relative_path}'
@@ -149,7 +153,10 @@ def get_plugin_dir():
     plugin_dir = release_location
     for line in lines:
         if line.startswith('jobplugindir'):
-            plugin_dir = Path(line.split('=')[1].strip())
+            new_location = line.split('=')[1].strip()
+            if new_location:
+                # The location may be set to an empty string
+                plugin_dir = Path(new_location)
     return plugin_dir
 
 
