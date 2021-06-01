@@ -2,6 +2,19 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.5
+
+### What's new
+* Respect the environment variable `RMS_PLUGINS_LIBRARY`
+
+### Fixes
+
+* Update dependencies with known vulnerabilities
+
+### Miscellaneous
+* Ignore vulnerable dev-dependencies in CI/CD, as these are never deployed to the user
+
+
 ## 1.3.4
 
 ### What's new
