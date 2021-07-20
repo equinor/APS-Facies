@@ -86,18 +86,22 @@ def run(
     # should also be as close as possible with the geo grid.
 
     rotation_anticlockwise_degrees = -attributes.azimuth_angle
-    x0, y0 = attributes.estimated_origo()
-    z0 = 0.0
 
-    dimension = (simbox_nx, simbox_ny, simbox_nz)
-    origin =(x0, y0, z0)
-
-    increment = (xinc, yinc, zinc)
     # Left handed for flip = 1
     # Right handed for flip = -1
     flip = 1
     if attributes.handedness == Direction.right:
         flip = -1
+    # Origo is upper left if flip is -1 and lower left if flip = +1
+    x0, y0 = attributes.estimated_origo(flip=flip)
+    z0 = 0.0
+    if debug_level >= Debug.VERBOSE:
+      print(f'-- Simbox rotation origo: ({x0}, {y0})')
+   
+    dimension = (simbox_nx, simbox_ny, simbox_nz)
+    origin =(x0, y0, z0)
+
+    increment = (xinc, yinc, zinc)
 
     # xtgeo create_box assume counter clockwise rotation in contrast to RMS
     simulation_grid = xtgeo.Grid()
