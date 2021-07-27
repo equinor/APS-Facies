@@ -16,7 +16,7 @@ from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.roxar.grid_model import GridSimBoxSize
-
+from aps.utils.constants.simple import FlipDirectionXtgeo
 
 def get_grid_rotation(geometry):
     return geometry['avg_rotation']
@@ -87,12 +87,13 @@ def run(
 
     rotation_anticlockwise_degrees = -attributes.azimuth_angle
 
-    # Left handed for flip = 1
-    # Right handed for flip = -1
-    flip = 1
+    # Origo is upper left if flip is UPPER_LEFT_CORNER 
+    # and lower left if flip = LOWER_LEFT_CORNER
+
+    flip = FlipDirectionXtgeo.LOWER_LEFT_CORNER
     if attributes.handedness == Direction.right:
-        flip = -1
-    # Origo is upper left if flip is -1 and lower left if flip = +1
+        flip = FlipDirectionXtgeo.UPPER_LEFT_CORNER
+
     x0, y0 = attributes.estimated_origo(flip=flip)
     z0 = 0.0
     if debug_level >= Debug.VERBOSE:

@@ -190,3 +190,7 @@ class SimBoxThicknessConstants:
 class TransformType(IntEnum):
     EMPIRIC = 0
     CUMNORM = 1
+
+class FlipDirectionXtgeo:
+    UPPER_LEFT_CORNER = -1
+    LOWER_LEFT_CORNER = 1
