@@ -820,17 +820,24 @@ class GridSimBoxSize:
         y_center = (self.y0 + self.y1 + self.y2 +self.y3)/4
         return x_center, y_center
 
-    def estimated_origo(self, angle_clockwise_degrees=None):
+    def estimated_origo(self, angle_clockwise_degrees=None, flip=1):
         # Calculate an origo by rotating the rectangle 
         # defining simbox around its center point
+        # Flip define if origo is upper left or lower left.
+        # flip = -1 if origo is upper left corner.
+        # flip = +1 if origo is lower left corner.
         if angle_clockwise_degrees is None:
             angle_clockwise_degrees = self.azimuth_angle
 
         xc, yc = self.center()
         cos_theta = np.cos(angle_clockwise_degrees * np.pi/180)
         sin_theta = np.sin(angle_clockwise_degrees * np.pi/180)
-        x0_unrotated =  - 0.5 * self.x_length
-        y0_unrotated =  - 0.5 * self.y_length
+        if flip == -1:
+            x0_unrotated =  - 0.5 * self.x_length
+            y0_unrotated =   0.5 * self.y_length
+        else:
+            x0_unrotated =  - 0.5 * self.x_length
+            y0_unrotated =  - 0.5 * self.y_length
         x0_rotated = x0_unrotated * cos_theta + y0_unrotated * sin_theta + xc
         y0_rotated = -x0_unrotated * sin_theta + y0_unrotated * cos_theta + yc
         return x0_rotated, y0_rotated
