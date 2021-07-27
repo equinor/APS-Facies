@@ -3,7 +3,7 @@
 from warnings import warn
 import numpy as np
 import copy
-from aps.utils.constants.simple import Debug, GridModelConstants, SimBoxThicknessConstants
+from aps.utils.constants.simple import Debug, GridModelConstants, SimBoxThicknessConstants,FlipDirectionXtgeo
 from aps.utils.decorators import cached
 from aps.utils.exceptions.general import raise_error
 from aps.utils.io import print_debug_information
@@ -820,19 +820,20 @@ class GridSimBoxSize:
         y_center = (self.y0 + self.y1 + self.y2 +self.y3)/4
         return x_center, y_center
 
-    def estimated_origo(self, angle_clockwise_degrees=None, flip=1):
+    def estimated_origo(self, angle_clockwise_degrees=None, 
+                        flip=FlipDirectionXtgeo.LOWER_LEFT_CORNER):
         # Calculate an origo by rotating the rectangle 
         # defining simbox around its center point
         # Flip define if origo is upper left or lower left.
-        # flip = -1 if origo is upper left corner.
-        # flip = +1 if origo is lower left corner.
+        # flip = UPPER_LEFT_CORNER if origo is upper left corner.
+        # flip = LOWER_LEFT_CORNER if origo is lower left corner.
         if angle_clockwise_degrees is None:
             angle_clockwise_degrees = self.azimuth_angle
 
         xc, yc = self.center()
         cos_theta = np.cos(angle_clockwise_degrees * np.pi/180)
         sin_theta = np.sin(angle_clockwise_degrees * np.pi/180)
-        if flip == -1:
+        if flip == FlipDirectionXtgeo.UPPER_LEFT_CORNER:
             x0_unrotated =  - 0.5 * self.x_length
             y0_unrotated =   0.5 * self.y_length
         else:
