@@ -100,6 +100,8 @@ export default class MultipleGaussianRandomFields extends Vue {
   }
 
   deleteField (field: Field): void {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     this.$refs[`confirmation_${field.id}`][0].open('Are you sure?', `This will delete the Gaussian random field '${field.name}'`)
       .then((confirmed: boolean) => {
         if (confirmed) this.$store.dispatch('gaussianRandomFields/deleteField', { field })

@@ -533,7 +533,7 @@ clean-tests: clean-integration
 
 find-circular-dependencies:
 	cd $(WEB_DIR) && \
-	npx strip-json-comments-cli --no-whitespace $(WEB_DIR)/tsconfig.json > /tmp/tsconfig.json && \
+	npx strip-json-comments-cli@1 --no-whitespace $(WEB_DIR)/tsconfig.json > /tmp/tsconfig.json && \
 	npx madge --circular \
 	          --warning \
 	          --ts-config /tmp/tsconfig.json \

@@ -73,7 +73,7 @@ export default class PreviewHeader<
     if (!this._canSimulateAllTrends) {
       return `Some Gaussian Random Field uses a trend that cannot be simulated in the previewer (${
         TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION
-          .reduce((prev: string, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`, '')
+          .reduce((prev, curr: string) => `${prev}${prev ? ', ' : ''}'${curr}'`, '')
       })`
     }
     if (!this.value.ready) return this.value.errorMessage
