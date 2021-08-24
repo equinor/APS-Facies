@@ -12,7 +12,7 @@
       <v-card-title>
         <v-row>
           <v-col>
-            <span class="headline">
+            <span class="text-h5">
               {{ `Export the APS model${ fmuMode ? ', and FMU settings' : '' }` }}
             </span>
           </v-col>

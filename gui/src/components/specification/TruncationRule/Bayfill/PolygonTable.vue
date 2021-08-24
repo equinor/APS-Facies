@@ -5,7 +5,7 @@
     @input.stop
   >
     <template
-      v-slot:item="{ item : polygon }"
+      #item="{ item : polygon }"
     >
       <tr>
         <td class="text-left">

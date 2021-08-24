@@ -11,12 +11,12 @@
       :disabled="disabled"
       :label="label"
     >
-      <template v-slot:item="{ item, on }">
+      <template #item="{ item, on }">
         <v-list-item
           v-on="on"
         >
           <v-hover
-            v-slot:default="{ hover }"
+            v-slot="{ hover }"
             class="pa-0 ma-0"
           >
             <base-tooltip

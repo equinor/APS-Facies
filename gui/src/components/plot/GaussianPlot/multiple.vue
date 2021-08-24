@@ -89,6 +89,8 @@ export default class MultipleGaussianPlots extends Vue {
       this.size = this.value
         .map(field => {
           if (Object.values(this.$refs).length > 0) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             const el = this.$refs[`v-flex:${field.id}`][0].firstChild
             return {
               width: el.clientWidth,

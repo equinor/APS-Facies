@@ -9,7 +9,7 @@
     :current.sync="current"
   >
     <template
-      v-slot:item="{ item, isCurrent }"
+      #item="{ item, isCurrent }"
     >
       <td
         v-if="showName"

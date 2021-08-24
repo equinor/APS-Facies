@@ -7,7 +7,7 @@
     @keydown.esc="cancel"
     @keydown.enter="() => {if (!hasErrors) ok}"
   >
-    <template v-slot:activator="{ on }">
+    <template #activator="{ on }">
       <v-btn
         outlined
         color="primary"
@@ -19,7 +19,7 @@
     </template>
     <v-card>
       <v-card-title
-        class="headline"
+        class="text-h5"
       />
       <v-card-text>
         <fmu-settings
@@ -110,7 +110,7 @@
                     label="The color library for Facies"
                     :items="$store.getters['constants/faciesColors/libraries']"
                   >
-                    <template v-slot:item="{ item }">
+                    <template #item="{ item }">
                       <v-col
                         align-self="space-between"
                       >

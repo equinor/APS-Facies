@@ -9,7 +9,7 @@
     :expanded="expanded"
   >
     <template
-      v-slot:item="{ item, isSelected, on }"
+      #item="{ item, isSelected, on }"
     >
       <tr
         :class="isCurrent(item) ? 'font-weight-bold' : ''"
@@ -49,7 +49,7 @@
       </tr>
     </template>
     <template
-      v-slot:expanded-item="{ item, headers }"
+      #expanded-item="{ item, headers }"
     >
       <slot
         :item="item"
