@@ -6,10 +6,13 @@ This document described the changes between versions of the APS GUI.
 
 ### Fixes
 * Fixing a bug that resulted in shifted localisation of the ERTBOX grid relative to the modelling grid when grid index origo was set to Eclipse standard location. XTgeo assumes that origo for rotation is the same location as the origo for the grid index
+* (mock) Decode bytes to UTF8
 
 
 ### Miscellaneous
 * Use an enum for the flip direction of grids in XTgeo
+* Update dependencies
+  * Linting rule changed in update
 
 
 ## 1.3.5
