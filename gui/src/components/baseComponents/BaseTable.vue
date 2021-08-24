@@ -17,7 +17,7 @@
     hide-default-header
   >
     <template
-      v-slot:header="{ props: { headers } }"
+      #header="{ props: { headers } }"
     >
       <thead>
         <tr>
@@ -33,7 +33,7 @@
       </thead>
     </template>
     <template
-      v-slot:item="{ item, isSelected, on }"
+      #item="{ item, isSelected, on }"
     >
       <slot
         :item="item"
@@ -43,7 +43,7 @@
       />
     </template>
     <template
-      v-slot:expanded-item="{ item, headers }"
+      #expanded-item="{ item, headers }"
     >
       <slot
         :item="item"

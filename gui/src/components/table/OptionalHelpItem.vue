@@ -4,7 +4,7 @@
       v-if="hasHelp"
       bottom
     >
-      <template v-slot:activator="{ on }">
+      <template #activator="{ on }">
         <span v-on="on">{{ text }}</span>
       </template>
       <span>

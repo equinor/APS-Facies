@@ -12,7 +12,7 @@
     :select-error="selectFaciesError"
   >
     <template
-      v-slot:item="{ item : facies }"
+      #item="{ item : facies }"
     >
       <td class="dense">
         <informational-icons
@@ -64,7 +64,7 @@
       />
     </template>
     <template
-      v-slot:expanded-item="{ item, headers }"
+      #expanded-item="{ item, headers }"
     >
       <td
         :colspan="headers.length"

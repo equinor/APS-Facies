@@ -10,7 +10,6 @@
     @click:append-outer="clear"
   >
     <v-progress-linear
-      v-slot:progress
       indeterminate
     />
   </v-select>

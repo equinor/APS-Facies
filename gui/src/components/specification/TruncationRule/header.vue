@@ -16,7 +16,7 @@
         :disabled="!type"
         label="Template"
       >
-        <template v-slot:item="{ item }">
+        <template #item="{ item }">
           <truncation-rule-preview
             :value="item.text"
             :type="type"

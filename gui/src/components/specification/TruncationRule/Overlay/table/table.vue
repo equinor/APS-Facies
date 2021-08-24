@@ -7,7 +7,7 @@
     @input.stop
   >
     <template
-      v-slot:item="{ item }"
+      #item="{ item }"
     >
       <tr>
         <td>

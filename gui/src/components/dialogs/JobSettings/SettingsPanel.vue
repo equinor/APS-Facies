@@ -2,7 +2,7 @@
   <v-card outlined>
     <v-list-item>
       <v-list-item-title
-        class="headline"
+        class="text-h5"
       >
         {{ title }}
       </v-list-item-title>

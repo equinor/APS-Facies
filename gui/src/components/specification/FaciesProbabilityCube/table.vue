@@ -6,7 +6,7 @@
     elevation="0"
   >
     <template
-      v-slot:item="{ item : facies }"
+      #item="{ item : facies }"
     >
       <tr>
         <td>
