@@ -40,8 +40,7 @@ ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
 
-BUILD_NUMBERE_TRACKER := https://version-bot.herokuapp.com/v1/versions?identifier=$(PROJECT_ID)
-BUILD_NUMBER = $(shell curl --silent -X GET $(BUILD_NUMBERE_TRACKER) | $(SED) -r 's/.*"?build"?: ?([0-9]+).*/\1/g')
+BUILD_NUMBER = $(shell date "+%Y%m%d%H%M%S")
 
 ROXENV := roxenv
 HAS_ROXENV := $(shell command -v $(ROXENV) 2>/dev/null)
@@ -211,7 +210,7 @@ build-stable-gui:
 	}
 	make build-gui VUE_APP_BUILD_MODE=stable
 
-build-gui: clean-build increase-build-number build-front-end compile-files-for-plugin
+build-gui: clean-build build-front-end compile-files-for-plugin
 	cd $(BUILD_DIR) && \
 	$(ZIP) $(PLUGIN_BIN) $(PLUGIN_NAME)
 	mv $(BUILD_DIR)/$(PLUGIN_BIN) $(CODE_DIR) 2>/dev/null || mv $(BUILD_DIR)/zip.zip $(CODE_DIR)/$(PLUGIN_BIN)
@@ -229,9 +228,6 @@ __init__.py:
 	touch $(PLUGIN_DIR)/__init__.py
 
 compile-python-files: compile-pydist remove-extraneous-files
-
-increase-build-number:
-	curl --silent -X POST $(BUILD_NUMBERE_TRACKER) > /dev/null
 
 compile-pydist: move-pydist move-python-files-to-pydist
 
