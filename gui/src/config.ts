@@ -21,7 +21,9 @@ export const DEFAULT_RUN_ONLY_FMU_UPDATE = false
 
 export const DEFAULT_CREATE_FMU_GRID = isDevelopmentBuild()
 
-export const DEFAULT_FIELD_FORMAT = 'grdecl'
+export const DEFAULT_FIELD_FORMAT = 'roff'
+
+export const DEFAULT_EXTRAPOLATION_METHOD = 'extend_layer_mean'
 
 export const DEFAULT_FMU_SIMULATION_GRID_NAME = 'ERTBOX'
 

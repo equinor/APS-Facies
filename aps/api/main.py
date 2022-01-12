@@ -9,7 +9,7 @@ from aps.rms_jobs.create_simulation_grid import run as run_create_simulation_gri
 from aps.rms_jobs.create_zone_parameter import run as run_create_zone_parameter
 from aps.rms_jobs.check_grid_index_origin import run as run_check_grid_index_origin
 from aps.rms_jobs.export_fmu_config_files import run as run_export_fmu_config_files
-
+from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import run as  run_copy_rms_param_trend_to_fmu_grid
 from aps.utils.decorators import loggable, output_version_information
 from aps.utils.fmu import fmu_aware_model_file
 from aps.utils.io import create_temporary_model_file
@@ -44,6 +44,8 @@ def run(config):
                 run_normalization(**kwargs)
             if job.update_model_with_fmu_variables:
                 run_update_fmu_variables_in_model_file(**kwargs)
+            if job.run_fmu_workflows:
+                run_copy_rms_param_trend_to_fmu_grid(**kwargs)
             with fmu_aware_model_file(**kwargs):
                 if job.simulate_fields:
                     run_simulation(**kwargs)
@@ -63,5 +65,5 @@ def run(config):
                     )
 
             run_truncation(**kwargs)
-
+            print('Finished')
     execute(config)

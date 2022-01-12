@@ -42,18 +42,20 @@ def extract_values_from_fmu_grid_to_geogrid_simbox(field_values, zone, number_of
 def get_field_name(field_name, zone):
     return 'aps_{}_{}'.format(zone, field_name)
 
-def _load_field_values_grdecl(field_name, path, grid=None):
-    print(f'File name: {path}')
-    print(f'Field name: {field_name}')
-    print('Format: GRDECL')
+def _load_field_values_grdecl(field_name, path, grid=None,debug_level=Debug.OFF):
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f'--- File name: {path}')
+        print(f'--- Field name: {field_name}')
+        print('--- Format: GRDECL')
     property = xtgeo.gridproperty_from_file(path, fformat='grdecl',
                                             name=field_name, grid=grid)
     return property.values
 
-def _load_field_values_roff(field_name, path, grid=None):
-    print(f'File name: {path}')
-    print(f'Field name: {field_name}')
-    print('Format: ROFF')
+def _load_field_values_roff(field_name, path, grid=None, debug_level=Debug.OFF):
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f'--- File name: {path}')
+        print(f'--- Field name: {field_name}')
+        print('--- Format: ROFF')
     property = xtgeo.gridproperty_from_file(path, fformat='roff',
                                             name=field_name)
     return property.values
@@ -76,11 +78,11 @@ def field_name_from_full_name(full_field_name, zone_name):
         raise IOError(f'Unexpected name of field to import: {full_field_name}')
     return field_name
 
-def load_field_values(field_name: str, path: Path, grid=None):
+def load_field_values(field_name: str, path: Path, grid=None, debug_level=Debug.OFF):
     if path.suffix.upper() == '.GRDECL':
-        return _load_field_values_grdecl(field_name, path, grid=grid)
+        return _load_field_values_grdecl(field_name, path, grid=grid, debug_level=debug_level)
     elif path.suffix.upper() == '.ROFF':
-        return _load_field_values_roff(field_name, path, grid=grid)
+        return _load_field_values_roff(field_name, path, grid=grid, debug_level=debug_level)
     else:
         raise ValueError(f'Invalid file format, {path.suffix}')
 
@@ -93,7 +95,7 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
                           'the grid and parameters should be shared and realisation = 1'
         )
     debug_level = get_debug_level(**kwargs)
-    aps_model = APSModel(model_file, debug_level=None)
+    aps_model = APSModel(model_file)
     file_format = kwargs.get('field_file_format')
     if geo_grid_name is None:
         geo_grid_name = aps_model.grid_model_name
@@ -101,9 +103,7 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
     if not fmu_mode:
         raise ValueError(f'The import of GRF is only available in FMU mode with AHM')
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
-    if debug_level >= Debug.VERBOSE:
-        print(f'-- Grid model:  {geo_grid_name}')
-        print(f'-- ERT box model:  {fmu_grid_name}')
+    print(f'Import 3D parameters from files into {fmu_grid_name} ')
 
     if load_dir is None:
         load_dir = get_ert_location() / '..' / '..'
@@ -151,8 +151,6 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
         )
 
     number_of_layers_per_zone_in_geo_grid, _, _ = get_zone_layer_numbering(grid3D)
-    if debug_level >= Debug.VERY_VERBOSE:
-        print(f'--- Number of layers per zone in geogrid {number_of_layers_per_zone_in_geo_grid}')
 
     # Loop over all zones defined in aps model
     for zone in aps_model.zone_models:
@@ -174,8 +172,9 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
 
                     # field is a 3D numpy array
                     field = load_field_values(full_field_name,
-                                              field_location,
-                                              grid=xtgeo_fmu_grid)
+                                            field_location,
+                                            grid=xtgeo_fmu_grid,
+                                            debug_level=debug_level)
 
                 else:
                     raise FileNotFoundError(
@@ -200,7 +199,7 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
             zone_number_fmu_grid = 1
             if debug_level >= Debug.VERY_VERBOSE:
                 for name in parameter_names_fmu_grid:
-                    print(f'-- Update parameter {name} in {fmu_grid_name}')
+                    print(f'--- Update parameter {name} in {fmu_grid_name}')
 
             set_continuous_3d_parameter_values_in_zone_region(
                 fmu_grid_model,
@@ -214,7 +213,7 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
             # Update geogrid. Has often multiple zones
             if debug_level >= Debug.VERY_VERBOSE:
                 for name in  parameter_names_geo_grid:
-                    print(f'-- Update parameter {name} for zone number {zone_number} in {geo_grid_name}')
+                    print(f'--- Update parameter {name} for zone number {zone_number} in {geo_grid_name}')
 
             set_continuous_3d_parameter_values_in_zone_region(
                 geo_grid_model,

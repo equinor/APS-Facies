@@ -43,7 +43,7 @@ def run(project, aps_model: APSModel, debug_level, **kwargs):
 
     if must_create:
         if debug_level >= Debug.ON:
-            print(f'Creating the zone property / parameter ({zone_parameter_name})')
+            print(f'- Creating the zone property / parameter ({zone_parameter_name})')
         create_zone_parameter(
             grid_model,
             zone_parameter_name,

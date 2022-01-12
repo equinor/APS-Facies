@@ -90,11 +90,10 @@ class Trend3D:
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(
-                'Debug output: Trend:\n'
-                'Debug output: Azimuth:        {}\n'
-                'Debug output: Stacking angle: {}\n'
-                'Debug output:Stacking type:   {}\n'
-                ''.format(self.azimuth.value, self.stacking_angle.value, self.stacking_direction.value)
+                '--- Trend:\n'
+                f'--- Azimuth:        {self.azimuth.value}\n'
+                f'--- Stacking angle: {self.stacking_angle.value}\n'
+                f'--- Stacking type:  {self.stacking_direction.value}\n'
             )
 
         # Position of a reference point for the trend function.
@@ -126,11 +125,12 @@ class Trend3D:
         )
         stacking_direction = getIntCommand(trend_rule_xml, 'directionStacking', modelFile=model_file_name)
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'''\
-Debug output: Trend parameters:'
-Debug output:   Azimuth:        {azimuth}
-Debug output:   Stacking angle: {stacking_angle}
-Debug output:   Stacking type:  {stacking_direction}''')
+            print(
+                f'--- Trend parameters:\n'
+                f'---   Azimuth:        {azimuth}\n'
+                f'---   Stacking angle: {stacking_angle}\n'
+                f'---   Stacking type:  {stacking_direction}\n'
+            )
         return cls(
             azimuth_angle=azimuth,
             azimuth_angle_fmu_updatable=is_azimuth_fmu_updatable,
@@ -367,23 +367,25 @@ Debug output:   Stacking type:  {stacking_direction}''')
         zinc = sim_box_thickness / num_layers_in_zone
         if self._debug_level >= Debug.VERY_VERBOSE:
             zone_name = grid_3d.zone_names[zone_number - 1]
-            print(f'''\
-Debug output:  In {self._class_name}
-Debug output:  Zone name: {zone_name}
-Debug output:  SimboxThickness: {sim_box_thickness}
-Debug output:  Zinc: {zinc}
-Debug output:  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}
-Debug output:  Start simbox layer in zone: {start_layer + 1}
-Debug output:  End   simbox layer in zone: {end_layer + 1}
-Debug output:  Trend type: {self.type.name}''')
+            print(
+                f'---  In {self._class_name}\n'
+                f'---  Zone name: {zone_name}\n'
+                f'---  SimboxThickness: {sim_box_thickness}\n'
+                f'---  Zinc: {zinc}\n'
+                f'---  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}\n'
+                f'---  Start simbox layer in zone: {start_layer + 1}\n'
+                f'---  End   simbox layer in zone: {end_layer + 1}\n'
+                f'---  Trend type: {self.type.name}\n'
+            )
             if self.type != TrendType.RMS_PARAM:
-                print(f'''\
-Debug output:  Trend azimuth: {self.azimuth.value}
-Debug output:  StackingAngle: {self.stacking_angle.value}
-Debug output:  Direction: {self.stacking_direction.value}
-Debug output:  x_center: {self._x_center}
-Debug output:  y_center: {self._y_center}
-Debug output:  z_center (sim box): {self._z_center}''')
+                print(
+                    f'---  Trend azimuth: {self.azimuth.value}\n'
+                    f'---  StackingAngle: {self.stacking_angle.value}\n'
+                    f'---  Direction: {self.stacking_direction.value}\n'
+                    f'---  x_center: {self._x_center}\n'
+                    f'---  y_center: {self._y_center}\n'
+                    f'---  z_center (sim box): {self._z_center}\n'
+                )
             self._writeTrendSpecificParam()
 
             # Create an empty array with 0 values with correct length
@@ -391,7 +393,11 @@ Debug output:  z_center (sim box): {self._z_center}''')
 
         if isinstance(self, Trend3D_rms_param):
             from aps.utils.roxar.grid_model import getContinuous3DParameterValues
-            print(f'-- Use customized trend function. No preview is implemented for this yet.')
+            if self._debug_level >= Debug.VERBOSE:
+                print(
+                    f'-- RMS 3D parameter {self.trend_parameter_name}\n'
+                     '-- No preview is implemented for this yet.'
+                )
             # Values for all active cells
             values_in_active_cells = getContinuous3DParameterValues(
                 grid_model, self.trend_parameter_name, realization_number, debug_level=self._debug_level
@@ -447,19 +453,20 @@ Debug output:  z_center (sim box): {self._z_center}''')
                              sim_box_z_size)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output:  Trend type: {}'.format(self.type.name))
+            print(f'---  Trend type: {self.type.name}')
             if self.type != TrendType.RMS_PARAM:
-                print(f'''\
-Debug output:  Trend azimuth:      {self.azimuth.value}
-Debug output:  StackingAngle:      {self.stacking_angle.value}
-Debug output:  Direction:          {self.stacking_direction.value}
-Debug output:  x_center (sim box): {self._x_center_in_sim_box_coordinates}
-Debug output:  y_center (sim box): {self._y_center_in_sim_box_coordinates}
-Debug output:  z_center (sim box): {self._z_center_in_sim_box_coordinates}
-Debug output:  Projection type:    {projection_type}
-Debug output:  nx_preview:         {nx_preview}
-Debug output:  ny_preview:         {ny_preview}
-Debug output:  nz_preview:         {nz_preview}''')
+                print(
+                    f'---  Trend azimuth:      {self.azimuth.value}\n'
+                    f'---  StackingAngle:      {self.stacking_angle.value}\n'
+                    f'---  Direction:          {self.stacking_direction.value}\n'
+                    f'---  x_center (sim box): {self._x_center_in_sim_box_coordinates}\n'
+                    f'---  y_center (sim box): {self._y_center_in_sim_box_coordinates}\n'
+                    f'---  z_center (sim box): {self._z_center_in_sim_box_coordinates}\n'
+                    f'---  Projection type:    {projection_type}\n'
+                    f'---  nx_preview:         {nx_preview}\n'
+                    f'---  ny_preview:         {ny_preview}\n'
+                    f'---  nz_preview:         {nz_preview}\n'
+                )
             self._writeTrendSpecificParam()
 
         # Calculate parameters used in the trend function.
@@ -550,11 +557,11 @@ Debug output:  nz_preview:         {nz_preview}''')
         minmax_difference = max_value_rescaled - min_value_rescaled
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(
-                f'Debug output: Approximate estimate of min value of trend within simBox before rescaling: {min_value}')
+                f'--- Approximate estimate of min value of trend within simBox before rescaling: {min_value}')
             print(
-                f'Debug output: Approximate estimate of max value of trend within simBox before rescaling: {max_value}')
+                f'--- Approximate estimate of max value of trend within simBox before rescaling: {max_value}')
             print(
-                f'Debug output: Difference between max and min value within simBox after rescaling: {minmax_difference}')
+                f'--- Difference between max and min value within simBox after rescaling: {minmax_difference}')
 
         return minmax_difference, average_trend, values_rescaled
 
@@ -611,7 +618,7 @@ class Trend3D_linear(Trend3D):
         # After this function is called, the parent element has got a new child element
         # for the current class.
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._class_name)
+            print(f'--- call XMLADDElement from {self._class_name}')
 
         trend_element = Element('Trend')
         parent.append(trend_element)
@@ -1053,7 +1060,7 @@ class Trend3D_elliptic(Trend3D_conic):
             for the current class.
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._class_name)
+            print(f'--- call XMLADDElement from {self._class_name}')
 
         trendElement = Element('Trend')
         parent.append(trendElement)
@@ -1207,9 +1214,9 @@ class Trend3D_elliptic(Trend3D_conic):
     def _writeTrendSpecificParam(self) -> None:
         # Elliptic
         print(
-            f'Debug output:  Curvature: {self.curvature}\n'
-            f'Debug output:  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})\n'
-            f'Debug output:  Origin type: {self.origin_type.name}'
+            f'---  Curvature: {self.curvature}\n'
+            f'---  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})\n'
+            f'---  Origin type: {self.origin_type.name}'
         )
 
     def as_dict(self) -> dict:
@@ -1429,22 +1436,24 @@ class Trend3D_hyperbolic(Trend3D_conic):
         parameters_for_trend_calc = (sin_theta, cos_theta, tan_alpha, tan_beta, a, b)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Calculated parameters for Hyperbolic trend:')
-            print(f'Debug output:   sinTheta = {sin_theta}')
-            print(f'Debug output:   cosTheta = {cos_theta}')
-            print(f'Debug output:   tan_alpha = {tan_alpha}')
-            print(f'Debug output:   tanBeta  = {tan_beta}')
-            print(f'Debug output:   a = {a}')
-            print(f'Debug output:   b = {b}')
-            print('')
+            print(
+                '--- Calculated parameters for Hyperbolic trend:\n'
+                f'---   sinTheta = {sin_theta}\n'
+                f'---   cosTheta = {cos_theta}\n'
+                f'---   tan_alpha = {tan_alpha}\n'
+                f'---   tanBeta  = {tan_beta}\n'
+                f'---   a = {a}\n'
+                f'---   b = {b}\n'
+            )
+
         return parameters_for_trend_calc
 
     def _writeTrendSpecificParam(self) -> None:
         print(
-            f'Debug output:  Curvature: {self.curvature}\n'
-            f'Debug output:  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})\n'
-            f'Debug output:  Origin type: {self.origin_type.name}\n'
-            f'Debug output:  Migration angle: {self.migration_angle}'
+            f'---  Curvature: {self.curvature}\n'
+            f'---  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})\n'
+            f'---  Origin type: {self.origin_type.name}\n'
+            f'---  Migration angle: {self.migration_angle}'
         )
 
     def XMLAddElement(
@@ -1462,7 +1471,7 @@ class Trend3D_hyperbolic(Trend3D_conic):
             for the current class.
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: call XMLADDElement from {self._class_name}')
+            print(f'--- call XMLADDElement from {self._class_name}')
 
         trend_element = Element('Trend')
         parent.append(trend_element)
@@ -1529,7 +1538,7 @@ class Trend3D_rms_param(Trend3D):
         )
 
     def _writeTrendSpecificParam(self) -> None:
-        print('Debug output:  RMS parameter name for trend values: {}'.format(self.trend_parameter_name))
+        print(f'---  RMS parameter name for trend values: {self.trend_parameter_name}')
 
     @property
     def type(self) -> TrendType:
@@ -1558,7 +1567,7 @@ class Trend3D_rms_param(Trend3D):
             for the current class.
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._class_name)
+            print(f'--- call XMLADDElement from  {self._class_name}')
 
         trend_element = Element('Trend')
         parent.append(trend_element)
@@ -1673,7 +1682,7 @@ class Trend3D_elliptic_cone(Trend3D_conic):
             for the current class.
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._class_name)
+            print(f'--- call XMLADDElement from {self._class_name}')
 
         trend_element = Element('Trend')
         parent.append(trend_element)
@@ -1870,9 +1879,9 @@ class Trend3D_elliptic_cone(Trend3D_conic):
     def _writeTrendSpecificParam(self) -> None:
         # Elliptic cone
         print(
-            f'Debug output:  Curvature: {self.curvature}\n'
-            f'Debug output:  Migration angle: {self.migration_angle}\n'
-            f'Debug output:  Relative size: {self.relative_size_of_ellipse}\n'
-            f'Debug output:  Origin: ({self.origin.x.value}, {self.origin.y.value}, {self.origin.z.value})\n'
-            f'Debug output:  Origin type: {self.origin_type.name}'
+            f'---  Curvature: {self.curvature}\n'
+            f'---  Migration angle: {self.migration_angle}\n'
+            f'---  Relative size: {self.relative_size_of_ellipse}\n'
+            f'---  Origin: ({self.origin.x.value}, {self.origin.y.value}, {self.origin.z.value})\n'
+            f'---  Origin type: {self.origin_type.name}'
         )

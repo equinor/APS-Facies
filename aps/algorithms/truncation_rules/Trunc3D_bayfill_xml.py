@@ -154,31 +154,31 @@ class Trunc3D_bayfill(Trunc2D_Base):
             self._checkFaciesForZone()
 
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies names in truncation rule:')
+                print('--- Facies names in truncation rule:')
                 print(repr(self._faciesInTruncRule))
-                print('Debug output: Facies ordering (relative to facies in zone):')
+                print('--- Facies ordering (relative to facies in zone):')
                 print(repr(self._orderIndex))
-                print('Debug output: Facies code for facies in zone')
+                print('--- Facies code for facies in zone')
                 print(repr(self._faciesCode))
                 print('')
-                print('Debug output: Gauss fields in zone:')
+                print('--- Gauss fields in zone:')
                 print(repr(self._gaussFieldsInZone))
-                print('Debug output: Gauss fields for each alpha coordinate:')
+                print('--- Gauss fields for each alpha coordinate:')
                 for i in range(len(self._alphaIndxList)):
                     j = self._alphaIndxList[i]
                     gfName = self._gaussFieldsInZone[j]
-                    print(' {} {}'.format(str(i + 1), gfName))
+                    print(f' {(i + 1)} {gfName}')
 
         else:
             if debug_level >= Debug.VERY_VERBOSE:
                 # Create an empty object which will be initialized by set functions
-                print('Debug output: Create empty object of ' + self._className)
+                print(f'--- Create empty object of {self._className}')
 
     def __interpretXMLTree(self, trRuleXML, modelFileName):
         # Initialize object from xml tree object trRuleXML
         # Reference to main facies table which is global for the whole model
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Call Trunc3D_bayfill init')
+            print('--- Call Trunc3D_bayfill init')
 
         # Get info from the XML model file tree for this truncation rule
         # Keyword BackGroundModel
@@ -312,11 +312,11 @@ class Trunc3D_bayfill(Trunc2D_Base):
             self._orderIndex.append(fIndx)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Facies names in truncation rule:')
+            print('--- Facies names in truncation rule:')
             print(repr(self._faciesInTruncRule))
-            print('Debug output: Facies ordering:')
+            print('--- Facies ordering:')
             print(repr(self._orderIndex))
-            print('Debug output: Facies code for facies in truncation rule')
+            print('--- Facies code for facies in truncation rule')
             print(repr(self._faciesCode))
 
     def initialize(
@@ -342,7 +342,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         # Initialize data structure
         self.__init__(debug_level=debug_level)
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: Call the initialize function in {self._className}')
+            print(f'--- Call the initialize function in {self._className}')
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
@@ -492,7 +492,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             fmu_attributes: List[FmuAttribute],
     ) -> None:
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._className)
+            print(f'--- call XMLADDElement from {self._className}')
 
         # Add to the parent element a new element with specified tag and attributes.
         # The attributes are a dictionary with {name:value}
@@ -683,7 +683,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
         fIndx = self._orderIndex[4]
         P5 = faciesProb[fIndx]
         if self._debug_level >= Debug.VERY_VERY_VERBOSE and cellIndx == 0:
-            print(f'Debug output: P1,P2,P3,P4,P5: {P1} {P2} {P3} {P4} {P5}')
+            print(f'--- P1,P2,P3,P4,P5: {P1} {P2} {P3} {P4} {P5}')
         if sbhd > 0.999:
             sbhd = 0.999
         elif sbhd < 0.001:

@@ -152,7 +152,6 @@ export default class TrendSpecification extends Vue {
       .map(name => {
         return {
           text: name,
-          disabled: name === 'RMS_PARAM' && (this.$store as Store).getters.fmuMode,
         }
       })
   }

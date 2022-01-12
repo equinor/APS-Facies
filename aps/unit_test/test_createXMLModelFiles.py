@@ -345,7 +345,7 @@ def test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zo
         aps_model.setRmsRegionParamName('')
 
 
-def test_read_and_write_modelfiles_without_project_name_word_flow_name_and_region_parameter_name(debug_level=Debug.OFF):
+def test_read_and_write_modelfiles_without_project_name_work_flow_name_and_region_parameter_name(debug_level=Debug.OFF):
 
     attributes_file = 'fmu_attributes.yaml'
 
@@ -355,12 +355,12 @@ def test_read_and_write_modelfiles_without_project_name_word_flow_name_and_regio
     aps_model.setRmsRegionParamName(None)
 
     outfile1 = 'testOut4.xml'
-    aps_model.write_model(outfile1, attributes_file, debug_level=debug_level)
+    aps_model.write_model(outfile1, attributes_file, debug_level=Debug.OFF)
 
-    aps_model_2 = APSModel(outfile1, debug_level=debug_level)
+    aps_model_2 = APSModel(outfile1, debug_level=Debug.READ)
 
     outfile2 = 'testOut5.xml'
-    aps_model_2.write_model(outfile2, attributes_file, debug_level=debug_level)
+    aps_model_2.write_model(outfile2, attributes_file, debug_level=Debug.OFF)
 
     assert (compare(outfile1, outfile2))
 
@@ -421,10 +421,10 @@ def test_variogram_generation():
 def test_read_and_write_APSModel():
     print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
     outfile3 = 'testOut3.xml'
     attributes_file = 'fmu_attributes.yaml'
-    apsmodel.write_model(outfile3, attributes_file, debug_level=Debug.OFF)
+    apsmodel.write_model(outfile3, attributes_file)
     reference_file = 'testData_models/APS_sorted.xml'
     print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)
@@ -435,7 +435,7 @@ def test_updating_model1():
     print('***** Case: Update parameters case 1 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
     # Do some updates of the model
     zoneNumber = 1
     zone = apsmodel.getZoneModel(zoneNumber)
@@ -515,7 +515,7 @@ def test_updating_model2():
     print('***** Case: Update parameters case 2 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
     # Do some updates of the model
     zoneNumber = 2
     regionNumber = 4
@@ -573,7 +573,7 @@ def test_updating_model3():
     print('***** Case: Update parameters case 3 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
     # Do some updates of the model
     zoneNumber = 2
     regionNumber = 3
@@ -709,7 +709,7 @@ def test_case_1():
 
     #  --- Zone 2 ---
     apsmodel = get_case_1_zone_2()
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    read_write_model(apsmodel, Debug.ON)
 
 
 def test_case_2():
@@ -717,11 +717,11 @@ def test_case_2():
 
     #  --- Zone 1 ---
     apsmodel = get_case_2_zone_1()
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    read_write_model(apsmodel, Debug.ON)
 
     #  --- Zone 2 ---
     apsmodel = get_case_2_zone_2()
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    read_write_model(apsmodel, Debug.ON)
 
 
 def test_case_3():
@@ -729,7 +729,7 @@ def test_case_3():
 
     #  --- Zone 1 ---
     apsmodel = get_case_3_zone_1()
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    read_write_model(apsmodel, Debug.ON)
 
 
 def test_case_4():
@@ -737,7 +737,7 @@ def test_case_4():
 
     #  --- Zone 1 ---
     apsmodel = get_case_4_zone_1()
-    read_write_model(apsmodel, Debug.SOMEWHAT_VERBOSE)
+    read_write_model(apsmodel, Debug.ON)
 
 
 def get_case_1_zone_1():
@@ -782,7 +782,7 @@ def get_case_1_zone_2():
         seedFileName=SEED_FILE_NAME,
         fTable=fTable, fTable_blockedWell='BW',
         fTable_blockedWellLog='facies',
-        debug_level=Debug.SOMEWHAT_VERBOSE,
+        debug_level=Debug.ON,
     )
     # Two zones
     print('Zone: 1')
@@ -815,7 +815,7 @@ def get_case_2_zone_1():
         seedFileName=SEED_FILE_NAME,
         fTable=fTable, fTable_blockedWell='BW',
         fTable_blockedWellLog='facies',
-        debug_level=Debug.SOMEWHAT_VERBOSE,
+        debug_level=Debug.ON,
     )
 
     # Only one zone
@@ -843,7 +843,7 @@ def get_case_2_zone_2():
         seedFileName=SEED_FILE_NAME,
         fTable=fTable, fTable_blockedWell='BW',
         fTable_blockedWellLog='facies',
-        debug_level=Debug.SOMEWHAT_VERBOSE,
+        debug_level=Debug.ON,
     )
     # Two zones
     print('Zone: 1')
@@ -877,7 +877,7 @@ def get_case_3_zone_1():
         fTable=fTable,
         fTable_blockedWell='BW',
         fTable_blockedWellLog='facies',
-        debug_level=Debug.SOMEWHAT_VERBOSE,
+        debug_level=Debug.ON,
     )
     # Only one zone
     print('Zone: 1')
@@ -905,7 +905,7 @@ def get_case_4_zone_1():
         fTable=fTable,
         fTable_blockedWell='BW',
         fTable_blockedWellLog='facies',
-        debug_level=Debug.SOMEWHAT_VERBOSE,
+        debug_level=Debug.ON,
     )
     # Only one zone
     print('Zone: 1')
@@ -1694,7 +1694,7 @@ def run():
 
     test_should_not_be_able_to_add_zones_with_region_to_apsmodel_when_regionparamname_is_empty()
     test_should_not_be_able_to_remove_region_parameter_name_when_at_least_one_zone_has_region_number()
-    test_read_and_write_modelfiles_without_project_name_word_flow_name_and_region_parameter_name()
+    test_read_and_write_modelfiles_without_project_name_work_flow_name_and_region_parameter_name()
 
     test_variogram_generation()
     print('Finished')

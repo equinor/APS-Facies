@@ -31,19 +31,19 @@ def add_trend_to_gauss_field(
     zone_model = aps_model.sorted_zone_models[key]
 
     # Get trend model, relative standard deviation
-    use_trend, trend_model, rel_std_dev, rel_std_dev_fmu = zone_model.getTrendModel(gauss_field_name)
+    _, trend_model, rel_std_dev, _ = zone_model.getTrendModel(gauss_field_name)
 
     if debug_level >= Debug.VERBOSE:
         trend_type = trend_model.type.name
         if use_regions:
             print(
-                f'--- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})\n'
-                f'--- Trend type: {trend_type}'
+                f'-- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})\n'
+                f'-- Trend type: {trend_type}'
             )
         else:
             print(
-                f'--- Calculate trend for: {gauss_field_name} for zone: {zone_number}\n'
-                f'--- Trend type: {trend_type}'
+                f'-- Calculate trend for: {gauss_field_name} for zone: {zone_number}\n'
+                f'-- Trend type: {trend_type}'
             )
 
     sim_box_thickness = zone_model.sim_box_thickness
@@ -64,13 +64,14 @@ def add_trend_to_gauss_field(
     # updates array values for the selected grid cells
     gauss_field_values[cell_index_defined] = val
     if debug_level >= Debug.VERY_VERBOSE:
-        print(f'Debug output: Trend minmax_difference = {minmax_difference}')
-        print(f'Debug output: SimBoxThickness = {sim_box_thickness}')
-        print(f'Debug output: RelStdDev = {rel_std_dev}')
-        print(f'Debug output: Sigma = {sigma}')
-        print(f'Debug output: Min trend, max trend    :  {trend_values.min()}  {trend_values.max()}')
-        print(f'Debug output: Residual min,max        :  {sigma * residual_values.min()}  {sigma * residual_values.max()}')
-        print(f'Debug output: trend + residual min,max:  {val.min()}  {val.max()}')
+        print(f'--- Number of active cells:{len(cell_index_defined)} ')
+        print(f'--- Trend minmax_difference = {minmax_difference}')
+        print(f'--- SimBoxThickness = {sim_box_thickness}')
+        print(f'--- RelStdDev = {rel_std_dev}')
+        print(f'--- Sigma = {sigma}')
+        print(f'--- Min trend, max trend    :  {trend_values.min()}  {trend_values.max()}')
+        print(f'--- Residual min,max        :  {sigma * residual_values.min()}  {sigma * residual_values.max()}')
+        print(f'--- Trend + residual min,max:  {val.min()}  {val.max()}')
 
     return gauss_field_values
 
@@ -132,12 +133,14 @@ def get_defined_cells(
         fmu_mode=False,
 ):
     realization_number = project.current_realisation
+    # zone parameter is created if it does not exist
     zone_param = create_zone_parameter(
         grid_model,
         name=aps_model.zone_parameter,
         realization_number=realization_number,
         set_shared=False,
         debug_level=debug_level,
+        create_new=fmu_mode,
     )
     region_values = None
     if aps_model.use_regions:

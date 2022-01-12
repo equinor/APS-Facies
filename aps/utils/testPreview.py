@@ -194,7 +194,7 @@ def run_previewer(
     # This can now be replaced by Roxar API functions instead:
     # TODO
     rmsData = APSDataFromRMS()
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('- Read file: {rms_data_file_name}'.format(rms_data_file_name=rms_data_file_name))
     rmsData.readRMSDataFromXMLFile(rms_data_file_name)
     [
@@ -260,7 +260,7 @@ def run_previewer(
     if not zoneModel.use_constant_probabilities:
         print('Warning: Preview plots require constant facies probabilities')
         print('       Use arbitrary constant values')
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'\n ---------  Zone number : {zoneNumber} -----------------')
     faciesProb = np.zeros(nFacies, np.float32)
     for fName in faciesNames:
@@ -269,18 +269,18 @@ def run_previewer(
             v = float(pName)
             p = int(v * 1000 + 0.5)
             w = float(p) / 1000.0
-            if debug_level >= Debug.SOMEWHAT_VERBOSE:
+            if debug_level >= Debug.ON:
                 print('Zone: ' + str(zoneNumber) + ' Facies: ' + fName + ' Prob: ' + str(w))
         else:
             v = 1.0 / float(nFacies)
             p = int(v * 1000 + 0.5)
             w = float(p) / 1000.0
-            if debug_level >= Debug.SOMEWHAT_VERBOSE:
+            if debug_level >= Debug.ON:
                 print(f'Zone: {zoneNumber} Facies: {fName} Prob: {w}')
         faciesProb[i] = v
 
     # Calculate truncation map for given facies probabilities
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('Facies prob:')
         print(repr(faciesProb))
     truncObject.setTruncRule(faciesProb)
@@ -320,7 +320,7 @@ def run_previewer(
 
     # Plot the result
 
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('Make plots')
     fig = plt.figure(figsize=[20.0, 10.0])
 
@@ -439,7 +439,7 @@ def plot_truncation_map(truncation_rule, ax=None, fig=None, num_facies=None, fac
     facies_polygons = truncation_rule.truncMapPolygons()
     facies_index_per_polygon = truncation_rule.faciesIndxPerPolygon()
     # Truncation map is plotted
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(
             'Number of facies:          {num_facies}\n'
             'Number of facies polygons: {num_polygons}'.format(num_facies=num_facies, num_polygons=len(facies_polygons))

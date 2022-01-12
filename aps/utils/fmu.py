@@ -18,7 +18,7 @@ from aps.algorithms.APSGaussModel import GaussianField
 from aps.algorithms.APSModel import APSModel
 from aps.algorithms.APSZoneModel import Conform, APSZoneModel
 from aps.algorithms.trend import Trend3D_elliptic_cone, ConicTrend
-from aps.utils.constants.simple import OriginType, Debug
+from aps.utils.constants.simple import OriginType, Debug, TrendType
 from aps.utils.decorators import cached
 from aps.utils.exceptions.zone import MissingConformityException
 
@@ -215,6 +215,7 @@ class UpdateFieldNamesInZones(UpdateModel):
         super().__init__(**kwargs)
         self.project = project
         self._original_names = self._get_field_names(self.aps_model)
+        self._original_trend_param_names = self._get_trend_param_names(self.aps_model)
 
     @staticmethod
     def _get_field_names(aps_model: APSModel) -> Dict[Tuple[int, int, int], str]:
@@ -224,8 +225,23 @@ class UpdateFieldNamesInZones(UpdateModel):
                 names[(zone_model.zone_number, zone_model.region_number, i)] = field.name
         return names
 
+    @staticmethod
+    def _get_trend_param_names(aps_model: APSModel) -> Dict[Tuple[int, int, int], str]:
+        names = {}
+        for zone_model in aps_model.zone_models:
+            for i, field in enumerate(zone_model.gaussian_fields):
+                if field.trend.use_trend:
+                    trend_model = field.trend.model
+                    if trend_model.type == TrendType.RMS_PARAM:
+                        trend_param_name = trend_model.trend_parameter_name
+                        names[(zone_model.zone_number, zone_model.region_number, i)] = trend_param_name
+        return names
+
     def _get_original_field_name(self, zone_model: APSZoneModel, field_index: int) -> str:
         return self._original_names[(zone_model.zone_number, zone_model.region_number, field_index)]
+
+    def _get_original_trend_param_name(self, zone_model: APSZoneModel, field_index: int) -> str:
+        return self._original_trend_param_names[(zone_model.zone_number, zone_model.region_number, field_index)]
 
     @property
     @cached
@@ -253,20 +269,54 @@ class UpdateFieldNamesInZones(UpdateModel):
         field_name += '_' + field_model.name
         return field_name
 
+    def _get_fmu_trend_param_name(self, zone_model: APSZoneModel, field_model: GaussianField) -> str:
+        zone_name = self.zone_names[zone_model.zone_number]
+        region_name = ''
+        if zone_model.uses_region:
+            region_name = self.region_names[zone_model.region_number]
+        field_name = 'aps_' + zone_name
+        if region_name:
+            field_name += '_' + region_name
+
+        if field_model.trend.use_trend:
+            trend_model = field_model.trend.model
+            if trend_model.type == TrendType.RMS_PARAM:
+                trend_param_name = trend_model.trend_parameter_name
+                field_name += '_' + trend_param_name
+                return field_name
+        return None
+
     @staticmethod
     def _change_field_name(field_model: GaussianField, name: str) -> None:
         field_model.name = name
         field_model.variogram.name = name
         field_model.trend.name = name
 
+    @staticmethod
+    def _change_trend_param_name(field_model: GaussianField, name: str) -> None:
+        if not field_model.trend.use_trend:
+            raise ValueError('Internal error. Use trend should be true ')
+        if field_model.trend.model.type != TrendType.RMS_PARAM:
+            raise ValueError('Internal error. Trend type should be RMS_PARAM here')
+
+        field_model.trend.model.trend_parameter_name = name
+
+
     def before(self):
         self._change_names(
             name_getter=lambda zone_model, field_model, field_index: self._get_fmu_field_name(zone_model, field_model),
+        )
+        self._change_name_of_trend_params(
+            name_getter=lambda zone_model, field_model, field_index: self._get_fmu_trend_param_name(zone_model, field_model),
         )
 
     def after(self):
         self._change_names(
             name_getter=lambda zone_model, field_model, field_index: self._get_original_field_name(zone_model,
+                                                                                                   field_index),
+        )
+        self._change_name_of_trend_params(
+            name_getter=lambda zone_model, field_model, field_index: self._get_original_trend_param_name(zone_model,
                                                                                                    field_index),
         )
 
@@ -280,6 +330,20 @@ class UpdateFieldNamesInZones(UpdateModel):
                 self._change_field_name(field, name)
             rule = zone_model.truncation_rule
             rule.names_of_gaussian_fields = [mapping[name] for name in rule.names_of_gaussian_fields]
+
+
+    def _change_name_of_trend_params(self, name_getter: Callable[[APSZoneModel, GaussianField, int], str]) -> None:
+        aps_model: APSModel = self.aps_model
+        mapping = {}
+        for zone_model in aps_model.zone_models:
+            for i, field in enumerate(zone_model.gaussian_fields):
+                if field.trend.use_trend:
+                    trend_model = field.trend.model
+                    if trend_model.type == TrendType.RMS_PARAM:
+                        trend_param_name = trend_model.trend_parameter_name
+                        name = name_getter(zone_model, field, i)
+                        mapping[trend_param_name] = name
+                        self._change_trend_param_name(field, name)
 
 
 class UpdateSimBoxThicknessInZones(SimBoxDependentUpdate):
@@ -415,8 +479,9 @@ class UpdateGridOrientation(FmuModelChange):
 def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
     """Updates the name of the grid, if necessary"""
     model_file = kwargs['model_file']
+    debug_level = kwargs['debug_level']
     # Instantiate the APS model anew, as it may have been modified by `global_variables`
-    aps_model = kwargs['aps_model'] = APSModel(model_file, debug_level=None)
+    aps_model = kwargs['aps_model'] = APSModel(model_file)
 
     changes = FmuModelChanges([
         UpdateTrends(**kwargs),
@@ -425,8 +490,13 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
         UpdateGridModelName(**kwargs),
     ])
     if fmu_mode:
-        print('- Prepare simulation using ERTBOX')
+        print('FMU mode. Update APS model parameters')
         changes.before()
+        if debug_level >= Debug.VERY_VERBOSE:
+            filename = "debug_model_with_updated_param.xml"
+            print(f"--- Write model file for debug purpose: {filename} ")
+            aps_model.dump(filename)
+
     try:
         aps_model.dump(model_file)
         yield model_file
@@ -434,6 +504,11 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
         if fmu_mode:
             changes.after()
         aps_model.dump(model_file)
+        if debug_level >= Debug.VERY_VERBOSE:
+            filename = "debug_model_with original_param.xml"
+            print(f"--- Write model file for debug purpose: {filename} ")
+            aps_model.dump(filename)
+
 
 
 def find_zone_range(defined: np.ndarray) -> Tuple[int, int]:

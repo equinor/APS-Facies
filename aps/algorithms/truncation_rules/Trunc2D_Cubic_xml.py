@@ -177,7 +177,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Read data from model file in: ' + self._className)
+                print(f'--- Read data from model file in: {self._className}')
 
             # Read truncation rule for background facies from xml tree.
             # Here the hierarchy of polygons in the 2D truncation map defined by the two
@@ -197,16 +197,16 @@ class Trunc2D_Cubic(Trunc2D_Base):
             self._checkFaciesForZone()
 
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies names in truncation rule:')
+                print('--- Facies names in truncation rule:')
                 print(repr(self._faciesInTruncRule))
-                print('Debug output: Facies ordering (relative to facies in zone):')
+                print('--- Facies ordering (relative to facies in zone):')
                 print(repr(self._orderIndex))
-                print('Debug output: Facies code for facies in zone')
+                print('--- Facies code for facies in zone')
                 print(repr(self._faciesCode))
                 print('')
-                print('Debug output: Gauss fields in zone:')
+                print('--- Gauss fields in zone:')
                 print(repr(self._gaussFieldsInZone))
-                print('Debug output: Gauss fields for each alpha coordinate:')
+                print('--- Gauss fields for each alpha coordinate:')
                 for i in range(len(self._alphaIndxList)):
                     j = self._alphaIndxList[i]
                     gfName = self._gaussFieldsInZone[j]
@@ -214,7 +214,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
 
         else:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Create empty object for: ' + self._className)
+                print(f'--- Create empty object for: {self._className}')
                 #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName) -> None:
@@ -226,7 +226,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         """
         self._className = 'Trunc2D_Cubic'
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: -- Start read background model in {self._className} from model file')
+            print(f'--- Start read background model in {self._className} from model file')
         # Get info from the XML model file tree for this truncation rule
         TYPE = self.__node_index['type']
         NLIST = self.__node_index['list of nodes']
@@ -408,7 +408,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         for i in range(self.num_facies_in_truncation_rule):
             facies_name = self._faciesInTruncRule[i]
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Sum prob frac for facies {facies_name} is: {sumProbFrac[i]}')
+                print(f'--- Sum prob frac for facies {facies_name} is: {sumProbFrac[i]}')
 
             if abs(sumProbFrac[i] - 1.0) > 0.001:
                 raise ValueError(
@@ -418,7 +418,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
                 )
         self.__truncStructure = truncStructure
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: -- End read background model in {self._className} from model file')
+            print(f'--- End read background model in {self._className} from model file')
 
     def writeContentsInDataStructure(self):
         # Write common contents from base class
@@ -1119,7 +1119,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self.__init__(keyResolution=keyResolution, debug_level=debug_level)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: Call the initialize function in {self._className}')
+            print(f'--- Call the initialize function in {self._className}')
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
@@ -1131,7 +1131,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
         self.__setTruncStructure(truncStructureList)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Background facies defined:')
+            print('--- Background facies defined:')
             print(repr(self._faciesInTruncRule))
 
         # Call base class function to fill data structure with overlay facies
@@ -1335,7 +1335,7 @@ class Trunc2D_Cubic(Trunc2D_Base):
     def XMLAddElement(self, parent: Element, zone_number: str, region_number: str,
                       fmu_attributes: List[FmuAttribute]) -> None:
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._className)
+            print(f'--- call XMLADDElement from {self._className}')
         TYPE = self.__node_index['type']
         DIR = self.__node_index['direction']
         NLIST = self.__node_index['list of nodes']

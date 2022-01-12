@@ -9,7 +9,7 @@ import roxar
 
 from aps.algorithms.APSModel import APSModel
 from aps.utils.fmu import create_get_property, get_export_location, find_zone_range
-from aps.utils.methods import get_specification_file
+from aps.utils.methods import get_specification_file, get_debug_level
 from aps.utils.roxar.grid_model import get_zone_layer_numbering, GridSimBoxSize
 from aps.utils.constants.simple import Debug
 
@@ -24,12 +24,13 @@ def run(project, **kwargs):
     fmu_mode = kwargs.get('fmu_mode', False)
     if not fmu_mode:
         raise ValueError(f'The export of GRF is only available in FMU mode with AHM')
-
-    debug_level = kwargs.get('debug_level', Debug.OFF)
+    debug_level = get_debug_level(**kwargs)
     model_file = get_specification_file(**kwargs)
-    aps_model = APSModel(model_file, debug_level=None)
+    aps_model = APSModel(model_file)
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
     file_format = kwargs.get('field_file_format')
+
+    print(f"Export 3D parameter files from {fmu_grid_name}")
 
     # Get the ERTBOX grid from RMS
     fmu_grid_model = project.grid_models[fmu_grid_name]
@@ -84,5 +85,4 @@ def run(project, **kwargs):
                         fformat=file_format,
                         name=field_name,
                     )
-
 

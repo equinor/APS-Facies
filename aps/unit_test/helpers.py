@@ -45,7 +45,7 @@ def apply_truncations(
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
         print('nGaussFields: ' + str(nGaussFields))
     assert nGaussFieldsInModel == nGaussFields
@@ -58,7 +58,7 @@ def apply_truncations(
         a, nx, ny = readFile(fileName)
         alphaFields.append(a)
         assert nValues == len(alphaFields[n])
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('nValues: ' + str(nValues))
         print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
     alphaCoord = {}
@@ -70,7 +70,7 @@ def apply_truncations(
             alphaCoord[truncRule._alphaIndxList[n]] = alpha[i]
         faciesCode, fIndx = truncRule.defineFaciesByTruncRule(alphaCoord)
         faciesReal.append(faciesCode)
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('Number of shifts in alpha values for numerical reasons: ' + str(truncRule.getNCountShiftAlpha()))
     writeFile(faciesOutputFile, faciesReal, nx, ny)
 
@@ -97,7 +97,7 @@ def apply_truncations_vectorized(
     assert truncRule is not None
     assert faciesReferenceFile != ''
     nGaussFieldsInModel = truncRule.getNGaussFieldsInModel()
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('nGaussFieldsInModel: ' + str(nGaussFieldsInModel))
         print('nGaussFields: ' + str(nGaussFields))
     assert nGaussFieldsInModel == nGaussFields
@@ -110,7 +110,7 @@ def apply_truncations_vectorized(
         a, nx, ny = readFile(fileName)
         alphaFields.append(a)
         assert nValues == len(alphaFields[n])
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('nValues: ' + str(nValues))
         print('nx,ny,nx*ny: ' + str(nx) + ' ' + str(ny) + ' ' + str(nx * ny))
     alphaCoord_vectors = np.zeros((nValues, nGaussFields), np.float32)
@@ -120,7 +120,7 @@ def apply_truncations_vectorized(
         alphaCoord_vectors[:, n] = alpha_vector
     faciesCode_vector, fIndx_vector = truncRule.defineFaciesByTruncRule_vectorized(alphaCoord_vectors)
 
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print('Number of shifts in alpha values for numerical reasons: ' + str(truncRule.getNCountShiftAlpha()))
         print('facies realization:')
         print(faciesCode_vector)
@@ -172,7 +172,7 @@ def truncMapPolygons(
 
 
 def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) -> None:
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'Write file: {fileName}')
     with open(fileName, 'w') as file:
         for n in range(len(polygons)):
@@ -184,7 +184,7 @@ def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) 
                 y = int(1000 * pt[1] + 0.5)
                 pt[0] = x / 1000.0
                 pt[1] = y / 1000.0
-                if debug_level >= Debug.SOMEWHAT_VERBOSE:
+                if debug_level >= Debug.ON:
                     print('x,y: ' + str(pt[0]) + ' ' + str(pt[1]))
                 file.write(str(pt))
                 file.write('\n')

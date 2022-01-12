@@ -30,6 +30,7 @@
           :fmu-grid.sync="fmuGrid"
           :create-fmu-grid.sync="createFmuGrid"
           :field-file-format.sync="fieldFileFormat"
+          :custom-trend-extrapolation-method.sync="customTrendExtrapolationMethod"
           :export-fmu-config-files.sync="exportFmuConfigFiles"
           @update:error="e => update('fmu', e)"
         />
@@ -241,6 +242,7 @@ export default class JobSettings extends Vue {
   maxAllowedFractionOfValuesOutsideTolerance = 0
   toleranceOfProbabilityNormalisation = 0
   fieldFileFormat = ''
+  customTrendExtrapolationMethod = ''
   exportFmuConfigFiles = false
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
@@ -260,6 +262,7 @@ export default class JobSettings extends Vue {
       this.fmuGrid = fmu.simulationGrid.current
       this.createFmuGrid = fmu.create.value
       this.fieldFileFormat = fmu.fieldFileFormat.value
+      this.customTrendExtrapolationMethod = fmu.customTrendExtrapolationMethod.value
 
       this.debugLevel = parameters.debugLevel.selected
       this.transformType = parameters.transformType.selected
@@ -296,6 +299,7 @@ export default class JobSettings extends Vue {
       dispatch('fmu/simulationGrid/set', this.fmuGrid),
       dispatch('fmu/create/set', this.createFmuGrid),
       dispatch('fmu/fieldFileFormat/set', this.fieldFileFormat),
+      dispatch('fmu/customTrendExtrapolationMethod/set', this.customTrendExtrapolationMethod),
 
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),

@@ -70,6 +70,15 @@
               label="File format for export of Gaussian Random Fields"
             />
           </v-row>
+          <v-row no-gutters>
+            <v-select
+              v-model="_customTrendExtrapolationMethod"
+              v-tooltip="'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'"
+              :items="customTrendExtrapolationMethods"
+              :disabled="!hasRmsParamTrend"
+              label="RMS_PARAM trend extrapolation method for ERT/FMU grid."
+            />
+          </v-row>
         </v-col>
         <v-col cols="12">
           <v-row
@@ -119,7 +128,6 @@ import BaseTooltip from '@/components/baseComponents/BaseTooltip.vue'
 
 import { Store } from '@/store/typing'
 import { ListItem } from '@/utils/typing'
-import { DialogOptions } from '@/utils/domain/bases/interfaces'
 import GridModel from '@/utils/domain/gridModel'
 
 interface Invalid {
@@ -128,35 +136,6 @@ interface Invalid {
 
 type FieldUsage = 'generate' | 'automatic_detect'
 
-interface WarningParameters {
-  toggled: boolean
-  store: Store
-  dialog: WarningDialog
-}
-
-function warn (dialog: WarningDialog, message: string, options: DialogOptions = { width: 450 }): void {
-  dialog.open(
-    'Be aware',
-    message,
-    options,
-  )
-}
-
-function warnIfUsingCustomTrends ({ toggled, store, dialog }: WarningParameters): void {
-  const affectedFields = Object.values(store.state.gaussianRandomFields.available)
-    .filter(field => field.trend.type === 'RMS_PARAM')
-  if (toggled && affectedFields.length > 0) {
-    warn(dialog,
-      `
-<p>Some Gaussian Random Fields are using a custom Trend ('RMS_PARAM'), which is not supported in AHM-mode.</p>
-<p>More specifically, these fields uses custom trends
-<ul>
-  ${affectedFields.map(({ name, parent }) => `<li>${name} in ${store.getters['zones/byParent'](parent)}</li>`)}
-<ul>
-</p>
-`)
-  }
-}
 
 @Component({
   components: {
@@ -193,6 +172,9 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true })
   readonly fieldFileFormat: string
 
+  @Prop({ required: true })
+  readonly customTrendExtrapolationMethod: string
+
   @Prop({ required: true, type: Boolean })
   readonly exportFmuConfigFiles: boolean
 
@@ -221,8 +203,6 @@ export default class FmuSettings extends Vue {
 
   get _runFmuWorkflows (): boolean { return this.runFmuWorkflows }
   set _runFmuWorkflows (toggled: boolean) {
-    const params = { toggled, store: this.$store, dialog: (this.$refs.confirm as WarningDialog) }
-    warnIfUsingCustomTrends(params)
     this.$emit('update:runFmuWorkflows', toggled)
     if (toggled) {
       this._onlyUpdateFromFmu = false
@@ -250,6 +230,15 @@ export default class FmuSettings extends Vue {
 
   get fieldFileFormats (): string[] { return this.$store.state.fmu.fieldFileFormat.legal }
 
+  get _customTrendExtrapolationMethod (): string { return this.customTrendExtrapolationMethod }
+  set _customTrendExtrapolationMethod (format: string) {
+    this.$emit('update:customTrendExtrapolationMethod', format)
+  }
+
+  get customTrendExtrapolationMethods (): string[] {
+    return this.$store.state.fmu.customTrendExtrapolationMethod.legal
+  }
+
   get _exportFmuConfigFiles (): boolean { return this.exportFmuConfigFiles }
   set _exportFmuConfigFiles (toggle: boolean) {
     this.$emit('update:exportFmuConfigFiles', toggle)
@@ -265,6 +254,13 @@ export default class FmuSettings extends Vue {
   get hasErrors (): boolean { return Object.values(this.invalid).some(invalid => invalid) }
 
   get hasGrid (): boolean { return !!this.$store.getters.gridModel }
+
+  get hasRmsParamTrend (): boolean {
+    const affectedFields = Object.values((this.$store as Store).state.gaussianRandomFields.available)
+        .filter(field => field.trend.type === 'RMS_PARAM')
+    if (affectedFields.length > 0) { return true }
+    return false
+  } 
 
   get fmuGridExists (): boolean {
     return this.availableGridModels

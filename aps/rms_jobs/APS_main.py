@@ -155,9 +155,9 @@ def check_and_normalise_probability(
 
     if debug_level >= Debug.VERY_VERBOSE:
         if use_const_probability:
-            print('Debug output: Check normalisation of probabilities.')
+            print('--- Check normalisation of probabilities.')
         else:
-            print('Debug output: Check normalisation of probability cubes.')
+            print('--- Check normalisation of probability cubes.')
 
     probability_defined = []
     num_cell_with_modified_probability = 0
@@ -167,7 +167,7 @@ def check_and_normalise_probability(
             facies_name = item.name
             values = item.value
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies: {} with constant probability: '.format(facies_name, values[0]))
+                print(f'--- Facies: {facies_name} with constant probability:{values[0]} ')
             probability_defined.append(values[0])
 
         # Check that probabilities sum to 1
@@ -189,7 +189,7 @@ def check_and_normalise_probability(
             facies_name = item.name
             values = item.value
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies: ' + facies_name)
+                print(f'--- Facies: {facies_name}')
 
             defined_values = values[cell_index_defined]
             # Check that probabilities are in interval [0,1]. If not, set to 0 if negative and 1 if larger than 1.
@@ -216,7 +216,7 @@ def check_and_normalise_probability(
         )
         if normalise_is_necessary:
             if debug_level >= Debug.VERBOSE:
-                print('--- Normalise probability cubes.')
+                print('-- Normalise probability cubes.')
 
             for f in range(num_facies):
                 prob_vector = probability_defined[f]
@@ -232,8 +232,8 @@ def check_and_normalise_probability(
 
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
-                    f'Debug output: Number of grid cells in zone is:                           {num_defined_cells}\n'
-                    f'Debug output: Number of grid cells which is recalculated and normalized: {num_cell_with_modified_probability}'
+                    f'--- Number of grid cells in zone is:                           {num_defined_cells}\n'
+                    f'--- Number of grid cells which is recalculated and normalized: {num_cell_with_modified_probability}'
                 )
     return probability_defined, num_cell_with_modified_probability
 
@@ -264,13 +264,12 @@ def run(
     realization_number = project.current_realisation
     debug_level = get_debug_level(**kwargs)
 
-    print(f'Run: APS_trunc on realisation {realization_number + 1}')
+    print(f'\nAPS truncations for realisation {realization_number + 1}')
     model_file_name = get_specification_file(**kwargs)
+    if debug_level >= Debug.ON:
+        print(f'- Read file: {model_file_name}')
 
-    print(f'- Read file: {model_file_name}')
-    aps_model = APSModel(model_file_name, debug_level=debug_level)
-    if debug_level == Debug.OFF:
-        debug_level = aps_model.debug_level
+    aps_model = APSModel(model_file_name)
     grid_model = project.grid_models[aps_model.grid_model_name]
     if grid_model.is_empty(realization_number):
         raise ValueError(f'Specified grid model: {grid_model.name} is empty for realization {realization_number}.')
@@ -297,12 +296,12 @@ def run(
             transf_type = 'Cumulative Normal Distribution Function'
         else:
             transf_type = 'Empiric Cumulative Distribution Function'
-        print(f'--- Transformation type for GRF: {transf_type}')
+        print(f'-- Transformation type for GRF: {transf_type}')
 
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
-        print(f'--- Get RMS zone parameter: {zone_param_name} from RMS project {aps_model.rms_project_name}')
+        print(f'-- Get RMS zone parameter: {zone_param_name}')
     zone_param = create_zone_parameter(
         grid_model,
         name=zone_param_name,
@@ -315,7 +314,7 @@ def run(
     region_values = None
     if use_regions:
         if debug_level >= Debug.VERBOSE:
-            print(f'--- Get RMS region parameter: {region_param_name} from RMS project {aps_model.rms_project_name}')
+            print(f'-- Get RMS region parameter: {region_param_name} from RMS project {aps_model.rms_project_name}')
         region_values, _ = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number, debug_level)
 
     # Get or initialize array for facies realisation
@@ -324,16 +323,16 @@ def run(
     code_names_for_input = {}
     # Check if specified facies realization exists and get it if so.
     if isParameterDefinedWithValuesInRMS(grid_model, result_param_name, realization_number):
-        if debug_level >= Debug.VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print(
-                f'--- Get RMS facies parameter which will be updated: '
+                '--- Get RMS facies parameter which will be updated: '
                 f'{result_param_name} from RMS project: {aps_model.rms_project_name}'
             )
         facies_real, code_names_for_input = getDiscrete3DParameterValues(
             grid_model, result_param_name, realization_number, debug_level
         )
     else:
-        if debug_level >= Debug.VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print(
                 f'--- Facies parameter: {result_param_name} for the result will be created '
                 f'in the RMS project: {aps_model.rms_project_name}'
@@ -354,9 +353,9 @@ def run(
     all_facies_names_modelled = []
     if debug_level >= Debug.VERY_VERBOSE:
         if aps_model.isAllZoneRegionModelsSelected():
-            print('Debug output: All combinations of zone and region in model file is selected to be run')
+            print('--- All combinations of zone and region in model file is selected to be run')
         else:
-            print('Debug output: Selected (zone,region) pairs to simulate:')
+            print('--- Selected (zone,region) pairs to simulate:')
             print_zones_and_regions(all_zone_models, aps_model, use_regions)
 
     # Loop over all pairs of (zone_number, region_number) that is specified and selected
@@ -368,9 +367,9 @@ def run(
 
         if debug_level >= Debug.ON:
             if use_regions:
-                print(f'\n- Run model for (zone_number, region_number) = ({zone_number}, {region_number})\n')
+                print(f'\n- Run model for (zone_number, region_number) = ({zone_number}, {region_number})')
             else:
-                print(f'\n- Run model for zone number: {zone_number}\n')
+                print(f'\n- Run model for zone number: {zone_number}')
 
         zone_model = aps_model.getZoneModel(zone_number, region_number)
 
@@ -387,12 +386,12 @@ def run(
         num_facies = len(facies_names_for_zone)
 
         if debug_level >= Debug.VERBOSE:
-            print('--- Gauss field parameter specified for this zone: ')
+            print('-- Gauss field parameter specified for this zone: ')
             for gf_name in gf_names_for_zone:
-                print(f'---   {gf_name}')
-            print('--- Gauss field parameter used in truncation rule for this zone: ')
+                print(f'--   {gf_name}')
+            print('-- Gauss field parameter used in truncation rule for this zone: ')
             for gf_name in gf_names_for_truncation_rule:
-                print(f'---   {gf_name}')
+                print(f'--   {gf_name}')
 
         # For current (zone,region) find the active cells
         cell_index_defined = find_defined_cells(
@@ -401,11 +400,11 @@ def run(
         if debug_level >= Debug.VERBOSE:
             if use_regions:
                 print(
-                    f'--- Number of active cells for (zone,region)='
+                    f'-- Number of active cells for (zone,region)='
                     f'({zone_number}, {region_number}): {len(cell_index_defined)}'
                 )
             else:
-                print(f'--- Number of active cells for zone: {len(cell_index_defined)}')
+                print(f'-- Number of active cells for zone: {len(cell_index_defined)}')
         if len(cell_index_defined) == 0:
             print(
                 f'Warning: No active grid cells for (zone, region)=({zone_number}, {region_number})\n'
@@ -423,24 +422,24 @@ def run(
 
                 if debug_level >= Debug.VERBOSE:
                     if use_regions:
-                        print(f'--- Transform: {gf_name} for (zone, region)=({zone_number}, {region_number})')
+                        print(f'-- Transform: {gf_name} for (zone, region)=({zone_number}, {region_number})')
                     else:
-                        print(f'--- Transform: {gf_name} for zone: {zone_number}')
+                        print(f'-- Transform: {gf_name} for zone: {zone_number}')
                 # Update alpha for current zone
                 alpha_all = gf_all_alpha[gf_name]
                 if not use_CDF_transform:
                     if debug_level >= Debug.VERBOSE:
-                        print(f'--- Transformation type:  Empiric')
+                        print(f'-- Transformation type:  Empiric')
 
                     alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
                 elif has_trend_in_gauss_field:
                     if debug_level >= Debug.VERBOSE:
-                        print(f'--- Transformation type:  Empiric since GRF has trend')
+                        print(f'-- Transformation type:  Empiric since GRF has trend')
 
                     alpha_all = transform_empiric(cell_index_defined, gauss_field_values_all, alpha_all)
                 else:
                     if debug_level >= Debug.VERBOSE:
-                        print(f'--- Transformation type:  Cumulative normal distribution')
+                        print(f'-- Transformation type:  Cumulative normal distribution')
 
                     alpha_all = transform_CDF(cell_index_defined, gauss_field_values_all, alpha_all)
 
@@ -470,7 +469,7 @@ def run(
             probability_parameter = zone_model.getProbParamName(facies_name)
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
-                    f'Debug output: Zone: {zone_number}  '
+                    f'--- Zone: {zone_number}  '
                     f'Facies name: {facies_name}  '
                     f'Probability: {probability_parameter}'
                 )
@@ -488,7 +487,7 @@ def run(
                     probability_parameter_names_already_read.append(probability_parameter)
                     if debug_level >= Debug.VERY_VERBOSE:
                         print(
-                            f'Debug output: '
+                            f'--- '
                             f'Probability parameter: {probability_parameter} is now being loaded '
                             f'for facies: {facies_name} for zone: {zone_number}'
                         )
@@ -508,13 +507,13 @@ def run(
                     if debug_level >= Debug.VERY_VERBOSE:
                         if use_regions:
                             print(
-                                f'Debug output: Probability parameter: {probability_parameter} '
+                                f'--- Probability parameter: {probability_parameter} '
                                 f'is already loaded for facies: {facies_name} for (zone, region)='
                                 f'({zone_number}, {region_number})'
                             )
                         else:
                             print(
-                                f'Debug output: '
+                                f'--- '
                                 f'Probability parameter: {probability_parameter} is already loaded '
                                 f'for facies: {facies_name} for zone: {zone_number}'
                             )
@@ -533,7 +532,7 @@ def run(
         # end for
 
         # Check and normalise probabilities if necessary for current zone
-        if debug_level >= Debug.VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print('--- Check normalisation of probability fields.')
         probability_defined, num_cells_modified_probability = check_and_normalise_probability(
             num_facies,
@@ -546,15 +545,15 @@ def run(
             debug_level
         )
         if debug_level >= Debug.VERBOSE:
-            print(f'--- Number of cells that are normalised: {num_cells_modified_probability}')
+            print(f'-- Number of cells that are normalised: {num_cells_modified_probability}')
 
         # Apply truncations and calculate or update facies realization
         if debug_level >= Debug.VERBOSE:
-            print('--- Truncate transformed Gaussian fields.')
+            print('-- Truncate transformed Gaussian fields.')
 
         if zone_model.key_resolution > 0:
             # Use optimization
-            if debug_level >= Debug.VERBOSE:
+            if debug_level >= Debug.VERY_VERBOSE:
                 print('--- Use optimization (Memoization and vectorization)')
             facies_real, volume_fraction = zone_model.applyTruncations_vectorized(
                 probability_defined, gf_alpha_for_current_zone, facies_real, cell_index_defined
@@ -571,7 +570,7 @@ def run(
             if zone_model.use_constant_probabilities:
                 if use_regions:
                     print(
-                        '--- Zone_number:  Region_number:    Facies_code:   Facies_name:'
+                        '- Zone_number:  Region_number:    Facies_code:   Facies_name:'
                         '     Volumefraction_specified:    Volumefracion_realisation:'
                     )
                     for f in range(len(facies_names_for_zone)):
@@ -587,7 +586,7 @@ def run(
                         )
                 else:
                     print(
-                        '--- Zone_number:    Facies_code:   Facies_name:'
+                        '- Zone_number:    Facies_code:   Facies_name:'
                         '     Volumefraction_specified:    Volumefracion_realisation:'
                     )
                     for f in range(len(facies_names_for_zone)):
@@ -605,7 +604,7 @@ def run(
             else:
                 if use_regions:
                     print(
-                        '--- Zone_number:  Region_number:   Facies_code:   Facies_name:'
+                        '- Zone_number:  Region_number:   Facies_code:   Facies_name:'
                         '     Volumefraction_realisation  Volumefraction_from_probcube:'
                     )
                     for f in range(len(facies_names_for_zone)):
@@ -626,7 +625,7 @@ def run(
                         )
                 else:
                     print(
-                        '--- Zone_number:    Facies_code:   Facies_name:'
+                        '- Zone_number:    Facies_code:   Facies_name:'
                         '     Volumefraction_realisation  Volumefraction_from_probcube:'
                     )
                     for f in range(len(facies_names_for_zone)):
@@ -646,7 +645,7 @@ def run(
             if facies_name not in all_facies_names_modelled:
                 all_facies_names_modelled.append(facies_name)
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'Debug: Add facies: {facies_name} to the list of modelled facies')
+                    print(f'--- Add facies: {facies_name} to the list of modelled facies')
 
     # End loop over zones
 
@@ -662,13 +661,13 @@ def run(
         code_names.update({facies_code: facies_name})
 
     if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output: Facies codes and names before merging with existing facies table for facies realisation:')
+        print('--- Facies codes and names before merging with existing facies table for facies realisation:')
         print(repr(code_names))
 
     # Write facies realisation back to RMS project for all zones that is modelled.
-    if debug_level >= Debug.VERBOSE:
+    if debug_level >= Debug.VERY_VERBOSE:
         if aps_model.isAllZoneRegionModelsSelected():
-            print('Debug output: All combinations of zone and region is selected to be run')
+            print('--- All combinations of zone and region is selected to be run')
         else:
             print('--- The following (zone,region) numbers are updated in facies realization:')
             print_zones_and_regions(all_zone_models, aps_model, use_regions)
@@ -694,7 +693,8 @@ def run(
             print(f'  {u:10}  {key:3d}')
 
         print('')
-    print('Finished APS_main.py')
+    if debug_level >= Debug.ON:
+        print('- Finished APS truncations')
 
 
 def print_zones_and_regions(all_zone_models, aps_model, use_regions):

@@ -7,11 +7,11 @@ from aps.utils.methods import get_specification_file
 
 def run(project, **kwargs):
     model_file = get_specification_file(**kwargs)
-    aps_model = APSModel(model_file, debug_level=None)
+    aps_model = APSModel(model_file)
     aps_grid_name = aps_model.grid_model_name
 
     field_location = get_export_location()
-    print("Exporting the simulation grid to '{}'".format(field_location))
+    print(f"Exporting {aps_grid_name} to '{field_location}'")
 
     aps_grid = xtgeo.grid_from_roxar(project, aps_grid_name, project.current_realisation)
 

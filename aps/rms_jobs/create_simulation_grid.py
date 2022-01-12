@@ -46,7 +46,7 @@ def run(
         )
 
     if debug_level >= Debug.ON:
-        print(f'-- Creating ERT simulation box: {fmu_simulation_grid_name}')
+        print(f'- Creating ERT simulation box: {fmu_simulation_grid_name}')
     if debug_level >= Debug.VERBOSE:
         print(f'-- Using grid model: {aps_model.grid_model_name} as reference grid')
 
@@ -96,8 +96,8 @@ def run(
 
     x0, y0 = attributes.estimated_origo(flip=flip)
     z0 = 0.0
-    if debug_level >= Debug.VERBOSE:
-      print(f'-- Simbox rotation origo: ({x0}, {y0})')
+    if debug_level >= Debug.VERY_VERBOSE:
+      print(f'--- Simbox rotation origo: ({x0}, {y0})')
    
     dimension = (simbox_nx, simbox_ny, simbox_nz)
     origin =(x0, y0, z0)
