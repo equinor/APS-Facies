@@ -2,6 +2,16 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.7
+
+### Fixes
+* Enable customized trends of type RMS_PARAM to be used in FMU workflows with ERT
+
+
+### Miscellaneous
+* Uses timestamp as build number, instead of a running number
+
+
 ## 1.3.6
 
 ### Fixes
