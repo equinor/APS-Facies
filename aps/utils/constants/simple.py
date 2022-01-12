@@ -16,11 +16,12 @@ class BaseEnum(Enum, metaclass=BaseMeta):
 
 class Debug(IntEnum):
     OFF = 0
-    ON = 1
-    SOMEWHAT_VERBOSE = 1
-    VERBOSE = 2
-    VERY_VERBOSE = 3
-    VERY_VERY_VERBOSE = 4
+    READ = 1
+    ON = 2
+    VERBOSE = 3
+    VERY_VERBOSE = 4
+    VERY_VERY_VERBOSE = 5
+
 
 
 class VariogramType(Enum):
@@ -186,6 +187,11 @@ class GridModelConstants:
 class SimBoxThicknessConstants:
     DEFAULT_VALUE = 30
 
+class Conform(Enum):
+    Proportional = 'Proportional'
+    TopConform = 'TopConform'
+    BaseConform = 'BaseConform'
+
 
 class TransformType(IntEnum):
     EMPIRIC = 0
@@ -194,3 +200,12 @@ class TransformType(IntEnum):
 class FlipDirectionXtgeo:
     UPPER_LEFT_CORNER = -1
     LOWER_LEFT_CORNER = 1
+
+class ExtrapolationMethod(IntEnum):
+    ZERO = 0
+    MEAN = 1
+    EXTEND_LAYER_MEAN = 2
+    REPEAT_LAYER_MEAN = 3
+    EXTEND = 4
+    REPEAT = 5
+

@@ -41,7 +41,6 @@ REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
 
 BUILD_NUMBER = $(shell date "+%Y%m%d%H%M%S")
-
 ROXENV := roxenv
 HAS_ROXENV := $(shell command -v $(ROXENV) 2>/dev/null)
 ZIP := $(ROXENV) --zip

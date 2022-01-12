@@ -231,7 +231,7 @@ class Trunc2D_Base:
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Read data from model file in: {self._className}')
+                print(f'--- Read data from model file in: {self._className}')
 
             if any(arg is None for arg in [mainFaciesTable, faciesInZone, gaussFieldsInZone]):
                 raise ValueError(
@@ -247,7 +247,7 @@ class Trunc2D_Base:
             self.__interpretXMLTree_read_gauss_field_names(trRuleXML, gaussFieldsInZone, modelFileName)
         else:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Create empty object for: {self._className}')
+                print(f'--- Create empty object for: {self._className}')
                 #  End of __init__
 
     @property
@@ -550,9 +550,9 @@ class Trunc2D_Base:
             self.__addAlpha(alphaFieldNames[i], True)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Background facies truncation rule use:')
+            print('--- Background facies truncation rule use:')
             for i in range(self._nGaussFieldsInBackGroundModel):
-                print(f'Alpha({i}): {alphaFieldNames[i]}')
+                print(f'--- Alpha({i}): {alphaFieldNames[i]}')
 
         assert self.getNGaussFieldsInModel() == self._nGaussFieldsInBackGroundModel
 
@@ -585,7 +585,7 @@ class Trunc2D_Base:
                modelFileName - Only used as a text string when printing error messages in order to make them more informative.
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: -- Start read overlay facies model in {self._className} from model file')
+            print(f'--- Start read overlay facies model in {self._className} from model file')
 
         # Number of background facies is the facies in truncation rule before overlay facies is added
         self._nBackGroundFacies = self.num_facies_in_truncation_rule
@@ -788,29 +788,29 @@ class Trunc2D_Base:
 
             if self._debug_level >= Debug.VERY_VERBOSE:
                 print(
-                    'Debug output: List of alpha fields used in the zone model. The sequence define the alpha coordinates'
+                    '--- List of alpha fields used in the zone model. The sequence define the alpha coordinates'
                 )
                 for i in range(len(self._alphaIndxList)):
                     indx = self._alphaIndxList[i]
                     alphaName = self._gaussFieldsInZone[indx]
-                    print(f'Debug output:  Alpha coordinate {i + 1} corresponds to gauss field {alphaName}')
-                print(f'Debug output: Dimension of Alpha space is: {len(self._alphaIndxList)}')
+                    print(f'--- Alpha coordinate {i + 1} corresponds to gauss field {alphaName}')
+                print(f'--- Dimension of Alpha space is: {len(self._alphaIndxList)}')
                 print('')
-                print(f'Debug output:   Number of overlay facies: {self._nOverLayFacies}')
-                print('Debug output: Group index for each background facies')
+                print(f'--- Number of overlay facies: {self._nOverLayFacies}')
+                print('--- Group index for each background facies')
                 for i in range(self._nBackGroundFacies):
                     fName = self._faciesInTruncRule[i]
                     groupIndx = self._groupIndxForBackGroundFaciesIndx[i]
                     if groupIndx >= 0:
-                        print(f'Debug output:  {fName}  belongs to groupIndx= {groupIndx}')
+                        print(f'---  {fName}  belongs to groupIndx= {groupIndx}')
                     else:
-                        print(f'Debug output:  {fName} does not belong to any defined group')
+                        print(f'---  {fName} does not belong to any defined group')
                 print('')
-                print('Debug output: Alpha fields per group and overlay facies defined.')
+                print('--- Alpha fields per group and overlay facies defined.')
                 for groupIndx in range(self._nGroups):
                     nAlpha = len(self._alphaInGroup[groupIndx])
-                    print(f'Debug output: For group with index: {groupIndx}  Number of alpha fields: {nAlpha}')
-                    print('Debug output: Alpha    Facies   TruncIntervalCenter     ProbFrac:')
+                    print(f'--- For group with index: {groupIndx}  Number of alpha fields: {nAlpha}')
+                    print('--- Alpha    Facies   TruncIntervalCenter     ProbFrac:')
                     for alphaInGroupIndx in range(nAlpha):
                         alphaIndx = self._alphaInGroup[groupIndx][alphaInGroupIndx]
                         gfname = self._gaussFieldsInZone[alphaIndx]
@@ -818,10 +818,10 @@ class Trunc2D_Base:
                         fName = self._faciesInTruncRule[indx]
                         centerVal = self._centerTruncIntervalInGroup[groupIndx][alphaInGroupIndx]
                         probFrac = self._probFracOverlayFaciesInGroup[groupIndx][alphaInGroupIndx]
-                        print(f'Debug output:   {gfname}     {fName}      {centerVal}     {probFrac}')
+                        print(f'---   {gfname}     {fName}      {centerVal}     {probFrac}')
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: -- End read overlay facies model in {self._className} from model file')
+            print(f'--- End read overlay facies model in {self._className} from model file')
 
             # End read overlay facies
 
@@ -1057,7 +1057,7 @@ Background facies:
         if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             print('\n')
             print(
-                'Debug output: Calculate modified area for background facies and threshold values for overlay facies:')
+                '--- Calculate modified area for background facies and threshold values for overlay facies:')
 
         for groupIndx in range(self._nGroups):
             # Sum over probability for background facies
@@ -1080,13 +1080,10 @@ Background facies:
             sumProb[groupIndx] = sumProbBackGround[groupIndx] + sumProbOverlay[groupIndx]
             if self._debug_level >= Debug.VERY_VERY_VERBOSE:
                 print(
-                    'Debug output: Group {group}: '
-                    'Background facies prob={background}  Overlay facies prob={overlay}   Sum prob= {total}'
-                    ''.format(
-                        group=groupIndx,
-                        background=sumProbBackGround[groupIndx],
-                        overlay=sumProbOverlay[groupIndx],
-                        total=sumProb[groupIndx])
+                    f'--- Group {groupIndx}: '
+                    f'Background facies prob={sumProbBackGround[groupIndx]} '
+                    f'Overlay facies prob={sumProbOverlay[groupIndx]}   '
+                    f'Sum prob= {sumProb[groupIndx]}'
                 )
 
             sumTotProb += sumProb[groupIndx]
@@ -1167,12 +1164,12 @@ Background facies:
             self._highAlphaInGroup.append(highAlphaThisGroup)
         if self._debug_level >= Debug.VERY_VERY_VERBOSE:
             if self._lowAlphaInGroup:
-                print('Debug output: Low threshold values for overlay facies:')
+                print('--- Low threshold values for overlay facies:')
                 print(repr(self._lowAlphaInGroup))
-                print('Debug output: High threshold values for overlay facies:')
+                print('--- High threshold values for overlay facies:')
                 print(repr(self._highAlphaInGroup))
             print(
-                'Debug output: Finished calculate modified area for background facies and threshold values for overlay facies')
+                '--- Finished calculate modified area for background facies and threshold values for overlay facies')
             print('')
         return area
 
@@ -1319,7 +1316,7 @@ Background facies:
         Description: Write to xml tree the keywords related to overlay facies
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from Trunc2D_Base_xml')
+            print('--- call XMLADDElement from Trunc2D_Base_xml')
         if self._nGroups == 0:
             return
 
@@ -1565,10 +1562,10 @@ Background facies:
                     faciesCode, fIndx = self._truncateOverlayFacies(indx, alphaCoord)
                     break
             if not inside:
-                print('Not inside any polygons, x,y: {} {}'.format(x, y))
+                print(f'Not inside any polygons, x,y: {x} {y}')
                 for i in range(self.num_polygons):
                     polygon = self._faciesPolygons[i]
-                    print('poly number {}'.format(i))
+                    print(f'poly number {i}')
                     for point in polygon:
                         print(f'point ({point[0]}, {point[1]})')
 

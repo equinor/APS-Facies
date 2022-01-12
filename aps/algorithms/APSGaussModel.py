@@ -329,37 +329,31 @@ class GaussianField:
         power = self.variogram.power.value
         if debug_level >= Debug.VERY_VERBOSE:
             print('')
-            print('Debug output: Within simGaussFieldWithTrendAndTransform')
-            print('Debug output: Simulate gauss field: ' + self.name)
-            print('Debug output: VariogramType: ' + str(variogram_type))
-            print('Debug output: Azimuth angle for Main range direction: ' + str(self.variogram.angles.azimuth))
-            print('Debug output: Azimuth angle for grid: ' + str(settings.grid_azimuth))
-            print('Debug output: Dip angle for Main range direction: ' + str(self.variogram.angles.dip))
+            print('--- Within simGaussFieldWithTrendAndTransform')
+            print('--- Simulate gauss field: ' + self.name)
+            print('--- VariogramType: ' + str(variogram_type))
+            print('--- Azimuth angle for Main range direction: ' + str(self.variogram.angles.azimuth))
+            print('--- Azimuth angle for grid: ' + str(settings.grid_azimuth))
+            print('--- Dip angle for Main range direction: ' + str(self.variogram.angles.dip))
 
             if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
-                print('Debug output: Power    : ' + str(power))
+                print('--- Power    : ' + str(power))
 
-            print('Debug output: Seed value: ' + str(seed_value))
+            print('--- Seed value: ' + str(seed_value))
         # Calculate 2D projection of the correlation ellipsoid
         angle1, range1, angle2, range2 = self.variogram.calc_2d_variogram_from_3d_variogram(
             settings.grid_azimuth, projection, debug_level)
         azimuth_variogram = angle1
         if debug_level >= Debug.VERY_VERBOSE:
             print(
-                '\nDebug output: Range1 in projection: {projection} : {range1}\n'
-                'Debug output: Range2 in projection: {projection} : {range2}\n'
-                'Debug output: Angle from vertical axis for Range1 direction: {angle1}\n'
-                'Debug output: Angle from vertical axis for Range2 direction: {angle2}\n'
-                'Debug output: (gridDim1, gridDim2) = ({gridDim1},{gridDim2})\n'
-                'Debug output: (Size1, Size2) = ({size1},  {size2})'
-                ''.format(
-                    projection=projection,
-                    range1=range1, range2=range2,
-                    angle1=angle1, angle2=angle2,
-                    gridDim1=grid_dimensions[0], gridDim2=grid_dimensions[1],
-                    size1=sizes[0], size2=sizes[1]
-                )
+                f'\n--- Range1 in projection: {projection} : {range1}\n'
+                f'--- Range2 in projection: {projection} : {range2}\n'
+                f'--- Angle from vertical axis for Range1 direction: {angle1}\n'
+                f'--- Angle from vertical axis for Range2 direction: {angle2}\n'
+                f'--- (gridDim1, gridDim2) = ({grid_dimensions[0]},{grid_dimensions[1]})\n'
+                f'--- (Size1, Size2) = ({sizes[0]},  {sizes[1]})'
             )
+
         residual_field = simGaussField(
             seed_value, *grid_dimensions, *sizes, variogram_type,
             range1, range2, azimuth_variogram, power, debug_level
@@ -368,7 +362,7 @@ class GaussianField:
         _, use_trend, trend_model, relative_std_dev, _ = self.trend.as_list()
         if use_trend:
             if debug_level >= Debug.VERBOSE:
-                print('    - Use Trend: {}'.format(trend_model.type.name))
+                print(f'-- Use Trend: {trend_model.type.name}')
             min_max_difference, average_trend, trend_field = trend_model.createTrendFor2DProjection(
                 settings.simulation_box_size, settings.grid_azimuth, settings.grid_size,
                 settings.cross_section, settings.simulation_box_origin
@@ -771,7 +765,7 @@ class Variogram:
          """
         func_name = self.calc_2d_variogram_from_3d_variogram.__name__
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Function: {}'.format(func_name))
+            print(f'--- Function: {func_name}')
         ry = self.ranges.main.value
         rx = self.ranges.perpendicular.value
         rz = self.ranges.vertical.value
@@ -837,7 +831,7 @@ class Variogram:
         Rt = np.transpose(R)
         M = Rt.dot(tmp)
         if debug_level >= Debug.VERY_VERY_VERBOSE:
-            print('Debug output: M:')
+            print('--- M:')
             print(M)
             print('')
 
@@ -955,7 +949,7 @@ class APSGaussModel:
         if ET_Tree_zone is not None:
             # Get data from xml tree
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Call init {self.__class_name} and read from xml file')
+                print(f'--- Call init {self.__class_name} and read from xml file')
 
             assert mainFaciesTable is not None
             assert simBoxThickness is not None
@@ -977,7 +971,7 @@ class APSGaussModel:
         for gf in ET_Tree_zone.findall('GaussField'):
             gf_name = gf.get('name')
             if self.debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Gauss field name: {}'.format(gf_name))
+                print(f'--- Gauss field name: {gf_name}')
 
             # Read variogram for current GF
             variogram, variogram_type = self.get_variogram(gf, gf_name, zone_number)
@@ -1000,7 +994,7 @@ class APSGaussModel:
             rel_std_dev_fmu_updatable = False
             if trend_xml_obj is not None:
                 if self.debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: Read trend')
+                    print('--- Read trend')
                 use_trend = True
 
                 if self.__sim_box_thickness <= 0.0:
@@ -1041,7 +1035,7 @@ class APSGaussModel:
                     )
             else:
                 if self.debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: No trend is specified')
+                    print('--- No trend is specified')
                 use_trend = False
                 trend_model = None
                 relative_std_dev = 0.0
@@ -1075,13 +1069,13 @@ class APSGaussModel:
             )
 
         if self.debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Gauss field variogram parameter for current zone model:')
-            print([repr(grf.variogram) for grf in self._gaussian_models.values()])
+            print('--- Gauss field variogram parameter for current zone model:')
+            print([grf.variogram.type for grf in self._gaussian_models.values()])
 
-            print('Debug output:Gauss field trend parameter for current zone model:')
-            print([repr(grf.trend) for grf in self._gaussian_models.values()])
+            print('--- Gauss field trend parameter for current zone model:')
+            print([grf.trend.name for grf in self._gaussian_models.values()])
 
-            print('Debug output: Gauss field preview seed for current zone model:')
+            print('--- Gauss field preview seed for current zone model:')
             print([(name, grf.seed) for name, grf in self._gaussian_models.items()])
 
     def _get_value_from_xml(self, property_name: str, xml_tree: Element) -> Tuple[Number, bool]:
@@ -1174,7 +1168,7 @@ class APSGaussModel:
     ) -> None:
 
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call the initialize function in ' + self.__class_name)
+            print(f'--- Call the initialize function in {self.__class_name}')
 
         self.__debug_level = debug_level
         self.__sim_box_thickness = sim_box_thickness
@@ -1540,8 +1534,8 @@ class APSGaussModel:
         )
 
     def XMLAddElement(self, parent: Element, zone_number: int, region_number: int, fmu_attributes: List[FmuAttribute]) -> None:
-        if self.debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self.__class_name)
+        if self.debug_level >= Debug.VERY_VERY_VERBOSE:
+            print(f'--- call XMLADDElement from {self.__class_name}')
 
         # Add child command GaussField
         for grf in self._gaussian_models.values():
@@ -1686,9 +1680,9 @@ def _add_trend(residual_field, trend_field, rel_sigma, trend_max_min_difference,
     else:
         sigma = rel_sigma * trend_max_min_difference
     if debug_level >= Debug.VERY_VERBOSE:
-        print(f'Debug output:  Relative standard deviation = {rel_sigma}')
-        print(f'Debug output:  Difference between max value and min value of trend = {trend_max_min_difference}')
-        print(f'Debug output:  Calculated standard deviation = {sigma}')
+        print(f'---  Relative standard deviation = {rel_sigma}')
+        print(f'---  Difference between max value and min value of trend = {trend_max_min_difference}')
+        print(f'---  Calculated standard deviation = {sigma}')
         print('')
     n = len(trend_field)
     if n != len(residual_field):
@@ -1711,7 +1705,7 @@ def _transform_empiric_distribution_to_uniform(values, debug_level=Debug.OFF):
     """
     # Transform into uniform distribution
     if debug_level >= Debug.VERY_VERBOSE:
-        print('Debug output:  Transform 2D Gauss field by empiric transformation to uniform distribution\n')
+        print('---  Transform 2D Gauss field by empiric transformation to uniform distribution\n')
 
     n = len(values)
     transformed = np.zeros(n, np.float32)
@@ -1726,13 +1720,13 @@ def _transform_empiric_distribution_to_uniform(values, debug_level=Debug.OFF):
 def _calculate_projection(U, debug_level=Debug.OFF):
     func_name = _calculate_projection.__name__
     if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print('Debug output: U:')
+        print('--- U:')
         print(U)
     w, v = np.linalg.eigh(U)
     if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print('Debug output: Eigenvalues:')
+        print('--- Eigenvalues:')
         print(w)
-        print('Debug output: Eigenvectors')
+        print('--- Eigenvectors')
         print(v)
 
     # Largest eigenvalue and corresponding eigenvector should be defined as main principal range and direction
@@ -1747,7 +1741,7 @@ def _calculate_projection(U, debug_level=Debug.OFF):
     angle1 = angle
     range1 = np.sqrt(1.0 / w[0])
     if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print(f'Debug output: Function: {func_name} Direction (angle): {angle1} for range: {range1}')
+        print(f'--- Function: {func_name} Direction (angle): {angle1} for range: {range1}')
 
     # Smallest eigenvalue and corresponding eigenvector should be defined as perpendicular principal direction
     if v[1, 1] != 0.0:
@@ -1761,7 +1755,7 @@ def _calculate_projection(U, debug_level=Debug.OFF):
     angle2 = angle
     range2 = np.sqrt(1.0 / w[1])
     if debug_level >= Debug.VERY_VERY_VERBOSE:
-        print(f'Debug output: Function: {func_name} Direction (angle): {angle2} for range: {range2}')
+        print(f'--- Function: {func_name} Direction (angle): {angle2} for range: {range2}')
 
     # Angles are azimuth angles
     return angle1, range1, angle2, range2

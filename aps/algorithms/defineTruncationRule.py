@@ -1225,7 +1225,7 @@ class DefineTruncationRule:
         colors = get_colors(nFacies)
 
         # Create the colormap
-        if self.debug_level >= Debug.SOMEWHAT_VERBOSE:
+        if self.debug_level >= Debug.ON:
             print('Debug output: Number of facies:          ' + str(nFacies))
             print('Debug output: Number of facies polygons: ' + str(len(faciesPolygons)))
         for i in range(len(faciesPolygons)):

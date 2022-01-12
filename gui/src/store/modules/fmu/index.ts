@@ -2,7 +2,8 @@ import {
   DEFAULT_CREATE_FMU_GRID,
   DEFAULT_FIELD_FORMAT,
   DEFAULT_RUN_FMU_MODE,
-  DEFAULT_RUN_ONLY_FMU_UPDATE
+  DEFAULT_RUN_ONLY_FMU_UPDATE,
+  DEFAULT_EXTRAPOLATION_METHOD
 } from '@/config'
 import { makeOption, populateState } from '@/store/utils'
 import { Module } from 'vuex'
@@ -20,7 +21,9 @@ const module: Module<FmuState, RootState> = {
     runFmuWorkflows: makeOption(DEFAULT_RUN_FMU_MODE, [true, false]),
     onlyUpdateFromFmu: makeOption(DEFAULT_RUN_ONLY_FMU_UPDATE, [true, false]),
     create: makeOption(DEFAULT_CREATE_FMU_GRID, [true, false]),
-    fieldFileFormat: makeOption(DEFAULT_FIELD_FORMAT, ['grdecl', 'roff']),
+    fieldFileFormat: makeOption(DEFAULT_FIELD_FORMAT, ['roff', 'grdecl']),
+    customTrendExtrapolationMethod: makeOption(DEFAULT_EXTRAPOLATION_METHOD,
+      ['extend_layer_mean', 'repeat_layer_mean', 'mean', 'zero']),
     simulationGrid,
   },
 

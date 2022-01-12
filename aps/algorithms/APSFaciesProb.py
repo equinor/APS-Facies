@@ -122,7 +122,7 @@ class APSFaciesProb:
 
             # Get data from xml tree
             if self.__debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Call init {self.__class_name} and read from xml file')
+                print(f'--- Call init {self.__class_name} and read from xml file')
             self.__interpretXMLTree(ET_Tree_zone, modelFileName)
 
             # End __init__
@@ -192,7 +192,7 @@ class APSFaciesProb:
         self.__checkConstProbValuesAndNormalize(self.zone_number)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: From ' + self.__class_name + ': Facies prob for current zone model:')
+            print(f'--- From {self.__class_name} Facies prob for current zone model:')
             print(repr(self.__faciesProbForZoneModel))
 
     def initialize(
@@ -206,7 +206,7 @@ class APSFaciesProb:
     ) -> None:
         ''' Initialize an APSFaciesProb object. '''
         if debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call the initialize function in ' + self.__class_name)
+            print(f'--- Call the initialize function in {self.__class_name}')
 
         self.__useConstProb = useConstProb
         self.__zoneNumber = zoneNumber
@@ -354,7 +354,7 @@ class APSFaciesProb:
 
     def XMLAddElement(self, parent: Element) -> None:
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self.__class_name)
+            print(f'--- call XMLADDElement from {self.__class_name}')
 
         # Add command FaciesProbForModel
         facies_probability = Element('FaciesProbForModel')

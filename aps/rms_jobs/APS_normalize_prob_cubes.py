@@ -201,8 +201,9 @@ def check_and_normalize_probabilities_for_APS(
         debug_level=Debug.OFF
 ):
     # Read APS model
-    print(f'- Read file: {model_file}')
-    aps_model = APSModel(model_file, debug_level=None)
+    if debug_level >= Debug.ON:
+        print(f'- Read file: {model_file}')
+    aps_model = APSModel(model_file)
 
     grid_model_name = aps_model.grid_model_name
     grid_model = project.grid_models[grid_model_name]
@@ -283,12 +284,12 @@ def check_and_normalize_probabilities_for_APS(
         if debug_level >= Debug.ON:
             if region_number > 0:
                 print(
-                    f'--- Number of cells that are normalised for (zone,region)=({zone_number}, {region_number}) '
+                    f'- Number of cells that are normalised for (zone,region)=({zone_number}, {region_number}) '
                     f'are {num_cells_modified_probability} of {len(cell_index_defined)} cells.'
                 )
             else:
                 print(
-                    f'--- Number of cells that are normalised for zone: {zone_number} '
+                    f'- Number of cells that are normalised for zone: {zone_number} '
                     f'are {num_cells_modified_probability} of {len(cell_index_defined)} cells.'
                 )
 
@@ -308,7 +309,7 @@ def check_and_normalize_probabilities_for_APS(
             raise IOError(f'Can not update parameter {parameter_name}')
         else:
             if debug_level >= Debug.ON:
-                print(f'--- Updated probability cube: {parameter_name}')
+                print(f'- Updated probability cube: {parameter_name}')
 
 
 def run(
@@ -320,7 +321,7 @@ def run(
         **kwargs
 ):
     real_number = project.current_realisation
-    print(f'Run: APS_normalize_prob_cubes on realisation {real_number + 1}')
+    print(f'Check normalisation of facies probabilities for realisation {real_number + 1}')
     model_file = get_specification_file(**kwargs)
     debug_level = get_debug_level(**kwargs)
     check_and_normalize_probabilities_for_APS(
@@ -332,4 +333,5 @@ def run(
         max_allowed_fraction_of_values_outside_tolerance,
         debug_level=debug_level
     )
-    print('Finished APS_normalize_prob_cubes')
+    if debug_level >= Debug.ON:
+        print('- Finished check and normalize facies probabilities')

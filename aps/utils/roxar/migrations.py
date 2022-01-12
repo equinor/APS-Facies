@@ -150,6 +150,13 @@ class Migration:
         }
         return state
 
+    @staticmethod
+    def add_custom_trend_extrapolation_method(state: dict):
+        state['fmu']['customTrendExtrapolationMethod'] = {
+            'value': 'extend',
+        }
+        return state
+
     def attempt_upgrading_legacy_state(self, state: dict):
         return _attempt_upgrading_legacy_state(self, state)
 
@@ -249,6 +256,11 @@ class Migration:
                 'to': '1.8.1',
                 'up': self.add_possibly_missing_root_polygon_to_cubic_truncation_rules,
             },
+            {
+                'from': '1.8.1',
+                'to': '1.9.0',
+                'up': self.add_custom_trend_extrapolation_method,
+            },
         ]
 
     def get_migrations(self, from_version: str, to_version: Optional[str] = None):
@@ -277,11 +289,11 @@ class Migration:
 
         if get_debug_level(state) >= Debug.VERBOSE:
             if len(migrations) == 0:
-                print(f'State at latest version ({from_version}). No migration needed.')
+                print(f'-- State at latest version ({from_version}). No migration needed.')
             else:
                 if to_version is None:
                     to_version = self.migrations[-1]['to']
-                print(f"Migrating state from {from_version} to {to_version}")
+                print(f"-- Migrating state from {from_version} to {to_version}")
 
         try:
             for migration in migrations:

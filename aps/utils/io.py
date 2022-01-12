@@ -24,7 +24,7 @@ def writeFile(
         a: Union[List[int], np.ndarray],
         nx: int,
         ny: int,
-        debug_level: Debug = Debug.SOMEWHAT_VERBOSE,
+        debug_level: Debug = Debug.ON,
 ):
     print(f'Write file: {file_name}')
     # Choose an arbitrary heading
@@ -40,7 +40,7 @@ def readFile(
         fileName: str,
         debug_level: Debug = Debug.OFF
 ) -> Tuple[np.ndarray, int, int]:
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'Read file: {fileName}')
     if not exists(fileName):
         fileName = f'aps/unit_test/{fileName}'
@@ -49,7 +49,7 @@ def readFile(
         words = inString.split()
         ny = int(words[1])
         nx = int(words[8])
-        if debug_level >= Debug.SOMEWHAT_VERBOSE:
+        if debug_level >= Debug.ON:
             n = len(words)
             print(
                 f'Number of words: {n}\n'
@@ -87,7 +87,7 @@ def _write_file(file_name, data, heading, debug_level):
     output = heading
     count = 0
     text = ''
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'len(data): {len(data)}')
     for point in data:
         text += str(point) + '  '
@@ -101,7 +101,7 @@ def _write_file(file_name, data, heading, debug_level):
         output += text + '\n'
     with open(file_name, 'w') as file:
         file.write(output)
-    if debug_level >= Debug.SOMEWHAT_VERBOSE:
+    if debug_level >= Debug.ON:
         print(f'Write file: {file_name}')
 
 

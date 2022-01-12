@@ -154,7 +154,7 @@ class APSMainFaciesTable:
             # Search xml tree for model file to find the specified Main facies table
             self.__interpretXMLTree(ET_Tree)
             if self.__debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Call APSMainFaciesTable init')
+                print('--- Call APSMainFaciesTable init')
 
     def __interpretXMLTree(self, ET_Tree: ElementTree) -> None:
         root = ET_Tree.getroot()

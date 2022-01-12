@@ -21,10 +21,9 @@ def run(project, **kwargs):
         # when the running from workflow or batch
         if job_name is None:
             job_name = default_job_name
-            warn(
-                '\nWARNING:\n'
-                '-- A default name of the created FMU config files will be used when running interactively.\n'
-                '   If you run from a workflow, the APS GUI job name will be used when creating the FMU config files.'
+            print(
+                '-- NOTE: A default name of the created FMU config files will be used when running interactively.\n'
+                '         If you run from a workflow, the APS GUI job name will be used when creating the FMU config files.\n'
             )
         model_name = job_name + '.xml'
         att_name = job_name + '_aps.yml'

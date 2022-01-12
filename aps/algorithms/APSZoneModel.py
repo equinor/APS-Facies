@@ -15,7 +15,7 @@ from aps.algorithms.Memoization import MemoizationItem, RoundOffConstant
 from aps.algorithms.trend import Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param
 from aps.algorithms.truncation_rules import Trunc2D_Angle, Trunc2D_Cubic, Trunc3D_bayfill
 from aps.algorithms.properties import CrossSection
-from aps.utils.constants.simple import Debug, VariogramType
+from aps.utils.constants.simple import Debug, VariogramType, Conform
 from aps.utils.containers import FmuAttribute
 from aps.utils.types import FaciesName
 from aps.algorithms.truncation_rules.types import TruncationRule
@@ -29,10 +29,6 @@ from aps.utils.xmlUtils import (
 )
 
 
-class Conform(Enum):
-    Proportional = 'Proportional'
-    TopConform = 'TopConform'
-    BaseConform = 'BaseConform'
 
 
 class APSZoneModel:
@@ -61,7 +57,7 @@ class APSZoneModel:
        def getDipAngle(self,gaussFieldName)
        def getPower(self,gaussFieldName)
        def getTruncRule(self)
-       def getTrendModel(self,gfName
+       def getTrendModel(self,gfName)
        def getTrendModelObject(self, gfName)
        def getProbParamName(self,fName)
        def getAllProbParamForZone(self)
@@ -155,19 +151,16 @@ class APSZoneModel:
         self.grid_layout = grid_layout
 
         if ET_Tree is not None:
-            self.__interpretXMLTree(ET_Tree, modelFileName)
+            self.__interpretXMLTree(ET_Tree, modelFileName, debug_level=self.__debug_level)
 
-    def __interpretXMLTree(self, ET_Tree, modelFileName):
+    def __interpretXMLTree(self, ET_Tree, modelFileName,debug_level=Debug.OFF):
         ''' The input XML tree is interpreted and values put into the data structure.'''
         #  Get root of xml tree for model specification
         root = ET_Tree.getroot()
 
-        # --- PrintInfo ---
-        kw = 'PrintInfo'
-        self.__debug_level = getIntCommand(root, kw, defaultValue=1, required=False)
-
+        self.__debug_level = debug_level
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('\nDebug output: Call init {self.__className}')
+            print(f'\n--- Call init {self.__className}')
 
         # Optimization parameters
         obj = getKeyword(root, 'Optimization', 'Root', modelFile=modelFileName, required=False)
@@ -195,11 +188,6 @@ class APSZoneModel:
                 raise ValueError('Zone number must be a positive integer number')
 
             region_number = get_region_number(zone)
-            if self.__debug_level == Debug.VERY_VERBOSE:
-                print(f'Debug output: Zone number: {zone_number}  Region number: {region_number}')
-            else:
-                if self.__debug_level == Debug.VERY_VERBOSE:
-                    print(f'Debug output: Zone number: {zone_number}')
 
             grid_layout = getTextCommand(zone, 'GridLayout', 'Zone', modelFile=modelFileName, required=False)
             self.grid_layout = grid_layout
@@ -214,12 +202,12 @@ class APSZoneModel:
                 self.__simBoxThickness = simBoxThickness
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print(f'''\
-Debug output: From APSZoneModel: ZoneNumber:       {zone_number}'
-Debug output: From APSZoneModel: RegionNumber:     {region_number}'
-Debug output: From APSZoneModel: useConstProb:     {self.__useConstProb}'
-Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
-''')
+                    print(
+                        f'--- From APSZoneModel: ZoneNumber:       {zone_number}\n'
+                        f'--- From APSZoneModel: RegionNumber:     {region_number}\n'
+                        f'--- From APSZoneModel: useConstProb:     {self.__useConstProb}\n'
+                        f'--- From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}\n'
+                    )
 
                 # Read facies probabilities
                 self.__faciesProbObject = APSFaciesProb(
@@ -242,7 +230,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                     )
                 truncRuleName = trRule[0].tag
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print(f'Debug output: TruncRuleName: {truncRuleName}')
+                    print(f'--- TruncRuleName: {truncRuleName}')
 
                 nGaussFieldInModel = int(trRule[0].get('nGFields'))
                 if nGaussFieldInModel > self.__gaussModelObject.num_gaussian_fields:
@@ -281,11 +269,14 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
 
                     if self.debug_level >= Debug.VERY_VERBOSE:
                         print(
-                            f'Debug output: APSZoneModel: '
-                            f'Truncation rule for current zone: {self.truncation_rule.getClassName()}'
+                            '--- APSZoneModel:\n'
+                            f'--- Truncation rule for current zone: {self.truncation_rule.getClassName()}'
                         )
-                        print('Debug output: APSZoneModel: Facies in truncation rule:')
-                        print(repr(self.truncation_rule.getFaciesInTruncRule()))
+                        print(
+                            '--- APSZoneModel: Facies in truncation rule:'
+                            f' {self.truncation_rule.getFaciesInTruncRule()}'
+                        )
+
                 break
                 # End if zone number
         # End for zone
@@ -552,25 +543,24 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
         faciesProb = np.zeros(nFacies, dtype=np.float32)
         volFrac = np.zeros(nFacies, dtype=np.float32)
         if debug_level >= Debug.VERBOSE:
-            print('--- Truncation rule: ' + classNameTrunc)
+            print(f'-- Truncation rule: {classNameTrunc}')
 
         alphaList = []
         if self.__useConstProb and useConstTruncParam:
             # Constant probability
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Using spatially constant probabilities for facies.')
+                print('--- Using spatially constant probabilities for facies.')
 
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
             if self.debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: faciesProb:')
-                print(repr(faciesProb))
+                print(f'--- faciesProb: {faciesProb}')
 
             for gfName, alphaDataArray in alpha_fields.items():
                 alphaList.append(alphaDataArray)
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: Use gauss fields: ' + gfName)
+                    print(f'--- Use gauss fields: {gfName}')
 
             # Calculate truncation rules
             # The truncation map/cube is constant and does not vary from cell to cell
@@ -580,9 +570,9 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 if debug_level == Debug.VERBOSE:
                     if np.mod(i, 500000) == 0:
                         if i == 0:
-                            print('--- Calculate facies')
+                            print('-- Calculate facies')
                         else:
-                            print(f'--- Calculate facies for cell number: {i}')
+                            print(f'-- Calculate facies for cell number: {i}')
                 elif debug_level >= Debug.VERY_VERBOSE:
                     if np.mod(i, 50000) == 0:
                         if i == 0:
@@ -606,20 +596,21 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
 
         else:
             if debug_level >= Debug.VERY_VERBOSE:
-                text = 'Debug output: Using spatially varying probabilities and/or '
-                text += 'truncation parameters for facies.'
-                print(text)
+                print(
+                    '--- Using spatially varying probabilities and/or '
+                    'truncation parameters for facies.'
+                )
 
             for gfName, alphaDataArray in alpha_fields.items():
                 alphaList.append(alphaDataArray)
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print('Debug output: Use gauss fields: ' + gfName)
+                    print(f'--- Use gauss fields: {gfName} ')
 
             for i in range(nDefinedCells):
                 if debug_level >= Debug.VERY_VERBOSE and np.mod(i, 50000) == 0 and i == 0 or debug_level < Debug.VERY_VERBOSE and debug_level == Debug.VERBOSE and np.mod(i, 500000) == 0 and i == 0:
                     print('--- Calculate facies')
                 elif debug_level >= Debug.VERY_VERBOSE and np.mod(i, 50000) == 0 or debug_level < Debug.VERY_VERBOSE and debug_level == Debug.VERBOSE and np.mod(i, 500000) == 0:
-                    print('--- Calculate facies for cell number: {}'.format(str(i)))
+                    print(f'--- Calculate facies for cell number: {i}')
                 for f in range(nFacies):
                     faciesProb[f] = probDefined[f] if self.__useConstProb else probDefined[f][i]
                 # Calculate truncation rules
@@ -637,13 +628,15 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 faciesReal[cellIndx] = fCode
                 volFrac[fIndx] += 1
 
-        if self.__debug_level >= Debug.VERBOSE:
+        if self.__debug_level >= Debug.VERY_VERBOSE:
             truncRuleName = self.truncation_rule.getClassName()
             if truncRuleName != 'Trunc3D_bayfill':
                 nCount = self.truncation_rule.getNCountShiftAlpha()
-                print('--- In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
-                      '    are done {} number of times for numerical reasons.'
-                      ''.format(truncRuleName, str(nCount)))
+                print(
+                    f'--- In truncation rule {truncRuleName} small shifts of values '
+                    'for orientation of facies boundary lines\n'
+                    f'    are done {nCount} number of times for numerical reasons.'
+                )
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -669,9 +662,9 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
         volFrac = np.zeros(nFacies, dtype=np.float32)
 
         if debug_level >= Debug.VERBOSE:
-            print('--- Truncation rule: ' + self.truncation_rule.getClassName())
+            print(f'-- Truncation rule: {self.truncation_rule.getClassName()}')
             for gfName, alphaDataArray in alpha_fields.items():
-                print('--- Use gauss fields: ' + gfName)
+                print(f'-- Use gauss fields:{gfName}')
 
         nGaussFields, nDefinedCells = len(alpha_fields), len(cellIndexDefined)
 
@@ -679,16 +672,15 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
         if self.__useConstProb:
             # Constant probability
             if debug_level >= Debug.VERBOSE:
-                print('--- Using spatially constant probabilities for facies.')
+                print('-- Using spatially constant probabilities for facies.')
 
             faciesProb = np.zeros(nFacies, dtype=np.float32)
             for f in range(nFacies):
                 faciesProb[f] = probDefined[f]
 
             if debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: faciesProb:')
-                print(repr(faciesProb))
-                print('Debug output:  Calculate truncation map/cube')
+                print(f'--- faciesProb: {faciesProb} ')
+                print('---  Calculate truncation map/cube')
             # Calculate truncation rules
             # The truncation map/cube is constant and does not vary from cell to cell
             self.truncation_rule.setTruncRule(faciesProb)
@@ -718,7 +710,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
             # Varying probability from cell to cell and / or
             # varying truncation parameter from cell to cell
             if debug_level >= Debug.VERBOSE:
-                print('--- Using spatially varying probabilities for facies.')
+                print('-- Using spatially varying probabilities for facies.')
             faciesProb = np.zeros((nDefinedCells, nFacies), dtype=np.float32)
 
             for f in range(nFacies):
@@ -741,7 +733,7 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
             count_unique_truncation_cubes = 0
             if num_maps < 0.2 * nDefinedCells:
                 # Use vectorization and look up facies for all cells having the same truncation cube at once
-                if debug_level >= Debug.VERBOSE:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('--- Using vectorization optimization')
                 count_single_cell_truncation_cubes = 0
                 for key, item in memo.items():
@@ -785,21 +777,24 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                     elif debug_level == Debug.VERBOSE:
                         if np.mod(nCells, 500000) == 0:
                             if nCells == 0:
-                                print('--- Calculate facies')
+                                print('-- Calculate facies')
                             else:
-                                print(f'--- Calculate facies for cell number: {nCells}')
+                                print(f'-- Calculate facies for cell number: {nCells}')
 
-                if debug_level >= Debug.VERBOSE:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print(
-                        '--- Number of cells where the truncation map is not shared with other cells is {} out of a total of {} cells.'
-                        ''.format(count_single_cell_truncation_cubes, nDefinedCells)
+                        '--- Number of cells where the truncation map is not '
+                        f'shared with other cells is {count_single_cell_truncation_cubes} '
+                        f'out of a total of {nDefinedCells} cells.'
                     )
-                    print('--- Number of different truncation cubes is {} out of a total of {} cells.'
-                          ''.format(count_unique_truncation_cubes, nDefinedCells)
-                          )
+                    print(
+                        '--- Number of different truncation cubes '
+                        f'is {count_unique_truncation_cubes} out of a total '
+                        f'of {nDefinedCells} cells.'
+                    )
             else:
                 # Don't use vectorization and look up facies for all cells one by one.
-                if debug_level >= Debug.VERBOSE:
+                if debug_level >= Debug.VERY_VERBOSE:
                     print('--- No vectorization optimization')
                 for key, item in memo.items():
                     # Calculate truncation map
@@ -824,9 +819,9 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                         elif debug_level == Debug.VERBOSE:
                             if np.mod(nCells, 500000) == 0:
                                 if nCells == 0:
-                                    print('--- Calculate facies')
+                                    print('-- Calculate facies')
                                 else:
-                                    print(f'--- Calculate facies for cell number: {nCells}')
+                                    print(f'-- Calculate facies for cell number: {nCells}')
 
                 assert nCells == nDefinedCells
 
@@ -835,9 +830,10 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
                 if truncRuleName == 'Trunc2D_Angle':
                     nCount = self.truncation_rule.getNCountShiftAlpha()
                     print(
-                        'Debug output: In truncation rule {} small shifts of values for orientation of facies boundary lines\n'
-                        '    are done {} number of times for numerical reasons.'
-                        ''.format(truncRuleName, nCount))
+                        f'--- In truncation rule {truncRuleName} small shifts '
+                        'of values for orientation of facies boundary lines\n'
+                        f'    are done {nCount} number of times for numerical reasons.'
+                    )
 
         for f in range(nFacies):
             volFrac[f] = volFrac[f] / float(nDefinedCells)
@@ -845,8 +841,8 @@ Debug output: From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}'
 
     def XMLAddElement(self, parent: Element, fmu_attributes: List[FmuAttribute]) -> None:
         ''' Add command Zone and all its children to the XML tree'''
-        if self.debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: call XMLADDElement from {self.__className}')
+        if self.debug_level >= Debug.VERY_VERY_VERBOSE:
+            print(f'--- call XMLADDElement from {self.__className}')
 
         tag = 'Zone'
         if self.region_number <= 0:

@@ -238,23 +238,22 @@ class APSModel:
         self.__aps_model_version = apsmodel_version
 
         # --- PrintInfo ---
-        kw = 'PrintInfo'
-        obj = root.find(kw)
-        if debug_level is None:
-            debug_level = Debug.OFF
-        elif debug_level == Debug.OFF:
-            # This is the default value. Now check if it should be overridden by
-            # debug_level in model file
+        # Debug level is specified in the APSModel constructor. 
+        # The only case when debug level specified in model file is used, is
+        # when debug level is set to Debug.READ. In that case the model file
+        # keyword setting in 'PrintInfo' is used.
+        if debug_level == Debug.READ:
+            kw = 'PrintInfo'
+            obj = root.find(kw)
             if obj is not None:
-                # Overridden by model file setting for debug_level
                 debug_level = obj.text
-        else:
-            # Input debug level is not Debug.OFF and use this value instead of model file specification
-            pass
+            else:
+                debug_level = Debug.OFF
+
         self.debug_level = debug_level
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print('')
-            print('Debug output: ------------ Start reading model file in APSModel ------------------')
+            print('------------ Start reading model file in APSModel ------------------')
             print('')
 
         # --- Preview ---
@@ -342,12 +341,12 @@ class APSModel:
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
             print(
-                f'Debug output: RMSGridModel:                       {self.__rmsGridModelName}\n'
-                f'Debug output: RMSZoneParamName:                   {self.__rmsZoneParamName}\n'
-                f'Debug output: RMSFaciesParamName:                 {self.__rmsFaciesParamName}\n'
-                f'Debug output: RMSRegionParamName:                 {self.__rmsRegionParamName}\n'
-                f'Debug output: Name of RMS project read:           {self.__rmsProjectName}\n'
-                f'Debug output: Name of RMS workflow read:          {self.__rmsWorkflowName}'
+                f'--- RMSGridModel:                       {self.__rmsGridModelName}\n'
+                f'--- RMSZoneParamName:                   {self.__rmsZoneParamName}\n'
+                f'--- RMSFaciesParamName:                 {self.__rmsFaciesParamName}\n'
+                f'--- RMSRegionParamName:                 {self.__rmsRegionParamName}\n'
+                f'--- Name of RMS project read:           {self.__rmsProjectName}\n'
+                f'--- Name of RMS workflow read:          {self.__rmsWorkflowName}'
             )
 
         # Read optional keyword to specify which transformation to use for Gaussian Fields
@@ -399,10 +398,10 @@ class APSModel:
                     print('')
                     print('')
                     if region_number <= 0:
-                        print(f'Debug output: ---- Read zone model for zone number: {zone_number}')
+                        print(f'--- Read zone model for zone number: {zone_number}')
                     else:
                         print(
-                            f'Debug output: ---- Read zone model for (zone, region) number: '
+                            f'--- Read zone model for (zone, region) number: '
                             f'({zone_number}, {region_number})'
                         )
 
@@ -410,7 +409,8 @@ class APSModel:
                     ET_Tree=self.__ET_Tree,
                     zoneNumber=zone_number,
                     regionNumber=region_number,
-                    modelFileName=model_file_name
+                    modelFileName=model_file_name,
+                    debug_level=self.__debug_level 
                 )
                 # This zoneNumber, regionNumber combination is not defined previously
                 # and must be added to the dictionary
@@ -480,7 +480,7 @@ class APSModel:
         self.__checkZoneModels()
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print('- Zone models are defined for the following combination '
+            print('--- Zone models are defined for the following combination '
                   'of zone and region numbers:')
             for key, value in self.sorted_zone_models.items():
                 zone_number = key[0]
@@ -517,12 +517,12 @@ class APSModel:
         # name that will be used as identifier.
         if debug_level >= Debug.VERY_VERBOSE:
             print('')
-            print(f'-- Model parameters marked as possible to update in model file {model_file_name}')
+            print(f'--- Model parameters marked as possible to update in model file {model_file_name}')
             print('Keyword:                                           Value:')
         keywords_defined_for_updating = []
         for obj in root.findall(".//*[@kw]"):
             key_word = obj.get('kw')
-            tag = obj.tag
+#            tag = obj.tag
             value = obj.text
             keywords_defined_for_updating.append([key_word.strip(), value.strip()])
             if debug_level >= Debug.VERY_VERBOSE:
@@ -539,7 +539,7 @@ class APSModel:
                                                               debug_level)
 
                 if current_job_name is None:
-                    print(f'- The APS parameters are not updated when running interactively')
+                    print(f'-- NOTE: The APS parameters are not updated when running interactively')
                 else:
                     if len(keywords_defined_for_updating) > 0:
                         if keywords_read is None:
@@ -603,11 +603,11 @@ class APSModel:
                         break
 
             if found_an_update:
-                print(f'-- The APS parameters are updated for the job: {current_job_name}')
+                print(f'-- NOTE: The APS parameters are updated for the job: {current_job_name}')
                 print(f'   Parameter name                                   Original value   New value')
             else:
                 if debug_level >= Debug.ON:
-                    print(f'-- APS parameters selected to be updated by FMU does not match parameters \n')
+                    print(f'-- NOTE: APS parameters selected to be updated by FMU does not match parameters \n')
                     print(f'   specified in {parameter_file_name}')
 
             # Update the model file fmu tags with updated values
@@ -646,7 +646,7 @@ class APSModel:
            is common and hence "overwrite" each other.
         """
         zoneNumbers = []
-        for key, zoneModel in self.__zoneModelTable.items():
+        for key, _ in self.__zoneModelTable.items():
             zone_number, region_number = key
             if zone_number in zoneNumbers and region_number == 0:
                 raise ValueError(f'There exists more than one zone model for zone: {zone_number}')
@@ -669,14 +669,14 @@ class APSModel:
         if GlobalVariables.check_file_format(global_variables_file) == 'ipl':
             keywords = GlobalVariables.parse(global_variables_file)
             if debug_level >= Debug.ON:
-                print(f'Debug output: Keywords and values found in parameter file:  {global_variables_file}')
+                print(f'- Keywords and values found in parameter file:  {global_variables_file}')
                 for item in keywords:
                     kw, val = item
                     print(f'  {kw:30} {val:20}')
                 print('')
         else:
             # YAML file with more general possibility for parameter specification
-            apsmodel = APSModel(model_file_name)
+#            apsmodel = APSModel(model_file_name)
             aps_dict = GlobalVariables.parse(global_variables_file)
 
             # Find the model parameters for the current aps job
@@ -700,14 +700,14 @@ class APSModel:
         return self.__debug_level
 
     @debug_level.setter
-    def debug_level(self, debug_level):
-        if isinstance(debug_level, str):
-            debug_level = int(debug_level.strip())
-        if isinstance(debug_level, int):
-            debug_level = Debug(debug_level)
-        if debug_level not in Debug:
-            debug_level = Debug.OFF
-        self.__debug_level = debug_level
+    def debug_level(self, debug_level_input):
+        if isinstance(debug_level_input, str):
+            debug_level_input = int(debug_level_input.strip())
+        if isinstance(debug_level_input, int):
+            debug_level_input = Debug(debug_level_input)
+        if debug_level_input not in Debug:
+            debug_level_input = Debug.OFF
+        self.__debug_level = debug_level_input
 
     @property
     def seed_file_name(self) -> str:
@@ -888,12 +888,12 @@ class APSModel:
                 if region_number == 0:
                     print(f'- Gaussian field names used for zone {zone_number}:')
                 else:
-                    print(f'-- Gaussian field names used for zone {zone_number} and region {region_number}:')
+                    print(f'- Gaussian field names used for zone {zone_number} and region {region_number}:')
             gfNames = zoneModel.used_gaussian_field_names
             for gf in gfNames:
                 # Add the gauss field name to the list if it not already is in the list
                 if self.__debug_level >= Debug.ON:
-                    print('   Gauss field name: {}'.format(gf))
+                    print(f'   Gauss field name: {gf}')
                 if gf not in gfAllZones:
                     gfAllZones.append(gf)
         return copy.copy(gfAllZones)
@@ -935,7 +935,7 @@ class APSModel:
 
     def getAllProbParam(self):
         all_probabilities = []
-        for key, zoneModel in self.__zoneModelTable.items():
+        for _, zoneModel in self.__zoneModelTable.items():
             probability_parameters = zoneModel.getAllProbParamForZone()
             for name in probability_parameters:
                 if name not in all_probabilities:
@@ -971,7 +971,7 @@ class APSModel:
 
     def setRmsRegionParamName(self, name: str) -> None:
         if not name:
-            for key, zoneModel in self.__zoneModelTable.items():
+            for key, _ in self.__zoneModelTable.items():
                 region_number = key[1]
                 current_zone_has_at_least_one_region = region_number > 0
                 if current_zone_has_at_least_one_region:
@@ -1015,8 +1015,8 @@ class APSModel:
         if region_number > 0 and not self.__rmsRegionParamName:
             raise ValueError('Cannot add zone with region number into a model where regionParamName is not specified')
         if self.debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call addNewZone')
-            print(f'Debug output: From addNewZone: (Zone number, Region number)=({zone_number}, {region_number})')
+            print('--- Call addNewZone')
+            print(f'--- From addNewZone: (Zone number, Region number)=({zone_number}, {region_number})')
         key = (zone_number, region_number)
         if key not in self.__zoneModelTable:
             self.__zoneModelTable[key] = zoneObject
@@ -1029,8 +1029,8 @@ class APSModel:
     def deleteZone(self, zone_number: int, region_number: int = 0) -> None:
         key = (zone_number, region_number)
         if self.debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Call deleteZone')
-            print(f'Debug output: From deleteZone: (ZoneNumber, regionNumber)=({zone_number}, {region_number})')
+            print('--- Call deleteZone')
+            print(f'--- From deleteZone: (ZoneNumber, regionNumber)=({zone_number}, {region_number})')
 
         if key in self.__zoneModelTable:
             del self.__zoneModelTable[key]
@@ -1053,7 +1053,7 @@ class APSModel:
         """
         # TODO: This is temporary solution
         if self.debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self.__class_name)
+            print('--- call XMLADDElement from ' + self.__class_name)
 
         if self.__previewZone > 0:
             tag = 'Preview'
@@ -1075,7 +1075,7 @@ class APSModel:
             tag = 'SelectedZonesAndRegions'
             selected_zone_and_region_element = ET.Element(tag)
             root.append(selected_zone_and_region_element)
-            for key, selected in selected_zone_numbers.items():
+            for key, _ in selected_zone_numbers.items():
                 zone_number, region_number = key
                 tag = 'SelectedZoneWithRegions'
                 attributes = {'zone': str(zone_number)}
@@ -1152,29 +1152,33 @@ class APSModel:
             - Write xml tree with model specification to file
         """
 
-        def write(file_name: str, content: str) -> None:
+        def write(file_name: str, content: str, debug_level: Debug = Debug.OFF) -> None:
             with open(file_name, 'w') as file:
                 file.write(content)
-            print(f'- Write file: {file_name}')
+            if debug_level >= Debug.ON:
+                print(f'- Write file: {file_name}')
 
         fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
-        write(model_file_name, root_updated)
+        write(model_file_name, root_updated, debug_level=debug_level)
 
         if attributes_file_name is not None:
-            aps_model = APSModel(model_file_name, debug_level=Debug.OFF)
+            aps_model = APSModel(model_file_name)
             grid_model_name = aps_model.grid_model_name
 
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
-            write(attributes_file_name, fmu_configuration(fmu_attributes, grid_model_name, current_job_name))
+            write(attributes_file_name, 
+                fmu_configuration(fmu_attributes, grid_model_name, current_job_name),
+                debug_level=debug_level)
 
         if probability_distribution_file_name is not None:
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
             write(probability_distribution_file_name,
-                  probability_distribution_configuration(fmu_attributes, current_job_name))
+                probability_distribution_configuration(fmu_attributes, current_job_name),
+                debug_level=debug_level)
 
     @property
     def has_fmu_updatable_values(self) -> bool:
@@ -1184,8 +1188,12 @@ class APSModel:
         return len(fmu_attributes) > 0
 
     @staticmethod
-    def write_model_from_xml_root(input_tree: ET.Element, output_model_file_name: FilePath) -> None:
-        print(f'Write file: {output_model_file_name}')
+    def write_model_from_xml_root(
+            input_tree: ET.Element, 
+            output_model_file_name: FilePath,
+            debug_level: Debug = Debug.OFF) -> None:
+        if debug_level >= Debug.ON:
+            print(f'- Write file: {output_model_file_name}')
         root = input_tree.getroot()
         root = minify(root)
         with open(output_model_file_name, 'w', encoding='utf-8') as file:

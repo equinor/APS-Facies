@@ -129,7 +129,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         if trRuleXML is not None:
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Read data from model file for: {self._className}')
+                print(f'--- Read data from model file for: {self._className}')
 
             # Read truncation rule for background facies from xml tree.
             # Here the hierarchy of polygons in the 2D truncation map defined by the two
@@ -149,16 +149,16 @@ class Trunc2D_Angle(Trunc2D_Base):
             self._checkFaciesForZone()
 
             if self._debug_level >= Debug.VERY_VERBOSE:
-                print('Debug output: Facies names in truncation rule:')
+                print('--- Facies names in truncation rule:')
                 print(repr(self._faciesInTruncRule))
-                print('Debug output: Facies ordering (relative to facies in zone):')
+                print('--- Facies ordering (relative to facies in zone):')
                 print(repr(self._orderIndex))
-                print('Debug output: Facies code for facies in zone')
+                print('--- Facies code for facies in zone')
                 print(repr(self._faciesCode))
                 print('')
-                print('Debug output: Gauss fields in zone:')
+                print('--- Gauss fields in zone:')
                 print(repr(self._gaussFieldsInZone))
-                print('Debug output: Gauss fields for each alpha coordinate:')
+                print('--- Gauss fields for each alpha coordinate:')
                 for i in range(len(self._alphaIndxList)):
                     j = self._alphaIndxList[i]
                     field_name = self._gaussFieldsInZone[j]
@@ -166,7 +166,7 @@ class Trunc2D_Angle(Trunc2D_Base):
 
         else:
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'Debug output: Create empty object for: {self._className}')
+                print(f'--- Create empty object for: {self._className}')
                 #  End of __init__
 
     def __interpretXMLTree(self, trRuleXML, modelFileName) -> None:
@@ -256,7 +256,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         for i in range(self._nBackGroundFacies):
             if self._debug_level >= Debug.VERY_VERBOSE:
                 fName = self._faciesInTruncRule[i]
-                print(f'Debug output: Sum prob frac for facies {fName} is: {sumProbFrac[i]}')
+                print(f'--- Sum prob frac for facies {fName} is: {sumProbFrac[i]}')
 
             if abs(sumProbFrac[i] - 1.0) > 0.001:
                 fName = self._faciesInTruncRule[i]
@@ -309,7 +309,7 @@ class Trunc2D_Angle(Trunc2D_Base):
         self.__init__(keyResolution=keyResolution, debug_level=debug_level)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(f'Debug output: Call the initialize function in {self._className}')
+            print(f'--- Call the initialize function in {self._className}')
 
         # Call base class method to set modelled facies
         self._setModelledFacies(mainFaciesTable, faciesInZone)
@@ -342,7 +342,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                 self._orderIndex.append(fIndx)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: Background facies defined:')
+            print('--- Background facies defined:')
             print(repr(self._faciesInTruncRule))
 
         # Call base class function to fill data structure with overlay facies
@@ -374,7 +374,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                     paramName = item[1]
                     # Get param values
                     if self._debug_level >= Debug.VERBOSE:
-                        print('--- Get RMS parameter: ' + paramName + ' for facies ' + fName)
+                        print(f'--- Get RMS parameter: {paramName} for facies {fName}')
                     values = getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
                     self.__faciesBoundaryOrientation.append(values)
                 else:
@@ -728,9 +728,12 @@ class Trunc2D_Angle(Trunc2D_Base):
                     closestPolygon = 2
 
             if self._debug_level >= Debug.VERY_VERY_VERBOSE:
-                print('FaciesProb: {}  Iteration number: {}  Area: {} S: {} SLow: {}  SHigh {}'
-                      ''.format(str(faciesProb), str(i), str(area), str(s), str(sLow), str(sHigh))
-                      )
+                print(
+                    f'FaciesProb: {faciesProb}  '
+                    f'Iteration number: {i}  '
+                    f'Area: {area} S: {s} SLow: {sLow}  SHigh {sHigh}'
+                )
+
 
             if np.abs(area - faciesProb) > tolerance:
                 if area > faciesProb:
@@ -914,9 +917,11 @@ class Trunc2D_Angle(Trunc2D_Base):
             indx = item[0]
             fName = self._faciesInTruncRule[indx]
             if self._debug_level >= Debug.VERY_VERBOSE:
-                text = 'Debug output: Set new angle for polygon number: ' + str(polygonNumber)
-                text = text + ' with facies ' + fName + ' : ' + str(angle)
-                print(text)
+                print(
+                    f'--- Set new angle for polygon number: {polygonNumber} '
+                    f'with facies {fName}: {angle}'
+                )
+
         return err
 
     def setAngleTrend(self, polygonNumber, angleParamName):
@@ -928,9 +933,11 @@ class Trunc2D_Angle(Trunc2D_Base):
             fName = self._faciesInTruncRule[indx]
             self.__faciesBoundaryOrientationName[polygonNumber] = [fName, angleParamName]
             if self._debug_level >= Debug.VERY_VERBOSE:
-                text = 'Debug output: Set new angle trend for polygon number: ' + str(polygonNumber)
-                text = text + ' with facies ' + fName + ' : ' + angleParamName
-                print(text)
+                print(
+                    f'--- Set new angle trend for polygon number: {polygonNumber} '
+                    f'with facies {fName}: {angleParamName}'
+                )
+
 
     def setUseTrendForAngles(self, useConstTrend):
         if useConstTrend == 1:
@@ -971,7 +978,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                'fmu_attributes' MUST be given
         """
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print('Debug output: call XMLADDElement from ' + self._className)
+            print(f'--- call XMLADDElement from {self._className}')
 
         nGF = self.getNGaussFieldsInModel()
 

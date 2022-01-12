@@ -46,9 +46,9 @@ def run_simulations(
     """
 
     # Read APS model
-    print(f'Run: Simulation of gaussian fields')
-    print(f'- Read file: {model_file}')
-    aps_model = APSModel(model_file, debug_level=None)
+    if debug_level >= Debug.ON:
+        print(f'- Read file: {model_file}')
+    aps_model = APSModel(model_file,debug_level=debug_level)
 
     # When running in single processing mode, there will not be created new start seeds in the RMS multi realization
     # workflow loop because the start random seed is created once per process,
@@ -64,7 +64,7 @@ def run_simulations(
             raise ValueError('The realisation number must be 1 in FMU mode.')
         grid = grid_model.get_grid(realisation)
         # Get grid dimensions
-        grid_attributes = GridAttributes(grid, debug_level=debug_level)
+        grid_attributes = GridAttributes(grid, debug_level=Debug.OFF)
         num_layers_per_zone = grid_attributes.num_layers_per_zone
         if len(num_layers_per_zone) != 1:
             raise ValueError('The ERTBOX grid can only have 1 zone')
@@ -83,7 +83,9 @@ def run_simulations(
     # Set start seed
     start_seed = get_project_realization_seed(project)
     nrlib.seed(start_seed)
-
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f"--- Start seed value: {nrlib.seed()}")
+        
     # Loop over all zones and simulate gauss fields
     all_zone_models = aps_model.sorted_zone_models
     for key, zone_model in all_zone_models.items():
@@ -105,11 +107,11 @@ def run_simulations(
         dz = zone_model.sim_box_thickness / nz
 
         if debug_level >= Debug.ON:
-            print('-- Zone: {}'.format(zone_number))
+            print(f'- Zone: {zone_number}')
         if debug_level >= Debug.VERY_VERBOSE:
             start = grid_attributes.start_layers_per_zone[zone_index]
             end = grid_attributes.end_layers_per_zone[zone_index]
-            print('--   Grid layers: {}     Start layer: {}     End layer: {}'.format(num_layers, start + 1, end))
+            print(f'--- Grid layers: {num_layers} Start layer: {start + 1} End layer: {end}')
 
         gauss_result_list_for_zone = []
         for gauss_field_name in gauss_field_names:
@@ -125,14 +127,14 @@ def run_simulations(
 
             if debug_level >= Debug.VERBOSE:
                 if region_number > 0:
-                    print(f'---  Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
+                    print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
                 else:
-                    print(f'---  Simulate: {gauss_field_name}  for zone: {zone_number}')
+                    print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}')
             if debug_level >= Debug.VERY_VERBOSE:
                 print(
                     f'     Zone,region             : ({zone_number}, {region_number})\n'
                     f'     Gauss field name        : {gauss_field_name}\n'
-                    f'     Variogram type          : {variogram.name}\n'
+                    f'     Variogram type          : {variogram.type.name.upper()}\n'
                     f'     Main range              : {variogram.ranges.main}\n'
                     f'     Perpendicular range     : {variogram.ranges.perpendicular}\n'
                     f'     Vertical range          : {variogram.ranges.vertical}\n'
@@ -214,8 +216,8 @@ def run(project, **kwargs):
     write_rms_parameters_for_qc_purpose = False
     real_number = project.current_realisation
     debug_level = get_debug_level(**kwargs)
-    if debug_level>= Debug.VERBOSE:
-        print(f'-- Realisation number: {real_number+1}')
+
+    print(f'\nSimulation of gaussian fields for realisation number: {real_number+1}')
 
     is_shared = fmu_mode or fmu_mode_only_param
 
@@ -229,4 +231,5 @@ def run(project, **kwargs):
         fmu_mode=fmu_mode,
         debug_level=debug_level,
     )
-    print('Finished simulation of gaussian fields for APS')
+    if debug_level >= Debug.ON:
+        print('- Finished simulation of gaussian fields for APS')

@@ -41,8 +41,9 @@ def run(project, **kwargs):
     workflow_name = params['workflow_name']
     current_job_name = params['current_job_name']
 
-    print(f'Run: Update APS model parameters from FMU parameters')
-    print(f'- Read file {global_variables_file}')
+    print(f'\nUpdate APS model parameters from FMU parameters')
+    if debug_level >= Debug.ON:
+        print(f'- Read file {global_variables_file}')
     update_aps_model_from_fmu(
         global_variables_file,
         input_aps_model_file,

@@ -6,7 +6,7 @@ from warnings import warn
 from typing import Dict
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
+from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType, ExtrapolationMethod
 from aps.utils.decorators import cached
 from aps.utils.fmu import get_export_location, get_ert_location, is_initial_iteration
 from aps.utils.roxar._config_getters import get_debug_level
@@ -49,6 +49,7 @@ class JobConfig:
             'transform_type_grf': self._transformation_type_for_grf,
             'current_job_name': self.roxar.rms.get_running_job_name(),
             'export_fmu_config_files': self.export_fmu_config_files,
+            'extrapolation_method': self.rms_param_trend_extrapolation_method,
         }
 
     @property
@@ -59,7 +60,7 @@ class JobConfig:
             return export_error
 
         if self.run_fmu_workflows:
-            aps_model = APSModel.from_string(self.model, debug_level=None)
+            aps_model = APSModel.from_string(self.model)
             for zone_model in aps_model.zone_models:
                 if not zone_model.grid_layout:
                     return (
@@ -217,6 +218,21 @@ class JobConfig:
                 not self.run_fmu_workflows
                 or self.debug_level >= Debug.ON
         )
+
+    @property
+    def rms_param_trend_extrapolation_method(self): 
+        value = self._config['fmu']['customTrendExtrapolationMethod']['value']
+        method = {
+            "zero": ExtrapolationMethod.ZERO,
+            "mean": ExtrapolationMethod.MEAN,
+            "extend_layer_mean": ExtrapolationMethod.EXTEND_LAYER_MEAN,
+            "repeat_layer_mean": ExtrapolationMethod.REPEAT_LAYER_MEAN,
+            "extend": ExtrapolationMethod.EXTEND,
+            "repeat": ExtrapolationMethod.REPEAT,
+        }
+        if value not in method:
+                raise ValueError(f"Method: {value} is not implemented")
+        return method[value]
 
     def to_json(self):
         return json.dumps(self._config)
