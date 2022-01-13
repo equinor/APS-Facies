@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.0"
+__version__ = "0.14.1"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -281,8 +281,8 @@ def get_input_directory():
 
 
 def get_debug_level():
-    # How verbose it should be
-    return _get_value(APS_DEBUG_LEVEL, 0)
+    # How verbose it should be. Default is to read it from model file keyword.
+    return _get_value(APS_DEBUG_LEVEL, -1)
 
 def get_transform_type():
     # Which type of transformation to use for GRF's 

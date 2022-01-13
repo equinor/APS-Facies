@@ -15,12 +15,12 @@ class BaseEnum(Enum, metaclass=BaseMeta):
 
 
 class Debug(IntEnum):
+    READ = -1
     OFF = 0
-    READ = 1
-    ON = 2
-    VERBOSE = 3
-    VERY_VERBOSE = 4
-    VERY_VERY_VERBOSE = 5
+    ON = 1
+    VERBOSE = 2
+    VERY_VERBOSE = 3
+    VERY_VERY_VERBOSE = 4
 
 
 
