@@ -1,11 +1,7 @@
-''' This module is used in FMU workflows to import gaussian field values from
-    disk into APS. Here we can assume that the project.current_realisation = 0
-    always since FMU ONLY run with one realization in the RMS project and
-    should have shared grid and shared parameters only. The grid model to be
-    created here should have same lateral grid size and grid increments and
-    same rotation. The number of layers is use defined, and the vertical
-    z increment can be arbitary. The purpose of the grid is to be a 3D array
-    to save the GRF values to be exchanged between ERT and APS.
+''' This module is used in FMU workflows to copy gaussian field values from
+    geomodel grid to ERTBOX grid and extrapolate values that are undefined
+    in ERTBOX grid. This functionality is used when the user wants to
+    apply customized trends for GRF's in APS and run this in FMU with AHM.
 '''
 
 import numpy as np
