@@ -43,6 +43,7 @@ def required_parameters(_type: TrendType) -> List[TrendParameter]:
     # TODO: Remove?
     none = []
     rms_parameter = none + [TrendParameter.RMS_PARAMETER]
+    rms_trendmap =  none + [TrendParameter.RMS_TREND_MAP_NAME, TrendParameter.RMS_TREND_MAP_ZONE]
     linear = none + [TrendParameter.AZIMUTH, TrendParameter.STACKING, TrendParameter.DIRECTION]
     elliptic = linear + [TrendParameter.CURVATURE, TrendParameter.ORIGIN, TrendParameter.ORIGIN_TYPE]
     hyperbolic = elliptic + [TrendParameter.MIGRATION]
@@ -50,6 +51,7 @@ def required_parameters(_type: TrendType) -> List[TrendParameter]:
     requirements = {
         TrendType.NONE: none,
         TrendType.RMS_PARAM: rms_parameter,
+        TrendType.RMS_TRENDMAP: rms_trendmap,
         TrendType.LINEAR: linear,
         TrendType.ELLIPTIC: elliptic,
         TrendType.HYPERBOLIC: hyperbolic,
@@ -305,6 +307,9 @@ class Trend3D:
             cell_index_defined,
             zone_number,
             sim_box_thickness,
+            project=None,
+            keep_temporary_trend_param=False,
+            debug_level=Debug.OFF,
     ):
         """
         Description: Create trend values for 3D grid zone using Roxar API.
@@ -321,7 +326,7 @@ class Trend3D:
         grid_indexer = grid_3d.simbox_indexer
         (nx, ny, nz) = grid_indexer.dimensions
 
-        sim_box_attributes = GridSimBoxSize(grid_3d, self._debug_level)
+        sim_box_attributes = GridSimBoxSize(grid_3d)
         self._sim_box_azimuth = sim_box_attributes.azimuth_angle
 
         # Define self._x_center, self._y_center for the trend
@@ -353,7 +358,6 @@ class Trend3D:
 
         zonation = grid_indexer.zonation
         layer_ranges = zonation[zone_number - 1]
-
         # In simbox there is only one interval of layers per zone and they 
         # come after each other and layer numbering increases downwards
         start_layer = np.infty
@@ -369,10 +373,11 @@ class Trend3D:
         self._end_layer = end_layer
         num_layers_in_zone = sum(len(layer) for layer in layer_ranges)
         zinc = sim_box_thickness / num_layers_in_zone
-        if self._debug_level >= Debug.VERY_VERBOSE:
+        if debug_level >= Debug.VERY_VERBOSE:
             print(
                 f'---  In {self._class_name}\n'
                 f'---  Zone number: {zone_number}\n'
+                f'---  Grid model: {grid_model.name}\n'
                 f'---  SimboxThickness: {sim_box_thickness}\n'
                 f'---  Zinc: {zinc}\n'
                 f'---  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}\n'
@@ -380,7 +385,7 @@ class Trend3D:
                 f'---  End   simbox layer in zone: {end_layer + 1}\n'
                 f'---  Trend type: {self.type.name}\n'
             )
-            if self.type != TrendType.RMS_PARAM:
+            if self.type not in [TrendType.RMS_PARAM, TrendType.RMS_TRENDMAP]:
                 print(
                     f'---  Trend azimuth: {self.azimuth.value}\n'
                     f'---  StackingAngle: {self.stacking_angle.value}\n'
@@ -396,9 +401,9 @@ class Trend3D:
 
         if isinstance(self, Trend3D_rms_param):
             from aps.utils.roxar.grid_model import getContinuous3DParameterValues
-            if self._debug_level >= Debug.VERBOSE:
+            if debug_level >= Debug.VERBOSE:
                 print(
-                    f'-- RMS 3D parameter {self.trend_parameter_name}\n'
+                    f'-- RMS 3D parameter: {self.trend_parameter_name}\n'
                      '-- No preview is implemented for this yet.'
                 )
             # Values for all active cells
@@ -412,6 +417,35 @@ class Trend3D:
             if len(values_in_selected_cells) > 0:
                 if np.ptp(values_in_selected_cells) < 0.000001:
                     values_in_selected_cells[0] += 1.0
+        elif isinstance(self, Trend3D_rms_map):
+            from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param
+            from aps.utils.roxar.grid_model import getContinuous3DParameterValues
+            if debug_level >= Debug.VERBOSE:
+                print(
+                    f'-- RMS 2D trend map from zone: {self.trend_map_zone}\n'
+                    f'-- Representation or type: {self.trend_map_name}\n'
+                     '-- No preview is implemented for this yet.'
+                )
+            # Create 3D parameter from 2D trend map
+            trend_param_name = 'tmp_'+ self.trend_map_zone + '_' + self.trend_map_name
+            trend_map_to_grid_param(project, grid_model.name,
+                self.trend_map_name,
+                self.trend_map_zone,
+                trend_param_name,
+                zone_number=zone_number,
+                debug_level=debug_level)
+
+            # Values for all active cells
+            values_in_active_cells = getContinuous3DParameterValues(
+                grid_model, trend_param_name, realization_number,            )
+            # Values for selected cells (using numpy vectors)
+            values_in_selected_cells = values_in_active_cells[cell_index_defined]
+            # If the user defined trend is constant, change one grid cell value to ensure it is not
+            # constant to avoid errors later.
+            if np.ptp(values_in_selected_cells) < 0.000001:
+                values_in_selected_cells[0] += 1.0
+            if not keep_temporary_trend_param:
+                del grid_model.properties[trend_param_name]
         else:
             num_defined_cells = len(cell_index_defined)
             values_in_selected_cells = np.zeros(num_defined_cells, np.float32)
@@ -443,8 +477,8 @@ class Trend3D:
             cross_section: CrossSection,
             sim_box_origin: SimulationBoxOrigin,
     ) -> Tuple[np.float64, np.float64, np.ndarray]:
-        if self.type in [TrendType.RMS_PARAM, TrendType.NONE]:
-            raise NotImplementedError('Preview of Trend of type RMS_PARAM or NONE is not implemented')
+        if self.type in [TrendType.RMS_PARAM, TrendType.NONE, TrendType.RMS_TRENDMAP]:
+            raise NotImplementedError('Preview of Trend of type RMS_PARAM, RMS_TRENDMAP or NONE is not implemented')
         sim_box_x_size, sim_box_y_size, sim_box_z_size = sim_box_size
         nx_preview, ny_preview, nz_preview = preview_size
         projection_type = cross_section.type
@@ -460,7 +494,7 @@ class Trend3D:
 
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(f'---  Trend type: {self.type.name}')
-            if self.type != TrendType.RMS_PARAM:
+            if self.type not in [TrendType.RMS_PARAM, TrendType.RMS_TRENDMAP]:
                 print(
                     f'---  Trend azimuth:      {self.azimuth.value}\n'
                     f'---  StackingAngle:      {self.stacking_angle.value}\n'
@@ -1586,6 +1620,105 @@ class Trend3D_rms_param(Trend3D):
     def as_dict(self):
         return dict(
             rms_param_name=self.trend_parameter_name,
+            debug_level=self._debug_level,
+        )
+
+
+# ----------------------------------------------------------------------------------------------------------
+
+class Trend3D_rms_map(Trend3D):
+    """
+        Description: Create a trend 3D object using a specified RMS 2D continuous trendmap.
+        Input is trendmap.
+    """
+
+    def __init__(
+            self,
+            rms_trendmap_name: str,
+            rms_trendmap_zone: str,
+            debug_level: Debug = Debug.OFF,
+            **kwargs
+    ):
+        self._rms_trendmap_name = rms_trendmap_name
+        self._rms_trendmap_zone = rms_trendmap_zone
+        self._debug_level = debug_level
+
+    @classmethod
+    def from_xml(
+            cls,
+            trend_rule_xml: Element,
+            model_file_name: Optional[str] = None,
+            debug_level: Debug = Debug.OFF
+    ) -> 'Trend3D_rms_map':
+        trend_map_name = getTextCommand(
+            trend_rule_xml, 'TrendMapName', 'Trend', defaultText=None, modelFile=model_file_name, required=True
+        )
+        trend_map_zone = getTextCommand(
+            trend_rule_xml, 'TrendMapZone', 'Trend', defaultText=None, modelFile=model_file_name, required=True
+        )
+        return cls(
+            rms_trendmap_name=trend_map_name,
+            rms_trendmap_zone=trend_map_zone,
+            debug_level=debug_level,
+        )
+
+    def _writeTrendSpecificParam(self) -> None:
+        print(f'---  RMS trend map name for trend values: {self.trend_map_name}')
+        print(f'---  RMS trend map zone for trend values: {self.trend_map_zone}')
+
+    @property
+    def type(self) -> TrendType:
+        return TrendType.RMS_TRENDMAP
+
+    @property
+    def trend_map_name(self) -> str:
+        return self._rms_trendmap_name
+
+    @trend_map_name.setter
+    def trend_map_name(self, trendmap_name: str):
+        self._rms_trendmap_name = trendmap_name.strip()
+
+    @property
+    def trend_map_zone(self) -> str:
+        return self._rms_trendmap_zone
+
+    @trend_map_zone.setter
+    def trend_map_zone(self, trendmap_zone: str):
+        self._rms_trendmap_zone = trendmap_zone.strip()
+
+    def XMLAddElement(
+            self,
+            parent: Element,
+            zone_number: int,
+            region_number: int,
+            gf_name: str,
+            fmu_attributes: List[FmuAttribute]
+    ) -> None:
+        """
+        Add to the parent element a new element with specified tag and attributes.
+            The attributes are a dictionary with {name:value}
+            After this function is called, the parent element has got a new child element
+            for the current class.
+        """
+        if self._debug_level >= Debug.VERY_VERBOSE:
+            print(f'--- call XMLADDElement from  {self._class_name}')
+
+        trend_element = Element('Trend')
+        parent.append(trend_element)
+        rms_trendmap_element = Element('RMSTrendMap')
+        trend_element.append(rms_trendmap_element)
+        trend_map_name_element = Element('TrendMapName')
+        trend_map_name_element.text = ' ' + self.trend_map_name + ' '
+        trend_map_zone_element = Element('TrendMapZone')
+        trend_map_zone_element.text = ' ' + self.trend_map_zone + ' '
+        rms_trendmap_element.append(trend_map_name_element)
+        rms_trendmap_element.append(trend_map_zone_element)
+
+
+    def as_dict(self):
+        return dict(
+            rms_trendmap_name=self.trend_map_name,
+            rms_trendmap_zone=self.trend_map_zone,
             debug_level=self._debug_level,
         )
 

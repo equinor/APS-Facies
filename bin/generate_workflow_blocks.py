@@ -384,6 +384,7 @@ def get_workflows() -> Dict[str, List[str]]:
             'createProbabilityLogs',
             'createRedefinedBlockedFaciesLog',
             'copy_rms_param_to_fmu_grid',
+            'test_jobs_and_workflow',
         ],
         'aps/algorithms': [
             'setupFMUtags',
@@ -428,6 +429,7 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('APS_set_seed_file_for_multiprocessing_workflow', 'APS_set_seed_file_for_multiprocessing_workflow.py'),
             ('APS_compare_files', 'compare_files.py'),
             ('APS_resample_to_ertbox', 'copy_rms_param_to_fmu_grid.py'),
+            ('APS_run_workflow', 'test_jobs_and_workflow.py'),
         ]
     }
 

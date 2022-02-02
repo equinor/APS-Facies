@@ -11,6 +11,7 @@ def add_trend_to_gauss_field(
         gauss_field_values,
         cell_index_defined,
         fmu_mode=False,
+        debug_level=Debug.OFF,
 ):
     '''
     Calculate trend and add trend to simulated gaussian residual field to get the
@@ -26,7 +27,6 @@ def add_trend_to_gauss_field(
     grid_model_name = aps_model.grid_model_name
     realization_number = project.current_realisation
     grid_model = project.grid_models[grid_model_name]
-    debug_level = aps_model.debug_level
     key = (zone_number, region_number)
     zone_model = aps_model.sorted_zone_models[key]
 
@@ -54,6 +54,9 @@ def add_trend_to_gauss_field(
         cell_index_defined,
         zone_number=1 if fmu_mode else zone_number,
         sim_box_thickness=sim_box_thickness,
+        project=project,
+        keep_temporary_trend_param=fmu_mode,
+        debug_level=debug_level,
     )
 
     # Calculate trend plus residual for the cells defined by cell_index_defined
@@ -169,7 +172,7 @@ def add_trends_to_field(
     gauss_field_values_all = add_trend_to_gauss_field(
         project, aps_model, zone_number, region_number,
         use_regions, gf_name, gauss_field_values_all, cell_index_defined,
-        fmu_mode,
+        fmu_mode, debug_level
     )
 
     # Write back to RMS project the untransformed gaussian values with trend for the zone
