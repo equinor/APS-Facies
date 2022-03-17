@@ -111,6 +111,7 @@ unit testing:
   stage: testing  # https://github.com/ksator/continuous-integration-with-python
   script:
     - 'export PYTHON="${RMS_PYTHON}"'
+    - 'export USE_MOCK=no'
     - 'eval $MAKE unit-tests'
   dependencies:
     - initialize
