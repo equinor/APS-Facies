@@ -110,6 +110,7 @@ linting (JavaScript):
 unit testing:
   stage: testing  # https://github.com/ksator/continuous-integration-with-python
   script:
+    - 'export PYTHON="${RMS_PYTHON}"'
     - 'eval $MAKE unit-tests'
   dependencies:
     - initialize
