@@ -88,6 +88,7 @@
     "vuetify-loader": "^1.0.5"
   },
   "resolutions": {
+    "@statnett/vue-plotly/plotly.js/glslify/minimist": "^1.2.6",
     "@vue/cli-service/ssri": "^8.0.1",
     "@vue/cli-service/terser-webpack-plugin/cacache/ssri": "^8.0.1",
     "@vue/cli-plugin-unit-jest/ts-jest/yargs-parser": "^20.2.4"
