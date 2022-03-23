@@ -121,45 +121,60 @@ def run_simulations(
                     f'No Gaussian Random Field named {gauss_field_name} is defined in zone {zone_number}'
                     f'{f", {region_number}" if region_number else "."}'
                 )
-            variogram = field.variogram
+            use_residuals = True
+            if zone_model.hasTrendModel(gauss_field_name):
+                _, _, rel_std_dev, _ = zone_model.getTrendModel(gauss_field_name)
+                if rel_std_dev < 0.001:
+                    use_residuals = False
+            if use_residuals:
+                variogram = field.variogram
 
-            azimuth_value_sim_box = variogram.angles.azimuth - grid_attributes.sim_box_size.azimuth_angle
+                azimuth_value_sim_box = variogram.angles.azimuth - grid_attributes.sim_box_size.azimuth_angle
 
-            if debug_level >= Debug.VERBOSE:
-                if region_number > 0:
-                    print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
-                else:
-                    print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}')
-            if debug_level >= Debug.VERY_VERBOSE:
-                print(
-                    f'     Zone,region             : ({zone_number}, {region_number})\n'
-                    f'     Gauss field name        : {gauss_field_name}\n'
-                    f'     Variogram type          : {variogram.type.name.upper()}\n'
-                    f'     Main range              : {variogram.ranges.main}\n'
-                    f'     Perpendicular range     : {variogram.ranges.perpendicular}\n'
-                    f'     Vertical range          : {variogram.ranges.vertical}\n'
-                    f'     Azimuth angle in sim box: {azimuth_value_sim_box}\n'
-                    f'     Dip angle               : {variogram.angles.dip}\n'
-                    f'     NX                      : {nx}\n'
-                    f'     NY                      : {ny}\n'
-                    f'     NZ for this zone        : {nz}\n'
-                    f'     DX                      : {dx}\n'
-                    f'     DY                      : {dy}\n'
-                    f'     DZ for this zone        : {dz}\n'
-                )
+                if debug_level >= Debug.VERBOSE:
+                    if region_number > 0:
+                        print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}  for region: {region_number}')
+                    else:
+                        print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}')
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(
+                        f'     Zone,region             : ({zone_number}, {region_number})\n'
+                        f'     Gauss field name        : {gauss_field_name}\n'
+                        f'     Variogram type          : {variogram.type.name.upper()}\n'
+                        f'     Main range              : {variogram.ranges.main}\n'
+                        f'     Perpendicular range     : {variogram.ranges.perpendicular}\n'
+                        f'     Vertical range          : {variogram.ranges.vertical}\n'
+                        f'     Azimuth angle in sim box: {azimuth_value_sim_box}\n'
+                        f'     Dip angle               : {variogram.angles.dip}\n'
+                        f'     NX                      : {nx}\n'
+                        f'     NY                      : {ny}\n'
+                        f'     NZ for this zone        : {nz}\n'
+                        f'     DX                      : {dx}\n'
+                        f'     DY                      : {dy}\n'
+                        f'     DZ for this zone        : {dz}\n'
+                    )
 
-            # Define variogram
-            sim_variogram = define_variogram(variogram, azimuth_value_sim_box)
+                # Define variogram
+                sim_variogram = define_variogram(variogram, azimuth_value_sim_box)
 
-            if debug_level >= Debug.VERY_VERBOSE:
-                nx_padding, ny_padding, nz_padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
-                print( '---  Grid dimensions with padding for simulation:')
-                print(f'     nx: {nx}   nx with padding: {nx_padding}')
-                print(f'     ny: {ny}   ny with padding: {ny_padding}')
-                print(f'     nz: {nz}   nz with padding: {nz_padding}')
+                if debug_level >= Debug.VERY_VERBOSE:
+                    nx_padding, ny_padding, nz_padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
+                    print( '---  Grid dimensions with padding for simulation:')
+                    print(f'     nx: {nx}   nx with padding: {nx_padding}')
+                    print(f'     ny: {ny}   ny with padding: {ny_padding}')
+                    print(f'     nz: {nz}   nz with padding: {nz_padding}')
 
-            # Simulate gauss field. Return numpy 1D vector in F order
-            gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
+                # Simulate gauss field. Return numpy 1D vector in F order
+                gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
+            else:
+                # No need to simulate gauss field, but set it to 0
+                if debug_level >= Debug.VERBOSE:
+                    print(
+                        f"-- No simulation of: {gauss_field_name} "
+                        f"for zone: {zone_number},  region: {region_number}.\n "
+                        f"-- Relative standard deviation is: {rel_std_dev}  < 0.001"
+                    )
+                gauss_vector = np.zeros((nx*ny*nz), dtype=np.float32)
             gauss_result = np.reshape(gauss_vector, (nx, ny, nz), order='F')
             gauss_result_list_for_zone.append(gauss_result)
             if debug_level >= Debug.VERBOSE:
