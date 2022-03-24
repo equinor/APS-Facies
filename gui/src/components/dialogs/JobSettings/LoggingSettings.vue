@@ -30,10 +30,10 @@ export default class LoggingSettings extends Vue {
   get debugLevels (): DebugLevel[] {
     return [
       { value: 0, text: 'Off' },
-      { value: 2, text: 'On' },
-      { value: 3, text: 'Verbose' },
-      { value: 4, text: 'Very verbose' },
-      { value: 5, text: 'Even more verbose' },
+      { value: 1, text: 'On' },
+      { value: 2, text: 'Verbose' },
+      { value: 3, text: 'Very verbose' },
+      { value: 4, text: 'For debugging only' },
     ]
   }
 

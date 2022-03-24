@@ -478,7 +478,7 @@ class Trunc3D_bayfill(Trunc2D_Base):
             print(f'--- Use spatially varying truncation rule parameter SF for truncation rule: {self._className}')
             print(f'--- Read RMS parameter: {paramName}')
 
-        values = getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
+        values = getContinuous3DParameterValues(gridModel, paramName, realNumber)
         self.__param_sf = values
 
     def faciesIndxPerPolygon(self):

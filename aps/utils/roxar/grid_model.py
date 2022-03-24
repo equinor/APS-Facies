@@ -3,12 +3,30 @@
 from warnings import warn
 import numpy as np
 import copy
-from aps.utils.constants.simple import Debug, GridModelConstants, SimBoxThicknessConstants,FlipDirectionXtgeo
+from aps.utils.constants.simple import (
+    Debug, GridModelConstants,
+    SimBoxThicknessConstants,FlipDirectionXtgeo,
+)
 from aps.utils.decorators import cached
 from aps.utils.exceptions.general import raise_error
 from aps.utils.io import print_debug_information
 from aps.utils.methods import calc_average
-from roxar import Direction
+from roxar import Direction, GridPropertyType
+
+def get_zone_code_names(grid_model):
+    zone_param_name = GridModelConstants.ZONE_NAME
+    properties = grid_model.properties
+    code_names ={}
+    if zone_param_name in properties:
+        code_names = copy.deepcopy(properties[zone_param_name].code_names)
+    return code_names
+
+def get_zone_names(grid_model):
+    code_names = get_zone_code_names(grid_model)
+    zone_names = []
+    for _, value in code_names.items():
+        zone_names.append(value)
+    return zone_names
 
 def find_defined_cells(zone_values, zone_number, region_values=None, region_number=0, debug_level=Debug.OFF):
     """
@@ -22,11 +40,11 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
     :param debug_level: Debug level
     :returns:  cell_index_defined
         WHERE
-        len(num_defined_cells)  is number of selected and active (physical cells) belonging to the specified zone and region
-        combination.
-        list cell_index_defined  is index array. The length is num_defined_cells. The content is cell index which
-                               is used in the grid parameter vectors zoneValues, regionValues and all other parameter
-                                vectors containing cell values for the selected and active (physical) cells for the grid.
+        the list cell_index_defined  is index array. The length is number of selected and active (physical cells)
+        belonging to the specified zone and region combination.
+        The content is cell index which is used in the grid parameter vectors zoneValues,
+        regionValues and all other parameter vectors containing cell values for the selected
+        and active (physical) cells for the grid.
     """
     num_cells_total = len(zone_values)
 
@@ -62,7 +80,7 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
         cell_index_defined = index_array[zone_values == zone_number]
         if debug_level >= Debug.VERY_VERBOSE:
             print(
-                f'--- In find_defined_cells: Zone:{zone_number}\n' 
+                f'--- In find_defined_cells: Zone:{zone_number}\n'
                 f'--- Number of active cells for the grid: {num_cells_total}\n'
                 f'--- Number of active cells for current zone: {len(cell_index_defined)}'
             )
@@ -79,26 +97,30 @@ def average_of_property_inside_zone_region(
     realization_number=0,
     debug_level=Debug.OFF
 ):
-    ''' Calculates average of the input properties in the list parameter_names for the specified realisation number.
-        Note that realisation number 0 is the first realisation.
-        The average is over the grid cells in the grid model that corresponds to the specified zone number and region number.
-        Note that zone_values are zone number in each grid cell (of active cells) and zone number starts at 1. Region number value
-        can be any positive integer value and possible values are case dependent.
-        If region_values is not specified , the average is over the cells corresponding to the specified zone number.
+    ''' Calculates average of the input properties in the list parameter_names for the
+        specified realisation number. Note that realisation number 0 is the first realisation.
+        The average is over the grid cells in the grid model that corresponds to the specified
+        zone number and region number.
+        Note that zone_values are zone number in each grid cell (of active cells) and zone number
+        starts at 1. Region number value can be any positive integer value and possible values
+        are case dependent. If region_values is not specified , the average is over the cells
+        corresponding to the specified zone number.
         Returns a dictionary with parameter name as key and average as value.
     '''
     cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
     return {
         name: calc_average(
             cell_index_defined,
-            values=getContinuous3DParameterValues(grid_model, name, realization_number, debug_level)
+            values=getContinuous3DParameterValues(grid_model, name, realization_number)
         ) for name in parameter_names
     }
 
 
-def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, realization_number=0, debug_level=Debug.OFF):
+def calcStatisticsFor3DParameter(grid_model, parameter_name,
+    zone_number_list, realization_number=0, debug_level=Debug.OFF):
     """
-    Calculates basic characteristics of property. Calculates the basric statistics of the Property object provided.
+    Calculates basic characteristics of property.
+    Calculates the basic statistics of the Property object provided.
     TODO
     Input:
            property       - The Property object we wish to perform calculation on.
@@ -117,7 +139,7 @@ def calcStatisticsFor3DParameter(grid_model, parameter_name, zone_number_list, r
         float maximum is the maximum value
         float average is the average value
     """
-    values = get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number, debug_level)
+    values = get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number)
     maximum = np.max(values)
     minimum = np.min(values)
     average = np.average(values)
@@ -155,7 +177,7 @@ def get3DParameter(grid_model, parameter_name, realization_number=0):
         )
 
 
-def getContinuous3DParameterValues(grid_model, parameter_name, realization_number=0, debug_level=Debug.OFF):
+def getContinuous3DParameterValues(grid_model, parameter_name, realization_number=0):
     """Get array of continuous values (numpy.float32) from active cells for specified 3D parameter from grid model.
     Input:
            grid_model     - grid model object
@@ -175,25 +197,27 @@ def getContinuous3DParameterValues(grid_model, parameter_name, realization_numbe
     return param.get_values(realization_number)
 
 
-def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realization_number, debug_level=Debug.OFF):
+def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realization_number):
     """
     Input:
            grid_model     - Grid model object
            parameter_name - Name of 3D parameter to get.
 
-           zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
-                            included in the list, then grid cells in all zones are updated.
-           realization_number    - Realisation number counted from 0 for the parameter to get.
+           zone_number_list - A list of integer values that are zone numbers (counted from 0).
+                              If the list is empty or has all zones included in the list,
+                              then grid cells in all zones are updated.
+           realization_number - Realisation number counted from 0 for the parameter to get.
     Output:
-           Numpy vector with parameter values for the active cells belonging to the specified zones. Note that the output
-           is in general not of the same length as a vector with all active cells.
+           Numpy vector with parameter values for the active cells belonging to the
+           specified zones. Note that the output is in general not of the same length as a vector
+           with all active cells.
     """
-    all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number, debug_level)
+    all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number)
     if len(zone_number_list) > 0:
         # Get values for the specified zones
         grid = grid_model.get_grid(realization_number)
         indexer = grid.grid_indexer
-        dim_i, dim_j, dim_k = indexer.dimensions
+        dim_i, dim_j, _ = indexer.dimensions
         num_cells_selected = 0
         values = []
         for zone_index in indexer.zonation:
@@ -213,24 +237,25 @@ def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realizati
         return all_values
 
 
-def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number, debug_level=Debug.OFF):
+def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number):
     """
     Input:
            grid_model     - Grid model object
            parameter_name - Name of 3D parameter to get.
 
-           zone_number_list - A list of integer values that are zone numbers (counted from 0). If the list is empty or has all zones
-                            included in the list, then grid cells in all zones are updated.
+           zone_number_list - A list of integer values that are zone numbers (counted from 0).
+                              If the list is empty or has all zones included in the list,
+                              then grid cells in all zones are updated.
            realization_number    - Realisation number counted from 0 for the parameter to get.
     Output:
-           Numpy vector with parameter values for the active cells belonging to the specified zones. Note that the output
-           is in general not of the same length as a vector with all active cells.
+           Numpy vector with parameter values for the active cells belonging to the specified zones.
+           Note that the output is in general not of the same length as a vector with all active cells.
     """
-    all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number, debug_level)
+    all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number)
     if len(zone_number_list) > 0:
         grid3d = grid_model.get_grid(realization_number)
         # Get all zone values
-        zone_values, _ = zone_parameter_values(grid3d, debug_level)
+        zone_values, _ = _zone_parameter_values(grid3d)
 
         # Get values for the specified zones
         index_array = np.arange(len(zone_values), dtype=np.uint64)
@@ -295,20 +320,21 @@ def isParameterDefinedWithValuesInRMS(grid_model, parameter_name, realization_nu
     return False
 
 
-def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=0, debug_level=Debug.OFF):
+def getDiscrete3DParameterValues(grid_model, parameter_name, realization_number=0):
     """Get array of discrete values (numpy.uint16) from active cells for specified 3D parameter from grid model.
     Input:
            grid_model     - Grid model object.
            parameter_name - Name of 3D parameter to get.
            realization_number    - Realisation number counted from 0 for the parameter to get.
-           debug_level     - (value 0,1,2 or 3) and specify how much info is to be printed to screen. (0 - almost nothing, 3 - also some debug info)
-           function_name  - Name of python function that call this function (Just for more informative print output).
+           debug_level     - (value 0,1,2 or 3) and specify how much info is to be printed to screen.
+           (0 - almost nothing, 3 - also some debug info)
+           function_name  - Name of python function that call this function.
+                            (Just for more informative print output).
 
     Output: numpy array with values for each active grid cell for specified 3D parameter
             and a dictionary object with code_names and values. If dictionary for code and facies names
             has empty facies names, the facies name is set to the code value to avoid empty facies names.
     """
-    from roxar import GridPropertyType
     function_name = getDiscrete3DParameterValues.__name__
     param = get3DParameter(grid_model, parameter_name, realization_number)
     # Check that parameter is defined and not empty
@@ -337,7 +363,7 @@ def modify_selected_grid_cells(grid_model, zone_numbers, realization_number, old
     """
     grid = grid_model.get_grid(realization_number)
     indexer = grid.simbox_indexer
-    dim_i, dim_j, dim_k = indexer.dimensions
+    dim_i, dim_j, _ = indexer.dimensions
     if zone_numbers is None:
         zone_numbers = []
     if len(zone_numbers) > 0:
@@ -354,9 +380,9 @@ def modify_selected_grid_cells(grid_model, zone_numbers, realization_number, old
     return old_values
 
 
-def update_code_names(property, new_code_names):
-    old_code_names = property.code_names
-    # Check old and new code names if there are empty codenames and 
+def update_code_names(rms_param, new_code_names):
+    old_code_names = rms_param.code_names
+    # Check old and new code names if there are empty codenames and
     # set to a default name which is the same as the code
     for code, name in old_code_names.items():
         if name == '':
@@ -392,14 +418,13 @@ def update_code_names(property, new_code_names):
                     else:
                         # The code has different names in the existing original and the new code_names dictionary
                         raise ValueError(
-                            'The facies code {code} has a different name in the new and original'
-                            ' ({old_name}, and {new_name} respectively)'
-                            ''.format(code=code, old_name=v, new_name=u)
+                            f'The facies code {code} has a different name in the new and original'
+                            f' ({v}, and {u} respectively)'
                         )
                 else:
                     # The facies name is empty string, assign a name from the new to it
                     old_code_names[code] = copy.copy(u)
-    property.code_names = old_code_names
+    rms_param.code_names = old_code_names
 
 def get_zone_layer_numbering(grid):
     indexer = grid.simbox_indexer
@@ -427,24 +452,20 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
         between top of some selected grid cell for top layer and bottom of
         the corresponding grid cells at bottom layer.
         The difference is calculated and average is calculated.
-        This is done for all zones in the grid adn a dictionary with values
+        This is done for all zones in the grid and a dictionary with values
         for each zone number is returned. The input parameter max_number_of_selected_cells
         define how many grid cells to be used in the average thickness calculation.
         This function works for grids with both normal and reverse faults.
     '''
     thickness_per_zone = {}
-    code_names = {}
     indexer = grid.grid_indexer
-    dim_i, dim_j, dim_k = indexer.dimensions
+    dim_i, dim_j, _ = indexer.dimensions
     zone_indices = indexer.zonation
     if zone is not None:
         zone_indices = [zone]
     for zone_index in zone_indices:
-        zone_name = grid.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
-        code_names[zone_index + 1] = zone_name
         zone_cell_numbers_top_layer = None
-        zone_cell_numbers_base_layer = None
         n_cell_columns_active_selected = 0
         n_cell_columns_inactive_selected = 0
         sum_thickness_for_selected_active_cell_columns = 0.0
@@ -452,9 +473,8 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
         has_no_active_cells_in_zone = True
 
         def num_active_grid_cells(index):
-            # Check if there are any active grid cells in this layer. If so use grid cells from this layer.
-            if debug_level >= Debug.VERY_VERY_VERBOSE:
-                print(f'--- Zone, layer_ranges, layer:  {zone_name}  {layer_ranges}   {index}')
+            # Check if there are any active grid cells in this layer.
+            # If so use grid cells from this layer.
 
             # Get all the cell numbers for the layer range
             zone_cell_numbers_layer = indexer.get_cell_numbers_in_range(
@@ -486,25 +506,31 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                     break
 
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'--- Zone, layer_ranges, top layer for thickness calculation:  {zone_name}  {layer_ranges}   {k_top}')
+                print(
+                    f'--- Zone number, layer_ranges, top layer for thickness calculation: '
+                    f'{zone_index + 1}  {layer_ranges}   {k_top}'
+                )
 
             for k in range(kmax, kmin - 1, -1):
-                n_cells_active_in_zone_base, zone_cell_numbers_base_layer = num_active_grid_cells(k)
+                n_cells_active_in_zone_base, _ = num_active_grid_cells(k)
                 if n_cells_active_in_zone_base > 0:
                     k_base = k
                     break
 
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'--- Zone, layer_ranges, base layer for thickness calculation:  {zone_name}  {layer_ranges}   {k_base}')
+                print(
+                    f'--- Zone number, layer_ranges, base layer for thickness calculation: '
+                    f'{zone_index + 1}  {layer_ranges}   {k_base}'
+                )
 
 
             # For this layer range, pick arbitrarily max_number_of_selected_cells among the defined grid cells
             # (from the zone_cell_numbers)
             if n_cells_active_in_zone_top <= 0:
                 if debug_level >= Debug.VERY_VERBOSE:
-                    warn(f'Zone {zone_name}  layer range {lr}  has no active cells')
+                    warn(f'Zone number {zone_index + 1}  layer range {lr}  has no active cells')
                     warn(
-                        f'Skipping the ranges {lr.start} - {lr.stop}, for the zone "{zone_name}".'
+                        f'Skipping the ranges {lr.start} - {lr.stop}, for zone number "{zone_index + 1}".'
                         f' They are not defined'
                     )
                 continue
@@ -550,30 +576,37 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                     n_cell_columns_inactive_this_layer_range += 1
 
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'--- Zone {zone_name}  layer range {lr}: \n'
-                      f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}'
-                      f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}'
-                      )
+                print(
+                    f'--- Zone number {zone_index + 1}  layer range {lr}: \n'
+                    f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}\n'
+                    f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}'
+                )
         # End loop over all layer_ranges
 
         if has_no_active_cells_in_zone:
             # There are no active cells in this zone
             thickness_per_zone[zone_index + 1] = SimBoxThicknessConstants.DEFAULT_VALUE
-            warn(f'Zone {zone_name}   No active grid cells. Use default zone thickness: {SimBoxThicknessConstants.DEFAULT_VALUE}')
+            warn(
+                f"Zone number {zone_index + 1}: No active grid cells.\n"
+                f"Use default zone thickness: {SimBoxThicknessConstants.DEFAULT_VALUE}"
+            )
         else:
             if n_cell_columns_active_selected > 3:
                 average_thickness = sum_thickness_for_selected_active_cell_columns / n_cell_columns_active_selected
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'--- Zone name: {zone_name}   Estimated sim box thickness {average_thickness}')
+                    print(f'--- Zone number: {zone_index + 1}   Estimated sim box thickness {average_thickness}')
             else:
                 average_thickness = (
                         (sum_thickness_for_selected_active_cell_columns + sum_thickness_for_selected_inactive_cell_columns)
                         / (n_cell_columns_active_selected + n_cell_columns_inactive_selected)
                 )
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(f'--- Zone name: {zone_name}   When estimating sim box thickness, '
-                          'use also cell columns where either top or base grid cell is inactive')
-                    print(f'--- Zone name: {zone_name}   Estimated sim box thickness {average_thickness}')
+                    print(
+                        f"--- Zone number: {zone_index + 1}: \n"
+                        "     When estimating sim box thickness, use also cell columns where "
+                        "either top or base grid cell is inactive\n"
+                        f"    Estimated sim box thickness: {average_thickness}"
+                    )
 
             thickness_per_zone[zone_index + 1] = average_thickness
 
@@ -597,9 +630,9 @@ class GridSimBoxSize:
                 f'--- Sim box rotation angle: {self.azimuth_angle}'
             )
             if self.ijk_handedness == Direction.right:
-                print(f'--- Sim box has right-handed coordinate system')
+                print('--- Sim box has right-handed coordinate system')
             else:
-                print(f'--- Sim box has left-handed coordinate system')
+                print('--- Sim box has left-handed coordinate system')
 
     @property
     @cached
@@ -821,9 +854,9 @@ class GridSimBoxSize:
         y_center = (self.y0 + self.y1 + self.y2 +self.y3)/4
         return x_center, y_center
 
-    def estimated_origo(self, angle_clockwise_degrees=None, 
+    def estimated_origo(self, angle_clockwise_degrees=None,
                         flip=FlipDirectionXtgeo.LOWER_LEFT_CORNER):
-        # Calculate an origo by rotating the rectangle 
+        # Calculate an origo by rotating the rectangle
         # defining simbox around its center point
         # Flip define if origo is upper left or lower left.
         # flip = UPPER_LEFT_CORNER if origo is upper left corner.
@@ -921,10 +954,10 @@ def getZoneLayerNumbering(grid_model, realization_number=0):
 
 
 class GridAttributes:
-    def __init__(self, grid, debug_level=Debug.OFF):
+    def __init__(self, grid, zone_names, debug_level=Debug.OFF):
         self.grid = grid
         self.debug_level = debug_level
-
+        self._zone_names = zone_names
         if self.debug_level >= Debug.VERY_VERBOSE:
             print('Min. X: {}   | Max. X: {}'.format(self.xmin, self.xmax))
             print('Min. Y: {}   | Max. Y: {}'.format(self.ymin, self.ymax))
@@ -937,10 +970,6 @@ class GridAttributes:
             total_cells = nx * ny * nz
 
             # Get Zone names
-            zone_names = []
-            for i, zone_index in enumerate(self.simbox_indexer.zonation.keys(), start=1):
-                zone_name = self.grid.zone_names[zone_index]
-                zone_names.append(zone_name)
 
             print('Total no. of cells:', total_cells)
             print('No. of defined cells:', self.grid.defined_cell_count)
@@ -960,22 +989,22 @@ class GridAttributes:
             print('\n')
             print('No. of zones:', self.num_zones)
             print('------------------------------------------------')
-
             for i, zone_index in enumerate(self.simbox_indexer.zonation.keys(), start=1):
-                zone_name = grid.zone_names[zone_index]
                 # Only one interval of layers per zone for grid layers in sim box
                 assert len(self.simbox_indexer.zonation[zone_index]) == 1
                 layer_range = self.simbox_indexer.zonation[zone_index]
                 start, *_, end = layer_range[0]
                 num_layers_in_zone = (end + 1 - start)
                 # Indexes start with 0, so add 1 to give user-friendly output
-                layers_text = "{}-{} ".format(str(start + 1), str(end + 1))
-                print('Zone{}: "{}", Layers {} ({} layers)\n'.format(i, zone_name, layers_text, num_layers_in_zone))
+                print(
+                    f"Zone number: {zone_index + 1}, "
+                    f"Layers {start + 1}-{end + 1} ({num_layers_in_zone} layers)\n"
+                )
 
     @property
     @cached
     def num_zones(self):
-        return len(self.simbox_indexer.zonation)
+        return len(self._zone_names)
 
     @property
     @cached
@@ -1022,11 +1051,7 @@ class GridAttributes:
     @property
     @cached
     def zone_names(self):
-        zone_names = []
-        for zone_index in self.simbox_indexer.zonation.keys():
-            zone_name = self.grid.zone_names[zone_index]
-            zone_names.append(zone_name)
-        return zone_names
+        return self._zone_names
 
     @property
     @cached
@@ -1092,49 +1117,58 @@ def create_zone_parameter(
         create_new=False,
 ):
     """ Description:
-     Creates zone parameter for specified grid model with specified name if the zone parameter does not exist.
-     If the zone parameter already exist, but is empty, the function will update it by filling in the zone parameter for the current realisation.
-     If the zone parameter already exist and is non-empty, only in the case that create_new is true, it will be created.
-     Return zone parameter either it is newly created, updated or already existing.
+    Creates zone parameter for specified grid model with specified name if the zone parameter
+    does not exist. If the zone parameter already exist, but is empty, the function will update
+    it by filling in the zone parameter for the current realisation. If the zone parameter
+    already exist and is non-empty, only in the case that create_new is true, it will be created.
+    Return zone parameter either it is newly created, updated or already existing.
     """
-    import roxar
-
     grid3d = grid_model.get_grid(realization_number)
     set_shared = grid_model.shared
     properties = grid_model.properties
     if name in properties:
         zone_parameter = properties[name]
         if debug_level >= Debug.VERY_VERBOSE:
-            print(f'--- Found existing zone parameter with name {zone_parameter.name}')
+            if not create_new:
+                print(f'--- Found existing zone parameter with name {zone_parameter.name}')
 
         if zone_parameter.is_empty(realisation=realization_number) or create_new:
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'--- Assign values to: {zone_parameter.name}')
-            # Fill the parameter with zone values
-            values, code_names = zone_parameter_values(grid3d)
-            zone_parameter.code_names = code_names.copy()
+                if not create_new:
+                    print(f"--- Zone parameter is empty. Assign values to: {zone_parameter.name}")
+            # Fill the parameter with zone values, but don't change the code_names
+            values, _ = _zone_parameter_values(grid3d)
             zone_parameter.set_values(values, realisation=realization_number)
     else:
 
         if debug_level >= Debug.VERY_VERBOSE:
             print(f'--- Create zone parameter with name {name}')
         # Create zone parameter connected to the grid model
-        zone_parameter = properties.create(name, property_type=roxar.GridPropertyType.discrete, data_type=np.uint16)
-        # Fill the parameter with zone values
-        values, code_names = zone_parameter_values(grid3d, debug_level)
+        zone_parameter = properties.create(name, property_type=GridPropertyType.discrete, data_type=np.uint16)
+        # Fill the parameter with zone values and set code_names
+        values, code_names = _zone_parameter_values(grid3d, debug_level=debug_level)
         zone_parameter.set_shared(set_shared)
         zone_parameter.set_values(values, realisation=realization_number)
         zone_parameter.code_names = code_names.copy()
     return zone_parameter
 
 
-def zone_parameter_values(grid3d, debug_level=Debug.OFF):
-    """ Description: Return numpy array for the active grid cells with zone number in each grid cell. """
+def _zone_parameter_values(grid3d, debug_level=Debug.OFF):
+    """ Description: Return numpy array for the active grid cells with
+        zone number in each grid cell.
+        Note: This function is meant to create new zone paraneter
+        from the grid instance if it does not exist.
+        Therefore, this function access the grid3d.zone_names
+        to get the zone names. But for all other functions
+        that need zone names, the code_names dictionary in
+        rms zone parameter is used.
+    """
     code_names = {}
     indexer = grid3d.grid_indexer
     dim_i, dim_j, _ = indexer.dimensions
     values = grid3d.generate_values(data_type=np.uint16)
     for zone_index in indexer.zonation:
+        # Use the grid zone_names to get zone names here
         zone_name = grid3d.zone_names[zone_index]
         layer_ranges = indexer.zonation[zone_index]
         zone_number = zone_index + 1  # Zone number values start from 1 while zone_index start from 0
@@ -1142,7 +1176,40 @@ def zone_parameter_values(grid3d, debug_level=Debug.OFF):
         for lr in layer_ranges:
             # Get all the cell numbers for the layer range
             if debug_level >= Debug.VERY_VERBOSE:
-                print(f'--- Zone number: {zone_number} Zone name: {zone_name}  Layer range: {lr.start + 1} - {lr.stop}')
+                print(f'--- Zone number: {zone_number} Zone name: {zone_name} Layer range: {lr.start + 1} - {lr.stop}')
             cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
             values[cell_numbers] = zone_number
     return values, code_names
+
+def check_active_cells_in_zone_region(grid_model, zone_number,
+    region_number=0, realisation_number=0,
+    region_param_name=None, debug_level=Debug.OFF):
+    zone_param_name = GridModelConstants.ZONE_NAME
+    zone_param = grid_model.properties[zone_param_name]
+    if zone_param.is_empty(realisation=realisation_number):
+        raise ValueError(
+            f"Expecting zone parameter:{zone_param_name} to be non-empty "
+            "here in 'check_active_cells_in_zone_region' "
+        )
+    zone_values = zone_param.get_values(realisation_number)
+
+    region_values = None
+    if region_param_name != None and len(region_param_name)>0:
+        region_param = grid_model.properties[region_param_name]
+        if region_param.is_empty(realisation=realisation_number):
+            raise ValueError(
+                f"Expecting region parameter:{region_param_name} to be non-empty "
+                "here in 'check_active_cells_in_zone_region' "
+            )
+        region_values = region_param.get_values(realisation_number)
+
+    active_cells = find_defined_cells(zone_values, zone_number,
+        region_values, region_number, debug_level=debug_level)
+    if 0 < len(active_cells) < 5:
+            print(
+                "NOTE: Number of active grid cells in (zone, region) = "
+                f"({zone_number},{region_number}) is very small. "
+                f"Number of active cells are {len(active_cells)}. "
+            )
+    nactive = len(active_cells)
+    return nactive > 0

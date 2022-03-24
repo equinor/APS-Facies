@@ -375,7 +375,7 @@ class Trunc2D_Angle(Trunc2D_Base):
                     # Get param values
                     if self._debug_level >= Debug.VERBOSE:
                         print(f'--- Get RMS parameter: {paramName} for facies {fName}')
-                    values = getContinuous3DParameterValues(gridModel, paramName, realNumber, self._debug_level)
+                    values = getContinuous3DParameterValues(gridModel, paramName, realNumber)
                     self.__faciesBoundaryOrientation.append(values)
                 else:
                     raise ValueError(

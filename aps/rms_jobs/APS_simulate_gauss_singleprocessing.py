@@ -14,15 +14,16 @@ from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     set_continuous_3d_parameter_values_in_zone_region,
     get_project_realization_seed,
 )
-from aps.utils.roxar.grid_model import GridAttributes
+from aps.utils.roxar.grid_model import GridAttributes, get_zone_names
 from aps.utils.methods import get_seed_log_file
 from aps.utils.trend import add_trends
 
 
 def define_variogram(variogram, azimuth_value_sim_box):
     variogram_name = variogram.type.name.lower()
-    # Note: Since RMS is a left-handed coordinate system and NrLib treat the coordinate system as right-handed
-    # we have to transform the azimuth angle to 90-azimuth to get it correct in RMS
+    # Note: Since RMS is a left-handed coordinate system and NrLib treat the coordinate
+    # system as right-handed, we have to transform the azimuth angle to 90-azimuth
+    # to get it correct in RMS.
     azimuth_in_nrlib = 90.0 - azimuth_value_sim_box
     args = [
         variogram.ranges.main, variogram.ranges.perpendicular, variogram.ranges.vertical,
@@ -36,7 +37,8 @@ def define_variogram(variogram, azimuth_value_sim_box):
 
 
 def run_simulations(
-        project, model_file='APS.xml', realisation=0, is_shared=False, seed_file_log='seedLogFile.dat',
+        project, model_file='APS.xml', realisation=0,
+        is_shared=False, seed_file_log='seedLogFile.dat',
         write_rms_parameters_for_qc_purpose=False,
         fmu_mode=False, debug_level=Debug.OFF,
 ):
@@ -48,30 +50,34 @@ def run_simulations(
     # Read APS model
     if debug_level >= Debug.ON:
         print(f'- Read file: {model_file}')
-    aps_model = APSModel(model_file,debug_level=debug_level)
+    aps_model = APSModel(model_file)
 
-    # When running in single processing mode, there will not be created new start seeds in the RMS multi realization
+    # When running in single processing mode, there will not be created
+    # new start seeds in the RMS multi realization
     # workflow loop because the start random seed is created once per process,
     # and the process is the same for all realizations in the loop.
     # Hence always read the start seed in single processing mode.
-    # The seed can e.g be defined by using the RMS project realization seed number and should be set into the seed file
+    # The seed can e.g be defined by using the RMS project
+    # realization seed number and should be set into the seed file
     # before calling the current script.
 
     grid_model = project.grid_models[aps_model.grid_model_name]
+    zone_names = get_zone_names(grid_model)
     if fmu_mode:
-        #Ensure that the grid is shared and the realisation number is 1 adn that there are only one zone
+        # Ensure that the grid is shared and the realisation number
+        # is 1 and that there are only one zone.
         if realisation > 1:
             raise ValueError('The realisation number must be 1 in FMU mode.')
         grid = grid_model.get_grid(realisation)
         # Get grid dimensions
-        grid_attributes = GridAttributes(grid, debug_level=Debug.OFF)
+        grid_attributes = GridAttributes(grid, zone_names, debug_level=Debug.OFF)
         num_layers_per_zone = grid_attributes.num_layers_per_zone
         if len(num_layers_per_zone) != 1:
             raise ValueError('The ERTBOX grid can only have 1 zone')
     else:
         grid = grid_model.get_grid(realisation)
         # Get grid dimensions
-        grid_attributes = GridAttributes(grid, debug_level=debug_level)
+        grid_attributes = GridAttributes(grid, zone_names, debug_level=debug_level)
         num_layers_per_zone = grid_attributes.num_layers_per_zone
 
     nx, ny, nz = grid_attributes.simbox_dimensions
@@ -85,15 +91,15 @@ def run_simulations(
     nrlib.seed(start_seed)
     if debug_level >= Debug.VERY_VERBOSE:
         print(f"--- Start seed value: {nrlib.seed()}")
-        
+
     # Loop over all zones and simulate gauss fields
     all_zone_models = aps_model.sorted_zone_models
     for key, zone_model in all_zone_models.items():
         zone_number, region_number = key
         if not aps_model.isSelected(zone_number, region_number):
             continue
-        gauss_field_names = zone_model.gaussian_fields_in_truncation_rule  # Add zone names / number, if FMU
-
+        gauss_field_names = zone_model.gaussian_fields_in_truncation_rule
+        # Add zone names / number, if FMU
         if fmu_mode:
             assert len(num_layers_per_zone) == 1
             zone_index = 0
@@ -118,7 +124,8 @@ def run_simulations(
             field = zone_model.get_gaussian_field(gauss_field_name)
             if field is None:
                 raise KeyError(
-                    f'No Gaussian Random Field named {gauss_field_name} is defined in zone {zone_number}'
+                    f"No Gaussian Random Field named {gauss_field_name}"
+                    f" is defined in zone {zone_number}"
                     f'{f", {region_number}" if region_number else "."}'
                 )
             use_residuals = True

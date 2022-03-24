@@ -24,7 +24,10 @@ class JobConfig:
         self._config = migrated['state']
 
     def get_parameters(self, model_file):
-        aps_model = APSModel(model_file)  # Represents the ORIGINAL APS model
+        # Represents the ORIGINAL APS model
+        aps_model = APSModel(model_file, debug_level=self.debug_level)
+        # Keep only models for (zone,region) pairs with active cells
+        aps_model.check_active_cells(self.project, debug_level=self.debug_level)
         return {
             'roxar': self.roxar,
             'project': self.project,
@@ -34,6 +37,7 @@ class JobConfig:
             'max_fmu_grid_layers': self.max_fmu_grid_layers,
             'fmu_mode': self.run_fmu_workflows,
             'fmu_mode_only_param': self._only_run_fmu_variables_update,
+            'fmu_simulate_fields': self.simulate_fields,
             'fmu_simulation_grid_name': self.fmu_grid_name,
             'rms_grid_name': aps_model.grid_model_name,
             'fmu_export_location': get_export_location(),

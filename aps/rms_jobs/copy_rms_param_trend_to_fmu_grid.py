@@ -10,8 +10,11 @@ import roxar
 
 from roxar import Direction
 from aps.algorithms.APSModel import APSModel
-from aps.utils.constants.simple import Debug, TrendType, Conform, ExtrapolationMethod
-from aps.utils.roxar.grid_model import get_zone_layer_numbering
+from aps.utils.constants.simple import (
+    Debug, TrendType, Conform, 
+    ExtrapolationMethod, GridModelConstants,
+)
+from aps.utils.roxar.grid_model import get_zone_layer_numbering, get_zone_names
 
 
 def get_grid_model(project,grid_model_name: str):
@@ -36,7 +39,7 @@ def check_and_get_grid_dimensions(
         geo_grid_model_name, ertbox_grid_model_name
     ):
     """
-    For given geogrid and ertbox grid return grid dimensions.
+    For a given geogrid and ertbox grid return grid dimensions.
     """
     geogrid_dims = geogrid.simbox_indexer.dimensions
     ertbox_dims = ertboxgrid.simbox_indexer.dimensions
@@ -64,7 +67,7 @@ def get_trend_param_names_from_aps_model(
     geo_grid_model_name = aps_model.grid_model_name
     geogrid_model, geogrid = get_grid_model(project,geo_grid_model_name)
     _, ertboxgrid = get_grid_model(project,ertbox_grid_model_name)
-
+    zone_names = get_zone_names(geogrid_model)
     number_layers_per_zone, _ , _  = get_zone_layer_numbering(geogrid)
     nz_ertbox = ertboxgrid.simbox_indexer.dimensions[2]
 
@@ -78,7 +81,7 @@ def get_trend_param_names_from_aps_model(
         if not aps_model.isSelected(zone_number, region_number):
             continue
         zone_index = zone_number - 1
-        zone_name = geogrid.zone_names[zone_index]
+        zone_name = zone_names[zone_index]
 
         number_layers = number_layers_per_zone[zone_number-1]
 
@@ -486,7 +489,7 @@ def run(*, project,
     EXTEND_LAYER_MEAN -  See doc string for copy_from_geo_to_ertbox_grid.
     REPEAT_LAYER_MEAN - See doc string for copy_from_geo_to_ertbox_grid.
     """
-    if not kwargs['fmu_mode']:
+    if not (kwargs['fmu_mode'] and kwargs['fmu_simulate_fields']):
             return
 
     if project.current_realisation > 0:
