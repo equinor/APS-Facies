@@ -16,6 +16,7 @@ from aps.utils.numeric import isNumber
 from aps.utils.types import FilePath
 from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
 from aps.utils.io import GlobalVariables
+from aps.utils.roxar.grid_model import check_active_cells_in_zone_region
 
 if TYPE_CHECKING:
     from roxar import Project
@@ -998,6 +999,26 @@ class APSModel:
                 'since the zone model does not exist'
             )
 
+    def deSelectedZoneAndRegionNumber(self, zone_number: int, region_number: int = 0) -> None:
+        """
+        Description: Remove selection a pair of (zone_number, region_number).
+        """
+        # De-select a specified pair (zone_number, region_number)
+        input_key = (zone_number, region_number)
+        if input_key in self.__zoneModelTable:
+            if self.__selectAllZonesAndRegions:
+                self.__selectAllZonesAndRegions = False
+                for key,_ in self.__zoneModelTable.items():
+                    self.__selectedZoneAndRegionNumberTable[key] = 1
+            if input_key in self.__selectedZoneAndRegionNumberTable:
+                del self.__selectedZoneAndRegionNumberTable[input_key]
+        else:
+            raise ValueError(
+                f'Can not select (zoneNumber, regionNumber) = ({zone_number}, {region_number}) '
+                'since the zone model does not exist'
+            )
+
+
     def setPreviewZoneAndRegionNumber(self, zone_number: int, region_number: int = 0) -> None:
         key = (zone_number, region_number)
         if key in self.__zoneModelTable:
@@ -1070,14 +1091,17 @@ class APSModel:
 
         # If selected zone list is defined (has elements) write them to a keyword
         selected_zone_numbers = self.getSelectedZoneNumberList()
-        if len(selected_zone_numbers) > 0:
+        if selected_zone_numbers:
             selected_zone_numbers = collections.OrderedDict(sorted(self.__selectedZoneAndRegionNumberTable.items()))
             tag = 'SelectedZonesAndRegions'
             selected_zone_and_region_element = ET.Element(tag)
             root.append(selected_zone_and_region_element)
+            zone_numbers_added = [] 
             for key, _ in selected_zone_numbers.items():
                 zone_number, region_number = key
                 tag = 'SelectedZoneWithRegions'
+                if zone_number in zone_numbers_added:
+                    continue
                 attributes = {'zone': str(zone_number)}
                 element_zone_region = ET.Element(tag, attributes)
 
@@ -1092,6 +1116,7 @@ class APSModel:
                         text += f' {region_number} '
                 element_zone_region.text = text
                 selected_zone_and_region_element.append(element_zone_region)
+                zone_numbers_added.append(zone_number)
 
         # Add all main commands to the root APSModel
         tags = [
@@ -1186,6 +1211,30 @@ class APSModel:
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         self.XMLAddElement(top, fmu_attributes)
         return len(fmu_attributes) > 0
+
+    def check_active_cells(self, project, debug_level=Debug.OFF):
+        """
+        Check if all specified models, for all (zone_number, region_number)
+        have active grid cells and remove the models for the (zone_number, region_number)
+        combinations that has 0 active cells from the list of selected models.
+        """
+        grid_model = project.grid_models[self.grid_model_name]
+        realisation_number = project.current_realisation
+        all_zone_models = self.sorted_zone_models
+        region_param_name = self.getRegionParamName()
+        for key, _ in all_zone_models.items():
+            zone_number, region_number = key
+            if not self.isSelected(zone_number, region_number):
+                continue
+            check = check_active_cells_in_zone_region(grid_model,
+                zone_number, region_number, realisation_number, 
+                region_param_name, debug_level=debug_level)
+            if not check:
+                if debug_level >= Debug.ON:
+                    print(
+                        f"- Skip (zone,region) = ({zone_number} {region_number}). No active cells."
+                    )
+                self.deSelectedZoneAndRegionNumber(zone_number,region_number)
 
     @staticmethod
     def write_model_from_xml_root(

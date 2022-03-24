@@ -18,7 +18,7 @@ from aps.algorithms.APSGaussModel import GaussianField
 from aps.algorithms.APSModel import APSModel
 from aps.algorithms.APSZoneModel import Conform, APSZoneModel
 from aps.algorithms.trend import Trend3D_elliptic_cone, ConicTrend
-from aps.utils.constants.simple import OriginType, Debug, TrendType
+from aps.utils.constants.simple import OriginType, Debug, TrendType, GridModelConstants
 from aps.utils.decorators import cached
 from aps.utils.exceptions.zone import MissingConformityException
 
@@ -124,6 +124,7 @@ class FmuModelChanges(list, FmuModelChange):
 class UpdateModel(FmuModelChange, metaclass=ABCMeta):
     def __init__(self, *, aps_model: APSModel, **kwargs):
         self.aps_model = aps_model
+        self.debug_level = kwargs['debug_level']
 
     @property
     def zone_models(self) -> List[APSZoneModel]:
@@ -251,7 +252,7 @@ class UpdateFieldNamesInZones(UpdateModel):
     @property
     @cached
     def zone_names(self) -> Dict[int, str]:
-        return self.grid_model.properties[self.aps_model.zone_parameter].code_names
+        return self.grid_model.properties[GridModelConstants.ZONE_NAME].code_names
 
     @property
     @cached
@@ -425,7 +426,9 @@ class UpdateRelativePositionOfTrends(TrendUpdate):
 
     @property
     def update_message(self) -> str:
-        return '- Updating the location of relative trends for ERTBOX simulation'
+        if self.debug_level >= Debug.VERY_VERBOSE:
+            return '--- Updating the location of relative trends for ERTBOX simulation'
+        return None
 
     def restore_trend(self, zone_model: APSZoneModel, field_model: GaussianField) -> None:
         field_model.trend.model.origin.z = self.get_original_value(zone_model, field_model)
@@ -451,34 +454,12 @@ class UpdateTrends(FmuModelChanges):
         ])
 
 
-class UpdateGridOrientation(FmuModelChange):
-    def __init__(self, *, project: Project, aps_model: APSModel, **kwargs):
-        grid = get_grid(project, aps_model)
-        self.skip = grid.has_dual_index_system
-        if self.skip:
-            warn(f'Ensuring correct rotation of the grid, is not supported for grids with reverse faults, yet')
-        else:
-            self._grid = xtgeo.grid_from_roxar(project, aps_model.grid_model_name, project.current_realisation)
-            self._original = self._grid.ijk_handedness
-
-    def turn_grid(self, handedness: 'Handedness') -> None:
-        if self._grid.ijk_handedness != handedness:
-            self._grid.reverse_row_axis()
-
-    def before(self):
-        # nrlib uses a right-handed coordinate system
-        if not self.skip:
-            self.turn_grid('right')
-
-    def after(self):
-        if not self.skip:
-            self.turn_grid(self._original)
-
 
 @contextmanager
 def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
     """Updates the name of the grid, if necessary"""
     model_file = kwargs['model_file']
+    ertbox_grid_model_name = kwargs['fmu_simulation_grid_name']
     debug_level = kwargs['debug_level']
     # Instantiate the APS model anew, as it may have been modified by `global_variables`
     aps_model = kwargs['aps_model'] = APSModel(model_file)
@@ -490,7 +471,10 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
         UpdateGridModelName(**kwargs),
     ])
     if fmu_mode:
-        print('FMU mode. Update APS model parameters')
+        print(
+            "FMU mode. Prepare for simulation of GRF's "
+            f"in {ertbox_grid_model_name}"
+        )
         changes.before()
         if debug_level >= Debug.VERY_VERBOSE:
             filename = "debug_model_with_updated_param.xml"
@@ -505,7 +489,7 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
             changes.after()
         aps_model.dump(model_file)
         if debug_level >= Debug.VERY_VERBOSE:
-            filename = "debug_model_with original_param.xml"
+            filename = "debug_model_with_original_param.xml"
             print(f"--- Write model file for debug purpose: {filename} ")
             aps_model.dump(filename)
 

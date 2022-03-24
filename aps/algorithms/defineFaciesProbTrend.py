@@ -59,10 +59,10 @@ class DefineFaciesProb(BaseDefineFacies):
         grid_model = self.project.grid_models[self.grid_model_name]
         is_shared = grid_model.shared
         [zone_values, _] = getDiscrete3DParameterValues(
-            grid_model, self.zone_parameter_name, real_number, debug_level
+            grid_model, self.zone_parameter_name, real_number
         )
         [facies_real_values, code_names_facies] = getDiscrete3DParameterValues(
-            grid_model, self.facies_parameter_name, real_number, debug_level
+            grid_model, self.facies_parameter_name, real_number
         )
 
         if use_const_prob_trend == 0:

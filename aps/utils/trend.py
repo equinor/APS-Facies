@@ -133,18 +133,15 @@ def get_defined_cells(
         fmu_mode=False,
 ):
     realization_number = project.current_realisation
-    # zone parameter is created if it does not exist
+    # Get zone parameter. Create and/or fill it with values if it does not exist
     zone_param = create_zone_parameter(
         grid_model,
-        name=aps_model.zone_parameter,
         realization_number=realization_number,
-        set_shared=False,
-        debug_level=debug_level,
         create_new=fmu_mode,
     )
     region_values = None
     if aps_model.use_regions:
-        region_values, _ = getDiscrete3DParameterValues(grid_model, aps_model.region_parameter, realization_number, debug_level)
+        region_values, _ = getDiscrete3DParameterValues(grid_model, aps_model.region_parameter, realization_number)
     zone_values = zone_param.get_values(realization_number)
     if fmu_mode:
         zone_number = 1

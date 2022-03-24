@@ -138,16 +138,12 @@ def run(project, model_file, geo_grid_name=None, load_dir=None, **kwargs):
                          f'is empty for realization {project.current_realisation}.')
     grid3D = geo_grid_model.get_grid(project.current_realisation)
 
-    # Get zone parameter for geomodel grid
-    try:
-        zone_property = geo_grid_model.properties[aps_model.zone_parameter]
-    except:
-        zone_property = create_zone_parameter(
+    # Get zone parameter for geomodel grid if it exist.
+    # Create it if non-existing. Fill it if empty.
+    zone_property = create_zone_parameter(
             geo_grid_model,
-            name=GridModelConstants.ZONE_NAME,
             realization_number=project.current_realisation,
-            set_shared=geo_grid_model.shared,
-            debug_level=debug_level,
+            set_shared=geo_grid_model.shared
         )
 
     number_of_layers_per_zone_in_geo_grid, _, _ = get_zone_layer_numbering(grid3D)

@@ -48,10 +48,10 @@ class DefineFaciesProbMapDep(BaseDefineFacies):
         indexer = grid_3d.simbox_indexer
         dim_i, dim_j, dim_k = indexer.dimensions
         [zone_values, _] = getDiscrete3DParameterValues(
-            grid_model, self.zone_parameter_name, real_number, debug_level=debug_level
+            grid_model, self.zone_parameter_name, real_number
         )
         [map_facies, facies_code_names] = getDiscrete3DParameterValues(
-            grid_model, self.facies_parameter_name, real_number, debug_level=debug_level
+            grid_model, self.facies_parameter_name, real_number
         )
 
         facies_values = []

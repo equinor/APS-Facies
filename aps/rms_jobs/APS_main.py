@@ -16,7 +16,10 @@ from scipy.stats import norm
 
 from aps.algorithms.APSModel import APSModel
 from aps.utils.checks import check_probability_values, check_probability_normalisation
-from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType
+from aps.utils.constants.simple import (
+    Debug, ProbabilityTolerances, TransformType,
+    GridModelConstants,
+)
 from aps.utils.grid import update_rms_parameter
 from aps.utils.methods import calc_average, get_specification_file, get_debug_level
 from aps.utils.records import Probability
@@ -282,7 +285,6 @@ def run(
         write_rms_parameters_for_qc_purpose = False
 
     all_zone_models = aps_model.sorted_zone_models
-    zone_param_name = aps_model.getZoneParamName()
     region_param_name = aps_model.getRegionParamName()
     use_regions = bool(region_param_name)
     result_param_name = aps_model.getResultFaciesParamName()
@@ -301,13 +303,10 @@ def run(
 
     # Get zone param values
     if debug_level >= Debug.VERBOSE:
-        print(f'-- Get RMS zone parameter: {zone_param_name}')
+        print(f'-- Get RMS zone parameter: {GridModelConstants.ZONE_NAME}')
     zone_param = create_zone_parameter(
         grid_model,
-        name=zone_param_name,
-        realization_number=realization_number,
-        set_shared=False,
-        debug_level=debug_level,
+        realization_number=realization_number
     )
     zone_values = zone_param.get_values(realization_number)
 
@@ -315,7 +314,7 @@ def run(
     if use_regions:
         if debug_level >= Debug.VERBOSE:
             print(f'-- Get RMS region parameter: {region_param_name} from RMS project {aps_model.rms_project_name}')
-        region_values, _ = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number, debug_level)
+        region_values, _ = getDiscrete3DParameterValues(grid_model, region_param_name, realization_number)
 
     # Get or initialize array for facies realisation
     num_cells_total = len(zone_values)
@@ -329,8 +328,7 @@ def run(
                 f'{result_param_name} from RMS project: {aps_model.rms_project_name}'
             )
         facies_real, code_names_for_input = getDiscrete3DParameterValues(
-            grid_model, result_param_name, realization_number, debug_level
-        )
+            grid_model, result_param_name, realization_number)
     else:
         if debug_level >= Debug.VERY_VERBOSE:
             print(
@@ -493,7 +491,7 @@ def run(
                         )
 
                     values = getContinuous3DParameterValues(
-                        grid_model, probability_parameter, realization_number, debug_level,
+                        grid_model, probability_parameter, realization_number
                     )
 
                     # Add the probability values to a common list containing probabilities for

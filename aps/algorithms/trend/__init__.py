@@ -25,7 +25,11 @@ from aps.algorithms.properties import (
     make_angle_property, FmuProperty, make_lower_bounded_property,
     make_ranged_property, CrossSection,
 )
-from aps.utils.constants.simple import Debug, OriginType, TrendType, CrossSectionType, Direction, TrendParameter
+from aps.utils.constants.simple import (
+    Debug, OriginType, TrendType, CrossSectionType,
+    Direction, TrendParameter, GridModelConstants,
+)
+
 from aps.utils.containers import FmuAttribute
 from aps.utils.types import Point3D, SimulationBoxOrigin, GaussianFieldName, HyperbolicTrendParameters
 from aps.utils.xmlUtils import (
@@ -366,10 +370,9 @@ class Trend3D:
         num_layers_in_zone = sum(len(layer) for layer in layer_ranges)
         zinc = sim_box_thickness / num_layers_in_zone
         if self._debug_level >= Debug.VERY_VERBOSE:
-            zone_name = grid_3d.zone_names[zone_number - 1]
             print(
                 f'---  In {self._class_name}\n'
-                f'---  Zone name: {zone_name}\n'
+                f'---  Zone number: {zone_number}\n'
                 f'---  SimboxThickness: {sim_box_thickness}\n'
                 f'---  Zinc: {zinc}\n'
                 f'---  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}\n'
@@ -400,14 +403,15 @@ class Trend3D:
                 )
             # Values for all active cells
             values_in_active_cells = getContinuous3DParameterValues(
-                grid_model, self.trend_parameter_name, realization_number, debug_level=self._debug_level
+                grid_model, self.trend_parameter_name, realization_number
             )
             # Values for selected cells (using numpy vectors)
             values_in_selected_cells = values_in_active_cells[cell_index_defined]
             # If the user defined trend is constant, change one grid cell value to ensure it is not
             # constant to avoid errors later.
-            if np.ptp(values_in_selected_cells) < 0.000001:
-                values_in_selected_cells[0] += 1.0
+            if len(values_in_selected_cells) > 0:
+                if np.ptp(values_in_selected_cells) < 0.000001:
+                    values_in_selected_cells[0] += 1.0
         else:
             num_defined_cells = len(cell_index_defined)
             values_in_selected_cells = np.zeros(num_defined_cells, np.float32)
@@ -418,15 +422,17 @@ class Trend3D:
             k_vec = ijk_cell_indices[index_vector, 2]
             values_in_selected_cells = self._trendValueCalculation_vectorized(parameters_for_trend_calc, 
                                                                                   x_vec, y_vec, k_vec, zinc)
+        if len(values_in_selected_cells)> 0:
+            min_value = values_in_selected_cells.min()
+            max_value = values_in_selected_cells.max()
+            minmax_difference = max_value - min_value
+            values_rescaled = (values_in_selected_cells - min_value) / minmax_difference
 
-        min_value = values_in_selected_cells.min()
-        max_value = values_in_selected_cells.max()
-        minmax_difference = max_value - min_value
-        values_rescaled = (values_in_selected_cells - min_value) / minmax_difference
-
-        min_value = values_rescaled.min()
-        max_value = values_rescaled.max()
-        minmax_difference = max_value - min_value
+            min_value = values_rescaled.min()
+            max_value = values_rescaled.max()
+            minmax_difference = max_value - min_value
+        else:
+            raise ValueError(f"Trend has no active cells")
         return minmax_difference, values_rescaled
 
     def createTrendFor2DProjection(

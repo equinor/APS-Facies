@@ -127,7 +127,6 @@ def set_continuous_3d_parameter_values_in_zone(
                            (0 - almost nothing, 3 - also some debug info)
     """
 
-    function_name = set_continuous_3d_parameter_values_in_zone.__name__
     # Check if specified grid model exists and is not empty
     if grid_model.is_empty(realisation_number):
         print(f'Specified grid model: {grid_model.name} is empty for realisation {realisation_number + 1}.')
@@ -219,6 +218,27 @@ def set_continuous_3d_parameter_values_in_zone(
     return True
 
 
+def define_active_cell_indices(indexer,
+    cell_numbers,
+    ijk_handedness,
+    use_left_handed_grid_indexing,
+    grid_model_name,
+    debug_level
+):
+    _, ny, _ = indexer.dimensions
+    defined_cell_indices = indexer.get_indices(cell_numbers)
+    if (ijk_handedness == Direction.right) and use_left_handed_grid_indexing:
+        if debug_level >= Debug.VERBOSE:
+            print(f'-- Modelling grid {grid_model_name}  is right-handed (Eclipse grid index ordering)')
+        i_indices = defined_cell_indices[:, 0]
+        j_indices = -defined_cell_indices[:, 1] + ny -1
+    else:
+        i_indices = defined_cell_indices[:, 0]
+        j_indices = defined_cell_indices[:, 1]
+    k_indices = defined_cell_indices[:, 2]
+    return i_indices, j_indices, k_indices
+
+
 def set_continuous_3d_parameter_values_in_zone_region(
         grid_model, parameter_names, input_values_for_zones, zone_number,
         region_number=0, region_parameter_name=None, realisation_number=0, is_shared=False,
@@ -228,7 +248,8 @@ def set_continuous_3d_parameter_values_in_zone_region(
     Input:
            grid_model     - Grid model object
            parameter_names - List of names of 3D parameter to update.
-           input_values_for_zones  - A list of numpy 3D arrays. They corresponds to the parameter names in parameter_names.
+           input_values_for_zones  - A list of numpy 3D arrays.
+                                     They corresponds to the parameter names in parameter_names.
                                      The size of the numpy input arrays are (nx,ny,nLayers) where nx, ny must match
                                      the gridModels 3D grid size for the simulation box grid and nLayers must match
                                      the number of layers for the zone in simulationx box. Note that since nx, ny
@@ -278,24 +299,28 @@ def set_continuous_3d_parameter_values_in_zone_region(
             f'Grid model ny: {ny}  Input array ny: {ny_in}\n'
             f'Grid model nLayers for zone {zone_number} is: {num_layers}    Input array nz: {nz_in}'
         )
+    use_regions = False
+    if region_parameter_name is None or len(region_parameter_name) == 0:
+        i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
+            zone_cell_numbers, ijk_handedness,
+            use_left_handed_grid_indexing, grid_model.name,debug_level)
 
-
-    defined_cell_indices = indexer.get_indices(zone_cell_numbers)
-    if (ijk_handedness == Direction.right) and use_left_handed_grid_indexing:
-        if debug_level >= Debug.VERBOSE:
-            print(f'-- Modelling grid {grid_model.name}  is right-handed (Eclipse grid index ordering)')
-        i_indices = defined_cell_indices[:, 0]
-        j_indices = -defined_cell_indices[:, 1] + ny -1
     else:
-        i_indices = defined_cell_indices[:, 0]
-        j_indices = defined_cell_indices[:, 1]
-    k_indices = defined_cell_indices[:, 2]
-
-    # Get region parameter values
-    region_param_values = None
-    if region_parameter_name is not None and len(region_parameter_name) > 0:
-        p = grid_model.properties[region_parameter_name]
-        region_param_values = p.get_values(realisation_number)
+        # Get region parameter values
+        region_param_values = None
+        zone_region_cell_numbers = None
+        if region_parameter_name in grid_model.properties:
+            p = grid_model.properties[region_parameter_name]
+            if not p.is_empty(realisation_number):
+                region_param_values = p.get_values(realisation_number)
+        else:
+            raise ValueError(f"Parameter {region_param_values} does not exist or is empty.")
+        region_param_values_in_zone = region_param_values[zone_cell_numbers]
+        zone_region_cell_numbers = zone_cell_numbers[region_param_values_in_zone == region_number]
+        i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
+            zone_region_cell_numbers, ijk_handedness,
+            use_left_handed_grid_indexing, grid_model.name,debug_level)
+        use_regions = True
 
     # Loop over all parameter names
     for param_index in range(len(parameter_names)):
@@ -317,7 +342,6 @@ def set_continuous_3d_parameter_values_in_zone_region(
         assert property_param is not None
         if property_param.is_empty(realisation_number):
             # Initialize to 0 if empty
-            #  v = np.zeros(grid3D.defined_cell_count, np.float32)
             v = grid.generate_values(np.float32)
             property_param.set_values(v, realisation_number)
 
@@ -328,24 +352,18 @@ def set_continuous_3d_parameter_values_in_zone_region(
         # Note that input array is of dimension (nx,ny,nLayers)
         # where nLayers is the number of layers of the input grid
         # These layers must correspond to layer from start_layer until but not including end_layer
-        # in the full 3D grid
-        if region_param_values is not None:
-            for index in range(len(i_indices)):
-                i = i_indices[index]
-                j = j_indices[index]
-                k = k_indices[index]
-                cell_index = (i, j, k)
-                cell_number = indexer.get_cell_numbers(cell_index)
-                if start_layer <= k < end_layer and region_param_values[cell_number] == region_number:
-                    current_values[cell_number] = input_values_for_zone[i, j, k - start_layer]
-        else:
-            # Create a 3D array for all cells in the grid including inactive cells
-            new_values = np.zeros((nx, ny, nz), dtype=float, order='F')
-            for k in range(start_layer, end_layer):
-                new_values[:, :, k] = input_values_for_zone[:, :, k - start_layer]
+        # in the full 3D grid.
 
-            # Since the cell numbers, and the indices all are based on the same range,
-            # it is possible to use numpy vectorization to copy
+        # Create a 3D array for all cells in the grid including inactive cells
+        # Since the cell numbers, and the indices all are based on the same range,
+        # it is possible to use numpy vectorization to copy
+        new_values = np.zeros((nx, ny, nz), dtype=float, order='F')
+        for k in range(start_layer, end_layer):
+            new_values[:, :, k] = input_values_for_zone[:, :, k - start_layer]
+
+        if use_regions:
+            current_values[zone_region_cell_numbers] = new_values[i_indices, j_indices, k_indices]
+        else:
             current_values[zone_cell_numbers] = new_values[i_indices, j_indices, k_indices]
 
         property_param.set_values(current_values, realisation_number)

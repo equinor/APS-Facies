@@ -1,8 +1,6 @@
 <?xml version="1.0" ?>
 <APSModel version="1.0">
-  <Preview crossSectionRelativePos="0.5" crossSectionType="IJ" regionNumber="0" resolution="Normal" scale="500.0" zoneNumber="5"/>
   <SelectedZonesAndRegions>
-    <SelectedZoneWithRegions zone="2"> 1  4 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="2"> 1  4 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="4"> 0 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="5"> 0 </SelectedZoneWithRegions>

@@ -289,7 +289,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
         if name == zoneParamName:
             # Get the zone parameter values
             zoneValues, codeNamesZone = getDiscrete3DParameterValues(
-                gridModel, name, realization_number=realizationNumber, debug_level=debug_level
+                gridModel, name, realization_number=realizationNumber
             )
         # Check if the property type is integer or float type
 
@@ -298,7 +298,7 @@ def scanRMSProjectAndWriteXMLFile(project, inputFile, outputRMSDataFile, debug_l
             if name == regionParamName:
                 # Get the region parameter values
                 regionValues, codeNamesRegion = getDiscrete3DParameterValues(
-                    gridModel, name, realization_number=realizationNumber, debug_level=debug_level
+                    gridModel, name, realization_number=realizationNumber
                 )
 
         # Check if the property type is integer or float type

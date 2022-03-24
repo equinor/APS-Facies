@@ -208,19 +208,14 @@ def check_and_normalize_probabilities_for_APS(
     grid_model_name = aps_model.grid_model_name
     grid_model = project.grid_models[grid_model_name]
 
-    zone_param_name = aps_model.getZoneParamName()
     region_param_name = aps_model.getRegionParamName()
 
     realization_number = project.current_realisation
 
     # Read zone parameter from RMS
-    assert zone_param_name is not None
     zone_param = create_zone_parameter(
         grid_model,
-        name=zone_param_name,
-        realization_number=realization_number,
-        set_shared=False,
-        debug_level=debug_level,
+        realization_number=realization_number
     )
     zone_values = zone_param.get_values(realization_number)
 

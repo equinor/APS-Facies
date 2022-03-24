@@ -48,6 +48,7 @@ from aps.utils.roxar.grid_model import (
     getDiscrete3DParameterValues,
     create_zone_parameter,
     GridSimBoxSize,
+    get_zone_names,
 )
 from aps.utils.facies_map import create_facies_map
 from aps.utils.roxar.migrations import Migration
@@ -142,10 +143,13 @@ class RMSData:
             name = grid_model.name
             grid = grid_model.get_grid(realisation=self.project.current_realisation)
             exists = self.grid_exists(name)
+            zone_names = []
+            if exists:
+                zone_names = get_zone_names(grid_model)
             models.append({
                 'name': name,
                 'exists': exists,
-                'zones': len(grid.zone_names) if exists else 0,
+                'zones': len(zone_names) if exists else 0,
                 'hasDualIndexSystem': grid.has_dual_index_system if exists else False,
             })
         return models
@@ -200,12 +204,14 @@ class RMSData:
 
     def get_zones(self, grid_model_name: GridName) -> List[dict]:
         grid = self.get_grid(grid_model_name)
+        grid_model = self.get_grid_model(grid_model_name)
+        zone_names = get_zone_names(grid_model)
         zones = []
         for key, zonations in grid.simbox_indexer.zonation.items():
             zonation, *_reverse = zonations
             zones.append({
                 'code': key + 1,
-                'name': grid.zone_names[key],
+                'name': zone_names[key],
                 'thickness': zonation.stop - zonation.start,
             })
         return zones
@@ -314,19 +320,12 @@ class RMSData:
         # Determine which facies appear in which zone, if any
         observed_facies = facies_property.get_values(self.project.current_realisation)
         observed_indices = blocked_wells.get_cell_numbers(self.project.current_realisation)
-        try:
-            zone_values = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(
-                self.project.current_realisation)
-        except:
-            # The Zone parameter is empty or non-existing, create it
-            zone_parameter = create_zone_parameter(
-                grid_model,
-                name=GridModelConstants.ZONE_NAME,
-                realization_number=self.project.current_realisation,
-                debug_level=Debug.VERBOSE
-            )
-            zone_values = grid_model.properties[GridModelConstants.ZONE_NAME].get_values(
-                self.project.current_realisation)
+
+        # Get zone parameter. If non-existing create it.
+        # If existing but empty, fill it with values
+        zone_param = create_zone_parameter(grid_model,
+            realization_number=self.project.current_realisation)
+        zone_values = zone_param.get_values(self.project.current_realisation)
 
         regions = np.zeros(zone_values.shape, zone_values.dtype)
         if region_parameter_name != '__REGIONS_NOT_IN_USE__':  # Hack to avoid incompatibility with decorator

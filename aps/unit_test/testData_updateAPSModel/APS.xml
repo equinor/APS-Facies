@@ -1,7 +1,5 @@
 <?xml version="1.0" ?>
 <APSModel version="1.0">
-  <Preview zoneNumber="4" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1">
-  </Preview>
   <Optimization>
     <UseMemoization>1</UseMemoization>
     <MemoizationResolution>100</MemoizationResolution>
