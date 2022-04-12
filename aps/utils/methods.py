@@ -191,6 +191,7 @@ class SpecificationType(Enum):
     FACIES_LOG = 2
     CONVERT_BITMAP = 3
     PROBABILITY_TREND = 4
+    RESAMPLE = 5
 
 
 def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL, **kwargs) -> Optional[ProbabilityLogSpecificationFile]:
@@ -200,6 +201,7 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         SpecificationType.FACIES_LOG: 'Create_redefined_blocked_facies_log.xml',
         SpecificationType.CONVERT_BITMAP: 'bitmap2rms_model.xml',
         SpecificationType.PROBABILITY_TREND: 'defineProbTrend.xml',
+        SpecificationType.RESAMPLE: 'resample.xml',
     }
     if _type in mapping:
         file = get_model_file_name(_default_name=mapping[_type], **kwargs)

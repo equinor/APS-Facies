@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.1"
+__version__ = "0.14.2"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -366,6 +366,7 @@ def get_workflows() -> Dict[str, List[str]]:
             'updateAPSModelFromUncertaintyTable',
             'createProbabilityLogs',
             'createRedefinedBlockedFaciesLog',
+            'copy_rms_param_to_fmu_grid',
         ],
         'aps/algorithms': [
             'setupFMUtags',
@@ -409,6 +410,7 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('APS_bitmap2rms', 'bitmap2rms.py'),
             ('APS_set_seed_file_for_multiprocessing_workflow', 'APS_set_seed_file_for_multiprocessing_workflow.py'),
             ('APS_compare_files', 'compare_files.py'),
+            ('APS_resample_to_ertbox', 'copy_rms_param_to_fmu_grid.py'),
         ]
     }
 

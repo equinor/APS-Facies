@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<!-- This model specification is used in the script to resample RMS 3D parameters
+     from geomodel grid to ERTBOX grid for use in ERT with assisted history matching
+     Name of script: APS_resample_to_ertbox
+     Name of model file:  resample.xml
+     Use symbolic link to specify actual filename like
+     ln -sf resample_properties_to_ertbox.xml  resample.xml
+-->
+<Resample>
+    <GridModelName>Grid_model_fine</GridModelName>
+    <ERTBoxGridName> ERTBOX_FINE </ERTBoxGridName>
+    <ZoneParam> Zone </ZoneParam>
+    <Parameters>
+        <Zone number="1">  Perm Poro </Zone>
+    </Parameters>
+    <Conformity>
+        <Zone number="1">  TopConform </Zone>
+    </Conformity>
+    <!-- Available extrapolation methods: ZERO, MEAN, EXTEND, REPEAT, EXTEND_LAYER_MEAN, REPEAT_LAYER_MEAN -->
+    <ExtrapolationMethod>REPEAT </ExtrapolationMethod>
+</Resample>

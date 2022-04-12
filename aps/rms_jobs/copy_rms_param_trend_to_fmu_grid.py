@@ -284,6 +284,7 @@ def copy_from_geo_to_ertbox_grid(
         debug_level: Debug,
         save_active_param=False,
         normalize_trend=False,
+        not_aps_workflow=False,
 ):
     """
     zone_dict[zone_name] = (zone_number, region_number, conformity, param_name_list)
@@ -437,8 +438,11 @@ def copy_from_geo_to_ertbox_grid(
 
             # Create and save a parameter for grid cells in ERTBOX 
             # corresponding to active cells from geomodel for current geomodel zone
+            prefix = "aps_"
+            if not_aps_workflow:
+                prefix = ""
             if save_active_param:
-                active_param_name = "aps_" + zone_name + "_active"
+                active_param_name = prefix + zone_name + "_active"
                 ertbox_active_param = ertbox_grid_model.properties.create(active_param_name,
                     property_type=roxar.GridPropertyType.discrete,
                     data_type=np.uint8)
@@ -461,7 +465,7 @@ def copy_from_geo_to_ertbox_grid(
 
 
             # Create ertbox properties if not already existing
-            full_param_name = "aps_" + zone_name + "_" + param_name
+            full_param_name = prefix + zone_name + "_" + param_name
             ertbox_param = ertbox_grid_model.properties.create(full_param_name,
                 property_type=roxar.GridPropertyType.continuous,
                 data_type=np.float32)
