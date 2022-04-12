@@ -272,7 +272,11 @@ class RMSData:
             zone_number: ZoneNumber,
             region_parameter: Optional[RegionParameter] = None,
             region_number: Optional[RegionNumber] = None,
+            debug_level=Debug.VERBOSE,
     ) -> Dict[ProbabilityCubeParameter, Average]:
+        # Ensure not duplicated parameter names for probability cubes
+        param_names = list(set(probability_cube_parameters))
+        param_names.sort()
 
         # Get parameters from RMS
         realisation_number = self.project.current_realisation
@@ -286,13 +290,23 @@ class RMSData:
             region_values = None
 
         averages = average_of_property_inside_zone_region(
-            grid_model, probability_cube_parameters,
+            grid_model, param_names,
             zone_values, zone_number,
             region_values, region_number,
             realisation_number
         )
+        if debug_level >= Debug.VERBOSE:
+            if region_values is not None:
+                text = f"zone number: {zone_number}  region number:  {region_number} "
+            else:
+                text = f"zone: {zone_number}"
+            print(f"-- Calculate average of probability cubes for {text}")
+            for name,prob in averages.items():
+                print(f" {name}  Average prob: {prob}")
+
         # numpy float to regular float
         return {parameter: float(probability) for parameter, probability in averages.items()}
+
 
     @empty_if_none
     def get_blocked_well_logs(self, grid_model_name: GridName, blocked_well_name: str) -> List[str]:

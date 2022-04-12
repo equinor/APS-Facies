@@ -1206,10 +1206,10 @@ def check_active_cells_in_zone_region(grid_model, zone_number,
     active_cells = find_defined_cells(zone_values, zone_number,
         region_values, region_number, debug_level=debug_level)
     if 0 < len(active_cells) < 5:
-            print(
-                "NOTE: Number of active grid cells in (zone, region) = "
-                f"({zone_number},{region_number}) is very small. "
-                f"Number of active cells are {len(active_cells)}. "
-            )
+        print(
+            "NOTE: Number of active grid cells in (zone, region) = "
+            f"({zone_number},{region_number}) is very small. "
+            f"Number of active cells are {len(active_cells)}. "
+        )
     nactive = len(active_cells)
     return nactive > 0
