@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<APS_prob_trend>
+  <FaciesProbTrend>
+    <GridModelName>   GridModelFine </GridModelName>
+    <ZoneParamName>  Zone </ZoneParamName>
+    <FaciesParamName>  Zone </FaciesParamName>
+    <ProbParamNamePrefix>  ProbTrendTest  </ProbParamNamePrefix>
+    <SelectedZones> 1 2 3 4 5 6 </SelectedZones>
+    <UseConstantProbFromVolumeFraction> 0 </UseConstantProbFromVolumeFraction>
+    <CondProbMatrix>
+      <Line>  F1  middle_Neslen_1  0.9  </Line>
+      <Line>  F2  middle_Neslen_1  0.05 </Line>
+      <Line>  F3  middle_Neslen_1  0.0 </Line>
+      <Line>  F4  middle_Neslen_1  0.0 </Line>
+      <Line>  F5  middle_Neslen_1  0.05 </Line>
+
+      <Line>  F1  middle_Neslen_2  0.02 </Line>
+      <Line>  F2  middle_Neslen_2  0.0 </Line>
+      <Line>  F3  middle_Neslen_2  0.0 </Line>
+      <Line>  F4  middle_Neslen_2  0.8 </Line>
+      <Line>  F5  middle_Neslen_2  0.18 </Line>
+
+      <Line>  F1  middle_Neslen_3  0.0 </Line>
+      <Line>  F2  middle_Neslen_3  0.0 </Line>
+      <Line>  F3  middle_Neslen_3  0.1 </Line>
+      <Line>  F4  middle_Neslen_3  0.5 </Line>
+      <Line>  F5  middle_Neslen_3  0.4 </Line>
+
+      <Line>  F1  middle_Neslen_4  0.4 </Line>
+      <Line>  F2  middle_Neslen_4  0.0 </Line>
+      <Line>  F3  middle_Neslen_4  0.0 </Line>
+      <Line>  F4  middle_Neslen_4  0.0 </Line>
+      <Line>  F5  middle_Neslen_4  0.6 </Line>
+
+      <Line>  F1  middle_Neslen_5  0.10 </Line>
+      <Line>  F2  middle_Neslen_5  0.10 </Line>
+      <Line>  F3  middle_Neslen_5  0.80 </Line>
+      <Line>  F4  middle_Neslen_5  0.0 </Line>
+      <Line>  F5  middle_Neslen_5  0.0 </Line>
+
+      <Line>  F1  middle_Neslen_6  0.1 </Line>
+      <Line>  F2  middle_Neslen_6  0.1 </Line>
+      <Line>  F3  middle_Neslen_6  0.2 </Line>
+      <Line>  F4  middle_Neslen_6  0.0 </Line>
+      <Line>  F5  middle_Neslen_6  0.6 </Line>
+    </CondProbMatrix>
+  </FaciesProbTrend>
+</APS_prob_trend>

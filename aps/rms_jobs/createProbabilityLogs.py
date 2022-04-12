@@ -228,7 +228,7 @@ def run(roxar=None, project=None, **kwargs):
 
     realization_number = project.current_realisation
     if debug_level >= Debug.VERBOSE:
-        print('Realization number: {}'.format(realization_number))
+        print(f'Realization number: {realization_number}')
 
     # Case: assign_binary_probabilities = True
     # In this case the probabilities are either 1 or 0 or undefined.
@@ -236,9 +236,11 @@ def run(roxar=None, project=None, **kwargs):
     # Case: assign_binary_probabilities = False (NB: Experimental, not for use as default)
     # In this case the user must for each zone specify a probability for each modelled facies given the 
     # observed facies in the facies log.
-    # The conditiona probabilities are specifed by one item per conditioned probability P(modelled_facies|observation_facies)
+    # The conditional probabilities are specifed by one item per conditioned probability
+    #   P(modelled_facies|observation_facies)
     # Note that the sum of probability for all modelled facies in a zone given an observed facies must be 1.0
-    # The dictionary conditional_prob_facies as entries of the type  ('modelled_facies', 'observed_facies'):probability
+    # The dictionary conditional_prob_facies has entries of the type:
+    #   ('modelled_facies', 'observed_facies'):probability
     # and is the way to specify the conditional probability P('modelled_facies' | 'observed_facies').
     # Note that conditional probabilities must be specified for all observed facies in the log.
     # The modelled facies can be different in number and have different names compared with observed facies, 
@@ -259,10 +261,10 @@ def run(roxar=None, project=None, **kwargs):
 
         createProbabilityLogs(**kwargs)
     else:
-        print('Calculate probability logs using specified conditional probabilities:')
-        if debug_level >= Debug.ON:
+        print('Calculate probability logs using specified conditional probabilities')
+        if debug_level >= Debug.VERBOSE:
             for key, prob_value in _file.conditional_prob_facies.items():
-                print('Zone: {}  Prob({}| {}) = {}'.format(key[0], key[1], key[2], prob_value))
+                print(f'Zone: {key[0]}  Prob({key[1]}| {key[2]}) = {prob_value}')
 
         createProbabilityLogs(
             conditional_prob_facies=_file.conditional_prob_facies,
@@ -372,10 +374,9 @@ def read_model_file(model_file_name):
                     if first:
                         if not use_same_facies_in_all_zones:
                             raise KeyError(
-                                'The modelled facied per zone vary from zone to zone.\n'
-                                'In this case it is necessary to specify conditional probabilities for each zone.\n'
-                                'Use the attribute \'number\' to specify zone number in keyword {}'
-                                ''.format(keyword)
+                                f"The modelled facied per zone vary from zone to zone.\n"
+                                f"In this case it is necessary to specify conditional probabilities for each zone.\n"
+                                f"Use the attribute 'number' to specify zone number in keyword {keyword}"
                             )  
                         conditional_prob_facies = read_cond_prob_matrix(conditional_prob_facies,
                                                                         keyword, 
@@ -386,13 +387,11 @@ def read_model_file(model_file_name):
                         first = False
                     else:
                         raise KeyError(
-                            'Keyword {} can not be specified multiple times if the keyword attribute \'number\' is not specified.'
-                            ''.format(keyword)
+                            f"Keyword {keyword} can not be specified multiple times if the keyword attribute 'number' is not specified."
                         )
             else:
                 raise KeyError(
-                    'Keyword {} is already specified without attribute \'number\' so the keyword can not be specified multiple times.'
-                    ''.format(keyword)
+                    f"Keyword {keyword} is already specified without attribute 'number' so the keyword can not be specified multiple times."
                 )
 
         # Check that all specified zones have a specified conditional probability matrix if this is required
@@ -483,13 +482,13 @@ def read_cond_prob_matrix(conditional_prob_facies,
             if key not in conditional_prob_facies:
                 if not use_common_cond_prod_matrix:
                     raise ValueError(
-                        'No conditional probability is specified for facies {} in zone {} conditioned to interpreted facies {}'
-                        ''.format(facies_name, zone_number, facies_name_conditioned)
+                        f"No conditional probability is specified for facies {facies_name} "
+                        f"in zone {zone_number} conditioned to interpreted facies {facies_name_conditioned}"
                     )   
                 else:
                     raise ValueError(
-                        'No conditional probability is specified for facies {} conditioned to interpreted facies {}'
-                        ''.format(facies_name, facies_name_conditioned)
+                        f"No conditional probability is specified for facies {facies_name} "
+                        f"conditioned to interpreted facies {facies_name_conditioned}"
                     )   
     return conditional_prob_facies
 
@@ -524,4 +523,4 @@ class _ModelFile:
 if __name__ == '__main__':
     import roxar
 
-    run(roxar, project, debug_level=Debug.VERBOSE)
+    run(roxar, project)
