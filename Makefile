@@ -40,7 +40,8 @@ ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
 
-BUILD_NUMBER = $(shell date "+%Y%m%d%H%M%S")
+# Time stamp format YY daynumber_in_year hour minutes
+BUILD_NUMBER := $(shell date "+%y%j%H%M")
 ROXENV := roxenv
 HAS_ROXENV := $(shell command -v $(ROXENV) 2>/dev/null)
 ZIP := $(ROXENV) --zip
