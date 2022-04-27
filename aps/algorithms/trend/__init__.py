@@ -418,8 +418,13 @@ class Trend3D:
                 if np.ptp(values_in_selected_cells) < 0.000001:
                     values_in_selected_cells[0] += 1.0
         elif isinstance(self, Trend3D_rms_map):
-            from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param
+            from aps.utils.roxar.sample_map_to_grid import trend_map_to_grid_param, check_existence_of_map
             from aps.utils.roxar.grid_model import getContinuous3DParameterValues
+            if not check_existence_of_map(project, self.trend_map_zone, self.trend_map_name):
+                raise IOError(
+                        f"Specified 2D trend map:  zone name: {self.trend_map_zone} surface type: {self.trend_map_name}\n"
+                        " does not exist or is empty.  Check the trend specification for trend of type RMS_TRENDMAP"
+                )
             if debug_level >= Debug.VERBOSE:
                 print(
                     f'-- RMS 2D trend map from zone: {self.trend_map_zone}\n'
@@ -1614,7 +1619,8 @@ class Trend3D_rms_param(Trend3D):
         rms_parameter_element = Element('RMSParameter')
         trend_element.append(rms_parameter_element)
         trend_param_name_element = Element('TrendParamName')
-        trend_param_name_element.text = ' ' + self.trend_parameter_name + ' '
+        if self.trend_parameter_name:
+            trend_param_name_element.text = ' ' + self.trend_parameter_name + ' '
         rms_parameter_element.append(trend_param_name_element)
 
     def as_dict(self):
@@ -1656,6 +1662,10 @@ class Trend3D_rms_map(Trend3D):
         trend_map_zone = getTextCommand(
             trend_rule_xml, 'TrendMapZone', 'Trend', defaultText=None, modelFile=model_file_name, required=True
         )
+        if trend_map_name is None or trend_map_zone is None:
+                raise ValueError(
+                    f"Missing input name of trend map and/or zone for {TrendType.RMS_TRENDMAP} "
+                )
         return cls(
             rms_trendmap_name=trend_map_name,
             rms_trendmap_zone=trend_map_zone,

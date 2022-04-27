@@ -81,14 +81,21 @@ def getTextCommand(
     """
     Return the text string specified in the keyword. If the keyword is required,
     but the keyword does not exist, error message is called.
+    If the text string specified in the keyword is None but a value is required, 
+    error message is called.
     If the keyword is not required and the keyword is not found, the default text is returned.
     """
     obj = parent.find(keyword)
-    if required and obj is None:
-        raise ReadingXmlError(keyword, parentKeyword, modelFile)
+    if required:
+        if obj is None:
+            raise ReadingXmlError(keyword, parentKeyword, modelFile)
+        if obj.text is None:
+            raise MissingRequiredValue(keyword, parentKeyword, modelFile)
+
     text = defaultText
     if obj is not None:
-        text = obj.text.strip()
+        if obj.text is not None:
+            text = obj.text.strip()
 
     return text
 

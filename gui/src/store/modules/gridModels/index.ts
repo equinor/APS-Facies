@@ -14,6 +14,8 @@ const parametersDependentOnGrid = [
   'blockedWell',
   'blockedWellLog',
   'rmsTrend',
+  'rmsTrendMapNames',
+  'rmsTrendMapZones',
   'probabilityCube',
   'grid',
   'realization',

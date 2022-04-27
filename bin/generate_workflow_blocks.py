@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.3"
+__version__ = "0.14.4"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo

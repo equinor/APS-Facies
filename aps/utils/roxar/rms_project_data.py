@@ -37,7 +37,6 @@ from aps.utils.constants.simple import (
     Direction,
     OriginType,
     ProbabilityTolerances,
-    GridModelConstants,
     CrossSectionType,
 )
 from aps.utils.debug import parse_dot_master
@@ -57,8 +56,8 @@ from aps.utils.roxar.migrations import Migration
 from aps.utils.truncation_rules import make_truncation_rule
 from aps.utils.types import (
     ProjectName, ProjectPath, FmuParameterListPath, WorkflowName, GridName, RegionParameter,
-    TrendParameter, ProbabilityCubeParameter, RealizationParameter, SimulationBoxOrigin,
-    GridSize, ZoneNumber,
+    TrendParameter, TrendMapName, TrendMapZone, ProbabilityCubeParameter, RealizationParameter,
+    GridSize, ZoneNumber, SimulationBoxOrigin,
     RegionNumber, Average, XML, VariogramName, TrendName, DirectionName, OriginTypeName,
     GridModelName,
 )
@@ -86,6 +85,9 @@ def _option_mapping() -> Dict[str, Type[Enum]]:
 
 
 class RMSData:
+    """
+    Purpose: Get RMS project data to be used in APS GUI using Roxar API.
+    """
     def __init__(self, roxar, project: Project):
         self.roxar = roxar
         self.project = project
@@ -163,6 +165,44 @@ class RMSData:
 
     def get_rms_trend_parameters(self, grid_model_name: GridName) -> List[TrendParameter]:
         return self._get_parameter_names(grid_model_name, self.is_trend_parameter)
+
+    def get_rms_trend_map_names(self, zone_name) -> List[TrendMapName]:
+        rms_surface_representations = self.project.zones.representations
+        repr_names = [item.name for item in rms_surface_representations]
+        repr_list = []
+        for repr_name in repr_names:
+            surface = None
+            surface = self.project.zones[zone_name][repr_name]
+            if surface:
+                if not surface.is_empty():
+                    repr_list.append(repr_name)
+        return repr_list
+
+    def get_rms_trend_map_names_all(self) -> List[TrendMapName]:
+        rms_surface_representations = self.project.zones.representations
+        repr_names = [item.name for item in rms_surface_representations]
+        return repr_names
+
+    def get_rms_trend_map_zones(self) -> Dict[str, List[str]]:
+        rms_surface_representations = self.project.zones.representations
+        representation_names = [item.name for item in rms_surface_representations]
+        zone_names = self.project.zones.keys()
+        # Find the surface types (representations) that have values and are not empty
+        # for each zone in the zone container in RMS
+        zones = {}
+        for zone_name in zone_names:
+            representations = []
+            for rep_name in representation_names:
+                try:
+                    surface = self.project.zones[zone_name][rep_name]
+                except KeyError:
+                    surface = None
+
+                if surface and not surface.is_empty():
+                    representations.append(rep_name)
+
+            zones[zone_name] = representations
+        return zones
 
     def get_probability_cube_parameters(self, grid_model_name: GridName) -> List[ProbabilityCubeParameter]:
         return self._get_parameter_names(grid_model_name, self.is_probability_cube)
@@ -376,7 +416,7 @@ class RMSData:
     def load_dot_master(self) -> dict:
         try:
             project_root = Path(__file__).parent.parent.parent.parent
-            with open(project_root / 'local.settings.json') as f:
+            with open(project_root / 'local.settings.json', encoding="utf-8") as f:
                 debug_settings = json.load(f)
                 filename = self.project.filename
                 if filename.startswith('/'):
@@ -548,6 +588,7 @@ class RMSData:
                 grid_azimuth=0,
                 grid_size=(100, 100, 1),
                 simulation_box_size=(100, 100, 1),
+                simulation_box_origin=(0, 0, 0),
                 seed=0,
             )
         else:

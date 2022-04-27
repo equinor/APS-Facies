@@ -4,23 +4,32 @@ JRIV/OLIA
 """
 import numpy as np
 import xtgeo
-from aps.utils.constants.simple import Debug
+from aps.utils.constants.simple import Debug, GridModelConstants
+
+def check_existence_of_map(project, zone_name, map_name):
+    exists = False
+    if zone_name in project.zones:
+        if map_name in project.zones[zone_name]:
+            surface = project.zones[zone_name][map_name] 
+            if surface:
+                if not surface.is_empty():
+                    exists = True
+    return exists
 
 
 def trend_map_to_grid_param(project, grid_model_name, trend_map_name, zone_name,
     result_param_name, zone_number=1,
-    zone_param_name="Zone", debug_level=Debug.OFF):
+    zone_param_name=GridModelConstants.ZONE_NAME, debug_level=Debug.OFF):
 
     grid, zone_param = _read_grid(project, grid_model_name, zone_param_name)
     grid, grid_points, kminmax = _derive_gridcells_points(grid, zone_param, zone_number)
     grid_points = _snap_points_to_surface(project, grid_points, trend_map_name, zone_name)
-    _create_property_and_store(project, grid_model_name, grid, grid_points, kminmax, result_param_name)
-    if debug_level >= Debug.VERY_VERBOSE:
+    if debug_level >= Debug.VERBOSE:
         print(
-            f"--- Mapped trendmap {trend_map_name} for zone {zone_number} "
-            f"to {result_param_name} for {grid_model_name}"
+            f"-- Create temporary 3D parameter {result_param_name} as trend "
+            f"using 2D trend map {trend_map_name} for zone {zone_number}"
         )
-
+    _create_property_and_store(project, grid_model_name, grid, grid_points, kminmax, result_param_name)
 
 def _read_grid(project, grid_model_name, zone_param_name):
     """Read 3D grid and zone property"""
@@ -70,7 +79,7 @@ def _create_property_and_store(project, grid_model_name, grid, gridpoints, kminm
         newprop = xtgeo.gridproperty_from_roxar(project, grid_model_name, result_param_name,
             realisation=project.current_realisation)
     except ValueError as verror:
-        if "No property in" in str(verror):
+        if "No property in" in str(verror) or "The requested grid property has no data." in str(verror):
             newprop = xtgeo.GridProperty(grid)
         else:
             raise

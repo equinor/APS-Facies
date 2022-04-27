@@ -40,14 +40,15 @@ if __name__ == "__main__":
     model_file_name = "aps_custom_trend_fmu.xml"
     zone_number = 1
     aps_model = APSModel(model_file_name)
-    kwargs = {}
-    kwargs['model_file'] =  model_file_name
-    kwargs['trend_map']= "A"
-    kwargs['trend_param_name'] = "Trend_from_map"
-    kwargs['aps_model'] = aps_model
-    kwargs['fmu_simulation_grid_name'] = "ERTBOXNEW"
-    kwargs['debug_level'] = Debug.VERBOSE
-    kwargs['zone_param_name'] = "Zone"
-    kwargs['fmu_mode'] = True
+    kwargs = {
+        'model_file': model_file_name,
+        'trend_map': "A",
+        'trend_param_name': "Trend_from_map",
+        'aps_model': aps_model,
+        'fmu_simulation_grid_name': "ERTBOXNEW",
+        'debug_level': Debug.VERBOSE,
+        'zone_param_name': "Zone",
+        'fmu_mode': True,
+    }
 
     run(project=project, zone_number=zone_number, **kwargs)

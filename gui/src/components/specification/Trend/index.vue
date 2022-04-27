@@ -60,6 +60,21 @@
             :items="availableRmsTrendParameters"
             label="Trend parameter"
           />
+          <v-select
+            v-if="isRmsTrendMap"
+            v-model="trendMapZone"
+            v-tooltip="'Select zone name from Zones folder for maps'"
+            :items="availableRmsTrendZones"
+            label="Zone name"
+          />
+          <v-select
+            v-if="isRmsTrendMap"
+            v-model="trendMapName"
+            v-tooltip="'Select surface with 2D trend corresponding to selected zone'"
+            :items="availableRmsTrendMaps"
+            :disabled="!hasDefinedRmsTrendZone"
+            label="Trend map"
+          />
           <div
             v-if="hasEllipticProperties"
           >
@@ -107,6 +122,7 @@ import {
 } from '@/components/specification/Trend/InputFields'
 
 import { TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION } from '@/config'
+import type { TrendMap } from '@/store/modules/parameters/rmsTrendMapZones'
 
 interface Invalid {
   relativeStdDev: boolean
@@ -147,6 +163,26 @@ export default class TrendSpecification extends Vue {
   }
 
   get availableRmsTrendParameters (): string[] { return this.$store.state.parameters.rmsTrend.available }
+  private get rmsTrendMapZones (): TrendMap[] { return this.$store.state.parameters.rmsTrendMapZones.available }
+  get availableRmsTrendZones (): string[] {
+    return this.rmsTrendMapZones
+      .filter(zone => zone.representations.length > 0)
+      .map(({ name }) => name)
+  }
+
+  private get trendMapZoneLookup (): Record<string, string[]> {
+    return this.rmsTrendMapZones
+      .reduce((mapping, trendMap) => {
+        mapping[trendMap.name] = trendMap.representations
+        return mapping
+      }, ({}))
+  }
+
+  get availableRmsTrendMaps (): string[] {
+    if (!this.trendMapZone) return []
+    return this.trendMapZoneLookup[this.trendMapZone]
+  }
+
   get availableTrends (): ListItem<string>[] {
     return (this.$store as Store).state.constants.options.trends.available
       .map(name => {
@@ -187,6 +223,7 @@ export default class TrendSpecification extends Vue {
   }
 
   get isRmsParameter (): boolean { return this.trend.type === 'RMS_PARAM' }
+  get isRmsTrendMap (): boolean { return this.trend.type === 'RMS_TRENDMAP' }
 
   get trendType (): TrendType { return this.value.trend.type }
   set trendType (value) { this.$store.dispatch('gaussianRandomFields/trendType', { field: this.value, value }) }
@@ -194,8 +231,16 @@ export default class TrendSpecification extends Vue {
   get trendParameter (): string | null { return this.trend.parameter }
   set trendParameter (value) { this.$store.dispatch('gaussianRandomFields/trendParameter', { field: this.value, value }) }
 
+  get trendMapName (): string | null { return this.trend.trendMapName }
+  set trendMapName (value) { this.$store.dispatch('gaussianRandomFields/trendMapName', { field: this.value, value }) }
+
+  get trendMapZone (): string | null { return this.trend.trendMapZone }
+  set trendMapZone (value) { this.$store.dispatch('gaussianRandomFields/trendMapZone', { field: this.value, value }) }
+
   get useTrend (): boolean { return this.trend.use }
   set useTrend (value) { this.$store.dispatch('gaussianRandomFields/useTrend', { field: this.value, value }) }
+
+  get hasDefinedRmsTrendZone (): boolean { return (this.trendMapZone != null) }
 
   notOneOf (types: TrendType[]): boolean {
     return types.indexOf(this.trend.type) === -1

@@ -17,4 +17,10 @@ export default interface ParametersState {
   maxAllowedFractionOfValuesOutsideTolerance: Selectable<number>
   toleranceOfProbabilityNormalisation: Selectable<number>
   transformType: Selectable<number>
+  rmsTrendMapNames: {
+    available: string[]
+  }
+  rmsTrendMapZones: {
+    available: string[]
+  }
 }

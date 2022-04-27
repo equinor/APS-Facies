@@ -549,7 +549,11 @@ class Trend:
                 TrendType.ELLIPTIC_CONE: Trend3D_elliptic_cone,
                 TrendType.HYPERBOLIC: Trend3D_hyperbolic,
             }
-            return trend_models[_type](**kwargs)
+            try:
+                return trend_models[_type](**kwargs)
+            except KeyError:
+                raise IOError(f"Missing input data for trend model: {_type.name}")
+
 
 
 def _map_js_to_py(add_empty=False, **kwargs):
@@ -574,9 +578,9 @@ def _map_js_to_py(add_empty=False, **kwargs):
                     res['direction'] = None
         elif key == 'parameter':
             _add_parameter('rms_parameter_name', value, res, add_empty)
-        elif key == 'trendmap_name':
+        elif key == 'trendMapName':
             _add_parameter('rms_trendmap_name', value, res, add_empty)
-        elif key == 'trendmap_zone':
+        elif key == 'trendMapZone':
             _add_parameter('rms_trendmap_zone', value, res, add_empty)
         elif key == 'curvature':
             _add_parameter('curvature', value, res, add_empty)

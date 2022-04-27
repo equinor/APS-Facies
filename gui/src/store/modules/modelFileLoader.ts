@@ -386,7 +386,7 @@ function getTrend (gaussFieldFromFile: XMLElement): Optional<Trend> {
 
   let type: Optional<TrendType> = null
   let trendContainer: Optional<XMLElement> = null
-  const [LINEAR, ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC, RMS_PARAM] = (['LINEAR', 'ELLIPTIC', 'ELLIPTIC_CONE', 'HYPERBOLIC', 'RMS_PARAM'] as TrendType[])
+  const [LINEAR, ELLIPTIC, ELLIPTIC_CONE, HYPERBOLIC, RMS_PARAM, RMS_TRENDMAP] = (['LINEAR', 'ELLIPTIC', 'ELLIPTIC_CONE', 'HYPERBOLIC', 'RMS_PARAM', 'RMS_TRENDMAP'] as TrendType[])
 
   const types: { name: TrendType, prop: string }[] = [
     { name: LINEAR, prop: 'Linear3D' },
@@ -394,6 +394,7 @@ function getTrend (gaussFieldFromFile: XMLElement): Optional<Trend> {
     { name: ELLIPTIC_CONE, prop: 'EllipticCone3D' },
     { name: HYPERBOLIC, prop: 'Hyperbolic3D' },
     { name: RMS_PARAM, prop: 'RMSParameter' },
+    { name: RMS_TRENDMAP, prop: 'RMSTrendMap' },
   ]
   for (const { name, prop } of types) {
     if (hasElement((container as XMLElement), prop)) {
@@ -440,6 +441,10 @@ function getTrend (gaussFieldFromFile: XMLElement): Optional<Trend> {
   }
   if ([RMS_PARAM].includes(type)) {
     options.parameter = getTextValue(trendContainer, 'TrendParamName')
+  }
+  if ([RMS_TRENDMAP].includes(type)) {
+    options.trendMapName = getTextValue(trendContainer, 'TrendMapName')
+    options.trendMapZone = getTextValue(trendContainer, 'TrendMapZone')
   }
 
   return new Trend(options)

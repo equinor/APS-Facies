@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<APSModel version="1.0">
+<APSModel version="1.1">
   <Preview zoneNumber="2" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1.0" resolution="Normal"/>
   <SelectedZonesAndRegions>
     <SelectedZoneWithRegions zone="1"> 0 </SelectedZoneWithRegions>
@@ -9,10 +9,17 @@
   <GridModelName> Grid_model </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
   <ResultFaciesParamName> FaciesReal_unconditioned_trend_map1 </ResultFaciesParamName>
-  <PrintInfo> 0 </PrintInfo>
-  <SeedFile> seed.dat </SeedFile>
-  <TransformationType> 0 </TransformationType>
-  <WriteSeeds> no </WriteSeeds>
+  <JobSettings>
+    <FmuSettings>
+      <FmuMode>OFF</FmuMode>
+    </FmuSettings>
+    <RunSettings>
+      <MaxFractionNotNormalised>0.1</MaxFractionNotNormalised>
+      <ToleranceLimitProbability>0.2</ToleranceLimitProbability>
+    </RunSettings>
+    <TransformationSettings>0</TransformationSettings>
+    <LogSetting>0</LogSetting>
+  </JobSettings>
   <MainFaciesTable blockedWell="BW2" blockedWellLog="FaciesLog">
     <Facies name="F1">
       <Code> 1 </Code>
