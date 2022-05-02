@@ -2,6 +2,31 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.8
+
+### What's new
+* Add script to copy 3D parameter from geogrid to ERT box grid and extrapolate in ertbox
+
+
+### Fixes
+* Set default debug level to read it from model file for APS scripts running outside APSGUI
+* Uses the new address/certificate for Equinor's container registry
+* Updated vulnerable dependencies
+* Ensure that `zone_name` is fetched from zone parameter everywhere
+* Fix bug in check for facies in `createProbabilityLogs.py`
+* The definition of timestamp for build-number was updated (RMS uses a signed 32-bit, and the previous number was greater than that)
+
+
+### Performance
+* Check if necessary to simulate GRF when using GRF with trends (that is, if the relative standard deviation is very close to `0`)
+* Remove duplicated entries of probability parameters. This slows down the calculation of average of probabilities
+
+
+### Miscellaneous
+* Edit doc string for module to copy GRF trend from geogrid to ERTBOX grid
+* Added comments in the output yml file to be included in the `global_master_config.yml` file in FMU
+
+
 ## 1.3.7
 
 ### Fixes
