@@ -523,7 +523,6 @@ class APSModel:
         keywords_defined_for_updating = []
         for obj in root.findall(".//*[@kw]"):
             key_word = obj.get('kw')
-#            tag = obj.tag
             value = obj.text
             keywords_defined_for_updating.append([key_word.strip(), value.strip()])
             if debug_level >= Debug.VERY_VERBOSE:
@@ -540,7 +539,7 @@ class APSModel:
                                                               debug_level)
 
                 if current_job_name is None:
-                    print(f'-- NOTE: The APS parameters are not updated when running interactively')
+                    print(f'NOTE: The APS parameters are not updated when running interactively')
                 else:
                     if len(keywords_defined_for_updating) > 0:
                         if keywords_read is None:
@@ -563,19 +562,10 @@ class APSModel:
                             text += f'   the APS job and the FMU global_variables file.\n'
                             warn(text)
                             print(' ')
-                        else:
-                            print(' ')
-                            text = '\nWARNING:\n'
-                            text += f'-- No FMU parameters are updated for APS job: {current_job_name}\n'
-                            text += f'   Ensure that APS parameters to be updated are specified both in \n'
-                            text += f'   the APS job and the FMU global_variables file:\n'
-                            text += f'   {parameter_file_name}\n'
-                            warn(text)
-                            print(' ')
 
                 if debug_level >= Debug.VERY_VERBOSE:
                     print(' ')
-                    print(f'  Keyword read from {parameter_file_name}:')
+                    print(f'-- Keyword read from {parameter_file_name}:')
                     if keywords_read is not None:
                         for item in keywords_read:
                             name = item[0]
@@ -604,12 +594,15 @@ class APSModel:
                         break
 
             if found_an_update:
-                print(f'-- NOTE: The APS parameters are updated for the job: {current_job_name}')
-                print(f'   Parameter name                                   Original value   New value')
+                print(f'The APS parameters are updated for the job: {current_job_name}')
+                if debug_level >= Debug.VERBOSE:
+                    print(f'   Parameter name                                   Original value   New value')
             else:
-                if debug_level >= Debug.ON:
-                    print(f'-- NOTE: APS parameters selected to be updated by FMU does not match parameters \n')
-                    print(f'   specified in {parameter_file_name}')
+                # Should never occur
+                raise ValueError(
+                    f"Internal error: APS parameters selected to be updated by FMU "
+                    f"does not match parameters specified in {parameter_file_name}"
+                )
 
             # Update the model file fmu tags with updated values
             for obj in root.findall(".//*[@kw]"):
@@ -634,7 +627,8 @@ class APSModel:
                         if found:
                             break
                 if found:
-                    print(f'   {key_word_from_model:42}    {old_value:12}  {obj.text:12}')
+                    if debug_level >= Debug.VERBOSE:
+                        print(f'   {key_word_from_model:42}    {old_value:12}  {obj.text:12}')
 
         return tree
 
@@ -1272,8 +1266,11 @@ def probability_distribution_configuration(fmu_attributes: List[FmuAttribute], c
 def fmu_configuration(fmu_attributes: List[FmuAttribute], grid_model_name: str, current_job_name: str) -> str:
     if not fmu_attributes:
         return ''
-
-    content = '  APS:\n'
+    content = '# Note: Check that job name specified under keyword APS below is correct.\n'
+    content += '#       It should be the same as the APS job these parameters belongs to.\n'
+    content += '# Note: This file should be copied into the "global:" section of the global_master_config.yml file\n'
+    content += '#       which is located per default under the "fmuconfig/input" directory in the FMU project.\n' 
+    content += '  APS:\n'
     content += f'    {current_job_name}:\n'
     max_length = _max_name_length(fmu_attributes)
     max_number_length = _max_value_length(fmu_attributes)

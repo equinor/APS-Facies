@@ -1,3 +1,7 @@
+# Note: Check that job name specified under keyword APS below is correct.
+#       It should be the same as the APS job these parameters belongs to.
+# Note: This file should be copied into the "global:" section of the global_master_config.yml file
+#       which is located per default under the "fmuconfig/input" directory in the FMU project.
   APS:
     apsgui_job_name:
         APS_1_0_GF_GF1_RESIDUAL_MAINRANGE:         750.0 ~ <APSGUI_JOB_NAME_APS_1_0_GF_GF1_RESIDUAL_MAINRANGE>
