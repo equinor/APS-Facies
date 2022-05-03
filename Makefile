@@ -599,9 +599,11 @@ update-remote-develop:
 update-remote-master:
 	$(RGS_EXEC) 'cd $(REMOTE_RGS_MASTER) && $(RGS_UPDATE_APS)'
 
+# Get the plugin name from the file $(DEPLOY_VERSION_PATH), not from $(PLUGIN_BIN)
 deploy-stable: deploy
+	$(eval $@_PLUGIN := $(shell cat $(DEPLOY_VERSION_PATH)))
 	cd $(CODE_DIR) && \
-	ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER) ln -s $(DEPLOYMENT_PATH)/$(PLUGIN_BIN) $(DEPLOYMENT_PATH)/stable/$(PLUGIN_NAME).$(APS_VERSION).plugin
+	ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER) ln -s $(DEPLOYMENT_PATH)/$($@_PLUGIN) $(DEPLOYMENT_PATH)/stable/$(PLUGIN_NAME).$(APS_VERSION).plugin
 
 # Getting RMS 11,
 get-rms-repo:
