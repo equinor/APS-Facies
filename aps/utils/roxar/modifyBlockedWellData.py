@@ -127,14 +127,30 @@ def get_facies_zone_table_and_log_from_bw(project, grid_model_name,
         facies_codes_found_in_zone = []
         for i in range(len(selected_facies_values)):
             facies_code = selected_facies_values[i]
-            if facies_code not in facies_codes_found_in_zone:
-                facies_codes_found_in_zone.append(facies_code)
+            if facies_code >= 0:
+                # Negative or masked values are not used
+                if facies_code not in facies_codes_found_in_zone:
+                    facies_codes_found_in_zone.append(facies_code)
 
         facies_names_found =[ facies_code_names[code] for code in facies_codes_found_in_zone]
         facies_per_zone[zone_number] = facies_names_found
-        print(f"Facies found in facies log for zone: {zone_number}")
-        for fcode in facies_codes_found_in_zone:
-            print(f"    {facies_code_names[fcode]}")
+
+        if zone_number <= 0:
+            print(
+                f"Note: Zone log has a zone with zone number equal to 0 or less in {blocked_wells_set_name} .\n"
+                "All probability logs in this zone will be undefined."
+            )
+        else:
+            if len(facies_codes_found_in_zone) > 0:
+                print(f"Facies found in facies log for zone: {zone_number}")
+                for fcode in facies_codes_found_in_zone:
+                    print(f"    {facies_code_names[fcode]}")
+            else:
+                print(
+                    f"Note: No facies found in facies log for zone: {zone_number} in {blocked_wells_set_name}  \n"
+                    "All probability logs will be undefined in this zone."
+                )
+
 
     return zone_code_names, zone_log_values, facies_code_names, facies_log_values, facies_per_zone
 
@@ -247,7 +263,7 @@ def createProbabilityLogs(
                     )
             if warn_msg_specified_facies_not_observed:
                 print(f"Warning: Following facies is specified but not observed for zone {zone_number}")
-                print( "         The specification has no effect.")
+                print( "         Probability log for these facies will be 0 in this zone.")
                 print( "         Maybe there are some misspelled facies names here?")
                 for msg in warn_msg_specified_facies_not_observed:
                     print(msg)
@@ -255,8 +271,8 @@ def createProbabilityLogs(
             if warn_msg_obs_facies_not_specified:
                 print(f"Warning: Following facies is observed but not specified for zone {zone_number}.")
                 print( "         Forgot to specify them for this zone?")
-                print( "         The probability logs for these facies will be either undefined or ")
-                print( "         will get 0 probability for this zone:")
+                print( "         The probability logs for these facies will be set to either undefined or ")
+                print( "         to 0 probability for this zone:")
                 for msg in warn_msg_obs_facies_not_specified:
                     print(msg)
                 print(" ")
