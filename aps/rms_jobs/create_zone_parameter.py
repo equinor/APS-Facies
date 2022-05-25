@@ -1,7 +1,7 @@
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import GridModelConstants, Debug
 from aps.utils.roxar.grid_model import create_zone_parameter, get_zone_names
-
+from roxar import GridPropertyType
 
 def get_zone_number_from_grid(grid_model, realization_number):
     zonations = grid_model.get_grid(realization_number).simbox_indexer.zonation
@@ -16,6 +16,11 @@ def get_codes_from_zone_param(grid_model,realization_number):
     if zone_property.is_empty(realization_number):
         return []
     else:
+        if zone_property.type is not GridPropertyType.discrete:
+            raise ValueError(
+                f"The parameter {zone_param_name} is used in APS and is expected to be a discrete parameter."
+                " Check that it is a discrete parameter."
+            ) 
         codes = zone_property.code_names.keys()
     return list(codes)
 
