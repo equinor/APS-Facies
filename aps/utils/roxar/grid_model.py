@@ -18,6 +18,11 @@ def get_zone_code_names(grid_model):
     properties = grid_model.properties
     code_names ={}
     if zone_param_name in properties:
+        if properties[zone_param_name].type is not GridPropertyType.discrete:
+            raise ValueError(
+                f"The parameter {zone_param_name} is used in APS and is expected to be a discrete parameter."
+                " Check that it is a discrete parameter."
+            )
         code_names = copy.deepcopy(properties[zone_param_name].code_names)
     return code_names
 
