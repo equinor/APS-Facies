@@ -18,7 +18,7 @@ def get_codes_from_zone_param(grid_model,realization_number):
     else:
         if zone_property.type is not GridPropertyType.discrete:
             raise ValueError(
-                f"The parameter {zone_param_name} is used in APS and is expected to be a discrete parameter."
+                f"The grid parameter {zone_param_name} is used in APS and is expected to be a discrete parameter."
                 " Check that it is a discrete parameter."
             ) 
         codes = zone_property.code_names.keys()
