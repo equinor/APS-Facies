@@ -25,7 +25,7 @@ const module: Module<GridParameterState, RootState> = {
   },
 
   actions: {
-    async fetch ({ commit, dispatch, rootGetters }, rough = true): Promise<void> {
+    async fetch ({ commit, dispatch, rootGetters }, rough = false): Promise<void> {
       commit('_WAITING', true)
       const grid: Optional<GridModel> = rootGetters['gridModels/current']
       if (grid) {
