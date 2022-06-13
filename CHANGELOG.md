@@ -2,6 +2,15 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.9
+
+### Fixes
+* Ensure that simbox thickness is calculated in the same way for both the original job and a copy created by "Save As"
+* Modified error message related to Zone parameter
+* Check parameter type for zone parameter in `RMSData`
+* Fix bug in `modifyBlockedWellData` when zone log is `0`, or  all facies log values are undefined in a zone
+* Fix the problem that the symlink from stable pointed to a non-existing plugin version
+
 ## 1.3.8
 
 ### What's new
