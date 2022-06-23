@@ -9,14 +9,14 @@ from warnings import warn
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.APSZoneModel import APSZoneModel
 from aps.algorithms.properties import CrossSection
-from aps.utils.constants.simple import Debug, TransformType, CrossSectionType
+from aps.utils.constants.simple import Debug, TransformType, CrossSectionType, GridModelConstants
 from aps.utils.exceptions.xml import MissingAttributeInKeyword
 from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import isNumber
 from aps.utils.types import FilePath
 from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
 from aps.utils.io import GlobalVariables
-from aps.utils.roxar.grid_model import check_active_cells_in_zone_region
+from aps.utils.roxar.grid_model import check_active_cells_in_zone_region, create_zone_parameter
 
 if TYPE_CHECKING:
     from roxar import Project
@@ -1205,6 +1205,18 @@ class APSModel:
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         self.XMLAddElement(top, fmu_attributes)
         return len(fmu_attributes) > 0
+
+    def check_or_create_zone_parameter(self, project, debug_level=Debug.OFF):
+        """
+        Check if zone parameter exist and create it if not existing or empty
+        """
+        grid_model = project.grid_models[self.grid_model_name]
+        realization_number = project.current_realisation
+        create_zone_parameter(grid_model,
+            name=GridModelConstants.ZONE_NAME,
+            realization_number=realization_number,
+            debug_level=debug_level
+        )
 
     def check_active_cells(self, project, debug_level=Debug.OFF):
         """

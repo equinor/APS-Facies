@@ -26,6 +26,10 @@ class JobConfig:
     def get_parameters(self, model_file):
         # Represents the ORIGINAL APS model
         aps_model = APSModel(model_file, debug_level=self.debug_level)
+
+        # Check that zone parameter exists and if not, then create it
+        aps_model.check_or_create_zone_parameter(self.project, debug_level=self.debug_level)
+
         # Keep only models for (zone,region) pairs with active cells
         aps_model.check_active_cells(self.project, debug_level=self.debug_level)
         return {
