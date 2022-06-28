@@ -1,3 +1,11 @@
 *
-!.rms/APS-workflows.rms11.tar.gz
-!libraries/sources/nrlib
+# Dependencies
+# Python
+!poetry.lock
+!pyproject.toml
+# Node.js
+!gui/package.json
+!gui/yarn.lock
+
+# Initialization
+!Makefile

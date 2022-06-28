@@ -1,8 +1,5 @@
 'use strict'
 import axios from 'axios'
-const API_PROTOCOL = process.env.VUE_APP_APS_PROTOCOL || 'http'
-const API_SERVER = process.env.VUE_APP_APS_SERVER || '127.0.0.1'
-const API_PORT = process.env.VUE_APP_APS_API_PORT || 5000
 
 function callPythonFunction (method: string, parameters: string): Promise<JSON> {
   return new Promise((resolve, reject) => {
@@ -10,7 +7,7 @@ function callPythonFunction (method: string, parameters: string): Promise<JSON> 
 
     // simple:
     axios.post(
-      `${API_PROTOCOL}://${API_SERVER}:${API_PORT}/${method}`,
+      `/api/${method}`,
       parameters,
       {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }

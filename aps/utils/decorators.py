@@ -33,7 +33,7 @@ def loggable(func):
 
 
 def output_version_information(func):
-    plugin_root = Path(__file__).parent.parent.parent.parent
+    plugin_root = Path(__file__).parent.parent.parent
 
     def get_content(file_name: str) -> str:
         try:
@@ -41,7 +41,7 @@ def output_version_information(func):
                 return f.read().strip()
         except (FileNotFoundError, NotADirectoryError):
             # This means that the plugin is running in RMS
-            archive = ZipFile(str(plugin_root.parent.absolute()), 'r')
+            archive = ZipFile(str(plugin_root.parent.parent.absolute()), 'r')
             try:
                 return archive.read(f'aps_gui/{file_name}').decode().strip()
             finally:

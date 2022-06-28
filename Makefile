@@ -80,15 +80,15 @@ ifeq ($(ALLWAYS_GET_RMS_RESOURCES),yes)
 GET_RMS_RESOURCES := get-rms get-rms-project
 endif
 
-APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | $(SED) -e "s/v//g")
+APS_VERSION = $(shell echo $(shell git describe --abbrev=0 --tags) | $(SED) -e "s/v//g")
 APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
-LATEST_COMMIT_HASH := $(shell git rev-parse --short HEAD)
-LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
+LATEST_COMMIT_HASH = $(shell git rev-parse --short HEAD)
+LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
 PLUGIN_NAME := aps_gui
 PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
 PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
-DEPLOY_VERSION_PATH := $(CODE_DIR)/DEPLOY_VERSION.txt
+DEPLOY_VERSION_PATH = $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 LIB_PREFIX := $(CODE_DIR)/libraries
@@ -112,10 +112,18 @@ PYLINT := $(RUN) pylint
 SAFETY_CHECK := $(POETRY) check
 FLASK := $(RUN) flask
 
-VUE_APP_APS_PROTOCOL := http
+VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
 VUE_APP_APS_API_PORT ?= 5000
 VUE_APP_APS_GUI_PORT ?= 8080
+
+ifeq ($(CODESPACES),true)
+VUE_APP_API_URL := https://$(CODESPACE_NAME)-$(VUE_APP_APS_API_PORT).preview.app.github.dev/api
+VUE_APP_GUI_URL := https://$(CODESPACE_NAME)-$(VUE_APP_APS_GUI_PORT).preview.app.github.dev/
+else
+VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT)
+VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
+endif
 
 # TODO?: SETUP.PY := PYTHONPATH=$(PYTHONPATH) $(PYTHON) setup.py ?
 PYTHON_PREFIX := $(shell dirname $(PYTHON))/..
@@ -165,11 +173,7 @@ define STANDARD_DOTENV
 STANDARD_RMS_DATA=synthetic-Neslen
 
 #VUE_APP_APP_USE_CORS=yes
-#VUE_APP_APS_PROTOCOL=http
-VUE_APP_APS_SERVER=127.0.0.1
-VUE_APP_APS_HOST_SERVER=127.0.0.1
-VUE_APP_APS_API_PORT=5000
-VUE_APP_APS_GUI_PORT=8080
+VUE_APP_API_URL="$(VUE_APP_API_URL)"
 endef
 export STANDARD_DOTENV
 
@@ -188,7 +192,7 @@ endif
 
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
-.PHONY: help run package.json matplotlibrc dotenv
+.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT
 
 # Build / clean / run
 build: clean-all init
@@ -263,7 +267,7 @@ clean-generated-truncation-rules:
 	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rules: generate-truncation-rule-images
-	$(POETRY) run python $(CODE_DIR)/bin/parse-truncation-rule-templates.py > $(WEB_DIR)/src/store/templates/truncationRules.json
+	$(POETRY) run python $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
@@ -293,9 +297,11 @@ TOOLBOX_VERSION:
 
 mock-VERSION:
 	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION
+	ln -sf $(SOURCE_DIR)/api/VERSION $(CODE_DIR)/VERSION
 
 mock-COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(SOURCE_DIR)/api/COMMIT
+	ln -sf $(SOURCE_DIR)/api/COMMIT $(CODE_DIR)/COMMIT
 
 init: dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 
@@ -496,6 +502,7 @@ javascript-linting:
 	$(YARN) lint
 
 web-start: $(PACKAGE.JSON)
+	VUE_APP_API_URL=$(VUE_APP_API_URL) \
 	$(YARN) serve:gui --port=$(VUE_APP_APS_GUI_PORT) \
 	                  --host=$(VUE_APP_APS_SERVER)
 
@@ -525,6 +532,8 @@ run-api-gunicorn:
 	         --graceful-timeout 1200 \
 	         --reload \
 	         app:app
+
+api-start: run-rms.uipy-mock
 
 run-rms.uipy-mock: matplotlibrc
 	FLASK_APP=$(SOURCE_DIR)/api/app.py \

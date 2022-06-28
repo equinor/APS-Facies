@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
+from pathlib import Path
 import re
 from copy import deepcopy
+import sys
 from typing import List
 
 
@@ -405,7 +407,11 @@ def parse(data: str):
     return Parser.parse(data)
 
 
-def run(data):
+def run(dump_site: Path):
+    truncation_rules_path = Path(__file__).parent / '..' / 'examples/truncation_settings.dat'
+    with open(truncation_rules_path, 'r', encoding='utf-8') as f:
+        data = f.readlines()
+
     rules = {
         "types": [
             {
@@ -426,11 +432,9 @@ def run(data):
         ],
         "templates": parse(data),
     }
-    print(json.dumps(rules))
+    with open(dump_site, 'w') as f:
+        json.dump(rules, f)
 
 
 if __name__ == '__main__':
-    with open('examples/truncation_settings.dat', 'r', encoding='utf-8') as f:
-        data = f.readlines()
-    run(data)
-
+    run(Path(sys.argv[1]))
