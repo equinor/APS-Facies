@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "aps-gui"
+version = "0.1.0"
+description = ""
+authors = [
+    "Oddvar Lie <olia@equinor.com>",
+    "Sindre Nistad <snis@equinor.com>",
+    "Sebastian Vittersø <svit@equinor.com>",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+matplotlib = "^3.6.0"
+numpy = "*"
+pillow = "*"
+scipy = "*"
+xtgeo = ">=2.5.0"
+pyyaml = ">=2.3.1"
+gaussianfft = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pylint = "*"
+graphviz = "*"
+piprot = "*"
+mypy = "*"
+flask = "*"
+flask-cors = "*"
+gunicorn = "*"
+python-dotenv = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
