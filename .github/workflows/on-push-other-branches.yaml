@@ -1,0 +1,79 @@
+name: "On push to non-develop and non-master branches"
+# This workflow should only test that the pushed code works well.
+# Consider it a quality check workflow.
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - develop
+      - master
+    tags-ignore:
+      - v*
+
+env:
+  HTTP_PROXY: "http://www-proxy.statoil.no:80"
+  HTTPS_PROXY: "http://www-proxy.statoil.no:80"
+
+jobs:
+  on-push:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up dependencies
+        run: |
+          python3.8 -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install "poetry==1.4.0"
+          poetry install
+          make --directory=${{ github.workspace }} init
+
+      # - name: Zip build-cache artifact
+      #   runs: zip -rq build-cache.zip Pipfile Pipfile.lock .venv/ gui/node_modules
+      # - name: Store working directory as artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: build-cache
+      #     path: build-cache.zip
+      #     retention-days: 1
+      # - name: Load initialized working directory from artifact
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: build-cache
+      # - name: Unzip build-cache artifact
+      #   run: unzip -q build-cache.zip
+
+      #   # allow fail
+      # - name: Safety check
+      #   run: |
+      #     source .venv/bin/activate
+      #     make --directory=${{ github.workspace }} safety-check
+
+      #   # allow fail
+      # - name: Check for JavaScript vulnerabilities
+      #   run: |
+      #     source .venv/bin/activate
+      #     make --directory=${{ github.workspace }} check-node-dependencies
+
+      #   # allow fail
+      # - name: Check for circular dependencies
+      #   run: |
+      #     source .venv/bin/activate
+      #     make --directory=${{ github.workspace }} find-circular-dependencies
+
+      # - name: Unit tests
+      #   run: |
+      #     source .venv/bin/activate
+      #     export PYTHON="${RMS_PYTHON}"
+      #     export USE_MOCK=no
+      #     make --directory=${{ github.workspace }} unit-tests
+
+      # - name: Integration tests
+      # - TODO
+
+      - name: Build GUI
+        run: |
+          source .venv/bin/activate
+          make --directory=${{ github.workspace }} build-gui
+

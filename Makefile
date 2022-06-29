@@ -267,7 +267,7 @@ clean-generated-truncation-rules:
 	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rules: generate-truncation-rule-images
-	$(POETRY) run python $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
+	$(RUN) python $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
@@ -276,7 +276,7 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 	DONT_WRITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
 	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
-	$(POETRY) run python $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
+	$(RUN) python $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
 
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
@@ -358,7 +358,7 @@ clean-changelog-link:
 	rm -f $(WEB_DIR)/public/CHANGELOG.md
 
 generate-workflow-files: $(CREATE_WORKFLOW_DIR)
-	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
+	$(RUN) python $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
 dependencies: requirements
 
