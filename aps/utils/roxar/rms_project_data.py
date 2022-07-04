@@ -4,7 +4,7 @@ import json
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Dict, Type, Optional, List, Union
-from warnings import warning
+from warnings import warn
 
 import numpy as np
 from base64 import b64decode
@@ -209,7 +209,7 @@ class RMSData:
         zone_names = get_zone_names(grid_model)
         if len(zone_names) == 0:
             name = GridModelConstants.ZONE_NAME
-            warning(f"No zone parameter with name '{name}' found. Create zone parameter from grid.")
+            warn(f"No zone parameter with name '{name}' found. Create zone parameter from grid.")
             create_zone_parameter(grid_model)
             zone_names = get_zone_names(grid_model)
         zones = []
