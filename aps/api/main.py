@@ -6,7 +6,6 @@ from aps.rms_jobs.import_fields_from_disk import run as run_import_fields
 from aps.rms_jobs.export_fields_to_disk import run as run_export_fields
 from aps.rms_jobs.export_simbox_grid_to_disk import run as run_export_aps_grid
 from aps.rms_jobs.create_simulation_grid import run as run_create_simulation_grid
-from aps.rms_jobs.create_zone_parameter import run as run_create_zone_parameter
 from aps.rms_jobs.check_grid_index_origin import run as run_check_grid_index_origin
 from aps.rms_jobs.export_fmu_config_files import run as run_export_fmu_config_files
 from aps.rms_jobs.copy_rms_param_trend_to_fmu_grid import run as  run_copy_rms_param_trend_to_fmu_grid
@@ -39,7 +38,6 @@ def run(config):
             if job.run_fmu_workflows and job.create_fmu_grid:
                 run_create_simulation_grid(**kwargs)
             run_check_grid_index_origin(**kwargs)
-            run_create_zone_parameter(**kwargs)
             if not kwargs['use_constant_probabilities']:
                 run_normalization(**kwargs)
             if job.update_model_with_fmu_variables:

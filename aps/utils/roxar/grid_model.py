@@ -1190,7 +1190,13 @@ def check_active_cells_in_zone_region(grid_model, zone_number,
     region_number=0, realisation_number=0,
     region_param_name=None, debug_level=Debug.OFF):
     zone_param_name = GridModelConstants.ZONE_NAME
-    zone_param = grid_model.properties[zone_param_name]
+    try:
+        zone_param = grid_model.properties[zone_param_name]
+    except KeyError:
+        raise KeyError(
+            f"The zone parameter with name '{zone_param_name}' does not longer exist."
+            " Open the APSGUI job and it will be recreated again or create it manually."
+        )
     if zone_param.is_empty(realisation=realisation_number):
         raise ValueError(
             f"Expecting zone parameter:{zone_param_name} to be non-empty "

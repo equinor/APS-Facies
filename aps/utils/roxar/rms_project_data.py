@@ -4,6 +4,7 @@ import json
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Dict, Type, Optional, List, Union
+from warnings import warning
 
 import numpy as np
 from base64 import b64decode
@@ -206,6 +207,11 @@ class RMSData:
         grid = self.get_grid(grid_model_name)
         grid_model = self.get_grid_model(grid_model_name)
         zone_names = get_zone_names(grid_model)
+        if len(zone_names) == 0:
+            name = GridModelConstants.ZONE_NAME
+            warning(f"No zone parameter with name '{name}' found. Create zone parameter from grid.")
+            create_zone_parameter(grid_model)
+            zone_names = get_zone_names(grid_model)
         zones = []
         for key, zonations in grid.simbox_indexer.zonation.items():
             zonation, *_reverse = zonations
