@@ -2,6 +2,12 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.3.10
+
+### Fixes
+* Revert back to use warn as long as the library `warnings`, is used
+* Create zone parameter if it does not exist when opening a grid model in the GUI
+
 ## 1.3.9
 
 ### Fixes
