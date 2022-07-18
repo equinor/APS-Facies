@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.2"
+__version__ = "0.14.3"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -164,10 +164,29 @@ def get_current_plugin_path():
     # TODO: Get the version RMS is _actually_ using
     #       That is, RMS _could_ be using a different version than what is _should_ (this happens occasionally)
     paths = [p.absolute() for p in get_plugin_dir().glob('aps_gui*')]
-    paths.sort()
-    if len(paths) > 0:
-        return paths[-1]
-    return None
+    version_data = []
+    current_path = None
+    #File format: directorypath/aps_gui.major.minor.patch.plugin   or
+    #             directorypath/aps_gui.major.minor.patch.timestamp.plugin
+    #Example /project/res/APSGUI/releases/aps_gui.1.3.10.221991918.plugin  or
+    #        /project/res/APSGUI/releases/stable/aps_gui.1.3.10.plugin
+
+    for path in paths:
+        last_suffix = path.suffixes[-1]
+        if last_suffix == '.plugin':
+            suffixes = [int(suffix.strip('.')) for suffix in path.suffixes[:-1]]
+            if len(suffixes) == 3:
+                # That is, major, minor, patch
+                suffixes.append(float('inf'))
+            version_data.append((path, tuple(suffixes)))
+
+    if version_data:
+        # Sort on version numbering
+        version_data.sort(key=lambda x: (x[-1]))
+        current_path = version_data[-1][0]
+    text = 'Plugin_path: ' + str(current_path)
+    print(text)
+    return current_path
 
 
 def stringify_path(path):
