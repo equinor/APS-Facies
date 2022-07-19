@@ -1,28 +1,21 @@
 <?xml version="1.0" ?>
-<APSModel version="1.1">
+<APSModel version="1.0">
   <SelectedZonesAndRegions>
     <SelectedZoneWithRegions zone="2"> 1  4 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="4"> 0 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="5"> 0 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="6"> 10 </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>
-  <RMSProjectName> testNeslen.rms10 </RMSProjectName>
+  <RMSProjectName> testNeslen.rms12.1.4 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
   <GridModelName> APS_NESLEN_ODM </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
-  <JobSettings>
-    <FmuSettings>
-      <FmuMode>OFF</FmuMode>
-    </FmuSettings>
-    <RunSettings>
-      <MaxFractionNotNormalised>0.1</MaxFractionNotNormalised>
-      <ToleranceLimitProbability>0.2</ToleranceLimitProbability>
-    </RunSettings>
-    <TransformationSettings>0</TransformationSettings>
-    <LogSetting>3</LogSetting>
-  </JobSettings>
+  <SeedFile> seed.dat </SeedFile>
+  <WriteSeeds> YES </WriteSeeds>
+  <TransformationType> 0 </TransformationType>
+  <PrintInfo> 3 </PrintInfo>
   <MainFaciesTable blockedWell="BW" blockedWellLog="facies">
     <Facies name="F1">
       <Code> 1 </Code>

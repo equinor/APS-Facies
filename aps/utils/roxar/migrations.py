@@ -4,7 +4,7 @@ from typing import Optional, List
 from uuid import uuid4
 from warnings import warn
 
-from aps.utils.constants.simple import Debug
+from aps.utils.constants.simple import Debug, ExtrapolationMethod
 from aps.utils.roxar._config_getters import get_debug_level
 
 
@@ -153,7 +153,7 @@ class Migration:
     @staticmethod
     def add_custom_trend_extrapolation_method(state: dict):
         state['fmu']['customTrendExtrapolationMethod'] = {
-            'value': 'extend',
+            'value': ExtrapolationMethod.EXTEND_LAYER_MEAN.value,
         }
         return state
 

@@ -30,27 +30,18 @@ def get_origin(geometry):
 def get_increments(geometry):
     return tuple(geometry[f'avg_d{axis}'] for axis in ('x', 'y', 'z'))
 
-
-def run(
-        *,
-        project,
-        aps_model:                APSModel,
-        fmu_simulation_grid_name: str,
-        max_fmu_grid_layers:       int,
-        debug_level:              Debug,
-        **kwargs,
-):
+def create_ertbox_grid_model(project, geo_grid_model_name: str,
+    fmu_simulation_grid_name: str, max_fmu_grid_layers: int, debug_level: Debug = Debug.OFF):
     if project.current_realisation > 0:
         raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
                          'the grid and parameters should be shared and realisation = 1'
         )
 
-    if debug_level >= Debug.ON:
-        print(f'- Creating ERT simulation box: {fmu_simulation_grid_name}')
+    print(f'-- Creating ERT simulation box: {fmu_simulation_grid_name}')
     if debug_level >= Debug.VERBOSE:
-        print(f'-- Using grid model: {aps_model.grid_model_name} as reference grid')
+        print(f'-- Using grid model: {geo_grid_model_name} as reference grid')
 
-    grid_model = project.grid_models[aps_model.grid_model_name]
+    grid_model = project.grid_models[geo_grid_model_name]
     grid = grid_model.get_grid(project.current_realisation)
 
     attributes = GridSimBoxSize(grid, debug_level=debug_level)
@@ -105,12 +96,32 @@ def run(
     increment = (xinc, yinc, zinc)
 
     # xtgeo create_box assume counter clockwise rotation in contrast to RMS
-    simulation_grid = xtgeo.Grid()
-    simulation_grid.create_box(
-        dimension,
-        origin=origin,
-        rotation=rotation_anticlockwise_degrees,
-        increment=increment,
-        flip=flip,
-    )
-    simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)
+    try:
+        simulation_grid = xtgeo.create_box_grid(
+            dimension,
+            origin=origin,
+            rotation=rotation_anticlockwise_degrees,
+            increment=increment,
+            flip=flip,
+        )
+        simulation_grid.to_roxar(project, fmu_simulation_grid_name, project.current_realisation)
+    except:
+        print(f'Error when creating grid model: {fmu_simulation_grid_name}')
+        return False
+    return True
+
+def run(
+        *,
+        project,
+        aps_model:                APSModel,
+        fmu_simulation_grid_name: str,
+        max_fmu_grid_layers:       int,
+        debug_level:              Debug,
+        **kwargs,
+):
+    create_ertbox_grid_model(project,
+        aps_model.grid_model_name,
+        fmu_simulation_grid_name,
+        max_fmu_grid_layers,
+        debug_level=debug_level)
+

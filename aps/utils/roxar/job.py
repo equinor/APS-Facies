@@ -229,18 +229,7 @@ class JobConfig:
 
     @property
     def rms_param_trend_extrapolation_method(self): 
-        value = self._config['fmu']['customTrendExtrapolationMethod']['value']
-        method = {
-            "zero": ExtrapolationMethod.ZERO,
-            "mean": ExtrapolationMethod.MEAN,
-            "extend_layer_mean": ExtrapolationMethod.EXTEND_LAYER_MEAN,
-            "repeat_layer_mean": ExtrapolationMethod.REPEAT_LAYER_MEAN,
-            "extend": ExtrapolationMethod.EXTEND,
-            "repeat": ExtrapolationMethod.REPEAT,
-        }
-        if value not in method:
-                raise ValueError(f"Method: {value} is not implemented")
-        return method[value]
+        return ExtrapolationMethod(self._config['fmu']['customTrendExtrapolationMethod']['value'])
 
     def to_json(self):
         return json.dumps(self._config)

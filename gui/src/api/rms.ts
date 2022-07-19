@@ -28,6 +28,7 @@ export default {
   fmuParameterList: (): Promise<string> => api.call('get_fmu_parameter_list_dir'),
   currentWorkflowName: (): Promise<string> => api.call('get_current_workflow_name'),
   gridModels: (): Promise<RmsGridModel[]> => api.call('get_grid_models'),
+  createErtBoxGrid: (gridNameGeo: string, gridNameErtBox: string, nLayers: Optional<number>, debugLevel: number): Promise<boolean> => api.call('create_ertbox_grid', gridNameGeo, gridNameErtBox, nLayers, debugLevel),
   zones: (gridName: string): Promise<ZoneConfiguration[]> => api.call('get_zones', gridName),
   regionParameters: (gridName: string): Promise<string[]> => api.call('get_region_parameters', gridName),
   regions: (gridName: string, zoneName: string, regionParameter: string): Promise<CodeName[]> => api.call('get_regions', gridName, zoneName, regionParameter),

@@ -9,12 +9,12 @@ from warnings import warn
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.APSZoneModel import APSZoneModel
 from aps.algorithms.properties import CrossSection
-from aps.utils.constants.simple import Debug, TransformType, CrossSectionType, GridModelConstants
+from aps.utils.constants.simple import Debug, TransformType, CrossSectionType, GridModelConstants, ExtrapolationMethod, ProbabilityTolerances
 from aps.utils.exceptions.xml import MissingAttributeInKeyword
 from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import isNumber
 from aps.utils.types import FilePath
-from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number
+from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number, create_node
 from aps.utils.io import GlobalVariables
 from aps.utils.roxar.grid_model import check_active_cells_in_zone_region, create_zone_parameter
 
@@ -29,13 +29,7 @@ class APSModel:
     Class member variables:
 
     Public member functions:
-      def __init__(
-            self, modelFileName=None,  apsmodelversion='1.0', rmsProjectName='', rmsWorkflowName='',
-            rmsGridModelName='', rmsZoneParameterName='', rmsRegionParameterName='',
-            rmsFaciesParameterName='', seedFileName='seed.dat', write_seeds=True,
-            mainFaciesTable=None, zoneModelTable=None,
-            previewZone=0, previewRegion=0, previewCrossSectionType='IJ', previewCrossSectionRelativePos=0.5,
-            previewScale=1.0, previewResolution='Normal', debug_level=Debug.OFF, transform_type=TransformType.EMPIRIC'):
+      def __init__(.....)
 
       def createSimGaussFieldIPL()
                 - Write IPL file to simulate gaussian fields
@@ -104,7 +98,7 @@ class APSModel:
     def __init__(
             self,
             model_file_name: Optional[str] = None,
-            aps_model_version: str = '1.0',
+            aps_model_version: str = '1.1',
             rms_project_name: Optional[str] = None,
             rms_workflow_name: Optional[str] = None,
             rms_grid_model_name: Optional[str] = None,
@@ -122,7 +116,18 @@ class APSModel:
             preview_scale: float = 1.0,
             preview_resolution: str = 'Normal',
             debug_level: Optional[Debug] = Debug.OFF,
+            log_setting: Debug = Debug.OFF,
+            fmu_mode: str  = 'OFF',
+            fmu_ertbox_name: str = 'ERTBOX',
+            fmu_exchange_mode: str  = 'AUTO',
+            fmu_file_format: str  = 'roff',
+            fmu_trend_param_extrapolation: int = ExtrapolationMethod.EXTEND_LAYER_MEAN,
+            fmu_export_config_files: bool = False,
+            prob_settings_fraction: float = ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
+            prob_settings_tolerance: float = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
             transform_type: TransformType = TransformType.EMPIRIC,
+
+
     ):
         """
          The following parameters are necessary to define a model:
@@ -161,10 +166,11 @@ class APSModel:
          previewScale - Scaling factor between K direction and I or J direction (Vertical scaling factor)
          previewResolution - Define  whether the testPreview program should use higher resolution or not compared with
                              default resolution taken from the grid model.
-         debugLevel - Define amount of output to the screen during runs
+         debug_level - Define amount of output to the screen during runs
          transform_type - Define whether Empiric transformation based on GRF (with trend) values within the (zone,region)
                           is used or the cumulative normal distribution is to be used to transform GRF
                           to a uniform distribution (alpha field)
+         Job settings parameters - Common settings for the APS model.
 
         """
         # Local variables
@@ -198,7 +204,19 @@ class APSModel:
         self.__previewScale = preview_scale
         self.__previewResolution = preview_resolution
         self.__debug_level = debug_level
+        self.__log_setting = log_setting
+
+        # Job settings for APS GUI
+        self.__fmu_mode = fmu_mode
+        self.__fmu_ertbox_name = fmu_ertbox_name
+        self.__fmu_exchange_mode = fmu_exchange_mode
+        self.__fmu_file_format = fmu_file_format
+        self.__fmu_trend_param_extrapolation = fmu_trend_param_extrapolation
+        self.__fmu_export_config_files = fmu_export_config_files
+        self.__prob_settings_fraction = prob_settings_fraction
+        self.__prob_settings_tolerance = prob_settings_tolerance
         self.__transform_type = transform_type
+
 
         # Read model if it is defined
         if model_file_name is not None:
@@ -223,39 +241,47 @@ class APSModel:
     def __interpretTree(
             self,
             root: ET.Element,
-            debug_level: Debug = Debug.OFF,
+            debug_level_input: Debug = Debug.OFF,
             model_file_name: Optional[str] = None,
     ) -> None:
         self.__ET_Tree = ET.ElementTree(root)
         if root.tag != 'APSModel':
             raise ValueError('The root element must be APSModel')
-        apsmodel_version = root.get('version')
-        if apsmodel_version is None:
+        apsmodel_version_input = root.get('version')
+        if apsmodel_version_input is None:
             raise ValueError('attribute version is not defined in root element')
-        elif apsmodel_version != "1.0":
+        elif apsmodel_version_input not in ["1.0", "1.1"]:
             raise ValueError(
-                f'Illegal value ( {apsmodel_version} ) specified for apsmodelversion (only 1.0 is supported)'
+                f'Illegal value ( {apsmodel_version_input} ) specified for apsmodelversion (only 1.0 and 1.1 is supported)'
             )
-        self.__aps_model_version = apsmodel_version
+        self.__aps_model_version_from_file = apsmodel_version_input
 
-        # --- PrintInfo ---
-        # Debug level is specified in the APSModel constructor. 
-        # The only case when debug level specified in model file is used, is
-        # when debug level is set to Debug.READ. In that case the model file
-        # keyword setting in 'PrintInfo' is used.
-        if debug_level == Debug.READ:
-            kw = 'PrintInfo'
-            obj = root.find(kw)
-            if obj is not None:
-                debug_level = obj.text
-            else:
-                debug_level = Debug.OFF
+        # Debug level used when reading model file
+        self.debug_level = debug_level_input
 
-        self.debug_level = debug_level
-        if self.__debug_level >= Debug.VERY_VERBOSE:
+        if self.__aps_model_version_from_file == "1.0":
+            print(
+                "NOTE: The model file that is imported has file format version 1.0.\n"
+                "This format is used for APSGUI versions less than 1.4\n"
+                "When importing model file using file format 1.0, the 'Job Settings' is not \n"
+                "part of the data saved in the model file. Therefore the user must \n"
+                "go into the 'Job Settings panel' and specify the 'Job settings' again after\n"
+                "the model file is imported."
+            )
+
+        if self.debug_level >= Debug.VERBOSE:
+            print(f"-- Read APS model file with version: {self.__aps_model_version_from_file}")
+
+        if self.debug_level >= Debug.VERY_VERBOSE:
             print('')
             print('------------ Start reading model file in APSModel ------------------')
             print('')
+
+        if self.__aps_model_version_from_file == "1.1":
+            # Read Job settings
+            self.read_job_settings(root, model_file_name)
+            if self.debug_level >= Debug.VERY_VERBOSE:
+                self.print_job_settings()
 
         # --- Preview ---
         kw = 'Preview'
@@ -326,17 +352,48 @@ class APSModel:
         if value is not None:
             self.__rmsRegionParamName = value
 
-        # Read optional keyword to specify name of seed file
-        keyword = 'SeedFile'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat',
-                               modelFile=model_file_name, required=False)
-        self.__seed_file_name = value
+        if self.__aps_model_version_from_file == "1.0":
+            # --- PrintInfo ---
+            # Debug level is specified in the APSModel constructor.
+            # The only case when debug level specified in model file is used, is
+            # when debug level is set to Debug.READ. In that case the model file
+            # keyword setting in 'PrintInfo' is used.
+            if debug_level_input == Debug.READ:
+                kw = 'PrintInfo'
+                obj = root.find(kw)
+                if obj is not None:
+                    self.debug_level = obj.text
+                else:
+                    self.debug_level = Debug.OFF
+            else:
+                self.debug_level = debug_level_input
 
-        # Read optional keyword to specify the boolean variable write_seeds
-        keyword = 'WriteSeeds'
-        value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=model_file_name,
-                               required=False)
-        self.write_seeds = True if value.upper() == 'YES' else False
+            # Read optional keyword to specify name of seed file
+            keyword = 'SeedFile'
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='seed.dat',
+                    modelFile=model_file_name, required=False)
+            self.__seed_file_name = value
+
+            # Read optional keyword to specify the boolean variable write_seeds
+            keyword = 'WriteSeeds'
+            value = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='yes', modelFile=model_file_name,
+                    required=False)
+            self.write_seeds = True if value.upper() == 'YES' else False
+
+            # Read optional keyword to specify which transformation to use for Gaussian Fields
+            keyword = 'TransformationType'
+            text = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='Empiric', modelFile=model_file_name,
+                    required=False)
+            if text.upper() == 'EMPIRIC' or text.upper() == '0':
+                self.__transform_type = TransformType.EMPIRIC
+            elif text.upper() == 'CDF' or text.upper() == '1':
+                self.__transform_type = TransformType.CUMNORM
+            else:
+                raise ValueError(
+                    f'Illegal value ( {text} ) specified for keyword {keyword}.\n'
+                    'Legal values are either  Empiric (or alternatively 0)  or CDF (or alternatively 1)'
+                )
+
         # Read all facies names available
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=model_file_name)
 
@@ -350,19 +407,6 @@ class APSModel:
                 f'--- Name of RMS workflow read:          {self.__rmsWorkflowName}'
             )
 
-        # Read optional keyword to specify which transformation to use for Gaussian Fields
-        keyword = 'TransformationType'
-        text = getTextCommand(root, keyword, parentKeyword='APSModel', defaultText='Empiric', modelFile=model_file_name,
-                              required=False)
-        if text.upper() == 'EMPIRIC' or text.upper() == '0':
-            self.__transform_type = TransformType.EMPIRIC
-        elif text.upper() == 'CDF' or text.upper() == '1':
-            self.__transform_type = TransformType.CUMNORM
-        else:
-            raise ValueError(
-                f'Illegal value ( {text} ) specified for keyword {keyword}.\n'
-                'Legal values are either  Empiric (or alternatively 0)  or CDF (or alternatively 1)'
-            )
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
@@ -671,7 +715,6 @@ class APSModel:
                 print('')
         else:
             # YAML file with more general possibility for parameter specification
-#            apsmodel = APSModel(model_file_name)
             aps_dict = GlobalVariables.parse(global_variables_file)
 
             # Find the model parameters for the current aps job
@@ -693,6 +736,10 @@ class APSModel:
     @property
     def debug_level(self) -> Debug:
         return self.__debug_level
+
+    @property
+    def log_setting(self) -> Debug:
+        return self.__log_setting
 
     @debug_level.setter
     def debug_level(self, debug_level_input):
@@ -1113,6 +1160,8 @@ class APSModel:
                 zone_numbers_added.append(zone_number)
 
         # Add all main commands to the root APSModel
+        # Note if APSModel is created from version 1.0, but read by reader for 1.1,
+        # it will be converted to version 1.1
         tags = [
             ('RMSProjectName', self.__rmsProjectName),
             ('RMSWorkflowName', self.__rmsWorkflowName),
@@ -1120,17 +1169,31 @@ class APSModel:
             ('ZoneParamName', self.__rmsZoneParamName),
             ('RegionParamName', self.__rmsRegionParamName),
             ('ResultFaciesParamName', self.__rmsFaciesParamName),
-            ('PrintInfo', str(self.debug_level.value)),
-            ('SeedFile', self.seed_file_name),
-            ('TransformationType', str(self.transform_type.value)),
-            ('WriteSeeds', 'yes' if self.write_seeds else 'no'),
-        ]
 
+        ]
         for tag, value in tags:
             if value:
                 elem = ET.Element(tag)
                 elem.text = ' ' + value.strip() + ' '
                 root.append(elem)
+
+        if self.__aps_model_version == "1.0":
+            write_seeds_text = "YES" if self.write_seeds else "NO"
+            tags = [
+                ('SeedFile', self.__seed_file_name),
+                ('WriteSeeds', write_seeds_text),
+                ('TransformationType', str(self.__transform_type.value)),
+                ('PrintInfo', str(self.debug_level.value)),
+            ]
+            for tag, value in tags:
+                if value:
+                    elem = ET.Element(tag)
+                    elem.text = ' ' + value.strip() + ' '
+                    root.append(elem)
+
+        elif self.__aps_model_version == "1.1":
+            # Add command JobSettings
+            self.job_settings_xml_add_elements(root)
 
         # Add command MainFaciesTable
         self.__faciesTable.XMLAddElement(root)
@@ -1254,6 +1317,213 @@ class APSModel:
         with open(output_model_file_name, 'w', encoding='utf-8') as file:
             file.write(root)
             file.write('\n')
+
+    def read_job_settings(self, root, model_file_name):
+        job_settings = getKeyword(root, 'JobSettings', modelFile=model_file_name, required=False)
+        if job_settings is not None:
+            fmu_settings = getKeyword(job_settings, 'FmuSettings', modelFile=model_file_name, required=False)
+            run_settings = getKeyword(job_settings, 'RunSettings', modelFile=model_file_name, required=False)
+            transform_settings = getKeyword(job_settings, 'TransformationSettings', modelFile=model_file_name, required=False)
+            log_settings = getKeyword(job_settings, 'LogSetting', modelFile= model_file_name, required=False)
+            if fmu_settings is not None:
+                kw_fmu_mode = 'FmuMode'
+                fmu_mode_setting = getKeyword(fmu_settings, kw_fmu_mode, modelFile=model_file_name, required=False)
+                if fmu_mode_setting is not None:
+                    value = fmu_mode_setting.text.strip().upper()
+                    legal_values = ['OFF', 'NOFIELDS', 'FIELDS']
+                    if value not in legal_values:
+                        raise ValueError(
+                            f"Job Setting parameter for {kw_fmu_mode} must be one of {legal_values}"
+                        )
+                    self.__fmu_mode = value
+                if self.__fmu_mode == 'FIELDS':
+                    update_grf_settings = getKeyword(fmu_settings, 'UpdateGRF', modelFile=model_file_name, required=True)
+                    if update_grf_settings is not None:
+                        kw_ertbox = 'ErtBoxGrid'
+                        ertbox_grid_settings = getKeyword(update_grf_settings, kw_ertbox, modelFile=model_file_name, required=True)
+                        value = ertbox_grid_settings.text.strip()
+                        if len(value) > 0:
+                            self.__fmu_ertbox_name = value
+                        else:
+                            raise ValueError(
+                                f"Job Settings parameter for {kw_ertbox} must be a name of a grid model."
+                            )
+                        kw_exchange = 'ExchangeMode'
+                        exchange_settings = getKeyword(update_grf_settings,  kw_exchange, modelFile=model_file_name, required=False)
+                        if exchange_settings is not None:
+                            value = exchange_settings.text.strip().upper()
+                            legal_values = ['SIMULATE', 'AUTO']
+                            if value not in legal_values:
+                                raise ValueError(
+                                    f"Job Setting parameter for {kw_exchange} must be one of {legal_values}"
+                                )
+                            self.__fmu_exchange_mode = value
+
+                        kw_extrapolation = 'ExtrapolationMethod'
+                        extrapolate_settings = getKeyword(update_grf_settings, kw_extrapolation, modelFile=model_file_name, required=False)
+                        if extrapolate_settings is not None:
+                            value = extrapolate_settings.text.strip()
+                            legal_values =[
+                                ExtrapolationMethod.ZERO.value,
+                                ExtrapolationMethod.MEAN.value,
+                                ExtrapolationMethod.EXTEND_LAYER_MEAN.value,
+                                ExtrapolationMethod.REPEAT_LAYER_MEAN.value,
+                                ExtrapolationMethod.EXTEND.value,
+                                ExtrapolationMethod.REPEAT.value,
+                            ]
+                            if value not in legal_values:
+                                raise ValueError(
+                                    f"Job settings parameter for {kw_extrapolation} was set to {value} "
+                                    f"but must be one of the values {legal_values} "
+                                )
+                            self.__fmu_trend_param_extrapolation = value
+
+                        kw_fileformat = 'FileFormat'
+                        fileformat_settings = getKeyword(update_grf_settings, kw_fileformat, modelFile=model_file_name, required=False)
+                        if fileformat_settings is not None:
+                            value = fileformat_settings.text.strip().lower()
+                            legal_values = ['roff', 'grdecl']
+                            if value in legal_values:
+                                self.__fmu_file_format = value
+                            else:
+                                raise ValueError(
+                                    f"Job settings parameter for {kw_fileformat} "
+                                    f"must be one of {legal_values}"
+                                )
+
+                if self.__fmu_mode in ['NOFIELDS', 'FIELDS']:
+                    kw_export = 'ExportConfigFiles'
+                    export_settings = getKeyword(fmu_settings, kw_export, modelFile=model_file_name, required=False)
+                    if export_settings is not None:
+                        value = export_settings.text.strip().upper()
+                        legal_values = ['YES', 'NO']
+                        if value not in legal_values:
+                            raise ValueError(
+                                f"Job settings for keyword {kw_export} must be one of {legal_values}. "
+                            )
+                        if value == 'YES':
+                            self.__fmu_export_config_files = True
+            if run_settings is not None:
+                kw_fraction = 'MaxFractionNotNormalised'
+                fraction_settings = getKeyword(run_settings, kw_fraction, modelFile=model_file_name, required=False)
+                if fraction_settings is not None:
+                    value = float(fraction_settings.text.strip())
+                    if value >= 0 and value <= 1.0:
+                        self.__prob_settings_fraction = value
+                    else:
+                        raise ValueError(
+                            f"Job settings for max probability fraction is {value}. "
+                            "Should be in interval [0.0, 1.0]"
+                        )
+                kw_tolerance = 'ToleranceLimitProbability'
+                tolerance_settings = getKeyword(run_settings, kw_tolerance, modelFile=model_file_name, required=False)
+                if tolerance_settings is not None:
+                    value = float(tolerance_settings.text.strip())
+                    if value >= 0 and value <= 1.0:
+                        self.__prob_settings_tolerance = value
+                    else:
+                        raise ValueError(
+                            f"Job settings for max probability tolerance (fraction between 0 and 1) is {value}. "
+                            "Should be in interval [0.0, 1.0]"
+                        )
+            if transform_settings is not None:
+                value = transform_settings.text.strip().upper()
+                if value in ['0', 'EMPIRIC']:
+                    self.__transform_type = TransformType.EMPIRIC
+                elif value in ['1', 'CDF']:
+                    self.__transform_type = TransformType.CUMNORM
+                else:
+                    raise ValueError(
+                        f"Job settings for transformation type was set to: {value}. "
+                        "Should be either Empiric (or alternatively 0) "
+                        "or CDF (or alternatively 1)."
+                    )
+            if log_settings is not None:
+                value = int(log_settings.text.strip())
+                legal_values = [
+                        Debug.OFF.value,
+                        Debug.ON.value,
+                        Debug.VERBOSE.value,
+                        Debug.VERY_VERBOSE.value,
+                        Debug.VERY_VERY_VERBOSE.value
+                        ]
+                if value in legal_values:
+                    self.__log_setting = Debug(value)
+                else:
+                    self.__log_setting = Debug.OFF
+
+    def print_job_settings(self):
+        print(
+            "--- Job settings parameters:\n"
+            "    FMU settings:\n"
+            f"     FMU mode: {self.__fmu_mode}"
+        )
+        if self.__fmu_mode == 'FIELDS':
+            print(
+                "     Update fields in ERT:\n"
+                f"      ERTBOX: {self.__fmu_ertbox_name}\n"
+                f"      Exchange mode: {self.__fmu_exchange_mode}\n"
+                f"      File format: {self.__fmu_file_format}\n"
+                f"      Trend param extrapolation:  {self.__fmu_trend_param_extrapolation}"
+            )
+        if self.__fmu_mode != 'OFF':
+            print(f"     Export config files: {self.__fmu_export_config_files} ")
+        print(
+            "    Prob check criteria:\n"
+            f"     Fraction:  {self.__prob_settings_fraction}\n"
+            f"     Tolerance: {self.__prob_settings_tolerance}\n"
+            f"    Transform type: {self.__transform_type.value}\n"
+            f"    Log setting: {self.__log_setting.name}\n\n"
+        )
+
+    def job_settings_xml_add_elements(self, root):
+        if self.debug_level >= Debug.VERY_VERBOSE:
+            print("--- call XMLADDElement from Job settings")
+
+        job_settings_element = ET.Element('JobSettings')
+        root.append(job_settings_element)
+
+        fmu_settings_element = ET.Element('FmuSettings')
+        job_settings_element.append(fmu_settings_element)
+
+        fmu_settings_element.append(create_node('FmuMode',
+                text=self.__fmu_mode))
+
+        if self.__fmu_mode == 'FIELDS':
+            fmu_update_grf_element = ET.Element('UpdateGRF')
+            fmu_settings_element.append(fmu_update_grf_element)
+
+            fmu_update_grf_element.append(create_node('ErtBoxGrid',
+                text=self.__fmu_ertbox_name))
+
+            fmu_update_grf_element.append(create_node('ExchangeMode',
+                text=self.__fmu_exchange_mode))
+
+            fmu_update_grf_element.append(create_node('FileFormat',
+                text=self.__fmu_file_format))
+
+            fmu_update_grf_element.append(create_node('ExtrapolationMethod',
+                text=self.__fmu_trend_param_extrapolation))
+
+        if self.__fmu_mode in ['NOFIELDS', 'FIELDS']:
+            if self.__fmu_export_config_files:
+                fmu_settings_element.append(create_node('ExportConfigFiles', text='YES'))
+
+        run_settings_element = ET.Element('RunSettings')
+        job_settings_element.append(run_settings_element)
+
+        run_settings_element.append(create_node('MaxFractionNotNormalised',
+            text=self.__prob_settings_fraction))
+
+        run_settings_element.append(create_node('ToleranceLimitProbability',
+            text=self.__prob_settings_tolerance))
+
+        job_settings_element.append(create_node('TransformationSettings',
+            text=self.__transform_type.value))
+
+        job_settings_element.append(create_node('LogSetting',
+            text=self.__log_setting.value))
+
 
 
 def _max_name_length(fmu_attributes: List[FmuAttribute]) -> int:

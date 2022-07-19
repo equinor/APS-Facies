@@ -12,7 +12,7 @@ from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import (
     Debug, TrendType, Conform, 
-    ExtrapolationMethod, GridModelConstants,
+    ExtrapolationMethod,
 )
 from aps.utils.roxar.grid_model import get_zone_layer_numbering, get_zone_names
 
@@ -312,7 +312,6 @@ def copy_from_geo_to_ertbox_grid(
         raise ValueError('In RMS models to be used with a FMU loop in ERT,'
                          'the grid and parameters should be shared and realisation = 1'
         )
-
     geogrid_model, geogrid = get_grid_model(project,geo_grid_model_name)
     ertbox_grid_model, ertboxgrid = get_grid_model(project,ertbox_grid_model_name)
 
@@ -409,9 +408,9 @@ def copy_from_geo_to_ertbox_grid(
 
 
             vertical_methods = \
-                (ExtrapolationMethod.EXTEND,ExtrapolationMethod.REPEAT)
+                (ExtrapolationMethod.EXTEND, ExtrapolationMethod.REPEAT)
             vertical_horizontal_methods = \
-                (ExtrapolationMethod.EXTEND_LAYER_MEAN,ExtrapolationMethod.REPEAT_LAYER_MEAN)
+                (ExtrapolationMethod.EXTEND_LAYER_MEAN, ExtrapolationMethod.REPEAT_LAYER_MEAN)
             if extrapolation_method in vertical_horizontal_methods:
                 ertbox_values_3d_masked = \
                 assign_undefined_lateral(nz_ertbox, ertbox_values_3d_masked)

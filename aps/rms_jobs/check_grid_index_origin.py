@@ -50,8 +50,9 @@ def run(project,
                 roxar.rms.error('APS should use shared grid models when running in FMU mode')
             except AttributeError:
                 pass
-            raise ValueError(f'''\
-FMU mode requires that grid model {rms_grid_name} is a shared grid in RMS''')
+            raise ValueError(
+                f"FMU mode requires that grid model {rms_grid_name} is a shared grid in RMS"
+            )
 
         if not fmu_mode_only_param:
             if not is_grid_model_shared(fmu_simulation_grid_name):
@@ -59,8 +60,9 @@ FMU mode requires that grid model {rms_grid_name} is a shared grid in RMS''')
                     roxar.rms.error('APS should use shared grid models when running in FMU mode')
                 except AttributeError:
                     pass
-                raise ValueError(f'''\
-FMU mode requires that grid model {fmu_simulation_grid_name} is a shared grid in RMS''')
+                raise ValueError(
+                    f"FMU mode requires that grid model {fmu_simulation_grid_name} is a shared grid in RMS"
+                )
 
             fmu_ijk_handedness = _get_grid_ijk_handedness(fmu_simulation_grid_name)
             if fmu_ijk_handedness != rms_ijk_handedness:
@@ -69,8 +71,9 @@ FMU mode requires that grid model {fmu_simulation_grid_name} is a shared grid in
                     # Introduced in version 12.1.
                     roxar.rms.error('APS workflows require same grid index origin for both modelling grid and ERTBOX grid')
                 except AttributeError:
-                    raise ValueError(f'''\
-Error using grid model: {rms_grid_name} and ERTBOX grid model:{fmu_simulation_grid_name}
-APS workflows require that both the modelling grid and the help grid for ERT
-uses the same grid index origin.
-The grid index origin must be either the standard RMS choice or the standard Eclipse choice''')
+                    pass
+                raise ValueError(
+                    f"Error using grid model: {rms_grid_name} and ERTBOX grid model:{fmu_simulation_grid_name}\n"
+                    "APS workflows require that both the modelling grid and the help grid for ERT uses the same grid index origin.\n"
+                    "The grid index origin must be either the standard RMS choice or the standard Eclipse choice"
+                )

@@ -170,7 +170,6 @@ def get_current_plugin_path():
     #             directorypath/aps_gui.major.minor.patch.timestamp.plugin
     #Example /project/res/APSGUI/releases/aps_gui.1.3.10.221991918.plugin  or
     #        /project/res/APSGUI/releases/stable/aps_gui.1.3.10.plugin
-
     for path in paths:
         last_suffix = path.suffixes[-1]
         if last_suffix == '.plugin':
@@ -179,7 +178,6 @@ def get_current_plugin_path():
                 # That is, major, minor, patch
                 suffixes.append(float('inf'))
             version_data.append((path, tuple(suffixes)))
-
     if version_data:
         # Sort on version numbering
         version_data.sort(key=lambda x: (x[-1]))

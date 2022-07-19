@@ -15,13 +15,16 @@ from roxar import Direction, GridPropertyType
 
 def get_zone_code_names(grid_model):
     zone_param_name = GridModelConstants.ZONE_NAME
+    grid_name = grid_model.name
     properties = grid_model.properties
     code_names ={}
     if zone_param_name in properties:
         if properties[zone_param_name].type is not GridPropertyType.discrete:
             raise ValueError(
-                f"The grid parameter {zone_param_name} is used in APS and is expected to be a discrete parameter."
-                " Check that it is a discrete parameter."
+                "When APSGUI scans all grid models to prepare a list of grid models available for use,\n"
+                f"it finds a grid model with name: {grid_name} which has a zone parameter with name {zone_param_name}\n"
+                "that is not of type discrete. Ensure that it is a correct discrete zone parameter or \n"
+                "delete it and let APSGUI create it automatically for you."
             )
         code_names = copy.deepcopy(properties[zone_param_name].code_names)
     return code_names
