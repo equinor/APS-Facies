@@ -31,6 +31,21 @@ interface XMLElement {
   [_: string]: any
 }
 
+interface JobSettingsParam {
+  runFmuWorkflows: boolean
+  onlyUpdateFromFmu: boolean
+  simulationGrid: string
+  importFields: boolean
+  fieldFileFormat: string
+  customTrendExtrapolationMethod: string
+  exportFmuConfigFiles: boolean
+  maxAllowedFractionOfValuesOutsideTolerance: number
+  toleranceOfProbabilityNormalisation: number
+  transformType: number
+  debugLevel: number
+}
+
+
 type Context = BaseContext<Record<string, unknown>, Record<string, unknown>>
 
 class KeywordError extends APSError {
@@ -465,6 +480,62 @@ function getZoneNumber (zoneModel: XMLElement): number {
   return zoneNumber
 }
 
+function getMandatoryTextValue(element: XMLElement, keyword: string) {
+  if (hasElement(element, keyword) ){
+    return String(getTextValue(element, keyword))
+  }
+  throw new KeywordError(keyword)
+}
+
+const jobSettings = (apsModelContainer:XMLElement) => {
+  const jobSettingsElement = getMandatoryNodeValue(apsModelContainer,'JobSettings')
+  const fmuSettingsElement = getMandatoryNodeValue(jobSettingsElement,'FmuSettings')
+  const fmuMode = getMandatoryTextValue(fmuSettingsElement, 'FmuMode')
+  let updateGRFElement = null
+  let ertBoxGrid = 'ERTBOX'
+  let exchangeMode = false
+  let fileFormat = 'roff'
+  let extrapolationMethod = 'extend_layer_mean'
+  let exportCheck = false
+  if (fmuMode === 'FIELDS')
+  {
+    updateGRFElement = getMandatoryNodeValue(fmuSettingsElement,'UpdateGRF')
+    ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
+    exchangeMode = getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
+    fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
+    extrapolationMethod = getMandatoryTextValue(updateGRFElement, 'ExtrapolationMethod')
+    exportCheck = getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+  }
+  if (fmuMode === 'NOFIELD')
+  {
+    exportCheck = getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+  }
+
+
+  const runSettingsElement = getMandatoryNodeValue(jobSettingsElement, 'RunSettings')
+  const maxFractionNotNormalised = getMandatoryNumericValue(runSettingsElement, 'MaxFractionNotNormalised')
+  const toleranceLimitProbability = getMandatoryNumericValue(runSettingsElement,'ToleranceLimitProbability')
+  const transformationSettings = getMandatoryNumericValue(jobSettingsElement, 'TransformationSettings')
+  const logSetting = getMandatoryNumericValue(jobSettingsElement, 'LogSetting')
+
+  const settings: JobSettingsParam = {
+    runFmuWorkflows: (fmuMode === 'FIELDS'), // might have to wrap !! around paranthesis to evaluate as false if fmuMode is undefined/null
+    onlyUpdateFromFmu: (fmuMode === 'NOFIELDS'),
+    simulationGrid: (fmuMode === 'FIELDS' && ertBoxGrid) ? ertBoxGrid : 'ERTBOX',
+    importFields: (fmuMode === 'FIELDS') ? exchangeMode : false,
+    fieldFileFormat: (fmuMode === 'FIELDS') ? fileFormat : 'roff',
+    customTrendExtrapolationMethod: (fmuMode === 'FIELDS') ? extrapolationMethod : 'mean',
+    exportFmuConfigFiles: (fmuMode === 'FIELDS' || fmuMode === 'NOFIELDS') ? exportCheck : false,
+    maxAllowedFractionOfValuesOutsideTolerance: maxFractionNotNormalised ?? 0.1,
+    toleranceOfProbabilityNormalisation: toleranceLimitProbability ?? 0.2,
+    transformType: transformationSettings ?? 0,
+    debugLevel: logSetting ?? 0,
+  }
+  
+  return settings
+}
+
+
 const module: Module<Record<string, unknown>, RootState> = {
   namespaced: true,
 
@@ -504,6 +575,8 @@ const module: Module<Record<string, unknown>, RootState> = {
         const apsModels = getNodeValues(getMandatoryNodeValue(apsModelContainer, 'ZoneModels'), 'Zone')
 
         await dispatch('populateGlobalFaciesList', getNodeValue(apsModelContainer, 'MainFaciesTable'))
+
+        await dispatch('populateJobSettings', apsModelContainer)
 
         const localActions = [
           'populateGaussianRandomFields',
@@ -780,6 +853,29 @@ const module: Module<Record<string, unknown>, RootState> = {
           commit('truncationRules/preset/CHANGE_TEMPLATE', { template: { text: 'Imported' } }, { root: true })
         }
       }
+    },
+
+    populateJobSettings: async (context, apsModelContainer: XMLElement): Promise<void> => {
+      const { dispatch } = context
+      const jobSettingsParam = jobSettings(apsModelContainer)
+      await dispatch('fmu/runFmuWorkflows/set', jobSettingsParam.runFmuWorkflows, { root: true })
+      await dispatch('fmu/onlyUpdateFromFmu/set', jobSettingsParam.onlyUpdateFromFmu, { root: true })
+      // Update JobSettings window for the three cases:
+      // Run APS facies update in AHM/ERT: runFmuWorkflows = True, onlyUpdateFromFmu = False
+      // Only run uncertainty update:      runFmuWorkflows = False, onlyUpdateFromFmu = True
+      // No FMU mode:                      runFmuWorkflows = False, onlyUpdateFromFmu = False
+      // The last combination should not be used
+      //where runFmuWorkflows = True and onlyUpdateFromFmu = True
+
+      await dispatch('fmu/simulationGrid/set', jobSettingsParam.simulationGrid, { root: true })
+      await dispatch('fmu/fieldFileFormat/set', jobSettingsParam.fieldFileFormat, { root: true })
+      await dispatch('fmu/customTrendExtrapolationMethod/set', jobSettingsParam.customTrendExtrapolationMethod, { root: true })
+      await dispatch('options/importFields/set', jobSettingsParam.importFields, { root: true })
+      await dispatch('options/exportFmuConfigFiles/set', jobSettingsParam.exportFmuConfigFiles, { root: true })
+      await dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', jobSettingsParam.maxAllowedFractionOfValuesOutsideTolerance, { root: true })
+      await dispatch('parameters/toleranceOfProbabilityNormalisation/select', jobSettingsParam.toleranceOfProbabilityNormalisation, { root: true })
+      await dispatch('parameters/transformType/select', jobSettingsParam.transformType, { root: true })
+      await dispatch('parameters/debugLevel/select', jobSettingsParam.debugLevel, { root: true })
     }
 
   },

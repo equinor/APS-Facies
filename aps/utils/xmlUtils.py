@@ -296,3 +296,9 @@ def createFMUvariableNameForNonCubicTruncation(
         region_number: Optional[int] = None,
 ) -> str:
     return f'APS_{zone_number}_{region_number}_TRUNC_NONCUBIC_POLYNUMBER_{index}_ANGLE'
+
+def create_node(tag: str, text: Optional[Union[str, float, int]] = None) -> ET.Element:
+    element = ET.Element(tag)
+    if text is not None:
+        element.text = str(text)
+    return element

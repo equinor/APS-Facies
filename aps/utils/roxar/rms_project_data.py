@@ -28,6 +28,7 @@ from aps.algorithms.APSGaussModel import (
 )
 from aps.algorithms.APSModel import APSModel
 from aps.algorithms.properties import CrossSection
+from aps.rms_jobs.create_simulation_grid import create_ertbox_grid_model
 from aps.utils.constants.simple import (
     VariogramType,
     MinimumValues,
@@ -63,7 +64,6 @@ from aps.utils.types import (
 )
 from aps.utils.xmlUtils import prettify
 from aps.utils.constants.simple import Debug
-
 
 def empty_if_none(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
@@ -171,12 +171,10 @@ class RMSData:
         grid = self.get_grid(grid_model_name)
         sim_box_attributes = GridSimBoxSize(grid)
         kwargs = {}
-
         if rough:
             kwargs['max_number_of_selected_cells'] = 10
 
         sim_box_z_length = get_simulation_box_thickness(grid, **kwargs)
-
         return {
             'size': {
                 'x': sim_box_attributes.x_length,
@@ -313,6 +311,14 @@ class RMSData:
         # numpy float to regular float
         return {parameter: float(probability) for parameter, probability in averages.items()}
 
+    def create_ertbox_grid(self,
+        geo_grid_model_name: GridName,
+        ertbox_grid_model_name: GridName,
+        nLayers: int,
+        debug_level: Debug = Debug.OFF) -> None:
+        create_ertbox_grid_model(self.project,
+            geo_grid_model_name, ertbox_grid_model_name,
+            nLayers, debug_level=debug_level)
 
     @empty_if_none
     def get_blocked_well_logs(self, grid_model_name: GridName, blocked_well_name: str) -> List[str]:

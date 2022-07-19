@@ -419,23 +419,67 @@ def test_variogram_generation():
 
 
 def test_read_and_write_APSModel():
-    print('****** Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****')
+    """
+    ******  Case: Read APSModel file and write back APSModel file in sorted order for (zone,region) key *****
+            Input has format version 1.0 and output has format version 1.1
+    """
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERBOSE, log_setting=Debug.VERY_VERBOSE)
     outfile3 = 'testOut3.xml'
     attributes_file = 'fmu_attributes.yaml'
     apsmodel.write_model(outfile3, attributes_file)
     reference_file = 'testData_models/APS_sorted.xml'
-    print(f'Compare file: {outfile3} and {reference_file}')
     check = compare(outfile3, reference_file)
-    assert check is True
+    assert check is True, f'Compare file: {outfile3} and {reference_file}'
+
+def test_read_and_write_APSModel_with_job_settings_version1():
+    """
+    ******  Case: Read APSModel file and write back APSModel file with job settings extension
+            Input has format version 1.1 and output has format version 1.1
+    """
+    modelFile = get_model_file_path('testData_models/APS_with_job_settings.xml')
+    apsmodel = APSModel(model_file_name=modelFile, log_setting=Debug.VERY_VERBOSE)
+    outfile3 = 'testOut3B.xml'
+    attributes_file = 'fmu_attributes.yaml'
+    apsmodel.write_model(outfile3, attributes_file)
+    reference_file = 'testData_models/APS_with_job_settings_out.xml'
+    check = compare(outfile3, reference_file)
+    assert check is True, f'Compare file: {outfile3} and {reference_file}'
+
+def test_read_and_write_APSModel_with_job_settings_version2():
+    """
+    ******  Case: Read APSModel file and write back APSModel file with job settings extension
+            Input has format version 1.0 and output has format version 1.0
+    """
+    modelFile = get_model_file_path('testData_models/APS.xml')
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE, log_setting=Debug.VERBOSE, aps_model_version="1.0")
+    outfile3 = 'testOut3C.xml'
+    attributes_file = 'fmu_attributes.yaml'
+    apsmodel.write_model(outfile3, attributes_file)
+    reference_file = 'testData_models/APS_without_job_settings.xml'
+    check = compare(outfile3, reference_file)
+    assert check is True, f'Compare file: {outfile3} and {reference_file}'
+
+def test_read_and_write_APSModel_with_job_settings_version3():
+    """
+    ******  Case: Read APSModel file and write back APSModel file with job settings extension
+            Input has format version 1.1 and output has format version 1.0
+    """
+    modelFile = get_model_file_path('testData_models/APS_with_job_settings.xml')
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERY_VERBOSE, log_setting=Debug.VERBOSE, aps_model_version="1.0")
+    outfile3 = 'testOut3D.xml'
+    attributes_file = 'fmu_attributes.yaml'
+    apsmodel.write_model(outfile3, attributes_file)
+    reference_file = 'testData_models/APS_without_job_settings2.xml'
+    check = compare(outfile3, reference_file)
+    assert check is True, f'Compare file: {outfile3} and {reference_file}'
 
 
 def test_updating_model1():
     print('***** Case: Update parameters case 1 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERBOSE, log_setting=Debug.VERBOSE)
     # Do some updates of the model
     zoneNumber = 1
     zone = apsmodel.getZoneModel(zoneNumber)
@@ -515,7 +559,7 @@ def test_updating_model2():
     print('***** Case: Update parameters case 2 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.VERBOSE, log_setting=Debug.VERBOSE)
     # Do some updates of the model
     zoneNumber = 2
     regionNumber = 4
@@ -573,7 +617,7 @@ def test_updating_model3():
     print('***** Case: Update parameters case 3 *****')
     # Test updating of model
     modelFile = get_model_file_path('testData_models/APS.xml')
-    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.READ)
+    apsmodel = APSModel(model_file_name=modelFile, debug_level=Debug.ON, log_setting=Debug.ON)
     # Do some updates of the model
     zoneNumber = 2
     regionNumber = 3

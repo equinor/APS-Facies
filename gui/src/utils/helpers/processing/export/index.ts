@@ -116,30 +116,55 @@ function addResultFaciesParamName ({ rootState }: Context, doc: Document, parent
   }
 }
 
-function addPrintInfo ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-  const value = 'DummyValue: What goes here?'
-  if (value) {
-    parentElement.appendChild(createElement(doc, 'PrintInfo', rootState.parameters.debugLevel.selected))
+function addKeyword(doc: Document, keyword: string, value: Optional<string>, parentElement: HTMLElement, required: boolean = false): HTMLElement {
+  if (required){
+    if (!value) throw new APSExportError('Missing value for keyword ' + keyword)
   }
+  const element = createElement(doc, keyword, value)
+  parentElement.appendChild(element)
+  return element
 }
 
-function addTransformTypeGRF ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-  parentElement.appendChild(createElement(doc, 'TransformationType', rootState.parameters.transformType.selected))
-}
+function addJobSettings({ rootState}: Context, doc: Document, parentElement: HTMLElement): void {
+  // Get the job settings
+  const transformType = rootState.parameters.transformType.selected
+  const probFrac = rootState.parameters.maxAllowedFractionOfValuesOutsideTolerance.selected
+  const probTol  = rootState.parameters.toleranceOfProbabilityNormalisation.selected
+  const onlyUpdateFromFmu = rootState.fmu.onlyUpdateFromFmu.value
+  const fmuUpdateFields = rootState.fmu.runFmuWorkflows.value
+  const fmuFileFormat = rootState.fmu.fieldFileFormat.value
+  const fmuGrid = String(rootState.fmu.simulationGrid.current)
+  const exportFmuConfigFiles = rootState.options.exportFmuConfigFiles.value
+  const importFieldsFromFmu = rootState.options.importFields.value
+  const fmuTrendExtrapolation = rootState.fmu.customTrendExtrapolationMethod.value
+  const logSetting = rootState.parameters.debugLevel.selected
 
-function addSeedFile ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-  const value = 'DummyValue: What goes here??? Seed.dat is said to be default value?'
-  if (value) {
-    // hard coded to seed.dat
-    parentElement.appendChild(createElement(doc, 'SeedFile', 'seed.dat'))
-  }
-}
+  const fmuMode = fmuUpdateFields ? "FIELDS" : ( onlyUpdateFromFmu ? "NOFIELDS" : "OFF" )
+  const exchangeMode = importFieldsFromFmu ? "AUTO" : "SIMULATE"
+  const exportConfigMode = exportFmuConfigFiles ? "YES" : "NO"
 
-function addWriteSeeds ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-  const value = 'No'
-  if (value) {
-    parentElement.appendChild(createElement(doc, 'WriteSeeds', value))
+  // Create the JobSettings keyword for the xml file
+  const jobSettingsElement = addKeyword(doc, 'JobSettings', null, parentElement)
+  const fmuSettingsElement = addKeyword(doc, 'FmuSettings', null, jobSettingsElement)
+
+  addKeyword(doc, 'FmuMode', fmuMode, fmuSettingsElement, true)
+  if(fmuMode === "FIELDS"){
+    const updateGRFElement = addKeyword(doc, 'UpdateGRF', null, fmuSettingsElement)
+    addKeyword(doc, 'ErtBoxGrid', fmuGrid, updateGRFElement, true)
+    addKeyword(doc, 'ExchangeMode', exchangeMode, updateGRFElement, true)
+    addKeyword(doc, 'FileFormat', fmuFileFormat, updateGRFElement, true)
+    addKeyword(doc, 'ExtrapolationMethod', fmuTrendExtrapolation, updateGRFElement, true)
   }
+  if (fmuMode === "FIELDS" || fmuMode === "NOFIELDS"){
+    addKeyword(doc, 'ExportConfigFiles', exportConfigMode, fmuSettingsElement, true)
+  }
+
+  const runSettingsElement = addKeyword(doc, 'RunSettings', null, jobSettingsElement)
+  addKeyword(doc, 'MaxFractionNotNormalised', String(probFrac), runSettingsElement, true)
+  addKeyword(doc, 'ToleranceLimitProbability', String(probTol), runSettingsElement, true)
+
+  addKeyword(doc, 'TransformationSettings', String(transformType), jobSettingsElement)
+  addKeyword(doc, 'LogSetting', String(logSetting), jobSettingsElement)
 }
 
 function addMainFaciesTable ({ rootState, rootGetters }: Context, doc: Document, parentElement: HTMLElement): void {
@@ -637,19 +662,15 @@ function addContent (context: Context, doc: Document, rootElem: HTMLElement): vo
   addZoneParamName(context, doc, rootElem)
   addRegionParamName(context, doc, rootElem)
   addResultFaciesParamName(context, doc, rootElem)
-  addPrintInfo(context, doc, rootElem)
-  addSeedFile(context, doc, rootElem)
-  addTransformTypeGRF(context, doc, rootElem)
-  addWriteSeeds(context, doc, rootElem)
+  addJobSettings(context, doc, rootElem)
   addMainFaciesTable(context, doc, rootElem)
   addZoneModels(context, doc, rootElem)
 }
 
 export function createModel (context: Context): string {
   const doc = document.implementation.createDocument('', '', null)
-  const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.0' }])
+  const rootElem = createElement(doc, 'APSModel', null, [{ name: 'version', value: '1.1' }])
   doc.appendChild(rootElem)
-
   addContent(context, doc, rootElem)
   const serializer = new XMLSerializer()
   return serializer.serializeToString(doc)

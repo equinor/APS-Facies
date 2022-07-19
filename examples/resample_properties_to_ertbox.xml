@@ -7,15 +7,28 @@
      ln -sf resample_properties_to_ertbox.xml  resample.xml
 -->
 <Resample>
-    <GridModelName>Grid_model_fine</GridModelName>
-    <ERTBoxGridName> ERTBOX_FINE </ERTBoxGridName>
+    <GridModelName>GridModelFine</GridModelName>
+    <ERTBoxGridName> ERTBOX </ERTBoxGridName>
     <ZoneParam> Zone </ZoneParam>
     <Parameters>
         <Zone number="1">  Perm Poro </Zone>
+        <Zone number="2">  Perm Poro </Zone>
+        <Zone number="3">  Perm Poro </Zone>
+        <Zone number="4">  Perm Poro </Zone>
+        <Zone number="5">  Perm Poro </Zone>
+        <Zone number="6">  Perm Poro </Zone>
     </Parameters>
     <Conformity>
         <Zone number="1">  TopConform </Zone>
+        <Zone number="2">  BaseConform </Zone>
+        <Zone number="3">  BaseConform </Zone>
+        <Zone number="4">  BaseConform </Zone>
+        <Zone number="5">  BaseConform </Zone>
+        <Zone number="6">  BaseConform </Zone>
     </Conformity>
-    <!-- Available extrapolation methods: ZERO, MEAN, EXTEND, REPEAT, EXTEND_LAYER_MEAN, REPEAT_LAYER_MEAN -->
-    <ExtrapolationMethod>REPEAT </ExtrapolationMethod>
+    <!-- 
+         Available extrapolation methods: zero, mean, extend,
+         repeat, extend_layer_mean, repeat_layer_mean 
+    -->
+    <ExtrapolationMethod>repeat </ExtrapolationMethod>
 </Resample>

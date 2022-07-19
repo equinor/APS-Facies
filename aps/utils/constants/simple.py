@@ -201,11 +201,11 @@ class FlipDirectionXtgeo:
     UPPER_LEFT_CORNER = -1
     LOWER_LEFT_CORNER = 1
 
-class ExtrapolationMethod(IntEnum):
-    ZERO = 0
-    MEAN = 1
-    EXTEND_LAYER_MEAN = 2
-    REPEAT_LAYER_MEAN = 3
-    EXTEND = 4
-    REPEAT = 5
+class ExtrapolationMethod(Enum):
+    ZERO = "zero"
+    MEAN = "mean"
+    EXTEND_LAYER_MEAN = "extend_layer_mean"
+    REPEAT_LAYER_MEAN = "repeat_layer_mean"
+    EXTEND = "extend"
+    REPEAT = "repeat"
 

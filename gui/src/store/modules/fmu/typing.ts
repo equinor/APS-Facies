@@ -17,4 +17,5 @@ export interface FmuState {
   create: OptionState<boolean>
   simulationGrid: SimulationGridModelsState
   fieldFileFormat: OptionState<string>
+  customTrendExtrapolationMethod: OptionState<string>
 }

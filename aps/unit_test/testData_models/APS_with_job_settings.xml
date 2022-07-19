@@ -6,22 +6,29 @@
     <SelectedZoneWithRegions zone="5"> 0 </SelectedZoneWithRegions>
     <SelectedZoneWithRegions zone="6"> 10 </SelectedZoneWithRegions>
   </SelectedZonesAndRegions>
-  <RMSProjectName> testNeslen.rms10 </RMSProjectName>
+  <RMSProjectName> testNeslen.rms12.1.4 </RMSProjectName>
   <RMSWorkflowName> Example APS workflow </RMSWorkflowName>
   <GridModelName> APS_NESLEN_ODM </GridModelName>
   <ZoneParamName> Zone </ZoneParamName>
   <RegionParamName> Region </RegionParamName>
   <ResultFaciesParamName> FaciesReal </ResultFaciesParamName>
+  <PrintInfo> 3 </PrintInfo>
   <JobSettings>
     <FmuSettings>
-      <FmuMode>OFF</FmuMode>
+      <FmuMode>FIELDS</FmuMode>
+      <UpdateGRF>
+        <ErtBoxGrid>ERTBOX</ErtBoxGrid>
+        <ExchangeMode>SIMULATE</ExchangeMode>
+        <FileFormat>roff</FileFormat>
+        <ExtrapolationMethod>extend_layer_mean</ExtrapolationMethod>
+      </UpdateGRF>
+      <ExportConfigFiles>YES</ExportConfigFiles>
     </FmuSettings>
     <RunSettings>
       <MaxFractionNotNormalised>0.1</MaxFractionNotNormalised>
       <ToleranceLimitProbability>0.2</ToleranceLimitProbability>
     </RunSettings>
     <TransformationSettings>0</TransformationSettings>
-    <LogSetting>3</LogSetting>
   </JobSettings>
   <MainFaciesTable blockedWell="BW" blockedWellLog="facies">
     <Facies name="F1">

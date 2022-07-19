@@ -186,7 +186,7 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
-
+import rms from '@/api/rms'
 import LoggingSettings from '@/components/dialogs/JobSettings/LoggingSettings.vue'
 import SettingsPanel from '@/components/dialogs/JobSettings/SettingsPanel.vue'
 import BoldButton from '@/components/baseComponents/BoldButton.vue'
@@ -248,6 +248,8 @@ export default class JobSettings extends Vue {
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
   get version (): string { return process.env.VUE_APP_APS_VERSION || '' }
+  get currentGridModel (): string { return this.$store.getters.gridModel }
+
 
   @Watch('dialog')
   onActivation (value: boolean): void {
@@ -292,7 +294,6 @@ export default class JobSettings extends Vue {
       dispatch('parameters/transformType/select', this.transformType),
       dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', this.maxAllowedFractionOfValuesOutsideTolerance),
       dispatch('parameters/toleranceOfProbabilityNormalisation/select', this.toleranceOfProbabilityNormalisation),
-
       dispatch('fmu/maxDepth/set', this.maxLayersInFmu),
       dispatch('fmu/runFmuWorkflows/set', this.runFmuWorkflows),
       dispatch('fmu/onlyUpdateFromFmu/set', this.onlyUpdateFromFmu),
@@ -313,6 +314,16 @@ export default class JobSettings extends Vue {
 
       dispatch('constants/faciesColors/set', this.faciesColorLibrary),
     ])
+    // Create ERTBOX grid if this.createFmuGrid is true
+    if (this.createFmuGrid){
+      rms.createErtBoxGrid(this.currentGridModel, this.fmuGrid, this.maxLayersInFmu, this.debugLevel)
+      this.createFmuGrid = false
+      await Promise.all([
+        dispatch('fmu/create/set', this.createFmuGrid),
+        dispatch('gridModels/refresh')
+      ])
+    }
+
     this.dialog = false
   }
 
