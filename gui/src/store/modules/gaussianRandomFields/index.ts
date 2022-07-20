@@ -209,6 +209,12 @@ const module: Module<GaussianRandomFieldState, RootState> = {
     trendParameter (context, { field, value }): void {
       setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_PARAM' })
     },
+    trendMapName (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_MAP' })
+    },
+    trendMapZone (context, { field, value }): void {
+      setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_RMS_TREND_ZONE' })
+    },
     stackingDirection (context, { field, value }): void {
       setValue(context, { field, variogramOrTrend: 'trend', value, commitName: 'CHANGE_STACKING_DIRECTION' })
     },
@@ -293,6 +299,12 @@ const module: Module<GaussianRandomFieldState, RootState> = {
     },
     CHANGE_RMS_TREND_PARAM (state, { field, value }): void {
       state.available[`${field.id}`].trend.parameter = value
+    },
+    CHANGE_RMS_TREND_MAP (state, { field, value }): void {
+      state.available[`${field.id}`].trend.trendMapName = value
+    },
+    CHANGE_RMS_TREND_ZONE (state, { field, value }): void {
+      state.available[`${field.id}`].trend.trendMapZone = value
     }
   },
 

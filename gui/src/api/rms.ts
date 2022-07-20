@@ -38,6 +38,7 @@ export default {
   facies: (gridName: string, blockedWellName: string, blockedWellLogName: string, regionParameter: Optional<string>): Promise<RmsFacies[]> => api.call('get_facies_table_from_blocked_well_log', gridName, blockedWellName, blockedWellLogName, regionParameter),
   truncationPolygons: <T extends TruncationRuleDescription>(specification: T): Promise<PolygonDescription[]> => api.call('get_truncation_map_polygons', specification),
   trendParameters: (gridName: string): Promise<string[]> => api.call('get_rms_trend_parameters', gridName),
+  trendMapZones: (): Promise<Record<string, string[]>> => api.call('get_rms_trend_map_zones'),
   probabilityCubeParameters: (gridName: string): Promise<string[]> => api.call('get_probability_cube_parameters', gridName),
   constants: (constantName: string, constantType: string): Promise<Constants> => api.call('get_constant', constantName, constantType),
   options: (name: string): Promise<string[]> => api.call('get_options', name),

@@ -12,7 +12,7 @@ from aps.algorithms.APSFaciesProb import APSFaciesProb
 from aps.algorithms.APSGaussModel import APSGaussModel, GaussianFieldName, GaussianField, Trend
 from aps.algorithms.APSMainFaciesTable import APSMainFaciesTable
 from aps.algorithms.Memoization import MemoizationItem, RoundOffConstant
-from aps.algorithms.trend import Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param
+from aps.algorithms.trend import Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param, Trend3D_rms_map
 from aps.algorithms.truncation_rules import Trunc2D_Angle, Trunc2D_Cubic, Trunc3D_bayfill
 from aps.algorithms.properties import CrossSection
 from aps.utils.constants.simple import Debug, VariogramType, Conform
@@ -400,7 +400,7 @@ class APSZoneModel:
 
     def getTrendModel(self, gfName: GaussianFieldName) -> Union[
             Tuple[None, None, None, None],
-            Tuple[bool, Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param], float, bool],
+            Tuple[bool, Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param, Trend3D_rms_map], float, bool],
         ]:
         return self.__gaussModelObject.getTrendModel(gfName)
 

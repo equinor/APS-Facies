@@ -1,6 +1,6 @@
 import FmuUpdatableValue, { FmuUpdatableSerialization } from '@/utils/domain/bases/fmuUpdatable'
 
-export type TrendType = 'NONE' | 'LINEAR' | 'ELLIPTIC' | 'ELLIPTIC_CONE' | 'HYPERBOLIC' | 'RMS_PARAM'
+export type TrendType = 'NONE' | 'LINEAR' | 'ELLIPTIC' | 'ELLIPTIC_CONE' | 'HYPERBOLIC' | 'RMS_PARAM' | 'RMS_TRENDMAP'
 export type StackingDirectionType = 'PROGRADING' | 'RETROGRADING'
 export type OriginType = 'RELATIVE' | 'ABSOLUTE'
 
@@ -41,6 +41,8 @@ export interface TrendConfiguration {
   migrationAngleUpdatable?: boolean
   stackingDirection?: StackingDirectionType
   parameter?: string | null
+  trendMapName?: string | null
+  trendMapZone?: string | null
   curvature?: number
   curvatureUpdatable?: boolean
   originX?: number
@@ -63,6 +65,8 @@ export interface TrendSerialization {
   stackingDirection: StackingDirectionType
   origin: OriginSerialization
   parameter: string | null
+  trendMapName: string | null
+  trendMapZone: string | null
   curvature: FmuUpdatableSerialization
   relativeSize: FmuUpdatableSerialization
   relativeStdDev: FmuUpdatableSerialization
@@ -80,6 +84,8 @@ export function unpackTrend (trend: TrendSerialization): TrendConfiguration {
     migrationAngleUpdatable: trend.angle.migration.updatable,
     stackingDirection: trend.stackingDirection,
     parameter: trend.parameter,
+    trendMapName: trend.trendMapName,
+    trendMapZone: trend.trendMapZone,
     curvature: trend.curvature.value,
     curvatureUpdatable: trend.curvature.updatable,
     originX: trend.origin.x.value,
@@ -102,6 +108,8 @@ export default class Trend {
   public angle: Angle
   public stackingDirection: StackingDirectionType
   public parameter: string | null
+  public trendMapName: string | null
+  public trendMapZone: string | null
   public curvature: FmuUpdatableValue
   public origin: Origin
   public relativeSize: FmuUpdatableValue
@@ -118,6 +126,8 @@ export default class Trend {
     migrationAngleUpdatable = false,
     stackingDirection = 'PROGRADING',
     parameter = null,
+    trendMapName = null,
+    trendMapZone = null,
     curvature = 1,
     curvatureUpdatable = false,
     originX = 0.5,
@@ -141,6 +151,8 @@ export default class Trend {
     }
     this.stackingDirection = stackingDirection
     this.parameter = parameter
+    this.trendMapName = trendMapName
+    this.trendMapZone = trendMapZone
     if (this.type === 'HYPERBOLIC' && curvature <= 1) curvature = 1.01
     this.curvature = new FmuUpdatableValue(curvature, !!curvatureUpdatable)
     if (this.type === 'ELLIPTIC_CONE') originZ = 0
@@ -157,7 +169,7 @@ export default class Trend {
   public get isFmuUpdatable (): boolean {
     return (
       this.relativeStdDev.updatable
-      || (this.type !== 'RMS_PARAM' && (
+      || (this.type !== 'RMS_PARAM' && this.type !== 'RMS_TRENDMAP' && (
         this.angle.azimuth.updatable
         || this.angle.stacking.updatable
         || (this.type !== 'LINEAR' && (
@@ -184,6 +196,8 @@ export default class Trend {
       stackingDirection: this.stackingDirection,
       origin: { ...this.origin },
       parameter: this.parameter,
+      trendMapName: this.trendMapName,
+      trendMapZone: this.trendMapZone,
       curvature: this.curvature.toJSON(),
       relativeSize: this.relativeSize.toJSON(),
       relativeStdDev: this.relativeStdDev.toJSON(),

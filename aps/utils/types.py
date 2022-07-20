@@ -55,6 +55,8 @@ OriginTypeName = NewType('OriginTypeName', str)
 ZoneParameter = NewType('ZoneParameter', str)
 RegionParameter = NewType('RegionParameter', str)
 TrendParameter = NewType('TrendParameter', str)
+TrendMapName = NewType('TrendMapName', str)
+TrendMapZone = NewType('TrendMapZone', str)
 ProbabilityCubeParameter = NewType('ProbabilityCubeParameter', str)
 RealizationParameter = NewType('RealizationParameter', str)
 

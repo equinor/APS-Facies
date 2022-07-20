@@ -56,6 +56,7 @@ class TrendType(Enum):
     HYPERBOLIC = 3
     RMS_PARAM = 4
     ELLIPTIC_CONE = 5
+    RMS_TRENDMAP = 6
 
 
 class TrendParameter(Enum):
@@ -68,6 +69,9 @@ class TrendParameter(Enum):
     ORIGIN_TYPE = 'origin_type'
     RELATIVE_SIZE = 'relative_size_of_ellipse'
     RMS_PARAMETER = 'rms_parameter_name'
+    RMS_TREND_MAP_NAME = 'rms_trendmap_name'
+    RMS_TREND_MAP_ZONE = 'rms_trendmap_zone'
+
 
 
 class CrossSectionType(Enum):

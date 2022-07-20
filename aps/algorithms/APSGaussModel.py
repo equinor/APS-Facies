@@ -9,6 +9,7 @@ from aps.algorithms.trend import (
     Trend3D_hyperbolic,
     Trend3D_linear,
     Trend3D_rms_param,
+    Trend3D_rms_map,
     Trend3D,
 )
 from typing import List, Optional, Tuple, Union, TypeVar, Dict, Callable
@@ -490,7 +491,7 @@ class Trend:
         self._name = value
 
     @property
-    def model(self) -> Optional[Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param]]:
+    def model(self) -> Optional[Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param, Trend3D_rms_map]]:
         return self._model
 
     @model.setter
@@ -542,12 +543,17 @@ class Trend:
         else:
             trend_models = {
                 TrendType.RMS_PARAM: Trend3D_rms_param,
+                TrendType.RMS_TRENDMAP: Trend3D_rms_map,
                 TrendType.LINEAR: Trend3D_linear,
                 TrendType.ELLIPTIC: Trend3D_elliptic,
                 TrendType.ELLIPTIC_CONE: Trend3D_elliptic_cone,
                 TrendType.HYPERBOLIC: Trend3D_hyperbolic,
             }
-            return trend_models[_type](**kwargs)
+            try:
+                return trend_models[_type](**kwargs)
+            except KeyError:
+                raise IOError(f"Missing input data for trend model: {_type.name}")
+
 
 
 def _map_js_to_py(add_empty=False, **kwargs):
@@ -572,6 +578,10 @@ def _map_js_to_py(add_empty=False, **kwargs):
                     res['direction'] = None
         elif key == 'parameter':
             _add_parameter('rms_parameter_name', value, res, add_empty)
+        elif key == 'trendMapName':
+            _add_parameter('rms_trendmap_name', value, res, add_empty)
+        elif key == 'trendMapZone':
+            _add_parameter('rms_trendmap_zone', value, res, add_empty)
         elif key == 'curvature':
             _add_parameter('curvature', value, res, add_empty)
         elif key == 'origin':
@@ -1022,6 +1032,7 @@ class APSGaussModel:
                     'Elliptic3D': Trend3D_elliptic,
                     'Hyperbolic3D': Trend3D_hyperbolic,
                     'RMSParameter': Trend3D_rms_param,
+                    'RMSTrendMap': Trend3D_rms_map,
                     'EllipticCone3D': Trend3D_elliptic_cone,
                 }
                 try:
@@ -1284,7 +1295,7 @@ class APSGaussModel:
             gfName: GaussianFieldName,
     ) -> Union[
             Tuple[None, None, None, None],
-            Tuple[bool, Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param], float, bool],
+            Tuple[bool, Union[Trend3D_hyperbolic, Trend3D_elliptic, Trend3D_linear, Trend3D_rms_param, Trend3D_rms_map], float, bool],
         ]:
         trend = self.getTrendItem(gfName)
         if trend is None:

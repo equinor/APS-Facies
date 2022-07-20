@@ -157,6 +157,17 @@ class Migration:
         }
         return state
 
+    def add_trend_map(self, state: dict):
+        trend_map_names_list = self.rms_data.get_rms_trend_map_names_all()
+        trend_map_zones_list = self.rms_data.get_rms_trend_map_zones_with_data()
+        state['parameters']['rmsTrendMapNames'] = {'available': trend_map_names_list}
+        state['parameters']['rmsTrendMapZones'] = {'available': trend_map_zones_list}
+        for key in state['gaussianRandomFields']['available'] :
+            state['gaussianRandomFields']['available'] [key]['trend']['trendMapName'] = None
+            state['gaussianRandomFields']['available'] [key]['trend']['trendMapZone'] = None
+
+        return state
+
     def attempt_upgrading_legacy_state(self, state: dict):
         return _attempt_upgrading_legacy_state(self, state)
 
@@ -261,6 +272,11 @@ class Migration:
                 'to': '1.9.0',
                 'up': self.add_custom_trend_extrapolation_method,
             },
+            {
+                'from': '1.9.0',
+                'to': '1.10.0',
+                'up': self.add_trend_map,
+            },
         ]
 
     def get_migrations(self, from_version: str, to_version: Optional[str] = None):
@@ -301,7 +317,9 @@ class Migration:
                 state['version'] = migration['to']
         except Exception as e:
             errors = e.__repr__()
+            print(f"Error: ")
             warn(errors)
+            raise KeyError(f"In migration:  {errors} ")
         return {
             'state': state,
             'errors': errors,

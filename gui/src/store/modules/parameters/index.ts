@@ -7,6 +7,7 @@ import region from '@/store/modules/parameters/region'
 import blockedWell from '@/store/modules/parameters/blockedWell'
 import blockedWellLog from '@/store/modules/parameters/blockedWellLog'
 import rmsTrend from '@/store/modules/parameters/rmsTrend'
+import rmsTrendMapZones from '@/store/modules/parameters/rmsTrendMapZones'
 import probabilityCube from '@/store/modules/parameters/probabilityCube'
 import grid from '@/store/modules/parameters/grid'
 import realization from '@/store/modules/parameters/realization'
@@ -25,6 +26,7 @@ const module: Module<ParametersState, RootState> = {
     blockedWell,
     blockedWellLog,
     rmsTrend,
+    rmsTrendMapZones,
     probabilityCube,
     grid,
     realization,

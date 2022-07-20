@@ -1,0 +1,132 @@
+<?xml version="1.0" ?>
+<APSModel version="1.1">
+  <Preview zoneNumber="2" regionNumber="0" crossSectionType="IJ" crossSectionRelativePos="0.5" scale="1.0" resolution="Normal"/>
+  <SelectedZonesAndRegions>
+    <SelectedZoneWithRegions zone="1"> 0 </SelectedZoneWithRegions>
+  </SelectedZonesAndRegions>
+  <RMSProjectName> TestSyntheticModels.rms12.1.2 </RMSProjectName>
+  <RMSWorkflowName> Test_trend_maps </RMSWorkflowName>
+  <GridModelName> Grid_model </GridModelName>
+  <ZoneParamName> Zone </ZoneParamName>
+  <ResultFaciesParamName> FaciesReal_unconditioned_trend_map1 </ResultFaciesParamName>
+  <JobSettings>
+    <FmuSettings>
+      <FmuMode>OFF</FmuMode>
+    </FmuSettings>
+    <RunSettings>
+      <MaxFractionNotNormalised>0.1</MaxFractionNotNormalised>
+      <ToleranceLimitProbability>0.2</ToleranceLimitProbability>
+    </RunSettings>
+    <TransformationSettings>0</TransformationSettings>
+    <LogSetting>0</LogSetting>
+  </JobSettings>
+  <MainFaciesTable blockedWell="BW2" blockedWellLog="FaciesLog">
+    <Facies name="F1">
+      <Code> 1 </Code>
+    </Facies>
+    <Facies name="F2">
+      <Code> 2 </Code>
+    </Facies>
+    <Facies name="F3">
+      <Code> 3 </Code>
+    </Facies>
+    <Facies name="F4">
+      <Code> 4 </Code>
+    </Facies>
+    <Facies name="F5">
+      <Code> 5 </Code>
+    </Facies>
+    <Facies name="F6">
+      <Code> 6 </Code>
+    </Facies>
+    <Facies name="F7">
+      <Code> 7 </Code>
+    </Facies>
+    <Facies name="F8">
+      <Code> 8 </Code>
+    </Facies>
+    <Facies name="F9">
+      <Code> 9 </Code>
+    </Facies>
+    <Facies name="F10">
+      <Code> 10 </Code>
+    </Facies>
+  </MainFaciesTable>
+  <ZoneModels>
+    <Zone number="1">
+      <GridLayout>Proportional</GridLayout>
+      <UseConstProb> 1 </UseConstProb>
+      <SimBoxThickness> 10.0 </SimBoxThickness>
+      <FaciesProbForModel>
+        <Facies name="F1">
+          <ProbCube> 0.4 </ProbCube>
+        </Facies>
+        <Facies name="F2">
+          <ProbCube> 0.1 </ProbCube>
+        </Facies>
+        <Facies name="F3">
+          <ProbCube> 0.3 </ProbCube>
+        </Facies>
+        <Facies name="F4">
+          <ProbCube> 0.15 </ProbCube>
+        </Facies>
+        <Facies name="F5">
+          <ProbCube> 0.05 </ProbCube>
+        </Facies>
+      </FaciesProbForModel>
+      <GaussField name="GF2">
+        <Vario name="GAUSSIAN">
+          <MainRange> 50.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 305.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 75151556 </SeedForPreview>
+      </GaussField>
+      <GaussField name="GF1">
+        <Vario name="GAUSSIAN">
+          <MainRange> 35.0 </MainRange>
+          <PerpRange> 25.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 35.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <Trend>
+          <RMSTrendMap>
+            <TrendMapName> APS_trend_map </TrendMapName>
+            <TrendMapZone> A </TrendMapZone>
+          </RMSTrendMap>
+        </Trend>
+        <RelStdDev> 0.05 </RelStdDev>
+        <SeedForPreview> 276787 </SeedForPreview>
+      </GaussField>
+      <GaussField name="GF3">
+        <Vario name="GAUSSIAN">
+          <MainRange> 50.0 </MainRange>
+          <PerpRange> 50.0 </PerpRange>
+          <VertRange> 5.0 </VertRange>
+          <AzimuthAngle> 125.0 </AzimuthAngle>
+          <DipAngle> 0.0 </DipAngle>
+        </Vario>
+        <SeedForPreview> 8276256 </SeedForPreview>
+      </GaussField>
+      <TruncationRule>
+        <Trunc3D_Bayfill nGFields="3">
+          <BackGroundModel>
+            <AlphaFields> GF1 GF2 GF3 </AlphaFields>
+            <UseConstTruncParam> 1 </UseConstTruncParam>
+            <Floodplain> F1 </Floodplain>
+            <Subbay> F2 </Subbay>
+            <WBF> F3 </WBF>
+            <BHD> F4 </BHD>
+            <Lagoon> F5 </Lagoon>
+            <SF> 0.5 </SF>
+            <YSF>  0.5 </YSF>
+            <SBHD>  0.1 </SBHD>
+          </BackGroundModel>
+        </Trunc3D_Bayfill>
+      </TruncationRule>
+    </Zone>
+  </ZoneModels>
+</APSModel>

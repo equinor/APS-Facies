@@ -80,19 +80,7 @@ function addGridModelName ({ rootGetters }: Context, doc: Document, parentElemen
 }
 
 function addZoneParamName ({ rootState }: Context, doc: Document, parentElement: HTMLElement): void {
-  /**
-   * zoneParamName : Kommentar fra Oddvar:
-   * GUI henter info direkte fra gridet. Workflow leser soneparameteren, men jeg har en funksjon som oppretter
-   * soneparameteren hvis den ikke finnes, så det vi kan gjøre er at den pr def skal hete Zone eller Zones
-   * (skal sjekke hva som RMS bruker som default i jobben som lager denne). Og hvis den ikke finnes , så
-   * oppretter vi den bare. Et søyeblikk så skal jeg gi deg navnet på funksjonen som lager soneparameteren.
-   *
-   * Default er Zone som navn på soneparameteren i jobben i RMS som heter 'Create Grid Index Parameters ' og
-   * som kan brukes til å lage soneparameter m.m
-   *
-   * Den jobben jeg laga ligger under grid_model.py under aps/utils/roxar og heter createZoneParameter.
-   * Den har pr i dag ikke blitt brukt til noe og jeg må endre default navnet til Zone for den RMS parameteren den lager.
-   */
+  // Default zone parameter name is Zone.
   const value = rootState.parameters.zone.selected || 'Zone'
   if (value) {
     parentElement.appendChild(createElement(doc, 'ZoneParamName', value))
@@ -269,6 +257,7 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
   // mapping from trend type names used in the store to the ones to be used in the exported file.
   const trendTypeMap = new Map()
   trendTypeMap.set('RMS_PARAM', 'RMSParameter')
+  trendTypeMap.set('RMS_TRENDMAP', 'RMSTrendMap')
   trendTypeMap.set('LINEAR', 'Linear3D')
   trendTypeMap.set('ELLIPTIC', 'Elliptic3D')
   trendTypeMap.set('HYPERBOLIC', 'Hyperbolic3D')
@@ -280,6 +269,8 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
 
   // fields in store that might be used depending on trendType
   const rmsTrendParam = field.trend.parameter
+  const rmsTrendMapName = field.trend.trendMapName
+  const rmsTrendMapZone = field.trend.trendMapZone
   const azimuth = field.trend.angle.azimuth
   const stackingDirection = field.trend.stackingDirection
   const stackAngle = field.trend.angle.stacking
@@ -299,6 +290,11 @@ function addTrend (doc: Document, field: GaussianRandomField, parent: Parent, ba
   if (trendType === 'RMSParameter') {
     const trendParamName = createElement(doc, 'TrendParamName', rmsTrendParam, null)
     trendTypeElement.append(trendParamName)
+  } else if (trendType === 'RMSTrendMap') {
+    const trendMapName = createElement(doc, 'TrendMapName', rmsTrendMapName, null)
+    trendTypeElement.append(trendMapName)
+    const trendMapZone = createElement(doc, 'TrendMapZone', rmsTrendMapZone, null)
+    trendTypeElement.append(trendMapZone)
   } else {
     // azimuth, directionStacking and stackAngle common to all trends except rms parameter
 
