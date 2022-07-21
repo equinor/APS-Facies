@@ -91,6 +91,7 @@ def get_parameters(**kwargs):
     fmu_dict['fmu_simulation_grid_name']  = None
     fmu_dict['global_variables'] = global_variables_file
     fmu_dict['export_fmu_config_files'] = False
+    fmu_dict['field_file_format'] = 'roff'
 
     if read_fmu_settings_from_file:
         fmu_settings_file = "APS_fmu_settings.txt"
