@@ -15,7 +15,7 @@ from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import isNumber
 from aps.utils.types import FilePath
 from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number, create_node
-from aps.utils.io import GlobalVariables
+from aps.utils.io import GlobalVariables, write_string_to_file
 from aps.utils.roxar.grid_model import check_active_cells_in_zone_region, create_zone_parameter
 
 if TYPE_CHECKING:
@@ -1234,16 +1234,10 @@ class APSModel:
             - Write xml tree with model specification to file
         """
 
-        def write(file_name: str, content: str, debug_level: Debug = Debug.OFF) -> None:
-            with open(file_name, 'w') as file:
-                file.write(content)
-            if debug_level >= Debug.ON:
-                print(f'- Write file: {file_name}')
-
         fmu_attributes: List[FmuAttribute] = []
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
-        write(model_file_name, root_updated, debug_level=debug_level)
+        write_string_to_file(model_file_name, root_updated, debug_level=debug_level)
 
         if attributes_file_name is not None:
             aps_model = APSModel(model_file_name)
@@ -1251,14 +1245,14 @@ class APSModel:
 
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
-            write(attributes_file_name, 
+            write_string_to_file(attributes_file_name, 
                 fmu_configuration(fmu_attributes, grid_model_name, current_job_name),
                 debug_level=debug_level)
 
         if probability_distribution_file_name is not None:
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
-            write(probability_distribution_file_name,
+            write_string_to_file(probability_distribution_file_name,
                 probability_distribution_configuration(fmu_attributes, current_job_name),
                 debug_level=debug_level)
 
@@ -1268,6 +1262,17 @@ class APSModel:
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         self.XMLAddElement(top, fmu_attributes)
         return len(fmu_attributes) > 0
+    @property
+    def fmu_mode(self) -> str:
+        return self.__fmu_mode
+
+    @property
+    def fmu_ertbox_name(self) -> str:
+        return self.__fmu_ertbox_name
+
+    @property
+    def fmu_field_file_format(self) -> str:
+        return self.__fmu_file_format
 
     def check_or_create_zone_parameter(self, project, debug_level=Debug.OFF):
         """

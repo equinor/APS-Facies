@@ -263,3 +263,11 @@ class GlobalVariables:
         except (ValueError, TypeError):
             return False
         return True
+
+
+def write_string_to_file(file_name: str, content: str,
+    debug_level: Debug = Debug.OFF) -> None:
+    with open(file_name, 'w') as file:
+        file.write(content)
+    if debug_level >= Debug.ON:
+        print(f'- Write file: {file_name}')
