@@ -158,10 +158,8 @@ class Migration:
         return state
 
     def add_trend_map(self, state: dict):
-        trend_map_names_list = self.rms_data.get_rms_trend_map_names_all()
-        trend_map_zones_list = self.rms_data.get_rms_trend_map_zones_with_data()
-        state['parameters']['rmsTrendMapNames'] = {'available': trend_map_names_list}
-        state['parameters']['rmsTrendMapZones'] = {'available': trend_map_zones_list}
+        trend_map_zones_dict = self.rms_data.get_rms_trend_map_zones()
+        state['parameters']['rmsTrendMapZones'] = {'available': trend_map_zones_dict}
         for key in state['gaussianRandomFields']['available'] :
             state['gaussianRandomFields']['available'] [key]['trend']['trendMapName'] = None
             state['gaussianRandomFields']['available'] [key]['trend']['trendMapZone'] = None
