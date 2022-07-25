@@ -259,7 +259,7 @@ class APSModel:
         # Debug level used when reading model file
         self.debug_level = debug_level_input
 
-        if self.__aps_model_version_from_file == "1.0":
+        if self.__aps_model_version_from_file == "1.0" and self.debug_level >= Debug.VERBOSE:
             print(
                 "NOTE: The model file that is imported has file format version 1.0.\n"
                 "This format is used for APSGUI versions less than 1.4\n"

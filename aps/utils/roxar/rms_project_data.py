@@ -166,23 +166,6 @@ class RMSData:
     def get_rms_trend_parameters(self, grid_model_name: GridName) -> List[TrendParameter]:
         return self._get_parameter_names(grid_model_name, self.is_trend_parameter)
 
-    def get_rms_trend_map_names(self, zone_name) -> List[TrendMapName]:
-        rms_surface_representations = self.project.zones.representations
-        repr_names = [item.name for item in rms_surface_representations]
-        repr_list = []
-        for repr_name in repr_names:
-            surface = None
-            surface = self.project.zones[zone_name][repr_name]
-            if surface:
-                if not surface.is_empty():
-                    repr_list.append(repr_name)
-        return repr_list
-
-    def get_rms_trend_map_names_all(self) -> List[TrendMapName]:
-        rms_surface_representations = self.project.zones.representations
-        repr_names = [item.name for item in rms_surface_representations]
-        return repr_names
-
     def get_rms_trend_map_zones(self) -> Dict[str, List[str]]:
         rms_surface_representations = self.project.zones.representations
         representation_names = [item.name for item in rms_surface_representations]
