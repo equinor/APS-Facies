@@ -1,5 +1,7 @@
 # Note: Check that job name specified under keyword APS below is correct.
 #       It should be the same as the APS job these parameters belongs to.
+#       The job name must be used only once and the job name must be case insensitive
+#       (e.g Jobname and JOBNAME is treated as the same name).
 # Note: This file should be copied into the "global:" section of the global_master_config.yml file
 #       which is located per default under the "fmuconfig/input" directory in the FMU project.
   APS:

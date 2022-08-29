@@ -4,6 +4,7 @@ from os.path import exists
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Tuple, Union, List
+from warnings import warn
 
 import numpy as np
 
@@ -256,6 +257,86 @@ class GlobalVariables:
         # with aps parameters for each specified job-id for each grid model
         return aps_variables
 
+    @classmethod
+    def check_master_config_yaml(cls,
+            global_master_config_file: Path,
+            current_job_name: str) -> _GlobalVariables:
+        ''' YAML format for global variables support RMS project with multiple grid models
+            where the grid models can be single-zone grid models or multi-zone grid models
+            and where each grid model may have multiple APS jobs where each job can have
+            their own set of APS model parameters to be updated by FMU.
+
+            To ensure uniqueness of model parameters for ERT parameters in template config
+            files for FMU, the APS jobs specified in the global_master_config file and hence
+            in global_variables file in FMU must be unique also after their names are
+            made upper case. It is allowed to regenerate template ERT file for
+            existing job, but not to add new APS job to global_master_config file which
+            is equal to existing ones when making the names upper case.
+
+
+            Example structure of the APS keyword in global master config YAML file:
+            global:
+              APS:
+                  APS_job_1:
+                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: value ~ <ert_param_name>
+                   APS_1_0_GF_GRF1_TREND_AZIMUTH: ~value  <ert_param_name>
+
+                  APS_job_2:
+                   APS_1_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: value ~ <ert_param_name>
+                   APS_1_0_GF_GRF2_TREND_AZIMUTH: value ~ <ert_param_name>
+
+                  APS_job_3:
+                   APS_1_0_GF_GRF1_TREND_RELSTDDEV: value ~ <ert_param_name>
+                   APS_2_0_GF_GRF1_TREND_AZIMUTH: value ~ <ert_param_name>
+                   APS_3_0_GF_GRF1_RESIDUAL_MAINRANGE: value ~ <ert_param_name>
+
+            Note: Should not allow two APS job names that are equal
+            after transforming the name to upper case. If current job name is equal to one
+            used in global_master_config.yml file, it is OK to generate a new template ERT file
+            that can be used to replace the section in global_master_config.yml file for this job.
+        '''
+        try:
+            import yaml
+        except ImportError:
+            raise NotImplementedError('PyYaml is required')
+        with open(global_master_config_file, 'r') as file:
+            all_variables = yaml.safe_load(file)
+
+        global_variables = all_variables['global']
+        aps_variables = None
+        if global_variables is not None:
+            for key in ['APS', 'aps', 'Aps']:
+                if key in global_variables.keys():
+                    aps_variables = global_variables[key]
+                    break
+
+        if aps_variables is not None:
+            job_names = list(aps_variables.keys())
+            uppercase_job_names = []
+            job_names_string = ""
+            for name in job_names:
+                uppercase_job_names.append(name.upper())
+                job_names_string += f"    {name}\n"
+            if current_job_name in job_names:
+                # This job name already exist and has same name as current job. This is OK since
+                # this will enable APS to re-generate a new version of the ERT template file that
+                # can be used if the user wants to replace the section for this job in
+                # global_master_config file.
+                return True
+            if current_job_name.upper() in uppercase_job_names:
+                # Not OK since current job is different from the ones already used, but
+                # converted to upper case letters, the job names are equal and not unique.
+                warn("\nWARNING:\n"
+                    f"Will not create FMU template file for APS job:   {current_job_name}.\n"
+                    "The job name in upper case letter is identical to other already defined APS jobs in "
+                    f"the global_master_config.yml file:\n"
+                    f"{job_names_string} "
+                )
+                return False
+            else:
+                return True
+        return False
+
     @staticmethod
     def is_numeric(val) -> bool:
         try:
@@ -269,5 +350,5 @@ def write_string_to_file(file_name: str, content: str,
     debug_level: Debug = Debug.OFF) -> None:
     with open(file_name, 'w') as file:
         file.write(content)
-    if debug_level >= Debug.ON:
-        print(f'- Write file: {file_name}')
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f'-- Write file: {file_name}')

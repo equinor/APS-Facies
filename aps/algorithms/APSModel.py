@@ -1246,7 +1246,7 @@ class APSModel:
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
             write_string_to_file(attributes_file_name, 
-                fmu_configuration(fmu_attributes, grid_model_name, current_job_name),
+                fmu_configuration(fmu_attributes, current_job_name),
                 debug_level=debug_level)
 
         if probability_distribution_file_name is not None:
@@ -1550,11 +1550,13 @@ def probability_distribution_configuration(fmu_attributes: List[FmuAttribute], c
     return content
 
 
-def fmu_configuration(fmu_attributes: List[FmuAttribute], grid_model_name: str, current_job_name: str) -> str:
+def fmu_configuration(fmu_attributes: List[FmuAttribute], current_job_name: str) -> str:
     if not fmu_attributes:
         return ''
     content = '# Note: Check that job name specified under keyword APS below is correct.\n'
     content += '#       It should be the same as the APS job these parameters belongs to.\n'
+    content += '#       The job name must be used only once and the job name must be case insensitive\n'
+    content += '#       (e.g Jobname and JOBNAME is treated as the same name).\n'
     content += '# Note: This file should be copied into the "global:" section of the global_master_config.yml file\n'
     content += '#       which is located per default under the "fmuconfig/input" directory in the FMU project.\n' 
     content += '  APS:\n'
