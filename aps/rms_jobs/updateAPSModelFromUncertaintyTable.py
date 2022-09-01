@@ -106,7 +106,7 @@ def run(roxar=None, project=None, **kwargs):
     # workflow_name = get_workflow_name()
     workflow_name = params['workflow_name']
     output_aps_model_file = input_aps_model_file.replace('APS.xml', 'APS_modified.xml')
-    write_output_file_with_parameter_names = False
+    write_output_file_with_parameter_names = True
     current_job_name = roxar.rms.get_running_job_name()
     if debug_level >= Debug.ON:
         print('Update model file {} from RMS uncertainty table {}'.format(input_aps_model_file, workflow_name))
