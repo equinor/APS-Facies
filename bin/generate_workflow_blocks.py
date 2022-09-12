@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.4"
+__version__ = "0.14.5"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -118,6 +118,7 @@ def _get_path_from_environment(environment_name, default_name):
 # The path to the repository's root folder
 temp_dir = Path(roxar.rms.get_tmp_dir())
 root_path = _get_path_from_environment(APS_ROOT, temp_dir / 'aps_gui' / 'pydist')
+print(f"Root path: {{root_path}}")
 release_location = _get_path_from_environment(RMS_PLUGINS_LIBRARY, '/project/res/APSGUI/releases/stable')
 
 # Path to where the file below is located within the repository
@@ -231,6 +232,7 @@ else:
 # Generating necessary paths
 def _load_module():
     module_path = relative_path.replace('/', '.') + '.' + file_name
+    print(f"Module used: {{module_path}}")
     return import_module(module_path)
 
 

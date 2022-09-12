@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<APS_prob_trend>
+  <FaciesProbTrend>
+    <GridModelName>   GridModelFine </GridModelName>
+    <ZoneParamName>  Zone </ZoneParamName>
+    <FaciesParamName>  Deterministic_facies </FaciesParamName>
+    <ProbParamNamePrefix>  ProbTrendTest2  </ProbParamNamePrefix>
+    <SelectedZones> 1 2 3 </SelectedZones>
+    <UseConstantProbFromVolumeFraction> 0 </UseConstantProbFromVolumeFraction>
+    <CondProbMatrix>
+      <Line>  F1  A 0.80 </Line>
+      <Line>  F2  A 0.1 </Line>
+      <Line>  F3  A 0.1 </Line>
+
+      <Line>  F1  B  0.0 </Line>
+      <Line>  F2  B  1.0 </Line>
+      <Line>  F3  B  0.0 </Line>
+
+      <Line>  F1  C  0.1 </Line>
+      <Line>  F2  C  0.2 </Line>
+      <Line>  F3  C  0.7 </Line>
+
+      <Line>  F1  D  0.1 </Line>
+      <Line>  F2  D  0.2 </Line>
+      <Line>  F3  D  0.7 </Line>
+    </CondProbMatrix>
+  </FaciesProbTrend>
+</APS_prob_trend>
