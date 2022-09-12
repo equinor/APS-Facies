@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<!-- This model specification is used in the script APS_define_probability_logs
+     Binary logs are created in this example.
+     The facies names defined in input facies log are F1,F2,F3,F4,F5,F6
+     For each zone, the modelled facies are also F1,F2,F3,F4,F5,F6
+     The calculated probabilities will get values 0 or 1 or missing code.
+     For each zone:
+        Prob_X = 1 if facies is X
+        Prob_X = 0 if facies is not X
+        Prob_X = missing code if facies has missing code
+        where X is either F1,F2,F3,F4,F5,F6.
+-->
+<ProbLogs>
+  <GridModelName>Grid_model_fine</GridModelName>
+  <BlockedWells> BW  </BlockedWells>
+  <FaciesLogName> Facies </FaciesLogName>
+  <ZoneLogName>   Zone  </ZoneLogName>
+  <OutputPrefix> Prob </OutputPrefix>
+  <ModellingFaciesPerZone>
+    <Zone number="1">  F1 F2 </Zone>
+  </ModellingFaciesPerZone>
+  <UseConditionalProbabilities> 0 </UseConditionalProbabilities>
+  <CondProbMatrix>
+    <Line>  F1  F1  0.8 </Line>
+    <Line>  F2  F1  0.2 </Line>
+
+    <Line>  F1  F2  0.3 </Line>
+    <Line>  F2  F2  0.7 </Line>
+  </CondProbMatrix>
+</ProbLogs>

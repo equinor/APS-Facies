@@ -62,11 +62,15 @@ def get_selected_zones(tree: Element, keyword: str = 'SelectedZones', model_file
         raise MissingKeyword(keyword, model_file)
 
     texts = obj.text.split()
-    zone_numbers = [int(s.strip()) for s in texts]
-    return [
-        zone_number - 1  # Zone numbers are specified from 1, but need them numbered from 0
-        for zone_number in zone_numbers
-    ]
+    try:
+        zone_numbers = [int(s.strip()) for s in texts]
+    except ValueError:
+        print(f"Specified zone numbers in keyword {keyword} are not only positive integer values")
+
+    for znr in zone_numbers:
+        if znr <= 0:
+            raise ValueError(f"List of selected zone numbers must have positive integer values")
+    return zone_numbers
 
 
 def get_colors(n: int, min_colors: int = 2) -> List[str]:
@@ -192,6 +196,7 @@ class SpecificationType(Enum):
     CONVERT_BITMAP = 3
     PROBABILITY_TREND = 4
     RESAMPLE = 5
+    PROBABILITY_DEP_TREND = 6
 
 
 def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL, **kwargs) -> Optional[ProbabilityLogSpecificationFile]:
@@ -201,6 +206,7 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         SpecificationType.FACIES_LOG: 'Create_redefined_blocked_facies_log.xml',
         SpecificationType.CONVERT_BITMAP: 'bitmap2rms_model.xml',
         SpecificationType.PROBABILITY_TREND: 'defineProbTrend.xml',
+        SpecificationType.PROBABILITY_DEP_TREND: 'Create_depositional_probability_trend.xml',
         SpecificationType.RESAMPLE: 'resample.xml',
     }
     if _type in mapping:
@@ -270,3 +276,19 @@ def get_job_name() -> JobName:
     except ImportError:
         name = None
     return name
+
+def check_missing_keywords_list(params: dict, required_kw: list):
+    missing_kw = []
+    for kw in required_kw:
+        if kw not in params or params[kw] is None:
+            missing_kw.append(kw)
+    if len(missing_kw) > 0:
+        raise ValueError(f"Missing specification of the keywords: {missing_kw}")
+
+def check_missing_keywords_dict(params: dict, required_kw: dict):
+    missing_kw = []
+    for kw in required_kw:
+        if kw not in params or params[kw] is None:
+            missing_kw.append(kw)
+    if len(missing_kw) > 0:
+        raise ValueError(f"Missing specification of the keywords: {missing_kw}")

@@ -3,6 +3,8 @@
 import roxar
 import numpy as np
 import collections
+
+from typing import Dict, List
 from aps.utils.constants.simple import ProbabilityTolerances, Debug
 from aps.utils.roxar.grid_model import create_zone_parameter, getDiscrete3DParameterValues
 
@@ -156,12 +158,12 @@ def get_facies_zone_table_and_log_from_bw(project, grid_model_name,
 
 
 def createProbabilityLogs(
-        project, grid_model_name,
+        project=None,
+        grid_model_name=None,
         bw_name='BW',
         facies_log_name='Facies',
         zone_log_name='Zone',
         modelling_facies_per_zone=None,
-        output_facies_names=None,
         conditional_prob_facies=None,
         prefix_prob_logs='Prob_',
         realization_number=0,
@@ -561,9 +563,16 @@ def check_probability_logs(probability_log_names,
 
 
 def createCombinedFaciesLogForBlockedWells(
-        project, grid_model_name, bw_name, original_facies_log_name,
-        new_facies_log_name, new_code_names, mapping_between_original_and_new, realization_number
+        project,
+        grid_model_name: str,
+        bw_name: str,
+        original_facies_log_name: str,
+        new_facies_log_name: str,
+        new_code_names: Dict[int,str],
+        mapping_between_original_and_new: Dict[str,str],
+        realization_number: int
 ):
+    print(f"Grid model name: {grid_model_name}  ")
     # Original facies log code and name table and log values
     original_code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, original_facies_log_name)
     if original_code_names is None:

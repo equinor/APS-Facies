@@ -75,7 +75,7 @@ import numpy as np
 from PIL import Image
 
 from aps.utils.constants.simple import Debug
-from aps.utils.methods import get_colors
+from aps.utils.methods import get_colors, check_missing_keywords_dict, check_missing_keywords_list
 
 
 def isOneByteColor(c):
@@ -135,28 +135,75 @@ def writeIrapMap(fmap, xOrigo, yOrigo, xinc, yinc, angleInDegrees, outputFileNam
 
 
 class ConvertBitMapToRMS:
-    def __init__(self, model_file_name,  debug_level=Debug.OFF):
-        self.__model_file_name = model_file_name
-        self.__nx = 0
-        self.__ny = 0
-        self.__iStart = 0
-        self.__iEnd = 0
-        self.__jStart = 0
-        self.__jEnd = 0
-        self.__xOrigo = 0.0
-        self.__yOrigo = 0.0
-        self.__xMax = 0.0
-        self.__yMax = 0.0
-        self.__xinc = 0.0
-        self.__yinc = 0.0
+    def __init__(self, params ):
+        self.__model_file_name =  params.get('model_file_name', None)
+
+        debug_level = params.get('debug_level', Debug.OFF)
+
+        # Internal variables,  not to be set here, but used in algorithm
         self.__faciesCode = []
-        self.__colorCode = []
+        self.__colorCode =[]
         self.__fmapFaciesList = []
         self.__fmapColorsList = []
-        self.__missingCode = None
-        self.__inputFileList = []
-        self.__outputFileList = []
-        self.__crop = False
+
+        # Read model file if it is defined or assign values from input dict
+        if self.__model_file_name is not None:
+            print(f'Model file: {self.__model_file_name}')
+            self.read_model_file(self.__model_file_name, debug_level=debug_level)
+        else:
+            # Check that all necessary parameters are set when not using model file
+            required_kw_dict = {
+                "Coordinates": ["xmin", "xmax", "ymin", "ymax"],
+                "PixelInterval": ["nx", "ny", "Istart", "Jstart", "Iend", "Jend"],
+            }
+            required_kw_list = [
+                "ColorCodeMapping",
+                "CropToPixelInterval",
+                "MissingCode",
+                "UseFaciesCode",
+                "InputFileList",
+                "OutputFileList",
+            ]
+            check_missing_keywords_dict(params, required_kw_dict)
+
+            for kw in required_kw_dict:
+                missing_kw = []
+                for kw2 in required_kw_dict[kw]:
+                    if kw2 not in params[kw]:
+                        missing_kw.append(kw2)
+                if len(missing_kw) > 0:
+                    raise ValueError(f"Missing sub keywords: {missing_kw} in {kw} ")
+
+            check_missing_keywords_list(params, required_kw_list)
+
+            # Assigned from user input
+            self.__nx = params['PixelInterval']['nx']
+            self.__ny = params['PixelInterval']['ny']
+            self.__iStart = params['PixelInterval']['Jstart']
+            self.__iEnd = params['PixelInterval']['Jend']
+            self.__jStart = params['PixelInterval']['Istart']
+            self.__jEnd = params['PixelInterval']['Iend']
+            self.__xOrigo = params['Coordinates']['xmin']
+            self.__yOrigo = params['Coordinates']['ymin']
+            self.__xMax = params['Coordinates']['xmax']
+            self.__yMax = params['Coordinates']['ymax']
+            self.__missingCode = params['MissingCode']
+            self.__crop = params['CropToPixelInterval']
+            self.__inputFileList = params['InputFileList']
+            self.__outputFileList = params['OutputFileList']
+            self.__faciesCode = list(params['ColorCodeMapping'].keys())
+            self.__colorCode = list(params['ColorCodeMapping'].values())
+
+            # Internal use
+            mx = self.__jEnd - self.__jStart + 1
+            my = self.__iEnd - self.__iStart + 1
+            self.__xinc = (self.__xMax - self.__xOrigo) / mx
+            self.__yinc = (self.__yMax - self.__yOrigo) / my
+
+
+
+
+    def read_model_file(self, model_file_name,  debug_level=Debug.OFF):
 
         if debug_level >= Debug.ON:
             print(f'Read file: {model_file_name}')
@@ -360,7 +407,10 @@ class ConvertBitMapToRMS:
             nrowSpecified = self.__ny
             path = Path(fileName)
             if not path.exists():
-                path = Path(self.__model_file_name).parent / fileName
+                if self.__model_file_name is not None:
+                    path = Path(self.__model_file_name).parent / fileName
+                else:
+                    path = "./" + fileName
             im = Image.open(path)
 
             fmapColors = np.array(im)

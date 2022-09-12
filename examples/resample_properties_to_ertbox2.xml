@@ -11,12 +11,12 @@
     <ERTBoxGridName> ERTBOX </ERTBoxGridName>
     <ZoneParam> Zone </ZoneParam>
     <Parameters>
-        <Zone number="1">  Perm Poro </Zone>
-        <Zone number="2">  Perm Poro </Zone>
-        <Zone number="3">  Perm Poro </Zone>
-        <Zone number="4">  Perm Poro </Zone>
-        <Zone number="5">  Perm Poro </Zone>
-        <Zone number="6">  Perm Poro </Zone>
+        <Zone number="1">  Perm2 Poro2 </Zone>
+        <Zone number="2">  Perm2 Poro2 </Zone>
+        <Zone number="3">  Perm2 Poro2 </Zone>
+        <Zone number="4">  Perm2 Poro2 </Zone>
+        <Zone number="5">  Perm2 Poro2 </Zone>
+        <Zone number="6">  Perm2 Poro2 </Zone>
     </Parameters>
     <Conformity>
         <Zone number="1">  TopConform </Zone>
