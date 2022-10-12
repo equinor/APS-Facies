@@ -69,6 +69,7 @@ Usage:
 --------------------------------------------------------------------------------------"""
 import copy
 import xml.etree.ElementTree as ET
+import os
 from pathlib import Path
 
 import numpy as np
@@ -76,7 +77,8 @@ from PIL import Image
 
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_colors, check_missing_keywords_dict, check_missing_keywords_list
-
+from aps.utils.ymlUtils import (get_text_value, get_bool_value,
+    get_float_value, get_dict, get_int_value, get_list, readYml)
 
 def isOneByteColor(c):
     try:
@@ -137,7 +139,6 @@ def writeIrapMap(fmap, xOrigo, yOrigo, xinc, yinc, angleInDegrees, outputFileNam
 class ConvertBitMapToRMS:
     def __init__(self, params ):
         self.__model_file_name =  params.get('model_file_name', None)
-
         debug_level = params.get('debug_level', Debug.OFF)
 
         # Internal variables,  not to be set here, but used in algorithm
@@ -149,7 +150,7 @@ class ConvertBitMapToRMS:
         # Read model file if it is defined or assign values from input dict
         if self.__model_file_name is not None:
             print(f'Model file: {self.__model_file_name}')
-            self.read_model_file(self.__model_file_name, debug_level=debug_level)
+            self.read_model_file(debug_level=debug_level)
         else:
             # Check that all necessary parameters are set when not using model file
             required_kw_dict = {
@@ -201,14 +202,108 @@ class ConvertBitMapToRMS:
             self.__yinc = (self.__yMax - self.__yOrigo) / my
 
 
+    def read_model_file(self, debug_level=Debug.OFF):
+        # Check suffix of file for file type
+        model_file = Path(self.__model_file_name)
+        suffix = model_file.suffix.lower().strip('.')
+        if suffix in ['yaml', 'yml']:
+            self.__read_model_file_yml(debug_level=debug_level)
+        elif suffix == 'xml':
+            self.__read_model_file_xml(debug_level=debug_level)
+        else:
+            raise ValueError(f"Model file name: {self.__model_file_name}  must be either 'xml' or 'yml' format")
 
 
-    def read_model_file(self, model_file_name,  debug_level=Debug.OFF):
+    def __read_model_file_yml(self, debug_level=Debug.OFF):
 
         if debug_level >= Debug.ON:
-            print(f'Read file: {model_file_name}')
+            print(f'Read file: {self.__model_file_name}')
 
-        tree = ET.parse(model_file_name)
+        spec_all = readYml(self.__model_file_name)
+
+        kw = 'bitmap2rms'
+        spec = spec_all[kw] if kw in spec_all else None
+        if spec is None:
+            raise ValueError(f"Missing keyword: {kw} ")
+
+        coord = get_dict(spec, 'bitmap2rms', 'Coordinates')
+        text = get_text_value(coord, 'Coordinates','x')
+        [xmin, xmax] = text.split()
+        self.__xOrigo = float(xmin)
+        self.__xMax = float(xmax)
+        text = get_text_value(coord, 'Coordinates','y')
+        [ymin,ymax] = text.split()
+        self.__yOrigo = float(ymin)
+        self.__yMax = float(ymax)
+
+        kw = 'PixelInterval'
+        pixinterval = get_dict(spec, 'bitmap2rms', 'PixelInterval')
+        self.__nx = get_int_value(pixinterval, 'PixelInterval', 'nx')
+        self.__ny = get_int_value(pixinterval, 'PixelInterval', 'ny')
+        text = get_text_value(pixinterval, 'PixelInterval', 'I')
+        [Istart, Iend] = text.split()
+        self.__jStart = int(Istart)
+        self.__jEnd = int(Iend)
+        text = get_text_value(pixinterval, 'PixelInterval', 'J')
+        [Jstart, Jend] = text.split()
+        self.__iStart = int(Jstart)
+        self.__iEnd = int(Jend)
+
+        if self.__iStart < 1 or self.__iEnd > self.__ny:
+            raise ValueError(
+                f"Error: Pixel interval in y direction ({self.__iStart},{self.__iEnd}) "
+                f"is not within {1} and {self.__ny}"
+            )
+
+        if self.__jStart < 1 or self.__jEnd > self.__nx:
+            raise ValueError(
+                f"Error: Pixel interval in y direction ({self.__jStart},{self.__jEnd}) "
+                f"is not within {1} and {self.__nx}"
+            )
+
+
+        self.__crop = get_bool_value(spec, 'CropToPixelInterval', True)
+        use_facies_code = get_bool_value(spec, 'UseFaciesCode', False)
+
+        if use_facies_code:
+
+            self.__missingCode = get_float_value(spec, 'bitmap2rms', 'MissingCode')
+
+            color_code_per_facies = get_dict(spec, 'bitmap2rms', 'ColorCode')
+            facies_codes = list(color_code_per_facies.keys())
+            color_codes = list(color_code_per_facies.values())
+            if debug_level >= Debug.VERBOSE:
+                print(f"-- faciesCodes: {facies_codes} ")
+                print(f"-- colorcodes: {color_codes} ")
+            if len(facies_codes) > 0:
+                self.__faciesCode = facies_codes
+                self.__colorCode = color_codes
+
+        file_dict_list = get_list(spec, 'bitmap2rms', 'Files')
+        self.__inputFileList = []
+        self.__outputFileList = []
+        for file_dict in file_dict_list:
+            input_file = file_dict['Input']
+            output_file = file_dict ['Output']
+            if debug_level >= Debug.VERBOSE:
+                print(f"-- Input file: {input_file} ")
+                print(f"-- Output file: {output_file} ")
+            self.__inputFileList.append(input_file)
+            self.__outputFileList.append(output_file)
+
+        mx = self.__jEnd - self.__jStart + 1
+        my = self.__iEnd - self.__iStart + 1
+        self.__xinc = (self.__xMax - self.__xOrigo) / mx
+        self.__yinc = (self.__yMax - self.__yOrigo) / my
+
+    def __read_model_file_xml(self, debug_level=Debug.OFF):
+
+        if debug_level >= Debug.ON:
+            print(f'Read file: {self.__model_file_name}')
+        if not os.path.exists(self.__model_file_name):
+            raise IOError(f"File {self.__model_file_name} does not exist")
+
+        tree = ET.parse(self.__model_file_name)
         self.__ET_Tree = tree
         root = tree.getroot()
 
@@ -216,32 +311,42 @@ class ConvertBitMapToRMS:
         kw = 'Coordinates'
         obj = root.find(kw)
         if obj is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         kw = 'xmin'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         self.__xOrigo = float(text.strip())
 
         kw = 'xmax'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         self.__xMax = float(text.strip())
 
         kw = 'ymin'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         self.__yOrigo = float(text.strip())
 
         kw = 'ymax'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         self.__yMax = float(text.strip())
 
@@ -249,26 +354,34 @@ class ConvertBitMapToRMS:
         kw = 'PixelInterval'
         obj = root.find(kw)
         if obj is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
 
         kw = 'nx'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         self.__nx = int(text.strip())
 
         kw = 'ny'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         self.__ny = int(text.strip())
 
         kw = 'I'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
         text = obj2.text
         [text1, text2] = text.split()
         self.__jStart = int(text1.strip())
@@ -277,7 +390,9 @@ class ConvertBitMapToRMS:
         kw = 'J'
         obj2 = obj.find(kw)
         if obj2 is None:
-            raise IOError('Error reading model file {}. Missing command: {}'.format(model_file_name, kw))
+            raise IOError(
+                f'Error reading model file {self.__model_file_name}. Missing command: {kw}'
+            )
 
         text = obj2.text
         [text1, text2] = text.split()
@@ -326,7 +441,9 @@ class ConvertBitMapToRMS:
             kw = 'MissingCode'
             obj = root.find(kw)
             if obj is None:
-                raise IOError('Error reading model file {}. Missing command {}\n'.format(model_file_name, kw))
+                raise IOError(
+                    f'Error reading model file {self.__model_file_name}. Missing command {kw}'
+                )
 
             text = obj.text
             self.__missingCode = float(text.strip())
@@ -337,7 +454,7 @@ class ConvertBitMapToRMS:
             colorCode = []
             for obj in root.findall(kw):
                 if obj is None:
-                    raise IOError('Error reading model file {}. Missing command: {}\n'.format(model_file_name, kw))
+                    raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw}")
                 fCode = int(obj.get('facies'))
                 cCode = int(obj.text.strip())
                 faciesCode.append(fCode)
@@ -352,17 +469,17 @@ class ConvertBitMapToRMS:
         kw = 'Files'
         for obj in root.findall(kw):
             if obj is None:
-                raise IOError('Error reading model file {}. Missing command: {}\n'.format(model_file_name, kw))
+                raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw}")
             kw1 = 'Input'
             obj2 = obj.find(kw1)
             if obj2 is None:
-                raise IOError('Error reading model file {}. Missing command {}\n'.format(model_file_name, kw1))
+                raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw1}")
             text = obj2.text
             self.__inputFileList.append(text.strip())
             kw2 = 'Output'
             obj3 = obj.find(kw2)
             if obj3 is None:
-                raise IOError('Error reading model file {}. Missing command {}\n'.format(model_file_name, kw2))
+                raise IOError(f"Error reading model file {self.__model_file_name}. Missing command: {kw2}")
             text = obj3.text
             self.__outputFileList.append(text.strip())
 

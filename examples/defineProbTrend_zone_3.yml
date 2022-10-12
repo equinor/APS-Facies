@@ -1,0 +1,27 @@
+FaciesProbTrend:
+    GridModelName: GridModelFine
+    ZoneParamName: Zone
+    FaciesParamName: DiscreteParam
+    ProbParamNamePrefix: ProbTrend
+    SelectedZones: 3
+    UseConstantProbFromVolumeFraction: False
+    CondProbMatrix:
+      (1, F1, A): 0.90
+      (1, F2, A): 0.10
+      (1, F3,  A):  0.0 
+      (1, F4,  A):  0.0
+
+      (1, F1,  B): 0.05 
+      (1, F2,  B): 0.90 
+      (1, F3,  B): 0.05 
+      (1, F4,  B): 0.0 
+      
+      (1, F1,  C): 0.0 
+      (1, F2,  C): 0.05 
+      (1, F3,  C): 0.90 
+      (1, F4,  C): 0.05 
+
+      (1, F1,  D): 0.0 
+      (1, F2,  D): 0.0 
+      (1, F3,  D): 0.05 
+      (1, F4,  D): 0.95 

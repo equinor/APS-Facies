@@ -92,12 +92,10 @@ def get_trend_param_names_from_aps_model(
                 f"for zone {zone_name}"
             )
         if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f"--- zone_number:{zone_number}\n"
-                f"--- zone name:{zone_name}\n"
-                f"--- region_number: {region_number}\n"
-                f"--- zone conformity:{zone_model.grid_layout}\n"
-            )
+            print(f"--- zone number: {zone_number}")
+            print(f"--- zone name: {zone_name}")
+            print(f"--- region number: {region_number}")
+            print(f"--- zone conformity: {zone_model.grid_layout}")
 
         gauss_field_names = zone_model.gaussian_fields_in_truncation_rule
         param_name_list = []

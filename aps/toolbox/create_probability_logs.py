@@ -202,11 +202,14 @@ Output:
     The output probability logs will get the name  <prefix>_<modelling_facies_name>.
 """
 import xml.etree.ElementTree as ET
+import os
+from pathlib import Path
 from aps.utils.xmlUtils import getKeyword, getTextCommand, getIntCommand
+from aps.utils.ymlUtils import get_text_value, get_bool_value, get_dict, readYml
 from aps.utils.roxar.modifyBlockedWellData import createProbabilityLogs
 from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.constants.simple import Debug
-from aps.utils.methods import check_missing_keywords_list
+from aps.utils.methods import check_missing_keywords_list, get_cond_prob_dict
 
 def run(params):
     """
@@ -295,7 +298,7 @@ create_probability_logs.run(input_dict)
     use_cond_prob = False
     if model_file_name is not None:
         # Read model file and overwrite all model parameters
-        _file = _read_model_file(model_file_name)
+        _file = read_model_file(model_file_name)
         params.pop('model_file_name')
         params['grid_model_name'] = _file.grid_model_name
         params['bw_name'] = _file.blocked_wells_set_name
@@ -358,16 +361,31 @@ create_probability_logs.run(input_dict)
     else:
         print('Calculate probability logs using specified conditional probabilities')
         if debug_level >= Debug.VERBOSE:
-            for key, prob_value in conditional_prob_facies.items():
+            sorted_by_zone_dict = dict(sorted(conditional_prob_facies.items(), key=lambda item: (item[0][0], item [0][2], item[0][1])))
+            for key, prob_value in sorted_by_zone_dict.items():
                 print(f'Zone: {key[0]}  Prob({key[1]}| {key[2]}) = {prob_value}')
         createProbabilityLogs(**params)
 
     print('Finished createProbabilityLogs')
 
+def read_model_file(model_file_name):
+    # Check suffix of file for file type
+    model_file = Path(model_file_name)
+    suffix = model_file.suffix.lower().strip('.')
+    if suffix in ['yaml', 'yml']:
+        _file = _read_model_file_yml(model_file_name)
+    elif suffix == 'xml':
+        _file = _read_model_file_xml(model_file_name)
+    else:
+        raise ValueError(f"Model file name: {model_file_name}  must be either 'xml' or 'yml' format")
+    return _file
 
-def _read_model_file(model_file_name):
+def _read_model_file_xml(model_file_name: str):
     assert model_file_name
     print(f'Read model file: {model_file_name}')
+    if not os.path.exists(model_file_name):
+        raise IOError(f"File {model_file_name} does not exist")
+
     root = ET.parse(model_file_name).getroot()
     main_keyword = 'ProbLogs'
     if root is None:
@@ -396,7 +414,6 @@ def _read_model_file(model_file_name):
         for facies_name in words:
             facies_names.append(facies_name)
             facies_list_per_zone[zone_number] = facies_names
-    
     
     conditional_prob_facies = {}
     if use_conditioned_probabilities:
@@ -568,6 +585,54 @@ def _read_cond_prob_matrix(conditional_prob_facies,
                         f"conditioned to interpreted facies {facies_name_conditioned}"
                     )   
     return conditional_prob_facies
+
+def _read_model_file_yml(model_file_name: str):
+    print(f'Read model file: {model_file_name}')
+    spec_all = readYml(model_file_name)
+
+    kw_parent = 'ProbLogs'
+    spec = spec_all[kw_parent] if kw_parent in spec_all else None
+    if spec is None:
+        raise ValueError(f"Missing keyword: {kw_parent} ")
+
+    grid_model_name = get_text_value(spec, kw_parent, 'GridModelName')
+    blocked_wells_name = get_text_value(spec, kw_parent, 'BlockedWells')
+    facies_log_name = get_text_value(spec, kw_parent, 'FaciesLogName')
+    zone_log_name = get_text_value(spec, kw_parent, 'ZoneLogName')
+    prefix = get_text_value(spec, kw_parent, 'OutputPrefix')
+    use_conditioned_probabilities = get_bool_value(spec, 'UseConditionalProbabilities', False)
+    fac_dict = get_dict(spec, kw_parent, 'ModellingFaciesPerZone')
+    facies_dict = {}
+    for znr in fac_dict:
+        # The text string contains multiple facies names
+        facies_list = fac_dict[znr].split()
+        facies_dict[znr]= facies_list
+
+    # Check if all specified zones use the same set of modelling facies
+    common_facies_list = True
+    active_zone_list = list(facies_dict.keys())
+    facies_list_previous_zone = facies_dict[active_zone_list[0]]
+    for znr in active_zone_list:
+        facies_list = facies_dict[znr]
+        if facies_list != facies_list_previous_zone:
+            common_facies_list = False
+
+    conditional_prob_facies = {}
+    if use_conditioned_probabilities:
+        cond_table = get_dict(spec, kw_parent, 'CondProbMatrix')
+        conditional_prob_facies = get_cond_prob_dict(cond_table, active_zone_list, common_facies_list=common_facies_list)
+
+    return _ModelFile(
+        grid_model_name,
+        blocked_wells_name,
+        facies_log_name,
+        zone_log_name,
+        prefix,
+        use_conditioned_probabilities,
+        facies_dict,
+        conditional_prob_facies,
+    )
+
 
 
 class _ModelFile:

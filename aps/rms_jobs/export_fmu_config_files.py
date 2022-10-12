@@ -16,14 +16,14 @@ def run(project, **kwargs):
     default_job_name = 'apsgui_job_name'
     job_name = kwargs.get('current_job_name', default_job_name)
     debug_level = get_debug_level(**kwargs)
-    global_master_config_file = "global_master_config.yml"
+    global_variables_file = "global_variables.yml"
 
     if export_fmu_files:
         # Use default file name equal to job name if this is defined and a default name if not
         # Job name will not exist if this script is run from APSGUI interactively, but only
         # when the running from workflow or batch
         if debug_level >= Debug.ON:
-            print(f"- Write FMU and ERT related template config files")
+            print(f"- Write FMU and ERT related template config files:")
         if job_name is None:
             job_name = default_job_name
             print(
@@ -31,29 +31,30 @@ def run(project, **kwargs):
                 '         If you run from a workflow, the APS GUI job name will be used when creating the FMU config files.\n'
             )
         model_name = job_name + '.xml'
-        att_name = job_name + '_aps.yml'
-        prob_name = job_name + '_param_dist.txt'
-        ert_field_name = job_name + '_ert_field_keyword.txt'
+        att_name = job_name + '_aps_fmu_config.yml'
+        prob_name = job_name + '_aps_ert_config_dist.txt'
+        ert_field_name = job_name + '_aps_ert_config_fields.txt'
 
         relative_dir_model_file = "rms/model"
         model_file_name = get_top_location() / relative_dir_model_file / model_name
 
-        relative_dir_param_file = "fmuconfig/input"
+        relative_dir_param_file = "fmuconfig/output"
         attributes_file_name = get_top_location() / relative_dir_param_file / att_name
-        global_master_config_file_path = get_top_location() / relative_dir_param_file / global_master_config_file
+        global_variables_file_path = get_top_location() / relative_dir_param_file / global_variables_file
 
         relative_dir_dist_file = "ert/input/distributions"
         probability_distribution_file_name = get_top_location() / relative_dir_dist_file / prob_name
 
-        relative_dir_ert_field_file = "ert/input"
+        relative_dir_ert_field_file = "ert/model"
         ert_field_keyword_file_name = get_top_location() / relative_dir_ert_field_file / ert_field_name
 
 
         # Check that using current APS job in the FMU global master config file is possible
         # e.g. that the job name is unique and not equal to any existing job name in
         # the global master config file (when comparing the job names after transforming
-        # the names to upper case letters.
-        if not GlobalVariables.check_master_config_yaml(global_master_config_file_path, job_name):
+        # the names to upper case letters. Note the check is done on the output file global_variables.yml file
+        # since this is an ordinary yaml file in contrast to the global_master_config.yml file which need special treatment.
+        if not GlobalVariables.check_global_variables_yaml(global_variables_file_path, job_name):
             # Do not write ERT config files for attributes and prob dist
             attributes_file_name=None
             probability_distribution_file_name=None
@@ -62,11 +63,11 @@ def run(project, **kwargs):
             if attributes_file_name or aps_model.fmu_mode == "FIELDS":
                 print(f"-- Main directory:   {get_top_location()}")
                 if attributes_file_name:
-                    print(f"-- File to be included in  {global_master_config_file}:   {relative_dir_param_file}/{att_name}")
-                    print(f"-- Template file for probability distributions of APS parameters in ERT:   {relative_dir_dist_file}/{prob_name}")
+                    print(f"-- Use in FMU main config:             {relative_dir_param_file}/{att_name}")
+                    print(f"-- Use in ERT distribution config:     {relative_dir_dist_file}/{prob_name}")
                 if aps_model.fmu_mode == "FIELDS":
-                    print(f"-- File with FIELD keywords to be included in ERT main config file:   {relative_dir_ert_field_file}/{ert_field_name}")
-
+                    print(f"-- Use in ERT main config:             {relative_dir_ert_field_file}/{ert_field_name}")
+            print(" ")
         # Write model file and ERT template config files
         aps_model.write_model(
             model_file_name,
@@ -98,3 +99,5 @@ def run(project, **kwargs):
                     content += f"MIN:-5.5  MAX:5.5  FORWARD_INIT:True\n"
 
             write_string_to_file(ert_field_keyword_file_name, content, debug_level=debug_level)
+            if debug_level >= Debug.VERBOSE:
+                print(" ")

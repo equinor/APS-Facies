@@ -21,7 +21,7 @@ modelling_facies_dict = {
 # Prob for modelled facies F1 is set to 1 where A is observed
 # Prob for modelled facies F2 is set to 1 where B is observed
 # Prob for modelled facies F3 is set to 1 where C is observed
-# Where observed facies is D in zone 1 and 6 where D is observed:
+# Where observed facies is D in zone 1 and 6:
 #   F1 is assigned prob = 0.7
 #   F2 is assigned prob = 0.2
 #   F3 is assigned prob = 0.1

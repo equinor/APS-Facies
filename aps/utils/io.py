@@ -11,6 +11,7 @@ import numpy as np
 from aps.utils.constants.simple import Debug
 from aps.utils.roxar import running_in_batch_mode
 from aps.utils.methods import get_workflow_name
+from aps.utils.ymlUtils import readYml
 
 
 def write_status_file(status: bool, always: bool = False) -> None:
@@ -235,12 +236,7 @@ class GlobalVariables:
                    APS_1_0_GF_GRF1_TREND_AZIMUTH: 0.0
                    APS_2_0_GF_GRF1_RESIDUAL_AZIMUTHANGLE: 135.0
        '''
-        try:
-            import yaml
-        except ImportError:
-            raise NotImplementedError('PyYaml is required')
-        with open(global_variables_file, 'r') as file:
-            all_variables = yaml.safe_load(file)
+        all_variables = readYml(global_variables_file)
 
         global_variables = all_variables['global']
         aps_variables = None
@@ -258,8 +254,8 @@ class GlobalVariables:
         return aps_variables
 
     @classmethod
-    def check_master_config_yaml(cls,
-            global_master_config_file: Path,
+    def check_global_variables_yaml(cls,
+            global_variables_file: Path,
             current_job_name: str) -> _GlobalVariables:
         ''' YAML format for global variables support RMS project with multiple grid models
             where the grid models can be single-zone grid models or multi-zone grid models
@@ -294,14 +290,10 @@ class GlobalVariables:
             after transforming the name to upper case. If current job name is equal to one
             used in global_master_config.yml file, it is OK to generate a new template ERT file
             that can be used to replace the section in global_master_config.yml file for this job.
+            NOTE: The global_variables.yml file that is generated from global_master_config.yml is used
+            since this is an ordinary yaml file.
         '''
-        try:
-            import yaml
-        except ImportError:
-            raise NotImplementedError('PyYaml is required')
-        with open(global_master_config_file, 'r') as file:
-            all_variables = yaml.safe_load(file)
-
+        all_variables = readYml(global_variables_file)
         global_variables = all_variables['global']
         aps_variables = None
         if global_variables is not None:
@@ -310,32 +302,35 @@ class GlobalVariables:
                     aps_variables = global_variables[key]
                     break
 
-        if aps_variables is not None:
-            job_names = list(aps_variables.keys())
-            uppercase_job_names = []
-            job_names_string = ""
-            for name in job_names:
-                uppercase_job_names.append(name.upper())
-                job_names_string += f"    {name}\n"
-            if current_job_name in job_names:
-                # This job name already exist and has same name as current job. This is OK since
-                # this will enable APS to re-generate a new version of the ERT template file that
-                # can be used if the user wants to replace the section for this job in
-                # global_master_config file.
-                return True
-            if current_job_name.upper() in uppercase_job_names:
-                # Not OK since current job is different from the ones already used, but
-                # converted to upper case letters, the job names are equal and not unique.
-                warn("\nWARNING:\n"
-                    f"Will not create FMU template file for APS job:   {current_job_name}.\n"
-                    "The job name in upper case letter is identical to other already defined APS jobs in "
-                    f"the global_master_config.yml file:\n"
-                    f"{job_names_string} "
-                )
-                return False
-            else:
-                return True
-        return False
+        if aps_variables is None:
+                # APS keyword does not exist in global_variables.yml file
+                # No name conflict
+            return True
+
+        job_names = list(aps_variables.keys())
+        uppercase_job_names = []
+        job_names_string = ""
+        for name in job_names:
+            uppercase_job_names.append(name.upper())
+            job_names_string += f"    {name}\n"
+        if current_job_name in job_names:
+            # This job name already exist and has same name as current job. This is OK since
+            # this will enable APS to re-generate a new version of the ERT template file that
+            # can be used if the user wants to replace the section for this job in
+            # global_master_config file.
+            return True
+        if current_job_name.upper() in uppercase_job_names:
+            # Not OK since current job is different from the ones already used, but
+            # converted to upper case letters, the job names are equal and not unique.
+            warn("\nWARNING:\n"
+                f"Will not create FMU template file for APS job:   {current_job_name}.\n"
+                "The job name in upper case letter is identical to other already defined APS jobs in "
+                f"the {global_variables_file} file:\n"
+                f"{job_names_string} "
+            )
+            return False
+        # The current job name is not used previously
+        return True
 
     @staticmethod
     def is_numeric(val) -> bool:

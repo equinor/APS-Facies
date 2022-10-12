@@ -36,12 +36,14 @@ Example model file in xml format:
 
 """
 import xml.etree.ElementTree as ET
-
+import os
+from pathlib import Path
 from aps.utils.xmlUtils import getKeyword, getTextCommand
 from aps.utils.roxar.modifyBlockedWellData import createCombinedFaciesLogForBlockedWells
 from aps.utils.exceptions.xml import MissingKeyword
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import check_missing_keywords_list
+from aps.utils.ymlUtils import get_text_value, get_dict, readYml
 
 
 def run(params):
@@ -105,22 +107,13 @@ create_redefined_blocked_facies_log.run(params)
     project = params['project']
     realization_number = project.current_realisation
     model_file_name = params.get('model_file_name', None)
-
     debug_level = params.get('debug_level', Debug.OFF)
     if model_file_name:
-        (grid_model_name, blocked_wells_name, original_facies_log_name, \
-        new_facies_log_name, new_code_names, mapping ) = _read_model_file(model_file_name)
-        params = {
-            "project": project,
-            "debug_level": debug_level,
-            "grid_model_name": grid_model_name,
-            "bw_name": blocked_wells_name,
-            "original_facies_log_name": original_facies_log_name,
-            "new_facies_log_name": new_facies_log_name,
-            "new_code_names": new_code_names,
-            "mapping_between_original_and_new": mapping,
-            "realization_number": realization_number
-        }
+        params = read_model_file(model_file_name)
+        params['project'] = project
+        params['debug_level'] = debug_level,
+        params['realization_number'] = realization_number
+
     required_kw = [
         "grid_model_name", "bw_name", "original_facies_log_name",
         "new_facies_log_name", "new_code_names",
@@ -138,11 +131,24 @@ create_redefined_blocked_facies_log.run(params)
         print(f" {params['mapping_between_original_and_new']}")
         print(f"Realization number: {realization_number + 1}")
     params.pop("debug_level")
-    createCombinedFaciesLogForBlockedWells(**params)
+    createCombinedFaciesLogForBlockedWells(params)
 
+def read_model_file(model_file_name):
+    # Check suffix of file for file type
+    model_file = Path(model_file_name)
+    suffix = model_file.suffix.lower().strip('.')
+    if suffix in ['yaml', 'yml']:
+        return _read_model_file_yml(model_file_name)
+    elif suffix == 'xml':
+        return _read_model_file_xml(model_file_name)
+    else:
+        raise ValueError(f"Model file name: {model_file_name}  must be either 'xml' or 'yml' format")
 
-def _read_model_file(model_file_name):
+def _read_model_file_xml(model_file_name):
     print(f'Read model file: {model_file_name}')
+    if not os.path.exists(model_file_name):
+        raise IOError(f"File {model_file_name} does not exist")
+
     root = ET.parse(model_file_name).getroot()
     main_keyword = 'MergeFaciesLog'
     if root is None:
@@ -186,4 +192,45 @@ def _read_model_file(model_file_name):
             new_name = words[1].strip()
             mapping[old_name] = new_name
 
-    return (grid_model_name, blocked_wells_name, original_facies_log_name, new_facies_log_name, new_code_names, mapping)
+    param_dict = {
+        'grid_model_name': grid_model_name,
+        'bw_name': blocked_wells_name,
+        'original_facies_log_name': original_facies_log_name,
+        'new_facies_log_name': new_facies_log_name,
+        'new_code_names': new_code_names,
+        'mapping_between_original_and_new':  mapping,
+    }
+    return param_dict
+
+
+
+
+def _read_model_file_yml(model_file_name):
+    # Read model file and overwrite model parameters
+    print(f"Read model file: {model_file_name}  ")
+    assert model_file_name
+    spec_all = readYml(model_file_name)
+
+    parent_kw = 'MergeFaciesLog'
+    spec = spec_all[parent_kw] if parent_kw in spec_all else None
+    if spec is None:
+        raise ValueError(f"Missing keyword: {parent_kw} ")
+
+    grid_model_name = get_text_value(spec, parent_kw, 'GridModelName')
+    blocked_wells_name = get_text_value(spec, parent_kw, 'BlockedWells')
+    original_facies_log_name = get_text_value(spec, parent_kw, 'OriginalFaciesLogName')
+    new_facies_log_name = get_text_value(spec, parent_kw, 'NewFaciesLogName')
+    new_code_names = get_dict(spec, parent_kw, 'NewFaciesCodes')
+    mapping = get_dict(spec, parent_kw, 'FromOldToNewFacies')
+
+
+    model_param_dict = {
+        "grid_model_name": grid_model_name,
+        "bw_name": blocked_wells_name,
+        "original_facies_log_name": original_facies_log_name,
+        "new_facies_log_name": new_facies_log_name,
+        "new_code_names": new_code_names,
+        "mapping_between_original_and_new":  mapping,
+    }
+    return model_param_dict
+
