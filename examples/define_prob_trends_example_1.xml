@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<APS_prob_trend>    
+  <FaciesProbTrend>
+    <GridModelName>   GridModelFine </GridModelName> 
+    <ZoneParamName>  Zone </ZoneParamName>
+    <FaciesParamName>  Facies_initial_example_1 </FaciesParamName>
+    <ProbParamNamePrefix>  ProbTrendEx1  </ProbParamNamePrefix>
+    <SelectedZones> 1 2 3 4 5 6 </SelectedZones>
+    <UseConstantProbFromVolumeFraction> 1 </UseConstantProbFromVolumeFraction>
+  </FaciesProbTrend>
+</APS_prob_trend>

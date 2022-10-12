@@ -213,3 +213,6 @@ class ExtrapolationMethod(Enum):
     EXTEND = "extend"
     REPEAT = "repeat"
 
+class ModelFileFormat(Enum):
+    YML = 'yml'
+    XML = 'xml'

@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 
 from aps.toolbox.bitmap_to_rms import run as run_convert_bitmap_to_rms
 from aps.utils.constants.simple import Debug
-from aps.utils.methods import get_specification_file, SpecificationType, get_debug_level
+from aps.utils.methods import get_specification_file, SpecificationType, get_debug_level, get_model_file_format
 
 
 def get_arguments():
@@ -19,8 +19,9 @@ def get_arguments():
 
 
 def run(roxar=None, project=None, **kwargs):
+    model_file_format = get_model_file_format(**kwargs)
     params = {
-      'model_file_name': get_specification_file(_type=SpecificationType.CONVERT_BITMAP, **kwargs),
+      'model_file_name': get_specification_file(_type=SpecificationType.CONVERT_BITMAP, _format=model_file_format, **kwargs),
       'debug_level': get_debug_level(**kwargs),
     }
     run_convert_bitmap_to_rms(params)

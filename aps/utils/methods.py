@@ -7,7 +7,7 @@ import numpy as np
 from enum import Enum
 from warnings import warn
 
-from aps.utils.constants.simple import Debug
+from aps.utils.constants.simple import Debug, ModelFileFormat
 from aps.utils.exceptions.xml import MissingKeyword
 
 from copy import copy
@@ -153,6 +153,9 @@ def get_output_tagged_variables_file(**kwargs):
 def get_tag_all_variables(**kwargs):
     return _get_value(kwargs, legal_kwargs=['tag_all_variables'], default_value=True)
 
+def get_model_file_format(**kwargs)-> ModelFileFormat:
+    return ModelFileFormat(_get_value(kwargs, legal_kwargs=['model_file_format'], default_value='xml'))
+
 
 def get_write_log_file(**kwargs):
     return _get_value(kwargs, legal_kwargs=['write_log_file'], default_value=True)
@@ -199,8 +202,9 @@ class SpecificationType(Enum):
     PROBABILITY_DEP_TREND = 6
 
 
-def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL, **kwargs) -> Optional[ProbabilityLogSpecificationFile]:
-    mapping = {
+def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL,
+    _format: ModelFileFormat = ModelFileFormat.XML, **kwargs) -> Optional[ProbabilityLogSpecificationFile]:
+    mapping_xml = {
         SpecificationType.APS_MODEL: 'APS.xml',
         SpecificationType.PROBABILITY_LOG: 'Create_prob_logs.xml',
         SpecificationType.FACIES_LOG: 'Create_redefined_blocked_facies_log.xml',
@@ -209,10 +213,24 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         SpecificationType.PROBABILITY_DEP_TREND: 'Create_depositional_probability_trend.xml',
         SpecificationType.RESAMPLE: 'resample.xml',
     }
-    if _type in mapping:
-        file = get_model_file_name(_default_name=mapping[_type], **kwargs)
+    mapping_yml = {
+        SpecificationType.APS_MODEL: 'APS.yml',
+        SpecificationType.PROBABILITY_LOG: 'Create_prob_logs.yml',
+        SpecificationType.FACIES_LOG: 'Create_redefined_blocked_facies_log.yml',
+        SpecificationType.CONVERT_BITMAP: 'bitmap2rms_model.yml',
+        SpecificationType.PROBABILITY_TREND: 'defineProbTrend.yml',
+        SpecificationType.PROBABILITY_DEP_TREND: 'Create_depositional_probability_trend.yml',
+        SpecificationType.RESAMPLE: 'resample.yml',
+    }
+    if _format == ModelFileFormat.XML and _type in mapping_xml:
+        file = get_model_file_name(_default_name=mapping_xml[_type], **kwargs)
         if not file:
-            file = mapping[_type]
+            file = mapping_xml[_type]
+        return str(file)
+    if _format == ModelFileFormat.YML and _type in mapping_yml:
+        file = get_model_file_name(_default_name=mapping_yml[_type], **kwargs)
+        if not file:
+            file = mapping_yml[_type]
         return str(file)
     return None
 
@@ -292,3 +310,58 @@ def check_missing_keywords_dict(params: dict, required_kw: dict):
             missing_kw.append(kw)
     if len(missing_kw) > 0:
         raise ValueError(f"Missing specification of the keywords: {missing_kw}")
+
+def get_cond_prob_dict(input_cond_table: dict, active_zone_list: list, common_facies_list: bool = True):
+    conditional_prob_facies = {}
+    err_list = []
+    common_prob_spec_all_zones = False
+    for key in input_cond_table:
+        # Check syntax
+        try:
+            prob = float(input_cond_table[key])
+        except ValueError:
+            err_list.append(f"Specified probability '{input_cond_table[key]}'  is not a float number for '{key}'\n")
+        key_string = str(key)
+        key_string.strip()
+        if key_string[0] != '(' or key_string[-1] != ')':
+            err_list.append(f'Missing parenteses in {key}\n')
+        text = key_string[1:]
+        text = text[:len(text)-1]
+        words = text.split(',')
+
+        if len(words) != 3:
+            raise ValueError(f"Expecting 3 values: zonenumber, facies_to_model, facies_interpreted  in {key}\n")
+        if not common_facies_list:
+            if words[0] == '*':
+                err_list.append(f"Facies list vary from zone to zone. Can not use '*' in {key}  for zone number in this case.")
+
+        if words[0] == '*':
+            common_prob_spec_all_zones = True
+        else:
+            if common_prob_spec_all_zones:
+                err_list.append(f"When using '*' for zone number, this must be used for  {key} and all other specified conditional probabilities.")
+        try:
+            if not common_prob_spec_all_zones:
+                zone_number = int(words[0])
+            fac_to_model = words[1].strip()
+            fac_conditioned_to = words[2].strip()
+        except ValueError:
+            err_list.append(f"Expecting: integer, string, string  in {key}\n")
+
+        if len(err_list) == 0:
+            if common_prob_spec_all_zones:
+                for znr in active_zone_list:
+                    new_key = (znr, fac_to_model, fac_conditioned_to)
+                    conditional_prob_facies[new_key] = input_cond_table[key]
+            else:
+                new_key = (zone_number, fac_to_model, fac_conditioned_to)
+                conditional_prob_facies[new_key] = input_cond_table[key]
+
+    if len(err_list) != 0:
+        print(f"Errors found:\n")
+        for err in err_list:
+            print(f" {err}  ")
+        print("\n")
+        raise ValueError(f"Errors found in specification of conditional probabilities.")
+
+    return conditional_prob_facies

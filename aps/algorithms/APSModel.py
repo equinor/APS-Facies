@@ -608,9 +608,9 @@ class APSModel:
                             print(' ')
 
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(' ')
-                    print(f'-- Keyword read from {parameter_file_name}:')
                     if keywords_read is not None:
+                        print(' ')
+                        print(f'-- Keyword read from {parameter_file_name}:')
                         for item in keywords_read:
                             name = item[0]
                             value = item[1]

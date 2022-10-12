@@ -258,7 +258,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
                                      numpy.float32. Only the grid cells belonging to the specified zone are updated,
                                      and error is raised if the number of grid cells for the zone doesn't match
                                      the size of the input array.
-           zoneNumber    - The zone number (counted from 0 in the input)
+           zone_number    - The zone number (counted from 1 in the input)
            regionNumber  - The region number for the grid cells to be updated.
            region_parameter_name - The name of the 3D grid parameter containing a discrete 3D parameter with region numbers
            realisation_number    - Realisation number counted from 0 for the parameter to get.

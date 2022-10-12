@@ -562,17 +562,16 @@ def check_probability_logs(probability_log_names,
 
 
 
-def createCombinedFaciesLogForBlockedWells(
-        project,
-        grid_model_name: str,
-        bw_name: str,
-        original_facies_log_name: str,
-        new_facies_log_name: str,
-        new_code_names: Dict[int,str],
-        mapping_between_original_and_new: Dict[str,str],
-        realization_number: int
-):
-    print(f"Grid model name: {grid_model_name}  ")
+def createCombinedFaciesLogForBlockedWells(params):
+    project = params['project']
+    grid_model_name = params['grid_model_name']
+    bw_name = params['bw_name']
+    original_facies_log_name = params['original_facies_log_name']
+    new_facies_log_name = params['new_facies_log_name']
+    new_code_names = params['new_code_names']
+    mapping_between_original_and_new = params['mapping_between_original_and_new']
+    realization_number = params['realization_number']
+
     # Original facies log code and name table and log values
     original_code_names, facies_log_values = getFaciesTableAndLogValuesFromBlockedWells(project, grid_model_name, bw_name, original_facies_log_name)
     if original_code_names is None:
@@ -600,7 +599,7 @@ def createCombinedFaciesLogForBlockedWells(
                 found = True
                 break
         if not found:
-            print('Error: The facies name {} is not found in original facies log'.format(original_facies))
+            print(f"Error: The facies name {original_facies} is not found in original facies log")
             return
 
         found = False
@@ -611,7 +610,7 @@ def createCombinedFaciesLogForBlockedWells(
                 found = True
                 break
         if not found:
-            print('Error: The facies name {} is not found in new facies log'.format(new_facies))
+            print(f"Error: The facies name {new_facies} is not found in new facies log")
             return
 
         new_code_for_old_code[original_code] = new_code
@@ -639,7 +638,7 @@ def createCombinedFaciesLogForBlockedWells(
         new_facies_log.set_values(values, realization_number)
 
     new_facies_log.code_names = new_code_names
-    print('Blocked well log {} created/updated'.format(new_facies_log_name))
+    print(f"Blocked well log {new_facies_log_name} created/updated")
 
 
 def cell_numbers_for_blocked_wells(project, grid_model_name, bw_name):

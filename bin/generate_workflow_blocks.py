@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.5"
+__version__ = "0.14.6"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -93,6 +93,7 @@ __status__ = "Draft"
 APS_ROOT                  = 'APS_ROOT'
 APS_RESOURCES             = 'APS_RESOURCES'
 APS_MODEL_FILE            = 'APS_MODEL_FILE'
+APS_MODEL_FILE_FORMAT     = 'APS_MODEL_FILE_FORMAT'
 APS_RMS_DATA_FILE         = 'APS_RMS_DATA_FILE'
 APS_GLOBAL_VARIABLES_FILE = 'APS_GLOBAL_VARIABLES_FILE'
 APS_FMU_VARIABLES_FILE    = 'APS_FMU_VARIABLES_FILE'
@@ -261,6 +262,8 @@ def get_model_file():
     else:
         return path
 
+def get_model_file_format():
+    return _get_value(APS_MODEL_FILE_FORMAT, 'xml')
 
 def get_rms_data_file():
     # Location/name of rms_project_data_for_APS_gui.xml
@@ -329,6 +332,7 @@ kwargs = {{
     'prefix': root_path,
     # APS model file
     'model_file_name': get_model_file(),
+    'model_file_format': get_model_file_format(),
     'output_rms_data_file': get_rms_data_file(),
     'global_variables_file': get_global_variables_file(),
     'output_model_file': get_output_fmu_tagged_model_file(),
