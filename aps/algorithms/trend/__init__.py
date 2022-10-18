@@ -1459,9 +1459,12 @@ class Trend3D_hyperbolic(Trend3D_conic):
 
     def _calculateTrendModelParam(self, use_relative_azimuth: bool = False) -> HyperbolicTrendParameters:
         # Calculate the 3D trend values for Hyperbolic
-        assert self.curvature.value > 1.0
-        assert abs(self.migration_angle) < 90.0
-        assert abs(self.stacking_angle) > 0.0
+        if not self.curvature.value > 1.0:
+            raise ValueError("Curvature value must be strictly larger than 1.0")
+        if not abs(self.migration_angle) < 90.0:
+            raise ValueError("Migration angles absolute value must be less than 90 degrees")
+        if not abs(self.stacking_angle) > 0.0:
+            raise ValueError("Stacking angle must be larger than 0 degrees.")
         if use_relative_azimuth:
             theta = self._relative_azimuth * np.pi / 180.0
         else:

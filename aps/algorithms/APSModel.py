@@ -1226,6 +1226,7 @@ class APSModel:
             self,
             model_file_name: FilePath,
             attributes_file_name: Optional[FilePath] = None,
+            param_file_name: Optional[FilePath] = None,
             probability_distribution_file_name: Optional[FilePath] = None,
             current_job_name: Optional[str] = None,
             debug_level: Debug = Debug.OFF,
@@ -1238,14 +1239,19 @@ class APSModel:
         top = ET.Element('APSModel', {'version': self.__aps_model_version})
         root_updated = self.XMLAddElement(top, fmu_attributes)
         write_string_to_file(model_file_name, root_updated, debug_level=debug_level)
-
+        if len(fmu_attributes) == 0:
+            return
         if attributes_file_name is not None:
-            aps_model = APSModel(model_file_name)
-            grid_model_name = aps_model.grid_model_name
-
             if current_job_name is None:
                 current_job_name = 'apsgui_job_name'
             write_string_to_file(attributes_file_name, 
+                fmu_configuration(fmu_attributes, current_job_name,alternative=True),
+                debug_level=debug_level)
+
+        if param_file_name is not None:
+            if current_job_name is None:
+                current_job_name = 'apsgui_job_name'
+            write_string_to_file(param_file_name,
                 fmu_configuration(fmu_attributes, current_job_name),
                 debug_level=debug_level)
 
@@ -1550,17 +1556,25 @@ def probability_distribution_configuration(fmu_attributes: List[FmuAttribute], c
     return content
 
 
-def fmu_configuration(fmu_attributes: List[FmuAttribute], current_job_name: str) -> str:
+def fmu_configuration(fmu_attributes: List[FmuAttribute], current_job_name: str,
+    alternative=False) -> str:
     if not fmu_attributes:
         return ''
     content = '# Note: Check that job name specified under keyword APS below is correct.\n'
     content += '#       It should be the same as the APS job these parameters belongs to.\n'
     content += '#       The job name must be used only once and the job name must be case insensitive\n'
     content += '#       (e.g Jobname and JOBNAME is treated as the same name).\n'
-    content += '# Note: This file should be copied into the "global:" section of the global_master_config.yml file\n'
-    content += '#       which is located per default under the "fmuconfig/input" directory in the FMU project.\n' 
-    content += '  APS:\n'
-    content += f'    {current_job_name}:\n'
+
+    if alternative:
+        content += '# Note: This file can be copied into the "global:" section of the global_variables.yml file\n'
+        content += '  APS:\n'
+        content += f'    {current_job_name}:\n'
+    else:
+        content += '# Note: This file can be renamed to _aps_params.yml and included in the\n'
+        content += '#       fmuconfig/input/global_master_config.yml file under the "global:" section\n'
+        content += '#       using the keyword and include statement:\n'
+        content += '#       APS: !include  _aps_params.yml\n'
+        content += f'{current_job_name}:\n'
     max_length = _max_name_length(fmu_attributes)
     max_number_length = _max_value_length(fmu_attributes)
     for fmu_attribute in fmu_attributes:

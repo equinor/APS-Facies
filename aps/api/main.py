@@ -15,6 +15,7 @@ from aps.utils.io import create_temporary_model_file
 from aps.utils.roxar.job import JobConfig, classify_job_configuration
 
 import roxar.rms
+import sys
 
 
 def run(config):
@@ -63,5 +64,9 @@ def run(config):
                     )
 
             run_truncation(**kwargs)
+
+            # Ensure traceback is on per default
+            sys.excepthook = sys.__excepthook__
+
             print('Finished')
     execute(config)
