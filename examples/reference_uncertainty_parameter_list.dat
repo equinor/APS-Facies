@@ -2,10 +2,11 @@
 #       It should be the same as the APS job these parameters belongs to.
 #       The job name must be used only once and the job name must be case insensitive
 #       (e.g Jobname and JOBNAME is treated as the same name).
-# Note: This file should be copied into the "global:" section of the global_master_config.yml file
-#       which is located per default under the "fmuconfig/input" directory in the FMU project.
-  APS:
-    apsgui_job_name:
+# Note: This file can be renamed to _aps_params.yml and included in the
+#       fmuconfig/input/global_master_config.yml file under the "global:" section
+#       using the keyword and include statement:
+#       APS: !include  _aps_params.yml
+apsgui_job_name:
         APS_1_0_GF_GF1_RESIDUAL_MAINRANGE:         750.0 ~ <APSGUI_JOB_NAME_APS_1_0_GF_GF1_RESIDUAL_MAINRANGE>
         APS_1_0_GF_GF1_TREND_AZIMUTH:              325.0 ~ <APSGUI_JOB_NAME_APS_1_0_GF_GF1_TREND_AZIMUTH>
         APS_1_0_GF_GF1_TREND_STACKANGLE:             0.3 ~ <APSGUI_JOB_NAME_APS_1_0_GF_GF1_TREND_STACKANGLE>

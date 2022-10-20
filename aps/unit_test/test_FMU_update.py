@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from typing import Dict
 
 import pytest
+import os
 from aps.utils.constants.simple import Debug
 from aps.rms_jobs.updateAPSModelFromFMU import update_aps_model_from_fmu
 from aps.unit_test.test_createXMLModelFiles import get_apsmodel_with_no_fmu_markers, get_apsmodel_with_all_fmu_markers
@@ -82,8 +83,12 @@ def test_case_with_no_fmu_markers_set():
 
     out_file = 'aps_model_with_no_fmu_markers.xml'
     attributes_file = 'fmu_attributes.yaml'
+    if os.path.isfile(attributes_file):
+        os.remove(attributes_file)
+    if os.path.isfile(out_file):
+        os.remove(out_file)
 
-    aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
+    aps_model.write_model(out_file, attributes_file_name=attributes_file, debug_level=Debug.OFF)
 
     check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file)
 
@@ -94,6 +99,11 @@ def test_case_with_all_fmu_markers_set():
 
     out_file = 'aps_model_with_all_fmu_markers.xml'
     attributes_file = 'fmu_attributes.yaml'
+    if os.path.isfile(attributes_file):
+        os.remove(attributes_file)
+    if os.path.isfile(out_file):
+        os.remove(out_file)
+
     expected_key_value_set_file = 'testData_FMU/expected_key_value_set.yaml'
 
     aps_model.write_model(out_file, attributes_file, debug_level=Debug.OFF)
@@ -103,10 +113,13 @@ def test_case_with_all_fmu_markers_set():
 
 
 def check_fmu_attributes_output_correlates_to_xml_output(out_file, attributes_file):
-
-    values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
-    values_from_generated_attributes_file = set(read_fmu_attributes_file(attributes_file).keys())
-    key_set_from_xml = set(values_from_generated_xml.keys())
+    key_set_from_xml = set()
+    values_from_generated_attributes_file = set()
+    if os.path.isfile(out_file):
+        values_from_generated_xml = read_values_from_xml_tree(ET.parse(out_file))
+        key_set_from_xml = set(values_from_generated_xml.keys())
+    if os.path.isfile(attributes_file):
+        values_from_generated_attributes_file = set(read_fmu_attributes_file(attributes_file).keys())
     print('Not in both:')
     print(key_set_from_xml^values_from_generated_attributes_file)
     assert len(key_set_from_xml.symmetric_difference(values_from_generated_attributes_file)) == 0

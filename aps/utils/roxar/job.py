@@ -1,4 +1,5 @@
 import json
+import sys
 from base64 import b64decode
 from functools import wraps
 from warnings import warn
@@ -13,6 +14,10 @@ from aps.utils.roxar._config_getters import get_debug_level
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.rms_project_data import RMSData
 
+def excepthook(type, value, traceback):
+    print(f"ERROR:")
+    print(f"Type:  {type.__name__}")
+    print(f"{value}")
 
 class JobConfig:
     def __init__(self, roxar, project, config: Dict):
@@ -22,6 +27,12 @@ class JobConfig:
         if migrated['errors']:
             warn(f"There was a problem migrating the state; {migrated['errors']}")
         self._config = migrated['state']
+
+        # Traceback is on per default
+        sys.excepthook = sys.__excepthook__
+        if self.debug_level <= Debug.VERBOSE:
+            # Traceback is turned off when low log output
+            sys.excepthook = excepthook
 
     def get_parameters(self, model_file):
         # Represents the ORIGINAL APS model

@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.6"
+__version__ = "0.14.7"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -106,6 +106,7 @@ APS_INPUT_DIRECTORY       = 'APS_INPUT_DIRECTORY'
 APS_DEBUG_LEVEL           = 'APS_DEBUG_LEVEL'
 APS_GRF_TRANSFORM         = 'APS_GRF_TRANSFORM'
 RMS_PLUGINS_LIBRARY       = 'RMS_PLUGINS_LIBRARY'
+APS_TRACEBACK             = 'APS_TRACEBACK'
 
 
 # Utils
@@ -115,6 +116,31 @@ def _get_path_from_environment(environment_name, default_name):
         return Path(paths.split(':')[0])
     return paths
 
+
+def _get_value(environ_name, default_value):
+    return os.environ.get(environ_name, default_value)
+
+# Check if traceback is to be turned off
+def excepthook(type, value, traceback):
+    print(f"ERROR:")
+    print(f"Type:  {{type.__name__}}")
+    print(f"{{value}}")
+
+def get_traceback_setting():
+    # Traceback setting on/off if errors are raised
+    value = _get_value(APS_TRACEBACK, False)
+    if isinstance(value, bool):
+        return value
+    if value == '0' or value == 'False':
+        return False
+    return True
+
+if get_traceback_setting():
+    # Use default traceback
+    sys.excepthook = sys.__excepthook__
+else:
+    # Turn off traceback
+    sys.excepthook = excepthook
 
 # The path to the repository's root folder
 temp_dir = Path(roxar.rms.get_tmp_dir())
@@ -242,9 +268,6 @@ def _get_file(environ_name, default_name):
     return _get_path_from_environment(environ_name, prepend_absolute_path(default_name))
 
 
-def _get_value(environ_name, default_value):
-    return os.environ.get(environ_name, default_value)
-
 
 def _undefined_file():
     return '_APS_NO_FILE'
@@ -344,6 +367,7 @@ kwargs = {{
     'field_file_format': get_fmu_file_format(),
     # GRF transformation
     'transformation_type': get_transform_type(),
+    'traceback': get_traceback_setting(),
 }}
 
 # Stringify Paths
@@ -353,6 +377,10 @@ for key, value in kwargs.items():
 
 module = _load_module()
 module.run(**kwargs)
+
+# Reset traceback to default
+if file_name != 'turn_off_traceback':
+    sys.excepthook = sys.__excepthook__
 '''
 
     return template.format(
@@ -391,6 +419,8 @@ def get_workflows() -> Dict[str, List[str]]:
             'createRedefinedBlockedFaciesLog',
             'copy_rms_param_to_fmu_grid',
             'test_jobs_and_workflow',
+            'turn_off_traceback',
+            'turn_on_traceback',
         ],
         'aps/algorithms': [
             'setupFMUtags',
@@ -436,6 +466,8 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('APS_compare_files', 'compare_files.py'),
             ('APS_resample_to_ertbox', 'copy_rms_param_to_fmu_grid.py'),
             ('APS_run_workflow', 'test_jobs_and_workflow.py'),
+            ('Turn_off_traceback', 'turn_off_traceback.py'),
+            ('Turn_on_traceback', 'turn_on_traceback.py'),
         ]
     }
 
@@ -478,6 +510,7 @@ def create_workflow_block_file(
     workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
     workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
     workflow_block = get_workflow_block(file_name, relative_path)
+    print(f"Generate: {workflow_path} ")
     with open(workflow_path, 'w') as f:
         f.write(workflow_block)
 

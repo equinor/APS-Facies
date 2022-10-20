@@ -233,7 +233,8 @@ def set_selected_as_fmu_updatable(
                     trunc_rule.setAngleFmuUpdatable(poly_number - 1, updatable)
     aps_model.write_model(
         output_model_file,
-        attributes_file_name=tagged_variable_file,
+        attributes_file_name=None,
+        param_file_name=tagged_variable_file,
         probability_distribution_file_name=distribution_file_name,
         debug_level=Debug.VERY_VERBOSE,
     )

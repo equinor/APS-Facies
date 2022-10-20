@@ -1073,7 +1073,8 @@ Background facies:
                 fIndx = self._orderIndex[indx]
                 prob = faciesProb[fIndx]
                 probFrac = self._probFracOverlayFaciesInGroup[groupIndx][j]
-                assert probFrac > 0.0
+                if not probFrac > 0.0:
+                    raise ValueError(f"Found a probability fraction {probFrac} which is not positive.")
                 prob = prob * probFrac
                 sumProbOverlay[groupIndx] += prob
 
