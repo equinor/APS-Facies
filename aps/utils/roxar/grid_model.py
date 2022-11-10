@@ -1227,3 +1227,10 @@ def check_active_cells_in_zone_region(grid_model, zone_number,
         )
     nactive = len(active_cells)
     return nactive > 0
+
+def flip_grid_index_origo(values3d, ny):
+    # Flip between RMS and Eclipse (Left and Right handed) grid index origo
+    values3d_flipped = values3d.copy()
+    for j in range(ny):
+        values3d_flipped[:,j,:] = values3d[:,ny - j -1,:]
+    return values3d_flipped
