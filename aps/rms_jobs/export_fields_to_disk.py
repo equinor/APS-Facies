@@ -6,11 +6,13 @@
 
 import xtgeo
 import roxar
+import numpy as np
+from roxar import Direction
 
 from aps.algorithms.APSModel import APSModel
-from aps.utils.fmu import create_get_property, get_export_location, find_zone_range
+from aps.utils.fmu import get_export_location
+from aps.utils.roxar.grid_model import flip_grid_index_origo
 from aps.utils.methods import get_specification_file, get_debug_level
-from aps.utils.roxar.grid_model import get_zone_layer_numbering, GridSimBoxSize
 from aps.utils.constants.simple import Debug
 
 
@@ -41,6 +43,7 @@ def run(project, **kwargs):
     # For ERTBOX grid the simulation box dimensions from simbox_indexer and grid_indexer are the same.
     indexer = grid3D.simbox_indexer
     nx, ny, nz  = indexer.dimensions
+    handedness = indexer.ijk_handedness
 
     field_location = kwargs.get('save_dir', None)
     if field_location is None:
@@ -74,15 +77,30 @@ def run(project, **kwargs):
                 else:
                     # Use xtgeo for other formats not available from roxar.grids
                     values = field_property.get_values(project.current_realisation)
-                    xtgeo_object = xtgeo.GridProperty(
-                        ncol=nx, nrow=ny, nlay=nz,
-                        values=values,
-                        name=field_name,
-                    )
+                    # The current grid model is ERTBOX grid model where all cells are active
+                    # Flip the order of the values to be consistent with right-handed if the
+                    values3d = np.reshape(values, (nx, ny, nz))
+
+                    if handedness == Direction.right:
+                        # Current grid model is right-handed
+                        # Need to flip order of the values to get correct export
+                        # when using GRDECL format with xtgeo.GridProperty instance
+                        values3d_flipped = flip_grid_index_origo(values3d, ny)
+
+                        xtgeo_object = xtgeo.GridProperty(
+                            ncol=nx, nrow=ny, nlay=nz,
+                            values=values3d_flipped,
+                            name=field_name,
+                        )
+                    else:
+                        xtgeo_object = xtgeo.GridProperty(
+                            ncol=nx, nrow=ny, nlay=nz,
+                            values=values3d,
+                            name=field_name,
+                        )
 
                     xtgeo_object.to_file(
                         file_name,
                         fformat=file_format,
                         name=field_name,
                     )
-
