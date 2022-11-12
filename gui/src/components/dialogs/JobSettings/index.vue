@@ -32,6 +32,7 @@
           :field-file-format.sync="fieldFileFormat"
           :custom-trend-extrapolation-method.sync="customTrendExtrapolationMethod"
           :export-fmu-config-files.sync="exportFmuConfigFiles"
+          :only-update-residual-fields.sync="onlyUpdateResidualFields"
           @update:error="e => update('fmu', e)"
         />
         <br>
@@ -244,6 +245,7 @@ export default class JobSettings extends Vue {
   fieldFileFormat = ''
   customTrendExtrapolationMethod = ''
   exportFmuConfigFiles = false
+  onlyUpdateResidualFields = false
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
@@ -265,6 +267,7 @@ export default class JobSettings extends Vue {
       this.createFmuGrid = fmu.create.value
       this.fieldFileFormat = fmu.fieldFileFormat.value
       this.customTrendExtrapolationMethod = fmu.customTrendExtrapolationMethod.value
+      this.onlyUpdateResidualFields = fmu.onlyUpdateResidualFields.value
 
       this.debugLevel = parameters.debugLevel.selected
       this.transformType = parameters.transformType.selected
@@ -301,6 +304,7 @@ export default class JobSettings extends Vue {
       dispatch('fmu/create/set', this.createFmuGrid),
       dispatch('fmu/fieldFileFormat/set', this.fieldFileFormat),
       dispatch('fmu/customTrendExtrapolationMethod/set', this.customTrendExtrapolationMethod),
+      dispatch('fmu/onlyUpdateResidualFields/set', this.onlyUpdateResidualFields),
 
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),

@@ -122,6 +122,7 @@ function addJobSettings({ rootState}: Context, doc: Document, parentElement: HTM
   const fmuUpdateFields = rootState.fmu.runFmuWorkflows.value
   const fmuFileFormat = rootState.fmu.fieldFileFormat.value
   const fmuGrid = String(rootState.fmu.simulationGrid.current)
+  const fmuOnlyUpdateResidualFields = rootState.fmu.onlyUpdateResidualFields.value
   const exportFmuConfigFiles = rootState.options.exportFmuConfigFiles.value
   const importFieldsFromFmu = rootState.options.importFields.value
   const fmuTrendExtrapolation = rootState.fmu.customTrendExtrapolationMethod.value
@@ -130,7 +131,7 @@ function addJobSettings({ rootState}: Context, doc: Document, parentElement: HTM
   const fmuMode = fmuUpdateFields ? "FIELDS" : ( onlyUpdateFromFmu ? "NOFIELDS" : "OFF" )
   const exchangeMode = importFieldsFromFmu ? "AUTO" : "SIMULATE"
   const exportConfigMode = exportFmuConfigFiles ? "YES" : "NO"
-
+  const useResidualFields = fmuOnlyUpdateResidualFields ? "YES" : "NO"
   // Create the JobSettings keyword for the xml file
   const jobSettingsElement = addKeyword(doc, 'JobSettings', null, parentElement)
   const fmuSettingsElement = addKeyword(doc, 'FmuSettings', null, jobSettingsElement)
@@ -142,6 +143,7 @@ function addJobSettings({ rootState}: Context, doc: Document, parentElement: HTM
     addKeyword(doc, 'ExchangeMode', exchangeMode, updateGRFElement, true)
     addKeyword(doc, 'FileFormat', fmuFileFormat, updateGRFElement, true)
     addKeyword(doc, 'ExtrapolationMethod', fmuTrendExtrapolation, updateGRFElement, true)
+    addKeyword(doc, 'UseResidualFields', useResidualFields,fmuSettingsElement, true)
   }
   if (fmuMode === "FIELDS" || fmuMode === "NOFIELDS"){
     addKeyword(doc, 'ExportConfigFiles', exportConfigMode, fmuSettingsElement, true)

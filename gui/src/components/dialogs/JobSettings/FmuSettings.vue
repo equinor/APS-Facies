@@ -71,6 +71,12 @@
             />
           </v-row>
           <v-row no-gutters>
+            <v-checkbox
+              v-model="_onlyUpdateResidualFields"
+              v-tooltip="'Export/Import only the Gaussian Residual for GRF with trend to/from ERT. The trend part of the GRF is added by APS before applying truncation rule. '"
+              label="For GRF with trend let ERT only update the residual field."
+              :disabled="!_runFmuWorkflows"
+            />
             <v-select
               v-model="_customTrendExtrapolationMethod"
               v-tooltip="'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'"
@@ -178,6 +184,9 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true, type: Boolean })
   readonly exportFmuConfigFiles: boolean
 
+  @Prop({ required: true, type: Boolean })
+  readonly onlyUpdateResidualFields: boolean
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
@@ -244,6 +253,11 @@ export default class FmuSettings extends Vue {
     this.$emit('update:exportFmuConfigFiles', toggle)
   }
 
+  get _onlyUpdateResidualFields (): boolean { return this.onlyUpdateResidualFields }
+  set _onlyUpdateResidualFields (toggle: boolean) {
+    this.$emit('update:onlyUpdateResidualFields', toggle)
+  }
+
   update (type: string, value: boolean): void {
     if (type === 'fmuGridDepth') {
       value = value && this.createFmuGrid
@@ -260,7 +274,7 @@ export default class FmuSettings extends Vue {
         .filter(field => field.trend.type === 'RMS_PARAM')
     if (affectedFields.length > 0) { return true }
     return false
-  } 
+  }
 
   get fmuGridExists (): boolean {
     return this.availableGridModels

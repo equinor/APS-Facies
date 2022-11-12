@@ -69,6 +69,7 @@ class JobConfig:
             'current_job_name': self.roxar.rms.get_running_job_name(),
             'export_fmu_config_files': self.export_fmu_config_files,
             'extrapolation_method': self.rms_param_trend_extrapolation_method,
+            'fmu_use_residual_fields': self.fmu_use_residual_fields
         }
 
     @property
@@ -153,6 +154,11 @@ class JobConfig:
                             '- APS is running in FMU mode for AHM and automatic selected: '
                             'Simulate GRF files and export to FMU'
                         )
+                        if self.fmu_use_residual_fields:
+                            print(
+                                '- APS will only exchange the GRF residuals with ERT for GRF with trend'
+                            )
+
                     return True
                 else:
                     # Import GRF from file when running in FMU workflow
@@ -161,10 +167,19 @@ class JobConfig:
                             '- APS is running in FMU mode for AHM and automatic selected: '
                             'Import updated GRF files from FMU'
                         )
+                        if self.fmu_use_residual_fields:
+                            print(
+                                '- APS will only exchange the GRF residuals with ERT for GRF with trend'
+                            )
                     return False
             else:
                 if self.debug_level >= Debug.ON:
                     print('- APS is running in FMU mode for AHM and simulate GRF files and export to FMU')
+                    if self.fmu_use_residual_fields:
+                        print(
+                            '- APS will only exchange the GRF residuals with ERT for GRF with trend'
+                        )
+
                 return True
         else:
             # Simulate and export since not in FMU mode to update GRF's
@@ -207,6 +222,16 @@ class JobConfig:
             return False
 
     @property
+    def fmu_use_residual_fields(self):
+        try:
+            use_residual = self._config['fmu']['onlyUpdateResidualFields']['value']
+            return use_residual
+        except KeyError:
+            # Some, older jobs may not be updated,
+            # and this "config.fmu.onlyUpdateResidualFields" does not exist.
+            return False
+
+    @property
     def debug_level(self):
         return get_debug_level(self._config)
 
@@ -233,14 +258,12 @@ class JobConfig:
 
     @property
     def write_rms_parameters_for_qc_purpose(self):
-        return (
-                not self.run_fmu_workflows
-                or self.debug_level >= Debug.ON
-        )
+        return self.debug_level >= Debug.VERY_VERBOSE
 
     @property
     def rms_param_trend_extrapolation_method(self): 
         return ExtrapolationMethod(self._config['fmu']['customTrendExtrapolationMethod']['value'])
+
 
     def to_json(self):
         return json.dumps(self._config)

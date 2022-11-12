@@ -16,6 +16,8 @@ from warnings import warn
 
 from typing import Dict
 
+from numpy import triu_indices
+
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType, ExtrapolationMethod
 from aps.utils.decorators import cached
@@ -49,8 +51,9 @@ def read_fmu_param_settings(fmu_dict, fmu_settings_file):
     with open(fmu_settings_file) as file:
         lines = file.readlines()
         for line in lines:
+            if len(line)<= 1 or line == "" or line == "\n":
+                continue
             words = line.split(":")
-            print(f"{words}")
             key = words[0].strip()
             if key not in fmu_dict:
                 raise KeyError(
@@ -58,9 +61,18 @@ def read_fmu_param_settings(fmu_dict, fmu_settings_file):
                     f"{fmu_settings_file}\n "
                     f"Available keywords: {fmu_dict.keys()} "
                 )
-            print(f"FMU settings: {key}:  {words[1].strip()}")
+            if key in [
+                'fmu_mode', 'fmu_mode_only_param',
+                'create_fmu_grid', 'fmu_simulate_fields',
+                'export_fmu_config_files', 'write_rms_parameters_for_qc_purpose' ]:
+                fmu_dict[key] = words[1].strip().upper() == 'TRUE'
+            if key in ['max_fmu_grid_layers']:
+                fmu_dict[key] = int(words[1].strip())
+            if key in ['fmu_simulation_grid_name',
+                'global_variables', 'field_file_format']:
+                fmu_dict[key] = words[1].strip()
+            print(f"FMU settings: {key}:  {fmu_dict [key]}")
 
-            fmu_dict[key] = words[1].strip()
     return fmu_dict
 
 def get_parameters(**kwargs):
@@ -73,7 +85,6 @@ def get_parameters(**kwargs):
     # Some other default values
     max_allowed_fraction_tolerance = ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
     tolerance_of_probability_normalisation = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR
-    field_file_format = "roff"
     transformation_type_for_grf = TransformType.EMPIRIC
     rms_param_trend_extrapolation_method = ExtrapolationMethod.EXTEND_LAYER_MEAN
 
@@ -81,8 +92,7 @@ def get_parameters(**kwargs):
     read_fmu_settings_from_file = True
 
     #default settings
-    fmu_dict ={} 
-    fmu_dict['debug_level']  = Debug.VERBOSE
+    fmu_dict ={}
     fmu_dict['fmu_mode']  = False
     fmu_dict['fmu_mode_only_param']  = False
     fmu_dict['create_fmu_grid']  = False
@@ -92,17 +102,19 @@ def get_parameters(**kwargs):
     fmu_dict['global_variables'] = global_variables_file
     fmu_dict['export_fmu_config_files'] = False
     fmu_dict['field_file_format'] = 'roff'
+    fmu_dict['write_rms_parameters_for_qc_purpose'] = False
+
+
 
     if read_fmu_settings_from_file:
         fmu_settings_file = "APS_fmu_settings.txt"
         fmu_dict = read_fmu_param_settings(fmu_dict, fmu_settings_file)
-        print(f"{fmu_dict} ")
 
 
 
     # APS model instance with default check
     print(f"APS model file: {model_file} ")
-    aps_model = APSModel(model_file, debug_level=debug_level)
+    aps_model = APSModel(model_file, debug_level=Debug.OFF)
 
     return {
         'project': project,
@@ -120,11 +132,11 @@ def get_parameters(**kwargs):
         'use_constant_probabilities': aps_model.use_constant_probability,
         'workflow_name': roxar.rms.get_running_workflow_name(),
         'seed_log_file': None,
-        'write_rms_parameters_for_qc_purpose': False,
-        'debug_level': int(fmu_dict['debug_level']),
+        'write_rms_parameters_for_qc_purpose': fmu_dict['write_rms_parameters_for_qc_purpose'],
+        'debug_level': aps_model.log_setting,
         'max_allowed_fraction_of_values_outside_tolerance': max_allowed_fraction_tolerance,
         'tolerance_of_probability_normalisation': tolerance_of_probability_normalisation,
-        'field_file_format': field_file_format,
+        'field_file_format': fmu_dict['field_file_format'],
         'transform_type_grf': transformation_type_for_grf,
         'current_job_name': roxar.rms.get_running_job_name(),
         'export_fmu_config_files': fmu_dict['export_fmu_config_files'],

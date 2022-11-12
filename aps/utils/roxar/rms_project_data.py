@@ -38,6 +38,7 @@ from aps.utils.constants.simple import (
     OriginType,
     ProbabilityTolerances,
     CrossSectionType,
+    GridModelConstants,
 )
 from aps.utils.debug import parse_dot_master
 from aps.utils.exceptions.xml import ApsXmlError

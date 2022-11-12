@@ -115,7 +115,10 @@ def run(project, **kwargs):
                     continue
                 zone_name = zone_names[zone_number]
                 for name in zone_model.used_gaussian_field_names:
-                    fmu_field_name = 'aps_' + zone_name + '_' + name
+                    if zone_model.hasTrendModel(name) and aps_model.fmu_use_residual_fields:
+                        fmu_field_name = 'aps_' + zone_name + '_' + name + '_residual'
+                    else:
+                        fmu_field_name = 'aps_' + zone_name + '_' + name
                     fmu_field_name_file = fmu_field_name + "." + aps_model.fmu_field_file_format
                     content += f"FIELD {fmu_field_name}   "
                     content += f"PARAMETER {fmu_field_name_file}   "

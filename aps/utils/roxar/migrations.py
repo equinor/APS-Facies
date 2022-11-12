@@ -144,6 +144,14 @@ class Migration:
         return state
 
     @staticmethod
+    def add_use_only_residual_fields(state: dict):
+        state['fmu']['onlyUpdateResidualFields'] = {
+            'value': False,
+        }
+        return state
+
+
+    @staticmethod
     def add_field_export_format(state: dict):
         state['fmu']['fieldFileFormat'] = {
             'value': 'grdecl',
@@ -274,6 +282,11 @@ class Migration:
                 'from': '1.9.0',
                 'to': '1.10.0',
                 'up': self.add_trend_map,
+            },
+            {
+                'from': '1.10.0',
+                'to': '1.11.0',
+                'up': self.add_use_only_residual_fields,
             },
         ]
 

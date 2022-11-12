@@ -126,6 +126,7 @@ class APSModel:
             prob_settings_fraction: float = ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
             prob_settings_tolerance: float = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
             transform_type: TransformType = TransformType.EMPIRIC,
+            fmu_use_residual_fields: bool = False,
 
 
     ):
@@ -216,6 +217,7 @@ class APSModel:
         self.__prob_settings_fraction = prob_settings_fraction
         self.__prob_settings_tolerance = prob_settings_tolerance
         self.__transform_type = transform_type
+        self.__fmu_use_residual_fields = fmu_use_residual_fields
 
 
         # Read model if it is defined
@@ -918,6 +920,10 @@ class APSModel:
         return self.__previewRegion
 
     @property
+    def fmu_use_residual_fields(self) -> bool:
+        return self.__fmu_use_residual_fields
+
+    @property
     def gaussian_field_names(self) -> List[str]:
         return self.getAllGaussFieldNamesUsed()
 
@@ -1402,6 +1408,18 @@ class APSModel:
                                     f"must be one of {legal_values}"
                                 )
 
+                    kw_use_residuals = 'UseResidualFields'
+                    use_residual_settings = getKeyword(fmu_settings, kw_use_residuals, modelFile=model_file_name, required=False)
+                    if use_residual_settings is not None:
+                        value = use_residual_settings.text.strip().upper()
+                        legal_values = ['YES', 'NO']
+                        if value not in legal_values:
+                            raise ValueError(
+                                f"Job settings for keyword {kw_use_residuals} must be one of {legal_values}. "
+                            )
+                        if value == 'YES':
+                            self.__fmu_use_residual_fields = True
+
                 if self.__fmu_mode in ['NOFIELDS', 'FIELDS']:
                     kw_export = 'ExportConfigFiles'
                     export_settings = getKeyword(fmu_settings, kw_export, modelFile=model_file_name, required=False)
@@ -1478,6 +1496,7 @@ class APSModel:
                 f"      Trend param extrapolation:  {self.__fmu_trend_param_extrapolation}"
             )
         if self.__fmu_mode != 'OFF':
+            print(f"     Update only residual GRF in ERT: {self.__fmu_use_residual_fields}")
             print(f"     Export config files: {self.__fmu_export_config_files} ")
         print(
             "    Prob check criteria:\n"
@@ -1516,9 +1535,16 @@ class APSModel:
             fmu_update_grf_element.append(create_node('ExtrapolationMethod',
                 text=self.__fmu_trend_param_extrapolation))
 
+            if self.__fmu_use_residual_fields:
+                fmu_settings_element.append(create_node('UseResidualFields', text='YES'))
+            else:
+                fmu_settings_element.append(create_node('UseResidualFields', text='NO'))
+
         if self.__fmu_mode in ['NOFIELDS', 'FIELDS']:
             if self.__fmu_export_config_files:
                 fmu_settings_element.append(create_node('ExportConfigFiles', text='YES'))
+            else:
+                fmu_settings_element.append(create_node('ExportConfigFiles', text='NO'))
 
         run_settings_element = ET.Element('RunSettings')
         job_settings_element.append(run_settings_element)

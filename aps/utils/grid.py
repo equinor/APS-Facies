@@ -31,8 +31,3 @@ def update_rms_parameter(
         set_initial_values=False,
         debug_level=debug_level
     )
-    if debug_level >= Debug.VERY_VERBOSE:
-        if use_regions:
-            print(f'--- Create or update parameter: {rms_variable_name} for (zone,region)= ({zone_number}, {region_number}')
-        else:
-            print(f'--- Create or update parameter: {rms_variable_name} for zone number: {zone_number}')

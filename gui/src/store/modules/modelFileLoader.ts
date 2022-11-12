@@ -39,6 +39,7 @@ interface JobSettingsParam {
   fieldFileFormat: string
   customTrendExtrapolationMethod: string
   exportFmuConfigFiles: boolean
+  onlyUpdateResidualFields: boolean
   maxAllowedFractionOfValuesOutsideTolerance: number
   toleranceOfProbabilityNormalisation: number
   transformType: number
@@ -502,6 +503,7 @@ const jobSettings = (apsModelContainer:XMLElement) => {
   let fileFormat = 'roff'
   let extrapolationMethod = 'extend_layer_mean'
   let exportCheck = false
+  let onlyResidual = false
   if (fmuMode === 'FIELDS')
   {
     updateGRFElement = getMandatoryNodeValue(fmuSettingsElement,'UpdateGRF')
@@ -510,6 +512,7 @@ const jobSettings = (apsModelContainer:XMLElement) => {
     fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
     extrapolationMethod = getMandatoryTextValue(updateGRFElement, 'ExtrapolationMethod')
     exportCheck = getMandatoryTextValue(fmuSettingsElement, 'ExportConfigFiles') === 'YES'
+    onlyResidual = getMandatoryTextValue(fmuSettingsElement, 'UseResidualFields') === 'YES'
   }
   if (fmuMode === 'NOFIELD')
   {
@@ -531,12 +534,13 @@ const jobSettings = (apsModelContainer:XMLElement) => {
     fieldFileFormat: (fmuMode === 'FIELDS') ? fileFormat : 'roff',
     customTrendExtrapolationMethod: (fmuMode === 'FIELDS') ? extrapolationMethod : 'mean',
     exportFmuConfigFiles: (fmuMode === 'FIELDS' || fmuMode === 'NOFIELDS') ? exportCheck : false,
+    onlyUpdateResidualFields: (fmuMode === 'FIELDS') ? onlyResidual : false,
     maxAllowedFractionOfValuesOutsideTolerance: maxFractionNotNormalised ?? 0.1,
     toleranceOfProbabilityNormalisation: toleranceLimitProbability ?? 0.2,
     transformType: transformationSettings ?? 0,
     debugLevel: logSetting ?? 0,
   }
-  
+
   return settings
 }
 
@@ -875,6 +879,7 @@ const module: Module<Record<string, unknown>, RootState> = {
       await dispatch('fmu/simulationGrid/set', jobSettingsParam.simulationGrid, { root: true })
       await dispatch('fmu/fieldFileFormat/set', jobSettingsParam.fieldFileFormat, { root: true })
       await dispatch('fmu/customTrendExtrapolationMethod/set', jobSettingsParam.customTrendExtrapolationMethod, { root: true })
+      await dispatch('fmu/onlyUpdateResidualFields/set', jobSettingsParam.onlyUpdateResidualFields, { root: true })
       await dispatch('options/importFields/set', jobSettingsParam.importFields, { root: true })
       await dispatch('options/exportFmuConfigFiles/set', jobSettingsParam.exportFmuConfigFiles, { root: true })
       await dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', jobSettingsParam.maxAllowedFractionOfValuesOutsideTolerance, { root: true })

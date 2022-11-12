@@ -261,7 +261,7 @@ def run(
         eps=ProbabilityTolerances.MAX_DEVIATION_BEFORE_ACTION,
         tolerance_of_probability_normalisation=ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
         max_allowed_fraction_with_mismatch=ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
-        write_rms_parameters_for_qc_purpose=True,
+        write_rms_parameters_for_qc_purpose=False,
         **kwargs
 ):
     realization_number = project.current_realisation
@@ -282,7 +282,6 @@ def run(
     is_shared = False
     if fmu_mode or fmu_mode_only_param:
         is_shared = True
-        write_rms_parameters_for_qc_purpose = False
 
     all_zone_models = aps_model.sorted_zone_models
     region_param_name = aps_model.getRegionParamName()
@@ -336,10 +335,15 @@ def run(
                 f'in the RMS project: {aps_model.rms_project_name}'
             )
 
-    # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
-
-    gf_all_values, gf_all_alpha = initialize_rms_parameters(
-        project, aps_model, write_rms_parameters_for_qc_purpose, is_shared=is_shared, debug_level=debug_level,
+    # Initialize dictionaries with gauss field values (with trend)
+    # and transformed gauss field values for all used gauss fields.
+    # The values are read from RMS project if they exists.
+    # If the 3D parameters does not exist, the values are initialized to 0.
+    gf_all_values, gf_all_alpha, _, _ = initialize_rms_parameters(
+        project, aps_model, [1,1,0,0],
+        write_rms_parameters_for_qc_purpose,
+        is_shared=is_shared,
+        debug_level=debug_level,
     )
     # Probability related lists
     probability_parameter_names_already_read = []
