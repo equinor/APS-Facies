@@ -18,6 +18,7 @@ kwargs ={
     'debug_level': debug_level,
     'fmu_simulation_grid_name': ertbox_grid_model_name,
     'rms_grid_name': aps_model.grid_model_name,
+    'fmu_use_residual_fields': aps_model.fmu_use_residual_fields,
 }
 
 def run(**kwargs):

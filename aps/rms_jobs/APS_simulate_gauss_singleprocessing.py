@@ -40,7 +40,7 @@ def run_simulations(
         project, model_file='APS.xml', realisation=0,
         is_shared=False, seed_file_log='seedLogFile.dat',
         write_rms_parameters_for_qc_purpose=False,
-        fmu_mode=False, debug_level=Debug.OFF,
+        fmu_mode=False,
 ):
     """
     Description: Run gauss simulations for the APS model i sequence
@@ -48,9 +48,12 @@ def run_simulations(
     """
 
     # Read APS model
+    aps_model = APSModel(model_file)
+    debug_level = aps_model.log_setting
+    fmu_with_residual_grf = aps_model.fmu_use_residual_fields
     if debug_level >= Debug.ON:
         print(f'- Read file: {model_file}')
-    aps_model = APSModel(model_file)
+
 
     # When running in single processing mode, there will not be created
     # new start seeds in the RMS multi realization
@@ -209,12 +212,15 @@ def run_simulations(
             use_left_handed_grid_indexing=True,
         )
 
+
         add_trends(
             project, aps_model, zone_number, region_number,
             write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
             debug_level=debug_level,
             fmu_mode=fmu_mode,
             is_shared=is_shared,
+            fmu_with_residual_grf=fmu_with_residual_grf,
+            fmu_add_trend_if_use_residual=False
         )
         # End loop over gauss fields for one zone
 
@@ -228,6 +234,8 @@ def run_simulations(
             seed_file_log = seed_file_log / 'seedLogFile.dat'
         with open(seed_file_log, 'a+') as file:
             file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + nrlib.seed()}\n')
+    if debug_level >= Debug.ON:
+        print('- Finished simulation of gaussian fields for APS')
 
 
 def run(project, **kwargs):
@@ -235,9 +243,8 @@ def run(project, **kwargs):
     seed_file_log = get_seed_log_file(**kwargs)
     fmu_mode = kwargs.get('fmu_mode', False)
     fmu_mode_only_param = kwargs.get('fmu_mode_only_param', False)
-    write_rms_parameters_for_qc_purpose = False
+    write_rms_parameters_for_qc_purpose = kwargs.get('write_rms_parameters_for_qc_purpose',False)
     real_number = project.current_realisation
-    debug_level = get_debug_level(**kwargs)
 
     print(f'\nSimulation of gaussian fields for realisation number: {real_number+1}')
 
@@ -251,7 +258,4 @@ def run(project, **kwargs):
         seed_file_log,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
         fmu_mode=fmu_mode,
-        debug_level=debug_level,
     )
-    if debug_level >= Debug.ON:
-        print('- Finished simulation of gaussian fields for APS')

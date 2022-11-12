@@ -18,4 +18,5 @@ export interface FmuState {
   simulationGrid: SimulationGridModelsState
   fieldFileFormat: OptionState<string>
   customTrendExtrapolationMethod: OptionState<string>
+  onlyUpdateResidualFields: OptionState<boolean>
 }

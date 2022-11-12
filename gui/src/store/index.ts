@@ -47,7 +47,7 @@ const store: Store<RootState> = new Vuex.Store({
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   state: {
-    version: '1.10.0',
+    version: '1.11.0',
     _loaded: {
       value: false,
       loading: false,

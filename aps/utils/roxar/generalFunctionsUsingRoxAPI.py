@@ -223,13 +223,17 @@ def define_active_cell_indices(indexer,
     ijk_handedness,
     use_left_handed_grid_indexing,
     grid_model_name,
-    debug_level
+    debug_level,
+    switch_handedness_for_parameters=False,
 ):
     _, ny, _ = indexer.dimensions
     defined_cell_indices = indexer.get_indices(cell_numbers)
+    switch_handedness = switch_handedness_for_parameters
     if (ijk_handedness == Direction.right) and use_left_handed_grid_indexing:
-        if debug_level >= Debug.VERBOSE:
-            print(f'-- Modelling grid {grid_model_name}  is right-handed (Eclipse grid index ordering)')
+        switch_handedness = True
+    if switch_handedness:
+        if debug_level >= Debug.VERY_VERBOSE:
+            print(f"-- Grid handedness for {grid_model_name} : {ijk_handedness}.  Switch handedness.")
         i_indices = defined_cell_indices[:, 0]
         j_indices = -defined_cell_indices[:, 1] + ny -1
     else:
@@ -242,7 +246,9 @@ def define_active_cell_indices(indexer,
 def set_continuous_3d_parameter_values_in_zone_region(
         grid_model, parameter_names, input_values_for_zones, zone_number,
         region_number=0, region_parameter_name=None, realisation_number=0, is_shared=False,
-        debug_level=Debug.OFF, fmu_mode=False, use_left_handed_grid_indexing=False,
+        debug_level=Debug.OFF, fmu_mode=False,
+        use_left_handed_grid_indexing=False,
+        switch_handedness=False,
 ):
     """Set 3D parameter with values for specified grid model for specified zone (and region)
     Input:
@@ -303,7 +309,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
     if region_parameter_name is None or len(region_parameter_name) == 0:
         i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
             zone_cell_numbers, ijk_handedness,
-            use_left_handed_grid_indexing, grid_model.name,debug_level)
+            use_left_handed_grid_indexing, grid_model.name,debug_level, switch_handedness)
 
     else:
         # Get region parameter values
@@ -319,7 +325,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
         zone_region_cell_numbers = zone_cell_numbers[region_param_values_in_zone == region_number]
         i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
             zone_region_cell_numbers, ijk_handedness,
-            use_left_handed_grid_indexing, grid_model.name,debug_level)
+            use_left_handed_grid_indexing, grid_model.name,debug_level, switch_handedness)
         use_regions = True
 
     # Loop over all parameter names

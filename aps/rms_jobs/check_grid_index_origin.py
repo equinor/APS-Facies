@@ -77,3 +77,5 @@ def run(project,
                     "APS workflows require that both the modelling grid and the help grid for ERT uses the same grid index origin.\n"
                     "The grid index origin must be either the standard RMS choice or the standard Eclipse choice"
                 )
+            if fmu_ijk_handedness == roxar.Direction.left:
+                raise ValueError(f"FMU mode for AHM require that the grid index origin is Eclipse standard (upper left corner index origin)")

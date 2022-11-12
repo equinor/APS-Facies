@@ -86,3 +86,5 @@ export const DEFAULT_MODEL_FILE_NAMES = {
 }
 
 export const DEFAULT_EXPORT_FMU_CONFIG_FILES = false
+
+export const DEFAULT_USE_RESIDUAL_FIELDS = false

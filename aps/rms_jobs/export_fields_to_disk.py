@@ -12,7 +12,6 @@ from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.fmu import get_export_location
 from aps.utils.roxar.grid_model import flip_grid_index_origo
-from aps.utils.methods import get_specification_file, get_debug_level
 from aps.utils.constants.simple import Debug
 
 
@@ -23,16 +22,26 @@ def run(project, **kwargs):
         raise ValueError(f'In RMS models to be used with a FMU loop in ERT,'
                          'the grid and parameters should be shared and realisation = 1'
         )
+    model_file_name = kwargs.get('model_file', None)
+    if model_file_name is None:
+        raise ValueError("Model file name is required in export_fields_to_dist")
     fmu_mode = kwargs.get('fmu_mode', False)
+    aps_model = APSModel(model_file_name)
+
     if not fmu_mode:
         raise ValueError(f'The export of GRF is only available in FMU mode with AHM')
-    debug_level = get_debug_level(**kwargs)
-    model_file = get_specification_file(**kwargs)
-    aps_model = APSModel(model_file)
-    fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
-    file_format = kwargs.get('field_file_format')
+    debug_level = aps_model.log_setting
+    fmu_grid_name = aps_model.grid_model_name
+    file_format = aps_model.fmu_field_file_format
+    fmu_use_residual_fields = aps_model.fmu_use_residual_fields
 
+    print(" ")
     print(f"Export 3D parameter files from {fmu_grid_name}")
+    if debug_level >= Debug.ON:
+        if fmu_use_residual_fields:
+            print(f"- Only the residual for GRF's with trend is written to files to be read by ERT!")
+        else:
+            print(f"- GRF files are written to files to be read by ERT")
 
     # Get the ERTBOX grid from RMS
     fmu_grid_model = project.grid_models[fmu_grid_name]
@@ -58,6 +67,8 @@ def run(project, **kwargs):
     for zone in aps_model.zone_models:
         if aps_model.isSelected(zone.zone_number,0):
             for field_name in zone.gaussian_fields_in_truncation_rule:
+                if fmu_use_residual_fields and zone.hasTrendModel(field_name):
+                    field_name = field_name + '_residual'
                 field_properties = fmu_grid_model.properties
                 field_property = None
                 if field_name in field_properties:
@@ -77,8 +88,6 @@ def run(project, **kwargs):
                 else:
                     # Use xtgeo for other formats not available from roxar.grids
                     values = field_property.get_values(project.current_realisation)
-                    # The current grid model is ERTBOX grid model where all cells are active
-                    # Flip the order of the values to be consistent with right-handed if the
                     values3d = np.reshape(values, (nx, ny, nz))
 
                     if handedness == Direction.right:

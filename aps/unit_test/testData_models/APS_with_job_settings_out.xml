@@ -21,6 +21,7 @@
         <FileFormat>roff</FileFormat>
         <ExtrapolationMethod>extend_layer_mean</ExtrapolationMethod>
       </UpdateGRF>
+      <UseResidualFields>NO</UseResidualFields>
       <ExportConfigFiles>YES</ExportConfigFiles>
     </FmuSettings>
     <RunSettings>
