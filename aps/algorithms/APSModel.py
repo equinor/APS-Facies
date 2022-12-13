@@ -127,6 +127,8 @@ class APSModel:
             prob_settings_tolerance: float = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
             transform_type: TransformType = TransformType.EMPIRIC,
             fmu_use_residual_fields: bool = False,
+            check_with_grid_model: bool = False,
+            project= None,
 
 
     ):
@@ -206,6 +208,7 @@ class APSModel:
         self.__previewResolution = preview_resolution
         self.__debug_level = debug_level
         self.__log_setting = log_setting
+        self.__zones_removed = False
 
         # Job settings for APS GUI
         self.__fmu_mode = fmu_mode
@@ -222,22 +225,51 @@ class APSModel:
 
         # Read model if it is defined
         if model_file_name is not None:
-            self.__parse_model_file(model_file_name, debug_level=debug_level)
+            self.__parse_model_file(
+                model_file_name,
+                debug_level=debug_level,
+                check_with_grid_model=check_with_grid_model,
+                project=project)
 
     @property
     def use_constant_probability(self) -> bool:
         return all(model.use_constant_probabilities for model in self.__zoneModelTable.values())
 
-    def __parse_model_file(self, model_file_name: FilePath, debug_level: Debug = Debug.OFF) -> None:
+    @property
+    def zones_removed(self)-> bool:
+        return self.__zones_removed
+
+    def __parse_model_file(self,
+        model_file_name: FilePath,
+        debug_level: Debug = Debug.OFF,
+        check_with_grid_model: Optional[bool] = False,
+        project=None
+    ) -> None:
         """ Read xml file and put the data into data structure """
         root = ET.parse(model_file_name).getroot()
-        self.__interpretTree(root, debug_level, model_file_name)
+        self.__interpretTree(
+            root,
+            debug_level,
+            model_file_name=model_file_name,
+            check_with_grid_model=check_with_grid_model,
+            project=project)
+
 
     @classmethod
-    def from_string(cls, xml_content: str, debug_level: Debug = Debug.OFF) -> 'APSModel':
+    def from_string(cls,
+            xml_content: str,
+            debug_level: Debug = Debug.OFF,
+            check_with_grid_model: Optional[bool] = False,
+            project=None
+    ) -> 'APSModel':
+
         root = ET.fromstring(xml_content)
         model = cls()
-        model.__interpretTree(root, debug_level)
+        model.__interpretTree(
+                root,
+                debug_level,
+                check_with_grid_model=check_with_grid_model,
+                project=project)
         return model
 
     def __interpretTree(
@@ -245,6 +277,8 @@ class APSModel:
             root: ET.Element,
             debug_level_input: Debug = Debug.OFF,
             model_file_name: Optional[str] = None,
+            check_with_grid_model: Optional[bool] = False,
+            project=None
     ) -> None:
         self.__ET_Tree = ET.ElementTree(root)
         if root.tag != 'APSModel':
@@ -409,9 +443,21 @@ class APSModel:
                 f'--- Name of RMS workflow read:          {self.__rmsWorkflowName}'
             )
 
+        # Get the number of zones of the current modelling grid if a check to compare
+        # the grid model with the specified zones in the APS model is to be done.
+        number_of_zones_in_grid = None
+        if check_with_grid_model:
+            if self.grid_model_name not in project.grid_models:
+                raise ValueError(f"Grid model {self.grid_model_name} does not exist.")
+            grid_model = project.grid_models[self.grid_model_name]
+            if grid_model.is_empty(project.current_realisation):
+                raise ValueError(f"Grid model {self.grid_model_name} is empty.")
+            zonation = grid_model.get_grid(project.current_realisation).simbox_indexer.zonation
+            number_of_zones_in_grid = len(zonation.keys())
 
         # Read all zones for models specifying main level facies
         # --- ZoneModels ---
+        self.__zones_removed = False
         zModels = root.find('ZoneModels')
         if zModels is None:
             raise IOError(
@@ -436,6 +482,12 @@ class APSModel:
                     f'Can not have zone number: {zone_number}'
                 )
             region_number = get_region_number(zone)
+
+            if check_with_grid_model and zone_number > number_of_zones_in_grid:
+                # Skip this zone since it does not exist in grid model
+                print(f"Warning: Skip zone models with zone_number = {zone_number} due to mismatch with {self.grid_model_name}")
+                self.__zones_removed = True
+                continue
 
             # The model is identified by the combination (zoneNumber, regionNumber)
             zoneModelKey = (zone_number, region_number)
