@@ -287,7 +287,7 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
 
-auxillary-files: VERSION COMMIT
+auxillary-files: VERSION COMMIT TOOLBOX_VERSION
 	cp $(INFO.XML) $(PLUGIN_DIR)
 
 VERSION:
@@ -295,6 +295,11 @@ VERSION:
 
 COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
+
+TOOLBOX_VERSION:
+	cat $(CODE_DIR)/bin/TOOLBOX_VERSION > $(PLUGIN_DIR)/TOOLBOX_VERSION
+
+
 
 mock-VERSION:
 	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION

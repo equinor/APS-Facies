@@ -54,8 +54,14 @@ def output_version_information(func):
             print(f'Plugin running from: {plugin_root.parent}')
 
         version = get_content('VERSION')
+        try:
+            toolbox_version = get_content('TOOLBOX_VERSION')
+        except:
+            toolbox_version = ' '
         print(f"GUI version: {version}")
+
         if config.debug_level >= Debug.VERBOSE:
+            print(f"APS toolbox (help script) version: {toolbox_version}  ")
             commit = get_content('COMMIT')
             print(f"Commit SHA: {commit}")
         return func(config)
