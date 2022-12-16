@@ -83,7 +83,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.14.7"
+__version__ = "0.15.1"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -421,6 +421,7 @@ def get_workflows() -> Dict[str, List[str]]:
             'test_jobs_and_workflow',
             'turn_off_traceback',
             'turn_on_traceback',
+            'APS_redefine_zone_models',
         ],
         'aps/algorithms': [
             'setupFMUtags',
@@ -468,6 +469,7 @@ def get_rms_mapping(suffix: str = '') -> Dict[str, Optional[str]]:
             ('APS_run_workflow', 'test_jobs_and_workflow.py'),
             ('Turn_off_traceback', 'turn_off_traceback.py'),
             ('Turn_on_traceback', 'turn_on_traceback.py'),
+            ('APS_redefine_zone_models', 'APS_redefine_zone_models.py'),
         ]
     }
 
