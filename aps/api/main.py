@@ -30,6 +30,10 @@ def run(config):
     @output_version_information
     def execute(job: JobConfig):
         if job.error_message:
+            try:
+                roxar.rms.error(job.error_message)
+            except:
+                pass
             raise ValueError(job.error_message)
         with create_temporary_model_file(job.model) as model_file:
             kwargs = job.get_parameters(model_file)

@@ -79,14 +79,19 @@ class JobConfig:
         if export_error:
             return export_error
 
+        aps_model = APSModel.from_string(self.model, check_with_grid_model=True, project=self.project)
         if self.run_fmu_workflows:
-            aps_model = APSModel.from_string(self.model)
             for zone_model in aps_model.zone_models:
                 if not zone_model.grid_layout:
                     return (
                            f'The zone with code {zone_model.zone_number} does not have any conformity specified. '
                            f'This is required, when running in ERT / AHM.'
                     )
+        # Check if APS model is consistent with grid model and has only zones defined in grid model
+        ok, err_msg = self.check_zones(aps_model)
+        if not ok:
+            return err_msg
+
         return None
 
     @property
@@ -272,6 +277,31 @@ class JobConfig:
         migration = Migration(RMSData(self.roxar, self.project))
         return migration.migrate(state)
 
+    def check_zones(self, aps_model: APSModel):
+        if aps_model.zones_removed:
+            current_job_name = self.roxar.rms.get_running_job_name()
+            print(f"Consistency error: Grid model has changed since the APS job {current_job_name} was created.")
+            print( "  Fix the problem using the following help script: APS_remap_zone_models.")
+            print( "  This script will take as input a YAML file specifying:")
+            print( "        1. The old APS model (exported to model file)")
+            print( "        2. Table of old zones and of new zones and a table defining the correspondence between them.")
+            print( "        3. The output will be a new APS model file having new zones and corresponding settings for the new zones.")
+            print( "  See the APS documentation of the help scripts on Equinor Wiki.")
+            print( "  The current job will be stopped since additional information is needed to remap the zone models from the old to the new grid model.")
+            if current_job_name is not None:
+                err_message = f"Current grid model: {aps_model.grid_model_name}  has less number of zones than specified in the APS job: {current_job_name}. "
+            else:
+                err_message = f"Current grid model has less number of zones than specified in the APS job."
+
+            if self.run_fmu_workflows:
+                self._config['fmu']['create']['value'] = True
+                if aps_model.fmu_ertbox_name in self.project.grid_models:
+                    fmu_ertbox_grid_model = self.project.grid_models[aps_model.fmu_ertbox_name]
+                    print(f"Warning: Will delete ERTBOX grid model: {aps_model.fmu_ertbox_name}. Must be created again.")
+                    del fmu_ertbox_grid_model
+
+            return False, err_message
+        return True, None
 
 def classify_job_configuration(roxar, project):
     def decorator(func):
