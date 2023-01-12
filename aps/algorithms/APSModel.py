@@ -196,9 +196,7 @@ class APSModel:
         self.write_seeds = write_seeds
 
         self.__faciesTable = main_facies_table
-        self.__zoneModelTable = zone_model_table if zone_model_table else {}
-        self.__sortedZoneModelTable = {}
-        self.__zoneNumberList = []
+        self.__zoneModelTable = zone_model_table or {}
         self.__selectedZoneAndRegionNumberTable = {}
         self.__selectAllZonesAndRegions = True
         self.__previewZone = preview_zone
@@ -945,6 +943,12 @@ class APSModel:
     def grid_model_name(self, name):
         self.__rmsGridModelName = name
 
+    def set_zone_models(self, input_zone_models: Dict[Tuple[int, int], APSZoneModel])-> None:
+        """
+        Can be used to redefine zone models of existing APSModel.
+        """
+        self.__zoneModelTable = copy.deepcopy(input_zone_models)
+
     def getResultFaciesParamName(self):
         return copy.copy(self.__rmsFaciesParamName)
 
@@ -1329,6 +1333,14 @@ class APSModel:
     @property
     def fmu_mode(self) -> str:
         return self.__fmu_mode
+
+    @fmu_mode.setter
+    def fmu_mode(self, value="OFF"):
+        legal_values = ["OFF", "NOFIELDS", "FIELDS"]
+        if value in legal_values:
+            self.__fmu_mode = value
+        else:
+            raise ValueError(f"Legal values for fmu_mode are: {legal_values}")
 
     @property
     def fmu_ertbox_name(self) -> str:

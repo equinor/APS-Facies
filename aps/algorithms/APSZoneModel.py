@@ -310,6 +310,10 @@ class APSZoneModel:
     def region_number(self) -> int:
         return self.__regionNumber
 
+    @region_number.setter
+    def region_number(self, value) -> int:
+        self.__regionNumber = value
+
     @property
     def key_resolution(self) -> int:
         return self.__keyResolution

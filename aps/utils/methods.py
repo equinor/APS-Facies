@@ -200,6 +200,7 @@ class SpecificationType(Enum):
     PROBABILITY_TREND = 4
     RESAMPLE = 5
     PROBABILITY_DEP_TREND = 6
+    REMAP_ZONE_MODELS = 7
 
 
 def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODEL,
@@ -221,6 +222,7 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         SpecificationType.PROBABILITY_TREND: 'defineProbTrend.yml',
         SpecificationType.PROBABILITY_DEP_TREND: 'Create_depositional_probability_trend.yml',
         SpecificationType.RESAMPLE: 'resample.yml',
+        SpecificationType.REMAP_ZONE_MODELS: 'redefine_zone_models.yml',
     }
     if _format == ModelFileFormat.XML and _type in mapping_xml:
         file = get_model_file_name(_default_name=mapping_xml[_type], **kwargs)
