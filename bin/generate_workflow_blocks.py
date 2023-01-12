@@ -31,6 +31,7 @@ from aps.utils.roxar import get_nrlib_path
 def run() -> None:
     root_path = get_root_path()
     workflows = get_workflows()
+    toolbox_version = get_toolbox_version()
     use_temporary = '--use-temporary-workflow-dir' in argv
     salt = None
     if use_temporary:
@@ -42,7 +43,8 @@ def run() -> None:
 
     for relative_path, items in workflows.items():
         for file_name in items:
-            create_workflow_block_file(file_name, root_path, relative_path, use_temporary, salt, suffix)
+            create_workflow_block_file(file_name, root_path, relative_path,
+                toolbox_version, use_temporary, salt, suffix)
 
     for i in range(len(argv)):
         arg = argv[i]
@@ -57,7 +59,7 @@ def run() -> None:
                     _OS.copy(workflow_dir / rms_name, project_location / 'pythoncomp' / rms_name)
 
 
-def get_workflow_block(file_name: str, relative_path: str) -> str:
+def get_workflow_block(file_name: str, relative_path: str, toolbox_version: str) -> str:
     template = '''#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -83,7 +85,7 @@ import shutil
 
 __author__ = "Sindre Nistad"
 __email__ = "snis@equinor.com"
-__version__ = "0.15.1"
+__version__ = "{toolbox_version}"
 __status__ = "Draft"
 
 # Toggle whether the source files should be read from the plugin, or the git repo
@@ -146,6 +148,7 @@ else:
 temp_dir = Path(roxar.rms.get_tmp_dir())
 root_path = _get_path_from_environment(APS_ROOT, temp_dir / 'aps_gui' / 'pydist')
 print(f"Root path: {{root_path}}")
+print(f"Version of this script: {{__version__}}")
 release_location = _get_path_from_environment(RMS_PLUGINS_LIBRARY, '/project/res/APSGUI/releases/stable')
 
 # Path to where the file below is located within the repository
@@ -199,6 +202,12 @@ def get_current_plugin_path():
     #Example /project/res/APSGUI/releases/aps_gui.1.3.10.221991918.plugin  or
     #        /project/res/APSGUI/releases/stable/aps_gui.1.3.10.plugin
     for path in paths:
+        if not path.suffix:
+            raise IOError(
+                f"Found file {{str(path)}}. "
+                f"Expecting plugin of the form aps_gui.major.minor.patch.plugin "
+                f"or aps_gui.major.minor.patch.timestamp.plugin"
+            )
         last_suffix = path.suffixes[-1]
         if last_suffix == '.plugin':
             suffixes = [int(suffix.strip('.')) for suffix in path.suffixes[:-1]]
@@ -221,10 +230,10 @@ def stringify_path(path):
 
 def extract_plugin():
     extracted = temp_dir / 'aps_gui'
-
     def unzip():
         with ZipFile(str(get_current_plugin_path())) as zf:
             zf.extractall(path=temp_dir)
+
     if not extracted.exists():
         unzip()
     else:
@@ -249,6 +258,25 @@ if APS_ROOT not in os.environ:
     # When a plugin is used, it includes a stump for importing nrlib as well
     extract_plugin()
     sys.path.insert(0, stringify_path(root_path))
+
+    # Check that the TOOLBOX_VERSION in the plugin is the same as in current file
+    toolbox_version_path = root_path / ".." / "TOOLBOX_VERSION"
+    if toolbox_version_path.is_file():
+        with open(toolbox_version_path, "r") as f:
+            for line in f.readlines():
+                if line:
+                    toolbox_version_in_plugin = line.strip()
+                    break
+
+        if toolbox_version_in_plugin != __version__:
+            print(f"The APS plugin version need helpscript version: {{toolbox_version_in_plugin}}")
+            print(f"The current script has version: {{__version__}}")
+            print("If you use APS default version (stable version), you can update the help script by re-loading the python code from the directory:")
+            print("/project/res/APSGUI/MasterBranch/aps_workflows.")
+            print("NOTE: When selecting file, choose 'All files (*)' and not 'Python files (*.py)' files since the help scripts don't have '.py' extension")
+            raise ValueError("Help script version is not up to date with the APS plugin version")
+    else:
+        raise IOError("Can not find file: TOOLBOX_VERSION")
 else:
     # Add nrlib to PYTHONPATH
     nrlib_path = Path('{nrlib_path}')
@@ -386,6 +414,7 @@ if file_name != 'turn_off_traceback':
     return template.format(
         file_name=file_name,
         relative_path=relative_path,
+        toolbox_version=toolbox_version,
         nrlib_path=get_nrlib_path(),
     )
 
@@ -396,6 +425,16 @@ def get_root_path() -> Path:
     else:
         return Path(argv[1])
 
+def get_toolbox_version() -> str:
+    try:
+        with open("bin/TOOLBOX_VERSION", "r") as file:
+            for line in file.readlines():
+                if line:
+                    version = line.strip()
+                    break
+    except:
+        raise IOError("Did not find the file: TOOLBOX_VERSION. Run from top directory of source code repo")
+    return version
 
 def get_workflows() -> Dict[str, List[str]]:
     return {
@@ -502,6 +541,7 @@ def create_workflow_block_file(
         file_name: str,
         root_path: Path,
         relative_path: str,
+        toolbox_version: str,
         use_temporary: Optional[bool] = False,
         salt: Optional[str] = None,
         suffix: str = '',
@@ -511,7 +551,7 @@ def create_workflow_block_file(
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
     workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
     workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
-    workflow_block = get_workflow_block(file_name, relative_path)
+    workflow_block = get_workflow_block(file_name, relative_path, toolbox_version)
     print(f"Generate: {workflow_path} ")
     with open(workflow_path, 'w') as f:
         f.write(workflow_block)
