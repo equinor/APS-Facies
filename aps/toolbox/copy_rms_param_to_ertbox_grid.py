@@ -5,7 +5,7 @@
     in ERTBOX grid. This functionality is used when the user wants to
     use FIELD keywords for petrophysical properties in ERT in Assisted History Matching.
 '''
-
+import roxar
 import xml.etree.ElementTree as ET
 
 from pathlib import Path
@@ -145,12 +145,30 @@ def from_geogrid_to_ertbox(project, params):
     method = ExtrapolationMethod(method)
 
 
-    # Create
-    geogrid_model, _ = get_grid_model(project, grid_model_name)
+    geogrid_model, geogrid3D = get_grid_model(project, grid_model_name)
     if not zone_param_name in geogrid_model.properties:
         raise ValueError(f"The parameter {zone_param_name} does not exist in {grid_model_name} .")
     zone_param = geogrid_model.properties[zone_param_name]
     zone_code_names = zone_param.code_names
+
+    _, ertboxgrid3D = get_grid_model(project, ertbox_grid_model_name)
+
+    # Check grid index origin
+    geogrid_handedness = geogrid3D.grid_indexer.ijk_handedness
+    ertboxgrid_handedness = ertboxgrid3D.grid_indexer.ijk_handedness
+
+    if geogrid_handedness != ertboxgrid_handedness:
+        raise ValueError(
+            f"Grid model for geomodel '{grid_model_name}' and "
+            f"grid model for ERTBOX grid '{ertbox_grid_model_name}'  "
+            f"have different grid index origin.\n"
+            "Use 'Eclipse grid standard' (upper left corner) as "
+            "common grid index origin (right-handed grid) in FMU projects using ERT."
+        )
+    if ertboxgrid_handedness != roxar.Direction.right:
+        print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
+        print("         Use the grid index origin job in RMS to set this.")
+
 
     zone_dict = {}
     zone_names_used =[] 
