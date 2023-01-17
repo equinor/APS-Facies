@@ -174,7 +174,7 @@ def truncMapPolygons(
 def writePolygons(fileName: str, polygons: Any, debug_level: Debug = Debug.OFF) -> None:
     if debug_level >= Debug.ON:
         print(f'Write file: {fileName}')
-    with open(fileName, 'w') as file:
+    with open(fileName, 'w', encoding='utf-8') as file:
         for n in range(len(polygons)):
             poly = polygons[n]
             file.write('Polygon number: ' + str(n) + '\n')

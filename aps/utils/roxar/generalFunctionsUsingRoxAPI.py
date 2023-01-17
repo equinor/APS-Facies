@@ -25,7 +25,7 @@ def get_project_realization_seed(project=None):
     external_seed = Path('./RMS_SEED_USED')
     if external_seed.exists():
         # For use in ERT, when the project seed is not set
-        with open(external_seed) as f:
+        with open(external_seed, encoding='utf-8') as f:
             content = ''.join(f.readlines()).strip()
         seed = int(content.split()[-1])
         return seed

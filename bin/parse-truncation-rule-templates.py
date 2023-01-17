@@ -430,7 +430,7 @@ def run(data):
 
 
 if __name__ == '__main__':
-    with open('examples/truncation_settings.dat', 'r') as f:
+    with open('examples/truncation_settings.dat', 'r', encoding='utf-8') as f:
         data = f.readlines()
     run(data)
 

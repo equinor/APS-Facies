@@ -172,7 +172,7 @@ def compare(
         if check:
             print('Files are equal. OK')
         else:
-            with open(source) as f, open(reference) as ref:
+            with open(source, encoding='utf-8') as f, open(reference, encoding='utf-8') as ref:
                 diff = difflib.Differ().compare(
                     f.readlines(),
                     ref.readlines(),

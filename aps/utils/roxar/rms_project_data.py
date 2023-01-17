@@ -437,7 +437,7 @@ class RMSData:
         if prettifier is None:
             prettifier = lambda _: _
         try:
-            with open(Path(path), 'w') as f:
+            with open(Path(path), 'w', encoding='utf-8') as f:
                 f.write(prettifier(_decode(content)))
             return True
         except FileNotFoundError:
@@ -611,7 +611,7 @@ class RMSData:
     @staticmethod
     def load_file(path: str) -> Optional[str]:
         try:
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 content = f.read()
             return content
         except FileNotFoundError:

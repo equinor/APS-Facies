@@ -52,7 +52,7 @@ def simulateGauss(
     DZ for this zone        : {dz}
 '''
     if logFileName is not None:
-        file = open(logFileName, 'w')
+        file = open(logFileName, 'w', encoding='utf-8')
         file.write(description)
 
     if debug_level >= Debug.VERBOSE:
@@ -76,7 +76,7 @@ def simulateGauss(
         # Read start seed from seed file for current gauss field, zone and region
         # Initialize start seed
         try:
-            with open(seedFileName, 'r') as sfile:
+            with open(seedFileName, 'r', encoding='utf-8') as sfile:
                 inputString = sfile.read()
                 words = inputString.split()
                 startSeed = -1
@@ -146,7 +146,7 @@ def simulateGauss(
             print(f'    Write file: {logFileName}')
 
     if writeSeedFile and seedFileName is not None:
-        file = open(seedFileName, 'w')
+        file = open(seedFileName, 'w', encoding='utf-8')
         file.write(f' {gauss_field_name}  {zone_number}  {region_number}  {startSeed}\n')
         file.close()
         if debug_level >= Debug.VERBOSE:

@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from aps.utils.xmlUtils import prettify
 
 def write(file_name: str, content: str) -> None:
-    with open(file_name, 'w') as file:
+    with open(file_name, 'w', encoding='utf-8') as file:
         file.write(content)
 
 def run():

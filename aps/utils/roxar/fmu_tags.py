@@ -26,7 +26,7 @@ def read_selected_fmu_variables(
     Tuple[str, int, int, str, int],
 ]]:
     fmu_variables = []
-    with open(input_selected_fmu_variable_file, 'r') as file:
+    with open(input_selected_fmu_variable_file, 'r', encoding='utf-8') as file:
         finished = False
         while not finished:
             line = file.readline()

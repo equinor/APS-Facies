@@ -66,7 +66,7 @@ def createXMLTreeAndWriteFile(truncRuleInput: Trunc2D_Cubic, outputModelFileName
     truncRuleInput.XMLAddElement(top, 1, 1, fmu_attributes)
     rootReformatted = prettify(top)
     print(f'Write file: {outputModelFileName}')
-    with open(outputModelFileName, 'w') as file:
+    with open(outputModelFileName, 'w', encoding='utf-8') as file:
         file.write(rootReformatted)
 
 

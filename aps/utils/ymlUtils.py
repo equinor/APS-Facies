@@ -49,6 +49,6 @@ def readYml(file_name):
     if not os.path.exists(file_name):
         raise IOError(f"File {file_name} does not exist")
 
-    with open(file_name, 'r') as file:
+    with open(file_name, 'r', encoding='utf-8') as file:
         spec_all = yaml.safe_load(file)
     return spec_all
