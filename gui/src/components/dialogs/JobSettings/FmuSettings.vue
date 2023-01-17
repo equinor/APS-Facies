@@ -8,16 +8,11 @@
           ref="confirm"
           html
         />
-        <base-tooltip
-          :message="reasonForDisabling"
-        >
           <v-checkbox
             v-model="_runFmuWorkflows"
             v-tooltip="'Enable updating of model parameters and Gaussian fields by FMU.'"
             label="Run APS facies update in AHM/ERT"
-            :disabled="disableErtMode"
           />
-        </base-tooltip>
       </v-col>
       <v-col>
         <v-checkbox
@@ -311,14 +306,6 @@ export default class FmuSettings extends Vue {
   }
 
   // Settings for handling regions, and ERT-mode
-  // These should not be needed when regions are supported in ERT-mode
-  get reasonForDisabling (): string | undefined {
-    if (this.useRegions) {
-      return 'Regions are not supported in ERT/AHM mode. Please deselect regions if you want to run APS with ERT/AHM'
-    }
-    return undefined
-  }
-
   get useRegions (): boolean { return (this.$store as Store).state.regions.use }
 
   get gridHasReverseFaults (): boolean {
@@ -326,6 +313,5 @@ export default class FmuSettings extends Vue {
     return !!grid && grid.hasDualIndexSystem
   }
 
-  get disableErtMode (): boolean { return !!this.reasonForDisabling }
 }
 </script>

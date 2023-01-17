@@ -65,7 +65,9 @@ def run(project, **kwargs):
 
     # Loop over all zones defined in aps model
     for zone in aps_model.zone_models:
-        if aps_model.isSelected(zone.zone_number,0):
+        if aps_model.isSelected(zone.zone_number, zone.region_number):
+            if debug_level >= Debug.VERBOSE:
+                print(f"-- Export GRF fields for (zone,region) = ({zone.zone_number},{zone.region_number})")
             for field_name in zone.gaussian_fields_in_truncation_rule:
                 if fmu_use_residual_fields and zone.hasTrendModel(field_name):
                     field_name = field_name + '_residual'

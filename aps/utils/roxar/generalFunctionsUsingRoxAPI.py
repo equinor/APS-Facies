@@ -306,7 +306,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
             f'Grid model nLayers for zone {zone_number} is: {num_layers}    Input array nz: {nz_in}'
         )
     use_regions = False
-    if region_parameter_name is None or len(region_parameter_name) == 0:
+    if region_parameter_name is None or len(region_parameter_name) == 0 or fmu_mode:
         i_indices, j_indices, k_indices = define_active_cell_indices(indexer,
             zone_cell_numbers, ijk_handedness,
             use_left_handed_grid_indexing, grid_model.name,debug_level, switch_handedness)
@@ -320,7 +320,7 @@ def set_continuous_3d_parameter_values_in_zone_region(
             if not p.is_empty(realisation_number):
                 region_param_values = p.get_values(realisation_number)
         else:
-            raise ValueError(f"Parameter {region_param_values} does not exist or is empty.")
+            raise ValueError(f"Parameter {region_parameter_name} does not exist or is empty in grid model {grid_model.name}.")
         region_param_values_in_zone = region_param_values[zone_cell_numbers]
         zone_region_cell_numbers = zone_cell_numbers[region_param_values_in_zone == region_number]
         i_indices, j_indices, k_indices = define_active_cell_indices(indexer,

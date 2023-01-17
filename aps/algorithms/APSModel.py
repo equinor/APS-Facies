@@ -16,7 +16,7 @@ from aps.utils.numeric import isNumber
 from aps.utils.types import FilePath
 from aps.utils.xmlUtils import getKeyword, getTextCommand, prettify, minify, get_region_number, create_node
 from aps.utils.io import GlobalVariables, write_string_to_file
-from aps.utils.roxar.grid_model import check_active_cells_in_zone_region, create_zone_parameter
+from aps.utils.roxar.grid_model import create_zone_parameter, find_defined_cells
 
 if TYPE_CHECKING:
     from roxar import Project
@@ -512,12 +512,18 @@ class APSModel:
                 # This zoneNumber, regionNumber combination is not defined previously
                 # and must be added to the dictionary
                 self.__zoneModelTable[zoneModelKey] = zone_model
+
+                # Initially set all defined zone models active
+                selected_key = (zone_number, region_number)
+                self.__selectedZoneAndRegionNumberTable[selected_key] = 1
+
             else:
                 raise ValueError(
                     'Can not have two or more entries of keyword Zone with the same zoneNumber and regionNumber.\n'
                     f'Can not have multiple specification of '
                     f'(zoneNumber, regionNumber) = ({zone_number}, {region_number})'
                 )
+            self.__selectAllZonesAndRegions = True
 
         # --- SelectedZones ---
         kw = 'SelectedZonesAndRegions'
@@ -527,6 +533,11 @@ class APSModel:
             # all zones and region combinations are selected.
             # Read this sub set of zone and region combinations.
             self.__selectAllZonesAndRegions = False
+
+            # Initialize selected to no zones
+            for key in self.__zoneModelTable:
+                self.__selectedZoneAndRegionNumberTable[key] = 0
+
             kw2 = 'SelectedZoneWithRegions'
             objSelectedZone = None
             for objSelectedZone in obj.findall(kw2):
@@ -903,16 +914,13 @@ class APSModel:
 
     def getSelectedRegionNumberListForSpecifiedZoneNumber(self, zoneNumber: int) -> List[int]:
         selectedRegionNumberList = []
-        keyList = sorted(list(self.__selectedZoneAndRegionNumberTable.keys()))
-        for item in keyList:
-            zNumber, rNumber = item
-            if zNumber == zoneNumber and rNumber not in selectedRegionNumberList:
-                selectedRegionNumberList.append(rNumber)
+        for key, is_selected in self.__selectedZoneAndRegionNumberTable.items():
+            znumber, rnumber = key
+            if is_selected and zoneNumber == znumber and rnumber not in selectedRegionNumberList:
+                selectedRegionNumberList.append(rnumber)
         return selectedRegionNumberList
 
     def isSelected(self, zone_number: int, region_number: int) -> bool:
-        if self.isAllZoneRegionModelsSelected():
-            return True
         key = (zone_number, region_number)
         return key in self.__selectedZoneAndRegionNumberTable
 
@@ -1193,15 +1201,17 @@ class APSModel:
             root.append(elem)
 
         # If selected zone list is defined (has elements) write them to a keyword
-        selected_zone_numbers = self.getSelectedZoneNumberList()
-        if selected_zone_numbers:
+        # but if all defined zones are selected, don't write this keyword.
+        if not self.isAllZoneRegionModelsSelected():
             selected_zone_numbers = collections.OrderedDict(sorted(self.__selectedZoneAndRegionNumberTable.items()))
             tag = 'SelectedZonesAndRegions'
             selected_zone_and_region_element = ET.Element(tag)
             root.append(selected_zone_and_region_element)
             zone_numbers_added = [] 
-            for key, _ in selected_zone_numbers.items():
+            for key, is_selected in selected_zone_numbers.items():
                 zone_number, region_number = key
+                if not is_selected:
+                    continue
                 tag = 'SelectedZoneWithRegions'
                 if zone_number in zone_numbers_added:
                     continue
@@ -1368,23 +1378,75 @@ class APSModel:
         have active grid cells and remove the models for the (zone_number, region_number)
         combinations that has 0 active cells from the list of selected models.
         """
+        if debug_level >= Debug.VERBOSE:
+            print("-- Check zones and regions in grid model for active cells.")
+
         grid_model = project.grid_models[self.grid_model_name]
         realisation_number = project.current_realisation
+        zone_param = create_zone_parameter(
+            grid_model,
+            name=GridModelConstants.ZONE_NAME,
+            realization_number=realisation_number)
+        zone_values = zone_param.get_values(realisation_number)
         all_zone_models = self.sorted_zone_models
+        region_values = None
+        region_param = None
         region_param_name = self.getRegionParamName()
+        if region_param_name is not None and len(region_param_name)>0:
+            if region_param_name not in grid_model.properties:
+                raise ValueError(
+                    f"Region parameter {region_param_name} does not exist or is empty in "
+                    f"grid model {self.grid_model_name}"
+                )
+            region_param = grid_model.properties[region_param_name]
+            region_values = region_param.get_values(realisation_number)
         for key, _ in all_zone_models.items():
-            zone_number, region_number = key
+            (zone_number, region_number) = key
             if not self.isSelected(zone_number, region_number):
                 continue
-            check = check_active_cells_in_zone_region(grid_model,
-                zone_number, region_number, realisation_number, 
-                region_param_name, debug_level=debug_level)
-            if not check:
+
+            active_cells = find_defined_cells(zone_values, zone_number,
+                region_values, region_number, debug_level=Debug.OFF)
+            nactive = len(active_cells)
+            if 0 < nactive < 5 and debug_level >= Debug.ON:
+                print(
+                "NOTE: Number of active grid cells in (zone, region) = "
+                f"({zone_number},{region_number}) is very small. "
+                f"Number of active cells are {nactive}. "
+            )
+
+            if nactive == 0:
                 if debug_level >= Debug.ON:
                     print(
                         f"- Skip (zone,region) = ({zone_number} {region_number}). No active cells."
                     )
                 self.deSelectedZoneAndRegionNumber(zone_number,region_number)
+
+        # Check if there are (zone_number, region_numbers) in the grid model without any specified APS model.
+        if debug_level >= Debug.VERBOSE:
+            print(f"-- Check if there are zones with regions without any specified APS model.")
+        list_of_undefined_zone_regions = []
+        for zone_number in zone_param.code_names.keys():
+            if region_param is not None:
+                for region_number in region_param.code_names.keys():
+                    active_cells = find_defined_cells(zone_values, zone_number,
+                        region_values, region_number)
+                    nactive = len(active_cells)
+                    if not self.isSelected(zone_number, region_number):
+                        if nactive > 0:
+                            # This (zone_number, region_number) combination has no active APS model,
+                            # but the grid model has grid cells for this combination.
+                            list_of_undefined_zone_regions.append((zone_number, region_number, nactive))
+
+        # Only when using regions this list is relevant
+        if len(list_of_undefined_zone_regions) > 0:
+            print("Warning: There exists zones with regions which does not have any specified APS model.")
+            print("Warning: The facies realization will not be updated for these grid cells:")
+            print("  (Zone, Region)      Number of active grid cells")
+            for item in list_of_undefined_zone_regions:
+                (zone_number, region_number, nactive)= item
+                print(f"  ({zone_number},{region_number})                    {nactive}")
+
 
     @staticmethod
     def write_model_from_xml_root(

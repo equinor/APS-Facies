@@ -108,7 +108,7 @@ def add_trends(
     gf_names_for_zone = zone_model.used_gaussian_field_names
     gf_names_for_truncation_rule = zone_model.getGaussFieldsInTruncationRule()
     realization_number = project.current_realisation
-
+    
     # Initialize dictionaries keeping gauss field values and trends for all used gauss fields
     gf_all_values, _, gf_all_trend_values, gf_all_residual_values = initialize_rms_parameters(
         project, aps_model, [1, 0, 1, 1], write_rms_parameters_for_qc_purpose,
@@ -158,6 +158,12 @@ def get_defined_cells(
         fmu_mode=False,
 ):
     realization_number = project.current_realisation
+    use_regions = aps_model.use_regions
+    if fmu_mode:
+        zone_number = 1
+        region_number = 0
+        use_regions = False
+
     # Get zone parameter. Create and/or fill it with values if it does not exist
     zone_param = create_zone_parameter(
         grid_model,
@@ -165,13 +171,11 @@ def get_defined_cells(
         create_new=fmu_mode,
     )
     region_values = None
-    if aps_model.use_regions:
+    if use_regions:
         region_values, _ = getDiscrete3DParameterValues(grid_model, aps_model.region_parameter, realization_number)
     zone_values = zone_param.get_values(realization_number)
-    if fmu_mode:
-        zone_number = 1
     return find_defined_cells(
-        zone_values, zone_number, region_values, region_number, debug_level=debug_level,
+        zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF,
     )
 
 

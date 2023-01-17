@@ -92,6 +92,7 @@ def get_trend_param_names_from_aps_model(
                 f"for zone {zone_name}"
             )
         if debug_level >= Debug.VERY_VERBOSE:
+            print(f"--- In module: {__name__} ")
             print(f"--- zone number: {zone_number}")
             print(f"--- zone name: {zone_name}")
             print(f"--- region number: {region_number}")

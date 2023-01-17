@@ -1,0 +1,20 @@
+# This model specification is used in the script createProbabilityLogs.py
+
+ProbLogs:
+  GridModelName: MultizoneTest
+  BlockedWells: BW
+  FaciesLogName: LF_facies
+  RegionLogName: Facies
+  ZoneLogName: Zone
+  OutputPrefix: Prob
+  ModellingFaciesPerZoneRegion:
+    (1, 1):  LF1 LF2
+    (1, 2):      LF2 LF3
+    (1, 3):  LF1     LF3
+    (2, 1):  LF1 LF2
+    (2, 2):      LF2 LF3
+    (2, 3):  LF1     LF3
+    (3, 1):  LF1 LF2
+    (3, 2):      LF2 LF3
+    (3, 3):  LF1     LF3
+

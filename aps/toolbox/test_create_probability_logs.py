@@ -7,14 +7,17 @@ print(f"Run script: {create_probability_logs.__file__}  ")
 
 # Define input parameters
 
-# Modelled facies for each zone can vary from zone to zone
+# Modelled facies for each zone can vary from zone to zone.
+# Format  Key: (zone_number, region_number) where region_number = 0 is used when region log is not specified.
+# Format  Value: list of facies for specified zone (and region).
+
 modelling_facies_dict = {
-    1: ["F1", "F2", "F3"],
-    2: ["F1", "F2", "F3"],
-    3: ["F1", "F2", "F3"],
-    4: ["F1", "F2", "F3"],
-    5: ["F1", "F2", "F3"],
-    6: ["F1", "F2", "F3"],
+    (1,0): ["F1", "F2", "F3"],
+    (2,0): ["F1", "F2", "F3"],
+    (3,0): ["F1", "F2", "F3"],
+    (4,0): ["F1", "F2", "F3"],
+    (5,0): ["F1", "F2", "F3"],
+    (6,0): ["F1", "F2", "F3"],
 }
 # Observed facies for zone 1 and 6 is A, B, C, D
 # Observed facies for zone 2,3,4,5 is A, B, C
@@ -100,7 +103,7 @@ input_dict = {
     "bw_name":                   "BW4",
     "facies_log_name":           "Facies",
     "zone_log_name":             "Zone",
-    "modelling_facies_per_zone": modelling_facies_dict,
+    "modelling_facies_per_zone_region": modelling_facies_dict,
     "prefix_prob_logs":          "Prob",
     "conditional_prob_facies":   conditional_prob_facies,
 }

@@ -106,6 +106,9 @@ def run(project, **kwargs):
             ertbox_grid_file_path = "../../rms/output/aps/" + ertbox_grid_file_name
             grid_model = project.grid_models[aps_model.grid_model_name]
             zone_names = grid_model.properties[GridModelConstants.ZONE_NAME].code_names
+            region_names = None
+            if aps_model.use_regions:
+                region_names = grid_model.properties[aps_model.region_parameter].code_names
 
             content = "-- ERT keywords related to fields used by APS.\n"
             content += f"GRID {ertbox_grid_file_path}\n"
@@ -114,11 +117,15 @@ def run(project, **kwargs):
                 if not aps_model.isSelected(zone_number, region_number):
                     continue
                 zone_name = zone_names[zone_number]
+                if aps_model.use_regions:
+                    region_name = region_names[region_number]
                 for name in zone_model.used_gaussian_field_names:
+                    fmu_field_name = 'aps_' + zone_name + '_'
+                    if aps_model.use_regions:
+                        fmu_field_name = fmu_field_name + region_name + '_'
+                    fmu_field_name = fmu_field_name + name
                     if zone_model.hasTrendModel(name) and aps_model.fmu_use_residual_fields:
-                        fmu_field_name = 'aps_' + zone_name + '_' + name + '_residual'
-                    else:
-                        fmu_field_name = 'aps_' + zone_name + '_' + name
+                        fmu_field_name = fmu_field_name + '_residual'
                     fmu_field_name_file = fmu_field_name + "." + aps_model.fmu_field_file_format
                     content += f"FIELD {fmu_field_name}   "
                     content += f"PARAMETER {fmu_field_name_file}   "
