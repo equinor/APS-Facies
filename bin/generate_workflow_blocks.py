@@ -178,7 +178,7 @@ def get_plugin_dir():
     except ValueError:
         rms_version = version
     preferences = Path(Path.home() / '.roxar/rms-{{}}/preferences.master'.format(rms_version))
-    with open(preferences) as f:
+    with open(preferences, encoding='utf-8') as f:
         lines = f.readlines()
 
     plugin_dir = release_location
@@ -238,7 +238,7 @@ def extract_plugin():
         unzip()
     else:
         # Check that the version of the extracted plugin is the same as the expected version
-        with open(extracted / 'VERSION') as f:
+        with open(extracted / 'VERSION', encoding='utf-8') as f:
             for line in f.readlines():
                 if line:
                     extracted_version = line.strip()
@@ -262,7 +262,7 @@ if APS_ROOT not in os.environ:
     # Check that the TOOLBOX_VERSION in the plugin is the same as in current file
     toolbox_version_path = root_path / ".." / "TOOLBOX_VERSION"
     if toolbox_version_path.is_file():
-        with open(toolbox_version_path, "r") as f:
+        with open(toolbox_version_path, "r", encoding='utf-8') as f:
             for line in f.readlines():
                 if line:
                     toolbox_version_in_plugin = line.strip()
@@ -427,7 +427,7 @@ def get_root_path() -> Path:
 
 def get_toolbox_version() -> str:
     try:
-        with open("bin/TOOLBOX_VERSION", "r") as file:
+        with open("bin/TOOLBOX_VERSION", "r", encoding='utf-8') as file:
             for line in file.readlines():
                 if line:
                     version = line.strip()
@@ -553,7 +553,7 @@ def create_workflow_block_file(
     workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
     workflow_block = get_workflow_block(file_name, relative_path, toolbox_version)
     print(f"Generate: {workflow_path} ")
-    with open(workflow_path, 'w') as f:
+    with open(workflow_path, 'w', encoding='utf-8') as f:
         f.write(workflow_block)
 
 

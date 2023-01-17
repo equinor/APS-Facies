@@ -17,7 +17,7 @@ from aps.utils.ymlUtils import readYml
 def write_status_file(status: bool, always: bool = False) -> None:
     if running_in_batch_mode() or always:
         file_name = f'statusfile_{get_workflow_name()}.dat'
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.write(f'{status}\n')
 
 
@@ -46,7 +46,7 @@ def readFile(
         print(f'Read file: {fileName}')
     if not exists(fileName):
         fileName = f'aps/unit_test/{fileName}'
-    with open(fileName, 'r') as file:
+    with open(fileName, 'r', encoding='utf-8') as file:
         inString = file.read()
         words = inString.split()
         ny = int(words[1])
@@ -101,7 +101,7 @@ def _write_file(file_name, data, heading, debug_level):
             text = ''
     if count > 0:
         output += text + '\n'
-    with open(file_name, 'w') as file:
+    with open(file_name, 'w', encoding='utf-8') as file:
         file.write(output)
     if debug_level >= Debug.ON:
         print(f'Write file: {file_name}')
@@ -191,7 +191,7 @@ class GlobalVariables:
         '''
 
         keywords = []
-        with open(global_variables_file, 'r') as file:
+        with open(global_variables_file, 'r', encoding='utf-8') as file:
             lines = file.readlines()
 
         for line in lines:
@@ -343,7 +343,7 @@ class GlobalVariables:
 
 def write_string_to_file(file_name: str, content: str,
     debug_level: Debug = Debug.OFF) -> None:
-    with open(file_name, 'w') as file:
+    with open(file_name, 'w', encoding='utf-8') as file:
         file.write(content)
     if debug_level >= Debug.VERY_VERBOSE:
         print(f'-- Write file: {file_name}')

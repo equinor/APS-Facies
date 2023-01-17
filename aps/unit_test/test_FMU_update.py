@@ -28,7 +28,7 @@ def update_values():
 
 def read_key_values_from_file_as_dict(input_file):
     key_value_dict = {}
-    with open(input_file, 'r') as f:
+    with open(input_file, 'r', encoding='utf-8') as f:
         for line in f:
             line_without_comment = line.partition('//')[0]
             if len(line_without_comment) > 0:
@@ -58,7 +58,7 @@ def read_fmu_attributes_file(file) -> Dict[str, str]:
         ...
     """
     fmu_attributes = {}
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()  # type: str
             if line == 'APS:' or line == 'apsgui_job_name:':

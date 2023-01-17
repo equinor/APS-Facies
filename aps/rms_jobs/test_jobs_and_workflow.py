@@ -46,7 +46,7 @@ import roxar.rms
 
 
 def read_fmu_param_settings(fmu_dict, fmu_settings_file):
-    with open(fmu_settings_file) as file:
+    with open(fmu_settings_file, encoding='utf-8') as file:
         lines = file.readlines()
         for line in lines:
             if len(line)<= 1 or line == "" or line == "\n":

@@ -75,7 +75,7 @@ def writeXMLFileGridDimensions(project, gridModelName, outputFile, debug_level=D
         element.text = ' {0} '.format(value)
         gmElement.append(element)
 
-    with open(outputFile, 'w') as file:
+    with open(outputFile, 'w', encoding='utf-8') as file:
         print(f'- Write file: {outputFile}')
         root = prettify(topElement)
         file.write(root)

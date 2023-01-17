@@ -235,7 +235,7 @@ def run_simulations(
         ensure_folder_exists(seed_file_log)
         if seed_file_log.is_dir():
             seed_file_log = seed_file_log / 'seedLogFile.dat'
-        with open(seed_file_log, 'a+') as file:
+        with open(seed_file_log, 'a+', encoding='utf-8') as file:
             file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + nrlib.seed()}\n')
     if debug_level >= Debug.ON:
         print('- Finished simulation of gaussian fields for APS')

@@ -228,7 +228,7 @@ class DefineTruncationRule:
             inputFile = self.__directory + '/' + self.__inputFileName
         else:
             inputFile = self.__inputFileName
-        with open(inputFile, 'r') as file:
+        with open(inputFile, 'r', encoding='utf-8') as file:
             while not finished:
                 line = file.readline()
                 if line == '':
@@ -283,7 +283,7 @@ class DefineTruncationRule:
         if self.debug_level >= Debug.VERBOSE:
             print('Debug output: Write file with truncation rules: {}'.format(outputFile))
 
-        with open(outputFile, 'w') as file:
+        with open(outputFile, 'w', encoding='utf-8') as file:
 
             sortedDictionaryCubic = collections.OrderedDict(sorted(self.__tableCubic.items()))
 
@@ -695,7 +695,7 @@ class DefineTruncationRule:
         truncRuleObj.XMLAddElement(top)
         rootReformatted = prettify(top)
         print('Write file:  {}'.format(outputFileName))
-        with open(outputFileName, 'w') as file:
+        with open(outputFileName, 'w', encoding='utf-8') as file:
             file.write(rootReformatted)
 
     def initNewTruncationRuleSettingsCubic(self, direction):

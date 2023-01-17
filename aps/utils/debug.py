@@ -60,7 +60,7 @@ def parse_dot_master(path: Path) -> dict:
     header = {}
     parameters = []
     state = None
-    with open(path) as file:
+    with open(path, encoding='utf-8') as file:
         parameter_index = 0
         for line in file:
             line = line.strip()

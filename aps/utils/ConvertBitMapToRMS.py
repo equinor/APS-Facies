@@ -104,7 +104,7 @@ def writeIrapMap(fmap, xOrigo, yOrigo, xinc, yinc, angleInDegrees, outputFileNam
     nx = cols
     ny = rows
 
-    with open(outputFileName, 'w') as file:
+    with open(outputFileName, 'w', encoding='utf-8') as file:
         line = ' -996 ' + str(ny) + '  ' + str(xinc) + '  ' + str(yinc) + str('\n')
         file.write(line)
 
