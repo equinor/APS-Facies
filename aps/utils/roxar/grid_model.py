@@ -115,7 +115,7 @@ def average_of_property_inside_zone_region(
         corresponding to the specified zone number.
         Returns a dictionary with parameter name as key and average as value.
     '''
-    cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level)
+    cell_index_defined = find_defined_cells(zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF)
     return {
         name: calc_average(
             cell_index_defined,
@@ -1188,45 +1188,6 @@ def _zone_parameter_values(grid3d, debug_level=Debug.OFF):
             cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
             values[cell_numbers] = zone_number
     return values, code_names
-
-def check_active_cells_in_zone_region(grid_model, zone_number,
-    region_number=0, realisation_number=0,
-    region_param_name=None, debug_level=Debug.OFF):
-    zone_param_name = GridModelConstants.ZONE_NAME
-    try:
-        zone_param = grid_model.properties[zone_param_name]
-    except KeyError:
-        raise KeyError(
-            f"The zone parameter with name '{zone_param_name}' does not longer exist."
-            " Open the APSGUI job and it will be recreated again or create it manually."
-        )
-    if zone_param.is_empty(realisation=realisation_number):
-        raise ValueError(
-            f"Expecting zone parameter:{zone_param_name} to be non-empty "
-            "here in 'check_active_cells_in_zone_region' "
-        )
-    zone_values = zone_param.get_values(realisation_number)
-
-    region_values = None
-    if region_param_name != None and len(region_param_name)>0:
-        region_param = grid_model.properties[region_param_name]
-        if region_param.is_empty(realisation=realisation_number):
-            raise ValueError(
-                f"Expecting region parameter:{region_param_name} to be non-empty "
-                "here in 'check_active_cells_in_zone_region' "
-            )
-        region_values = region_param.get_values(realisation_number)
-
-    active_cells = find_defined_cells(zone_values, zone_number,
-        region_values, region_number, debug_level=debug_level)
-    if 0 < len(active_cells) < 5:
-        print(
-            "NOTE: Number of active grid cells in (zone, region) = "
-            f"({zone_number},{region_number}) is very small. "
-            f"Number of active cells are {len(active_cells)}. "
-        )
-    nactive = len(active_cells)
-    return nactive > 0
 
 def flip_grid_index_origo(values3d, ny):
     # Flip between RMS and Eclipse (Left and Right handed) grid index origo

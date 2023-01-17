@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<ProbLogs>
+  <GridModelName>MultizoneTest</GridModelName>
+  <BlockedWells> BW  </BlockedWells>
+  <FaciesLogName> LF_facies </FaciesLogName>
+  <RegionLogName> Facies </RegionLogName>
+  <ZoneLogName>   Zone  </ZoneLogName>
+  <OutputPrefix> Prob_nested_LF </OutputPrefix>
+  <ModellingFaciesPerZoneRegion>
+    <Zone number="1" region="1">  LF1 LF2 </Zone>
+    <Zone number="1" region="2">      LF2 LF3 </Zone>
+    <Zone number="1" region="3">  LF1     LF3 </Zone>
+
+    <Zone number="2" region="1">  LF1 LF2 </Zone>
+    <Zone number="2" region="2">      LF2 LF3 </Zone>
+    <Zone number="2" region="3">  LF1     LF3 </Zone>
+
+    <Zone number="3" region="1">  LF1 LF2 </Zone>
+    <Zone number="3" region="2">      LF2 LF3 </Zone>
+    <Zone number="3" region="3">  LF1     LF3 </Zone>
+
+  </ModellingFaciesPerZoneRegion>
+  <UseConditionalProbabilities> 0 </UseConditionalProbabilities>
+</ProbLogs>

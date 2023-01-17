@@ -68,7 +68,7 @@ def run_simulations(
     zone_names = get_zone_names(grid_model)
     if fmu_mode:
         # Ensure that the grid is shared and the realisation number
-        # is 1 and that there are only one zone.
+        # is 1 and that there are only one zone and one region.
         if realisation > 1:
             raise ValueError('The realisation number must be 1 in FMU mode.')
         grid = grid_model.get_grid(realisation)
@@ -116,7 +116,10 @@ def run_simulations(
         dz = zone_model.sim_box_thickness / nz
 
         if debug_level >= Debug.ON:
-            print(f'- Zone: {zone_number}')
+            if region_number == 0:
+                print(f'- Zone: {zone_number}')
+            else:
+                print(f'- Zone: {zone_number}   Region: {region_number}  ')
         if debug_level >= Debug.VERY_VERBOSE:
             start = grid_attributes.start_layers_per_zone[zone_index]
             end = grid_attributes.end_layers_per_zone[zone_index]

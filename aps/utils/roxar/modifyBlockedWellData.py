@@ -97,6 +97,7 @@ def get_discrete_log_from_blocked_well_set(project,
 def get_facies_zone_table_and_log_from_bw(project, grid_model_name,
         blocked_wells_set_name,
         facies_log_name,
+        region_log_name,
         zone_log_name,
         realization_number=0):
     """ Get blocked well of type discrete and return dictionary
@@ -120,68 +121,110 @@ def get_facies_zone_table_and_log_from_bw(project, grid_model_name,
             realization_number,
             facies_log_name)
 
+    region_code_names = None
+    region_log_values = None
+    use_regions = False
+    if region_log_name:
+        use_regions = True
+        region_code_names, region_log_values = \
+            get_discrete_log_from_blocked_well_set(project,
+                grid_model_name,
+                blocked_wells_set_name,
+                realization_number,
+                region_log_name)
+
     # Dict of facies names found in each zone
     print(f"Facies log: {facies_log_name}")
+    if use_regions:
+        print(f"Region log: {region_log_name}")
+        region_dict = region_code_names
+    else:
+        region_dict = {}
+        region_dict[0] = None
     print(f"Zone   log: {zone_log_name}")
-    facies_per_zone ={}
+    facies_per_zone_region ={}
     for zone_number, _ in zone_code_names.items():
-        selected_facies_values = facies_log_values[zone_log_values == zone_number]
-        facies_codes_found_in_zone = []
-        for i in range(len(selected_facies_values)):
-            facies_code = selected_facies_values[i]
-            if facies_code >= 0:
-                # Negative or masked values are not used
-                if facies_code not in facies_codes_found_in_zone:
-                    facies_codes_found_in_zone.append(facies_code)
-
-        facies_names_found =[ facies_code_names[code] for code in facies_codes_found_in_zone]
-        facies_per_zone[zone_number] = facies_names_found
-
-        if zone_number <= 0:
-            print(
-                f"Note: Zone log has a zone with zone number equal to 0 or less in {blocked_wells_set_name} .\n"
-                "All probability logs in this zone will be undefined."
-            )
-        else:
-            if len(facies_codes_found_in_zone) > 0:
-                print(f"Facies found in facies log for zone: {zone_number}")
-                for fcode in facies_codes_found_in_zone:
-                    print(f"    {facies_code_names[fcode]}")
+        for region_number, _ in region_dict.items():
+            key = (zone_number, region_number)
+            if use_regions:
+                selection = (zone_log_values == zone_number) & (region_log_values == region_number)
             else:
+                selection = (zone_log_values == zone_number)
+            selected_facies_values = facies_log_values[selection]
+            facies_codes_found_in_zone_region = []
+            for i in range(len(selected_facies_values)):
+                facies_code = selected_facies_values[i]
+                if facies_code >= 0:
+                    # Negative or masked values are not used
+                    if facies_code not in facies_codes_found_in_zone_region:
+                        facies_codes_found_in_zone_region.append(facies_code)
+
+            facies_names_found = [facies_code_names[code] for code in facies_codes_found_in_zone_region]
+            facies_per_zone_region[key] = facies_names_found
+
+            if zone_number <= 0:
                 print(
-                    f"Note: No facies found in facies log for zone: {zone_number} in {blocked_wells_set_name}  \n"
-                    "All probability logs will be undefined in this zone."
+                    f"Note: Zone log has a zone with zone number equal to 0 or less in {blocked_wells_set_name} .\n"
+                    "All probability logs in this zone will be undefined."
                 )
+            else:
+                if len(facies_codes_found_in_zone_region) > 0:
+                    if use_regions:
+                        print(f"Facies found in facies log for (zone, region): ({zone_number}, {region_number})  ")
+                    else:
+                        print(f"Facies found in facies log for zone: {zone_number}  ")
+                    for fcode in facies_codes_found_in_zone_region:
+                        print(f"    {facies_code_names[fcode]}")
+                else:
+                    if use_regions:
+                        print(
+                            f"Note: No facies found in facies log for (zone, region): ({zone_number}, {region_number})   in {blocked_wells_set_name}  \n"
+                            "All probability logs will be undefined in this (zone, region)."
+                        )
+                    else:
+                        print(
+                            f"Note: No facies found in facies log for zone: {zone_number}  in {blocked_wells_set_name}  \n"
+                            "All probability logs will be undefined in this zone."
+                        )
+
+    return zone_code_names, zone_log_values, region_code_names, region_log_values, facies_code_names, facies_log_values, facies_per_zone_region
 
 
-    return zone_code_names, zone_log_values, facies_code_names, facies_log_values, facies_per_zone
 
+def createProbabilityLogs(params):
 
-def createProbabilityLogs(
-        project=None,
-        grid_model_name=None,
-        bw_name='BW',
-        facies_log_name='Facies',
-        zone_log_name='Zone',
-        modelling_facies_per_zone=None,
-        conditional_prob_facies=None,
-        prefix_prob_logs='Prob_',
-        realization_number=0,
-        accept_unobserved_facies_names=True,
-        debug_level=Debug.OFF
-):
     """ Get Facies log from blocked wells and create probability logs that have values 0.0 or 1.0 for each facies.
         It is possible to specify a list of additional facies names for facies that should be modelled,
         but is not observed. Probability logs for these unobserved facies will only contain 0 as value
         since the facies is not observed. It is possible to specify conditional probability for facies
         given the input facies.
     """
-    _, zone_log_values, code_names, facies_log_values, facies_per_zone = get_facies_zone_table_and_log_from_bw(project,
+
+    project = params['project']
+    debug_level = params.get('debug_level', Debug.OFF)
+    grid_model_name = params['grid_model_name']
+    bw_name = params['bw_name']
+    facies_log_name = params['facies_log_name']
+    region_log_name = params.get('region_log_name',"")
+    zone_log_name = params['zone_log_name']
+    modelling_facies_per_zone_region=params.get('modelling_facies_per_zone_region')
+    conditional_prob_facies = params.get('conditional_prob_facies', None)
+    prefix_prob_logs = params['prefix_prob_logs']
+    realization_number = project.current_realisation
+    accept_unobserved_facies_names=True
+
+    _, zone_log_values, _, region_log_values, code_names, facies_log_values, facies_per_zone_region = get_facies_zone_table_and_log_from_bw(project,
         grid_model_name,
         bw_name,
         facies_log_name,
+        region_log_name,
         zone_log_name,
         realization_number)
+
+    use_regions = False
+    if region_log_values is not None:
+        use_regions = True
+        conditional_prob_facies = None
 
     blocked_wells = getBlockedWells(project, grid_model_name, bw_name)
     if blocked_wells is None:
@@ -193,13 +236,14 @@ def createProbabilityLogs(
     probability_log_names = []
     probability_logs = {}
 
-    sorted_zone_facies_dictionary = collections.OrderedDict(sorted(modelling_facies_per_zone.items()))
-    modelled_facies_codes_observed_per_zone = check_observed_facies_per_zone(sorted_zone_facies_dictionary, 
+    sorted_zone_region_facies_dictionary = collections.OrderedDict(sorted(modelling_facies_per_zone_region.items()))
+    modelled_facies_codes_observed_per_zone_region = check_observed_facies_per_zone(sorted_zone_region_facies_dictionary,
                                                                              code_names,
                                                                              facies_log_values,
+                                                                             region_log_values,
                                                                              zone_log_values)
 
-    keys_for_modelled_facies_per_zone = modelled_facies_codes_observed_per_zone.keys()
+    keys_for_modelled_facies_per_zone_region = modelled_facies_codes_observed_per_zone_region.keys()
 
     # This list is used to inform the user about facies specified to be modelled but is not observed
     modelled_facies_not_observed = []
@@ -207,7 +251,8 @@ def createProbabilityLogs(
     # This list is used to inform the user about facies specified to be modelled and also is observed
     modelled_facies_observed = []
 
-    for zone_number, facies_for_modelling in sorted_zone_facies_dictionary.items():
+    for key, facies_for_modelling in sorted_zone_region_facies_dictionary.items():
+        (zone_number, region_number) = key
         for facies_name in facies_for_modelling:
             if facies_name not in facies_names_in_log:
                 if not accept_unobserved_facies_names:
@@ -243,38 +288,60 @@ def createProbabilityLogs(
 
     use_mask_facies = False
     use_mask_zone = False
+    use_mask_region = False
     if type(facies_log_values) == np.ma.core.MaskedArray:
         use_mask_facies = True
     if type(zone_log_values) == np.ma.core.MaskedArray:
         use_mask_zone = True
-    use_mask_prob = use_mask_zone or use_mask_facies
+    if use_regions and type(region_log_values) == np.ma.core.MaskedArray:
+        use_mask_region = True
+    use_mask_prob = use_mask_zone or use_mask_facies or use_mask_region
+
+    if debug_level >= Debug.VERBOSE:
+        if use_mask_prob:
+            print("Use mask arrays")
+        else:
+            print("Don't use mask array")
 
     if conditional_prob_facies is None:
-        for zone_number, facies_for_modelling in sorted_zone_facies_dictionary.items():
+        for key, facies_for_modelling in sorted_zone_region_facies_dictionary.items():
+            (zone_number, region_number) = key
             warn_msg_obs_facies_not_specified = []
             warn_msg_specified_facies_not_observed = []
-            for name in facies_per_zone[zone_number]:
+            for name in facies_per_zone_region[key]:
                 if name not in facies_for_modelling:
                     warn_msg_obs_facies_not_specified.append(
                         f" {name}  "
                     )
             for fname in facies_for_modelling:
-                if fname not in facies_per_zone[zone_number]:
+                if fname not in facies_per_zone_region[key]:
                     warn_msg_specified_facies_not_observed.append(
                         f"  {fname}  "
                     )
             if warn_msg_specified_facies_not_observed:
-                print(f"Warning: Following facies is specified but not observed for zone {zone_number}")
-                print( "         Probability log for these facies will be 0 in this zone.")
+                if use_regions:
+                    print(f"Warning: Following facies is specified but not observed for (zone, region): ({zone_number}, {region_number}) ")
+                    print( "         Probability log for these facies will be 0 in this (zone, region).")
+                else:
+                    print(f"Warning: Following facies is specified but not observed for zone {zone_number}")
+                    print( "         Probability log for these facies will be 0 in this zone.")
+
                 print( "         Maybe there are some misspelled facies names here?")
                 for msg in warn_msg_specified_facies_not_observed:
                     print(msg)
                 print(" ")
+
             if warn_msg_obs_facies_not_specified:
-                print(f"Warning: Following facies is observed but not specified for zone {zone_number}.")
-                print( "         Forgot to specify them for this zone?")
-                print( "         The probability logs for these facies will be set to either undefined or ")
-                print( "         to 0 probability for this zone:")
+                if use_regions:
+                    print(f"Warning: Following facies is observed but not specified for (zone, region): ({zone_number}, {region_number}).")
+                    print( "         Forgot to specify them for this (zone, region)?")
+                    print( "         The probability logs for these facies will be set to either undefined or ")
+                    print( "         to 0 probability for this (zone, region):")
+                else:
+                    print(f"Warning: Following facies is observed but not specified for zone {zone_number}.")
+                    print( "         Forgot to specify them for this zone?")
+                    print( "         The probability logs for these facies will be set to either undefined or ")
+                    print( "         to 0 probability for this zone:")
                 for msg in warn_msg_obs_facies_not_specified:
                     print(msg)
                 print(" ")
@@ -307,13 +374,24 @@ def createProbabilityLogs(
                 else:
                     facies_code_in_log = facies_log_values[i]
 
-                if zone_number > 0 and facies_code_in_log >= 0:
+
+                if region_log_values is not None:
+                    region_number = -1
+                    if use_mask_region:
+                        if not region_log_values.mask[i]:
+                            region_number = region_log_values[i]
+                    else:
+                        region_number = region_log_values[i]
+                else:
+                    region_number = 0
+
+                if zone_number > 0 and facies_code_in_log >= 0 and region_number >= 0:
                     # The facies code is not missing code
                     # Check that the grid cell has facies that belongs to the zone
-                    key = (zone_number, facies_code_in_log)
-                    if key in keys_for_modelled_facies_per_zone:
+                    key = (zone_number, region_number, facies_code_in_log)
+                    if key in keys_for_modelled_facies_per_zone_region:
                         # This facies is a modelled facies for this zone either observed or not observed
-                        if modelled_facies_codes_observed_per_zone[key] != 0:
+                        if modelled_facies_codes_observed_per_zone_region[key] != 0:
                             # This modelling facies belongs to a zone with some observed facies
                             # Set probability log to 1 or 0
                             update_prob_log = True
@@ -341,22 +419,23 @@ def createProbabilityLogs(
                 prob_log.set_values(prob_values, realization_number)
             print(f'Probability log defined:  {prob_log.name}')
     else:
-
+        region_number = 0
         # Check input consistency
         # For each facies in the blocked well, log, check that it is defined in the list of modelled facies
-        for zone_number, facies_for_modelling in sorted_zone_facies_dictionary.items():
-            for name in facies_per_zone[zone_number]:
+        for key, facies_for_modelling in sorted_zone_region_facies_dictionary.items():
+            (zone_number, region_number) = key
+            for name in facies_per_zone_region[key]:
                 sum_prob = 0.0
                 err_list =[] 
                 for facies_name in facies_for_modelling:
-                    key = (zone_number, facies_name, name)
-                    if key not in conditional_prob_facies:
+                    key_for_cond_prob = (zone_number, facies_name, name)
+                    if key_for_cond_prob not in conditional_prob_facies:
                         # Check if the specified facies and facies to condition to belongs to the zone
                         err_list.append(
                             f"  P({facies_name} | {name} ) in zone {zone_number}"
                         )
                     else:
-                        prob = conditional_prob_facies[key]
+                        prob = conditional_prob_facies[key_for_cond_prob]
                         sum_prob = sum_prob + prob
                 if err_list:
                     print(f"Missing specification of conditional probabilities of modelled facies conditioned to {name} :")
@@ -375,7 +454,7 @@ def createProbabilityLogs(
             for key in conditional_prob_facies:
                 (znr, fmodelled, finterpreted) = key
                 if znr == zone_number:
-                    if finterpreted not in facies_per_zone[zone_number]:
+                    if finterpreted not in facies_per_zone_region[(zone_number, region_number)]:
                         warning_msg.append(
                             f"   P( {fmodelled} |{finterpreted}) "
                             f"specified but {finterpreted} is not observed in zone {zone_number}  ")
@@ -442,85 +521,101 @@ def createProbabilityLogs(
                            probability_logs,
                            code_names,
                            zone_log_values,
-                           sorted_zone_facies_dictionary, 
+                           region_log_values,
+                           sorted_zone_region_facies_dictionary,
                            realization_number,
                            debug_level
     )
 
 
 
-def check_observed_facies_per_zone(specified_modelled_facies_per_zone_dict, 
+def check_observed_facies_per_zone(specified_modelled_facies_per_zone_region_dict,
                                    code_names,
                                    facies_log_values,
+                                   region_log_values,
                                    zone_log_values):
-    # Find which modelled facies is observed or not for each zone
-    zones_specified = list(specified_modelled_facies_per_zone_dict.keys())
+    # Find which modelled facies is observed or not for each zone, region
+    zones_regions_specified = list(specified_modelled_facies_per_zone_region_dict.keys())
     number_of_values_in_facies_log = len(facies_log_values)
     number_of_values_in_zone_log   = len(zone_log_values)
     assert(number_of_values_in_facies_log == number_of_values_in_zone_log)
+    if region_log_values is not None:
+        number_of_values_in_region_log = len(region_log_values)
+        assert(number_of_values_in_facies_log == number_of_values_in_region_log)
 
-    modelled_facies_codes_observed_in_zone = {}
+
+    modelled_facies_codes_observed_in_zone_region = {}
     index_all_values = np.arange(number_of_values_in_zone_log)
-    for zone_number in zones_specified:
-        modelled_facies = specified_modelled_facies_per_zone_dict[zone_number]
-        number_of_modelled_facies_observed_in_zone = 0
+    for key in zones_regions_specified:
+        (zone_number, region_number) = key
+        modelled_facies = specified_modelled_facies_per_zone_region_dict[key]
+        number_of_modelled_facies_observed_in_zone_region = 0
         for facies_name in modelled_facies:
             facies_code = get_facies_code(code_names, facies_name)
             if facies_code is not None:
                 # This modelled facies is observed in facies log in some zone
-                index_selected_values = index_all_values[(zone_log_values == zone_number) & (facies_log_values == facies_code)]
+                if region_log_values is None:
+                    index_selected_values = index_all_values[(zone_log_values == zone_number) & (facies_log_values == facies_code)]
+                else:
+                    index_selected_values = index_all_values[(zone_log_values == zone_number) & (region_log_values == region_number) & (facies_log_values == facies_code)]
                 if len(index_selected_values) > 0:
                     # This facies is both defined as a modelled facies and also observed for current zone
-                    key = (zone_number, facies_code)
-                    modelled_facies_codes_observed_in_zone[key] = 1
-                    number_of_modelled_facies_observed_in_zone = number_of_modelled_facies_observed_in_zone +1
+                    key_obs = (zone_number, region_number, facies_code)
+                    modelled_facies_codes_observed_in_zone_region[key_obs] = 1
+                    number_of_modelled_facies_observed_in_zone_region = number_of_modelled_facies_observed_in_zone_region +1
                 else:
                     # This facies is defined as a modelled facies but not observed for current zone.
-                    key = (zone_number, facies_code)
-                    modelled_facies_codes_observed_in_zone[key] = 0
+                    key_obs = (zone_number, region_number, facies_code)
+                    modelled_facies_codes_observed_in_zone_region[key_obs] = 0
             else:
                 # This facies is defined as a modelled facies but does not exist in the facies log at all
                 facies_code = -1
-                key = (zone_number, facies_code)
-                modelled_facies_codes_observed_in_zone[key] = 0
+                key_obs = (zone_number, region_number, facies_code)
+                modelled_facies_codes_observed_in_zone_region[key_obs] = 0
 
         codes = list(code_names.keys())
-        keys = modelled_facies_codes_observed_in_zone.keys()
+        keys = modelled_facies_codes_observed_in_zone_region.keys()
         # Include also facies code -1 which is defined as the code for all modelled facies not found in the facies log
         codes.append(-1) 
-        if number_of_modelled_facies_observed_in_zone > 0:
+        if number_of_modelled_facies_observed_in_zone_region > 0:
             for facies_code in codes:
-                key = (zone_number, facies_code)
-                if key in keys:
-                    if modelled_facies_codes_observed_in_zone[key] == 0:
+                key_obs = (zone_number, region_number, facies_code)
+                if key_obs in keys:
+                    if modelled_facies_codes_observed_in_zone_region[key_obs] == 0:
                         # This facies is defined as modelled but not observed and there exist 
                         # modelled facies that is observed for the same zone
                         # Need to distinguish this facies from unobserved facies in zones that 
                         # does not have any observed facies at all.
-                        modelled_facies_codes_observed_in_zone[key] = -1
+                        modelled_facies_codes_observed_in_zone_region[key_obs] = -1
 
-    return modelled_facies_codes_observed_in_zone
+    return modelled_facies_codes_observed_in_zone_region
 
 def check_probability_logs(probability_log_names, 
                            probability_logs,
                            code_names,
-                           zone_log_values, 
-                           modelling_facies_per_zone, 
+                           zone_log_values,
+                           region_log_values,
+                           modelling_facies_per_zone_region,
                            realization_number,
                            debug_level=Debug.VERBOSE):
     print('\nCheck created probability logs:\n')
+    use_regions = region_log_values is not None
     normalization_error = {}
     count_zones = 0
-    for zone_number, modelling_facies in modelling_facies_per_zone.items():
-        first = True
+    for key, modelling_facies in modelling_facies_per_zone_region.items():
+        (zone_number, region_number) = key
+        if use_regions and region_number <= 0:
+            raise ValueError(f"Region log should only have integer region values > 0")
         sum_values = None
         number_of_active_values = 0
-        for facies_name in modelling_facies:
+        for index, facies_name in enumerate(modelling_facies):
             prob_log = probability_logs[facies_name]
             prob_values = prob_log.get_values(realization_number)
-            selected_prob_values = prob_values[zone_log_values == zone_number]
-            if first:
-                first = False
+            if use_regions:
+                selected_prob_values = prob_values[(zone_log_values == zone_number) & (region_log_values == region_number)]
+            else:
+                selected_prob_values = prob_values[zone_log_values == zone_number]
+            if index == 0:
                 sum_values = selected_prob_values
                 number_of_active_values = len(sum_values)
             else:
@@ -528,25 +623,35 @@ def check_probability_logs(probability_log_names,
                     sum_values = sum_values + selected_prob_values
 
         if number_of_active_values == 0:
-            print(f'Zone: {zone_number} has no blocked well cells with probability logs')
+            if use_regions:
+                print(f'Zone, Region: ({zone_number},{region_number}) has no blocked well cells with probability logs.')
+            else:
+                print(f'Zone: {zone_number} has no blocked well cells with probability logs.')
         else:
             # Check if the sum is 1 for all entries in the numpy array
             eps = 0.001
-
             check_value = (sum_values > (1.0 + eps)) | (sum_values < (1.0 - eps))
             num_cell_with_not_normalized_prob = check_value.sum()
-            normalization_error[zone_number] =  num_cell_with_not_normalized_prob
+            normalization_error[key] =  num_cell_with_not_normalized_prob
             if num_cell_with_not_normalized_prob > 0:
-                count_zones = count_zones +1
+                count_zones = count_zones + 1
     if count_zones == 0:
         print('Normalization of probability logs is OK')
     else:
-        for zone_number, modelling_facies in modelling_facies_per_zone.items():
-            if normalization_error[zone_number] > 0:
-                print(
-                    f"Zone: {zone_number} Number of cell values in BW where sum of probability logs "
-                    f"has values outside interval [{1-eps}, {1+eps}]: {num_cell_with_not_normalized_prob}"
-                )
+        for key, modelling_facies in modelling_facies_per_zone_region.items():
+            (zone_number, region_number) = key
+            if normalization_error[key] > 0:
+
+                if use_regions:
+                    print(
+                        f"Zone, Region: ({zone_number}, {region_number})  Number of cell values in BW where sum of probability logs "
+                        f"has values outside interval [{1-eps}, {1+eps}]: {normalization_error[key]}"
+                    )
+                else:
+                    print(
+                        f"Zone: {zone_number} Number of cell values in BW where sum of probability logs "
+                        f"has values outside interval [{1-eps}, {1+eps}]: {normalization_error[key]}"
+                    )
             if debug_level >= Debug.VERBOSE:
                 for i in range(len(sum_values)):
                     text = str(i)

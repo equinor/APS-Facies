@@ -397,7 +397,7 @@ def run(
 
         # For current (zone,region) find the active cells
         cell_index_defined = find_defined_cells(
-            zone_values, zone_number, region_values, region_number, debug_level=debug_level,
+            zone_values, zone_number, region_values, region_number, debug_level=Debug.OFF,
         )
         if debug_level >= Debug.VERBOSE:
             if use_regions:

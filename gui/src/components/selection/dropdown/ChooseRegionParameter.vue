@@ -10,19 +10,14 @@
       />
     </v-col>
     <v-col cols="3">
-      <base-tooltip
-        :message="reasonForDisabling"
-      >
-        <v-checkbox
+      <v-checkbox
           v-model="useRegions"
-          :disabled="ertMode"
           label="Use regions?"
-        />
-      </base-tooltip>
+      />
     </v-col>
     <v-col cols="9">
       <choose-parameter
-        :disabled="!useRegions || ertMode"
+        :disabled="!useRegions"
         regular
         parameter-type="region"
         label="Region parameter"
@@ -55,24 +50,9 @@ export default class ChooseRegionParameter extends Vue {
   }
 
   set useRegions (value: boolean) {
-    if (value) {
-      (this.$refs.warning as WarningDialog).open(
-        'Be aware',
-        `
-<p>Regions are not, <em>currently</em>, supported in ERT / AHM mode.</p>
-<p> You may not use ERT / AHM (in the job settings) while using regions.</p>
-`
-      )
-    }
     this.$store.dispatch('regions/use', { use: value })
   }
 
   get ertMode (): boolean { return (this.$store as Store).state.fmu.runFmuWorkflows.value }
-  get reasonForDisabling (): string {
-    if (this.ertMode) {
-      return 'ERT / AHM mode is not compatible with regions yet.'
-    }
-    return ''
-  }
 }
 </script>

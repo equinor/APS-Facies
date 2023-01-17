@@ -16,8 +16,6 @@ from warnings import warn
 
 from typing import Dict
 
-from numpy import triu_indices
-
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType, ExtrapolationMethod
 from aps.utils.decorators import cached
@@ -78,7 +76,7 @@ def read_fmu_param_settings(fmu_dict, fmu_settings_file):
 def get_parameters(**kwargs):
     # Variables set by default from the startup script APS_run_workflow
     project = kwargs['project']
-    debug_level = Debug.VERBOSE
+    debug_level = Debug.VERY_VERBOSE
     model_file = get_specification_file(**kwargs)
     global_variables_file = kwargs['global_variables_file']
 
@@ -114,7 +112,13 @@ def get_parameters(**kwargs):
 
     # APS model instance with default check
     print(f"APS model file: {model_file} ")
-    aps_model = APSModel(model_file, debug_level=Debug.OFF)
+    aps_model = APSModel(model_file, debug_level=debug_level)
+
+    # Check that zone parameter exists and if not, then create it
+    aps_model.check_or_create_zone_parameter(project, debug_level=debug_level)
+
+    # Keep only models for (zone,region) pairs with active cells
+    aps_model.check_active_cells(project, debug_level=debug_level)
 
     return {
         'project': project,
@@ -152,7 +156,6 @@ def run(**kwargs_input):
     debug_level = kwargs['debug_level']
     model_file = kwargs ['model_file']
     aps_model = kwargs['aps_model']
-    aps_model.check_active_cells(project, debug_level=debug_level)
 
     aps_model.write_model(model_file)
     if kwargs['export_fmu_config_files']:

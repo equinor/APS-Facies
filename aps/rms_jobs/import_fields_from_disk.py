@@ -98,13 +98,16 @@ def _trim(field_name, prefix):
         trimmed = True
     return field_name, trimmed
 
-def field_name_from_full_name(full_field_name, zone_name):
+def field_name_from_full_name(full_field_name, zone_name, region_name=""):
     is_trimmed = False
     field_name_tmp, is_trimmed = _trim(full_field_name, prefix='aps_')
     if not is_trimmed:
         raise IOError(f'Unexpected name of field to import: {full_field_name}')
     is_trimmed = False
-    field_name, is_trimmed  = _trim(field_name_tmp, prefix=zone_name + '_')
+    if len(region_name) == 0:
+        field_name, is_trimmed  = _trim(field_name_tmp, prefix=zone_name + '_')
+    else:
+        field_name, is_trimmed  = _trim(field_name_tmp, prefix=zone_name + '_' + region_name + '_')
     if not is_trimmed:
         raise IOError(f'Unexpected name of field to import: {full_field_name}')
     return field_name
@@ -179,7 +182,14 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             set_shared=geo_grid_model.shared
         )
     zone_names = zone_property.code_names
-
+    region_names = None
+    region_param_name = None
+    if aps_model.use_regions:
+        region_param_name = aps_model.region_parameter
+        if region_param_name in geo_grid_model.properties:
+            region_param = geo_grid_model.properties[region_param_name]
+            if not region_param.is_empty(project.current_realisation):
+                region_names = region_param.code_names
 
     if not use_residuals:
         import_and_update_ertbox_and_geogrid(project,
@@ -191,6 +201,8 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             file_format,
             xtgeo_fmu_grid,
             number_of_layers_per_zone_in_geo_grid,
+            region_names=region_names,
+            region_param_name=region_param_name,
             debug_level=debug_level)
     else:
         import_and_update_ertbox_and_geogrid_with_residuals(project,
@@ -203,6 +215,8 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             xtgeo_fmu_grid,
             number_of_layers_per_zone_in_geo_grid,
             handedness=handedness,
+            region_names=region_names,
+            region_param_name=region_param_name,
             debug_level=debug_level)
 
 
@@ -215,12 +229,17 @@ def import_and_update_ertbox_and_geogrid(project,
     file_format: str,
     xtgeo_fmu_grid: xtgeo.Grid,
     number_of_layers_per_zone_in_geo_grid: list,
+    region_names: dict = None,
+    region_param_name: str = None,
     debug_level: Debug = Debug.OFF):
 
     # Loop over all zones defined in aps model
     for zone in aps_model.zone_models:
-        if aps_model.isSelected(zone.zone_number,0):
+        if aps_model.isSelected(zone.zone_number,zone.region_number):
             zone_name = zone_names[zone.zone_number]
+            region_name = ""
+            if region_names:
+                region_name = region_names[zone.region_number]
 
             parameter_names_fmu_grid = []
             parameter_names_geo_grid = []
@@ -231,7 +250,7 @@ def import_and_update_ertbox_and_geogrid(project,
             # Get the sub set of values from fmu grid that should be mapped into geogrid for the current zone
             nz_layers = number_of_layers_per_zone_in_geo_grid[zone.zone_number-1]
             for full_field_name in zone.gaussian_fields_in_truncation_rule:
-                field_name = field_name_from_full_name(full_field_name, zone_name)
+                field_name = field_name_from_full_name(full_field_name, zone_name, region_name=region_name)
                 field_location = load_dir / f'{full_field_name}.{file_format}'
 
                 if field_location.exists():
@@ -276,13 +295,18 @@ def import_and_update_ertbox_and_geogrid(project,
             # Update geogrid. Has often multiple zones
             if debug_level >= Debug.VERY_VERBOSE:
                 for name in  parameter_names_geo_grid:
-                    print(f'--- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}')
+                    if aps_model.use_regions:
+                        print(f'--- Update parameter {name} for (zone number, region number) = ({zone.zone_number},{zone.region_number})  in {geo_grid_model.name}')
+                    else:
+                        print(f'--- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}')
 
             set_continuous_3d_parameter_values_in_zone_region(
                 geo_grid_model,
                 parameter_names_geo_grid,
                 parameter_values_geo_grid,
                 zone.zone_number,
+                zone.region_number,
+                region_parameter_name=region_param_name,
                 realisation_number=project.current_realisation,
                 is_shared=geo_grid_model.shared,
             )
@@ -298,6 +322,8 @@ def import_and_update_ertbox_and_geogrid_with_residuals(project,
     xtgeo_fmu_grid: xtgeo.Grid,
     number_of_layers_per_zone_in_geo_grid: list,
     handedness=Direction.right,
+    region_names: dict = None,
+    region_param_name: str = None,
     debug_level: Debug = Debug.OFF):
 
     use_residuals = True
@@ -307,7 +333,9 @@ def import_and_update_ertbox_and_geogrid_with_residuals(project,
     for zone in aps_model.zone_models:
         if aps_model.isSelected(zone.zone_number,0):
             zone_name = zone_names[zone.zone_number]
-
+            region_name = ""
+            if aps_model.use_regions:
+                region_name = region_names[zone.region_number]
             parameter_names_fmu_grid = []
             parameter_names_geo_grid = []
 
@@ -318,7 +346,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(project,
             nz_layers = number_of_layers_per_zone_in_geo_grid[zone.zone_number-1]
 
             for full_field_name in zone.gaussian_fields_in_truncation_rule:
-                field_name = field_name_from_full_name(full_field_name, zone_name)
+                field_name = field_name_from_full_name(full_field_name, zone_name, region_name=region_name)
                 if zone.hasTrendModel(full_field_name):
                     full_field_name_residual = full_field_name + '_residual'
                     field_location = load_dir / f'{full_field_name_residual}.{file_format}'
@@ -367,6 +395,7 @@ def import_and_update_ertbox_and_geogrid_with_residuals(project,
                 project,
                 aps_model,
                 zone.zone_number,
+                zone.region_number,
                 write_rms_parameters_for_qc_purpose=False,
                 debug_level=debug_level,
                 fmu_mode=True,
@@ -391,13 +420,18 @@ def import_and_update_ertbox_and_geogrid_with_residuals(project,
             # Update geogrid. Has often multiple zones
             if debug_level >= Debug.VERBOSE:
                 for name in  parameter_names_geo_grid:
-                    print(f'-- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}')
+                    if aps_model.use_regions:
+                        print(f'-- Update parameter {name} for (zone number, region number) = ({zone.zone_number},{zone.region_number}) in {geo_grid_model.name}')
+                    else:
+                        print(f'-- Update parameter {name} for zone number {zone.zone_number} in {geo_grid_model.name}')
 
             set_continuous_3d_parameter_values_in_zone_region(
                 geo_grid_model,
                 parameter_names_geo_grid,
                 parameter_values_geo_grid,
                 zone.zone_number,
+                zone.region_number,
+                region_parameter_name=region_param_name,
                 realisation_number=project.current_realisation,
                 is_shared=geo_grid_model.shared,
             )
