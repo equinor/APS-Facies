@@ -19,7 +19,7 @@ def get_root_path():
 
 
 def get_docker_image_version(dockerfile):
-    with open(dockerfile, 'r', encoding='utf-8') as f:
+    with open(dockerfile, 'r') as f:
         for line in f:
             words = line.split()
             if words and words[0].lower() == 'label':
