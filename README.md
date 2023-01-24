@@ -1,4 +1,6 @@
-see [wiki](https://git.equinor.com/APS/GUI/wikis/)
+see [gitlab wiki](https://git.equinor.com/APS/GUI/wikis/)
+
+(there's a [github mirror](https://github.com/equinor/aps-gui))
 
 ### Getting started
 
