@@ -651,23 +651,21 @@ class APSModel:
                     if len(keywords_defined_for_updating) > 0:
                         if keywords_read is None:
                             print(' ')
-                            text = '\nWARNING:\n'
-                            text += f'-- The APS parameters selected to be updated by FMU in APS job: {current_job_name}\n'
-                            text += f'   will not be updated since no APS parameters are specified in \n'
-                            text += f'   {parameter_file_name} for the current job.\n'
-                            text += f'   Ensure that APS parameters to be updated are specified both in \n'
-                            text += f'   the APS job and the FMU global_variables file.\n'
-                            warn(text)
-                            print(' ')
+                            print('WARNING:')
+                            print(f'   The APS parameters selected to be updated by FMU in APS job: {current_job_name}')
+                            print( '   will not be updated since no APS parameters are specified in')
+                            print(f'   {parameter_file_name} for the current job.')
+                            print( '   Ensure that APS parameters to be updated are specified both in ')
+                            print( '   the APS job and the FMU global_variables file.')
+                            print( ' ')
                     else:
                         if keywords_read is not None:
                             print(' ')
-                            text = '\nWARNING:\n'
-                            text += f'-- No APS parameters are selected to be updated by FMU in APS job: {current_job_name}\n'
-                            text += f'   There are defined APS parameters for this APS job in: {parameter_file_name}\n'
-                            text += f'   Ensure that APS parameters to be updated are specified both in \n'
-                            text += f'   the APS job and the FMU global_variables file.\n'
-                            warn(text)
+                            print('WARNING:')
+                            print(f'   No APS parameters are selected to be updated by FMU in APS job: {current_job_name}')
+                            print(f'   There are defined APS parameters for this APS job in: {parameter_file_name}')
+                            print( '   Ensure that APS parameters to be updated are specified both in ')
+                            print( '   the APS job and the FMU global_variables file.')
                             print(' ')
 
                 if debug_level >= Debug.VERY_VERBOSE:
