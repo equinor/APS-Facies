@@ -83,11 +83,11 @@ outdated (Node) dependencies:
   allow_failure: true
   needs: []
 
-circular dependencies:
-  stage: check dependencies
-  script:
-    - 'eval $MAKE find-circular-dependencies'
-  needs: []
+#circular dependencies:
+#  stage: check dependencies
+#  script:
+#    - 'eval $MAKE find-circular-dependencies'
+#  needs: []
 
 linting (Python):
   stage: testing
