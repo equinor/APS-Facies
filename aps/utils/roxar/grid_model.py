@@ -87,11 +87,9 @@ def find_defined_cells(zone_values, zone_number, region_values=None, region_numb
         index_array = np.arange(num_cells_total, dtype=np.uint64)
         cell_index_defined = index_array[zone_values == zone_number]
         if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'--- In find_defined_cells: Zone:{zone_number}\n'
-                f'--- Number of active cells for the grid: {num_cells_total}\n'
-                f'--- Number of active cells for current zone: {len(cell_index_defined)}'
-            )
+            print(f'--- In find_defined_cells: Zone:{zone_number}')
+            print(f'--- Number of active cells for the grid: {num_cells_total}')
+            print(f'--- Number of active cells for current zone: {len(cell_index_defined)}')
     return cell_index_defined
 
 
@@ -584,11 +582,10 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                     n_cell_columns_inactive_this_layer_range += 1
 
             if debug_level >= Debug.VERY_VERBOSE:
-                print(
-                    f'--- Zone number {zone_index + 1}  layer range {lr}: \n'
-                    f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}\n'
-                    f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}'
-                )
+                print(f'--- Zone number {zone_index + 1}  layer range {lr}:')
+                print(f'     Selected number of active cell columns: {n_cell_columns_active_this_layer_range}')
+                print(f'     Selected number of columns with one inactive cell: {n_cell_columns_inactive_this_layer_range}')
+
         # End loop over all layer_ranges
 
         if has_no_active_cells_in_zone:
@@ -609,12 +606,13 @@ def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_num
                         / (n_cell_columns_active_selected + n_cell_columns_inactive_selected)
                 )
                 if debug_level >= Debug.VERY_VERBOSE:
+                    print(f"--- Zone number: {zone_index + 1}:")
                     print(
-                        f"--- Zone number: {zone_index + 1}: \n"
-                        "     When estimating sim box thickness, use also cell columns where "
-                        "either top or base grid cell is inactive\n"
-                        f"    Estimated sim box thickness: {average_thickness}"
+                        "    When estimating sim box thickness, "
+                        "use also cell columns where either top or base grid cell is inactive."
                     )
+                    print(f"    Estimated sim box thickness: {average_thickness}")
+
 
             thickness_per_zone[zone_index + 1] = average_thickness
 
@@ -632,11 +630,9 @@ class GridSimBoxSize:
             self.ijk_handedness = grid.grid_indexer.handedness
 
         if self.debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'--- Length in x direction:  {self.x_length}\n'
-                f'--- Length in y direction:  {self.y_length}\n'
-                f'--- Sim box rotation angle: {self.azimuth_angle}'
-            )
+            print(f'--- Length in x direction:  {self.x_length}')
+            print(f'--- Length in y direction:  {self.y_length}')
+            print(f'--- Sim box rotation angle: {self.azimuth_angle}')
             if self.ijk_handedness == Direction.right:
                 print('--- Sim box has right-handed coordinate system')
             else:

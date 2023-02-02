@@ -41,15 +41,19 @@ def run(project, **kwargs):
     workflow_name = params['workflow_name']
     current_job_name = params['current_job_name']
 
-    print(f'\nUpdate APS model parameters from FMU parameters')
-    if debug_level >= Debug.ON:
-        print(f'- Read file {global_variables_file}')
-    update_aps_model_from_fmu(
-        global_variables_file,
-        input_aps_model_file,
-        output_aps_model_file,
-        debug_level=debug_level,
-        project=project,
-        workflow_name=workflow_name,
-        current_job_name=current_job_name,
-    )
+    if global_variables_file:
+        print(f'\nUpdate APS model parameters from FMU parameters')
+        if debug_level >= Debug.ON:
+            print(f'- Read file with global variables from FMU: {global_variables_file}')
+        update_aps_model_from_fmu(
+            global_variables_file,
+            input_aps_model_file,
+            output_aps_model_file,
+            debug_level=debug_level,
+            project=project,
+            workflow_name=workflow_name,
+            current_job_name=current_job_name,
+        )
+    else:
+        if debug_level >= Debug.ON:
+            print("No global variables file was found. Check FMU project or aps_config.yml file if that is used.")

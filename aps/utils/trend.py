@@ -38,15 +38,12 @@ def add_trend_to_gauss_field(
     if debug_level >= Debug.VERY_VERBOSE:
         trend_type = trend_model.type.name
         if use_regions:
-            print(
-                f'--- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})\n'
-                f'--- Trend type: {trend_type}'
-            )
+            print(f'--- Calculate trend for: {gauss_field_name} for (zone,region)=({zone_number}, {region_number})')
+            print(f'--- Trend type: {trend_type}')
+
         else:
-            print(
-                f'--- Calculate trend for: {gauss_field_name} for zone: {zone_number}\n'
-                f'--- Trend type: {trend_type}'
-            )
+            print(f'--- Calculate trend for: {gauss_field_name} for zone: {zone_number}')
+            print(f'--- Trend type: {trend_type}')
 
     sim_box_thickness = zone_model.sim_box_thickness
     # trend_values contain trend values for the cells belonging to the set defined by cell_index_defined

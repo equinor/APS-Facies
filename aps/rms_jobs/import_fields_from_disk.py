@@ -28,7 +28,6 @@
 # if they are specified to be updated by ERT). And finally all the imported GRF fields
 # (including the added trends for those that should have trends) is then copied back to the geomodel grid.
 
-from collections import defaultdict
 from pathlib import Path
 from roxar import Direction
 
@@ -48,6 +47,7 @@ from aps.utils.roxar.grid_model import (
     flip_grid_index_origo)
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values_in_zone_region
 from aps.utils.trend import add_trends
+from aps.utils.aps_config import APSConfig
 
 def extract_values_from_fmu_grid_to_geogrid_simbox(field_values, zone, number_of_layers_in_geo_grid_zone):
     ''' Updates or replaces the input field_values for fmu grid to contain only the values
@@ -71,7 +71,7 @@ def extract_values_from_fmu_grid_to_geogrid_simbox(field_values, zone, number_of
     return field_values
 
 def get_field_name(field_name, zone):
-    return 'aps_{}_{}'.format(zone, field_name)
+    return f'aps_{zone}_{field_name}'
 
 def _load_field_values_grdecl(field_name, path, grid=None,debug_level=Debug.OFF):
     if debug_level >= Debug.VERY_VERBOSE:
@@ -141,7 +141,7 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
     fmu_grid_name = kwargs.get('fmu_simulation_grid_name')
     import_from_ert = False
     if load_dir is None:
-        load_dir = get_ert_location() / '..' / '..'
+        load_dir = Path(APSConfig.top_dir())
         import_from_ert = True
 
     print(" ")

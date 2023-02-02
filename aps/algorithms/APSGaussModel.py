@@ -346,14 +346,12 @@ class GaussianField:
             settings.grid_azimuth, projection, debug_level)
         azimuth_variogram = angle1
         if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'\n--- Range1 in projection: {projection} : {range1}\n'
-                f'--- Range2 in projection: {projection} : {range2}\n'
-                f'--- Angle from vertical axis for Range1 direction: {angle1}\n'
-                f'--- Angle from vertical axis for Range2 direction: {angle2}\n'
-                f'--- (gridDim1, gridDim2) = ({grid_dimensions[0]},{grid_dimensions[1]})\n'
-                f'--- (Size1, Size2) = ({sizes[0]},  {sizes[1]})'
-            )
+            print(f'\n--- Range1 in projection: {projection} : {range1}')
+            print(f'--- Range2 in projection: {projection} : {range2}')
+            print(f'--- Angle from vertical axis for Range1 direction: {angle1}')
+            print(f'--- Angle from vertical axis for Range2 direction: {angle2}')
+            print(f'--- (gridDim1, gridDim2) = ({grid_dimensions[0]},{grid_dimensions[1]})')
+            print(f'--- (Size1, Size2) = ({sizes[0]},  {sizes[1]})')
 
         residual_field = simGaussField(
             seed_value, *grid_dimensions, *sizes, variogram_type,

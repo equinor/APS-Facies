@@ -228,10 +228,10 @@ def from_ertbox_to_geogrid(project, params):
         param_names_geogrid_list = param_names_geogrid_dict[zone_number]
         param_names_ertbox_list = param_names_ertbox_dict[zone_number]
         if debug_level >= Debug.VERBOSE:
-            print(f"--Zone number:  {zone_number}")
-            print(f"--Conformity: {conformity}  ")
-            print(f"--Copy from:  {param_names_ertbox_list}")
-            print(f"--Copy to:    {param_names_geogrid_list}")
+            print(f"-- Zone number:  {zone_number}")
+            print(f"-- Conformity: {conformity}  ")
+            print(f"-- Copy from:  {param_names_ertbox_list}")
+            print(f"-- Copy to:    {param_names_geogrid_list}")
         nz_for_zone = number_of_layers_per_zone_in_geo_grid[zone_index]
         parameter_names_geo_grid = []
         parameter_values_geo_grid = []

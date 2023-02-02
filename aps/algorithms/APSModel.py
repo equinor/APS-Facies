@@ -123,6 +123,7 @@ class APSModel:
             fmu_file_format: str  = 'roff',
             fmu_trend_param_extrapolation: int = ExtrapolationMethod.EXTEND_LAYER_MEAN,
             fmu_export_config_files: bool = False,
+            fmu_use_non_standard_dir_and_files: bool = False,
             prob_settings_fraction: float = ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
             prob_settings_tolerance: float = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
             transform_type: TransformType = TransformType.EMPIRIC,
@@ -219,6 +220,7 @@ class APSModel:
         self.__prob_settings_tolerance = prob_settings_tolerance
         self.__transform_type = transform_type
         self.__fmu_use_residual_fields = fmu_use_residual_fields
+        self.__fmu_use_non_standard_dir_and_files = fmu_use_non_standard_dir_and_files
 
 
         # Read model if it is defined
@@ -432,14 +434,12 @@ class APSModel:
         self.__faciesTable = APSMainFaciesTable(ET_Tree=self.__ET_Tree, modelFileName=model_file_name)
 
         if self.__debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'--- RMSGridModel:                       {self.__rmsGridModelName}\n'
-                f'--- RMSZoneParamName:                   {self.__rmsZoneParamName}\n'
-                f'--- RMSFaciesParamName:                 {self.__rmsFaciesParamName}\n'
-                f'--- RMSRegionParamName:                 {self.__rmsRegionParamName}\n'
-                f'--- Name of RMS project read:           {self.__rmsProjectName}\n'
-                f'--- Name of RMS workflow read:          {self.__rmsWorkflowName}'
-            )
+            print(f'--- RMSGridModel:                       {self.__rmsGridModelName}')
+            print(f'--- RMSZoneParamName:                   {self.__rmsZoneParamName}')
+            print(f'--- RMSFaciesParamName:                 {self.__rmsFaciesParamName}')
+            print(f'--- RMSRegionParamName:                 {self.__rmsRegionParamName}')
+            print(f'--- Name of RMS project read:           {self.__rmsProjectName}')
+            print(f'--- Name of RMS workflow read:          {self.__rmsWorkflowName}')
 
         # Get the number of zones of the current modelling grid if a check to compare
         # the grid model with the specified zones in the APS model is to be done.
@@ -615,6 +615,8 @@ class APSModel:
         Read xml model file and IPL parameter file and write updated xml model file
         without putting any data into the data structure.
         """
+        if (not use_rms_uncertainty_table) and (not parameter_file_name):
+            raise IOError(f"Expect that a global variable file exists")
         # Read XML model file
         tree = ET.parse(model_file_name)
         root = tree.getroot()
@@ -639,6 +641,8 @@ class APSModel:
         keywords_read = None
         if not use_rms_uncertainty_table:
             if parameter_file_name is not None:
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(f"--- Read global variables from file: {parameter_file_name} ")
                 # keywords_read is a list of items where each item is [name, value]
                 keywords_read = self.__parse_global_variables(model_file_name,
                                                               parameter_file_name,
@@ -671,7 +675,7 @@ class APSModel:
                 if debug_level >= Debug.VERY_VERBOSE:
                     if keywords_read is not None:
                         print(' ')
-                        print(f'-- Keyword read from {parameter_file_name}:')
+                        print(f'--- Keyword read from {parameter_file_name}:')
                         for item in keywords_read:
                             name = item[0]
                             value = item[1]
@@ -984,6 +988,10 @@ class APSModel:
     @property
     def fmu_use_residual_fields(self) -> bool:
         return self.__fmu_use_residual_fields
+
+    @property
+    def fmu_use_non_standard_files(self) -> bool:
+        return self.__fmu_use_non_standard_dir_and_files
 
     @property
     def gaussian_field_names(self) -> List[str]:
@@ -1544,6 +1552,18 @@ class APSModel:
                         if value == 'YES':
                             self.__fmu_use_residual_fields = True
 
+                    kw_use_non_standard_fmu = 'UseNonStandardFMU'
+                    use_non_standard_fmu_settings = getKeyword(fmu_settings, kw_use_non_standard_fmu, modelFile=model_file_name, required=False)
+                    if use_non_standard_fmu_settings is not None:
+                        value = use_non_standard_fmu_settings.text.strip().upper()
+                        legal_values = ['YES', 'NO']
+                        if value not in legal_values:
+                            raise ValueError(
+                                f"Job settings for keyword {kw_use_non_standard_fmu} must be one of {legal_values}. "
+                            )
+                        if value == 'YES':
+                            self.__fmu_use_non_standard_dir_and_files = True
+
                 if self.__fmu_mode in ['NOFIELDS', 'FIELDS']:
                     kw_export = 'ExportConfigFiles'
                     export_settings = getKeyword(fmu_settings, kw_export, modelFile=model_file_name, required=False)
@@ -1606,29 +1626,28 @@ class APSModel:
                     self.__log_setting = Debug.OFF
 
     def print_job_settings(self):
+        print("--- Job settings parameters:\n")
+        if self.__fmu_use_non_standard_dir_and_files:
+            print("  NOTE: Use aps config file to find FMU directories and global variable file.\n")
         print(
-            "--- Job settings parameters:\n"
             "    FMU settings:\n"
             f"     FMU mode: {self.__fmu_mode}"
         )
         if self.__fmu_mode == 'FIELDS':
-            print(
-                "     Update fields in ERT:\n"
-                f"      ERTBOX: {self.__fmu_ertbox_name}\n"
-                f"      Exchange mode: {self.__fmu_exchange_mode}\n"
-                f"      File format: {self.__fmu_file_format}\n"
-                f"      Trend param extrapolation:  {self.__fmu_trend_param_extrapolation}"
-            )
+            print(    "     Update fields in ERT:")
+            print(    f"      ERTBOX: {self.__fmu_ertbox_name}")
+            print(    f"      Exchange mode: {self.__fmu_exchange_mode}")
+            print(    f"      File format: {self.__fmu_file_format}")
+            print(    f"      Trend param extrapolation:  {self.__fmu_trend_param_extrapolation}")
+
         if self.__fmu_mode != 'OFF':
             print(f"     Update only residual GRF in ERT: {self.__fmu_use_residual_fields}")
             print(f"     Export config files: {self.__fmu_export_config_files} ")
-        print(
-            "    Prob check criteria:\n"
-            f"     Fraction:  {self.__prob_settings_fraction}\n"
-            f"     Tolerance: {self.__prob_settings_tolerance}\n"
-            f"    Transform type: {self.__transform_type.value}\n"
-            f"    Log setting: {self.__log_setting.name}\n\n"
-        )
+        print(    "    Prob check criteria:")
+        print(    f"     Fraction:  {self.__prob_settings_fraction}")
+        print(    f"     Tolerance: {self.__prob_settings_tolerance}")
+        print(    f"    Transform type: {self.__transform_type.value}")
+        print(    f"    Log setting: {self.__log_setting.name}\n")
 
     def job_settings_xml_add_elements(self, root):
         if self.debug_level >= Debug.VERY_VERBOSE:
@@ -1663,6 +1682,11 @@ class APSModel:
                 fmu_settings_element.append(create_node('UseResidualFields', text='YES'))
             else:
                 fmu_settings_element.append(create_node('UseResidualFields', text='NO'))
+
+            if self.__fmu_use_non_standard_dir_and_files:
+                fmu_settings_element.append(create_node('UseNonStandardFMU', text='YES'))
+            else:
+                fmu_settings_element.append(create_node('UseNonStandardFMU', text='NO'))
 
         if self.__fmu_mode in ['NOFIELDS', 'FIELDS']:
             if self.__fmu_export_config_files:

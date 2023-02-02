@@ -174,6 +174,14 @@ class Migration:
 
         return state
 
+    @staticmethod
+    def add_use_customized_fmu_directory_structure(state: dict):
+        state['fmu']['useNonStandardFmu'] = {
+            'value':  False,
+        }
+        return state
+
+
     def attempt_upgrading_legacy_state(self, state: dict):
         return _attempt_upgrading_legacy_state(self, state)
 
@@ -288,6 +296,12 @@ class Migration:
                 'to': '1.11.0',
                 'up': self.add_use_only_residual_fields,
             },
+            {
+                'from': '1.11.0',
+                'to': '1.12.0',
+                'up': self.add_use_customized_fmu_directory_structure,
+            },
+
         ]
 
     def get_migrations(self, from_version: str, to_version: Optional[str] = None):

@@ -338,11 +338,9 @@ def copy_from_geo_to_ertbox_grid(
                 f"for zone {zone_name}."
             )
         if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f"--- zone name: {zone_name}\n"
-                f"--- number_layers: {number_layers}\n"
-                f"--- start_layer: {start_layer}  end_layer: {end_layer}\n"
-            )
+            print(f"--- zone name: {zone_name}")
+            print(f"--- number_layers: {number_layers}")
+            print(f"--- start_layer: {start_layer}  end_layer: {end_layer}")
 
         i_indices, j_indices, k_indices, zone_cell_numbers = \
             get_grid_indices(geogrid, nx, ny, start_layer, end_layer)

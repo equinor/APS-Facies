@@ -5,9 +5,13 @@ from aps.utils.roxar.fmu_tags import (
     read_selected_fmu_variables,  set_all_as_fmu_updatable,  set_selected_as_fmu_updatable,
 )
 from aps.utils.io import write_status_file
-
+from aps.utils.aps_config import APSConfig
 
 def run(roxar=None, project=None, **kwargs):
+    if project is None:
+        raise ValueError(f"project can not be None")
+
+    APSConfig.init(project)
     params = get_run_parameters(**kwargs)
     model_file = params['model_file']
     input_selected_fmu_variable_file = params['fmu_variables_file']

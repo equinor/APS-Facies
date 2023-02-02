@@ -4,7 +4,8 @@ import {
   DEFAULT_RUN_FMU_MODE,
   DEFAULT_RUN_ONLY_FMU_UPDATE,
   DEFAULT_EXTRAPOLATION_METHOD,
-  DEFAULT_USE_RESIDUAL_FIELDS
+  DEFAULT_USE_RESIDUAL_FIELDS,
+  DEFAULT_USE_NON_STANDARD_FMU_DIRS
 } from '@/config'
 import { makeOption, populateState } from '@/store/utils'
 import { Module } from 'vuex'
@@ -27,6 +28,7 @@ const module: Module<FmuState, RootState> = {
       ['extend_layer_mean', 'repeat_layer_mean', 'mean', 'zero']),
     simulationGrid,
     onlyUpdateResidualFields: makeOption(DEFAULT_USE_RESIDUAL_FIELDS,[true, false]),
+    useNonStandardFmu: makeOption(DEFAULT_USE_NON_STANDARD_FMU_DIRS, [true, false] ),
   },
 
   actions: {

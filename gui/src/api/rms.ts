@@ -54,6 +54,8 @@ export default {
   saveModel: (model: string, paths: Paths): Promise<boolean> => api.call('dump_aps_model', model, paths.model, paths.fmuConfig, paths.probabilityDistribution),
   hasFmuUpdatableValues: (model: string): Promise<boolean> => api.call('has_fmu_updatable_values', model),
   loadFile: (path: string): Promise<string | null> => api.call('load_file', path),
+  apsFmuConfig: (): Promise<[string, string, string]> => api.call('get_aps_fmu_config'),
+  createAPSFmuConfigFile: (setApsFmuConfig: boolean): Promise<void> => api.call('set_aps_fmu_config', setApsFmuConfig),
   // @ts-ignore
   chooseDir: (mode: string, suggestion = ''): Promise<string> => typeof rms !== 'undefined' ? rms.chooseDir(mode, suggestion) : new Promise((resolve) => resolve(null)),
   // @ts-ignore

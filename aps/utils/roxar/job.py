@@ -1,5 +1,6 @@
 import json
 import sys
+from pathlib import Path
 from base64 import b64decode
 from functools import wraps
 from warnings import warn
@@ -13,6 +14,7 @@ from aps.utils.fmu import get_export_location, get_ert_location, is_initial_iter
 from aps.utils.roxar._config_getters import get_debug_level
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.rms_project_data import RMSData
+from aps.utils.aps_config import APSConfig
 
 def excepthook(type, value, traceback):
     print(f"ERROR:")
@@ -33,6 +35,18 @@ class JobConfig:
         if self.debug_level <= Debug.VERBOSE:
             # Traceback is turned off when low log output
             sys.excepthook = excepthook
+
+        # Ensure that existing config file is read
+        if self._only_run_fmu_variables_update or self.run_fmu_workflows:
+            APSConfig.init(
+                self.project,
+                use_available_config_file=self.use_customized_fmu_config,
+                must_read_existing_config_file=True,
+                check_existence_of_paths=True,
+            )
+        else:
+            APSConfig.init(self.project)
+
 
     def get_parameters(self, model_file):
         # Represents the ORIGINAL APS model
@@ -195,6 +209,16 @@ class JobConfig:
         return self._config['fmu']['maxDepth']['value']
 
     @property
+    def use_customized_fmu_config(self):
+        try:
+            use_non_standard_fmu = self._config['fmu']['useNonStandardFmu']['value']
+            return use_non_standard_fmu
+        except KeyError:
+            # Some, older jobs may not be updated, and this "config.fmu.useNonStandardFmu"
+            # does not exist.
+            return False
+
+    @property
     def _max_allowed_fraction_of_values_outside_tolerance(self):
         return self._config['parameters']['maxAllowedFractionOfValuesOutsideTolerance']['selected']
 
@@ -219,8 +243,10 @@ class JobConfig:
     @property
     def export_fmu_config_files(self):
         try:
-            export_fmu = self._config['options']['exportFmuConfigFiles']['value']
-            return export_fmu
+            if self.fmu_mode or self._only_run_fmu_variables_update:
+                return self._config['options']['exportFmuConfigFiles']['value']
+            else:
+                return False
         except KeyError:
             # Some, older jobs may not be updated, and this "config.options.exportFmuConfigFiles"
             # does not exist.
@@ -241,24 +267,10 @@ class JobConfig:
         return get_debug_level(self._config)
 
     @property
-    def _config_location(self):
-        if self.run_fmu_workflows or self._only_run_fmu_variables_update:
-            return get_ert_location() / '..' / '..' / 'fmuconfig' / 'output'
-        return None
-
-    @property
     def global_variables_file(self):
-        config_location = self._config_location
-        if config_location and config_location.exists() and config_location.is_dir():
-            file_priority = [
-                'global_variables.yml',
-                'global_variables.yaml',
-                'global_variables.ipl',
-            ]
-            for file_name in file_priority:
-                location = config_location / file_name
-                if location.exists():
-                    return str(location.absolute())
+        file_path = Path(APSConfig.global_variables_file())
+        if file_path.exists():
+            return str(file_path.absolute())
         return None
 
     @property

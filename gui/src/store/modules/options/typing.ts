@@ -16,6 +16,5 @@ export default interface OptionsState {
   runFmuWorkflows: OptionState<boolean>
   importFields: OptionState<boolean>
   exportFmuConfigFiles: OptionState<boolean>
-  onlyUpdateResidualFields: OptionState<boolean>
   colorScale: OptionState<string>
 }

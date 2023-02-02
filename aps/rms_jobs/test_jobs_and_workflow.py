@@ -41,7 +41,7 @@ from aps.utils.decorators import loggable, output_version_information
 from aps.utils.fmu import fmu_aware_model_file
 from aps.utils.io import create_temporary_model_file
 from aps.utils.roxar.job import JobConfig, classify_job_configuration
-
+from aps.utils.aps_config import APSConfig
 import roxar.rms
 
 
@@ -78,7 +78,7 @@ def get_parameters(**kwargs):
     project = kwargs['project']
     debug_level = Debug.VERY_VERBOSE
     model_file = get_specification_file(**kwargs)
-    global_variables_file = kwargs['global_variables_file']
+
 
     # Some other default values
     max_allowed_fraction_tolerance = ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE
@@ -97,15 +97,20 @@ def get_parameters(**kwargs):
     fmu_dict['fmu_simulate_fields']  = True
     fmu_dict['max_fmu_grid_layers']  = 0
     fmu_dict['fmu_simulation_grid_name']  = None
-    fmu_dict['global_variables'] = global_variables_file
     fmu_dict['export_fmu_config_files'] = False
     fmu_dict['field_file_format'] = 'roff'
     fmu_dict['write_rms_parameters_for_qc_purpose'] = False
+    fmu_dict['use_aps_config_file'] = True
+    fmu_dict['create_aps_config_file'] = True
 
-
+    # Ensure that existing config file is read and make one if non exists
+    APSConfig.init(
+        project,
+        use_available_config_file=fmu_dict['use_aps_config_file'],
+        must_read_existing_config_file=True)
 
     if read_fmu_settings_from_file:
-        fmu_settings_file = "APS_fmu_settings.txt"
+        fmu_settings_file = APSConfig.rms_model_dir() + "/" + "APS_fmu_settings.txt"
         fmu_dict = read_fmu_param_settings(fmu_dict, fmu_settings_file)
 
 
@@ -119,12 +124,13 @@ def get_parameters(**kwargs):
 
     # Keep only models for (zone,region) pairs with active cells
     aps_model.check_active_cells(project, debug_level=debug_level)
+    global_variables_file = APSConfig.global_variables_file()
 
     return {
         'project': project,
         'model_file': model_file,
         'output_model_file': model_file,
-        'global_variables': fmu_dict['global_variables'],
+        'global_variables': global_variables_file,
         'max_fmu_grid_layers': int(fmu_dict['max_fmu_grid_layers']),
         'fmu_mode': bool(fmu_dict['fmu_mode']),
         'fmu_mode_only_param': bool(fmu_dict['fmu_mode_only_param']),
