@@ -95,12 +95,10 @@ class Trend3D:
         self._sim_box_azimuth = None
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(
-                '--- Trend:\n'
-                f'--- Azimuth:        {self.azimuth.value}\n'
-                f'--- Stacking angle: {self.stacking_angle.value}\n'
-                f'--- Stacking type:  {self.stacking_direction.value}\n'
-            )
+            print('--- Trend:')
+            print(f'--- Azimuth:        {self.azimuth.value}')
+            print(f'--- Stacking angle: {self.stacking_angle.value}')
+            print(f'--- Stacking type:  {self.stacking_direction.value}')
 
         # Position of a reference point for the trend function.
         # This is in global coordinates for (x, y) and relative to simulation box for the zone for z coordinate.
@@ -131,12 +129,11 @@ class Trend3D:
         )
         stacking_direction = getIntCommand(trend_rule_xml, 'directionStacking', modelFile=model_file_name)
         if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'--- Trend parameters:\n'
-                f'---   Azimuth:        {azimuth}\n'
-                f'---   Stacking angle: {stacking_angle}\n'
-                f'---   Stacking type:  {stacking_direction}\n'
-            )
+            print(f'--- Trend parameters:')
+            print(f'---   Azimuth:        {azimuth}')
+            print(f'---   Stacking angle: {stacking_angle}')
+            print(f'---   Stacking type:  {stacking_direction}')
+
         return cls(
             azimuth_angle=azimuth,
             azimuth_angle_fmu_updatable=is_azimuth_fmu_updatable,
@@ -374,26 +371,24 @@ class Trend3D:
         num_layers_in_zone = sum(len(layer) for layer in layer_ranges)
         zinc = sim_box_thickness / num_layers_in_zone
         if debug_level >= Debug.VERY_VERBOSE:
-            print(
-                f'---  In {self._class_name}\n'
-                f'---  Zone number: {zone_number}\n'
-                f'---  Grid model: {grid_model.name}\n'
-                f'---  SimboxThickness: {sim_box_thickness}\n'
-                f'---  Zinc: {zinc}\n'
-                f'---  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}\n'
-                f'---  Start simbox layer in zone: {start_layer + 1}\n'
-                f'---  End   simbox layer in zone: {end_layer + 1}\n'
-                f'---  Trend type: {self.type.name}\n'
-            )
+            print(f'---  In {self._class_name}')
+            print(f'---  Zone number: {zone_number}')
+            print(f'---  Grid model: {grid_model.name}')
+            print(f'---  SimboxThickness: {sim_box_thickness}')
+            print(f'---  Zinc: {zinc}')
+            print(f'---  Simbox dimensions nx,ny,nz: {nx}, {ny}, {nz}')
+            print(f'---  Start simbox layer in zone: {start_layer + 1}')
+            print(f'---  End   simbox layer in zone: {end_layer + 1}')
+            print(f'---  Trend type: {self.type.name}')
+
             if self.type not in [TrendType.RMS_PARAM, TrendType.RMS_TRENDMAP]:
-                print(
-                    f'---  Trend azimuth: {self.azimuth.value}\n'
-                    f'---  StackingAngle: {self.stacking_angle.value}\n'
-                    f'---  Direction: {self.stacking_direction.value}\n'
-                    f'---  x_center: {self._x_center}\n'
-                    f'---  y_center: {self._y_center}\n'
-                    f'---  z_center (sim box): {self._z_center}\n'
-                )
+                print(f'---  Trend azimuth: {self.azimuth.value}')
+                print(f'---  StackingAngle: {self.stacking_angle.value}')
+                print(f'---  Direction: {self.stacking_direction.value}')
+                print(f'---  x_center: {self._x_center}')
+                print(f'---  y_center: {self._y_center}')
+                print(f'---  z_center (sim box): {self._z_center}')
+
             self._writeTrendSpecificParam()
 
             # Create an empty array with 0 values with correct length
@@ -426,11 +421,10 @@ class Trend3D:
                         " does not exist or is empty.  Check the trend specification for trend of type RMS_TRENDMAP"
                 )
             if debug_level >= Debug.VERBOSE:
-                print(
-                    f'-- RMS 2D trend map from zone: {self.trend_map_zone}\n'
-                    f'-- Representation or type: {self.trend_map_name}\n'
-                     '-- No preview is implemented for this yet.'
-                )
+                print(f'-- RMS 2D trend map from zone: {self.trend_map_zone}')
+                print(f'-- Representation or type: {self.trend_map_name}')
+                print( '-- No preview is implemented for this yet.')
+
             # Create 3D parameter from 2D trend map
             trend_param_name = 'tmp_'+ self.trend_map_zone + '_' + self.trend_map_name
             trend_map_to_grid_param(project, grid_model.name,
@@ -500,18 +494,17 @@ class Trend3D:
         if self._debug_level >= Debug.VERY_VERBOSE:
             print(f'---  Trend type: {self.type.name}')
             if self.type not in [TrendType.RMS_PARAM, TrendType.RMS_TRENDMAP]:
-                print(
-                    f'---  Trend azimuth:      {self.azimuth.value}\n'
-                    f'---  StackingAngle:      {self.stacking_angle.value}\n'
-                    f'---  Direction:          {self.stacking_direction.value}\n'
-                    f'---  x_center (sim box): {self._x_center_in_sim_box_coordinates}\n'
-                    f'---  y_center (sim box): {self._y_center_in_sim_box_coordinates}\n'
-                    f'---  z_center (sim box): {self._z_center_in_sim_box_coordinates}\n'
-                    f'---  Projection type:    {projection_type}\n'
-                    f'---  nx_preview:         {nx_preview}\n'
-                    f'---  ny_preview:         {ny_preview}\n'
-                    f'---  nz_preview:         {nz_preview}\n'
-                )
+                print(f'---  Trend azimuth:      {self.azimuth.value}')
+                print(f'---  StackingAngle:      {self.stacking_angle.value}')
+                print(f'---  Direction:          {self.stacking_direction.value}')
+                print(f'---  x_center (sim box): {self._x_center_in_sim_box_coordinates}')
+                print(f'---  y_center (sim box): {self._y_center_in_sim_box_coordinates}')
+                print(f'---  z_center (sim box): {self._z_center_in_sim_box_coordinates}')
+                print(f'---  Projection type:    {projection_type}')
+                print(f'---  nx_preview:         {nx_preview}')
+                print(f'---  ny_preview:         {ny_preview}')
+                print(f'---  nz_preview:         {nz_preview}')
+
             self._writeTrendSpecificParam()
 
         # Calculate parameters used in the trend function.
@@ -1258,11 +1251,10 @@ class Trend3D_elliptic(Trend3D_conic):
 
     def _writeTrendSpecificParam(self) -> None:
         # Elliptic
-        print(
-            f'---  Curvature: {self.curvature}\n'
-            f'---  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})\n'
-            f'---  Origin type: {self.origin_type.name}'
-        )
+        print(f'---  Curvature: {self.curvature}')
+        print(f'---  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})')
+        print(f'---  Origin type: {self.origin_type.name}')
+
 
     def as_dict(self) -> dict:
         representation = super().as_dict()
@@ -1484,25 +1476,22 @@ class Trend3D_hyperbolic(Trend3D_conic):
         parameters_for_trend_calc = (sin_theta, cos_theta, tan_alpha, tan_beta, a, b)
 
         if self._debug_level >= Debug.VERY_VERBOSE:
-            print(
-                '--- Calculated parameters for Hyperbolic trend:\n'
-                f'---   sinTheta = {sin_theta}\n'
-                f'---   cosTheta = {cos_theta}\n'
-                f'---   tan_alpha = {tan_alpha}\n'
-                f'---   tanBeta  = {tan_beta}\n'
-                f'---   a = {a}\n'
-                f'---   b = {b}\n'
-            )
+            print('--- Calculated parameters for Hyperbolic trend:')
+            print(f'---   sinTheta = {sin_theta}')
+            print(f'---   cosTheta = {cos_theta}')
+            print(f'---   tan_alpha = {tan_alpha}')
+            print(f'---   tanBeta  = {tan_beta}')
+            print(f'---   a = {a}')
+            print(f'---   b = {b}')
 
         return parameters_for_trend_calc
 
     def _writeTrendSpecificParam(self) -> None:
-        print(
-            f'---  Curvature: {self.curvature}\n'
-            f'---  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})\n'
-            f'---  Origin type: {self.origin_type.name}\n'
-            f'---  Migration angle: {self.migration_angle}'
-        )
+        print(f'---  Curvature: {self.curvature}')
+        print(f'---  Origin: ({self.origin.x}, {self.origin.y}, {self.origin.z})')
+        print(f'---  Origin type: {self.origin_type.name}')
+        print(f'---  Migration angle: {self.migration_angle}')
+
 
     def XMLAddElement(
             self,
@@ -2030,10 +2019,8 @@ class Trend3D_elliptic_cone(Trend3D_conic):
 
     def _writeTrendSpecificParam(self) -> None:
         # Elliptic cone
-        print(
-            f'---  Curvature: {self.curvature}\n'
-            f'---  Migration angle: {self.migration_angle}\n'
-            f'---  Relative size: {self.relative_size_of_ellipse}\n'
-            f'---  Origin: ({self.origin.x.value}, {self.origin.y.value}, {self.origin.z.value})\n'
-            f'---  Origin type: {self.origin_type.name}'
-        )
+        print(f'---  Curvature: {self.curvature}')
+        print(f'---  Migration angle: {self.migration_angle}')
+        print(f'---  Relative size: {self.relative_size_of_ellipse}')
+        print(f'---  Origin: ({self.origin.x.value}, {self.origin.y.value}, {self.origin.z.value})')
+        print(f'---  Origin type: {self.origin_type.name}')

@@ -202,12 +202,10 @@ class APSZoneModel:
                 self.__simBoxThickness = simBoxThickness
 
                 if self.__debug_level >= Debug.VERY_VERBOSE:
-                    print(
-                        f'--- From APSZoneModel: ZoneNumber:       {zone_number}\n'
-                        f'--- From APSZoneModel: RegionNumber:     {region_number}\n'
-                        f'--- From APSZoneModel: useConstProb:     {self.__useConstProb}\n'
-                        f'--- From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}\n'
-                    )
+                    print(f'--- From APSZoneModel: ZoneNumber:       {zone_number}')
+                    print(f'--- From APSZoneModel: RegionNumber:     {region_number}')
+                    print(f'--- From APSZoneModel: useConstProb:     {self.__useConstProb}')
+                    print(f'--- From APSZoneModel: simBoxThickness:  {self.__simBoxThickness}')
 
                 # Read facies probabilities
                 self.__faciesProbObject = APSFaciesProb(
@@ -268,14 +266,10 @@ class APSZoneModel:
                         )
 
                     if self.debug_level >= Debug.VERY_VERBOSE:
-                        print(
-                            '--- APSZoneModel:\n'
-                            f'--- Truncation rule for current zone: {self.truncation_rule.getClassName()}'
-                        )
-                        print(
-                            '--- APSZoneModel: Facies in truncation rule:'
-                            f' {self.truncation_rule.getFaciesInTruncRule()}'
-                        )
+                        print('--- APSZoneModel:')
+                        print(f'--- Truncation rule for current zone: {self.truncation_rule.getClassName()}')
+                        print('--- APSZoneModel: Facies in truncation rule:')
+                        print(f' {self.truncation_rule.getFaciesInTruncRule()}')
 
                 break
                 # End if zone number

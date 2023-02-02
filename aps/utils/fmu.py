@@ -21,6 +21,7 @@ from aps.algorithms.trend import Trend3D_elliptic_cone, ConicTrend
 from aps.utils.constants.simple import OriginType, Debug, TrendType, GridModelConstants
 from aps.utils.decorators import cached
 from aps.utils.exceptions.zone import MissingConformityException
+from aps.utils.aps_config import APSConfig
 
 
 if TYPE_CHECKING:
@@ -54,7 +55,7 @@ def get_ert_location() -> Path:
 
 
 def get_top_location() -> Path:
-    top_location = get_ert_location() / '..' / '..'
+    top_location = APSConfig.top_dir()
     return Path(top_location)
 
 
@@ -68,7 +69,7 @@ def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
     the APS mode is import updated GRF from ERT and this function return False
     '''
     MAXITER = 100
-    toplevel = Path("../..").absolute()
+    toplevel = Path(APSConfig.top_dir()).absolute()
     iterfolder = -1
     for folder in range(MAXITER):
         if (toplevel / str(folder)).exists():
@@ -77,7 +78,7 @@ def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
     return iterfolder <= 0
 
 def get_export_location(create: bool = True) -> Path:
-    field_location = get_ert_location() / '..' / 'output' / 'aps'
+    field_location = Path(APSConfig.rms_field_dir())
     if create and not field_location.exists():
         os.makedirs(field_location, exist_ok=True)
     return field_location
@@ -471,6 +472,7 @@ def fmu_aware_model_file(*, fmu_mode: bool, **kwargs) -> ContextManager[str]:
         UpdateGridModelName(**kwargs),
     ])
     if fmu_mode:
+        print(" ")
         print(
             "FMU mode. Prepare for simulation of GRF's "
             f"in {ertbox_grid_model_name}"

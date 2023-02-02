@@ -81,10 +81,12 @@ export const TREND_NOT_IMPLEMENTED_PREVIEW_VISUALIZATION: ('RMS_PARAM' | 'RMS_TR
 
 export const DEFAULT_MODEL_FILE_NAMES = {
   model: 'myApsExport.xml',
-  fmuConfig: 'aps.yaml',
-  probabilityDistribution: 'aps_param_dist.txt',
+  fmuConfig: 'aps_fmu_params.yaml',
+  probabilityDistribution: 'aps_dist.txt',
 }
 
 export const DEFAULT_EXPORT_FMU_CONFIG_FILES = false
 
 export const DEFAULT_USE_RESIDUAL_FIELDS = false
+
+export const DEFAULT_USE_NON_STANDARD_FMU_DIRS = false

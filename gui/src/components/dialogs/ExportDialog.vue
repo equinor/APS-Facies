@@ -176,17 +176,20 @@ export default class ExportDialog extends Vue {
     } else return undefined
   }
 
-  defaultPaths (): PathsState {
+  async defaultPaths (): Promise< PathsState > {
     const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
-
+    const defaultRelativeExportPaths = await rms.apsFmuConfig()
+    const modelPath = defaultRelativeExportPaths[0]
+    const ertParamPath = defaultRelativeExportPaths[1]
+    const fmuParamPath = defaultRelativeExportPaths[2]
     return {
-      model: `${this.projectPath}/../input/config/apsgui/${model}`,
+      model: `${modelPath}/${model}`,
       fmuConfig: {
-        path: `${this.projectPath}/../../fmuconfig/input/${fmuConfig}`,
+        path: `${fmuParamPath}/${fmuConfig}`,
         disabled: false,
       },
       probabilityDistribution: {
-        path: `${this.projectPath}/../../ert/input/distributions/${probabilityDistribution}`,
+        path: `${ertParamPath}/${probabilityDistribution}`,
         disabled: false,
       },
     }
@@ -196,7 +199,6 @@ export default class ExportDialog extends Vue {
     this.dialog = true
     this.$asyncComputed.hasFmuUpdatableValues.update()
     await this.updateProjectPath()
-
     return new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject
@@ -222,6 +224,7 @@ export default class ExportDialog extends Vue {
       }
     this.resolve({ paths })
     this.dialog = false
+
   }
 
   abort (): void {
@@ -231,8 +234,8 @@ export default class ExportDialog extends Vue {
     this.dialog = false
   }
 
-  restoreDefaults (): void {
-    this.paths = this.defaultPaths()
+  async restoreDefaults (): Promise<void> {
+    this.paths = await this.defaultPaths()
   }
 
   async updateProjectPath (): Promise<void> {

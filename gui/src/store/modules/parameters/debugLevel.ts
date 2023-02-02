@@ -6,7 +6,7 @@ const module: Module<Selectable<number>, RootState> = {
   namespaced: true,
 
   state: {
-    selected: 0,
+    selected: 1,
   },
 
   actions: {

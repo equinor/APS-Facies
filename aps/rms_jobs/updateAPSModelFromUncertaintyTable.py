@@ -5,6 +5,7 @@ from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.roxar.fmu_tags import get_list_of_aps_uncertainty_parameters, set_selected_as_fmu_updatable
 from aps.utils.methods import get_run_parameters, get_workflow_name, get_debug_level
+from aps.utils.aps_config import APSConfig
 
 """
 Description:
@@ -100,6 +101,7 @@ def update_aps_model_from_uncertainty(
 # -------  Main ----------------
 def run(roxar=None, project=None, **kwargs):
     import roxar.rms
+    APSConfig.init(project)
     params = get_run_parameters(**kwargs)
     input_aps_model_file = params['model_file']
     debug_level = get_debug_level(**kwargs)

@@ -22,6 +22,7 @@
         <ExtrapolationMethod>extend_layer_mean</ExtrapolationMethod>
       </UpdateGRF>
       <UseResidualFields>NO</UseResidualFields>
+      <UseNonStandardFMU>NO</UseNonStandardFMU>
       <ExportConfigFiles>YES</ExportConfigFiles>
     </FmuSettings>
     <RunSettings>

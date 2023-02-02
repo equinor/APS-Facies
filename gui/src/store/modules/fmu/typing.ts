@@ -19,4 +19,5 @@ export interface FmuState {
   fieldFileFormat: OptionState<string>
   customTrendExtrapolationMethod: OptionState<string>
   onlyUpdateResidualFields: OptionState<boolean>
+  useNonStandardFmu: OptionState<boolean>
 }

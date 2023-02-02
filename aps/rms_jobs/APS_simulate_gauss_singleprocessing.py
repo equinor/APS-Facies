@@ -150,22 +150,20 @@ def run_simulations(
                     else:
                         print(f'-- Simulate: {gauss_field_name}  for zone: {zone_number}')
                 if debug_level >= Debug.VERY_VERBOSE:
-                    print(
-                        f'     Zone,region             : ({zone_number}, {region_number})\n'
-                        f'     Gauss field name        : {gauss_field_name}\n'
-                        f'     Variogram type          : {variogram.type.name.upper()}\n'
-                        f'     Main range              : {variogram.ranges.main}\n'
-                        f'     Perpendicular range     : {variogram.ranges.perpendicular}\n'
-                        f'     Vertical range          : {variogram.ranges.vertical}\n'
-                        f'     Azimuth angle in sim box: {azimuth_value_sim_box}\n'
-                        f'     Dip angle               : {variogram.angles.dip}\n'
-                        f'     NX                      : {nx}\n'
-                        f'     NY                      : {ny}\n'
-                        f'     NZ for this zone        : {nz}\n'
-                        f'     DX                      : {dx}\n'
-                        f'     DY                      : {dy}\n'
-                        f'     DZ for this zone        : {dz}\n'
-                    )
+                    print(f'     Zone,region             : ({zone_number}, {region_number})')
+                    print(f'     Gauss field name        : {gauss_field_name}')
+                    print(f'     Variogram type          : {variogram.type.name.upper()}')
+                    print(f'     Main range              : {variogram.ranges.main}')
+                    print(f'     Perpendicular range     : {variogram.ranges.perpendicular}')
+                    print(f'     Vertical range          : {variogram.ranges.vertical}')
+                    print(f'     Azimuth angle in sim box: {azimuth_value_sim_box}')
+                    print(f'     Dip angle               : {variogram.angles.dip}')
+                    print(f'     NX                      : {nx}')
+                    print(f'     NY                      : {ny}')
+                    print(f'     NZ for this zone        : {nz}')
+                    print(f'     DX                      : {dx}')
+                    print(f'     DY                      : {dy}')
+                    print(f'     DZ for this zone        : {dz}')
 
                 # Define variogram
                 sim_variogram = define_variogram(variogram, azimuth_value_sim_box)
@@ -184,9 +182,10 @@ def run_simulations(
                 if debug_level >= Debug.VERBOSE:
                     print(
                         f"-- No simulation of: {gauss_field_name} "
-                        f"for zone: {zone_number},  region: {region_number}.\n "
-                        f"-- Relative standard deviation is: {rel_std_dev}  < 0.001"
+                        f"for zone: {zone_number},  region: {region_number}."
                     )
+                    print(f"-- Relative standard deviation is: {rel_std_dev}  < 0.001")
+
                 gauss_vector = np.zeros((nx*ny*nz), dtype=np.float32)
             gauss_result = np.reshape(gauss_vector, (nx, ny, nz), order='F')
             gauss_result_list_for_zone.append(gauss_result)

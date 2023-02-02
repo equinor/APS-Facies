@@ -9,7 +9,7 @@ from warnings import warn
 
 from aps.utils.constants.simple import Debug, ModelFileFormat
 from aps.utils.exceptions.xml import MissingKeyword
-
+from aps.utils.aps_config import APSConfig
 from copy import copy
 
 from aps.utils.types import (
@@ -104,15 +104,8 @@ def get_rms_project_data_file(**kwargs) -> RmsProjectDataFile:
     )
 
 
-def get_global_variables_file(**kwargs) -> GlobalVariablesFile:
-    return _get_file_name(
-        kwargs,
-        legal_kwargs=[
-            'global_variables', 'globalIPLFile', 'global_ipl_file', 'global_include_file', 'global_variables_file',
-        ],
-        default_name='../../fmuconfig/output/global_variables.yml',
-    )
-
+def get_global_variables_file() -> GlobalVariablesFile:
+    return APSConfig.global_variables_file()
 
 def get_debug_level(**kwargs) -> Debug:
     debug_level = _get_value(kwargs, legal_kwargs=['debugInfo', 'debug_level'], default_value=Debug.OFF)
@@ -251,7 +244,7 @@ def get_run_parameters(**kwargs) -> dict:
         'model_file': get_specification_file(**kwargs),
         'output_model_file': get_output_model_file(**kwargs),
         'rms_data_file': get_rms_project_data_file(**kwargs),
-        'global_variables_file': get_global_variables_file(**kwargs),
+        'global_variables_file': get_global_variables_file(),
         'output_tagged_variables_file': get_output_tagged_variables_file(**kwargs),
         'tag_all_variables': get_tag_all_variables(**kwargs),
         'fmu_variables_file': get_fmu_variables_file(**kwargs),

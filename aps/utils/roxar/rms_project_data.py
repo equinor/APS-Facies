@@ -64,6 +64,7 @@ from aps.utils.types import (
 )
 from aps.utils.xmlUtils import prettify
 from aps.utils.constants.simple import Debug
+from aps.utils.aps_config import APSConfig
 
 def empty_if_none(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
@@ -92,6 +93,7 @@ class RMSData:
     def __init__(self, roxar, project: Project):
         self.roxar = roxar
         self.project = project
+        APSConfig.init(self.project)
 
     def is_discrete(self, _property: Property, can_be_empty: bool = False) -> bool:
         return self.is_property_type(_property, self.roxar.GridPropertyType.discrete, can_be_empty)
@@ -113,6 +115,16 @@ class RMSData:
                 )
         )
 
+    def get_aps_fmu_config(self) -> List[str]:
+        dir1 = APSConfig.relative_aps_model_export_dir()
+        dir2 = APSConfig.relative_ert_distribution_dir()
+        dir3 = APSConfig.relative_fmu_config_input_dir()
+        return [dir1, dir2, dir3]
+
+    def set_aps_fmu_config(self, use_config_file=False):
+            APSConfig.init(self.project,
+                use_available_config_file=use_config_file)
+
     def get_project_name(self) -> ProjectName:
         return Path(self.project.filename).name
 
@@ -123,7 +135,8 @@ class RMSData:
         return Path(self.project.filename).parent
 
     def get_fmu_parameter_list_dir(self) -> FmuParameterListPath:
-        default_location = self._get_project_location() / '..' / '..' / 'fmuconfig' / 'output'
+        fmu_config_output_dir = APSConfig.fmu_config_output_dir()
+        default_location = self._get_project_location() / fmu_config_output_dir
         return str(default_location.absolute())
 
     def get_current_workflow_name(self) -> WorkflowName:

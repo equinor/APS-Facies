@@ -3,9 +3,11 @@
 
 from aps.algorithms.APSModel import APSModel
 from aps.utils.methods import get_specification_file, get_debug_level
-from aps.utils.fmu import get_top_location
+from aps.utils.fmu import get_top_location, get_ert_location
 from aps.utils.constants.simple import GridModelConstants, Debug
 from aps.utils.io import write_string_to_file, GlobalVariables
+from aps.utils.aps_config import APSConfig
+
 from warnings import warn
 from pathlib import Path
 
@@ -17,7 +19,7 @@ def run(project, **kwargs):
     default_job_name = 'apsgui_job_name'
     job_name = kwargs.get('current_job_name', default_job_name)
     debug_level = get_debug_level(**kwargs)
-    global_variables_file = "global_variables.yml"
+    aps_config = APSConfig
 
     if export_fmu_files:
         # Use default file name equal to job name if this is defined and a default name if not
@@ -27,42 +29,36 @@ def run(project, **kwargs):
             print(f"- Write FMU and ERT related template config files:")
         if job_name is None:
             job_name = default_job_name
-            print(
-                '-- NOTE: A default name of the created FMU config files will be used when running interactively.\n'
-                '         If you run from a workflow, the APS GUI job name will be used when creating the FMU config files.\n'
-            )
-        model_name = job_name + '.xml'
-        att_name = job_name + '_aps_fmu_config.yml'
-        prob_name = job_name + '_aps_ert_config_dist.txt'
-        ert_field_name = job_name + '_aps_ert_config_fields.txt'
-        aps_fmuconfig_name = job_name + '_aps_params.yml'
+            print('-- NOTE: A default name of the created FMU config files will be used when running interactively.')
+            print('         If you run from a workflow, the APS GUI job name will be used when creating the FMU config files.')
 
-        relative_dir_rms_model = "rms/model"
-        relative_dir_fmuconfig_input = "fmuconfig/input"
-        relative_dir_fmuconfig_output = "fmuconfig/output"
-        relative_dir_ert_dist = "ert/input/distributions"
-        relative_dir_ert_model = "ert/model"
-        global_variables_file_path = get_top_location() / relative_dir_fmuconfig_output / global_variables_file
+        model_name = job_name + '.xml'
+        att_name = job_name + aps_config.fmu_config_extension()
+        prob_name = job_name + aps_config.ert_config_probs_extension()
+        ert_field_name = job_name + aps_config.ert_config_fields_extension()
+        aps_fmuconfig_name = job_name + aps_config.fmu_master_config_extension()
+
+        global_variables_file_path = aps_config.global_variables_file()
 
         # APS model file
-        model_file_name = get_top_location() / relative_dir_rms_model / model_name
+        model_file_name = aps_config.rms_model_dir() + "/" + model_name
         param_file_name = None
         param_file_name_alternative = None
-        param_dir_path = get_top_location() / relative_dir_fmuconfig_input
-        param_dir_path_alternative = get_top_location() / relative_dir_fmuconfig_output
+        param_dir_path = aps_config.fmu_config_input_dir()
+        param_dir_path_alternative = aps_config.fmu_config_output_dir()
         if not Path(param_dir_path).is_dir():
             if Path(param_dir_path_alternative).is_dir():
                 # APS param file the user can copy into global_variables.yml file
                 # for FMU projects not using global_master_config.yml file
-                param_file_name_alternative = param_dir_path_alternative / att_name
+                param_file_name_alternative = param_dir_path_alternative + "/" + att_name
             else:
                 raise IOError(f"Directory {param_dir_path_alternative} does not exist.")
         else:
             # APS param file to include into global_master_config.yml file
-            param_file_name = param_dir_path / aps_fmuconfig_name
+            param_file_name = param_dir_path + "/" + aps_fmuconfig_name
 
-        probability_distribution_file_name = get_top_location() / relative_dir_ert_dist / prob_name
-        ert_field_keyword_file_name = get_top_location() / relative_dir_ert_model / ert_field_name
+        probability_distribution_file_name = aps_config.ert_distribution_dir() + "/" + prob_name
+        ert_field_keyword_file_name = aps_config.ert_model_dir() + "/" + ert_field_name
 
 
         # Check that using current APS job in the FMU global master config file is possible
@@ -81,7 +77,7 @@ def run(project, **kwargs):
             )
 
         if debug_level >= Debug.VERBOSE:
-            print(f"-- Main directory:   {get_top_location()}")
+            print(f"-- Main directory:   {aps_config.top_dir()} ")
             if param_file_name:
                 print(f"-- Use in FMU global_master_config.yml:  {param_file_name}")
             if param_file_name_alternative:
@@ -103,7 +99,7 @@ def run(project, **kwargs):
 
         if aps_model.fmu_mode == "FIELDS":
             ertbox_grid_file_name = aps_model.fmu_ertbox_name + ".EGRID"
-            ertbox_grid_file_path = "../../rms/output/aps/" + ertbox_grid_file_name
+            ertbox_grid_file_path = aps_config.rms_field_dir_for_run_path() + "/" + ertbox_grid_file_name
             grid_model = project.grid_models[aps_model.grid_model_name]
             zone_names = grid_model.properties[GridModelConstants.ZONE_NAME].code_names
             region_names = None
@@ -129,7 +125,7 @@ def run(project, **kwargs):
                     fmu_field_name_file = fmu_field_name + "." + aps_model.fmu_field_file_format
                     content += f"FIELD {fmu_field_name}   "
                     content += f"PARAMETER {fmu_field_name_file}   "
-                    content += f"INIT_FILES:rms/output/aps/{fmu_field_name_file}   "
+                    content += f"INIT_FILES:{aps_config.rms_field_dir_for_run_path()}/{fmu_field_name_file}   "
                     content += f"MIN:-5.5  MAX:5.5  FORWARD_INIT:True\n"
 
             write_string_to_file(ert_field_keyword_file_name, content, debug_level=debug_level)

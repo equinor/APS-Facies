@@ -33,6 +33,7 @@
           :custom-trend-extrapolation-method.sync="customTrendExtrapolationMethod"
           :export-fmu-config-files.sync="exportFmuConfigFiles"
           :only-update-residual-fields.sync="onlyUpdateResidualFields"
+          :use-non-standard-fmu.sync="useNonStandardFmu"
           @update:error="e => update('fmu', e)"
         />
         <br>
@@ -245,6 +246,7 @@ export default class JobSettings extends Vue {
   fieldFileFormat = ''
   customTrendExtrapolationMethod = ''
   exportFmuConfigFiles = false
+  useNonStandardFmu = false
   onlyUpdateResidualFields = false
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
@@ -268,6 +270,7 @@ export default class JobSettings extends Vue {
       this.fieldFileFormat = fmu.fieldFileFormat.value
       this.customTrendExtrapolationMethod = fmu.customTrendExtrapolationMethod.value
       this.onlyUpdateResidualFields = fmu.onlyUpdateResidualFields.value
+      this.useNonStandardFmu = fmu.useNonStandardFmu.value
 
       this.debugLevel = parameters.debugLevel.selected
       this.transformType = parameters.transformType.selected
@@ -305,6 +308,7 @@ export default class JobSettings extends Vue {
       dispatch('fmu/fieldFileFormat/set', this.fieldFileFormat),
       dispatch('fmu/customTrendExtrapolationMethod/set', this.customTrendExtrapolationMethod),
       dispatch('fmu/onlyUpdateResidualFields/set', this.onlyUpdateResidualFields),
+      dispatch('fmu/useNonStandardFmu/set', this.useNonStandardFmu),
 
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),
@@ -327,6 +331,9 @@ export default class JobSettings extends Vue {
         dispatch('gridModels/refresh')
       ])
     }
+
+    // Create the .aps_config file if this.useNonStandardFmu is true and it does not exist already
+    await rms.createAPSFmuConfigFile(this.useNonStandardFmu)
 
     this.dialog = false
   }

@@ -41,6 +41,26 @@
             />
             <span slot="popover">No grid model has been selected</span>
           </v-popover>
+          <v-row
+            v-if="!fmuGridExists"
+          >
+            <v-col cols="6">
+              <span>The specified grid does not exist.</span>
+              <v-checkbox
+                v-model="_createFmuGrid"
+                label="Do you want to create it?"
+              />
+              <numeric-field
+                v-model="_maxLayersInFmu"
+                :ranges="{ min: minimumErtLayers, max: Number.POSITIVE_INFINITY }"
+                :disabled="!createFmuGrid"
+                :ignore-errors="!createFmuGrid"
+                :required="createFmuGrid"
+                label="Number of layers in ERTBOX grid"
+                @update:error="e => update('fmuGridDepth', e)"
+              />
+            </v-col>
+          </v-row>
         </v-col>
         <v-col cols="6">
           <v-radio-group
@@ -64,14 +84,6 @@
               :items="fieldFileFormats"
               label="File format for export of Gaussian Random Fields"
             />
-          </v-row>
-          <v-row no-gutters>
-            <v-checkbox
-              v-model="_onlyUpdateResidualFields"
-              v-tooltip="'Export/Import only the Gaussian Residual for GRF with trend to/from ERT. The trend part of the GRF is added by APS before applying truncation rule. '"
-              label="For GRF with trend let ERT only update the residual field."
-              :disabled="!_runFmuWorkflows"
-            />
             <v-select
               v-model="_customTrendExtrapolationMethod"
               v-tooltip="'Extrapolation method for custom trends to fill undefined grid cells in ERT/FMU grid.'"
@@ -79,42 +91,32 @@
               :disabled="!hasRmsParamTrend"
               label="RMS_PARAM trend extrapolation method for ERT/FMU grid."
             />
-          </v-row>
-        </v-col>
-        <v-col cols="12">
-          <v-row
-            v-if="!fmuGridExists"
-          >
-            <v-col cols="6">
-              <span>The specified grid does not exist.</span>
-              <v-checkbox
-                v-model="_createFmuGrid"
-                label="Do you want to create it?"
-              />
-            </v-col>
-            <v-col cols="6">
-              <numeric-field
-                v-model="_maxLayersInFmu"
-                :ranges="{ min: minimumErtLayers, max: Number.POSITIVE_INFINITY }"
-                :disabled="!createFmuGrid"
-                :ignore-errors="!createFmuGrid"
-                :required="createFmuGrid"
-                label="Number of layers in FMU simulation box grid"
-                @update:error="e => update('fmuGridDepth', e)"
-              />
-            </v-col>
+            <v-checkbox
+              v-model="_onlyUpdateResidualFields"
+              v-tooltip="'Export/Import only the Gaussian Residual for GRF with trend to/from ERT. The trend part of the GRF is added by APS before applying truncation rule. '"
+              label="For GRF with trend let ERT only update the residual field."
+              :disabled="!_runFmuWorkflows"
+            />
           </v-row>
         </v-col>
       </v-row>
+      <v-col cols="6">
+        <v-row no-gutters>
+          <v-checkbox
+            v-model="_exportFmuConfigFiles"
+            v-tooltip="'When running this job from RMS workflow, FMU config and template files with APS parameters are exported automatically.'"
+            label="Export APS model and FMU config files."
+            :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
+          />
+          <v-checkbox
+            v-model="_useNonStandardFmu"
+            v-tooltip="'Use non-standard customized settings for FMU files and directories. File .aps_config will be used. '"
+            label="Use non-standard FMU files and directory structure."
+            :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
+          />
+        </v-row>
+      </v-col>
     </div>
-    <v-row no-gutters>
-      <v-checkbox
-        v-model="_exportFmuConfigFiles"
-        v-tooltip="'When running this job from RMS workflow, APS model file and FMU config files are exported automatically.'"
-        label="Export model file and FMU config files for current job."
-        :disabled="!_runFmuWorkflows && !_onlyUpdateFromFmu"
-      />
-    </v-row>
   </settings-panel>
 </template>
 
@@ -181,6 +183,9 @@ export default class FmuSettings extends Vue {
 
   @Prop({ required: true, type: Boolean })
   readonly onlyUpdateResidualFields: boolean
+
+  @Prop({ required: true, type: Boolean })
+  readonly useNonStandardFmu: boolean
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -251,6 +256,11 @@ export default class FmuSettings extends Vue {
   get _onlyUpdateResidualFields (): boolean { return this.onlyUpdateResidualFields }
   set _onlyUpdateResidualFields (toggle: boolean) {
     this.$emit('update:onlyUpdateResidualFields', toggle)
+  }
+
+  get _useNonStandardFmu (): boolean { return this.useNonStandardFmu }
+  set _useNonStandardFmu (toggle: boolean) {
+    this.$emit('update:useNonStandardFmu', toggle)
   }
 
   update (type: string, value: boolean): void {
