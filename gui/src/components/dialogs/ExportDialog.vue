@@ -178,7 +178,8 @@ export default class ExportDialog extends Vue {
 
   async defaultPaths (): Promise< PathsState > {
     const { model, fmuConfig, probabilityDistribution } = DEFAULT_MODEL_FILE_NAMES
-    const defaultRelativeExportPaths = await rms.apsFmuConfig()
+    const useNonStandardFmu = this.$store.state.fmu.useNonStandardFmu.value
+    const defaultRelativeExportPaths = await rms.apsFmuConfig(useNonStandardFmu)
     const modelPath = defaultRelativeExportPaths[0]
     const ertParamPath = defaultRelativeExportPaths[1]
     const fmuParamPath = defaultRelativeExportPaths[2]
@@ -199,6 +200,7 @@ export default class ExportDialog extends Vue {
     this.dialog = true
     this.$asyncComputed.hasFmuUpdatableValues.update()
     await this.updateProjectPath()
+    await this.restoreDefaults()
     return new Promise((resolve, reject) => {
       this.resolve = resolve
       this.reject = reject

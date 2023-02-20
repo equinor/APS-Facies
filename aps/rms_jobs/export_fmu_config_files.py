@@ -3,7 +3,6 @@
 
 from aps.algorithms.APSModel import APSModel
 from aps.utils.methods import get_specification_file, get_debug_level
-from aps.utils.fmu import get_top_location, get_ert_location
 from aps.utils.constants.simple import GridModelConstants, Debug
 from aps.utils.io import write_string_to_file, GlobalVariables
 from aps.utils.aps_config import APSConfig
@@ -41,11 +40,11 @@ def run(project, **kwargs):
         global_variables_file_path = aps_config.global_variables_file()
 
         # APS model file
-        model_file_name = aps_config.rms_model_dir() + "/" + model_name
+        model_file_name = aps_config.rms_model_dir_absolute() + "/" + model_name
         param_file_name = None
         param_file_name_alternative = None
-        param_dir_path = aps_config.fmu_config_input_dir()
-        param_dir_path_alternative = aps_config.fmu_config_output_dir()
+        param_dir_path = aps_config.fmu_config_input_dir_absolute()
+        param_dir_path_alternative = aps_config.fmu_config_output_dir_absolute()
         if not Path(param_dir_path).is_dir():
             if Path(param_dir_path_alternative).is_dir():
                 # APS param file the user can copy into global_variables.yml file
@@ -57,8 +56,8 @@ def run(project, **kwargs):
             # APS param file to include into global_master_config.yml file
             param_file_name = param_dir_path + "/" + aps_fmuconfig_name
 
-        probability_distribution_file_name = aps_config.ert_distribution_dir() + "/" + prob_name
-        ert_field_keyword_file_name = aps_config.ert_model_dir() + "/" + ert_field_name
+        probability_distribution_file_name = aps_config.ert_distribution_dir_absolute() + "/" + prob_name
+        ert_field_keyword_file_name = aps_config.ert_model_dir_absolute() + "/" + ert_field_name
 
 
         # Check that using current APS job in the FMU global master config file is possible
@@ -99,7 +98,7 @@ def run(project, **kwargs):
 
         if aps_model.fmu_mode == "FIELDS":
             ertbox_grid_file_name = aps_model.fmu_ertbox_name + ".EGRID"
-            ertbox_grid_file_path = aps_config.rms_field_dir_for_run_path() + "/" + ertbox_grid_file_name
+            ertbox_grid_file_path = aps_config.rms_field_dir() + "/" + ertbox_grid_file_name
             grid_model = project.grid_models[aps_model.grid_model_name]
             zone_names = grid_model.properties[GridModelConstants.ZONE_NAME].code_names
             region_names = None

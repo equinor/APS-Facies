@@ -50,10 +50,6 @@ def create_get_property(
     return get_property
 
 
-def get_ert_location() -> Path:
-    return Path(os.getcwd())
-
-
 def get_top_location() -> Path:
     top_location = APSConfig.top_dir()
     return Path(top_location)
@@ -69,12 +65,14 @@ def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
     the APS mode is import updated GRF from ERT and this function return False
     '''
     MAXITER = 100
-    toplevel = Path(APSConfig.top_dir()).absolute()
+    toplevel = Path(APSConfig.top_dir())
     iterfolder = -1
     for folder in range(MAXITER):
         if (toplevel / str(folder)).exists():
             iterfolder = folder
             break
+    if debug_level >= Debug.VERY_VERBOSE:
+        print(f"--- ERT iteration: {iterfolder} ")
     return iterfolder <= 0
 
 def get_export_location(create: bool = True) -> Path:

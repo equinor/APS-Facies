@@ -208,7 +208,6 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         SpecificationType.RESAMPLE: 'resample.xml',
     }
     mapping_yml = {
-        SpecificationType.APS_MODEL: 'APS.yml',
         SpecificationType.PROBABILITY_LOG: 'Create_prob_logs.yml',
         SpecificationType.FACIES_LOG: 'Create_redefined_blocked_facies_log.yml',
         SpecificationType.CONVERT_BITMAP: 'bitmap2rms_model.yml',
