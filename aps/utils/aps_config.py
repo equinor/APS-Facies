@@ -5,6 +5,7 @@ import copy
 
 from pathlib import Path
 from aps.utils.ymlUtils import readYml
+from aps.utils.constants.simple import Debug
 
 class APSConfig:
     """
@@ -13,11 +14,11 @@ class APSConfig:
     The init function can be used to create a config file.
     """
     project = None
+    debug_level = Debug.OFF
     config_file_without_path = "aps_config.yml"
     config_file = None
     use_config_from_file = False
     create_config_file = False
-    has_been_read = False
     rms_project_directory_path = None
     config_initial = {
         "top_directory_relative_to_rms_project": "../..",
@@ -53,14 +54,16 @@ class APSConfig:
             use_available_config_file: bool = False,
             must_read_existing_config_file: bool = False,
             check_existence_of_paths: bool = False,
+            debug_level: Debug = Debug.OFF,
         ):
         """
         use_available_config_file: Turn on/off whether to read FMU directory config from file or not.
                                    If turned on and config files does not exist, it will be created.
         must_read_existing_config_file: If turned on, config file is re-read even if it has already been read.
         """
+        cls.debug_level = debug_level
         cls.project = project
-        cls.rms_project_directory_path = cls.get_project_dir()
+        cls.rms_project_directory_path = str(Path(cls.project.filename).parent.absolute())
         cls.config_file = cls.rms_project_directory_path + "/" + cls.config_file_without_path
         # Create and use config file
         if use_available_config_file:
@@ -93,94 +96,77 @@ class APSConfig:
         return cls.use_config_from_file
 
     @classmethod
-    def get_project_dir(cls):
-        return str(Path(cls.project.filename).parent.absolute())
+    def global_variables_file(cls):
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["global_variables_file"]
 
     @classmethod
-    def global_variables_file(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" +  \
-            cls.config["relative_paths"]["global_variables_file"]
-        return path
+    def global_variables_file_absolute(cls):
+        return cls.project_dir() + "/" + cls.global_variables_file(cls)
 
     @classmethod
     def top_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"]
-        return path
+        return cls.config["top_directory_relative_to_rms_project"]
+
+    @classmethod
+    def top_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.top_dir()
 
     @classmethod
     def rms_model_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["rms_model"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["rms_model"]
+
+
+    @classmethod
+    def rms_model_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.rms_model_dir()
 
     @classmethod
     def aps_model_export_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["aps_model_export"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["aps_model_export"]
 
     @classmethod
-    def relative_aps_model_export_dir(cls):
-        path = cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["aps_model_export"]
-        return path
+    def aps_model_export_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.aps_model_export_dir()
 
     @classmethod
     def fmu_config_input_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["fmu_config_input"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["fmu_config_input"]
 
     @classmethod
-    def relative_fmu_config_input_dir(cls):
-        path = cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["fmu_config_input"]
-        return path
+    def fmu_config_input_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.fmu_config_input_dir()
 
     @classmethod
     def fmu_config_output_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["fmu_config_output"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["fmu_config_output"]
 
     @classmethod
-    def relative_fmu_config_output_dir(cls):
-        path = cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["fmu_config_output"]
-        return path
+    def fmu_config_output_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.fmu_config_output_dir()
 
     @classmethod
     def ert_model_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["ert_model"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["ert_model"]
 
     @classmethod
-    def relative_ert_distribution_dir(cls):
-        path = cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["ert_dist"]
-        return path
+    def ert_model_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.ert_model_dir()
 
     @classmethod
     def ert_distribution_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["ert_dist"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["ert_dist"]
+
+    @classmethod
+    def ert_distribution_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.ert_distribution_dir()
 
     @classmethod
     def rms_field_dir(cls):
-        path = cls.project_dir() + "/" + \
-            cls.config["top_directory_relative_to_rms_project"] + "/" + \
-            cls.config["relative_paths"]["rms_field"]
-        return path
+        return cls.top_dir() + "/" + cls.config["relative_paths"]["rms_field"]
+
+    @classmethod
+    def rms_field_dir_absolute(cls):
+        return cls.project_dir() + "/" + cls.rms_field_dir()
 
     @classmethod
     def rms_field_dir_for_run_path(cls):
@@ -207,6 +193,10 @@ class APSConfig:
         return cls.config
 
     @classmethod
+    def get_debug_level(cls):
+        return cls.debug_level
+
+    @classmethod
     def check_file_and_directory_existence(cls):
         file_paths = [
             cls.global_variables_file(),
@@ -218,6 +208,9 @@ class APSConfig:
             cls.aps_model_export_dir(),
         ]
         err= False
+        if cls.get_debug_level() >= Debug.VERY_VERBOSE:
+            print(f"--- Current RMS project directory: {cls.project_dir()} ")
+            print(f"--- Current working dir:           {str(Path().absolute())}  ")
         for p in file_paths:
             if not Path(p).exists():
                 print(f"Error: In FMU mode, expect that this path or file exists: {p}")

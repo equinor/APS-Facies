@@ -19,7 +19,7 @@ from typing import Dict
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug, ProbabilityTolerances, TransformType, ExtrapolationMethod
 from aps.utils.decorators import cached
-from aps.utils.fmu import get_export_location, get_ert_location, is_initial_iteration
+from aps.utils.fmu import get_export_location
 from aps.utils.roxar._config_getters import get_debug_level
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.rms_project_data import RMSData

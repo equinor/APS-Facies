@@ -93,7 +93,7 @@ class RMSData:
     def __init__(self, roxar, project: Project):
         self.roxar = roxar
         self.project = project
-        APSConfig.init(self.project)
+
 
     def is_discrete(self, _property: Property, can_be_empty: bool = False) -> bool:
         return self.is_property_type(_property, self.roxar.GridPropertyType.discrete, can_be_empty)
@@ -115,15 +115,19 @@ class RMSData:
                 )
         )
 
-    def get_aps_fmu_config(self) -> List[str]:
-        dir1 = APSConfig.relative_aps_model_export_dir()
-        dir2 = APSConfig.relative_ert_distribution_dir()
-        dir3 = APSConfig.relative_fmu_config_input_dir()
+    def get_aps_fmu_config(self, use_config_file: bool = False) -> List[str]:
+        APSConfig.init(self.project,
+            use_available_config_file=use_config_file,
+            must_read_existing_config_file=True)
+        dir1 = APSConfig.aps_model_export_dir()
+        dir2 = APSConfig.ert_distribution_dir()
+        dir3 = APSConfig.fmu_config_input_dir()
         return [dir1, dir2, dir3]
 
-    def set_aps_fmu_config(self, use_config_file=False):
-            APSConfig.init(self.project,
-                use_available_config_file=use_config_file)
+    def set_aps_fmu_config(self, use_config_file: bool = False):
+        APSConfig.init(self.project,
+            use_available_config_file=use_config_file,
+            must_read_existing_config_file=True)
 
     def get_project_name(self) -> ProjectName:
         return Path(self.project.filename).name

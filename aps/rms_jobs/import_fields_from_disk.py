@@ -37,7 +37,6 @@ import xtgeo
 from aps.algorithms.APSModel import APSModel
 from aps.algorithms.APSZoneModel import Conform
 from aps.utils.exceptions.zone import MissingConformityException
-from aps.utils.fmu import get_ert_location
 from aps.utils.constants.simple import Debug
 from aps.utils.roxar.grid_model import (
     create_zone_parameter,
