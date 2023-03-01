@@ -41,6 +41,7 @@ interface JobSettingsParam {
   exportFmuConfigFiles: boolean
   onlyUpdateResidualFields: boolean
   useNonStandardFmu: boolean
+  exportErtBoxGrid: boolean
   maxAllowedFractionOfValuesOutsideTolerance: number
   toleranceOfProbabilityNormalisation: number
   transformType: number
@@ -506,10 +507,12 @@ const jobSettings = (apsModelContainer:XMLElement) => {
   let exportCheck = false
   let onlyResidual = false
   let useAPSConfigFile = false
+  let exportErtBox = true
   if (fmuMode === 'FIELDS')
   {
     updateGRFElement = getMandatoryNodeValue(fmuSettingsElement,'UpdateGRF')
     ertBoxGrid = getMandatoryTextValue(updateGRFElement, 'ErtBoxGrid')
+    exportErtBox = getMandatoryTextValue(updateGRFElement, 'ExportErtBoxGrid') === 'YES'
     exchangeMode = getMandatoryTextValue(updateGRFElement, 'ExchangeMode') === 'AUTO'
     fileFormat = getMandatoryTextValue(updateGRFElement, 'FileFormat')
     extrapolationMethod = getMandatoryTextValue(updateGRFElement, 'ExtrapolationMethod')
@@ -540,6 +543,7 @@ const jobSettings = (apsModelContainer:XMLElement) => {
     exportFmuConfigFiles: (fmuMode === 'FIELDS' || fmuMode === 'NOFIELDS') ? exportCheck : false,
     onlyUpdateResidualFields: (fmuMode === 'FIELDS') ? onlyResidual : false,
     useNonStandardFmu: (fmuMode === 'FIELDS' || fmuMode === 'NOFIELDS') ? useAPSConfigFile : false,
+    exportErtBoxGrid: (fmuMode === 'FIELDS') ? exportErtBox : false,
     maxAllowedFractionOfValuesOutsideTolerance: maxFractionNotNormalised ?? 0.1,
     toleranceOfProbabilityNormalisation: toleranceLimitProbability ?? 0.2,
     transformType: transformationSettings ?? 0,
@@ -886,6 +890,7 @@ const module: Module<Record<string, unknown>, RootState> = {
       await dispatch('fmu/customTrendExtrapolationMethod/set', jobSettingsParam.customTrendExtrapolationMethod, { root: true })
       await dispatch('fmu/onlyUpdateResidualFields/set', jobSettingsParam.onlyUpdateResidualFields, { root: true })
       await dispatch('fmu/useNonStandardFmu/set', jobSettingsParam.useNonStandardFmu, { root: true })
+      await dispatch('fmu/exportErtBoxGrid/set', jobSettingsParam.exportErtBoxGrid, { root: true })
       await dispatch('options/importFields/set', jobSettingsParam.importFields, { root: true })
       await dispatch('options/exportFmuConfigFiles/set', jobSettingsParam.exportFmuConfigFiles, { root: true })
       await dispatch('parameters/maxAllowedFractionOfValuesOutsideTolerance/select', jobSettingsParam.maxAllowedFractionOfValuesOutsideTolerance, { root: true })

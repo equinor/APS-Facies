@@ -34,6 +34,7 @@
           :export-fmu-config-files.sync="exportFmuConfigFiles"
           :only-update-residual-fields.sync="onlyUpdateResidualFields"
           :use-non-standard-fmu.sync="useNonStandardFmu"
+          :export-ert-box-grid.sync="exportErtBoxGrid"
           @update:error="e => update('fmu', e)"
         />
         <br>
@@ -248,6 +249,7 @@ export default class JobSettings extends Vue {
   exportFmuConfigFiles = false
   useNonStandardFmu = false
   onlyUpdateResidualFields = false
+  exportErtBoxGrid = true
 
   get simulationSettings (): SimulationSettings { return this.$store.getters.simulationSettings() }
   get gridSize (): Coordinate3D { return this.simulationSettings.gridSize }
@@ -271,6 +273,7 @@ export default class JobSettings extends Vue {
       this.customTrendExtrapolationMethod = fmu.customTrendExtrapolationMethod.value
       this.onlyUpdateResidualFields = fmu.onlyUpdateResidualFields.value
       this.useNonStandardFmu = fmu.useNonStandardFmu.value
+      this.exportErtBoxGrid =  fmu.exportErtBoxGrid.value
 
       this.debugLevel = parameters.debugLevel.selected
       this.transformType = parameters.transformType.selected
@@ -309,6 +312,7 @@ export default class JobSettings extends Vue {
       dispatch('fmu/customTrendExtrapolationMethod/set', this.customTrendExtrapolationMethod),
       dispatch('fmu/onlyUpdateResidualFields/set', this.onlyUpdateResidualFields),
       dispatch('fmu/useNonStandardFmu/set', this.useNonStandardFmu),
+      dispatch('fmu/exportErtBoxGrid/set', this.exportErtBoxGrid),
 
       dispatch('options/showNameOrNumber/zone/set', this.showZoneNameNumber),
       dispatch('options/showNameOrNumber/region/set', this.showRegionNameNumber),

@@ -124,6 +124,7 @@ class APSModel:
             fmu_trend_param_extrapolation: int = ExtrapolationMethod.EXTEND_LAYER_MEAN,
             fmu_export_config_files: bool = False,
             fmu_use_non_standard_dir_and_files: bool = False,
+            fmu_export_ertbox_grid: bool = True,
             prob_settings_fraction: float = ProbabilityTolerances.MAX_ALLOWED_FRACTION_OF_VALUES_OUTSIDE_TOLERANCE,
             prob_settings_tolerance: float = ProbabilityTolerances.MAX_ALLOWED_DEVIATION_BEFORE_ERROR,
             transform_type: TransformType = TransformType.EMPIRIC,
@@ -221,6 +222,7 @@ class APSModel:
         self.__transform_type = transform_type
         self.__fmu_use_residual_fields = fmu_use_residual_fields
         self.__fmu_use_non_standard_dir_and_files = fmu_use_non_standard_dir_and_files
+        self.__fmu_export_ertbox_grid = fmu_export_ertbox_grid
 
 
         # Read model if it is defined
@@ -994,6 +996,10 @@ class APSModel:
         return self.__fmu_use_non_standard_dir_and_files
 
     @property
+    def fmu_export_ertbox_grid(self) -> bool:
+        return self.__fmu_export_ertbox_grid
+
+    @property
     def gaussian_field_names(self) -> List[str]:
         return self.getAllGaussFieldNamesUsed()
 
@@ -1497,6 +1503,19 @@ class APSModel:
                             raise ValueError(
                                 f"Job Settings parameter for {kw_ertbox} must be a name of a grid model."
                             )
+
+                        kw_export_ertbox = 'ExportErtBoxGrid'
+                        use_export_ertbox_settings = getKeyword(update_grf_settings, kw_export_ertbox, modelFile=model_file_name, required=False)
+                        if use_export_ertbox_settings is not None:
+                            value = use_export_ertbox_settings.text.strip().upper()
+                            legal_values = ['YES', 'NO']
+                            if value not in legal_values:
+                                raise ValueError(
+                                    f"Job settings for keyword {kw_export_ertbox} must be one of {legal_values}. "
+                                )
+                            # Default is that self.__fmu_export_ertbox_grid = True
+                            self.__fmu_export_ertbox_grid =  value == 'YES'
+
                         kw_exchange = 'ExchangeMode'
                         exchange_settings = getKeyword(update_grf_settings,  kw_exchange, modelFile=model_file_name, required=False)
                         if exchange_settings is not None:
@@ -1636,6 +1655,7 @@ class APSModel:
         if self.__fmu_mode == 'FIELDS':
             print(    "     Update fields in ERT:")
             print(    f"      ERTBOX: {self.__fmu_ertbox_name}")
+            print(    f"      Export ERTBOX grid: {self.__fmu_export_ertbox_grid} ")
             print(    f"      Exchange mode: {self.__fmu_exchange_mode}")
             print(    f"      File format: {self.__fmu_file_format}")
             print(    f"      Trend param extrapolation:  {self.__fmu_trend_param_extrapolation}")
@@ -1668,6 +1688,11 @@ class APSModel:
 
             fmu_update_grf_element.append(create_node('ErtBoxGrid',
                 text=self.__fmu_ertbox_name))
+
+            if self.__fmu_export_ertbox_grid:
+                fmu_update_grf_element.append(create_node('ExportErtBoxGrid', text='YES'))
+            else:
+                fmu_update_grf_element.append(create_node('ExportErtBoxGrid', text='NO'))
 
             fmu_update_grf_element.append(create_node('ExchangeMode',
                 text=self.__fmu_exchange_mode))

@@ -187,6 +187,9 @@ export default class FmuSettings extends Vue {
   @Prop({ required: true, type: Boolean })
   readonly useNonStandardFmu: boolean
 
+  @Prop({ required: true, type: Boolean })
+  readonly exportErtBoxGrid: boolean
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   get _fmuGrid (): string { return this.fmuGrid }
@@ -261,6 +264,11 @@ export default class FmuSettings extends Vue {
   get _useNonStandardFmu (): boolean { return this.useNonStandardFmu }
   set _useNonStandardFmu (toggle: boolean) {
     this.$emit('update:useNonStandardFmu', toggle)
+  }
+
+  get _exportErtBoxGrid (): boolean { return this.exportErtBoxGrid }
+  set _exportErtBoxGrid (toggle: boolean) {
+    this.$emit('update:exportErtBoxGrid', toggle)
   }
 
   update (type: string, value: boolean): void {

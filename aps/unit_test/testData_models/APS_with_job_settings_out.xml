@@ -17,6 +17,7 @@
       <FmuMode>FIELDS</FmuMode>
       <UpdateGRF>
         <ErtBoxGrid>ERTBOX</ErtBoxGrid>
+        <ExportErtBoxGrid>YES</ExportErtBoxGrid>
         <ExchangeMode>SIMULATE</ExchangeMode>
         <FileFormat>roff</FileFormat>
         <ExtrapolationMethod>extend_layer_mean</ExtrapolationMethod>
