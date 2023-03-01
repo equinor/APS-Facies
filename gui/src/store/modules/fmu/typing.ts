@@ -20,4 +20,5 @@ export interface FmuState {
   customTrendExtrapolationMethod: OptionState<string>
   onlyUpdateResidualFields: OptionState<boolean>
   useNonStandardFmu: OptionState<boolean>
+  exportErtBoxGrid: OptionState<boolean>
 }

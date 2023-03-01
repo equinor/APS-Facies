@@ -5,7 +5,8 @@ import {
   DEFAULT_RUN_ONLY_FMU_UPDATE,
   DEFAULT_EXTRAPOLATION_METHOD,
   DEFAULT_USE_RESIDUAL_FIELDS,
-  DEFAULT_USE_NON_STANDARD_FMU_DIRS
+  DEFAULT_USE_NON_STANDARD_FMU_DIRS,
+  DEFAULT_EXPORT_ERTBOX_GRID
 } from '@/config'
 import { makeOption, populateState } from '@/store/utils'
 import { Module } from 'vuex'
@@ -29,6 +30,7 @@ const module: Module<FmuState, RootState> = {
     simulationGrid,
     onlyUpdateResidualFields: makeOption(DEFAULT_USE_RESIDUAL_FIELDS,[true, false]),
     useNonStandardFmu: makeOption(DEFAULT_USE_NON_STANDARD_FMU_DIRS, [true, false] ),
+    exportErtBoxGrid: makeOption(DEFAULT_EXPORT_ERTBOX_GRID, [true, false] ),
   },
 
   actions: {

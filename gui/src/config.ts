@@ -90,3 +90,5 @@ export const DEFAULT_EXPORT_FMU_CONFIG_FILES = false
 export const DEFAULT_USE_RESIDUAL_FIELDS = false
 
 export const DEFAULT_USE_NON_STANDARD_FMU_DIRS = false
+
+export const DEFAULT_EXPORT_ERTBOX_GRID = true

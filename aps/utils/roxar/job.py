@@ -15,6 +15,7 @@ from aps.utils.roxar._config_getters import get_debug_level
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.rms_project_data import RMSData
 from aps.utils.aps_config import APSConfig
+from aps.utils.check_rms_interactive_or_batch import check_rms_execution_mode
 
 def excepthook(type, value, traceback):
     print(f"ERROR:")
@@ -67,6 +68,7 @@ class JobConfig:
             'fmu_mode_only_param': self._only_run_fmu_variables_update,
             'fmu_simulate_fields': self.simulate_fields,
             'fmu_simulation_grid_name': self.fmu_grid_name,
+            'export_ertbox_grid': self.export_ertbox_grid,
             'rms_grid_name': aps_model.grid_model_name,
             'fmu_export_location': get_export_location(),
             'aps_model': aps_model,
@@ -118,6 +120,10 @@ class JobConfig:
             self._config['fmu']['create']['value']
             and self.fmu_grid_name not in self.project.grid_models
         )
+    @property
+    def export_ertbox_grid(self):
+        rms_mode_is_batch = check_rms_execution_mode(self.debug_level)
+        return self._config['fmu']['exportErtBoxGrid']['value'] and not rms_mode_is_batch
 
     @property
     def fmu_grid_name(self):
@@ -241,6 +247,9 @@ class JobConfig:
 
     @property
     def export_fmu_config_files(self):
+        if check_rms_execution_mode(self.debug_level):
+            # RMS run in batch model. Don't write the files
+            return False
         try:
             if self.fmu_mode or self._only_run_fmu_variables_update:
                 return self._config['options']['exportFmuConfigFiles']['value']

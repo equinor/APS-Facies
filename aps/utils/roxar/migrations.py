@@ -181,6 +181,12 @@ class Migration:
         }
         return state
 
+    @staticmethod
+    def add_check_export_ertbox_grid(state: dict):
+        state['fmu']['exportErtBoxGrid'] = {
+            'value':  True,
+        }
+        return state
 
     def attempt_upgrading_legacy_state(self, state: dict):
         return _attempt_upgrading_legacy_state(self, state)
@@ -300,6 +306,11 @@ class Migration:
                 'from': '1.11.0',
                 'to': '1.12.0',
                 'up': self.add_use_customized_fmu_directory_structure,
+            },
+            {
+                'from': '1.12.0',
+                'to': '1.13.0',
+                'up': self.add_check_export_ertbox_grid,
             },
 
         ]
