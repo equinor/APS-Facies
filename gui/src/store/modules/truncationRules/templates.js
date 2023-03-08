@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { cloneDeep } from 'lodash'
 
-import templates from '@/store/templates/truncationRules'
+import templates from '@/store/templates/truncationRules.json'
 import simpleTemplates from '@/store/templates/simpleTruncationRules'
 import types from '@/store/modules/truncationRules/types'
 import { addItem } from '@/store/actions'

@@ -11,7 +11,7 @@ def _get_environ(variable_name, default, divider=':'):
     value = environ.get(variable_name, default)
     if value is None:
         value = ''
-    if isinstance(value, str):
+    if isinstance(value, str) and divider in value:
         value = value.split(divider)
     return value
 
@@ -21,14 +21,8 @@ def _get_client_url():
     servers = _get_environ('VUE_APP_APS_SERVER', 'localhost:127.0.0.1')
     ports = (
         _get_environ('VUE_APP_APS_GUI_PORT', '8080')
-        + _get_environ('VUE_APP_APS_API_PORT', '5000')
     )
-    return [
-        '{protocol}://{server}:{port}'.format(protocol=protocol, server=server, port=port)
-        for protocol in protocols
-        for server in servers
-        for port in ports
-    ]
+    return _get_environ('VUE_APP_GUI_URL', 'http://127.0.0.1:8080')
 
 
 app = Flask(__name__)
@@ -38,7 +32,7 @@ app.debug = _get_environ('FLASK_DEBUG', False)
 cors = CORS(app)
 
 
-@app.route('/<path:method>', methods=['POST'])
+@app.route('/api/<path:method>', methods=['POST'])
 @cross_origin()
 def call_python(method: str) -> str:
     signature = f'{method}({request.data.decode()})'

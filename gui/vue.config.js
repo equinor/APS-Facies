@@ -7,6 +7,11 @@ const canParallelize = require('os').cpus().length > 1
 
 const assetsDir = 'static'
 
+const { CODESPACE_NAME } = process.env
+
+/**
+ * @type {import('@vue/cli-service').ProjectOptions}
+ */
 module.exports = {
   assetsDir: assetsDir,
   runtimeCompiler: !isProduction,
@@ -32,6 +37,20 @@ module.exports = {
         options.appendTsSuffixTo = [/\.vue$/]
         return options
       })
+  },
+  devServer: {
+    proxy: /* CODESPACE_NAME
+      ? */({
+      '^/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+      }
+    }),
+    // The port in Codespaces is the one used by NginX, and not the dev server
+    // The reason, is that it is that URL that the browser sees.
+    host: CODESPACE_NAME ? `${CODESPACE_NAME}-8888.preview.app.github.dev` : 'localhost:8080',
+    port: 8080,
+    // disableHostCheck: true,
   },
 
   // These dependencies contains various ECMA Script features, or syntax that are not supported by RMS 11

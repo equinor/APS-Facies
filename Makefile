@@ -80,15 +80,15 @@ ifeq ($(ALLWAYS_GET_RMS_RESOURCES),yes)
 GET_RMS_RESOURCES := get-rms get-rms-project
 endif
 
-APS_VERSION := $(shell echo $(shell git describe --abbrev=0 --tags) | $(SED) -e "s/v//g")
+APS_VERSION = $(shell echo $(shell git describe --abbrev=0 --tags) | $(SED) -e "s/v//g")
 APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
-LATEST_COMMIT_HASH := $(shell git rev-parse --short HEAD)
-LATEST_COMMIT_HASH_LONG := $(shell git rev-parse HEAD)
+LATEST_COMMIT_HASH = $(shell git rev-parse --short HEAD)
+LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
 PLUGIN_NAME := aps_gui
 PLUGIN_BIN = $(PLUGIN_NAME).$(APS_FULL_VERSION).plugin
 PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
-DEPLOY_VERSION_PATH := $(CODE_DIR)/DEPLOY_VERSION.txt
+DEPLOY_VERSION_PATH = $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
 LIB_PREFIX := $(CODE_DIR)/libraries
@@ -102,20 +102,28 @@ DOCKER_REGISTRY_SERVER := registry.git.equinor.com
 DOCKER_REGISTRY := $(DOCKER_REGISTRY_SERVER)/aps/gui
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
-PYTHON ?= $(shell which python)
-PIPENV := $(PYTHON) -m pipenv
-RUN := PYTHONPATH=$(PYTHONPATH) $(PIPENV) run
+POETRY := $(shell which poetry)
+PYTHON ?= $(POETRY) run python3
+RUN := PYTHONPATH=$(PYTHONPATH) $(POETRY) run
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
 PIPROT := $(RUN) piprot
 PYLINT := $(RUN) pylint
-SAFETY_CHECK := $(PIPENV) check
+SAFETY_CHECK := $(POETRY) check
 FLASK := $(RUN) flask
 
-VUE_APP_APS_PROTOCOL := http
+VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
 VUE_APP_APS_API_PORT ?= 5000
 VUE_APP_APS_GUI_PORT ?= 8080
+
+ifeq ($(CODESPACES),true)
+VUE_APP_API_URL := https://$(CODESPACE_NAME)-$(VUE_APP_APS_API_PORT).preview.app.github.dev/api
+VUE_APP_GUI_URL := https://$(CODESPACE_NAME)-$(VUE_APP_APS_GUI_PORT).preview.app.github.dev/
+else
+VUE_APP_API_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_API_PORT)
+VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS_GUI_PORT)
+endif
 
 # TODO?: SETUP.PY := PYTHONPATH=$(PYTHONPATH) $(PYTHON) setup.py ?
 PYTHON_PREFIX := $(shell dirname $(PYTHON))/..
@@ -158,16 +166,6 @@ define LOCAL_SETTINGS_JSON
 endef
 export LOCAL_SETTINGS_JSON
 
-# NRlib
-BUILD_NRLIB ?= no
-NRLIB := $(EMPTY)
-TEST_NRLIB := $(EMPTY)
-ifeq ($(BUILD_NRLIB),yes)
-NRLIB := install-nrlib
-TEST_NRLIB := test-nrlib
-endif
-NRLIB_PATH := $(LIB_SOURCE)/nrlib
-NRLIB_VERSION ?= 1.1-r7
 
 YARN := yarn --cwd $(WEB_DIR)
 
@@ -175,11 +173,7 @@ define STANDARD_DOTENV
 STANDARD_RMS_DATA=synthetic-Neslen
 
 #VUE_APP_APP_USE_CORS=yes
-#VUE_APP_APS_PROTOCOL=http
-VUE_APP_APS_SERVER=127.0.0.1
-VUE_APP_APS_HOST_SERVER=127.0.0.1
-VUE_APP_APS_API_PORT=5000
-VUE_APP_APS_GUI_PORT=8080
+VUE_APP_API_URL="$(VUE_APP_API_URL)"
 endef
 export STANDARD_DOTENV
 
@@ -198,7 +192,7 @@ endif
 
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
-.PHONY: help run package.json matplotlibrc dotenv
+.PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT
 
 # Build / clean / run
 build: clean-all init
@@ -273,7 +267,7 @@ clean-generated-truncation-rules:
 	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rules: generate-truncation-rule-images
-	$(PYTHON) $(CODE_DIR)/bin/parse-truncation-rule-templates.py > $(WEB_DIR)/src/store/templates/truncationRules.json
+	$(POETRY) run python $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
@@ -282,7 +276,7 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 	DONT_WRITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
 	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
-	$(PYTHON) $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
+	$(POETRY) run python $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
 
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
@@ -303,11 +297,13 @@ TOOLBOX_VERSION:
 
 mock-VERSION:
 	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION
+	ln -sf $(SOURCE_DIR)/api/VERSION $(CODE_DIR)/VERSION
 
 mock-COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(SOURCE_DIR)/api/COMMIT
+	ln -sf $(SOURCE_DIR)/api/COMMIT $(CODE_DIR)/COMMIT
 
-init: initialize-python-environment dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
+init: dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 
 init-workflow: links generate-workflow-files
 
@@ -364,47 +360,9 @@ clean-changelog-link:
 generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
-dependencies: nrlib requirements $(TEST_NRLIB)
-
-nrlib: $(NRLIB)
-
-install-nrlib: build-nrlib
-	cd $(CODE_DIR) && \
-	$(PIPENV) install $(NRLIB_PATH) && \
-	git checkout -- $(CODE_DIR)/Pipfile $(CODE_DIR)/Pipfile.lock
-
-build-nrlib: get-nrlib
-	cd $(NRLIB_PATH) && \
-	CODE_DIR=$(NRLIB_PATH) \
-	make build-boost-python
-
-test-nrlib:
-	$(PY.TEST) $(NRLIB_PATH)/tests
-
-get-nrlib:
-	$(MKDIR) $(NRLIB_PATH)
-	[ -d $(NRLIB_PATH) ] && { \
-	    echo "NRlib has been downloaded. Updating" ; \
-	    cd $(NRLIB_PATH) ; \
-	    git fetch ; \
-	    git checkout v$(NRLIB_VERSION) ; \
-	} || { \
-	    echo "Fetching NRlib" ;\
-	    git clone git@git.equinor.com:/sdp/nrlib.git \
-	        $(NRLIB_PATH) ; \
-	    git checkout v$(NRLIB_VERSION) ; \
-	}
-
-initialize-python-environment: install-pipenv
-	cd $(CODE_DIR) && \
-	{ $(PIPENV) --venv || $(PIPENV) --python=$(PYTHON) --site-packages ; }
-
-install-pipenv:
-	type pipenv >/dev/null || $(PIPENV) >/dev/null || { $(PIP) install $(USER_INSTALL_PIPENV) pipenv ; }
+dependencies: requirements
 
 requirements: matplotlibrc
-	cd $(CODE_DIR) && \
-	$(PIPENV) install --dev --keep-outdated
 
 relink-matplotlibrc: clean-matplotlibrc matplotlibrc matplotlibrc-links
 
@@ -428,16 +386,7 @@ clean: clean-links clean-workflow-blocks
 clean-workflow-blocks:
 	rm -rf $(CODE_DIR)/workflow
 
-clean-all: clean clean-tests clean-cache clean-nrlib
-
-clean-nrlib: uninstall-nrlib remove-nrlib-source
-
-remove-nrlib-source:
-	rm -rf $(NRLIB_PATH)
-	rm -f nrlib-$(NRLIB_VERSION).tar.gz
-
-uninstall-nrlib:
-	$(PIPENV) uninstall nrlib 2>/dev/null || echo "NRlib not installed"
+clean-all: clean clean-tests clean-cache
 
 clean-cache: clean-__pycache__ clean-pyc
 
@@ -447,7 +396,7 @@ clean-__pycache__:
 clean-pyc:
 	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
-docker-image: $(GET_RMS_RESOURCES) get-nrlib
+docker-image: $(GET_RMS_RESOURCES)
 	docker build --rm --pull --tag $(DOCKER_IMAGE) --file $(DOCKERFILE) $(CODE_DIR)
 
 docker-login:
@@ -466,13 +415,13 @@ docker-bash:
 	docker run --rm -it -v $(CODE_DIR):/code --workdir=/code $(DOCKER_IMAGE) bash
 
 check-requirements:
-	$(PIPENV) lock --dev --requirements | $(PIPROT) --outdated -
+	$(POETRY) lock --dev --requirements | $(PIPROT) --outdated -
 
 check-node-dependencies:
 	$(YARN) outdated
 
 safety-check:
-	$(PIPENV) check
+	$(POETRY) check
 
 check-node-dependencies-for-vulnerabilities:
 	$(YARN) run improved-yarn-audit --fail-on-missing-exclutions  --ignore-dev-deps
@@ -483,7 +432,7 @@ update-node-dependencies:
 	$(YARN) upgrade
 
 update-python-dependencies:
-	$(PIPENV) update --dev
+	$(POETRY) update --dev
 
 integration-tests: clean-integration init-workflow links link-example-files
 	MATPLOTLIB_BACKEND="Agg" \
@@ -553,6 +502,7 @@ javascript-linting:
 	$(YARN) lint
 
 web-start: $(PACKAGE.JSON)
+	VUE_APP_API_URL=$(VUE_APP_API_URL) \
 	$(YARN) serve:gui --port=$(VUE_APP_APS_GUI_PORT) \
 	                  --host=$(VUE_APP_APS_SERVER)
 
@@ -583,12 +533,18 @@ run-api-gunicorn:
 	         --reload \
 	         app:app
 
+api-start: run-rms.uipy-mock
+
 run-rms.uipy-mock: matplotlibrc
 	FLASK_APP=$(SOURCE_DIR)/api/app.py \
-	FLASK_ENV=development \
+	FLASK_DEBUG=1 \
 	APS_MODE='develop' \
-	$(FLASK) run --port=$(VUE_APP_APS_API_PORT) \
-	             --host=$(VUE_APP_APS_SERVER)
+	VUE_APP_GUI_URL=$(VUE_APP_GUI_URL) \
+	$(RUN) flask \
+		--app $(SOURCE_DIR)/api/app.py \
+		run \
+		--port=$(VUE_APP_APS_API_PORT) \
+		--host=$(VUE_APP_APS_SERVER)
 
 # TODO: Add versioning to the plugin file
 deploy:
