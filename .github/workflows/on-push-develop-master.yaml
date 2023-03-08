@@ -1,0 +1,42 @@
+name: "Push to develop/master branch"
+# This workflow should only build artifacts to be used,
+# it does not concern itself with checking if the code works.
+# `on-push-other-branches.yaml` does that.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+      - master
+
+env:
+  HTTP_PROXY: "http://www-proxy.statoil.no:80"
+  HTTPS_PROXY: "http://www-proxy.statoil.no:80"
+
+jobs:
+  on-push:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up dependencies
+        run: |
+          python3.8 -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install "poetry==1.4.0"
+          poetry install
+          make --directory=${{ github.workspace }} init
+
+      - name: Build GUI
+        run: |
+          source .venv/bin/activate
+          make --directory=${{ github.workspace }} build-gui
+
+      - name: Store GUI artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gui
+          path: |
+            *.plugin
+          retention-days: 400
