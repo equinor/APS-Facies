@@ -78,5 +78,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: gui-dev
-          path: *.plugin
+          path: |
+            *.plugin
           retention-days: 30
