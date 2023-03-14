@@ -425,7 +425,11 @@ class RMSData:
                 project_location = Path(debug_settings['projectRootLocation']) / filename
         except Exception:
             project_location = Path(self.project.filename)
-        return parse_dot_master(project_location / 'pythoncomp/apsgui/.master')
+        try:
+            return parse_dot_master(project_location / 'pythoncomp/apsgui/.master')
+        except FileNotFoundError as e:
+            warn(f"Could not find a .master file corresponding to {filename}. Looked at {e.filename}")
+            return {}
 
     def migrate_state(self, state: str, from_version: str, to_version: str):
         migration = Migration(self)
