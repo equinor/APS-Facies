@@ -18,7 +18,7 @@ def _get_arguments(raw: str) -> Arguments:
 
 
 def parse_signature(signature: str) -> Tuple[str, Arguments]:
-    parse = re.match(r"ui\.call\(['\"](?P<method_name>\w+)['\"](, ?)?(?P<arguments>.*)\)", signature).groupdict()
+    parse = re.match(r"(api/)?ui\.call\(['\"](?P<method_name>\w+)['\"](, ?)?(?P<arguments>.*)\)", signature).groupdict()
     arguments = _get_arguments(parse['arguments'])
     method_name = parse['method_name']
     return method_name, arguments
