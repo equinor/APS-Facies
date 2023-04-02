@@ -147,7 +147,7 @@ def get_tag_all_variables(**kwargs):
     return _get_value(kwargs, legal_kwargs=['tag_all_variables'], default_value=True)
 
 def get_model_file_format(**kwargs)-> ModelFileFormat:
-    return ModelFileFormat(_get_value(kwargs, legal_kwargs=['model_file_format'], default_value='xml'))
+    return ModelFileFormat(_get_value(kwargs, legal_kwargs=['model_file_format'], default_value='both'))
 
 
 def get_write_log_file(**kwargs):
@@ -220,13 +220,40 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         file = get_model_file_name(_default_name=mapping_xml[_type], **kwargs)
         if not file:
             file = mapping_xml[_type]
+        if Path(file).exists():
+            print(f"Use XML file: {file} ")
+        else:
+            raise ValueError(f"File: {file} does not exist.")
         return str(file)
     if _format == ModelFileFormat.YML and _type in mapping_yml:
         file = get_model_file_name(_default_name=mapping_yml[_type], **kwargs)
         if not file:
             file = mapping_yml[_type]
+        if Path(file).exists():
+            print(f"Use YML file: {file} ")
+        else:
+            raise ValueError(f"File: {file} does not exist.")
         return str(file)
-    return None
+    if _format == ModelFileFormat.BOTH:
+        # First check yml format then xml format
+        if _type in mapping_yml:
+            file = get_model_file_name(_default_name=mapping_yml[_type], **kwargs)
+            if not file:
+                file = mapping_yml[_type]
+            if Path(file).exists():
+                print(f"Use YAML file: {file} ")
+                return str(file)
+        if _type in mapping_xml:
+            file = get_model_file_name(_default_name=mapping_xml[_type], **kwargs)
+            if not file:
+                file = mapping_xml[_type]
+            if Path(file).exists():
+                print(f"Use XML file: {file} ")
+                return str(file)
+            else:
+                raise ValueError(f"File: {file} does not exist.")
+    else:
+        raise ValueError(f"Unknown file format: {_format}")
 
 
 # TODO: Make more generic; dict with precise names?

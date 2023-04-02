@@ -230,6 +230,7 @@ move-python-files-to-pydist:
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
+	cp $(BIN_DIR)/generate_workflow_blocks.py $(PLUGIN_DIR)
 
 move-pydist:
 	mv $(PLUGIN_DIR)/aps/pydist $(PLUGIN_DIR)

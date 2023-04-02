@@ -25,12 +25,32 @@ from tempfile import gettempdir
 import os
 from typing import Dict, List, Optional, Tuple, Iterator, Iterable, Callable, Any
 
-from aps.utils.roxar import get_nrlib_path
+
+# TODO
+# Temporary solution before APS start using gaussianfft
+# The original function in get_nrlib_path from aps.utils.roxar
+# is not used to make this script independent and easier to use outside
+# the APS repo but the path is then fixed and will have to be updated
+# if new version of RMS cannot use this compilation. But the plan is to
+# replace nrlib and use gaussianfft that is a PyPI installation of the same code.
+def get_nrlib_path() -> Path:
+    filepath = "/project/res/nrlib/nrlib-dist-RHEL7-RMS13.1"
+    print(f"Temporary solution for Gaussian simulaton library of this version: {filepath}")
+    return Path(filepath)
 
 
 def run() -> None:
-    root_path = get_root_path()
-    workflows = get_workflows()
+    use_plugin_dir = False
+    if '--normal-install' in argv:
+        # Install from unpacked plugin directory
+        print("Standard install")
+        use_plugin_dir = True
+    else:
+        # Install from APS repo bin directory
+        print("Full install")
+
+    workflows = get_workflows(use_plugin_dir=use_plugin_dir)
+    root_path = get_root_path(use_plugin_dir=use_plugin_dir)
     toolbox_version = get_toolbox_version()
     use_temporary = '--use-temporary-workflow-dir' in argv
     salt = None
@@ -44,7 +64,7 @@ def run() -> None:
     for relative_path, items in workflows.items():
         for file_name in items:
             create_workflow_block_file(file_name, root_path, relative_path,
-                toolbox_version, use_temporary, salt, suffix)
+                toolbox_version, use_temporary, salt, suffix, use_plugin_dir=use_plugin_dir)
 
     for i in range(len(argv)):
         arg = argv[i]
@@ -272,7 +292,7 @@ if APS_ROOT not in os.environ:
             print(f"The APS plugin version need helpscript version: {{toolbox_version_in_plugin}}")
             print(f"The current script has version: {{__version__}}")
             print("If you use APS default version (stable version), you can update the help script by re-loading the python code from the directory:")
-            print("/project/res/APSGUI/MasterBranch/aps_workflows.")
+            print("/project/res/APSGUI/releases/stable/aps_workflows.")
             print("NOTE: When selecting file, choose 'All files (*)' and not 'Python files (*.py)' files since the help scripts don't have '.py' extension")
             raise ValueError("Help script version is not up to date with the APS plugin version")
     else:
@@ -314,7 +334,7 @@ def get_model_file():
         return path
 
 def get_model_file_format():
-    return _get_value(APS_MODEL_FILE_FORMAT, 'xml')
+    return _get_value(APS_MODEL_FILE_FORMAT, 'both')
 
 def get_rms_data_file():
     # Location/name of rms_project_data_for_APS_gui.xml
@@ -419,29 +439,45 @@ if file_name != 'turn_off_traceback':
     )
 
 
-def get_root_path() -> Path:
-    if len(argv) == 1 or argv[1] in ['--read-only', '--copy-to-rms-project', '--use-temporary-workflow-dir']:
-        return Path('.').absolute()
+def get_root_path(use_plugin_dir=False) -> Path:
+    legal_options = ['--read-only', '--copy-to-rms-project', '--use-temporary-workflow-dir', '--normal-install']
+    if not use_plugin_dir:
+        if len(argv) == 1 or argv[1] in legal_options:
+            path = '.'
+            return Path(path).absolute()
+        else:
+            return Path(argv[1])
     else:
-        return Path(argv[1])
+        if len(argv) == 1 or argv[1] in legal_options:
+            path = Path('.') / 'aps_gui' / 'pydist'
+            print(path)
+            return path.absolute()
+        else:
+            return Path(argv[1])
+
 
 def get_toolbox_version() -> str:
-    try:
-        with open("bin/TOOLBOX_VERSION", "r", encoding='utf-8') as file:
-            for line in file.readlines():
-                if line:
-                    version = line.strip()
-                    break
-    except:
-        raise IOError("Did not find the file: TOOLBOX_VERSION. Run from top directory of source code repo")
+    file_paths = ["bin/TOOLBOX_VERSION", "aps_gui/TOOLBOX_VERSION" ]
+    version = None
+    for file_path in file_paths:
+        if Path(file_path).exists():
+            with open(file_path, "r", encoding='utf-8') as file:
+                for line in file.readlines():
+                    if line:
+                        version = line.strip()
+                        break
+    if not version:
+        raise IOError(
+            "Did not find the file: TOOLBOX_VERSION.\n"
+            "Run from top directory of source code repo  (bin/generate_workflow_blocks.py)\n"
+            "or run from directory for unpacked version of the plugin (aps_gui/generate_workflow_blocks.py --normal-install).")
     return version
 
-def get_workflows() -> Dict[str, List[str]]:
+
+def get_workflows(use_plugin_dir: bool = False) -> Dict[str, List[str]]:
     return {
-        'bin': [
-        ],
-        'depricated': [
-        ],
+        'bin': [],
+        'depricated': [],
         'aps/rms_jobs': [
             'APS_main',
             'APS_simulate_gauss_multiprocessing',
@@ -545,12 +581,19 @@ def create_workflow_block_file(
         use_temporary: Optional[bool] = False,
         salt: Optional[str] = None,
         suffix: str = '',
+        use_plugin_dir: bool = False,
 ) -> None:
     script_name = file_name + '.py'
     script_path = root_path / relative_path / script_name
     assert _OS.exists(script_path), "the file '{}' does not exist".format(script_path)
-    workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
-    workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
+    if use_plugin_dir:
+        workflow_dir = Path('.').absolute() / 'aps_workflows'
+        if not _OS.exists(workflow_dir):
+            _OS.makedirs(workflow_dir.absolute())
+        workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
+    else:
+        workflow_dir = get_workflow_dir(root_path, use_temporary, salt)
+        workflow_path = str(workflow_dir / get_file_mapping(suffix)[script_name])
     workflow_block = get_workflow_block(file_name, relative_path, toolbox_version)
     print(f"Generate: {workflow_path} ")
     with open(workflow_path, 'w', encoding='utf-8') as f:
