@@ -216,3 +216,4 @@ class ExtrapolationMethod(Enum):
 class ModelFileFormat(Enum):
     YML = 'yml'
     XML = 'xml'
+    BOTH = 'both'
