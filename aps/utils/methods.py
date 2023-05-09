@@ -221,7 +221,10 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
         if not file:
             file = mapping_xml[_type]
         if Path(file).exists():
-            print(f"Use XML file: {file} ")
+            if _type != SpecificationType.APS_MODEL:
+                # This print is meant for help scripts in a period before xml format
+                # is deprecated for the help scripts.
+                print(f"Use XML file: {file} ")
         else:
             raise ValueError(f"File: {file} does not exist.")
         return str(file)
@@ -248,7 +251,10 @@ def get_specification_file(_type: SpecificationType = SpecificationType.APS_MODE
             if not file:
                 file = mapping_xml[_type]
             if Path(file).exists():
-                print(f"Use XML file: {file} ")
+                if _type != SpecificationType.APS_MODEL:
+                    # This print is meant for help scripts in a period before xml format
+                    # is deprecated for the help scripts.
+                    print(f"Use XML file: {file} ")
                 return str(file)
             else:
                 raise ValueError(f"File: {file} does not exist.")
