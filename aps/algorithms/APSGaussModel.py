@@ -29,7 +29,7 @@ from aps.utils.constants.simple import (
 )
 from aps.utils.containers import FmuAttribute
 from aps.utils.numeric import flip_if_necessary
-from aps.utils.simGauss2D_nrlib import simGaussField
+from aps.utils.simGauss2D import simGaussField
 from aps.utils.types import (
     GridSize,
     SimulationBoxSize,

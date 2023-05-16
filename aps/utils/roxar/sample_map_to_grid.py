@@ -83,7 +83,7 @@ def _create_property_and_store(project, grid_model_name, grid, gridpoints, kminm
             newprop = xtgeo.GridProperty(grid)
         else:
             raise
-    krange = np.linspace(kminmax[0], kminmax[1], kminmax[1] - kminmax[0] + 1, dtype=np.int)
+    krange = np.linspace(kminmax[0], kminmax[1], kminmax[1] - kminmax[0] + 1, dtype=np.int32)
 
     for klay in krange:
         newprop.values[ixn, jyn, klay] = zvalues

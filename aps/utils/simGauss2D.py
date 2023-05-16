@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from typing import Optional
 
-import nrlib
+import gaussianfft
 import numpy as np
 
 from aps.utils.constants.simple import Debug, VariogramType
@@ -56,9 +56,9 @@ def simGaussField(
         print('Debug output:  Simulate  2D Gauss field using seed: ' + str(iseed))
 
     # Set startSeed
-    nrlib.seed(iseed)
+    gaussianfft.seed(iseed)
 
-    # Have to define input to nrlib as 90-azimuth since it is based on
+    # Have to define input to gaussianfft as 90-azimuth since it is based on
     # a right handed coordinate system and not a left handed as in RMS
     azimuth_angle = 90.0 - azimuth_angle
 
@@ -68,7 +68,7 @@ def simGaussField(
     if variogram_type == VariogramType.GENERAL_EXPONENTIAL:
         assert power is not None
         kwargs['power'] = power
-    sim_variogram = nrlib.variogram(variogram_name, **kwargs)
+    sim_variogram = gaussianfft.variogram(variogram_name, **kwargs)
 
     dx = xsize / nx
     dy = ysize / ny
@@ -77,7 +77,7 @@ def simGaussField(
 
     # Simulate gauss field. Return numpy 1D vector in F order
     if debug_level >= Debug.VERY_VERBOSE:
-        padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
+        padding = gaussianfft.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
         coordinates = ['x', 'y', 'z']
         debug_info = 'Debug output: '
         for i in range(len(padding)):
@@ -86,7 +86,7 @@ def simGaussField(
 
     # Have to remap the array to get it correct when plotting.
     # That is why switching nx by ny and so on and the remapping of the result vector.
-    gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy)
+    gauss_vector = gaussianfft.simulate(sim_variogram, nx, dx, ny, dy)
     a = np.reshape(gauss_vector, (nx, ny), 'F')
     gauss_vector = np.reshape(a, (nx * ny), 'F')
     return gauss_vector

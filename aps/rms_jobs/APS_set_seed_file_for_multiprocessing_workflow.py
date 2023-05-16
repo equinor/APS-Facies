@@ -1,6 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-# This script use both nrlib and ROXAR API functions and run simulations sequentially and not in parallel
+# This script use both gaussianfft and ROXAR API functions and run simulations sequentially and not in parallel
 import os
 from pathlib import Path
 from aps.algorithms.APSModel import APSModel

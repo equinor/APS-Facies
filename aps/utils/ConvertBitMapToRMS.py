@@ -562,7 +562,7 @@ class ConvertBitMapToRMS:
 
             if self.nFacies > 0:
                 # Initialize mapping function between color code and facies to missing code for all colors.
-                self.__codeMapping = np.zeros(256, np.int)
+                self.__codeMapping = np.zeros(256, np.int32)
                 for n in range(256):
                     self.__codeMapping[n] = self.__missingCode
 

@@ -265,7 +265,7 @@ class DefineFaciesProb(BaseDefineFacies):
         minimum = np.min(facies_real_values)
         maximum = np.max(facies_real_values)
 
-        prob_index = np.zeros(maximum + 1, np.int)
+        prob_index = np.zeros(maximum + 1, np.int32)
         for i in range(maximum):
             prob_index[i] = -1
         for i in range(len(facies_names_in_real)):
