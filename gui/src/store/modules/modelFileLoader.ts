@@ -496,7 +496,27 @@ function getMandatoryTextValue(element: XMLElement, keyword: string) {
 }
 
 const jobSettings = (apsModelContainer:XMLElement) => {
-  const jobSettingsElement = getMandatoryNodeValue(apsModelContainer,'JobSettings')
+  const default_settings: JobSettingsParam = {
+    runFmuWorkflows: false,
+    onlyUpdateFromFmu: false,
+    simulationGrid: 'ERTBOX',
+    importFields: false,
+    fieldFileFormat: 'roff',
+    customTrendExtrapolationMethod: 'extend_layer_mean',
+    exportFmuConfigFiles: false,
+    onlyUpdateResidualFields: false,
+    useNonStandardFmu: false,
+    exportErtBoxGrid: true,
+    maxAllowedFractionOfValuesOutsideTolerance: 0.1,
+    toleranceOfProbabilityNormalisation: 0.2,
+    transformType: 0,
+    debugLevel: 1,
+  }
+  const jobSettingsElement = getNodeValue(apsModelContainer,'JobSettings')
+  if (jobSettingsElement == null) {
+    return default_settings
+  }
+
   const fmuSettingsElement = getMandatoryNodeValue(jobSettingsElement,'FmuSettings')
   const fmuMode = getMandatoryTextValue(fmuSettingsElement, 'FmuMode')
   let updateGRFElement = null
@@ -526,12 +546,12 @@ const jobSettings = (apsModelContainer:XMLElement) => {
     useAPSConfigFile = getMandatoryTextValue(fmuSettingsElement, 'UseNonStandardFMU') === 'YES'
   }
 
-
   const runSettingsElement = getMandatoryNodeValue(jobSettingsElement, 'RunSettings')
   const maxFractionNotNormalised = getMandatoryNumericValue(runSettingsElement, 'MaxFractionNotNormalised')
   const toleranceLimitProbability = getMandatoryNumericValue(runSettingsElement,'ToleranceLimitProbability')
   const transformationSettings = getMandatoryNumericValue(jobSettingsElement, 'TransformationSettings')
   const logSetting = getMandatoryNumericValue(jobSettingsElement, 'LogSetting')
+
 
   const settings: JobSettingsParam = {
     runFmuWorkflows: (fmuMode === 'FIELDS'), // might have to wrap !! around paranthesis to evaluate as false if fmuMode is undefined/null
