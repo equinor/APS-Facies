@@ -25,7 +25,7 @@ def run(project, **kwargs):
         # Job name will not exist if this script is run from APSGUI interactively, but only
         # when the running from workflow or batch
         if debug_level >= Debug.ON:
-            print(f"- Write FMU and ERT related template config files:")
+            print(f"- Write FMU and ERT related template config files")
         if job_name is None:
             job_name = default_job_name
             print('-- NOTE: A default name of the created FMU config files will be used when running interactively.')
@@ -40,7 +40,7 @@ def run(project, **kwargs):
         global_variables_file_path = aps_config.global_variables_file()
 
         # APS model file
-        model_file_name = aps_config.rms_model_dir_absolute() + "/" + model_name
+        model_file_name = aps_config.aps_model_export_dir() + "/" + model_name
         param_file_name = None
         param_file_name_alternative = None
         param_dir_path = aps_config.fmu_config_input_dir_absolute()
@@ -51,14 +51,20 @@ def run(project, **kwargs):
                 # for FMU projects not using global_master_config.yml file
                 param_file_name_alternative = param_dir_path_alternative + "/" + att_name
             else:
-                raise IOError(f"Directory {param_dir_path_alternative} does not exist.")
+                raise IOError(f"Directory {param_dir_path_alternative} and {param_dir_path} does not exist.")
         else:
             # APS param file to include into global_master_config.yml file
             param_file_name = param_dir_path + "/" + aps_fmuconfig_name
-
+ 
         probability_distribution_file_name = aps_config.ert_distribution_dir_absolute() + "/" + prob_name
         ert_field_keyword_file_name = aps_config.ert_model_dir_absolute() + "/" + ert_field_name
 
+        # Check that default directory exist for export of APS model file
+        export_file_full_path = Path(model_file_name).absolute()
+        export_file_dir = export_file_full_path.parent
+        if not export_file_dir.exists():
+            export_file_dir.mkdir()
+            print(f"Make directory: {export_file_dir}  ")
 
         # Check that using current APS job in the FMU global master config file is possible
         # e.g. that the job name is unique and not equal to any existing job name in
