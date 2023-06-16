@@ -1,9 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-# This script use both nrlib and ROXAR API functions and run simulations sequentially and not in parallel
+# This script use both gaussianfft and ROXAR API functions and run simulations sequentially and not in parallel
 from pathlib import Path
 
-import nrlib
+import gaussianfft
 import numpy as np
 
 from aps.algorithms.APSModel import APSModel
@@ -21,19 +21,19 @@ from aps.utils.trend import add_trends
 
 def define_variogram(variogram, azimuth_value_sim_box):
     variogram_name = variogram.type.name.lower()
-    # Note: Since RMS is a left-handed coordinate system and NrLib treat the coordinate
+    # Note: Since RMS is a left-handed coordinate system and gaussianfft treat the coordinate
     # system as right-handed, we have to transform the azimuth angle to 90-azimuth
     # to get it correct in RMS.
-    azimuth_in_nrlib = 90.0 - azimuth_value_sim_box
+    azimuth_in_gaussianfft = 90.0 - azimuth_value_sim_box
     args = [
         variogram.ranges.main, variogram.ranges.perpendicular, variogram.ranges.vertical,
-        azimuth_in_nrlib, variogram.angles.dip,
+        azimuth_in_gaussianfft, variogram.angles.dip,
     ]
     if variogram_name == 'general_exponential':
         args.append(variogram.power)
     args = [float(arg) for arg in args]
 
-    return nrlib.variogram(variogram_name, *args)
+    return gaussianfft.variogram(variogram_name, *args)
 
 
 def run_simulations(
@@ -91,9 +91,9 @@ def run_simulations(
 
     # Set start seed
     start_seed = get_project_realization_seed(project)
-    nrlib.seed(start_seed)
+    gaussianfft.seed(start_seed)
     if debug_level >= Debug.VERY_VERBOSE:
-        print(f"--- Start seed value: {nrlib.seed()}")
+        print(f"--- Start seed value: {gaussianfft.seed()}")
 
     # Loop over all zones and simulate gauss fields
     all_zone_models = aps_model.sorted_zone_models
@@ -169,14 +169,14 @@ def run_simulations(
                 sim_variogram = define_variogram(variogram, azimuth_value_sim_box)
 
                 if debug_level >= Debug.VERY_VERBOSE:
-                    nx_padding, ny_padding, nz_padding = nrlib.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
+                    nx_padding, ny_padding, nz_padding = gaussianfft.simulation_size(sim_variogram, nx, dx, ny, dy, nz, dz)
                     print( '---  Grid dimensions with padding for simulation:')
                     print(f'     nx: {nx}   nx with padding: {nx_padding}')
                     print(f'     ny: {ny}   ny with padding: {ny_padding}')
                     print(f'     nz: {nz}   nz with padding: {nz_padding}')
 
                 # Simulate gauss field. Return numpy 1D vector in F order
-                gauss_vector = nrlib.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
+                gauss_vector = gaussianfft.simulate(sim_variogram, nx, dx, ny, dy, nz, dz)
             else:
                 # No need to simulate gauss field, but set it to 0
                 if debug_level >= Debug.VERBOSE:
@@ -235,7 +235,7 @@ def run_simulations(
         if seed_file_log.is_dir():
             seed_file_log = seed_file_log / 'seedLogFile.dat'
         with open(seed_file_log, 'a+', encoding='utf-8') as file:
-            file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + nrlib.seed()}\n')
+            file.write(f'RealNumber: {realisation}  StartSeed for this realization: {1 + gaussianfft.seed()}\n')
     if debug_level >= Debug.ON:
         print('- Finished simulation of gaussian fields for APS')
 

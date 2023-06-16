@@ -26,7 +26,7 @@ def unpack_aps_code_and_load_module(module_name):
         # Add the path to searchable path
         # Assumed that the plugin should not be used, if 'APS_ROOT' is set
 
-        # When a plugin is used, it includes a stump for importing nrlib as well
+        # When a plugin is used, it includes a stump for importing gaussianfft as well
         print(f"Unpack code to temporary directory: {root_path} ")
         _extract_plugin(temp_dir)
         sys.path.insert(0, _stringify_path(root_path))

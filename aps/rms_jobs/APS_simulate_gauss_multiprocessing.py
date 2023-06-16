@@ -17,7 +17,7 @@ def simulateGauss(
         simParamObject, outputDir, logFileName=None, seedFileName=None,
         writeSeedFile=True, debug_level=Debug.OFF
 ):
-    import nrlib
+    import gaussianfft
     zone_number = simParamObject['zoneNumber']
     region_number = simParamObject['regionNumber']
     gauss_field_name = simParamObject['gaussFieldName']
@@ -102,20 +102,20 @@ def simulateGauss(
 
         if debug_level >= Debug.ON:
             print(f'-  Start seed: {startSeed}')
-        nrlib.seed(startSeed)
+        gaussianfft.seed(startSeed)
 
     # Define variogram
     variogramName = variogram_mapping[variogram_type.name]
 
-    #  Note that since RMS uses left-handed coordinate system while nrlib uses right-handed coordinate system, we have to use
-    #  azimuth for nrlib simulation equal to: ( 90 - specified azimuth in simulation box).
+    #  Note that since RMS uses left-handed coordinate system while gaussianfft uses right-handed coordinate system, we have to use
+    #  azimuth for gaussianfft simulation equal to: ( 90 - specified azimuth in simulation box).
     if variogramName == 'general_exponential':
-        simVariogram = nrlib.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip, power)
+        simVariogram = gaussianfft.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip, power)
     else:
-        simVariogram = nrlib.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip)
+        simVariogram = gaussianfft.variogram(variogramName, main_range, perpendicular_range, vertical_range, 90.0 - azimuth, dip)
 
     # Simulate gauss field. Return numpy 1D vector in F order. Get padding + grid size as information
-    [nx_padding, ny_padding, nz_padding] = nrlib.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
+    [nx_padding, ny_padding, nz_padding] = gaussianfft.simulation_size(simVariogram, nx, dx, ny, dy, nz, dz)
     if logFileName is not None:
         file.write(f'''
     Simulation grid size with padding due to correlation lengths for gauss field {gauss_field_name} for zone,region: ({zone_number}, {region_number})
@@ -123,10 +123,10 @@ def simulateGauss(
       ny with padding: {ny_padding}
       nz with padding: {nz_padding}
 ''')
-    gaussVector = nrlib.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
+    gaussVector = gaussianfft.simulate(simVariogram, nx, dx, ny, dy, nz, dz)
 
     # Get the start seed
-    startSeed = nrlib.seed()
+    startSeed = gaussianfft.seed()
     if debug_level >= Debug.VERBOSE:
         print(f'    Start seed: {startSeed}')
 

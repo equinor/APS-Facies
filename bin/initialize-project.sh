@@ -5,10 +5,10 @@
 # This script is made to add the auxiliary Python jobs to a given RMS project.
 #
 # Author: Sindre Nistad <snis@equinor.com>
-# Version: 1.0.1
+# Version: 1.0.2
 ##
 
-RMS_VERSION="11.0.1"
+RMS_VERSION="13.1.2"
 RMS_ROOT="/prog/roxar/rms/versions/${RMS_VERSION}"
 RMS_LIB="${RMS_ROOT}/lib/LINUX_64"
 RMS_PYTHON="${RMS_ROOT}/bin/LINUX_64/python"
@@ -51,6 +51,7 @@ fi
 
 if [ -n "$APS_PROJECT_DIR" ]; then
   make_dir=$(get_abs_filename "$APS_PROJECT_DIR")
+  echo "Directory: " $make_dir
 fi
 
 WRITE_WORKFLOW_FILES_TO_PROJECT="yes" \

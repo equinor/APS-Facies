@@ -35,37 +35,6 @@ def must_run_in_rms(func):
         return func(*args, **kwargs)
     return wrapper
 
-
-@must_run_in_rms
-def get_nrlib_path(debug_level=Debug.VERBOSE) -> Path:
-
-    redhat_version = get_redhat_version()
-    if redhat_version is not None:
-        # Assuming we are on RGS
-        redhat_version = get_redhat_version()
-        rms_version = get_rms_version()
-
-        found = False
-        nrlib_path = Path('/project/res/nrlib')
-        major, minor, patch = rms_version.as_tuple()
-        for version in [f'{major}.{minor}.{patch}', f'{major}.{minor}', f'{major}']:
-            folder = f'nrlib-dist-RHEL{redhat_version}-RMS{version}'
-            if (nrlib_path / folder).exists():
-                found = True
-                nrlib_path = nrlib_path / folder
-
-        if not found:
-            ValueError(f'nrlib is not installed for APS plugin in RMS version: {rms_version}')
-
-        if debug_level >= Debug.VERBOSE:
-            print(f'-- RMS version: {rms_version}')
-            print(
-                f'-- Using nrlib path:\n'
-                f'   {nrlib_path}'
-            )
-        return nrlib_path.absolute()
-
-
 def get_rms_version() -> Optional[Version]:
     try:
         import roxar.rms

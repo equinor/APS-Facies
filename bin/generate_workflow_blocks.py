@@ -26,19 +26,6 @@ import os
 from typing import Dict, List, Optional, Tuple, Iterator, Iterable, Callable, Any
 
 
-# TODO
-# Temporary solution before APS start using gaussianfft
-# The original function in get_nrlib_path from aps.utils.roxar
-# is not used to make this script independent and easier to use outside
-# the APS repo but the path is then fixed and will have to be updated
-# if new version of RMS cannot use this compilation. But the plan is to
-# replace nrlib and use gaussianfft that is a PyPI installation of the same code.
-def get_nrlib_path() -> Path:
-    filepath = "/project/res/nrlib/nrlib-dist-RHEL7-RMS13.1"
-    print(f"Temporary solution for Gaussian simulaton library of this version: {filepath}")
-    return Path(filepath)
-
-
 def run() -> None:
     use_plugin_dir = False
     if '--normal-install' in argv:
@@ -275,7 +262,6 @@ if APS_ROOT not in os.environ:
     # Add the path to searchable path
     # Assumed that the plugin should not be used, if 'APS_ROOT' is set
     
-    # When a plugin is used, it includes a stump for importing nrlib as well
     extract_plugin()
     sys.path.insert(0, stringify_path(root_path))
 
@@ -297,11 +283,6 @@ if APS_ROOT not in os.environ:
             raise ValueError("Help script version is not up to date with the APS plugin version")
     else:
         raise IOError("Can not find file: TOOLBOX_VERSION")
-else:
-    # Add nrlib to PYTHONPATH
-    nrlib_path = Path('{nrlib_path}')
-    if nrlib_path.exists():
-        sys.path.insert(0, stringify_path(nrlib_path))
 
 
 # Generating necessary paths
@@ -435,7 +416,6 @@ if file_name != 'turn_off_traceback':
         file_name=file_name,
         relative_path=relative_path,
         toolbox_version=toolbox_version,
-        nrlib_path=get_nrlib_path(),
     )
 
 
