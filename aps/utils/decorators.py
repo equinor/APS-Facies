@@ -34,16 +34,20 @@ def loggable(func):
 
 def output_version_information(func):
     plugin_root = Path(__file__).parent.parent.parent
+    if plugin_root.name != "pydist":
+        raise FileNotFoundError(f"Can not find plugin root 'pydist'. Found {plugin_root.name} ")
 
     def get_content(file_name: str) -> str:
         try:
-            with open(plugin_root / file_name) as f:
+            with open(plugin_root.parent / file_name) as f:
                 return f.read().strip()
         except (FileNotFoundError, NotADirectoryError):
-            # This means that the plugin is running in RMS
-            archive = ZipFile(str(plugin_root.parent.parent.absolute()), 'r')
             try:
+                plugin_file = str(plugin_root.parent.parent.absolute())
+                archive = ZipFile(plugin_file, 'r')
                 return archive.read(f'aps_gui/{file_name}').decode().strip()
+            except:
+                raise FileNotFoundError(f"Can not unzip and read plugin file with path {plugin_file}")
             finally:
                 archive.close()
 
