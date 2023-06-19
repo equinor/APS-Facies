@@ -36,7 +36,7 @@ class APSConfig:
             "rms":               "rms",
             "rms_model":         "rms/model",
             "rms_field":         "rms/output/aps",
-            "aps_model_export":  "rms/input/config/apsgui",
+            "aps_model_export":  "rms/input/config/aps",
         },
         "aps_file_extensions":  {
             "fmu_master_config": "_aps_params.yml",
