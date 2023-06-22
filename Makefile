@@ -359,7 +359,7 @@ clean-changelog-link:
 	rm -f $(WEB_DIR)/public/CHANGELOG.md
 
 generate-workflow-files: $(CREATE_WORKFLOW_DIR)
-	$(RUN) python $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
+	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
 
 dependencies: requirements
 
