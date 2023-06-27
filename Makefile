@@ -8,13 +8,13 @@ PROJECT_ID := CF80C9B5-C704-4CAB-A5A6-9B93526C7A13
 
 PROJECT_NAME ?= aps-gui
 SHELL := /bin/bash
-OS ?= $(shell uname -s)
+CURRENT_OS := $(shell uname -s)
 EMPTY :=
 
 ifneq ("$(wildcard /.dockerenv)","")
 MATPLOTLIB_BACKEND ?= Agg
 endif
-ifeq ($(OS),Linux)
+ifeq ($(CURRENT_OS),Linux)
 NUMBER_OF_PROCESSORS := $(shell cat /proc/cpuinfo | grep processor | wc -l)
 TAR := tar
 SED := sed
@@ -26,7 +26,7 @@ SED := gsed
 MATPLOTLIB_BACKEND ?= Agg
 endif
 
-TAR_EXCRACT := $(TAR) -xf
+TAR_EXTRACT := $(TAR) -xf
 # Mode may be 'production', or 'development'
 MODE ?= production
 CODE_DIR ?= $(shell pwd)
@@ -39,6 +39,8 @@ REMOVE_APS_GUI_TEMP_FOLDER := $(EMPTY)
 ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
+
+GIT_VERSION  := $(shell git --version)
 
 # Time stamp format YY daynumber_in_year hour minutes
 BUILD_NUMBER := $(shell date "+%y%j%H%M")
@@ -80,8 +82,10 @@ ifeq ($(ALLWAYS_GET_RMS_RESOURCES),yes)
 GET_RMS_RESOURCES := get-rms get-rms-project
 endif
 
-APS_VERSION = $(shell echo $(shell git describe --abbrev=0 --tags) | $(SED) -e "s/v//g")
-APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
+
+APS_VERSION_FROM_GIT :=  $(shell git describe --abbrev=0 --tags)
+APS_VERSION := $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
+APS_FULL_VERSION := $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH = $(shell git rev-parse --short HEAD)
 LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
@@ -287,6 +291,10 @@ auxillary-files: VERSION COMMIT TOOLBOX_VERSION
 
 VERSION:
 	echo $(APS_FULL_VERSION) > $(PLUGIN_DIR)/VERSION
+	echo $(CURRENT_OS)
+	echo $(SED)
+	echo $(GIT_VERSION)
+	echo $(APS_VERSION_FROM_GIT)
 
 COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
