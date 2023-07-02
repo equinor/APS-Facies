@@ -1459,6 +1459,36 @@ class APSModel:
                 (zone_number, region_number, nactive)= item
                 print(f"  ({zone_number},{region_number})                    {nactive}")
 
+    def check_and_update_simbox_thickness(self, project, debug_level=Debug.OFF):
+        """
+        Update APSModel object with simbox thickness from current realization of the grid.
+        The current simbox thickness values are from the grid that was the current grid realization
+        at the last time GUI was opened and saved for the current APS job,
+        but grid can be realization dependent and we therefore should ensure that we use the
+        simbox thickness for the current realisation of the grid.
+        """
+        from aps.utils.roxar.grid_model import get_simulation_box_thickness
+        if debug_level >= Debug.VERBOSE:
+            print(f"-- Get simbox thickness for grid model {self.grid_model_name}")
+
+        grid_model = project.grid_models[self.grid_model_name]
+        realisation_number = project.current_realisation
+        grid3D = grid_model.get_grid(realisation_number)
+        try:
+            # Check for RMS14.1 and newer
+            simbox = grid3D.simbox
+            # Is RMS14.1 or newer
+            simbox_thickness_per_zone = get_simulation_box_thickness(grid3D)
+            for key, zone_model in self.__zoneModelTable.items():
+                (zone_number, _) = key
+                zone_model.sim_box_thickness = simbox_thickness_per_zone[zone_number]
+                if debug_level >= Debug.VERY_VERBOSE:
+                    print(f"--- Zone: {zone_number}  Simbox thickness:  {zone_model.sim_box_thickness}")
+                self.__zoneModelTable[key] = zone_model
+        except:
+            # Nothing done for older versions of RMS
+            pass
+
 
     @staticmethod
     def write_model_from_xml_root(

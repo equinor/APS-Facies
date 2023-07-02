@@ -57,6 +57,11 @@ class JobConfig:
 
         # Keep only models for (zone,region) pairs with active cells
         aps_model.check_active_cells(self.project, debug_level=self.debug_level)
+
+        # Update simbox thickness to match current grid model and also write back the updated model
+        # since both model file and APSModel object is used later and must be consistent.
+        self.check_and_update_simbox_thickness(model_file, aps_model)
+
         return {
             'roxar': self.roxar,
             'project': self.project,
@@ -321,6 +326,11 @@ class JobConfig:
 
             return False, err_message
         return True, None
+
+    def check_and_update_simbox_thickness(self, model_file: str, aps_model: APSModel):
+        aps_model.check_and_update_simbox_thickness(self.project, debug_level=self.debug_level)
+        aps_model.write_model(model_file)
+
 
 def classify_job_configuration(roxar, project):
     def decorator(func):
