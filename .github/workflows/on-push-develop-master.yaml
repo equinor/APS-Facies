@@ -19,6 +19,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up dependencies
         run: |
           python3.8 -m venv .venv
