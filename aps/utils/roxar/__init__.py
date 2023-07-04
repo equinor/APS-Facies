@@ -61,16 +61,16 @@ def get_rgs_specific_python_package_paths() -> Optional[List[str]]:
 
     python_version = sys.version_info
     python_version = f'{python_version.major}.{python_version.minor}'
-
+    (major, minor, _)= get_rms_version().as_tuple()
+    rms_version = str(major) + '.' + str(minor)
     common_equinor_path = (
-        '/project/res/roxapi/x86_64_RH_{redhat_version}/{rms_version}/lib/python{python_version}/site-packages'
+        '/prog/res/roxapi/x86_64_RH_{redhat_version}/matrix/{rms_version}/lib/python{python_version}/site-packages'
         ''.format(
             redhat_version=get_redhat_version(),
-            rms_version=get_rms_version(),
+            rms_version=rms_version,
             python_version=python_version,
         )
     )
-
     return [common_equinor_path]
 
 

@@ -185,6 +185,10 @@ def get_plugin_dir():
     except ValueError:
         rms_version = version
     preferences = Path(Path.home() / '.roxar/rms-{{}}/preferences.master'.format(rms_version))
+    if not preferences.exists():
+        preferences = Path(Path.home() / '.config/AspenTech/RMS/{{}}/preferences.master'.format(rms_version))
+        if not preferences.exists():
+            raise IOError(f'Can not find file {{preferences}} with RMS user preferences')
     with open(preferences, encoding='utf-8') as f:
         lines = f.readlines()
 
