@@ -203,46 +203,6 @@ def getContinuous3DParameterValues(grid_model, parameter_name, realization_numbe
     return param.get_values(realization_number)
 
 
-def getSelectedGridCells(grid_model, parameter_name, zone_number_list, realization_number):
-    """
-    Input:
-           grid_model     - Grid model object
-           parameter_name - Name of 3D parameter to get.
-
-           zone_number_list - A list of integer values that are zone numbers (counted from 0).
-                              If the list is empty or has all zones included in the list,
-                              then grid cells in all zones are updated.
-           realization_number - Realisation number counted from 0 for the parameter to get.
-    Output:
-           Numpy vector with parameter values for the active cells belonging to the
-           specified zones. Note that the output is in general not of the same length as a vector
-           with all active cells.
-    """
-    all_values = getContinuous3DParameterValues(grid_model, parameter_name, realization_number)
-    if len(zone_number_list) > 0:
-        # Get values for the specified zones
-        grid = grid_model.get_grid(realization_number)
-        indexer = grid.grid_indexer
-        dim_i, dim_j, _ = indexer.dimensions
-        num_cells_selected = 0
-        values = []
-        for zone_index in indexer.zonation:
-            if zone_index in zone_number_list:
-                layer_ranges = indexer.zonation[zone_index]
-                for lr in layer_ranges:
-                    # Get all the cell numbers for the layer range
-                    cell_numbers = indexer.get_cell_numbers_in_range((0, 0, lr.start), (dim_i, dim_j, lr.stop))
-
-                    # Set values for all cells in this layer
-                    num_cells_selected += len(cell_numbers)
-                    for cIndx in cell_numbers:
-                        values.append(all_values[cIndx])
-        values = np.asarray(values)
-        return values
-    else:
-        return all_values
-
-
 def get_selected_grid_cells(grid_model, parameter_name, zone_number_list, realization_number):
     """
     Input:
@@ -451,8 +411,44 @@ def get_zone_layer_numbering(grid):
         end_layers_per_zone.append(end)
     return number_layers_per_zone, start_layers_per_zone, end_layers_per_zone
 
+def get_simulation_box_thickness(grid,
+        zone=None,
+        debug_level=Debug.OFF,
+        max_number_of_selected_cells=1000):
+    # Check if API has simboxthickness access
+    try:
+        thickness_per_zone = {}
+        simbox = grid.simbox
+        simbox_increments_dict = simbox.cell_increments
+        simbox_increments = simbox_increments_dict['z_increments']
+        number_of_layers_per_zone, _, _ = get_zone_layer_numbering(grid)
+        for zindx, nlayer in enumerate(number_of_layers_per_zone):
+            zone_number = zindx + 1
+            thickness_per_zone[zone_number] = simbox_increments[zindx] * nlayer
+        if debug_level >= Debug.VERBOSE:
+            print(f"-- Get simbox thickness using Roxar API for RMS version 14.1.0 or later")
+            if debug_level >= Debug.VERY_VERBOSE:
+                for zone_number, value in thickness_per_zone.items():
+                    print(f"--- Zone: {zone_number} sim box thickness: {value}  nlayers: {number_of_layers_per_zone[zone_number - 1] } ")
 
-def get_simulation_box_thickness(grid, zone=None, debug_level=Debug.OFF, max_number_of_selected_cells=1000):
+    except AttributeError:
+        # For RMS version earlier than 14.1
+        thickness_per_zone = \
+            get_simulation_box_thickness_estimate(
+                grid,
+                zone=zone,
+                debug_level=Debug.OFF,
+                max_number_of_selected_cells=max_number_of_selected_cells
+            )
+        if debug_level >= Debug.VERBOSE:
+            print(f"-- Get simbox thickness by estimating it from the grid")
+            if debug_level >= Debug.VERY_VERBOSE:
+                for zone_number, value in thickness_per_zone.items():
+                    print(f"--- Zone: {zone_number} sim box thickness: {value}")
+
+    return thickness_per_zone
+
+def get_simulation_box_thickness_estimate(grid, zone=None, debug_level=Debug.OFF, max_number_of_selected_cells=1000):
     ''' Estimate simulation box thickness for each zone.
         This is done by assuming that it is sufficient to calculate difference
         between top of some selected grid cell for top layer and bottom of
@@ -926,35 +922,6 @@ class GridSimBoxSize:
         cell_center_xyz[:,1] = -x * sin_theta + y * cos_theta + y0
         cell_center_xyz[:,2] = 0.0
         return cell_center_xyz
-
-def getNumberOfLayersPerZone(grid, zone_number):
-    indexer = grid.grid_indexer
-    layer_ranges = indexer.zonation[zone_number]
-    number_layers = 0
-    for layer_range in layer_ranges:
-        start = layer_range[0]
-        end = layer_range[-1]
-        number_layers += (end + 1 - start)
-    return number_layers
-
-
-def getNumberOfLayers(grid):
-    indexer = grid.grid_indexer
-    number_layers_per_zone = []
-    for key in indexer.zonation:
-        layer_ranges = indexer.zonation[key]
-        number_layers = 0
-        for layer_range in layer_ranges:
-            start = layer_range[0]
-            end = layer_range[-1]
-            number_layers += (end + 1 - start)
-        number_layers_per_zone.append(number_layers)
-    return number_layers_per_zone
-
-
-def getZoneLayerNumbering(grid_model, realization_number=0):
-    grid = grid_model.get_grid(realization_number)
-    return get_zone_layer_numbering(grid)
 
 
 class GridAttributes:
