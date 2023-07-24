@@ -85,7 +85,7 @@
     "vue-meta": "^2.3.1",
     "vue-property-decorator": "^9.0.0",
     "vue-template-compiler": "^2.5.16",
-    "vuetify-loader": "^1.0.5"
+    "vuetify-loader": "^1.9.2"
   },
   "resolutions": {
     "@statnett/vue-plotly/plotly.js/glslify/minimist": "^1.2.6",
