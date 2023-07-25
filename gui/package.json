@@ -69,7 +69,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-security": "^1.7.1",
     "eslint-plugin-vuetify": "^1.0.0-beta.4",
-    "fibers": "^5.0.0",
+    "fibers": "^5.0.3",
     "ify-loader": "^1.1.0",
     "improved-yarn-audit": "^3.0.0",
     "jest-webpack-resolver": "^0.3.0",
