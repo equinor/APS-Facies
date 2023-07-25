@@ -25,7 +25,7 @@
         <td
           v-if="useProbabilityCubes"
         >
-          {{ facies.previewProbability }}
+          {{ parseFloat(facies.previewProbability).toFixed(2) }}
         </td>
         <td
           v-else
