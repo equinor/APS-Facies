@@ -45,7 +45,7 @@
     "@types/object-hash": "^2.1.0",
     "@types/plotly.js": "^1.54.22",
     "@types/uuid": "^8.0.0",
-    "@types/vuelidate": "^0.7.2",
+    "@types/vuelidate": "^0.7.18",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "@vue/cli-plugin-babel": "^4.5.19",
