@@ -24,7 +24,7 @@
     "mathjs": "^9.5.2",
     "object-hash": "^2.0.1",
     "plotly.js-dist": "^1.39.2",
-    "regenerator-runtime": "^0.13.3",
+    "regenerator-runtime": "^0.13.10",
     "roboto-fontface": "*",
     "uuid": "^8.1.0",
     "v-tooltip": "^2.0.0-rc.33",
