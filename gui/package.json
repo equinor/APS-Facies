@@ -15,7 +15,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.5.0",
     "@statnett/vue-plotly": "^0.3.2",
-    "core-js": "^3.31.0",
+    "core-js": "^3.31.1",
     "flat": "^5.0.0",
     "hex-rgb": "^5.0.0",
     "lodash": "^4.17.11",
