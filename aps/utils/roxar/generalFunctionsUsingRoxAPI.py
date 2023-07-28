@@ -9,7 +9,6 @@ from warnings import warn
 from aps.utils.exceptions.general import raise_error
 from aps.utils.io import print_debug_information, print_error
 from aps.utils.roxar.grid_model import get3DParameter, modify_selected_grid_cells, update_code_names
-
 from aps.utils.constants.simple import Debug
 
 import roxar

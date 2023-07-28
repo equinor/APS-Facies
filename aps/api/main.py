@@ -13,6 +13,7 @@ from aps.utils.decorators import loggable, output_version_information
 from aps.utils.fmu import fmu_aware_model_file
 from aps.utils.io import create_temporary_model_file
 from aps.utils.roxar.job import JobConfig, classify_job_configuration
+from aps.utils.roxar.progress_bar import APSProgressBar
 
 import roxar.rms
 import sys
@@ -71,6 +72,8 @@ def run(config):
 
             # Ensure traceback is on per default
             sys.excepthook = sys.__excepthook__
+
+            APSProgressBar.close_progress_bar()
 
             print('Finished')
     execute(config)

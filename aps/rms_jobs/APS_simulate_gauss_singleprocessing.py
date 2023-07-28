@@ -15,6 +15,7 @@ from aps.utils.roxar.generalFunctionsUsingRoxAPI import (
     get_project_realization_seed,
 )
 from aps.utils.roxar.grid_model import GridAttributes, get_zone_names
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.methods import get_seed_log_file
 from aps.utils.trend import add_trends
 
@@ -199,6 +200,7 @@ def run_simulations(
                     print(
                         f'-- Finished running simulation of {gauss_field_name} for zone: {zone_number}\n'
                     )
+            APSProgressBar.increment()
 
         set_continuous_3d_parameter_values_in_zone_region(
             grid_model,
@@ -213,7 +215,7 @@ def run_simulations(
             fmu_mode=fmu_mode,
             use_left_handed_grid_indexing=True,
         )
-
+        APSProgressBar.increment()
 
         add_trends(
             project, aps_model, zone_number, region_number,
@@ -259,5 +261,5 @@ def run(project, **kwargs):
         is_shared,
         seed_file_log,
         write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
-        fmu_mode=fmu_mode,
+        fmu_mode=fmu_mode
     )

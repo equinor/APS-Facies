@@ -45,6 +45,7 @@ from aps.utils.roxar.grid_model import (
     GridSimBoxSize,
     flip_grid_index_origo)
 from aps.utils.roxar.generalFunctionsUsingRoxAPI import set_continuous_3d_parameter_values_in_zone_region
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.trend import add_trends
 from aps.utils.aps_config import APSConfig
 
@@ -218,6 +219,7 @@ def run(project, model_file, geo_grid_name, load_dir=None, **kwargs):
             region_param_name=region_param_name,
             debug_level=debug_level)
 
+    APSProgressBar.increment()
 
 def import_and_update_ertbox_and_geogrid(project,
     aps_model: APSModel,

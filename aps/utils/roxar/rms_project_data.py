@@ -54,6 +54,7 @@ from aps.utils.roxar.grid_model import (
 )
 from aps.utils.facies_map import create_facies_map
 from aps.utils.roxar.migrations import Migration
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.truncation_rules import make_truncation_rule
 from aps.utils.types import (
     ProjectName, ProjectPath, FmuParameterListPath, WorkflowName, GridName, RegionParameter,
@@ -93,6 +94,9 @@ class RMSData:
     def __init__(self, roxar, project: Project):
         self.roxar = roxar
         self.project = project
+        # Progress bar initialized to not to be in use.
+        # Will be initialized to be used when running the APS job.
+        APSProgressBar()
 
 
     def is_discrete(self, _property: Property, can_be_empty: bool = False) -> bool:

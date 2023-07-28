@@ -31,6 +31,7 @@ from aps.utils.roxar.grid_model import (
     isParameterDefinedWithValuesInRMS, getDiscrete3DParameterValues,
     find_defined_cells, create_zone_parameter,
 )
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.simulation import initialize_rms_parameters
 
 
@@ -649,6 +650,8 @@ def run(
                 if debug_level >= Debug.VERY_VERBOSE:
                     print(f'--- Add facies: {facies_name} to the list of modelled facies')
 
+        APSProgressBar.increment()
+
     # End loop over zones
 
     print('')
@@ -698,6 +701,7 @@ def run(
     if debug_level >= Debug.ON:
         print('- Finished APS truncations')
 
+    APSProgressBar.increment()
 
 def print_zones_and_regions(all_zone_models, aps_model, use_regions):
     for key, zone_model in all_zone_models.items():

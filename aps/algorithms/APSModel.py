@@ -1764,7 +1764,30 @@ class APSModel:
         job_settings_element.append(create_node('LogSetting',
             text=self.__log_setting.value))
 
+    def estimate_progress_steps(self):
+        nsteps = 0
+        zone_models = self.sorted_zone_models
+        count_grf = 0
+        count_trend = 0
+        count_zone_region = 0
+        for key, zone_model in zone_models.items():
+            zone_number, region_number = key
+            if not self.isSelected(zone_number, region_number):
+                continue
+            gauss_field_names = zone_model.gaussian_fields_in_truncation_rule
+            count_zone_region += 2
+            for name in gauss_field_names:
+                count_grf += 1
+                if zone_model.hasTrendModel(name):
+                    count_trend += 1
 
+        nsteps += 3
+        nsteps += count_grf
+        nsteps += count_trend
+        nsteps += 3
+        nsteps += count_zone_region
+        nsteps += 1
+        return nsteps
 
 def _max_name_length(fmu_attributes: List[FmuAttribute]) -> int:
     return max(len(fmu_attribute.name) for fmu_attribute in fmu_attributes)

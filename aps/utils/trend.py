@@ -1,6 +1,7 @@
 from aps.utils.constants.simple import Debug
 from aps.utils.grid import update_rms_parameter
 from aps.utils.roxar.grid_model import find_defined_cells, create_zone_parameter, getDiscrete3DParameterValues
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.simulation import initialize_rms_parameters
 
 
@@ -143,7 +144,7 @@ def add_trends(
                     fmu_add_trend_if_use_residual=fmu_add_trend_if_use_residual,
                     write_rms_parameters_for_qc_purpose=write_rms_parameters_for_qc_purpose,
                 )
-
+                APSProgressBar.increment()
 
 def get_defined_cells(
         project,

@@ -6,7 +6,7 @@ from pathlib import Path
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.methods import get_run_parameters, get_debug_level
-
+from aps.utils.roxar.progress_bar import APSProgressBar
 
 def update_aps_model_from_fmu(
         global_variables_file, input_aps_model_file, output_aps_model_file, debug_level=Debug.OFF,
@@ -57,3 +57,5 @@ def run(project, **kwargs):
     else:
         if debug_level >= Debug.ON:
             print("No global variables file was found. Check FMU project or aps_config.yml file if that is used.")
+
+    APSProgressBar.increment()

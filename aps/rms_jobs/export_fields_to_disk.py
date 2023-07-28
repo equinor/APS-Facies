@@ -12,6 +12,7 @@ from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.fmu import get_export_location
 from aps.utils.roxar.grid_model import flip_grid_index_origo
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.constants.simple import Debug
 
 
@@ -115,3 +116,4 @@ def run(project, **kwargs):
                         fformat=file_format,
                         name=field_name,
                     )
+    APSProgressBar.increment()
