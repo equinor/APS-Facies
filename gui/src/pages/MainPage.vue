@@ -29,19 +29,25 @@
     >
       <v-col cols="4">
         <scrollable-area>
-          <selection />
+          <vue-horizontal>
+            <selection />
+          </vue-horizontal>
         </scrollable-area>
       </v-col>
       <v-col cols="4">
         <scrollable-area>
-          <preview v-if="hasSimulations" />
+          <vue-horizontal>
+            <preview v-if="hasSimulations" />
+          </vue-horizontal>
         </scrollable-area>
       </v-col>
       <v-col cols="4">
         <scrollable-area>
-          <settings
-            v-if="canSpecifyModelSettings"
-          />
+          <vue-horizontal>
+            <settings
+              v-if="canSpecifyModelSettings"
+            />
+          </vue-horizontal>
         </scrollable-area>
       </v-col>
     </v-row>
