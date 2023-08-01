@@ -10,7 +10,7 @@
     >
       <tr>
         <td>
-          {{ facies.name }}
+          {{ facies.alias }}
         </td>
         <td
           v-if="useProbabilityCubes"
