@@ -1217,6 +1217,7 @@ class DefineTruncationRule:
         faciesOrdering = truncObj.getFaciesOrderIndexList()
 
         # Truncation map is plotted
+        self.show_title = False
         plt.axis('off')
         if self.show_title:
             axTrunc = plt.subplot(Nrow, Ncol, indx)
@@ -1228,6 +1229,21 @@ class DefineTruncationRule:
         if self.debug_level >= Debug.ON:
             print('Debug output: Number of facies:          ' + str(nFacies))
             print('Debug output: Number of facies polygons: ' + str(len(faciesPolygons)))
+        # Add a background polygon (square) that is slightly larger than unit square to make a frame
+        poly = np.zeros((5,2), dtype=np.float32)
+        frame_size = 0.05
+        poly[0,0] = -frame_size
+        poly[0,1] = -frame_size
+        poly[1,0] = 1 + frame_size
+        poly[1,1] = -frame_size
+        poly[2,0] = 1 + frame_size
+        poly[2,1] = 1 + frame_size
+        poly[3,0] = -frame_size
+        poly[3,1] = 1 + frame_size
+        poly[4,0] = -frame_size
+        poly[4,1] = -frame_size
+        polygon = Polygon(poly, closed=True, facecolor='white')
+        axTrunc.add_patch(polygon)
         for i in range(len(faciesPolygons)):
             indx = faciesIndxPerPolygon[i]
             fIndx = faciesOrdering[indx]
