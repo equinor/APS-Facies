@@ -96,6 +96,9 @@ class GaussianFieldSimulationSettings:
         self._simulation_box_origin = simulation_box_origin
         self._seed = seed
 
+        # Rescale grid size (nx, ny, nz) for preview grid used in the GUI
+        self._rescale_grid_size_for_preview()
+
     @property
     def cross_section(self) -> CrossSection:
         return self._cross_section
@@ -132,6 +135,26 @@ class GaussianFieldSimulationSettings:
             return mapping[self.cross_section.type]
         except KeyError:
             raise NotImplementedError
+
+    def _rescale_grid_size_for_preview(self):
+        # Change nz to be half of horizontal number of grid cells
+        # as default for cross sections.
+        # GUI preview plot does not care about grid cell size, but
+        # only about number of grid cell values represented as a 2D matrix
+        x_dim = self._grid_size[0]
+        y_dim = self._grid_size[1]
+        z_dim = self._grid_size[2]
+        if x_dim <= y_dim:
+            if x_dim < 100:
+                y_dim = int(y_dim * 100 / x_dim)
+                x_dim = 100
+            z_dim = int(y_dim/2)
+        elif y_dim < x_dim:
+            if y_dim < 100:
+                x_dim = int(x_dim * 100 / y_dim)
+                y_dim = 100
+            z_dim = int(x_dim/2)
+        self._grid_size = (x_dim, y_dim, z_dim)
 
     def merge(
             self,
@@ -321,7 +344,7 @@ class GaussianField:
         else:
             settings = self.settings.merge(*args)
 
-        grid_dimensions, sizes, projection, = _get_projection_parameters(settings.cross_section.type,
+        grid_dimensions_2d, sizes, projection = _get_projection_parameters(settings.cross_section.type,
                                                                          settings.grid_size,
                                                                          settings.simulation_box_size)
         # Find data for specified Gauss field name
@@ -350,11 +373,11 @@ class GaussianField:
             print(f'--- Range2 in projection: {projection} : {range2}')
             print(f'--- Angle from vertical axis for Range1 direction: {angle1}')
             print(f'--- Angle from vertical axis for Range2 direction: {angle2}')
-            print(f'--- (gridDim1, gridDim2) = ({grid_dimensions[0]},{grid_dimensions[1]})')
+            print(f'--- (gridDim1, gridDim2) = ({grid_dimensions_2d[0]},{grid_dimensions_2d[1]})')
             print(f'--- (Size1, Size2) = ({sizes[0]},  {sizes[1]})')
 
         residual_field = simGaussField(
-            seed_value, *grid_dimensions, *sizes, variogram_type,
+            seed_value, *grid_dimensions_2d, *sizes, variogram_type,
             range1, range2, azimuth_variogram, power, debug_level
         )
         # Calculate trend
@@ -1656,24 +1679,25 @@ def _get_projection_parameters(
         cross_section_type: CrossSectionType,
         grid_size: GridSize,
         simulation_box_size: SimulationBoxSize,
+        resize_for_gui: bool = True,
 ) -> Tuple[Tuple[int, int], Tuple[float, float], str]:
     x_sim_box_size, y_sim_box_size, z_sim_box_size = simulation_box_size
     x_grid, y_grid, z_grid = grid_size
     if cross_section_type == CrossSectionType.IJ:
-        grid_dimensions = (x_grid, y_grid)
+        grid_dimensions_2d = (x_grid, y_grid)
         size = (x_sim_box_size, y_sim_box_size)
         projection = 'xy'
     elif cross_section_type == CrossSectionType.IK:
-        grid_dimensions = (x_grid, z_grid)
+        grid_dimensions_2d = (x_grid, z_grid)
         size = (x_sim_box_size, z_sim_box_size)
         projection = 'xz'
     elif cross_section_type == CrossSectionType.JK:
-        grid_dimensions = (y_grid, z_grid)
+        grid_dimensions_2d = (y_grid, z_grid)
         size = (y_sim_box_size, z_sim_box_size)
         projection = 'yz'
     else:
         raise ValueError('Undefined cross section {}'.format(cross_section_type.name))
-    return grid_dimensions, size, projection
+    return grid_dimensions_2d, size, projection
 
 
 def _add_trend(residual_field, trend_field, rel_sigma, trend_max_min_difference, average_trend, debug_level=Debug.OFF):
