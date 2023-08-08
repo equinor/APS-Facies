@@ -131,6 +131,7 @@ class APSModel:
             fmu_use_residual_fields: bool = False,
             check_with_grid_model: bool = False,
             project= None,
+            save_job_name= True,
 
 
     ):
@@ -223,7 +224,7 @@ class APSModel:
         self.__fmu_use_residual_fields = fmu_use_residual_fields
         self.__fmu_use_non_standard_dir_and_files = fmu_use_non_standard_dir_and_files
         self.__fmu_export_ertbox_grid = fmu_export_ertbox_grid
-
+        self.__save_job_name = save_job_name
 
         # Read model if it is defined
         if model_file_name is not None:
@@ -1211,6 +1212,18 @@ class APSModel:
             }
             elem = ET.Element(tag, attribute)
             root.append(elem)
+
+        if self.__save_job_name:
+            # Save job name when possible to model file as info for the user
+            # It will not be used in any context or read by the xml model file reader.
+            from roxar.rms import get_running_job_name
+            job_name = get_running_job_name()
+            if job_name is not None:
+                tag = 'JobName'
+                elem = ET.Element(tag)
+                elem.text = ' ' + job_name.strip() + ' '
+                root.append(elem)
+
 
         # If selected zone list is defined (has elements) write them to a keyword
         # but if all defined zones are selected, don't write this keyword.
