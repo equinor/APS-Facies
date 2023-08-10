@@ -87,8 +87,8 @@ def get_trend_param_names_from_aps_model(
 
         if number_layers > nz_ertbox:
             raise ValueError(
-                f"Number of layers nz of {ertbox_grid_model_name} "
-                f"is less than number of layers in {geo_grid_model_name} "
+                f"Number of layers nz of {ertbox_grid_model_name}: ({nz_ertbox}) "
+                f"is less than number of layers in {geo_grid_model_name}: ({number_layers})  "
                 f"for zone {zone_name}"
             )
         if debug_level >= Debug.VERY_VERBOSE:

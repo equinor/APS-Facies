@@ -122,7 +122,7 @@ class JobConfig:
     @property
     def create_fmu_grid(self):
         # Create grid if in fmu ahm mode and grid does not exist or is specified to be created in GUI
-        return self.run_fmu_workflows and (self._config['fmu']['create']['value'] or (self.fmu_grid_name not in self.project.grid_models))
+        return self.run_fmu_workflows and (self.fmu_grid_name not in self.project.grid_models)
 
     @property
     def export_ertbox_grid(self):
