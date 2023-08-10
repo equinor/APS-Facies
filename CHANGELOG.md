@@ -2,6 +2,97 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.4.0
+
+### What's new
+* Added  a new script to modify facies probability cube set
+* Added a new job name to model file as info for the users
+* Modify number of vertical grid cells in vertical cross sections in preview
+* Horizontal scrollbars introduced
+* Add roxar api progress bar when running APS job
+* Use Roxar API to get simbox thickness for RMS 14.1.0 and newer
+* Change default export directory for APS model file.
+* Add support for zone representations
+* Add Job settings option to turn on or off if ERTBOX grid should be exported or not
+* Make APS plugin more flexible with respect to FMU directory structure
+* Enable use of regions in FMU workflows
+* Added possibility to only let ERT update the residual fields separately.
+* Implement YAML format for toolbox scripts
+* Write config file for ERT FIELD keyword
+* Updated GUI code to use 2D maps as trend input for new trend type
+* Add trend type `RMS_TRENDMAP`
+
+### Fixes
+* Fix preview error message from preview  when using custom trends
+* Frame around truncation rule map plots used as icons
+* Use alias for facies names when specifying constant probabilities
+* Update a check for ertbox
+* Two decimals only in preview probability
+* Add check to use correct version of user preferences file for current RMS version
+* Add fetch depth to actions files
+* Use provided interpreter if given
+* Updated `decorators.py` to check and search for plugin path
+* Update modelFileLoader for JobSettings
+* Fix a check related to ertbox grid existence
+* Fixed paths to be relative for paths used in ERT and absolute for paths to APS
+* A multi-line warning is rewritten with print to get more readable output in RMS
+* Check that correct version of RMS stubs is used together with a given APS plugin version
+* Add check for grid index origin in script to copy RMS parameters between geogrid and ERTBOX grid
+* Check and update number of zones in APS model if grid model is changed
+* Fix the flip in export script needed to get correct export of GRF files when using `GRDECL` format and Eclipse grid index origo
+* Check `global_master_config.yml` file that current APS job is unique if added to this file
+* Fix migration error from state 1.9.0 to 1.10.0
+* Update xmlUtils with better check when reading text and this is expected to exist and not be None
+* Ensure that APS GUI can save and load APS model files (`APS.xml`) containing also Job Settings parameters
+* Fix selection of plugin version when one of the version numbers get more digits
+
+### Restructure
+* Refactor aps toolbox scripts to prepare them for being used in a library.
+
+### Miscellaneous
+* Update dependencies
+  * `vuelidate` (0.7.6 &rarr; 0.7.7)
+  * `eslint-plugin-vuetify` (1.0.1 &rarr; 1.1.0)
+  * `core-js` (3.31.0 &rarr; 3.31.1)
+  * `regenerator-runtime` (0.13.9 &rarr; 0.13.10)
+  * `eslint-plugin-promise` (5.1.0 &rarr; 5.2.0)
+  * `deepmerge` (4.2.2 &rarr; 4.3.1)
+  * `@types/object-hash` (2.1.1 &rarr; 2.2.1)
+  * `ts-custom-error` (3.2.0 &rarr; 3.3.1)
+  * `fibers` (5.0.0 &rarr; 5.0.3)
+  * `@types/uuid` (8.3.1 &rarr; 8.3.4)
+  * `@types/vuelidate` (0.7.15 &rarr; 0.7.18)
+  * `@types/markdown-it` (12.2.0 &rarr; 12.2.3)
+  * `eslint-plugin-security` (1.4.0 &rarr; 1.7.1)
+  * `mathjs` (9.4.4 &rarr; 9.5.2)
+  * `vuetify` (2.6.10 &rarr; 2.6.15)
+  * `vuetify-loader` (1.7.2 &rarr; 1.9.2)
+  * `@vue/cli-plugin-unit-jest` (4.5.13 &rarr; 4.5.19) 
+  * `sass-loader` (10.2.0 &rarr; 10.4.1)
+  * `@vue/cli-plugin-eslint` (4.5.13 &rarr; 4.5.19)
+  * `@vue/cli-plugin-babel` (4.5.13 &rarr; 4.5.19)
+  * `@vue/cli-service` (4.5.13 &rarr; 4.5.19)
+  * `@vue/cli-plugin-typescript` (4.5.13 &rarr; 4.5.19)
+  * `@vue/test-utils` (1.2.2 &rarr; 1.3.6)
+  * `@types/plotly.js` (1.54.14 &rarr; 1.54.22)
+  * `lint-staged` (11.1.2 &rarr; 11.2.6)
+  * `axios` (0.21.1 &rarr; 0.27.2)
+  * `eslint-plugin-import` (2.24.1 &rarr; 2.27.5)
+  * `vue-cli-plugin-vuetify` (2.4.2 &rarr; 2.5.8)
+  * `@types/lodash` (4.14.172 &rarr; 4.14.195)
+  * `@typescript-eslint/eslint-plugin` (4.29.3 &rarr; 4.33.0)
+  * `@typescript-eslint/parser` (4.29.3 &rarr; 4.33.0)
+  * `sass` (1.38.1 &rarr; 1.63.4)
+  * `core-js` (3.16.2 &rarr; 3.31.0)
+
+* Replaced `nrlib` with `gaussianfft` as module for sim og gauss fields in 2D and 3D.
+* Removed unnecessary print to log window when running GUI
+* Update `methods.py` and `generate_workflow_blocks.py` to simplify installation of `aps_workflows` directory 
+* Use blake2 instead of SHA 512
+* Add some missing documentation, and method stubs
+* Help script to re-map zone models from original APS model file to new APS model file
+* Turn on/off traceback depending on debug level. Add stub for turning off and on traceback also.
+
 ## 1.3.10
 
 ### Fixes
