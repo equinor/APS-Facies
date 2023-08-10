@@ -359,7 +359,10 @@ class GaussianField:
         )
         # Calculate trend
         _, use_trend, trend_model, relative_std_dev, _ = self.trend.as_list()
-        if use_trend:
+        if use_trend and  trend_model.type in (TrendType.NONE, TrendType.RMS_PARAM, TrendType.RMS_TRENDMAP):
+            print(f"Note: No preview is implemented for trend type {trend_model.type.name}. Ignore trend in preview. ")
+            gauss_field_with_trend = residual_field
+        elif use_trend:
             if debug_level >= Debug.VERBOSE:
                 print(f'-- Use Trend: {trend_model.type.name}')
             min_max_difference, average_trend, trend_field = trend_model.createTrendFor2DProjection(
