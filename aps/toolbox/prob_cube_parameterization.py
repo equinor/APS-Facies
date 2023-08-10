@@ -219,6 +219,8 @@ def check_normalization(
         normalize,
         tolerance=0.01,
         debug_level=Debug.OFF,
+        prefix=None,
+        weights=None,
     ):
     facies_names_per_zone_dict = facies
     prob_set_dict = prob_cube_set
