@@ -4,6 +4,7 @@ from aps.algorithms.APSModel import APSModel
 from aps.utils.fmu import get_export_location
 from aps.utils.methods import get_specification_file
 from aps.utils.constants.simple  import Debug
+from aps.utils.roxar.progress_bar import APSProgressBar
 
 def run(project, **kwargs):
     export_grid = kwargs.get('export_ertbox_grid',True)
@@ -29,3 +30,4 @@ def run(project, **kwargs):
         str(field_location / '{}.EGRID'.format(aps_grid_name)),
         fformat='egrid',
     )
+    APSProgressBar.increment()

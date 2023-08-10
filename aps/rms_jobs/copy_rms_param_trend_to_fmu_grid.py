@@ -15,7 +15,7 @@ from aps.utils.constants.simple import (
     ExtrapolationMethod,
 )
 from aps.utils.roxar.grid_model import get_zone_layer_numbering, get_zone_names
-
+from aps.utils.roxar.progress_bar import APSProgressBar
 
 def get_grid_model(project,grid_model_name: str):
     """
@@ -529,3 +529,4 @@ def run(*, project,
     if debug_level >= Debug.ON:
         print(f"- Finished copy rms trend parameters to {ertbox_grid_model_name} ")
 
+    APSProgressBar.increment()

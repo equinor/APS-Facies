@@ -16,6 +16,7 @@ from roxar import Direction
 from aps.algorithms.APSModel import APSModel
 from aps.utils.constants.simple import Debug
 from aps.utils.roxar.grid_model import GridSimBoxSize
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.constants.simple import FlipDirectionXtgeo
 
 def get_grid_rotation(geometry):
@@ -124,4 +125,6 @@ def run(
         fmu_simulation_grid_name,
         max_fmu_grid_layers,
         debug_level=debug_level)
+
+    APSProgressBar.increment()
 

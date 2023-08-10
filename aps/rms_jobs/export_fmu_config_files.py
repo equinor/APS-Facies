@@ -6,6 +6,7 @@ from aps.utils.methods import get_specification_file, get_debug_level
 from aps.utils.constants.simple import GridModelConstants, Debug
 from aps.utils.io import write_string_to_file, GlobalVariables
 from aps.utils.aps_config import APSConfig
+from aps.utils.roxar.progress_bar import APSProgressBar
 
 from warnings import warn
 from pathlib import Path
@@ -134,3 +135,6 @@ def run(project, **kwargs):
                     content += f"MIN:-5.5  MAX:5.5  FORWARD_INIT:True\n"
 
             write_string_to_file(ert_field_keyword_file_name, content, debug_level=debug_level)
+
+    APSProgressBar.increment()
+

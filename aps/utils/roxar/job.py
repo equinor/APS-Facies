@@ -15,6 +15,7 @@ from aps.utils.roxar._config_getters import get_debug_level
 from aps.utils.roxar.migrations import Migration
 from aps.utils.roxar.rms_project_data import RMSData
 from aps.utils.aps_config import APSConfig
+from aps.utils.roxar.progress_bar import APSProgressBar
 from aps.utils.check_rms_interactive_or_batch import check_rms_execution_mode
 
 def excepthook(type, value, traceback):
@@ -47,6 +48,9 @@ class JobConfig:
         else:
             APSConfig.init(self.project)
 
+    def initialize_progress_bar(self, aps_model: APSModel):
+        estimated_number_of_steps = aps_model.estimate_progress_steps()
+        APSProgressBar.initialize_progress_bar(number_of_steps=estimated_number_of_steps)
 
     def get_parameters(self, model_file):
         # Represents the ORIGINAL APS model
@@ -61,6 +65,9 @@ class JobConfig:
         # Update simbox thickness to match current grid model and also write back the updated model
         # since both model file and APSModel object is used later and must be consistent.
         self.check_and_update_simbox_thickness(model_file, aps_model)
+
+        # Initialize progress bar
+        self.initialize_progress_bar(aps_model)
 
         return {
             'roxar': self.roxar,
