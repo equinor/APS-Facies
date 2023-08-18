@@ -1,4 +1,4 @@
-# Test script reading input parameters from model file
+# Test script where input is specified directly in the python dictionary.
 
 from aps.toolbox import bitmap_to_rms
 from aps.utils.constants.simple import Debug

@@ -1,0 +1,12 @@
+This directory contains help scripts related to APS and use of ERTBOX.
+The scripts are:
+- bitmap_to_rms.py                         Convert a 8bit bitmap file to RMS readable surface format file.
+- create_probability_logs.py               Make prob logs form blocked well facies logs
+- create_redefined_blocked_facies_log.py   Merge facies and define new facies from original facies for blocked wells.
+- define_facies_prob_trend.py              Define prob cube trends using input facies parameter and conditional probabilities.
+- define_facies_prob_map_dep_trend.py      Define prob cube trends in specified direction based on input facies parameter.
+- check_and_normalise_probability.py       Check normalization of prob cubes and normalize them if specified criteria is satisfied.
+- prob_cube_parameterization.py            Make linear combination of different sets of prob cubes. Useful in ERT for prob uncertainty.
+- copy_rms_param_to_ertbox_grid.py         Copy 3D parameters in RMS from geogrid to ERTBOX grid and vice versa. Extrapolation is also available.
+- redefine_zones_in_aps_model.py           If zone subdivision is changed after APS model is defined, this script can remap the zones and make updated model file for APS.
+

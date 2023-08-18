@@ -1,0 +1,7 @@
+  FaciesProbTrend:
+    GridModelName:   GridModelFine
+    ZoneParamName:  Zone
+    FaciesParamName:  Facies_initial_example_1
+    ProbParamNamePrefix:  ProbTrendEx1
+    SelectedZones: 1 2 3 4 5 6
+    UseConstantProbFromVolumeFraction: True
