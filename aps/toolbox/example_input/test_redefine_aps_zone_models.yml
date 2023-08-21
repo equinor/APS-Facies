@@ -1,0 +1,31 @@
+# This model specification is used in the script redefine_zones_in_aps_model.py
+
+RemapZoneModels:
+  InputAPSModelFile: examples/Test_zones_original.xml
+  OutputAPSModelFile: APS_remapped_from_yml.xml
+  OutputGridModel: Test_remap_modified
+  NewZones:
+    1: Zone_A
+    2: Zone_B
+    3: Zone_C2
+    4: Zone_C1
+    5: Zone_D
+
+  OldZones:
+    1: Zone_A3_orig
+    2: Zone_A2_orig
+    3: Zone_A1_orig
+    4: Zone_B2_orig
+    5: Zone_B1_orig
+    6: Zone_C_orig
+    7: Zone_D_orig
+
+  ZoneMapping:
+    Zone_A: Zone_A3_orig Zone_A2_orig Zone_A1_orig
+    Zone_B: Zone_B1_orig Zone_B2_orig
+    Zone_C2: Zone_C_orig
+    Zone_C1: Zone_C_orig
+    Zone_D: Zone_D_orig
+
+
+

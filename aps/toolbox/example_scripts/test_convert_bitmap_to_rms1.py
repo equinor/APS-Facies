@@ -6,7 +6,7 @@ from aps.utils.constants.simple import Debug
 print(f"Run script: {bitmap_to_rms.__file__}  ")
 
 params = {
-   "model_file_name": "examples/bitmap2rms_facies_codes2.xml",
+   "model_file_name": "example_input/bitmap2rms_facies_codes.yml",
    "debug_level": Debug.VERBOSE,
 }
 

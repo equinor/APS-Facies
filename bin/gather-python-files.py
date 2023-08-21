@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Usage ./gather-python-files.py CODE_DIR APS_DIR
 # Finds all Python files in CODE_DIR/aps and adds them to APS_DIR/aps with the same hierarchy
+# Also find all yml files and xml files under aps/toolbox/example_input and add
 
 import re
 from os import walk, makedirs
@@ -50,7 +51,18 @@ def run():
     source_dir = str(code_dir / 'aps')
     target_dir = Path(argv[2]).absolute()
 
+    # Collect python files
     files = gather_files(source_dir, file_ending='py')
+    files = get_relative_paths(files, code_dir)
+    copy_files(files, code_dir, target_dir)
+
+    # Collect xml files for toolbox examples
+    files = gather_files(source_dir, file_ending='xml')
+    files = get_relative_paths(files, code_dir)
+    copy_files(files, code_dir, target_dir)
+
+    # Collect yml files for toolbox examples
+    files = gather_files(source_dir, file_ending='yml')
     files = get_relative_paths(files, code_dir)
     copy_files(files, code_dir, target_dir)
 

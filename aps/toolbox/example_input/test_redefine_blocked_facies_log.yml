@@ -1,0 +1,20 @@
+# This model specification is used in the script createRedefinedBlockedFaciesLog.py
+
+MergeFaciesLog:
+  GridModelName: GridModelFine
+  BlockedWells: BW3
+  OriginalFaciesLogName: FaciesEx1
+  NewFaciesLogName: TestMergedFacies2Yml
+  NewFaciesCodes:
+    1: A
+    2: B
+    3: C
+
+  FromOldToNewFacies:
+    F1: A
+    F2: A
+    F3: B
+    F4: B
+    F5: C
+    F6: C
+

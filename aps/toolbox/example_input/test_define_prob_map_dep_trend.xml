@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<APS_prob_trend>
+  <FaciesProbMapDepTrend>
+    <GridModelName>   GridModelFine </GridModelName>
+    <ZoneParamName>  Zone </ZoneParamName>
+    <FaciesParamName>  Deterministic_facies </FaciesParamName>
+    <ProbParamNamePrefix>  ProbTestDep2  </ProbParamNamePrefix>
+    <SelectedZones> 1 2 3  </SelectedZones>
+    <ZoneDepositionAzimuthValues> 45 35 25  </ZoneDepositionAzimuthValues>
+    <!-- Either one azimuth value used for all zones or one value per zone -->
+    <Resolution> 25 </Resolution>
+  </FaciesProbMapDepTrend>
+</APS_prob_trend>

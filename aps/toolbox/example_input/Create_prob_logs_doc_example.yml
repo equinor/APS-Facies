@@ -1,0 +1,63 @@
+# This model specification is used in the script createProbabilityLogs.py
+
+ProbLogs:
+  GridModelName: GridModelFine
+  BlockedWells: BW
+  FaciesLogName: facies_log
+  ZoneLogName:  Zone
+  OutputPrefix: Prob
+  ModellingFaciesPerZone:
+    1:  Sand_A  Sand_B  Shale
+    2:  Sand_A  Sand_B  Shale
+    3:  Sand_A  Sand_B  Shale
+
+  UseConditionalProbabilities: True
+
+  CondProbMatrix:
+    (1, Sand_A,  Shale): 0.0
+    (1, Sand_B,  Shale): 0.0
+    (1, Shale ,  Shale): 1.0
+
+    (1, Sand_A,  Sand): 0.5
+    (1, Sand_B,  Sand): 0.5
+    (1, Shale,   Sand): 0.0
+
+    (1, Sand_A,  Sand_A): 1.0
+    (1, Sand_B,  Sand_A): 0.0
+    (1, Shale,   Sand_A): 0.0
+
+    (1, Sand_A,  Sand_B): 0.0
+    (1, Sand_B,  Sand_B): 1.0
+    (1, Shale,   Sand_B): 0.0
+
+    (2, Sand_A,  Shale): 0.0
+    (2, Sand_B,  Shale): 0.0
+    (2, Shale,   Shale): 1.0
+
+    (2, Sand_A,  Sand): 0.5
+    (2, Sand_B,  Sand): 0.5
+    (2, Shale,   Sand): 0.0
+
+    (2, Sand_A,  Sand_A): 1.0
+    (2, Sand_B,  Sand_A): 0.0
+    (2, Shale,   Sand_A): 0.0
+
+    (2, Sand_A,  Sand_B): 0.0
+    (2, Sand_B,  Sand_B): 1.0
+    (2, Shale,   Sand_B): 0.0
+
+    (3, Sand_A,  Shale): 0.0
+    (3, Sand_B,  Shale): 0.0
+    (3, Shale,   Shale): 1.0
+
+    (3, Sand_A,  Sand): 0.5
+    (3, Sand_B,  Sand): 0.5
+    (3, Shale,   Sand): 0.0
+
+    (3, Sand_A,  Sand_A): 1.0
+    (3, Sand_B,  Sand_A): 0.0
+    (3, Shale,   Sand_A): 0.0
+
+    (3, Sand_A,  Sand_B): 0.0
+    (3, Sand_B,  Sand_B): 1.0
+    (3, Shale,   Sand_B): 0.0

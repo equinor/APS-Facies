@@ -1,0 +1,40 @@
+# This model specification is used in the script to resample RMS 3D parameters
+# from geogrid to ertbox grid.
+
+Resample:
+  Mode: from_geo_to_ertbox
+  GridModelName: GridModelFine
+  ERTBoxGridName: ERTBOX
+  ZoneParam: Zone
+  ExtrapolationMethod: repeat
+  GeoGridParameters:
+    1:  Perm Poro
+    2:  Perm Poro
+    3:  Perm Poro
+    4:  Perm Poro
+    5:  Perm Poro
+    6:  Perm Poro
+
+  ErtboxParameters:
+    1:  middle_Neslen_1_Perm  middle_Neslen_1_Poro
+    2:  middle_Neslen_2_Perm  middle_Neslen_2_Poro
+    3:  middle_Neslen_3_Perm  middle_Neslen_3_Poro
+    4:  middle_Neslen_4_Perm  middle_Neslen_4_Poro
+    5:  middle_Neslen_5_Perm  middle_Neslen_5_Poro
+    6:  middle_Neslen_6_Perm  middle_Neslen_6_Poro
+
+  Conformity:
+    1: TopConform
+    2: Proportional
+    3: BaseConform
+    4: TopConform
+    5: BaseConform
+    6: BaseConform
+
+
+# Available extrapolation methods:
+#  zero, mean, extend, repeat,
+#  extend_layer_mean, repeat_layer_mean
+
+
+

@@ -1,0 +1,24 @@
+# File in YAML format defining FMU directory structure and some file names
+# When using standard FMU directory structure and file names,
+# turn off using non-standard FMU settings in APS settings and this file will not be used.
+# For FMU project using non-standard directory structure or alternative name for file with global variables,
+# modify the settings here, but keep all keywords.
+# Only file paths relevant for APS plugin is specified here.
+top_directory_relative_to_rms_project: ../..
+relative_paths:
+    fmuconfig: fmuconfig
+    fmu_config_input: fmuconfig/input2
+    fmu_config_output: fmuconfig/output2
+    global_variables_file: fmuconfig/output2/global_var.yml
+    ert: ert
+    ert_model: ert/model
+    ert_dist: ert/input/distributions2
+    rms: rms
+    rms_model: rms/model
+    rms_field: rms/output/aps2
+    aps_model_export: rms/input/config/apsgui
+aps_file_extensions:
+    fmu_master_config: _aps_params2.yml
+    fmu_config: _aps_fmu_config2.yml
+    ert_fields: _aps_ert_config_fields2.txt
+    ert_prob: _aps_ert_config_dis2t.txt

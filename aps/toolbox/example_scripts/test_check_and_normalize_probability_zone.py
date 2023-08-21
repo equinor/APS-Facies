@@ -5,12 +5,10 @@ from aps.utils.constants.simple import Debug, ProbabilityTolerances
 
 print(f"Run script: {check_and_normalise_probability.__file__}  ")
 print("Example with zones.")
-# Define input parameters
+# Define input parameters for specific zones
 modelling_facies_per_zone_dict = {
     1: ["F1", "F2", "F3", "F4", "F5"],
-#    2: ["F1", "F2", "F3", "F4", "F5"],
     3: ["F1", "F2", "F3", "F4", "F5"],
-#    4: ["F1", "F2", "F3", "F4", "F5"],
     5: ["F1", "F2", "F3", "F4", "F5"],
     6: ["F1", "F2", "F3", "F4", "F5"],
 }
