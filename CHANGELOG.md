@@ -2,10 +2,26 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.4.1
+
+### What's new
+* Add example script to check ERT iteration when using perm poro as fields in ERT
+
+### Fixes
+* Fix missing function inputs in usage of `check_normalization`
+
+### Restructure
+* Reorganize test example scripts and input model files into separate directories
+
+### Miscellaneous
+* Update dependencies
+  * `sass` (1.63.6 &rarr; 1.64.1)
+  * `@types/lodash` (4.14.195 &rarr; 4.14.196)
+
 ## 1.4.0
 
 ### What's new
-* Added  a new script to modify facies probability cube set
+* Added a new script to modify facies probability cube set
 * Added a new job name to model file as info for the users
 * Modify number of vertical grid cells in vertical cross sections in preview
 * Horizontal scrollbars introduced
