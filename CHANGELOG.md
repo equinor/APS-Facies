@@ -2,6 +2,12 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.4.2
+
+### Miscellaneous
+* Update package.json and tag version 1.4.2
+
+
 ## 1.4.1
 
 ### What's new
