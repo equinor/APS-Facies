@@ -59,7 +59,7 @@ def output_version_information(func):
 
         version = get_content('VERSION')
         try:
-            toolbox_version = get_content('TOOLBOX_VERSION')
+            toolbox_version = get_content('STUB_VERSION')
         except:
             toolbox_version = ' '
         print(f"GUI version: {version}")

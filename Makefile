@@ -231,6 +231,7 @@ compile-pydist: move-pydist move-python-files-to-pydist
 
 move-python-files-to-pydist:
 	mv $(PLUGIN_DIR)/aps $(PLUGIN_DIR)/pydist/aps
+	cp $(PLUGIN_DIR)/VERSION $(PLUGIN_DIR)/pydist/aps/toolbox/VERSION
 
 copy-python-files:
 	$(PYTHON) $(BIN_DIR)/gather-python-files.py $(CODE_DIR) $(PLUGIN_DIR)
@@ -286,7 +287,7 @@ generate-truncation-rule-images: clean-generated-truncation-rules truncation-rul
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
 
-auxillary-files: VERSION COMMIT TOOLBOX_VERSION
+auxillary-files: VERSION COMMIT STUB_VERSION
 	cp $(INFO.XML) $(PLUGIN_DIR)
 
 VERSION:
@@ -299,8 +300,8 @@ VERSION:
 COMMIT:
 	echo $(LATEST_COMMIT_HASH_LONG) > $(PLUGIN_DIR)/COMMIT
 
-TOOLBOX_VERSION:
-	cat $(CODE_DIR)/bin/TOOLBOX_VERSION > $(PLUGIN_DIR)/TOOLBOX_VERSION
+STUB_VERSION:
+	cat $(CODE_DIR)/bin/STUB_VERSION > $(PLUGIN_DIR)/STUB_VERSION
 
 
 
