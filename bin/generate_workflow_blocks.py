@@ -269,8 +269,9 @@ if APS_ROOT not in os.environ:
     extract_plugin()
     sys.path.insert(0, stringify_path(root_path))
 
-    # Check that the TOOLBOX_VERSION in the plugin is the same as in current file
-    toolbox_version_path = root_path / ".." / "TOOLBOX_VERSION"
+    # Check that the STUB_VERSION in the plugin is the same as in current file
+    toolbox_version_path = root_path / ".." / "STUB_VERSION"
+    version_error = False
     if toolbox_version_path.is_file():
         with open(toolbox_version_path, "r", encoding='utf-8') as f:
             for line in f.readlines():
@@ -279,14 +280,21 @@ if APS_ROOT not in os.environ:
                     break
 
         if toolbox_version_in_plugin != __version__:
+            version_error = True
             print(f"The APS plugin version need helpscript version: {{toolbox_version_in_plugin}}")
-            print(f"The current script has version: {{__version__}}")
-            print("If you use APS default version (stable version), you can update the help script by re-loading the python code from the directory:")
-            print("/project/res/APSGUI/releases/stable/aps_workflows.")
-            print("NOTE: When selecting file, choose 'All files (*)' and not 'Python files (*.py)' files since the help scripts don't have '.py' extension")
-            raise ValueError("Help script version is not up to date with the APS plugin version")
+            print(f"The current help script has version: {{__version__}}")
     else:
-        raise IOError("Can not find file: TOOLBOX_VERSION")
+        version_error = True
+
+    if version_error:
+        print("The APS help scripts in your RMS workflow must be updated.")
+        env_key = "APS_TOOLBOX_PATH"
+        if env_key in os.environ:
+            install_path = str(os.environ[env_key])
+            print("You can update the help script by re-loading the python code from the directory:")
+            print(f"{{install_path}}/aps_workflows")
+            print("NOTE: When selecting file, choose 'All files (*)' and not 'Python files (*.py)' files since the help scripts don't have '.py' extension")
+        raise ValueError("Help script version is not up to date with the APS plugin version")
 
 
 # Generating necessary paths
@@ -441,7 +449,7 @@ def get_root_path(use_plugin_dir=False) -> Path:
 
 
 def get_toolbox_version() -> str:
-    file_paths = ["bin/TOOLBOX_VERSION", "aps_gui/TOOLBOX_VERSION" ]
+    file_paths = ["bin/STUB_VERSION", "aps_gui/STUB_VERSION" ]
     version = None
     for file_path in file_paths:
         if Path(file_path).exists():
@@ -452,7 +460,7 @@ def get_toolbox_version() -> str:
                         break
     if not version:
         raise IOError(
-            "Did not find the file: TOOLBOX_VERSION.\n"
+            "Did not find the file: STUB_VERSION.\n"
             "Run from top directory of source code repo  (bin/generate_workflow_blocks.py)\n"
             "or run from directory for unpacked version of the plugin (aps_gui/generate_workflow_blocks.py --normal-install).")
     return version
