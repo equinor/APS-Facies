@@ -20,14 +20,6 @@ params ={
         5: ["Perm", "Poro"],
         6: ["Perm", "Poro"],
     },
-    "ErtboxParameters": {
-        1: ["Perm", "Poro"],
-        2: ["Perm", "Poro"],
-        3: ["Perm", "Poro"],
-        4: ["Perm", "Poro"],
-        5: ["Perm", "Poro"],
-        6: ["Perm", "Poro"],
-    },
     "Conformity": {
         1: "TopConform",
         2: "Proportional",

@@ -110,17 +110,26 @@ copy_rms_param_to_ertbox_grid.run(params)
     required_kw_list = [
         "Mode",
         "GridModelName", "ERTBoxGridName",
-        "ZoneParam", "GeoGridParameters", "ErtboxParameters",
-        "Conformity",
+        "ZoneParam", "Conformity",
     ]
     check_missing_keywords_list(params, required_kw_list)
     mode = params['Mode']
 
     if mode == 'from_geo_to_ertbox':
+        # The names of the parameters in ertbox is automatically set to
+        # <zone_name>_<param_name_from_geomodel> since it follows
+        # the standard used in APS and therefore no need to specify
+        # parameter names in ertbox.
         required_kw_list.append("ExtrapolationMethod")
+        required_kw_list.append("GeoGridParameters")
         check_missing_keywords_list(params, required_kw_list)
         from_geogrid_to_ertbox(project, params)
     elif mode == 'from_ertbox_to_geo':
+        # The name both in ertbox and in geogrid is required
+        # here since no standard naming convention is required here.
+        required_kw_list.append('ErtboxParameters')
+        required_kw_list.append("GeoGridParameters")
+        check_missing_keywords_list(params, required_kw_list)
         from_ertbox_to_geogrid(project, params)
 
 
@@ -161,7 +170,7 @@ def from_geogrid_to_ertbox(project, params):
         raise ValueError(
             f"Grid model for geomodel '{grid_model_name}' and "
             f"grid model for ERTBOX grid '{ertbox_grid_model_name}'  "
-            f"have different grid index origin.\n"
+            "have different grid index origin.\n"
             "Use 'Eclipse grid standard' (upper left corner) as "
             "common grid index origin (right-handed grid) in FMU projects using ERT."
         )
@@ -216,11 +225,27 @@ def from_ertbox_to_geogrid(project, params):
 
 
     # Create
-    geogrid_model, _ = get_grid_model(project, grid_model_name)
-    ertbox_grid_model, _ = get_grid_model(project, ertbox_grid_model_name)
-    grid3D = geogrid_model.get_grid()
+    geogrid_model, grid3D = get_grid_model(project, grid_model_name)
+    ertbox_grid_model, ertbox3D = get_grid_model(project, ertbox_grid_model_name)
+
+    # Check grid index origin
+    geogrid_handedness = grid3D.grid_indexer.ijk_handedness
+    ertboxgrid_handedness = ertbox3D.grid_indexer.ijk_handedness
+    if geogrid_handedness != ertboxgrid_handedness:
+        raise ValueError(
+            f"Grid model for geomodel '{grid_model_name}' and "
+            f"grid model for ERTBOX grid '{ertbox_grid_model_name}'  "
+            "have different grid index origin.\n"
+            "Use 'Eclipse grid standard' (upper left corner) as "
+            "common grid index origin (right-handed grid) in FMU projects using ERT."
+        )
+    if ertboxgrid_handedness != roxar.Direction.right:
+        print("WARNING: ERTBOX grid should have 'Eclipse grid index origin'.")
+        print("         Use the grid index origin job in RMS to set this.")
+
+
+
     number_of_layers_per_zone_in_geo_grid, _, _ = get_zone_layer_numbering(grid3D)
-    ertbox3D = ertbox_grid_model.get_grid()
     nx, ny, nz_ertbox = ertbox3D.simbox_indexer.dimensions
     for zone_number in param_names_geogrid_dict:
         zone_index = zone_number - 1
@@ -269,6 +294,7 @@ def from_ertbox_to_geogrid(project, params):
             zone_number,
             realisation_number=project.current_realisation,
             is_shared=geogrid_model.shared,
+            switch_handedness=True,
         )
     if debug_level >= Debug.ON:
         print(f"- Finished copy rms parameters from {ertbox_grid_model_name}  to {grid_model_name}.")
@@ -301,6 +327,8 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
     ertbox_grid_model_name = get_text_value(spec, kw_parent, 'ERTBoxGridName')
     zone_param_name = get_text_value(spec, kw_parent, 'ZoneParam')
     method = None
+    param_names_geo_per_zone = None
+    param_names_ertbox_per_zone = None
     if mode == 'from_geo_to_ertbox':
         method_text = get_text_value(spec, kw_parent, 'ExtrapolationMethod')
         valid_methods = [
@@ -324,11 +352,12 @@ def _read_model_file_yml(model_file_name, debug_level=Debug.OFF):
         text = str(param_list_geogrid_dict[key])
         param_names_geo_per_zone[key] = text.split()
 
-    param_list_ertbox_dict = get_dict(spec, kw_parent, 'ErtboxParameters')
-    param_names_ertbox_per_zone = {}
-    for key in param_list_ertbox_dict:
-        text = str(param_list_ertbox_dict[key])
-        param_names_ertbox_per_zone[key] = text.split()
+    if mode == 'from_ertbox_to_geo':
+        param_list_ertbox_dict = get_dict(spec, kw_parent, 'ErtboxParameters')
+        param_names_ertbox_per_zone = {}
+        for key in param_list_ertbox_dict:
+            text = str(param_list_ertbox_dict[key])
+            param_names_ertbox_per_zone[key] = text.split()
 
     conformity_text =  get_dict(spec, kw_parent, 'Conformity')
     valid_conformities_list = ["Proportional", "TopConform", "BaseConform"]
