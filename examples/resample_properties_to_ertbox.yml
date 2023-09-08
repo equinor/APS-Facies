@@ -15,14 +15,6 @@ Resample:
     5:  Perm Poro
     6:  Perm Poro
 
-  ErtboxParameters:
-    1:  middle_Neslen_1_Perm  middle_Neslen_1_Poro
-    2:  middle_Neslen_2_Perm  middle_Neslen_2_Poro
-    3:  middle_Neslen_3_Perm  middle_Neslen_3_Poro
-    4:  middle_Neslen_4_Perm  middle_Neslen_4_Poro
-    5:  middle_Neslen_5_Perm  middle_Neslen_5_Poro
-    6:  middle_Neslen_6_Perm  middle_Neslen_6_Poro
-
   Conformity:
     1: TopConform
     2: Proportional
