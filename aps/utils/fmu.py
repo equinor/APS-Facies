@@ -57,6 +57,28 @@ def get_top_location() -> Path:
 
 def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
     '''
+    Check ERT iteration using environment variable defined by ERT.
+    If iteration is 0 the APS mode is to simulate and export GRF files to be used in ERT
+    and this function return True.
+    If iteration > 0, the APS mode is import updated GRF from ERT and this function return False
+    '''
+    key = "_ERT_ITERATION_NUMBER"
+    if key in os.environ:
+        iteration = int(os.environ[key])
+
+        if debug_level >= Debug.VERBOSE:
+            print(f"-- ERT iteration: {iteration} ")
+        return iteration <= 0
+    else:
+        print(f"Warning: The environment variable: {key} is not defined.")
+        print( "         Assume the RMS job is not run in ERT as a FORWARD model or")
+        print( "         using an old version of ERT < 5.0.")
+
+        return is_initial_iteration_check_file(debug_level=debug_level)
+
+
+def is_initial_iteration_check_file(debug_level: Debug = Debug.OFF) -> bool:
+    '''
     Check if folder with name equal to a non-negative integer exists.
     If a folder with name 0 is found or no folder with integer exists,
     the APS mode is to simulate and export GRF files to be used in ERT
@@ -71,8 +93,13 @@ def is_initial_iteration(debug_level: Debug = Debug.OFF) -> bool:
         if (toplevel / str(folder)).exists():
             iterfolder = folder
             break
-    if debug_level >= Debug.VERY_VERBOSE:
-        print(f"--- ERT iteration: {iterfolder} ")
+    if iterfolder == -1:
+        print(f"Warning: When running ERT version < 5.0 specify a forward model")
+        print( "         creating a directory with name equal to iteration number.")
+        print( "         If folder does not exists, APS will assume iteration = 0.")
+
+    if debug_level >= Debug.VERBOSE:
+        print(f"-- ERT iteration: {iterfolder} ")
     return iterfolder <= 0
 
 def get_export_location(create: bool = True) -> Path:
