@@ -2,6 +2,25 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.4.3
+
+### What's new
+* Add example script to be used in ERT to copy APS generated GRF from initial ensemble to updated ensemble
+* Renamed file `TOOLBOX_VERSION` to `STUB_VERSION` in the plugin directory
+
+
+### Fixes
+* Updated check of ERT iteration number
+* Add a check on grid index origin
+
+
+### Miscellaneous
+* Update dependencies
+  * `core-js` (3.32.0 &rarr; 3.32.1)
+  * `sass` (1.65.1 &rarr; 1.66.0)
+  * `vuetify` (2.7.0 &rarr; 2.7.1)
+  * `eslint-plugin-import` (2.27.5 &rarr; 2.28.0)
+
 ## 1.4.2
 
 ### Miscellaneous
