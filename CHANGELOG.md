@@ -2,6 +2,17 @@
 
 This document described the changes between versions of the APS GUI.
 
+## 1.4.4
+
+### What's new
+* Added releases to GitHub
+
+  New versions of the plugin should be available to download
+
+### Fixes
+* New releases should no longer be marked as beta
+
+
 ## 1.4.3
 
 ### What's new
