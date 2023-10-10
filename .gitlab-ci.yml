@@ -122,7 +122,7 @@ integration testing (RMS 11):
   stage: testing
   variables:
     WRITE_WORKFLOW_FILES_TO_PROJECT: "yes"
-    RMS_PROJECT:                     "/integration_test_rms11/rms/model/testAPSWorkflow_new.rms11.1.2"
+    RMS_PROJECT:                     "/integration_test_rms11/rms/model/testAPSWorkflow_new.rms12.0.2"
     APS_DEBUG_LEVEL:                 "4"
   script:
     - export PYTHON="$RMS_PYTHON"
