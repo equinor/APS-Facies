@@ -1242,8 +1242,9 @@ class DefineTruncationRule:
         poly[3,1] = 1 + frame_size
         poly[4,0] = -frame_size
         poly[4,1] = -frame_size
-        polygon = Polygon(poly, closed=True, facecolor='white')
-        axTrunc.add_patch(polygon)
+        if self.show_title:
+            polygon = Polygon(poly, closed=True, facecolor='white')
+            axTrunc.add_patch(polygon)
         for i in range(len(faciesPolygons)):
             indx = faciesIndxPerPolygon[i]
             fIndx = faciesOrdering[indx]
