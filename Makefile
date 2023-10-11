@@ -40,7 +40,7 @@ ifeq ($(MODE),production)
 REMOVE_APS_GUI_TEMP_FOLDER := --move
 endif
 
-GIT_VERSION  := $(shell git --version)
+GIT_VERSION  = $(shell git --version)
 
 # Time stamp format YY daynumber_in_year hour minutes
 BUILD_NUMBER := $(shell date "+%y%j%H%M")
@@ -76,16 +76,9 @@ ifneq ($(STUB_PREFIX),$(EMPTY))
 WORKFLOWS_TO_PROJECT := --suffix $(STUB_SUFFIX) $(WORKFLOWS_TO_PROJECT)
 endif
 
-ALLWAYS_GET_RMS_RESOURCES ?= no
-GET_RMS_RESOURCES := $(EMPTY)
-ifeq ($(ALLWAYS_GET_RMS_RESOURCES),yes)
-GET_RMS_RESOURCES := get-rms get-rms-project
-endif
-
-
-APS_VERSION_FROM_GIT :=  $(shell git describe --abbrev=0 --tags)
-APS_VERSION := $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
-APS_FULL_VERSION := $(APS_VERSION).$(BUILD_NUMBER)
+APS_VERSION_FROM_GIT =  $(shell git describe --abbrev=0 --tags)
+APS_VERSION = $(shell echo $(APS_VERSION_FROM_GIT) | $(SED) -e "s/v//g")
+APS_FULL_VERSION = $(APS_VERSION).$(BUILD_NUMBER)
 LATEST_COMMIT_HASH = $(shell git rev-parse --short HEAD)
 LATEST_COMMIT_HASH_LONG = $(shell git rev-parse HEAD)
 
@@ -95,26 +88,28 @@ PLUGIN_DIR := $(BUILD_DIR)/$(PLUGIN_NAME)
 DEPLOY_VERSION_PATH = $(CODE_DIR)/DEPLOY_VERSION.txt
 WEB_DIR := $(CODE_DIR)/gui
 TRUNCATION_RULE_VISUALIZATIONS := $(WEB_DIR)/public/truncation-rules
-LIB_PREFIX := $(CODE_DIR)/libraries
+LIB_PREFIX := $(CODE_DIR)/aps/libraries
 LIB_SOURCE := $(LIB_PREFIX)/sources
 EXAMPLES_FOLDER := $(CODE_DIR)/examples
 TEST_FOLDER := $(SOURCE_DIR)/unit_test
 INTEGRATION_TESTS := $(TEST_FOLDER)/integration
 AUXILLARY := $(CODE_DIR)/auxillary
-DOCKERFILE := $(CODE_DIR)/Dockerfile
-DOCKER_REGISTRY_SERVER := registry.git.equinor.com
-DOCKER_REGISTRY := $(DOCKER_REGISTRY_SERVER)/aps/gui
 # Paths local to the compiled app
 REQUESTS_CA_BUNDLE ?= $(SSL_CERT_FILE)
 POETRY := $(shell which poetry)
 PYTHON ?= $(POETRY) run python3
+ifneq ($(POETRY),)
 RUN := PYTHONPATH=$(PYTHONPATH) $(POETRY) run
+else
+RUN := PYTHONPATH=$(PYTHONPATH)
+endif
 PIP ?= $(PYTHON) -m pip
 PY.TEST := $(RUN) python -m pytest
 PIPROT := $(RUN) piprot
 PYLINT := $(RUN) pylint
 SAFETY_CHECK := $(POETRY) check
 FLASK := $(RUN) flask
+REQUIREMENTS.TXT := $(POETRY) export --dev --format 'requirements.txt'
 
 VUE_APP_APS_PROTOCOL ?= http
 VUE_APP_APS_SERVER := localhost
@@ -130,10 +125,7 @@ VUE_APP_GUI_URL := $(VUE_APP_APS_PROTOCOL)://$(VUE_APP_APS_SERVER):$(VUE_APP_APS
 endif
 
 # TODO?: SETUP.PY := PYTHONPATH=$(PYTHONPATH) $(PYTHON) setup.py ?
-PYTHON_PREFIX := $(shell dirname $(PYTHON))/..
-IMAGE_VERSION ?= $(shell $(BIN_DIR)/find-version-of-docker-image.py $(CODE_DIR))
-IMAGE_NAME ?= $(PROJECT_NAME):$(IMAGE_VERSION)
-DOCKER_IMAGE := $(DOCKER_REGISTRY)/$(IMAGE_NAME)
+PYTHON_PREFIX = $(shell dirname $(PYTHON))/..
 
 UI.PY := $(PYTHON_API_DIR)/ui.py
 MAIN.PY := $(PYTHON_API_DIR)/main.py
@@ -149,7 +141,6 @@ REMOTE_RGS_DEVELOP := /project/res/APSGUI/DevelopmentBranch/APSGUI
 REMOTE_RGS_MASTER := /project/res/APSGUI/MasterBranch
 
 RGS_EXEC := ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER)
-RMS_VERSION := $(shell cat $(CODE_DIR)/Dockerfile | grep RMS_VERSION= | $(SED) -E 's/.*=([0-9]+\.[0-9]+\.[0-9]+).*/\1/g')
 RGS_UPDATE_APS := git pull \
  && rm -rf workflow \
  && mkdir -p workflow/pythoncomp/ \
@@ -188,12 +179,6 @@ savefig.transparent : False
 endef
 export MATPLOTLIBRC
 
-SYSTEM_INSTALL_PIPENV ?= no
-USER_INSTALL_PIPENV := $(EMPTY)
-ifeq ($(SYSTEM_INSTALL_PIPENV),no)
-USER_INSTALL_PIPENV := --user
-endif
-
 COLOR = \033[32;01m
 NO_COLOR = \033[0m
 .PHONY: help run package.json matplotlibrc dotenv VERSION COMMIT
@@ -202,7 +187,7 @@ NO_COLOR = \033[0m
 build: clean-all init
 
 build-stable-gui:
-	cat $(CODE_DIR)/CHANGELOG.md | grep $(APS_VERSION) >/dev/null || { \
+	cat $(WEB_DIR)/public/CHANGELOG.md | grep $(APS_VERSION) >/dev/null || { \
 	    echo "When building a stable version, the changelog MUST have some information of this version ($(APS_VERSION))." ; \
 	    exit 1 ; \
 	}
@@ -262,7 +247,7 @@ _build-front-end:
 	mv $(WEB_DIR)/dist $(PLUGIN_DIR)
 
 copy-changelog.md:
-	cp $(CODE_DIR)/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
+	cp $(WEB_DIR)/public/CHANGELOG.md $(PLUGIN_DIR)/CHANGELOG.md
 
 truncation-rule-vislualization-dir: relink-matplotlibrc
 	$(MKDIR) $(TRUNCATION_RULE_VISUALIZATIONS)
@@ -273,16 +258,17 @@ clean-generated-truncation-rules:
 	rm -f  $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rules: generate-truncation-rule-images
-	$(RUN) python $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
+	$(RUN) python3 $(CODE_DIR)/bin/parse-truncation-rule-templates.py $(WEB_DIR)/src/store/templates/truncationRules.json
 
 generate-truncation-rule-images: clean-generated-truncation-rules truncation-rule-vislualization-dir
 	cd $(TRUNCATION_RULE_VISUALIZATIONS) && \
-	printf "r\n$(EXAMPLES_FOLDER)/truncation_settings.dat\nm\na\nq\nq\n" | \
+	printf "r\n$(EXAMPLES_FOLDER)/truncation_settings.dat\nm\nf\nsvg\na\nq\nq\n" | \
 	HIDE_TITLE='yes' \
 	DONT_WRITE_OVERVIEW='yes' \
 	WRITE_TO_DIRECTORIES='yes' \
 	MPLBACKEND=$(MATPLOTLIB_BACKEND) \
-	$(RUN) python $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
+	$(RUN) python3 $(SOURCE_DIR)/algorithms/setupInteractiveTruncationSetting.py
+	rm -f $(TRUNCATION_RULE_VISUALIZATIONS)/matplotlibrc
 
 build-dir:
 	$(MKDIR) $(BUILD_DIR)
@@ -303,8 +289,6 @@ COMMIT:
 STUB_VERSION:
 	cat $(CODE_DIR)/bin/STUB_VERSION > $(PLUGIN_DIR)/STUB_VERSION
 
-
-
 mock-VERSION:
 	echo $(APS_FULL_VERSION) > $(SOURCE_DIR)/api/VERSION
 	ln -sf $(SOURCE_DIR)/api/VERSION $(CODE_DIR)/VERSION
@@ -316,6 +300,10 @@ mock-COMMIT:
 init: dependencies init-workflow package.json local.settings.json dotenv generate-truncation-rules
 
 init-workflow: links generate-workflow-files
+
+init-local-develop: local.settings.json dotenv docker-compose
+
+docker-compose: generate-truncation-rules
 
 local.settings.json: dummy-fmu-location
 	echo "$$LOCAL_SETTINGS_JSON" > $(CODE_DIR)/local.settings.json
@@ -346,7 +334,7 @@ links: clean-links create-workflow-dir matplotlibrc-links changelog-link
 	ln -sf $(CODE_DIR)/.env $(WEB_DIR)/.env
 
 changelog-link:
-	ln -sf $(CODE_DIR)/CHANGELOG.md $(WEB_DIR)/public/CHANGELOG.md
+	ln -sf $(WEB_DIR)/public/CHANGELOG.md $(CODE_DIR)/CHANGELOG.md
 
 create-workflow-dir:
 	$(MKDIR) $(CODE_DIR)/workflow
@@ -365,7 +353,7 @@ clean-links: clean-matplotlibrc clean-changelog-link
 	rm -f $(BIN_DIR)/bitmap2rms_xml.py
 
 clean-changelog-link:
-	rm -f $(WEB_DIR)/public/CHANGELOG.md
+	rm -f $(CODE_DIR)/CHANGELOG.md
 
 generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 	$(PYTHON) $(BIN_DIR)/generate_workflow_blocks.py $(CODE_DIR) $(WORKFLOWS_TO_PROJECT)
@@ -373,6 +361,7 @@ generate-workflow-files: $(CREATE_WORKFLOW_DIR)
 dependencies: requirements
 
 requirements: matplotlibrc
+	$(POETRY) install --no-root
 
 relink-matplotlibrc: clean-matplotlibrc matplotlibrc matplotlibrc-links
 
@@ -406,23 +395,10 @@ clean-__pycache__:
 clean-pyc:
 	rm -f $(shell find $(CODE_DIR) -name *.py[cod] -not -path *.rms/*)
 
-docker-image: $(GET_RMS_RESOURCES)
-	docker build --rm --pull --tag $(DOCKER_IMAGE) --file $(DOCKERFILE) $(CODE_DIR)
-
-docker-login:
-	docker login $(DOCKER_REGISTRY_SERVER)
-	# TODO: Add new user / bot to gitlab
-
-docker-push-image: docker-image
-	docker push $(DOCKER_IMAGE)
-
 copy-source:
 	cd $(CODE_DIR)
 	$(TAR) --exclude-vcs-ignore \
 	    -cvzf code.tar.gz .
-
-docker-bash:
-	docker run --rm -it -v $(CODE_DIR):/code --workdir=/code $(DOCKER_IMAGE) bash
 
 check-requirements:
 	$(POETRY) lock --dev --requirements | $(PIPROT) --outdated -
@@ -575,15 +551,6 @@ deploy-stable: deploy
 	$(eval $@_PLUGIN := $(shell cat $(DEPLOY_VERSION_PATH)))
 	cd $(CODE_DIR) && \
 	ssh $(DEPLOYMENT_USER)@$(DEPLOY_SERVER) ln -s $(DEPLOYMENT_PATH)/$($@_PLUGIN) $(DEPLOYMENT_PATH)/stable/$(PLUGIN_NAME).$(APS_VERSION).plugin
-
-# Getting RMS 11,
-get-rms-repo:
-	git clone git@git.equinor.com:APS/RMS.git $(RMS_DIR) || git -C $(RMS_DIR) pull
-
-rms-bundle: get-rms-repo
-	cd $(RMS_DIR) && \
-	CODE_DIR=$(RMS_DIR) \
-	make -f $(RMS_DIR)/Makefile bundle
 
 
 print-%  : ; @echo $($*)

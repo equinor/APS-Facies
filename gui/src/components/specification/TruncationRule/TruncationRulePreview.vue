@@ -15,7 +15,6 @@
       cols="12"
     >
       <v-row
-        v-if="imagePath"
         justify="center"
         align="center"
       >
@@ -29,7 +28,6 @@
           :max-width="size.width"
         />
       </v-row>
-      <span v-else>{{ value }}</span>
     </v-col>
   </v-row>
 </template>
@@ -56,12 +54,7 @@ export default class TruncationRulePreview extends Vue {
   readonly disabled!: boolean
 
   get imagePath (): string {
-    try {
-      // eslint-disable-next-line security/detect-non-literal-require
-      return require(`@/../public/truncation-rules/${this.type}/${this.value}.png`)
-    } catch {
-      return ''
-    }
+    return `/public/truncation-rules/${this.type}/${this.value}.svg`
   }
 
   get isDevelop (): boolean { return isDevelopmentBuild() }

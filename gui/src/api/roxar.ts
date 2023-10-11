@@ -7,7 +7,7 @@ function callPythonFunction (method: string, parameters: string): Promise<JSON> 
 
     // simple:
     axios.post(
-      `/api/${method}`,
+      `/${method}`,
       parameters,
       {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }

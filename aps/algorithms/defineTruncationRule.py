@@ -10,6 +10,8 @@ from sys import argv
 
 import copy
 import collections
+from typing import Literal
+
 import numpy as np
 
 from matplotlib import pyplot as plt
@@ -26,6 +28,8 @@ from aps.utils.methods import get_colors
 from aps.utils.xmlUtils import prettify
 
 from xml.etree.ElementTree import Element
+
+FORMAT_TYPES = Literal['svg', 'png']
 
 
 def conditional_directory(name):
@@ -217,6 +221,7 @@ class DefineTruncationRule:
         self.write_overlay = write_overlay
         self.write_overview = write_overview
         self.write_to_directories = write_to_directories
+        self.format: FORMAT_TYPES = 'png'
 
     def readFile(self, inputFileName):
         ''' Read ascii file with definition of truncation rule settings for background facies.'''
@@ -1180,7 +1185,12 @@ class DefineTruncationRule:
 
         return overlay_setting_list
 
-    def makeTruncationMapPlot(self, name, writePngFile=True):
+    def setFormat(self, format: FORMAT_TYPES):
+        if format not in ['svg', 'png']:
+            raise ValueError(f"Invalid format, {format}. Only png and svg is supported")
+        self.format = format
+
+    def makeTruncationMapPlot(self, name, write_file: bool = True):
         # Truncation map is plotted
         fig = plt.figure(figsize=[2.0, 2.0], frameon=False)
         axTrunc = self.__makeTruncationMapSubPlot(name, fig, 1, 1, 1)
@@ -1191,12 +1201,12 @@ class DefineTruncationRule:
             fig.patch.set_visible(False)
             axTrunc.axis('off')
             plt.autoscale(tight=True)
-        if writePngFile:
-            plotFileName = name + '.png'
+        if write_file:
+            plotFileName = name + f'.{self.format}'
             if self.__directory:
                 plotFileName = self.__directory + '/' + plotFileName
             print('Write file: {}'.format(plotFileName))
-            fig.savefig(plotFileName)
+            fig.savefig(plotFileName, transparent=True)
             plt.close(fig)
         else:
             plt.show()
@@ -1242,8 +1252,9 @@ class DefineTruncationRule:
         poly[3,1] = 1 + frame_size
         poly[4,0] = -frame_size
         poly[4,1] = -frame_size
-        polygon = Polygon(poly, closed=True, facecolor='white')
-        axTrunc.add_patch(polygon)
+        if self.show_title:
+            polygon = Polygon(poly, closed=True, facecolor='white')
+            axTrunc.add_patch(polygon)
         for i in range(len(faciesPolygons)):
             indx = faciesIndxPerPolygon[i]
             fIndx = faciesOrdering[indx]

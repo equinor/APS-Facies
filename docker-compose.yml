@@ -1,0 +1,39 @@
+services:
+  api:
+    build:
+      context: .
+      target: aps
+#      target: truncation-rules
+    environment:
+      FLASK_DEBUG: '1'
+    volumes:
+    - './aps:/app/aps'
+    - './fmu.model/private:/private'
+    - './fmu.model/project:/project'
+
+  web:
+    build:
+      context: .
+      target: gui
+    environment:
+      NODE_ENV: development
+      HOST: '0.0.0.0'
+    volumes:
+    - './gui/src:/code/src'
+    - 'yarn-cache:/yarn'
+    - 'node-cache:/code/node_modules/.cache'
+    env_file:
+      - gui/.env
+
+  proxy:
+    build:
+      context: .
+      target: server
+    ports:
+      - '8080:8080'
+    volumes:
+    - './nginx/local.nginx:/opt/bitnami/nginx/conf/server_blocks/local.conf:ro'
+
+volumes:
+  yarn-cache:
+  node-cache:

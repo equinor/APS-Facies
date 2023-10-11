@@ -445,7 +445,6 @@ Thumbs.db
 *.py~
 state.db
 *cache/
-.tool-versions
 *.plugin
 *.plugin.gpg
 DEPLOY_VERSION.txt
@@ -491,7 +490,7 @@ examples/DefineTruncStructure.py
 workflow/Cleanup_tmpdir.ipl
 workflow/APS_simulate_gauss_multiprocessing.ipl
 aps/unit_test/integration/examples
-gui/public/CHANGELOG.md
+!gui/public/CHANGELOG.md
 
 # Data stores
 monkeytype.sqlite3
